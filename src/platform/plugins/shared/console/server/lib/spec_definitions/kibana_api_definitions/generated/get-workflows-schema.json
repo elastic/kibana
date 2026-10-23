@@ -1,0 +1,14 @@
+{
+  "get-workflows-schema": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/schema"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-schema",
+    "url_params": {
+      "loose": "__flag__"
+    }
+  }
+}

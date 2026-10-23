@@ -1,0 +1,69 @@
+{
+  "UpdateAttackDiscoverySchedules": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-UpdateAttackDiscoverySchedules",
+    "data_autocomplete_rules": {
+      "actions": [
+        {
+          "action_type_id": "",
+          "id": "",
+          "params": {},
+          "uuid": "",
+          "alerts_filter": {},
+          "frequency": {
+            "notify_when": {
+              "__one_of": [
+                "onActiveAlert",
+                "onThrottleInterval",
+                "onActionGroupChange"
+              ]
+            },
+            "summary": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "throttle": ""
+          },
+          "group": ""
+        }
+      ],
+      "name": "",
+      "params": {
+        "alerts_index_pattern": "",
+        "api_config": {
+          "name": "",
+          "actionTypeId": "",
+          "connectorId": "",
+          "defaultSystemPromptId": "",
+          "model": "",
+          "provider": {
+            "__one_of": [
+              "OpenAI",
+              "Azure OpenAI",
+              "Other"
+            ]
+          }
+        },
+        "combined_filter": {},
+        "end": "",
+        "filters": [],
+        "query": {
+          "language": "",
+          "query": ""
+        },
+        "size": "",
+        "start": ""
+      },
+      "schedule": {
+        "interval": ""
+      }
+    }
+  }
+}

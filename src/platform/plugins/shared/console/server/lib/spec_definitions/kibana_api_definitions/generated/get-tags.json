@@ -1,0 +1,16 @@
+{
+  "get-tags": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/tags"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-tags",
+    "url_params": {
+      "query": [],
+      "page": [],
+      "per_page": []
+    }
+  }
+}

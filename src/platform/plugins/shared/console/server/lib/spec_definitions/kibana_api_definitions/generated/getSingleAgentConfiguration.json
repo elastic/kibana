@@ -1,0 +1,15 @@
+{
+  "getSingleAgentConfiguration": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration/view"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getSingleAgentConfiguration",
+    "url_params": {
+      "name": [],
+      "environment": []
+    }
+  }
+}

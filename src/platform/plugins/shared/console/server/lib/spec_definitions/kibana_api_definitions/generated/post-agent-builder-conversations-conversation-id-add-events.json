@@ -1,0 +1,19 @@
+{
+  "post-agent-builder-conversations-conversation-id-add-events": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}/_add_events"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-conversations-conversation-id-add-events",
+    "data_autocomplete_rules": {
+      "events": [
+        {
+          "data": {},
+          "type": ""
+        }
+      ]
+    }
+  }
+}

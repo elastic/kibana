@@ -1,0 +1,20 @@
+{
+  "post-fleet-epm-packages-pkgname-pkgversion-kibana-assets": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages-pkgname-pkgversion-kibana-assets",
+    "data_autocomplete_rules": {
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "space_ids": []
+    }
+  }
+}

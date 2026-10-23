@@ -1,0 +1,37 @@
+{
+  "get-saved-objects-find": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/saved_objects/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-saved-objects-find",
+    "url_params": {
+      "per_page": [],
+      "page": [],
+      "type": [],
+      "search": [],
+      "default_search_operator": [
+        "OR",
+        "AND"
+      ],
+      "search_fields": [],
+      "sort_field": [],
+      "has_reference": [],
+      "has_reference_operator": [
+        "OR",
+        "AND"
+      ],
+      "has_no_reference": [],
+      "has_no_reference_operator": [
+        "OR",
+        "AND"
+      ],
+      "fields": [],
+      "filter": [],
+      "aggs": [],
+      "namespaces": []
+    }
+  }
+}

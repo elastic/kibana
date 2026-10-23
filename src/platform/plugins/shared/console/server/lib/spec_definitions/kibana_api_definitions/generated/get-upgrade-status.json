@@ -1,0 +1,11 @@
+{
+  "get-upgrade-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/upgrade_assistant/status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-upgrade-status"
+  }
+}

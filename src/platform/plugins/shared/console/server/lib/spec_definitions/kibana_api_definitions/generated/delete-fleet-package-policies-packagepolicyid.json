@@ -1,0 +1,14 @@
+{
+  "delete-fleet-package-policies-packagepolicyid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/{packagePolicyId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-package-policies-packagepolicyid",
+    "url_params": {
+      "force": "__flag__"
+    }
+  }
+}

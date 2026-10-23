@@ -1,0 +1,437 @@
+{
+  "post-fleet-outputs": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/outputs"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-outputs",
+    "data_autocomplete_rules": {
+      "allow_edit": [],
+      "id": "",
+      "is_default": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "is_default_monitoring": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "is_internal": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "is_preconfigured": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "otlp_exporter": {
+        "compression": {
+          "__one_of": [
+            "gzip",
+            "snappy",
+            "zstd",
+            "none"
+          ]
+        },
+        "compression_params": {
+          "level": ""
+        },
+        "cookies": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "disable_keep_alives": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "encoding": {
+          "__one_of": [
+            "proto",
+            "json"
+          ]
+        },
+        "endpoint": "",
+        "force_attempt_http2": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "headers": {},
+        "http2_ping_timeout": "",
+        "http2_read_idle_timeout": "",
+        "idle_conn_timeout": "",
+        "logs_endpoint": "",
+        "max_conns_per_host": "",
+        "max_idle_conns": "",
+        "max_idle_conns_per_host": "",
+        "metrics_endpoint": "",
+        "profiles_endpoint": "",
+        "protocol": {
+          "__one_of": [
+            "grpc"
+          ]
+        },
+        "proxy_url": "",
+        "read_buffer_size": "",
+        "retry_on_failure": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "initial_interval": "",
+          "max_elapsed_time": "",
+          "max_interval": "",
+          "multiplier": "",
+          "randomization_factor": ""
+        },
+        "sending_queue": {
+          "batch": {},
+          "block_on_overflow": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "num_consumers": "",
+          "queue_size": "",
+          "sizer": {
+            "__one_of": [
+              "requests",
+              "items",
+              "bytes"
+            ]
+          },
+          "wait_for_result": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "timeout": "",
+        "tls": {
+          "ca_file": "",
+          "ca_pem": "",
+          "cert_file": "",
+          "cert_pem": "",
+          "cipher_suites": [],
+          "curve_preferences": [
+            {
+              "__one_of": [
+                "X25519",
+                "P521",
+                "P256",
+                "P384"
+              ]
+            }
+          ],
+          "include_insecure_cipher_suites": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "include_system_ca_certs_pool": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "insecure": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "insecure_skip_verify": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "key_file": "",
+          "max_version": "",
+          "min_version": "",
+          "reload_interval": "",
+          "server_name_override": "",
+          "tpm": {}
+        },
+        "traces_endpoint": "",
+        "write_buffer_size": "",
+        "authority": "",
+        "balancer_name": "",
+        "keepalive": {
+          "permit_without_stream": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "time": "",
+          "timeout": ""
+        },
+        "user_agent": "",
+        "wait_for_ready": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "secrets": {
+        "ssl": {
+          "key": {}
+        }
+      },
+      "type": {
+        "__one_of": [
+          "elasticsearch"
+        ]
+      },
+      "auth_type": {
+        "__one_of": [
+          "none",
+          "user_pass",
+          "ssl",
+          "kerberos",
+          "oauth2"
+        ]
+      },
+      "broker_timeout": "",
+      "ca_sha256": "",
+      "ca_trusted_fingerprint": "",
+      "client_id": "",
+      "compression": {
+        "__one_of": [
+          "gzip",
+          "snappy",
+          "lz4",
+          "none"
+        ]
+      },
+      "compression_level": "",
+      "config_yaml": "",
+      "connection_type": {
+        "__one_of": [
+          "plaintext",
+          "encryption"
+        ]
+      },
+      "hash": {
+        "hash": "",
+        "random": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "headers": [
+        {
+          "key": "",
+          "value": ""
+        }
+      ],
+      "hosts": [],
+      "kerberos": {
+        "auth_type": {
+          "__one_of": [
+            "keytab",
+            "password"
+          ]
+        },
+        "config_path": "",
+        "enable_krb5_fast": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "keytab": "",
+        "realm": "",
+        "service_name": "",
+        "username": ""
+      },
+      "key": "",
+      "oauth2": {
+        "audience": "",
+        "claims": {},
+        "client_certificate_key_file": "",
+        "client_certificate_key_id": "",
+        "client_id": "",
+        "client_id_file": "",
+        "client_secret_file": "",
+        "endpoint_params": {},
+        "expiry_buffer": "",
+        "grant_type": {
+          "__one_of": [
+            "client_credentials",
+            "urn:ietf:params:oauth:grant-type:jwt-bearer"
+          ]
+        },
+        "iss": "",
+        "scopes": [],
+        "signature_algorithm": {
+          "__one_of": [
+            "RS256",
+            "RS384",
+            "RS512"
+          ]
+        },
+        "timeout": "",
+        "tls": {
+          "ca_file": "",
+          "cert_file": "",
+          "insecure_skip_verify": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "key_file": "",
+          "max_version": "",
+          "min_version": "",
+          "server_name_override": ""
+        },
+        "token_url": ""
+      },
+      "otel_disable_beatsauth": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "otel_exporter_config_yaml": "",
+      "partition": {
+        "__one_of": [
+          "random",
+          "round_robin",
+          "hash"
+        ]
+      },
+      "password": "",
+      "proxy_id": "",
+      "random": {
+        "group_events": ""
+      },
+      "required_acks": "",
+      "round_robin": {
+        "group_events": ""
+      },
+      "sasl": {
+        "mechanism": {
+          "__one_of": [
+            "PLAIN",
+            "SCRAM-SHA-256",
+            "SCRAM-SHA-512"
+          ]
+        }
+      },
+      "shipper": {
+        "compression_level": "",
+        "disk_queue_compression_enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "disk_queue_enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "disk_queue_encryption_enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "disk_queue_max_size": "",
+        "disk_queue_path": "",
+        "loadbalance": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "max_batch_bytes": "",
+        "mem_queue_events": "",
+        "queue_flush_timeout": ""
+      },
+      "ssl": {
+        "certificate": "",
+        "certificate_authorities": [],
+        "key": "",
+        "verification_mode": {
+          "__one_of": [
+            "full",
+            "none",
+            "certificate",
+            "strict"
+          ]
+        }
+      },
+      "timeout": "",
+      "topic": "",
+      "username": "",
+      "version": "",
+      "kibana_api_key": "",
+      "kibana_url": "",
+      "preset": {
+        "__one_of": [
+          "balanced",
+          "custom",
+          "throughput",
+          "scale",
+          "latency"
+        ]
+      },
+      "service_token": "",
+      "sync_integrations": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "sync_uninstalled_integrations": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "write_to_logs_streams": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

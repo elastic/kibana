@@ -1,0 +1,11 @@
+{
+  "get-fleet-remote-synced-integrations-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/remote_synced_integrations/status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-remote-synced-integrations-status"
+  }
+}

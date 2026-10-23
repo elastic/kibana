@@ -1,0 +1,14 @@
+{
+  "patch-agent-builder-conversations-conversation-id-attachments-attachment-id": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-patch-agent-builder-conversations-conversation-id-attachments-attachment-id",
+    "data_autocomplete_rules": {
+      "description": ""
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "put-fleet-agents-agentid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-agents-agentid",
+    "data_autocomplete_rules": {
+      "tags": [],
+      "user_provided_metadata": {}
+    }
+  }
+}

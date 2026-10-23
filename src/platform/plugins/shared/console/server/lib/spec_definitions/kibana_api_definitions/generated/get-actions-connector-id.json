@@ -1,0 +1,14 @@
+{
+  "get-actions-connector-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/actions/connector/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-actions-connector-id",
+    "url_components": {
+      "id": "__kibana_connector"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "BulkEnableAttackDiscoverySchedules": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/_bulk_enable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-BulkEnableAttackDiscoverySchedules",
+    "data_autocomplete_rules": {
+      "ids": []
+    }
+  }
+}

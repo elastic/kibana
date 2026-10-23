@@ -1,0 +1,15 @@
+{
+  "post-workflows-executions-executionid-resume": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/resume"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-workflows-executions-executionid-resume",
+    "data_autocomplete_rules": {
+      "input": {},
+      "stepExecutionId": ""
+    }
+  }
+}

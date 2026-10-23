@@ -1,0 +1,11 @@
+{
+  "DisableAttackDiscoverySchedules": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/{id}/_disable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DisableAttackDiscoverySchedules"
+  }
+}

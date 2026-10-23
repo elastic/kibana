@@ -1,0 +1,11 @@
+{
+  "getAlertingHealth": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/_health"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getAlertingHealth"
+  }
+}

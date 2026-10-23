@@ -1,0 +1,36 @@
+{
+  "post-agent-builder-agents-agent-id-consumption": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/agents/{agent_id}/consumption"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-agents-agent-id-consumption",
+    "data_autocomplete_rules": {
+      "has_warnings": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "search": "",
+      "search_after": [],
+      "size": "",
+      "sort_field": {
+        "__one_of": [
+          "updated_at",
+          "total_tokens",
+          "round_count"
+        ]
+      },
+      "sort_order": {
+        "__one_of": [
+          "asc",
+          "desc"
+        ]
+      },
+      "usernames": []
+    }
+  }
+}

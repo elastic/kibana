@@ -1,0 +1,11 @@
+{
+  "post-alerting-v2-rules-id-enable": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/{id}/_enable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-id-enable"
+  }
+}

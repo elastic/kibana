@@ -1,0 +1,14 @@
+{
+  "delete-agent-builder-tools-toolid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/agent_builder/tools/{toolId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-agent-builder-tools-toolid",
+    "url_params": {
+      "force": "__flag__"
+    }
+  }
+}

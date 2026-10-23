@@ -1,0 +1,11 @@
+{
+  "PrivmonBulkUploadUsersCSV": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users/_csv"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PrivmonBulkUploadUsersCSV"
+  }
+}

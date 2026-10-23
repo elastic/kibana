@@ -1,0 +1,11 @@
+{
+  "OsqueryCopySavedQuery": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries/{id}/copy"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryCopySavedQuery"
+  }
+}

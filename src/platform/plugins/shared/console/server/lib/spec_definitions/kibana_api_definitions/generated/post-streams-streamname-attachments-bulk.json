@@ -1,0 +1,37 @@
+{
+  "post-streams-streamname-attachments-bulk": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/{streamName}/attachments/_bulk"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-streams-streamname-attachments-bulk",
+    "data_autocomplete_rules": {
+      "operations": [
+        {
+          "delete": {
+            "id": "",
+            "type": {
+              "__one_of": [
+                "dashboard",
+                "rule",
+                "slo"
+              ]
+            }
+          },
+          "index": {
+            "id": "",
+            "type": {
+              "__one_of": [
+                "dashboard",
+                "rule",
+                "slo"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

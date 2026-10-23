@@ -1,0 +1,28 @@
+{
+  "GetRiskScoreHistory": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/risk_score/history"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetRiskScoreHistory",
+    "url_params": {
+      "entity_type": [
+        "host",
+        "user",
+        "service",
+        "generic"
+      ],
+      "entity_id": [],
+      "from": [],
+      "to": [],
+      "score_type": [
+        "base",
+        "propagated",
+        "resolution"
+      ],
+      "include_contributions": "__flag__"
+    }
+  }
+}

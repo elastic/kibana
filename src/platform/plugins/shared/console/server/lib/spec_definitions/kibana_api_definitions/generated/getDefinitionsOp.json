@@ -1,0 +1,19 @@
+{
+  "getDefinitionsOp": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "s/{spaceId}/internal/observability/slos/_definitions"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getDefinitionsOp",
+    "url_params": {
+      "includeOutdatedOnly": "__flag__",
+      "includeHealth": "__flag__",
+      "tags": [],
+      "search": [],
+      "page": [],
+      "perPage": []
+    }
+  }
+}

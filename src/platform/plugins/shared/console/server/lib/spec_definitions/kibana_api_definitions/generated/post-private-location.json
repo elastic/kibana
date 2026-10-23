@@ -1,0 +1,21 @@
+{
+  "post-private-location": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/private_locations"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-private-location",
+    "data_autocomplete_rules": {
+      "agentPolicyId": "",
+      "geo": {
+        "lat": "",
+        "lon": ""
+      },
+      "label": "",
+      "spaces": [],
+      "tags": []
+    }
+  }
+}

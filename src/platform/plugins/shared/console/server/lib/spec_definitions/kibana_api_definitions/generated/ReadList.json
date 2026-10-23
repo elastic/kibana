@@ -1,0 +1,14 @@
+{
+  "ReadList": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/lists"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadList",
+    "url_params": {
+      "id": []
+    }
+  }
+}

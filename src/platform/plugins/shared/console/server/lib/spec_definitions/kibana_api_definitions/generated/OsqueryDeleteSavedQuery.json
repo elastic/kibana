@@ -1,0 +1,11 @@
+{
+  "OsqueryDeleteSavedQuery": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryDeleteSavedQuery"
+  }
+}

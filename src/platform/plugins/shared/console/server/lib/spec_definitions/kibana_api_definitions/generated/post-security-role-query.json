@@ -1,0 +1,33 @@
+{
+  "post-security-role-query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/role/_query"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-security-role-query",
+    "data_autocomplete_rules": {
+      "filters": {
+        "showReservedRoles": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "from": "",
+      "query": "",
+      "size": "",
+      "sort": {
+        "direction": {
+          "__one_of": [
+            "asc",
+            "desc"
+          ]
+        },
+        "field": ""
+      }
+    }
+  }
+}

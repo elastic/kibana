@@ -1,0 +1,16 @@
+{
+  "get-fleet-kubernetes-download": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/kubernetes/download"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-kubernetes-download",
+    "url_params": {
+      "download": "__flag__",
+      "fleetServer": [],
+      "enrolToken": []
+    }
+  }
+}

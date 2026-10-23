@@ -1,0 +1,11 @@
+{
+  "get-agent-builder-plugins-pluginid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/plugins/{pluginId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-agent-builder-plugins-pluginid"
+  }
+}

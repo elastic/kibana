@@ -1,0 +1,11 @@
+{
+  "get-workflows-executions-executionid-children": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/children"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-executions-executionid-children"
+  }
+}

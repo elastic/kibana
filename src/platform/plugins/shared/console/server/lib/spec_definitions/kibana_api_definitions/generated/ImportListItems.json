@@ -1,0 +1,44 @@
+{
+  "ImportListItems": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/lists/items/_import"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ImportListItems",
+    "url_params": {
+      "list_id": [],
+      "type": [
+        "binary",
+        "boolean",
+        "byte",
+        "date",
+        "date_nanos",
+        "date_range",
+        "double",
+        "double_range",
+        "float",
+        "float_range",
+        "geo_point",
+        "geo_shape",
+        "half_float",
+        "integer",
+        "integer_range",
+        "ip",
+        "ip_range",
+        "keyword",
+        "long",
+        "long_range",
+        "shape",
+        "short",
+        "text"
+      ],
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
+    }
+  }
+}

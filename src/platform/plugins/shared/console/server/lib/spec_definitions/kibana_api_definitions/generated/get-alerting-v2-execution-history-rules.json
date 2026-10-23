@@ -1,0 +1,31 @@
+{
+  "get-alerting-v2-execution-history-rules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/v2/execution_history/rules"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-alerting-v2-execution-history-rules",
+    "url_params": {
+      "rule_ids": [],
+      "search": [],
+      "outcomes": [
+        "success",
+        "failure"
+      ],
+      "from": [],
+      "to": [],
+      "sort_field": [
+        "started_at",
+        "duration_ms"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "page": [],
+      "per_page": []
+    }
+  }
+}

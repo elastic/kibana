@@ -1,0 +1,47 @@
+{
+  "createDataViewDefaultw": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/data_views/data_view"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-createDataViewDefaultw",
+    "data_autocomplete_rules": {
+      "data_view": {
+        "allowNoIndex": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "fieldAttrs": {},
+        "fieldFormats": {},
+        "fields": {},
+        "id": "",
+        "name": "",
+        "namespaces": [],
+        "runtimeFieldMap": {},
+        "sourceFilters": [
+          {
+            "value": ""
+          }
+        ],
+        "timeFieldName": "",
+        "title": "",
+        "type": "",
+        "typeMeta": {
+          "aggs": {},
+          "params": {}
+        },
+        "version": ""
+      },
+      "override": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

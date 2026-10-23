@@ -1,0 +1,11 @@
+{
+  "post-agent-builder-a2a-agentid": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/a2a/{agentId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-a2a-agentid"
+  }
+}

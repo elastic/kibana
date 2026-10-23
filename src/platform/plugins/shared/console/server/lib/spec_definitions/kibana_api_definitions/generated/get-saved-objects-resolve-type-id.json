@@ -1,0 +1,11 @@
+{
+  "get-saved-objects-resolve-type-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/saved_objects/resolve/{type}/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-saved-objects-resolve-type-id"
+  }
+}

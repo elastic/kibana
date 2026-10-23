@@ -1,0 +1,45 @@
+{
+  "UpdatePrivMonUser": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-UpdatePrivMonUser",
+    "data_autocomplete_rules": {
+      "entity_analytics_monitoring": {
+        "labels": [
+          {
+            "field": "",
+            "source": "",
+            "value": ""
+          }
+        ]
+      },
+      "id": "",
+      "labels": {
+        "source_ids": [],
+        "source_integrations": [],
+        "sources": [
+          {
+            "__one_of": [
+              "csv",
+              "index_sync",
+              "api"
+            ]
+          }
+        ]
+      },
+      "user": {
+        "is_privileged": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "name": ""
+      }
+    }
+  }
+}

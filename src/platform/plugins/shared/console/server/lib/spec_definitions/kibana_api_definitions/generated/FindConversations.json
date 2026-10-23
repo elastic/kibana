@@ -1,0 +1,27 @@
+{
+  "FindConversations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/current_user/conversations/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindConversations",
+    "url_params": {
+      "fields": [],
+      "filter": [],
+      "sort_field": [
+        "created_at",
+        "title",
+        "updated_at"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "page": [],
+      "per_page": [],
+      "is_owner": "__flag__"
+    }
+  }
+}

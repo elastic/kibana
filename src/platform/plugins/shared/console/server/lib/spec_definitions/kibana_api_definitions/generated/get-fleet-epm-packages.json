@@ -1,0 +1,17 @@
+{
+  "get-fleet-epm-packages": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-packages",
+    "url_params": {
+      "category": [],
+      "prerelease": "__flag__",
+      "excludeInstallStatus": "__flag__",
+      "withPackagePoliciesCount": "__flag__"
+    }
+  }
+}

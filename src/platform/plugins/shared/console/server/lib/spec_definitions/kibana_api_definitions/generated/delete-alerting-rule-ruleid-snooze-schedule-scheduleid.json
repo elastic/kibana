@@ -1,0 +1,14 @@
+{
+  "delete-alerting-rule-ruleid-snooze-schedule-scheduleid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-alerting-rule-ruleid-snooze-schedule-scheduleid",
+    "url_components": {
+      "ruleId": "__kibana_rule"
+    }
+  }
+}

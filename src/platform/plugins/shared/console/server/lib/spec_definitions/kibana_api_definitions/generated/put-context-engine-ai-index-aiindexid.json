@@ -1,0 +1,95 @@
+{
+  "put-context-engine-ai-index-aiindexid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/context_engine/ai_index/{aiIndexId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-context-engine-ai-index-aiindexid",
+    "data_autocomplete_rules": {
+      "automations": [
+        {
+          "type": {
+            "__one_of": [
+              "workflow"
+            ]
+          },
+          "value": ""
+        }
+      ],
+      "description": "",
+      "dest": {
+        "type": {
+          "__one_of": [
+            "data_stream",
+            "index"
+          ]
+        },
+        "value": ""
+      },
+      "feedback_analysis": {
+        "agent_id": "",
+        "allowed_actions": [
+          {
+            "__one_of": [
+              "add_ki",
+              "edit_ki",
+              "remove_ki",
+              "add_workflow",
+              "edit_workflow",
+              "remove_workflow",
+              "add_source",
+              "edit_source",
+              "remove_source"
+            ]
+          }
+        ],
+        "enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "schedule": {
+          "interval": ""
+        },
+        "signal_filter": "",
+        "signal_time_range": {
+          "from": "",
+          "type": {
+            "__one_of": [
+              "relative"
+            ]
+          }
+        }
+      },
+      "memory_enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "sources": [
+        {
+          "type": {
+            "__one_of": [
+              "esql"
+            ]
+          },
+          "value": ""
+        }
+      ],
+      "traces": [
+        {
+          "type": {
+            "__one_of": [
+              "elastic_agent"
+            ]
+          },
+          "value": ""
+        }
+      ]
+    }
+  }
+}

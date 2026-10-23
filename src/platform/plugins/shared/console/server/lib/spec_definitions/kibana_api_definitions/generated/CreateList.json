@@ -1,0 +1,45 @@
+{
+  "CreateList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/lists"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateList",
+    "data_autocomplete_rules": {
+      "description": "",
+      "id": "",
+      "meta": {},
+      "name": "",
+      "type": {
+        "__one_of": [
+          "binary",
+          "boolean",
+          "byte",
+          "date",
+          "date_nanos",
+          "date_range",
+          "double",
+          "double_range",
+          "float",
+          "float_range",
+          "geo_point",
+          "geo_shape",
+          "half_float",
+          "integer",
+          "integer_range",
+          "ip",
+          "ip_range",
+          "keyword",
+          "long",
+          "long_range",
+          "shape",
+          "short",
+          "text"
+        ]
+      },
+      "version": ""
+    }
+  }
+}

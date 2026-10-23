@@ -1,0 +1,11 @@
+{
+  "get-parameter": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/synthetics/params/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-parameter"
+  }
+}

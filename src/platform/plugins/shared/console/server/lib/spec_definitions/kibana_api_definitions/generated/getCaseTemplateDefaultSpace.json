@@ -1,0 +1,14 @@
+{
+  "getCaseTemplateDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/templates/{template_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseTemplateDefaultSpace",
+    "url_params": {
+      "version": []
+    }
+  }
+}

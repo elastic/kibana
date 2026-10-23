@@ -1,0 +1,14 @@
+{
+  "UnassignWatchlistEntities": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{watchlist_id}/entities/unassign"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-UnassignWatchlistEntities",
+    "data_autocomplete_rules": {
+      "euids": []
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "ListPrivMonUsers": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users/list"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ListPrivMonUsers",
+    "url_params": {
+      "kql": []
+    }
+  }
+}

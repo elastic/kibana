@@ -1,0 +1,31 @@
+{
+  "put-agent-builder-agents-id-access-control": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/agents/{id}/access_control"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-agent-builder-agents-id-access-control",
+    "data_autocomplete_rules": {
+      "entries": [
+        {
+          "id": "",
+          "name": "",
+          "role": {
+            "__one_of": [
+              "user",
+              "editor",
+              "manager"
+            ]
+          },
+          "type": {
+            "__one_of": [
+              "user"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

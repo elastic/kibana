@@ -1,0 +1,19 @@
+{
+  "get-workflows-aggs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/aggs"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-aggs",
+    "url_params": {
+      "fields": [],
+      "managed": [
+        "all",
+        "managed",
+        "unmanaged"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "FindAttackDiscoverySchedules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindAttackDiscoverySchedules",
+    "url_params": {
+      "page": [],
+      "per_page": [],
+      "sort_field": [],
+      "sort_direction": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

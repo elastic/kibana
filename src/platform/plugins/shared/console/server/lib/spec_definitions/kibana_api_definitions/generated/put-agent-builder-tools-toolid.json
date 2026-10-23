@@ -1,0 +1,25 @@
+{
+  "put-agent-builder-tools-toolid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/tools/{toolId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-agent-builder-tools-toolid",
+    "data_autocomplete_rules": {
+      "configuration": {},
+      "confirmation": {
+        "askUser": {
+          "__one_of": [
+            "once",
+            "always",
+            "never"
+          ]
+        }
+      },
+      "description": "",
+      "tags": []
+    }
+  }
+}

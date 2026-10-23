@@ -1,0 +1,44 @@
+{
+  "post-spaces-copy-saved-objects": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/_copy_saved_objects"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-spaces-copy-saved-objects",
+    "data_autocomplete_rules": {
+      "compatibilityMode": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "createNewCopies": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "includeReferences": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "objects": [
+        {
+          "id": "",
+          "type": ""
+        }
+      ],
+      "overwrite": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "spaces": []
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "CreateUpdateProtectionUpdatesNote": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/protection_updates_note/{package_policy_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateUpdateProtectionUpdatesNote",
+    "data_autocomplete_rules": {
+      "note": ""
+    }
+  }
+}

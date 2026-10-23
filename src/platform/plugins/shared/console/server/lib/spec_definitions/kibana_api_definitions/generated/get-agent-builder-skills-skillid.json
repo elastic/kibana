@@ -1,0 +1,11 @@
+{
+  "get-agent-builder-skills-skillid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/skills/{skillId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-agent-builder-skills-skillid"
+  }
+}

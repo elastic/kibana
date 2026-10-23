@@ -1,0 +1,47 @@
+{
+  "OsqueryCreatePacks": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/packs"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryCreatePacks",
+    "data_autocomplete_rules": {
+      "description": "",
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "interval": "",
+      "min_osquery_version": "",
+      "name": "",
+      "platform": "",
+      "policy_ids": [],
+      "queries": {},
+      "result_type": {
+        "__one_of": [
+          "snapshot",
+          "differential",
+          "differential_added_only"
+        ]
+      },
+      "rrule_schedule": {
+        "end_date": "",
+        "rrule": "",
+        "splay": "",
+        "start_date": "",
+        "timeout": ""
+      },
+      "schedule_type": {
+        "__one_of": [
+          "interval",
+          "rrule"
+        ]
+      },
+      "shards": {}
+    }
+  }
+}

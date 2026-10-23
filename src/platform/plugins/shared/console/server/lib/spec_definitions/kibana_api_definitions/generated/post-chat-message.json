@@ -1,0 +1,16 @@
+{
+  "post-chat-message": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/chat/message"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-chat-message",
+    "data_autocomplete_rules": {
+      "agent_id": "",
+      "conversation_id": "",
+      "message": ""
+    }
+  }
+}

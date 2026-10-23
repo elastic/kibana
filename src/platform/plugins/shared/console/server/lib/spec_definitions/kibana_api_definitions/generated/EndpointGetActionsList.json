@@ -1,0 +1,44 @@
+{
+  "EndpointGetActionsList": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/action"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointGetActionsList",
+    "url_params": {
+      "page": [],
+      "pageSize": [],
+      "commands": [
+        "isolate",
+        "unisolate",
+        "kill-process",
+        "suspend-process",
+        "running-processes",
+        "get-file",
+        "execute",
+        "upload",
+        "scan",
+        "runscript",
+        "cancel",
+        "memory-dump"
+      ],
+      "agentIds": [],
+      "userIds": [],
+      "startDate": [],
+      "endDate": [],
+      "agentTypes": [
+        "endpoint",
+        "sentinel_one",
+        "crowdstrike",
+        "microsoft_defender_endpoint"
+      ],
+      "withOutputs": [],
+      "types": [
+        "automated",
+        "manual"
+      ]
+    }
+  }
+}

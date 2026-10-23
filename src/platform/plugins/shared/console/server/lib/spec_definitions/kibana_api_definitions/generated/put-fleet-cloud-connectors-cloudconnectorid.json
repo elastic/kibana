@@ -1,0 +1,25 @@
+{
+  "put-fleet-cloud-connectors-cloudconnectorid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/cloud_connectors/{cloudConnectorId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-cloud-connectors-cloudconnectorid",
+    "data_autocomplete_rules": {
+      "accountType": {
+        "__one_of": [
+          "single-account",
+          "organization-account"
+        ]
+      },
+      "iac_blueprint_id": "",
+      "iac_blueprint_version": "",
+      "iac_deployment_id": "",
+      "iac_key": "",
+      "name": "",
+      "vars": {}
+    }
+  }
+}

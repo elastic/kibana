@@ -1,0 +1,11 @@
+{
+  "ReadPrebuiltRulesAndTimelinesStatus": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/detection_engine/rules/prepackaged/_status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadPrebuiltRulesAndTimelinesStatus"
+  }
+}

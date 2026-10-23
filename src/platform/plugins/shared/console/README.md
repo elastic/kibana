@@ -86,7 +86,7 @@ can be placed in the folder [`manual`](https://github.com/elastic/kibana/blob/ma
 
 ### Kibana API doc links
 
-The [`generated_kibana_api_doc_links.json`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json) file maps Kibana API path templates to their OpenAPI `operationId`, and powers the "Open API reference" link for `kbn:` requests in Console. It's generated from the Kibana OpenAPI bundle (`oas_docs/output/kibana.yaml`) by running:
+The [`generated_kibana_api_doc_links.json`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json) file maps Kibana API path templates to their OpenAPI `operationId`. It's generated from the Kibana OpenAPI bundle (`oas_docs/output/kibana.yaml`) by running:
 
 ```
 node scripts/generate_kibana_api_doc_links.js
@@ -347,5 +347,12 @@ Another change is replacing jQuery with the core http client to communicate with
 
 ### Outstanding issues
 #### Autocomplete suggestions for Kibana API endpoints
-Console currently supports autocomplete suggestions for Elasticsearch API endpoints. The autocomplete suggestions for Kibana API endpoints are not supported yet.
+Requests starting with `kbn:` are autocompleted against Kibana API definitions, kept separate from the Elasticsearch ones. They provide the methods and URL paths, the query parameters (booleans, enums and free text), the path parameters that have a fixed set of values, and the top levels of the JSON request body (field names, booleans, enums and nested fields up to a fixed depth; `allOf`, `oneOf` and `anyOf` are merged into one set of suggestions). Values that depend on the cluster, such as space or connector ids, are not suggested yet.
+The definitions (one file per OpenAPI operation) live in [`kibana_api_definitions/generated`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_definitions/generated) and are generated from the Kibana OpenAPI bundle (`oas_docs/output/kibana.yaml`) by running:
+
+```
+node scripts/generate_kibana_api_paths.js
+```
+
+Re-run it whenever the bundle changes. Each definition's `documentation` field powers the "Open API reference" link for `kbn:` requests. They are served to the client as `kibana.endpoints` by the spec definitions route.
 Related issue: [#130661](https://github.com/elastic/kibana/issues/130661)

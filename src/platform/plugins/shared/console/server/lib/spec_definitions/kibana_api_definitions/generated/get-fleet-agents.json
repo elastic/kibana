@@ -1,0 +1,30 @@
+{
+  "get-fleet-agents": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agents",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "kuery": [],
+      "showAgentless": "__flag__",
+      "showInactive": "__flag__",
+      "withMetrics": "__flag__",
+      "showUpgradeable": "__flag__",
+      "getStatusSummary": "__flag__",
+      "sortField": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ],
+      "searchAfter": [],
+      "openPit": "__flag__",
+      "pitId": [],
+      "pitKeepAlive": []
+    }
+  }
+}

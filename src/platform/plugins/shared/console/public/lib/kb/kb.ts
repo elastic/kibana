@@ -11,6 +11,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
 import {
+  ListComponent,
   IndexAutocompleteComponent,
   FieldAutocompleteComponent,
   LegacyTemplateAutocompleteComponent,
@@ -22,12 +23,33 @@ import {
 import type { SharedComponent } from '../autocomplete/components/shared_component';
 
 import { Api } from './api';
+import { KibanaValuesProvider } from './kibana_values';
+import type { KibanaDynamicValueSource } from '../../../common/constants';
+import { fromKibanaDynamicValueMarker } from '../../../common/constants';
 import { isRecord } from '../../../common/utils/record_utils';
-import type { KibanaApiDocLinksMap } from '../../../common/types/api_responses';
 
 let ACTIVE_API = new Api();
+let KIBANA_VALUES: KibanaValuesProvider | undefined;
+
+const createKibanaValuesComponent =
+  (source: KibanaDynamicValueSource): ParamComponentFactory =>
+  (name, parent) =>
+    // accepts any value, the cluster specific ones are only suggested
+    new ListComponent(name, () => KIBANA_VALUES?.getTerms(source) ?? [], parent, false, true);
+
+// Kibana path params marked as cluster specific in the generated definitions
+const kibanaParametrizedComponentFactories = {
+  getComponent(marker: string) {
+    const source = fromKibanaDynamicValueMarker(marker);
+    return source ? createKibanaValuesComponent(source) : undefined;
+  },
+};
+
+// Kibana APIs don't accept the Elasticsearch url params (pretty, format, filter_path)
+const createKibanaApi = () =>
+  new Api(kibanaParametrizedComponentFactories, kibanaParametrizedComponentFactories, {});
+let KIBANA_API = createKibanaApi();
 let apiLoaded = false;
-let KIBANA_API_DOC_LINKS: KibanaApiDocLinksMap = {};
 
 type ParamComponentFactory = (name: string, parent?: SharedComponent) => SharedComponent;
 
@@ -87,8 +109,12 @@ export function getEndpointBodyCompleteComponents(endpoint: string) {
   return components;
 }
 
-export function getTopLevelUrlCompleteComponents(method: string) {
-  return ACTIVE_API.getTopLevelUrlCompleteComponents(method);
+export function getTopLevelUrlCompleteComponents(method: string, isKibanaRequest = false) {
+  if (isKibanaRequest) {
+    // so that the cluster specific values are loaded by the time a path param is reached
+    KIBANA_VALUES?.prefetch();
+  }
+  return (isKibanaRequest ? KIBANA_API : ACTIVE_API).getTopLevelUrlCompleteComponents(method);
 }
 
 export function getGlobalAutocompleteComponents(term: string, throwOnMissing?: boolean) {
@@ -149,26 +175,29 @@ function setActiveApi(api: Api | undefined) {
   ACTIVE_API = api;
 }
 
-function setKibanaApiDocLinks(docLinks: unknown) {
-  if (isRecord(docLinks)) {
-    KIBANA_API_DOC_LINKS = docLinks as KibanaApiDocLinksMap;
+function setKibanaApi(endpoints: unknown) {
+  if (!isRecord(endpoints)) {
+    return;
   }
-}
-
-export function getKibanaApiDocLinks(): KibanaApiDocLinksMap {
-  return KIBANA_API_DOC_LINKS;
+  const api = createKibanaApi();
+  for (const [endpointName, endpointJson] of Object.entries(endpoints)) {
+    api.addEndpointDescription(endpointName, endpointJson);
+  }
+  api.name = 'kibana';
+  KIBANA_API = api;
 }
 
 export async function loadActiveApi(http: HttpSetup) {
   // Only load the API data once
   if (apiLoaded) return;
   apiLoaded = true;
+  KIBANA_VALUES = new KibanaValuesProvider(http);
 
   try {
     const data: unknown = await http.get(`${API_BASE_PATH}/api_server`);
     if (isRecord(data)) {
       setActiveApi(loadApisFromJson({ es: data.es }));
-      setKibanaApiDocLinks(isRecord(data.kibana) ? data.kibana.docLinks : undefined);
+      setKibanaApi(isRecord(data.kibana) ? data.kibana.endpoints : undefined);
     }
   } catch (err) {
     const responseText =
@@ -183,5 +212,8 @@ export async function loadActiveApi(http: HttpSetup) {
 export const _test = {
   loadApisFromJson,
   setActiveApi,
-  setKibanaApiDocLinks,
+  setKibanaApi,
+  setKibanaValues(values: KibanaValuesProvider | undefined) {
+    KIBANA_VALUES = values;
+  },
 };

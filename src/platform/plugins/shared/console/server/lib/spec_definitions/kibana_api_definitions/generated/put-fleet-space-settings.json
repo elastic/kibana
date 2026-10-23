@@ -1,0 +1,14 @@
+{
+  "put-fleet-space-settings": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/space_settings"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-space-settings",
+    "data_autocomplete_rules": {
+      "allowed_namespace_prefixes": []
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "DeleteAssetCriticalityRecord": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/asset_criticality"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteAssetCriticalityRecord",
+    "url_params": {
+      "id_value": [],
+      "id_field": [
+        "host.name",
+        "user.name",
+        "service.name",
+        "entity.id"
+      ],
+      "refresh": [
+        "wait_for"
+      ]
+    }
+  }
+}

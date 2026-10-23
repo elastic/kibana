@@ -1,0 +1,11 @@
+{
+  "get-visualization": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/visualizations/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-visualization"
+  }
+}

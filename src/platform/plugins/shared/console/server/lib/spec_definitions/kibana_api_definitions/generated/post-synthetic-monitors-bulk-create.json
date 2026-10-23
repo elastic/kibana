@@ -1,0 +1,133 @@
+{
+  "post-synthetic-monitors-bulk-create": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/monitors/_bulk_create"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-synthetic-monitors-bulk-create",
+    "data_autocomplete_rules": {
+      "monitors": [
+        {
+          "alert": {
+            "status": {},
+            "tls": {}
+          },
+          "certificate_error_spki_allowlist": "",
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "filter_journeys": "",
+          "filter_journeys.match": "",
+          "filter_journeys.tags": "",
+          "id": "",
+          "ignore_https_errors": "",
+          "inline_script": "",
+          "labels": {},
+          "locations": [
+            {
+              "id": ""
+            }
+          ],
+          "maintenance_windows": [],
+          "name": "",
+          "namespace": "",
+          "params": "",
+          "playwright_options": "",
+          "playwright_text_assertion": "",
+          "private_locations": [
+            {
+              "id": ""
+            }
+          ],
+          "retest_on_failure": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "schedule": {
+            "number": "",
+            "unit": {
+              "__one_of": [
+                "m",
+                "s"
+              ]
+            }
+          },
+          "service.name": "",
+          "source": "",
+          "source.inline": "",
+          "source.inline.script": "",
+          "source.project.content": "",
+          "spaces": [],
+          "ssl": "",
+          "ssl.certificate": "",
+          "ssl.certificate_authorities": "",
+          "ssl.key": "",
+          "ssl.key_passphrase": "",
+          "ssl.supported_protocols": "",
+          "ssl.verification_mode": "",
+          "synthetics_args": "",
+          "tags": "",
+          "timeout": "",
+          "type": {
+            "__one_of": [
+              "http"
+            ]
+          },
+          "screenshots": "",
+          "throttling": "",
+          "host": "",
+          "ipv4": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "ipv6": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "mode": {
+            "__one_of": [
+              "any",
+              "all"
+            ]
+          },
+          "wait": "",
+          "check": "",
+          "check.receive": "",
+          "check.send": "",
+          "proxy_url": "",
+          "proxy_use_local_resolver": "",
+          "check.request.body": "",
+          "check.request.headers": "",
+          "check.request.method": "",
+          "check.response.body.negative": "",
+          "check.response.body.positive": "",
+          "check.response.headers": "",
+          "check.response.json": "",
+          "check.response.status": "",
+          "kerberos": "",
+          "max_redirects": "",
+          "ntlm": "",
+          "password": "",
+          "proxy_headers": "",
+          "response": "",
+          "response.include_body": "",
+          "response.include_body_max_bytes": "",
+          "response.include_headers": "",
+          "url": "",
+          "username": ""
+        }
+      ]
+    }
+  }
+}

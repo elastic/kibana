@@ -1,0 +1,20 @@
+{
+  "post-fleet-package-policies-delete": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/delete"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-package-policies-delete",
+    "data_autocomplete_rules": {
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "packagePolicyIds": []
+    }
+  }
+}

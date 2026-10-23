@@ -1,0 +1,21 @@
+{
+  "OsqueryFindLiveQueries": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/live_queries"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryFindLiveQueries",
+    "url_params": {
+      "kuery": [],
+      "page": [],
+      "pageSize": [],
+      "sort": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

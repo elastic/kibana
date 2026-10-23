@@ -1,0 +1,14 @@
+{
+  "getEnvironmentsForService": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration/environments"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getEnvironmentsForService",
+    "url_params": {
+      "serviceName": []
+    }
+  }
+}

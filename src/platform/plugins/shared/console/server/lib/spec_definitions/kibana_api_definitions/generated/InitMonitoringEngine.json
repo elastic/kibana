@@ -1,0 +1,11 @@
+{
+  "InitMonitoringEngine": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/engine/init"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-InitMonitoringEngine"
+  }
+}

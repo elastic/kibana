@@ -1,0 +1,22 @@
+{
+  "createAgentKey": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/apm/agent_keys"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-createAgentKey",
+    "data_autocomplete_rules": {
+      "name": "",
+      "privileges": [
+        {
+          "__one_of": [
+            "event:write",
+            "config_agent:read"
+          ]
+        }
+      ]
+    }
+  }
+}

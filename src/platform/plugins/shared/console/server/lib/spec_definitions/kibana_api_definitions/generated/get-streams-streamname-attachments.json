@@ -1,0 +1,20 @@
+{
+  "get-streams-streamname-attachments": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/streams/{streamName}/attachments"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams-streamname-attachments",
+    "url_params": {
+      "query": [],
+      "attachmentTypes": [
+        "dashboard",
+        "rule",
+        "slo"
+      ],
+      "tags": []
+    }
+  }
+}

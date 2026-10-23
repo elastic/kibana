@@ -1,0 +1,11 @@
+{
+  "post-fleet-setup": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/setup"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-setup"
+  }
+}

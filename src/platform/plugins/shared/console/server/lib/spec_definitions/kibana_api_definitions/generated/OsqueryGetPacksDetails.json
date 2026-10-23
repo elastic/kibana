@@ -1,0 +1,11 @@
+{
+  "OsqueryGetPacksDetails": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/packs/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryGetPacksDetails"
+  }
+}

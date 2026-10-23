@@ -1,0 +1,11 @@
+{
+  "DeleteAttackDiscoverySchedules": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteAttackDiscoverySchedules"
+  }
+}

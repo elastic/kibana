@@ -1,0 +1,11 @@
+{
+  "delete-alerting-rules-backfill-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/alerting/rules/backfill/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-alerting-rules-backfill-id"
+  }
+}

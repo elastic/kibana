@@ -1,0 +1,11 @@
+{
+  "addCaseFileDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/files"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-addCaseFileDefaultSpace"
+  }
+}

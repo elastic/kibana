@@ -1,0 +1,21 @@
+{
+  "FindEndpointListItems": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint_list/items/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindEndpointListItems",
+    "url_params": {
+      "filter": [],
+      "page": [],
+      "per_page": [],
+      "sort_field": [],
+      "sort_order": [
+        "desc",
+        "asc"
+      ]
+    }
+  }
+}

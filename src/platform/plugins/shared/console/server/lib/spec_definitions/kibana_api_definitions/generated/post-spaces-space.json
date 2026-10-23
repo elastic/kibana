@@ -1,0 +1,35 @@
+{
+  "post-spaces-space": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/space"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-spaces-space",
+    "data_autocomplete_rules": {
+      "_reserved": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "color": "",
+      "description": "",
+      "disabledFeatures": [],
+      "id": "",
+      "imageUrl": "",
+      "initials": "",
+      "name": "",
+      "projectRouting": "",
+      "solution": {
+        "__one_of": [
+          "security",
+          "oblt",
+          "es",
+          "classic"
+        ]
+      }
+    }
+  }
+}

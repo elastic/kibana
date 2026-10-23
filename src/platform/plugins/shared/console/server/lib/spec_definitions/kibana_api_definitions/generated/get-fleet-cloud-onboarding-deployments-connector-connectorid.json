@@ -1,0 +1,11 @@
+{
+  "get-fleet-cloud-onboarding-deployments-connector-connectorid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/cloud_onboarding_deployments/connector/{connectorId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-cloud-onboarding-deployments-connector-connectorid"
+  }
+}

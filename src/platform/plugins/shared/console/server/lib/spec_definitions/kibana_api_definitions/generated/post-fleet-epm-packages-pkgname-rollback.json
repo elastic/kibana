@@ -1,0 +1,11 @@
+{
+  "post-fleet-epm-packages-pkgname-rollback": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/rollback"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages-pkgname-rollback"
+  }
+}

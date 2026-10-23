@@ -1,0 +1,11 @@
+{
+  "delete-discover-session": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/discover_sessions/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-discover-session"
+  }
+}

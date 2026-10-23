@@ -1,0 +1,28 @@
+{
+  "EndpointScriptLibraryListScripts": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/scripts_library"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointScriptLibraryListScripts",
+    "url_params": {
+      "page": [],
+      "pageSize": [],
+      "sortField": [
+        "name",
+        "createdAt",
+        "createdBy",
+        "updatedAt",
+        "updatedBy",
+        "fileSize"
+      ],
+      "sortDirection": [
+        "asc",
+        "desc"
+      ],
+      "kuery": []
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "get-agent-builder-conversations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-agent-builder-conversations",
+    "url_params": {
+      "agent_id": [],
+      "page": [],
+      "per_page": [],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "pinned": "__flag__"
+    }
+  }
+}

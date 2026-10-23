@@ -1,0 +1,20 @@
+{
+  "bulkSnapshotOp": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos/_bulk_snapshot"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-bulkSnapshotOp",
+    "data_autocomplete_rules": {
+      "at": "",
+      "requests": [
+        {
+          "id": "",
+          "instanceId": ""
+        }
+      ]
+    }
+  }
+}

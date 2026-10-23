@@ -1,0 +1,63 @@
+{
+  "CreateKnowledgeBaseEntry": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base/entries"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateKnowledgeBaseEntry",
+    "data_autocomplete_rules": {
+      "inputSchema": [
+        {
+          "description": "",
+          "fieldName": "",
+          "fieldType": ""
+        }
+      ],
+      "outputFields": [],
+      "description": "",
+      "field": "",
+      "index": "",
+      "queryDescription": "",
+      "type": {
+        "__one_of": [
+          "document"
+        ]
+      },
+      "global": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "namespace": "",
+      "users": [
+        {
+          "id": "",
+          "name": ""
+        }
+      ],
+      "required": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "vector": {
+        "modelId": "",
+        "tokens": {}
+      },
+      "kbResource": {
+        "__one_of": [
+          "security_labs",
+          "defend_insights",
+          "user"
+        ]
+      },
+      "source": "",
+      "text": ""
+    }
+  }
+}

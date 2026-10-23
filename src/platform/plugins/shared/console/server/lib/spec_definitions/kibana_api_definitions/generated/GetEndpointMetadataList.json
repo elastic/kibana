@@ -1,0 +1,38 @@
+{
+  "GetEndpointMetadataList": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/metadata"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetEndpointMetadataList",
+    "url_params": {
+      "page": [],
+      "pageSize": [],
+      "kuery": [],
+      "hostStatuses": [
+        "healthy",
+        "offline",
+        "updating",
+        "inactive",
+        "unenrolled"
+      ],
+      "sortField": [
+        "enrolled_at",
+        "metadata.host.hostname",
+        "host_status",
+        "metadata.Endpoint.policy.applied.name",
+        "metadata.Endpoint.policy.applied.status",
+        "metadata.host.os.name",
+        "metadata.host.ip",
+        "metadata.agent.version",
+        "last_checkin"
+      ],
+      "sortDirection": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

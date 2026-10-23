@@ -1,0 +1,11 @@
+{
+  "delete-dashboard": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/dashboards/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-dashboard"
+  }
+}

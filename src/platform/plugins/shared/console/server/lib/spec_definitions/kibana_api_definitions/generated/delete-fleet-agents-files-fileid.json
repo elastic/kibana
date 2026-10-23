@@ -1,0 +1,11 @@
+{
+  "delete-fleet-agents-files-fileid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/agents/files/{fileId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-agents-files-fileid"
+  }
+}

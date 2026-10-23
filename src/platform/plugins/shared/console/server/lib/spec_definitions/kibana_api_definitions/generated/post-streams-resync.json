@@ -1,0 +1,11 @@
+{
+  "post-streams-resync": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/_resync"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-streams-resync"
+  }
+}

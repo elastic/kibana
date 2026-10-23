@@ -1,0 +1,22 @@
+{
+  "DuplicateExceptionList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/exception_lists/_duplicate"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DuplicateExceptionList",
+    "url_params": {
+      "list_id": [],
+      "namespace_type": [
+        "agnostic",
+        "single"
+      ],
+      "include_expired_exceptions": [
+        "true",
+        "false"
+      ]
+    }
+  }
+}

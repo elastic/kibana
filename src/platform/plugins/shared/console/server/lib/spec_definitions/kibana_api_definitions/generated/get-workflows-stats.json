@@ -1,0 +1,11 @@
+{
+  "get-workflows-stats": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/stats"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-stats"
+  }
+}

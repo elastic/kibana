@@ -1,0 +1,20 @@
+{
+  "get-fleet-epm-templates-pkgname-pkgversion-inputs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-templates-pkgname-pkgversion-inputs",
+    "url_params": {
+      "format": [
+        "json",
+        "yml",
+        "yaml"
+      ],
+      "prerelease": "__flag__",
+      "ignoreUnverified": "__flag__"
+    }
+  }
+}

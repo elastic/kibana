@@ -1,0 +1,11 @@
+{
+  "post-streams-name-content-import": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/{name}/content/import"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-streams-name-content-import"
+  }
+}

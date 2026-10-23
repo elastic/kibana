@@ -1,0 +1,14 @@
+{
+  "get-fleet-check-permissions": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/check-permissions"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-check-permissions",
+    "url_params": {
+      "fleetServerSetup": "__flag__"
+    }
+  }
+}

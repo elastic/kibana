@@ -1,0 +1,14 @@
+{
+  "FinalizeAlertsMigration": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/signals/finalize_migration"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FinalizeAlertsMigration",
+    "data_autocomplete_rules": {
+      "migration_ids": []
+    }
+  }
+}

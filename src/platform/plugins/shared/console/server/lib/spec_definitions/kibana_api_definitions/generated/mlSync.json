@@ -1,0 +1,14 @@
+{
+  "mlSync": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/ml/saved_objects/sync"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-mlSync",
+    "url_params": {
+      "simulate": "__flag__"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "post-fleet-agents-agentid-request-diagnostics": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/request_diagnostics"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-agentid-request-diagnostics",
+    "data_autocomplete_rules": {
+      "additional_metrics": [
+        {
+          "__one_of": [
+            "CPU"
+          ]
+        }
+      ]
+    }
+  }
+}

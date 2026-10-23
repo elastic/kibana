@@ -1,0 +1,11 @@
+{
+  "delete-fleet-agent-download-sources-sourceid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/agent_download_sources/{sourceId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-agent-download-sources-sourceid"
+  }
+}

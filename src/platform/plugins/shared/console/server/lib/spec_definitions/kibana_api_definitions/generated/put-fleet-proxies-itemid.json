@@ -1,0 +1,19 @@
+{
+  "put-fleet-proxies-itemid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/proxies/{itemId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-proxies-itemid",
+    "data_autocomplete_rules": {
+      "certificate": "",
+      "certificate_authorities": "",
+      "certificate_key": "",
+      "name": "",
+      "proxy_headers": {},
+      "url": ""
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "put-fleet-agent-download-sources-sourceid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/agent_download_sources/{sourceId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-agent-download-sources-sourceid",
+    "data_autocomplete_rules": {
+      "auth": {
+        "api_key": "",
+        "headers": [
+          {
+            "key": "",
+            "value": ""
+          }
+        ],
+        "password": "",
+        "username": ""
+      },
+      "host": "",
+      "id": "",
+      "is_default": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "proxy_id": "",
+      "secrets": {
+        "auth": {
+          "api_key": {},
+          "password": {}
+        },
+        "ssl": {
+          "key": {}
+        }
+      },
+      "ssl": {
+        "certificate": "",
+        "certificate_authorities": [],
+        "key": ""
+      }
+    }
+  }
+}

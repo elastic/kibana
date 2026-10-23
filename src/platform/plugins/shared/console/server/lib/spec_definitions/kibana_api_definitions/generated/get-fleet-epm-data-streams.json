@@ -1,0 +1,26 @@
+{
+  "get-fleet-epm-data-streams": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/data_streams"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-data-streams",
+    "url_params": {
+      "type": [
+        "logs",
+        "metrics",
+        "traces",
+        "synthetics",
+        "profiles"
+      ],
+      "datasetQuery": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ],
+      "uncategorisedOnly": "__flag__"
+    }
+  }
+}

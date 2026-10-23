@@ -1,0 +1,32 @@
+{
+  "post-fleet-agent-policies-bulk-get": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/_bulk_get"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agent-policies-bulk-get",
+    "url_params": {
+      "format": [
+        "simplified",
+        "legacy"
+      ]
+    },
+    "data_autocomplete_rules": {
+      "full": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "ids": [],
+      "ignoreMissing": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

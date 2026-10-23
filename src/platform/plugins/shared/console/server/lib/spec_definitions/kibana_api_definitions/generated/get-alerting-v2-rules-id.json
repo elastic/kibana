@@ -1,0 +1,11 @@
+{
+  "get-alerting-v2-rules-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-alerting-v2-rules-id"
+  }
+}

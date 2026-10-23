@@ -1,0 +1,14 @@
+{
+  "get-actions-connector-types": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/actions/connector_types"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-actions-connector-types",
+    "url_params": {
+      "feature_id": []
+    }
+  }
+}

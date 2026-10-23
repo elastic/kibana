@@ -1,0 +1,16 @@
+{
+  "put-private-location": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/synthetics/private_locations/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-private-location",
+    "data_autocomplete_rules": {
+      "agentPolicyId": "",
+      "label": "",
+      "tags": []
+    }
+  }
+}

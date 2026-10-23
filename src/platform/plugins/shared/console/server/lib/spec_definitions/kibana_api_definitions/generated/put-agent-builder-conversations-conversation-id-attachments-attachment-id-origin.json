@@ -1,0 +1,14 @@
+{
+  "put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/origin"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin",
+    "data_autocomplete_rules": {
+      "origin": ""
+    }
+  }
+}

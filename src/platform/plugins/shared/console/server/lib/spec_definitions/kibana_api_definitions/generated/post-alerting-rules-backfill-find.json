@@ -1,0 +1,30 @@
+{
+  "post-alerting-rules-backfill-find": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rules/backfill/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rules-backfill-find",
+    "url_params": {
+      "end": [],
+      "page": [],
+      "per_page": [],
+      "rule_ids": [],
+      "initiator": [
+        "user",
+        "system"
+      ],
+      "start": [],
+      "sort_field": [
+        "createdAt",
+        "start"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

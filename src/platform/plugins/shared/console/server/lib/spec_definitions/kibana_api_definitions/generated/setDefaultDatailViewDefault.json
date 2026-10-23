@@ -1,0 +1,20 @@
+{
+  "setDefaultDatailViewDefault": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/data_views/default"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-setDefaultDatailViewDefault",
+    "data_autocomplete_rules": {
+      "data_view_id": "",
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

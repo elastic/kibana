@@ -1,0 +1,19 @@
+{
+  "findCaseCommentsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/comments/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-findCaseCommentsDefaultSpace",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

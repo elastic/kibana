@@ -1,0 +1,14 @@
+{
+  "delete-saved-objects-type-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/saved_objects/{type}/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-saved-objects-type-id",
+    "url_params": {
+      "force": "__flag__"
+    }
+  }
+}

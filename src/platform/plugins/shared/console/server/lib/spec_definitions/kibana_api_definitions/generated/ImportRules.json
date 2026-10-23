@@ -1,0 +1,17 @@
+{
+  "ImportRules": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/rules/_import"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ImportRules",
+    "url_params": {
+      "overwrite": "__flag__",
+      "overwrite_exceptions": "__flag__",
+      "overwrite_action_connectors": "__flag__",
+      "as_new_list": "__flag__"
+    }
+  }
+}

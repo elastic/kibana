@@ -1,0 +1,54 @@
+{
+  "put-fleet-fleet-server-hosts-itemid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/fleet_server_hosts/{itemId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-fleet-server-hosts-itemid",
+    "data_autocomplete_rules": {
+      "allow_edit": [],
+      "host_urls": [],
+      "is_default": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "is_internal": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "proxy_id": "",
+      "secrets": {
+        "ssl": {
+          "agent_key": {},
+          "es_key": {},
+          "key": {}
+        }
+      },
+      "ssl": {
+        "agent_certificate": "",
+        "agent_certificate_authorities": [],
+        "agent_key": "",
+        "certificate": "",
+        "certificate_authorities": [],
+        "client_auth": {
+          "__one_of": [
+            "optional",
+            "required",
+            "none"
+          ]
+        },
+        "es_certificate": "",
+        "es_certificate_authorities": [],
+        "es_key": "",
+        "key": ""
+      }
+    }
+  }
+}

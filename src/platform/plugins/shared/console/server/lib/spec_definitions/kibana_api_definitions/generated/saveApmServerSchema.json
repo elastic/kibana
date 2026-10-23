@@ -1,0 +1,14 @@
+{
+  "saveApmServerSchema": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/apm/fleet/apm_server_schema"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-saveApmServerSchema",
+    "data_autocomplete_rules": {
+      "schema": {}
+    }
+  }
+}

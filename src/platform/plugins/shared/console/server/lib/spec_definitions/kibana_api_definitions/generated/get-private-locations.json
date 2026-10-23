@@ -1,0 +1,11 @@
+{
+  "get-private-locations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/synthetics/private_locations"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-private-locations"
+  }
+}

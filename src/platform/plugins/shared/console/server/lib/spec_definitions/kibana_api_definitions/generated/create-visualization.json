@@ -1,0 +1,11 @@
+{
+  "create-visualization": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/visualizations"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-create-visualization"
+  }
+}

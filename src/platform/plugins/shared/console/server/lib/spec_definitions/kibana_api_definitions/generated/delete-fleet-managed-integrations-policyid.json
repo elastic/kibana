@@ -1,0 +1,14 @@
+{
+  "delete-fleet-managed-integrations-policyid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/managed_integrations/{policyId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-managed-integrations-policyid",
+    "url_params": {
+      "force": "__flag__"
+    }
+  }
+}

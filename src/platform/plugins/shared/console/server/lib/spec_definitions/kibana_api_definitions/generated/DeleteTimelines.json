@@ -1,0 +1,15 @@
+{
+  "DeleteTimelines": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/timeline"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteTimelines",
+    "data_autocomplete_rules": {
+      "savedObjectIds": [],
+      "searchIds": []
+    }
+  }
+}

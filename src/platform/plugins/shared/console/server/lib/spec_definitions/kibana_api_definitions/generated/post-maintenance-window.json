@@ -1,0 +1,48 @@
+{
+  "post-maintenance-window": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/maintenance_window"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-maintenance-window",
+    "data_autocomplete_rules": {
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "schedule": {
+        "custom": {
+          "duration": "",
+          "recurring": {},
+          "start": "",
+          "timezone": ""
+        }
+      },
+      "scope": {
+        "alerting": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "query": {}
+        },
+        "alerting_v2": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "query": {}
+        }
+      },
+      "title": ""
+    }
+  }
+}

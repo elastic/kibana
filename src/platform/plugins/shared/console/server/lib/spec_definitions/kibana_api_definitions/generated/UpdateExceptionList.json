@@ -1,0 +1,49 @@
+{
+  "UpdateExceptionList": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/exception_lists"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-UpdateExceptionList",
+    "data_autocomplete_rules": {
+      "_version": "",
+      "description": "",
+      "id": "",
+      "list_id": "",
+      "meta": {},
+      "name": "",
+      "namespace_type": {
+        "__one_of": [
+          "agnostic",
+          "single"
+        ]
+      },
+      "os_types": [
+        {
+          "__one_of": [
+            "linux",
+            "macos",
+            "windows"
+          ]
+        }
+      ],
+      "tags": [],
+      "type": {
+        "__one_of": [
+          "detection",
+          "rule_default",
+          "endpoint",
+          "endpoint_trusted_apps",
+          "endpoint_trusted_devices",
+          "endpoint_events",
+          "endpoint_host_isolation_exceptions",
+          "endpoint_blocklists",
+          "endpoint_custom_yara_signatures"
+        ]
+      },
+      "version": ""
+    }
+  }
+}

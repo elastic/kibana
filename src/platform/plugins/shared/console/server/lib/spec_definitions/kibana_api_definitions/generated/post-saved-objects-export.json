@@ -1,0 +1,37 @@
+{
+  "post-saved-objects-export": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/saved_objects/_export"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-export",
+    "data_autocomplete_rules": {
+      "excludeExportDetails": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "hasReference": {
+        "id": "",
+        "type": ""
+      },
+      "includeReferencesDeep": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "objects": [
+        {
+          "id": "",
+          "type": ""
+        }
+      ],
+      "search": "",
+      "type": ""
+    }
+  }
+}

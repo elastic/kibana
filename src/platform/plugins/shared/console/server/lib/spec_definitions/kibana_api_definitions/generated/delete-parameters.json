@@ -1,0 +1,14 @@
+{
+  "delete-parameters": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/params/_bulk_delete"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-parameters",
+    "data_autocomplete_rules": {
+      "ids": []
+    }
+  }
+}

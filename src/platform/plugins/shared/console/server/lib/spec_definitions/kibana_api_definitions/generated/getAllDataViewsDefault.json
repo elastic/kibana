@@ -1,0 +1,11 @@
+{
+  "getAllDataViewsDefault": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/data_views"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getAllDataViewsDefault"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "put-workflows-workflow-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/workflows/workflow/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-workflows-workflow-id",
+    "data_autocomplete_rules": {
+      "description": "",
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "tags": [],
+      "yaml": ""
+    }
+  }
+}

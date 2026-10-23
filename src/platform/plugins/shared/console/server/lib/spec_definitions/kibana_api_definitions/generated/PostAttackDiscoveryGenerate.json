@@ -1,0 +1,64 @@
+{
+  "PostAttackDiscoveryGenerate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/_generate"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PostAttackDiscoveryGenerate",
+    "data_autocomplete_rules": {
+      "alertsIndexPattern": "",
+      "anonymizationFields": [
+        {
+          "allowed": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "anonymized": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "createdAt": "",
+          "createdBy": "",
+          "field": "",
+          "id": "",
+          "namespace": "",
+          "timestamp": "",
+          "updatedAt": "",
+          "updatedBy": ""
+        }
+      ],
+      "apiConfig": {
+        "actionTypeId": "",
+        "connectorId": "",
+        "defaultSystemPromptId": "",
+        "model": "",
+        "provider": {
+          "__one_of": [
+            "OpenAI",
+            "Azure OpenAI",
+            "Other"
+          ]
+        }
+      },
+      "connectorName": "",
+      "end": "",
+      "filter": {},
+      "model": "",
+      "replacements": {},
+      "size": "",
+      "start": "",
+      "subAction": {
+        "__one_of": [
+          "invokeAI",
+          "invokeStream"
+        ]
+      }
+    }
+  }
+}

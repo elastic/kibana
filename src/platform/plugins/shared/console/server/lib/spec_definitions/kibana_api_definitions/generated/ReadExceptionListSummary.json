@@ -1,0 +1,20 @@
+{
+  "ReadExceptionListSummary": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/exception_lists/summary"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadExceptionListSummary",
+    "url_params": {
+      "id": [],
+      "list_id": [],
+      "namespace_type": [
+        "agnostic",
+        "single"
+      ],
+      "filter": []
+    }
+  }
+}

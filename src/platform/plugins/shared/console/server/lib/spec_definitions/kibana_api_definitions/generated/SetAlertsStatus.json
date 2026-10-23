@@ -1,0 +1,38 @@
+{
+  "SetAlertsStatus": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/signals/status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-SetAlertsStatus",
+    "data_autocomplete_rules": {
+      "conflicts": {
+        "__one_of": [
+          "abort",
+          "proceed"
+        ]
+      },
+      "query": {},
+      "runtime_fields": {},
+      "runtime_mappings": {},
+      "status": {
+        "__one_of": [
+          "closed"
+        ]
+      },
+      "reason": {
+        "__one_of": [
+          "false_positive",
+          "duplicate",
+          "true_positive",
+          "benign_positive",
+          "automated_closure",
+          "other"
+        ]
+      },
+      "signal_ids": []
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "AssignWatchlistEntities": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{watchlist_id}/entities/assign"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-AssignWatchlistEntities",
+    "data_autocomplete_rules": {
+      "euids": []
+    }
+  }
+}

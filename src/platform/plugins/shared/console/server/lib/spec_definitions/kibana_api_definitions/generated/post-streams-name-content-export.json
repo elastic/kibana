@@ -1,0 +1,21 @@
+{
+  "post-streams-name-content-export": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/{name}/content/export"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-streams-name-content-export",
+    "data_autocomplete_rules": {
+      "description": "",
+      "include": {
+        "objects": {
+          "all": {}
+        }
+      },
+      "name": "",
+      "version": ""
+    }
+  }
+}

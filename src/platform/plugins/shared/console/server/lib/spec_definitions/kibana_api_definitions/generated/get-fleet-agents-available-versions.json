@@ -1,0 +1,11 @@
+{
+  "get-fleet-agents-available-versions": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/available_versions"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agents-available-versions"
+  }
+}

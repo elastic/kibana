@@ -1,0 +1,11 @@
+{
+  "mlUpdateTrainedModelsSpaces": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/ml/saved_objects/update_trained_models_spaces"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-mlUpdateTrainedModelsSpaces"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "get-fleet-package-policies": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/package_policies"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-package-policies",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "sortField": [],
+      "sortOrder": [
+        "desc",
+        "asc"
+      ],
+      "showUpgradeable": "__flag__",
+      "kuery": [],
+      "format": [
+        "simplified",
+        "legacy"
+      ],
+      "withAgentCount": "__flag__"
+    }
+  }
+}

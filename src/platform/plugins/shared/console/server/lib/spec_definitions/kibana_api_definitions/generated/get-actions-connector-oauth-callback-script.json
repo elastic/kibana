@@ -1,0 +1,11 @@
+{
+  "get-actions-connector-oauth-callback-script": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/actions/connector/_oauth_callback_script"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-actions-connector-oauth-callback-script"
+  }
+}

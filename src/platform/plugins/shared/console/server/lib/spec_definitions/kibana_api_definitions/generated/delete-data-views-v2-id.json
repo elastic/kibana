@@ -1,0 +1,11 @@
+{
+  "delete-data-views-v2-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/data_views/v2/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-data-views-v2-id"
+  }
+}

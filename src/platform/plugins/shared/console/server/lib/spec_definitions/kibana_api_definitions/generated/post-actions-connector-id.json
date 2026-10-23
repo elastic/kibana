@@ -1,0 +1,222 @@
+{
+  "post-actions-connector-id": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/actions/connector/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id",
+    "url_components": {
+      "id": "__kibana_connector"
+    },
+    "data_autocomplete_rules": {
+      "connector_type_id": "",
+      "is_inbound_events_enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "config": {
+        "configUrl": "",
+        "usesBasic": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "authType": {
+          "__one_of": [
+            "webhook-authentication-basic",
+            "webhook-authentication-ssl",
+            "webhook-oauth2-client-credentials"
+          ]
+        },
+        "ca": "",
+        "certType": {
+          "__one_of": [
+            "ssl-crt-key",
+            "ssl-pfx"
+          ]
+        },
+        "createCommentJson": "",
+        "createCommentMethod": {
+          "__one_of": [
+            "patch",
+            "post",
+            "put"
+          ]
+        },
+        "createCommentUrl": "",
+        "createIncidentJson": "",
+        "createIncidentMethod": {
+          "__one_of": [
+            "patch",
+            "post",
+            "put"
+          ]
+        },
+        "createIncidentResponseKey": "",
+        "createIncidentUrl": "",
+        "getIncidentResponseExternalTitleKey": "",
+        "getIncidentUrl": "",
+        "hasAuth": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "headers": {},
+        "updateIncidentJson": "",
+        "updateIncidentMethod": {
+          "__one_of": [
+            "patch",
+            "post",
+            "put"
+          ]
+        },
+        "updateIncidentUrl": "",
+        "verificationMode": {
+          "__one_of": [
+            "full",
+            "certificate",
+            "none"
+          ]
+        },
+        "viewIncidentUrl": "",
+        "accessTokenUrl": "",
+        "additionalFields": "",
+        "clientId": "",
+        "method": {
+          "__one_of": [
+            "post",
+            "put",
+            "patch",
+            "get",
+            "delete"
+          ]
+        },
+        "scope": "",
+        "url": "",
+        "webhookIntegrationUrl": "",
+        "organisation": "",
+        "apiUrl": "",
+        "appId": "",
+        "connectorType": {
+          "__one_of": [
+            "all",
+            "alerts",
+            "cases"
+          ]
+        },
+        "mappings": {
+          "alertIdConfig": {},
+          "caseIdConfig": {},
+          "caseNameConfig": {},
+          "commentsConfig": {},
+          "descriptionConfig": {},
+          "ruleNameConfig": {},
+          "severityConfig": {}
+        },
+        "allowedChannels": [
+          {
+            "id": "",
+            "name": ""
+          }
+        ],
+        "isOAuth": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "jwtKeyId": "",
+        "userIdentifierValue": "",
+        "usesTableApi": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "apiProvider": {
+          "__one_of": [
+            "Azure OpenAI"
+          ]
+        },
+        "defaultModel": "",
+        "certificateData": "",
+        "privateKeyData": "",
+        "caData": "",
+        "projectKey": "",
+        "executionTimeField": "",
+        "index": "",
+        "refresh": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "orgId": "",
+        "gcpRegion": "",
+        "gcpProjectID": "",
+        "allowHtml": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "from": "",
+        "host": "",
+        "oauthTokenUrl": "",
+        "port": "",
+        "secure": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "service": {
+          "__one_of": [
+            "elastic_cloud",
+            "exchange_server",
+            "gmail",
+            "other",
+            "outlook365",
+            "ses"
+          ]
+        },
+        "tenantId": "",
+        "region": ""
+      },
+      "secrets": {
+        "password": "",
+        "secretsUrl": "",
+        "user": "",
+        "crt": "",
+        "key": "",
+        "pfx": "",
+        "clientSecret": "",
+        "token": "",
+        "email": "",
+        "apiKey": "",
+        "apiToken": "",
+        "privateKey": "",
+        "privateKeyPassword": "",
+        "username": "",
+        "routingKey": "",
+        "certificateData": "",
+        "privateKeyData": "",
+        "caData": "",
+        "webhookUrl": "",
+        "apiKeyId": "",
+        "apiKeySecret": "",
+        "credentialsJson": "",
+        "clientId": "",
+        "accessKey": "",
+        "secret": ""
+      }
+    }
+  }
+}

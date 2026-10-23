@@ -1,0 +1,65 @@
+{
+  "put-fleet-cloud-onboarding-deployments-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/cloud_onboarding_deployments/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-cloud-onboarding-deployments-id",
+    "data_autocomplete_rules": {
+      "agentPolicyIds": [],
+      "apiKeyId": "",
+      "attemptCount": "",
+      "authMethod": {
+        "__one_of": [
+          "identity_federation",
+          "static_keys",
+          "temporary_keys",
+          "shared_credentials",
+          "assume_role"
+        ]
+      },
+      "connectorId": "",
+      "deploymentId": "",
+      "deploymentName": "",
+      "ecfStacks": [
+        {
+          "family": {
+            "__one_of": [
+              "unified",
+              "otel",
+              "crowdstrike"
+            ]
+          },
+          "serviceIds": [],
+          "stackArn": "",
+          "stackName": "",
+          "templateVersion": ""
+        }
+      ],
+      "mechanisms": [
+        {
+          "__one_of": [
+            "managed_integration",
+            "ecf",
+            "agent_based"
+          ]
+        }
+      ],
+      "packagePolicyIds": [],
+      "policyIdsByInstance": {},
+      "services": [],
+      "serviceVars": {},
+      "status": {
+        "__one_of": [
+          "pending",
+          "deploying",
+          "succeeded",
+          "failed"
+        ]
+      },
+      "statusMessage": ""
+    }
+  }
+}

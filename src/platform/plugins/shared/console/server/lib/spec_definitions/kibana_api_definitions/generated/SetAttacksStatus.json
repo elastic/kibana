@@ -1,0 +1,35 @@
+{
+  "SetAttacksStatus": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/attacks/status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-SetAttacksStatus",
+    "data_autocomplete_rules": {
+      "ids": [],
+      "status": {
+        "__one_of": [
+          "closed"
+        ]
+      },
+      "update_related_alerts": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "reason": {
+        "__one_of": [
+          "false_positive",
+          "duplicate",
+          "true_positive",
+          "benign_positive",
+          "automated_closure",
+          "other"
+        ]
+      }
+    }
+  }
+}

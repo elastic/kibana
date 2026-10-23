@@ -1,0 +1,16 @@
+{
+  "get-fleet-agent-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agent_status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agent-status",
+    "url_params": {
+      "policyId": [],
+      "policyIds": [],
+      "kuery": []
+    }
+  }
+}

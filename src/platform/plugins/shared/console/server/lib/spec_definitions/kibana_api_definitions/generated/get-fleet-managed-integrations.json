@@ -1,0 +1,21 @@
+{
+  "get-fleet-managed-integrations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/managed_integrations"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-managed-integrations",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "sortField": [],
+      "sortOrder": [
+        "desc",
+        "asc"
+      ],
+      "kuery": []
+    }
+  }
+}

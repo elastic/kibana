@@ -1,0 +1,46 @@
+{
+  "put-security-entity-store-entities-bulk": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/entities/bulk"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-entity-store-entities-bulk",
+    "url_params": {
+      "force": [
+        "true",
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    "data_autocomplete_rules": {
+      "entities": [
+        {
+          "doc": {
+            "@timestamp": "",
+            "asset": {},
+            "cloud": {},
+            "entity": {},
+            "event": {},
+            "labels": {},
+            "orchestrator": {},
+            "tags": [],
+            "service": {},
+            "host": {},
+            "user": {}
+          },
+          "type": {
+            "__one_of": [
+              "user",
+              "host",
+              "service",
+              "generic"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

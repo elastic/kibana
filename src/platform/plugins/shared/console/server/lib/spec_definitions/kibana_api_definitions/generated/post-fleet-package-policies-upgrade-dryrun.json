@@ -1,0 +1,15 @@
+{
+  "post-fleet-package-policies-upgrade-dryrun": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/upgrade/dryrun"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-package-policies-upgrade-dryrun",
+    "data_autocomplete_rules": {
+      "packagePolicyIds": [],
+      "packageVersion": ""
+    }
+  }
+}

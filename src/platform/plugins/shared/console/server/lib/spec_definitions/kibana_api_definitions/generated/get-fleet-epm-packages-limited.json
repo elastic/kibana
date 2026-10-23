@@ -1,0 +1,11 @@
+{
+  "get-fleet-epm-packages-limited": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/limited"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-packages-limited"
+  }
+}

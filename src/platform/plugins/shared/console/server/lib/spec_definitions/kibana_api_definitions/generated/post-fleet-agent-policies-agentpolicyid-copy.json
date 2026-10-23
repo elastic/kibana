@@ -1,0 +1,21 @@
+{
+  "post-fleet-agent-policies-agentpolicyid-copy": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/{agentPolicyId}/copy"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agent-policies-agentpolicyid-copy",
+    "url_params": {
+      "format": [
+        "simplified",
+        "legacy"
+      ]
+    },
+    "data_autocomplete_rules": {
+      "description": "",
+      "name": ""
+    }
+  }
+}

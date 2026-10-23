@@ -10,8 +10,10 @@
 import { createHash } from 'crypto';
 import type { RequestHandler } from '@kbn/core/server';
 import type { RouteDependencies } from '../../..';
+import type { EndpointDescription } from '../../../../../common/types';
 import type { KibanaApiDocLinksMap } from '../../../../../common/types/api_responses';
 import kibanaApiDocLinks from '../../../../lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json';
+import { loadKibanaApiDefinitions } from '../../../../services/load_kibana_api_definitions';
 import { compactSpecDefinitions } from '../../../../services/compact_spec_definitions';
 import type { SpecDefinitionsJson } from '../../../../types';
 
@@ -19,6 +21,7 @@ interface SpecDefinitionsRouteResponse {
   es: SpecDefinitionsJson;
   kibana: {
     docLinks: KibanaApiDocLinksMap;
+    endpoints: Record<string, EndpointDescription>;
   };
 }
 
@@ -63,7 +66,7 @@ export const registerSpecDefinitionsRoute = ({ router, log, services }: RouteDep
       }
       const specResponse: SpecDefinitionsRouteResponse = {
         es,
-        kibana: { docLinks: kibanaApiDocLinks },
+        kibana: { docLinks: kibanaApiDocLinks, endpoints: loadKibanaApiDefinitions() },
       };
       const body = JSON.stringify(specResponse);
       cachedResponse = {

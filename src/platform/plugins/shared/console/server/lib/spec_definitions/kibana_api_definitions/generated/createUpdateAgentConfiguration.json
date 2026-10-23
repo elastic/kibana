@@ -1,0 +1,22 @@
+{
+  "createUpdateAgentConfiguration": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-createUpdateAgentConfiguration",
+    "url_params": {
+      "overwrite": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "agent_name": "",
+      "service": {
+        "environment": "",
+        "name": ""
+      },
+      "settings": {}
+    }
+  }
+}

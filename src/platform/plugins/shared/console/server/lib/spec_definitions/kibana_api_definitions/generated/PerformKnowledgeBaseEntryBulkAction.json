@@ -1,0 +1,126 @@
+{
+  "PerformKnowledgeBaseEntryBulkAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base/entries/_bulk_action"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PerformKnowledgeBaseEntryBulkAction",
+    "data_autocomplete_rules": {
+      "create": [
+        {
+          "inputSchema": [
+            {
+              "description": "",
+              "fieldName": "",
+              "fieldType": ""
+            }
+          ],
+          "outputFields": [],
+          "description": "",
+          "field": "",
+          "index": "",
+          "queryDescription": "",
+          "type": {
+            "__one_of": [
+              "document"
+            ]
+          },
+          "global": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "name": "",
+          "namespace": "",
+          "users": [
+            {
+              "id": "",
+              "name": ""
+            }
+          ],
+          "required": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "vector": {
+            "modelId": "",
+            "tokens": {}
+          },
+          "kbResource": {
+            "__one_of": [
+              "security_labs",
+              "defend_insights",
+              "user"
+            ]
+          },
+          "source": "",
+          "text": ""
+        }
+      ],
+      "delete": {
+        "ids": [],
+        "query": ""
+      },
+      "update": [
+        {
+          "inputSchema": [
+            {
+              "description": "",
+              "fieldName": "",
+              "fieldType": ""
+            }
+          ],
+          "outputFields": [],
+          "description": "",
+          "field": "",
+          "index": "",
+          "queryDescription": "",
+          "type": {
+            "__one_of": [
+              "document"
+            ]
+          },
+          "global": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "name": "",
+          "namespace": "",
+          "users": [
+            {
+              "id": "",
+              "name": ""
+            }
+          ],
+          "id": "",
+          "required": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "vector": {
+            "modelId": "",
+            "tokens": {}
+          },
+          "kbResource": {
+            "__one_of": [
+              "security_labs",
+              "defend_insights",
+              "user"
+            ]
+          },
+          "source": "",
+          "text": ""
+        }
+      ]
+    }
+  }
+}

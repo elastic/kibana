@@ -1,0 +1,11 @@
+{
+  "post-maintenance-window-id-archive": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/maintenance_window/{id}/_archive"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-maintenance-window-id-archive"
+  }
+}

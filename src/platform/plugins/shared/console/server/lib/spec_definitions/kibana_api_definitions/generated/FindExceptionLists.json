@@ -1,0 +1,25 @@
+{
+  "FindExceptionLists": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/exception_lists/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindExceptionLists",
+    "url_params": {
+      "filter": [],
+      "namespace_type": [
+        "agnostic",
+        "single"
+      ],
+      "page": [],
+      "per_page": [],
+      "sort_field": [],
+      "sort_order": [
+        "desc",
+        "asc"
+      ]
+    }
+  }
+}

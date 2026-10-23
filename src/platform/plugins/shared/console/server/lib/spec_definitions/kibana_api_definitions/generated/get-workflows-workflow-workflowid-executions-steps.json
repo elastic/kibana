@@ -1,0 +1,20 @@
+{
+  "get-workflows-workflow-workflowid-executions-steps": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/workflow/{workflowId}/executions/steps"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-workflow-workflowid-executions-steps",
+    "url_params": {
+      "stepId": [],
+      "includeInput": "__flag__",
+      "includeOutput": "__flag__",
+      "page": [],
+      "size": [],
+      "startedAfter": [],
+      "startedBefore": []
+    }
+  }
+}

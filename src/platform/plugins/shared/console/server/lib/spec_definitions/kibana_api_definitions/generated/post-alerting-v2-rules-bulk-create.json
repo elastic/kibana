@@ -1,0 +1,77 @@
+{
+  "post-alerting-v2-rules-bulk-create": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/_bulk_create"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-bulk-create",
+    "data_autocomplete_rules": {
+      "items": [
+        {
+          "artifacts": [
+            {
+              "data": {},
+              "id": "",
+              "type": ""
+            }
+          ],
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "grouping": {
+            "fields": []
+          },
+          "id": "",
+          "kind": {
+            "__one_of": [
+              "alert",
+              "signal"
+            ]
+          },
+          "metadata": {
+            "builder": {},
+            "description": "",
+            "name": "",
+            "routing_tags": [],
+            "tags": []
+          },
+          "no_data": {
+            "query": "",
+            "strategy": {
+              "__one_of": [
+                "ignore"
+              ]
+            }
+          },
+          "query": {
+            "base": "",
+            "breach": {}
+          },
+          "recovery": {
+            "strategy": {
+              "__one_of": [
+                "no_breach"
+              ]
+            },
+            "query": "",
+            "segment": ""
+          },
+          "schedule": {
+            "every": "",
+            "lookback": ""
+          },
+          "state_transition": {
+            "pending": {},
+            "recovering": {}
+          },
+          "time_field": ""
+        }
+      ]
+    }
+  }
+}

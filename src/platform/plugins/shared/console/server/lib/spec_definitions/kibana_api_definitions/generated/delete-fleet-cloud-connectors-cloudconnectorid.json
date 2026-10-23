@@ -1,0 +1,14 @@
+{
+  "delete-fleet-cloud-connectors-cloudconnectorid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/cloud_connectors/{cloudConnectorId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-cloud-connectors-cloudconnectorid",
+    "url_params": {
+      "force": "__flag__"
+    }
+  }
+}

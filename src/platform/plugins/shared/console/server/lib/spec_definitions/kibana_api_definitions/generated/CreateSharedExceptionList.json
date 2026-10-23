@@ -1,0 +1,15 @@
+{
+  "CreateSharedExceptionList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/exceptions/shared"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateSharedExceptionList",
+    "data_autocomplete_rules": {
+      "description": "",
+      "name": ""
+    }
+  }
+}

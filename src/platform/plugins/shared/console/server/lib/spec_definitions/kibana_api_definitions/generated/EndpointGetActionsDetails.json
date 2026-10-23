@@ -1,0 +1,11 @@
+{
+  "EndpointGetActionsDetails": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/action/{action_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointGetActionsDetails"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "CleanDraftTimelines": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline/_draft"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CleanDraftTimelines",
+    "data_autocomplete_rules": {
+      "timelineType": {
+        "__one_of": [
+          "default",
+          "template"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "OsqueryCreateSavedQuery": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryCreateSavedQuery",
+    "data_autocomplete_rules": {
+      "description": "",
+      "ecs_mapping": {},
+      "id": "",
+      "interval": "",
+      "platform": "",
+      "query": "",
+      "removed": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "snapshot": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "version": ""
+    }
+  }
+}

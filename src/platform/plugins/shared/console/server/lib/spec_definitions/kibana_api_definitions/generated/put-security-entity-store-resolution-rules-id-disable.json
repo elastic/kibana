@@ -1,0 +1,11 @@
+{
+  "put-security-entity-store-resolution-rules-id-disable": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/resolution/rules/{id}/disable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-entity-store-resolution-rules-id-disable"
+  }
+}

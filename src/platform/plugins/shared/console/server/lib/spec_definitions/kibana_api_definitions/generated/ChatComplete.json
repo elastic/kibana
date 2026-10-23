@@ -1,0 +1,49 @@
+{
+  "ChatComplete": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/chat/complete"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ChatComplete",
+    "url_params": {
+      "content_references_disabled": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "connectorId": "",
+      "conversationId": "",
+      "isStream": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "langSmithApiKey": "",
+      "langSmithProject": "",
+      "messages": [
+        {
+          "content": "",
+          "data": {},
+          "fields_to_anonymize": [],
+          "role": {
+            "__one_of": [
+              "system",
+              "user",
+              "assistant"
+            ]
+          }
+        }
+      ],
+      "model": "",
+      "persist": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "promptId": "",
+      "responseLanguage": ""
+    }
+  }
+}

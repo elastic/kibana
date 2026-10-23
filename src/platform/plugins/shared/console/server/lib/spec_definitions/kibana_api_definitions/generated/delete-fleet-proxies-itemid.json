@@ -1,0 +1,11 @@
+{
+  "delete-fleet-proxies-itemid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/proxies/{itemId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-proxies-itemid"
+  }
+}

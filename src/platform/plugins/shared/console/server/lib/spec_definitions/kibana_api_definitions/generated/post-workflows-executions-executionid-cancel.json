@@ -1,0 +1,11 @@
+{
+  "post-workflows-executions-executionid-cancel": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/cancel"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-workflows-executions-executionid-cancel"
+  }
+}

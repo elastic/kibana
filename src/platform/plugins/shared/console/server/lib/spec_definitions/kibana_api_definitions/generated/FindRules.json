@@ -1,0 +1,46 @@
+{
+  "FindRules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/detection_engine/rules/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindRules",
+    "url_params": {
+      "fields": [],
+      "filter": [],
+      "sort_field": [
+        "created_at",
+        "createdAt",
+        "enabled",
+        "execution_summary.last_execution.date",
+        "execution_summary.last_execution.metrics.execution_gap_duration_s",
+        "execution_summary.last_execution.metrics.total_indexing_duration_ms",
+        "execution_summary.last_execution.metrics.total_search_duration_ms",
+        "execution_summary.last_execution.status",
+        "name",
+        "risk_score",
+        "riskScore",
+        "severity",
+        "updated_at",
+        "updatedAt"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "page": [],
+      "per_page": [],
+      "gaps_range_start": [],
+      "gaps_range_end": [],
+      "gap_fill_statuses": [
+        "unfilled",
+        "in_progress",
+        "filled",
+        "error"
+      ],
+      "gap_auto_fill_scheduler_id": []
+    }
+  }
+}

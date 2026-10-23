@@ -1,0 +1,11 @@
+{
+  "CreateAlertsIndex": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/index"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateAlertsIndex"
+  }
+}

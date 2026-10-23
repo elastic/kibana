@@ -1,0 +1,26 @@
+{
+  "CancelAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/cancel"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CancelAction",
+    "data_autocomplete_rules": {
+      "parameters": {},
+      "agent_type": {
+        "__one_of": [
+          "endpoint",
+          "sentinel_one",
+          "crowdstrike",
+          "microsoft_defender_endpoint"
+        ]
+      },
+      "alert_ids": [],
+      "case_ids": [],
+      "comment": "",
+      "endpoint_ids": []
+    }
+  }
+}

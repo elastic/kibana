@@ -1,0 +1,14 @@
+{
+  "get-actions-connector-connectorid-oauth-start": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/actions/connector/{connectorId}/oauth/start"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-actions-connector-connectorid-oauth-start",
+    "url_components": {
+      "connectorId": "__kibana_connector"
+    }
+  }
+}

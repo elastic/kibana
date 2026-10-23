@@ -30,3 +30,9 @@ export const KIBANA_API_DOC_LINKS_FILE = resolve(
   __dirname,
   '../../server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json'
 );
+
+// Generated from the Kibana OpenAPI bundle by `node scripts/generate_kibana_api_paths.js`.
+export const KIBANA_API_DEFINITIONS_FOLDER = resolve(
+  __dirname,
+  '../../server/lib/spec_definitions/kibana_api_definitions'
+);

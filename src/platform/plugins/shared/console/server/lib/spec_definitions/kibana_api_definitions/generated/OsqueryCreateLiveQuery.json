@@ -1,0 +1,64 @@
+{
+  "OsqueryCreateLiveQuery": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/live_queries"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryCreateLiveQuery",
+    "data_autocomplete_rules": {
+      "agent_all": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "agent_ids": [],
+      "agent_platforms": [],
+      "agent_policy_ids": [],
+      "alert_ids": [],
+      "case_ids": [],
+      "ecs_mapping": {},
+      "event_ids": [],
+      "metadata": {},
+      "pack_id": "",
+      "queries": [
+        {
+          "ecs_mapping": {},
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "id": "",
+          "platform": "",
+          "query": "",
+          "removed": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "result_type": {
+            "__one_of": [
+              "snapshot",
+              "differential",
+              "differential_added_only"
+            ]
+          },
+          "snapshot": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "version": ""
+        }
+      ],
+      "query": "",
+      "saved_query_id": ""
+    }
+  }
+}

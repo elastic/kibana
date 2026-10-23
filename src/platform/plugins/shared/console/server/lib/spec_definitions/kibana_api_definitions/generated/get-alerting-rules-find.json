@@ -1,0 +1,30 @@
+{
+  "get-alerting-rules-find": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/rules/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-alerting-rules-find",
+    "url_params": {
+      "per_page": [],
+      "page": [],
+      "search": [],
+      "default_search_operator": [
+        "OR",
+        "AND"
+      ],
+      "search_fields": [],
+      "sort_field": [],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "has_reference": [],
+      "fields": [],
+      "filter": [],
+      "filter_consumers": []
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "DeleteExceptionList": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/exception_lists"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteExceptionList",
+    "url_params": {
+      "id": [],
+      "list_id": [],
+      "namespace_type": [
+        "agnostic",
+        "single"
+      ]
+    }
+  }
+}

@@ -1,0 +1,250 @@
+{
+  "put-security-entity-store-entities-entitytype": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/entities/{entityType}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-entity-store-entities-entitytype",
+    "url_params": {
+      "force": [
+        "true",
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    "url_components": {
+      "entityType": [
+        "user",
+        "host",
+        "service",
+        "generic"
+      ]
+    },
+    "data_autocomplete_rules": {
+      "@timestamp": "",
+      "asset": {
+        "business_unit": "",
+        "criticality": {
+          "__one_of": [
+            "low_impact",
+            "medium_impact",
+            "high_impact",
+            "extreme_impact"
+          ]
+        },
+        "environment": "",
+        "id": "",
+        "model": "",
+        "name": "",
+        "owner": "",
+        "serial_number": "",
+        "vendor": ""
+      },
+      "cloud": {
+        "account": {
+          "id": "",
+          "name": ""
+        },
+        "availability_zone": "",
+        "instance": {
+          "id": "",
+          "name": ""
+        },
+        "machine": {
+          "type": ""
+        },
+        "project": {
+          "id": "",
+          "name": ""
+        },
+        "provider": "",
+        "region": "",
+        "service": {
+          "name": ""
+        }
+      },
+      "entity": {
+        "attributes": {
+          "asset": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "known_redirects": [],
+          "managed": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "mfa_enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "oauth_consent_restriction": "",
+          "permissions": [],
+          "storage_class": "",
+          "watchlists": []
+        },
+        "behaviors": {
+          "anomaly_job_ids": [],
+          "rule_names": []
+        },
+        "created_by": "",
+        "EngineMetadata": {
+          "Type": ""
+        },
+        "id": "",
+        "lifecycle": {
+          "first_seen": "",
+          "last_activity": "",
+          "last_seen": ""
+        },
+        "name": "",
+        "relationships": {
+          "accesses_frequently": {},
+          "accesses_infrequently": {},
+          "administers": {},
+          "communicates_with": {},
+          "depends_on": {},
+          "owns": {},
+          "owns_inferred": {},
+          "resolution": {},
+          "supervises": {}
+        },
+        "risk": {
+          "calculated_level": {
+            "__one_of": [
+              "Unknown",
+              "Low",
+              "Moderate",
+              "High",
+              "Critical"
+            ]
+          },
+          "calculated_score": "",
+          "calculated_score_norm": ""
+        },
+        "schema_version": "",
+        "source": [],
+        "sub_type": "",
+        "type": "",
+        "url": ""
+      },
+      "event": {
+        "ingested": ""
+      },
+      "labels": {},
+      "orchestrator": {
+        "api_version": "",
+        "cluster": {
+          "id": "",
+          "name": "",
+          "url": "",
+          "version": ""
+        },
+        "namespace": "",
+        "organization": "",
+        "resource": {
+          "annotation": "",
+          "id": "",
+          "ip": "",
+          "label": "",
+          "name": "",
+          "parent": {},
+          "type": ""
+        },
+        "type": ""
+      },
+      "tags": [],
+      "service": {
+        "address": "",
+        "environment": "",
+        "ephemeral_id": "",
+        "id": "",
+        "name": "",
+        "node": {
+          "name": "",
+          "role": "",
+          "roles": []
+        },
+        "risk": {
+          "calculated_level": {
+            "__one_of": [
+              "Unknown",
+              "Low",
+              "Moderate",
+              "High",
+              "Critical"
+            ]
+          },
+          "calculated_score": "",
+          "calculated_score_norm": ""
+        },
+        "state": "",
+        "type": "",
+        "version": ""
+      },
+      "host": {
+        "architecture": [],
+        "domain": [],
+        "hostname": [],
+        "id": [],
+        "ip": [],
+        "mac": [],
+        "name": "",
+        "os": {
+          "family": "",
+          "full": "",
+          "kernel": "",
+          "name": "",
+          "platform": "",
+          "type": "",
+          "version": ""
+        },
+        "risk": {
+          "calculated_level": {
+            "__one_of": [
+              "Unknown",
+              "Low",
+              "Moderate",
+              "High",
+              "Critical"
+            ]
+          },
+          "calculated_score": "",
+          "calculated_score_norm": ""
+        },
+        "type": []
+      },
+      "user": {
+        "domain": [],
+        "email": [],
+        "full_name": [],
+        "hash": [],
+        "id": [],
+        "name": "",
+        "risk": {
+          "calculated_level": {
+            "__one_of": [
+              "Unknown",
+              "Low",
+              "Moderate",
+              "High",
+              "Critical"
+            ]
+          },
+          "calculated_score": "",
+          "calculated_score_norm": ""
+        },
+        "roles": []
+      }
+    }
+  }
+}

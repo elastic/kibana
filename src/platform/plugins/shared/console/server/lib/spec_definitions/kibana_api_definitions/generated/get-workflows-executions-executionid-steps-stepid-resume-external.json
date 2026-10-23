@@ -1,0 +1,20 @@
+{
+  "get-workflows-executions-executionid-steps-stepid-resume-external": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/steps/{stepId}/resume/external"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-executions-executionid-steps-stepid-resume-external",
+    "url_params": {
+      "token": [],
+      "approved": [
+        "true",
+        "false",
+        "true",
+        "false"
+      ]
+    }
+  }
+}

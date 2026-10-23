@@ -1,0 +1,11 @@
+{
+  "get-fleet-agents-agentid-effective-config": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/effective_config"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agents-agentid-effective-config"
+  }
+}

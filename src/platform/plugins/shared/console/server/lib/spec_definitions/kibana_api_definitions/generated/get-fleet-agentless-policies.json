@@ -1,0 +1,21 @@
+{
+  "get-fleet-agentless-policies": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agentless_policies"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agentless-policies",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "sortField": [],
+      "sortOrder": [
+        "desc",
+        "asc"
+      ],
+      "kuery": []
+    }
+  }
+}

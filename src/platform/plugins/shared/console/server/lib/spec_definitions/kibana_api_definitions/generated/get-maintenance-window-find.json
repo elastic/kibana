@@ -1,0 +1,24 @@
+{
+  "get-maintenance-window-find": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/maintenance_window/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-maintenance-window-find",
+    "url_params": {
+      "title": [],
+      "created_by": [],
+      "status": [
+        "running",
+        "finished",
+        "upcoming",
+        "archived",
+        "disabled"
+      ],
+      "page": [],
+      "per_page": []
+    }
+  }
+}

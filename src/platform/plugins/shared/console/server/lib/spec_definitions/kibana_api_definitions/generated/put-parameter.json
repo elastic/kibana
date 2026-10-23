@@ -1,0 +1,17 @@
+{
+  "put-parameter": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/synthetics/params/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-parameter",
+    "data_autocomplete_rules": {
+      "description": "",
+      "key": "",
+      "tags": [],
+      "value": ""
+    }
+  }
+}

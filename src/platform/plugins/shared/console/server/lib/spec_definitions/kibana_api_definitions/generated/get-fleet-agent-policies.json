@@ -1,0 +1,30 @@
+{
+  "get-fleet-agent-policies": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agent-policies",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "sortField": [],
+      "sortOrder": [
+        "desc",
+        "asc"
+      ],
+      "showUpgradeable": "__flag__",
+      "kuery": [],
+      "showAgentless": "__flag__",
+      "noAgentCount": "__flag__",
+      "withAgentCount": "__flag__",
+      "full": "__flag__",
+      "format": [
+        "simplified",
+        "legacy"
+      ]
+    }
+  }
+}

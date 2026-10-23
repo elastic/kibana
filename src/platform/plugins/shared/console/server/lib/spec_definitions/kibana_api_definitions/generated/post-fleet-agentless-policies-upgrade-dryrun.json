@@ -1,0 +1,15 @@
+{
+  "post-fleet-agentless-policies-upgrade-dryrun": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agentless_policies/_upgrade/dryrun"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agentless-policies-upgrade-dryrun",
+    "data_autocomplete_rules": {
+      "pkgVersion": "",
+      "policyIds": []
+    }
+  }
+}

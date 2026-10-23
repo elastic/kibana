@@ -1,0 +1,23 @@
+{
+  "put-saved-objects-type-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/saved_objects/{type}/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-saved-objects-type-id",
+    "data_autocomplete_rules": {
+      "attributes": {},
+      "references": [
+        {
+          "id": "",
+          "name": "",
+          "type": ""
+        }
+      ],
+      "upsert": {},
+      "version": ""
+    }
+  }
+}

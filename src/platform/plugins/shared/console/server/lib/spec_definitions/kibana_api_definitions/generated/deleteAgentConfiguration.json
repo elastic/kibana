@@ -1,0 +1,17 @@
+{
+  "deleteAgentConfiguration": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteAgentConfiguration",
+    "data_autocomplete_rules": {
+      "service": {
+        "environment": "",
+        "name": ""
+      }
+    }
+  }
+}

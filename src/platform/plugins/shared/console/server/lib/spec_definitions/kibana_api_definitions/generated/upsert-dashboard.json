@@ -1,0 +1,11 @@
+{
+  "upsert-dashboard": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/dashboards/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-upsert-dashboard"
+  }
+}

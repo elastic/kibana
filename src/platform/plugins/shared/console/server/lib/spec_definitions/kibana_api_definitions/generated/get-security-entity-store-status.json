@@ -1,0 +1,19 @@
+{
+  "get-security-entity-store-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security/entity_store/status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-security-entity-store-status",
+    "url_params": {
+      "include_components": [
+        "true",
+        "false",
+        "true",
+        "false"
+      ]
+    }
+  }
+}

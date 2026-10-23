@@ -1,0 +1,11 @@
+{
+  "get-streams": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/streams"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams"
+  }
+}

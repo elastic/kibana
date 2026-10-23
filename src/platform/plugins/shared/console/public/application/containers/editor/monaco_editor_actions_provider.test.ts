@@ -58,7 +58,6 @@ import { monaco as monacoRuntime } from '@kbn/monaco';
 import { createParser } from '@kbn/monaco/src/languages/definitions/console/parser';
 import { sendRequest } from '../../hooks';
 import { serviceContextMock } from '../../contexts/services_context.mock';
-import { _test as kbTest } from '../../../lib/kb';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
@@ -1686,6 +1685,7 @@ describe('Editor actions provider', () => {
     });
 
     it('returns the kibana API reference link for a kbn: request with no matching operation', async () => {
+      mockPopulateContext.mockImplementationOnce(() => {});
       editor.getModel.mockReturnValue({
         getLineMaxColumn: () => 26,
         getPositionAt: () => ({ lineNumber: 1 }),
@@ -1707,9 +1707,11 @@ describe('Editor actions provider', () => {
       expect(link).toBe(kibanaApiReferenceLink);
     });
 
-    it('returns the specific operation deep link for a kbn: request that matches the doc links map', async () => {
-      kbTest.setKibanaApiDocLinks({
-        '/api/spaces/space/{id}': { get: 'get-spaces-space-id' },
+    it('returns the specific operation link for a kbn: request that matches a Kibana API definition', async () => {
+      const operationLink =
+        'http://elastic.co/docs/api/doc/kibana/operation/operation-get-spaces-space-id';
+      mockPopulateContext.mockImplementationOnce((...args) => {
+        args[0][1].endpoint = { documentation: operationLink };
       });
       editor.getModel.mockReturnValue({
         getLineMaxColumn: () => 34,
@@ -1729,13 +1731,11 @@ describe('Editor actions provider', () => {
         docLinkVersion,
         kibanaApiReferenceLink
       );
-      expect(link).toBe(
-        'http://elastic.co/docs/api/doc/kibana/operation/operation-get-spaces-space-id'
-      );
-      kbTest.setKibanaApiDocLinks({});
+      expect(link).toBe(operationLink);
     });
 
     it('returns null for a kbn: request when no kibana API reference link is provided', async () => {
+      mockPopulateContext.mockImplementationOnce(() => {});
       editor.getModel.mockReturnValue({
         getLineMaxColumn: () => 26,
         getPositionAt: () => ({ lineNumber: 1 }),

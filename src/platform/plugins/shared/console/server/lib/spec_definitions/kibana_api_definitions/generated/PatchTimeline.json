@@ -1,0 +1,159 @@
+{
+  "PatchTimeline": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/timeline"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PatchTimeline",
+    "data_autocomplete_rules": {
+      "timeline": {
+        "columns": [
+          {
+            "aggregatable": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "category": "",
+            "columnHeaderType": "",
+            "description": "",
+            "example": "",
+            "id": "",
+            "indexes": [],
+            "name": "",
+            "placeholder": "",
+            "searchable": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "type": ""
+          }
+        ],
+        "created": "",
+        "createdBy": "",
+        "dataProviders": [
+          {
+            "and": [
+              {}
+            ],
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "excluded": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "id": "",
+            "kqlQuery": "",
+            "name": "",
+            "queryMatch": {},
+            "type": {
+              "__one_of": [
+                "default",
+                "template"
+              ]
+            }
+          }
+        ],
+        "dataViewId": "",
+        "dateRange": {
+          "end": "",
+          "start": ""
+        },
+        "description": "",
+        "eqlOptions": {
+          "eventCategoryField": "",
+          "query": "",
+          "size": "",
+          "tiebreakerField": "",
+          "timestampField": ""
+        },
+        "eventType": "",
+        "excludedRowRendererIds": [
+          {
+            "__one_of": [
+              "alert",
+              "alerts",
+              "auditd",
+              "auditd_file",
+              "library",
+              "netflow",
+              "plain",
+              "registry",
+              "suricata",
+              "system",
+              "system_dns",
+              "system_endgame_process",
+              "system_file",
+              "system_fim",
+              "system_security_event",
+              "system_socket",
+              "threat_match",
+              "zeek"
+            ]
+          }
+        ],
+        "favorite": [
+          {
+            "favoriteDate": "",
+            "fullName": "",
+            "userName": ""
+          }
+        ],
+        "filters": [
+          {
+            "exists": "",
+            "match_all": "",
+            "meta": {},
+            "missing": "",
+            "query": "",
+            "range": "",
+            "script": ""
+          }
+        ],
+        "indexNames": [],
+        "kqlMode": "",
+        "kqlQuery": {
+          "filterQuery": {}
+        },
+        "savedQueryId": "",
+        "savedSearchId": "",
+        "sort": {
+          "columnId": "",
+          "columnType": "",
+          "sortDirection": ""
+        },
+        "status": {
+          "__one_of": [
+            "active",
+            "draft",
+            "immutable"
+          ]
+        },
+        "templateTimelineId": "",
+        "templateTimelineVersion": "",
+        "timelineType": {
+          "__one_of": [
+            "default",
+            "template"
+          ]
+        },
+        "title": "",
+        "updated": "",
+        "updatedBy": ""
+      },
+      "timelineId": "",
+      "version": ""
+    }
+  }
+}

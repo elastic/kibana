@@ -1,0 +1,87 @@
+{
+  "put-alerting-rule-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-alerting-rule-id",
+    "url_components": {
+      "id": "__kibana_rule"
+    },
+    "data_autocomplete_rules": {
+      "actions": [
+        {
+          "alerts_filter": {
+            "query": {},
+            "timeframe": {}
+          },
+          "frequency": {
+            "notify_when": {
+              "__one_of": [
+                "onActionGroupChange",
+                "onActiveAlert",
+                "onThrottleInterval"
+              ]
+            },
+            "summary": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "throttle": ""
+          },
+          "group": "",
+          "id": "",
+          "params": {},
+          "use_alert_data_for_template": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "uuid": ""
+        }
+      ],
+      "alert_delay": {
+        "active": ""
+      },
+      "artifacts": {
+        "dashboards": [
+          {
+            "id": ""
+          }
+        ],
+        "investigation_guide": {
+          "blob": ""
+        }
+      },
+      "flapping": {
+        "enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "look_back_window": "",
+        "status_change_threshold": ""
+      },
+      "name": "",
+      "notify_when": {
+        "__one_of": [
+          "onActionGroupChange",
+          "onActiveAlert",
+          "onThrottleInterval"
+        ]
+      },
+      "params": {},
+      "schedule": {
+        "interval": ""
+      },
+      "tags": [],
+      "throttle": ""
+    }
+  }
+}

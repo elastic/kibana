@@ -1,0 +1,18 @@
+{
+  "post-fleet-epm-packages-bulk-rollback": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/_bulk_rollback"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages-bulk-rollback",
+    "data_autocomplete_rules": {
+      "packages": [
+        {
+          "name": ""
+        }
+      ]
+    }
+  }
+}

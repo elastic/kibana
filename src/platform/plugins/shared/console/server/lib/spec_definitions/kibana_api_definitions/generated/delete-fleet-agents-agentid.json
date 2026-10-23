@@ -1,0 +1,11 @@
+{
+  "delete-fleet-agents-agentid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-agents-agentid"
+  }
+}

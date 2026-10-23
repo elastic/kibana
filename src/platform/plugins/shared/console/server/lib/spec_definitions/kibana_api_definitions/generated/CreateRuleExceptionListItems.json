@@ -1,0 +1,69 @@
+{
+  "CreateRuleExceptionListItems": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/rules/{id}/exceptions"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateRuleExceptionListItems",
+    "data_autocomplete_rules": {
+      "items": [
+        {
+          "comments": [
+            {
+              "comment": ""
+            }
+          ],
+          "description": "",
+          "entries": [
+            {
+              "field": "",
+              "operator": {
+                "__one_of": [
+                  "excluded",
+                  "included"
+                ]
+              },
+              "type": {
+                "__one_of": [
+                  "match"
+                ]
+              },
+              "value": "",
+              "entries": [
+                {}
+              ],
+              "list": {}
+            }
+          ],
+          "expire_time": "",
+          "item_id": "",
+          "meta": {},
+          "name": "",
+          "namespace_type": {
+            "__one_of": [
+              "agnostic",
+              "single"
+            ]
+          },
+          "os_types": [
+            {
+              "__one_of": [
+                "linux",
+                "macos",
+                "windows"
+              ]
+            }
+          ],
+          "tags": [],
+          "type": {
+            "__one_of": [
+              "simple"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

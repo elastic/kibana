@@ -1,0 +1,11 @@
+{
+  "getCaseDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseDefaultSpace"
+  }
+}

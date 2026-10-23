@@ -1,0 +1,17 @@
+{
+  "GetAttackDiscoveryGenerations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/attack_discovery/generations"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetAttackDiscoveryGenerations",
+    "url_params": {
+      "end": [],
+      "size": [],
+      "scheduled": "__flag__",
+      "start": []
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "post-spaces-disable-legacy-url-aliases": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/_disable_legacy_url_aliases"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-spaces-disable-legacy-url-aliases",
+    "data_autocomplete_rules": {
+      "aliases": [
+        {
+          "sourceId": "",
+          "targetSpace": "",
+          "targetType": ""
+        }
+      ]
+    }
+  }
+}

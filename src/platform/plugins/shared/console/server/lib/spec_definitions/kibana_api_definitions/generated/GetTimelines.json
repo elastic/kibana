@@ -1,0 +1,39 @@
+{
+  "GetTimelines": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/timelines"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetTimelines",
+    "url_params": {
+      "only_user_favorite": [
+        "true",
+        "false"
+      ],
+      "timeline_type": [
+        "default",
+        "template"
+      ],
+      "sort_field": [
+        "title",
+        "description",
+        "updated",
+        "created"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "page_size": [],
+      "page_index": [],
+      "search": [],
+      "status": [
+        "active",
+        "draft",
+        "immutable"
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "ReadListPrivileges": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/lists/privileges"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadListPrivileges"
+  }
+}

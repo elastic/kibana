@@ -1,0 +1,200 @@
+{
+  "post-fleet-agent-policies": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agent-policies",
+    "url_params": {
+      "sys_monitoring": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "advanced_settings": {
+        "agent_download_target_directory": "",
+        "agent_download_timeout": "",
+        "agent_features_disable_policy_change_acks_enabled": "",
+        "agent_features_include_tags_in_events_enabled": "",
+        "agent_internal": "",
+        "agent_limits_go_max_procs": "",
+        "agent_logging_files_interval": "",
+        "agent_logging_files_keepfiles": "",
+        "agent_logging_files_rotateeverybytes": "",
+        "agent_logging_level": "",
+        "agent_logging_metrics_period": "",
+        "agent_logging_to_files": "",
+        "agent_monitoring_runtime_experimental": ""
+      },
+      "agent_features": [
+        {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "name": ""
+        }
+      ],
+      "agentless": {
+        "cloud_connectors": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "target_csp": {
+            "__one_of": [
+              "aws",
+              "azure",
+              "gcp"
+            ]
+          }
+        },
+        "cluster_id": "",
+        "resources": {
+          "requests": {}
+        }
+      },
+      "data_output_id": "",
+      "description": "",
+      "download_source_id": "",
+      "download_source_ids": [],
+      "fleet_server_host_id": "",
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "global_data_tags": [
+        {
+          "name": "",
+          "value": ""
+        }
+      ],
+      "has_agent_version_conditions": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "has_fleet_server": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "id": "",
+      "inactivity_timeout": "",
+      "is_default": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "is_default_fleet_server": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "is_managed": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "is_protected": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "is_verifier": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "keep_monitoring_alive": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "min_agent_version": "",
+      "monitoring_diagnostics": {
+        "limit": {
+          "burst": "",
+          "interval": ""
+        },
+        "uploader": {
+          "init_dur": "",
+          "max_dur": "",
+          "max_retries": ""
+        }
+      },
+      "monitoring_enabled": [
+        {
+          "__one_of": [
+            "logs",
+            "metrics",
+            "traces"
+          ]
+        }
+      ],
+      "monitoring_http": {
+        "buffer": {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "host": "",
+        "port": ""
+      },
+      "monitoring_output_id": "",
+      "monitoring_pprof_enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "namespace": "",
+      "overrides": {},
+      "package_agent_version_conditions": [
+        {
+          "name": "",
+          "title": "",
+          "version_condition": ""
+        }
+      ],
+      "required_versions": [
+        {
+          "percentage": "",
+          "version": ""
+        }
+      ],
+      "space_ids": [],
+      "supports_agentless": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "unenroll_timeout": ""
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "post-links": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/links"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-links",
+    "data_autocomplete_rules": {
+      "description": "",
+      "layout": {
+        "__one_of": [
+          "horizontal",
+          "vertical"
+        ]
+      },
+      "links": [
+        {
+          "destination": "",
+          "label": "",
+          "options": {
+            "open_in_new_tab": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "use_filters": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "use_time_range": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "type": {
+            "__one_of": [
+              "dashboardLink"
+            ]
+          }
+        }
+      ],
+      "tags": [],
+      "title": ""
+    }
+  }
+}

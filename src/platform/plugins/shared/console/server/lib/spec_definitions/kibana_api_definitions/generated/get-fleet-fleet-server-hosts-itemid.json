@@ -1,0 +1,11 @@
+{
+  "get-fleet-fleet-server-hosts-itemid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/fleet_server_hosts/{itemId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-fleet-server-hosts-itemid"
+  }
+}

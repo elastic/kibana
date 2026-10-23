@@ -1,0 +1,11 @@
+{
+  "get-fleet-agentless-policies-policyid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agentless_policies/{policyId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agentless-policies-policyid"
+  }
+}

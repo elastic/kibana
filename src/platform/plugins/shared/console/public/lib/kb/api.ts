@@ -53,11 +53,18 @@ export class Api {
 
   private urlPatternMatcher: UrlPatternMatcher;
   private globalBodyComponentFactories: BodyFactories;
+  private defaultUrlParams?: UrlParamsDescription;
 
+  /**
+   * @param defaultUrlParams url params suggested for every endpoint, defaults to the
+   * Elasticsearch ones (pretty, format, filter_path). Pass `{}` for none.
+   */
   constructor(
     urlParametrizedComponentFactories: UrlFactories = emptyUrlFactories,
-    bodyParametrizedComponentFactories: BodyFactories = emptyBodyFactories
+    bodyParametrizedComponentFactories: BodyFactories = emptyBodyFactories,
+    defaultUrlParams?: UrlParamsDescription
   ) {
+    this.defaultUrlParams = defaultUrlParams;
     this.urlPatternMatcher = new UrlPatternMatcher(urlParametrizedComponentFactories);
     this.globalBodyComponentFactories = bodyParametrizedComponentFactories;
   }
@@ -109,7 +116,10 @@ export class Api {
       this.urlPatternMatcher.addEndpoint(p, copiedDescription);
     });
 
-    copiedDescription.paramsAutocomplete = new UrlParams(copiedDescription.url_params);
+    copiedDescription.paramsAutocomplete = new UrlParams(
+      copiedDescription.url_params,
+      this.defaultUrlParams
+    );
     let bodyAutocompleteRootComponents: AutocompleteComponent[] | undefined;
     Object.defineProperty(copiedDescription, 'bodyAutocompleteRootComponents', {
       enumerable: true,

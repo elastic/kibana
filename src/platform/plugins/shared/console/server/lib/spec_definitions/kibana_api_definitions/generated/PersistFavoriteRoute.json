@@ -1,0 +1,22 @@
+{
+  "PersistFavoriteRoute": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/timeline/_favorite"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PersistFavoriteRoute",
+    "data_autocomplete_rules": {
+      "templateTimelineId": "",
+      "templateTimelineVersion": "",
+      "timelineId": "",
+      "timelineType": {
+        "__one_of": [
+          "default",
+          "template"
+        ]
+      }
+    }
+  }
+}

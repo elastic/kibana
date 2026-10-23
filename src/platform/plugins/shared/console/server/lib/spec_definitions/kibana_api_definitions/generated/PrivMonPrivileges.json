@@ -1,0 +1,11 @@
+{
+  "PrivMonPrivileges": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/privileges/privileges"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PrivMonPrivileges"
+  }
+}

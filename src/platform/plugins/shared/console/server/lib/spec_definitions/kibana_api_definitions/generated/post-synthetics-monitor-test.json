@@ -1,0 +1,11 @@
+{
+  "post-synthetics-monitor-test": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/monitor/test/{monitorId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-synthetics-monitor-test"
+  }
+}

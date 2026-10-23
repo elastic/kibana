@@ -1,0 +1,14 @@
+{
+  "deleteCaseDefaultSpace": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/cases"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteCaseDefaultSpace",
+    "url_params": {
+      "ids": []
+    }
+  }
+}

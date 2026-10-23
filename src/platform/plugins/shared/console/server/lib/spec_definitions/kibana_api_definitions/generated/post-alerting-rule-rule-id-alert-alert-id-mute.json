@@ -1,0 +1,17 @@
+{
+  "post-alerting-rule-rule-id-alert-alert-id-mute": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rule/{rule_id}/alert/{alert_id}/_mute"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rule-rule-id-alert-alert-id-mute",
+    "url_params": {
+      "validate_alerts_existence": "__flag__"
+    },
+    "url_components": {
+      "rule_id": "__kibana_rule"
+    }
+  }
+}

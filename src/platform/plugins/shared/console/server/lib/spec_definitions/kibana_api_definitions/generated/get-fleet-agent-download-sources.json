@@ -1,0 +1,11 @@
+{
+  "get-fleet-agent-download-sources": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agent_download_sources"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agent-download-sources"
+  }
+}
