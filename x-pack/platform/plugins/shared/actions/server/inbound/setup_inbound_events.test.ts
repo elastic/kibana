@@ -6,6 +6,7 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { actionsConfigMock } from '../actions_config.mock';
 import { createInboundEventsClient } from './factory';
@@ -23,7 +24,7 @@ const createInboundEventsClientMock = createInboundEventsClient as jest.MockedFu
 const emitParams = (): ConnectorEventEmitParams => ({
   eventId: 'evt-1',
   payload: { hello: 'world' },
-  spaceId: 'default',
+  spaceId: DEFAULT_SPACE_ID,
   connectorId: 'c1',
   connectorTypeId: '.inboundWebhook',
   request: httpServerMock.createKibanaRequest(),

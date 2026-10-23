@@ -422,17 +422,23 @@ describe('schema_to_skill_docs', () => {
    * real types rather than rendered as `unknown`.
    */
   describe('schemas extracted into `definitions` / `$defs`', () => {
-    const allDocs = () => [
+    const schemaDocs = () => [
       generateRuleSchemaDoc(),
       generateRuleOperationsDoc(),
       generateActionPolicySchemaDoc(),
       generateActionPolicyOperationsDoc(),
-      generateActionPolicyWorkflowPayloadDoc(),
     ];
 
+    const allDocs = () => [...schemaDocs(), generateActionPolicyWorkflowPayloadDoc()];
+
     it('never leaves an unresolved pointer or type in any doc', () => {
-      for (const doc of allDocs()) {
+      // The payload doc intentionally embeds the raw JSON Schema and a YAML
+      // example that contain `$ref`, so only check schema-derived docs for
+      // unresolved pointers.
+      for (const doc of schemaDocs()) {
         expect(doc).not.toContain('$ref');
+      }
+      for (const doc of allDocs()) {
         expect(doc).not.toContain('| unknown');
         expect(doc).not.toContain('unknown[]');
       }
@@ -839,20 +845,21 @@ describe('schema_to_skill_docs', () => {
     it('documents every ActionPolicyWorkflowPayload top-level field', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       for (const field of Object.keys(payloadKeyGuard)) {
-        expect(doc).toContain(`\`${field}\``);
+        expect(doc).toContain(`"${field}"`);
       }
     });
 
     it('documents every ActionPolicyWorkflowPayloadAlert field', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       for (const field of Object.keys(alertKeyGuard)) {
-        expect(doc).toContain(`\`${field}\``);
+        expect(doc).toContain(`"${field}"`);
       }
     });
 
     it('documents rule_id as nullable, since external alerts have no rule', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
-      expect(doc).toContain('| `rule_id` | string \\| null | required |');
+      expect(doc).toContain('"rule_id"');
+      expect(doc).toMatch(/"type":\s*\[\s*"string",\s*"null"\s*\]/);
     });
 
     it('documents the inputs.payload Liquid access pattern', () => {
@@ -873,7 +880,7 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
-  describe('Alerting v2 agent builder start contract', () => {
+  describe('Universal alerting agent builder start contract', () => {
     it.each([
       ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],

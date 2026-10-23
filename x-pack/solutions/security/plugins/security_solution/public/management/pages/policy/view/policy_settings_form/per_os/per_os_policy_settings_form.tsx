@@ -18,6 +18,7 @@ import { EventMergingBanner } from '../components/event_merging_banner';
 import { RelatedDetectionRulesCallout } from '../components/related_detection_rules_callout';
 import { useGetProtectionsUnavailableComponent } from '../hooks/use_get_protections_unavailable_component';
 import type { PolicyFormComponentCommonProps } from '../types';
+import { PerOsAiDataCollectionCard } from './per_os_ai_data_collection_card';
 import { PerOsAntivirusRegistrationCard } from './per_os_antivirus_registration_card';
 import { PerOsAttackSurfaceReductionCard } from './per_os_attack_surface_reduction_card';
 import { PerOsBehaviourProtectionCard } from './per_os_behaviour_protection_card';
@@ -37,6 +38,14 @@ const SETTINGS_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Settings' }
 );
 
+const FORM_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.perOsFormDescription',
+  {
+    defaultMessage:
+      'Configure how Elastic Defend protects your endpoints. Changes apply to all hosts assigned to this policy.',
+  }
+);
+
 // The macOS row on the Ransomware card owns this field, so it is hidden from the advanced
 // settings rather than offered twice.
 const OMITTED_ADVANCED_KEYS: readonly string[] = ['mac.ransomware.mode'];
@@ -48,6 +57,7 @@ export const PerOsPolicySettingsForm = memo(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const ProtectionsUpSellingComponent = useGetProtectionsUnavailableComponent();
     const trustedDevices = useIsExperimentalFeatureEnabled('trustedDevices');
+    const endpointAiDataCollection = useIsExperimentalFeatureEnabled('endpointAiDataCollection');
     const { storage } = useKibana().services;
     const [showEventMergingBanner, setShowEventMergingBanner] = useState(
       storage.get('securitySolution.showEventMergingBanner') ?? true
@@ -83,6 +93,10 @@ export const PerOsPolicySettingsForm = memo(
 
     return (
       <div data-test-subj={getTestId()}>
+        <EuiText size="s" color="subdued" data-test-subj={getTestId('description')}>
+          <p>{FORM_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="m" />
         {showEventMergingBanner && (
           <>
             <EventMergingBanner onDismiss={onBannerDismiss} />
@@ -141,6 +155,16 @@ export const PerOsPolicySettingsForm = memo(
             <PerOsAttackSurfaceReductionCard
               {...commonProps}
               data-test-subj={getTestId('perOsAttackSurface')}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {endpointAiDataCollection && (
+          <>
+            <PerOsAiDataCollectionCard
+              {...commonProps}
+              data-test-subj={getTestId('perOsAiDataCollection')}
             />
             <EuiSpacer size="l" />
           </>

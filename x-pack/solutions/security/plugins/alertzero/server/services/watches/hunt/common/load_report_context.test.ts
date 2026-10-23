@@ -67,8 +67,11 @@ describe('loadReportHuntContext', () => {
           ...reportHit,
           _source: {
             ...reportHit._source,
-            '@timestamp': '2026-09-02T17:51:57.050Z',
-            content: { ...reportHit._source.content, title: 'CloudTrail retrospective' },
+            content: {
+              ...reportHit._source.content,
+              title: 'CloudTrail retrospective',
+              published_at: '2026-09-02T17:51:57.050Z',
+            },
             source: { name: 'AWS IAM privilege escalation feed' },
             severity: { level: 'medium', score: 40 },
           },
@@ -85,6 +88,40 @@ describe('loadReportHuntContext', () => {
       })
     );
   });
+
+  it('asks the index for the publication date', async () => {
+    await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+    const source = (esClient.search as unknown as jest.Mock).mock.calls[0][0]._source;
+    expect(source).toContain('content.published_at');
+    expect(source).not.toContain('@timestamp');
+  });
+
+  it.each([
+    ['is absent', undefined],
+    ['is empty', ''],
+  ])(
+    'does not report ingest time as the publication date when content.published_at %s',
+    async (_label, publishedAt) => {
+      esClient.search.mockResolvedValue(
+        respond([
+          {
+            ...reportHit,
+            _source: {
+              ...reportHit._source,
+              '@timestamp': '2026-10-20T00:00:00.000Z',
+              content: { ...reportHit._source.content, published_at: publishedAt },
+            },
+          },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context).not.toHaveProperty('published_at');
+    }
+  );
 
   it('omits descriptive facts the report does not carry instead of writing empty strings', async () => {
     const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
@@ -428,6 +465,50 @@ describe('loadReportHuntContext', () => {
       expect(context?.vendor).toHaveLength(256);
       expect(context?.product).toHaveLength(256);
     });
+  });
+
+  describe('whether extraction has finished', () => {
+    const withMethod = (lineage?: unknown) =>
+      respond([
+        { ...reportHit, _source: { ...reportHit._source, ...(lineage ? { lineage } : {}) } },
+      ]);
+
+    it('asks the index for the extraction method', async () => {
+      await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: expect.arrayContaining(['lineage.extraction_method']),
+        })
+      );
+    });
+
+    it.each([
+      ['absent', undefined],
+      ['blank', { extraction_method: '   ' }],
+      ['pending', { extraction_method: 'pending' }],
+      ['padded pending', { extraction_method: ' pending ' }],
+    ])('is pending when the method is %s', async (_label, lineage) => {
+      esClient.search.mockResolvedValue(withMethod(lineage));
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.extraction_pending).toBe(true);
+    });
+
+    it.each(['workflow_v4', 'workflow_v4_rejected', 'kev', 'text_indicator_list'])(
+      'is not pending when the method is %s',
+      async (extraction_method) => {
+        esClient.search.mockResolvedValue(withMethod({ extraction_method }));
+        const context = await loadReportHuntContext({
+          esClient,
+          spaceId: 'hunt-a',
+          reportId: 'rpt-1',
+        });
+        expect(context?.extraction_pending).toBe(false);
+      }
+    );
   });
 
   it('scopes the lookup to the acting space', async () => {
