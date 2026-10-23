@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -14,8 +13,7 @@ import { sendUpdateCloudConnector, sendVerifyCloudConnectorIacKey } from '@kbn/f
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
-import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
+import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import { buildDeployGroups } from './deploy_groups';
 import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import type { DeployGroup } from './deploy_groups';
@@ -74,10 +72,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
 
-  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
-    SERVICE_SETTINGS_SESSION_KEY,
-    { globalRegion: '', serviceVars: {} }
-  );
+  const serviceSettings = useReconciledServiceSettings();
 
   const [isDeploying, setIsDeploying] = useState(false);
   // Seeded from session storage so a partial failure survives unmounting Step 3. Without this,

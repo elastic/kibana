@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   getMaxPackageName,
@@ -339,9 +340,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     });
   }, [persisted, toAutoName, setPersisted]);
 
-  // Lazy prune: drop serviceVars entries for instances no longer present (deselected in Step 1).
-  // Runs on mount and whenever the instance list changes. Writing only when stale keys exist
-  // breaks the update→re-run loop after one iteration (next run finds zero stale keys).
+  // Keeps the stored copy in step with the reconciled one, so steps that read session storage
+  // without going through this step (jumping ahead, a reload, a resume) see the same instances.
+  // Also prunes serviceVars entries for instances no longer present (deselected in Step 1), in the
+  // same write so the two never overwrite each other. Runs on mount and whenever the instance list
+  // changes. Writing only when something differs breaks the update→re-run loop after one
+  // iteration (the next run finds the stored instances equal and zero stale keys).
   // Guard: skip while awsServicesMap is still loading — instances would be empty, making every
   // stored key look stale and erasing valid configuration before the matrix can reconstruct them.
   useEffect(() => {
@@ -349,12 +353,17 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     const validIds = new Set(instances.map((i) => i.instanceId));
     const storedVars = persisted?.serviceVars ?? {};
     const staleKeys = Object.keys(storedVars).filter((k) => !validIds.has(k));
-    if (staleKeys.length === 0) return;
+    const instancesChanged = !isEqual(persisted?.instances ?? [], instances);
+    if (staleKeys.length === 0 && !instancesChanged) return;
     const pruned: Record<string, ServiceVars> = {};
     for (const [k, v] of Object.entries(storedVars)) {
       if (validIds.has(k)) pruned[k] = v as ServiceVars;
     }
-    setPersisted({ ...(persisted ?? { globalRegion: '', serviceVars: {} }), serviceVars: pruned });
+    setPersisted({
+      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+      instances,
+      serviceVars: pruned,
+    });
   }, [instances, persisted, setPersisted, awsServicesMap]);
 
   const getServiceVars = useCallback(
