@@ -1,0 +1,67 @@
+{
+  "operations": {
+    "getDom": [
+      {
+        "method": "get",
+        "path": "/dom/{scanId}/",
+        "source": "v1"
+      }
+    ],
+    "getQuota": [],
+    "getResult": [
+      {
+        "method": "get",
+        "path": "/api/v1/result/{scanId}/",
+        "source": "v1"
+      }
+    ],
+    "getScreenshot": [
+      {
+        "method": "get",
+        "path": "/screenshots/{scanId}.png",
+        "source": "v1"
+      }
+    ],
+    "scanUrl": [],
+    "scanUrlAndWait": [],
+    "searchScans": []
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "1.0.0",
+      "fetchedAt": "2026-10-07T20:20:27.706Z",
+      "format": "openapi",
+      "url": "https://docs.urlscan.io/_bundle/apis/urlscan-openapi.json?download"
+    }
+  },
+  "unmatched": {
+    "getQuota": [
+      {
+        "method": "get",
+        "path": "/user/quotas/",
+        "reason": "https://urlscan.io/docs/api/#quotas--rate-limiting documents GET /user/quotas/, which answers anonymous callers with scope \"ip-address\"; the OpenAPI spec only has GET /api/v1/quotas, which requires an API key"
+      }
+    ],
+    "scanUrl": [
+      {
+        "method": "post",
+        "path": "/api/v1/scan/",
+        "reason": "https://urlscan.io/docs/api/ documents POST /api/v1/scan/ with a trailing slash; the OpenAPI spec only has POST /api/v1/scan, and an overlay copying that operation would not survive the snapshot, which keeps only recorded operations"
+      }
+    ],
+    "scanUrlAndWait": [
+      {
+        "method": "post",
+        "path": "/api/v1/scan/",
+        "reason": "https://urlscan.io/docs/api/ documents POST /api/v1/scan/ with a trailing slash; the OpenAPI spec only has POST /api/v1/scan, and an overlay copying that operation would not survive the snapshot, which keeps only recorded operations"
+      }
+    ],
+    "searchScans": [
+      {
+        "method": "get",
+        "path": "/api/v1/search/",
+        "reason": "https://urlscan.io/docs/api/ documents GET /api/v1/search/ with a trailing slash; the OpenAPI spec only has GET /api/v1/search, and an overlay copying that operation would not survive the snapshot, which keeps only recorded operations"
+      }
+    ]
+  }
+}

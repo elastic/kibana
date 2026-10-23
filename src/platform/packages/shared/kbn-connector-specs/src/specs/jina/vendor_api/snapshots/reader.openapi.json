@@ -1,0 +1,3431 @@
+{
+  "components": {
+    "schemas": {
+      "AbuseAlleviationError@0x2e": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 403,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40305,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "AbuseAlleviationError",
+        "type": "object"
+      },
+      "Array<string>@0x3a": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Array<string>",
+        "type": "array"
+      },
+      "Array<string>@0x3c": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Array<string>",
+        "type": "array"
+      },
+      "Array<string>@0x3e": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Array<string>",
+        "type": "array"
+      },
+      "AssertionFailureError@0x34": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 422,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 42206,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "AssertionFailureError",
+        "type": "object"
+      },
+      "AuthenticationFailedError@0x29": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 401,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40102,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "AuthenticationFailedError",
+        "type": "object"
+      },
+      "AuthenticationRequiredError@0x2a": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 401,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40103,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "AuthenticationRequiredError",
+        "type": "object"
+      },
+      "BudgetExceededError@0x30": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 409,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40904,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "BudgetExceededError",
+        "type": "object"
+      },
+      "Cookie@0x16": {
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "expires": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "httpOnly": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "default": "/",
+            "type": "string"
+          },
+          "sameSite": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/enum@0x15"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "secure": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "title": "Cookie",
+        "type": "object"
+      },
+      "CrawlerOptions@0x26": {
+        "properties": {
+          "assertStatusCode": {
+            "type": "number"
+          },
+          "base": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x0d"
+              }
+            ],
+            "default": "initial"
+          },
+          "cacheTolerance": {
+            "type": "number"
+          },
+          "customHeader": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "properties": {},
+            "type": "object"
+          },
+          "detachInvisibles": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "engine": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/enum@0x1a"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "exportStorageState": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "file": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FancyFile@0x0e"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "html": {
+            "type": "string"
+          },
+          "injectFrameScript": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "injectPageScript": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "instruction": {
+            "type": "string"
+          },
+          "jsonSchema": {
+            "nullable": true
+          },
+          "keepImgDataUrl": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "locale": {
+            "type": "string"
+          },
+          "markdown": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TurnDownTweakableOptions@0x22"
+              }
+            ]
+          },
+          "markdownChunking": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/enum@0x25"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "maxTokens": {
+            "type": "number"
+          },
+          "noCache": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "noGfm": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "noServiceWorker": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "ocr": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OCRPreferences@0x23"
+              }
+            ]
+          },
+          "page": {
+            "type": "number"
+          },
+          "pdf": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FancyFile@0x0e"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "preloadUrl": {
+            "type": "string"
+          },
+          "preset": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x13"
+              }
+            ]
+          },
+          "proxy": {
+            "type": "string"
+          },
+          "proxyResources": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "proxyUrl": {
+            "type": "string"
+          },
+          "referer": {
+            "type": "string"
+          },
+          "removeOverlay": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "removeSelector": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "respondTiming": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x24"
+              }
+            ]
+          },
+          "respondWith": {
+            "default": "content",
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/enum@0x0f"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "retainImages": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x11"
+              }
+            ],
+            "default": "all"
+          },
+          "retainLinks": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x14"
+              }
+            ],
+            "default": "all"
+          },
+          "retainMedia": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x12"
+              }
+            ],
+            "default": "link"
+          },
+          "robotsTxt": {
+            "type": "string"
+          },
+          "setCookies": {
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "skipCertVerification": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "storageState": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StorageState@0x19"
+              }
+            ]
+          },
+          "targetSelector": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timeout": {
+            "type": "number"
+          },
+          "tokenBudget": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "viewport": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Viewport@0x1b"
+              }
+            ]
+          },
+          "waitForSelector": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "withGeneratedAlt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBoolean@0x10"
+              }
+            ]
+          },
+          "withIframe": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "withImagesSummary": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "withLinksSummary": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "withShadowDom": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "zeroDataRetention": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          }
+        },
+        "title": "CrawlerOptions",
+        "type": "object"
+      },
+      "CrawlerOptionsHeaderOnly@0x39": {
+        "properties": {
+          "assertStatusCode": {
+            "type": "number"
+          },
+          "base": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x0d"
+              }
+            ],
+            "default": "initial"
+          },
+          "cacheTolerance": {
+            "type": "number"
+          },
+          "customHeader": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "properties": {},
+            "type": "object"
+          },
+          "detachInvisibles": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "engine": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/enum@0x1a"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "exportStorageState": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "file": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FancyFile@0x0e"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "html": {
+            "type": "string"
+          },
+          "injectFrameScript": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "injectPageScript": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "instruction": {
+            "type": "string"
+          },
+          "jsonSchema": {
+            "nullable": true
+          },
+          "keepImgDataUrl": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "locale": {
+            "type": "string"
+          },
+          "markdown": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TurnDownTweakableOptions@0x22"
+              }
+            ]
+          },
+          "markdownChunking": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/enum@0x25"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "maxTokens": {
+            "type": "number"
+          },
+          "noCache": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "noGfm": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "noServiceWorker": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "ocr": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OCRPreferences@0x23"
+              }
+            ]
+          },
+          "page": {
+            "type": "number"
+          },
+          "pdf": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FancyFile@0x0e"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "preloadUrl": {
+            "type": "string"
+          },
+          "preset": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x13"
+              }
+            ]
+          },
+          "proxy": {
+            "type": "string"
+          },
+          "proxyResources": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "proxyUrl": {
+            "type": "string"
+          },
+          "referer": {
+            "type": "string"
+          },
+          "removeOverlay": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "removeSelector": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "respondTiming": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x24"
+              }
+            ]
+          },
+          "respondWith": {
+            "default": "content",
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/enum@0x0f"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "retainImages": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x11"
+              }
+            ],
+            "default": "all"
+          },
+          "retainLinks": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x14"
+              }
+            ],
+            "default": "all"
+          },
+          "retainMedia": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x12"
+              }
+            ],
+            "default": "link"
+          },
+          "robotsTxt": {
+            "type": "string"
+          },
+          "setCookies": {
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "skipCertVerification": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "storageState": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StorageState@0x19"
+              }
+            ]
+          },
+          "targetSelector": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timeout": {
+            "type": "number"
+          },
+          "tokenBudget": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "viewport": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Viewport@0x1b"
+              }
+            ]
+          },
+          "waitForSelector": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "withGeneratedAlt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBoolean@0x10"
+              }
+            ]
+          },
+          "withIframe": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "withImagesSummary": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "withLinksSummary": {
+            "oneOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "withShadowDom": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          },
+          "zeroDataRetention": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+              }
+            ]
+          }
+        },
+        "title": "CrawlerOptionsHeaderOnly",
+        "type": "object"
+      },
+      "DataStreamBrokenError@0x28": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 400,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40003,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "DataStreamBrokenError",
+        "type": "object"
+      },
+      "DownstreamServiceError@0x37": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 500,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 50002,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "DownstreamServiceError",
+        "type": "object"
+      },
+      "DownstreamServiceFailureError@0x33": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 422,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 42205,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "DownstreamServiceFailureError",
+        "type": "object"
+      },
+      "FancyFile@0x0e": {
+        "format": "binary",
+        "title": "FancyFile",
+        "type": "string"
+      },
+      "FormattedPageDto@0x41": {
+        "properties": {
+          "chunks": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Array<string>@0x3a"
+              }
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "external": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Record<string|symbol, Record<string|symbol, Record<string|symbol, string|object>@0x08|object>@0x09|object>@0x40"
+                  }
+                ]
+              }
+            ]
+          },
+          "html": {
+            "type": "string"
+          },
+          "httpStatus": {
+            "type": "number"
+          },
+          "httpStatusText": {
+            "type": "string"
+          },
+          "images": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Record<string|symbol, string>@0x3d"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Array<string>@0x3e"
+                  }
+                ]
+              }
+            ]
+          },
+          "links": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Record<string|symbol, string>@0x3b"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Array<string>@0x3c"
+                  }
+                ]
+              }
+            ]
+          },
+          "metadata": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Record<string|symbol, string>@0x3f"
+                  }
+                ]
+              }
+            ]
+          },
+          "numPages": {
+            "type": "number"
+          },
+          "pageshotUrl": {
+            "type": "string"
+          },
+          "publishedTime": {
+            "type": "string"
+          },
+          "screenshotUrl": {
+            "type": "string"
+          },
+          "storageState": {
+            "nullable": true
+          },
+          "text": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "warning": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "FormattedPageDto",
+        "type": "object"
+      },
+      "HarmfulContentError@0x36": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 451,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 45101,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "HarmfulContentError",
+        "type": "object"
+      },
+      "InsufficientBalanceError@0x2c": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 402,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40203,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "InsufficientBalanceError",
+        "type": "object"
+      },
+      "JinaEmbeddingsAuthDTO@0x0b": {
+        "title": "JinaEmbeddingsAuthDTO"
+      },
+      "LocalStorageItem@0x17": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "title": "LocalStorageItem",
+        "type": "object"
+      },
+      "LocalStorageOrigin@0x18": {
+        "properties": {
+          "localStorage": {
+            "default": [],
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/LocalStorageItem@0x17"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ],
+        "title": "LocalStorageOrigin",
+        "type": "object"
+      },
+      "OCRPreferences@0x23": {
+        "properties": {
+          "blockFormula": {
+            "default": true,
+            "type": "boolean"
+          },
+          "inlineFormula": {
+            "type": "boolean"
+          },
+          "preferEndToEnd": {
+            "type": "boolean"
+          },
+          "preferImgOrder": {
+            "type": "boolean"
+          },
+          "table": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "title": "OCRPreferences",
+        "type": "object"
+      },
+      "OperationNotAllowedError@0x2d": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 403,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40301,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "OperationNotAllowedError",
+        "type": "object"
+      },
+      "OutputServerEventStream@0x42": {
+        "format": "binary",
+        "type": "string"
+      },
+      "ParamValidationError@0x27": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 400,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40001,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "ParamValidationError",
+        "type": "object"
+      },
+      "PseudoBoolean@0x10": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "format": "pseudo-boolean",
+            "type": "string"
+          }
+        ],
+        "title": "PseudoBoolean"
+      },
+      "PseudoBooleanLoose@0x0c": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "format": "pseudo-boolean-loose",
+            "type": "string"
+          }
+        ],
+        "title": "PseudoBooleanLoose"
+      },
+      "RateLimitTriggeredError@0x35": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 429,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "retryAfter": {
+            "type": "number"
+          },
+          "retryAfterDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "default": 42903,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "RateLimitTriggeredError",
+        "type": "object"
+      },
+      "Record<string|symbol, Record<string|symbol, Record<string|symbol, string|object>@0x08|object>@0x09|object>@0x40": {
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Record<string|symbol, Record<string|symbol, string|object>@0x08|object>@0x09"
+                }
+              ]
+            },
+            {
+              "nullable": true
+            }
+          ]
+        },
+        "properties": {},
+        "title": "Record<string|symbol, Record<string|symbol, Record<string|symbol, string|object>@0x08|object>@0x09|object>",
+        "type": "object"
+      },
+      "Record<string|symbol, Record<string|symbol, string|object>@0x08|object>@0x09": {
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Record<string|symbol, string|object>@0x08"
+                }
+              ]
+            },
+            {
+              "nullable": true
+            }
+          ]
+        },
+        "properties": {},
+        "title": "Record<string|symbol, Record<string|symbol, string|object>@0x08|object>",
+        "type": "object"
+      },
+      "Record<string|symbol, string>@0x3b": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "properties": {},
+        "title": "Record<string|symbol, string>",
+        "type": "object"
+      },
+      "Record<string|symbol, string>@0x3d": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "properties": {},
+        "title": "Record<string|symbol, string>",
+        "type": "object"
+      },
+      "Record<string|symbol, string>@0x3f": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "properties": {},
+        "title": "Record<string|symbol, string>",
+        "type": "object"
+      },
+      "Record<string|symbol, string|object>@0x08": {
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "nullable": true
+            }
+          ]
+        },
+        "properties": {},
+        "title": "Record<string|symbol, string|object>",
+        "type": "object"
+      },
+      "ResourcePolicyDenyError@0x2f": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 409,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40902,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "ResourcePolicyDenyError",
+        "type": "object"
+      },
+      "ServiceNodeResourceDrainError@0x38": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 503,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 50303,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "ServiceNodeResourceDrainError",
+        "type": "object"
+      },
+      "StorageState@0x19": {
+        "properties": {
+          "cookies": {
+            "default": [],
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Cookie@0x16"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "origins": {
+            "default": [],
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/LocalStorageOrigin@0x18"
+                }
+              ]
+            },
+            "type": "array"
+          }
+        },
+        "title": "StorageState",
+        "type": "object"
+      },
+      "SubmittedDataMalformedError@0x32": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 422,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 42203,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "SubmittedDataMalformedError",
+        "type": "object"
+      },
+      "TargetFileTooLargeError@0x31": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 413,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 41302,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "TargetFileTooLargeError",
+        "type": "object"
+      },
+      "TierFeatureConstraintError@0x2b": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "default": 402,
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          },
+          "readableMessage": {
+            "type": "string"
+          },
+          "status": {
+            "default": 40202,
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "title": "TierFeatureConstraintError",
+        "type": "object"
+      },
+      "TurnDownTweakableOptions@0x22": {
+        "properties": {
+          "bulletListMarker": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x1d"
+              }
+            ]
+          },
+          "emDelimiter": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x1e"
+              }
+            ]
+          },
+          "headingStyle": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x1c"
+              }
+            ]
+          },
+          "hr": {
+            "type": "string"
+          },
+          "linkReferenceStyle": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x21"
+              }
+            ]
+          },
+          "linkStyle": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x20"
+              }
+            ]
+          },
+          "strongDelimiter": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/enum@0x1f"
+              }
+            ]
+          }
+        },
+        "title": "TurnDownTweakableOptions",
+        "type": "object"
+      },
+      "Viewport@0x1b": {
+        "properties": {
+          "deviceScaleFactor": {
+            "type": "number"
+          },
+          "hasTouch": {
+            "type": "boolean"
+          },
+          "height": {
+            "default": 1280,
+            "type": "number"
+          },
+          "isLandscape": {
+            "type": "boolean"
+          },
+          "isMobile": {
+            "type": "boolean"
+          },
+          "width": {
+            "default": 1280,
+            "type": "number"
+          }
+        },
+        "title": "Viewport",
+        "type": "object"
+      },
+      "enum@0x0d": {
+        "enum": [
+          "initial",
+          "final"
+        ],
+        "type": "string"
+      },
+      "enum@0x0f": {
+        "enum": [
+          "content",
+          "markdown",
+          "html",
+          "text",
+          "pageshot",
+          "screenshot",
+          "vlm",
+          "readerlm-v2",
+          "frontmatter",
+          "readability",
+          "jina-ocr-v1",
+          "jina-ocr",
+          "pp-doclayoutv3",
+          "pp-doclayout",
+          "doclayout"
+        ],
+        "type": "string"
+      },
+      "enum@0x11": {
+        "enum": [
+          "none",
+          "all",
+          "alt",
+          "all_p",
+          "alt_p"
+        ],
+        "type": "string"
+      },
+      "enum@0x12": {
+        "enum": [
+          "none",
+          "text",
+          "link",
+          "image",
+          "html"
+        ],
+        "type": "string"
+      },
+      "enum@0x13": {
+        "enum": [
+          "reader",
+          "index",
+          "research",
+          "agent",
+          "spider",
+          "ocr",
+          "ocr+",
+          "ocr++",
+          "pdf",
+          "pdf+",
+          "pdf++"
+        ],
+        "type": "string"
+      },
+      "enum@0x14": {
+        "enum": [
+          "none",
+          "all",
+          "text",
+          "gpt-oss"
+        ],
+        "type": "string"
+      },
+      "enum@0x15": {
+        "enum": [
+          "Strict",
+          "Lax",
+          "None"
+        ],
+        "type": "string"
+      },
+      "enum@0x1a": {
+        "enum": [
+          "auto",
+          "browser",
+          "curl",
+          "cf-browser-rendering"
+        ],
+        "type": "string"
+      },
+      "enum@0x1c": {
+        "enum": [
+          "setext",
+          "atx"
+        ],
+        "type": "string"
+      },
+      "enum@0x1d": {
+        "enum": [
+          "-",
+          "+",
+          "*"
+        ],
+        "type": "string"
+      },
+      "enum@0x1e": {
+        "enum": [
+          "_",
+          "*"
+        ],
+        "type": "string"
+      },
+      "enum@0x1f": {
+        "enum": [
+          "__",
+          "**"
+        ],
+        "type": "string"
+      },
+      "enum@0x20": {
+        "enum": [
+          "inlined",
+          "referenced",
+          "discarded"
+        ],
+        "type": "string"
+      },
+      "enum@0x21": {
+        "enum": [
+          "full",
+          "collapsed",
+          "shortcut",
+          "discarded"
+        ],
+        "type": "string"
+      },
+      "enum@0x24": {
+        "enum": [
+          "html",
+          "visible-content",
+          "mutation-idle",
+          "resource-idle",
+          "media-idle",
+          "network-idle"
+        ],
+        "type": "string"
+      },
+      "enum@0x25": {
+        "enum": [
+          "true",
+          "h1",
+          "h2",
+          "h3",
+          "h4",
+          "h5",
+          "structured",
+          "s1",
+          "s2",
+          "s3",
+          "s4",
+          "s5"
+        ],
+        "type": "string"
+      }
+    }
+  },
+  "info": {
+    "title": "Jina Reader API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "post": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "preloadUrl",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "noServiceWorker",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "html",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "base",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/enum@0x0d"
+                }
+              ],
+              "default": "initial"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pdf",
+            "schema": {
+              "oneOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FancyFile@0x0e"
+                    }
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "file",
+            "schema": {
+              "oneOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FancyFile@0x0e"
+                    }
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "respondWith",
+            "schema": {
+              "default": "content",
+              "oneOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/enum@0x0f"
+                    }
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "withGeneratedAlt",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "retainImages",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/enum@0x11"
+                }
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "retainMedia",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/enum@0x12"
+                }
+              ],
+              "default": "link"
+            }
+          },
+          {
+            "in": "query",
+            "name": "preset",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/enum@0x13"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "retainLinks",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/enum@0x14"
+                }
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withLinksSummary",
+            "schema": {
+              "oneOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                    }
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "withImagesSummary",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "noCache",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "removeOverlay",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "detachInvisibles",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "noGfm",
+            "schema": {
+              "oneOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                    }
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "cacheTolerance",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetSelector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "waitForSelector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "removeSelector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keepImgDataUrl",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "withIframe",
+            "schema": {
+              "oneOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                    }
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "withShadowDom",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "skipCertVerification",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "setCookies",
+            "schema": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "exportStorageState",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "proxyUrl",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "proxyResources",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "proxy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userAgent",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "engine",
+            "schema": {
+              "oneOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/enum@0x1a"
+                    }
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "injectPageScript",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "injectFrameScript",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeout",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "referer",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tokenBudget",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assertStatusCode",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "instruction",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jsonSchema",
+            "schema": {
+              "nullable": true
+            }
+          },
+          {
+            "in": "query",
+            "name": "robotsTxt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "zeroDataRetention",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "respondTiming",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/enum@0x24"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "markdownChunking",
+            "schema": {
+              "oneOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/enum@0x25"
+                    }
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxTokens",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "token",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Cache-Tolerance",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-No-Cache",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Respond-With",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Wait-For-Selector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Target-Selector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Remove-Selector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Keep-Img-Data-Url",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Proxy-Url",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Proxy-Resources",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Proxy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Robots-Txt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "DNT",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Set-Cookie",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Export-Storage-State",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-With-Generated-Alt",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-With-Images-Summary",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-With-links-Summary",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Retain-Links",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Retain-Images",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Retain-Media",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Preset",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-With-Iframe",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-With-Shadow-Dom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Skip-Cert-Verification",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-User-Agent",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Timeout",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Locale",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Referer",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Token-Budget",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Max-Tokens",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Assert-Status-Code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Respond-Timing",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Engine",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Base",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Remove-Overlay",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Detach-Invisibles",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Markdown-Chunking",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Md-Heading-Style",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Md-Hr",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Md-Bullet-List-Marker",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Md-Em-Delimiter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Md-Strong-Delimiter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Md-Link-Style",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Md-Link-Reference-Style",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Preload-Url",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-No-Service-Worker",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/JinaEmbeddingsAuthDTO@0x0b"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CrawlerOptionsHeaderOnly@0x39"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CrawlerOptions@0x26"
+                  }
+                ]
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "assertStatusCode": {
+                    "type": "number"
+                  },
+                  "base": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/enum@0x0d"
+                      }
+                    ],
+                    "default": "initial"
+                  },
+                  "cacheTolerance": {
+                    "type": "number"
+                  },
+                  "detachInvisibles": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "engine": {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/enum@0x1a"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "exportStorageState": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "file": {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/FancyFile@0x0e"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "html": {
+                    "type": "string"
+                  },
+                  "injectFrameScript": {
+                    "type": "string"
+                  },
+                  "injectPageScript": {
+                    "type": "string"
+                  },
+                  "instruction": {
+                    "type": "string"
+                  },
+                  "jsonSchema": {
+                    "nullable": true
+                  },
+                  "keepImgDataUrl": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "locale": {
+                    "type": "string"
+                  },
+                  "markdownChunking": {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/enum@0x25"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "maxTokens": {
+                    "type": "number"
+                  },
+                  "noCache": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "noGfm": {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "noServiceWorker": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "pdf": {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/FancyFile@0x0e"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "preloadUrl": {
+                    "type": "string"
+                  },
+                  "preset": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/enum@0x13"
+                      }
+                    ]
+                  },
+                  "proxy": {
+                    "type": "string"
+                  },
+                  "proxyResources": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "proxyUrl": {
+                    "type": "string"
+                  },
+                  "referer": {
+                    "type": "string"
+                  },
+                  "removeOverlay": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "removeSelector": {
+                    "type": "string"
+                  },
+                  "respondTiming": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/enum@0x24"
+                      }
+                    ]
+                  },
+                  "respondWith": {
+                    "default": "content",
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/enum@0x0f"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "retainImages": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/enum@0x11"
+                      }
+                    ],
+                    "default": "all"
+                  },
+                  "retainLinks": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/enum@0x14"
+                      }
+                    ],
+                    "default": "all"
+                  },
+                  "retainMedia": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/enum@0x12"
+                      }
+                    ],
+                    "default": "link"
+                  },
+                  "robotsTxt": {
+                    "type": "string"
+                  },
+                  "setCookies": {
+                    "oneOf": [
+                      {
+                        "nullable": true
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "skipCertVerification": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "targetSelector": {
+                    "type": "string"
+                  },
+                  "timeout": {
+                    "type": "number"
+                  },
+                  "tokenBudget": {
+                    "type": "number"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "userAgent": {
+                    "type": "string"
+                  },
+                  "waitForSelector": {
+                    "type": "string"
+                  },
+                  "withGeneratedAlt": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                      }
+                    ]
+                  },
+                  "withIframe": {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "withImagesSummary": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "withLinksSummary": {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/PseudoBoolean@0x10"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "withShadowDom": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  },
+                  "zeroDataRetention": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/PseudoBooleanLoose@0x0c"
+                      }
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/JinaEmbeddingsAuthDTO@0x0b"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CrawlerOptionsHeaderOnly@0x39"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CrawlerOptions@0x26"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "primitive": true,
+                  "properties": {
+                    "code": {
+                      "default": 200,
+                      "type": "number"
+                    },
+                    "data": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/FormattedPageDto@0x41"
+                        }
+                      ]
+                    },
+                    "meta": {
+                      "nullable": true
+                    },
+                    "status": {
+                      "default": 20000,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "status"
+                  ],
+                  "title": "ReaderEnvelopeWrappedFormattedPageDto",
+                  "type": "object"
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/OutputServerEventStream@0x42"
+                    }
+                  ]
+                }
+              },
+              "text/plain; charset=utf-8": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ParamValidationError@0x27"
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/DataStreamBrokenError@0x28"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/AuthenticationFailedError@0x29"
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/AuthenticationRequiredError@0x2a"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/TierFeatureConstraintError@0x2b"
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/InsufficientBalanceError@0x2c"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/OperationNotAllowedError@0x2d"
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/AbuseAlleviationError@0x2e"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ResourcePolicyDenyError@0x2f"
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/BudgetExceededError@0x30"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/TargetFileTooLargeError@0x31"
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/SubmittedDataMalformedError@0x32"
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/DownstreamServiceFailureError@0x33"
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/AssertionFailureError@0x34"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/RateLimitTriggeredError@0x35"
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "451": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/HarmfulContentError@0x36"
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/DownstreamServiceError@0x37"
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ServiceNodeResourceDrainError@0x38"
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://r.jina.ai/"
+    }
+  ]
+}

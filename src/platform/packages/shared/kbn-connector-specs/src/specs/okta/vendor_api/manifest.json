@@ -1,0 +1,174 @@
+{
+  "operations": {
+    "activateUser": [
+      {
+        "method": "post",
+        "path": "/api/v1/users/{id}/lifecycle/activate",
+        "source": "management"
+      }
+    ],
+    "addUserToGroup": [
+      {
+        "method": "put",
+        "path": "/api/v1/groups/{groupId}/users/{userId}",
+        "source": "management"
+      }
+    ],
+    "clearUserSessions": [
+      {
+        "method": "delete",
+        "path": "/api/v1/users/{userId}/sessions",
+        "source": "management"
+      }
+    ],
+    "deactivateUser": [
+      {
+        "method": "post",
+        "path": "/api/v1/users/{id}/lifecycle/deactivate",
+        "source": "management"
+      }
+    ],
+    "expirePassword": [
+      {
+        "method": "post",
+        "path": "/api/v1/users/{id}/lifecycle/expire_password",
+        "source": "management"
+      },
+      {
+        "method": "post",
+        "path": "/api/v1/users/{id}/lifecycle/expire_password_with_temp_password",
+        "source": "management"
+      }
+    ],
+    "getLogs": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "after",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/api/v1/logs",
+        "source": "management"
+      }
+    ],
+    "getUser": [
+      {
+        "method": "get",
+        "path": "/api/v1/users/{id}",
+        "source": "management"
+      }
+    ],
+    "getUserFactors": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/api/v1/users/{userId}/factors",
+        "source": "management"
+      }
+    ],
+    "getUserGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 200,
+          "request": {
+            "cursorParam": "after",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/api/v1/users/{id}/groups",
+        "source": "management"
+      }
+    ],
+    "listUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 200,
+          "request": {
+            "cursorParam": "after",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/api/v1/users",
+        "source": "management"
+      }
+    ],
+    "removeUserFromGroup": [
+      {
+        "method": "delete",
+        "path": "/api/v1/groups/{groupId}/users/{userId}",
+        "source": "management"
+      }
+    ],
+    "resetFactors": [
+      {
+        "method": "post",
+        "path": "/api/v1/users/{id}/lifecycle/reset_factors",
+        "source": "management"
+      }
+    ],
+    "resetPassword": [
+      {
+        "method": "post",
+        "path": "/api/v1/users/{id}/lifecycle/reset_password",
+        "source": "management"
+      }
+    ],
+    "searchUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 200,
+          "request": {
+            "cursorParam": "after",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/api/v1/users",
+        "source": "management"
+      }
+    ],
+    "suspendUser": [
+      {
+        "method": "post",
+        "path": "/api/v1/users/{id}/lifecycle/suspend",
+        "source": "management"
+      }
+    ],
+    "unsuspendUser": [
+      {
+        "method": "post",
+        "path": "/api/v1/users/{id}/lifecycle/unsuspend",
+        "source": "management"
+      }
+    ]
+  },
+  "sources": {
+    "management": {
+      "apiVersion": "2026.09.2",
+      "fetchedAt": "2026-10-07T20:20:21.968Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/okta/okta-management-openapi-spec/master/dist/current/management-minimal.yaml"
+    }
+  }
+}

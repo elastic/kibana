@@ -392,18 +392,40 @@ describe('Rootly', () => {
       expect(result).toEqual({ id: 'ai1', summary: 'Patch server' });
     });
 
-    it('should list action items scoped to an incident', async () => {
-      mockClient.get.mockResolvedValue({ data: { data: [{ id: 'ai1', attributes: {} }] } });
+    it('should list action items scoped to an incident, filtering them by status', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          data: [
+            { id: 'ai1', attributes: { status: 'open' } },
+            { id: 'ai2', attributes: { status: 'done' } },
+          ],
+        },
+      });
 
-      await Rootly.actions.listActionItems.handler(mockContext, {
+      const result = await Rootly.actions.listActionItems.handler(mockContext, {
         incidentId: 'inc1',
         status: 'open',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.rootly.com/v1/incidents/inc1/action_items',
-        { params: { 'filter[status]': 'open' }, headers: JSON_API_HEADERS }
+        { params: {}, headers: JSON_API_HEADERS }
       );
+      expect(result).toEqual({ items: [{ id: 'ai1', status: 'open' }], meta: undefined });
+    });
+
+    it('should filter action items org-wide by status and priority', async () => {
+      mockClient.get.mockResolvedValue({ data: { data: [] } });
+
+      await Rootly.actions.listActionItems.handler(mockContext, {
+        status: 'open',
+        priority: 'high',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.rootly.com/v1/action_items', {
+        params: { 'filter[status]': 'open', 'filter[priority]': 'high' },
+        headers: JSON_API_HEADERS,
+      });
     });
 
     it('should list action items org-wide when incidentId omitted', async () => {

@@ -1,0 +1,293 @@
+{
+  "operations": {
+    "advancedSearch": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/intelligence/search",
+        "source": "v3"
+      }
+    ],
+    "getAnalysis": [
+      {
+        "method": "get",
+        "path": "/analyses/{id}",
+        "source": "v3"
+      }
+    ],
+    "getCollection": [
+      {
+        "method": "get",
+        "path": "/collections/{id}",
+        "source": "v3"
+      }
+    ],
+    "getDomainRelationship": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/domains/{domain}/{relationship}",
+        "source": "v3"
+      }
+    ],
+    "getDomainReport": [
+      {
+        "method": "get",
+        "path": "/domains/{domain}",
+        "source": "v3"
+      }
+    ],
+    "getFileBehaviours": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/files/{id}/behaviours",
+        "source": "v3"
+      }
+    ],
+    "getFileMitreAttackTechniques": [
+      {
+        "method": "get",
+        "path": "/files/{id}/behaviour_mitre_trees",
+        "source": "v3"
+      }
+    ],
+    "getFileRelationship": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/files/{id}/{relationship}",
+        "source": "v3"
+      }
+    ],
+    "getFileReport": [
+      {
+        "method": "get",
+        "path": "/files/{id}",
+        "source": "v3"
+      }
+    ],
+    "getIocStream": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "links.next"
+          },
+          "style": "next_url"
+        },
+        "path": "/ioc_stream",
+        "source": "v3"
+      }
+    ],
+    "getIpRelationship": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/ip_addresses/{ip}/{relationship}",
+        "source": "v3"
+      }
+    ],
+    "getIpReport": [
+      {
+        "method": "get",
+        "path": "/ip_addresses/{ip}",
+        "source": "v3"
+      }
+    ],
+    "getPrivateAnalysis": [
+      {
+        "method": "get",
+        "path": "/private/analyses/{id}",
+        "source": "v3"
+      }
+    ],
+    "getPrivateUrlReport": [
+      {
+        "method": "get",
+        "path": "/private/urls/{id}",
+        "source": "v3"
+      }
+    ],
+    "getRelatedObjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/collections/{id}/{relationship}",
+        "source": "v3"
+      }
+    ],
+    "getReportMitreAttackTechniques": [
+      {
+        "method": "get",
+        "path": "/collections/{id}/mitre_tree",
+        "source": "v3"
+      }
+    ],
+    "getUrlRelationship": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/urls/{id}/{relationship}",
+        "source": "v3"
+      }
+    ],
+    "getUrlReport": [
+      {
+        "method": "get",
+        "path": "/urls/{id}",
+        "source": "v3"
+      }
+    ],
+    "getUrlScanReport": [
+      {
+        "method": "get",
+        "path": "/urls/{id}",
+        "source": "v3"
+      }
+    ],
+    "scanPrivateUrl": [
+      {
+        "method": "post",
+        "path": "/private/urls",
+        "source": "v3"
+      }
+    ],
+    "scanUrl": [
+      {
+        "method": "post",
+        "path": "/urls",
+        "source": "v3"
+      }
+    ],
+    "searchCollectionIocs": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/collections/{id}/search",
+        "source": "v3"
+      }
+    ],
+    "searchCollections": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/collections",
+        "source": "v3"
+      }
+    ]
+  },
+  "sources": {
+    "v3": {
+      "apiVersion": "3.0",
+      "fetchedAt": "2026-10-07T20:20:18.751Z",
+      "format": "openapi",
+      "url": "https://storage.googleapis.com/gtidocresources/guides/GTI_API_v3_openapi_spec_10022025.json"
+    }
+  }
+}

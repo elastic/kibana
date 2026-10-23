@@ -48,6 +48,62 @@ Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendo
 
 Clients must trust the CA's certificate (`certificateAuthority.cert`, PEM). Kibana's actions plugin trusts it for a vendor host through `xpack.actions.customHostSettings` (`ssl.certificateAuthoritiesData`), or for every host through the `NODE_EXTRA_CA_CERTS` environment variable. `createCertificateAuthority({ cert, key })` loads a CA created earlier, so a Kibana configured to trust it keeps working when the mock restarts.
 
+### Control endpoints
+
+A test that drives Kibana can't read `mock.calls` across processes, so the proxy can serve control endpoints on its own origin:
+
+```ts
+import { createEmulatorControl, createEmulatorControlHandler } from '@kbn/connector-emulate';
+
+const proxy = createEmulatorProxy({
+  fetch: mock.fetch,
+  certificateAuthority,
+  control: createEmulatorControlHandler(mock),
+});
+const proxyUrl = await proxy.listen(8080);
+
+// In the test, possibly in another process:
+const control = createEmulatorControl(proxyUrl);
+const { calls, total } = await control.calls(); // GET /_mock/calls?since=0
+await control.reset(); // POST /_mock/reset
+const operations = await control.operations(); // GET /_mock/operations
+```
+
+| Endpoint | Answer |
+| --- | --- |
+| `GET /_mock/calls?since=<n>` | `{ calls, total }`: the calls from index `n` on (default 0); pass `total` as the next `since` to read only later calls |
+| `POST /_mock/reset` | **204** after emptying the calls (`mock.reset()`) |
+| `GET /_mock/operations` | `{ operations }`: each OpenAPI operation's method, path template, server URLs and spec name, and each GraphQL root field or MCP tool by the name calls give it |
+
+Only requests sent to the proxy itself (a path, not an absolute URL) reach them: requests through the proxy, plain or tunnelled, always go to the mock, so a vendor path under `/_mock` can't collide with them. Other paths sent to the proxy itself still get **400**. The endpoints take no credentials; like the proxy, they are for local and CI test runs.
+
+Each call says where its response came from in `responseSource`: `fixture`, `recording`, `generated` for the spec's examples and samples, or `responder` when a `respond` answered without deferring to the default chain. `createEmulatorFetch({ onCall })` is called with each call as it is recorded, e.g. to log requests as they arrive.
+
+### Several connectors
+
+`combineEmulators` puts several connectors' emulators behind one `fetch`, so one proxy, and one Kibana, can serve them all. Each keeps its own specs, overlay, fixtures and recordings:
+
+```ts
+import { combineEmulators, emulatorCredential } from '@kbn/connector-emulate';
+
+const mock = combineEmulators({
+  outlook: createEmulatorFetch({ specs: outlookSpecs }),
+  one_drive: createEmulatorFetch({ specs: oneDriveSpecs, fixtures }),
+});
+const proxy = createEmulatorProxy({
+  fetch: mock.fetch,
+  certificateAuthority,
+  control: createEmulatorControlHandler(mock),
+});
+
+// The connector's secrets carry its credential, e.g. an API key or OAuth client ID:
+emulatorCredential('one_drive'); // 'emulate-one_drive'
+```
+
+A request goes to the connector whose credential it carries: in any header, in Basic auth, the query, the body, or a claim of a JWT assertion. Token URLs answering a request with the credential issue tokens that carry it too, so later requests with the token reach the same connector. Other requests go to the first connector whose specs match the URL (`emulator.answers(method, url)`), and requests no connector matches get **404**. Connectors that share a vendor host therefore need the credential to get their own responses.
+
+Every call is recorded in the combined `calls` with its `connector`, and `operations` and `rejectedResponses` say whose they are. The control endpoints take `?connector=<id>` to see, reset or list only one connector's (`createEmulatorControl(proxyUrl, { connector })`), so tests running in parallel don't read or clear each other's calls; an unknown connector gets **400**.
+
 ## GraphQL
 
 GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.
@@ -131,11 +187,37 @@ const { fetch, rejectedResponses } = createEmulatorFetch({
 });
 ```
 
-Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`. Pass `respond: (operation, request) => response` to replace examples and samples.
+Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`.
 
 `sampleJsonSchema(schema, { optional, boundary })` samples a standalone JSON Schema the same way, with refs resolving against the schema itself (`#/$defs/...`), for example to generate inputs from a zod schema converted with `z.toJSONSchema`. `optional: 'required'` leaves out optional properties at every depth, so object and array examples and defaults, which may include them, are skipped; `boundary: true` samples at the upper bounds, ignoring examples and defaults.
 
-To test how a connector handles extreme responses, pass `respond: sampleBoundaryResponse`. It skips examples and samples bodies at the schema's upper bounds: strings at `maxLength` (1024 characters when unbounded), numbers at `maximum` or the largest value of their format (`int32`, `float`; `int64` and unbounded integers at `Number.MAX_SAFE_INTEGER`), arrays at `maxItems` (capped at 100; 3 items when unbounded, one for `uniqueItems`), and the last `enum` value. Fixtures and recordings are still preferred. Vendor `oneOf`s whose variants only differ in their examples can't be sampled without them, and are reported in the call's `responseViolations`; an overlay can correct them.
+To test how a connector handles extreme responses, pass `sampling: 'boundary'`. Fixtures and recordings still come first, but examples are skipped and bodies are sampled at the schema's upper bounds: strings at `maxLength` (1024 characters when unbounded), numbers at `maximum` or the largest value of their format (`int32`, `float`; `int64` and unbounded integers at `Number.MAX_SAFE_INTEGER`), arrays at `maxItems` (capped at 100; 3 items when unbounded, one for `uniqueItems`), and the last `enum` value. Fixtures and recordings are still preferred. Vendor `oneOf`s whose variants only differ in their examples can't be sampled without them, and are reported in the call's `responseViolations`; an overlay can correct them.
+
+### Responders
+
+Pass `respond` to answer OpenAPI operations in front of the default chain above, for example to keep state across requests (create something, then read it back), or to answer from another emulator. It gets the operation, the request and a context, and may return a promise:
+
+```ts
+const CREATED = Symbol('created items');
+
+const { fetch, reset } = createEmulatorFetch({
+  specs: [openApiDocument],
+  respond: async (operation, request, { state, next }) => {
+    const created = (state.get(CREATED) as unknown[] | undefined) ?? [];
+    if (operation.id === 'createItem') {
+      state.set(CREATED, [...created, request.body]);
+      return { statusCode: 201, headers: { 'content-type': 'application/json' }, body: request.body };
+    }
+    return operation.id === 'listItems'
+      ? { statusCode: 200, headers: { 'content-type': 'application/json' }, body: created }
+      : next();
+  },
+});
+```
+
+- `context.next()` answers with the default chain: fixtures, recordings, then examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there.
+- `context.state` is a `Map` kept for the emulator's run; `reset()` empties it, along with `calls`. Responders keep their entries under keys of their own, such as a symbol, so several can share it.
+- Answers are validated against the spec like any other, so a responder that drifts from the vendor's contract shows up in `calls`.
 
 ## Pagination
 

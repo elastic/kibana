@@ -207,7 +207,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
         // Cloud Run requires an OIDC ID token (not an access token) for service invocation.
         const serviceAccountJson = ctx.secrets?.serviceAccountJson as string;
         const sa = parseServiceAccountKey(serviceAccountJson);
-        const idToken = await getGcpIdToken(sa.client_email, sa.private_key, serviceUrl);
+        const idToken = await getGcpIdToken(sa.client_email, sa.private_key, serviceUrl, ctx.fetch);
 
         const invokeResponse = await callGcpApi(ctx, 'POST', serviceUrl, {}, body, {
           Authorization: `Bearer ${idToken}`,

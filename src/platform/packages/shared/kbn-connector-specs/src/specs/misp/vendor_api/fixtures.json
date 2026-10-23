@@ -1,0 +1,38 @@
+{
+  "checkIndicator": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/attributes/restSearch",
+        "source": "v2"
+      }
+    ]
+  },
+  "checkWarninglist": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/warninglists/checkValue",
+        "source": "v2"
+      }
+    ]
+  },
+  "searchAttributes": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/attributes/restSearch",
+        "source": "v2"
+      }
+    ]
+  },
+  "searchEvents": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/events/restSearch",
+        "source": "v2"
+      }
+    ]
+  }
+}

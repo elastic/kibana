@@ -1,0 +1,875 @@
+{
+  "components": {
+    "schemas": {
+      "alert": {
+        "properties": {
+          "generatorURL": {
+            "format": "uri",
+            "type": "string"
+          },
+          "labels": {
+            "$ref": "#/components/schemas/labelSet"
+          }
+        },
+        "required": [
+          "labels"
+        ],
+        "type": "object"
+      },
+      "alertGroup": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/gettableAlert"
+            },
+            "type": "array"
+          },
+          "labels": {
+            "$ref": "#/components/schemas/labelSet"
+          },
+          "receiver": {
+            "$ref": "#/components/schemas/receiverReference"
+          },
+          "routeLabels": {
+            "$ref": "#/components/schemas/labelSet"
+          }
+        },
+        "required": [
+          "labels",
+          "routeLabels",
+          "receiver",
+          "alerts"
+        ],
+        "type": "object"
+      },
+      "alertGroups": {
+        "items": {
+          "$ref": "#/components/schemas/alertGroup"
+        },
+        "type": "array"
+      },
+      "alertStatus": {
+        "properties": {
+          "inhibitedBy": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "mutedBy": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "silencedBy": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "state": {
+            "enum": [
+              "unprocessed",
+              "active",
+              "suppressed"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "silencedBy",
+          "inhibitedBy",
+          "mutedBy"
+        ],
+        "type": "object"
+      },
+      "alertmanagerConfig": {
+        "properties": {
+          "original": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "original"
+        ],
+        "type": "object"
+      },
+      "alertmanagerStatus": {
+        "properties": {
+          "cluster": {
+            "$ref": "#/components/schemas/clusterStatus"
+          },
+          "config": {
+            "$ref": "#/components/schemas/alertmanagerConfig"
+          },
+          "uptime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "versionInfo": {
+            "$ref": "#/components/schemas/versionInfo"
+          }
+        },
+        "required": [
+          "cluster",
+          "versionInfo",
+          "config",
+          "uptime"
+        ],
+        "type": "object"
+      },
+      "clusterStatus": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "peers": {
+            "items": {
+              "$ref": "#/components/schemas/peerStatus"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "ready",
+              "settling",
+              "disabled"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "gettableAlert": {
+        "allOf": [
+          {
+            "properties": {
+              "annotations": {
+                "$ref": "#/components/schemas/labelSet"
+              },
+              "endsAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "fingerprint": {
+                "type": "string"
+              },
+              "receivers": {
+                "items": {
+                  "$ref": "#/components/schemas/receiverReference"
+                },
+                "type": "array"
+              },
+              "startsAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/alertStatus"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "receivers",
+              "fingerprint",
+              "startsAt",
+              "updatedAt",
+              "endsAt",
+              "annotations",
+              "status"
+            ],
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/alert"
+          }
+        ]
+      },
+      "gettableAlerts": {
+        "items": {
+          "$ref": "#/components/schemas/gettableAlert"
+        },
+        "type": "array"
+      },
+      "gettableSilence": {
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/silenceStatus"
+              },
+              "updatedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "status",
+              "updatedAt",
+              "annotations"
+            ],
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/silence"
+          }
+        ]
+      },
+      "gettableSilences": {
+        "items": {
+          "$ref": "#/components/schemas/gettableSilence"
+        },
+        "type": "array"
+      },
+      "labelSet": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "matcher": {
+        "properties": {
+          "isEqual": {
+            "default": true,
+            "type": "boolean"
+          },
+          "isRegex": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value",
+          "isRegex"
+        ],
+        "type": "object"
+      },
+      "matchers": {
+        "items": {
+          "$ref": "#/components/schemas/matcher"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "peerStatus": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "address"
+        ],
+        "type": "object"
+      },
+      "postableAlert": {
+        "allOf": [
+          {
+            "properties": {
+              "annotations": {
+                "$ref": "#/components/schemas/labelSet"
+              },
+              "endsAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "startsAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/alert"
+          }
+        ]
+      },
+      "postableAlerts": {
+        "items": {
+          "$ref": "#/components/schemas/postableAlert"
+        },
+        "type": "array"
+      },
+      "postableSilence": {
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/silence"
+          }
+        ]
+      },
+      "receiverReference": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "silence": {
+        "properties": {
+          "annotations": {
+            "$ref": "#/components/schemas/labelSet"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "matchers": {
+            "$ref": "#/components/schemas/matchers"
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "matchers",
+          "startsAt",
+          "endsAt",
+          "createdBy",
+          "comment"
+        ],
+        "type": "object"
+      },
+      "silenceStatus": {
+        "properties": {
+          "state": {
+            "enum": [
+              "expired",
+              "active",
+              "pending"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "type": "object"
+      },
+      "versionInfo": {
+        "properties": {
+          "branch": {
+            "type": "string"
+          },
+          "buildDate": {
+            "type": "string"
+          },
+          "buildUser": {
+            "type": "string"
+          },
+          "goVersion": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "revision",
+          "branch",
+          "buildUser",
+          "buildDate",
+          "goVersion"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Alertmanager API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/alerts": {
+      "get": {
+        "operationId": "getAlerts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "silenced",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "inhibited",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "unprocessed",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "receiver",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "receiver_matchers",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gettableAlerts"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "postAlerts",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/postableAlerts"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {},
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/groups": {
+      "get": {
+        "operationId": "getAlertGroups",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "silenced",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "inhibited",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "muted",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "receiver",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "receiver_matchers",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alertGroups"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/silence/{silenceID}": {
+      "delete": {
+        "operationId": "deleteSilence",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "silenceID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "404": {},
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "getSilence",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "silenceID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gettableSilence"
+                }
+              }
+            }
+          },
+          "404": {},
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/silences": {
+      "get": {
+        "operationId": "getSilences",
+        "parameters": [
+          {
+            "explode": true,
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expired",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pending",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gettableSilences"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "postSilences",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/postableSilence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "silenceID": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "operationId": "getStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alertmanagerStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v2"
+    }
+  ]
+}

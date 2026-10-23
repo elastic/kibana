@@ -1,0 +1,242 @@
+{
+  "components": {
+    "schemas": {
+      "CloudError": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorResponse"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorAdditionalInfo": {
+        "properties": {
+          "info": {
+            "readOnly": true,
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "additionalInfo": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorAdditionalInfo"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "code": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "message": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "target": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "title": "Error response",
+        "type": "object"
+      },
+      "ManagedByTenant": {
+        "properties": {
+          "tenantId": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SpendingLimit": {
+        "enum": [
+          "On",
+          "Off",
+          "CurrentPeriodOff"
+        ],
+        "type": "string"
+      },
+      "Subscription": {
+        "properties": {
+          "authorizationSource": {
+            "type": "string"
+          },
+          "displayName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "managedByTenants": {
+            "items": {
+              "$ref": "#/components/schemas/ManagedByTenant"
+            },
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SubscriptionState",
+            "readOnly": true
+          },
+          "subscriptionId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "subscriptionPolicies": {
+            "$ref": "#/components/schemas/SubscriptionPolicies"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "tenantId": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SubscriptionListResult": {
+        "properties": {
+          "nextLink": {
+            "format": "uri",
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/Subscription"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "SubscriptionPolicies": {
+        "properties": {
+          "locationPlacementId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "quotaId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "spendingLimit": {
+            "$ref": "#/components/schemas/SpendingLimit",
+            "readOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "SubscriptionState": {
+        "enum": [
+          "Enabled",
+          "Warned",
+          "PastDue",
+          "Disabled",
+          "Deleted"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "SubscriptionClient"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions": {
+      "get": {
+        "operationId": "Subscriptions_List",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionListResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

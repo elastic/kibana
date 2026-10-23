@@ -1,0 +1,98 @@
+{
+  "browseActivity": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseAlertGrouping": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseChangeEvents": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseEscalationPolicies": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseEventOrchestrations": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseIncidents": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseSchedules": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseServices": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseStatusPages": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseTeams": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseUsers": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "listTools": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6308 @@
+{
+  "components": {
+    "parameters": {
+      "notionVersion": {
+        "in": "header",
+        "name": "Notion-Version",
+        "required": true,
+        "schema": {
+          "enum": [
+            "2026-03-11"
+          ]
+        }
+      }
+    },
+    "schemas": {
+      "agentIdParentForBlockBasedObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "type": {
+            "const": "agent_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "agent_id"
+        ],
+        "type": "object"
+      },
+      "annotationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "bold": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "boolean"
+          },
+          "color": {
+            "$ref": "#/components/schemas/apiColor"
+          },
+          "italic": {
+            "type": "boolean"
+          },
+          "strikethrough": {
+            "type": "boolean"
+          },
+          "underline": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "bold",
+          "italic",
+          "strikethrough",
+          "underline",
+          "code",
+          "color"
+        ],
+        "type": "object"
+      },
+      "apiColor": {
+        "enum": [
+          "default",
+          "gray",
+          "brown",
+          "orange",
+          "yellow",
+          "green",
+          "blue",
+          "purple",
+          "pink",
+          "red",
+          "default_background",
+          "gray_background",
+          "brown_background",
+          "orange_background",
+          "yellow_background",
+          "green_background",
+          "blue_background",
+          "purple_background",
+          "pink_background",
+          "red_background"
+        ],
+        "type": "string"
+      },
+      "arrayBasedPropertyValueResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/titleArrayBasedPropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/richTextArrayBasedPropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/peopleArrayBasedPropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/relationArrayBasedPropertyValueResponse"
+          }
+        ]
+      },
+      "arrayPartialRollupValueResponse": {
+        "properties": {
+          "array": {
+            "items": {
+              "$ref": "#/components/schemas/simpleOrArrayPropertyValueResponse"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "type": {
+            "const": "array",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "array"
+        ],
+        "title": "Array",
+        "type": "object"
+      },
+      "blockIdParentForBlockBasedObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "block_id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "type": {
+            "const": "block_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "block_id"
+        ],
+        "type": "object"
+      },
+      "booleanFormulaPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "boolean": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "boolean",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "boolean"
+        ],
+        "title": "Boolean",
+        "type": "object"
+      },
+      "botInfoResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "owner": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "const": "user",
+                    "type": "string"
+                  },
+                  "user": {
+                    "oneOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "avatar_url": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "id": {
+                            "$ref": "#/components/schemas/idResponse"
+                          },
+                          "name": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "object": {
+                            "const": "user",
+                            "type": "string"
+                          },
+                          "person": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "email": {
+                                "type": "string"
+                              },
+                              "email_verified": {
+                                "type": "boolean"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": {
+                            "const": "person",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "object",
+                          "name",
+                          "avatar_url",
+                          "type",
+                          "person"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "$ref": "#/components/schemas/partialUserObjectResponse"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "user"
+                ],
+                "title": "User",
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "const": "workspace",
+                    "type": "string"
+                  },
+                  "workspace": {
+                    "const": true,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "type",
+                  "workspace"
+                ],
+                "title": "Workspace",
+                "type": "object"
+              }
+            ]
+          },
+          "workspace_id": {
+            "type": "string"
+          },
+          "workspace_limits": {
+            "additionalProperties": false,
+            "properties": {
+              "max_file_upload_size_in_bytes": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "max_file_upload_size_in_bytes"
+            ],
+            "type": "object"
+          },
+          "workspace_name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "owner",
+          "workspace_id",
+          "workspace_limits",
+          "workspace_name"
+        ],
+        "type": "object"
+      },
+      "botUserObjectResponse": {
+        "properties": {
+          "bot": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/emptyObject"
+              },
+              {
+                "$ref": "#/components/schemas/botInfoResponse"
+              }
+            ]
+          },
+          "type": {
+            "const": "bot",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "bot"
+        ],
+        "title": "Bot",
+        "type": "object"
+      },
+      "buttonSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "button": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "button",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "button"
+        ],
+        "title": "Button",
+        "type": "object"
+      },
+      "checkboxDatabasePropertyConfigResponse": {
+        "properties": {
+          "checkbox": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "checkbox",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "checkbox"
+        ],
+        "title": "Checkbox",
+        "type": "object"
+      },
+      "checkboxPropertyFilter": {
+        "anyOf": [
+          {
+            "properties": {
+              "equals": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "equals"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "does_not_equal": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "does_not_equal"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "checkboxSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "checkbox": {
+            "type": "boolean"
+          },
+          "type": {
+            "const": "checkbox",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "checkbox"
+        ],
+        "title": "Checkbox",
+        "type": "object"
+      },
+      "createdByDatabasePropertyConfigResponse": {
+        "properties": {
+          "created_by": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "created_by",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "created_by"
+        ],
+        "title": "Created By",
+        "type": "object"
+      },
+      "createdBySimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_by": {
+            "$ref": "#/components/schemas/userValueResponse"
+          },
+          "type": {
+            "const": "created_by",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "created_by"
+        ],
+        "title": "Created By",
+        "type": "object"
+      },
+      "createdTimeDatabasePropertyConfigResponse": {
+        "properties": {
+          "created_time": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "created_time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "created_time"
+        ],
+        "title": "Created Time",
+        "type": "object"
+      },
+      "createdTimeSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "const": "created_time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "created_time"
+        ],
+        "title": "Created Time",
+        "type": "object"
+      },
+      "customEmojiPageIconResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "custom_emoji": {
+            "$ref": "#/components/schemas/customEmojiResponse"
+          },
+          "type": {
+            "const": "custom_emoji",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "custom_emoji"
+        ],
+        "title": "Custom Emoji",
+        "type": "object"
+      },
+      "customEmojiResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url"
+        ],
+        "type": "object"
+      },
+      "dataSourceObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cover": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/pageCoverResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/partialUserObjectResponse"
+          },
+          "created_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "database_parent": {
+            "$ref": "#/components/schemas/parentOfDatabaseResponse"
+          },
+          "database_type": {
+            "oneOf": [
+              {
+                "enum": [
+                  "tasks",
+                  "projects",
+                  "sprints",
+                  "docs",
+                  "wiki",
+                  "meetings",
+                  "meeting_notes",
+                  "skills",
+                  "github_prs"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "items": {
+              "$ref": "#/components/schemas/richTextItemResponse"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "icon": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/pageIconResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "in_trash": {
+            "type": "boolean"
+          },
+          "is_inline": {
+            "type": "boolean"
+          },
+          "last_edited_by": {
+            "$ref": "#/components/schemas/partialUserObjectResponse"
+          },
+          "last_edited_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "object": {
+            "const": "data_source",
+            "type": "string"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/parentOfDataSourceResponse"
+          },
+          "properties": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/databasePropertyConfigResponse"
+            },
+            "type": "object"
+          },
+          "public_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": {
+            "items": {
+              "$ref": "#/components/schemas/richTextItemResponse"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "description",
+          "parent",
+          "database_parent",
+          "is_inline",
+          "database_type",
+          "in_trash",
+          "created_time",
+          "last_edited_time",
+          "created_by",
+          "last_edited_by",
+          "properties",
+          "icon",
+          "cover",
+          "url",
+          "public_url"
+        ],
+        "type": "object"
+      },
+      "dataSourceParentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data_source_id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "database_id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "type": {
+            "const": "data_source_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "data_source_id",
+          "database_id"
+        ],
+        "type": "object"
+      },
+      "databaseParentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "database_id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "type": {
+            "const": "database_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "database_id"
+        ],
+        "type": "object"
+      },
+      "databasePropertyConfigResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/databasePropertyConfigResponseCommon"
+          },
+          {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/numberDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/formulaDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/selectDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/multiSelectDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/statusDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/relationDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/rollupDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/uniqueIdDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/titleDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/richTextDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/urlDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/peopleDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/filesDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/emailDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/phoneNumberDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/dateDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/checkboxDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/createdByDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/createdTimeDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/lastEditedByDatabasePropertyConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/lastEditedTimeDatabasePropertyConfigResponse"
+              }
+            ]
+          }
+        ]
+      },
+      "databasePropertyConfigResponseCommon": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/propertyDescriptionRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
+        "type": "object"
+      },
+      "databasePropertyRelationConfigResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/databasePropertyRelationConfigResponseCommon"
+          },
+          {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/singlePropertyDatabasePropertyRelationConfigResponse"
+              },
+              {
+                "$ref": "#/components/schemas/dualPropertyDatabasePropertyRelationConfigResponse"
+              }
+            ]
+          }
+        ]
+      },
+      "databasePropertyRelationConfigResponseCommon": {
+        "additionalProperties": false,
+        "properties": {
+          "data_source_id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "database_id": {
+            "$ref": "#/components/schemas/idResponse"
+          }
+        },
+        "required": [
+          "database_id",
+          "data_source_id"
+        ],
+        "type": "object"
+      },
+      "dateDatabasePropertyConfigResponse": {
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "date"
+        ],
+        "title": "Date",
+        "type": "object"
+      },
+      "dateFormulaPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/dateResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "date"
+        ],
+        "title": "Date",
+        "type": "object"
+      },
+      "dateOrRelativeDate": {
+        "anyOf": [
+          {
+            "format": "date",
+            "type": "string"
+          },
+          {
+            "$ref": "#/components/schemas/relativeDateValue"
+          }
+        ]
+      },
+      "datePartialRollupValueResponse": {
+        "properties": {
+          "date": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/dateResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "date"
+        ],
+        "title": "Date",
+        "type": "object"
+      },
+      "datePropertyFilter": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "equals": {
+                    "$ref": "#/components/schemas/dateOrRelativeDate"
+                  }
+                },
+                "required": [
+                  "equals"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "before": {
+                    "$ref": "#/components/schemas/dateOrRelativeDate"
+                  }
+                },
+                "required": [
+                  "before"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "after": {
+                    "$ref": "#/components/schemas/dateOrRelativeDate"
+                  }
+                },
+                "required": [
+                  "after"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "on_or_before": {
+                    "$ref": "#/components/schemas/dateOrRelativeDate"
+                  }
+                },
+                "required": [
+                  "on_or_before"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "on_or_after": {
+                    "$ref": "#/components/schemas/dateOrRelativeDate"
+                  }
+                },
+                "required": [
+                  "on_or_after"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "this_week": {
+                    "$ref": "#/components/schemas/emptyObject"
+                  }
+                },
+                "required": [
+                  "this_week"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "past_week": {
+                    "$ref": "#/components/schemas/emptyObject"
+                  }
+                },
+                "required": [
+                  "past_week"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "past_month": {
+                    "$ref": "#/components/schemas/emptyObject"
+                  }
+                },
+                "required": [
+                  "past_month"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "past_year": {
+                    "$ref": "#/components/schemas/emptyObject"
+                  }
+                },
+                "required": [
+                  "past_year"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "next_week": {
+                    "$ref": "#/components/schemas/emptyObject"
+                  }
+                },
+                "required": [
+                  "next_week"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "next_month": {
+                    "$ref": "#/components/schemas/emptyObject"
+                  }
+                },
+                "required": [
+                  "next_month"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "next_year": {
+                    "$ref": "#/components/schemas/emptyObject"
+                  }
+                },
+                "required": [
+                  "next_year"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/existencePropertyFilter"
+          }
+        ]
+      },
+      "dateResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "oneOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "start": {
+            "format": "date",
+            "type": "string"
+          },
+          "time_zone": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/timeZoneRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "time_zone"
+        ],
+        "type": "object"
+      },
+      "dateSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/dateResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "date"
+        ],
+        "title": "Date",
+        "type": "object"
+      },
+      "dualPropertyDatabasePropertyRelationConfigResponse": {
+        "properties": {
+          "dual_property": {
+            "additionalProperties": false,
+            "properties": {
+              "synced_property_id": {
+                "type": "string"
+              },
+              "synced_property_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "synced_property_id",
+              "synced_property_name"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "dual_property",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dual_property"
+        ],
+        "title": "Dual Property",
+        "type": "object"
+      },
+      "emailDatabasePropertyConfigResponse": {
+        "properties": {
+          "email": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "email"
+        ],
+        "title": "Email",
+        "type": "object"
+      },
+      "emailSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "email"
+        ],
+        "title": "Email",
+        "type": "object"
+      },
+      "emojiPageIconResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "emoji": {
+            "$ref": "#/components/schemas/emojiRequest"
+          },
+          "type": {
+            "const": "emoji",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "emoji"
+        ],
+        "title": "Emoji",
+        "type": "object"
+      },
+      "emojiRequest": {
+        "type": "string"
+      },
+      "emptyObject": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "equationRichTextItemResponse": {
+        "properties": {
+          "equation": {
+            "additionalProperties": false,
+            "properties": {
+              "expression": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "expression"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "equation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "equation"
+        ],
+        "title": "Equation",
+        "type": "object"
+      },
+      "error_api_400": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "invalid_json",
+                  "invalid_request_url",
+                  "invalid_request",
+                  "missing_version",
+                  "invalid_beta",
+                  "validation_error",
+                  "invalid_credit_limit"
+                ]
+              },
+              "status": {
+                "const": 400
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_401": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "unauthorized"
+                ]
+              },
+              "status": {
+                "const": 401
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_403": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "restricted_resource",
+                      "status_change_not_allowed"
+                    ]
+                  },
+                  "status": {
+                    "const": 403
+                  }
+                },
+                "required": [
+                  "code",
+                  "status"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+              },
+              {
+                "properties": {
+                  "additional_data": {
+                    "additionalProperties": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "recovery_kind": {
+                        "enum": [
+                          "contact_workspace_owner",
+                          "open_workspace_credit_settings"
+                        ]
+                      },
+                      "recovery_url": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "tool_error_class": {
+                        "const": "entitlement_required"
+                      },
+                      "tool_error_code": {
+                        "const": "workspace_credits_exhausted"
+                      },
+                      "tool_error_retryable": {
+                        "const": "false"
+                      }
+                    },
+                    "required": [
+                      "tool_error_code",
+                      "tool_error_class",
+                      "tool_error_retryable",
+                      "recovery_kind"
+                    ],
+                    "type": "object"
+                  },
+                  "code": {
+                    "const": "workspace_credits_exhausted"
+                  },
+                  "status": {
+                    "const": 403
+                  }
+                },
+                "required": [
+                  "code",
+                  "status",
+                  "additional_data"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+              },
+              {
+                "properties": {
+                  "additional_data": {
+                    "additionalProperties": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "recovery_kind": {
+                        "enum": [
+                          "contact_workspace_owner",
+                          "none",
+                          "open_agent_settings",
+                          "request_agent_limit_increase",
+                          "request_pending"
+                        ]
+                      },
+                      "recovery_url": {
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "tool_error_class": {
+                        "const": "entitlement_required"
+                      },
+                      "tool_error_code": {
+                        "const": "agent_credit_limit_reached"
+                      },
+                      "tool_error_retryable": {
+                        "const": "false"
+                      }
+                    },
+                    "required": [
+                      "tool_error_code",
+                      "tool_error_class",
+                      "tool_error_retryable",
+                      "recovery_kind"
+                    ],
+                    "type": "object"
+                  },
+                  "code": {
+                    "const": "agent_credit_limit_reached"
+                  },
+                  "status": {
+                    "const": 403
+                  }
+                },
+                "required": [
+                  "code",
+                  "status",
+                  "additional_data"
+                ],
+                "type": "object"
+              }
+            ]
+          }
+        ]
+      },
+      "error_api_404": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "object_not_found",
+                  "directory_not_found"
+                ]
+              },
+              "status": {
+                "const": 404
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_406": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "row_limit_exceeded"
+                ]
+              },
+              "status": {
+                "const": 406
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_409": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "conflict_error",
+                  "idempotency_key_reused",
+                  "agent_deleted"
+                ]
+              },
+              "status": {
+                "const": 409
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_429": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "rate_limited"
+                ]
+              },
+              "status": {
+                "const": 429
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_500": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "internal_server_error"
+                ]
+              },
+              "status": {
+                "const": 500
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_503": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "service_unavailable"
+                ]
+              },
+              "status": {
+                "const": 503
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_504": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "gateway_timeout"
+                ]
+              },
+              "status": {
+                "const": 504
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "error_api_529": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/publicApiCommonErrorResponse"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "enum": [
+                  "service_overload"
+                ]
+              },
+              "status": {
+                "const": 529
+              }
+            },
+            "required": [
+              "code",
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "existencePropertyFilter": {
+        "anyOf": [
+          {
+            "properties": {
+              "is_empty": {
+                "const": true,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "is_empty"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "is_not_empty": {
+                "const": true,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "is_not_empty"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "externalInternalOrExternalFileWithNameResponse": {
+        "properties": {
+          "external": {
+            "additionalProperties": false,
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "external",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "external"
+        ],
+        "title": "External",
+        "type": "object"
+      },
+      "externalPageCoverResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "external": {
+            "additionalProperties": false,
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "external",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "external"
+        ],
+        "title": "External",
+        "type": "object"
+      },
+      "externalPageIconResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "external": {
+            "additionalProperties": false,
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "external",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "external"
+        ],
+        "title": "External",
+        "type": "object"
+      },
+      "fileInternalOrExternalFileWithNameResponse": {
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/internalFileResponse"
+          },
+          "type": {
+            "const": "file",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "file"
+        ],
+        "title": "File",
+        "type": "object"
+      },
+      "filePageCoverResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/internalFileResponse"
+          },
+          "type": {
+            "const": "file",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "file"
+        ],
+        "title": "File",
+        "type": "object"
+      },
+      "filePageIconResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/internalFileResponse"
+          },
+          "type": {
+            "const": "file",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "file"
+        ],
+        "title": "File",
+        "type": "object"
+      },
+      "filesDatabasePropertyConfigResponse": {
+        "properties": {
+          "files": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "files",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "files"
+        ],
+        "title": "Files",
+        "type": "object"
+      },
+      "filesSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/internalOrExternalFileWithNameResponse"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "type": {
+            "const": "files",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "files"
+        ],
+        "title": "Files",
+        "type": "object"
+      },
+      "formulaDatabasePropertyConfigResponse": {
+        "properties": {
+          "formula": {
+            "additionalProperties": false,
+            "properties": {
+              "expression": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "expression"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "formula",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "formula"
+        ],
+        "title": "Formula",
+        "type": "object"
+      },
+      "formulaPropertyFilter": {
+        "anyOf": [
+          {
+            "properties": {
+              "string": {
+                "$ref": "#/components/schemas/textPropertyFilter"
+              }
+            },
+            "required": [
+              "string"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "checkbox": {
+                "$ref": "#/components/schemas/checkboxPropertyFilter"
+              }
+            },
+            "required": [
+              "checkbox"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "number": {
+                "$ref": "#/components/schemas/numberPropertyFilter"
+              }
+            },
+            "required": [
+              "number"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "date": {
+                "$ref": "#/components/schemas/datePropertyFilter"
+              }
+            },
+            "required": [
+              "date"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "formulaPropertyValueResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/booleanFormulaPropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/dateFormulaPropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/numberFormulaPropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/stringFormulaPropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/unsupportedFormulaPropertyValueResponse"
+          }
+        ]
+      },
+      "formulaSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "formula": {
+            "$ref": "#/components/schemas/formulaPropertyValueResponse"
+          },
+          "type": {
+            "const": "formula",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "formula"
+        ],
+        "title": "Formula",
+        "type": "object"
+      },
+      "groupFilterOperatorArray": {
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/propertyOrTimestampFilter"
+            },
+            {
+              "anyOf": [
+                {
+                  "properties": {
+                    "or": {
+                      "$ref": "#/components/schemas/propertyOrTimestampFilterArray"
+                    }
+                  },
+                  "required": [
+                    "or"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "properties": {
+                    "and": {
+                      "$ref": "#/components/schemas/propertyOrTimestampFilterArray"
+                    }
+                  },
+                  "required": [
+                    "and"
+                  ],
+                  "type": "object"
+                }
+              ]
+            }
+          ]
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "groupObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "object": {
+            "const": "group",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "name"
+        ],
+        "type": "object"
+      },
+      "iconPageIconResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "icon": {
+            "$ref": "#/components/schemas/noticonIconResponse"
+          },
+          "type": {
+            "const": "icon",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "icon"
+        ],
+        "title": "Icon",
+        "type": "object"
+      },
+      "idObjectResponse": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "idRequest": {
+        "type": "string"
+      },
+      "idResponse": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "internalFileResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "expiry_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "expiry_time"
+        ],
+        "type": "object"
+      },
+      "internalOrExternalFileWithNameResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/internalOrExternalFileWithNameResponseCommon"
+          },
+          {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/fileInternalOrExternalFileWithNameResponse"
+              },
+              {
+                "$ref": "#/components/schemas/externalInternalOrExternalFileWithNameResponse"
+              }
+            ]
+          }
+        ]
+      },
+      "internalOrExternalFileWithNameResponseCommon": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "lastEditedByDatabasePropertyConfigResponse": {
+        "properties": {
+          "last_edited_by": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "last_edited_by",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "last_edited_by"
+        ],
+        "title": "Last Edited By",
+        "type": "object"
+      },
+      "lastEditedBySimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "last_edited_by": {
+            "$ref": "#/components/schemas/userValueResponse"
+          },
+          "type": {
+            "const": "last_edited_by",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "last_edited_by"
+        ],
+        "title": "Last Edited By",
+        "type": "object"
+      },
+      "lastEditedTimeDatabasePropertyConfigResponse": {
+        "properties": {
+          "last_edited_time": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "last_edited_time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "last_edited_time"
+        ],
+        "title": "Last Edited Time",
+        "type": "object"
+      },
+      "lastEditedTimeSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "last_edited_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "const": "last_edited_time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "last_edited_time"
+        ],
+        "title": "Last Edited Time",
+        "type": "object"
+      },
+      "linkMentionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "href": {
+            "type": "string"
+          },
+          "icon_url": {
+            "type": "string"
+          },
+          "iframe_url": {
+            "type": "string"
+          },
+          "link_author": {
+            "type": "string"
+          },
+          "link_provider": {
+            "type": "string"
+          },
+          "padding": {
+            "type": "integer"
+          },
+          "padding_top": {
+            "type": "integer"
+          },
+          "thumbnail_url": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "href"
+        ],
+        "type": "object"
+      },
+      "linkPreviewMentionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      },
+      "mentionRichTextItemResponse": {
+        "properties": {
+          "mention": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "const": "user",
+                    "type": "string"
+                  },
+                  "user": {
+                    "$ref": "#/components/schemas/userValueResponse"
+                  }
+                },
+                "required": [
+                  "type",
+                  "user"
+                ],
+                "title": "User",
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "date": {
+                    "$ref": "#/components/schemas/dateResponse"
+                  },
+                  "type": {
+                    "const": "date",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "date"
+                ],
+                "title": "Date",
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "link_preview": {
+                    "$ref": "#/components/schemas/linkPreviewMentionResponse"
+                  },
+                  "type": {
+                    "const": "link_preview",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "link_preview"
+                ],
+                "title": "Link Preview",
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "link_mention": {
+                    "$ref": "#/components/schemas/linkMentionResponse"
+                  },
+                  "type": {
+                    "const": "link_mention",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "link_mention"
+                ],
+                "title": "Link Mention",
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "page": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "$ref": "#/components/schemas/idResponse"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "type": "object"
+                  },
+                  "type": {
+                    "const": "page",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "page"
+                ],
+                "title": "Page",
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "database": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "$ref": "#/components/schemas/idResponse"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "type": "object"
+                  },
+                  "type": {
+                    "const": "database",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "database"
+                ],
+                "title": "Database",
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "template_mention": {
+                    "$ref": "#/components/schemas/templateMentionResponse"
+                  },
+                  "type": {
+                    "const": "template_mention",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "template_mention"
+                ],
+                "title": "Template Mention",
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "custom_emoji": {
+                    "$ref": "#/components/schemas/customEmojiResponse"
+                  },
+                  "type": {
+                    "const": "custom_emoji",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "custom_emoji"
+                ],
+                "title": "Custom Emoji",
+                "type": "object"
+              }
+            ]
+          },
+          "type": {
+            "const": "mention",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "mention"
+        ],
+        "title": "Mention",
+        "type": "object"
+      },
+      "multiSelectDatabasePropertyConfigResponse": {
+        "properties": {
+          "multi_select": {
+            "additionalProperties": false,
+            "properties": {
+              "options": {
+                "items": {
+                  "$ref": "#/components/schemas/selectPropertyResponse"
+                },
+                "maxItems": 100,
+                "type": "array"
+              }
+            },
+            "required": [
+              "options"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "multi_select",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "multi_select"
+        ],
+        "title": "Multi Select",
+        "type": "object"
+      },
+      "multiSelectPropertyFilter": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "contains": {
+                    "$ref": "#/components/schemas/stringOrStringArray"
+                  }
+                },
+                "required": [
+                  "contains"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "does_not_contain": {
+                    "$ref": "#/components/schemas/stringOrStringArray"
+                  }
+                },
+                "required": [
+                  "does_not_contain"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/existencePropertyFilter"
+          }
+        ]
+      },
+      "multiSelectSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "multi_select": {
+            "items": {
+              "$ref": "#/components/schemas/partialSelectPropertyValueResponse"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "type": {
+            "const": "multi_select",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "multi_select"
+        ],
+        "title": "Multi Select",
+        "type": "object"
+      },
+      "noticonColor": {
+        "enum": [
+          "gray",
+          "lightgray",
+          "brown",
+          "yellow",
+          "orange",
+          "green",
+          "blue",
+          "purple",
+          "pink",
+          "red"
+        ],
+        "type": "string"
+      },
+      "noticonIconResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "$ref": "#/components/schemas/noticonColor"
+          },
+          "name": {
+            "$ref": "#/components/schemas/noticonName"
+          }
+        },
+        "required": [
+          "name",
+          "color"
+        ],
+        "type": "object"
+      },
+      "noticonName": {
+        "type": "string"
+      },
+      "numberDatabasePropertyConfigResponse": {
+        "properties": {
+          "number": {
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "$ref": "#/components/schemas/numberFormat"
+              }
+            },
+            "required": [
+              "format"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "number"
+        ],
+        "title": "Number",
+        "type": "object"
+      },
+      "numberFormat": {
+        "type": "string"
+      },
+      "numberFormulaPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "number"
+        ],
+        "title": "Number",
+        "type": "object"
+      },
+      "numberPartialRollupValueResponse": {
+        "properties": {
+          "number": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "number"
+        ],
+        "title": "Number",
+        "type": "object"
+      },
+      "numberPropertyFilter": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "equals": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "equals"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "does_not_equal": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "does_not_equal"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "greater_than": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "greater_than"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "less_than": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "less_than"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "greater_than_or_equal_to": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "greater_than_or_equal_to"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "less_than_or_equal_to": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "less_than_or_equal_to"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/existencePropertyFilter"
+          }
+        ]
+      },
+      "numberSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "number"
+        ],
+        "title": "Number",
+        "type": "object"
+      },
+      "pageCoverResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/filePageCoverResponse"
+          },
+          {
+            "$ref": "#/components/schemas/externalPageCoverResponse"
+          }
+        ]
+      },
+      "pageIconResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/emojiPageIconResponse"
+          },
+          {
+            "$ref": "#/components/schemas/filePageIconResponse"
+          },
+          {
+            "$ref": "#/components/schemas/externalPageIconResponse"
+          },
+          {
+            "$ref": "#/components/schemas/customEmojiPageIconResponse"
+          },
+          {
+            "$ref": "#/components/schemas/iconPageIconResponse"
+          }
+        ]
+      },
+      "pageIdParentForBlockBasedObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "page_id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "type": {
+            "const": "page_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "page_id"
+        ],
+        "type": "object"
+      },
+      "pageObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cover": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/pageCoverResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/partialUserObjectResponse"
+          },
+          "created_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "icon": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/pageIconResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "in_trash": {
+            "type": "boolean"
+          },
+          "is_archived": {
+            "type": "boolean"
+          },
+          "is_locked": {
+            "type": "boolean"
+          },
+          "last_edited_by": {
+            "$ref": "#/components/schemas/partialUserObjectResponse"
+          },
+          "last_edited_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "object": {
+            "const": "page",
+            "type": "string"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/parentForBlockBasedObjectResponse"
+          },
+          "properties": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/pagePropertyValueWithIdResponse"
+            },
+            "type": "object"
+          },
+          "public_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "created_time",
+          "last_edited_time",
+          "in_trash",
+          "is_archived",
+          "is_locked",
+          "url",
+          "public_url",
+          "parent",
+          "properties",
+          "icon",
+          "cover",
+          "created_by",
+          "last_edited_by"
+        ],
+        "type": "object"
+      },
+      "pagePropertyValueWithIdResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/idObjectResponse"
+          },
+          {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/simpleOrArrayPropertyValueResponse"
+              },
+              {
+                "$ref": "#/components/schemas/partialRollupPropertyResponse"
+              }
+            ]
+          }
+        ]
+      },
+      "parentForBlockBasedObjectResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/databaseParentResponse"
+          },
+          {
+            "$ref": "#/components/schemas/dataSourceParentResponse"
+          },
+          {
+            "$ref": "#/components/schemas/pageIdParentForBlockBasedObjectResponse"
+          },
+          {
+            "$ref": "#/components/schemas/blockIdParentForBlockBasedObjectResponse"
+          },
+          {
+            "$ref": "#/components/schemas/agentIdParentForBlockBasedObjectResponse"
+          },
+          {
+            "$ref": "#/components/schemas/workspaceParentForBlockBasedObjectResponse"
+          }
+        ]
+      },
+      "parentOfDataSourceResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/databaseParentResponse"
+          },
+          {
+            "$ref": "#/components/schemas/dataSourceParentResponse"
+          }
+        ]
+      },
+      "parentOfDatabaseResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/pageIdParentForBlockBasedObjectResponse"
+          },
+          {
+            "$ref": "#/components/schemas/workspaceParentForBlockBasedObjectResponse"
+          },
+          {
+            "$ref": "#/components/schemas/databaseParentResponse"
+          },
+          {
+            "$ref": "#/components/schemas/blockIdParentForBlockBasedObjectResponse"
+          }
+        ]
+      },
+      "partialDataSourceObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "object": {
+            "const": "data_source",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/databasePropertyConfigResponse"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "properties"
+        ],
+        "type": "object"
+      },
+      "partialPageObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "object": {
+            "const": "page",
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "id"
+        ],
+        "type": "object"
+      },
+      "partialRollupPropertyResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "rollup": {
+            "$ref": "#/components/schemas/partialRollupValueResponse"
+          },
+          "type": {
+            "const": "rollup",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "rollup"
+        ],
+        "type": "object"
+      },
+      "partialRollupValueResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/partialRollupValueResponseCommon"
+          },
+          {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/numberPartialRollupValueResponse"
+              },
+              {
+                "$ref": "#/components/schemas/datePartialRollupValueResponse"
+              },
+              {
+                "$ref": "#/components/schemas/arrayPartialRollupValueResponse"
+              },
+              {
+                "$ref": "#/components/schemas/unsupportedPartialRollupValueResponse"
+              }
+            ]
+          }
+        ]
+      },
+      "partialRollupValueResponseCommon": {
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "$ref": "#/components/schemas/rollupFunction"
+          }
+        },
+        "required": [
+          "function"
+        ],
+        "type": "object"
+      },
+      "partialSelectPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "enum": [
+              "default",
+              "gray",
+              "brown",
+              "orange",
+              "yellow",
+              "green",
+              "blue",
+              "purple",
+              "pink",
+              "red"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color"
+        ],
+        "type": "object"
+      },
+      "partialUserObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "object": {
+            "const": "user",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "object"
+        ],
+        "type": "object"
+      },
+      "peopleArrayBasedPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "people": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/userValueResponse"
+                },
+                {
+                  "$ref": "#/components/schemas/groupObjectResponse"
+                }
+              ]
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "type": {
+            "const": "people",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "people"
+        ],
+        "title": "People",
+        "type": "object"
+      },
+      "peopleDatabasePropertyConfigResponse": {
+        "properties": {
+          "people": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "people",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "people"
+        ],
+        "title": "People",
+        "type": "object"
+      },
+      "peoplePropertyFilter": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "contains": {
+                    "$ref": "#/components/schemas/personIdOrMe"
+                  }
+                },
+                "required": [
+                  "contains"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "does_not_contain": {
+                    "$ref": "#/components/schemas/personIdOrMe"
+                  }
+                },
+                "required": [
+                  "does_not_contain"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/existencePropertyFilter"
+          }
+        ]
+      },
+      "personIdOrMe": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/idRequest"
+          },
+          {
+            "const": "me",
+            "type": "string"
+          }
+        ]
+      },
+      "personUserObjectResponse": {
+        "properties": {
+          "person": {
+            "additionalProperties": false,
+            "properties": {
+              "email": {
+                "type": "string"
+              },
+              "email_verified": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "type": {
+            "const": "person",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "person"
+        ],
+        "title": "Person",
+        "type": "object"
+      },
+      "phoneNumberDatabasePropertyConfigResponse": {
+        "properties": {
+          "phone_number": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "phone_number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "phone_number"
+        ],
+        "title": "Phone Number",
+        "type": "object"
+      },
+      "phoneNumberSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "phone_number": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "phone_number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "phone_number"
+        ],
+        "title": "Phone Number",
+        "type": "object"
+      },
+      "placePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "aws_place_id": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "google_place_id": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "type": "object"
+      },
+      "placeSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "place": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/placePropertyValueResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "place",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "place"
+        ],
+        "title": "Place",
+        "type": "object"
+      },
+      "propertyDescriptionRequest": {
+        "maxLength": 280,
+        "minLength": 1,
+        "type": "string"
+      },
+      "propertyFilter": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "title": {
+                "$ref": "#/components/schemas/textPropertyFilter"
+              },
+              "type": {
+                "const": "title",
+                "type": "string"
+              }
+            },
+            "required": [
+              "title",
+              "property"
+            ],
+            "title": "Title",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "rich_text": {
+                "$ref": "#/components/schemas/textPropertyFilter"
+              },
+              "type": {
+                "const": "rich_text",
+                "type": "string"
+              }
+            },
+            "required": [
+              "rich_text",
+              "property"
+            ],
+            "title": "Rich Text",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "number": {
+                "$ref": "#/components/schemas/numberPropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "number",
+                "type": "string"
+              }
+            },
+            "required": [
+              "number",
+              "property"
+            ],
+            "title": "Number",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "checkbox": {
+                "$ref": "#/components/schemas/checkboxPropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "checkbox",
+                "type": "string"
+              }
+            },
+            "required": [
+              "checkbox",
+              "property"
+            ],
+            "title": "Checkbox",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "select": {
+                "$ref": "#/components/schemas/selectPropertyFilter"
+              },
+              "type": {
+                "const": "select",
+                "type": "string"
+              }
+            },
+            "required": [
+              "select",
+              "property"
+            ],
+            "title": "Select",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "multi_select": {
+                "$ref": "#/components/schemas/multiSelectPropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "multi_select",
+                "type": "string"
+              }
+            },
+            "required": [
+              "multi_select",
+              "property"
+            ],
+            "title": "Multi Select",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/statusPropertyFilter"
+              },
+              "type": {
+                "const": "status",
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "property"
+            ],
+            "title": "Status",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "date": {
+                "$ref": "#/components/schemas/datePropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "date",
+                "type": "string"
+              }
+            },
+            "required": [
+              "date",
+              "property"
+            ],
+            "title": "Date",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "people": {
+                "$ref": "#/components/schemas/peoplePropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "people",
+                "type": "string"
+              }
+            },
+            "required": [
+              "people",
+              "property"
+            ],
+            "title": "People",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "files": {
+                "$ref": "#/components/schemas/existencePropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "files",
+                "type": "string"
+              }
+            },
+            "required": [
+              "files",
+              "property"
+            ],
+            "title": "Files",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "url",
+                "type": "string"
+              },
+              "url": {
+                "$ref": "#/components/schemas/textPropertyFilter"
+              }
+            },
+            "required": [
+              "url",
+              "property"
+            ],
+            "title": "Url",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "email": {
+                "$ref": "#/components/schemas/textPropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "email",
+                "type": "string"
+              }
+            },
+            "required": [
+              "email",
+              "property"
+            ],
+            "title": "Email",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "phone_number": {
+                "$ref": "#/components/schemas/textPropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "phone_number",
+                "type": "string"
+              }
+            },
+            "required": [
+              "phone_number",
+              "property"
+            ],
+            "title": "Phone Number",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "relation": {
+                "$ref": "#/components/schemas/relationPropertyFilter"
+              },
+              "type": {
+                "const": "relation",
+                "type": "string"
+              }
+            },
+            "required": [
+              "relation",
+              "property"
+            ],
+            "title": "Relation",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "created_by": {
+                "$ref": "#/components/schemas/peoplePropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "created_by",
+                "type": "string"
+              }
+            },
+            "required": [
+              "created_by",
+              "property"
+            ],
+            "title": "Created By",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "created_time": {
+                "$ref": "#/components/schemas/datePropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "created_time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "created_time",
+              "property"
+            ],
+            "title": "Created Time",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "last_edited_by": {
+                "$ref": "#/components/schemas/peoplePropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "last_edited_by",
+                "type": "string"
+              }
+            },
+            "required": [
+              "last_edited_by",
+              "property"
+            ],
+            "title": "Last Edited By",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "last_edited_time": {
+                "$ref": "#/components/schemas/datePropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "last_edited_time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "last_edited_time",
+              "property"
+            ],
+            "title": "Last Edited Time",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "formula": {
+                "$ref": "#/components/schemas/formulaPropertyFilter"
+              },
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "formula",
+                "type": "string"
+              }
+            },
+            "required": [
+              "formula",
+              "property"
+            ],
+            "title": "Formula",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "unique_id",
+                "type": "string"
+              },
+              "unique_id": {
+                "$ref": "#/components/schemas/numberPropertyFilter"
+              }
+            },
+            "required": [
+              "unique_id",
+              "property"
+            ],
+            "title": "Unique Id",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "rollup": {
+                "$ref": "#/components/schemas/rollupPropertyFilter"
+              },
+              "type": {
+                "const": "rollup",
+                "type": "string"
+              }
+            },
+            "required": [
+              "rollup",
+              "property"
+            ],
+            "title": "Rollup",
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "type": {
+                "const": "verification",
+                "type": "string"
+              },
+              "verification": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/verificationPropertyStatusFilter"
+                  },
+                  {
+                    "$ref": "#/components/schemas/verificationPropertyDoesNotEqualFilter"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "verification",
+              "property"
+            ],
+            "title": "Verification",
+            "type": "object"
+          }
+        ]
+      },
+      "propertyOrTimestampFilter": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/propertyFilter"
+          },
+          {
+            "$ref": "#/components/schemas/timestampFilter"
+          }
+        ]
+      },
+      "propertyOrTimestampFilterArray": {
+        "items": {
+          "$ref": "#/components/schemas/propertyOrTimestampFilter"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "publicApiCommonErrorResponse": {
+        "properties": {
+          "additional_data": {
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            },
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          },
+          "object": {
+            "const": "error"
+          }
+        },
+        "required": [
+          "object",
+          "message"
+        ],
+        "type": "object"
+      },
+      "relationArrayBasedPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "relation": {
+            "items": {
+              "$ref": "#/components/schemas/relationItemPropertyValueResponse"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "type": {
+            "const": "relation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "relation"
+        ],
+        "title": "Relation",
+        "type": "object"
+      },
+      "relationDatabasePropertyConfigResponse": {
+        "properties": {
+          "relation": {
+            "$ref": "#/components/schemas/databasePropertyRelationConfigResponse"
+          },
+          "type": {
+            "const": "relation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "relation"
+        ],
+        "title": "Relation",
+        "type": "object"
+      },
+      "relationItemPropertyValueResponse": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/idRequest"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "relationPropertyFilter": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "contains": {
+                    "$ref": "#/components/schemas/idRequest"
+                  }
+                },
+                "required": [
+                  "contains"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "does_not_contain": {
+                    "$ref": "#/components/schemas/idRequest"
+                  }
+                },
+                "required": [
+                  "does_not_contain"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/existencePropertyFilter"
+          }
+        ]
+      },
+      "relativeDateValue": {
+        "enum": [
+          "today",
+          "tomorrow",
+          "yesterday",
+          "one_week_ago",
+          "one_week_from_now",
+          "one_month_ago",
+          "one_month_from_now"
+        ],
+        "type": "string"
+      },
+      "richTextArrayBasedPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "rich_text": {
+            "items": {
+              "$ref": "#/components/schemas/richTextItemResponse"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "type": {
+            "const": "rich_text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "rich_text"
+        ],
+        "title": "Rich Text",
+        "type": "object"
+      },
+      "richTextDatabasePropertyConfigResponse": {
+        "properties": {
+          "rich_text": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "rich_text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "rich_text"
+        ],
+        "title": "Rich Text",
+        "type": "object"
+      },
+      "richTextItemResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/richTextItemResponseCommon"
+          },
+          {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/textRichTextItemResponse"
+              },
+              {
+                "$ref": "#/components/schemas/mentionRichTextItemResponse"
+              },
+              {
+                "$ref": "#/components/schemas/equationRichTextItemResponse"
+              }
+            ]
+          }
+        ]
+      },
+      "richTextItemResponseCommon": {
+        "additionalProperties": false,
+        "properties": {
+          "annotations": {
+            "$ref": "#/components/schemas/annotationResponse"
+          },
+          "href": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plain_text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "plain_text",
+          "href",
+          "annotations"
+        ],
+        "type": "object"
+      },
+      "rollupDatabasePropertyConfigResponse": {
+        "properties": {
+          "rollup": {
+            "additionalProperties": false,
+            "properties": {
+              "function": {
+                "$ref": "#/components/schemas/rollupFunction"
+              },
+              "relation_property_id": {
+                "type": "string"
+              },
+              "relation_property_name": {
+                "type": "string"
+              },
+              "rollup_property_id": {
+                "type": "string"
+              },
+              "rollup_property_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "function",
+              "rollup_property_name",
+              "relation_property_name",
+              "rollup_property_id",
+              "relation_property_id"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "rollup",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "rollup"
+        ],
+        "title": "Rollup",
+        "type": "object"
+      },
+      "rollupFunction": {
+        "enum": [
+          "count",
+          "count_values",
+          "empty",
+          "not_empty",
+          "unique",
+          "show_unique",
+          "percent_empty",
+          "percent_not_empty",
+          "sum",
+          "average",
+          "median",
+          "min",
+          "max",
+          "range",
+          "earliest_date",
+          "latest_date",
+          "date_range",
+          "checked",
+          "unchecked",
+          "percent_checked",
+          "percent_unchecked",
+          "count_per_group",
+          "percent_per_group",
+          "show_original"
+        ],
+        "type": "string"
+      },
+      "rollupPropertyFilter": {
+        "anyOf": [
+          {
+            "properties": {
+              "any": {
+                "$ref": "#/components/schemas/rollupSubfilterPropertyFilter"
+              }
+            },
+            "required": [
+              "any"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "none": {
+                "$ref": "#/components/schemas/rollupSubfilterPropertyFilter"
+              }
+            },
+            "required": [
+              "none"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "every": {
+                "$ref": "#/components/schemas/rollupSubfilterPropertyFilter"
+              }
+            },
+            "required": [
+              "every"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "date": {
+                "$ref": "#/components/schemas/datePropertyFilter"
+              }
+            },
+            "required": [
+              "date"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "number": {
+                "$ref": "#/components/schemas/numberPropertyFilter"
+              }
+            },
+            "required": [
+              "number"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "rollupSubfilterPropertyFilter": {
+        "anyOf": [
+          {
+            "properties": {
+              "rich_text": {
+                "$ref": "#/components/schemas/textPropertyFilter"
+              }
+            },
+            "required": [
+              "rich_text"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "number": {
+                "$ref": "#/components/schemas/numberPropertyFilter"
+              }
+            },
+            "required": [
+              "number"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "checkbox": {
+                "$ref": "#/components/schemas/checkboxPropertyFilter"
+              }
+            },
+            "required": [
+              "checkbox"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "select": {
+                "$ref": "#/components/schemas/selectPropertyFilter"
+              }
+            },
+            "required": [
+              "select"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "multi_select": {
+                "$ref": "#/components/schemas/multiSelectPropertyFilter"
+              }
+            },
+            "required": [
+              "multi_select"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "relation": {
+                "$ref": "#/components/schemas/relationPropertyFilter"
+              }
+            },
+            "required": [
+              "relation"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "date": {
+                "$ref": "#/components/schemas/datePropertyFilter"
+              }
+            },
+            "required": [
+              "date"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "people": {
+                "$ref": "#/components/schemas/peoplePropertyFilter"
+              }
+            },
+            "required": [
+              "people"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "files": {
+                "$ref": "#/components/schemas/existencePropertyFilter"
+              }
+            },
+            "required": [
+              "files"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/statusPropertyFilter"
+              }
+            },
+            "required": [
+              "status"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "selectColor": {
+        "enum": [
+          "default",
+          "gray",
+          "brown",
+          "orange",
+          "yellow",
+          "green",
+          "blue",
+          "purple",
+          "pink",
+          "red"
+        ],
+        "type": "string"
+      },
+      "selectDatabasePropertyConfigResponse": {
+        "properties": {
+          "select": {
+            "additionalProperties": false,
+            "properties": {
+              "options": {
+                "items": {
+                  "$ref": "#/components/schemas/selectPropertyResponse"
+                },
+                "maxItems": 100,
+                "type": "array"
+              }
+            },
+            "required": [
+              "options"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "select",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "select"
+        ],
+        "title": "Select",
+        "type": "object"
+      },
+      "selectPropertyFilter": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "equals": {
+                    "$ref": "#/components/schemas/stringOrStringArray"
+                  }
+                },
+                "required": [
+                  "equals"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "does_not_equal": {
+                    "$ref": "#/components/schemas/stringOrStringArray"
+                  }
+                },
+                "required": [
+                  "does_not_equal"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/existencePropertyFilter"
+          }
+        ]
+      },
+      "selectPropertyResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "$ref": "#/components/schemas/selectColor"
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "description"
+        ],
+        "type": "object"
+      },
+      "selectSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "select": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/partialSelectPropertyValueResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "select",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "select"
+        ],
+        "title": "Select",
+        "type": "object"
+      },
+      "simpleOrArrayPropertyValueResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/simplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/arrayBasedPropertyValueResponse"
+          }
+        ]
+      },
+      "simplePropertyValueResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/numberSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/urlSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/selectSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/multiSelectSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/statusSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/dateSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/emailSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/phoneNumberSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/checkboxSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/filesSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/createdBySimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/createdTimeSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/lastEditedBySimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/lastEditedTimeSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/formulaSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/buttonSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/uniqueIdSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/verificationSimplePropertyValueResponse"
+          },
+          {
+            "$ref": "#/components/schemas/placeSimplePropertyValueResponse"
+          }
+        ]
+      },
+      "singlePropertyDatabasePropertyRelationConfigResponse": {
+        "properties": {
+          "single_property": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "single_property",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "single_property"
+        ],
+        "title": "Single Property",
+        "type": "object"
+      },
+      "statusDatabasePropertyConfigResponse": {
+        "properties": {
+          "status": {
+            "additionalProperties": false,
+            "properties": {
+              "groups": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "color": {
+                      "$ref": "#/components/schemas/selectColor"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "option_ids": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 100,
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "color",
+                    "option_ids"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              "options": {
+                "items": {
+                  "$ref": "#/components/schemas/statusPropertyResponse"
+                },
+                "maxItems": 100,
+                "type": "array"
+              }
+            },
+            "required": [
+              "options",
+              "groups"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "status"
+        ],
+        "title": "Status",
+        "type": "object"
+      },
+      "statusGroupFilter": {
+        "anyOf": [
+          {
+            "properties": {
+              "equals": {
+                "$ref": "#/components/schemas/statusGroupNames"
+              }
+            },
+            "required": [
+              "equals"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "does_not_equal": {
+                "$ref": "#/components/schemas/statusGroupNames"
+              }
+            },
+            "required": [
+              "does_not_equal"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "statusGroupNames": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/stringRequest"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/stringRequest"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        ]
+      },
+      "statusPropertyFilter": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "equals": {
+                    "$ref": "#/components/schemas/stringOrStringArray"
+                  }
+                },
+                "required": [
+                  "equals"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "does_not_equal": {
+                    "$ref": "#/components/schemas/stringOrStringArray"
+                  }
+                },
+                "required": [
+                  "does_not_equal"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "group": {
+                    "$ref": "#/components/schemas/statusGroupFilter"
+                  }
+                },
+                "required": [
+                  "group"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/existencePropertyFilter"
+          }
+        ]
+      },
+      "statusPropertyResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "$ref": "#/components/schemas/selectColor"
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "description"
+        ],
+        "type": "object"
+      },
+      "statusSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/partialSelectPropertyValueResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "status"
+        ],
+        "title": "Status",
+        "type": "object"
+      },
+      "stringFormulaPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "string": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "string",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "string"
+        ],
+        "title": "String",
+        "type": "object"
+      },
+      "stringOrStringArray": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "stringRequest": {
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+      },
+      "templateMentionDateTemplateMentionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "template_mention_date": {
+            "enum": [
+              "today",
+              "now"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "const": "template_mention_date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "template_mention_date"
+        ],
+        "title": "Template Mention Date",
+        "type": "object"
+      },
+      "templateMentionResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/templateMentionDateTemplateMentionResponse"
+          },
+          {
+            "$ref": "#/components/schemas/templateMentionUserTemplateMentionResponse"
+          }
+        ]
+      },
+      "templateMentionUserTemplateMentionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "template_mention_user": {
+            "const": "me",
+            "type": "string"
+          },
+          "type": {
+            "const": "template_mention_user",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "template_mention_user"
+        ],
+        "title": "Template Mention User",
+        "type": "object"
+      },
+      "textPropertyFilter": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "equals": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "equals"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "does_not_equal": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "does_not_equal"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "contains": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "contains"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "does_not_contain": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "does_not_contain"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "starts_with": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "starts_with"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "ends_with": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ends_with"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/existencePropertyFilter"
+          }
+        ]
+      },
+      "textRichTextItemResponse": {
+        "properties": {
+          "text": {
+            "additionalProperties": false,
+            "properties": {
+              "content": {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              "link": {
+                "oneOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "content",
+              "link"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "const": "text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "text"
+        ],
+        "title": "Text",
+        "type": "object"
+      },
+      "timeZoneRequest": {
+        "type": "string"
+      },
+      "timestampCreatedTimeFilter": {
+        "additionalProperties": false,
+        "properties": {
+          "created_time": {
+            "$ref": "#/components/schemas/datePropertyFilter"
+          },
+          "timestamp": {
+            "const": "created_time",
+            "type": "string"
+          },
+          "type": {
+            "const": "created_time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_time",
+          "timestamp"
+        ],
+        "title": "Created Time",
+        "type": "object"
+      },
+      "timestampFilter": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/timestampCreatedTimeFilter"
+          },
+          {
+            "$ref": "#/components/schemas/timestampLastEditedTimeFilter"
+          }
+        ]
+      },
+      "timestampLastEditedTimeFilter": {
+        "additionalProperties": false,
+        "properties": {
+          "last_edited_time": {
+            "$ref": "#/components/schemas/datePropertyFilter"
+          },
+          "timestamp": {
+            "const": "last_edited_time",
+            "type": "string"
+          },
+          "type": {
+            "const": "last_edited_time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "last_edited_time",
+          "timestamp"
+        ],
+        "title": "Last Edited Time",
+        "type": "object"
+      },
+      "titleArrayBasedPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "items": {
+              "$ref": "#/components/schemas/richTextItemResponse"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "type": {
+            "const": "title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title"
+        ],
+        "title": "Title",
+        "type": "object"
+      },
+      "titleDatabasePropertyConfigResponse": {
+        "properties": {
+          "title": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "type": {
+            "const": "title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title"
+        ],
+        "title": "Title",
+        "type": "object"
+      },
+      "uniqueIdDatabasePropertyConfigResponse": {
+        "properties": {
+          "type": {
+            "const": "unique_id",
+            "type": "string"
+          },
+          "unique_id": {
+            "additionalProperties": false,
+            "properties": {
+              "prefix": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "prefix"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "type",
+          "unique_id"
+        ],
+        "title": "Unique Id",
+        "type": "object"
+      },
+      "uniqueIdPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prefix": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "prefix",
+          "number"
+        ],
+        "type": "object"
+      },
+      "uniqueIdSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "unique_id",
+            "type": "string"
+          },
+          "unique_id": {
+            "$ref": "#/components/schemas/uniqueIdPropertyValueResponse"
+          }
+        },
+        "required": [
+          "type",
+          "unique_id"
+        ],
+        "title": "Unique Id",
+        "type": "object"
+      },
+      "unsupportedFormulaPropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "unsupported",
+            "type": "string"
+          },
+          "unsupported": {
+            "$ref": "#/components/schemas/emptyObject"
+          }
+        },
+        "required": [
+          "type",
+          "unsupported"
+        ],
+        "title": "Unsupported",
+        "type": "object"
+      },
+      "unsupportedPartialRollupValueResponse": {
+        "properties": {
+          "type": {
+            "const": "unsupported",
+            "type": "string"
+          },
+          "unsupported": {
+            "$ref": "#/components/schemas/emptyObject"
+          }
+        },
+        "required": [
+          "type",
+          "unsupported"
+        ],
+        "title": "Unsupported",
+        "type": "object"
+      },
+      "urlDatabasePropertyConfigResponse": {
+        "properties": {
+          "type": {
+            "const": "url",
+            "type": "string"
+          },
+          "url": {
+            "$ref": "#/components/schemas/emptyObject"
+          }
+        },
+        "required": [
+          "type",
+          "url"
+        ],
+        "title": "Url",
+        "type": "object"
+      },
+      "urlSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "url",
+            "type": "string"
+          },
+          "url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "url"
+        ],
+        "title": "Url",
+        "type": "object"
+      },
+      "userObjectResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/userObjectResponseCommon"
+          },
+          {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/personUserObjectResponse"
+              },
+              {
+                "$ref": "#/components/schemas/botUserObjectResponse"
+              }
+            ]
+          }
+        ]
+      },
+      "userObjectResponseCommon": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "object": {
+            "const": "user",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "name",
+          "avatar_url"
+        ],
+        "type": "object"
+      },
+      "userValueResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/partialUserObjectResponse"
+          },
+          {
+            "$ref": "#/components/schemas/userObjectResponse"
+          }
+        ]
+      },
+      "verificationPropertyDoesNotEqualFilter": {
+        "additionalProperties": false,
+        "properties": {
+          "does_not_equal": {
+            "enum": [
+              "verified",
+              "expired",
+              "none"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "does_not_equal"
+        ],
+        "type": "object"
+      },
+      "verificationPropertyResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/dateResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "enum": [
+              "verified",
+              "expired"
+            ],
+            "type": "string"
+          },
+          "verified_by": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/userValueResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "state",
+          "date",
+          "verified_by"
+        ],
+        "title": "Verified",
+        "type": "object"
+      },
+      "verificationPropertyStatusFilter": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "verified",
+              "expired",
+              "none"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "verificationPropertyUnverifiedResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "type": "null"
+          },
+          "state": {
+            "const": "unverified",
+            "type": "string"
+          },
+          "verified_by": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "state",
+          "date",
+          "verified_by"
+        ],
+        "title": "Unverified",
+        "type": "object"
+      },
+      "verificationPropertyValueResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/verificationPropertyUnverifiedResponse"
+          },
+          {
+            "$ref": "#/components/schemas/verificationPropertyResponse"
+          }
+        ]
+      },
+      "verificationSimplePropertyValueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "verification",
+            "type": "string"
+          },
+          "verification": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/verificationPropertyValueResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "verification"
+        ],
+        "title": "Verification",
+        "type": "object"
+      },
+      "workspaceParentForBlockBasedObjectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "workspace",
+            "type": "string"
+          },
+          "workspace": {
+            "const": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "workspace"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Notion API"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/data_sources/{data_source_id}": {
+      "get": {
+        "operationId": "retrieve-a-data-source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_source_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/idRequest"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/partialDataSourceObjectResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/dataSourceObjectResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_401"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_403"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_404"
+                }
+              }
+            }
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_406"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_409"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_429"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_500"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_503"
+                }
+              }
+            }
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_504"
+                }
+              }
+            }
+          },
+          "529": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_529"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/data_sources/{data_source_id}/query": {
+      "post": {
+        "operationId": "post-database-query",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_source_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/idRequest"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter_properties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "filter": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "or": {
+                                "$ref": "#/components/schemas/groupFilterOperatorArray"
+                              }
+                            },
+                            "required": [
+                              "or"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "properties": {
+                              "and": {
+                                "$ref": "#/components/schemas/groupFilterOperatorArray"
+                              }
+                            },
+                            "required": [
+                              "and"
+                            ],
+                            "type": "object"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "#/components/schemas/propertyFilter"
+                      },
+                      {
+                        "$ref": "#/components/schemas/timestampFilter"
+                      }
+                    ]
+                  },
+                  "is_archived": {
+                    "type": "boolean"
+                  },
+                  "page_size": {
+                    "type": "number"
+                  },
+                  "result_type": {
+                    "enum": [
+                      "page",
+                      "data_source"
+                    ],
+                    "type": "string"
+                  },
+                  "sorts": {
+                    "items": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "direction": {
+                              "enum": [
+                                "ascending",
+                                "descending"
+                              ],
+                              "type": "string"
+                            },
+                            "property": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "property",
+                            "direction"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "properties": {
+                            "direction": {
+                              "enum": [
+                                "ascending",
+                                "descending"
+                              ],
+                              "type": "string"
+                            },
+                            "timestamp": {
+                              "enum": [
+                                "created_time",
+                                "last_edited_time"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "timestamp",
+                            "direction"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "type": "array"
+                  },
+                  "start_cursor": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "object": {
+                      "const": "list",
+                      "type": "string"
+                    },
+                    "page_or_data_source": {
+                      "$ref": "#/components/schemas/emptyObject"
+                    },
+                    "request_status": {
+                      "properties": {
+                        "incomplete_reason": {
+                          "enum": [
+                            "query_result_limit_reached"
+                          ],
+                          "type": "string"
+                        },
+                        "type": {
+                          "enum": [
+                            "complete",
+                            "incomplete"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "type": "object"
+                    },
+                    "results": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/pageObjectResponse"
+                              },
+                              {
+                                "$ref": "#/components/schemas/partialPageObjectResponse"
+                              }
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/partialDataSourceObjectResponse"
+                              },
+                              {
+                                "$ref": "#/components/schemas/dataSourceObjectResponse"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "array"
+                    },
+                    "type": {
+                      "const": "page_or_data_source",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "page_or_data_source",
+                    "object",
+                    "next_cursor",
+                    "has_more",
+                    "results"
+                  ],
+                  "title": "Page Or Data Source",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_401"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_403"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_404"
+                }
+              }
+            }
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_406"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_409"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_429"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_500"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_503"
+                }
+              }
+            }
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_504"
+                }
+              }
+            }
+          },
+          "529": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_529"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/pages/{page_id}": {
+      "get": {
+        "operationId": "retrieve-a-page",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "page_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/idRequest"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter_properties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 100,
+              "type": "array"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/partialPageObjectResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/pageObjectResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_401"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_403"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_404"
+                }
+              }
+            }
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_406"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_409"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_429"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_500"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_503"
+                }
+              }
+            }
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_504"
+                }
+              }
+            }
+          },
+          "529": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_529"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/search": {
+      "post": {
+        "operationId": "post-search",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "filter": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "in_trash": {
+                            "type": "boolean"
+                          },
+                          "property": {
+                            "enum": [
+                              "object"
+                            ],
+                            "type": "string"
+                          },
+                          "value": {
+                            "enum": [
+                              "page",
+                              "data_source"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "property",
+                          "value"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "in_trash": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "in_trash"
+                        ],
+                        "type": "object"
+                      }
+                    ]
+                  },
+                  "page_size": {
+                    "type": "number"
+                  },
+                  "query": {
+                    "type": "string"
+                  },
+                  "sort": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "direction": {
+                            "enum": [
+                              "ascending",
+                              "descending"
+                            ],
+                            "type": "string"
+                          },
+                          "timestamp": {
+                            "enum": [
+                              "last_edited_time"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "timestamp",
+                          "direction"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "property": {
+                            "enum": [
+                              "relevance"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "property"
+                        ],
+                        "type": "object"
+                      }
+                    ]
+                  },
+                  "start_cursor": {
+                    "format": "uuid",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "object": {
+                      "const": "list",
+                      "type": "string"
+                    },
+                    "page_or_data_source": {
+                      "$ref": "#/components/schemas/emptyObject"
+                    },
+                    "request_status": {
+                      "properties": {
+                        "incomplete_reason": {
+                          "enum": [
+                            "query_result_limit_reached"
+                          ],
+                          "type": "string"
+                        },
+                        "type": {
+                          "enum": [
+                            "complete",
+                            "incomplete"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "type": "object"
+                    },
+                    "results": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/pageObjectResponse"
+                              },
+                              {
+                                "$ref": "#/components/schemas/partialPageObjectResponse"
+                              }
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/partialDataSourceObjectResponse"
+                              },
+                              {
+                                "$ref": "#/components/schemas/dataSourceObjectResponse"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "array"
+                    },
+                    "type": {
+                      "const": "page_or_data_source",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "page_or_data_source",
+                    "object",
+                    "next_cursor",
+                    "has_more",
+                    "results"
+                  ],
+                  "title": "Page Or Data Source",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_400"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_401"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_403"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_404"
+                }
+              }
+            }
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_406"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_409"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_429"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_500"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_503"
+                }
+              }
+            }
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_504"
+                }
+              }
+            }
+          },
+          "529": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_api_529"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api.notion.com"
+    }
+  ]
+}

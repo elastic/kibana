@@ -22,9 +22,13 @@ export const SearchInputSchema = lazySchema(() =>
       ),
     query: z
       .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= 30, { message: 'At most 30 top-level query keys.' })
+      .refine((v) => Object.keys(v).length === 1, {
+        message: 'Exactly one top-level query type, e.g. "match" or "bool".',
+      })
       .default({ match_all: {} })
-      .describe('Elasticsearch Query DSL object. Defaults to match_all.'),
+      .describe(
+        'Elasticsearch Query DSL object with exactly one top-level query type; combine clauses with "bool". Defaults to match_all.'
+      ),
     size: z
       .number()
       .int()
@@ -82,9 +86,13 @@ export const EsqlInputSchema = lazySchema(() =>
       .describe('Positional parameter values for ? placeholders in the query.'),
     filter: z
       .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= 20, { message: 'At most 20 top-level filter keys.' })
+      .refine((v) => Object.keys(v).length === 1, {
+        message: 'Exactly one top-level query type, e.g. "range" or "bool".',
+      })
       .optional()
-      .describe('Additional Query DSL filter applied alongside the query.'),
+      .describe(
+        'Additional Query DSL filter applied alongside the query, with exactly one top-level query type; combine clauses with "bool".'
+      ),
     locale: z
       .string()
       .max(20)

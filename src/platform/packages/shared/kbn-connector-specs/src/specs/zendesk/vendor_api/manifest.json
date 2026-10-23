@@ -1,0 +1,78 @@
+{
+  "operations": {
+    "getTicket": [
+      {
+        "method": "get",
+        "path": "/api/v2/tickets/{ticket_id}",
+        "source": "v2"
+      }
+    ],
+    "getTicketComments": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": "comments"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/tickets/{ticket_id}/comments",
+        "source": "v2"
+      }
+    ],
+    "listTickets": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": "tickets"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/tickets",
+        "source": "v2"
+      }
+    ],
+    "search": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": "results",
+            "totalPath": "count"
+          },
+          "style": "page"
+        },
+        "path": "/api/v2/search",
+        "source": "v2"
+      }
+    ],
+    "whoAmI": [
+      {
+        "method": "get",
+        "path": "/api/v2/users/me",
+        "source": "v2"
+      }
+    ]
+  },
+  "sources": {
+    "v2": {
+      "apiVersion": "2.0.0",
+      "fetchedAt": "2026-10-07T20:48:47.792Z",
+      "format": "openapi",
+      "url": "https://developer.zendesk.com/zendesk/oas.yaml"
+    }
+  }
+}

@@ -1,0 +1,544 @@
+{
+  "components": {
+    "securitySchemes": {
+      "openapi_authorization": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "openapi_oauth": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/",
+            "refreshUrl": "",
+            "scopes": {
+              " division:read:admin": " division:read:admin",
+              "contact_group:read:admin": "contact_group:read:admin",
+              "contact_group:write:admin": "contact_group:write:admin",
+              "division:delete:division:admin": "division:delete:division:admin",
+              "division:read:division:admin": "division:read:division:admin",
+              "division:read:list_divisions:admin": "division:read:list_divisions:admin",
+              "division:read:member:admin": "division:read:member:admin",
+              "division:update:division:admin": "division:update:division:admin",
+              "division:wirte:admin": "division:wirte:admin",
+              "division:write:division:admin": "division:write:division:admin",
+              "division:write:member:admin": "division:write:member:admin",
+              "group:delete:administrator:admin": "group:delete:administrator:admin",
+              "group:delete:group:admin": "group:delete:group:admin",
+              "group:delete:member:admin": "group:delete:member:admin",
+              "group:delete:virtual_background_files:admin": "group:delete:virtual_background_files:admin",
+              "group:read:admin": "group:read:admin",
+              "group:read:administrator:admin": "group:read:administrator:admin",
+              "group:read:group:admin": "group:read:group:admin",
+              "group:read:list_channels:admin": "group:read:list_channels:admin",
+              "group:read:list_groups:admin": "group:read:list_groups:admin",
+              "group:read:list_members:admin": "group:read:list_members:admin",
+              "group:read:lock_settings:admin": "group:read:lock_settings:admin",
+              "group:read:registration_settings:admin": "group:read:registration_settings:admin",
+              "group:read:settings:admin": "group:read:settings:admin",
+              "group:update:group:admin": "group:update:group:admin",
+              "group:update:lock_settings:admin": "group:update:lock_settings:admin",
+              "group:update:member:admin": "group:update:member:admin",
+              "group:update:registration_settings:admin": "group:update:registration_settings:admin",
+              "group:update:settings:admin": "group:update:settings:admin",
+              "group:write:admin": "group:write:admin",
+              "group:write:administrator:admin": "group:write:administrator:admin",
+              "group:write:group:admin": "group:write:group:admin",
+              "group:write:member:admin": "group:write:member:admin",
+              "group:write:virtual_background_files:admin": "group:write:virtual_background_files:admin",
+              "group:write:waiting_room_branding:admin": "group:write:waiting_room_branding:admin",
+              "user:delete:assistant": "user:delete:assistant",
+              "user:delete:assistant:admin": "user:delete:assistant:admin",
+              "user:delete:scheduler": "user:delete:scheduler",
+              "user:delete:scheduler:admin": "user:delete:scheduler:admin",
+              "user:delete:token": "user:delete:token",
+              "user:delete:token:admin": "user:delete:token:admin",
+              "user:delete:user": "user:delete:user",
+              "user:delete:user:admin": "user:delete:user:admin",
+              "user:delete:virtual_background_files": "user:delete:virtual_background_files",
+              "user:delete:virtual_background_files:admin": "user:delete:virtual_background_files:admin",
+              "user:read": "user:read",
+              "user:read:admin": "user:read:admin",
+              "user:read:collaboration_device": "user:read:collaboration_device",
+              "user:read:collaboration_device:admin": "user:read:collaboration_device:admin",
+              "user:read:email": "user:read:email",
+              "user:read:email:admin": "user:read:email:admin",
+              "user:read:list_assistants": "user:read:list_assistants",
+              "user:read:list_assistants:admin": "user:read:list_assistants:admin",
+              "user:read:list_collaboration_devices": "user:read:list_collaboration_devices",
+              "user:read:list_collaboration_devices:admin": "user:read:list_collaboration_devices:admin",
+              "user:read:list_permissions": "user:read:list_permissions",
+              "user:read:list_permissions:admin": "user:read:list_permissions:admin",
+              "user:read:list_schedulers": "user:read:list_schedulers",
+              "user:read:list_schedulers:admin": "user:read:list_schedulers:admin",
+              "user:read:list_users:admin": "user:read:list_users:admin",
+              "user:read:pm_room": "user:read:pm_room",
+              "user:read:pm_room:admin": "user:read:pm_room:admin",
+              "user:read:presence_status": "user:read:presence_status",
+              "user:read:presence_status:admin": "user:read:presence_status:admin",
+              "user:read:settings": "user:read:settings",
+              "user:read:settings:admin": "user:read:settings:admin",
+              "user:read:summary:admin": "user:read:summary:admin",
+              "user:read:token": "user:read:token",
+              "user:read:token:admin": "user:read:token:admin",
+              "user:read:user": "user:read:user",
+              "user:read:user:admin": "user:read:user:admin",
+              "user:read:zak": "user:read:zak",
+              "user:read:zak:admin": "user:read:zak:admin",
+              "user:update:email": "user:update:email",
+              "user:update:email:admin": "user:update:email:admin",
+              "user:update:password": "user:update:password",
+              "user:update:password:admin": "user:update:password:admin",
+              "user:update:presence_status": "user:update:presence_status",
+              "user:update:presence_status:admin": "user:update:presence_status:admin",
+              "user:update:settings": "user:update:settings",
+              "user:update:settings:admin": "user:update:settings:admin",
+              "user:update:status": "user:update:status",
+              "user:update:status:admin": "user:update:status:admin",
+              "user:update:user": "user:update:user",
+              "user:update:user:admin": "user:update:user:admin",
+              "user:write": "user:write",
+              "user:write:admin": "user:write:admin",
+              "user:write:assistant": "user:write:assistant",
+              "user:write:assistant:admin": "user:write:assistant:admin",
+              "user:write:feature:admin": "user:write:feature:admin",
+              "user:write:profile_picture": "user:write:profile_picture",
+              "user:write:profile_picture:admin": "user:write:profile_picture:admin",
+              "user:write:user:admin": "user:write:user:admin",
+              "user:write:virtual_background_files": "user:write:virtual_background_files",
+              "user:write:virtual_background_files:admin": "user:write:virtual_background_files:admin",
+              "user:write:waiting_room_branding": "user:write:waiting_room_branding",
+              "user:write:waiting_room_branding:admin": "user:write:waiting_room_branding:admin",
+              "user_info:read": "user_info:read",
+              "user_profile": "user_profile",
+              "user_zak:read": "user_zak:read"
+            },
+            "tokenUrl": ""
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Users"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/users/{userId}": {
+      "get": {
+        "operationId": "user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "login_type",
+            "required": false,
+            "schema": {
+              "enum": [
+                0,
+                1,
+                11,
+                21,
+                23,
+                24,
+                27,
+                97,
+                98,
+                99,
+                100,
+                101
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "encrypted_email",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search_by_unique_id",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "dept": {
+                          "type": "string"
+                        },
+                        "display_name": {
+                          "maxLength": 128,
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "first_name": {
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "last_client_version": {
+                          "type": "string"
+                        },
+                        "last_login_time": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "last_name": {
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "pmi": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "role_name": {
+                          "type": "string"
+                        },
+                        "timezone": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "enum": [
+                            1,
+                            2,
+                            4,
+                            99
+                          ],
+                          "type": "integer"
+                        },
+                        "use_pmi": {
+                          "default": false,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "account_id": {
+                          "type": "string"
+                        },
+                        "account_number": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "cluster": {
+                          "type": "string"
+                        },
+                        "cms_user_id": {
+                          "type": "string"
+                        },
+                        "company": {
+                          "type": "string"
+                        },
+                        "cost_center": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "deprecated": true,
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "custom_attributes": {
+                          "items": {
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "division_ids": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "employee_unique_id": {
+                          "type": "string"
+                        },
+                        "group_ids": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "im_group_ids": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "jid": {
+                          "type": "string"
+                        },
+                        "job_title": {
+                          "type": "string"
+                        },
+                        "language": {
+                          "type": "string"
+                        },
+                        "license_info_list": {
+                          "items": {
+                            "properties": {
+                              "license_option": {
+                                "enum": [
+                                  2,
+                                  4,
+                                  8,
+                                  16,
+                                  32,
+                                  64,
+                                  128,
+                                  33554432,
+                                  134217728,
+                                  1073741824,
+                                  536870912,
+                                  268435456,
+                                  4398046511104,
+                                  18014398509481984,
+                                  72057594037927940,
+                                  576460752303423500,
+                                  144115188075855870,
+                                  137438953472,
+                                  1099511627776,
+                                  549755813888,
+                                  274877906944,
+                                  2199023255552,
+                                  4294967296,
+                                  34359738368,
+                                  17179869184,
+                                  8589934592,
+                                  68719476736
+                                ],
+                                "type": "integer"
+                              },
+                              "license_type": {
+                                "enum": [
+                                  "MEETING",
+                                  "ZOOM_WORKPLACE_BUNDLE"
+                                ],
+                                "type": "string"
+                              },
+                              "subscription_id": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "location": {
+                          "type": "string"
+                        },
+                        "login_types": {
+                          "items": {
+                            "enum": [
+                              0,
+                              1,
+                              11,
+                              21,
+                              23,
+                              24,
+                              27,
+                              97,
+                              98,
+                              99,
+                              100,
+                              101
+                            ],
+                            "type": "integer"
+                          },
+                          "type": "array"
+                        },
+                        "manager": {
+                          "format": "email",
+                          "type": "string"
+                        },
+                        "personal_meeting_url": {
+                          "type": "string"
+                        },
+                        "phone_country": {
+                          "deprecated": true,
+                          "type": "string"
+                        },
+                        "phone_number": {
+                          "deprecated": true,
+                          "type": "string"
+                        },
+                        "phone_numbers": {
+                          "items": {
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "country": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "enum": [
+                                  "Mobile",
+                                  "Office",
+                                  "Home",
+                                  "Fax"
+                                ],
+                                "type": "string"
+                              },
+                              "number": {
+                                "type": "string"
+                              },
+                              "verified": {
+                                "type": "boolean"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "pic_url": {
+                          "type": "string"
+                        },
+                        "plan_united_type": {
+                          "enum": [
+                            "1",
+                            "2",
+                            "4",
+                            "8",
+                            "16",
+                            "32",
+                            "64",
+                            "128",
+                            "256",
+                            "512",
+                            "1024",
+                            "2048",
+                            "4096",
+                            "8192",
+                            "16384",
+                            "32768",
+                            "65536",
+                            "131072"
+                          ],
+                          "type": "string"
+                        },
+                        "pronouns": {
+                          "type": "string"
+                        },
+                        "pronouns_option": {
+                          "enum": [
+                            1,
+                            2,
+                            3
+                          ],
+                          "type": "integer"
+                        },
+                        "role_id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "enum": [
+                            "pending",
+                            "active",
+                            "inactive"
+                          ],
+                          "type": "string"
+                        },
+                        "use_pmi": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "user_created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "vanity_url": {
+                          "type": "string"
+                        },
+                        "verified": {
+                          "type": "integer"
+                        },
+                        "zoom_one_type": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {},
+          "404": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "openapi_authorization": [],
+            "openapi_oauth": [
+              "user:read",
+              "user:write",
+              "user:read:admin",
+              "user:write:admin",
+              "user_profile",
+              "user_info:read",
+              "user:read:user",
+              "user:read:user:admin"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.zoom.us/v2"
+    }
+  ]
+}

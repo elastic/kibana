@@ -1,0 +1,173 @@
+{
+  "operations": {
+    "acknowledgeAlert": [],
+    "acknowledgeDetectorAlert": [],
+    "createMonitor": [],
+    "deleteMonitor": [],
+    "disableMonitor": [],
+    "enableMonitor": [],
+    "executeMonitor": [],
+    "getAlerts": [],
+    "getDetectorFindings": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "offsetParam": "startIndex",
+            "sizeParam": "size"
+          },
+          "response": {
+            "itemsPath": "findings",
+            "totalPath": "total_findings"
+          },
+          "style": "offset"
+        },
+        "path": "/_plugins/_security_analytics/findings/_search",
+        "source": "core"
+      }
+    ],
+    "getMonitor": [],
+    "indexDocument": [
+      {
+        "method": "post",
+        "path": "/{index}/_doc",
+        "source": "core"
+      },
+      {
+        "method": "put",
+        "path": "/{index}/_doc/{id}",
+        "source": "core"
+      }
+    ],
+    "listIndices": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/_cat/indices",
+        "source": "core"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/_cat/indices/{index}",
+        "source": "core"
+      }
+    ],
+    "runQuery": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "in": "body",
+            "offsetParam": "from",
+            "sizeParam": "size"
+          },
+          "response": {
+            "itemsPath": "hits.hits",
+            "totalPath": "hits.total.value"
+          },
+          "style": "offset"
+        },
+        "path": "/{index}/_search",
+        "source": "core"
+      }
+    ],
+    "searchDetectors": [
+      {
+        "method": "post",
+        "path": "/_plugins/_security_analytics/detectors/_search",
+        "source": "core"
+      }
+    ],
+    "searchMonitors": [
+      {
+        "method": "post",
+        "path": "/_plugins/_alerting/monitors/_search",
+        "source": "core"
+      }
+    ],
+    "updateMonitor": []
+  },
+  "sources": {
+    "core": {
+      "apiVersion": "0.3.0",
+      "fetchedAt": "2026-10-07T20:20:24.121Z",
+      "format": "openapi",
+      "url": "https://github.com/opensearch-project/opensearch-api-specification/releases/download/main-latest/opensearch-openapi.yaml"
+    }
+  },
+  "unmatched": {
+    "acknowledgeAlert": [
+      {
+        "method": "post",
+        "path": "/_plugins/_alerting/monitors/{monitorId}/_acknowledge/alerts",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#acknowledge-alert"
+      }
+    ],
+    "acknowledgeDetectorAlert": [
+      {
+        "method": "post",
+        "path": "/_plugins/_security_analytics/detectors/{detectorId}/_acknowledge/alerts",
+        "reason": "Security Analytics detector API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/security-analytics/api-tools/alert-finding-api/#acknowledge-alerts"
+      }
+    ],
+    "createMonitor": [
+      {
+        "method": "post",
+        "path": "/_plugins/_alerting/monitors",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#create-a-query-level-monitor"
+      }
+    ],
+    "deleteMonitor": [
+      {
+        "method": "delete",
+        "path": "/_plugins/_alerting/monitors/{monitorId}",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#delete-monitor"
+      }
+    ],
+    "disableMonitor": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/{monitorId}",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-monitor"
+      }
+    ],
+    "enableMonitor": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/{monitorId}",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-monitor"
+      }
+    ],
+    "executeMonitor": [
+      {
+        "method": "post",
+        "path": "/_plugins/_alerting/monitors/{monitorId}/_execute",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#run-monitor"
+      }
+    ],
+    "getAlerts": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/alerts",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-alerts"
+      }
+    ],
+    "getMonitor": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/{monitorId}",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-monitor"
+      }
+    ],
+    "updateMonitor": [
+      {
+        "method": "get",
+        "path": "/_plugins/_alerting/monitors/{monitorId}",
+        "reason": "Alerting plugin API, which the OpenSearch spec does not cover; see https://docs.opensearch.org/latest/observing-your-data/alerting/api/#get-monitor"
+      }
+    ]
+  }
+}
