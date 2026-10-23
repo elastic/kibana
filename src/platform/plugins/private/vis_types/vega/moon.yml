@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/utility-types'
   - '@kbn/ui-theme'
+  - '@kbn/ui-callout'
   - '@kbn/std'
   - '@kbn/datemath'
   - '@kbn/mapbox-gl'

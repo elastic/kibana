@@ -11,7 +11,6 @@ import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -22,6 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { HasSerializedChildState, HasSerializableState } from '@kbn/presentation-publishing';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -140,18 +140,16 @@ export const EmbeddableEditorPreview = <
           {toolbar ? <EuiFlexItem grow={false}>{toolbar}</EuiFlexItem> : null}
           {updateError ? (
             <EuiFlexItem grow={false}>
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
-                color="danger"
                 title={i18n.translate(
                   'presentationUtil.embeddableEditorPreview.updateErrorMessage',
                   {
                     defaultMessage: 'Unable to update preview',
                   }
                 )}
-              >
-                <p>{updateError.message}</p>
-              </EuiCallOut>
+                text={<p>{updateError.message}</p>}
+              />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem

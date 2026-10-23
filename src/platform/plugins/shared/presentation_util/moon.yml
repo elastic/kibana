@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/react-field'
   - '@kbn/storybook'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/field-utils'
