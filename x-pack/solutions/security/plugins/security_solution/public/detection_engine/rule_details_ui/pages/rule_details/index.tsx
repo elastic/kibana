@@ -619,7 +619,6 @@ export const RuleDetailsPage = connector(
               <Display show={!globalFullScreen}>
                 {ruleError}
                 <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
-                <EuiSpacer size="l" />
               </Display>
               <div>
                 <Routes>
