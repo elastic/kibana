@@ -13,8 +13,14 @@ import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/
 import { getFilterForTestNowRun } from './test_now_run_filter';
 import type { SyntheticsServerSetup } from '../types';
 
-/** Fleet SO bulk-delete allows 10k; keep well under that and getByIDs payload size. */
-export const DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE = 500;
+/**
+ * Fleet's delete reads every policy of a batch in full, so this bounds memory
+ * rather than an ES limit. Past 1000, larger batches barely shorten the run.
+ */
+export const DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE = 1000;
+
+/** Scans read ids and a few small fields only; ES caps a page at 10k hits. */
+export const PACKAGE_POLICY_SCAN_PAGE_SIZE = 5000;
 
 export interface LeftoverPackagePolicies {
   /** Private-location policies that no monitor expects, including old-format ids. */
@@ -39,7 +45,7 @@ export const findLeftoverPackagePolicies = async (
   const policyIdPages = await fleet.packagePolicyService.fetchAllItemIds(soClient, {
     kuery: getFilterForTestNowRun(true),
     spaceIds: ['*'],
-    perPage: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
+    perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE,
   });
   for await (const ids of policyIdPages) {
     ids.forEach((id) => existingIds.add(id));
@@ -49,8 +55,9 @@ export const findLeftoverPackagePolicies = async (
   const expectedLocationById = new Map<string, string>();
   const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
     type: syntheticsMonitorSOTypes,
-    fields: ['id', 'name', 'locations', 'origin'],
+    fields: ['id', 'locations', 'origin'],
     namespaces: ['*'],
+    perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE,
   });
   try {
     for await (const { saved_objects: monitors } of finder.find()) {
