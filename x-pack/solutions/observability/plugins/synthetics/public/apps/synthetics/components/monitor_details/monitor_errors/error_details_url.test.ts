@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getErrorDetailsUrl } from './error_details_url';
+import { getErrorDetailsAppPath, getErrorDetailsUrl } from './error_details_url';
 
 describe('getErrorDetailsUrl', () => {
   it('builds a URL without spaceId when none is provided', () => {
@@ -89,5 +89,17 @@ describe('getErrorDetailsUrl', () => {
     ).toBe(
       '/s/foo/app/synthetics/monitor/cfg-1/errors/state-1?locationId=loc-1&spaceId=team-a&remoteName=cluster-one'
     );
+  });
+});
+
+describe('getErrorDetailsAppPath', () => {
+  it('returns a history-relative path without the app prefix', () => {
+    expect(
+      getErrorDetailsAppPath({
+        configId: 'cfg-1',
+        stateId: 'state-1',
+        locationId: 'loc-1',
+      })
+    ).toBe('/monitor/cfg-1/errors/state-1?locationId=loc-1');
   });
 });
