@@ -22,7 +22,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MAX_ASSESSMENT_NOTE_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 
 const MODAL_TITLE = i18n.translate(
@@ -98,7 +98,7 @@ export const DismissEventModal = ({ eventId, onClose, onSuccess }: DismissEventM
                 fullWidth
                 value={assessmentNote}
                 onChange={(e) => setAssessmentNote(e.target.value)}
-                maxLength={MAX_ASSESSMENT_NOTE_LENGTH}
+                maxLength={MAX_TEXT_LENGTH}
                 disabled={isUpdating}
                 data-test-subj="sigEventDismissReasonInput"
               />

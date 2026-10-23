@@ -8,19 +8,24 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
-  matchesEntityFilter,
   type BaseActionsProps,
   type ConversationsActionsGroupProps,
   type Investigation,
 } from '@kbn/agentic-investigations-common';
 import { proposalOutcome } from '../proposal_outcome';
+import {
+  ALERTZERO_UI_EVENTS,
+  classifyError,
+  useAlertZeroTelemetry,
+  useReportErrorShown,
+} from '../../../telemetry';
 import type { QueueSection as QueueSectionState } from './use_queue_section';
 
 export interface QueueSectionProps {
   section: QueueSectionState;
   entityFilter: string | null;
-  /** Conversation behind the open flyout; its cards are marked as current. */
-  selectedConversationId?: string;
+  /** Proposal whose card opened the flyout; only that card is marked as current. */
+  selectedProposalId?: string;
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
@@ -38,7 +43,8 @@ export interface QueueSectionProps {
 export const QueueSection = ({
   section,
   entityFilter,
-  selectedConversationId,
+  selectedProposalId,
+  onClickCard,
   ...handlers
 }: QueueSectionProps) => {
   const {
@@ -50,7 +56,10 @@ export const QueueSection = ({
     onToggle,
     loadingRows,
     hasLoadError,
+    loadError,
+    isRefetchingRows,
     hasLoadMoreError,
+    loadMoreError,
     hasCountError,
     retry,
     remaining,
@@ -59,22 +68,9 @@ export const QueueSection = ({
     isLoadingMore,
   } = section;
 
-  const briefingList = useMemo(
-    () =>
-      entityFilter
-        ? investigations.filter((investigation) => matchesEntityFilter(investigation, entityFilter))
-        : investigations,
-    [investigations, entityFilter]
-  );
-
   const selectedIds = useMemo(
-    () =>
-      selectedConversationId
-        ? proposals
-            .filter(({ conversationId }) => conversationId === selectedConversationId)
-            .map(({ id: proposalId }) => proposalId)
-        : [],
-    [proposals, selectedConversationId]
+    () => (selectedProposalId ? [selectedProposalId] : []),
+    [selectedProposalId]
   );
 
   // Read off the raw proposals: the adapted Investigation carries no decision.
@@ -84,10 +80,45 @@ export const QueueSection = ({
   );
   const getOutcomeLabel = useCallback((proposalId: string) => outcomes.get(proposalId), [outcomes]);
 
+  useReportErrorShown({
+    errorClass: classifyError(loadError),
+    isShown: hasLoadError,
+    isRefetching: isRefetchingRows,
+    resetKey: entityFilter ?? undefined,
+    surface: 'queue',
+  });
+  // Each Show more click clears the failure first, so a retry that fails again is a new report.
+  useReportErrorShown({
+    errorClass: classifyError(loadMoreError),
+    isShown: hasLoadMoreError,
+    surface: 'queue',
+  });
+
+  // Only a click reaches here: a copied link or the URL opens the flyout without a card.
+  const { reportEvent } = useAlertZeroTelemetry();
+  const onClickBriefCard = useCallback(
+    (proposalId: Investigation['id']) => {
+      const position = investigations.findIndex((investigation) => investigation.id === proposalId);
+      // A card is rendered from this list, so it is always found; a miss reports nothing rather
+      // than a `-1` position.
+      if (position >= 0) {
+        reportEvent(ALERTZERO_UI_EVENTS.BriefCardClicked, {
+          conversation_type: 'investigation',
+          has_pending_proposal:
+            proposals.find((proposal) => proposal.id === proposalId)?.status === 'pending',
+          position_in_list: position,
+          section: id,
+        });
+      }
+      onClickCard(proposalId);
+    },
+    [id, investigations, onClickCard, proposals, reportEvent]
+  );
+
   return (
     <ConversationQueue
       briefingType={id}
-      briefingList={briefingList}
+      briefingList={investigations}
       count={total}
       isOpen={isOpen}
       onToggle={onToggle}
@@ -102,6 +133,7 @@ export const QueueSection = ({
       isFiltered={Boolean(entityFilter)}
       selectedIds={selectedIds}
       getOutcomeLabel={getOutcomeLabel}
+      onClickCard={onClickBriefCard}
       {...handlers}
     />
   );

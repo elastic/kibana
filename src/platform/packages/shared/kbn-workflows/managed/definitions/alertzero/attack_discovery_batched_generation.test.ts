@@ -22,6 +22,7 @@ interface ParsedStep {
   'branch-timeout'?: string;
   concurrency?: number;
   foreach?: string;
+  if?: string;
   mode?: string;
   status?: string;
   steps?: ParsedStep[];
@@ -160,6 +161,22 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(clauses).toContain(
         'WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"'
       );
+    });
+
+    // A true-positive or inconclusive review retires its alerts with this tag, so
+    // correlating them again would only persist a near-duplicate attack.
+    it('excludes alerts the review tagged az:ad_correlated', () => {
+      expect(retrieve().with?.filter).toEqual({
+        bool: {
+          must_not: [{ terms: { 'kibana.alert.workflow_tags': ['az:ad_correlated'] } }],
+        },
+      });
+    });
+
+    // A `must_not` keeps untagged alerts, which an ES|QL comparison on the
+    // multi-valued, often-absent tag field would drop unless it had a null arm.
+    it('excludes the tag in the pushed-down filter rather than the ES|QL query', () => {
+      expect(query()).not.toContain('workflow_tags');
     });
 
     it('selects METADATA _id, which is all the batches need', () => {
@@ -320,6 +337,21 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(fanOut().steps?.[0].with?.include_attack_discoveries).toBe(false);
     });
 
+    // The review's FP/TP analysis owns the false-positive decision. With the
+    // gate on, generation dropped false-positive chains before any review ran.
+    it('turns off the ground-truth gate on the run step', () => {
+      expect(fanOut().steps?.[0].with?.ground_truth_gate_enabled).toBe(false);
+    });
+
+    // An unset cyber-domain row resolves to nothing, so the frontier tier stays
+    // in charge. The order is the resolution order.
+    it('tries the cyber-domain row before the frontier tier', () => {
+      expect(fanOut().steps?.[0].with?.feature_id).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
+    });
+
     // Step IO is keyed by step id and returns the latest execution, so two
     // concurrent branches running the same step name would race.
     it('keeps the branch body to a single step', () => {
@@ -335,6 +367,18 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         index: '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}',
         type: 'elasticsearch.search',
       });
+    });
+
+    // Persistence writes only when the model produced attacks. A zero count must
+    // not search an index that was never created.
+    it('searches only when attacks were generated', () => {
+      expect(fetch().if).toBe('${{ steps.aggregate.output.discoveries_generated > 0 }}');
+    });
+
+    // `ignore_unavailable` also hides an index the caller cannot read. Leaving it
+    // unset makes that 403 fail the run instead of looking like a quiet run.
+    it('fails the run when the search is not authorized', () => {
+      expect(fetch().with?.ignore_unavailable).toBeUndefined();
     });
 
     // The run step's `execution_uuid` is written to each persisted document as
@@ -357,6 +401,12 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       const names = parsed.steps?.map(({ name }) => name) ?? [];
 
       expect(names.indexOf('fetch_discoveries')).toBeGreaterThan(names.indexOf('generate_batches'));
+    });
+
+    it('runs after the generated count, which gates the search', () => {
+      const names = parsed.steps?.map(({ name }) => name) ?? [];
+
+      expect(names.indexOf('fetch_discoveries')).toBeGreaterThan(names.indexOf('aggregate'));
     });
   });
 
@@ -406,7 +456,7 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
 
     it('emits the persisted documents rather than the branch outputs', () => {
       expect(step('emit_result').with?.attack_discoveries).toBe(
-        "${{ steps.fetch_discoveries.output.hits.hits | map: '_source' }}"
+        "${{ steps.fetch_discoveries.output.hits.hits | default: steps.aggregate.output.no_discoveries | map: '_source' }}"
       );
     });
 

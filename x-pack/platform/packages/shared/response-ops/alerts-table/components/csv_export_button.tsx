@@ -14,7 +14,7 @@ import moment from 'moment';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { useCreateCsvReport } from '../hooks/use_create_csv_report';
 
-const CSV_EXPORT_LABEL = i18n.translate('responseOpsAlertsTable.csvExport.buttonLabel', {
+const CSV_EXPORT_LABEL = i18n.translate('xpack.responseOpsAlertsTable.csvExport.buttonLabel', {
   defaultMessage: 'CSV export',
 });
 

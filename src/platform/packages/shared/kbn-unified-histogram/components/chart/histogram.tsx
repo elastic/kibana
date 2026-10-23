@@ -27,7 +27,6 @@ export interface HistogramProps {
   dataSource: DataSource;
   chart: UnifiedHistogramChartContext;
   bucketInterval: UnifiedHistogramBucketInterval | undefined;
-  isPlainRecord: boolean;
   requestData: string;
   lensProps: LensProps;
   visContext: UnifiedHistogramVisContext;
@@ -44,7 +43,6 @@ export function Histogram({
   dataSource,
   chart: { timeInterval },
   bucketInterval,
-  isPlainRecord,
   requestData,
   lensProps,
   visContext,
@@ -61,8 +59,7 @@ export function Histogram({
     bucketInterval,
     timeRange: lensProps.timeRange!,
     timeInterval,
-    isPlainRecord,
-    timeField: dataSource.timeFieldName,
+    dataSource,
   });
   const { attributes } = visContext;
   const { euiTheme } = useEuiTheme();

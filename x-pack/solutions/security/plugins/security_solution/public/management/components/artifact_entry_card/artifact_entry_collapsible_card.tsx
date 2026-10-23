@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, useGeneratedHtmlId } from '@elastic/eui';
 import type { AnyArtifact } from './types';
 import type { CommonArtifactEntryCardProps } from './artifact_entry_card';
 import { CardContainerPanel } from './components/card_container_panel';
@@ -20,6 +20,8 @@ import { CardCompressedHeader } from './components/card_compressed_header';
 export interface ArtifactEntryCollapsibleCardProps extends CommonArtifactEntryCardProps {
   onExpandCollapse: () => void;
   expanded?: boolean;
+  /** When true, shows a read-only Enabled column for artifacts that support the `disabled` tag. */
+  showEnabledColumn?: boolean;
 }
 
 export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardProps>(
@@ -31,10 +33,15 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
     expanded = false,
     'data-test-subj': dataTestSubj,
     Decorator,
+    CriteriaComponent = CriteriaConditions,
+    showEnabledColumn = false,
     ...commonProps
   }) => {
     const artifact = useNormalizedArtifact(item);
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const expandedSectionId = useGeneratedHtmlId({
+      prefix: 'artifactEntryCollapsibleCardDetails',
+    });
 
     return (
       <CardContainerPanel {...commonProps} item={item as AnyArtifact} data-test-subj={dataTestSubj}>
@@ -44,7 +51,9 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
             actions={actions}
             policies={policies}
             expanded={expanded}
+            showEnabledColumn={showEnabledColumn}
             onExpandCollapse={onExpandCollapse}
+            expandedSectionId={expandedSectionId}
             data-test-subj={getTestId('header')}
           />
         </CardSectionPanel>
@@ -52,10 +61,10 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
           <>
             <EuiHorizontalRule margin="xs" />
 
-            <CardSectionPanel>
+            <CardSectionPanel id={expandedSectionId}>
               {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
-              <CriteriaConditions
+              <CriteriaComponent
                 os={artifact.os as CriteriaConditionsProps['os']}
                 entries={artifact.entries}
                 data-test-subj={getTestId('criteriaConditions')}

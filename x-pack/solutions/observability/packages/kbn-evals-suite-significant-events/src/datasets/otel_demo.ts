@@ -605,7 +605,7 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'healthy-baseline',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'OTel Demo application logs under healthy conditions with normal traffic across all microservices',
       },
@@ -664,7 +664,7 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'payment-unreachable',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'OTel Demo logs where the payment service becomes unreachable, causing charge failures with dial tcp / i/o timeout / connection refused and gRPC transport dialing errors in frontend logs',
       },
@@ -705,7 +705,7 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'cart-redis-cutoff',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'OTel Demo logs where the cart service loses connectivity to its Valkey/Redis backing store, causing cart operations to fail',
       },
@@ -754,7 +754,7 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'checkout-memory-starvation',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'OTel Demo logs during a checkout service disruption with Kubernetes pod lifecycle events (pod termination and rolling update) across a multi-service microservice environment',
       },

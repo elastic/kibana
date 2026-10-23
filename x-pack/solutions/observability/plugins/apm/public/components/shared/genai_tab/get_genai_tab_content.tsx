@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { GenAiTab, GenAiTabImpression, type GenAiFields } from '@kbn/apm-ui-shared';
+import type { GenAiFields } from '@kbn/genai-common';
+import { GenAiTab, GenAiTabImpression } from '@kbn/apm-ui-shared';
 import { getEbtProps, type EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
@@ -48,11 +48,6 @@ export function getGenAiTabContent({ isGenAiSpan, genAi, ebt, reportEvent, resou
       defaultMessage: 'GenAI',
     }),
     ...getEbtProps(getGenAiTabEbt(ebt.element)),
-    content: (
-      <>
-        <EuiSpacer size="m" />
-        <GenAiTab genAi={genAi} ebt={{ element: GENAI_TAB_EBT_ELEMENTS.TAB_BODY }} />
-      </>
-    ),
+    content: <GenAiTab genAi={genAi} ebt={{ element: GENAI_TAB_EBT_ELEMENTS.TAB_BODY }} />,
   };
 }

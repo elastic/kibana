@@ -20,6 +20,10 @@ export interface CloudOnboardingEcfStack {
   stackName: string;
   /** ECF template semantic version resolved at launch time, e.g. "1.10.0". */
   templateVersion: string;
+  /** CloudFormation stack ARN (StackId) pasted by the user after launch. Used to build the AWS Console update link when services change. */
+  stackArn?: string;
+  /** Service IDs active when the stack was last launched or updated. Used to detect staleness on session resume. */
+  serviceIds?: string[];
 }
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
@@ -50,6 +54,10 @@ export interface CloudOnboardingDeployment {
   serviceVars?: Record<string, CloudOnboardingDeploymentServiceVars>;
   /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
   globalRegion?: string;
+  /** Integration name as entered in the Service settings step, before any per-package suffix is applied. Used to identify the onboarding session. */
+  integrationName?: string;
+  /** Integration description as entered in the Service settings step. Set on every package policy created by the deploy. */
+  description?: string;
   /** Data format selected in the Services step. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   packagePolicyIds?: string[];
@@ -83,8 +91,13 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
 >;
 
 export type UpdateCloudOnboardingDeploymentInput = Partial<
-  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod'>
+  Omit<
+    CloudOnboardingDeployment,
+    'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod' | 'description'
+  >
 > & {
+  /** Set to null to clear the description. */
+  description?: string | null;
   /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
   connectorId?: string | null;
   /** Set to null to clear the auth method (e.g. on MI→ECF transition). */

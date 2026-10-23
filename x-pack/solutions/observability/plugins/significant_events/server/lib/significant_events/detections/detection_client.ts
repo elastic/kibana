@@ -21,7 +21,8 @@ import {
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
   runFindByIdsEsqlQuery,
-  runGetProcessedMarkerIds,
+  runGetProcessedMarkers,
+  runFindSkippedDetectionIds,
 } from '../latest_source_query';
 import {
   DETECTIONS_DATA_STREAM,
@@ -52,9 +53,18 @@ export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions
 
 const PROCESSED_MARKER_CHUNK_SIZE = 250;
 
+// Page size and write batch size of the sweep that marks a deleted source's detections processed.
+const SOURCE_SWEEP_PAGE_SIZE = 1000;
+
+// Row cap of one history read, the ES|QL maximum.
+const ESQL_MAX_ROWS = 10_000;
+
 // Cap the per-rule detection history (flyout timeline) to the most recent N transitions so a churny
 // rule doesn't produce an unbounded scroll.
 const DETECTION_HISTORY_LIMIT = 20;
+
+// Cap on the skipped detections one event's lifecycle shows.
+const SKIPPED_PER_EVENT_LIMIT = 1000;
 
 // Detections carry `change_point_type`; processed markers carry `processed_by` instead.
 // Every detection read filters on this so marker docs never surface as detections.
@@ -88,8 +98,8 @@ export class DetectionClient {
   }
 
   // `processed` is derived: a detection is processed iff a marker references its exact id.
-  private async getProcessedIds(detectionIds: string[]): Promise<Set<string>> {
-    return runGetProcessedMarkerIds({
+  private async getProcessedMarkers(detectionIds: string[]) {
+    return runGetProcessedMarkers({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DETECTIONS_DATA_STREAM,
@@ -131,6 +141,7 @@ export class DetectionClient {
       idField: FIELD_DETECTION_ID,
       idValues: detectionIds,
       where: detectionFilter(),
+      limit: detectionIds.length,
     });
     return { hits: await this.withDerivedProcessed(hits) };
   }
@@ -150,6 +161,33 @@ export class DetectionClient {
       limit: DETECTION_HISTORY_LIMIT,
     });
     return { hits: await this.withDerivedProcessed(hits) };
+  }
+
+  /**
+   * The detections the classifier closed on the strength of the given event, oldest→newest: the
+   * newest SKIPPED_PER_EVENT_LIMIT of them, with `truncated` set when there are more. A detection
+   * whose latest marker no longer carries that skip is left out.
+   */
+  async findSkippedForEvent(eventId: string): Promise<{ hits: Detection[]; truncated: boolean }> {
+    const { ids, truncated } = await runFindSkippedDetectionIds({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: FIELD_DETECTION_ID,
+      eventId,
+      limit: SKIPPED_PER_EVENT_LIMIT,
+    });
+    const { hits: rawHits } = await runFindByIdsEsqlQuery<RawDetection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: FIELD_DETECTION_ID,
+      idValues: ids,
+      where: detectionFilter(),
+      limit: ids.length,
+    });
+    const hits = await this.withDerivedProcessed(rawHits);
+    return { hits: hits.filter((hit) => hit.skip?.event_id === eventId), truncated };
   }
 
   async findLatest(options: DetectionsSearchOptions = {}): Promise<{ hits: Detection[] }> {
@@ -180,12 +218,126 @@ export class DetectionClient {
     return { ...result, hits: await this.withDerivedProcessed(result.hits) };
   }
 
+  /**
+   * Marks every unprocessed detection of a source as processed, and returns how many it marked.
+   * A deleted source leaves its detections behind, and the discovery batch keeps offering them, so
+   * the agent writes events for a source that no longer exists. A rule can hold several
+   * unprocessed detections, and discovery falls back to the next one when the newest is processed,
+   * so the whole history of each rule is marked, not only its latest detection.
+   *
+   * `source_id` is stored but not mapped, so it cannot be filtered in the query: the latest
+   * detection of every rule is read to find the source's rules, then their histories are read.
+   */
+  async markSourceDetectionsProcessed({
+    sourceId,
+    processedBy,
+    historyPageSize = ESQL_MAX_ROWS,
+  }: {
+    sourceId: string;
+    processedBy: string;
+    /** Rows of a rule's history read per query. Defaults to the ES|QL maximum. */
+    historyPageSize?: number;
+  }): Promise<number> {
+    const ruleUuids = new Set<string>();
+    for (let page = 1; ; page++) {
+      const result = await this.findLatestPaginated({ page, perPage: SOURCE_SWEEP_PAGE_SIZE });
+      for (const detection of result.hits) {
+        if (detection.source_id === sourceId && detection.rule_uuid) {
+          ruleUuids.add(detection.rule_uuid);
+        }
+      }
+      if (page * SOURCE_SWEEP_PAGE_SIZE >= result.total) {
+        break;
+      }
+    }
+
+    const detectionIdSet = new Set<string>();
+    for (const ruleUuid of ruleUuids) {
+      await this.collectUnprocessedHistory({
+        ruleUuid,
+        sourceId,
+        pageSize: historyPageSize,
+        into: detectionIdSet,
+      });
+    }
+    const detectionIds = [...detectionIdSet];
+
+    const timestamp = new Date().toISOString();
+    for (let start = 0; start < detectionIds.length; start += SOURCE_SWEEP_PAGE_SIZE) {
+      await this.bulkCreate(
+        detectionIds.slice(start, start + SOURCE_SWEEP_PAGE_SIZE).map((detectionId) => ({
+          '@timestamp': timestamp,
+          detection_id: detectionId,
+          processed_by: processedBy,
+        }))
+      );
+    }
+    return detectionIds.length;
+  }
+
+  /**
+   * Adds the ids of a rule's unprocessed detections of the source to `into`, reading its history
+   * oldest to newest in pages. A page starts at the last timestamp seen, so rows sharing it appear
+   * twice and the set dedupes them. It stops on a short page, or on one that brings no new row,
+   * which also ends a page made only of rows with one timestamp.
+   */
+  private async collectUnprocessedHistory({
+    ruleUuid,
+    sourceId,
+    pageSize,
+    into,
+  }: {
+    ruleUuid: string;
+    sourceId: string;
+    pageSize: number;
+    into: Set<string>;
+  }): Promise<void> {
+    const seen = new Set<string>();
+    let after: string | undefined;
+    for (;;) {
+      const { hits } = await runFindByIdsEsqlQuery<RawDetection>({
+        esClient: this.clients.esClient,
+        space: this.clients.space,
+        index: DETECTIONS_DATA_STREAM,
+        idField: FIELD_RULE_UUID,
+        idValues: [ruleUuid],
+        where:
+          after === undefined
+            ? detectionFilter()
+            : andWhere(
+                detectionFilter(),
+                esql.exp`${esql.col('@timestamp')} >= TO_DATETIME(${esql.str(after)})`
+              ),
+        limit: pageSize,
+      });
+
+      const unseen = hits.filter(({ detection_id: id }) => id !== undefined && !seen.has(id));
+      unseen.forEach(({ detection_id: id }) => seen.add(id as string));
+      for (const detection of await this.withDerivedProcessed(unseen)) {
+        if (detection.source_id === sourceId && !detection.processed && detection.detection_id) {
+          into.add(detection.detection_id);
+        }
+      }
+
+      const last = hits.at(-1);
+      if (hits.length < pageSize || unseen.length === 0 || last === undefined) {
+        return;
+      }
+      after = last['@timestamp'];
+    }
+  }
+
   private async withDerivedProcessed(rawHits: RawDetection[]): Promise<Detection[]> {
-    const processedIds = await this.getProcessedIds(
+    const markers = await this.getProcessedMarkers(
       rawHits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
     );
-    return rawHits.map(
-      (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') } as Detection)
-    );
+    return rawHits.map((raw) => {
+      const marker = markers.get(raw.detection_id ?? '');
+      return {
+        ...raw,
+        processed: marker !== undefined,
+        ...(marker?.skip ? { skip: { ...marker.skip, checked_at: marker.processedAt } } : {}),
+      } as Detection;
+    });
   }
 }
