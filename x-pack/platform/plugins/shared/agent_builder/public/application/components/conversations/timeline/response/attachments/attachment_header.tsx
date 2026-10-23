@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiSplitPanel,
   EuiText,
   EuiToolTip,
@@ -228,14 +229,13 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
               {isShownInApp && (
                 <EuiFlexItem grow={false}>
                   {isCompact ? (
-                    <EuiToolTip content={SHOWN_IN_APP_LABEL} disableScreenReaderOutput>
-                      <EuiBadge
-                        color="primary"
-                        iconType="eye"
-                        aria-label={SHOWN_IN_APP_LABEL}
-                        tabIndex={0}
-                      />
-                    </EuiToolTip>
+                    <EuiIconTip
+                      type="eye"
+                      color="primary"
+                      size="m"
+                      content={SHOWN_IN_APP_LABEL}
+                      aria-label={SHOWN_IN_APP_LABEL}
+                    />
                   ) : (
                     <EuiBadge color="primary" iconType="eye">
                       {SHOWN_IN_APP_LABEL}
