@@ -83,6 +83,7 @@ export function LensEditConfigurationFlyout({
   parentApi,
   panelId,
   applyButtonLabel,
+  panelSettingsApi,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
@@ -521,6 +522,7 @@ export function LensEditConfigurationFlyout({
           applyButtonDisabledTooltip={applyButtonDisabledTooltip}
           toolbar={toolbar}
           layerTabs={layerTabs}
+          panelSettingsApi={panelSettingsApi}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -560,6 +562,7 @@ export function LensEditConfigurationFlyout({
         applyButtonDisabledTooltip={applyButtonDisabledTooltip}
         toolbar={toolbar}
         layerTabs={layerTabs}
+        panelSettingsApi={panelSettingsApi}
       >
         <>
           {/* Flex container for the flyout content layout.
