@@ -233,6 +233,26 @@ describe('HuntWatchClient.runHunts', () => {
     expect(requests.some((r) => r.path.endsWith('/run'))).toBe(false);
   });
 
+  it('an unstamped (not_usable) report invalidates its batch and never triggers the Worker', async () => {
+    // Regression: the hunt-usable bar requires lineage.extraction_method; a
+    // report the route reports not_usable must surface as an INVALID batch,
+    // not a hunt over a shrunk batch.
+    const request = jest.fn(async (req: Req) => {
+      if (req.path === '/internal/alertzero/hunt/candidates') {
+        return { data: { ids: ['rep-0'], skipped: [{ id: 'rep-1', reason: 'not_usable' }] } };
+      }
+      throw new Error('sweep must not run for an invalid batch');
+    });
+    const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
+      huntWorkerWorkflowId: 'worker-1',
+      esClient: { indices: { refresh: async () => ({}) } },
+    });
+    const { runs, invalidBatches } = await client.runHunts(['rep-0', 'rep-1']);
+    expect(runs.size).toBe(0);
+    expect(invalidBatches).toHaveLength(1);
+    expect(invalidBatches[0].response.skipped).toEqual([{ id: 'rep-1', reason: 'not_usable' }]);
+  });
+
   it('batches at the route cap of 10 and serializes the sweeps', async () => {
     const ids = Array.from({ length: 23 }, (_, i) => `rep-${i}`);
     const batches: string[][] = [];
@@ -307,7 +327,20 @@ describe('candidatesMatchBatch (per-batch ids == batch control)', () => {
   it('a length mismatch or any skipped entry fails', () => {
     expect(candidatesMatchBatch(['a'], ok)).toBe(false);
     expect(
-      candidatesMatchBatch(['a', 'b'], { ids: ['a', 'b'], skipped: [{ id: 'a', reason: 'x' }] })
+      candidatesMatchBatch(['a', 'b'], {
+        ids: ['a', 'b'],
+        skipped: [{ id: 'a', reason: 'not_usable' }],
+      })
     ).toBe(false);
+  });
+  it('a valid skip reason still invalidates the batch (the suite builds all-eligible batches)', () => {
+    for (const reason of ['not_found', 'not_usable', 'open_proposal'] as const) {
+      expect(
+        candidatesMatchBatch(['a', 'b'], {
+          ids: ['a'],
+          skipped: [{ id: 'b', reason }],
+        })
+      ).toBe(false);
+    }
   });
 });

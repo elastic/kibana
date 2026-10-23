@@ -32,6 +32,7 @@ const LOAD_REPORT_CONTEXT_FIELDS = [
 export interface ThreatReportDocument {
   'content.title'?: string;
   'content.body_text'?: string;
+  'lineage.extraction_method'?: string;
   'extracted.iocs'?: Array<{ type: string; value: string }>;
   'extracted.ttps.techniques'?: string[];
   'extracted.vulnerability.vendor'?: string;
@@ -92,5 +93,27 @@ describe('extracted.* field names vs load_report_context', () => {
   it('report plan constants stay sane', () => {
     expect(Object.keys(REPORT_CLASSES_BY_CHAIN)).toHaveLength(5);
     expect(phaseOrder()).toEqual(['E0', 'E+', 'E-']);
+  });
+
+  // The hunt-usable bar requires lineage.extraction_method to exist and not be
+  // pending/rejected; the ingest route writes documents verbatim and enrich
+  // never runs on suite reports, so an unstamped fixture is deterministically
+  // `not_usable` on the candidates route and invalidates every batch.
+  describe('hunt-usable lineage stamp', () => {
+    const allSpecs = () =>
+      (['A', 'B'] as const).flatMap((arm) => buildReportSpecs(loadManifest(), loadSamples(), arm));
+
+    it('every report document stamps a finished extraction_method', () => {
+      for (const spec of allSpecs()) {
+        expect(spec.document['lineage.extraction_method']).toBe('seeded');
+      }
+    });
+
+    it('an unstamped report fails the pin (drift breaks this test)', () => {
+      const unstamped = allSpecs().filter(
+        (s) => s.document['lineage.extraction_method'] !== 'seeded'
+      );
+      expect(unstamped).toEqual([]);
+    });
   });
 });

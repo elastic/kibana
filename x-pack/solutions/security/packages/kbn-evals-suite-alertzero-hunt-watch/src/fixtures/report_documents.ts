@@ -35,6 +35,16 @@ export const PAYLOAD_HASHES = {
   sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
 };
 
+/**
+ * The hunt-usable bar (HUNT_USABLE_FILTER) requires `lineage.extraction_method`
+ * to exist and not be pending or rejected. The ingest route writes documents
+ * verbatim and enrich never runs on suite reports, so an unstamped report is
+ * deterministically `not_usable` and the whole batch comes back skipped.
+ * `seeded` is a finished adapter value (usable_report_filter.ts): extraction is
+ * done by construction and the planted `extracted.*` fields are final.
+ */
+const HUNT_USABLE_LINEAGE = { 'lineage.extraction_method': 'seeded' } as const;
+
 const titleCase = (s: string): string =>
   s
     .split(/[-_]/)
@@ -143,6 +153,7 @@ export const buildReportSpecs = (
         'content.body_text': `Indicator package for observed ${chain.key} activity. Domains and file hashes below are confirmed malicious by the reporting source. Short text; no behavioural analysis is included.`,
         'source.name': 'g5-ad2-seeded-recall',
         'severity.level': 'high',
+        ...HUNT_USABLE_LINEAGE,
         'extracted.iocs': [
           ...chainZones.map((zone) => ({ type: 'domain', value: zone })),
           { type: 'hash_md5', value: PAYLOAD_HASHES.md5 },
@@ -168,6 +179,7 @@ export const buildReportSpecs = (
         ),
         'source.name': 'g5-ad2-seeded-recall',
         'severity.level': 'high',
+        ...HUNT_USABLE_LINEAGE,
         ...(arm === 'B' && firstBase
           ? { 'extracted.ttps.techniques': stepTechniques(chain.key, 0) }
           : {}),
@@ -185,6 +197,7 @@ export const buildReportSpecs = (
         'Indicator package for a campaign using registry-key persistence and an unsigned driver load. Values below are confirmed malicious by the reporting source.',
       'source.name': 'g5-ad2-seeded-recall',
       'severity.level': 'medium',
+      ...HUNT_USABLE_LINEAGE,
       'extracted.iocs': [
         { type: 'domain', value: 'malicious-c2.example.co' },
         { type: 'hash_sha256', value: `f${'0'.repeat(63)}` },
@@ -203,6 +216,7 @@ export const buildReportSpecs = (
         'content.body_text': narrative,
         'source.name': 'g5-ad2-seeded-recall',
         'severity.level': 'medium',
+        ...HUNT_USABLE_LINEAGE,
       },
     });
   }

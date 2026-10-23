@@ -59,24 +59,31 @@ export const batches = (ids: string[], cap = REPORT_IDS_CAP): string[][] => {
 
 /**
  * Model of POST /internal/alertzero/hunt/candidates with named report_ids
- * (build_candidate_query.ts at the pin): ids visible in the reports index are
- * selected unless an open proposal exists for them; named ids not visible come
- * back as skipped not_found. The ingest route never refreshes, so visibility
- * needs an explicit _refresh before the trigger.
+ * (build_candidate_query.ts): a named id that is visible in this space and
+ * passes the hunt-usable bar (`lineage.extraction_method` present and not
+ * pending/rejected — an unstamped report is not usable) is selected, unless an
+ * open Hunt Proposal exists for it. A named id the filtered search did not
+ * return is looked up ids-only: it exists in the space but fails the usable
+ * bar → skipped not_usable; it does not exist → skipped not_found. The named
+ * path bypasses the hunt-once gate, so already_hunted never appears here. The
+ * ingest route never refreshes, so visibility needs an explicit _refresh
+ * before the trigger.
  */
 export interface CandidatesRouteResponse {
   ids: string[];
-  skipped: Array<{ id: string; reason: 'not_found' | 'open_proposal' }>;
+  skipped: Array<{ id: string; reason: 'not_found' | 'not_usable' | 'open_proposal' }>;
 }
 
 export const candidatesRoute = (
   batch: string[],
-  visible: ReadonlySet<string>
+  visible: ReadonlySet<string>,
+  { usable = visible }: { usable?: ReadonlySet<string> } = {}
 ): CandidatesRouteResponse => {
   const ids: string[] = [];
   const skipped: CandidatesRouteResponse['skipped'] = [];
   for (const id of batch) {
     if (!visible.has(id)) skipped.push({ id, reason: 'not_found' });
+    else if (!usable.has(id)) skipped.push({ id, reason: 'not_usable' });
     else ids.push(id);
   }
   return { ids, skipped };
@@ -93,11 +100,15 @@ export type TriggerOutcome =
 
 export const harnessTrigger = (
   allIds: string[],
-  { visible, assertPerBatch = true }: { visible: ReadonlySet<string>; assertPerBatch?: boolean }
+  {
+    visible,
+    usable,
+    assertPerBatch = true,
+  }: { visible: ReadonlySet<string>; usable?: ReadonlySet<string>; assertPerBatch?: boolean }
 ): TriggerOutcome => {
   let reached = 0;
   for (const batch of batches(allIds)) {
-    const response = candidatesRoute(batch, visible);
+    const response = candidatesRoute(batch, visible, { usable });
     if (assertPerBatch && (response.ids.length !== batch.length || response.skipped.length > 0)) {
       return { ok: false, reason: 'per-batch', batch, response };
     }

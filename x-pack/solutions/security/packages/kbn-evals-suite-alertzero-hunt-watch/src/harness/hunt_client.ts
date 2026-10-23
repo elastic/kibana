@@ -8,6 +8,7 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
+import type { CandidateSkipReason } from '@kbn/alertzero-common';
 import type { CoordinatorRun } from '../types';
 import { nestDottedKeys } from './nest_document';
 import { isCoordinatorResult, wireToCoordinatorRun } from './wire_adapter';
@@ -45,7 +46,12 @@ export interface IngestedReport {
 
 export interface CandidatesResponse {
   ids: string[];
-  skipped: Array<{ id: string; reason: string }>;
+  /**
+   * Wire enum (candidates_route.gen.ts). On the manual named-id path only
+   * not_found / not_usable / open_proposal can appear: the named path lifts
+   * the hunt-once gate, so already_hunted is scheduled-path only.
+   */
+  skipped: Array<{ id: string; reason: CandidateSkipReason }>;
 }
 
 /**
@@ -148,7 +154,7 @@ export class HuntWatchClient {
     await this.options.esClient.indices.refresh({ index: THREAT_REPORTS_INDEX });
     const response = await this.kbnClient.request<{
       ids: string[];
-      skipped: Array<{ id: string; reason: string }>;
+      skipped: Array<{ id: string; reason: CandidateSkipReason }>;
     }>({
       path: CANDIDATES_URL,
       method: 'POST',

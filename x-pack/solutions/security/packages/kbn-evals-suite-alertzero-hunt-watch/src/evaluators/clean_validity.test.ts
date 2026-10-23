@@ -357,6 +357,25 @@ describe('R5-NB-1: refresh, then a per-batch route assertion', () => {
       reached: allIds.length - 1,
     });
   });
+
+  it('a visible but unusable report is skipped not_usable, and the batch asserts on it', () => {
+    // The hunt-usable bar is a second gate past visibility: a report that
+    // exists but fails it (extraction pending or rejected) comes back
+    // not_usable on the named path, and the per-batch assertion catches it.
+    const visible = new Set(allIds);
+    const usable = new Set(allIds.slice(0, allIds.length - 1));
+    const out = harnessTrigger(allIds, { visible, usable });
+    expect(out.ok).toBe(false);
+    if (!out.ok) {
+      expect(out.response.skipped).toEqual([
+        { id: allIds[allIds.length - 1], reason: 'not_usable' },
+      ]);
+    }
+    expect(harnessTrigger(allIds, { visible, usable, assertPerBatch: false })).toMatchObject({
+      ok: true,
+      reached: allIds.length - 1,
+    });
+  });
 });
 
 // ---------------------------------------------------------------- R5-NB-2
