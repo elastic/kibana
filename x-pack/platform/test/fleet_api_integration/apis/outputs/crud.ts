@@ -809,12 +809,13 @@ export default function (providerContext: FtrProviderContext) {
       // fails with `key file not configured accessing 'logstash.ssl'`.
       describe('updating an output that keeps a credential as a secret', () => {
         const expectSecretDeleted = async (id: string) => {
-          try {
-            await getSecretById(id);
-            expect().fail(`Secret ${id} should have been deleted`);
-          } catch (e) {
-            // not found
-          }
+          // the error is read outside of any `try`, so that a secret that still exists fails the
+          // test, and an error other than a not found does too
+          const error = await getSecretById(id).then(
+            () => undefined,
+            (e) => e
+          );
+          expect(error?.meta?.statusCode).to.be(404);
         };
 
         const createLogstashOutputWithSecretKey = async () => {

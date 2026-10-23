@@ -15,7 +15,9 @@ import type { SecretFieldDefinition } from '../secrets/preserve';
  *
  * The secrets of the Kafka authentication methods are left out on purpose: `withSavedKafkaAuth`
  * keeps the settings and the secrets of the method of an output together. The TLS credentials of
- * an OTLP output have no plain text counterpart, they are only accepted under `secrets`.
+ * an OTLP output have no plain text counterpart, they are only accepted under `secrets`: they are
+ * removed by clearing the TLS settings they belong to (`otlp_exporter.tls: null`, or
+ * `otlp_exporter.tls.tpm: null` for the TPM ones).
  */
 export function getOutputSecretFields(type: ValueOf<OutputType>): SecretFieldDefinition[] {
   const fields: SecretFieldDefinition[] = [];
@@ -35,9 +37,15 @@ export function getOutputSecretFields(type: ValueOf<OutputType>): SecretFieldDef
   }
   if (type === outputType.Otlp) {
     fields.push(
-      { secretPath: 'secrets.otlp_exporter.tls.key_pem' },
-      { secretPath: 'secrets.otlp_exporter.tls.tpm.owner_auth' },
-      { secretPath: 'secrets.otlp_exporter.tls.tpm.auth' }
+      { secretPath: 'secrets.otlp_exporter.tls.key_pem', clearedBy: ['otlp_exporter.tls'] },
+      {
+        secretPath: 'secrets.otlp_exporter.tls.tpm.owner_auth',
+        clearedBy: ['otlp_exporter.tls', 'otlp_exporter.tls.tpm'],
+      },
+      {
+        secretPath: 'secrets.otlp_exporter.tls.tpm.auth',
+        clearedBy: ['otlp_exporter.tls', 'otlp_exporter.tls.tpm'],
+      }
     );
   }
 
