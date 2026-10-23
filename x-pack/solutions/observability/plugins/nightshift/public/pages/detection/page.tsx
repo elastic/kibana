@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -58,9 +59,6 @@ const SignalsTab = React.lazy(() =>
   import('./signals/signals_tab').then(({ SignalsTab: Tab }) => ({ default: Tab }))
 );
 
-const OVERVIEW_TRANSITION_MS = 240;
-const OVERVIEW_COMPACT_SCROLL_PX = 8;
-
 export type DetectionPageHeaderProps = Pick<
   NightshiftAppHeaderProps,
   | 'onSourcesClick'
@@ -92,9 +90,12 @@ export const DetectionPage = ({
   const selection = useEntitySelection();
   const [isOverviewCompact, setIsOverviewCompact] = React.useState(false);
   React.useEffect(() => setIsOverviewCompact(false), [tab]);
-  const handleTabBodyScroll = React.useCallback((event: React.UIEvent<HTMLDivElement>) => {
-    setIsOverviewCompact(event.currentTarget.scrollTop > OVERVIEW_COMPACT_SCROLL_PX);
-  }, []);
+  const handleTabBodyScroll = React.useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      setIsOverviewCompact(event.currentTarget.scrollTop > euiTheme.base / 2);
+    },
+    [euiTheme.base]
+  );
   // Tab switches keep every filter, so returning to a tab restores it; only pages and flyouts reset.
   const tabParams = new URLSearchParams(location.search);
   [
@@ -121,12 +122,12 @@ export const DetectionPage = ({
     opacity: ${expanded ? 1 : 0};
     visibility: ${expanded ? 'visible' : 'hidden'};
     margin-block-end: ${expanded && spaceAfter ? euiTheme.size.m : 0};
-    transition: grid-template-rows ${OVERVIEW_TRANSITION_MS}ms ease,
-      opacity ${OVERVIEW_TRANSITION_MS}ms ease, margin-block-end ${OVERVIEW_TRANSITION_MS}ms ease,
-      visibility 0s linear ${expanded ? '0s' : `${OVERVIEW_TRANSITION_MS}ms`};
 
-    @media (prefers-reduced-motion: reduce) {
-      transition: none;
+    ${euiCanAnimate} {
+      transition: grid-template-rows ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+        opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+        margin-block-end ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+        visibility 0s linear ${expanded ? '0s' : euiTheme.animation.normal};
     }
 
     > * {
@@ -144,7 +145,6 @@ export const DetectionPage = ({
         height: 100%;
         min-height: 0;
         overflow: hidden;
-        width: 100%;
       `}
       data-test-subj="nightshiftDetectionPage"
     >
@@ -163,7 +163,6 @@ export const DetectionPage = ({
         restrictWidth={false}
         grow
         css={css`
-          flex: 1 1 auto;
           min-height: 0;
           overflow: hidden;
         `}
@@ -174,7 +173,6 @@ export const DetectionPage = ({
             flex-direction: column;
             min-height: 0;
             overflow: hidden;
-            width: 100%;
           `,
         }}
       >
@@ -199,8 +197,6 @@ export const DetectionPage = ({
           <EuiFlexItem
             grow={false}
             css={css`
-              display: flex;
-              flex-direction: column;
               width: ${euiTheme.base * 16}px;
               min-height: 0;
             `}

@@ -242,11 +242,9 @@ export const EntitiesPanel = ({
       data-test-subj="nightshiftDetectionEntitiesPanel"
       css={{
         display: 'flex',
-        flex: '1 1 auto',
         flexDirection: 'column',
         minHeight: 0,
         overflow: 'hidden',
-        width: '100%',
       }}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
