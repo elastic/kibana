@@ -143,7 +143,10 @@ interface VegaEmbeddableDependencies {
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
   /** Used to edit the library item of a by-reference panel. */
-  libraryEditorDependencies: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch'>;
+  libraryEditorDependencies: Pick<
+    VegaPluginStartDependencies,
+    'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'
+  >;
   /** Whether panels can be linked to and unlinked from the library. */
   isLibraryEnabled: boolean;
 }

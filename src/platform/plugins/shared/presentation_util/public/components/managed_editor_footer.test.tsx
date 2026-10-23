@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ManagedEditorFooter } from './managed_editor_footer';
 import type { ManagedEditorFooterProps } from './managed_editor_footer';
@@ -72,5 +72,43 @@ describe('ManagedEditorFooter', () => {
     renderFooter({ hideSave: true });
     expect(screen.queryByTestId('save')).not.toBeInTheDocument();
     expect(screen.getByTestId('cancel')).toBeInTheDocument();
+  });
+
+  describe('with a save menu', () => {
+    it('saves from the primary segment without opening the menu', async () => {
+      const onMenuItemClick = jest.fn();
+      const { onSave } = renderFooter({
+        saveMenuItems: [{ name: 'Save as new…', onClick: onMenuItemClick, 'data-test-subj': 'as' }],
+      });
+
+      await userEvent.click(screen.getByTestId('savePrimary'));
+
+      expect(onSave).toHaveBeenCalledTimes(1);
+      expect(onMenuItemClick).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('as')).not.toBeInTheDocument();
+    });
+
+    it('runs a menu item and closes the menu', async () => {
+      const onMenuItemClick = jest.fn();
+      const { onSave } = renderFooter({
+        saveMenuItems: [{ name: 'Save as new…', onClick: onMenuItemClick, 'data-test-subj': 'as' }],
+      });
+
+      await userEvent.click(screen.getByTestId('saveMenu'));
+      // The menu's popover ignores pointer events while it animates in.
+      fireEvent.click(await screen.findByTestId('as'));
+
+      expect(onMenuItemClick).toHaveBeenCalledTimes(1);
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it('disables the primary segment when save is disabled', () => {
+      renderFooter({
+        isSaveDisabled: true,
+        saveMenuItems: [{ name: 'Save as new…', onClick: jest.fn() }],
+      });
+
+      expect(screen.getByTestId('savePrimary')).toBeDisabled();
+    });
   });
 });

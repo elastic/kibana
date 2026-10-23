@@ -89,6 +89,8 @@ spaceTest.describe('Vega panels linked to the library', { tag: '@local-stateful-
       await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', title);
 
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
+      // A copy couldn't replace the item the panel references.
+      await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonMenu')).toBeHidden();
 
       // The search bar puts its test subject on the query input itself.
       const queryInput = page.testSubj.locator('editorFlyoutSearchBar');

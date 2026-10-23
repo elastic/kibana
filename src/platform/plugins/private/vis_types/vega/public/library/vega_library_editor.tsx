@@ -29,6 +29,7 @@ import type {
   PublishesTimeRange,
 } from '@kbn/presentation-publishing';
 import { EmbeddableEditorPreview, ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { parse } from 'hjson';
 import { BehaviorSubject } from 'rxjs';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
@@ -43,6 +44,7 @@ import { fromDraft, isSameDraft, toDraft } from '../lib/library_draft';
 import type { VegaDraft, VegaEditableState } from '../lib/library_draft';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { getData } from '../services';
+import { saveVegaToLibrary } from './save_to_library';
 import type { VegaLibraryClient } from './vega_library_client';
 
 type VegaPreviewApi = DefaultEmbeddableApi<VegaByValueState> &
@@ -57,14 +59,23 @@ const closeLabel = i18n.translate('visTypeVega.libraryEditor.closeButtonLabel', 
   defaultMessage: 'Close',
 });
 
+const savedMessage = (title: string) =>
+  i18n.translate('visTypeVega.libraryEditor.savedToast', {
+    defaultMessage: 'Saved "{title}"',
+    values: { title },
+  });
+
 interface VegaLibraryEditorProps {
   core: Pick<CoreStart, 'notifications'>;
   client: VegaLibraryClient;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
+  savedObjectsTagging?: SavedObjectsTaggingApi;
   item: { id: string; data: VegaReadResponseBody['data'] };
   defaultDataView?: DataView;
   /** Whether the user may save library items. Without it, the editor can still be used to explore. */
   canSave: boolean;
+  /** Whether "Save as new" is offered. Dashboard panels can't switch to the new item. */
+  allowSaveAsNew?: boolean;
   /** Shows the preview in the panel being edited, instead of in a flyout. */
   onPreview?: (state: VegaEditableState) => void;
   closeFlyout: () => void;
@@ -86,9 +97,11 @@ export const VegaLibraryEditor = ({
   core,
   client,
   SearchBar,
+  savedObjectsTagging,
   item,
   defaultDataView,
   canSave,
+  allowSaveAsNew = true,
   onPreview,
   closeFlyout,
   ariaLabelledBy,
@@ -151,17 +164,35 @@ export const VegaLibraryEditor = ({
       }),
     });
 
+  const saveAsNewItem = async () => {
+    setIsSaving(true);
+    try {
+      const created = await saveVegaToLibrary({
+        client,
+        state: fromDraft(draft),
+        initialDetails: {
+          title: item.data.title,
+          description: item.data.description,
+          tags: item.data.tags,
+        },
+        savedObjectsTagging,
+      });
+      if (!created) return;
+      core.notifications.toasts.addSuccess(savedMessage(created.title));
+      closeFlyout();
+    } catch (error) {
+      reportSaveError(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const saveChanges = async () => {
     setIsSaving(true);
     try {
       // The API replaces the whole item, so keep what the editor doesn't change.
       await client.update(item.id, { ...item.data, ...fromDraft(draft) });
-      core.notifications.toasts.addSuccess(
-        i18n.translate('visTypeVega.libraryEditor.savedToast', {
-          defaultMessage: 'Saved "{title}"',
-          values: { title: item.data.title },
-        })
-      );
+      core.notifications.toasts.addSuccess(savedMessage(item.data.title));
       closeFlyout();
     } catch (error) {
       reportSaveError(error);
@@ -260,6 +291,19 @@ export const VegaLibraryEditor = ({
         isSaveDisabled={!isDirty || hasTooManyFilters(draft.filters)}
         isSaving={isSaving}
         saveButtonDataTestSubj="vegaLibraryEditorSaveButton"
+        saveMenuItems={
+          allowSaveAsNew
+            ? [
+                {
+                  name: i18n.translate('visTypeVega.libraryEditor.saveAsNewButtonLabel', {
+                    defaultMessage: 'Save as new…',
+                  }),
+                  onClick: saveAsNewItem,
+                  'data-test-subj': 'vegaLibraryEditorSaveAsNewButton',
+                },
+              ]
+            : undefined
+        }
       />
       {isPreviewOpen ? (
         <EmbeddableEditorPreview<VegaByValueState, VegaPreviewApi, VegaPreviewParentApi>

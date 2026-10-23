@@ -25,7 +25,7 @@ export const openVegaLibraryEditor = async ({
   panel,
 }: {
   core: CoreStart;
-  deps: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch'>;
+  deps: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'>;
   id: string;
   /** The dashboard or Canvas panel being edited, which shows the preview instead of a flyout. */
   panel?: { parentApi: unknown; uuid: string; onPreview: (state: VegaEditableState) => void };
@@ -51,9 +51,12 @@ export const openVegaLibraryEditor = async ({
         core={core}
         client={client}
         SearchBar={deps.unifiedSearch.ui.SearchBar}
+        savedObjectsTagging={deps.savedObjectsTaggingOss?.getTaggingApi()}
         item={item}
         defaultDataView={defaultDataView ?? undefined}
         canSave={Boolean(core.application.capabilities.visualize_v2?.save)}
+        // A panel couldn't switch to a new copy of the item it references.
+        allowSaveAsNew={!panel}
         onPreview={panel?.onPreview}
         closeFlyout={closeFlyout}
         ariaLabelledBy={ariaLabelledBy}

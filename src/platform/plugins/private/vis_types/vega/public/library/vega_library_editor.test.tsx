@@ -20,6 +20,7 @@ import type { VegaReadResponseBody } from '../../server';
 import type { VegaEditableState } from '../lib/library_draft';
 import { setData } from '../services';
 import type { VegaPluginStartDependencies } from '../plugin';
+import { saveVegaToLibrary } from './save_to_library';
 import type { VegaLibraryClient } from './vega_library_client';
 import { VegaLibraryEditor } from './vega_library_editor';
 
@@ -48,6 +49,7 @@ jest.mock('@kbn/presentation-util-plugin/public', () => ({
 }));
 
 jest.mock('../default_spec', () => ({ getDefaultSpec: () => '{ mark: default }' }));
+jest.mock('./save_to_library', () => ({ saveVegaToLibrary: jest.fn() }));
 jest.mock('../lib/extract_index_pattern', () => ({
   extractIndexPatternsFromSpec: jest.fn().mockResolvedValue([]),
 }));
@@ -66,9 +68,11 @@ const lastPreviewState = () => mockPreview.mock.lastCall?.[0].serializedState;
 
 const renderEditor = ({
   canSave = true,
+  allowSaveAsNew,
   onPreview,
 }: {
   canSave?: boolean;
+  allowSaveAsNew?: boolean;
   onPreview?: (state: VegaEditableState) => void;
 } = {}) => {
   const core = coreMock.createStart();
@@ -90,6 +94,7 @@ const renderEditor = ({
       SearchBar={SearchBar as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar']}
       item={item}
       canSave={canSave}
+      allowSaveAsNew={allowSaveAsNew}
       onPreview={onPreview}
       closeFlyout={closeFlyout}
       ariaLabelledBy="vegaLibraryEditorTitle"
@@ -137,24 +142,25 @@ describe('VegaLibraryEditor', () => {
     it('cannot be saved until something changes', async () => {
       renderEditor();
 
-      expect(await screen.findByTestId('vegaLibraryEditorSaveButton')).toBeDisabled();
+      expect(await screen.findByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
 
       await userEvent.click(screen.getByText('changeSpec'));
 
-      expect(screen.getByTestId('vegaLibraryEditorSaveButton')).toBeEnabled();
+      expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeEnabled();
     });
 
     it('saves the changes in place and keeps the title, description and tags', async () => {
       const { client, core, closeFlyout } = renderEditor();
 
       await userEvent.click(await screen.findByText('changeSpec'));
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButton'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary'));
 
       await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
       expect(client.update).toHaveBeenCalledWith('item-1', {
         ...item.data,
         spec: { format: 'hjson', value: '{ mark: bar }' },
       });
+      expect(saveVegaToLibrary).not.toHaveBeenCalled();
       expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Saved "My chart"');
     });
 
@@ -168,7 +174,7 @@ describe('VegaLibraryEditor', () => {
           dateRange: { from: 'now-15m', to: 'now' },
         });
       });
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButton'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary'));
 
       await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
       expect(client.update).toHaveBeenCalledWith(
@@ -183,7 +189,7 @@ describe('VegaLibraryEditor', () => {
       jest.mocked(client.update).mockRejectedValue(error);
 
       await userEvent.click(await screen.findByText('changeSpec'));
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButton'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary'));
 
       await waitFor(() =>
         expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
@@ -204,7 +210,47 @@ describe('VegaLibraryEditor', () => {
       });
 
       expect(screen.getByTestId('vegaEditorTooManyFiltersCallout')).toBeInTheDocument();
-      expect(screen.getByTestId('vegaLibraryEditorSaveButton')).toBeDisabled();
+      expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
+    });
+
+    it('saves a copy with the current draft and the details of the item', async () => {
+      jest.mocked(saveVegaToLibrary).mockResolvedValue({ id: 'copy', title: 'Copy' });
+      const { client, core, closeFlyout } = renderEditor();
+
+      await userEvent.click(await screen.findByText('changeSpec'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButtonMenu'));
+      // The menu's popover ignores pointer events while it animates in.
+      fireEvent.click(await screen.findByTestId('vegaLibraryEditorSaveAsNewButton'));
+
+      await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
+      expect(saveVegaToLibrary).toHaveBeenCalledWith(
+        expect.objectContaining({
+          state: { spec: { format: 'hjson', value: '{ mark: bar }' } },
+          initialDetails: { title: 'My chart', description: 'A chart', tags: ['tag-1'] },
+        })
+      );
+      expect(client.update).not.toHaveBeenCalled();
+      expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Saved "Copy"');
+    });
+
+    it('can save a copy of an unchanged item', async () => {
+      jest.mocked(saveVegaToLibrary).mockResolvedValue(undefined);
+      renderEditor();
+
+      await userEvent.click(await screen.findByTestId('vegaLibraryEditorSaveButtonMenu'));
+      // The menu's popover ignores pointer events while it animates in.
+      fireEvent.click(await screen.findByTestId('vegaLibraryEditorSaveAsNewButton'));
+
+      await waitFor(() => expect(saveVegaToLibrary).toHaveBeenCalledTimes(1));
+    });
+
+    it('offers no copy when it is opened from a dashboard panel', async () => {
+      renderEditor({ allowSaveAsNew: false });
+
+      await userEvent.click(await screen.findByText('changeSpec'));
+
+      expect(screen.getByTestId('vegaLibraryEditorSaveButton')).toBeEnabled();
+      expect(screen.queryByTestId('vegaLibraryEditorSaveButtonMenu')).not.toBeInTheDocument();
     });
   });
 
@@ -397,7 +443,7 @@ describe('VegaLibraryEditor', () => {
 
       expect(await screen.findByTestId('vegaLibraryEditorReadOnlyBadge')).toBeInTheDocument();
       expect(screen.queryByTestId('vegaLibraryEditorSaveButton')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('vegaLibraryEditorSaveButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('vegaLibraryEditorSaveButtonPrimary')).not.toBeInTheDocument();
       expect(screen.getByTestId('vegaLibraryEditorCancelButton')).toHaveTextContent('Close');
     });
 

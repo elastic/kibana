@@ -7,15 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
+  EuiPopover,
+  EuiSplitButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+const moreSaveOptionsLabel = i18n.translate(
+  'presentationUtil.managedEditorFooter.moreSaveOptionsAriaLabel',
+  {
+    defaultMessage: 'More save options',
+  }
+);
+
+interface ManagedEditorFooterSaveMenuItem {
+  name: string;
+  onClick: () => void;
+  'data-test-subj'?: string;
+}
 
 export interface ManagedEditorFooterProps {
   onCancel: () => void;
@@ -39,7 +56,70 @@ export interface ManagedEditorFooterProps {
   saveButtonDataTestSubj?: string;
   /** Hides the save action, e.g. for users who can't save. */
   hideSave?: boolean;
+  /**
+   * When provided, the save action renders as a split button whose menu holds these items,
+   * e.g. "Save as new…".
+   */
+  saveMenuItems?: ManagedEditorFooterSaveMenuItem[];
 }
+
+const SaveSplitButton = ({
+  onSave,
+  saveButtonLabel,
+  isSaveDisabled,
+  isSaving,
+  saveButtonDataTestSubj,
+  saveMenuItems,
+}: Pick<
+  ManagedEditorFooterProps,
+  'onSave' | 'saveButtonLabel' | 'isSaveDisabled' | 'isSaving' | 'saveButtonDataTestSubj'
+> & { saveMenuItems: ManagedEditorFooterSaveMenuItem[] }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <EuiPopover
+      aria-label={moreSaveOptionsLabel}
+      isOpen={isMenuOpen}
+      closePopover={() => setIsMenuOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="upRight"
+      button={
+        <EuiSplitButton fill data-test-subj={saveButtonDataTestSubj}>
+          <EuiSplitButton.ActionPrimary
+            isLoading={isSaving}
+            isDisabled={isSaveDisabled || isSaving}
+            onClick={onSave}
+            data-test-subj={saveButtonDataTestSubj ? `${saveButtonDataTestSubj}Primary` : undefined}
+          >
+            {saveButtonLabel}
+          </EuiSplitButton.ActionPrimary>
+          <EuiSplitButton.ActionSecondary
+            iconType="chevronSingleDown"
+            aria-label={moreSaveOptionsLabel}
+            isDisabled={isSaving}
+            onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
+            data-test-subj={saveButtonDataTestSubj ? `${saveButtonDataTestSubj}Menu` : undefined}
+          />
+        </EuiSplitButton>
+      }
+    >
+      <EuiContextMenuPanel
+        items={saveMenuItems.map(({ name, onClick, 'data-test-subj': dataTestSubj }) => (
+          <EuiContextMenuItem
+            key={name}
+            data-test-subj={dataTestSubj}
+            onClick={() => {
+              setIsMenuOpen(false);
+              onClick();
+            }}
+          >
+            {name}
+          </EuiContextMenuItem>
+        ))}
+      />
+    </EuiPopover>
+  );
+};
 
 /** Shared flyout footer for managed library editors. */
 export const ManagedEditorFooter = ({
@@ -55,6 +135,7 @@ export const ManagedEditorFooter = ({
   isSaving,
   saveButtonDataTestSubj,
   hideSave,
+  saveMenuItems,
 }: ManagedEditorFooterProps) => {
   return (
     <EuiFlyoutFooter>
@@ -83,15 +164,26 @@ export const ManagedEditorFooter = ({
             ) : null}
             {hideSave ? null : (
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  isLoading={isSaving}
-                  disabled={isSaveDisabled || isSaving}
-                  onClick={onSave}
-                  data-test-subj={saveButtonDataTestSubj}
-                >
-                  {saveButtonLabel}
-                </EuiButton>
+                {saveMenuItems?.length ? (
+                  <SaveSplitButton
+                    onSave={onSave}
+                    saveButtonLabel={saveButtonLabel}
+                    isSaveDisabled={isSaveDisabled}
+                    isSaving={isSaving}
+                    saveButtonDataTestSubj={saveButtonDataTestSubj}
+                    saveMenuItems={saveMenuItems}
+                  />
+                ) : (
+                  <EuiButton
+                    fill
+                    isLoading={isSaving}
+                    disabled={isSaveDisabled || isSaving}
+                    onClick={onSave}
+                    data-test-subj={saveButtonDataTestSubj}
+                  >
+                    {saveButtonLabel}
+                  </EuiButton>
+                )}
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
