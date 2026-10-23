@@ -13,6 +13,7 @@ export {
   FLEET_SETUP_LOCK_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
 } from './saved_objects';
 export * from './routes';
 export * from './agent';

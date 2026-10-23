@@ -111,6 +111,8 @@ export async function navigateToOnboardingStep(
     /** Data format to seed. Omitted leaves it unset, so the solution default applies. */
     dataFormat?: 'ecs' | 'otel';
     globalRegion?: string;
+    /** Integration name to seed. Omitted leaves it for the app to prefill (`aws-<n>`). */
+    integrationName?: string;
     serviceVars?: Record<string, ServiceVars>;
     instances?: unknown[];
     /** Optional ECF launch step to seed — sets the post-launch state without clicking the button. */
@@ -135,6 +137,7 @@ export async function navigateToOnboardingStep(
     selectedServiceIds,
     dataFormat,
     globalRegion = 'us-east-1',
+    integrationName,
     serviceVars = {},
     instances,
     ecfLaunchStep,
@@ -150,6 +153,7 @@ export async function navigateToOnboardingStep(
       ids,
       format,
       region,
+      name,
       vars,
       insts,
       ecfStep,
@@ -164,6 +168,7 @@ export async function navigateToOnboardingStep(
       ids: string[];
       format: 'ecs' | 'otel' | undefined;
       region: string;
+      name: string | undefined;
       vars: Record<string, ServiceVars>;
       insts: unknown[] | undefined;
       ecfStep: PersistedEcfLaunchStep | undefined;
@@ -191,6 +196,7 @@ export async function navigateToOnboardingStep(
         JSON.stringify({ selectedServiceIds: ids, ...(format ? { dataFormat: format } : {}) })
       );
       const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
+      if (name !== undefined) settingsPayload.integrationName = name;
       if (insts !== undefined) settingsPayload.instances = insts;
       sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
       if (ecfStep !== undefined) {
@@ -214,6 +220,7 @@ export async function navigateToOnboardingStep(
       ids: selectedServiceIds,
       format: dataFormat,
       region: globalRegion,
+      name: integrationName,
       vars: serviceVars,
       insts: instances,
       ecfStep: ecfLaunchStep,

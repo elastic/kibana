@@ -45,6 +45,28 @@ describe('hydrateOnboardingSession', () => {
     ).not.toBeNull();
   });
 
+  it('restores the integration name and description into the service settings state', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({ integrationName: 'my-aws', description: 'Production AWS' }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    expect(
+      JSON.parse(sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.serviceSettingsStep`)!)
+    ).toEqual(
+      expect.objectContaining({ integrationName: 'my-aws', description: 'Production AWS' })
+    );
+  });
+
+  it('leaves the integration name unset for onboardings saved without one, so a default is prefilled', async () => {
+    mockSendGet.mockResolvedValue({ item: makeItem() });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const settings = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.serviceSettingsStep`)!
+    );
+    expect(settings).not.toHaveProperty('integrationName');
+    expect(settings).not.toHaveProperty('description');
+  });
+
   it('returns false and does not write session storage when fetch fails', async () => {
     mockSendGet.mockRejectedValue(new Error('network error'));
     const result = await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);

@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import {
+  getMaxPackageName,
+  isValidNamespace,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '@kbn/fleet-plugin/common';
+import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
+import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
@@ -20,6 +28,17 @@ import {
   toTyped,
 } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
+import {
+  AWS_MAIN_PACKAGE_NAME,
+  AWS_OTEL_PACKAGE_NAME,
+  getBareNamePackage,
+  isMainPackageName,
+} from '../authenticate_and_deploy_step/deploy_group_helpers';
+import {
+  getDescriptionError,
+  getIntegrationNameError,
+  supportsIntegrationSettings,
+} from './integration_settings';
 
 export interface ServiceDataStreamVars {
   /** Input types enabled for this data stream. */
@@ -58,6 +77,16 @@ export interface ServiceInstance {
 
 export interface ServiceSettingsPersistedState {
   globalRegion: string;
+  /**
+   * Integration name as entered. Policy names are derived from it at deploy time. Absent until
+   * the default is prefilled or the user types one.
+   */
+  integrationName?: string;
+  /** The Fleet-style default (`aws-<n>`) the name was prefilled from. Absent once the name came from a saved onboarding. */
+  defaultNameBase?: string;
+  /** The last name the prefill generated. While the name still equals it, it follows the selection. */
+  autoName?: string;
+  description?: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -208,7 +237,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     awsServicesMap,
     deploymentMethod,
     setServiceSettingsMethod,
+    detectAndReviewStep,
   } = useOnboardingFlow();
+  const { updateDeployment } = useOnboardingSO();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -228,11 +259,126 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [persisted, setPersisted]
   );
 
+  const integrationName = persisted?.integrationName ?? '';
+  const description = persisted?.description ?? '';
+
+  const setIntegrationName = useCallback(
+    (name: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        integrationName: name,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  const setDescription = useCallback(
+    (value: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        description: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
   // Reconcile instances each render — cheap since selectedServiceIds rarely changes.
   const instances: ServiceInstance[] = useMemo(
     () => reconcileInstances(selectedServiceIds, persisted?.instances, awsServicesMap),
     [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
+
+  // Packages of the services that deploy as a package policy. ECF-only services create none under
+  // managed integration; the name and description still apply to them (they describe the
+  // onboarding instance) but they do not take part in naming policies.
+  const policyPackages = useMemo(
+    () =>
+      instances.flatMap((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return service && supportsIntegrationSettings(service, deploymentMethod)
+          ? [service.packageName]
+          : [];
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+
+  // The package whose policy keeps the integration name as entered (the only package selected, or
+  // the main one), so the default name already carries the package when that is not `aws`.
+  const bareNamePackage = useMemo(() => getBareNamePackage(policyPackages), [policyPackages]);
+  // Policies of the selected packages count too: a Bedrock-only deploy creates `aws-1-aws_bedrock`
+  // under `aws_bedrock`, which an `aws`-only query never sees. Both main packages always count,
+  // because ECS and OTel onboardings share the plain `aws-<n>` names.
+  const defaultNamePackages = useMemo(
+    () => [...new Set([AWS_MAIN_PACKAGE_NAME, AWS_OTEL_PACKAGE_NAME, ...policyPackages])].sort(),
+    [policyPackages]
+  );
+  const defaultNamePackagesRef = useRef(defaultNamePackages);
+  defaultNamePackagesRef.current = defaultNamePackages;
+  const toAutoName = useCallback(
+    (base: string) => (isMainPackageName(bareNamePackage) ? base : `${base}-${bareNamePackage}`),
+    [bareNamePackage]
+  );
+
+  // Prefill the Fleet-style default (`aws-<n>`) once, when no name exists yet. The fetch can
+  // outlive other edits, so the write is based on the latest persisted state.
+  const persistedRef = useRef(persisted);
+  persistedRef.current = persisted;
+  const toAutoNameRef = useRef(toAutoName);
+  toAutoNameRef.current = toAutoName;
+  const isPrefilling = useRef(false);
+  useEffect(() => {
+    if (persisted?.integrationName !== undefined || isPrefilling.current) {
+      return;
+    }
+    isPrefilling.current = true;
+    let cancelled = false;
+    (async () => {
+      let base = `${AWS_MAIN_PACKAGE_NAME}-1`;
+      try {
+        const { data } = await sendGetPackagePolicies({
+          perPage: SO_SEARCH_LIMIT,
+          page: 1,
+          kuery: defaultNamePackagesRef.current
+            .map((pkg) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkg}`)
+            .join(' or '),
+        });
+        base = getMaxPackageName(AWS_MAIN_PACKAGE_NAME, data?.items);
+      } catch {
+        // Best-effort: fall back to the first number, the user can still edit the name.
+      }
+      const latest = persistedRef.current;
+      if (cancelled || latest?.integrationName !== undefined) {
+        isPrefilling.current = false;
+        return;
+      }
+      const name = toAutoNameRef.current(base);
+      setPersisted({
+        ...(latest ?? { globalRegion: '', serviceVars: {} }),
+        integrationName: name,
+        defaultNameBase: base,
+        autoName: name,
+      });
+      isPrefilling.current = false;
+    })();
+    return () => {
+      cancelled = true;
+      isPrefilling.current = false;
+    };
+  }, [persisted?.integrationName, setPersisted]);
+
+  // A name nobody edited follows the selection: Bedrock alone gives `aws-1-aws_bedrock`, adding an
+  // `aws` service back gives `aws-1`.
+  useEffect(() => {
+    const { defaultNameBase, autoName } = persisted ?? {};
+    if (!defaultNameBase || !autoName || persisted?.integrationName !== autoName) return;
+    const next = toAutoName(defaultNameBase);
+    if (next === autoName) return;
+    setPersisted({
+      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+      integrationName: next,
+      autoName: next,
+    });
+  }, [persisted, toAutoName, setPersisted]);
 
   // Lazy prune: drop serviceVars entries for instances no longer present (deselected in Step 1).
   // Runs on mount and whenever the instance list changes. Writing only when stale keys exist
@@ -382,9 +528,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [incompleteInstances]
   );
 
+  const integrationNameError = getIntegrationNameError(integrationName);
+  const descriptionError = getDescriptionError(description);
+
   const isReady = useMemo(
-    () => !!globalRegion.trim() && incompleteInstances.length === 0,
-    [globalRegion, incompleteInstances]
+    () =>
+      !!globalRegion.trim() &&
+      incompleteInstances.length === 0 &&
+      !integrationNameError &&
+      !descriptionError,
+    [globalRegion, incompleteInstances, integrationNameError, descriptionError]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -396,8 +549,24 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       instances,
     });
     setServiceSettingsMethod(deploymentMethod);
+    // The name and description stay editable after a deploy, and a later deploy may find nothing
+    // to do, so save them to the onboarding record here. Best-effort: the next deploy writes them
+    // again.
+    const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+    if (deploymentId) {
+      updateDeployment(deploymentId, toSOSettingsUpdate(persisted));
+    }
     onContinue();
-  }, [onContinue, persisted, setPersisted, instances, deploymentMethod, setServiceSettingsMethod]);
+  }, [
+    onContinue,
+    persisted,
+    setPersisted,
+    instances,
+    deploymentMethod,
+    setServiceSettingsMethod,
+    detectAndReviewStep?.onboardingDeploymentId,
+    updateDeployment,
+  ]);
 
   // All instance display names — used by the duplicate modal for collision detection.
   const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);
@@ -405,6 +574,13 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   return {
     globalRegion,
     setGlobalRegion,
+    integrationName,
+    setIntegrationName,
+    integrationNameError,
+    description,
+    setDescription,
+    descriptionError,
+    bareNamePackage,
     instances,
     filteredInstances,
     incompleteInstances,
