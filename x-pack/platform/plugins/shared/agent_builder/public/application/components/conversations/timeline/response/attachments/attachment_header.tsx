@@ -227,7 +227,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               {isShownInApp && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="success" iconType="eye">
+                  <EuiBadge color="primary" iconType="eye">
                     {SHOWN_IN_APP_LABEL}
                   </EuiBadge>
                 </EuiFlexItem>
