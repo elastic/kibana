@@ -9,12 +9,10 @@ import React, { Suspense, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
-  EuiHealth,
   EuiLink,
   EuiPanel,
   EuiSkeletonTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
@@ -31,8 +29,7 @@ import { isRuleLoaded } from '../../types/rule_state';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import { isSupportedEpisodeSeverity, normalizeEpisodeSeverity } from '../severity/severity_utils';
 import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
-import { getEpisodeStatusBadgeLabel } from '../status/status_badge';
-import { alertTimelineStatusColor } from '../../alert_timeline/alert_timeline_status_palette';
+import { AlertEpisodeStatusHealth } from '../status/status_badge';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import { UserProfileDisplay } from '../user_profile_display';
 import { CopyableShortId } from '../copyable_short_id';
@@ -172,7 +169,6 @@ export const AlertEpisodeDetailsFlyout = ({
   getEpisodeDetailsHref,
 }: AlertEpisodeDetailsFlyoutProps) => {
   const [tab, setTab] = useState<TabId>('overview');
-  const { euiTheme } = useEuiTheme();
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
   const {
@@ -330,9 +326,7 @@ export const AlertEpisodeDetailsFlyout = ({
         <FlyoutTemplate.Header title={titleNode} description={descriptionNode}>
           {status && (
             <FlyoutTemplate.Header.Badge color="hollow">
-              <EuiHealth color={alertTimelineStatusColor(euiTheme, status)} textSize="inherit">
-                {getEpisodeStatusBadgeLabel(status)}
-              </EuiHealth>
+              <AlertEpisodeStatusHealth status={status} />
             </FlyoutTemplate.Header.Badge>
           )}
 
