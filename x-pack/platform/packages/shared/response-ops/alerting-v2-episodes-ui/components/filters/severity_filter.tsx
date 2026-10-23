@@ -32,7 +32,7 @@ export function AlertEpisodesSeverityFilter({
       ...[...entries].reverse().map(({ label, value, color }) => ({
         label,
         value,
-        prepend: <EuiBadge color={color}>{label}</EuiBadge>,
+        prepend: <EuiBadge color={color} aria-hidden />,
       })),
       {
         label: i18n.SEVERITY_FILTER_NONE_LABEL,
