@@ -301,6 +301,12 @@ describe('ProfileDetailsPage', () => {
   it('offers to create a rule with a profile no rule uses', async () => {
     renderAt(`/profiles/${BUILTIN_INDICES_PROFILE_NAMES.high_availability}`);
 
+    // Under the same title as the rules it would list.
+    expect(
+      within(screen.getByTestId('boostProfileUnused')).getByRole('heading', {
+        name: 'Boost rules using this profile',
+      })
+    ).toBeInTheDocument();
     expect(screen.getByTestId('boostProfileUnused')).toHaveTextContent("This profile isn't in use");
     expect(screen.queryByTestId('boostProfileRules')).not.toBeInTheDocument();
     expect(screen.queryByTestId('boostProfileUsedBy')).not.toBeInTheDocument();

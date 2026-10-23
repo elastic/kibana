@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -52,6 +53,10 @@ const OFF_LABEL = i18n.translate('xpack.boost.profileDetails.off', { defaultMess
 
 const BOOST_LABEL = i18n.translate('xpack.boost.profileDetails.boost', {
   defaultMessage: 'Boost',
+});
+
+const RULES_TITLE = i18n.translate('xpack.boost.profileDetails.rulesTitle', {
+  defaultMessage: 'Boost rules using this profile',
 });
 
 const RULES_SEARCH_LABEL = i18n.translate('xpack.boost.profileDetails.searchRules', {
@@ -300,52 +305,55 @@ export const ProfileDetailsPage = () => {
       {/* Until a rule uses the profile, there are no rules to list, just a way to start. */}
       {profileRules.length === 0 ? (
         <DetailsBand hasDivider={false}>
-          <EuiEmptyPrompt
-            titleSize="xs"
-            title={
-              <h2>
-                {i18n.translate('xpack.boost.profileDetails.unusedTitle', {
-                  defaultMessage: "This profile isn't in use",
-                })}
-              </h2>
-            }
-            body={
-              <p>
-                {profile.type === 'indices'
-                  ? i18n.translate('xpack.boost.profileDetails.unusedIndicesBody', {
-                      defaultMessage:
-                        'No boost rules use it yet. Create one to boost indices with this profile.',
-                    })
-                  : i18n.translate('xpack.boost.profileDetails.unusedDataStreamsBody', {
-                      defaultMessage:
-                        'No boost rules use it yet. Create one to boost data streams with this profile.',
-                    })}
-              </p>
-            }
-            actions={
-              canEdit && (
-                <EuiButton
-                  fill
-                  onClick={() => setFlyout('createRule')}
-                  data-test-subj="boostProfileDetailsCreateRule"
-                >
-                  {i18n.translate('xpack.boost.profileDetails.createRule', {
-                    defaultMessage: 'Create boost rule',
+          {/* Under the same title as the rules it would list, a prompt to create the first one,
+              sized to fit a section rather than the page. */}
+          <DetailsSection title={RULES_TITLE} data-test-subj="boostProfileUnused">
+            <EuiEmptyPrompt
+              color="subdued"
+              titleSize="xxs"
+              title={
+                <h3>
+                  {i18n.translate('xpack.boost.profileDetails.unusedTitle', {
+                    defaultMessage: "This profile isn't in use",
                   })}
-                </EuiButton>
-              )
-            }
-            data-test-subj="boostProfileUnused"
-          />
+                </h3>
+              }
+              body={
+                // The prompt's own body text is a size larger than its title here.
+                <EuiText size="s">
+                  <p>
+                    {profile.type === 'indices'
+                      ? i18n.translate('xpack.boost.profileDetails.unusedIndicesBody', {
+                          defaultMessage:
+                            'No boost rules use it yet. Create one to boost indices with this profile.',
+                        })
+                      : i18n.translate('xpack.boost.profileDetails.unusedDataStreamsBody', {
+                          defaultMessage:
+                            'No boost rules use it yet. Create one to boost data streams with this profile.',
+                        })}
+                  </p>
+                </EuiText>
+              }
+              actions={
+                canEdit && (
+                  <EuiButton
+                    fill
+                    size="s"
+                    onClick={() => setFlyout('createRule')}
+                    data-test-subj="boostProfileDetailsCreateRule"
+                  >
+                    {i18n.translate('xpack.boost.profileDetails.createRule', {
+                      defaultMessage: 'Create boost rule',
+                    })}
+                  </EuiButton>
+                )
+              }
+            />
+          </DetailsSection>
         </DetailsBand>
       ) : (
         <DetailsBand hasDivider={false}>
-          <DetailsSection
-            title={i18n.translate('xpack.boost.profileDetails.rulesTitle', {
-              defaultMessage: 'Boost rules using this profile',
-            })}
-            data-test-subj="boostProfileRules"
-          >
+          <DetailsSection title={RULES_TITLE} data-test-subj="boostProfileRules">
             {/* Above the table: the search, and the same button as the rules tab to create a rule,
                 with this profile chosen. The rules all share the profile's type, so the tab's other
                 filters have nothing to filter. */}
