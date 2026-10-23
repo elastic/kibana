@@ -184,6 +184,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
+      removeAttachment: jest.fn(),
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) =>
@@ -449,7 +450,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       jest.useRealTimers();
     });
 
-    it('does not attach the dashboard when navigating to a dashboard with an existing conversation already open', async () => {
+    it('attaches the dashboard when navigating to a dashboard with an existing conversation already open', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.emitConversationChange({
@@ -460,7 +461,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
-      expect(deps.addAttachment).not.toHaveBeenCalled();
+      expect(deps.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ type: DASHBOARD_ATTACHMENT_TYPE })
+      );
     });
 
     it('attaches the dashboard when navigating to a dashboard with a new conversation already open', async () => {
@@ -479,7 +482,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       );
     });
 
-    it('does not attach the dashboard when opening an existing conversation from a dashboard', async () => {
+    it('attaches the dashboard when opening an existing conversation from a dashboard', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
@@ -490,7 +493,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
-      expect(deps.addAttachment).not.toHaveBeenCalled();
+      expect(deps.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ type: DASHBOARD_ATTACHMENT_TYPE })
+      );
     });
 
     it('attaches the dashboard when opening a new conversation from a dashboard', async () => {

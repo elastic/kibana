@@ -383,20 +383,26 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('does not create an unsaved attachment from manual changes in an existing conversation', () => {
+  it('stages the open dashboard in an existing conversation that does not have it', () => {
+    mockApi.savedObjectId$.next('dashboard-2');
     register();
-    emitConversationChange({ id: 'conversation-1', attachments: [] });
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [
+        createVersionedAttachment(
+          createDashboardAttachment({ id: 'dashboard-attachment-1', origin: 'dashboard-1' })
+        ),
+      ],
+    });
+    jest.runOnlyPendingTimers();
 
-    addAttachment.mockClear();
-    simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    expect(addAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'draft-attachment-id-1', origin: 'dashboard-2' })
+    );
 
-    expect(addAttachment).not.toHaveBeenCalled();
+    cleanup();
 
-    addAttachment.mockClear();
-    emitConversationChange({ id: 'conversation-2', attachments: [] });
-
-    expect(addAttachment).not.toHaveBeenCalled();
+    expect(removeAttachment).toHaveBeenCalledWith('draft-attachment-id-1');
   });
 
   it('regenerates the pending attachment id once the draft attachment is in the conversation', () => {

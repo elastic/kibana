@@ -100,6 +100,7 @@ export const applyAttachmentToDashboard = ({
   attachment: DashboardAttachment;
 }): Promise<void> =>
   store.queueApply(async () => {
+    store.linkedAttachmentIds.set(api, attachment.id);
     if (
       isAttachmentAppliedToDashboard({
         store,

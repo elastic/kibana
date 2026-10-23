@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject, Subject, type Observable } from 'rxjs';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common/types';
 
 export interface AppliedAttachmentBaseline {
@@ -22,6 +23,8 @@ export interface AppliedAttachmentBaseline {
  */
 export interface AppliedAttachmentsStore {
   baselines: Map<string, AppliedAttachmentBaseline>;
+  /** Attachment each open dashboard was applied from or staged as, so it stays linked before it has an origin. */
+  linkedAttachmentIds: WeakMap<DashboardApi, string>;
   /**
    * Runs the apply once the previous ones settled, so a baseline is never read from a
    * dashboard that is still applying another attachment.
@@ -45,6 +48,7 @@ export const createAppliedAttachmentsStore = (): AppliedAttachmentsStore => {
 
   return {
     baselines: new Map(),
+    linkedAttachmentIds: new WeakMap(),
     queueApply: (apply) => {
       // an idle queue starts the apply right away, so the dashboard updates in the same tick
       const isIdle = pendingApplies++ === 0;

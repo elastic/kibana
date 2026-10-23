@@ -29,6 +29,7 @@ import { toShownVersionKey, type AppliedAttachmentsStore } from './applied_attac
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
+import { getLinkedAttachment } from './linked_attachment';
 import type { IdGenerator } from '..';
 
 export interface DashboardAppIntegrationParams {
@@ -109,23 +110,22 @@ export const registerDashboardAppIntegration = ({
       return;
     }
 
-    const dashboardId = api.savedObjectId$.getValue();
-    const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
-
-    // update an existing linked attachment, or add a draft attachment only when the conversation is new
-    if (!syncAttachment && state.conversationId) {
-      return;
-    }
-
-    const attachmentId = syncAttachment?.id ?? draftAttachmentId.current;
     const dashboardData = getDashboardAttachmentData(api);
+    const linkedAttachment = getLinkedAttachment({
+      api,
+      store: appliedAttachments,
+      attachments: state.attachments,
+      dashboardData,
+    });
+    // changes become versions of the linked attachment, otherwise the dashboard is staged as a draft
+    const attachmentId = linkedAttachment?.id ?? draftAttachmentId.current;
 
     if (
-      syncAttachment &&
+      linkedAttachment &&
       isAttachmentAppliedToDashboard({
         store: appliedAttachments,
         dashboardData,
-        attachment: syncAttachment,
+        attachment: linkedAttachment,
       })
     ) {
       // the chat already has this state, so drop an edit staged before it was reverted, even one
@@ -144,9 +144,10 @@ export const registerDashboardAppIntegration = ({
     }
 
     stagedAttachmentData.set(attachmentId, dashboardData);
+    appliedAttachments.linkedAttachmentIds.set(api, attachmentId);
     agentBuilder.addAttachment({
       id: attachmentId,
-      origin: dashboardId,
+      origin: api.savedObjectId$.getValue() ?? linkedAttachment?.origin,
       type: DASHBOARD_ATTACHMENT_TYPE,
       data: dashboardData,
     });
@@ -243,6 +244,11 @@ export const registerDashboardAppIntegration = ({
     state.attachments = undefined;
     state.versionedAttachments = [];
     state.conversationId = undefined;
+    // the staged dashboard belongs to this dashboard, so drop it from the chat input when leaving;
+    // attachments already sent stay in the conversation
+    for (const attachmentId of stagedAttachmentData.keys()) {
+      agentBuilder.removeAttachment(attachmentId);
+    }
     stagedAttachmentData.clear();
     appliedAttachmentIds.clear();
   };
