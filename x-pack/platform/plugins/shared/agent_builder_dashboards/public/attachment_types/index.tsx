@@ -168,9 +168,9 @@ export const registerDashboardAttachmentUiDefinition = ({
           {
             label: isShownOnDashboard
               ? i18n.translate(
-                  'xpack.agentBuilderDashboards.attachments.dashboard.shownOnDashboardActionLabel',
+                  'xpack.agentBuilderDashboards.attachments.dashboard.previewingActionLabel',
                   {
-                    defaultMessage: 'Shown on the dashboard',
+                    defaultMessage: "You're previewing this",
                   }
                 )
               : i18n.translate(
@@ -181,7 +181,7 @@ export const registerDashboardAttachmentUiDefinition = ({
                 ),
             icon: 'eye',
             type: ActionButtonType.SECONDARY,
-            color: isShownOnDashboard ? 'primary' : undefined,
+            color: isShownOnDashboard ? 'success' : undefined,
             highlighted: isShownOnDashboard,
             handler: async () => {
               const { handlePreview } = await import('./async_services');
