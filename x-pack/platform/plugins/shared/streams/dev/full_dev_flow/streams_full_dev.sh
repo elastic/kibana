@@ -427,11 +427,16 @@ ensure_motel() {
   log "ensuring motel"
   local rendered="$STATE_DIR/motel.yaml"
   sed "s/__COLLECTOR_TAG__/$MOTEL_COLLECTOR_TAG/g" "$ASSETS/motel.yaml" > "$rendered"
-  kubectl_ctx apply -f "$rendered" >/dev/null
+  local applied
+  applied="$(kubectl_ctx apply -f "$rendered")"
   if [[ -n "${STREAMS_CONTROLLER:-}" && -x "$STREAMS_CONTROLLER/dev/registry-secret.sh" ]]; then
     NAMESPACE="$MOTEL_NS" bash "$STREAMS_CONTROLLER/dev/registry-secret.sh"
   else
     warn "could not create motel image pull secret; set STREAMS_CONTROLLER or run docker login + registry-secret.sh"
+  fi
+  # A changed ConfigMap does not restart the pod, so motel would keep serving the old input paths.
+  if grep -q 'configmap/motel-ingest-collector configured' <<<"$applied"; then
+    kubectl_ctx -n "$MOTEL_NS" rollout restart deploy/motel-ingest-collector >/dev/null
   fi
   kubectl_ctx -n "$MOTEL_NS" rollout status deploy/motel-ingest-collector --timeout=180s
   ensure_motel_forward
@@ -443,11 +448,16 @@ ensure_index_collector() {
   sed -e "s/__COLLECTOR_TAG__/$MOTEL_COLLECTOR_TAG/g" \
       -e "s/__TARGET_ID__/$TARGET_ID/g" \
       "$ASSETS/index.yaml" > "$rendered"
-  kubectl_ctx apply -f "$rendered" >/dev/null
+  local applied
+  applied="$(kubectl_ctx apply -f "$rendered")"
   if [[ -n "${STREAMS_CONTROLLER:-}" && -x "$STREAMS_CONTROLLER/dev/registry-secret.sh" ]]; then
     NAMESPACE="$INDEX_NS" bash "$STREAMS_CONTROLLER/dev/registry-secret.sh"
   else
     warn "could not create index-collector image pull secret; set STREAMS_CONTROLLER or run docker login + registry-secret.sh"
+  fi
+  # A changed ConfigMap does not restart the pod, so the collector would keep the old config.
+  if grep -q 'configmap/motel-index-collector configured' <<<"$applied"; then
+    kubectl_ctx -n "$INDEX_NS" rollout restart deploy/motel-index-collector >/dev/null
   fi
   kubectl_ctx -n "$INDEX_NS" rollout status deploy/motel-index-collector --timeout=180s
 }
@@ -635,6 +645,13 @@ sys.exit(10 if patched == original.rstrip("\n") + "\n" else 0)
 PY
 }
 
+# The unit's collector Deployment. Newer controllers name it `streams-<unit>`, older ones
+# `<unit>`, so look it up by label and take the newest.
+unit_deployment() {
+  kubectl_ctx -n "$UNIT_NS" get deploy -l "app.kubernetes.io/instance=$UNIT_ID" \
+    --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1
+}
+
 # Status and logs of the newest collector pod. `logs deploy/...` would pick any pod, often
 # an older healthy one, and hide why the new one fails.
 report_unready_collector() {
@@ -656,7 +673,7 @@ wait_for_collector_rollout() {
   local attempt started
   for attempt in 1 2 3 4 5 6; do
     started=$SECONDS
-    kubectl_ctx -n "$UNIT_NS" rollout status "deployment/$UNIT_ID" --timeout=180s && return 0
+    kubectl_ctx -n "$UNIT_NS" rollout status "$(unit_deployment)" --timeout=180s && return 0
     (( SECONDS - started < 20 )) || return 1
     log "rollout status failed at once, probably a stale condition. Retrying in 10s ($attempt/6)"
     sleep 10
@@ -729,7 +746,7 @@ wait_for_marker_docs() {
     sleep 5
   done
   warn "marker did not appear. Collector errors:"
-  kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --since=5m \
+  kubectl_ctx -n "$UNIT_NS" logs "$(unit_deployment)" --since=5m \
     | grep -E '"log.level":"(warn|error)"' | tail -20 || true
   return 1
 }
@@ -880,7 +897,7 @@ wait_for_data() {
     return 0
   fi
   warn "no demo documents yet. Collector logs:"
-  kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --since=5m \
+  kubectl_ctx -n "$UNIT_NS" logs "$(unit_deployment)" --since=5m \
     | grep -E '"log.level":"(warn|error)"' | tail -20 || true
   die "demo data did not appear (see above)"
 }
@@ -946,7 +963,7 @@ artifact_has_es_tls() {
 }
 
 collector_dropping_tls() {
-  kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --since=3m 2>/dev/null \
+  kubectl_ctx -n "$UNIT_NS" logs "$(unit_deployment)" --since=3m 2>/dev/null \
     | grep -q 'certificate is valid for host.docker.internal'
 }
 
