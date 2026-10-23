@@ -177,7 +177,7 @@
     },
     {
       "groupName": "axe-core",
-      "matchDepNames": ["axe-core", "@axe-core/playwright"],
+      "matchDepNames": ["axe-core"],
       "reviewers": ["team:appex-qa"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:QA"],
