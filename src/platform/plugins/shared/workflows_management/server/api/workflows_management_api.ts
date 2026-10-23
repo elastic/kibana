@@ -1065,6 +1065,21 @@ export class WorkflowsManagementApi {
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+    // A test run is still a top-level run: it holds the same concurrency slot and would
+    // fail the same way on an inherited step. Unsaved drafts of delegated-identity-only
+    // workflows reach the engine through this path, so gate it too.
+    this.assertRunnableStandalone(
+      toWorkflowExecutionEngineModel(
+        {
+          id: resolvedWorkflowId,
+          name: workflowJson.name,
+          enabled: workflowJson.enabled,
+          definition: workflowJson.definition,
+          yaml: resolvedYaml,
+        },
+        { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
+      )
+    );
     const { event, ...manualInputs } = inputs;
     const context = {
       event,

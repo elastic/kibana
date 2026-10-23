@@ -979,6 +979,39 @@ steps:
         expect(engine.executeWorkflow).not.toHaveBeenCalled();
       });
 
+      it('refuses a delegated-identity-only workflow before creating a test execution', async () => {
+        // The detail editor's Run button tests unsaved drafts through this path; a draft
+        // whose every path inherits would hold the same concurrency slot and fail the
+        // same way a saved manual run does.
+        mockWorkflowsService.validateWorkflow.mockResolvedValue({
+          valid: true,
+          diagnostics: [],
+          parsedWorkflow: {
+            name: 'Delegated draft',
+            enabled: true,
+            steps: [
+              {
+                name: 'child',
+                type: 'workflow.execute',
+                with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+              },
+            ],
+          } as any,
+        });
+
+        await expect(
+          api.testWorkflow({
+            workflowYaml: 'name: Delegated draft',
+            inputs,
+            spaceId,
+            request: mockRequest,
+          })
+        ).rejects.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+
+        const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+        expect(engine.executeWorkflow).not.toHaveBeenCalled();
+      });
+
       it('should separate event from manual inputs when executing workflow', async () => {
         const complexInputs = {
           event: { type: 'test-event', data: { foo: 'bar' } },
@@ -1446,7 +1479,7 @@ steps:
       expect(result).toEqual({ workflowExecutionId: 'test-exec-id' });
     });
 
-    it('refuses to run a workflow whose steps inherit a parent service account', async () => {
+    it('refuses to run a workflow whose every path inherits a parent service account', async () => {
       // Regression (elastic/kibana#297266): the managed Attack Discovery runner. It must be
       // refused before any execution is created — a doomed run cancels the scheduled one.
       const workflow = {
@@ -1519,6 +1552,51 @@ steps:
         inputs: {},
         request: mockRequest,
         preprocessingContext: {} as AlertPreprocessingContext,
+      });
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not refuse a workflow whose only inherit is conditional, even on the Run path', async () => {
+      // The Run route opts in to the gate, but the gate only refuses workflows that
+      // always need delegation. A conditional inherit may never execute standalone.
+      const conditionalInheritDefinition = {
+        version: '1',
+        name: 'Conditionally delegating',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'route',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'child',
+                type: 'workflow.execute',
+                with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+              },
+            ],
+            else: [],
+          },
+        ],
+      } as unknown as NonNullable<WorkflowExecutionEngineModel['definition']>;
+      const workflow = {
+        id: 'conditionally-delegating',
+        name: 'Conditionally delegating',
+        enabled: true,
+        definition: conditionalInheritDefinition,
+        yaml: 'name: Conditionally delegating',
+      } as WorkflowExecutionEngineModel;
+      mockPreprocessTriggerInputs.mockResolvedValue({});
+
+      await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs: {},
+        request: mockRequest,
+        preprocessingContext: {} as AlertPreprocessingContext,
+        rejectDelegatedIdentity: true,
       });
 
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
@@ -1620,10 +1698,11 @@ steps:
       );
     });
 
-    it('executes a workflow with a nested run-as-mode inherit step and no run_as (server-side caller is not gated)', async () => {
-      // Regression: shape of the proposals `system-create-proposal` workflow — an `inherit`
-      // step nested in if/else inside a while loop. `executeWorkflow` is the server-side
-      // entry (agent tools), so it must not be refused the way a manual Run of it is.
+    it('runs a workflow whose only inherit is conditional (server-side caller, not gated)', async () => {
+      // Regression (Libra P2): shape of the proposals `system-create-proposal` workflow —
+      // an `inherit` step in if/else inside a while loop. A standalone run may complete
+      // without ever executing it, so neither the Run gate nor anything else refuses it;
+      // `executeWorkflow` (agent tools) was never gated to begin with.
       const definition = {
         version: '1' as const,
         name: 'Create proposal shape',
