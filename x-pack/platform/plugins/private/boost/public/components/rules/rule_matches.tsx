@@ -100,25 +100,15 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
       // The list sets its own padding, inside its scroll area, so its scroll fade covers only that.
       panelPaddingSize="none"
       button={
-        // What the rule applies to, with how many matches a higher-ranked rule takes after it, which
-        // the list shows struck through.
-        <span>
-          <EuiLink
-            onClick={() => setIsOpen(!isOpen)}
-            aria-expanded={isOpen}
-            data-test-subj="boostRuleMatches"
-          >
-            {formatDataSourceCount(type, appliesTo)}
-          </EuiLink>
-          {outranked > 0 && (
-            <EuiTextColor color="subdued" data-test-subj="boostRuleOutranked">
-              {i18n.translate('xpack.boost.ruleMatches.outranked', {
-                defaultMessage: ' · {count} outranked',
-                values: { count: outranked },
-              })}
-            </EuiTextColor>
-          )}
-        </span>
+        // What the rule applies to. The list shows everything it matches, with what higher-ranked
+        // rules take struck through.
+        <EuiLink
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          data-test-subj="boostRuleMatches"
+        >
+          {formatDataSourceCount(type, appliesTo)}
+        </EuiLink>
       }
     >
       <EuiPopoverTitle paddingSize="s">
@@ -130,6 +120,22 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
           />
         ) : (
           title
+        )}
+        {/* How the matches add up to the count, when higher-ranked rules take some of them. It's
+            set in the regular weight, since it's in the title. */}
+        {outranked > 0 && (
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={{ fontWeight: euiTheme.font.weight.regular }}
+            data-test-subj="boostRuleOutranked"
+          >
+            {i18n.translate('xpack.boost.ruleMatches.outranked', {
+              defaultMessage:
+                '{matches, plural, one {# match} other {# matches}}, {outranked} outranked',
+              values: { matches, outranked },
+            })}
+          </EuiText>
         )}
       </EuiPopoverTitle>
       <div

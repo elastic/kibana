@@ -35,7 +35,7 @@ import { getDefaultRuleType } from '../../../common/presets';
 import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { RuleFlyout } from './rule_flyout';
 import { getAllUnmatchedLabel } from './rule_matches';
-import { DEFAULT_BADGE_LABEL } from './rules_tab';
+import { DEFAULT_BADGE_LABEL } from './rules_table';
 
 type FlyoutState = 'edit' | 'duplicate' | undefined;
 

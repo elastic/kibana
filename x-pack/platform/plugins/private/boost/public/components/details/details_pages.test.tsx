@@ -211,7 +211,17 @@ describe('ProfileDetailsPage', () => {
     expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('Rows per page: 10');
     // A higher-ranked rule keeps catalog-fall, so the profile only applies to catalog-spring. The
     // rules list what they apply it to on their own pages, so this page doesn't list them too.
-    expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('1 index');
+    const profileRules = within(screen.getByTestId('boostProfileRules'));
+    expect(profileRules.getByTestId('boostRuleMatches')).toHaveTextContent('1 index');
+    // The same table as the rules tab, with each rule's actions, but not its profile, which is
+    // this one.
+    expect(profileRules.getByTestId('editBoostRule')).toBeInTheDocument();
+    expect(profileRules.queryByText('Profile name')).not.toBeInTheDocument();
+    // It's searched like the rules tab, beside the same button to create a rule.
+    expect(profileRules.getByPlaceholderText('Search boost rules')).toBeInTheDocument();
+    expect(profileRules.getByTestId('boostProfileDetailsCreateRule')).toHaveTextContent(
+      'Create boost rule'
+    );
     expect(screen.queryByTestId('boostProfileUsedBy')).not.toBeInTheDocument();
     expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Applies to1 index');
     expect(screen.getByTestId('boostProfileStorageShare')).toHaveTextContent(/GB\d+% of project/);

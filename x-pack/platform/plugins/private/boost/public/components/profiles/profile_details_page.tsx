@@ -7,23 +7,13 @@
 
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_ID } from '../../../common/constants';
-import type { RuleCoverage } from '../../../common/resolution';
-import { getAppliedRules, getRuleCoverage } from '../../../common/resolution';
-import type { BoostProfile, BoostRule, IndicesBoostProfile } from '../../../common/types';
+import { getAppliedRules } from '../../../common/resolution';
+import type { BoostProfile, IndicesBoostProfile } from '../../../common/types';
 import { estimateDataSourcesVcuRange, estimateProjectVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
@@ -37,11 +27,11 @@ import {
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { ShareMeter, ShareMeterGroup } from '../details/share_meter';
-import { DetailsLink } from '../details_link';
 import { PROFILE_TYPE_LABELS, formatBoost, formatDataSourceCount } from '../format';
 import { LoadError } from '../load_error';
 import { RuleFlyout } from '../rules/rule_flyout';
-import { DEFAULT_BADGE_LABEL, getProfileRulesLocation } from '../rules/rules_tab';
+import { getProfileRulesLocation } from '../rules/rules_tab';
+import { RulesTable } from '../rules/rules_table';
 import { DeleteProfileModal } from './delete_profile_modal';
 import { PhaseCards } from './phase_cards';
 import { INDEX_OPTIONS, ProfileFlyout } from './profile_flyout';
@@ -58,8 +48,6 @@ const MAX_BOOST_LABEL = i18n.translate('xpack.boost.profileDetails.maxBoost', {
 });
 
 type FlyoutState = 'edit' | 'duplicate' | 'createRule' | undefined;
-
-type RuleRow = BoostRule & RuleCoverage;
 
 const IndicesSettings = ({ profile }: { profile: IndicesBoostProfile }) => {
   const optionValues = {
@@ -85,7 +73,6 @@ const IndicesSettings = ({ profile }: { profile: IndicesBoostProfile }) => {
 /** A boost profile's settings, the rules that use it, and what it applies to. */
 export const ProfileDetailsPage = () => {
   const { application } = useBoostServices();
-  const { euiTheme } = useEuiTheme();
   const canEdit = application.capabilities[PLUGIN_ID]?.save === true;
   const history = useHistory();
   const { profileName: name } = useParams<{ profileName: string }>();
@@ -106,18 +93,7 @@ export const ProfileDetailsPage = () => {
   }
 
   const { rules, profiles, data_sources: dataSources } = state;
-  const coverage = getRuleCoverage(dataSources, rules, profiles);
-  const profileRules: RuleRow[] = rules
-    .filter(({ boost_profile: profileName }) => profileName === name)
-    .map((rule) => ({
-      ...rule,
-      ...(coverage.get(rule.name) ?? {
-        matches: 0,
-        matchedNames: [],
-        appliesTo: 0,
-        supersededBy: new Map(),
-      }),
-    }));
+  const profileRules = rules.filter(({ boost_profile: profileName }) => profileName === name);
   const appliedRules = getAppliedRules(dataSources, rules, profiles);
   const usedBy = dataSources
     .filter((dataSource) => appliedRules.get(dataSource.name)?.boost_profile === name)
@@ -141,51 +117,6 @@ export const ProfileDetailsPage = () => {
     run: () => setFlyout('duplicate'),
     testId: 'boostProfileDetailsDuplicate',
   };
-
-  const rulesColumns: Array<EuiBasicTableColumn<RuleRow>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.boost.profileDetails.ruleNameColumn', {
-        defaultMessage: 'Rule name',
-      }),
-      render: (ruleName: string, { is_builtin: isBuiltin }: RuleRow) => (
-        <span>
-          <DetailsLink kind="rule" name={ruleName} />
-          {isBuiltin && (
-            <>
-              {' '}
-              <EuiBadge>{DEFAULT_BADGE_LABEL}</EuiBadge>
-            </>
-          )}
-        </span>
-      ),
-    },
-    {
-      field: 'priority',
-      name: i18n.translate('xpack.boost.profileDetails.priorityColumn', {
-        defaultMessage: 'Priority',
-      }),
-      width: '7em',
-      dataType: 'number',
-    },
-    // Where each rule applies this profile, rather than all it matches, which can include what
-    // higher-ranked rules apply other profiles to.
-    {
-      field: 'appliesTo',
-      name: i18n.translate('xpack.boost.profileDetails.appliesToColumn', {
-        defaultMessage: 'Applies to',
-      }),
-      width: '12em',
-      render: (appliesTo: number) =>
-        appliesTo > 0 ? (
-          formatDataSourceCount(profile.type, appliesTo)
-        ) : (
-          <EuiTextColor color={euiTheme.colors.textDisabled}>
-            {formatDataSourceCount(profile.type, 0)}
-          </EuiTextColor>
-        ),
-    },
-  ];
 
   return (
     <DetailsPage
@@ -384,30 +315,44 @@ export const ProfileDetailsPage = () => {
             title={i18n.translate('xpack.boost.profileDetails.rulesTitle', {
               defaultMessage: 'Boost rules using this profile',
             })}
-            titleAppend={
-              canEdit && (
-                <EuiButton
-                  size="s"
-                  onClick={() => setFlyout('createRule')}
-                  data-test-subj="boostProfileDetailsCreateRule"
-                >
-                  {i18n.translate('xpack.boost.profileDetails.createRule', {
-                    defaultMessage: 'Create boost rule',
-                  })}
-                </EuiButton>
-              )
-            }
             data-test-subj="boostProfileRules"
           >
-            <EuiInMemoryTable
+            {/* The same table as the rules tab, without the profile, which is this page's. Its
+                rules all share the profile's type, so only the search remains of the tab's
+                filters, beside the same button to create a rule, with this profile chosen. */}
+            <RulesTable
+              rules={rules}
+              profiles={profiles}
+              dataSources={dataSources}
+              canEdit={canEdit}
+              filter={({ boost_profile: profileName }) => profileName === name}
+              showsProfile={false}
+              search={{
+                compressed: true,
+                box: {
+                  incremental: true,
+                  placeholder: i18n.translate('xpack.boost.profileDetails.searchRules', {
+                    defaultMessage: 'Search boost rules',
+                  }),
+                },
+                toolsRight: canEdit
+                  ? [
+                      <EuiButton
+                        key="create"
+                        fill
+                        size="s"
+                        onClick={() => setFlyout('createRule')}
+                        data-test-subj="boostProfileDetailsCreateRule"
+                      >
+                        {i18n.translate('xpack.boost.profileDetails.createRule', {
+                          defaultMessage: 'Create boost rule',
+                        })}
+                      </EuiButton>,
+                    ]
+                  : undefined,
+              }}
               tableCaption={i18n.translate('xpack.boost.profileDetails.rulesCaption', {
                 defaultMessage: 'Boost rules using this profile',
-              })}
-              items={profileRules}
-              columns={rulesColumns}
-              pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
-              noItemsMessage={i18n.translate('xpack.boost.profileDetails.noRules', {
-                defaultMessage: 'No boost rules use this profile yet.',
               })}
             />
           </DetailsSection>

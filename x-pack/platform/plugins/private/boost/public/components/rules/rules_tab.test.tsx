@@ -210,12 +210,13 @@ describe('RulesTab matches', () => {
     renderTab('/rules');
 
     const picked = getRow('picked');
-    // Of its two matches, a higher-ranked rule takes one.
+    // Of its two matches, a higher-ranked rule takes one, which only its list of matches tells.
     expect(picked.getByTestId('boostRuleMatches')).toHaveTextContent('1 index');
-    expect(picked.getByTestId('boostRuleOutranked')).toHaveTextContent('1 outranked');
+    expect(picked.queryByTestId('boostRuleOutranked')).not.toBeInTheDocument();
     await userEvent.click(picked.getByTestId('boostRuleMatches'));
 
     const popover = within(screen.getByRole('dialog'));
+    expect(popover.getByTestId('boostRuleOutranked')).toHaveTextContent('2 matches, 1 outranked');
     expect(popover.getByText('Using selected indices')).toBeInTheDocument();
     expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
     expect(popover.getByTestId('boostSupersedingRule')).toHaveTextContent('products-first');
@@ -244,7 +245,7 @@ describe('RulesTab matches', () => {
     expect(popover).not.toHaveTextContent('Using selected');
     expect(popover).toHaveTextContent('archives-2024');
     // No higher-ranked rule takes any of its matches, so there's nothing outranked to note.
-    expect(getRow('archives').queryByTestId('boostRuleOutranked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('boostRuleOutranked')).not.toBeInTheDocument();
   });
 
   it("doesn't show a pattern for a rule that names its targets", async () => {
