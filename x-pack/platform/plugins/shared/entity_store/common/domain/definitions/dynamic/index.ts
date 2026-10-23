@@ -32,6 +32,7 @@ export type {
 export {
   MAX_DYNAMIC_IDENTITY_FIELDS,
   assertDynamicDefinitionRules,
+  getIdentityCompositions,
   getIdentityFields,
   getPresenceFilter,
 } from './dynamic_definition_rules';
