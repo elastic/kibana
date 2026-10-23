@@ -42,6 +42,14 @@ export const pullImage = (image: string): void => {
   runDocker(['pull', image]);
 };
 
+export const isImageAvailableInRegistry = (image: string): boolean => {
+  const result = spawnSync('docker', ['manifest', 'inspect', image], {
+    encoding: 'utf8',
+    timeout: 60_000,
+  });
+  return result.status === 0;
+};
+
 export const removeContainer = (name: string): void => {
   spawnSync('docker', ['rm', '-f', name], { encoding: 'utf8' });
 };
