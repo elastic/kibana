@@ -33,7 +33,8 @@ import {
   ExecutionHistoryClient,
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
-import { EventOriginToken } from '../lib/event_origin/token';
+import { EventOriginActorToken } from '../lib/event_origin/token';
+import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
@@ -106,6 +107,8 @@ import { WorkflowService } from '../lib/services/workflow_service/workflow_servi
 import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
 import { LicenseService } from '../lib/services/license_service/license_service';
 import { LicenseServiceToken } from '../lib/services/license_service/tokens';
+import { EbtService } from '../lib/services/ebt_service/ebt_service';
+import { EbtServiceToken } from '../lib/services/ebt_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -129,7 +132,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
   bind(InternalRulesClientProvider).toSelf().inSingletonScope();
   bind(InternalRulesClient).toSelf().inSingletonScope();
-  bind(EventOriginToken).toConstantValue('user');
+  bind(EventOriginActorToken).toConstantValue('user');
+  bind(RulesClientOptionsToken).toConstantValue({});
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
@@ -196,6 +200,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(WorkflowServiceToken).toService(WorkflowService);
   bind(LicenseService).toSelf().inSingletonScope();
   bind(LicenseServiceToken).toService(LicenseService);
+  bind(EbtService).toSelf().inSingletonScope();
+  bind(EbtServiceToken).toService(EbtService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)

@@ -205,6 +205,7 @@ export const createApiKey = async (
 
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
   const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, options, user);
+  const refreshOptions = options?.refreshApiKey === false ? { refresh: false } : {};
 
   if (cloneApiKey) {
     return grantApiKeysForTaskTypes({
@@ -215,7 +216,7 @@ export const createApiKey = async (
         security.authc.apiKeys.cloneAsInternalUser(request, {
           name,
           metadata: { managed: true },
-          refresh: false,
+          ...refreshOptions,
         }),
     });
   }
@@ -262,7 +263,7 @@ export const createApiKey = async (
           role_descriptors: {},
           metadata: { managed: true },
         },
-        { refresh: false }
+        refreshOptions
       ),
   });
 };

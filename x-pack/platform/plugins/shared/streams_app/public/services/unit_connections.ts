@@ -147,7 +147,12 @@ const replacePipelines = (unit: Unit, pipelines: Unit['unit']['pipelines']): Uni
 const findSourcePipelineIndex = (pipelines: Unit['unit']['pipelines'], sourceId: string): number =>
   pipelines.findIndex((pipeline) => readIdentifiers(pipeline.config, 'sources').includes(sourceId));
 
-const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit => {
+const writePipeline = (
+  unit: Unit,
+  pipelineIndex: number,
+  config: PipelineConfig,
+  supportedTelemetry?: UnitPipeline['supported_telemetry']
+): Unit => {
   const pipelines = unit.unit.pipelines.flatMap((pipeline, index) => {
     if (index !== pipelineIndex) {
       return [pipeline];
@@ -155,9 +160,30 @@ const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig
     if (!pipelineForwards(config)) {
       return [];
     }
-    return [{ ...pipeline, config }];
+    return [
+      {
+        ...pipeline,
+        config,
+        ...(supportedTelemetry ? { supported_telemetry: [...supportedTelemetry] } : {}),
+      },
+    ];
   });
   return replacePipelines(unit, pipelines);
+};
+
+const unionTelemetry = (
+  current: UnitPipeline['supported_telemetry'],
+  added: UnitPipeline['supported_telemetry']
+): UnitPipeline['supported_telemetry'] => {
+  const seen = new Set(current);
+  const next = [...current];
+  for (const signal of added) {
+    if (!seen.has(signal)) {
+      seen.add(signal);
+      next.push(signal);
+    }
+  }
+  return next;
 };
 
 const usedIds = (unit: Unit): Set<string> => {
@@ -326,12 +352,6 @@ export const canConnectSourceToDestination = (
     return true;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  if (fit !== 'unknown') {
-    const pipelineSignals = new Set(pipeline.supported_telemetry);
-    if (!fit.some((signal) => pipelineSignals.has(signal))) {
-      return false;
-    }
-  }
   if (pipelineUsesRoutes(pipeline)) {
     const routes = readRoutes(pipeline.config);
     return !routesIncludeDestination(routes, destinationId) && !catchAllBlocksDestination(routes);
@@ -356,15 +376,19 @@ export const connectSourceToDestination = (
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
   const sources = readIdentifiers(pipeline.config, 'sources');
+  const nextTelemetry = unionTelemetry(
+    pipeline.supported_telemetry,
+    pipelineTelemetry(unit, sourceId, destinationId)
+  );
   if (pipelineUsesRoutes(pipeline)) {
     const routes = addDestinationToRoutes(readRoutes(pipeline.config), destinationId);
     if (sources.length === 1) {
-      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes));
+      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes), nextTelemetry);
     }
     return appendSourcePipeline(
       detachSource(unit, pipelineIndex, sourceId),
       sourceId,
-      pipeline.supported_telemetry,
+      nextTelemetry,
       [...processorEntries(pipeline.config), { name: 'routes', value: routes }]
     );
   }
@@ -373,13 +397,14 @@ export const connectSourceToDestination = (
     return writePipeline(
       unit,
       pipelineIndex,
-      withIdentifiers(pipeline.config, 'destinations', [...destinations, destinationId])
+      withIdentifiers(pipeline.config, 'destinations', [...destinations, destinationId]),
+      nextTelemetry
     );
   }
   return appendSourcePipeline(
     detachSource(unit, pipelineIndex, sourceId),
     sourceId,
-    pipeline.supported_telemetry,
+    nextTelemetry,
     [
       ...processorEntries(pipeline.config),
       { name: 'destinations', value: [...destinations, destinationId] },
