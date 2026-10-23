@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
@@ -17,11 +19,29 @@ import {
   buildInvestigationConversation,
   buildInvestigationRound,
 } from '../decision_trees/investigation_round';
-import { DECISION_TREE_LEARNING_TOOL_IDS } from '../tools/decision_tree';
+import {
+  DECISION_TREE_LEARNING_TOOL_IDS,
+  DECISION_TREE_SUBMIT_TOOL_ID,
+} from '../tools/decision_tree';
 import { withToolResults } from './cortex_optimize';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
+const SUBMIT_ARGUMENTS_JSON_LIMIT = 100_000;
+
+/** Arguments of each submit call, so a micro-eval can grade them without a persisted conversation. */
+export const submitArgumentsJson = (
+  steps: readonly ConversationRoundStep[] | undefined
+): string => {
+  const submissions = (steps ?? [])
+    .filter(isToolCallStep)
+    .filter((step) => step.tool_id === DECISION_TREE_SUBMIT_TOOL_ID)
+    .map((step) => step.params);
+  const json = JSON.stringify(submissions);
+  if (json.length <= SUBMIT_ARGUMENTS_JSON_LIMIT) return json;
+  const last = JSON.stringify(submissions.slice(-1));
+  return last.length <= SUBMIT_ARGUMENTS_JSON_LIMIT ? last : '[]';
+};
 
 export const decisionTreeReinforceStepDefinition = ({
   getAgentBuilder,
@@ -68,13 +88,18 @@ export const decisionTreeReinforceStepDefinition = ({
     outputSchema: z.object({
       message: z.string().describe("The reinforcement agent's final response."),
       skipped: z.boolean().optional(),
+      submissions_json: z
+        .string()
+        .describe(
+          'JSON array of nightshift_submit_optimizer_result arguments, in call order. Empty when the agent did not submit.'
+        ),
     }),
     handler: async (context) => {
       // The combined optimize workflow installs with Cortex or Memory, so this step is registered
       // even when the tree feature is off.
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped decision tree reinforcement (flag off)');
-        return { output: { message: '', skipped: true } };
+        return { output: { message: '', skipped: true, submissions_json: '[]' } };
       }
 
       const agentBuilder = getAgentBuilder();
@@ -135,6 +160,11 @@ export const decisionTreeReinforceStepDefinition = ({
         },
       });
 
-      return { output: { message: result.round.response.message } };
+      return {
+        output: {
+          message: result.round.response.message,
+          submissions_json: submitArgumentsJson(result.round.steps),
+        },
+      };
     },
   });
