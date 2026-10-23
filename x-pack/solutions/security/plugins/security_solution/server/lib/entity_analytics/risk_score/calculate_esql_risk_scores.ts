@@ -45,6 +45,10 @@ import {
 } from './constants';
 
 import { filterFromRange } from './helpers';
+import {
+  RESOLUTION_RELATIONSHIP_TYPE,
+  SELF_RELATIONSHIP_TYPE,
+} from './maintainer/lookup/lookup_types';
 import { applyScoreModifiers } from './apply_score_modifiers';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
@@ -759,6 +763,10 @@ export const getResolutionScoreESQLByIds = (
  * run's rows are still there: a target whose aliases have all moved elsewhere keeps its old row,
  * and without the run filter it would be scored again as a group of one, taking a slot under the
  * page's LIMIT from a current group.
+ *
+ * With `entityStoreIndex`, each alert's target comes from its entity's store document instead
+ * (`resolved_to`, or the entity itself). Nothing then tells a target from an entity in no group,
+ * so the caller must limit the alerts to the page's group members.
  */
 export const getResolutionScoreESQLByRange = (
   entityType: EntityType,
@@ -767,7 +775,8 @@ export const getResolutionScoreESQLByRange = (
   sampleSize: number,
   pageSize: number,
   alertsIndex: string,
-  lookupIndex: string
+  lookupIndex: string,
+  { entityStoreIndex }: { entityStoreIndex?: string } = {}
 ): string => {
   assertEsqlInterpolatableIds(
     [bounds.lower, bounds.upper, calculationRunId].filter(
@@ -785,13 +794,16 @@ export const getResolutionScoreESQLByRange = (
   return buildResolutionScoreESQL({
     entityType,
     // Alerts with no lookup row have a null run ID after the join, so this also drops them.
-    membershipClause: `| WHERE calculation_run_id == "${escapeEsqlStringLiteral(
-      calculationRunId
-    )}" AND ${rangeClause}`,
+    membershipClause: entityStoreIndex
+      ? `| WHERE ${rangeClause}`
+      : `| WHERE calculation_run_id == "${escapeEsqlStringLiteral(
+          calculationRunId
+        )}" AND ${rangeClause}`,
     sampleSize,
     pageSize,
     alertsIndex,
     lookupIndex,
+    entityStoreIndex,
   });
 };
 
@@ -802,6 +814,7 @@ const buildResolutionScoreESQL = ({
   pageSize,
   alertsIndex,
   lookupIndex,
+  entityStoreIndex,
 }: {
   entityType: EntityType;
   /** Filters joined alert rows down to the page's resolution groups. */
@@ -810,6 +823,8 @@ const buildResolutionScoreESQL = ({
   pageSize: number;
   alertsIndex: string;
   lookupIndex: string;
+  /** Joins the entity store instead of the lookup index to find each alert's resolution target. */
+  entityStoreIndex?: string;
 }): string => {
   const definition = getBuiltInEntityDefinition(entityType);
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
@@ -834,21 +849,39 @@ const buildResolutionScoreESQL = ({
   // happens for alerts that belong to the page's groups.
   // The alert timestamp is renamed before the join because lookup rows have their own
   // @timestamp, which would otherwise replace the alert's (and null it on unmatched rows).
-  const query = /* esql */ `
+  const alertFieldsRename = `| RENAME kibana.alert.risk_score as risk_score,
+             kibana.alert.rule.name as rule_name,
+             kibana.alert.rule.uuid as rule_id,
+             kibana.alert.uuid as alert_id,
+             event.kind as category`;
+  // Store documents carry fields alerts have too (such as \`event.kind\` and \`entity.id\`), and
+  // joined fields replace the alert's, so only the alert columns used below go into that join.
+  const membershipJoin = entityStoreIndex
+    ? `${alertFieldsRename}
+    | KEEP entity_id, time, _index, risk_score, rule_name, rule_id, alert_id, category
+    | LOOKUP JOIN ${entityStoreIndex} ON entity_id == entity.id
+    | EVAL resolution_target_id = COALESCE(entity.relationships.resolution.resolved_to, entity_id),
+           relationship_type = CASE(
+             entity.relationships.resolution.resolved_to IS NULL,
+             "${SELF_RELATIONSHIP_TYPE}",
+             "${RESOLUTION_RELATIONSHIP_TYPE}"
+           )
+    ${membershipClause}`
+    : `| LOOKUP JOIN ${lookupIndex} ON entity_id
+    ${membershipClause}
+    ${alertFieldsRename}`;
+
+  const alertsSource = `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
     ${euidEvalClause}
     ${storedEuidCoalesceClause}
-    | RENAME @timestamp as time
-    | LOOKUP JOIN ${lookupIndex} ON entity_id
-    ${membershipClause}
-    | RENAME kibana.alert.risk_score as risk_score,
-             kibana.alert.rule.name as rule_name,
-             kibana.alert.rule.uuid as rule_id,
-             kibana.alert.uuid as alert_id,
-             event.kind as category
+    | RENAME @timestamp as time`;
+
+  const query = /* esql */ `${alertsSource}
+    ${membershipJoin}
     | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)

@@ -49,6 +49,11 @@ interface ScoreResolutionEntitiesParams {
   alertFilters: QueryDslQueryContainer[];
   /** Collects each page's step times; pass one in to read them after the stage. */
   pageTimings?: PageStepTimings;
+  /**
+   * Find each alert's resolution target by joining the entity store rather than the lookup
+   * index. Full runs only; it relies on the page's member filter to leave out entities in no group.
+   */
+  joinEntityStore?: boolean;
 }
 
 interface ResolutionPageResult {
@@ -140,6 +145,7 @@ export const scoreResolutionPage = async (
     calculationRunId,
     watchlistConfigs,
     alertFilters,
+    joinEntityStore = false,
   }: ScoreResolutionEntitiesParams,
   { pageNumber, resolutionTargetIds, bounds, timer }: ResolutionPageTask
 ): Promise<EntityRiskScoreRecord[]> => {
@@ -161,11 +167,16 @@ export const scoreResolutionPage = async (
     );
   }
 
+  // The store join needs the member filter to leave out entities in no group, so a page too big for
+  // one keeps the lookup join.
+  const entityStoreIndex =
+    joinEntityStore && memberFilter ? await crudClient.latestIndexName() : undefined;
   const { parsedScores, esqlRows, profileSummary } = await runResolutionScoringQuery({
     esClient,
     entityType,
     resolutionTargetIds,
     bounds,
+    entityStoreIndex,
     // A full run shares its ID with the lookup rows Phase 0 wrote for it.
     calculationRunId,
     sampleSize,
@@ -447,6 +458,7 @@ const runResolutionScoringQuery = async ({
   entityType,
   resolutionTargetIds,
   bounds,
+  entityStoreIndex,
   calculationRunId,
   sampleSize,
   pageSize,
@@ -460,6 +472,7 @@ const runResolutionScoringQuery = async ({
   entityType: EntityType;
   resolutionTargetIds: string[];
   bounds: { lower?: string; upper: string } | undefined;
+  entityStoreIndex: string | undefined;
   calculationRunId: string;
   sampleSize: number;
   pageSize: number;
@@ -481,7 +494,8 @@ const runResolutionScoringQuery = async ({
         sampleSize,
         pageSize,
         alertsIndex,
-        lookupIndex
+        lookupIndex,
+        { entityStoreIndex }
       )
     : getResolutionScoreESQLByIds(
         entityType,

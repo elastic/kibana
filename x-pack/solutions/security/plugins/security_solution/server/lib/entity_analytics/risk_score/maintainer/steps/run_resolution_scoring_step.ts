@@ -48,6 +48,8 @@ interface RunResolutionScoringParams {
   entityStoreWriteChunks?: number;
   /** How many pages are scored and written at the same time. */
   pagesInFlight?: number;
+  /** Find each alert's resolution target by joining the entity store rather than the lookup index. */
+  joinEntityStore?: boolean;
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
   /** Collects each page's step times; pass one in to read them after the stage. */
@@ -75,6 +77,7 @@ export const runResolutionScoringStep = async ({
   entityStoreRefresh,
   entityStoreWriteChunks,
   pagesInFlight = 1,
+  joinEntityStore,
   collectScores,
   pageTimings = createPageStepTimings(),
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
@@ -141,6 +144,7 @@ export const runResolutionScoringStep = async ({
     targetEntityIds,
     alertFilters,
     pageTimings,
+    joinEntityStore,
   };
 
   await forEachConcurrently(discoverResolutionPages(scoringParams), pagesInFlight, async (task) => {

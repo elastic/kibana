@@ -201,6 +201,37 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).not.toContain('resolution_target_id IS NOT NULL');
     });
 
+    it("finds each alert's target in the entity store when given its index", () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:target-a', upper: 'user:target-m' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default',
+        { entityStoreIndex: '.entities.v2.latest.default-00001' }
+      );
+
+      expect(query).toContain(
+        '| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity_id == entity.id'
+      );
+      expect(query).toContain(
+        'resolution_target_id = COALESCE(entity.relationships.resolution.resolved_to, entity_id)'
+      );
+      expect(query).not.toContain('.entity_analytics.risk_score.lookup-default');
+      expect(query).not.toContain('calculation_run_id');
+      expect(query).toContain(
+        '| WHERE resolution_target_id > "user:target-a" AND resolution_target_id <= "user:target-m"'
+      );
+      // Store documents carry fields alerts have too, such as event.kind and entity.id, so only
+      // the alert columns used later go into the join.
+      expect(query.indexOf('event.kind as category')).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
+      expect(query.indexOf('| KEEP entity_id, time, _index')).toBeLessThan(
+        query.indexOf('| LOOKUP JOIN')
+      );
+    });
+
     it('escapes quote and backslash characters in resolution target bounds', () => {
       const query = getResolutionScoreESQLByRange(
         EntityType.user,
