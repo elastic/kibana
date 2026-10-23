@@ -13,7 +13,9 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { getSLOSummaryTransformId } from '../../common/constants';
+import { REQUEST_RETRY_OPTIONS } from '../utils/retry';
 import { DefaultSummaryTransformManager } from './summay_transform_manager';
+import type { TransformManagerOptions } from './transform_manager';
 import { DefaultSummaryTransformGenerator } from './summary_transform_generator/summary_transform_generator';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 
@@ -38,11 +40,12 @@ describe('SummaryTransformManager', () => {
     loggerMock = loggingSystemMock.createLogger();
   });
 
-  const createManager = () =>
+  const createManager = (options?: TransformManagerOptions) =>
     new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(false),
       scopedClusterClientMock,
-      loggerMock
+      loggerMock,
+      options
     );
 
   describe('Install', () => {
@@ -58,6 +61,79 @@ describe('SummaryTransformManager', () => {
       expect(
         scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
       ).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('Abort signal', () => {
+    const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+
+    it('forwards the call signal to putTransform', async () => {
+      const controller = new AbortController();
+
+      await createManager().install(slo, { signal: controller.signal });
+
+      const [[, options]] =
+        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform.mock.calls;
+      expect(options?.signal).toBe(controller.signal);
+    });
+
+    it('forwards the call signal to startTransform', async () => {
+      const controller = new AbortController();
+
+      await createManager().start('slo-summary-transform-id', { signal: controller.signal });
+
+      const [[, options]] =
+        scopedClusterClientMock.asSecondaryAuthUser.transform.startTransform.mock.calls;
+      expect(options?.signal).toBe(controller.signal);
+    });
+
+    it('forwards the call signal to deleteTransform', async () => {
+      const controller = new AbortController();
+
+      await createManager().uninstall('slo-summary-transform-id', { signal: controller.signal });
+
+      const [[, options]] =
+        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mock.calls;
+      expect(options?.signal).toBe(controller.signal);
+    });
+
+    it('forwards the call signal to getTransform', async () => {
+      scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mockResolvedValue({
+        count: 0,
+        transforms: [],
+      });
+      const controller = new AbortController();
+
+      await createManager().getVersion('slo-summary-transform-id', { signal: controller.signal });
+
+      const [[, options]] =
+        scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mock.calls;
+      expect(options?.signal).toBe(controller.signal);
+    });
+
+    it('uses the constructor signal when no call signal is given', async () => {
+      const controller = new AbortController();
+
+      await createManager({ signal: controller.signal }).uninstall('slo-summary-transform-id');
+
+      const [[, options]] =
+        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mock.calls;
+      expect(options?.signal).toBe(controller.signal);
+    });
+  });
+
+  describe('Retry options', () => {
+    it('uses the retry options given to the constructor', async () => {
+      scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mockRejectedValue(
+        new EsErrors.ConnectionError('irrelevant')
+      );
+
+      await expect(
+        createManager({ retryOptions: REQUEST_RETRY_OPTIONS }).uninstall('slo-summary-transform-id')
+      ).rejects.toThrow('irrelevant');
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
+      ).toHaveBeenCalledTimes(3);
     });
   });
 });

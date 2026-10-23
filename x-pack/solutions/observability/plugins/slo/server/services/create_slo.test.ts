@@ -18,6 +18,8 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { SUMMARY_TEMP_INDEX_NAME } from '../../common/constants';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
 import type { SLODefinition } from '../domain/models';
+import { SLOOperationTimeout } from '../errors';
+import { REQUEST_DEADLINE_MS } from '../utils/retry';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -110,6 +112,36 @@ describe('CreateSLO', () => {
       expect(mockScopedClusterClient.asCurrentUser.index.mock.calls[0]).toMatchSnapshot();
 
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
+    });
+
+    it('passes the deadline signal to every Elasticsearch operation', async () => {
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+      const deadlineSignal = { signal: expect.objectContaining({ aborted: false }) };
+
+      await createSLO.execute(sloParams);
+
+      expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockScopedClusterClient.asCurrentUser.index).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockTransformManager.install).toHaveBeenCalledWith(expect.any(Object), deadlineSignal);
+      expect(mockSummaryTransformManager.install).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockTransformManager.start).toHaveBeenCalledWith(expect.any(String), deadlineSignal);
+      expect(mockSummaryTransformManager.start).toHaveBeenCalledWith(
+        expect.any(String),
+        deadlineSignal
+      );
     });
 
     it('overrides the default values when provided', async () => {
@@ -245,7 +277,7 @@ describe('CreateSLO', () => {
       expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
         expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
-        { ignore: [404] }
+        expect.objectContaining({ ignore: [404] })
       );
     });
 
@@ -324,6 +356,78 @@ describe('CreateSLO', () => {
 
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
       expect(mockRepository.deleteById).toHaveBeenCalled();
+    });
+
+    it('throws SLOOperationTimeout and rolls back when the deadline is exceeded', async () => {
+      mockTransformManager.install.mockImplementationOnce(
+        (_slo, { signal } = {}) =>
+          new Promise((_resolve, reject) => {
+            signal?.addEventListener('abort', () => reject(new Error('Request aborted')));
+          })
+      );
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const assertion = expect(createSLO.execute(sloParams)).rejects.toBeInstanceOf(
+        SLOOperationTimeout
+      );
+      await jest.advanceTimersByTimeAsync(REQUEST_DEADLINE_MS);
+      await assertion;
+
+      expect(mockTransformManager.start).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(2);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteById).toHaveBeenCalledTimes(1);
+    });
+
+    it('rolls back resources in parallel and deletes the definition last', async () => {
+      const pendingUninstall = Promise.withResolvers<void>();
+      mockTransformManager.install.mockRejectedValueOnce(
+        new Error('Rollup transform install error')
+      );
+      mockTransformManager.uninstall.mockReturnValueOnce(pendingUninstall.promise);
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const assertion = expect(createSLO.execute(sloParams)).rejects.toThrow(
+        'Rollup transform install error'
+      );
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(expect.any(String), {
+        signal: expect.objectContaining({ aborted: false }),
+      });
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(2);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
+
+      pendingUninstall.resolve();
+      await assertion;
+
+      expect(mockRepository.deleteById).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps rolling back when a rollback operation fails', async () => {
+      mockTransformManager.install.mockRejectedValueOnce(
+        new Error('Rollup transform install error')
+      );
+      mockSummaryTransformManager.uninstall.mockRejectedValueOnce(new Error('uninstall failed'));
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrow('Rollup transform install error');
+
+      expect(mockRepository.deleteById).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Rollback operation failed.',
+        expect.objectContaining({
+          labels: expect.objectContaining({ error_type: 'rollback_failed' }),
+        })
+      );
     });
   });
 });

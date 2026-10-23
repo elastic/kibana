@@ -58,6 +58,7 @@ import { OrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanu
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
+import { REQUEST_RETRY_OPTIONS } from './utils/retry';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -244,12 +245,14 @@ export class SLOPlugin
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless, isCpsAvailable),
             scopedClusterClient,
-            logger
+            logger,
+            { retryOptions: REQUEST_RETRY_OPTIONS }
           );
           const summaryTransformManager = new DefaultSummaryTransformManager(
             new DefaultSummaryTransformGenerator(this.isServerless, isCpsAvailable),
             scopedClusterClient,
-            logger
+            logger,
+            { retryOptions: REQUEST_RETRY_OPTIONS }
           );
 
           return {
