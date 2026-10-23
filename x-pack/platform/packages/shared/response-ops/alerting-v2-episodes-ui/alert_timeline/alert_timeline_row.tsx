@@ -131,7 +131,7 @@ const TooltipPanel: React.FC<TooltipPanelProps> = ({
                     ...listItems,
                     {
                       title: i18n.translate(
-                        'xpack.alertingV2.alertTimeline.tooltip.episodeIdLabel',
+                        'xpack.alertingV2EpisodesUi.alertTimeline.tooltip.episodeIdLabel',
                         { defaultMessage: 'Alert ID' }
                       ),
                       description: episodeId,
@@ -260,7 +260,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                 listItems={[
                   {
                     title: i18n.translate(
-                      'xpack.alertingV2.alertTimeline.tooltip.transitionedAtLabel',
+                      'xpack.alertingV2EpisodesUi.alertTimeline.tooltip.transitionedAtLabel',
                       { defaultMessage: 'Transitioned at' }
                     ),
                     description: formatTimestamp(datum.x, timeZone),
@@ -303,17 +303,23 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                 });
                 const listItems = [
                   {
-                    title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.fromLabel', {
-                      defaultMessage: 'From',
-                    }),
+                    title: i18n.translate(
+                      'xpack.alertingV2EpisodesUi.alertTimeline.tooltip.fromLabel',
+                      {
+                        defaultMessage: 'From',
+                      }
+                    ),
                     description: formatTimestamp(d.trueStartMs, timeZone),
                   },
                   {
-                    title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.toLabel', {
-                      defaultMessage: 'To',
-                    }),
+                    title: i18n.translate(
+                      'xpack.alertingV2EpisodesUi.alertTimeline.tooltip.toLabel',
+                      {
+                        defaultMessage: 'To',
+                      }
+                    ),
                     description: isOngoing
-                      ? i18n.translate('xpack.alertingV2.alertTimeline.tooltip.ongoing', {
+                      ? i18n.translate('xpack.alertingV2EpisodesUi.alertTimeline.tooltip.ongoing', {
                           defaultMessage: 'Ongoing',
                         })
                       : formatTimestamp(d.x1Ms, timeZone),
@@ -324,9 +330,12 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                 // Measure from the true start, not the clamped render edge.
                 if (!isOngoing) {
                   listItems.push({
-                    title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.durationLabel', {
-                      defaultMessage: 'Duration',
-                    }),
+                    title: i18n.translate(
+                      'xpack.alertingV2EpisodesUi.alertTimeline.tooltip.durationLabel',
+                      {
+                        defaultMessage: 'Duration',
+                      }
+                    ),
                     description: formatDuration(d.x1Ms - d.trueStartMs),
                   });
                 }
