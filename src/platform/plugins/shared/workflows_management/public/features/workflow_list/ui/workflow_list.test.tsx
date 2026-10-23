@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -364,8 +364,7 @@ describe('WorkflowList', () => {
       });
     });
 
-    it('preserves list search params in route state when running a workflow opens executions', async () => {
-      const user = userEvent.setup();
+    it('preserves list search params in route state when running a workflow opens executions', () => {
       mockRunWorkflow.mutate.mockImplementationOnce(
         (
           _params: unknown,
@@ -377,8 +376,8 @@ describe('WorkflowList', () => {
 
       renderComponent({}, ['/?tags=prod&enabled=true']);
 
-      await user.click(screen.getByTestId('runWorkflowAction'));
-      await user.click(await screen.findByTestId('workflow-execute-modal'));
+      fireEvent.click(screen.getByTestId('runWorkflowAction'));
+      fireEvent.click(screen.getByTestId('workflow-execute-modal'));
 
       expect(mockApplication.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
         path: '/wf-1?tab=executions&executionId=exec-1',
