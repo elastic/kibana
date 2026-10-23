@@ -175,6 +175,48 @@ describe('createEmulatorMcpHandler', () => {
     ]);
   });
 
+  it('reports each request to onRequest, tool calls with what they did', async () => {
+    const onRequest = jest.fn();
+    handle = createEmulatorMcpHandler(emulator, { onRequest });
+
+    await handle(
+      post({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-06-18',
+          capabilities: {},
+          clientInfo: { name: 'claude-code', version: '2.1.0' },
+        },
+      })
+    );
+    await handle(post({ jsonrpc: '2.0', id: 2, method: 'tools/list' }));
+    await callTool('set_fixtures', {
+      fixtures: [{ operation: listItems, response: { status: 429 } }],
+    });
+    await callTool('describe_operation', { id: 'getItem' });
+
+    expect(onRequest.mock.calls.map(([request]) => request)).toEqual([
+      { method: 'initialize', client: 'claude-code 2.1.0' },
+      { method: 'tools/list' },
+      {
+        method: 'tools/call',
+        tool: 'set_fixtures',
+        arguments: { fixtures: [{ operation: listItems, response: { status: 429 } }] },
+        isError: false,
+        summary: '1 fixture in effect',
+      },
+      {
+        method: 'tools/call',
+        tool: 'describe_operation',
+        arguments: { id: 'getItem' },
+        isError: true,
+        summary: 'No OpenAPI operation has the id getItem; list_operations shows the ids',
+      },
+    ]);
+  });
+
   it('answers as a stateless Streamable HTTP server', async () => {
     const notification = await handle(
       post({ jsonrpc: '2.0', method: 'notifications/initialized' })
