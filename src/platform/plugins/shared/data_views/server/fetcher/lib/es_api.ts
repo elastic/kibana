@@ -117,7 +117,8 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     ) {
       return { body: { indices: [], fields: {} } };
     }
-    // ES fails the whole request for a non-existing remote cluster, so retry without its patterns
+    // ES fails the whole request for a non-existing remote cluster, so retry without its patterns.
+    // TODO: remove once https://github.com/elastic/elasticsearch/issues/163130 is resolved
     const missingRemoteCluster = getMissingRemoteCluster(error);
     if (missingRemoteCluster) {
       const patterns = castArray(indices).flatMap((pattern) => pattern.split(','));
