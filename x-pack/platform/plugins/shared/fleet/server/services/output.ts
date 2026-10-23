@@ -103,7 +103,9 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { omitNullSecrets, withSavedSecrets } from './secrets/preserve';
 import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
+import { getOutputSecretFields } from './outputs/secret_fields';
 import { checkKafkaAuthMethodAllowed } from './outputs/kafka_auth_gate';
 import type { KafkaAuthMethod, KafkaAuthOutput } from './outputs/kafka_auth';
 import {
@@ -164,14 +166,16 @@ const isOtlpSOOutput = (attrs: OutputSOAttributes): attrs is OutputSoOtlpAttribu
 
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
+  // the references of the secrets an update removed are kept as `null` by the saved object update
+  const soAttributes = omitNullSecrets(so.attributes);
 
-  if (isBeatsSOOutput(so.attributes)) {
+  if (isBeatsSOOutput(soAttributes)) {
     const {
       output_id: outputId,
       ssl,
       proxy_id: proxyId,
       ...attributes
-    } = omitRemovedKafkaAuthData(so.attributes);
+    } = omitRemovedKafkaAuthData(soAttributes);
     let parsedSsl;
     try {
       parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
@@ -187,14 +191,14 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     };
   }
 
-  if (isOtlpSOOutput(so.attributes)) {
-    const { output_id: outputId, ...attributes } = so.attributes;
+  if (isOtlpSOOutput(soAttributes)) {
+    const { output_id: outputId, ...attributes } = soAttributes;
     // canonical id placed last so attributes.id cannot shadow it
     return { ...attributes, id: outputId ?? so.id };
   }
 
-  const { output_id: outputId, ...attributes } =
-    so.attributes as unknown as OutputSoBaseAttributes & Record<string, unknown>;
+  const { output_id: outputId, ...attributes } = soAttributes as unknown as OutputSoBaseAttributes &
+    Record<string, unknown>;
   // canonical id placed last so attributes.id cannot shadow it
   return { ...attributes, id: outputId ?? so.id } as unknown as Output;
 }
@@ -1216,7 +1220,16 @@ class OutputService {
     {
       fromPreconfiguration = false,
       secretHashes,
-    }: { fromPreconfiguration: boolean; secretHashes?: Record<string, any> } = {
+      declaresAllSecrets = false,
+    }: {
+      fromPreconfiguration: boolean;
+      secretHashes?: Record<string, any>;
+      /**
+       * The payload declares the whole output, so the secrets it leaves out are removed rather
+       * than kept. Set by preconfiguration, for which the Kibana config file is authoritative.
+       */
+      declaresAllSecrets?: boolean;
+    } = {
       fromPreconfiguration: false,
     }
   ) {
@@ -1250,6 +1263,18 @@ class OutputService {
         (kept, method) => withSavedKafkaAuth(method, originalOutput, kept),
         data
       );
+    }
+
+    const secretStorageEnabled = await isOutputSecretStorageEnabled(esClient, soClient);
+    if (secretStorageEnabled && !declaresAllSecrets) {
+      // an update that does not touch a credential kept as a secret keeps it, and a plain text
+      // value for such a credential is stored as a secret too. Applied before the payload is
+      // validated and turned into saved object attributes, so that every step sees the same data.
+      data = withSavedSecrets({
+        fields: getOutputSecretFields(mergedType),
+        original: originalOutput,
+        update: data,
+      });
     }
 
     // an edit that keeps the authentication as it is does not need its method to be allowed
@@ -1659,7 +1684,7 @@ class OutputService {
     await remoteSyncIntegrationsCheck(esClient, data);
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    if (secretStorageEnabled) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,

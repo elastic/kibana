@@ -12,5 +12,6 @@ export * from './fleet_policies';
 export * from './fleet_server_hosts';
 export * from './outputs';
 export * from './package_policies';
+export * from './preserve';
 export * from './actions';
 export * from './ssl';

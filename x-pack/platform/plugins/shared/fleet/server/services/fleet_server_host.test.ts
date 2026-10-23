@@ -769,36 +769,125 @@ describe('update', () => {
     );
   });
 
-  it('should not call extractAndUpdateFleetServerHostsSecrets or deleteSecrets when updating a non-secret field on a host with stored secrets', async () => {
-    const soClient = getMockedSoClient();
-    const esoClient = getMockedEncryptedSoClient();
+  describe('stored secrets', () => {
+    const givenHostWithSecrets = (secrets: object) => {
+      const soClient = getMockedSoClient();
+      const esoClient = getMockedEncryptedSoClient();
 
-    esoClient.getDecryptedAsInternalUser.mockResolvedValue({
-      id: 'fleet-server-with-secrets',
-      type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-      references: [],
-      attributes: {
-        name: 'Fleet Server With Secrets',
-        host_urls: ['https://fleet.example.com:8220'],
-        is_default: false,
-        is_preconfigured: false,
-        secrets: { ssl: { key: { id: 'stored-secret-id' } } },
-      },
-    } as any);
+      esoClient.getDecryptedAsInternalUser.mockResolvedValue({
+        id: 'fleet-server-with-secrets',
+        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          name: 'Fleet Server With Secrets',
+          host_urls: ['https://fleet.example.com:8220'],
+          is_default: false,
+          is_preconfigured: false,
+          secrets,
+        },
+      } as any);
 
-    soClient.update.mockResolvedValue({ id: 'fleet-server-with-secrets', attributes: {} } as any);
-    (isSecretStorageEnabled as jest.Mock).mockResolvedValue(true);
+      soClient.update.mockResolvedValue({ id: 'fleet-server-with-secrets', attributes: {} } as any);
+      (isSecretStorageEnabled as jest.Mock).mockResolvedValue(true);
+      (extractAndUpdateFleetServerHostsSecrets as jest.Mock).mockImplementation(
+        async ({ fleetServerHostUpdate }) => ({
+          fleetServerHostUpdate,
+          secretReferences: [],
+          secretsToDelete: [],
+        })
+      );
 
-    await fleetServerHostService.update(soClient, esClientMock, 'fleet-server-with-secrets', {
-      ssl: { certificate_authorities: ['/etc/certs/ca.pem'] },
+      return soClient;
+    };
+
+    it('keeps a stored secret when updating a non-secret field', async () => {
+      const soClient = givenHostWithSecrets({ ssl: { key: { id: 'stored-secret-id' } } });
+
+      await fleetServerHostService.update(soClient, esClientMock, 'fleet-server-with-secrets', {
+        ssl: { certificate_authorities: ['/etc/certs/ca.pem'] },
+      });
+
+      expect(deleteSecrets).not.toHaveBeenCalled();
+      expect(soClient.update).toHaveBeenCalledWith(
+        FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        'fleet-server-with-secrets',
+        expect.objectContaining({ secrets: { ssl: { key: { id: 'stored-secret-id' } } } })
+      );
     });
 
-    expect(extractAndUpdateFleetServerHostsSecrets).not.toHaveBeenCalled();
-    expect(deleteSecrets).not.toHaveBeenCalled();
-    expect(soClient.update).toHaveBeenCalledWith(
-      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-      'fleet-server-with-secrets',
-      expect.not.objectContaining({ secrets: expect.anything() })
-    );
+    it('keeps the stored secrets an update does not name alongside the one it does', async () => {
+      const soClient = givenHostWithSecrets({
+        ssl: {
+          key: { id: 'stored-key-id' },
+          es_key: { id: 'stored-es-key-id' },
+          agent_key: { id: 'stored-agent-key-id' },
+        },
+      });
+
+      await fleetServerHostService.update(soClient, esClientMock, 'fleet-server-with-secrets', {
+        secrets: { ssl: { key: 'NEW KEY' } },
+      });
+
+      expect(extractAndUpdateFleetServerHostsSecrets).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fleetServerHostUpdate: {
+            secrets: {
+              ssl: {
+                key: 'NEW KEY',
+                es_key: { id: 'stored-es-key-id' },
+                agent_key: { id: 'stored-agent-key-id' },
+              },
+            },
+          },
+        })
+      );
+    });
+
+    it('stores a plain text key sent for a credential the host keeps as a secret as a secret', async () => {
+      const soClient = givenHostWithSecrets({ ssl: { key: { id: 'stored-key-id' } } });
+
+      await fleetServerHostService.update(soClient, esClientMock, 'fleet-server-with-secrets', {
+        ssl: { certificate: 'CERT', key: 'PLAIN KEY' },
+      });
+
+      expect(extractAndUpdateFleetServerHostsSecrets).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fleetServerHostUpdate: expect.objectContaining({
+            secrets: { ssl: { key: 'PLAIN KEY' } },
+          }),
+        })
+      );
+      // the plain text value is not stored next to the secret
+      expect(soClient.update).toHaveBeenCalledWith(
+        FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        'fleet-server-with-secrets',
+        expect.objectContaining({ ssl: JSON.stringify({ certificate: 'CERT' }) })
+      );
+    });
+
+    it('removes a stored secret cleared with an explicit null', async () => {
+      const soClient = givenHostWithSecrets({ ssl: { key: { id: 'stored-key-id' } } });
+
+      await fleetServerHostService.update(soClient, esClientMock, 'fleet-server-with-secrets', {
+        secrets: { ssl: { key: null } },
+      });
+
+      expect(extractAndUpdateFleetServerHostsSecrets).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fleetServerHostUpdate: { secrets: { ssl: { key: null } } },
+        })
+      );
+    });
+
+    it('rejects an update that sends both a plain text value and a secret', async () => {
+      const soClient = givenHostWithSecrets({ ssl: { key: { id: 'stored-key-id' } } });
+
+      await expect(
+        fleetServerHostService.update(soClient, esClientMock, 'fleet-server-with-secrets', {
+          ssl: { key: 'PLAIN KEY' },
+          secrets: { ssl: { key: 'SECRET KEY' } },
+        })
+      ).rejects.toThrowError('Cannot specify both ssl.key and secrets.ssl.key');
+    });
   });
 });
