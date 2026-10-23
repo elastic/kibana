@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/disk_usage.sh
 
 echo "--- pnpm install and bootstrap"
 BOOTSTRAP_PARAMS=()
@@ -46,13 +47,12 @@ if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 
-  # Delete node_modules in between attempts to prompt a clean install
-  rm -rf node_modules
-
   echo "--- pnpm install and bootstrap, attempt 2"
   BOOTSTRAP_PARAMS+=(--force-install)
   pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"
 fi
+
+print_disk_usage "post-bootstrap"
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'pnpm kbn bootstrap'
