@@ -28,6 +28,12 @@ const productDocInstallStatusAttributesSchemaV2 = productDocInstallStatusAttribu
   }
 );
 
+const productDocInstallStatusAttributesSchemaV3 = productDocInstallStatusAttributesSchemaV2.extends(
+  {
+    artifact_last_modified: schema.maybe(schema.string()),
+  }
+);
+
 /**
  * Interface describing the raw attributes of the product doc install SO type.
  * Contains more fields than the mappings, which only list
@@ -46,6 +52,11 @@ export interface ProductDocInstallStatusAttributes {
    * Defaults to 'product_doc' for backwards compatibility.
    */
   resource_type?: ResourceType;
+  /**
+   * ISO 8601 last-modified time of the installed artifact (e.g. GCS object Last-Modified).
+   * Empty string clears a previously stored value.
+   */
+  artifact_last_modified?: string;
 }
 
 const modelVersion1: SavedObjectsModelVersion = {
@@ -77,6 +88,17 @@ const modelVersion2: SavedObjectsModelVersion = {
   },
 };
 
+const modelVersion3: SavedObjectsModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: productDocInstallStatusAttributesSchemaV3.extends(
+      {},
+      { unknowns: 'ignore' }
+    ),
+    create: productDocInstallStatusAttributesSchemaV3,
+  },
+};
+
 export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDocInstallStatusAttributes> =
   {
     name: productDocInstallStatusSavedObjectTypeName,
@@ -97,5 +119,5 @@ export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDoc
     management: {
       importableAndExportable: false,
     },
-    modelVersions: { '1': modelVersion1, '2': modelVersion2 },
+    modelVersions: { '1': modelVersion1, '2': modelVersion2, '3': modelVersion3 },
   };

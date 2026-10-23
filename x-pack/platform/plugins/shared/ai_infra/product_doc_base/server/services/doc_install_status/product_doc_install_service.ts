@@ -123,6 +123,9 @@ export class ProductDocInstallClient {
           ? { failureReason: attributes.last_installation_failure_reason }
           : {}),
         ...(updatedAt ? { updatedAt } : {}),
+        ...(attributes.artifact_last_modified
+          ? { artifactLastModified: attributes.artifact_last_modified }
+          : {}),
       };
     });
 
@@ -158,17 +161,21 @@ export class ProductDocInstallClient {
     });
   }
 
-  async setInstallationSuccessful(
-    productName: ProductName,
-    indexName: string,
-    inferenceId: string | undefined
-  ) {
+  async setInstallationSuccessful(fields: {
+    productName: ProductName;
+    indexName: string;
+    inferenceId: string | undefined;
+    artifactLastModified?: string;
+  }) {
+    const { productName, indexName, inferenceId, artifactLastModified } = fields;
     const objectId = getObjectIdFromProductName(productName, inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       installation_status: 'installed',
       index_name: indexName,
       inference_id: inferenceId,
       resource_type: ResourceTypes.productDoc,
+      // Clear a previous value when the download had no timestamp.
+      artifact_last_modified: artifactLastModified ?? '',
     });
   }
 
@@ -222,6 +229,10 @@ export class ProductDocInstallClient {
         ...(so.attributes.last_installation_failure_reason
           ? { failureReason: so.attributes.last_installation_failure_reason }
           : {}),
+        ...(so.updated_at ? { updatedAt: so.updated_at } : {}),
+        ...(so.attributes.artifact_last_modified
+          ? { artifactLastModified: so.attributes.artifact_last_modified }
+          : {}),
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -252,8 +263,9 @@ export class ProductDocInstallClient {
     version: string;
     indexName: string;
     inferenceId: string;
+    artifactLastModified?: string;
   }) {
-    const { version, indexName, inferenceId } = fields;
+    const { version, indexName, inferenceId, artifactLastModified } = fields;
     const objectId = getSecurityLabsObjectId(inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       product_name: 'security',
@@ -262,6 +274,8 @@ export class ProductDocInstallClient {
       index_name: indexName,
       inference_id: inferenceId,
       resource_type: ResourceTypes.securityLabs,
+      // Clear a previous value when the download had no timestamp.
+      artifact_last_modified: artifactLastModified ?? '',
     });
   }
 
@@ -318,6 +332,9 @@ export class ProductDocInstallClient {
           ? { failureReason: so.attributes.last_installation_failure_reason }
           : {}),
         ...(so.updated_at ? { updatedAt: so.updated_at } : {}),
+        ...(so.attributes.artifact_last_modified
+          ? { artifactLastModified: so.attributes.artifact_last_modified }
+          : {}),
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -352,8 +369,9 @@ export class ProductDocInstallClient {
     productVersion: string;
     indexName: string;
     inferenceId: string;
+    artifactLastModified?: string;
   }) {
-    const { productName, productVersion, indexName, inferenceId } = fields;
+    const { productName, productVersion, indexName, inferenceId, artifactLastModified } = fields;
     const objectId = getOpenAPISpecObjectId(inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       product_name: productName,
@@ -362,6 +380,8 @@ export class ProductDocInstallClient {
       index_name: indexName,
       inference_id: inferenceId,
       resource_type: ResourceTypes.openapiSpec,
+      // Clear a previous value when the download had no timestamp.
+      artifact_last_modified: artifactLastModified ?? '',
     });
   }
 

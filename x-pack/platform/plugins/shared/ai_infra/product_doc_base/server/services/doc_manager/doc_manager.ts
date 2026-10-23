@@ -10,7 +10,15 @@ import type { CoreAuditService, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { ResourceTypes, resolveDefaultInferenceIdFromInferenceGet } from '@kbn/product-doc-common';
+import type { KibanaRequest } from '@kbn/core/server';
+import {
+  getDefaultInferenceIndexKey,
+  planDefaultInferenceMigration,
+  ResourceTypes,
+  resolveDefaultInferenceId,
+  resolveDefaultInferenceIdFromInferenceGet,
+  type ResourceType,
+} from '@kbn/product-doc-common';
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
@@ -90,6 +98,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
 
     const { status: previousStatus } = await this.getStatus({ inferenceId });
     if (!force && previousStatus === 'installed') {
+      await this.uninstallSupersededDefaultInferenceIds(inferenceId, request);
       return;
     }
 
@@ -119,13 +128,21 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
-    if (wait) {
-      await waitUntilTaskCompleted({
-        taskManager: this.taskManager,
-        taskId,
-        timeout: INSTALL_TASK_WAIT_TIMEOUT_MS,
-      });
+    if (!wait) {
+      return;
     }
+
+    await waitUntilTaskCompleted({
+      taskManager: this.taskManager,
+      taskId,
+      timeout: INSTALL_TASK_WAIT_TIMEOUT_MS,
+    });
+    const { status } = await this.getStatus({ inferenceId });
+    // A failed install must not delete the previous model's documentation.
+    if (status !== 'installed') {
+      return;
+    }
+    await this.uninstallSupersededDefaultInferenceIds(inferenceId, request);
   }
 
   async update(options: DocUpdateOptions): Promise<void> {
@@ -198,18 +215,139 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
-    const { forceUpdate, inferenceIds } = options ?? {};
-    const idsToUpdate: string[] =
-      Array.isArray(inferenceIds) && inferenceIds?.length > 0
-        ? inferenceIds
-        : (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
+    const { forceUpdate, inferenceIds, request } = options ?? {};
+    const previouslyInstalled =
+      (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
+    const explicitRequest = Array.isArray(inferenceIds) && inferenceIds.length > 0;
+    const requestedIds = explicitRequest ? inferenceIds : previouslyInstalled;
+
+    const currentDefaultInferenceId = await this.resolveCurrentDefaultInferenceId(
+      ResourceTypes.productDoc
+    );
+    const migration = currentDefaultInferenceId
+      ? planDefaultInferenceMigration({
+          installedInferenceIds: previouslyInstalled,
+          currentDefaultInferenceId,
+          requestedInferenceIds: explicitRequest ? inferenceIds : undefined,
+        })
+      : undefined;
+
+    let idsToUpdate = requestedIds;
+    if (migration) {
+      const supersededKeys = new Set(
+        migration.supersededInferenceIds.map((inferenceId) =>
+          getDefaultInferenceIndexKey(inferenceId)
+        )
+      );
+      idsToUpdate = requestedIds.filter(
+        (inferenceId) => !supersededKeys.has(getDefaultInferenceIndexKey(inferenceId))
+      );
+      const currentKey = getDefaultInferenceIndexKey(migration.currentDefaultInferenceId);
+      if (
+        !idsToUpdate.some((inferenceId) => getDefaultInferenceIndexKey(inferenceId) === currentKey)
+      ) {
+        idsToUpdate = [...idsToUpdate, migration.currentDefaultInferenceId];
+      }
+
+      this.logger.info(
+        `Default inference ID changed to [${
+          migration.currentDefaultInferenceId
+        }]; removing product documentation for [${migration.supersededInferenceIds.join(', ')}]`
+      );
+
+      // Some (not all) products of the current default may be installed, or its install may still
+      // be running. Only delete the previous default once the current one is fully installed.
+      const currentStatus = migration.installCurrentDefault
+        ? 'uninstalled'
+        : (await this.getStatus({ inferenceId: migration.currentDefaultInferenceId })).status;
+      if (currentStatus === 'uninstalled' || currentStatus === 'error') {
+        // Wait so the previous default is removed only after the new documentation is installed.
+        await this.install({
+          inferenceId: migration.currentDefaultInferenceId,
+          request,
+          wait: true,
+        });
+      } else if (currentStatus === 'installed') {
+        await this.uninstallInferenceIds(migration.supersededInferenceIds, request);
+      }
+    }
+
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
-    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate })));
+    await Promise.all(
+      idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate, request }))
+    );
     return {
       inferenceIds: idsToUpdate,
     };
+  }
+
+  /**
+   * Deletes documentation installed for a previous default model when `keepingInferenceId`
+   * is the current default. A failure to resolve the default leaves the existing docs in place.
+   */
+  private async uninstallSupersededDefaultInferenceIds(
+    keepingInferenceId: string,
+    request?: KibanaRequest
+  ): Promise<void> {
+    const currentDefaultInferenceId = await this.resolveCurrentDefaultInferenceId(
+      ResourceTypes.productDoc
+    );
+    if (
+      !currentDefaultInferenceId ||
+      getDefaultInferenceIndexKey(keepingInferenceId) !==
+        getDefaultInferenceIndexKey(currentDefaultInferenceId)
+    ) {
+      return;
+    }
+
+    const previouslyInstalled =
+      (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
+    const migration = planDefaultInferenceMigration({
+      installedInferenceIds: previouslyInstalled,
+      currentDefaultInferenceId,
+      requestedInferenceIds: [keepingInferenceId],
+    });
+    if (!migration) {
+      return;
+    }
+
+    this.logger.info(
+      `Removing product documentation for previous default inference ID [${migration.supersededInferenceIds.join(
+        ', '
+      )}] after switching to [${currentDefaultInferenceId}]`
+    );
+    await this.uninstallInferenceIds(migration.supersededInferenceIds, request);
+  }
+
+  private async uninstallInferenceIds(
+    inferenceIds: string[],
+    request?: KibanaRequest
+  ): Promise<void> {
+    for (const inferenceId of inferenceIds) {
+      // Product docs only: the OpenAPI spec index is not replaced by a product docs install.
+      await this.uninstall({ inferenceId, request, resourceType: ResourceTypes.productDoc });
+    }
+  }
+
+  private async resolveCurrentDefaultInferenceId(
+    resourceType: ResourceType
+  ): Promise<string | undefined> {
+    try {
+      const result = await this.esClient.inference.get({});
+      const endpointIds = new Set(
+        (result.endpoints ?? []).map((endpoint) => endpoint.inference_id)
+      );
+      return resolveDefaultInferenceId(endpointIds, { resourceType });
+    } catch (error) {
+      this.logger.warn(
+        `Unable to resolve the default inference ID; installed documentation will not switch models: ${
+          (error as Error).message
+        }`
+      );
+      return undefined;
+    }
   }
 
   async ensureDefaultSecurityLabs(): Promise<void> {
@@ -294,8 +432,41 @@ export class DocumentationManager implements DocumentationManagerAPI {
     forceUpdate?: boolean;
   }): Promise<{ inferenceIds: string[] }> {
     const { forceUpdate } = options ?? {};
-    const idsToUpdate =
+    const previouslyInstalled =
       (await this.docInstallClient.getPreviouslyInstalledSecurityLabsInferenceIds()) ?? [];
+    const currentDefaultInferenceId = await this.resolveCurrentDefaultInferenceId(
+      ResourceTypes.securityLabs
+    );
+    const migration = currentDefaultInferenceId
+      ? planDefaultInferenceMigration({
+          installedInferenceIds: previouslyInstalled,
+          currentDefaultInferenceId,
+        })
+      : undefined;
+
+    let idsToUpdate = previouslyInstalled;
+    if (migration) {
+      const canReplace = await this.replaceSecurityLabsInference(migration);
+      if (canReplace) {
+        const supersededKeys = new Set(
+          migration.supersededInferenceIds.map((inferenceId) =>
+            getDefaultInferenceIndexKey(inferenceId)
+          )
+        );
+        idsToUpdate = previouslyInstalled.filter(
+          (inferenceId) => !supersededKeys.has(getDefaultInferenceIndexKey(inferenceId))
+        );
+        const currentKey = getDefaultInferenceIndexKey(migration.currentDefaultInferenceId);
+        if (
+          !idsToUpdate.some(
+            (inferenceId) => getDefaultInferenceIndexKey(inferenceId) === currentKey
+          )
+        ) {
+          idsToUpdate = [...idsToUpdate, migration.currentDefaultInferenceId];
+        }
+      }
+    }
+
     if (idsToUpdate.length === 0) {
       return { inferenceIds: [] };
     }
@@ -313,6 +484,36 @@ export class DocumentationManager implements DocumentationManagerAPI {
       )
     );
     return { inferenceIds: idsToUpdate };
+  }
+
+  /**
+   * Installs Security Labs for the new default and deletes the previous default.
+   * Returns false when the new default cannot be installed, leaving the previous content in place.
+   */
+  private async replaceSecurityLabsInference(migration: {
+    currentDefaultInferenceId: string;
+    supersededInferenceIds: string[];
+    installCurrentDefault: boolean;
+  }): Promise<boolean> {
+    this.logger.info(
+      `Default inference ID changed to [${
+        migration.currentDefaultInferenceId
+      }]; removing Security Labs content for [${migration.supersededInferenceIds.join(', ')}]`
+    );
+    if (migration.installCurrentDefault) {
+      const license = await this.licensing.getLicense();
+      if (!checkLicense(license)) {
+        this.logger.debug(
+          `Skipping Security Labs inference switch to [${migration.currentDefaultInferenceId}]: invalid license`
+        );
+        return false;
+      }
+      await this.installDefaultSecurityLabs(migration.currentDefaultInferenceId);
+    }
+    for (const inferenceId of migration.supersededInferenceIds) {
+      await this.uninstallSecurityLabs({ inferenceId });
+    }
+    return true;
   }
 
   async uninstall(options: DocUninstallOptions): Promise<void> {
@@ -506,15 +707,20 @@ export class DocumentationManager implements DocumentationManagerAPI {
 
   async getSecurityLabsStatus({
     inferenceId,
+    includeAvailableArtifacts,
   }: {
     inferenceId: string;
+    includeAvailableArtifacts?: boolean;
   }): Promise<SecurityLabsStatusResponse> {
     if (!this.packageInstaller) {
       return { status: 'uninstalled' };
     }
 
     try {
-      return await this.packageInstaller.getSecurityLabsStatus({ inferenceId });
+      return await this.packageInstaller.getSecurityLabsStatus({
+        inferenceId,
+        includeAvailableArtifacts,
+      });
     } catch (error) {
       this.logger.error(`Failed to get Security Labs status: ${error.message}`);
       return {

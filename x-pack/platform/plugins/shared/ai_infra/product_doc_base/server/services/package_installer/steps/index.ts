@@ -11,4 +11,11 @@ export {
   validateArtifactArchive,
   validateOpenApiArtifactArchive,
 } from './validate_artifact_archive';
-export { fetchArtifactVersions, fetchSecurityLabsVersions } from './fetch_artifact_versions';
+export {
+  fetchArtifactVersions,
+  fetchSecurityLabsVersions,
+  type SecurityLabsVersionsResult,
+  type FetchArtifactVersionsResult,
+  type ArtifactAvailableVersions,
+  type ArtifactLastModifiedByProductVersion,
+} from './fetch_artifact_versions';

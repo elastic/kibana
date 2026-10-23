@@ -26,8 +26,8 @@ export interface DocumentationManagerAPI {
    */
   update(options?: DocUpdateOptions): Promise<void>;
   /**
-   * Update the product documentation for all previously installed inference IDs to the latest version.
-   * No-op if the product documentation is not currently installed.
+   * Update product documentation for the requested inference IDs, or every previously installed ID.
+   * When the default model changed, the previous default is deleted and the new one is installed.
    */
   updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
   /**
@@ -65,13 +65,16 @@ export interface DocumentationManagerAPI {
    */
   getSecurityLabsStatus({
     inferenceId,
+    includeAvailableArtifacts,
   }: {
     inferenceId: string;
+    /** Include the repository artifact and its last-modified date even when nothing is installed. */
+    includeAvailableArtifacts?: boolean;
   }): Promise<SecurityLabsStatusResponse>;
 
   /**
-   * Update Security Labs content for all previously installed inference IDs to the latest version.
-   * No-op if Security Labs content is not currently installed.
+   * Update Security Labs content for every previously installed inference ID.
+   * When the default model changed, the previous default is deleted and the new one is installed.
    */
   updateSecurityLabsAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
 }
@@ -84,8 +87,12 @@ export interface SecurityLabsStatusResponse {
   version?: string;
   /** Last time the status was written, ISO 8601 */
   updatedAt?: string;
+  /** ISO 8601 last-modified time of the installed artifact, when known. */
+  artifactLastModified?: string;
   latestVersion?: string;
   isUpdateAvailable?: boolean;
+  /** ISO 8601 LastModified of the newer repository artifact, when an update is available. */
+  availableArtifactLastModified?: string;
   failureReason?: string;
 }
 

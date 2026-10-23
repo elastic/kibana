@@ -38,8 +38,82 @@ const getStatusForResourceType = async <T extends ResourceType>({
 export interface NormalizedDocStatus {
   status: DocumentationStatus;
   updateAvailable?: boolean;
+  /** ISO 8601 LastModified of the newer repository artifact, when an update is available. */
+  availableArtifactLastModified?: string;
+  /** Major.minor stack version of that artifact, when it is a versioned zip. */
+  availableStackVersion?: string;
   failureReason?: string;
+  /** ISO 8601 time the documentation was last installed. Present when status is `installed`. */
+  installedAt?: string;
+  /**
+   * ISO 8601 LastModified of the installed zip. Together with `installedStackVersion`
+   * this is the installed release, for example `9.6 | Sep 28, 2026`.
+   */
+  artifactLastModified?: string;
+  /**
+   * Installed release version shown on the version badge.
+   * Product docs use a major.minor stack version. Security labs uses its content version.
+   * Omitted when the artifact is identified only by its last-modified date.
+   */
+  installedStackVersion?: string;
 }
+
+const latestTimestamp = (
+  perProducts: InstallationStatusResponse['perProducts'] | undefined,
+  field: 'updatedAt' | 'artifactLastModified'
+): string | undefined => {
+  let latest: string | undefined;
+  for (const product of Object.values(perProducts ?? {})) {
+    if (product.status !== 'installed') {
+      continue;
+    }
+    const value = product[field];
+    if (!value) {
+      continue;
+    }
+    if (!latest || value > latest) {
+      latest = value;
+    }
+  }
+  return latest;
+};
+
+const STACK_VERSION_PATTERN = /^\d+\.\d+$/;
+
+/**
+ * Stack version and zip LastModified of the newest installed product doc.
+ * Both come from the same product so the version line stays one release, such as `9.6 | Sep 28, 2026`.
+ */
+const installedRelease = (
+  perProducts: InstallationStatusResponse['perProducts'] | undefined
+): { installedStackVersion?: string; artifactLastModified?: string } => {
+  let stackVersion: string | undefined;
+  let artifactLastModified: string | undefined;
+
+  for (const product of Object.values(perProducts ?? {})) {
+    if (product.status !== 'installed') {
+      continue;
+    }
+    const modified = product.artifactLastModified;
+    const version =
+      product.version && STACK_VERSION_PATTERN.test(product.version) ? product.version : undefined;
+    if (!modified && !version) {
+      continue;
+    }
+    const isFirst = stackVersion === undefined && artifactLastModified === undefined;
+    const isNewer = Boolean(modified && (!artifactLastModified || modified > artifactLastModified));
+    if (!isFirst && !isNewer) {
+      continue;
+    }
+    stackVersion = version;
+    artifactLastModified = modified;
+  }
+
+  return {
+    ...(stackVersion ? { installedStackVersion: stackVersion } : {}),
+    ...(artifactLastModified ? { artifactLastModified } : {}),
+  };
+};
 
 export interface DocumentationItemConfig {
   id: string;
@@ -69,7 +143,7 @@ export const DOCUMENTATION_ITEMS_CONFIG: readonly DocumentationItemConfig[] = [
     name: i18n.ELASTIC_DOCS_NAME,
     icon: 'logoElastic',
     resourceType: ResourceTypes.productDoc,
-    supportsUpdates: false,
+    supportsUpdates: true,
     isTechPreview: false,
     isStubbed: false,
     getNormalizedStatus: async ({ productDocBase, inferenceId }) => {
@@ -78,10 +152,24 @@ export const DOCUMENTATION_ITEMS_CONFIG: readonly DocumentationItemConfig[] = [
         inferenceId,
         resourceType: ResourceTypes.productDoc,
       });
+      const status = res.overall ?? 'uninstalled';
       const failureReason = Object.values(res.perProducts ?? {})
         .map((p) => p.failureReason)
         .find(Boolean);
-      return { status: res.overall ?? 'uninstalled', failureReason };
+      const installedAt =
+        status === 'installed' ? latestTimestamp(res.perProducts, 'updatedAt') : undefined;
+      const release = status === 'installed' ? installedRelease(res.perProducts) : {};
+      return {
+        status,
+        updateAvailable: Boolean(res.isUpdateAvailable),
+        ...(res.availableArtifactLastModified
+          ? { availableArtifactLastModified: res.availableArtifactLastModified }
+          : {}),
+        ...(res.availableStackVersion ? { availableStackVersion: res.availableStackVersion } : {}),
+        failureReason,
+        ...(installedAt ? { installedAt } : {}),
+        ...release,
+      };
     },
   },
   {
@@ -98,10 +186,19 @@ export const DOCUMENTATION_ITEMS_CONFIG: readonly DocumentationItemConfig[] = [
         inferenceId,
         resourceType: ResourceTypes.securityLabs,
       });
+      const status = res.status ?? 'uninstalled';
       return {
-        status: res.status ?? 'uninstalled',
+        status,
         updateAvailable: Boolean(res.isUpdateAvailable),
+        ...(res.availableArtifactLastModified
+          ? { availableArtifactLastModified: res.availableArtifactLastModified }
+          : {}),
         failureReason: res.failureReason,
+        ...(status === 'installed' && res.updatedAt ? { installedAt: res.updatedAt } : {}),
+        ...(status === 'installed' && res.version ? { installedStackVersion: res.version } : {}),
+        ...(status === 'installed' && res.artifactLastModified
+          ? { artifactLastModified: res.artifactLastModified }
+          : {}),
       };
     },
   },

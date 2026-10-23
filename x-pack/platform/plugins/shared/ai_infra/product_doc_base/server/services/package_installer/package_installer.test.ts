@@ -82,6 +82,10 @@ describe('PackageInstaller', () => {
     validateArtifactArchiveMock.mockReturnValue({ valid: true });
     validateOpenApiArtifactArchiveMock.mockReturnValue({ valid: true });
     checkArtifactAvailableMock.mockResolvedValue(undefined);
+    downloadToDiskMock.mockResolvedValue({
+      artifactFullPath: `${artifactsFolder}/artifact.zip`,
+    });
+    openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
     productDocClient.getInstallationStatusOrThrow.mockResolvedValue({} as never);
     productDocClient.getSecurityLabsInstallationStatus.mockResolvedValue({ status: 'uninstalled' });
     productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({ status: 'uninstalled' });
@@ -110,7 +114,9 @@ describe('PackageInstaller', () => {
     it('deletes the downloaded artifact after a successful install', async () => {
       openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: '/data/lost/kb-product-doc-kibana-8.16.zip',
+      });
 
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
@@ -124,7 +130,9 @@ describe('PackageInstaller', () => {
     it('deletes the existing index only after the archive has been downloaded and validated', async () => {
       openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: '/data/lost/kb-product-doc-kibana-8.16.zip',
+      });
 
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
@@ -140,7 +148,9 @@ describe('PackageInstaller', () => {
 
     it('keeps the existing index when the archive fails validation', async () => {
       openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: '/data/lost/kb-product-doc-kibana-8.16.zip',
+      });
       validateArtifactArchiveMock.mockReturnValue({ valid: false, error: 'truncated' });
 
       await expect(
@@ -154,7 +164,9 @@ describe('PackageInstaller', () => {
     it('only marks the status as installing once the archive is ready to replace the index', async () => {
       openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: '/data/lost/kb-product-doc-kibana-8.16.zip',
+      });
 
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
@@ -215,7 +227,9 @@ describe('PackageInstaller', () => {
       } as never);
       openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: '/data/lost/kb-product-doc-kibana-8.16.zip',
+      });
       populateIndexMock.mockRejectedValue(new Error('bulk failed'));
 
       await expect(
@@ -226,7 +240,9 @@ describe('PackageInstaller', () => {
     });
 
     it('deletes the downloaded artifact when the install fails', async () => {
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: '/data/lost/kb-product-doc-kibana-8.16.zip',
+      });
       openZipArchiveMock.mockRejectedValue(new Error('corrupt archive'));
 
       await expect(
@@ -250,7 +266,10 @@ describe('PackageInstaller', () => {
         productVersion: '8.16',
       });
 
-      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: `${artifactsFolder}/${artifactName}`,
+        lastModified: '2026-01-27T23:25:54.000Z',
+      });
 
       const mappings = {
         properties: {
@@ -307,11 +326,12 @@ describe('PackageInstaller', () => {
       });
 
       expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledTimes(1);
-      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith(
-        'kibana',
+      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith({
+        productName: 'kibana',
         indexName,
-        defaultInferenceEndpoints.ELSER
-      );
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        artifactLastModified: '2026-01-27T23:25:54.000Z',
+      });
 
       expect(zipArchive.close).toHaveBeenCalledTimes(1);
 
@@ -326,7 +346,9 @@ describe('PackageInstaller', () => {
         productVersion: '8.16',
         inferenceId: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
       });
-      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: `${artifactsFolder}/${artifactName}`,
+      });
       loadMappingFileMock.mockResolvedValue({
         properties: { semantic: { inference_id: '.elser', type: 'semantic_text' } },
       });
@@ -348,11 +370,15 @@ describe('PackageInstaller', () => {
         client: esClient,
         inferenceId: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
       });
-      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith(
-        'kibana',
-        getProductDocIndexName('kibana', defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID),
-        defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
-      );
+      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith({
+        productName: 'kibana',
+        indexName: getProductDocIndexName(
+          'kibana',
+          defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
+        ),
+        inferenceId: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+        artifactLastModified: undefined,
+      });
     });
 
     it('rejects a custom inference endpoint that is not a text embedding model', async () => {
@@ -431,7 +457,8 @@ describe('PackageInstaller', () => {
   describe('installProduct', () => {
     it('installs the version selected for the current stack version', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
-        kibana: ['8.15', '8.16'],
+        versions: { kibana: ['8.15', '8.16'] },
+        lastModifiedByProductVersion: {},
       });
       jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
 
@@ -445,7 +472,10 @@ describe('PackageInstaller', () => {
     });
 
     it('warns and skips when the repository has no version for the product', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({ kibana: [] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: [] },
+        lastModifiedByProductVersion: {},
+      });
       jest.spyOn(packageInstaller, 'installPackage');
 
       await expect(packageInstaller.installProduct({ productName: 'kibana' })).resolves.toBe(false);
@@ -468,7 +498,10 @@ describe('PackageInstaller', () => {
     const params = { productName: 'kibana' as const, inferenceId: '.elser', since };
 
     beforeEach(() => {
-      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.15', '8.16'] },
+        lastModifiedByProductVersion: {},
+      });
       jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
     });
 
@@ -541,7 +574,10 @@ describe('PackageInstaller', () => {
     });
 
     it('skips when the repository has no version for the product', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({ kibana: [] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: [] },
+        lastModifiedByProductVersion: {},
+      });
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({} as never);
 
       await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(false);
@@ -562,7 +598,10 @@ describe('PackageInstaller', () => {
     const params = { productName: 'kibana' as const, inferenceId: '.elser', since };
 
     beforeEach(() => {
-      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.15', '8.16'] },
+        lastModifiedByProductVersion: {},
+      });
       jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
     });
 
@@ -572,6 +611,9 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.updateProductIfNeeded(params)).resolves.toBe(true);
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: '.elser' })
+      );
       expect(packageInstaller.installPackage).toHaveBeenCalledWith({
         productName: 'kibana',
         productVersion: '8.16',
@@ -694,13 +736,201 @@ describe('PackageInstaller', () => {
     });
   });
 
+  describe('isProductDocUpdateAvailable', () => {
+    it('returns true when GCS LastModified is newer than the stored artifactLastModified', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.16'] },
+        lastModifiedByProductVersion: {
+          kibana: { '8.16': '2026-02-01T00:00:00.000Z' },
+        },
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: {
+          status: 'installed',
+          version: '8.16',
+          artifactLastModified: '2026-01-01T00:00:00.000Z',
+        },
+      } as never);
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toEqual({
+        isUpdateAvailable: true,
+        availableArtifactLastModified: '2026-02-01T00:00:00.000Z',
+        availableStackVersion: '8.16',
+      });
+    });
+
+    it('returns false when the stored artifactLastModified matches GCS', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.16'] },
+        lastModifiedByProductVersion: {
+          kibana: { '8.16': '2026-01-01T00:00:00.000Z' },
+        },
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: {
+          status: 'installed',
+          version: '8.16',
+          artifactLastModified: '2026-01-01T00:00:00.000Z',
+        },
+      } as never);
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toEqual({ isUpdateAvailable: false });
+    });
+
+    it('ignores millisecond-only differences between HTTP and GCS LastModified', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.16'] },
+        lastModifiedByProductVersion: {
+          kibana: { '8.16': '2026-09-28T18:38:31.727Z' },
+        },
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: {
+          status: 'installed',
+          version: '8.16',
+          // HTTP Last-Modified is second-precision
+          artifactLastModified: '2026-09-28T18:38:31.000Z',
+        },
+      } as never);
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toEqual({ isUpdateAvailable: false });
+    });
+
+    it('does not use LastModified when latest version strings already match', async () => {
+      const version = 'latest-2026-09-28T18:38:31.727Z';
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: [version] },
+        lastModifiedByProductVersion: {
+          kibana: { [version]: '2026-09-28T18:38:31.727Z' },
+        },
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: {
+          status: 'installed',
+          version,
+          artifactLastModified: '2026-09-28T18:38:31.000Z',
+        },
+      } as never);
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toEqual({ isUpdateAvailable: false });
+    });
+
+    it('returns true when the installed version differs from the installable version', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.15', '8.16'] },
+        lastModifiedByProductVersion: {
+          kibana: { '8.16': '2026-03-01T00:00:00.000Z' },
+        },
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: {
+          status: 'installed',
+          version: '8.15',
+          artifactLastModified: '2026-01-01T00:00:00.000Z',
+        },
+      } as never);
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toEqual({
+        isUpdateAvailable: true,
+        availableArtifactLastModified: '2026-03-01T00:00:00.000Z',
+        availableStackVersion: '8.16',
+      });
+    });
+
+    it('reports an update when a same stack version zip is uploaded after an install with no stored zip date', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.16'] },
+        lastModifiedByProductVersion: {
+          kibana: { '8.16': '2026-10-13T14:40:44.000Z' },
+        },
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: {
+          status: 'installed',
+          version: '8.16',
+          updatedAt: '2026-09-17T16:05:00.000Z',
+        },
+      } as never);
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toEqual({
+        isUpdateAvailable: true,
+        availableArtifactLastModified: '2026-10-13T14:40:44.000Z',
+        availableStackVersion: '8.16',
+      });
+    });
+
+    it('shows the repository zip date when an install has no stored date and the zip is unchanged', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.16'] },
+        lastModifiedByProductVersion: {
+          kibana: { '8.16': '2026-09-01T00:00:00.000Z' },
+        },
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: {
+          status: 'installed',
+          version: '8.16',
+          updatedAt: '2026-09-17T16:05:00.000Z',
+        },
+      } as never);
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toEqual({
+        isUpdateAvailable: false,
+        installedArtifactLastModifiedByProduct: {
+          kibana: '2026-09-01T00:00:00.000Z',
+        },
+      });
+    });
+
+    it('returns undefined when the repository listing fails', async () => {
+      fetchArtifactVersionsMock.mockRejectedValue(new Error('network down'));
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('getProductsToUpdate', () => {
     it('returns installed products whose version differs from the selected version', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
-        kibana: ['8.15', '8.16'],
-        security: ['8.15', '8.16'],
-        elasticsearch: ['8.16'],
-        openapi: [],
+        versions: {
+          kibana: ['8.15', '8.16'],
+          security: ['8.15', '8.16'],
+          elasticsearch: ['8.16'],
+          openapi: [],
+        },
+        lastModifiedByProductVersion: {},
       });
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
@@ -717,9 +947,8 @@ describe('PackageInstaller', () => {
 
     it('returns every installed product when forceUpdate is set', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
-        kibana: ['8.16'],
-        security: ['8.16'],
-        openapi: [],
+        versions: { kibana: ['8.16'], security: ['8.16'], openapi: [] },
+        lastModifiedByProductVersion: {},
       });
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.16' },
@@ -738,7 +967,10 @@ describe('PackageInstaller', () => {
 
   describe('getProductsToUpdate with an unpublished selected artifact', () => {
     it('does not plan an update when the installable fallback version is already installed', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.15', '8.16'] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.15', '8.16'] },
+        lastModifiedByProductVersion: {},
+      });
       checkArtifactAvailableMock.mockImplementation(async (url: string) => {
         if (url.includes('8.16')) {
           throw new ArtifactNotFoundError(url);
@@ -754,7 +986,10 @@ describe('PackageInstaller', () => {
     });
 
     it('skips a product with no installable artifact at all', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.16'] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.16'] },
+        lastModifiedByProductVersion: {},
+      });
       checkArtifactAvailableMock.mockRejectedValue(new ArtifactNotFoundError('missing'));
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.15' },
@@ -769,7 +1004,10 @@ describe('PackageInstaller', () => {
 
   describe('ensureOpenApiSpecUpToDate', () => {
     it('does not reinstall when the installed version matches the selected version', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['8.16'] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { openapi: ['8.16'] },
+        lastModifiedByProductVersion: {},
+      });
       productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
         status: 'installed',
         version: '8.16',
@@ -784,7 +1022,10 @@ describe('PackageInstaller', () => {
     });
 
     it('installs when the installed version differs from the selected version', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['8.15', '8.16'] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { openapi: ['8.15', '8.16'] },
+        lastModifiedByProductVersion: {},
+      });
       productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
         status: 'installed',
         version: '8.15',
@@ -806,7 +1047,10 @@ describe('PackageInstaller', () => {
     const since = new Date('2026-09-17T10:00:00.000Z');
 
     it('skips the reinstall when another task installed the selected version after the request', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['8.16'] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { openapi: ['8.16'] },
+        lastModifiedByProductVersion: {},
+      });
       productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
         status: 'installed',
         version: '8.16',
@@ -824,7 +1068,10 @@ describe('PackageInstaller', () => {
     });
 
     it('reinstalls when forced and the spec was not refreshed since the request', async () => {
-      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['8.16'] });
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { openapi: ['8.16'] },
+        lastModifiedByProductVersion: {},
+      });
       productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
         status: 'installed',
         version: '8.16',
@@ -854,7 +1101,10 @@ describe('PackageInstaller', () => {
         isServerless: true,
       });
       fetchArtifactVersionsMock.mockResolvedValue({
-        openapi: ['latest-2026-08-20T20:51:06.777Z', 'latest-2026-08-20T23:08:00.384Z'],
+        versions: {
+          openapi: ['latest-2026-08-20T20:51:06.777Z', 'latest-2026-08-20T23:08:00.384Z'],
+        },
+        lastModifiedByProductVersion: {},
       });
       productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
         status: 'installed',
@@ -889,7 +1139,8 @@ describe('PackageInstaller', () => {
       jest.spyOn(proxyPackageInstaller, 'installPackage').mockResolvedValue(undefined as never);
 
       fetchArtifactVersionsMock.mockResolvedValue({
-        kibana: ['8.16'],
+        versions: { kibana: ['8.16'] },
+        lastModifiedByProductVersion: {},
       });
 
       await proxyPackageInstaller.installProduct({ productName: 'kibana' });
@@ -905,7 +1156,7 @@ describe('PackageInstaller', () => {
         close: jest.fn(),
       };
       openZipArchiveMock.mockResolvedValue(zipArchive);
-      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/artifact.zip`);
+      downloadToDiskMock.mockResolvedValue({ artifactFullPath: `${artifactsFolder}/artifact.zip` });
 
       await proxyPackageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
@@ -957,10 +1208,16 @@ describe('PackageInstaller', () => {
     it('downloads and installs the latest version when no version is provided', async () => {
       const zipArchive = { close: jest.fn() };
       openZipArchiveMock.mockResolvedValue(zipArchive);
-      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_OLD, VERSION_NEW]);
-      downloadToDiskMock.mockResolvedValue(
-        `${artifactsFolder}/${getSecurityLabsArtifactName({ version: VERSION_NEW })}`
-      );
+      fetchSecurityLabsVersionsMock.mockResolvedValue({
+        versions: [VERSION_OLD, VERSION_NEW],
+        lastModifiedByVersion: {},
+      });
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: `${artifactsFolder}/${getSecurityLabsArtifactName({
+          version: VERSION_NEW,
+        })}`,
+        lastModified: '2026-01-27T23:25:54.000Z',
+      });
 
       const mappings = {
         properties: {
@@ -1028,6 +1285,7 @@ describe('PackageInstaller', () => {
         version: VERSION_NEW,
         indexName,
         inferenceId: defaultInferenceEndpoints.ELSER,
+        artifactLastModified: '2026-01-27T23:25:54.000Z',
       });
 
       expect(zipArchive.close).toHaveBeenCalledTimes(1);
@@ -1037,10 +1295,16 @@ describe('PackageInstaller', () => {
       const inferenceId = defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
       const zipArchive = { close: jest.fn() };
       openZipArchiveMock.mockResolvedValue(zipArchive);
-      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_NEW]);
-      downloadToDiskMock.mockResolvedValue(
-        `${artifactsFolder}/${getSecurityLabsArtifactName({ version: VERSION_NEW, inferenceId })}`
-      );
+      fetchSecurityLabsVersionsMock.mockResolvedValue({
+        versions: [VERSION_NEW],
+        lastModifiedByVersion: {},
+      });
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: `${artifactsFolder}/${getSecurityLabsArtifactName({
+          version: VERSION_NEW,
+          inferenceId,
+        })}`,
+      });
       loadMappingFileMock.mockResolvedValue({
         properties: { semantic: { inference_id: '.elser', type: 'semantic_text' } },
       });
@@ -1055,18 +1319,24 @@ describe('PackageInstaller', () => {
         version: VERSION_NEW,
         indexName: getSecurityLabsIndexName(inferenceId),
         inferenceId,
+        artifactLastModified: undefined,
       });
     });
 
     it('calls setSecurityLabsInstallationFailed if installation fails', async () => {
       const zipArchive = { close: jest.fn() };
       openZipArchiveMock.mockResolvedValue(zipArchive);
-      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_NEW]);
+      fetchSecurityLabsVersionsMock.mockResolvedValue({
+        versions: [VERSION_NEW],
+        lastModifiedByVersion: {},
+      });
       const artifactName = getSecurityLabsArtifactName({
         version: VERSION_NEW,
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
-      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: `${artifactsFolder}/${artifactName}`,
+      });
 
       populateIndexMock.mockImplementation(async () => {
         throw new Error('something bad');
@@ -1088,7 +1358,10 @@ describe('PackageInstaller', () => {
 
   describe('installSecurityLabs status preservation', () => {
     beforeEach(() => {
-      fetchSecurityLabsVersionsMock.mockResolvedValue(['2025.12.12']);
+      fetchSecurityLabsVersionsMock.mockResolvedValue({
+        versions: ['2025.12.12'],
+        lastModifiedByVersion: {},
+      });
     });
 
     it('keeps a previously installed status when the new archive cannot be prepared', async () => {
@@ -1139,13 +1412,19 @@ describe('PackageInstaller', () => {
         properties: { semantic: { inference_id: '.elser', type: 'semantic_text' } },
       });
       loadManifestFileMock.mockResolvedValue({ formatVersion: TEST_FORMAT_VERSION } as any);
-      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION]);
-      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/artifact.zip`);
+      fetchSecurityLabsVersionsMock.mockResolvedValue({
+        versions: [VERSION],
+        lastModifiedByVersion: {},
+      });
+      downloadToDiskMock.mockResolvedValue({ artifactFullPath: `${artifactsFolder}/artifact.zip` });
     });
 
     it('checks a missing `latest` product artifact once across timestamped fallback versions', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
-        kibana: ['latest-2026-08-20T23:08:00.384Z', 'latest-2026-08-20T20:51:06.777Z'],
+        versions: {
+          kibana: ['latest-2026-08-20T23:08:00.384Z', 'latest-2026-08-20T20:51:06.777Z'],
+        },
+        lastModifiedByProductVersion: {},
       });
       checkArtifactAvailableMock.mockRejectedValue(new ArtifactNotFoundError('missing'));
 
@@ -1159,7 +1438,10 @@ describe('PackageInstaller', () => {
 
     it('selects the most recent `latest` upload rather than the first listed one', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
-        kibana: ['latest-2026-08-20T20:51:06.777Z', 'latest-2026-08-20T23:08:00.384Z'],
+        versions: {
+          kibana: ['latest-2026-08-20T20:51:06.777Z', 'latest-2026-08-20T23:08:00.384Z'],
+        },
+        lastModifiedByProductVersion: {},
       });
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: 'latest-2026-08-20T23:08:00.384Z' },
@@ -1302,7 +1584,7 @@ describe('PackageInstaller', () => {
 
     it('downloads the `latest` artifact for a `latest-<timestamp>` version', async () => {
       openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
-      downloadToDiskMock.mockResolvedValue('/tmp/openapi-latest.zip');
+      downloadToDiskMock.mockResolvedValue({ artifactFullPath: '/tmp/openapi-latest.zip' });
 
       await packageInstaller.installOpenAPISpec({
         version: 'latest-2026-08-20T23:08:00.384Z',
@@ -1320,11 +1602,14 @@ describe('PackageInstaller', () => {
 
     it('checks a missing `latest` artifact once even when several timestamped versions map to it', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
-        openapi: [
-          'latest-2026-08-20T23:08:00.384Z',
-          'latest-2026-08-20T20:51:06.777Z',
-          'latest-2026-07-01T00:00:00.000Z',
-        ],
+        versions: {
+          openapi: [
+            'latest-2026-08-20T23:08:00.384Z',
+            'latest-2026-08-20T20:51:06.777Z',
+            'latest-2026-07-01T00:00:00.000Z',
+          ],
+        },
+        lastModifiedByProductVersion: {},
       });
       checkArtifactAvailableMock.mockRejectedValue(new ArtifactNotFoundError('missing'));
 
@@ -1341,7 +1626,9 @@ describe('PackageInstaller', () => {
 
     it('deletes the downloaded artifact and logs the folder usage after installing', async () => {
       openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-openapi-8.16.zip');
+      downloadToDiskMock.mockResolvedValue({
+        artifactFullPath: '/data/lost/kb-product-doc-openapi-8.16.zip',
+      });
 
       await packageInstaller.installOpenAPISpec({
         version: '8.16',
@@ -1357,7 +1644,7 @@ describe('PackageInstaller', () => {
 
     it('does not fetch artifact versions when explicit version is directly installable', async () => {
       openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
-      downloadToDiskMock.mockResolvedValue('/tmp/openapi-explicit.zip');
+      downloadToDiskMock.mockResolvedValue({ artifactFullPath: '/tmp/openapi-explicit.zip' });
 
       await packageInstaller.installOpenAPISpec({
         version: '8.16',
@@ -1378,12 +1665,13 @@ describe('PackageInstaller', () => {
         .mockRejectedValueOnce(new ArtifactNotFoundError('missing')) // explicit version
         .mockResolvedValueOnce(undefined); // fallback version
       openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
-      downloadToDiskMock.mockResolvedValue('/tmp/openapi-fallback.zip');
+      downloadToDiskMock.mockResolvedValue({ artifactFullPath: '/tmp/openapi-fallback.zip' });
 
       fetchArtifactVersionsMock
         .mockRejectedValueOnce(new Error('temporary listing failure'))
         .mockResolvedValueOnce({
-          openapi: ['8.16', '8.15'],
+          versions: { openapi: ['8.16', '8.15'] },
+          lastModifiedByProductVersion: {},
         });
 
       await packageInstaller.installOpenAPISpec({
