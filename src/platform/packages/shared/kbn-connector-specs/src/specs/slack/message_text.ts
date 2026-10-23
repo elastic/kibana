@@ -205,8 +205,27 @@ const normalize = (value: string): string =>
     .replace(/^(?:[•◦▪‣-]|\d+\.) /, '')
     .trim();
 
-/** Letters and digits only, for comparing against text Slack generated in its own format. */
-const toWords = (value: string): string => value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+/** Lowercase words separated by single spaces, for comparing against text Slack generated itself. */
+const toWords = (value: string): string =>
+  value
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word.length > 0)
+    .join(' ');
+
+/** Whether `words` holds `line` on word boundaries, so `node-1` is not found in `node-10`. */
+const containsWords = (words: string, line: string): boolean =>
+  ` ${words} `.includes(` ${toWords(line)} `);
+
+/** Cuts to `maxLength` UTF-16 units without leaving half of a surrogate pair at the end. */
+const cutText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  const lastUnit = text.charCodeAt(maxLength - 1);
+  const splitsPair = maxLength > 0 && lastUnit >= 0xd800 && lastUnit <= 0xdbff;
+  return text.slice(0, splitsPair ? maxLength - 1 : maxLength);
+};
 
 /** The message's `text` plus the block and attachment lines it does not already contain. */
 export const readSlackMessageText = (
@@ -217,9 +236,10 @@ export const readSlackMessageText = (
   const baseWords = toWords(baseText ?? '');
   const blocks = blockLines(source.blocks, 0);
   // `text` can already hold the blocks in another format, so the block lines are dropped together
-  // once every one of them is in it.
+  // once every one of them is in it. All or nothing: if a single block line is missing from
+  // `text`, every block line is kept, trading some repetition for never losing a distinct line.
   const blocksAreInText =
-    baseWords.length > 0 && blocks.every((line) => baseWords.includes(toWords(line)));
+    baseWords.length > 0 && blocks.every((line) => containsWords(baseWords, line));
   const baseLines = new Set((baseText?.split('\n') ?? []).map(normalize));
   const normalizedBase = normalize(baseText ?? '');
   const seen = new Set<string>();
@@ -238,5 +258,5 @@ export const readSlackMessageText = (
     }
   );
   const text = [...toLines(baseText), ...extra].join('\n');
-  return text.length === 0 ? undefined : text.slice(0, maxLength);
+  return text.length === 0 ? undefined : cutText(text, maxLength);
 };

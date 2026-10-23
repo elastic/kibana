@@ -277,6 +277,11 @@ describe('readSlackMessageText', () => {
       'prod-eu down\np99 4s\nEnv: prod',
     ],
     [
+      'a block that text only contains inside a longer host name',
+      { text: 'node-10 down', blocks: [section('node-1')] },
+      'node-10 down\nnode-1',
+    ],
+    [
       'repeated lines once, ignoring whitespace',
       { blocks: [section('same  line'), section('same line')] },
       'same  line',
@@ -302,6 +307,10 @@ describe('readSlackMessageText', () => {
     ['containers nested deeper than the limit', { blocks: nestContainers(10) }, undefined],
   ])('reads %s', (_name, source, expected) => {
     expect(readSlackMessageText(source, MAX)).toBe(expected);
+  });
+
+  it('does not cut an emoji in half at the maximum length', () => {
+    expect(readSlackMessageText({ text: `ab${'😀'}cd` }, 3)).toBe('ab');
   });
 
   it('cuts the result to the maximum length', () => {
