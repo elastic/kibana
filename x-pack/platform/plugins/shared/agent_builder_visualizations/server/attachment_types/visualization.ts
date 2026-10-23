@@ -88,7 +88,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
 
         return {
           renderer: 'lens',
-          query: origin,
+          query: lensAttributes.title ?? origin,
           visualization: lensApiConfig as unknown as Record<string, unknown>,
           chart_type: toSupportedChartType(lensApiConfig.type),
           esql: extractEsqlFromLens(lensAttributes),
