@@ -12,6 +12,9 @@ import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 const BULK_STATUS_ENDPOINT = 'internal/streams/onboarding/_bulk_status';
+// On Cloud a flag override only applies on the node that served the PUT; the others pick it up
+// through core's ~10s dynamic config poll.
+const FLAG_PROPAGATION_POLL_OPTIONS = { timeout: 45_000, intervals: [1_000] };
 
 apiTest.describe(
   'Onboarding bulk status API',
@@ -60,20 +63,33 @@ apiTest.describe(
     apiTest(
       'returns 403 when significant events is disabled',
       async ({ apiClient, samlAuth, apiServices }) => {
+        apiTest.setTimeout(120_000);
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const sourceIds = [uuidv4()];
 
         await apiServices.significantEventsTest.disableSignificantEvents();
 
         try {
-          const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
-            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-            body: { sourceIds: [uuidv4()] },
-            responseType: 'json',
-          });
-
-          expect(response.statusCode).toBe(403);
+          await expect
+            .poll(
+              async () => {
+                const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
+                  headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+                  body: { sourceIds },
+                  responseType: 'json',
+                });
+                return response.statusCode;
+              },
+              {
+                ...FLAG_PROPAGATION_POLL_OPTIONS,
+                message: 'the bulk status endpoint is denied while the flag is off',
+              }
+            )
+            .toBe(403);
         } finally {
           await apiServices.significantEventsTest.enableSignificantEvents();
+          // Flag-off pauses every space and turning the flag back on does not resume.
+          await apiServices.significantEventsTest.resumeSignificantEvents();
         }
       }
     );
