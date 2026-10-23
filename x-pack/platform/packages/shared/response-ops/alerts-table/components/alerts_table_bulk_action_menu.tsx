@@ -36,11 +36,13 @@ interface AlertsTableBulkActionMenuProps {
   panels: BulkActionsPanelConfig[];
   refresh: () => void;
   setIsBulkActionsLoading: (loading: boolean) => void;
+  /** Number of alerts matching the table's query, which a "select all" selects. */
+  totalItems: number;
 }
 
 const ACTION_GROUP_ORDER = [
   ['status'],
-  ['assignees', 'cases', 'tags'],
+  ['assignees', 'cases', 'caseRemoval', 'tags'],
   ['timeline'],
   ['custom'],
   ['workflow'],
@@ -139,6 +141,7 @@ export const AlertsTableBulkActionMenu = ({
   panels,
   refresh,
   setIsBulkActionsLoading,
+  totalItems,
 }: AlertsTableBulkActionMenuProps) => {
   const {
     bulkActionsStore: [{ isAllSelected, rowSelection }],
@@ -146,6 +149,7 @@ export const AlertsTableBulkActionMenu = ({
 
   const menuPanels = useMemo(() => {
     const selectedAlertItems = selectedIdsToTimelineItemMapper(alerts, rowSelection.keys());
+    const selectedCount = isAllSelected ? totalItems : rowSelection.size;
     const runAction = (item: BulkActionsConfig) => {
       closePopover();
       item.onClick?.(
@@ -160,16 +164,22 @@ export const AlertsTableBulkActionMenu = ({
     const mappedPanels = panels.map((panel) => {
       if (panel.items) {
         const toMenuItem = (item: BulkActionsConfig): EuiContextMenuPanelItemDescriptor => {
-          const isDisabled = isAllSelected && item.disableOnQuery;
+          const isDisabledOnQuery = isAllSelected && item.disableOnQuery;
+          const exceededLimit =
+            item.selectionLimit !== undefined && selectedCount > item.selectionLimit.max
+              ? item.selectionLimit
+              : undefined;
+          const isDisabled = isDisabledOnQuery || exceededLimit !== undefined;
 
           return {
             key: item.key,
             'data-test-subj': item['data-test-subj'],
             disabled: isDisabled,
             onClick: item.onClick ? () => runAction(item) : undefined,
-            name: isDisabled && item.disabledLabel ? item.disabledLabel : item.label,
+            name: isDisabledOnQuery && item.disabledLabel ? item.disabledLabel : item.label,
             panel: item.panel,
             icon: item.icon ?? ACTION_ICONS_BY_ID[item.key],
+            ...(exceededLimit !== undefined && { toolTipContent: exceededLimit.reason }),
           };
         };
         const items =
@@ -201,6 +211,7 @@ export const AlertsTableBulkActionMenu = ({
     refresh,
     rowSelection,
     setIsBulkActionsLoading,
+    totalItems,
   ]);
 
   return (
