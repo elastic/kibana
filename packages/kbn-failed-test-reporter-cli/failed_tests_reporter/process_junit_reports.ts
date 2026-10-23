@@ -73,9 +73,19 @@ export async function processJUnitReports(
       };
 
       if (failure.likelyIrrelevant) {
+        const { infraReason } = failure;
+        if (infraReason) {
+          log.info(
+            `FTR failure is likely an infrastructure issue (${infraReason.category}): ` +
+              `${failure.classname} - ${failure.name}`
+          );
+        }
         pushMessage(
-          'Failure is likely irrelevant' +
-            (updateGithub ? ', so an issue was not created or updated' : '')
+          (infraReason
+            ? `Failure is likely an infrastructure issue (${infraReason.category})`
+            : 'Failure is likely irrelevant') +
+            (updateGithub ? ', so an issue was not created or updated' : '') +
+            (infraReason ? `. ${infraReason.message}` : '')
         );
         continue;
       }

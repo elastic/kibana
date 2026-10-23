@@ -162,6 +162,25 @@ describe('dev/mocha/junit report generation', () => {
     expect(cascading.$['cascading-failure']).toBe('true');
   });
 
+  it('records the test target on the root element', async () => {
+    const xmlPath = getUniqueJunitReportPath(PROJECT_DIR, 'target');
+    const mocha = new Mocha({
+      reporter: function Runner(runner) {
+        setupJUnitReportGeneration(runner, {
+          reportName: 'target',
+          rootDirectory: PROJECT_DIR,
+          target: 'cloud-serverless-search',
+        });
+      },
+    });
+
+    mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
+    await new Promise((resolve) => mocha.run(resolve));
+    const report = await parseStringAsync(await readFile(xmlPath));
+
+    expect(report.testsuites.$).toMatchObject({ name: 'ftr', target: 'cloud-serverless-search' });
+  });
+
   it('logs report generation errors without blocking the mocha run callback', async () => {
     const log = new ToolingLog();
     const writer = new ToolingLogCollectingWriter();

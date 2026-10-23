@@ -33,6 +33,7 @@ const { createFailureIssue, updateFailureIssue, updateSuiteIssue } =
   jest.requireMock('./report_failure');
 const { reportFailuresToEs } = jest.requireMock('./report_failures_to_es');
 const { reportFailuresToFile } = jest.requireMock('./report_failures_to_file');
+const { addMessagesToReport } = jest.requireMock('./add_messages_to_report');
 
 const makeFailure = (i: number): TestFailure => ({
   classname: `suite ${i}`,
@@ -302,5 +303,39 @@ describe('processJUnitReports cascading failures', () => {
 
     expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(3);
     expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(3);
+  });
+});
+
+describe('processJUnitReports infrastructure failures', () => {
+  const makeInfraFailure = (i: number): TestFailure => ({
+    ...makeFailure(i),
+    likelyIrrelevant: true,
+    infraReason: { category: 'es_timeout', message: 'Elasticsearch timed out.' },
+  });
+
+  it('neither creates nor updates issues for them', async () => {
+    const failures = [makeInfraFailure(0), makeInfraFailure(1)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams([createExistingIssue(failures[1])]);
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).not.toHaveBeenCalled();
+    expect(updateFailureIssue).not.toHaveBeenCalled();
+  });
+
+  it('explains the infrastructure reason in the report message', async () => {
+    getFailures.mockReturnValue([makeInfraFailure(0)]);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(addMessagesToReport.mock.calls[0][0].messages).toContainEqual({
+      classname: 'suite 0',
+      name: 'test 0',
+      message:
+        'Failure is likely an infrastructure issue (es_timeout), so an issue was not created ' +
+        'or updated. Elasticsearch timed out.',
+    });
   });
 });
