@@ -106,7 +106,7 @@ describe('cache token fields in the details table', () => {
     expect(
       getGenAiDetailFieldNames({
         'attributes.gen_ai.response.model': ['claude'],
-        'attributes.gen_ai.usage.cache_creation.input_tokens': [300],
+        'attributes.gen_ai.usage.cache_write.input_tokens': [300],
         'attributes.gen_ai.usage.cache_read.input_tokens': [2100],
         'attributes.gen_ai.usage.output_tokens': [80],
         'attributes.gen_ai.usage.input_tokens': [2800],
@@ -115,7 +115,7 @@ describe('cache token fields in the details table', () => {
       'attributes.gen_ai.usage.input_tokens',
       'attributes.gen_ai.usage.output_tokens',
       'attributes.gen_ai.usage.cache_read.input_tokens',
-      'attributes.gen_ai.usage.cache_creation.input_tokens',
+      'attributes.gen_ai.usage.cache_write.input_tokens',
       'attributes.gen_ai.response.model',
     ]);
   });
@@ -250,7 +250,7 @@ describe('GenAiDetailsTable', () => {
       const flattened = {
         'attributes.gen_ai.usage.input_tokens': [12775],
         'attributes.gen_ai.usage.cache_read.input_tokens': [8517],
-        'attributes.gen_ai.usage.cache_creation.input_tokens': [1000],
+        'attributes.gen_ai.usage.cache_write.input_tokens': [1000],
       };
 
       const read = renderFormatted(
@@ -264,7 +264,7 @@ describe('GenAiDetailsTable', () => {
       mockContentFrameworkTable.mockClear();
       const write = renderFormatted(
         flattened,
-        'attributes.gen_ai.usage.cache_creation.input_tokens',
+        'attributes.gen_ai.usage.cache_write.input_tokens',
         1000
       );
       expect(write.config?.title).toBe('Cache write tokens');

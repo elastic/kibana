@@ -162,7 +162,7 @@ function setTokens(
     attributes[GenAISemanticConventions.GenAIUsageCacheReadInputTokens] = cached;
   }
   if (cacheWrite != null) {
-    attributes[GenAISemanticConventions.GenAIUsageCacheCreationInputTokens] = cacheWrite;
+    attributes[GenAISemanticConventions.GenAIUsageCacheWriteInputTokens] = cacheWrite;
   }
   span.setAttributes(attributes);
 }

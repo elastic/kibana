@@ -21,7 +21,7 @@ import {
   ATTRIBUTE_GEN_AI_RESPONSE_ID,
   ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
   ATTRIBUTE_GEN_AI_SYSTEM,
-  ATTRIBUTE_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_CACHE_WRITE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
@@ -79,7 +79,7 @@ const DETAIL_FIELD_TITLES: Record<string, string> = {
     'unifiedDocViewer.observability.traces.genAi.details.cacheReadTokens',
     { defaultMessage: 'Cache read tokens' }
   ),
-  [ATTRIBUTE_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]: i18n.translate(
+  [ATTRIBUTE_GEN_AI_USAGE_CACHE_WRITE_INPUT_TOKENS]: i18n.translate(
     'unifiedDocViewer.observability.traces.genAi.details.cacheWriteTokens',
     { defaultMessage: 'Cache write tokens' }
   ),
@@ -128,7 +128,7 @@ const hasValue = (value: unknown): boolean =>
 
 const CACHE_TOKEN_ATTRIBUTES = [
   ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS,
-  ATTRIBUTE_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_CACHE_WRITE_INPUT_TOKENS,
 ];
 
 const toFiniteNumber = (value: unknown): number | undefined => {

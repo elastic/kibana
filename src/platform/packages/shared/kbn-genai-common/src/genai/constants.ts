@@ -21,8 +21,8 @@ export const ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS = 'attributes.gen_ai.usage.inpu
 export const ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS = 'attributes.gen_ai.usage.output_tokens';
 export const ATTRIBUTE_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS =
   'attributes.gen_ai.usage.cache_read.input_tokens';
-export const ATTRIBUTE_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS =
-  'attributes.gen_ai.usage.cache_creation.input_tokens';
+export const ATTRIBUTE_GEN_AI_USAGE_CACHE_WRITE_INPUT_TOKENS =
+  'attributes.gen_ai.usage.cache_write.input_tokens';
 export const ATTRIBUTE_GEN_AI_RESPONSE_MODEL = 'attributes.gen_ai.response.model';
 export const ATTRIBUTE_GEN_AI_RESPONSE_ID = 'attributes.gen_ai.response.id';
 export const ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS = 'attributes.gen_ai.response.finish_reasons';
