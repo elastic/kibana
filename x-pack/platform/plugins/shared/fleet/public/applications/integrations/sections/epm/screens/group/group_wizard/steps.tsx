@@ -462,7 +462,18 @@ export const HowStep: React.FC<{
   method: SetupTechnology;
   onMethodChange: (method: SetupTechnology) => void;
   agentPolicySection: React.ReactNode;
-}> = ({ methods, method, onMethodChange, agentPolicySection }) => (
+  /** Selected data streams the chosen method can't collect (stock: input deployment modes). */
+  excludedByMethod?: string[];
+  /** PROTOTYPE: other selected packages, not added when agentless. */
+  extraPackageTitles?: string[];
+}> = ({
+  methods,
+  method,
+  onMethodChange,
+  agentPolicySection,
+  excludedByMethod = [],
+  extraPackageTitles = [],
+}) => (
   <div css={sectionGap}>
     <div>
       <SectionHeading title="Deployment" description="How the data gets collected." />
@@ -483,6 +494,31 @@ export const HowStep: React.FC<{
         ))}
       </EuiFlexGroup>
     </div>
+    {method === SetupTechnology.AGENTLESS && excludedByMethod.length > 0 && (
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        iconType="info"
+        title="Not collected when managed by Elastic"
+        data-test-subj="groupWizardAgentlessExcluded"
+      >
+        <p>
+          {excludedByMethod.join(', ')}. These need Elastic Agent on your hosts. Pick Elastic Agent
+          to collect them.
+        </p>
+      </EuiCallOut>
+    )}
+    {method === SetupTechnology.AGENTLESS && extraPackageTitles.length > 0 && (
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="warning"
+        iconType="warning"
+        title={`Prototype: only the first integration is added managed by Elastic`}
+      >
+        <p>{extraPackageTitles.join(', ')} won&apos;t be added. Pick Elastic Agent to add them.</p>
+      </EuiCallOut>
+    )}
     {method === SetupTechnology.AGENT_BASED && agentPolicySection}
   </div>
 );

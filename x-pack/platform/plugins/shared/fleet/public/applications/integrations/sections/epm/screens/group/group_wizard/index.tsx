@@ -85,7 +85,10 @@ import {
   carryOverSchemaState,
   emptySchemaState,
   getDatasetVarValue,
-  getDeploymentMethods,
+  getDeploymentOptions,
+  getSelectedPolicyTemplate,
+  getStreamsExcludedByMethod,
+  restrictStateToMethod,
   getEnabledSignals,
   getEnabledStreams,
   getInstallSummary,
@@ -239,7 +242,7 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
 }) => {
   const spaceSettings = useSpaceSettingsContext();
   const existingPolicies = useAllNonManagedAgentPolicies();
-  const { isAgentlessEnabled } = useAgentless();
+  const { isAgentlessEnabled, isAgentlessDefault } = useAgentless();
   const packages = useMemberPackages(options);
 
   // Schemas come from the listed members' `schema`; the default is the default member's schema
@@ -304,27 +307,45 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
   }, [existingPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedNames = selectedNamesOf(schema);
-  const units: WizardUnit[] = selectedNames.map((name) => ({
+  const rawUnits: WizardUnit[] = selectedNames.map((name) => ({
     packageName: name,
     packageInfo: packages[name]?.packageInfo,
     model: packages[name]?.model,
     state: packageStates[name] ?? EMPTY_STATE,
   }));
   // The first selected package runs the stock create flow; the others are saved alongside it.
-  const primary = units[0];
-  const model = primary?.model;
-  const state = primary?.state ?? EMPTY_STATE;
+  const model = rawUnits[0]?.model;
+  const primaryInfo = rawUnits[0]?.packageInfo;
+  const rawState = rawUnits[0]?.state ?? EMPTY_STATE;
 
-  // "How" only shows when the child offers more than one deployment method.
-  const methods = getDeploymentMethods(model, isAgentlessEnabled);
+  // Deployment: stock rules for the policy template of the selection (agentless offered when the
+  // template supports it and the deployment does, default agentless only when the template says
+  // so). "How" only shows when there's more than one method.
+  const policyTemplate = model ? getSelectedPolicyTemplate(model, rawState) : undefined;
+  const deployment = getDeploymentOptions(primaryInfo, policyTemplate, {
+    isAgentlessEnabled,
+    isAgentlessDefault,
+  });
+  const methods = deployment.methods;
   const showHow = methods.length > 1;
   const [pickedMethod, setPickedMethod] = useState<SetupTechnology>();
-  const method = pickedMethod && methods.includes(pickedMethod) ? pickedMethod : methods[0];
+  const method =
+    pickedMethod && methods.includes(pickedMethod) ? pickedMethod : deployment.defaultMethod;
+  // With agentless, streams of inputs the template doesn't allow agentless are off.
+  const state = useMemo(
+    () => (model ? restrictStateToMethod(model, rawState, primaryInfo, method) : rawState),
+    [model, rawState, primaryInfo, method]
+  );
+  const excludedByMethod = model
+    ? getStreamsExcludedByMethod(model, rawState, primaryInfo, method)
+    : [];
+  const units = rawUnits.map((u, i) => (i === 0 ? { ...u, state } : u));
+  const primary = units[0];
 
   const unitsKey = units.map((u) => `${u.packageName}:${!!u.model}`).join(',');
   const steps = useMemo(
     () => getGroupSteps(units, { showHow }),
-    [unitsKey, packageStates, showHow] // eslint-disable-line react-hooks/exhaustive-deps
+    [unitsKey, packageStates, state, showHow] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const updateState = useCallback(
@@ -460,6 +481,8 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
       }
       methods={methods}
       method={method}
+      supportsAgentless={deployment.supportsAgentless}
+      excludedByMethod={excludedByMethod.map((s) => s.title)}
       onMethodChange={setPickedMethod}
       showHow={showHow}
       steps={steps}
@@ -526,6 +549,10 @@ interface BodyProps {
   onSkippedAssetsChange: (packageName: string, skippedKeys: string[]) => void;
   methods: SetupTechnology[];
   method: SetupTechnology;
+  /** The selection's policy template supports agentless (whether or not the deployment does). */
+  supportsAgentless: boolean;
+  /** Selected streams the chosen method can't collect. */
+  excludedByMethod: string[];
   onMethodChange: (method: SetupTechnology) => void;
   showHow: boolean;
   steps: WizardStep[];
@@ -856,6 +883,8 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     if (step === HOW_STEP) {
       return (
         <HowStep
+          excludedByMethod={props.excludedByMethod}
+          extraPackageTitles={extras.map((e) => e.model?.packageTitle ?? e.packageName)}
           methods={props.methods}
           method={props.method}
           onMethodChange={props.onMethodChange}
@@ -934,7 +963,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
           agentPolicySection={!props.showHow ? agentPolicySection : undefined}
           showManagedUnavailable={
             !props.showHow &&
-            !!model.supportsAgentless &&
+            props.supportsAgentless &&
             !props.methods.includes(SetupTechnology.AGENTLESS)
           }
           agentPolicyLabel={

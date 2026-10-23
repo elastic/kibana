@@ -38,7 +38,11 @@ import type { SchemaModel, SchemaState, WizardStream } from './model';
 import {
   getAgentInputErrors,
   getContentInstallText,
-  getDeploymentMethods,
+  getDeploymentOptions,
+  getEnabledSignals,
+  getSelectedPolicyTemplate,
+  getStreamsExcludedByMethod,
+  restrictStateToMethod,
   getDetectStatus,
   getInstallSummary,
   getGroupSteps,
@@ -225,20 +229,100 @@ describe('group wizard model', () => {
     });
 
     it('"how" only shows when there is more than one deployment method', () => {
-      expect(getDeploymentMethods(model, true)).toEqual([SetupTechnology.AGENT_BASED]);
-      const agentless = { ...model, supportsAgentless: true };
-      expect(getDeploymentMethods(agentless, false)).toEqual([SetupTechnology.AGENT_BASED]);
-      expect(getDeploymentMethods(agentless, true)).toEqual([
-        SetupTechnology.AGENTLESS,
+      const on = { isAgentlessEnabled: true, isAgentlessDefault: false };
+      expect(getDeploymentOptions(nginxPackageInfo, 'nginx', on).methods).toEqual([
         SetupTechnology.AGENT_BASED,
-      ]);
-      expect(getDeploymentMethods({ ...agentless, agentlessOnly: true }, true)).toEqual([
-        SetupTechnology.AGENTLESS,
       ]);
       expect(getSteps(model, emptySchemaState(), { showHow: true }).slice(0, 2)).toEqual([
         'collect',
         'how',
       ]);
+    });
+  });
+
+  // PROTOTYPE: same rules as the stock create page, per policy template
+  describe('deployment (agentless per policy template)', () => {
+    const withDeploymentModes = (
+      templateModes: Record<string, unknown>,
+      inputModes?: Record<string, string[]>
+    ): PackageInfo => {
+      const info = cloneDeep(nginxPackageInfo);
+      info.policy_templates![0] = {
+        ...info.policy_templates![0],
+        deployment_modes: templateModes,
+        inputs: (info.policy_templates![0] as any).inputs.map((input: any) =>
+          inputModes?.[input.type] ? { ...input, deployment_modes: inputModes[input.type] } : input
+        ),
+      } as any;
+      return info;
+    };
+    const on = { isAgentlessEnabled: true, isAgentlessDefault: false };
+    const off = { isAgentlessEnabled: false, isAgentlessDefault: false };
+    const agentlessToo = withDeploymentModes(
+      { default: { enabled: true }, agentless: { enabled: true } },
+      { logfile: ['default'], 'nginx/metrics': ['default', 'agentless'] }
+    );
+
+    it('agentless offered when the template supports it and the deployment does', () => {
+      expect(getDeploymentOptions(nginxPackageInfo, 'nginx', on)).toEqual({
+        methods: [SetupTechnology.AGENT_BASED],
+        defaultMethod: SetupTechnology.AGENT_BASED,
+        supportsAgentless: false,
+      });
+      expect(getDeploymentOptions(agentlessToo, 'nginx', on)).toEqual({
+        methods: [SetupTechnology.AGENTLESS, SetupTechnology.AGENT_BASED],
+        defaultMethod: SetupTechnology.AGENT_BASED,
+        supportsAgentless: true,
+      });
+      // Deployment without agentless: Elastic Agent only, "Where to run" shows managed disabled
+      expect(getDeploymentOptions(agentlessToo, 'nginx', off)).toEqual({
+        methods: [SetupTechnology.AGENT_BASED],
+        defaultMethod: SetupTechnology.AGENT_BASED,
+        supportsAgentless: true,
+      });
+      // Another template name: not this one's deployment modes
+      expect(getDeploymentOptions(agentlessToo, 'other', on).supportsAgentless).toBe(false);
+    });
+
+    it('default is agentless only for agentless-only templates or agentless.is_default', () => {
+      const isDefault = withDeploymentModes({
+        default: { enabled: true },
+        agentless: { enabled: true, is_default: true },
+      });
+      expect(getDeploymentOptions(isDefault, 'nginx', on).defaultMethod).toBe(
+        SetupTechnology.AGENTLESS
+      );
+      const only = withDeploymentModes({
+        default: { enabled: false },
+        agentless: { enabled: true },
+      });
+      expect(getDeploymentOptions(only, 'nginx', on)).toEqual({
+        methods: [SetupTechnology.AGENTLESS],
+        defaultMethod: SetupTechnology.AGENTLESS,
+        supportsAgentless: true,
+      });
+    });
+
+    it('agentless turns off streams of inputs the template does not allow agentless', () => {
+      const model = buildSchemaModel(agentlessToo);
+      const state = emptySchemaState();
+      expect(getSelectedPolicyTemplate(model, state)).toBe('nginx');
+      const restricted = restrictStateToMethod(
+        model,
+        state,
+        agentlessToo,
+        SetupTechnology.AGENTLESS
+      );
+      expect(getEnabledSignals(model, restricted)).toEqual(['metrics']);
+      expect(
+        getStreamsExcludedByMethod(model, state, agentlessToo, SetupTechnology.AGENTLESS).map(
+          (st) => st.dataset
+        )
+      ).toEqual(['nginx.access', 'nginx.error']);
+      // Elastic Agent: untouched
+      expect(restrictStateToMethod(model, state, agentlessToo, SetupTechnology.AGENT_BASED)).toBe(
+        state
+      );
     });
   });
 

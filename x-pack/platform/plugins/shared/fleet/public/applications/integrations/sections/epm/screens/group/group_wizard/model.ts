@@ -34,8 +34,10 @@ import {
 import type { PackagePolicyValidationResults } from '../../../../../../../../common/services';
 import {
   isAgentlessIntegration,
+  isInputAllowedForDeploymentMode,
   isOnlyAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
+import { isAgentlessSetupDefault } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { SetupTechnology } from '../../../../../../../../common/types';
 import { getInputUnitsByPackage } from '../../../../../../fleet/sections/agents/agent_details_page/components/agent_details/input_status_utils';
 import type {
@@ -104,9 +106,6 @@ export interface SchemaModel {
   packageTitle: string;
   packageVersion: string;
   packageType: string;
-  /** Deployment methods the child declares (agentless needs the deployment to support it too). */
-  supportsAgentless: boolean;
-  agentlessOnly: boolean;
   packageVars: RegistryVarsEntry[];
   packageVarGroups?: RegistryVarGroup[];
   inputs: WizardInput[];
@@ -183,8 +182,6 @@ export const buildSchemaModel = (packageInfo: PackageInfo): SchemaModel => {
     packageTitle: packageInfo.title,
     packageVersion: packageInfo.version,
     packageType: packageInfo.type ?? 'integration',
-    supportsAgentless: isAgentlessIntegration(packageInfo),
-    agentlessOnly: isOnlyAgentlessIntegration(packageInfo),
     packageVars: packageInfo.vars ?? [],
     packageVarGroups: packageInfo.var_groups,
     inputs: inputs.filter((input) => streams.some((s) => s.inputKey === input.key)),
@@ -307,16 +304,130 @@ export const toggleDataStreamChoice = (
 export const getEnabledSignals = (model: SchemaModel, state: SchemaState) =>
   sortSignals(getEnabledStreams(model, state).map((s) => s.signal));
 
-export const getDeploymentMethods = (
-  model: SchemaModel | undefined,
-  isAgentlessAvailable: boolean
-): SetupTechnology[] => {
-  if (!model) return [SetupTechnology.AGENT_BASED];
-  return [
-    ...(isAgentlessAvailable && model.supportsAgentless ? [SetupTechnology.AGENTLESS] : []),
-    ...(!model.agentlessOnly || !isAgentlessAvailable ? [SetupTechnology.AGENT_BASED] : []),
+/* ---------- Deployment: Elastic Agent or Managed by Elastic (agentless) ---------- */
+
+// PROTOTYPE: same rules as the stock create page (useSetupTechnology + useOnSubmit), per policy
+// template: agentless is offered when the template's `deployment_modes.agentless` is enabled and
+// the deployment supports agentless; Elastic Agent unless the template is agentless only; the
+// default is agentless only for agentless-only templates or `agentless.is_default`. With agentless
+// picked, inputs the template doesn't allow agentless are off.
+
+/**
+ * Policy template the selection belongs to: the only one with enabled streams, else the package's
+ * only template. Undefined when the selection spans templates (stock: package-level checks).
+ */
+export const getSelectedPolicyTemplate = (
+  model: SchemaModel,
+  state: SchemaState
+): string | undefined => {
+  const inputTemplate = (stream: WizardStream) =>
+    model.inputs.find((i) => i.key === stream.inputKey)?.policyTemplate;
+  const selected = [
+    ...new Set(
+      model.streams
+        .filter((s) => isStreamEnabled(s, state))
+        .map(inputTemplate)
+        .filter(Boolean)
+    ),
   ];
+  if (selected.length === 1) return selected[0];
+  const all = [...new Set(model.inputs.map((i) => i.policyTemplate))];
+  return selected.length === 0 && all.length === 1 ? all[0] : undefined;
 };
+
+export interface DeploymentOptions {
+  /** Methods to offer, agentless first. */
+  methods: SetupTechnology[];
+  defaultMethod: SetupTechnology;
+  /** The template supports agentless, whether or not this deployment does. */
+  supportsAgentless: boolean;
+}
+
+export const getDeploymentOptions = (
+  packageInfo: PackageInfo | undefined,
+  policyTemplate: string | undefined,
+  {
+    isAgentlessEnabled,
+    isAgentlessDefault,
+  }: { isAgentlessEnabled: boolean; isAgentlessDefault: boolean }
+): DeploymentOptions => {
+  const supportsAgentless = isAgentlessIntegration(packageInfo, policyTemplate);
+  const agentlessOnly = isOnlyAgentlessIntegration(packageInfo, policyTemplate);
+  const methods = [
+    ...(isAgentlessEnabled && supportsAgentless ? [SetupTechnology.AGENTLESS] : []),
+    ...(!agentlessOnly || !isAgentlessEnabled ? [SetupTechnology.AGENT_BASED] : []),
+  ];
+  const agentlessDefault =
+    isAgentlessEnabled &&
+    (agentlessOnly || isAgentlessSetupDefault(isAgentlessDefault, packageInfo, policyTemplate));
+  return {
+    methods,
+    defaultMethod:
+      agentlessDefault && methods.includes(SetupTechnology.AGENTLESS)
+        ? SetupTechnology.AGENTLESS
+        : methods.includes(SetupTechnology.AGENT_BASED)
+        ? SetupTechnology.AGENT_BASED
+        : methods[0],
+    supportsAgentless,
+  };
+};
+
+/** Stock rule: the input's `deployment_modes`, else the agentless input type blocklist. */
+export const isStreamAllowedForMethod = (
+  stream: WizardStream,
+  model: SchemaModel,
+  packageInfo: PackageInfo | undefined,
+  method: SetupTechnology
+) => {
+  if (method !== SetupTechnology.AGENTLESS) return true;
+  const input = model.inputs.find((i) => i.key === stream.inputKey);
+  return (
+    !!input &&
+    isInputAllowedForDeploymentMode(
+      { type: input.type, policy_template: input.policyTemplate },
+      'agentless',
+      packageInfo
+    )
+  );
+};
+
+/**
+ * Wizard state as the chosen method sees it: with agentless, streams of inputs not allowed
+ * agentless are off. Like the stock form, a single agentless input that's off by default is
+ * turned on (unless the user turned its streams off).
+ */
+export const restrictStateToMethod = (
+  model: SchemaModel,
+  state: SchemaState,
+  packageInfo: PackageInfo | undefined,
+  method: SetupTechnology
+): SchemaState => {
+  if (method !== SetupTechnology.AGENTLESS) return state;
+  const allowed = model.streams.filter((s) =>
+    isStreamAllowedForMethod(s, model, packageInfo, method)
+  );
+  const enabled = { ...state.enabled };
+  model.streams.forEach((s) => {
+    if (!allowed.includes(s)) enabled[s.id] = false;
+  });
+  if (new Set(allowed.map((s) => s.inputKey)).size === 1) {
+    allowed.forEach((s) => {
+      if (state.enabled[s.id] === undefined) enabled[s.id] = true;
+    });
+  }
+  return { ...state, enabled };
+};
+
+/** Streams the user selected that the chosen method can't collect (shown on the "how" step). */
+export const getStreamsExcludedByMethod = (
+  model: SchemaModel,
+  state: SchemaState,
+  packageInfo: PackageInfo | undefined,
+  method: SetupTechnology
+) =>
+  model.streams.filter(
+    (s) => isStreamEnabled(s, state) && !isStreamAllowedForMethod(s, model, packageInfo, method)
+  );
 
 /**
  * Zero selected signals is allowed (Nima's spec): the settings steps drop out and review offers

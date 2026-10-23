@@ -76,6 +76,35 @@ jest.mock('../../../../../../../hooks', () => ({
   ),
 }));
 
+// PROTOTYPE: agentless on/off per test (stock hook, used by the wizard and useOnSubmit)
+const mockAgentless = { enabled: false };
+jest.mock(
+  '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
+  () => {
+    const actual = jest.requireActual(
+      '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology'
+    );
+    return {
+      ...actual,
+      useAgentless: () => {
+        const real = actual.useAgentless();
+        return mockAgentless.enabled
+          ? {
+              ...real,
+              isAgentlessEnabled: true,
+              getAgentlessStatusForPackage: (pkg: any, template?: string) => ({
+                isAgentless: jest
+                  .requireActual('../../../../../../../../common/services/agentless_policy_helper')
+                  .isAgentlessIntegration(pkg, template),
+                isDefaultDeploymentMode: false,
+              }),
+            }
+          : real;
+      },
+    };
+  }
+);
+
 jest.mock('../../../../../../fleet/services/ensure_kibana_assets_installed', () => ({
   ensurePackageKibanaAssetsInstalled: jest.fn().mockResolvedValue(undefined),
 }));
@@ -333,6 +362,81 @@ describe('GroupOnboardingWizard', () => {
     });
     (sendCreatePackagePolicyForRq as jest.Mock).mockClear();
     (sendInstallPackage as jest.Mock).mockClear();
+  });
+
+  describe('deployment (agentless per policy template, stock rules)', () => {
+    afterEach(() => {
+      mockAgentless.enabled = false;
+    });
+    // Nginx ECS with a template that also supports agentless; only nginx/metrics may run agentless
+    const agentlessNginx = (() => {
+      const info = JSON.parse(JSON.stringify(nginxPackageInfo));
+      info.policy_templates[0].deployment_modes = {
+        default: { enabled: true },
+        agentless: { enabled: true },
+      };
+      info.policy_templates[0].inputs = info.policy_templates[0].inputs.map((input: any) => ({
+        ...input,
+        deployment_modes: input.type === 'nginx/metrics' ? ['default', 'agentless'] : ['default'],
+      }));
+      return info as PackageInfo;
+    })();
+    const group: IntegrationGroup = {
+      ...singleSchemaGroup,
+      default: 'nginx',
+      members: [{ package: 'nginx', version: '3.2.2', title: 'Nginx', schema: 'ecs' }],
+    };
+
+    it('deployment supports agentless: "how" step, Elastic Agent default, agentless drops disallowed inputs', async () => {
+      mockAgentless.enabled = true;
+      (sendGetPackageInfoByKeyForRq as jest.Mock).mockImplementation(() =>
+        Promise.resolve({ item: agentlessNginx })
+      );
+      const result = renderWizard(group, [option('ecs', agentlessNginx)]);
+      await waitFor(() => expect(result.getByTestId('groupWizardRail-how')).toBeInTheDocument());
+      expect(result.getByTestId('groupWizardRail-logs')).toBeInTheDocument();
+      click(result.getByTestId('groupWizardNext'));
+      await waitFor(() =>
+        expect(
+          within(result.getByTestId('groupWizardMethod-agent-based')).getByRole('radio')
+        ).toBeChecked()
+      );
+      click(within(result.getByTestId('groupWizardMethod-agentless')).getByRole('radio'));
+      await waitFor(() =>
+        expect(result.getByTestId('groupWizardAgentlessExcluded')).toHaveTextContent(
+          'Nginx access logs, Nginx error logs'
+        )
+      );
+      // Logs come from logfile (not allowed agentless): the logs step drops out
+      expect(result.queryByTestId('groupWizardRail-logs')).not.toBeInTheDocument();
+      expect(result.getByTestId('groupWizardRail-metrics')).toBeInTheDocument();
+    });
+
+    it('deployment without agentless: no "how" step, managed shown disabled on review', async () => {
+      (sendGetPackageInfoByKeyForRq as jest.Mock).mockImplementation(() =>
+        Promise.resolve({ item: agentlessNginx })
+      );
+      const result = renderWizard(group, [option('ecs', agentlessNginx)]);
+      await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
+      expect(result.queryByTestId('groupWizardRail-how')).not.toBeInTheDocument();
+      click(result.getByTestId('groupWizardSignal-logs').querySelector('input')!);
+      click(result.getByTestId('groupWizardSignal-metrics').querySelector('input')!);
+      click(result.getByTestId('groupWizardNext'));
+      await waitFor(() => expect(result.getByTestId('groupWizardReview')).toBeInTheDocument());
+      expect(
+        within(result.getByTestId('groupWizardWhereToRun-agentless')).getByRole('radio')
+      ).toBeDisabled();
+    });
+
+    it('template without agentless: no managed option anywhere', async () => {
+      const result = renderWizard(group, [option('ecs', nginxPackageInfo)]);
+      await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
+      click(result.getByTestId('groupWizardSignal-logs').querySelector('input')!);
+      click(result.getByTestId('groupWizardSignal-metrics').querySelector('input')!);
+      click(result.getByTestId('groupWizardNext'));
+      await waitFor(() => expect(result.getByTestId('groupWizardReview')).toBeInTheDocument());
+      expect(result.queryByTestId('groupWizardWhereToRun')).not.toBeInTheDocument();
+    });
   });
 
   it('Apache: same code, OTel input package child with metrics only', async () => {
