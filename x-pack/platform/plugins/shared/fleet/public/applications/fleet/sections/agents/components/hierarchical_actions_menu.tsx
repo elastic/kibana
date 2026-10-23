@@ -179,6 +179,9 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
     return result;
   }, [items, closeMenu]);
 
+  // Nothing to show (for example no action is available for the item): disable the button
+  const isEmpty = items.length === 0;
+
   // Render the button
   const buttonElement = button ? (
     <EuiButton
@@ -187,6 +190,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
       color={button.props?.color}
       fill={button.props?.fill}
       isLoading={button.props?.isLoading}
+      isDisabled={isEmpty}
       onClick={toggleMenu}
       data-test-subj={dataTestSubj}
     >
@@ -201,6 +205,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
     >
       <EuiButtonIcon
         iconType="boxesVertical"
+        isDisabled={isEmpty}
         onClick={toggleMenu}
         aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
           defaultMessage: 'Open menu',

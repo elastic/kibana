@@ -70,7 +70,7 @@ export const LOGARITHMIC_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'log',
     signature: 'log(value)',
-    description: i18n.translate('xpack.streams.math.docs.log', {
+    description: i18n.translate('xpack.streamlang.math.docs.log', {
       defaultMessage: 'Returns the natural logarithm (base e) of a value.',
     }),
     args: [{ name: 'value', type: 'number' }],
@@ -84,7 +84,7 @@ export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'eq',
     signature: 'eq(left, right)',
-    description: i18n.translate('xpack.streams.math.docs.eq', {
+    description: i18n.translate('xpack.streamlang.math.docs.eq', {
       defaultMessage:
         'Returns true if values are equal, false otherwise. Equivalent to the == operator.',
     }),
@@ -99,7 +99,7 @@ export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'neq',
     signature: 'neq(left, right)',
-    description: i18n.translate('xpack.streams.math.docs.neq', {
+    description: i18n.translate('xpack.streamlang.math.docs.neq', {
       defaultMessage:
         'Returns true if values are not equal, false otherwise. Use this function for inequality checks (the != operator is not supported).',
     }),
@@ -114,7 +114,7 @@ export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'gt',
     signature: 'gt(left, right)',
-    description: i18n.translate('xpack.streams.math.docs.gt', {
+    description: i18n.translate('xpack.streamlang.math.docs.gt', {
       defaultMessage:
         'Returns true if left > right, false otherwise. Equivalent to the > operator.',
     }),
@@ -129,7 +129,7 @@ export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'gte',
     signature: 'gte(left, right)',
-    description: i18n.translate('xpack.streams.math.docs.gte', {
+    description: i18n.translate('xpack.streamlang.math.docs.gte', {
       defaultMessage:
         'Returns true if left >= right, false otherwise. Equivalent to the >= operator.',
     }),
@@ -144,7 +144,7 @@ export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'lt',
     signature: 'lt(left, right)',
-    description: i18n.translate('xpack.streams.math.docs.lt', {
+    description: i18n.translate('xpack.streamlang.math.docs.lt', {
       defaultMessage:
         'Returns true if left < right, false otherwise. Equivalent to the < operator.',
     }),
@@ -159,7 +159,7 @@ export const COMPARISON_FUNCTIONS: MathFunctionDefinition[] = [
   {
     name: 'lte',
     signature: 'lte(left, right)',
-    description: i18n.translate('xpack.streams.math.docs.lte', {
+    description: i18n.translate('xpack.streamlang.math.docs.lte', {
       defaultMessage:
         'Returns true if left <= right, false otherwise. Equivalent to the <= operator.',
     }),
