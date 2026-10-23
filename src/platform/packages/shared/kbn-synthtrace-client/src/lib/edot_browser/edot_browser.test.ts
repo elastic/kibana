@@ -924,8 +924,8 @@ describe('edotBrowser', () => {
             Math.abs(Number(vital(name)?.['@timestamp']) - (TIMESTAMP + vitalValue(name)))
           ).toBeLessThan(1.1);
         });
-        // CLS at the largest shift, or when the page is hidden at the session end if nothing shifted.
-        // The shift can fall on the same millisecond as the last event, e.g. the LCP.
+        // CLS at the largest shift, or when the page is hidden at the session end if nothing
+        // shifted. The shift can fall on the same millisecond as the last event, e.g. the LCP.
         const sessionEnd = Math.max(...timestamps(docs));
         if (vitalValue('cls') < 0.0001) {
           expect(vital('cls')?.['@timestamp']).toBe(sessionEnd);

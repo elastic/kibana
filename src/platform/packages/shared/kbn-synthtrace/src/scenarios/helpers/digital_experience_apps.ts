@@ -37,8 +37,8 @@ export interface DigitalExperienceApp {
 export interface DigitalExperienceScenarioOpts {
   /**
    * Write `attributes.session.id`, with the tab ID and `session.start` that come with sessions.
-   * Turn off to match EDOT Browser 0.3.0 and earlier, which
-   * also sets the version of the distro to 0.3.0.
+   * Turn off to match EDOT Browser 0.3.0 and earlier: the apps then report distro version 0.3.0
+   * instead of 0.4.0.
    */
   withSessionId: boolean;
   /** Write the web vital attribution as a JSON body, which EDOT Browser only does when opted in. */

@@ -29,7 +29,8 @@
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID
  *   and `session.start` that come with sessions. Set to false to match EDOT Browser 0.3.0 and
- *   earlier, which don't emit them (elastic/elastic-otel-rum-js#120 added them).
+ *   earlier, which don't emit them (elastic/elastic-otel-rum-js#120 added them). The apps then
+ *   report distro version 0.3.0 instead of 0.4.0.
  * - includeRawAttribution (boolean, default: false): write the web-vitals attribution as a JSON
  *   body on `browser.web_vital` events, like the instrumentation's experimental opt-in option
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
