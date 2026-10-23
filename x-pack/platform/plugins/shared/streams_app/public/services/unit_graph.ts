@@ -8,6 +8,7 @@
 import type { Unit } from './unit_repository';
 import {
   PIPELINE_ENTRY,
+  hasScopedWiring,
   intersectSignals,
   isDelegatingRoute,
   readEntryIds,
@@ -286,10 +287,16 @@ export const buildUnitGraph = (
   ): UnitEdgeSlotTarget | undefined =>
     nodes.get(processingNodeId(ref))?.editable ? { ref, position, exists: true } : undefined;
 
+  const canMoveLineOff = (slot: ProcessingNodeRef): boolean => {
+    const pipeline = pipelinesById.get(slot.pipelineId);
+    return pipeline !== undefined && !hasScopedWiring(pipeline.config);
+  };
+
   // A line adds to the node it leads into; otherwise it creates the most specific
   // empty slot it crosses, preferring one no other line shares. A source line
-  // whose only slot is shared gets a pipeline of its own instead. Otherwise the
-  // line adds to the node it leaves.
+  // whose only slot is shared gets a pipeline of its own instead, unless that
+  // pipeline's wiring is telemetry-scoped. Otherwise the line adds to the node it
+  // leaves.
   const resolveProcessingTarget = ({
     source,
     target,
@@ -308,7 +315,8 @@ export const buildUnitGraph = (
       target.kind === GRAPH_ENDPOINT_KIND.destination &&
       candidates.length === 1 &&
       candidates[0].kind === PROCESSING_SLOT_KIND.pipeline &&
-      emptySlots.length === 1
+      emptySlots.length === 1 &&
+      canMoveLineOff(candidates[0])
     ) {
       return { line: { sourceId: source.id, destinationId: target.id } };
     }

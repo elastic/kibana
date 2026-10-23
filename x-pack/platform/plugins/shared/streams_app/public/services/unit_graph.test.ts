@@ -94,6 +94,28 @@ describe('buildUnitGraph', () => {
     ]);
   });
 
+  it('adds to the shared slot instead of moving a line off telemetry-scoped wiring', () => {
+    const graph = buildUnitGraph(
+      unitWith([
+        {
+          id: 'p-src',
+          supported_telemetry: ['logs', 'traces'],
+          config: [
+            { name: 'sources', value: ['src'] },
+            { name: 'destinations', value: ['a'], telemetry: ['logs'] },
+            { name: 'destinations', value: ['b'], telemetry: ['traces'] },
+          ],
+        },
+      ]),
+      new Set(['src']),
+      new Set(['a', 'b'])
+    );
+    expect(graph.edges.map(({ processingTarget }) => processingTarget)).toEqual([
+      { ref: pipelineSlot('p-src'), position: 'end', exists: false },
+      { ref: pipelineSlot('p-src'), position: 'end', exists: false },
+    ]);
+  });
+
   it('adds to the shared node from the lines leaving it', () => {
     const graph = buildUnitGraph(
       unitWith([

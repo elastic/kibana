@@ -45,6 +45,14 @@ export const readEntryIds = (config: PipelineConfig, name: IdListEntryName): str
 export const readRoutes = (config: PipelineConfig): RouteRule[] =>
   config.flatMap((entry) => (entry.name === PIPELINE_ENTRY.routes ? entry.value : []));
 
+/**
+ * Whether `sources`, `destinations` or `routes` are split into telemetry-scoped
+ * entries. Line edits merge the entries of one name, so these pipelines are
+ * left as they are.
+ */
+export const hasScopedWiring = (config: PipelineConfig): boolean =>
+  config.some((entry) => entry.telemetry !== undefined && entry.name !== PIPELINE_ENTRY.processors);
+
 export const pipelineForwards = (config: PipelineConfig): boolean =>
   config.some(({ name }) => name === PIPELINE_ENTRY.destinations || name === PIPELINE_ENTRY.routes);
 

@@ -556,6 +556,51 @@ describe('unit connections', () => {
     });
   });
 
+  describe('with telemetry-scoped wiring', () => {
+    const scoped = (processors: string[] = []): Unit => {
+      const unit = unitWith([
+        {
+          id: 'split',
+          supported_telemetry: ['logs', 'traces'],
+          config: [
+            { name: 'sources', value: ['otlp-input'] },
+            ...(processors.length > 0 ? [{ name: 'processors' as const, value: processors }] : []),
+            { name: 'destinations', value: ['es-logs'], telemetry: ['logs'] },
+            { name: 'destinations', value: ['es-metrics'], telemetry: ['traces'] },
+          ],
+        },
+      ]);
+      unit.unit.processors = [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }];
+      return unit;
+    };
+
+    it('stores a new source line on a pipeline of its own', () => {
+      const next = connectSourceToDestination(scoped(), 'otlp-input', 'debug-out');
+
+      expect(pipelineConfig(next, 'split')).toEqual(pipelineConfig(scoped(), 'split'));
+      expect(pipelineConfig(next, 'p-otlp-input')).toEqual([
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'destinations', value: ['debug-out'] },
+      ]);
+    });
+
+    it('leaves its source lines in place', () => {
+      expect(canDisconnectFromDestination(scoped(), source('otlp-input'), 'es-logs')).toBe(false);
+      expect(disconnectFromDestination(scoped(), source('otlp-input'), 'es-logs')).toEqual(
+        scoped()
+      );
+      expect(isolateSourceLine(scoped(), 'otlp-input', 'es-logs')).toBeUndefined();
+    });
+
+    it('does not wire its processing node', () => {
+      const unit = scoped(['tag']);
+
+      expect(canConnectToDestination(unit, processing('split'), 'debug-out')).toBe(false);
+      expect(canDisconnectFromDestination(unit, processing('split'), 'es-logs')).toBe(false);
+      expect(disconnectFromDestination(unit, processing('split'), 'es-logs')).toEqual(unit);
+    });
+  });
+
   describe('with route delegation', () => {
     const delegated = (child: Unit['unit']['pipelines'][number]['config']): Unit => {
       const unit = unitWith([

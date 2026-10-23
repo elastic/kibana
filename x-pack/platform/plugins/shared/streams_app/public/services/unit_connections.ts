@@ -24,6 +24,7 @@ import {
   PIPELINE_ENTRY,
   allocateComponentId,
   isDelegatingRoute,
+  hasScopedWiring,
   pipelineForwards,
   pruneUnit,
   readEntryIds,
@@ -156,8 +157,9 @@ const forwardsDirectlyTo = (pipeline: UnitPipeline, destinationId: string): bool
     : readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations).includes(destinationId);
 
 /**
- * The source pipeline whose lines start at the source: one without processors.
- * With a destination, only the pipeline that forwards to it matches.
+ * The source pipeline whose lines start at the source: one without processors,
+ * and without telemetry-scoped wiring this module would merge. With a
+ * destination, only the pipeline that forwards to it matches.
  */
 const findUnprocessedSourcePipelineIndex = (
   pipelines: Unit['unit']['pipelines'],
@@ -167,12 +169,24 @@ const findUnprocessedSourcePipelineIndex = (
   pipelines.findIndex(
     (pipeline) =>
       !hasProcessors(pipeline) &&
+      !hasScopedWiring(pipeline.config) &&
       readEntryIds(pipeline.config, PIPELINE_ENTRY.sources).includes(sourceId) &&
       (destinationId === undefined || forwardsDirectlyTo(pipeline, destinationId))
   );
 
 const findPipelineIndex = (unit: Unit, pipelineId: string): number =>
   unit.unit.pipelines.findIndex(({ id }) => id === pipelineId);
+
+/** The pipeline a processing node's lines are stored on, unless it is a route's or scoped. */
+const findWirableProcessingPipelineIndex = (unit: Unit, ref: ProcessingNodeRef): number => {
+  if (ref.kind !== PROCESSING_SLOT_KIND.pipeline) {
+    return -1;
+  }
+  const pipelineIndex = findPipelineIndex(unit, ref.pipelineId);
+  return pipelineIndex !== -1 && !hasScopedWiring(unit.unit.pipelines[pipelineIndex].config)
+    ? pipelineIndex
+    : -1;
+};
 
 const replacePipelineConfig = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit =>
   replacePipelines(
@@ -560,10 +574,7 @@ const canConnectProcessingToDestination = (
   ref: ProcessingNodeRef,
   destinationId: string
 ): boolean => {
-  if (ref.kind !== PROCESSING_SLOT_KIND.pipeline) {
-    return false;
-  }
-  const pipeline = unit.unit.pipelines.find(({ id }) => id === ref.pipelineId);
+  const pipeline = unit.unit.pipelines[findWirableProcessingPipelineIndex(unit, ref)];
   if (!pipeline) {
     return false;
   }
@@ -588,7 +599,7 @@ const connectProcessingToDestination = (
   if (!canConnectProcessingToDestination(unit, ref, destinationId)) {
     return unit;
   }
-  const pipelineIndex = findPipelineIndex(unit, ref.pipelineId);
+  const pipelineIndex = findWirableProcessingPipelineIndex(unit, ref);
   const pipeline = unit.unit.pipelines[pipelineIndex];
   const { config } = pipeline;
   return writePipeline(
@@ -608,8 +619,7 @@ const disconnectProcessingFromDestination = (
   ref: ProcessingNodeRef,
   destinationId: string
 ): Unit => {
-  const pipelineIndex =
-    ref.kind === PROCESSING_SLOT_KIND.pipeline ? findPipelineIndex(unit, ref.pipelineId) : -1;
+  const pipelineIndex = findWirableProcessingPipelineIndex(unit, ref);
   const pipeline = unit.unit.pipelines[pipelineIndex];
   if (!pipeline || !forwardsDirectlyTo(pipeline, destinationId)) {
     return unit;
@@ -676,10 +686,7 @@ export const canDisconnectFromDestination = (
   if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
     return findUnprocessedSourcePipelineIndex(unit.unit.pipelines, origin.id, destinationId) !== -1;
   }
-  const pipeline =
-    origin.ref.kind === PROCESSING_SLOT_KIND.pipeline
-      ? unit.unit.pipelines[findPipelineIndex(unit, origin.ref.pipelineId)]
-      : undefined;
+  const pipeline = unit.unit.pipelines[findWirableProcessingPipelineIndex(unit, origin.ref)];
   return pipeline !== undefined && forwardsDirectlyTo(pipeline, destinationId);
 };
 

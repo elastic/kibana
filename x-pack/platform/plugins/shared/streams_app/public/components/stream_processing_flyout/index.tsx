@@ -48,6 +48,8 @@ const deleteAllLabel = i18n.translate('xpack.streams.processingFlyout.deleteAll'
   defaultMessage: 'Delete all processors',
 });
 
+const noop = () => {};
+
 const closeLabel = i18n.translate('xpack.streams.processingFlyout.close', {
   defaultMessage: 'Close',
 });
@@ -101,10 +103,12 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
   );
   const cancelStep = useCallback(() => ref.send({ type: 'step.cancel' }), [ref]);
 
-  const requestClose = useDiscardConfirm(closeProcessingFlyout, {
+  const confirmClose = useDiscardConfirm(closeProcessingFlyout, {
     enabled: hasChanges || isEditing,
     ...discardProcessingChangesPromptOptions,
   });
+  // Closing does not cancel a save in flight, so the flyout stays open until it settles.
+  const requestClose = isSaving ? noop : confirmClose;
   const requestDeleteAll = useDiscardConfirm(
     () => ref.send({ type: 'step.deleteAll' }),
     deleteAllProcessorsPromptOptions
@@ -218,6 +222,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
                 iconType="cross"
                 color="text"
                 aria-label={closeLabel}
+                isDisabled={isSaving}
                 onClick={requestClose}
                 data-test-subj="streamsProcessingFlyoutClose"
               />
@@ -277,7 +282,11 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={requestClose} data-test-subj="streamsProcessingFlyoutCancel">
+            <EuiButtonEmpty
+              isDisabled={isSaving}
+              onClick={requestClose}
+              data-test-subj="streamsProcessingFlyoutCancel"
+            >
               {i18n.translate('xpack.streams.processingFlyout.cancel', {
                 defaultMessage: 'Cancel',
               })}
