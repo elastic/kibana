@@ -17,7 +17,7 @@ import type { Detection } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import { useFormatTimestamp } from '../../../common/format_timestamp';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
-import { getChangePointLabel } from '../../../components/entities/detection/change_point';
+import { getChangePointLabel } from '../../../common/change_point';
 import {
   CHANGE_LABEL,
   DISCOVERY_COLUMN_LABEL,
