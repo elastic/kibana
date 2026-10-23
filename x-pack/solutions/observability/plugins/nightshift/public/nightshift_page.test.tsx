@@ -408,11 +408,11 @@ describe('NightshiftPage', () => {
     expect(history.location.search).toBe('?entity=checkout&signalsSearch=latency');
   });
 
-  it('shows Sources and detection Settings in the Detections header', async () => {
+  it('shows Sources and detection Settings in the Signals header', async () => {
     renderPage('/detections/events');
 
     expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detections');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Signals');
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
 
     const sourcesLink = screen.getByTestId('nightshiftSourcesLink');

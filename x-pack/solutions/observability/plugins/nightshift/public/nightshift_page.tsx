@@ -21,10 +21,10 @@ import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightsh
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
 import {
-  DETECTION_PAGE_TITLE,
   KNOWLEDGE_PAGE_TITLE,
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
+  SIGNALS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
 } from './app/app_header';
 import { AutomationsPage } from './automations/automations_page';
@@ -216,7 +216,7 @@ export function NightshiftPage(): React.ReactElement | null {
       ...(isSettingsPage ? [{ text: SETTINGS_PAGE_TITLE }] : []),
       ...(isKnowledgePage ? [{ text: KNOWLEDGE_PAGE_TITLE }] : []),
       ...(isSourcesPage ? [{ text: SOURCES_PAGE_TITLE }] : []),
-      ...(isDetectionPage ? [{ text: DETECTION_PAGE_TITLE }] : []),
+      ...(isDetectionPage ? [{ text: SIGNALS_PAGE_TITLE }] : []),
     ],
     { serverless }
   );
