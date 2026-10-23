@@ -217,7 +217,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'can list and get sources but cannot create, update or delete them from Agent Builder',
+      'can list and get sources but the tools that change them are not available from Agent Builder',
       async ({ apiClient }) => {
         const listResponse = await executeTool(apiClient, toolHeaders, SOURCE_LIST_TOOL_ID, {
           search: sourceTitle,
@@ -242,15 +242,8 @@ apiTest.describe(
         ] as const;
         for (const [toolId, toolParams] of deniedCalls) {
           const response = await executeTool(apiClient, toolHeaders, toolId, toolParams);
-          expect(response).toHaveStatusCode(200);
-          expect(response.body.results).toStrictEqual([
-            expect.objectContaining({
-              type: 'error',
-              data: expect.objectContaining({
-                message: expect.stringContaining('requires the Nightshift manage privilege'),
-              }),
-            }),
-          ]);
+          expect(response).toHaveStatusCode(400);
+          expect(response.body.message).toBe(`Tool ${toolId} is not available`);
         }
 
         // The denied delete and disable left the source as it was.
