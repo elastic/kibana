@@ -53,7 +53,7 @@ describe('Datadog alert translation managed workflow', () => {
               data: expect.objectContaining({
                 rule_name: '{{ event.body.title }}',
                 monitor_id: '{{ event.body.monitor_id }}',
-                alert_url: '{{ event.body.url }}',
+                source_url: '{{ event.body.url }}',
                 message: '{{ event.body.message }}',
                 priority: '{{ event.body.severity }}',
               }),

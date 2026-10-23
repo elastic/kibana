@@ -411,12 +411,12 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutSeverity')).not.toBeInTheDocument();
   });
 
-  it('links to an absolute HTTP(S) source URL from an info block', () => {
+  it('links to an absolute HTTP(S) data.source_url from an info block', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({
       ...baseHeaderData,
       episode: {
         ...mockEpisode,
-        episode_data: JSON.stringify({ alert_url: 'https://monitoring.example/alerts/1' }),
+        episode_data: JSON.stringify({ source_url: 'https://monitoring.example/alerts/1' }),
       } as AlertEpisode,
     });
 
@@ -454,7 +454,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
       ...baseHeaderData,
       episode: {
         ...mockEpisode,
-        episode_data: JSON.stringify({ alert_url: alertUrl }),
+        episode_data: JSON.stringify({ source_url: alertUrl }),
       } as AlertEpisode,
     });
 

@@ -16,7 +16,7 @@ steps:
         monitor_id: "{{ event.body.monitor_id }}"
         transition: "{{ event.body.alert_transition }}"
         message: "{{ event.body.message }}"
-        alert_url: "{{ event.body.url }}"
+        source_url: "{{ event.body.url }}"
         priority: "{{ event.body.severity }}"
         tags: "{{ event.body.tags }}"
         alert_type: "{{ event.body.alert_type }}"

@@ -66,11 +66,11 @@ export const AlertEpisodeOverviewList = ({
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
   const tags = episodeAction?.tags ?? [];
-  // Caller-controlled (data.alert_url from external ingest). Restrict to absolute
+  // Caller-controlled (data.source_url from external ingest). Restrict to absolute
   // http(s) before putting into href — blocks javascript:/data: stored XSS.
   const rawAlertUrl =
-    typeof groupingData.alert_url === 'string' && groupingData.alert_url.length > 0
-      ? groupingData.alert_url
+    typeof groupingData.source_url === 'string' && groupingData.source_url.length > 0
+      ? groupingData.source_url
       : undefined;
   const alertUrl = rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 
