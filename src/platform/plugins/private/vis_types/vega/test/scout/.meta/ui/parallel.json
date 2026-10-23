@@ -1,9 +1,20 @@
 {
-  "sha1": "f81a96c6f083138e870175b931468d7ab5bd3864",
+  "sha1": "bef70956d356b5ddfd44525a7f8ee3fe43dae742",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "fb6a28fdbf970dc-afb747e911dd160",
+      "title": "Enable the Vega feature flags",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 8,
+        "column": 1
+      }
+    },
     {
       "id": "fb6a28fdbf970dc-91c1b7602a9ab49",
       "title": "Setup Vega tests data",
@@ -11,8 +22,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 8,
-        "column": 1
+        "line": 17,
+        "column": 26
       }
     },
     {
@@ -117,6 +128,17 @@
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
         "line": 103,
         "column": 4
+      }
+    },
+    {
+      "id": "824a1c0d9b29284-17918192e7921d8",
+      "title": "Disable the Vega feature flags",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

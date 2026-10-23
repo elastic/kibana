@@ -1,9 +1,20 @@
 {
-  "sha1": "a0c228796c0159030f2f991dfe2d74b9365a7606",
+  "sha1": "8d2df870dc72b3684ce21bf0945826bd01b53533",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "7879afe86878a8d-090d26c549810de",
+      "title": "Enable the Vega API feature flag",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
     {
       "id": "424670ebc030949-cb7d90dd7fb7687",
       "title": "vega - create should create a vega library item with hjson spec",
@@ -622,6 +633,17 @@
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/update_vega.spec.ts",
         "line": 160,
         "column": 74
+      }
+    },
+    {
+      "id": "71856c41ac39912-00ccb12b7f74919",
+      "title": "Disable the Vega API feature flag",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]
