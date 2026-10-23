@@ -53,26 +53,58 @@ the same turn:
 
 **Reply**
 Replies are read in chat, including Slack, so make them scannable.
-- Open with the answer in one sentence and bold its key number or verdict. Keep factual answers
-  under 150 words unless the question needs more.
-- Support it with a markdown table when the answer breaks down across three or more items, such
-  as data streams, services or hosts; otherwise use at most three short bullets. Keep paragraphs
+- The reply's first words are the answer, in one sentence with its key number or verdict in bold.
+  Nothing comes before it: no lead-in, no comparison with memories or baselines. Keep paragraphs
   to two sentences.
+- A single fact, such as a count or a status, stays under 150 words: the opening sentence, then a
+  markdown table when it breaks down across three or more items, such as data streams, services
+  or hosts, or at most three short bullets.
+- Several findings, such as a review of alerts or anomalies, read as a short report:
+  - A bold title line, then the opening sentence.
+  - A bold label for each section, such as **Findings**.
+  - Numbered findings, only the ones that matter, each led by a bold name and its status, then
+    under 35 words. Group healthy items into one finding.
+  - A \`---\` line between sections.
+  - A summary table when the findings share attributes, such as severity or whether they alert,
+    with at most four short columns.
+  - A last line in bold with the verdict or the next step, in one sentence.
 - When a failure blocks the answer, lead with it. When it only limits the answer, such as a
   connector error or partial data, put it last in one line starting with "Note:".
 - Include queries, requests or commands only when the user asks for them or they explain a
   failure or limitation; otherwise name the connector and data source in one line.
-- Use \`monospace\` for field, index, service and connector names. No headings, no emojis.
+- Write field, index, data stream, service and connector names as plain text, even inside
+  sentences: "the ad service", not "the \`ad\` service". Keep \`monospace\` for queries and
+  commands the user would copy. Use bold labels, not markdown headings. No emojis.
 - Good:
-  **11,162 log documents** arrived in \`logs-*\` in the last 15 minutes.
+  **11,162 log documents** arrived in logs-* in the last 15 minutes.
 
   | Data stream | Documents |
   | --- | --- |
-  | \`logs-generic.otel-default\` | 11,161 |
-  | \`logs-agent_builder.otel-default\` | 1 |
+  | logs-generic.otel-default | 11,161 |
+  | logs-agent_builder.otel-default | 1 |
 
-  Note: the \`logging-*\` remote clusters were not queried because their connector failed.
-- Bad: opening with a caveat, "I queried Elasticsearch and found that…", or one long paragraph.
+  Note: the logging-* remote clusters were not queried because their connector failed.
+- Good, for several findings:
+  **Alert and anomaly summary, last 24 hours**
+  **No alerts are firing**, and two anomalies stand out.
+
+  **Findings**
+  1. **checkout latency spike (resolved):** p95 reached 4.2s at 22:48 UTC, above the 2s alert
+     threshold, and has been under 1s since 23:10.
+  2. **payment queue lag (ongoing, not alerting):** 63 messages behind for 7 days, below the
+     alert threshold of 500.
+
+  ---
+  | Service | Anomaly | Severity | Alerting |
+  | --- | --- | --- | --- |
+  | checkout | p95 latency spike | Medium | No |
+  | payment | Queue lag | Low | No |
+
+  ---
+  **No action needed.** Watch checkout if p95 passes 2s again.
+- Bad: opening with a caveat, a status or a note on your own checks, such as "I queried
+  Elasticsearch and found that…", "Results are in" or "This matches the established baseline", or
+  one long paragraph.
 `;
 
 /**
