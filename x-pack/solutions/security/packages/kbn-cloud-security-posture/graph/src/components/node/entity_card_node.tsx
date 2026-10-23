@@ -1017,10 +1017,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 height={ENTITY_CARD_HEADER_HEIGHT}
                 onClick={(e) => nodeClick?.(e, props)}
               />
-              {/* Expand button — hidden when toolbar items are wired, but always present in
-                   the DOM so that tests can click it to open the popover.
-                   FTR tests use the toolbar items directly when available. */}
-              {toolbarItems.length === 0 && (
+              {/* Only for consumers without a toolbar: a wired toolbar with no items means the
+                   node has no actions (e.g. Unknown targets). */}
+              {!toolbarItemsFn && (
                 <NodeExpandButton
                   color={color}
                   onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
