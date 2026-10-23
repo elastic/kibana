@@ -205,6 +205,27 @@ describe('index table', () => {
     ]);
   });
 
+  test('should show index mode filter in the search bar', async () => {
+    await renderIndexApp();
+
+    expect(screen.getByRole('button', { name: 'Index mode' })).toBeInTheDocument();
+  });
+
+  test('should show index mode in the indices table', async () => {
+    await renderIndexApp();
+
+    expect(screen.getByTestId('indexTableHeaderCell-mode')).toHaveTextContent('Index mode');
+
+    const searchInput = screen.getByTestId('indicesSearch');
+    fireEvent.change(searchInput, { target: { value: 'lookup-index' } });
+
+    const rowIndex = getRowIndexByName('lookup-index');
+    expect(rowIndex).toBeGreaterThanOrEqual(0);
+
+    const modeCells = screen.getAllByTestId('indexTableCell-mode');
+    expect(modeCells[rowIndex]).toHaveTextContent('Lookup');
+  });
+
   test('should not show "Convert to lookup index" option in the context menu when lookup index is selected', async () => {
     await renderIndexApp();
 

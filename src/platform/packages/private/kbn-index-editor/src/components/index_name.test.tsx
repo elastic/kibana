@@ -78,6 +78,17 @@ describe('IndexName', () => {
     });
   });
 
+  it('keeps the index name input open when only the lookup prefix is prefilled', async () => {
+    indexName$.next('lookup-');
+    render(<IndexName />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('indexNameInput')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('indexNameInput')).toHaveValue('lookup-');
+    expect(screen.queryByTestId('indexNameReadMode')).not.toBeInTheDocument();
+  });
+
   it('validates and saves a new index name', async () => {
     render(<IndexName />);
     const input = await screen.findByTestId('indexNameInput');

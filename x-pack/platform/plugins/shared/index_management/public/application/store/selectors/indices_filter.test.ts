@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EuiSearchBar } from '@elastic/eui';
+import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../common/constants';
 import { ExtensionsService } from '../../../services';
 import { getFilteredIndices } from '.';
 import { defaultTableState } from '../reducers/table_state';
@@ -40,6 +42,29 @@ describe('getFilteredIndices selector', () => {
     const expected = [{ name: 'index2', hidden: false }, { name: 'index3' }, { name: '.index4' }];
 
     expect(getFilteredIndices(state)).toEqual(expected);
+  });
+
+  it('filters indices by index mode', () => {
+    const filterState: IndexManagementState = {
+      ...state,
+      indices: {
+        ...state.indices,
+        byId: {
+          standard: { name: 'standard-index' },
+          lookup: { name: 'lookup-index', mode: LOOKUP_INDEX_MODE },
+          explicitStandard: { name: 'explicit-standard', mode: STANDARD_INDEX_MODE },
+        },
+        allIds: ['standard', 'lookup', 'explicitStandard'],
+      },
+      tableState: {
+        ...defaultTableState,
+        filter: EuiSearchBar.Query.parse(`mode:${LOOKUP_INDEX_MODE}`),
+      },
+    };
+
+    expect(getFilteredIndices(filterState)).toEqual([
+      { name: 'lookup-index', mode: LOOKUP_INDEX_MODE },
+    ]);
   });
 
   it('includes hidden indices', () => {
