@@ -24,6 +24,8 @@ interface ServerPrefix {
   readonly regExp: RegExp;
   /** Relative server URLs such as `/api/v2` are matched against the path only. */
   readonly relative: boolean;
+  /** Whether the server's captures are path parameters the request's path leaves out. */
+  readonly suppliesPath: boolean;
 }
 
 interface Route {
@@ -46,16 +48,29 @@ const compileTemplate = (template: string, toPattern: (name: string) => string):
     .map((part, index) => (index % 2 === 0 ? escapeRegExp(part) : toPattern(part)))
     .join('');
 
-const compileServerTemplate = ({ url, variables }: OperationServer): string =>
-  compileTemplate(url.replace(/\/+$/, ''), (name) => {
-    const values = variables[name]?.enum ?? [];
-    return values.length > 0 ? `(?:${values.map(escapeRegExp).join('|')})` : '[^/]*';
-  });
+const serverVariablePattern = (variables: OperationServer['variables'], name: string): string => {
+  const values = variables[name]?.enum ?? [];
+  return values.length > 0 ? `(?:${values.map(escapeRegExp).join('|')})` : '[^/]*';
+};
 
-const compileServer = (server: OperationServer): ServerPrefix => ({
-  regExp: new RegExp(`^${compileServerTemplate(server)}(?=/|$)`, 'i'),
-  relative: server.url.startsWith('/'),
-});
+const compileServerTemplate = ({ url, variables }: OperationServer): string =>
+  compileTemplate(url.replace(/\/+$/, ''), (name) => serverVariablePattern(variables, name));
+
+const compileServer = ({ url, variables }: OperationServer): ServerPrefix => {
+  let suppliesPath = false;
+  const source = compileTemplate(url.replace(/\/+$/, ''), (name) => {
+    if (variables[name]?.pathParameter) {
+      suppliesPath = true;
+      return '([^/]+?)';
+    }
+    return serverVariablePattern(variables, name);
+  });
+  return {
+    regExp: new RegExp(`^${source}(?=/|$)`, 'i'),
+    relative: url.startsWith('/'),
+    suppliesPath,
+  };
+};
 
 const toMatchTarget = ({ relative }: ServerPrefix, url: URL): string =>
   relative ? url.pathname : `${url.origin}${url.pathname}`;
@@ -85,7 +100,9 @@ const compileRoute = (operation: ContractOperation): Route => {
       .filter((parameter) => parameter.in === 'path' && parameter.multiSegment)
       .map(({ name }) => name)
   );
-  const source = compileTemplate(operation.path, (name) => {
+  // `x-ms-paths` keys end in the operation's fixed query parameters.
+  const [template] = operation.path.split('?');
+  const source = compileTemplate(template, (name) => {
     parameterNames.push(name);
     return multiSegment.has(name) ? '(.+?)' : '([^/]+)';
   });
@@ -94,9 +111,36 @@ const compileRoute = (operation: ContractOperation): Route => {
     servers: operation.servers.map(compileServer),
     path: new RegExp(`^${source}$`),
     parameterNames,
-    literalLength: operation.path.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
+    literalLength: template.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
   };
 };
+
+const hasFixedQuery = ({ operation: { fixedQuery = [] } }: Route, url: URL): boolean =>
+  fixedQuery.every(({ name, value, optional }) =>
+    optional && !url.searchParams.has(name)
+      ? true
+      : value === undefined
+      ? url.searchParams.has(name)
+      : url.searchParams.getAll(name).includes(value)
+  );
+
+const fixedQueryCount = ({ operation: { fixedQuery = [] } }: Route, url: URL): number =>
+  fixedQuery.filter(({ name, optional }) => !optional || url.searchParams.has(name)).length;
+
+// Operations on the same path that only differ in their query parameters, such as S3's
+// `GetObject` and `ListParts` (which requires `uploadId`), are told apart by the query: first
+// by the required parameters the request leaves out, then by how many of its parameters each
+// declares.
+const missingQueryCount = ({ operation: { parameters } }: Route, url: URL): number =>
+  parameters.filter(
+    ({ in: location, required, name }) =>
+      location === 'query' && required && !url.searchParams.has(name)
+  ).length;
+
+const declaredQueryCount = ({ operation: { parameters } }: Route, url: URL): number =>
+  [...new Set(url.searchParams.keys())].filter((key) =>
+    parameters.some(({ in: location, name }) => location === 'query' && name === key)
+  ).length;
 
 // Strips the longest matching server URL, e.g. `https://api.trello.com/1` from a Trello URL.
 const getOperationPath = ({ servers }: Route, url: URL): string | undefined => {
@@ -106,7 +150,14 @@ const getOperationPath = ({ servers }: Route, url: URL): string | undefined => {
   const prefixes = servers.flatMap((server) => {
     const target = toMatchTarget(server, url);
     const match = server.regExp.exec(target);
-    return match ? [target.slice(match[0].length) || '/'] : [];
+    if (!match) {
+      return [];
+    }
+    const rest = target.slice(match[0].length) || '/';
+    // `https://logs.s3.eu-west-1.amazonaws.com/2024/app.log` is `/logs/2024/app.log`.
+    return server.suppliesPath
+      ? [`/${match.slice(1).join('/')}${rest === '/' ? '' : rest}`]
+      : [rest];
   });
   return prefixes.reduce<string | undefined>(
     (shortest, path) => (shortest === undefined || path.length < shortest.length ? path : shortest),
@@ -126,26 +177,40 @@ const decodePathSegment = (segment: string): string => {
  * Creates a router that finds the operation for a request. When several path templates match,
  * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`,
  * then the one with the most literal text, so `/items/{id}:archive` takes precedence over
- * `/items/{id}`.
+ * `/items/{id}`, then the one with the most fixed query parameters (`x-ms-paths`), so
+ * `/?restype=service&comp=properties` takes precedence over `/?comp=properties`.
  */
 export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
   const routes = operations.map(compileRoute);
 
   return (method: string, url: URL): OperationMatch | OperationMismatch => {
-    const candidates = routes.flatMap((route) => {
+    const pathMatches = routes.flatMap((route) => {
       const path = getOperationPath(route, url);
       const match = path === undefined ? null : route.path.exec(path);
       return match ? [{ route, values: match.slice(1) }] : [];
     });
-    if (candidates.length === 0) {
+    if (pathMatches.length === 0) {
       return { status: 404, message: 'No operation matches the path' };
+    }
+    const candidates = pathMatches.filter(({ route }) => hasFixedQuery(route, url));
+    if (candidates.length === 0) {
+      const expected = [...new Set(pathMatches.map(({ route }) => route.operation.path))];
+      return {
+        status: 404,
+        message: `No operation matches the query; operations on the path expect ${expected.join(
+          ', or '
+        )}`,
+      };
     }
     const [best] = candidates
       .filter(({ route }) => route.operation.method === method.toLowerCase())
       .sort(
         (a, b) =>
           a.route.parameterNames.length - b.route.parameterNames.length ||
-          b.route.literalLength - a.route.literalLength
+          b.route.literalLength - a.route.literalLength ||
+          fixedQueryCount(b.route, url) - fixedQueryCount(a.route, url) ||
+          missingQueryCount(a.route, url) - missingQueryCount(b.route, url) ||
+          declaredQueryCount(b.route, url) - declaredQueryCount(a.route, url)
       );
     if (!best) {
       const allowed = [...new Set(candidates.map(({ route }) => route.operation.method))];

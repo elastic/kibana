@@ -10,6 +10,7 @@
 import { coerceValue } from './coerce_value';
 import { validateValue } from './schema_violations';
 import type { ContractOperation, OperationResponse, Violation } from './types';
+import { isRecord } from './schema_walk';
 import { validateContent } from './validate_content';
 
 export interface ResponseInput {
@@ -44,7 +45,13 @@ const checkHeaders = (
       if (value === undefined) {
         return required ? [{ path, code: 'required', message: `${subject} is required` }] : [];
       }
-      const coerced = coerceValue(value, schema?.schema, operation.spec.document);
+      // Headers carry arrays comma-separated (`style: simple`).
+      const isArray = isRecord(schema?.schema) && schema?.schema.type === 'array';
+      const coerced = coerceValue(
+        isArray ? value.split(',').map((item) => item.trim()) : value,
+        schema?.schema,
+        operation.spec.document
+      );
       return validateValue(operation, schema, coerced, { path, subject, direction: 'response' });
     });
 
@@ -68,7 +75,8 @@ export const validateResponse = (
   );
   return [
     ...checkHeaders(operation, response, values),
-    ...(body === undefined || response.contents.length === 0
+    // Payloads are often optional, so an empty body is a body left out.
+    ...(body === undefined || body === '' || response.contents.length === 0
       ? []
       : validateContent(operation, response.contents, {
           contentType: values['content-type'],

@@ -10,6 +10,7 @@
 import type { ParameterInput } from './read_parameters';
 import { readParameters } from './read_parameters';
 import { validateValue } from './schema_violations';
+import { isRecord } from './schema_walk';
 import type { ContractOperation, Violation } from './types';
 import { validateContent } from './validate_content';
 
@@ -41,21 +42,33 @@ const checkParameters = (operation: ContractOperation, input: RequestInput): Vio
 
 // Schemas can't express these, but vendors reject such query strings.
 const checkQueryEncoding = (
-  { parameters, security }: ContractOperation,
+  { parameters, security, fixedQuery = [] }: ContractOperation,
   { query }: RequestInput
 ): Violation[] => {
   const declared = parameters.filter((parameter) => parameter.in === 'query');
-  // API keys sent in the query are declared by security schemes, not as parameters.
-  const credentials = new Set(
-    security
+  // API keys sent in the query are declared by security schemes, not as parameters, and the
+  // query parameters of `x-ms-paths` keys by the key.
+  const implied = new Set([
+    ...security
       .flat()
-      .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : []))
+      .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : [])),
+    ...fixedQuery.map(({ name }) => name),
+  ]);
+  // A map of all query parameters (`style: form`, `explode: true`, an object), such as Smithy's
+  // `@httpQueryParams`, takes every parameter.
+  const takesAll = declared.some(
+    ({ style, explode, schema }) =>
+      style === 'form' &&
+      explode &&
+      isRecord(schema?.schema) &&
+      schema?.schema.type === 'object' &&
+      schema.schema.additionalProperties !== undefined
   );
-  const undeclared = Object.keys(query)
+  const undeclared = (takesAll ? [] : Object.keys(query))
     .filter(
       (key) =>
         key !== MOCK_PAGE_PARAM &&
-        !credentials.has(key) &&
+        !implied.has(key) &&
         !declared.some(
           ({ name, style }) =>
             key === name || (style === 'deepObject' && key.startsWith(`${name}[`))

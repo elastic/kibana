@@ -35,6 +35,7 @@ import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import { serializeXmlBody } from '../xml/serialize_xml_body';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -318,7 +319,10 @@ export const createEmulatorFetch = ({
       requestViolations,
       responseViolations,
     });
-    return response;
+    // HEAD responses carry the headers of a GET, without its body.
+    return request.method === 'head'
+      ? { ...response, body: undefined }
+      : serializeXmlBody(operation, response);
   };
 
   const mockFetch: typeof fetch = async (input, init) =>
