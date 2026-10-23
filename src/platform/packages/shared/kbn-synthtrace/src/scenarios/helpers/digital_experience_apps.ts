@@ -35,7 +35,10 @@ export interface DigitalExperienceApp {
 }
 
 export interface DigitalExperienceScenarioOpts {
-  /** Write `attributes.session.id`. Turn off to match EDOT Browser `main`, which doesn't emit it yet. */
+  /**
+   * Write `attributes.session.id`, with the tab ID and `session.start` that come with sessions.
+   * Turn off to match EDOT Browser 0.3.0 and earlier.
+   */
   withSessionId: boolean;
   /** Write the web vital attribution as a JSON body, which EDOT Browser only does when opted in. */
   includeRawAttribution: boolean;

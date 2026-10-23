@@ -24,14 +24,16 @@
  * - checkout-web: failing `POST /api/payment` and frequent JS errors
  * - media-portal-web: slow, poor LCP from large images and render-blocking CSS
  * - support-center-web: critical, poor INP/CLS and high error rate
- * - docs-web: healthy, low traffic, desktop-heavy
+ * - docs-web: healthy, low traffic, desktop-heavy, no environment
  *
  * Scenario options:
- * - withSessionId (boolean, default: true): write `attributes.session.id`. Set to false to match
- *   EDOT Browser `main`, which does not emit it yet (elastic/opentelemetry-dev#1410).
+ * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID
+ *   and `session.start` that come with sessions. Set to false to match EDOT Browser 0.3.0 and
+ *   earlier, which don't emit them (elastic/elastic-otel-rum-js#120 added them).
  * - includeRawAttribution (boolean, default: false): write the web-vitals attribution as a JSON
  *   body on `browser.web_vital` events, like the instrumentation's experimental opt-in option
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
+ * - seed (string or number, default: random): makes the data reproducible
  *
  * Run:
  *   node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
