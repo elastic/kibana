@@ -36,7 +36,7 @@ interface YamlStep {
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean; retry?: Record<string, unknown> };
   'agent-id'?: string;
-  'connector-id-by-feature'?: string;
+  'connector-id-by-feature'?: string | string[];
   'create-conversation'?: boolean;
   'plugin-id'?: string;
   'aggregate-by'?: string;
@@ -381,6 +381,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_attack_discovery` would report not-found.
+    it('fails the run when the discovery search is not authorized', () => {
+      expect(loadAttack?.with?.ignore_unavailable).toBeUndefined();
+    });
+
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
     // same value and needs no mapping to be queryable.
     it('reads it by the id it was given', () => {
@@ -513,6 +519,28 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('require_cited_alerts')?.type).toBe('workflow.fail');
     });
 
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_cited_alerts` would report missing alerts.
+    it('fails the run when the alerts search is not authorized', () => {
+      expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBeUndefined();
+    });
+
+    it.each(['load_attack_discovery', 'load_alerts', 'load_entities', 'load_events'] as const)(
+      'projects %s so the template payload stays inside the gateway cap',
+      (name) => {
+        expect(stepIn(name)?.with?._source).toEqual(expect.any(Array));
+      }
+    );
+
+    it('keeps the alert fields the workflow expressions read', () => {
+      expect(stepIn('load_alerts')?.with?._source).toEqual(
+        expect.arrayContaining(['host.id', 'user.name'])
+      );
+      expect(stepIn('load_attack_discovery')?.with?._source).toEqual(
+        expect.arrayContaining(['@timestamp', 'kibana.alert.attack_discovery.alert_ids'])
+      );
+    });
+
     it.each(['load_entities', 'load_events'] as const)(
       'continues when optional source %s fails',
       (name) => {
@@ -534,8 +562,11 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(overrides?.tools).toEqual([]);
     });
 
-    it('routes the agent through the AlertZero reasoning feature', () => {
-      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_reasoning');
+    it('prefers a saved template-row model, then the AlertZero frontier feature', () => {
+      expect(analyze?.['connector-id-by-feature']).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
     });
 
     it('uses the thin agent', () => {
@@ -546,9 +577,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(analyze?.timeout).toBe('8m');
     });
 
-    // The first-match block is locked to the sample workflow's text, so the eval
-    // suite's later retarget onto this YAML still passes.
-    it('keeps the sample verdict rules', () => {
+    // The eval suite's verdict_rules.test.ts locks this block to FP_TP_VERDICT_RULES.
+    it('keeps the managed verdict rules', () => {
       const message = String(analyze?.with?.message);
       const [, rules = ''] =
         /Choose the verdict by the first rule that matches:\n([\s\S]*?)\n\s*\n/.exec(message) ?? [];
@@ -610,6 +640,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           };
         };
       };
+
+      expect((analyze?.with?.schema as { required: string[] }).required).not.toContain('claims');
 
       expect(schema.properties.claims.properties.alert_link.properties.field.enum).toEqual([
         'user.name',

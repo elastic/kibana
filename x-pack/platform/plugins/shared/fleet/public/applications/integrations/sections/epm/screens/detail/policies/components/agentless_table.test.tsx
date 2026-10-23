@@ -9,7 +9,7 @@ import { fireEvent, act, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 
 import { AGENTS_PREFIX } from '../../../../../../../../../common/constants';
-import { sendGetAgents } from '../../../../../../hooks';
+import { sendGetAgentsForRq } from '../../../../../../../../hooks/use_request/agents';
 // The flyout imports sendGetAgents directly from the top-level public/hooks barrel,
 // which is a different Jest module instance than the integrations hooks barrel the
 // table uses. Import + mock it separately so we can assert the flyout's own agent lookup.
@@ -28,18 +28,24 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../../hooks'),
   useConfirmForceInstall: jest.fn(),
-  sendGetAgents: jest.fn(),
+}));
+
+// The table gets its agents through useAgentsForPolicyIds, which requests them with this.
+jest.mock('../../../../../../../../hooks/use_request/agents', () => ({
+  ...jest.requireActual('../../../../../../../../hooks/use_request/agents'),
+  sendGetAgentsForRq: jest.fn(),
 }));
 
 jest.mock('../../../../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../../../../hooks'),
   sendGetAgents: jest.fn(),
+  sendGetPackageInfoByKeyForRq: jest.fn().mockResolvedValue({ data: undefined, error: null }),
 }));
 
 const mockUseLocation = useLocation as jest.MockedFunction<typeof useLocation>;
 
 describe('AgentlessPackagePoliciesTable', () => {
-  const mockSendGetAgents = sendGetAgents as jest.MockedFunction<typeof sendGetAgents>;
+  const mockSendGetAgents = sendGetAgentsForRq as jest.MockedFunction<typeof sendGetAgentsForRq>;
   const mockSendGetAgentsFromFlyout = sendGetAgentsFromFlyout as jest.MockedFunction<
     typeof sendGetAgentsFromFlyout
   >;
@@ -60,24 +66,21 @@ describe('AgentlessPackagePoliciesTable', () => {
     });
 
     mockSendGetAgents.mockResolvedValue({
-      data: {
-        items: [
-          {
-            policy_id: 'policy1',
-            id: 'agent1',
-            packages: ['package'],
-            type: 'PERMANENT',
-            active: true,
-            enrolled_at: '2023-01-01T00:00:00Z',
-            local_metadata: {},
-            status: 'online',
-          },
-        ],
-        total: 1,
-        page: 1,
-        perPage: 10000,
-      },
-      error: null,
+      items: [
+        {
+          policy_id: 'policy1',
+          id: 'agent1',
+          packages: ['package'],
+          type: 'PERMANENT',
+          active: true,
+          enrolled_at: '2023-01-01T00:00:00Z',
+          local_metadata: {},
+          status: 'online',
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 10000,
     });
   });
 
@@ -231,19 +234,21 @@ describe('AgentlessPackagePoliciesTable', () => {
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
-        perPage: 10000,
+        perPage: 1000,
+        page: 1,
         kuery: `(${AGENTS_PREFIX}.policy_base_id:(policy1) or (${AGENTS_PREFIX}.policy_id:(policy1) and not ${AGENTS_PREFIX}.policy_base_id:*))`,
       });
     });
     expect(await result.findByText('Healthy')).toBeInTheDocument();
   });
 
-  it('opens flyout when status badge is clicked', async () => {
+  it('opens the enrollment flyout when status badge is clicked', async () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
-        perPage: 10000,
+        perPage: 1000,
+        page: 1,
         kuery: `(${AGENTS_PREFIX}.policy_base_id:(policy1) or (${AGENTS_PREFIX}.policy_id:(policy1) and not ${AGENTS_PREFIX}.policy_base_id:*))`,
       });
     });
@@ -251,6 +256,48 @@ describe('AgentlessPackagePoliciesTable', () => {
       fireEvent.click(await result.findByText('Healthy'));
     });
     expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
+    expect(result.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
+  });
+
+  describe('Details row action', () => {
+    const agentlessProps = {
+      ...defaultProps,
+      packagePolicies: [
+        {
+          ...defaultProps.packagePolicies[0],
+          packagePolicy: {
+            ...defaultProps.packagePolicies[0].packagePolicy,
+            supports_agentless: true,
+          },
+        },
+      ],
+    };
+
+    it('is enabled and opens the status details flyout when an agent is enrolled', async () => {
+      const renderer = createIntegrationsTestRendererMock();
+      const result = renderer.render(<AgentlessPackagePoliciesTable {...agentlessProps} />);
+      await result.findByText('Healthy');
+      await act(async () => {
+        fireEvent.click(result.getByLabelText('Actions for Package Policy 1'));
+      });
+      const details = await result.findByTestId('PackagePolicyActionsDetailsItem');
+      expect(details).toBeEnabled();
+      await act(async () => {
+        fireEvent.click(details);
+      });
+      expect(await result.findByTestId('agentlessStatusDetailsFlyout')).toBeInTheDocument();
+    });
+
+    it('is disabled when no agent is enrolled', async () => {
+      mockSendGetAgents.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 1000 });
+      const renderer = createIntegrationsTestRendererMock();
+      const result = renderer.render(<AgentlessPackagePoliciesTable {...agentlessProps} />);
+      await result.findByText('Pending');
+      await act(async () => {
+        fireEvent.click(result.getByLabelText('Actions for Package Policy 1'));
+      });
+      expect(await result.findByTestId('PackagePolicyActionsDetailsItem')).toBeDisabled();
+    });
   });
 
   it('opens flyout when openEnrollmentFlyout query param matches a package policy id', async () => {
@@ -272,28 +319,38 @@ describe('AgentlessPackagePoliciesTable', () => {
     // version-specific assignment task). The result map must key by the stripped base id so the
     // lookup by agentPolicy.id ('policy1') still resolves correctly.
     mockSendGetAgents.mockResolvedValueOnce({
-      data: {
-        items: [
-          {
-            policy_id: 'policy1#9.2',
-            id: 'agent-variant',
-            packages: ['package'],
-            type: 'PERMANENT',
-            active: true,
-            enrolled_at: '2023-01-01T00:00:00Z',
-            local_metadata: {},
-            status: 'online',
-          },
-        ],
-        total: 1,
-        page: 1,
-        perPage: 10000,
-      },
-      error: null,
+      items: [
+        {
+          policy_id: 'policy1#9.2',
+          id: 'agent-variant',
+          packages: ['package'],
+          type: 'PERMANENT',
+          active: true,
+          enrolled_at: '2023-01-01T00:00:00Z',
+          local_metadata: {},
+          status: 'online',
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 10000,
     });
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
     expect(await result.findByText('Healthy')).toBeInTheDocument();
+  });
+
+  it('shows an error toast when the agents cannot be fetched', async () => {
+    const error = new Error('agents unavailable');
+    mockSendGetAgents.mockRejectedValue(error);
+    const renderer = createIntegrationsTestRendererMock();
+    renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(renderer.startServices.notifications.toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Error fetching managed integration status information',
+      });
+    });
   });
 
   it('does not open flyout when openEnrollmentFlyout query param does not match any policy', async () => {

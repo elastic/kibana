@@ -38,6 +38,52 @@ const approvalLabelsFrom = (approveLabel?: string, rejectLabel?: string): Approv
     typeof rejectLabel === 'string' ? rejectLabel : DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
 });
 
+interface WaitingStepInput {
+  message?: unknown;
+  schema?: unknown;
+  approveLabel?: unknown;
+  rejectLabel?: unknown;
+}
+
+const waitingStepInput = (input: unknown): WaitingStepInput | undefined =>
+  input != null && typeof input === 'object' ? (input as WaitingStepInput) : undefined;
+
+/** Prompt copied onto a selected wait step, including one that belongs to a child run. */
+export function resumeMessageForStepExecution(
+  step: { input?: unknown } | undefined
+): string | undefined {
+  const message = waitingStepInput(step?.input)?.message;
+  return typeof message === 'string' && message.length > 0 ? message : undefined;
+}
+
+/** JSON Schema copied onto a selected waitForInput step, including one that belongs to a child run. */
+export function resumeSchemaForStepExecution(
+  step: { input?: unknown } | undefined
+): JsonModelSchemaType | undefined {
+  const schema = waitingStepInput(step?.input)?.schema;
+  if (schema == null || typeof schema !== 'object' || Array.isArray(schema)) {
+    return undefined;
+  }
+  return schema as JsonModelSchemaType;
+}
+
+/** Approve/Reject labels for a selected wait step, including one that belongs to a child run. */
+export function approvalLabelsForStepExecution(step: {
+  stepType?: string;
+  input?: unknown;
+}): ApprovalLabels | undefined {
+  const input = waitingStepInput(step.input);
+  const isApproval =
+    step.stepType === 'waitForApproval' ||
+    typeof input?.approveLabel === 'string' ||
+    typeof input?.rejectLabel === 'string';
+  if (!isApproval) return undefined;
+  return approvalLabelsFrom(
+    typeof input?.approveLabel === 'string' ? input.approveLabel : undefined,
+    typeof input?.rejectLabel === 'string' ? input.rejectLabel : undefined
+  );
+}
+
 /** Resolves the active waitForInput pause and its resume copy for Provide action / Approve–Reject. */
 export function useWaitingStepResume(
   executionId: string,

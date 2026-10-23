@@ -188,7 +188,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await mockAwsPackage(page, MOCK_AWS_PACKAGE_RESPONSE);
   });
 
-  test('renders table with Service Name, Collects, Category, Region columns', async ({
+  test('renders table with Service Name, Collects, Region columns', async ({
     browserAuth,
     page,
   }) => {
@@ -200,7 +200,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     // Column headers
     await expect(page.getByRole('columnheader', { name: 'Service Name' })).toBeVisible();
     await expect(page.getByRole('columnheader', { name: 'Collects' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Category' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Category' })).toBeHidden();
     await expect(page.getByRole('columnheader', { name: 'Region' })).toBeVisible();
 
     // Both services appear as rows
@@ -509,6 +509,48 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     // Table now shows 2 rows
     await expect(page.getByText(/Showing.*2.*services/)).toBeVisible();
     await expect(page.getByText(/AWS ELB.*\[Duplicate\]/)).toBeVisible();
+  });
+
+  test('duplicate keeps its own namespace across reloads', async ({ browserAuth, page }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['elb'],
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          namespace: 'prod',
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
+            },
+          },
+        },
+      },
+    });
+
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
+    const modalNamespace = page.testSubj
+      .locator('duplicateServiceModal')
+      .locator('[data-test-subj="serviceSettings-namespaceField"]');
+    await expect(modalNamespace).toContainText('prod');
+    await modalNamespace.locator('input').fill('staging');
+    await modalNamespace.locator('input').press('Enter');
+    await fillFlyoutField(page, 'aws-s3', 'bucket_arn', 'arn:aws:s3:::second-bucket');
+    await page.testSubj.locator('duplicateServiceModal-addButton').click();
+    await expect(page.testSubj.locator('duplicateServiceModal')).toBeHidden();
+
+    await page.reload();
+
+    const flyoutNamespace = page.testSubj
+      .locator('serviceSettingsFlyout')
+      .locator('[data-test-subj="serviceSettings-namespaceField"]');
+    await page.testSubj.locator('serviceSettingsStep-editButton-elb__dup-1').click();
+    await expect(flyoutNamespace).toContainText('staging');
+    await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
+
+    await page.testSubj.locator('serviceSettingsStep-editButton-elb').click();
+    await expect(flyoutNamespace).toContainText('prod');
   });
 
   test("duplicate row's config is independent from the original", async ({ browserAuth, page }) => {

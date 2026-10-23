@@ -34,20 +34,46 @@ describe('confirmedEvidencesEvaluator', () => {
   });
 
   it('scores 0 for an open event of any severity with no confirmed signal', async () => {
-    const result = await evaluate([{ status: 'open', severity: '40-medium' }], [esqlStep]);
+    const result = await evaluate([{ status: 'active', severity: 'medium' }], [esqlStep]);
     expect(result.score).toBe(0);
   });
 
+  it('accepts an open event that confirms nothing when it is rated low with little confidence', async () => {
+    const events = [
+      {
+        status: 'active',
+        severity: 'low',
+        confidence: 0.3,
+        signals: [{ type: 'detection', description: 'No rows.', verdict: 'inconclusive' }],
+      },
+    ];
+    expect((await evaluate(events, [esqlStep])).score).toBe(1);
+  });
+
+  it.each([
+    ['severity', { severity: 'medium', confidence: 0.2 }],
+    ['confidence', { severity: 'low', confidence: 0.5 }],
+  ])('scores 0 for an unconfirmed open event rated too high on %s', async (_label, rating) => {
+    const events = [
+      {
+        status: 'active',
+        ...rating,
+        signals: [{ type: 'detection', description: 'No rows.', verdict: 'inconclusive' }],
+      },
+    ];
+    expect((await evaluate(events, [esqlStep])).score).toBe(0);
+  });
+
   it('is unavailable when dismissed', async () => {
-    const result = await evaluate([{ status: 'dismissed', severity: '20-low' }], [esqlStep]);
+    const result = await evaluate([{ status: 'inactive', severity: 'low' }], [esqlStep]);
     expect(result.score).toBeNull();
   });
 
   it('scores 1 when an open+critical event has a confirmed signal and execute_esql ran', async () => {
     const events = [
       {
-        status: 'open',
-        severity: '80-critical',
+        status: 'active',
+        severity: 'critical',
         signals: [
           {
             type: 'detection',
@@ -63,8 +89,8 @@ describe('confirmedEvidencesEvaluator', () => {
   it('scores 0 when open+critical without a confirmed signal', async () => {
     const events = [
       {
-        status: 'open',
-        severity: '80-critical',
+        status: 'active',
+        severity: 'critical',
         signals: [
           {
             type: 'detection',
@@ -80,8 +106,8 @@ describe('confirmedEvidencesEvaluator', () => {
   it('scores 0 when open+critical but execute_esql never ran', async () => {
     const events = [
       {
-        status: 'open',
-        severity: '80-critical',
+        status: 'active',
+        severity: 'critical',
         signals: [
           {
             type: 'detection',
@@ -97,8 +123,8 @@ describe('confirmedEvidencesEvaluator', () => {
   it('scores 0 when fewer esql calls than critical-open events', async () => {
     const events = [
       {
-        status: 'open',
-        severity: '80-critical',
+        status: 'active',
+        severity: 'critical',
         signals: [
           {
             type: 'detection',
@@ -108,8 +134,8 @@ describe('confirmedEvidencesEvaluator', () => {
         ],
       },
       {
-        status: 'open',
-        severity: '80-critical',
+        status: 'active',
+        severity: 'critical',
         signals: [
           {
             type: 'detection',
@@ -126,8 +152,8 @@ describe('confirmedEvidencesEvaluator', () => {
   it('gives partial credit when some critical-open events lack confirmed signals', async () => {
     const events = [
       {
-        status: 'open',
-        severity: '80-critical',
+        status: 'active',
+        severity: 'critical',
         signals: [
           {
             type: 'detection',
@@ -137,8 +163,8 @@ describe('confirmedEvidencesEvaluator', () => {
         ],
       },
       {
-        status: 'open',
-        severity: '80-critical',
+        status: 'active',
+        severity: 'critical',
         signals: [
           {
             type: 'detection',

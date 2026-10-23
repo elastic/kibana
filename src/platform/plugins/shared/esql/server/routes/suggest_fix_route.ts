@@ -12,7 +12,7 @@ import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/ser
 import { SUGGEST_FIX_ROUTE } from '@kbn/esql-types';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { EsqlServerPluginStart } from '../types';
-import { createScopedModel, resolveConnectorId, resolveIncludeDatasets } from './helpers';
+import { createScopedModel, resolveConnectorId } from './helpers';
 
 const buildSuggestFixContext = (queryString: string, errorMessage: string): string =>
   [
@@ -74,16 +74,16 @@ export const registerSuggestFixRoute = (
         }
 
         const model = await createScopedModel({ inference, request, connectorId });
-        const includeDatasets = await resolveIncludeDatasets(core.uiSettings.client);
 
         const result = await generateEsql({
           model,
           esClient: client,
+          internalEsClient: core.elasticsearch.client.asInternalUser,
           logger,
           nlQuery: 'Fix the following ES|QL query. Return only the corrected query.',
           additionalContext: buildSuggestFixContext(queryString, errorMessage),
           execute: 'none',
-          includeDatasets,
+          includeDatasets: true,
           includeViews: true,
         });
 

@@ -9,6 +9,8 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   HasTypeDisplayName,
   HasEditCapabilities,
@@ -16,6 +18,7 @@ import type {
   PublishesDataLoading,
   PublishesEsql,
   PublishesWritableTimeRange,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
@@ -28,6 +31,7 @@ import {
   apiPublishesTimeRange,
   apiIsPresentationContainer,
   fetch$,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout, tracksOverlays } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
@@ -98,7 +102,8 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   PublishesDataViews &
   PublishesDataLoading &
   PublishesEsql &
-  PublishesWritableTimeRange;
+  PublishesWritableTimeRange &
+  HasInspectorAdapters;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
@@ -133,6 +138,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     let isRetained = false;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
+    const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const isGenerating$ = new BehaviorSubject<boolean>(false);
     const chatGeneratingCallbacks = {
@@ -212,6 +218,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       approximationApplied$,
       dataViews$,
       dataLoading$,
+      // A static panel makes no request, so it offers no Inspect entry.
+      getInspectorAdapters: () =>
+        esqlQuery$.getValue() ? { requests: requestAdapter } : undefined,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom panel',
@@ -374,6 +383,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       }
     });
 
+    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('edit');
+
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
@@ -389,6 +400,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           previewHtml,
           timeRange,
           isGenerating,
+          viewMode,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
@@ -400,7 +412,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlVariables$,
           previewHtml$,
           effectiveTimeRange$,
-          isGenerating$
+          isGenerating$,
+          viewMode$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
 
@@ -525,8 +538,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               filters={filters}
               esqlVariables={esqlVariables}
               previewHtml={previewHtml}
-              isAiAvailable={Boolean(agentBuilder)}
+              isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}
+              isInteractive={viewMode !== 'non-interactive'}
+              requestAdapter={requestAdapter}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

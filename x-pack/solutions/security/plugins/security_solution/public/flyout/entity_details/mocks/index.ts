@@ -232,6 +232,16 @@ export const mockUserEntityRiskScores: EntityRiskScoresState<EntityType.user> = 
   refetch: () => {},
 };
 
+export const mockUserEntityRiskScoresWithResolution: EntityRiskScoresState<EntityType.user> = {
+  base: { ...mockUserRiskScoreState },
+  resolution: {
+    state: { ...mockUserRiskScoreState },
+    hasResolutionGroup: true,
+    resolutionTargetEntityId: 'user:target-entity',
+  },
+  refetch: () => {},
+};
+
 export const mockServiceEntityRiskScores: EntityRiskScoresState<EntityType.service> = {
   base: { ...mockServiceRiskScoreState },
   resolution: {
@@ -241,6 +251,17 @@ export const mockServiceEntityRiskScores: EntityRiskScoresState<EntityType.servi
   },
   refetch: () => {},
 };
+
+export const mockServiceEntityRiskScoresWithResolution: EntityRiskScoresState<EntityType.service> =
+  {
+    base: { ...mockServiceRiskScoreState },
+    resolution: {
+      state: { ...mockServiceRiskScoreState },
+      hasResolutionGroup: true,
+      resolutionTargetEntityId: 'service:target-entity',
+    },
+    refetch: () => {},
+  };
 
 const hostMetadata: HostMetadataInterface = {
   '@timestamp': 1036358673463478,

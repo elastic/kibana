@@ -16,11 +16,13 @@ interface WorkflowStep {
   type: string;
   if?: string;
   condition?: string;
+  foreach?: string;
   steps?: WorkflowStep[];
   with?: {
     query?: string;
     filter?: unknown;
     params?: unknown;
+    body?: unknown;
   };
 }
 
@@ -128,6 +130,29 @@ describe('significant events fair batch selection', () => {
     expect(backlog?.with?.query).toContain('processed_count == 0');
   });
 
+  it('chunks skipped detection markers at the route limit', () => {
+    const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
+    const outer = discovery.steps
+      .find(({ name }) => name === 'stamp_skipped_detections')
+      ?.steps?.find(({ name }) => name === 'foreach_stamp_skipped');
+    const prepare = outer?.steps?.find(({ name }) => name === 'prepare_skipped_marker') as
+      | (WorkflowStep & { with?: { detection_ids?: string; rule_uuid?: string } })
+      | undefined;
+    const chunk = outer?.steps?.find(({ name }) => name === 'foreach_skipped_detection_chunk');
+    const write = chunk?.steps?.find(({ name }) => name === 'write_skipped_marker');
+
+    expect(prepare?.with?.detection_ids).toContain('join: "," | split: ","');
+    expect(prepare?.with?.rule_uuid).toBe('${{ foreach.item[1] }}');
+    expect(chunk?.type).toBe('foreach');
+    expect(chunk?.foreach).toBe(
+      '${{ steps.prepare_skipped_marker.output.detection_ids | chunk: 1000 | json }}'
+    );
+    expect(write?.with?.body).toMatchObject({ detection_ids: '${{ foreach.item }}' });
+    expect(JSON.stringify(write?.with?.body)).toContain(
+      'steps.prepare_skipped_marker.output.rule_uuid'
+    );
+  });
+
   it('reports hasWork from the batch size so the drain loop can continue without a queue count', () => {
     const discovery = parse(DISCOVERY_YAML) as {
       outputs: Array<{ name: string }>;
@@ -137,44 +162,43 @@ describe('significant events fair batch selection', () => {
     expect(discovery.outputs.map(({ name }) => name)).toEqual([
       'processedCount',
       'hasWork',
-      'suppressedRuleCount',
+      'skippedCount',
+      'needsAgentCount',
+      'classifierReasonCounts',
+      'classifierProbeStatusCounts',
+      'classifierFailed',
     ]);
     expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
       hasWork: true,
     });
-    expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toHaveProperty(
-      'suppressedRuleCount'
-    );
-    expect(findStepRecursive(discovery.steps, 'output_no_detections')?.with).toHaveProperty(
-      'suppressedRuleCount'
-    );
   });
 
   it('carries the three flaky-rule throttle inputs with documented defaults', () => {
     const discovery = parse(DISCOVERY_YAML) as {
       triggers: Array<{
         type: string;
-        inputs?: Array<{ name: string; default: number; required: boolean }>;
+        inputs?: {
+          properties?: Record<string, { default?: number }>;
+          required?: string[];
+        };
       }>;
     };
 
     const manualTrigger = discovery.triggers.find((t) => t.type === 'manual');
-    const inputs = manualTrigger?.inputs ?? [];
+    const inputs = manualTrigger?.inputs?.properties ?? {};
 
-    const threshold = inputs.find((i) => i.name === 'flakyRuleDetectionThreshold');
+    const threshold = inputs.flakyRuleDetectionThreshold;
     expect(threshold).toBeDefined();
     expect(threshold?.default).toBe(10);
-    expect(threshold?.required).toBe(false);
 
-    const probe = inputs.find((i) => i.name === 'flakyRuleProbeAfterMinutes');
+    const probe = inputs.flakyRuleProbeAfterMinutes;
     expect(probe).toBeDefined();
     expect(probe?.default).toBe(360);
-    expect(probe?.required).toBe(false);
 
-    const exempt = inputs.find((i) => i.name === 'flakyRuleExemptSeverityScore');
+    const exempt = inputs.flakyRuleExemptSeverityScore;
     expect(exempt).toBeDefined();
     expect(exempt?.default).toBe(80);
-    expect(exempt?.required).toBe(false);
+    expect(manualTrigger?.inputs?.required).toBeUndefined();
   });
 
   it('passes the four positional params in the expected order', () => {

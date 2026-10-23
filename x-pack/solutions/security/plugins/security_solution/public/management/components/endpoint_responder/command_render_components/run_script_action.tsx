@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { parsedExecuteTimeout } from '../lib/utils';
 import type { ParsedCommandInput } from '../../console/service/types';
-import { RunscriptActionResult } from '../../runscript_action_result';
 import type { ArgSelectorState, SupportedArguments } from '../../console';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
 import type {
@@ -131,7 +129,7 @@ export const RunScriptActionResult = memo<
     } as unknown as RunScriptActionRequestBody;
   }, [command]);
 
-  const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
+  return useConsoleActionSubmitter<
     RunScriptActionRequestBody,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
@@ -144,27 +142,6 @@ export const RunScriptActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'runscript',
-  });
-
-  if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
-    return result;
-  }
-
-  return (
-    <ResultComponent
-      data-test-subj="executeSuccess"
-      showAs="success"
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.runScriptAction.successTitle',
-        { defaultMessage: 'RunScript was successful.' }
-      )}
-    >
-      <RunscriptActionResult
-        action={completedActionDetails}
-        data-test-subj="runscriptResult"
-        textSize="s"
-      />
-    </ResultComponent>
-  );
+  }).result;
 });
 RunScriptActionResult.displayName = 'RunScriptActionResult';

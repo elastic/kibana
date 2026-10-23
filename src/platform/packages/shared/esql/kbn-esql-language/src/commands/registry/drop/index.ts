@@ -24,7 +24,8 @@ export const dropCommand = {
   name: Commands.DROP,
   methods: dropCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.dropDoc', {
+    docPreserving: true,
+    description: i18n.translate('esqlLanguage.esql.definitions.dropDoc', {
       defaultMessage: 'Drops columns',
     }),
     declaration: 'DROP column1[, ..., columnN]',

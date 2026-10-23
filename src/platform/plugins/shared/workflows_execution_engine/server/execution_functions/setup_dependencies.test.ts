@@ -52,13 +52,11 @@ describe('setupDependencies', () => {
 
   const mockConfig: WorkflowsExecutionEngineConfig = {
     enabled: true,
+    storage: { source: 'plain_index', dataRetention: '90d' },
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     maxWorkflowDepth: 10,
     logging: {
       console: true,
-    },
-    http: {
-      allowedHosts: ['*'],
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
     eviction: {

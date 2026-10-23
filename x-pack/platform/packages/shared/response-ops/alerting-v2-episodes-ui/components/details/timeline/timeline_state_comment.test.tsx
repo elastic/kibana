@@ -29,7 +29,7 @@ describe('AlertEpisodeTimelineStateComment', () => {
       prevEventCount: 0,
     });
 
-    expect(screen.getByText('started the episode as')).toBeInTheDocument();
+    expect(screen.getByText('started the alert as')).toBeInTheDocument();
     expect(screen.getByText('Pending')).toBeInTheDocument();
   });
 

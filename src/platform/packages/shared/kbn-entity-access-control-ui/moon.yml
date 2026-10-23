@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/entity-access-control'
   - '@kbn/i18n'
+  - '@kbn/ui-callout'
   - '@kbn/user-profile-components'
 tags:
   - shared-browser
@@ -32,6 +33,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

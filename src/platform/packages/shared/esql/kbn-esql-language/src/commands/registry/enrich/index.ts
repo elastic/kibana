@@ -26,7 +26,8 @@ export const enrichCommand = {
   name: Commands.ENRICH,
   methods: enrichCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.enrichDoc', {
+    docPreserving: true,
+    description: i18n.translate('esqlLanguage.esql.definitions.enrichDoc', {
       defaultMessage:
         'Enrich table with another table. Before you can use enrich, you need to create and execute an enrich policy.',
     }),

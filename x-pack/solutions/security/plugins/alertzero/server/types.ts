@@ -13,6 +13,7 @@ import type {
 } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
@@ -20,11 +21,15 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SubscriptionAvailability } from '../common/availability';
 
 export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
@@ -33,32 +38,13 @@ export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
 }>;
 
 /**
- * The subset of security_solution's rule-attachment service this plugin actually calls.
- * Kept local and structural rather than importing security_solution's own type, so this
- * plugin has no reference — type or runtime — to security_solution at all; see
- * `AlertTriageAttachmentServiceProvider` for why.
+ * Installs threat-intel supply managed workflows owned by security_solution
+ * (global ingest/enrich plus the per-space attribute workflow) for the given
+ * space. Pushed from security_solution's `start()` so AlertZero can call it when
+ * Hunt enable finds a required TI document missing, without owning TI YAML or
+ * declaring a reverse plugin dependency.
  */
-export interface AlertTriageAttachmentService {
-  getRuleAttachmentSelection(params: {
-    search: string;
-    attachmentFilter: 'all' | 'attached' | 'not_attached';
-  }): Promise<{ ruleIds: string[]; attachedRuleIds: string[]; skippedRuleCount?: number }>;
-  updateRuleAttachments(params: {
-    attachRuleIds: string[];
-    detachRuleIds: string[];
-  }): Promise<unknown>;
-}
-
-/**
- * Resolves the Alert Triage rule-attachment service, or `undefined` if no consumer has
- * registered one — e.g. security_solution is disabled, or a request lands before its
- * `start()` has run the registration. Always safe to call: production wires an unconditional
- * function whose *result* may be absent, rather than leaving the function itself undefined.
- */
-export type AlertTriageAttachmentServiceProvider = (
-  request: KibanaRequest,
-  workflowId: string
-) => Promise<AlertTriageAttachmentService | undefined>;
+export type ThreatIntelSupplyWorkflowInstaller = (params: { spaceId: string }) => Promise<void>;
 
 /**
  * Soft-enable contract. Always returned from `setup()` so optional consumers
@@ -78,13 +64,14 @@ export interface AlertZeroPluginSetup {
 export interface AlertZeroPluginStart {
   /**
    * Lets an optional consumer that already depends on this plugin (e.g. security_solution, via
-   * the `isEnabled` soft-flag above) hand this plugin its Alert Triage rule-attachment service
-   * from within the consumer's own `start()`. This is a push, not a pull: this plugin declaring
-   * a reverse dependency on that consumer instead would make the two plugins depend on each
-   * other, which fails Kibana's plugin boot with a circular-dependency error.
+   * the `isEnabled` soft-flag above) register the TI owner installer from its own `start()`, so
+   * Hunt ensure can install missing supply workflows without AlertZero owning those definitions.
+   * This is a push, not a pull: this plugin declaring a reverse dependency on that consumer
+   * instead would make the two plugins depend on each other, which fails Kibana's plugin boot
+   * with a circular-dependency error.
    */
-  registerAlertTriageAttachmentServiceProvider: (
-    provider: AlertTriageAttachmentServiceProvider
+  registerThreatIntelSupplyWorkflowInstaller: (
+    installer: ThreatIntelSupplyWorkflowInstaller
   ) => void;
 }
 
@@ -96,9 +83,11 @@ export interface AlertZeroSetupDependencies {
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface AlertZeroStartDependencies {
+  taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
@@ -119,6 +108,22 @@ export interface AlertZeroStartDependencies {
    * connector an operator picked for a tier.
    */
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  /**
+   * Optional, matching the plugin manifest. Resolves a hunted host's Fleet
+   * enrollment so package_report can fill a respond action's endpoint_ids.
+   * Absence degrades every host to unenrolled, same as no agent found.
+   */
+  fleet?: FleetStartContract;
+  /**
+   * Optional, matching the plugin manifest. Supplies the MITRE data client behind the Tier 2
+   * technique catalog. Absence (or its managed source being off) leaves the catalog empty.
+   */
+  mitreAttack?: MitreAttackServerStart;
+  /**
+   * Optional, matching the plugin manifest. The report step reads its opt-in state before any
+   * Elasticsearch work; a missing telemetry plugin counts as opted out.
+   */
+  telemetry?: TelemetryPluginStart;
 }
 
 export type AlertZeroRouter = IRouter<AlertZeroRequestHandlerContext>;

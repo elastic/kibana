@@ -7,9 +7,11 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { useQueryClient } from '@kbn/react-query';
 import type { EntityType } from '@kbn/entity-store/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
+import { useOnResolutionGroupUpdatedToolEvent } from '../../hooks/use_on_resolution_group_updated_tool_event';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
@@ -18,9 +20,14 @@ import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_e
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './hooks/use_resolution_group';
+import {
+  useResolutionGroup,
+  RESOLUTION_GROUP_ROUTE,
+  RESOLUTION_GROUP_QUERY_KEY,
+} from './hooks/use_resolution_group';
 import type { ResolutionGroup } from './hooks/use_resolution_group';
 import { useLinkEntities } from './hooks/use_link_entities';
 import { useUnlinkEntities } from './hooks/use_unlink_entities';
@@ -53,6 +60,11 @@ interface ResolutionGroupTabProps {
     entityId: string;
     entityName: string | undefined;
   }) => void;
+  /**
+   * View mode of the flyout the tab was opened from. In `resolved` mode that flyout shows the whole
+   * group, so the target entity's row stays openable and opens its own single-entity view.
+   */
+  mode?: EntityViewMode;
 }
 
 export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
@@ -60,6 +72,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   entityType,
   scopeId,
   onShowEntity,
+  mode = 'single',
 }) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
@@ -75,6 +88,12 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
     },
   });
   const unlinkEntities = useUnlinkEntities();
+  const queryClient = useQueryClient();
+  useOnResolutionGroupUpdatedToolEvent(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
+    }, [queryClient])
+  );
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -84,6 +103,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   const [removingEntityId, setRemovingEntityId] = useState<string | undefined>();
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
+  // In the group view no single entity is "open", so every row (the target included) can be opened.
+  const currentEntityId = mode === 'resolved' ? undefined : entityId;
   const hasGroup = group && group.group_size > 1;
   const resolutionRiskScore = hasGroup ? getResolutionRiskScore(group.target) : undefined;
 
@@ -243,7 +264,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           targetEntityId={targetEntityId}
           removingEntityId={removingEntityId}
           onEntityNameClick={handleEntityNameClick}
-          currentEntityId={entityId}
+          currentEntityId={currentEntityId}
         />
         <EuiSpacer size="l" />
         <AddEntitiesSection

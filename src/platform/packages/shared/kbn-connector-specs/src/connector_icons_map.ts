@@ -363,7 +363,6 @@ export const ConnectorIconsMap: Map<
     '.zabbix',
     lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
   ],
-
   ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconOkta" */ './specs/okta/icon'))],
   [
     '.gcp_iam',
@@ -382,6 +381,11 @@ export const ConnectorIconsMap: Map<
   [
     '.urlscan_io',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
+  ],
+
+  [
+    '.aws_eks',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsEks" */ './specs/aws_eks/icon')),
   ],
   [
     '.google_gke',
@@ -425,6 +429,20 @@ export const ConnectorIconsMap: Map<
     lazy(
       () =>
         import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
+    ),
+  ],
+
+  [
+    '.azure_sql',
+    lazy(() => import(/* webpackChunkName: "connectorIconazuresql" */ './specs/azure_sql/icon')),
+  ],
+  [
+    '.solarwinds_platform',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSolarWindsPlatform" */ './specs/solarwinds_platform/icon'
+        )
     ),
   ],
 ]);

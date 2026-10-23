@@ -7,6 +7,9 @@
 
 import type { PartialSetupState, ProfilingSetupOptions } from './setup';
 
+const UNIVERSAL_PROFILING_INDEX_PATTERN = 'profiling*';
+const EXCLUDE_OTEL_INDEX_PATTERN = '-*.otel-*';
+
 export async function hasProfilingData({
   clientWithProfilingAuth,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
@@ -14,7 +17,9 @@ export async function hasProfilingData({
     const hasProfilingDataResponse = await clientWithProfilingAuth.search(
       'has_any_profiling_data',
       {
-        index: 'profiling*',
+        // The OTel profiling data streams (`profiling-*.otel-*`) also match `profiling*`,
+        // so they are excluded to only report data ingested in the Universal Profiling schema.
+        index: [UNIVERSAL_PROFILING_INDEX_PATTERN, EXCLUDE_OTEL_INDEX_PATTERN],
         size: 0,
         track_total_hits: 1,
         terminate_after: 1,
