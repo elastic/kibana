@@ -1130,6 +1130,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   {%- assign retired = steps.resolve_attack_alerts_retired.output -%}
@@ -1504,6 +1505,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           Verdict was not an incident; {{ steps.forensic_analysis.output.structured_output.recommendedActions | size }}
@@ -1586,6 +1588,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           {%- if steps.resolve_verdict.output.not_an_incident == true -%}
