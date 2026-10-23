@@ -166,13 +166,6 @@ export async function findRules<Params extends RuleParams = never>(
       throw error;
     }
 
-    const reportError = (error: Error) => {
-      errors.push({
-        message: error.message,
-        rule: { id, ...(attributes.name && { name: attributes.name }) },
-      });
-    };
-
     let rule;
     try {
       rule = getAlertFromRaw<Params>({
@@ -189,7 +182,10 @@ export async function findRules<Params extends RuleParams = never>(
       context.logger.warn(
         `Error transforming rule with id ${id}, the rule will be omitted from the results: ${error.message}`
       );
-      reportError(error);
+      errors.push({
+        message: error.message,
+        rule: { id, ...(attributes.name && { name: attributes.name }) },
+      });
       return [];
     }
 
