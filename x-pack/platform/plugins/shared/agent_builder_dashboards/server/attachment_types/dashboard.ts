@@ -10,12 +10,11 @@ import type {
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import deepEqual from 'fast-deep-equal';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
-  attachmentDataToDashboardState,
   dashboardAttachmentDataSchema,
   dashboardStateToAttachmentData,
+  isSameDashboardContent,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
@@ -25,12 +24,6 @@ interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
 }
-
-const normalizeDashboardAttachmentData = (
-  data: DashboardAttachmentData
-): DashboardAttachmentData => {
-  return dashboardStateToAttachmentData(attachmentDataToDashboardState(data));
-};
 
 /**
  * Creates the definition for the `dashboard` attachment type.
@@ -101,13 +94,10 @@ export const createDashboardAttachmentType = ({
             );
             return false;
           }
-          const resolvedDashboardData = normalizeDashboardAttachmentData(
-            dashboardStateToAttachmentData(dashboard.data)
-          );
-          // Compare canonicalized attachment data so Lens panel shape differences do not cause false staleness.
-          return !deepEqual(
-            resolvedDashboardData,
-            normalizeDashboardAttachmentData(latestVersion.data)
+          // compare content, so what saving adds or drops and Lens panel shape differences do not cause false staleness
+          return !isSameDashboardContent(
+            dashboardStateToAttachmentData(dashboard.data),
+            latestVersion.data
           );
         }
         return false;
