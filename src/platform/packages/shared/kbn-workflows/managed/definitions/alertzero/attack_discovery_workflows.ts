@@ -31,12 +31,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID =
 export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID =
   'system-security-attack-discovery-fp-tp-analysis';
 
+/**
+ * Version 6 marks the workflow billable. The YAML is unchanged, so the bump is what
+ * already-installed copies reconcile.
+ */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 5,
+  version: 6,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -55,13 +59,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  * Version 10 carries the telemetry report steps.
  *
  * Version 11 space-scopes the proposal read-back so a named space records who decided and why.
+ *
+ * Version 12 marks the workflow billable. The YAML is unchanged, so the bump is what
+ * already-installed copies reconcile.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 11,
+  version: 12,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -77,13 +84,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * review's FP/TP analysis. Version 5 skips alerts the review tagged
  * `az:ad_correlated`. Each bump is a deliberate rollout signal; the YAML change
  * alone already rolls out through `definitionHash`.
+ *
+ * Version 6 marks the workflow billable. The YAML is unchanged, so the bump is what
+ * already-installed copies reconcile.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 5,
+  version: 6,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -94,14 +104,18 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
  * restorable, because a disabled analysis would leave the review recording every
  * attack as a failure.
  *
- * The version is the prompt version. Execution output echoes it as
- * `workflow_version`, so a result traces back to the prompt that produced it.
+ * The version is the prompt version. Execution output echoes `workflow.version`,
+ * which is the YAML document version (`"1"`), not this managed `version`, so a
+ * managed bump does not relabel the prompt.
+ *
+ * Version 3 marks the workflow billable. The YAML is unchanged, so the bump is what
+ * already-installed copies reconcile. It is not a prompt change.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;
