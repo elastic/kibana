@@ -11,7 +11,6 @@ import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { filterReadableSourceIds } from '../../utils/resolve_source_ids';
 import { listAllSources } from '../../utils/list_all_sources';
-import { getLiveEntities } from '../../../lib/significant_events/entities/get_live_entities';
 
 const detectionOverviewRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/detection/_overview',
@@ -60,7 +59,7 @@ const detectionOverviewRoute = createServerRoute({
         scopedClients.getEventSearchClient(),
       ]);
 
-    const [features, unbackedQueries, activeRules, detections, significantEvents, liveEntities] =
+    const [features, unbackedQueries, activeRules, detections, significantEvents, entities] =
       await Promise.all([
         knowledgeIndicatorClient.countFeatures(readableSourceIds),
         knowledgeIndicatorClient.countUnbackedQueries(readableSourceIds),
@@ -71,11 +70,12 @@ const detectionOverviewRoute = createServerRoute({
         eventClient
           .findLatestByCurrentStatePaginated({ ...params.query, page: 1, perPage: 1 })
           .then(({ total }) => total),
-        getLiveEntities(knowledgeIndicatorClient, readableSourceIds),
+        // Counted on its own: the panel's entity list stops at 1,000 records.
+        knowledgeIndicatorClient.countEntities(readableSourceIds),
       ]);
 
     return {
-      entities: liveEntities.entities.length,
+      entities,
       knowledge_indicators: features + unbackedQueries,
       active_rules: activeRules,
       detections,

@@ -64,6 +64,26 @@ export class IndicatorReader {
     return this.revisionReader.countLatestRevisions(inPredicate(TYPE, [type]), IS_NOT_DELETED);
   }
 
+  /** Distinct live entity slugs, matching the entities `getFeatures` returns but without its limit. */
+  countEntities(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_FEATURE]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXCLUDED,
+      IS_NOT_EXPIRED,
+      inPredicate(FEATURE_TYPE, ['entity'])
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere, FEATURE_SLUG);
+  }
+
   countFeatures(sourceIds: string[]): Promise<number> {
     if (sourceIds.length === 0) {
       return Promise.resolve(0);
