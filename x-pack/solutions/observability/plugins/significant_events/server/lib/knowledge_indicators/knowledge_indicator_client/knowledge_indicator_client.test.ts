@@ -81,12 +81,10 @@ function createFeatureDoc(
 }
 
 const revisionIdOf = ({
-  'source.id': sourceId,
-  type,
   id,
   '@timestamp': timestamp,
-}: Pick<StoredKnowledgeIndicator, 'source.id' | 'type' | 'id' | '@timestamp'>): string =>
-  computeRevisionId({ sourceId, type, id, timestamp });
+}: Pick<StoredKnowledgeIndicator, 'id' | '@timestamp'>): string =>
+  computeRevisionId({ id, timestamp });
 
 function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   return createFeatureDoc({

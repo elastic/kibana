@@ -74,7 +74,7 @@ export function toStoredFeature({
   return {
     '@timestamp': timestamp,
     id,
-    revision_id: computeRevisionId({ sourceId, type: KI_TYPE_FEATURE, id, timestamp }),
+    revision_id: computeRevisionId({ id, timestamp }),
     type: KI_TYPE_FEATURE,
     title: feature.title,
     description: feature.description,
@@ -124,7 +124,7 @@ export function toStoredQuery({
   return {
     '@timestamp': timestamp,
     id: query.id,
-    revision_id: computeRevisionId({ sourceId, type: KI_TYPE_QUERY, id: query.id, timestamp }),
+    revision_id: computeRevisionId({ id: query.id, timestamp }),
     type: KI_TYPE_QUERY,
     title: query.title,
     description: query.description,
@@ -152,7 +152,7 @@ export function toTombstone(
   return {
     '@timestamp': timestamp,
     id: identity.id,
-    revision_id: computeRevisionId({ sourceId, type: identity.type, id: identity.id, timestamp }),
+    revision_id: computeRevisionId({ id: identity.id, timestamp }),
     type: identity.type,
     'source.id': sourceId,
     deleted: true,

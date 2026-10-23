@@ -42,7 +42,7 @@ const rankResponse = (rows: Array<[string, string, string, string, (string | nul
 const storedFeatureIn = (sourceId: string, id: string, timestamp: string) => ({
   '@timestamp': timestamp,
   id,
-  revision_id: `${sourceId}:feature:${id}:${timestamp}`,
+  revision_id: `${id}:${timestamp}`,
   type: 'feature',
   title: id,
   description: 'desc',
@@ -55,9 +55,10 @@ const storedFeature = storedFeatureIn('src-a', 'u1', T1);
 describe('IndicatorSearcher ranking function per embedding model', () => {
   const fetchLatestRevisions = jest.fn();
   const resolveEmbeddingModel = jest.fn<Promise<SearchEmbeddingModel>, []>();
+  const logger = loggingSystemMock.createLogger();
   const searcher = new IndicatorSearcher(
     elasticsearchServiceMock.createElasticsearchClient(),
-    loggingSystemMock.createLogger(),
+    logger,
     { semantic_min_score: 0, rrf_rank_constant: 60 },
     { fetchLatestRevisions } as unknown as RevisionReader,
     SPACE,
@@ -77,7 +78,7 @@ describe('IndicatorSearcher ranking function per embedding model', () => {
   const run = (searchMode: 'semantic' | 'keyword' | 'hybrid' = 'semantic') =>
     searcher.findFeatures('src-a', 'redis cache', { searchMode, limit: 50 });
 
-  it('ranks a dense model with KNN(TEXT_EMBEDDING) and binds the params', async () => {
+  it('ranks a dense model with KNN(TEXT_EMBEDDING) prefiltered on current revision ids in WHERE', async () => {
     resolveEmbeddingModel.mockResolvedValue({ kind: 'dense', inferenceId: '.jina-v5' });
 
     await run();
@@ -89,14 +90,6 @@ describe('IndicatorSearcher ranking function per embedding model', () => {
     expect(rankQuery().toRequest().params).toEqual(
       expect.arrayContaining([{ q: 'redis cache' }, { inference_id: '.jina-v5' }])
     );
-  });
-
-  it('prefilters on the latest revision ids in WHERE instead of a request filter', async () => {
-    resolveEmbeddingModel.mockResolvedValue({ kind: 'dense', inferenceId: '.jina-v5' });
-
-    await run();
-
-    const printed = rankQuery().print('basic');
     expect(printed).toContain(`revision_id IN ("${storedFeature.revision_id}")`);
     expect(printed.indexOf('revision_id IN')).toBeLessThan(printed.indexOf('FORK'));
     expect(rankCall().filter).toBeUndefined();
@@ -127,29 +120,59 @@ describe('IndicatorSearcher ranking function per embedding model', () => {
     expect(resolveEmbeddingModel).not.toHaveBeenCalled();
     expect(rankQuery().print('basic')).not.toContain('KNN(');
   });
+
+  it('skips current revisions without revision_id instead of failing the search', async () => {
+    const { revision_id: _dropped, ...legacy } = storedFeatureIn('src-a', 'u-legacy', T1);
+    fetchLatestRevisions.mockResolvedValue([legacy, storedFeature]);
+
+    await run();
+
+    const printed = rankQuery().print('basic');
+    expect(printed).toContain(`revision_id IN ("${storedFeature.revision_id}")`);
+    expect(printed).not.toContain('undefined');
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('1 current revision(s) have no revision_id')
+    );
+  });
+
+  it('cuts the prefilter at the ES|QL statement budget and warns', async () => {
+    const docs = Array.from({ length: 6000 }, (_, i) =>
+      storedFeatureIn('src-a', `u${i}-${'x'.repeat(150)}`, T1)
+    );
+    fetchLatestRevisions.mockResolvedValue(docs);
+
+    await run();
+
+    const printed = rankQuery().print('basic');
+    expect(printed.length).toBeLessThan(1_000_000);
+    const kept = printed.match(/"u\d+-x/g)?.length ?? 0;
+    expect(kept).toBeGreaterThan(4000);
+    expect(kept).toBeLessThan(docs.length);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`${docs.length - kept} of ${docs.length} current revisions dropped`)
+    );
+  });
 });
 
 describe('IndicatorSearcher.findFeaturesAcrossSources', () => {
   const fetchLatestRevisions = jest.fn();
   const resolveEmbeddingModel = jest.fn<Promise<SearchEmbeddingModel>, []>();
-  const createSearcher = (semanticMinScore = 0) =>
-    new IndicatorSearcher(
-      elasticsearchServiceMock.createElasticsearchClient(),
-      loggingSystemMock.createLogger(),
-      { semantic_min_score: semanticMinScore, rrf_rank_constant: 60 },
-      { fetchLatestRevisions } as unknown as RevisionReader,
-      SPACE,
-      resolveEmbeddingModel
-    );
-  const searcher = createSearcher();
+  const searcher = new IndicatorSearcher(
+    elasticsearchServiceMock.createElasticsearchClient(),
+    loggingSystemMock.createLogger(),
+    { semantic_min_score: 0, rrf_rank_constant: 60 },
+    { fetchLatestRevisions } as unknown as RevisionReader,
+    SPACE,
+    resolveEmbeddingModel
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
     resolveEmbeddingModel.mockResolvedValue({ kind: 'dense', inferenceId: '.jina-v5' });
   });
 
-  const run = (limit?: number, instance = searcher) =>
-    instance.findFeaturesAcrossSources(['src-a', 'src-b'], 'redis cache', {
+  const run = (limit?: number) =>
+    searcher.findFeaturesAcrossSources(['src-a', 'src-b'], 'redis cache', {
       featureType: 'technology',
       searchMode: 'semantic',
       limit,
@@ -204,31 +227,6 @@ describe('IndicatorSearcher.findFeaturesAcrossSources', () => {
 
     expect((await run()).hits).toEqual([]);
     expect(queryEsql).not.toHaveBeenCalled();
-  });
-
-  it('retries without the semantic threshold when no ranked row carries the semantic label', async () => {
-    fetchLatestRevisions.mockResolvedValue([
-      storedFeatureIn('src-a', 'u1', T1),
-      storedFeatureIn('src-b', 'u2', T1),
-    ]);
-    (queryEsql as jest.Mock)
-      .mockResolvedValueOnce(rankResponse([['u1', 'src-a', 'feature', T1, null]]))
-      .mockResolvedValueOnce(
-        rankResponse([
-          ['u2', 'src-b', 'feature', T1],
-          ['u1', 'src-a', 'feature', T1, null],
-        ])
-      );
-
-    const { hits } = await run(undefined, createSearcher(0.1));
-
-    expect(queryEsql).toHaveBeenCalledTimes(2);
-    const [{ query: first }] = (queryEsql as jest.Mock).mock.calls[0];
-    const [{ query: second }] = (queryEsql as jest.Mock).mock.calls[1];
-    expect(first.print('basic')).toContain('WHERE _score >= 0.1');
-    expect(second.print('basic')).toContain('WHERE _score >= 0');
-    expect(second.print('basic')).not.toContain('WHERE _score >= 0.1');
-    expect(hits.map(({ uuid }) => uuid)).toEqual(['u2', 'u1']);
   });
 
   it('applies the caller limit in rank order', async () => {

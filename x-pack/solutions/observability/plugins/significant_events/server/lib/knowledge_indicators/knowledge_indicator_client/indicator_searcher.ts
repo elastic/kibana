@@ -67,6 +67,9 @@ import {
 
 const SEARCH_SIZE_LIMIT = 10_000;
 const CROSS_SOURCE_RANK_LIMIT = 300;
+// ES|QL rejects statements over 1,000,000 characters (`EsqlParser.MAX_LENGTH`).
+const RANK_PREFILTER_CHAR_BUDGET = 900_000;
+const RANK_PREFILTER_LITERAL_OVERHEAD = '"", '.length;
 const QUERY_FEATURE_ID = 'query.features.id';
 // `FUSE` preserves this label only when the semantic branch contributes the row.
 const RANK_LABEL_COLUMN = 'label';
@@ -207,9 +210,8 @@ export class IndicatorSearcher {
     queryText: string,
     { featureType, limit }: { featureType: string; limit?: number }
   ): Promise<{ hits: Feature[] }> {
-    // Latest-per-group cannot be folded into the rank query: a `KNN()`/`MATCH` placed after
-    // `INLINE STATS` is no longer pushed to Lucene (dense `KNN()` fails outright on `semantic_text`),
-    // so the current revisions are read first and ranking is prefiltered on their `revision_id`.
+    // Latest-per-group cannot be folded into the rank query: `KNN()`/`MATCH` after `INLINE STATS`
+    // is not pushed to Lucene, and dense `KNN()` fails outright on `semantic_text` there.
     const latest = await this.revisionReader.fetchLatestRevisions(
       combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, [KI_TYPE_FEATURE])),
       combineWhere(
@@ -232,10 +234,7 @@ export class IndicatorSearcher {
       combineWhere(
         inPredicate(SOURCE_ID, sourceIds),
         inPredicate(TYPE, [KI_TYPE_FEATURE]),
-        inPredicate(
-          REVISION_ID,
-          latest.map(({ revision_id: revisionId }) => revisionId)
-        )
+        inPredicate(REVISION_ID, this.prefilterRevisionIds(latest, 'Cross-source feature search'))
       ),
       inSpace(this.space)
     );
@@ -382,7 +381,7 @@ export class IndicatorSearcher {
         inPredicate(TYPE, options.types ?? []),
         inPredicate(
           REVISION_ID,
-          docs.map(({ revision_id: revisionId }) => revisionId)
+          this.prefilterRevisionIds(docs, `KnowledgeIndicator ${mode} search`)
         )
       ),
       inSpace(this.space)
@@ -438,6 +437,42 @@ export class IndicatorSearcher {
     }
 
     return { hits };
+  }
+
+  /**
+   * Documents predating `revision_id` and ids past the statement budget are dropped with a warning;
+   * an empty result lifts the restriction and leaves stale rows to the post-ranking timestamp check.
+   */
+  private prefilterRevisionIds(
+    docs: ReadonlyArray<{ revision_id?: string }>,
+    label: string
+  ): string[] {
+    const revisionIds: string[] = [];
+    let legacy = 0;
+    let chars = 0;
+    for (const { revision_id: revisionId } of docs) {
+      if (!revisionId) {
+        legacy += 1;
+        continue;
+      }
+      chars += revisionId.length + RANK_PREFILTER_LITERAL_OVERHEAD;
+      if (chars > RANK_PREFILTER_CHAR_BUDGET) {
+        break;
+      }
+      revisionIds.push(revisionId);
+    }
+    const dropped = docs.length - legacy - revisionIds.length;
+    if (legacy > 0) {
+      this.logger.warn(
+        `${label}: ${legacy} current revision(s) have no revision_id and are not searchable; backfill the field`
+      );
+    }
+    if (dropped > 0) {
+      this.logger.warn(
+        `${label}: prefilter exceeds the ES|QL statement budget; ${dropped} of ${docs.length} current revisions dropped from ranking`
+      );
+    }
+    return revisionIds;
   }
 
   /**
@@ -581,7 +616,6 @@ export class IndicatorSearcher {
     const includeQueries = types.length === 0 || types.includes(KI_TYPE_QUERY);
 
     if (includeFeatures) {
-      // The slug is the public id and the normalized form ("Fleet Server" -> `fleet-server`).
       clauses.push(likeClause(FEATURE_SLUG, 3));
       // Join the multivalue so substring LIKE works; LIKE is null per-element, and MV_CONTAINS matched whole tags only.
       clauses.push(likeClause(FEATURE_TYPE, 1), likeClause(FEATURE_SUBTYPE, 1), {

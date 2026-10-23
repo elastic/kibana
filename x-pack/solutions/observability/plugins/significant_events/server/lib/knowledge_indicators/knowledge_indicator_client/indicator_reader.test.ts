@@ -47,7 +47,7 @@ function createQueryDoc(
   return {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: 'query-1',
-    revision_id: `${SOURCE}:query:query-1:2026-01-01T00:00:00.000Z`,
+    revision_id: 'query-1:2026-01-01T00:00:00.000Z',
     type: KI_TYPE_QUERY,
     'source.id': SOURCE,
     title: 'Test Query',

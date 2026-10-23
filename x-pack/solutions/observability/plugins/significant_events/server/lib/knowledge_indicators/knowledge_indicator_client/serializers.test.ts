@@ -145,8 +145,8 @@ describe('revision_id', () => {
     const query = storeQuery(makeQuery());
     const tombstone = toTombstone(SOURCE_ID, { id: 'q-1', type: 'query' });
 
-    expect(feature.revision_id).toBe(`${SOURCE_ID}:feature:${feature.id}:${feature['@timestamp']}`);
-    expect(query.revision_id).toBe(`${SOURCE_ID}:query:q-1:${query['@timestamp']}`);
-    expect(tombstone.revision_id).toBe(`${SOURCE_ID}:query:q-1:${tombstone['@timestamp']}`);
+    expect(feature.revision_id).toBe(`${feature.id}:${feature['@timestamp']}`);
+    expect(query.revision_id).toBe(`q-1:${query['@timestamp']}`);
+    expect(tombstone.revision_id).toBe(`q-1:${tombstone['@timestamp']}`);
   });
 });

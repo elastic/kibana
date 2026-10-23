@@ -81,18 +81,12 @@ interface StoredKiRevisionIdentity {
   'source.id': string;
 }
 
-/** Per-revision key; stands in for `_id`, which ES|QL cannot push down as a filter. */
-export const computeRevisionId = ({
-  sourceId,
-  type,
-  id,
-  timestamp,
-}: {
-  sourceId: string;
-  type: KnowledgeIndicatorType;
-  id: string;
-  timestamp: string;
-}): string => `${sourceId}:${type}:${id}:${timestamp}`;
+/**
+ * Stands in for `_id`, which ES|QL cannot push down; kept short because every current revision
+ * is inlined into the ranking statement, which ES|QL caps at 1,000,000 characters.
+ */
+export const computeRevisionId = ({ id, timestamp }: { id: string; timestamp: string }): string =>
+  `${id}:${timestamp}`;
 
 export interface StoredFeature {
   type: string;
