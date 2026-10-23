@@ -14,8 +14,6 @@ import {
   createRootStreamViews,
   deleteQueryStream,
   deleteRootStreamViews,
-  disableQueryStreams,
-  enableQueryStreams,
 } from '../fixtures/query_stream_helpers';
 
 const PARENT_STREAM_NAME = 'logs.ecs';
@@ -29,7 +27,6 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
       await browserAuth.loginAsAdmin();
-      await enableQueryStreams(kbnClient);
       await createRootStreamViews(esClient);
 
       await createQueryStream(
@@ -43,10 +40,9 @@ test.describe(
       await pageObjects.streams.gotoStreamMainPage();
     });
 
-    test.afterAll(async ({ kbnClient, apiServices, esClient, log }) => {
+    test.afterAll(async ({ apiServices, esClient, log }) => {
       await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME, log);
       await deleteRootStreamViews(esClient);
-      await disableQueryStreams(kbnClient);
     });
 
     test('should edit a query stream inline from the partitioning view', async ({

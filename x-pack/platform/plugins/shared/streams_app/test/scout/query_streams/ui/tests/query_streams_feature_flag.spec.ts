@@ -17,7 +17,8 @@ test.describe('Query streams - feature flag gating', { tag: tags.stateful.classi
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await disableQueryStreams(kbnClient);
+    // This is the only suite that toggles the flag; restore what the global setup hook established.
+    await enableQueryStreams(kbnClient);
   });
 
   test('should properly hide query streams UI when feature flag is off', async ({

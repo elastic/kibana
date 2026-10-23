@@ -10,12 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import { getEsqlViewName } from '@kbn/streams-schema/src/models/query/view_name';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
-import {
-  createQueryStream,
-  deleteQueryStream,
-  disableQueryStreams,
-  enableQueryStreams,
-} from '../fixtures/query_stream_helpers';
+import { createQueryStream, deleteQueryStream } from '../fixtures/query_stream_helpers';
 
 const CLASSIC_STREAM_NAME = 'logs-classic-qe-test';
 const QUERY_STREAM_NAME = `${CLASSIC_STREAM_NAME}.inline-edit-test`;
@@ -38,7 +33,6 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, kbnClient, esClient, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await enableQueryStreams(kbnClient);
       await createQueryStream(
         esClient,
         kbnClient,
@@ -49,7 +43,7 @@ test.describe(
       await pageObjects.streams.gotoStreamMainPage();
     });
 
-    test.afterAll(async ({ apiServices, esClient, kbnClient, logsSynthtraceEsClient, log }) => {
+    test.afterAll(async ({ apiServices, esClient, logsSynthtraceEsClient, log }) => {
       try {
         await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME, log);
         await apiServices.streams.deleteStream(CLASSIC_STREAM_NAME);
@@ -57,7 +51,6 @@ test.describe(
         // Streams may not exist
       } finally {
         await logsSynthtraceEsClient.clean();
-        await disableQueryStreams(kbnClient);
       }
     });
 

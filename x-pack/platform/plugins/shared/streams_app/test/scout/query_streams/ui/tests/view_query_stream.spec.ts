@@ -13,8 +13,6 @@ import {
   createRootStreamViews,
   deleteQueryStream,
   deleteRootStreamViews,
-  disableQueryStreams,
-  enableQueryStreams,
 } from '../fixtures/query_stream_helpers';
 
 const QUERY_STREAM_NAME = 'logs.ecs.view-test';
@@ -24,7 +22,6 @@ const TEST_ESQL_QUERY = 'FROM $.logs.ecs | LIMIT 1';
 test.describe('Query streams - View query stream', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
     await browserAuth.loginAsAdmin();
-    await enableQueryStreams(kbnClient);
     await createRootStreamViews(esClient);
     await createQueryStream(
       esClient,
@@ -36,10 +33,9 @@ test.describe('Query streams - View query stream', { tag: tags.stateful.classic 
     await pageObjects.streams.gotoStreamMainPage();
   });
 
-  test.afterAll(async ({ kbnClient, apiServices, esClient, log }) => {
+  test.afterAll(async ({ apiServices, esClient, log }) => {
     await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME, log);
     await deleteRootStreamViews(esClient);
-    await disableQueryStreams(kbnClient);
   });
 
   test('should show query stream in navigation with detail view accessible', async ({

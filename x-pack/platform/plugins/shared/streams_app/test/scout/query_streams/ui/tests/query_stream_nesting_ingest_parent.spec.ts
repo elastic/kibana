@@ -12,8 +12,6 @@ import {
   createRootStreamViews,
   deleteRootStreamViews,
   deleteQueryStream,
-  disableQueryStreams,
-  enableQueryStreams,
 } from '../fixtures/query_stream_helpers';
 
 const ROOT_STREAM_NAMES = ['logs.ecs', 'logs.otel'];
@@ -30,9 +28,8 @@ test.describe(
   'Query streams - Nested partitioning from ingest stream parent',
   { tag: tags.stateful.classic },
   () => {
-    test.beforeEach(async ({ browserAuth, kbnClient, apiServices, esClient, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, esClient, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await enableQueryStreams(kbnClient);
       for (const rootStreamName of ROOT_STREAM_NAMES) {
         await apiServices.streams.restoreDataStream(rootStreamName);
       }
@@ -40,12 +37,11 @@ test.describe(
       await pageObjects.streams.gotoStreamMainPage();
     });
 
-    test.afterAll(async ({ kbnClient, esClient, apiServices, log }) => {
+    test.afterAll(async ({ esClient, apiServices, log }) => {
       for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
         await deleteQueryStream(apiServices, esClient, streamName, `$.${streamName}`, log);
       }
       await deleteRootStreamViews(esClient);
-      await disableQueryStreams(kbnClient);
     });
 
     test('Should create nested query streams from ingest stream parent', async ({
