@@ -162,11 +162,9 @@ _nightshift_automations:
     _reserved: true
   cluster:
     - 'monitor_inference'
-    - 'read_project_routing'
   applications:
     - application: 'kibana-.kibana'
       privileges:
-        - 'feature_nightshift.read'
         - 'feature_agenticInvestigations.minimal_read'
         - 'feature_agenticInvestigations.investigations_all'
         - 'feature_agentBuilder.minimal_all'
