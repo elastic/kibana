@@ -328,6 +328,10 @@ describe('Http1BasePathProxyServer', () => {
     let proxyServerWithoutShouldRedirect: Http1BasePathProxyServer;
     let proxyWithoutShouldRedirectSupertest: supertest.Agent;
 
+    // the queried proxy's own random base path would get proxied, not treated as stale
+    const staleBasePath = (proxy: Http1BasePathProxyServer) =>
+      proxy.basePath === '/abc' ? 'efg' : 'abc';
+
     beforeEach(async () => {
       // setup and start a proxy server which does not use "shouldRedirectFromOldBasePath"
       const proxyConfig: IHttpConfig = { ...config, port: 10004 };
@@ -350,14 +354,14 @@ describe('Http1BasePathProxyServer', () => {
     });
 
     test('it will do a redirect if it detects what looks like a stale or previously used base path', async () => {
-      const fakeBasePath = basePath !== 'abc' ? 'abc' : 'efg';
+      const fakeBasePath = staleBasePath(proxyServer);
       const res = await proxySupertest.get(`/${fakeBasePath}`).expect(302);
       const location = res.header.location;
       expect(location).toEqual(`${basePath}/`);
     });
 
     test('it will NOT do a redirect if it detects what looks like a stale or previously used base path if we intentionally turn it off', async () => {
-      const fakeBasePath = basePath !== 'abc' ? 'abc' : 'efg';
+      const fakeBasePath = staleBasePath(proxyServerWithoutShouldRedirect);
       await proxyWithoutShouldRedirectSupertest.get(`/${fakeBasePath}`).expect(404);
     });
 
@@ -366,7 +370,7 @@ describe('Http1BasePathProxyServer', () => {
     });
 
     test('it will NOT redirect if it is not a GET verb', async () => {
-      const fakeBasePath = basePath !== 'abc' ? 'abc' : 'efg';
+      const fakeBasePath = staleBasePath(proxyServer);
       await proxySupertest.put(`/${fakeBasePath}`).expect(404);
     });
   });
