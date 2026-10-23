@@ -435,7 +435,7 @@ const SandboxServiceConstructor = grpc.makeClientConstructor(sandboxServiceDef, 
 // Deadlines cap every RPC. Without one, an RPC sent on a connection the load
 // balancer already dropped hangs forever: the transport keeps retransmitting
 // and nothing on either end fails the call.
-const FILE_RPC_DEADLINE_MS = 30_000;
+const FILE_RPC_DEADLINE_MS = 180_000;
 // The sandbox server caps a command at its timeout_seconds (600s when unset);
 // mirror that plus a margin so a legitimate long command is not cut short.
 const DEFAULT_COMMAND_TIMEOUT_SECONDS = 600;
