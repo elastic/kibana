@@ -24,7 +24,7 @@ export const serializeSpecDetail = (
       isEarsEnabled: configurationUtilities.isEarsEnabled(),
       isEarsExperimentalEnabled: configurationUtilities.isEarsExperimentalEnabled(),
     });
-    const { availability: _availability, ...summary } = serializeSpecSummary(registered);
+    const summary = serializeSpecSummary(registered);
 
     return {
       ...summary,

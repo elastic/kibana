@@ -82,6 +82,9 @@ describe('serializeSpecDetail', () => {
     );
 
     expect(detail).toMatchObject({
+      availability: expect.objectContaining({
+        enabled: expect.any(Boolean),
+      }),
       skill: 'Use listThings to search.',
       formSchema: expect.objectContaining({
         properties: expect.objectContaining({
