@@ -74,6 +74,7 @@ export const prepareConversation = async ({
   context,
   metadata,
   templateId,
+  includeAttachmentTypes = true,
 }: {
   /** The conversation's normalized context timeline (see `eventsForContext`). */
   timeline: ContextTimelineEvent[];
@@ -82,6 +83,11 @@ export const prepareConversation = async ({
   context: AgentHandlerContext;
   metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
+  /**
+   * Whether to describe the attachment types in the user messages. An agent without attachment
+   * tools cannot act on the descriptions, so it leaves them out.
+   */
+  includeAttachmentTypes?: boolean;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const resolveContext: AttachmentResolveContext = {
@@ -191,14 +197,16 @@ export const prepareConversation = async ({
   ];
 
   const attachmentTypes = await Promise.all(
-    attachmentTypeIds.map<Promise<ProcessedAttachmentType>>(async (type) => {
-      const definition = attachmentsService.getTypeDefinition(type);
-      const description = definition?.getAgentDescription?.() ?? undefined;
-      return {
-        type,
-        description,
-      };
-    })
+    (includeAttachmentTypes ? attachmentTypeIds : []).map<Promise<ProcessedAttachmentType>>(
+      async (type) => {
+        const definition = attachmentsService.getTypeDefinition(type);
+        const description = definition?.getAgentDescription?.() ?? undefined;
+        return {
+          type,
+          description,
+        };
+      }
+    )
   );
 
   return {

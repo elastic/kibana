@@ -231,6 +231,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
+    includeAttachmentTypes: !agentConfiguration.disable_internal_tools,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   // Everything in the log at this point came from the incoming message's attachments; anything

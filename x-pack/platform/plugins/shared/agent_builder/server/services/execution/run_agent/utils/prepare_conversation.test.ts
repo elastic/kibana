@@ -259,6 +259,34 @@ describe('prepareConversation', () => {
       ]);
     });
 
+    it('leaves the attachment types out when includeAttachmentTypes is false', async () => {
+      mockContext.attachmentStateManager = createAttachmentStateManager([], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true as const, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+      mockAttachmentsService.getTypeDefinition.mockReturnValue({
+        id: 'text',
+        validate: jest.fn(),
+        format: jest.fn(),
+        getAgentDescription: () => 'A text attachment type',
+      });
+
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'I uploaded a note',
+          attachments: [{ id: 'note-1', type: 'text', data: { content: 'hello' } }],
+        },
+        context: mockContext,
+        includeAttachmentTypes: false,
+      });
+
+      expect(result.attachmentTypes).toEqual([]);
+    });
+
     it('treats same ID as a new version of an existing attachment and sets an updated attachment_ref', async () => {
       const existing: VersionedAttachment = {
         id: 'a-1',
