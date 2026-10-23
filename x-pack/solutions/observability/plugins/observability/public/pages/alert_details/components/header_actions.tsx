@@ -218,7 +218,7 @@ export function HeaderActions({
             <AiButton
               variant="outlined"
               size="m"
-              iconType="sparkles"
+              iconType="inspect"
               isLoading={isStarting}
               disabled={isStarting}
               aria-busy={isStarting}
