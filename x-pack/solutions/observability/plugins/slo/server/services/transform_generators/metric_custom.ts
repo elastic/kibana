@@ -6,11 +6,7 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  is,
-  metricCustomIndicatorSchemaZod,
-  timeslicesBudgetingMethodSchemaZod,
-} from '@kbn/slo-schema';
+import { is, metricCustomIndicatorSchemaZod } from '@kbn/slo-schema';
 
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
@@ -95,7 +91,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
         type: 'total',
         aggregationKey: 'slo.denominator',
       }),
-      ...(is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'timeslices' && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {

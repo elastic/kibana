@@ -14,12 +14,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  ALL_VALUE,
-  is,
-  occurrencesBudgetingMethodSchemaZod,
-  timeslicesBudgetingMethodSchemaZod,
-} from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { DateRange, Duration, SLODefinition } from '../domain/models';
 import { computeBurnRate, computeSLI } from '../domain/services';
@@ -97,17 +92,18 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
     const result = await this.esClient.search<unknown, EsAggregations>({
       ...commonQuery(slo, instanceId, longestDateRange),
       index,
-      aggs: is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod)
-        ? toLookbackWindowsAggregationsQuery(
-            longestDateRange.to,
-            sortedLookbackWindows,
-            delayInSeconds
-          )
-        : toLookbackWindowsSlicedAggregationsQuery(
-            longestDateRange.to,
-            sortedLookbackWindows,
-            delayInSeconds
-          ),
+      aggs:
+        slo.budgetingMethod === 'occurrences'
+          ? toLookbackWindowsAggregationsQuery(
+              longestDateRange.to,
+              sortedLookbackWindows,
+              delayInSeconds
+            )
+          : toLookbackWindowsSlicedAggregationsQuery(
+              longestDateRange.to,
+              sortedLookbackWindows,
+              delayInSeconds
+            ),
     });
 
     return handleWindowedResult(result.aggregations, lookbackWindows, slo);
@@ -196,17 +192,18 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
 
       memberAggs[`member_${i}`] = {
         filter: { bool: { filter: filterClauses } },
-        aggs: is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod)
-          ? toLookbackWindowsAggregationsQuery(
-              longestDateRange.to,
-              sortedLookbackWindows,
-              delayInSeconds
-            )
-          : toLookbackWindowsSlicedAggregationsQuery(
-              longestDateRange.to,
-              sortedLookbackWindows,
-              delayInSeconds
-            ),
+        aggs:
+          slo.budgetingMethod === 'occurrences'
+            ? toLookbackWindowsAggregationsQuery(
+                longestDateRange.to,
+                sortedLookbackWindows,
+                delayInSeconds
+              )
+            : toLookbackWindowsSlicedAggregationsQuery(
+                longestDateRange.to,
+                sortedLookbackWindows,
+                delayInSeconds
+              ),
       };
     }
 
@@ -250,17 +247,18 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
         { index },
         {
           ...commonQuery(slo, instanceId, longestDateRange),
-          aggs: is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod)
-            ? toLookbackWindowsAggregationsQuery(
-                longestDateRange.to,
-                sortedLookbackWindows,
-                delayInSeconds
-              )
-            : toLookbackWindowsSlicedAggregationsQuery(
-                longestDateRange.to,
-                sortedLookbackWindows,
-                delayInSeconds
-              ),
+          aggs:
+            slo.budgetingMethod === 'occurrences'
+              ? toLookbackWindowsAggregationsQuery(
+                  longestDateRange.to,
+                  sortedLookbackWindows,
+                  delayInSeconds
+                )
+              : toLookbackWindowsSlicedAggregationsQuery(
+                  longestDateRange.to,
+                  sortedLookbackWindows,
+                  delayInSeconds
+                ),
         },
       ]
     );
@@ -412,7 +410,7 @@ function handleWindowedResult(
     }
 
     let sliValue;
-    if (is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)) {
+    if (slo.budgetingMethod === 'timeslices') {
       const dateRange = {
         from: new Date(bucket.from_as_string!),
         to: new Date(bucket.to_as_string!),

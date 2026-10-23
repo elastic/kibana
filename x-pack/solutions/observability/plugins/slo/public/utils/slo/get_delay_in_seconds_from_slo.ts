@@ -6,12 +6,13 @@
  */
 
 import type { SLODefinitionResponse } from '@kbn/slo-schema';
-import { durationTypeZod, is, timeslicesBudgetingMethodSchemaZod } from '@kbn/slo-schema';
+import { durationTypeZod } from '@kbn/slo-schema';
 
 export function getDelayInSecondsFromSLO(slo: SLODefinitionResponse) {
-  const fixedInterval = is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)
-    ? durationStringToSeconds(slo.objective.timesliceWindow)
-    : 60;
+  const fixedInterval =
+    slo.budgetingMethod === 'timeslices'
+      ? durationStringToSeconds(slo.objective.timesliceWindow)
+      : 60;
   const syncDelay = durationStringToSeconds(slo.settings.syncDelay);
   const frequency = durationStringToSeconds(slo.settings.frequency);
   return fixedInterval + syncDelay + frequency;

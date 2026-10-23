@@ -19,12 +19,7 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import {
-  type SLOWithSummaryResponse,
-  is,
-  occurrencesBudgetingMethodSchemaZod,
-  rollingTimeWindowTypeSchemaZod,
-} from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
@@ -79,7 +74,7 @@ export function SettingsPanel({ slo }: Props) {
           })}
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          {is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod) ? (
+          {slo.budgetingMethod === 'occurrences' ? (
             <EuiText size="s">{BUDGETING_METHOD_OCCURRENCES}</EuiText>
           ) : (
             <EuiText size="s">
@@ -181,7 +176,7 @@ export function SettingsPanel({ slo }: Props) {
 }
 
 function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {
-  if (is(rollingTimeWindowTypeSchemaZod, timeWindow.type)) {
+  if (timeWindow.type === 'rolling') {
     return i18n.translate('xpack.slo.sloDetails.overview.rollingTimeWindow', {
       defaultMessage: '{duration} rolling',
       values: {

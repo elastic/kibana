@@ -11,7 +11,6 @@ import {
   timesliceMetricComparatorMapping,
   is,
   timesliceMetricIndicatorSchemaZod,
-  timeslicesBudgetingMethodSchemaZod,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
@@ -79,7 +78,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       throw new Error(`Invalid equation: ${indicator.params.metric.equation}`);
     }
 
-    if (!is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)) {
+    if (slo.budgetingMethod !== 'timeslices') {
       throw new Error('The sli.metric.timeslice indicator MUST have a timeslice budgeting method.');
     }
 

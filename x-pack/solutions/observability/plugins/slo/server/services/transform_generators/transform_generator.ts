@@ -10,7 +10,7 @@ import type {
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
-import { ALL_VALUE, is, timeslicesBudgetingMethodSchemaZod } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import type { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
 import type { SLODefinition } from '../../domain/models';
 import { getSloProjectRouting } from '../utils';
@@ -48,7 +48,7 @@ export abstract class TransformGenerator {
     extraGroupByFields = {}
   ) {
     let fixedInterval = '1m';
-    if (is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)) {
+    if (slo.budgetingMethod === 'timeslices') {
       fixedInterval = slo.objective.timesliceWindow!.format();
     }
 
