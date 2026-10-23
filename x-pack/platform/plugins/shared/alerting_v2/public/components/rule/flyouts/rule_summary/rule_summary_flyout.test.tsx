@@ -331,9 +331,7 @@ describe('RuleSummaryFlyout', () => {
       renderFlyout();
       openMenu();
 
-      expect(rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' }, undefined, [
-        'rule-1',
-      ]);
+      expect(rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
       expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
         'href',
         '/mock-locator-url'
@@ -345,11 +343,11 @@ describe('RuleSummaryFlyout', () => {
       openMenu();
 
       const { rulesLocators } = mockLocators;
-      const useUrlCall = jest
-        .mocked(rulesLocators.useUrl)
+      const redirectCall = jest
+        .mocked(rulesLocators.getRedirectUrl)
         .mock.calls.find(([p]) => p.ruleId === 'rule-1');
       const location = await AlertingV2RulesLocatorDefinition.getLocation({
-        ...useUrlCall![0],
+        ...redirectCall![0],
         host: TEST_HOST.rules,
       });
       expect(location).toMatchObject({
@@ -365,13 +363,9 @@ describe('RuleSummaryFlyout', () => {
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
-      expect(rulesLocators.useUrl).toHaveBeenCalledWith(
-        {
-          ruleId: 'rule with spaces/and slash',
-        },
-        undefined,
-        ['rule with spaces/and slash']
-      );
+      expect(rulesLocators.getRedirectUrl).toHaveBeenCalledWith({
+        ruleId: 'rule with spaces/and slash',
+      });
       expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
         'href',
         '/mock-locator-url'
@@ -385,11 +379,11 @@ describe('RuleSummaryFlyout', () => {
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
       const { rulesLocators } = mockLocators;
-      const useUrlCall = jest
-        .mocked(rulesLocators.useUrl)
+      const redirectCall = jest
+        .mocked(rulesLocators.getRedirectUrl)
         .mock.calls.find(([p]) => p.ruleId === 'rule with spaces/and slash');
       const location = await AlertingV2RulesLocatorDefinition.getLocation({
-        ...useUrlCall![0],
+        ...redirectCall![0],
         host: TEST_HOST.rules,
       });
       expect(location).toMatchObject({

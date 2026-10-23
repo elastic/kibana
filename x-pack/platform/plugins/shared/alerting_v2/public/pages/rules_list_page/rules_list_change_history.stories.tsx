@@ -11,8 +11,6 @@ import { action } from '@storybook/addon-actions';
 import { EuiCallOut, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { createMockChangeHistoryAdapter } from '@kbn/change-history-ui/mocks';
 import { i18n } from '@kbn/i18n';
-import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { MemoryRouter } from 'react-router-dom';
 import {
   AutoOpenChangeHistoryModal,
@@ -20,31 +18,12 @@ import {
   createRuleApiResponseFromHistoryFixtures,
   createRuleChangeHistoryFixtures,
 } from '../../components/rule/modals/change_history';
-import { LocatorProvider, type AlertingV2Locators } from '../../application/locator_context';
+import { LocatorProvider } from '../../application/locator_context';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { createStoryLocators } from '../../test_utils/story_locators';
 import { RulesListTable } from './rules_list_table';
 
-const createStoryLocator = <P extends SerializableRecord>(id: string): LocatorPublic<P> => ({
-  id,
-  getLocation: async () => ({ app: 'alerting', path: '/', state: {} }),
-  getUrl: async () => '#',
-  getRedirectUrl: () => '#',
-  navigate: async () => {},
-  navigateSync: action(`${id}.navigateSync`),
-  useUrl: () => '#',
-  telemetry: (state, stats) => stats,
-  inject: (state) => state,
-  extract: (state) => ({ state, references: [] }),
-  migrations: {},
-});
-
-const storyLocators: AlertingV2Locators = {
-  rulesLocators: createStoryLocator('rules'),
-  ruleLibraryLocators: createStoryLocator('ruleLibrary'),
-  episodesLocators: createStoryLocator('episodes'),
-  actionPolicyLocators: createStoryLocator('actionPolicies'),
-  executionHistoryLocators: createStoryLocator('executionHistory'),
-};
+const storyLocators = createStoryLocators(action);
 
 const BAD_WEATHER_ID = 'rule-bad-weather';
 const QUIET_SKIES_ID = 'rule-quiet-skies';

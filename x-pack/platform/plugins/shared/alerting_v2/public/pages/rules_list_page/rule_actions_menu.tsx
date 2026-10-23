@@ -29,20 +29,18 @@ interface ViewRuleDetailsItemProps {
 }
 
 /**
- * Mounted only while the menu is open, so the details URL resolves lazily. Plain left clicks
- * navigate in-app through the locator; modified clicks fall through to the href.
+ * Mounted only while the menu is open. `getRedirectUrl` is synchronous, so the item is a
+ * link on first paint. Plain left clicks navigate in-app; modified clicks use the href.
  */
 const ViewRuleDetailsItem = ({ ruleId, onClose }: ViewRuleDetailsItemProps) => {
   const { rulesLocators } = useAlertingLocators();
-  const url = rulesLocators.useUrl({ ruleId }, undefined, [ruleId]);
   const { href, onClick } = getRouterLinkProps({
-    href: url || undefined,
+    href: rulesLocators.getRedirectUrl({ ruleId }),
     onClick: () => rulesLocators.navigateSync({ ruleId }),
   });
 
   return (
     <EuiContextMenuItem
-      role="menuitem"
       icon={<EuiIcon type="eye" size="m" aria-hidden={true} />}
       href={href}
       onClick={(event) => {

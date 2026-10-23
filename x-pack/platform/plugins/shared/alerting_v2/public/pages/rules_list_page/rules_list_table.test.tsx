@@ -655,9 +655,7 @@ describe('RulesListTable', () => {
 
       const viewDetails = await screen.findByTestId('viewRuleDetails-rule-1');
       expect(viewDetails).toHaveAttribute('href', '/mock-locator-url');
-      expect(rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' }, undefined, [
-        'rule-1',
-      ]);
+      expect(rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
 
       fireEvent.click(viewDetails);
 
@@ -672,7 +670,7 @@ describe('RulesListTable', () => {
         locators: { rulesLocators },
       } = renderTable();
 
-      expect(rulesLocators.useUrl).not.toHaveBeenCalled();
+      expect(rulesLocators.getRedirectUrl).not.toHaveBeenCalled();
     });
 
     it('does not render an expand button', () => {

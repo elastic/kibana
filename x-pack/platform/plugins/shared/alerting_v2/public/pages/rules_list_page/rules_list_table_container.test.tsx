@@ -240,9 +240,7 @@ describe('RulesListTableContainer', () => {
       const viewDetails = await screen.findByTestId('viewRuleDetails-rule-1');
 
       expect(viewDetails).toHaveAttribute('href', '/mock-locator-url');
-      expect(locators.rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' }, undefined, [
-        'rule-1',
-      ]);
+      expect(locators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
       expect(screen.queryByTestId('ruleSummaryFlyout')).not.toBeInTheDocument();
       expect(locators.rulesLocators.navigateSync).not.toHaveBeenCalled();
 
