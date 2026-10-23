@@ -15,6 +15,9 @@ import { WorkflowRunFixture } from '../workflow_run_fixture';
 describe('workflow with wait step', () => {
   let duration: string;
 
+  // A timer-based wait is not millisecond-exact against the wall clock measured here.
+  const TIMER_TOLERANCE_MS = 50;
+
   const buildYaml = () => {
     return `
 steps:
@@ -109,7 +112,7 @@ steps:
           'fake_workflow_execution_id'
         );
       // The configured wait must elapse.
-      expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(1999);
+      expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(2000 - TIMER_TOLERANCE_MS);
       expect(workflowExecutionDoc?.duration).toBeLessThan(10_000);
     });
 
@@ -129,9 +132,9 @@ steps:
       const waitStepEndTime = new Date(waitStepExecution!.finishedAt!).getTime();
       const lastStepStartTime = new Date(lastStepExecution!.startedAt).getTime();
 
-      // Wait step execution time should be at least 2s
+      // Wait step execution time should be ~2s
       const waitStepExecutionTime = waitStepEndTime - waitStepStartTime;
-      expect(waitStepExecutionTime).toBeGreaterThanOrEqual(2000);
+      expect(waitStepExecutionTime).toBeGreaterThanOrEqual(2000 - TIMER_TOLERANCE_MS);
 
       // Last step should start after wait step completes
       expect(lastStepStartTime).toBeGreaterThanOrEqual(waitStepEndTime);
