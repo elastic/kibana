@@ -303,6 +303,49 @@ export class DatePicker {
     await this.refreshIntervalInput.waitFor({ state: 'visible' });
   }
 
+  async openCalendarPanel(): Promise<void> {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('openCalendarPanel is only supported by the new DateRangePicker');
+    }
+
+    await this.ensurePickerVisible();
+
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+    await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor({ state: 'visible' });
+
+    await this.page.testSubj.locator('dateRangePickerCalendarNavItem').getByRole('button').click();
+
+    await this.page.testSubj.locator('dateRangePickerCalendarPanel').waitFor({ state: 'visible' });
+  }
+
+  private getCalendarMonth(monthLabel: string): Locator {
+    return this.page.testSubj
+      .locator('dateRangePickerCalendarScroller')
+      .getByRole('grid', { name: monthLabel });
+  }
+
+  getCalendarWeekdayHeaders(monthLabel: string): Locator {
+    return this.getCalendarMonth(monthLabel).getByRole('columnheader', {
+      includeHidden: true,
+    });
+  }
+
+  getCalendarDay(monthLabel: string, day: number): Locator {
+    return this.getCalendarMonth(monthLabel)
+      .getByRole('button')
+      .filter({ hasText: new RegExp(`^${day}$`) });
+  }
+
+  async selectCalendarDay(monthLabel: string, day: number): Promise<void> {
+    await this.getCalendarDay(monthLabel, day).click();
+  }
+
+  async applyCalendarSelection(): Promise<void> {
+    await this.page.testSubj.locator('dateRangePickerCalendarApplyButton').click();
+
+    await this.page.testSubj.locator('dateRangePickerPopoverPanel').waitFor({ state: 'hidden' });
+  }
+
   // ---------------------------------------------------------------------------
   // Public API (dual-path)
   // ---------------------------------------------------------------------------
