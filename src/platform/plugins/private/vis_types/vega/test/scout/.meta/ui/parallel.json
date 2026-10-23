@@ -1,5 +1,5 @@
 {
-  "sha1": "bef70956d356b5ddfd44525a7f8ee3fe43dae742",
+  "sha1": "5051bf8c2c89bb422b9a204323d7fd4224cf718e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -87,21 +87,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 45,
-        "column": 40
-      }
-    },
-    {
-      "id": "7b072b0731322c3-ff733218948dadc",
-      "title": "Vega library editor saves a copy and leaves the original unchanged",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 67,
-        "column": 19
+        "line": 35,
+        "column": 59
       }
     },
     {
@@ -113,8 +100,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 78,
-        "column": 94
+        "line": 61,
+        "column": 19
       }
     },
     {
@@ -126,13 +113,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 103,
-        "column": 4
+        "line": 75,
+        "column": 21
       }
     },
     {
-      "id": "824a1c0d9b29284-17918192e7921d8",
-      "title": "Disable the Vega feature flags",
+      "id": "824a1c0d9b29284-e20f893877d4a0a",
+      "title": "Reset the Vega feature flags",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
