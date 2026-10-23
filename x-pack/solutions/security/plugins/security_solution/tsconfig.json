@@ -8,9 +8,6 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "test/scout/**/*",
-    "test/scout_es_max_response_size/**/*",
-    "test/scout_security_attacks_alignment/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -18,7 +15,7 @@
     "public/**/*.json",
     "../../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": ["target/**/*", "test/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/setup-node-env",
     "@kbn/core",
@@ -238,7 +235,6 @@
     "@kbn/security-ai-prompts",
     "@kbn/inference-common",
     "@kbn/inference-langchain",
-    "@kbn/scout-security",
     "@kbn/custom-icons",
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
