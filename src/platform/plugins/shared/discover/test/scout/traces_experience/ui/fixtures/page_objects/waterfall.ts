@@ -38,9 +38,11 @@ export function createWaterfall(page: ScoutPage): Waterfall {
   return {
     container,
     sizeWarning: page.testSubj.locator('waterfallSizeWarning'),
-    sizeWarningDiscoverLink: page
-      .locator('.euiCallOutHeader__title')
-      .locator('[data-test-subj="waterfallSizeWarningDiscoverLink"]'),
+    // The call out announces on mount, which renders an off-screen copy of its content under a
+    // `role="status"` live region. Exclude that copy so the link resolves to one element.
+    sizeWarningDiscoverLink: page.locator(
+      '[data-test-subj="waterfallSizeWarningDiscoverLink"]:not([role="status"] *)'
+    ),
     getItem(name: string): WaterfallItem {
       return getWaterfallItem(container, name);
     },
