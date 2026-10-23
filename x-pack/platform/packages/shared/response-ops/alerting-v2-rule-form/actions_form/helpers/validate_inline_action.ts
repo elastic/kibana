@@ -16,7 +16,7 @@ export interface InlineActionErrors {
 }
 
 const connectorRequired = (): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.connectorRequired', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.connectorRequired', {
     defaultMessage: 'Select a connector.',
   });
 

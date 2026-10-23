@@ -23,6 +23,9 @@ jest.mock('../../data/maintenance/use_significant_events_maintenance');
 jest.mock('./events/events_tab', () => ({
   EventsTab: () => <div data-test-subj="eventsTabStub" />,
 }));
+jest.mock('./rules/rules_tab', () => ({
+  RulesTab: () => <div data-test-subj="rulesTabStub" />,
+}));
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
@@ -37,12 +40,12 @@ const mockUseDetectionOverview = useDetectionOverview as jest.Mock;
 const mockUseMaintenanceStatus = useMaintenanceStatus as jest.Mock;
 const refetch = jest.fn();
 
-const renderPage = (initialPath = '/detections/events') =>
+const renderPage = (initialPath = '/detections/events', tab: 'events' | 'rules' = 'events') =>
   render(
     <I18nProvider>
       <EuiProvider>
         <Router history={createMemoryHistory({ initialEntries: [initialPath] })}>
-          <DetectionPage headerProps={{}} tab="events" />
+          <DetectionPage headerProps={{}} tab={tab} />
         </Router>
       </EuiProvider>
     </I18nProvider>
@@ -68,6 +71,15 @@ describe('DetectionPage', () => {
       isError: false,
       refetch,
     });
+  });
+
+  it('shows the Rules tab on the rules route', async () => {
+    renderPage('/detections/rules', 'rules');
+    expect(await screen.findByTestId('rulesTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionTab-rules')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   it('shows the paused detection process status', async () => {

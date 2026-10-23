@@ -15,31 +15,31 @@ export interface ParsedInlineParams {
 }
 
 const invalidYaml = (reason: string): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.invalidYaml', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.invalidYaml', {
     defaultMessage: 'Invalid YAML: {reason}',
     values: { reason },
   });
 
 const paramsNotAMap = (): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.paramsNotAMap', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.paramsNotAMap', {
     defaultMessage: 'Parameters must be a YAML map of field names to values.',
   });
 
 const fieldRequired = (field: string): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldRequired', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.fieldRequired', {
     defaultMessage: "''{field}'' is required.",
     values: { field },
   });
 
 const fieldMustBeString = (field: string): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldMustBeString', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.fieldMustBeString', {
     defaultMessage: "''{field}'' must be a string.",
     values: { field },
   });
 
 const fieldMustBeStringList = (field: string): string =>
   i18n.translate(
-    'xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldMustBeStringList',
+    'xpack.alertingV2.alertingV2RuleForm.actionForm.validation.fieldMustBeStringList',
     {
       defaultMessage: "''{field}'' must be a list of strings.",
       values: { field },
@@ -48,7 +48,7 @@ const fieldMustBeStringList = (field: string): string =>
 
 const fieldMustNotContainEmptyValues = (field: string): string =>
   i18n.translate(
-    'xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldMustNotContainEmptyValues',
+    'xpack.alertingV2.alertingV2RuleForm.actionForm.validation.fieldMustNotContainEmptyValues',
     {
       defaultMessage: "''{field}'' must not contain empty values.",
       values: { field },
@@ -56,7 +56,7 @@ const fieldMustNotContainEmptyValues = (field: string): string =>
   );
 
 const unknownFields = (fields: string[]): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.unknownFields', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.unknownFields', {
     defaultMessage:
       '{count, plural, one {Unknown field: {fields}.} other {Unknown fields: {fields}.}}',
     values: { count: fields.length, fields: fields.map((field) => `'${field}'`).join(', ') },
