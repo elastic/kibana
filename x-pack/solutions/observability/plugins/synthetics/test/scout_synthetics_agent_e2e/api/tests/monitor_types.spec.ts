@@ -99,7 +99,8 @@ const assertBrowserJourneyStep = async (
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
  *   node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/playwright.config.ts
  */
-apiTest.describe(
+// Skipped until elastic-agent 9.7.0-SNAPSHOT is published: https://github.com/elastic/kibana/issues/300031
+apiTest.describe.skip(
   'Synthetics real-agent monitor types',
   { tag: ['@local-stateful-classic'] },
   () => {

@@ -14,11 +14,13 @@ import {
   useEuiMemoizedStyles,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import {
+  ApprovalActorTime,
   ApprovalModal,
+  type ApprovalActorTimeProps,
   getApprovalOutcomeBadge,
   getProposalCaption,
+  ProposalCaption,
   getProposalDecision,
   ProposedActionStatusBadge,
   type ApprovalPhase,
@@ -49,8 +51,20 @@ export interface ProposedActionButtonProps {
   isSubmitting?: 'applying' | 'declining';
   /** Who's approving/declining, for the modal's "Applying"/"Declining" caption. */
   currentActorName?: string;
+  /** Marks a to-do proposal that was marked as applied as not applied, from the modal. */
+  onReopen?: () => Promise<void>;
+  isReopening?: boolean;
   'data-test-subj'?: string;
 }
+
+const ACTOR_OUTCOME_BY_STATUS: Partial<Record<ApprovalPhase, ApprovalActorTimeProps['outcome']>> = {
+  applied: 'approved',
+  applying: 'approved',
+  // A to-do proposal, marked as applied by the human who carried it out.
+  marked_applied: 'applied',
+  declined: 'declined',
+  failed: 'executed',
+};
 
 const PENDING_BADGE = {
   color: 'primary' as const,
@@ -131,6 +145,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     onDismiss,
     isSubmitting,
     currentActorName,
+    onReopen,
+    isReopening,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -143,36 +159,27 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
 
-    const pendingCaption = getProposalCaption(proposal);
+    const pendingCaption = getProposalCaption(proposal) && <ProposalCaption proposal={proposal} />;
 
     // A decision with no `actorName` is a terminal state nobody actually decided (expired,
     // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds
-    // "by {name}" when there is a real actor to name.
-    const caption = decision?.actorName ? (
-      decision.decidedAt ? (
-        <FormattedMessage
-          id="xpack.alertzero.detailsFlyout.proposedAction.decidedByCaption"
-          defaultMessage="{approvalType} by {name} at {time}"
-          values={{
-            approvalType: badge.label,
-            name: decision.actorName,
-            time: <FormattedTime value={decision.decidedAt} />,
-          }}
+    // "by {name}" when there is a real actor to name. Only the outcomes below read naturally with
+    // one; any other status (an expired proposal that has an actor, say) keeps the badge label.
+    const actorOutcome = decision ? ACTOR_OUTCOME_BY_STATUS[decision.status] : undefined;
+    const caption =
+      decision?.actorName && actorOutcome ? (
+        <ApprovalActorTime
+          actorName={decision.actorName}
+          at={decision.decidedAt}
+          outcome={actorOutcome}
         />
+      ) : decision ? (
+        badge.label
+      ) : pendingCaption ? (
+        pendingCaption
       ) : (
-        <FormattedMessage
-          id="xpack.alertzero.detailsFlyout.proposedAction.decidedByCaptionWithoutTime"
-          defaultMessage="{approvalType} by {name}"
-          values={{ approvalType: badge.label, name: decision.actorName }}
-        />
-      )
-    ) : decision ? (
-      badge.label
-    ) : pendingCaption ? (
-      pendingCaption
-    ) : (
-      getEmptyValue()
-    );
+        getEmptyValue()
+      );
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
     const isTitleTruncated = useIsTextTruncated(titleElement, proposal.title);
@@ -234,6 +241,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             onDismiss={onDismiss}
             isSubmitting={isSubmitting}
             currentActorName={currentActorName}
+            onReopen={onReopen}
+            isReopening={isReopening}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}

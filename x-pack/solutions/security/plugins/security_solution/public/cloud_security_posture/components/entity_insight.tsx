@@ -42,6 +42,7 @@ export const EntityInsight = <T,>({
   openDetailsPanel,
   entityType,
   entityRecord,
+  aliasRecords,
   hideHeaderIcons,
   scopeId,
 }: {
@@ -51,11 +52,16 @@ export const EntityInsight = <T,>({
   /** Host or user when the flyout represents that entity; enables v2 alerts resolution by `entity.id`. */
   entityType?: string;
   entityRecord?: EntityStoreRecord | null;
+  /**
+   * Resolution-group aliases of `entityRecord` (empty outside the group view). Alerts, misconfigurations
+   * and vulnerabilities are then counted across the whole group.
+   */
+  aliasRecords?: readonly EntityStoreRecord[];
   /** When true, hides the chevron icons in the section headers. Used by the v2 flyout. */
   hideHeaderIcons?: boolean;
   /**
    * Scope ID of the table or panel that opened this flyout. When the scope has
-   * a registered time-range override in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES}
+   * a registered time-range override in {@link getScopeFlyoutTimeRange}
    * that window is used for the alerts query instead of the global time range.
    */
   scopeId?: string;
@@ -72,12 +78,14 @@ export const EntityInsight = <T,>({
   } = useHasMisconfigurations(
     buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
       legacyIdentityFields: identityFields,
+      aliasRecords,
     })
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
     buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
       legacyIdentityFields: identityFields,
+      aliasRecords,
     })
   );
 
@@ -89,6 +97,7 @@ export const EntityInsight = <T,>({
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
     identityFields,
     entityRecord,
+    aliasRecords,
     entityType,
     to,
     from,
@@ -127,6 +136,7 @@ export const EntityInsight = <T,>({
         <VulnerabilitiesPreview
           identityFields={identityFields}
           entityRecord={entityRecord}
+          aliasRecords={aliasRecords}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
           hideHeaderIcons={hideHeaderIcons}

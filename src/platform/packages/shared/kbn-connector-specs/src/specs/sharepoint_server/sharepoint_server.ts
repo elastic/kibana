@@ -43,7 +43,7 @@ export const SharepointServer: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-server',
     displayName: 'SharePoint Server',
-    description: i18n.translate('core.kibanaConnectorSpecs.sharepointServer.metadata.description', {
+    description: i18n.translate('connectorSpecs.sharepointServer.metadata.description', {
       defaultMessage:
         'Connect to SharePoint Server (on-premises) to search and retrieve site content.',
     }),
@@ -302,7 +302,7 @@ export const SharepointServer: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.sharepointServer.test.description', {
+    description: i18n.translate('connectorSpecs.sharepointServer.test.description', {
       defaultMessage: 'Verifies SharePoint Server connection by fetching the site title.',
     }),
     handler: async (ctx) => {

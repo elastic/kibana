@@ -30,7 +30,10 @@ import {
 import type { LensProps } from './types';
 import { isOpenLensActionCompatible, OpenLensButton } from './open_lens_button';
 import { LensRenderer } from './lens_renderer';
-import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
+import {
+  SavedObjectAddedEvent,
+  getSavedObjectDeletedEvent,
+} from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 
 type LensViewProps = UnifiedHybridAttachmentViewProps<
@@ -140,8 +143,17 @@ export const getVisualizationAttachmentType = () =>
     getIcon: () => 'lensApp',
     getLabel: () => i18n.VISUALIZATIONS,
     getCreationActivity: getVisualizationCreationActivity,
-    getRemovalActivity: () => ({ event: i18n.REMOVED_VISUALIZATION }),
+    getRemovalActivity: ({ attachmentId, metadata }: LensViewProps) => ({
+      event: getSavedObjectDeletedEvent({
+        soType: LENS_SO_TYPE,
+        attachmentId,
+        title: metadata?.title,
+        label: i18n.REMOVED_VISUALIZATION,
+        'data-test-subj': 'cases-lens-deleted-event-link',
+      }),
+    }),
     getAttachmentList: () => ({ children: LensAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.VISUALIZATIONS_COUNT(count),
     schema: LensAttachmentPayloadSchema,
     // Workflow authors reference a lens visualization by SO id; the by-value
     // `data.state` arm and the optional `data` snapshot are embeddable bags they

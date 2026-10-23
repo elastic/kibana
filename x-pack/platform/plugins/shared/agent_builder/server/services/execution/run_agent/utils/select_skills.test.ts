@@ -8,6 +8,7 @@
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { createSkillsServiceMock, createSkillsStoreMock } from '../../../../test_utils/runner';
+import { kiRetrievalSkillId } from '@kbn/agent-builder-common';
 import { selectSkills } from './select_skills';
 
 const createSkill = (id: string, readonly = false): InternalSkillDefinition => ({
@@ -267,6 +268,83 @@ describe('selectSkills', () => {
       // bulkGet called once for skill_ids, but NOT a second time for empty additionalSkillIds
       expect(skills.bulkGet).toHaveBeenCalledTimes(1);
       expect(skills.bulkGet).toHaveBeenCalledWith(['custom-1']);
+    });
+  });
+  describe('built-in capability skills', () => {
+    const kiRetrievalSkill = createSkill(kiRetrievalSkillId, true);
+
+    it('grants ki-retrieval when the agent has at least one AI Index', async () => {
+      const skills = createSkillsServiceMock();
+      skills.bulkGet.mockResolvedValue(new Map([[kiRetrievalSkillId, kiRetrievalSkill]]));
+      const skillsStore = createSkillsStoreMock();
+
+      const result = await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig({ ai_indices: ['elastic'] }),
+      });
+
+      expect(skills.bulkGet).toHaveBeenCalledWith([kiRetrievalSkillId]);
+      expect(result).toEqual([kiRetrievalSkill]);
+      expect(skillsStore.add).toHaveBeenCalledWith(kiRetrievalSkill);
+    });
+
+    it('does not grant ki-retrieval when the agent has no AI Index', async () => {
+      const skills = createSkillsServiceMock();
+      const skillsStore = createSkillsStoreMock();
+
+      const result = await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig({ ai_indices: [] }),
+      });
+
+      expect(skills.bulkGet).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
+
+    it('appends capability skills after the agent and plugin skills, without duplicates', async () => {
+      const customSkill = createSkill('custom-1');
+      const pluginSkill = createSkill('plugin-1');
+      const skills = createSkillsServiceMock();
+      // The registry returns skills in the order they were requested.
+      skills.bulkGet.mockResolvedValue(
+        new Map([
+          ['custom-1', customSkill],
+          [kiRetrievalSkillId, kiRetrievalSkill],
+          ['plugin-1', pluginSkill],
+        ])
+      );
+      const skillsStore = createSkillsStoreMock();
+
+      const result = await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig({
+          skill_ids: ['custom-1', kiRetrievalSkillId],
+          ai_indices: ['elastic'],
+        }),
+        additionalSkillIds: ['plugin-1'],
+      });
+
+      expect(skills.bulkGet).toHaveBeenCalledWith(['custom-1', kiRetrievalSkillId, 'plugin-1']);
+      expect(result.map((s) => s.id)).toEqual(['custom-1', kiRetrievalSkillId, 'plugin-1']);
+    });
+
+    it('grants nothing when the registry does not return the skill (Context Engine off in this space)', async () => {
+      const skills = createSkillsServiceMock();
+      skills.bulkGet.mockResolvedValue(new Map());
+      const skillsStore = createSkillsStoreMock();
+
+      const result = await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig({ ai_indices: ['elastic'] }),
+      });
+
+      expect(skills.bulkGet).toHaveBeenCalledWith([kiRetrievalSkillId]);
+      expect(result).toEqual([]);
+      expect(skillsStore.add).not.toHaveBeenCalled();
     });
   });
 });

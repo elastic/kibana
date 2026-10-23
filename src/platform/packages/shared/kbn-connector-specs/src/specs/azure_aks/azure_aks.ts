@@ -232,7 +232,7 @@ export const AzureAks: ConnectorSpec = {
   metadata: {
     id: '.azure_aks',
     displayName: 'Azure Kubernetes Service (AKS)',
-    description: i18n.translate('core.kibanaConnectorSpecs.azureAks.metadata.description', {
+    description: i18n.translate('connectorSpecs.azureAks.metadata.description', {
       defaultMessage: 'List, inspect, and manage Azure Kubernetes Service clusters and node pools',
     }),
     minimumLicense: 'enterprise',
@@ -252,26 +252,19 @@ export const AzureAks: ConnectorSpec = {
           meta: {
             scope: { hidden: true },
             tokenUrl: {
-              label: i18n.translate('core.kibanaConnectorSpecs.azureAks.auth.tokenUrl.label', {
+              label: i18n.translate('connectorSpecs.azureAks.auth.tokenUrl.label', {
                 defaultMessage: 'Token URL',
               }),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.azureAks.auth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    "Replace '{tenantId}' with your Azure AD tenant ID. The app registration must have at least the 'Azure Kubernetes Service Cluster User Role' on each cluster, and 'Azure Kubernetes Service Contributor Role' for scale/stop/start/run-command actions.",
-                  values: { tenantId: '{tenant-id}' },
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.azureAks.auth.tokenUrl.helpText', {
+                defaultMessage:
+                  "Replace '{tenant-id}' with your Azure AD tenant ID. The app registration must have at least the 'Azure Kubernetes Service Cluster User Role' on each cluster, and 'Azure Kubernetes Service Contributor Role' for scale/stop/start/run-command actions.",
+              }),
             },
             clientId: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.azureAks.auth.clientId.helpText',
-                {
-                  defaultMessage: 'The Application (client) ID of the Azure AD app registration.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.azureAks.auth.clientId.helpText', {
+                defaultMessage: 'The Application (client) ID of the Azure AD app registration.',
+              }),
             },
           },
         },
@@ -290,23 +283,20 @@ export const AzureAks: ConnectorSpec = {
         )
         .optional()
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.azureAks.config.subscriptionId', {
+          i18n.translate('connectorSpecs.azureAks.config.subscriptionId', {
             defaultMessage: 'Azure subscription ID (optional — required for most actions)',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.azureAks.config.subscriptionId.label', {
+          label: i18n.translate('connectorSpecs.azureAks.config.subscriptionId.label', {
             defaultMessage: 'Subscription ID',
           }),
           placeholder: '00000000-0000-0000-0000-000000000000',
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.azureAks.config.subscriptionId.helpText',
-            {
-              defaultMessage:
-                'The Azure subscription that contains your AKS clusters. Every action except listSubscriptions needs a subscription ID, either configured here or passed in as "subscriptionId" on the individual call.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.azureAks.config.subscriptionId.helpText', {
+            defaultMessage:
+              'The Azure subscription that contains your AKS clusters. Every action except listSubscriptions needs a subscription ID, either configured here or passed in as "subscriptionId" on the individual call.',
+          }),
         }),
     })
   ),
@@ -654,7 +644,7 @@ export const AzureAks: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.azureAks.test.description', {
+    description: i18n.translate('connectorSpecs.azureAks.test.description', {
       defaultMessage: 'Verifies Azure connectivity by listing accessible subscriptions',
     }),
     handler: async (ctx) => {

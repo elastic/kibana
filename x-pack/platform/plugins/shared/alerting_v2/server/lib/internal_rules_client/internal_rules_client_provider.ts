@@ -15,7 +15,7 @@ import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../types';
-import { EventOriginToken } from '../event_origin/token';
+import { EventOriginActorToken } from '../event_origin/token';
 import { RulesClient } from '../rules_client';
 import {
   LoggerServiceToken,
@@ -58,8 +58,8 @@ export class InternalRulesClientProvider {
       scope.bind(Global).toConstantValue(Request);
       scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
       scope.bind(Global).toConstantValue(RequestSpaceIdToken);
-      scope.bind(EventOriginToken).toConstantValue('internal');
-      scope.bind(Global).toConstantValue(EventOriginToken);
+      scope.bind(EventOriginActorToken).toConstantValue('internal');
+      scope.bind(Global).toConstantValue(EventOriginActorToken);
 
       const namespace = spaceIdToNamespace(this.spaces, spaceId);
       scope
