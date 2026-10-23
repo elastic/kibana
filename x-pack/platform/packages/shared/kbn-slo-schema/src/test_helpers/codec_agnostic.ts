@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { is as isDecodedForm } from '../schema/zod/guards';
+import { is as isDecodedForm } from '../schema/guards';
 
 export type DecodeOutcome<T> = { success: true; value: T } | { success: false; errors: unknown };
 

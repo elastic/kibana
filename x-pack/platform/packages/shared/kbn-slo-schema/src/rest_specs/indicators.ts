@@ -22,7 +22,7 @@ import type {
   timesliceMetricDocCountMetric,
   timesliceMetricIndicatorSchema,
   timesliceMetricPercentileMetric,
-} from '../schema/zod';
+} from '../schema';
 
 type IndicatorType = z.input<typeof indicatorTypesSchema>;
 type Indicator = z.input<typeof indicatorSchema>;

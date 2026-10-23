@@ -12,7 +12,7 @@ import type {
   objectiveSchema,
   statusSchema,
   timeWindowTypeSchema,
-} from '../schema/zod';
+} from '../schema';
 
 type BudgetingMethod = z.input<typeof budgetingMethodSchema>;
 type TimeWindowType = z.input<typeof timeWindowTypeSchema>;

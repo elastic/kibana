@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+export * from './common';
+export * from './duration';
+export * from './guards';
+export * from './health';
+export * from './indicators';
+export * from './settings';
+export * from './slo';
+export * from './slo_template';
+export * from './time_window';
 export * from './composite_slo';
 export * from './composite_slo_summary_index';
 
 export { ALL_VALUE, SLO_GROUPINGS_PREFIX, SLO_STATUS } from '../constants';
-export type { SLOStatus, TransformHealthResponse } from './zod';
-export { timesliceMetricComparatorMapping } from './zod';
 
 // Zod schemas, exported with a temporary `…Zod` suffix that is dropped in a
 // follow-up commit of the zod migration.
 export {
-  // common
   allOrAnyString as allOrAnyStringZod,
   allOrAnyStringOrArray as allOrAnyStringOrArrayZod,
   dateRangeSchema as dateRangeSchemaZod,
@@ -27,9 +33,9 @@ export {
   metaSchema as metaSchemaZod,
   groupSummarySchema as groupSummarySchemaZod,
   remoteSchema as remoteSchemaZod,
-  // duration
-  durationType as durationTypeZod,
-  // indicators
+} from './common';
+export { durationType as durationTypeZod } from './duration';
+export {
   kqlQuerySchema as kqlQuerySchemaZod,
   kqlWithFiltersSchema as kqlWithFiltersSchemaZod,
   querySchema as querySchemaZod,
@@ -57,7 +63,8 @@ export {
   indicatorSchema as indicatorSchemaZod,
   indicatorTypesArraySchema as indicatorTypesArraySchemaZod,
   indicatorTypesSchema as indicatorTypesSchemaZod,
-  // slo
+} from './indicators';
+export {
   boundedProjectRoutingSchema as boundedProjectRoutingSchemaZod,
   budgetingMethodSchema as budgetingMethodSchemaZod,
   dashboardsWithIdSchema as dashboardsWithIdSchemaZod,
@@ -72,24 +79,25 @@ export {
   tagsSchema as tagsSchemaZod,
   targetSchema as targetSchemaZod,
   timeslicesBudgetingMethodSchema as timeslicesBudgetingMethodSchemaZod,
-  // time_window
+} from './slo';
+export {
   rollingTimeWindowSchema as rollingTimeWindowSchemaZod,
   rollingTimeWindowTypeSchema as rollingTimeWindowTypeSchemaZod,
   calendarAlignedTimeWindowSchema as calendarAlignedTimeWindowSchemaZod,
   calendarAlignedTimeWindowTypeSchema as calendarAlignedTimeWindowTypeSchemaZod,
   timeWindowSchema as timeWindowSchemaZod,
   timeWindowTypeSchema as timeWindowTypeSchemaZod,
-  // settings
+} from './time_window';
+export {
   serverlessSloSettingsSchema as serverlessSloSettingsSchemaZod,
   sloSettingsSchema as sloSettingsSchemaZod,
   storedSloSettingsSchema as storedSloSettingsSchemaZod,
-  // health
+} from './settings';
+export {
   sloHealthSchema as sloHealthSchemaZod,
   transformHealthSchema as transformHealthSchemaZod,
-  // slo_template
+} from './health';
+export {
   sloTemplateSchema as sloTemplateSchemaZod,
   storedSloTemplateSchema as storedSloTemplateSchemaZod,
-} from './zod';
-
-// Unsuffixed: a helper.
-export { is } from './zod';
+} from './slo_template';

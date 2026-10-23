@@ -22,18 +22,16 @@ import {
 } from '../test_helpers/fixtures';
 import type { DecodeOutcome } from '../test_helpers/codec_agnostic';
 import { decode, encode, is } from '../test_helpers/codec_agnostic';
+import { dateType } from './common';
+import { durationType } from './duration';
+import { indicatorSchema, indicatorTypesArraySchema } from './indicators';
 import {
   boundedProjectRoutingSchema,
-  dateType,
-  durationType,
-  indicatorSchema,
-  indicatorTypesArraySchema,
-  rollingTimeWindowSchema,
   sloDefinitionSchema,
   sloIdSchema,
   storedSloDefinitionSchema,
-  timeWindowSchema,
-} from './zod';
+} from './slo';
+import { rollingTimeWindowSchema, timeWindowSchema } from './time_window';
 
 /** A codec bound to the codec-agnostic helpers. */
 interface CodecUnderTest<A> {

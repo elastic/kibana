@@ -10,7 +10,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import { Duration, DurationUnit } from '../../models/duration';
+import { Duration, DurationUnit } from '../models/duration';
 import {
   allWireIndicators,
   apmTransactionDurationIndicator,
@@ -20,7 +20,7 @@ import {
   metricCustomIndicator,
   syntheticsAvailabilityIndicator,
   timesliceMetricIndicator,
-} from '../../test_helpers/fixtures';
+} from '../test_helpers/fixtures';
 import { is } from './guards';
 import {
   apmTransactionDurationIndicatorSchema,

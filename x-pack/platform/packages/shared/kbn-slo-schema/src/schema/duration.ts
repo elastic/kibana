@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 
-import { Duration } from '../../models/duration';
+import { Duration } from '../models/duration';
 import { MAX_DURATION_STRING_LENGTH } from './limits';
 
 /**
