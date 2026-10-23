@@ -31,6 +31,7 @@ import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { context as otelContext, ROOT_CONTEXT } from '@opentelemetry/api';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { BeforeAgentWorkflowOutput } from './types';
@@ -225,15 +226,17 @@ export async function runBeforeAgentWorkflows({
       request: context.request,
       logger,
     });
-    const result = await executeWorkflow({
-      workflowId,
-      workflowParams,
-      request: context.request,
-      spaceId,
-      workflowApi,
-      waitForCompletion: true,
-      triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
-    });
+    const result = await otelContext.with(ROOT_CONTEXT, () =>
+      executeWorkflow({
+        workflowId,
+        workflowParams,
+        request: context.request,
+        spaceId,
+        workflowApi,
+        waitForCompletion: true,
+        triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
+      })
+    );
 
     if (!result.success) {
       throw createWorkflowExecutionError(result.error, { workflow: workflowId });

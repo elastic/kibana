@@ -183,7 +183,7 @@ export const MongoDBConnector: ConnectorSpec = {
   metadata: {
     id: '.mongodb',
     displayName: 'MongoDB',
-    description: i18n.translate('core.kibanaConnectorSpecs.mongodb.metadata.description', {
+    description: i18n.translate('connectorSpecs.mongodb.metadata.description', {
       defaultMessage:
         'Query and write to MongoDB collections using find, aggregate, count, and listCollections, ' +
         'plus insertOne, updateOne, and deleteOne for workflows.',
@@ -215,10 +215,10 @@ export const MongoDBConnector: ConnectorSpec = {
         .describe('MongoDB connection URI.')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.mongodb.config.uri.label', {
+          label: i18n.translate('connectorSpecs.mongodb.config.uri.label', {
             defaultMessage: 'Connection URI',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.mongodb.config.uri.helpText', {
+          helpText: i18n.translate('connectorSpecs.mongodb.config.uri.helpText', {
             defaultMessage:
               'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. ' +
               'Include the database name in the path (e.g. /mydb) to use it as the default for actions. ' +
@@ -408,7 +408,7 @@ export const MongoDBConnector: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.mongodb.test.description', {
+    description: i18n.translate('connectorSpecs.mongodb.test.description', {
       defaultMessage:
         'Verifies the connection URI and credentials are valid by pinging the MongoDB deployment.',
     }),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { InferenceFeatureConfig } from '../types';
 import { validateFeature } from './validate_feature';
 
@@ -22,6 +23,22 @@ const createValidFeature = (
 describe('validateFeature', () => {
   it('accepts a valid feature', () => {
     expect(() => validateFeature(createValidFeature())).not.toThrow();
+  });
+
+  it('accepts recommendedEndpoints mixing ids and entries with valid parameters', () => {
+    expect(() =>
+      validateFeature(
+        createValidFeature({
+          recommendedEndpoints: [
+            'plain',
+            { id: 'with_reasoning', parameters: { reasoning: { effort: 'xhigh' } } },
+            { id: 'with_temperature', parameters: { temperature: 0 } },
+            { id: 'with_max_temperature', parameters: { temperature: 2 } },
+            { id: 'without_parameters' },
+          ],
+        })
+      )
+    ).not.toThrow();
   });
 
   const validationErrors: Array<{
@@ -105,6 +122,38 @@ describe('validateFeature', () => {
       name: 'recommendedEndpoints with empty string',
       overrides: { recommendedEndpoints: ['valid', ''] },
       expectedMessage: 'recommendedEndpoints',
+    },
+    {
+      name: 'recommendedEndpoints entry with whitespace-only id',
+      overrides: { recommendedEndpoints: [{ id: '  ' }] },
+      expectedMessage: 'recommendedEndpoints',
+    },
+    {
+      name: 'recommendedEndpoints entry with unknown reasoning effort',
+      overrides: {
+        recommendedEndpoints: [
+          {
+            id: 'ep',
+            parameters: { reasoning: { effort: 'extreme' as ChatCompletionReasoningEffort } },
+          },
+        ],
+      },
+      expectedMessage: 'parameters.reasoning.effort',
+    },
+    {
+      name: 'recommendedEndpoints entry with negative temperature',
+      overrides: { recommendedEndpoints: [{ id: 'ep', parameters: { temperature: -0.1 } }] },
+      expectedMessage: 'parameters.temperature',
+    },
+    {
+      name: 'recommendedEndpoints entry with temperature above the maximum',
+      overrides: { recommendedEndpoints: [{ id: 'ep', parameters: { temperature: 2.1 } }] },
+      expectedMessage: 'parameters.temperature',
+    },
+    {
+      name: 'recommendedEndpoints entry with NaN temperature',
+      overrides: { recommendedEndpoints: [{ id: 'ep', parameters: { temperature: NaN } }] },
+      expectedMessage: 'parameters.temperature',
     },
   ];
 

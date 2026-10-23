@@ -184,9 +184,7 @@ describe('Nightshift investigation agent type', () => {
       expect(instructions).toContain(`\`${tool}\``);
     }
     expect(instructions).toContain('"origin": "nightshift"');
-    for (const category of ['mitigate', 'remediate', 'investigate', 'escalate']) {
-      expect(instructions).toContain(`\`${category}\``);
-    }
+    expect(instructions).toContain('"category": "todo"');
     expect(instructions).toContain('**Check before you finish.**');
     expect(instructions).not.toContain('blind_spots');
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
