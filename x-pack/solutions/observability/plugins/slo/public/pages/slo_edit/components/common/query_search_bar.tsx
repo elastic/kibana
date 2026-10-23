@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
-import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
+import { is, kqlQuerySchemaZod, kqlWithFiltersSchemaZod } from '@kbn/slo-schema';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -58,7 +58,7 @@ export function QuerySearchBar({
             if (typeof value === 'string') {
               const ast = fromKueryExpression(value);
               toElasticsearchQuery(ast, dataView);
-            } else if (kqlWithFiltersSchema.is(value)) {
+            } else if (is(kqlWithFiltersSchemaZod, value)) {
               const ast = fromKueryExpression(value.kqlQuery);
               toElasticsearchQuery(ast, dataView);
             }
@@ -73,7 +73,7 @@ export function QuerySearchBar({
             setRange?.(nRange);
           }
 
-          if (kqlQuerySchema.is(field.value)) {
+          if (is(kqlQuerySchemaZod, field.value)) {
             field.onChange(String(value?.query));
           } else {
             field.onChange({
@@ -112,7 +112,7 @@ export function QuerySearchBar({
                 isDisabled={!dataView}
                 placeholder={placeholder}
                 query={{
-                  query: kqlQuerySchema.is(field.value)
+                  query: is(kqlQuerySchemaZod, field.value)
                     ? String(field.value)
                     : field.value.kqlQuery,
                   language: 'kuery',
@@ -139,7 +139,7 @@ export function QuerySearchBar({
 
                   dataService.query.filterManager.setFilters(updatedFilters);
 
-                  if (kqlQuerySchema.is(field.value)) {
+                  if (is(kqlQuerySchemaZod, field.value)) {
                     field.onChange({
                       filters: updatedFilters,
                       kqlQuery: field.value,
@@ -167,7 +167,7 @@ export function QuerySearchBar({
                 showQueryInput={true}
                 disableQueryLanguageSwitcher={true}
                 onClearSavedQuery={() => {}}
-                filters={kqlQuerySchema.is(field.value) ? [] : field.value?.filters ?? []}
+                filters={is(kqlQuerySchemaZod, field.value) ? [] : field.value?.filters ?? []}
                 allowSavingQueries={true}
                 showSavedQueryControls={true}
               />

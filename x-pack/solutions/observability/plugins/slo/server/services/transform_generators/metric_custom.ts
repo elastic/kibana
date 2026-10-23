@@ -6,7 +6,11 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { metricCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import {
+  is,
+  metricCustomIndicatorSchemaZod,
+  timeslicesBudgetingMethodSchemaZod,
+} from '@kbn/slo-schema';
 
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
@@ -24,7 +28,7 @@ export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?
 
 export class MetricCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!metricCustomIndicatorSchema.is(slo.indicator)) {
+    if (!is(metricCustomIndicatorSchemaZod, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -91,7 +95,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
         type: 'total',
         aggregationKey: 'slo.denominator',
       }),
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+      ...(is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {

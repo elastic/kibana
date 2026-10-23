@@ -13,11 +13,12 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
-  calendarAlignedTimeWindowSchema,
   Duration,
   DurationUnit,
-  occurrencesBudgetingMethodSchema,
-  timeslicesBudgetingMethodSchema,
+  is,
+  calendarAlignedTimeWindowSchemaZod,
+  occurrencesBudgetingMethodSchemaZod,
+  timeslicesBudgetingMethodSchemaZod,
 } from '@kbn/slo-schema';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
@@ -345,7 +346,7 @@ function buildNoDataResult(slo: SLODefinition): SummaryResult {
 }
 
 function buildAggs(slo: SLODefinition) {
-  return timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+  return is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)
     ? {
         good: { sum: { field: 'slo.isGoodSlice' } },
         total: { value_count: { field: 'slo.isGoodSlice' } },
@@ -394,7 +395,10 @@ function computeSliValue(
   const good = bucket?.good?.value ?? 0;
   const total = bucket?.total?.value ?? 0;
 
-  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && slo.objective.timesliceWindow) {
+  if (
+    is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) &&
+    slo.objective.timesliceWindow
+  ) {
     const totalSlices = getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow);
 
     return computeSLI(good, total, totalSlices);
@@ -410,8 +414,8 @@ function computeErrorBudget(slo: SLODefinition, sliValue: number) {
   return toErrorBudget(
     initialErrorBudget,
     consumedErrorBudget,
-    calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
-      occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+    is(calendarAlignedTimeWindowSchemaZod, slo.timeWindow) &&
+      is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod)
   );
 }
 

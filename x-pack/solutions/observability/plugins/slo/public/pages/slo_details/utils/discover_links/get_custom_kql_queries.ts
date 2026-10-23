@@ -7,19 +7,19 @@
 
 import type { EsQueryConfig } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
-import { kqlWithFiltersSchema, type KQLCustomIndicator } from '@kbn/slo-schema';
+import { type KQLCustomIndicator, is, kqlWithFiltersSchemaZod } from '@kbn/slo-schema';
 
 export function getCustomKqlQueries(indicator: KQLCustomIndicator, esQueryConfig?: EsQueryConfig) {
-  const goodKuery = kqlWithFiltersSchema.is(indicator.params.good)
+  const goodKuery = is(kqlWithFiltersSchemaZod, indicator.params.good)
     ? indicator.params.good.kqlQuery
     : indicator.params.good;
-  const goodFilters = kqlWithFiltersSchema.is(indicator.params.good)
+  const goodFilters = is(kqlWithFiltersSchemaZod, indicator.params.good)
     ? indicator.params.good.filters
     : [];
-  const totalKuery = kqlWithFiltersSchema.is(indicator.params.total)
+  const totalKuery = is(kqlWithFiltersSchemaZod, indicator.params.total)
     ? indicator.params.total.kqlQuery
     : indicator.params.total;
-  const totalFilters = kqlWithFiltersSchema.is(indicator.params.total)
+  const totalFilters = is(kqlWithFiltersSchemaZod, indicator.params.total)
     ? indicator.params.total.filters
     : [];
 

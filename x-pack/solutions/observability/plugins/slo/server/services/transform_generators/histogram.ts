@@ -7,7 +7,11 @@
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { HistogramIndicator } from '@kbn/slo-schema';
-import { histogramIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import {
+  is,
+  histogramIndicatorSchemaZod,
+  timeslicesBudgetingMethodSchemaZod,
+} from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -22,7 +26,7 @@ import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class HistogramTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!histogramIndicatorSchema.is(slo.indicator)) {
+    if (!is(histogramIndicatorSchemaZod, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -83,7 +87,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
         type: 'total',
         aggregationKey: 'slo.denominator',
       }),
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+      ...(is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {

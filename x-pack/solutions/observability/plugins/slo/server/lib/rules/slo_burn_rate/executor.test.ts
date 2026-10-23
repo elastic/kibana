@@ -36,7 +36,7 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import { storedSloDefinitionSchema } from '@kbn/slo-schema';
+import { storedSloDefinitionSchemaZod } from '@kbn/slo-schema';
 import {
   getErrorSource,
   TaskErrorSource,
@@ -112,7 +112,7 @@ function createFindResponse(
     saved_objects: sloList.map((slo) => {
       return {
         id: slo.id,
-        attributes: storedSloDefinitionSchema.encode(omit(slo, 'artifacts')),
+        attributes: storedSloDefinitionSchemaZod.encode(omit(slo, 'artifacts')),
         type: SO_SLO_TYPE,
         references: [],
         score: 1,

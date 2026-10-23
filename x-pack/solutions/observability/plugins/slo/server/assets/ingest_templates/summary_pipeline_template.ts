@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { is, timeslicesBudgetingMethodSchemaZod } from '@kbn/slo-schema';
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IBasePath } from '@kbn/core-http-server';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../../../common/constants';
@@ -19,7 +19,8 @@ export const getSummaryPipelineTemplate = (
   const errorBudgetEstimated =
     slo.budgetingMethod === 'occurrences' && slo.timeWindow.type === 'calendarAligned';
 
-  const optionalObjectiveTimesliceProcessors = timeslicesBudgetingMethodSchema.is(
+  const optionalObjectiveTimesliceProcessors = is(
+    timeslicesBudgetingMethodSchemaZod,
     slo.budgetingMethod
   )
     ? [
@@ -200,8 +201,8 @@ export const getSummaryPipelineTemplate = (
           description: 'Computes the last five minute burn rate value',
           lang: 'painless',
           params: {
-            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
-            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+            isTimeslice: is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod),
+            totalSlicesInRange: is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)
               ? Math.floor(5 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },
@@ -213,8 +214,8 @@ export const getSummaryPipelineTemplate = (
           description: 'Computes the last hour burn rate value',
           lang: 'painless',
           params: {
-            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
-            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+            isTimeslice: is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod),
+            totalSlicesInRange: is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)
               ? Math.floor(60 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },
@@ -226,8 +227,8 @@ export const getSummaryPipelineTemplate = (
           description: 'Computes the last day burn rate value',
           lang: 'painless',
           params: {
-            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
-            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+            isTimeslice: is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod),
+            totalSlicesInRange: is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)
               ? Math.floor(1440 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },

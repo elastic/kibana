@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
+  is,
+  apmTransactionDurationIndicatorSchemaZod,
+  apmTransactionErrorRateIndicatorSchemaZod,
 } from '@kbn/slo-schema';
 import { SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type { MouseEvent } from 'react';
@@ -65,8 +66,8 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
           {toIndicatorTypeLabel(slo.indicator.type)}
         </EuiBadge>
       </EuiFlexItem>
-      {(apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
-        apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) &&
+      {(is(apmTransactionDurationIndicatorSchemaZod, slo.indicator) ||
+        is(apmTransactionErrorRateIndicatorSchemaZod, slo.indicator)) &&
         slo.indicator.params.service !== '' &&
         slo.indicator.params.service !== ALL_VALUE && (
           <EuiFlexItem grow={false} css={{ maxWidth: 100 }}>
