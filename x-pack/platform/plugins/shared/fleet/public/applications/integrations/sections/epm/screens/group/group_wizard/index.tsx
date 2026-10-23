@@ -91,6 +91,7 @@ import {
   getInstallSummary,
   getEnabledPushSources,
   getGroupSteps,
+  getPushSources,
   getSignalInfo,
   getTargetDataset,
   isSignalStep,
@@ -173,6 +174,9 @@ const useStepState = (mode: 'url' | 'local') => {
 };
 
 const EMPTY_STATE = emptySchemaState();
+
+/** Schemas every wizard shows, available or not. */
+const BASE_SCHEMAS = ['otel', 'ecs'];
 
 interface MemberPackage {
   packageInfo?: PackageInfo;
@@ -380,10 +384,24 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
   const schemaChoices: SchemaChoice[] = [
     ...schemas.map((s) => {
       const first = packages[selectedNamesOf(s)[0] ?? membersOf(s)[0]?.packageName];
-      return { schema: s, isReady: !!first?.model, signals: first?.model?.signals };
+      const signals = first?.model
+        ? [
+            ...new Set([
+              ...getPushSources(first.model).map((p) => p.signal),
+              ...first.model.signals,
+            ]),
+          ]
+        : undefined;
+      return { schema: s, isReady: !!first?.model, signals };
     }),
+    // PROTOTYPE: ECS and OTel always show (Kyle 10-23); the one no member has is disabled.
+    ...BASE_SCHEMAS.filter((s) => !schemas.includes(s)).map((s) => ({
+      schema: s,
+      isReady: false,
+      isMissing: true,
+    })),
     ...(group.planned_schemas ?? [])
-      .filter((s) => !schemas.includes(s))
+      .filter((s) => !schemas.includes(s) && !BASE_SCHEMAS.includes(s))
       .map((s) => ({ schema: s, isReady: false, isPlanned: true })),
   ];
   const collectPackages: CollectPackage[] = membersOf(schema).map((o) => ({

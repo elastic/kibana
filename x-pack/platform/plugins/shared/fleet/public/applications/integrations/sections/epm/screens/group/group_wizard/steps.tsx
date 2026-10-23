@@ -34,7 +34,6 @@ import {
 import type { AgentPolicy, NewPackagePolicy } from '../../../../../../../types';
 import type { PackagePolicyValidationResults } from '../../../../../../../../common/services';
 import { SetupTechnology } from '../../../../../../../../common/types';
-import { getSchemaLabel } from '../../../../../../../../common/services';
 
 import type {
   CarryOverReport,
@@ -85,6 +84,8 @@ export interface SchemaChoice {
   signals?: string[];
   /** PROTOTYPE: group `planned_schemas` - no package yet, shown disabled. */
   isPlanned?: boolean;
+  /** PROTOTYPE: ECS/OTel always show; no member has this one, shown disabled. */
+  isMissing?: boolean;
 }
 
 /** A member package of the selected schema. */
@@ -113,12 +114,10 @@ export const CollectStep: React.FC<{
   onPushChange: (packageName: string, id: string, enabled: boolean) => void;
 }> = (props) => {
   const { title, schemaLabels } = props;
-  // Default (recommended) schema first, planned (not available yet) last
-  const schemas = [...props.schemas].sort(
-    (a, b) =>
-      Number(!!a.isPlanned) - Number(!!b.isPlanned) ||
-      Number(b.schema === props.defaultSchema) - Number(a.schema === props.defaultSchema)
-  );
+  // Default (recommended) schema first, then available, unavailable, planned
+  const rank = (c: SchemaChoice) =>
+    c.schema === props.defaultSchema ? 0 : c.isPlanned ? 3 : c.isMissing ? 2 : 1;
+  const schemas = [...props.schemas].sort((a, b) => rank(a) - rank(b));
   const switchNote =
     props.lastSwitch && props.lastSwitch.to === props.schema ? props.lastSwitch : undefined;
   const selectedPackages = props.packages.filter((p) => p.selected);
@@ -134,7 +133,8 @@ export const CollectStep: React.FC<{
 
   return (
     <div css={sectionGap}>
-      {schemas.length > 1 ? (
+      {/* PROTOTYPE: always cards, ECS + OTel at minimum (no read-only "Schema: X" label) */}
+      {schemas.length > 0 && (
         <div data-test-subj="groupWizardSchemaChoice">
           <SectionHeading
             title="Data schema"
@@ -151,11 +151,11 @@ export const CollectStep: React.FC<{
                     name="groupWizardSchema"
                     title={info.title}
                     description={
-                      s.isPlanned ? (
+                      s.isPlanned || s.isMissing ? (
                         <>
                           {info.description}
                           <br />
-                          Not available yet
+                          {s.isPlanned ? 'Not available yet' : `Not available for ${title}`}
                         </>
                       ) : (
                         <>
@@ -173,7 +173,7 @@ export const CollectStep: React.FC<{
                     }
                     badge={s.schema === props.defaultSchema ? 'Recommended' : undefined}
                     checked={props.schema === s.schema}
-                    disabled={s.isPlanned || !s.isReady}
+                    disabled={s.isPlanned || s.isMissing || !s.isReady}
                     onChange={() => props.onSchemaChange(s.schema)}
                     data-test-subj={`groupWizardSchema-${s.schema}`}
                   />
@@ -212,12 +212,6 @@ export const CollectStep: React.FC<{
               </>
             )}
         </div>
-      ) : (
-        // One schema: read-only label, no disabled options (design: avoids a disabled OCSF on
-        // every tile).
-        <EuiText size="s" data-test-subj="groupWizardSchemaLabel">
-          <strong>Schema:</strong> {getSchemaLabel(props.schema, { schema_labels: schemaLabels })}
-        </EuiText>
       )}
 
       {single ? (

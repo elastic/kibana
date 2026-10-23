@@ -237,11 +237,15 @@ describe('GroupOnboardingWizard', () => {
     expect(result.getByText('Access logs')).toBeInTheDocument();
   });
 
-  it('single-schema group: no schema choice', async () => {
+  it('single-schema group: ECS + OTel shown, missing one disabled', async () => {
     const result = renderWizard(singleSchemaGroup, [option('otel', nginxOtelPackageInfo)]);
     await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
-    expect(result.queryByTestId('groupWizardSchemaChoice')).not.toBeInTheDocument();
-    expect(result.getByTestId('groupWizardSchemaLabel')).toHaveTextContent('Schema: OTel');
+    // ECS + OTel always show; the one the integration doesn't have is disabled
+    expect(within(result.getByTestId('groupWizardSchema-otel')).getByRole('radio')).toBeChecked();
+    expect(result.getByTestId('groupWizardSchema-ecs')).toHaveTextContent(
+      'Not available for Nginx'
+    );
+    expect(within(result.getByTestId('groupWizardSchema-ecs')).getByRole('radio')).toBeDisabled();
   });
 
   it('pick-any: same-schema members as package cards, one package policy each', async () => {
@@ -257,6 +261,9 @@ describe('GroupOnboardingWizard', () => {
     );
     expect(result.getByTestId('groupWizardSchema-prometheus')).toHaveTextContent(
       'Not available yet'
+    );
+    expect(result.getByTestId('groupWizardSchema-otel')).toHaveTextContent(
+      'Not available for Web servers'
     );
     expect(
       within(result.getByTestId('groupWizardSchema-prometheus')).getByRole('radio')
