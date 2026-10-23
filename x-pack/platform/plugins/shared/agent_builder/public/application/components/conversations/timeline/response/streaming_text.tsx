@@ -14,6 +14,8 @@ import type {
 import { ChatMessageText } from './chat_message_text';
 
 const TOKEN_DELAY = 17;
+/** Each tick shows 1/10 of the waiting tokens (at least 1), so a long wait ends fast. */
+const CATCH_UP_TICKS = 10;
 interface StreamingTextProps {
   content: string;
   steps: ConversationRoundStep[];
@@ -51,26 +53,29 @@ export const StreamingText = ({
 
     if (!intervalRef.current && tokenQueueRef.current.length > 0) {
       intervalRef.current = setInterval(() => {
-        if (tokenQueueRef.current.length === 0) {
+        const queue = tokenQueueRef.current;
+        if (queue.length === 0) {
           clearInterval(intervalRef.current!);
           intervalRef.current = null;
           return;
         }
 
-        const nextToken = tokenQueueRef.current.shift();
-        if (nextToken) {
-          setDisplayedText((prev) => prev + nextToken);
-        }
+        const count = Math.ceil(queue.length / CATCH_UP_TICKS);
+        const nextTokens = queue.splice(0, count).join('');
+        setDisplayedText((prev) => prev + nextTokens);
       }, tokenDelay);
     }
+  }, [content, tokenDelay]);
 
-    return () => {
+  useEffect(
+    () => () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-    };
-  }, [content, tokenDelay]);
+    },
+    []
+  );
 
   return (
     <ChatMessageText
