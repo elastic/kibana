@@ -1,0 +1,840 @@
+{
+  "components": {
+    "headers": {
+      "Link": {
+        "schema": {
+          "type": "string"
+        }
+      },
+      "X-Snowflake-Request-ID": {
+        "schema": {
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "parameters": {
+      "database": {
+        "in": "path",
+        "name": "database",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Identifier"
+        }
+      },
+      "fromName": {
+        "in": "query",
+        "name": "fromName",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "like": {
+        "in": "query",
+        "name": "like",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "name": {
+        "in": "path",
+        "name": "name",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Identifier"
+        }
+      },
+      "schema": {
+        "in": "path",
+        "name": "schema",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Identifier"
+        }
+      },
+      "showLimit": {
+        "in": "query",
+        "name": "showLimit",
+        "schema": {
+          "maximum": 10000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "startsWith": {
+        "in": "query",
+        "name": "startsWith",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "202SuccessAcceptedResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SuccessAcceptedResponse"
+            }
+          }
+        },
+        "headers": {
+          "Location": {
+            "schema": {
+              "type": "string"
+            }
+          },
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "400BadRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "401Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "403Forbidden": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "404NotFound": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "405MethodNotAllowed": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "408RequestTimeout": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "409Conflict": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "410Gone": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "429LimitExceeded": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "500InternalServerError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "503ServiceUnavailable": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      },
+      "504GatewayTimeout": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        },
+        "headers": {
+          "X-Snowflake-Request-ID": {
+            "$ref": "#/components/headers/X-Snowflake-Request-ID"
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Constraint": {
+        "discriminator": {
+          "mapping": {
+            "CHECK": "CheckConstraint",
+            "FOREIGN KEY": "ForeignKey",
+            "PRIMARY KEY": "PrimaryKey",
+            "UNIQUE": "UniqueKey"
+          },
+          "propertyName": "constraint_type"
+        },
+        "properties": {
+          "column_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "comment": {
+            "nullable": true,
+            "type": "string"
+          },
+          "constraint_type": {
+            "type": "string"
+          },
+          "deferrability": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "enable": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "enforced": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rely": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "validate": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "DataMetricSchedule": {
+        "discriminator": {
+          "mapping": {
+            "CRON": "DataMetricCronSchedule",
+            "MINUTES": "DataMetricMinutesSchedule",
+            "TRIGGER_ON_CHANGES": "DataMetricTriggerOnChangesSchedule"
+          },
+          "propertyName": "schedule_type"
+        },
+        "properties": {
+          "schedule_type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schedule_type"
+        ],
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Identifier": {
+        "pattern": "^\"([^\"]|\"\")+\"|[a-zA-Z_][a-zA-Z0-9_$]*$|^[$][0-9]+$",
+        "type": "string"
+      },
+      "SearchOptimizationExpression": {
+        "properties": {
+          "expression_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "method": {
+            "enum": [
+              "EQUALITY",
+              "SUBSTRING",
+              "FULL_TEXT",
+              "GEO"
+            ],
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expression_id",
+          "method",
+          "target"
+        ],
+        "type": "object"
+      },
+      "SuccessAcceptedResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "resultHandler": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Table": {
+        "properties": {
+          "automatic_clustering": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "budget": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "bytes": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "change_tracking": {
+            "type": "boolean"
+          },
+          "cluster_by": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "cluster_by_raw": {
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/TableColumn"
+            },
+            "type": "array"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "constraints": {
+            "items": {
+              "$ref": "#/components/schemas/Constraint"
+            },
+            "type": "array"
+          },
+          "created_on": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data_metric_schedule": {
+            "$ref": "#/components/schemas/DataMetricSchedule"
+          },
+          "data_retention_time_in_days": {
+            "type": "integer"
+          },
+          "database_name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "default_ddl_collation": {
+            "type": "string"
+          },
+          "dropped_on": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "enable_schema_evolution": {
+            "type": "boolean"
+          },
+          "error_logging": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "kind": {
+            "default": "PERMANENT",
+            "enum": [
+              "PERMANENT",
+              "TRANSIENT",
+              "TEMPORARY",
+              "",
+              "transient",
+              "temporary"
+            ],
+            "type": "string"
+          },
+          "max_data_extension_time_in_days": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "owner_role_type": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "row_timestamp": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "rows": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "schema_name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "search_optimization": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "search_optimization_bytes": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "search_optimization_configuration": {
+            "items": {
+              "$ref": "#/components/schemas/SearchOptimizationExpression"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "search_optimization_progress": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "table_type": {
+            "enum": [
+              "NORMAL",
+              "DYNAMIC",
+              "EXTERNAL",
+              "EVENT",
+              "HYBRID",
+              "ICEBERG",
+              "IMMUTABLE"
+            ],
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "TableColumn": {
+        "properties": {
+          "autoincrement": {
+            "type": "boolean"
+          },
+          "autoincrement_increment": {
+            "type": "integer"
+          },
+          "autoincrement_order": {
+            "nullable": true,
+            "type": "string"
+          },
+          "autoincrement_start": {
+            "type": "integer"
+          },
+          "collate": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "constraints": {
+            "items": {
+              "$ref": "#/components/schemas/Constraint"
+            },
+            "type": "array"
+          },
+          "datatype": {
+            "type": "string"
+          },
+          "default": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nullable": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "datatype"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "ExternalOAuth": {
+        "$ref": "#/components/securitySchemes/specifications_common_ExternalOAuth"
+      },
+      "KeyPair": {
+        "$ref": "#/components/securitySchemes/specifications_common_KeyPair"
+      },
+      "ProgrammaticAccessToken": {
+        "$ref": "#/components/securitySchemes/specifications_common_ProgrammaticAccessToken"
+      },
+      "SnowflakeOAuth": {
+        "$ref": "#/components/securitySchemes/specifications_common_SnowflakeOAuth"
+      },
+      "specifications_common_ExternalOAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "specifications_common_KeyPair": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "specifications_common_ProgrammaticAccessToken": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "specifications_common_SnowflakeOAuth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "/oauth/authorize",
+            "scopes": {}
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Snowflake Table API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v2/databases/{database}/schemas/{schema}/tables": {
+      "get": {
+        "operationId": "listTables",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/database"
+          },
+          {
+            "$ref": "#/components/parameters/schema"
+          },
+          {
+            "$ref": "#/components/parameters/like"
+          },
+          {
+            "$ref": "#/components/parameters/startsWith"
+          },
+          {
+            "$ref": "#/components/parameters/showLimit"
+          },
+          {
+            "$ref": "#/components/parameters/fromName"
+          },
+          {
+            "in": "query",
+            "name": "history",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deep",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Table"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "headers": {
+              "Link": {
+                "$ref": "#/components/headers/Link"
+              },
+              "X-Snowflake-Request-ID": {
+                "$ref": "#/components/headers/X-Snowflake-Request-ID"
+              }
+            }
+          },
+          "202": {
+            "$ref": "#/components/responses/202SuccessAcceptedResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/405MethodNotAllowed"
+          },
+          "408": {
+            "$ref": "#/components/responses/408RequestTimeout"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "410": {
+            "$ref": "#/components/responses/410Gone"
+          },
+          "429": {
+            "$ref": "#/components/responses/429LimitExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/504GatewayTimeout"
+          }
+        }
+      }
+    },
+    "/api/v2/databases/{database}/schemas/{schema}/tables/{name}": {
+      "get": {
+        "operationId": "fetchTable",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/database"
+          },
+          {
+            "$ref": "#/components/parameters/schema"
+          },
+          {
+            "$ref": "#/components/parameters/name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Table"
+                }
+              }
+            },
+            "headers": {
+              "Link": {
+                "$ref": "#/components/headers/Link"
+              },
+              "X-Snowflake-Request-ID": {
+                "$ref": "#/components/headers/X-Snowflake-Request-ID"
+              }
+            }
+          },
+          "202": {
+            "$ref": "#/components/responses/202SuccessAcceptedResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/405MethodNotAllowed"
+          },
+          "408": {
+            "$ref": "#/components/responses/408RequestTimeout"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "410": {
+            "$ref": "#/components/responses/410Gone"
+          },
+          "429": {
+            "$ref": "#/components/responses/429LimitExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/504GatewayTimeout"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "KeyPair": []
+    },
+    {
+      "ExternalOAuth": []
+    },
+    {
+      "SnowflakeOAuth": []
+    },
+    {
+      "ProgrammaticAccessToken": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://org-account.snowflakecomputing.com"
+    }
+  ]
+}

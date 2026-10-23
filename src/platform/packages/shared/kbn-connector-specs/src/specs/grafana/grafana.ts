@@ -250,7 +250,10 @@ export const Grafana: ConnectorSpec = {
           const response = await ctx.client.post(
             `${buildBaseUrl(ctx)}/api/alertmanager/grafana/api/v2/silences`,
             {
-              matchers: input.matchers,
+              matchers: input.matchers.map((matcher) => ({
+                ...matcher,
+                isRegex: matcher.isRegex ?? false,
+              })),
               startsAt: input.startsAt,
               endsAt: input.endsAt,
               comment: input.comment,

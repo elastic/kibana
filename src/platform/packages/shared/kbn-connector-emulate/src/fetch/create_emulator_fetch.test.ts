@@ -76,9 +76,106 @@ describe('createEmulatorFetch', () => {
         request: 'GET https://api.example.com/v1/items',
         operation: 'listItems',
         matched: { method: 'get', path: '/items' },
+        responseSource: 'responder',
         status: 200,
         requestViolations: [],
         responseViolations: [],
+      },
+    ]);
+  });
+
+  it('records whether a fixture, a recording or the responder answered each call', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [spec],
+      fixtures: [
+        { operation: { method: 'GET', path: '/items' }, response: { status: 200, body: [] } },
+      ],
+      recordings: [
+        {
+          exchanges: [
+            {
+              operation: { method: 'POST', path: '/items' },
+              response: { status: 201, body: { name: 'recorded' } },
+            },
+          ],
+        },
+      ],
+    });
+
+    await fetch(`${BASE_URL}/items`);
+    await fetch(`${BASE_URL}/items`, postJson({ name: 'a' }));
+    await fetch(`${BASE_URL}/items?limit=500`);
+
+    expect(calls.map(({ operation, responseSource }) => ({ operation, responseSource }))).toEqual([
+      { operation: 'listItems', responseSource: 'fixture' },
+      { operation: 'createItem', responseSource: 'recording' },
+      // Rejected requests get no response from any source.
+      { operation: 'listItems', responseSource: undefined },
+    ]);
+  });
+
+  it('reports each call to onCall as it is recorded', async () => {
+    const onCall = jest.fn();
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond: listResponder, onCall });
+
+    await fetch(`${BASE_URL}/items`);
+    await fetch(`${BASE_URL}/unknown`);
+
+    expect(onCall.mock.calls.map(([call]) => call)).toEqual(calls);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('empties calls on reset, keeping the array that tests hold', async () => {
+    const emulator = createEmulatorFetch({ specs: [spec], respond: listResponder });
+    const { calls } = emulator;
+
+    await emulator.fetch(`${BASE_URL}/items`);
+    emulator.reset();
+    await emulator.fetch(`${BASE_URL}/unknown`);
+
+    expect(emulator.calls).toBe(calls);
+    expect(calls).toEqual([expect.objectContaining({ status: 404 })]);
+  });
+
+  it('lists the operations it answers, for OpenAPI and protocol specs', () => {
+    const graphql = {
+      format: 'graphql' as const,
+      sdl: 'type Query { boards: [String] } type Mutation { createBoard(name: String): String }',
+      endpoints: ['https://api.example.com/graphql'],
+    };
+
+    const { operations } = createEmulatorFetch({ specs: { rest: spec, graphql } });
+
+    expect(operations).toEqual([
+      {
+        protocol: 'openapi',
+        id: 'listItems',
+        method: 'GET',
+        path: '/items',
+        servers: [BASE_URL],
+        source: 'rest',
+      },
+      {
+        protocol: 'openapi',
+        id: 'createItem',
+        method: 'POST',
+        path: '/items',
+        servers: [BASE_URL],
+        source: 'rest',
+      },
+      {
+        protocol: 'graphql',
+        name: 'query boards',
+        readOnly: true,
+        endpoints: ['https://api.example.com/graphql'],
+        source: 'graphql',
+      },
+      {
+        protocol: 'graphql',
+        name: 'mutation createBoard',
+        readOnly: false,
+        endpoints: ['https://api.example.com/graphql'],
+        source: 'graphql',
       },
     ]);
   });
@@ -138,6 +235,71 @@ describe('createEmulatorFetch', () => {
       expect.objectContaining({ code: 'required' }),
     ]);
     expect(valid.status).toBe(201);
+  });
+
+  describe('with a responder in front of the default chain', () => {
+    const CREATED = Symbol('created items');
+    // Remembers created items for the run and lists them back; defers the rest to next().
+    const remember: Responder = async (operation, request, { state, next }) => {
+      const created = (state.get(CREATED) as unknown[] | undefined) ?? [];
+      if (operation.id === 'createItem') {
+        state.set(CREATED, [...created, request.body]);
+        return { statusCode: 201, headers: json, body: request.body };
+      }
+      if (operation.id === 'listItems') {
+        return { statusCode: 200, headers: json, body: created };
+      }
+      return next();
+    };
+
+    it('keeps state across requests until reset, and validates its answers', async () => {
+      const { fetch, calls, reset } = createEmulatorFetch({ specs: [spec], respond: remember });
+
+      await fetch(`${BASE_URL}/items`, postJson({ name: 'a' }));
+      const listed = await fetch(`${BASE_URL}/items`);
+      reset();
+      const afterReset = await fetch(`${BASE_URL}/items`);
+
+      expect(await listed.json()).toEqual([{ name: 'a' }]);
+      expect(await afterReset.json()).toEqual([]);
+      expect(calls).toEqual([
+        expect.objectContaining({ operation: 'listItems', status: 200, responseViolations: [] }),
+      ]);
+    });
+
+    it('sees requests the default chain would answer, which next() then answers', async () => {
+      const seen: string[] = [];
+      const { fetch, calls } = createEmulatorFetch({
+        specs: [spec],
+        fixtures: [
+          {
+            operation: { method: 'get', path: '/items' },
+            response: { status: 200, body: [{ name: 'fixture' }] },
+          },
+        ],
+        respond: async (operation, _request, { next }) => {
+          seen.push(operation.id);
+          return next();
+        },
+      });
+
+      const response = await fetch(`${BASE_URL}/items`);
+
+      expect(seen).toEqual(['listItems']);
+      expect(await response.json()).toEqual([{ name: 'fixture' }]);
+      expect(calls[0].responseSource).toBe('fixture');
+    });
+
+    it('reports answers that break the spec', async () => {
+      const { fetch, calls } = createEmulatorFetch({
+        specs: [spec],
+        respond: async () => ({ statusCode: 200, headers: json, body: [{ id: 1 }] }),
+      });
+
+      await fetch(`${BASE_URL}/items`);
+
+      expect(calls[0].responseViolations).toEqual([expect.objectContaining({ code: 'required' })]);
+    });
   });
 
   it('records responses that break the spec', async () => {

@@ -1,0 +1,68 @@
+{
+  "operations": {
+    "getDataSource": [
+      {
+        "method": "get",
+        "path": "/v1/data_sources/{data_source_id}",
+        "source": "v1"
+      }
+    ],
+    "getPage": [
+      {
+        "method": "get",
+        "path": "/v1/pages/{page_id}",
+        "source": "v1"
+      }
+    ],
+    "queryDataSource": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "null",
+          "request": {
+            "cursorParam": "start_cursor",
+            "in": "body",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "hasMorePath": "has_more",
+            "itemsPath": "results",
+            "nextPath": "next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/v1/data_sources/{data_source_id}/query",
+        "source": "v1"
+      }
+    ],
+    "searchPageOrDSByTitle": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "null",
+          "request": {
+            "cursorParam": "start_cursor",
+            "in": "body",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "hasMorePath": "has_more",
+            "itemsPath": "results",
+            "nextPath": "next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/v1/search",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "1.0.0",
+      "fetchedAt": "2026-10-07T20:21:06.970Z",
+      "format": "openapi",
+      "url": "https://developers.notion.com/openapi.json"
+    }
+  }
+}

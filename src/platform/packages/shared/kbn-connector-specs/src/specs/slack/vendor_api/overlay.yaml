@@ -1,0 +1,87 @@
+overlay: 1.0.0
+info:
+  title: Slack Web API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/chat.postMessage'].post.parameters[?@.name == 'token']
+    description: &bearer >-
+      https://docs.slack.dev/apis/web-api/#authentication says "We prefer tokens to be sent in the
+      Authorization HTTP header", which is how the connector sends them; the spec requires a
+      `token` parameter instead.
+    update:
+      required: false
+  - target: $.paths['/chat.update'].post.parameters[?@.name == 'token']
+    description: *bearer
+    update:
+      required: false
+  - target: $.paths['/auth.test'].get.parameters[?@.name == 'token']
+    description: *bearer
+    update:
+      required: false
+  - target: $.paths['/users.lookupByEmail'].get.parameters[?@.name == 'token']
+    description: >-
+      https://docs.slack.dev/apis/web-api/#authentication says tokens go in the Authorization HTTP
+      header and "cannot be sent as a query parameter"; the spec requires a `token` query parameter.
+    update:
+      required: false
+
+  - target: $.paths['/conversations.create'].post.requestBody.content
+    description: &json >-
+      https://docs.slack.dev/apis/web-api/#posting_json says "For write methods that support JSON,
+      you may alternatively send your HTTP POST data as Content-type: application/json", with the
+      token as a bearer token; the spec only documents form bodies. These are the JSON bodies the
+      connector sends.
+    update:
+      application/json:
+        schema:
+          type: object
+          required: [name]
+          properties:
+            name:
+              type: string
+            is_private:
+              type: boolean
+  - target: $.paths['/conversations.invite'].post.requestBody.content
+    description: *json
+    update:
+      application/json:
+        schema:
+          type: object
+          required: [channel, users]
+          properties:
+            channel:
+              type: string
+            users:
+              type: string
+  - target: $.paths['/chat.postMessage'].post.requestBody.content
+    description: *json
+    update:
+      application/json:
+        schema:
+          type: object
+          required: [channel]
+          properties:
+            channel:
+              type: string
+            text:
+              type: string
+            thread_ts:
+              type: string
+            unfurl_links:
+              type: boolean
+            unfurl_media:
+              type: boolean
+  - target: $.paths['/chat.update'].post.requestBody.content
+    description: *json
+    update:
+      application/json:
+        schema:
+          type: object
+          required: [channel, ts]
+          properties:
+            channel:
+              type: string
+            ts:
+              type: string
+            text:
+              type: string

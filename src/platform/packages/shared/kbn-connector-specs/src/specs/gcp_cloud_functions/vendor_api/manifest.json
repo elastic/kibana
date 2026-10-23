@@ -1,0 +1,53 @@
+{
+  "operations": {
+    "getFunction": [
+      {
+        "method": "get",
+        "path": "/v2/projects/{projectsId}/locations/{locationsId}/services/{servicesId}",
+        "source": "runV2"
+      }
+    ],
+    "invoke": [
+      {
+        "method": "get",
+        "path": "/v2/projects/{projectsId}/locations/{locationsId}/services/{servicesId}",
+        "source": "runV2"
+      }
+    ],
+    "listFunctions": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "services",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v2/projects/{projectsId}/locations/{locationsId}/services",
+        "source": "runV2"
+      }
+    ]
+  },
+  "sources": {
+    "runV2": {
+      "apiVersion": "v2",
+      "fetchedAt": "2026-10-07T20:20:12.745Z",
+      "format": "discovery",
+      "url": "https://run.googleapis.com/$discovery/rest?version=v2"
+    }
+  },
+  "unmatched": {
+    "invoke": [
+      {
+        "method": "post",
+        "path": "/",
+        "reason": "The function's own HTTP endpoint (the service's `uri`), called with an ID token as https://cloud.google.com/run/docs/authenticating/service-to-service describes; it is the deployed function's API, not part of the Cloud Run Admin API."
+      }
+    ]
+  }
+}

@@ -50,7 +50,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The Elasticsearch connector has the following actions:
 
 `search`
-:   Search documents in one or more indices using the [Elasticsearch Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl). Pass the full query body in the `query` parameter. Supports aggregations (`aggs`), sorting, field filtering (`_source`), and pagination (`size`, `from`). Use `listIndices` first if you do not know the index name, and `getMapping` to understand the available fields.
+:   Search documents in one or more indices using the [Elasticsearch Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl). Pass the query in the `query` parameter, with exactly one top-level query type such as `match` or `bool`; combine clauses with `bool`. Supports aggregations (`aggs`), sorting, field filtering (`_source`), and pagination (`size`, `from`). Use `listIndices` first if you do not know the index name, and `getMapping` to understand the available fields.
 
 `esql`
 :   Run an [ES|QL](https://www.elastic.co/docs/reference/query-languages/esql) query — a pipe-based analytics language optimized for time-series exploration and aggregations. Returns a columnar result set with column names and row values. Requires Elasticsearch 8.11 or later.

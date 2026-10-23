@@ -1,0 +1,7352 @@
+{
+  "components": {
+    "schemas": {
+      "AcceleratorConfig": {
+        "properties": {
+          "acceleratorCount": {
+            "format": "int64",
+            "type": "string"
+          },
+          "acceleratorType": {
+            "type": "string"
+          },
+          "gpuDriverInstallationConfig": {
+            "$ref": "#/components/schemas/GPUDriverInstallationConfig"
+          },
+          "gpuPartitionSize": {
+            "type": "string"
+          },
+          "gpuSharingConfig": {
+            "$ref": "#/components/schemas/GPUSharingConfig"
+          }
+        },
+        "type": "object"
+      },
+      "AccurateTimeConfig": {
+        "properties": {
+          "enablePtpKvmTimeSync": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AdditionalIPRangesConfig": {
+        "properties": {
+          "podIpv4RangeNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "STATUS_UNSPECIFIED",
+              "ACTIVE",
+              "DRAINING"
+            ],
+            "type": "string"
+          },
+          "subnetwork": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdditionalNodeNetworkConfig": {
+        "properties": {
+          "network": {
+            "type": "string"
+          },
+          "subnetwork": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdditionalPodNetworkConfig": {
+        "properties": {
+          "maxPodsPerNode": {
+            "$ref": "#/components/schemas/MaxPodsConstraint"
+          },
+          "networkAttachment": {
+            "type": "string"
+          },
+          "secondaryPodRange": {
+            "type": "string"
+          },
+          "subnetwork": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdditionalPodRangesConfig": {
+        "properties": {
+          "podRangeInfo": {
+            "items": {
+              "$ref": "#/components/schemas/RangeInfo"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "podRangeNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AddonsConfig": {
+        "properties": {
+          "agentSandboxConfig": {
+            "$ref": "#/components/schemas/AgentSandboxConfig"
+          },
+          "cloudRunConfig": {
+            "$ref": "#/components/schemas/CloudRunConfig"
+          },
+          "configConnectorConfig": {
+            "$ref": "#/components/schemas/ConfigConnectorConfig"
+          },
+          "dnsCacheConfig": {
+            "$ref": "#/components/schemas/DnsCacheConfig"
+          },
+          "gcePersistentDiskCsiDriverConfig": {
+            "$ref": "#/components/schemas/GcePersistentDiskCsiDriverConfig"
+          },
+          "gcpFilestoreCsiDriverConfig": {
+            "$ref": "#/components/schemas/GcpFilestoreCsiDriverConfig"
+          },
+          "gcsFuseCsiDriverConfig": {
+            "$ref": "#/components/schemas/GcsFuseCsiDriverConfig"
+          },
+          "gkeBackupAgentConfig": {
+            "$ref": "#/components/schemas/GkeBackupAgentConfig"
+          },
+          "highScaleCheckpointingConfig": {
+            "$ref": "#/components/schemas/HighScaleCheckpointingConfig"
+          },
+          "horizontalPodAutoscaling": {
+            "$ref": "#/components/schemas/HorizontalPodAutoscaling"
+          },
+          "httpLoadBalancing": {
+            "$ref": "#/components/schemas/HttpLoadBalancing"
+          },
+          "kubernetesDashboard": {
+            "$ref": "#/components/schemas/KubernetesDashboard"
+          },
+          "lustreCsiDriverConfig": {
+            "$ref": "#/components/schemas/LustreCsiDriverConfig"
+          },
+          "networkPolicyConfig": {
+            "$ref": "#/components/schemas/NetworkPolicyConfig"
+          },
+          "nodeReadinessConfig": {
+            "$ref": "#/components/schemas/NodeReadinessConfig"
+          },
+          "parallelstoreCsiDriverConfig": {
+            "$ref": "#/components/schemas/ParallelstoreCsiDriverConfig"
+          },
+          "podSnapshotConfig": {
+            "$ref": "#/components/schemas/PodSnapshotConfig"
+          },
+          "rayOperatorConfig": {
+            "$ref": "#/components/schemas/RayOperatorConfig"
+          },
+          "sliceControllerConfig": {
+            "$ref": "#/components/schemas/SliceControllerConfig"
+          },
+          "slurmOperatorConfig": {
+            "$ref": "#/components/schemas/SlurmOperatorConfig"
+          },
+          "statefulHaConfig": {
+            "$ref": "#/components/schemas/StatefulHAConfig"
+          }
+        },
+        "type": "object"
+      },
+      "AdvancedDatapathObservabilityConfig": {
+        "properties": {
+          "enableMetrics": {
+            "type": "boolean"
+          },
+          "enableRelay": {
+            "type": "boolean"
+          },
+          "relayMode": {
+            "enum": [
+              "RELAY_MODE_UNSPECIFIED",
+              "DISABLED",
+              "INTERNAL_VPC_LB",
+              "EXTERNAL_LB"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdvancedMachineFeatures": {
+        "properties": {
+          "enableNestedVirtualization": {
+            "type": "boolean"
+          },
+          "performanceMonitoringUnit": {
+            "enum": [
+              "PERFORMANCE_MONITORING_UNIT_UNSPECIFIED",
+              "ARCHITECTURAL",
+              "STANDARD",
+              "ENHANCED"
+            ],
+            "type": "string"
+          },
+          "threadsPerCore": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentSandboxConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AnonymousAuthenticationConfig": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "ENABLED",
+              "LIMITED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AuthenticatorGroupsConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "securityGroup": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoIpamConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AutoMonitoringConfig": {
+        "properties": {
+          "scope": {
+            "enum": [
+              "SCOPE_UNSPECIFIED",
+              "ALL",
+              "NONE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoUpgradeOptions": {
+        "properties": {
+          "autoUpgradeStartTime": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Autopilot": {
+        "properties": {
+          "clusterPolicyConfig": {
+            "$ref": "#/components/schemas/ClusterPolicyConfig"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "privilegedAdmissionConfig": {
+            "$ref": "#/components/schemas/PrivilegedAdmissionConfig"
+          },
+          "workloadPolicyConfig": {
+            "$ref": "#/components/schemas/WorkloadPolicyConfig"
+          }
+        },
+        "type": "object"
+      },
+      "AutopilotConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AutoprovisioningNodePoolDefaults": {
+        "properties": {
+          "bootDiskKmsKey": {
+            "type": "string"
+          },
+          "diskSizeGb": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "diskType": {
+            "type": "string"
+          },
+          "imageType": {
+            "type": "string"
+          },
+          "insecureKubeletReadonlyPortEnabled": {
+            "type": "boolean"
+          },
+          "management": {
+            "$ref": "#/components/schemas/NodeManagement"
+          },
+          "minCpuPlatform": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "oauthScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "serviceAccount": {
+            "type": "string"
+          },
+          "shieldedInstanceConfig": {
+            "$ref": "#/components/schemas/ShieldedInstanceConfig"
+          },
+          "upgradeSettings": {
+            "$ref": "#/components/schemas/UpgradeSettings"
+          }
+        },
+        "type": "object"
+      },
+      "AutoscaledRolloutPolicy": {
+        "properties": {
+          "waitForDrainDuration": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BestEffortProvisioning": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "minProvisionNodes": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BigQueryDestination": {
+        "properties": {
+          "datasetId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BinaryAuthorization": {
+        "properties": {
+          "enabled": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "evaluationMode": {
+            "enum": [
+              "EVALUATION_MODE_UNSPECIFIED",
+              "DISABLED",
+              "PROJECT_SINGLETON_POLICY_ENFORCE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BlueGreenInfo": {
+        "properties": {
+          "blueInstanceGroupUrls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "bluePoolDeletionStartTime": {
+            "type": "string"
+          },
+          "greenInstanceGroupUrls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "greenPoolVersion": {
+            "type": "string"
+          },
+          "phase": {
+            "enum": [
+              "PHASE_UNSPECIFIED",
+              "UPDATE_STARTED",
+              "CREATING_GREEN_POOL",
+              "CORDONING_BLUE_POOL",
+              "DRAINING_BLUE_POOL",
+              "NODE_POOL_SOAKING",
+              "DELETING_BLUE_POOL",
+              "ROLLBACK_STARTED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BlueGreenSettings": {
+        "properties": {
+          "autoscaledRolloutPolicy": {
+            "$ref": "#/components/schemas/AutoscaledRolloutPolicy"
+          },
+          "nodePoolSoakDuration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "standardRolloutPolicy": {
+            "$ref": "#/components/schemas/StandardRolloutPolicy"
+          }
+        },
+        "type": "object"
+      },
+      "BootDisk": {
+        "properties": {
+          "diskType": {
+            "type": "string"
+          },
+          "provisionedIops": {
+            "format": "int64",
+            "type": "string"
+          },
+          "provisionedThroughput": {
+            "format": "int64",
+            "type": "string"
+          },
+          "sizeGb": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BootDiskProfile": {
+        "properties": {
+          "swapSizeGib": {
+            "format": "int64",
+            "type": "string"
+          },
+          "swapSizePercent": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "CancelOperationRequest": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "operationId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "projectId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "zone": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CertificateAuthorityDomainConfig": {
+        "properties": {
+          "fqdns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gcpSecretManagerCertificateConfig": {
+            "$ref": "#/components/schemas/GCPSecretManagerCertificateConfig"
+          }
+        },
+        "type": "object"
+      },
+      "CertificateConfig": {
+        "properties": {
+          "gcpSecretManagerSecretUri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CertificateConfigPair": {
+        "properties": {
+          "cert": {
+            "$ref": "#/components/schemas/CertificateConfig"
+          },
+          "key": {
+            "$ref": "#/components/schemas/CertificateConfig"
+          }
+        },
+        "type": "object"
+      },
+      "CidrBlock": {
+        "properties": {
+          "cidrBlock": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClientCertificateConfig": {
+        "properties": {
+          "issueClientCertificate": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CloudRunConfig": {
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          },
+          "loadBalancerType": {
+            "enum": [
+              "LOAD_BALANCER_TYPE_UNSPECIFIED",
+              "LOAD_BALANCER_TYPE_EXTERNAL",
+              "LOAD_BALANCER_TYPE_INTERNAL"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Cluster": {
+        "properties": {
+          "addonsConfig": {
+            "$ref": "#/components/schemas/AddonsConfig"
+          },
+          "alphaClusterFeatureGates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "anonymousAuthenticationConfig": {
+            "$ref": "#/components/schemas/AnonymousAuthenticationConfig"
+          },
+          "authenticatorGroupsConfig": {
+            "$ref": "#/components/schemas/AuthenticatorGroupsConfig"
+          },
+          "autopilot": {
+            "$ref": "#/components/schemas/Autopilot"
+          },
+          "autoscaling": {
+            "$ref": "#/components/schemas/ClusterAutoscaling"
+          },
+          "binaryAuthorization": {
+            "$ref": "#/components/schemas/BinaryAuthorization"
+          },
+          "clusterIpv4Cidr": {
+            "type": "string"
+          },
+          "compliancePostureConfig": {
+            "$ref": "#/components/schemas/CompliancePostureConfig"
+          },
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCondition"
+            },
+            "type": "array"
+          },
+          "confidentialNodes": {
+            "$ref": "#/components/schemas/ConfidentialNodes"
+          },
+          "controlPlaneEgress": {
+            "$ref": "#/components/schemas/ControlPlaneEgress"
+          },
+          "controlPlaneEndpointsConfig": {
+            "$ref": "#/components/schemas/ControlPlaneEndpointsConfig"
+          },
+          "costManagementConfig": {
+            "$ref": "#/components/schemas/CostManagementConfig"
+          },
+          "createTime": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "currentEmulatedVersion": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "currentMasterVersion": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "currentNodeCount": {
+            "deprecated": true,
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "currentNodeVersion": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "databaseEncryption": {
+            "$ref": "#/components/schemas/DatabaseEncryption"
+          },
+          "defaultMaxPodsConstraint": {
+            "$ref": "#/components/schemas/MaxPodsConstraint"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enableK8sBetaApis": {
+            "$ref": "#/components/schemas/K8sBetaAPIConfig"
+          },
+          "enableKubernetesAlpha": {
+            "type": "boolean"
+          },
+          "enableTpu": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "endpoint": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "enterpriseConfig": {
+            "$ref": "#/components/schemas/EnterpriseConfig"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "expireTime": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "fleet": {
+            "$ref": "#/components/schemas/Fleet"
+          },
+          "gkeAutoUpgradeConfig": {
+            "$ref": "#/components/schemas/GkeAutoUpgradeConfig"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "identityServiceConfig": {
+            "$ref": "#/components/schemas/IdentityServiceConfig"
+          },
+          "initialClusterVersion": {
+            "type": "string"
+          },
+          "initialNodeCount": {
+            "deprecated": true,
+            "format": "int32",
+            "type": "integer"
+          },
+          "instanceGroupUrls": {
+            "deprecated": true,
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "ipAllocationPolicy": {
+            "$ref": "#/components/schemas/IPAllocationPolicy"
+          },
+          "labelFingerprint": {
+            "type": "string"
+          },
+          "legacyAbac": {
+            "$ref": "#/components/schemas/LegacyAbac"
+          },
+          "location": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "locations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "loggingConfig": {
+            "$ref": "#/components/schemas/LoggingConfig"
+          },
+          "loggingService": {
+            "type": "string"
+          },
+          "maintenancePolicy": {
+            "$ref": "#/components/schemas/MaintenancePolicy"
+          },
+          "managedMachineLearningDiagnosticsConfig": {
+            "$ref": "#/components/schemas/ManagedMachineLearningDiagnosticsConfig"
+          },
+          "managedOpentelemetryConfig": {
+            "$ref": "#/components/schemas/ManagedOpenTelemetryConfig"
+          },
+          "masterAuth": {
+            "$ref": "#/components/schemas/MasterAuth"
+          },
+          "masterAuthorizedNetworksConfig": {
+            "$ref": "#/components/schemas/MasterAuthorizedNetworksConfig"
+          },
+          "meshCertificates": {
+            "$ref": "#/components/schemas/MeshCertificates"
+          },
+          "monitoringConfig": {
+            "$ref": "#/components/schemas/MonitoringConfig"
+          },
+          "monitoringService": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "network": {
+            "type": "string"
+          },
+          "networkConfig": {
+            "$ref": "#/components/schemas/NetworkConfig"
+          },
+          "networkPolicy": {
+            "$ref": "#/components/schemas/NetworkPolicy"
+          },
+          "nodeConfig": {
+            "$ref": "#/components/schemas/NodeConfig"
+          },
+          "nodeCreationConfig": {
+            "$ref": "#/components/schemas/NodeCreationConfig"
+          },
+          "nodeIpv4CidrSize": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nodePoolAutoConfig": {
+            "$ref": "#/components/schemas/NodePoolAutoConfig"
+          },
+          "nodePoolDefaults": {
+            "$ref": "#/components/schemas/NodePoolDefaults"
+          },
+          "nodePools": {
+            "items": {
+              "$ref": "#/components/schemas/NodePool"
+            },
+            "type": "array"
+          },
+          "notificationConfig": {
+            "$ref": "#/components/schemas/NotificationConfig"
+          },
+          "parentProductConfig": {
+            "$ref": "#/components/schemas/ParentProductConfig"
+          },
+          "podAutoscaling": {
+            "$ref": "#/components/schemas/PodAutoscaling"
+          },
+          "privateClusterConfig": {
+            "$ref": "#/components/schemas/PrivateClusterConfig"
+          },
+          "rbacBindingConfig": {
+            "$ref": "#/components/schemas/RBACBindingConfig"
+          },
+          "releaseChannel": {
+            "$ref": "#/components/schemas/ReleaseChannel"
+          },
+          "resourceLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "resourceUsageExportConfig": {
+            "$ref": "#/components/schemas/ResourceUsageExportConfig"
+          },
+          "rollbackSafeUpgrade": {
+            "$ref": "#/components/schemas/RollbackSafeUpgrade"
+          },
+          "satisfiesPzi": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "satisfiesPzs": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "scheduleUpgradeConfig": {
+            "$ref": "#/components/schemas/ScheduleUpgradeConfig"
+          },
+          "secretManagerConfig": {
+            "$ref": "#/components/schemas/SecretManagerConfig"
+          },
+          "secretSyncConfig": {
+            "$ref": "#/components/schemas/SecretSyncConfig"
+          },
+          "securityPostureConfig": {
+            "$ref": "#/components/schemas/SecurityPostureConfig"
+          },
+          "selfLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "servicesIpv4Cidr": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "shieldedNodes": {
+            "$ref": "#/components/schemas/ShieldedNodes"
+          },
+          "status": {
+            "enum": [
+              "STATUS_UNSPECIFIED",
+              "PROVISIONING",
+              "RUNNING",
+              "RECONCILING",
+              "STOPPING",
+              "ERROR",
+              "DEGRADED"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "statusMessage": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "subnetwork": {
+            "type": "string"
+          },
+          "tpuIpv4CidrBlock": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "userManagedKeysConfig": {
+            "$ref": "#/components/schemas/UserManagedKeysConfig"
+          },
+          "verticalPodAutoscaling": {
+            "$ref": "#/components/schemas/VerticalPodAutoscaling"
+          },
+          "workloadIdentityConfig": {
+            "$ref": "#/components/schemas/WorkloadIdentityConfig"
+          },
+          "zone": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterAutoscaling": {
+        "properties": {
+          "autopilotGeneralProfile": {
+            "enum": [
+              "AUTOPILOT_GENERAL_PROFILE_UNSPECIFIED",
+              "NO_PERFORMANCE",
+              "NONE"
+            ],
+            "type": "string"
+          },
+          "autoprovisioningLocations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "autoprovisioningNodePoolDefaults": {
+            "$ref": "#/components/schemas/AutoprovisioningNodePoolDefaults"
+          },
+          "autoscalingProfile": {
+            "enum": [
+              "PROFILE_UNSPECIFIED",
+              "OPTIMIZE_UTILIZATION",
+              "BALANCED"
+            ],
+            "type": "string"
+          },
+          "defaultComputeClassConfig": {
+            "$ref": "#/components/schemas/DefaultComputeClassConfig"
+          },
+          "enableNodeAutoprovisioning": {
+            "type": "boolean"
+          },
+          "resourceLimits": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceLimit"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterNetworkPerformanceConfig": {
+        "properties": {
+          "totalEgressBandwidthTier": {
+            "enum": [
+              "TIER_UNSPECIFIED",
+              "TIER_1"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterPolicyConfig": {
+        "properties": {
+          "noStandardNodePools": {
+            "type": "boolean"
+          },
+          "noSystemImpersonation": {
+            "type": "boolean"
+          },
+          "noSystemMutation": {
+            "type": "boolean"
+          },
+          "noUnsafeWebhooks": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterUpdate": {
+        "properties": {
+          "additionalPodRangesConfig": {
+            "$ref": "#/components/schemas/AdditionalPodRangesConfig"
+          },
+          "desiredAdditionalIpRangesConfig": {
+            "$ref": "#/components/schemas/DesiredAdditionalIPRangesConfig"
+          },
+          "desiredAddonsConfig": {
+            "$ref": "#/components/schemas/AddonsConfig"
+          },
+          "desiredAnonymousAuthenticationConfig": {
+            "$ref": "#/components/schemas/AnonymousAuthenticationConfig"
+          },
+          "desiredAuthenticatorGroupsConfig": {
+            "$ref": "#/components/schemas/AuthenticatorGroupsConfig"
+          },
+          "desiredAutoIpamConfig": {
+            "$ref": "#/components/schemas/AutoIpamConfig"
+          },
+          "desiredAutopilotClusterPolicyConfig": {
+            "$ref": "#/components/schemas/ClusterPolicyConfig"
+          },
+          "desiredAutopilotWorkloadPolicyConfig": {
+            "$ref": "#/components/schemas/WorkloadPolicyConfig"
+          },
+          "desiredBinaryAuthorization": {
+            "$ref": "#/components/schemas/BinaryAuthorization"
+          },
+          "desiredClusterAutoscaling": {
+            "$ref": "#/components/schemas/ClusterAutoscaling"
+          },
+          "desiredCompliancePostureConfig": {
+            "$ref": "#/components/schemas/CompliancePostureConfig"
+          },
+          "desiredContainerdConfig": {
+            "$ref": "#/components/schemas/ContainerdConfig"
+          },
+          "desiredControlPlaneEgress": {
+            "$ref": "#/components/schemas/ControlPlaneEgress"
+          },
+          "desiredControlPlaneEndpointsConfig": {
+            "$ref": "#/components/schemas/ControlPlaneEndpointsConfig"
+          },
+          "desiredCostManagementConfig": {
+            "$ref": "#/components/schemas/CostManagementConfig"
+          },
+          "desiredDatabaseEncryption": {
+            "$ref": "#/components/schemas/DatabaseEncryption"
+          },
+          "desiredDatapathProvider": {
+            "enum": [
+              "DATAPATH_PROVIDER_UNSPECIFIED",
+              "LEGACY_DATAPATH",
+              "ADVANCED_DATAPATH"
+            ],
+            "type": "string"
+          },
+          "desiredDefaultEnablePrivateNodes": {
+            "type": "boolean"
+          },
+          "desiredDefaultSnatStatus": {
+            "$ref": "#/components/schemas/DefaultSnatStatus"
+          },
+          "desiredDisableL4LbFirewallReconciliation": {
+            "type": "boolean"
+          },
+          "desiredDnsConfig": {
+            "$ref": "#/components/schemas/DNSConfig"
+          },
+          "desiredEmulatedVersion": {
+            "type": "string"
+          },
+          "desiredEnableCiliumClusterwideNetworkPolicy": {
+            "type": "boolean"
+          },
+          "desiredEnableFqdnNetworkPolicy": {
+            "type": "boolean"
+          },
+          "desiredEnableMultiNetworking": {
+            "type": "boolean"
+          },
+          "desiredEnablePrivateEndpoint": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "desiredEnterpriseConfig": {
+            "$ref": "#/components/schemas/DesiredEnterpriseConfig"
+          },
+          "desiredFleet": {
+            "$ref": "#/components/schemas/Fleet"
+          },
+          "desiredGatewayApiConfig": {
+            "$ref": "#/components/schemas/GatewayAPIConfig"
+          },
+          "desiredGcfsConfig": {
+            "$ref": "#/components/schemas/GcfsConfig"
+          },
+          "desiredIdentityServiceConfig": {
+            "$ref": "#/components/schemas/IdentityServiceConfig"
+          },
+          "desiredImage": {
+            "type": "string"
+          },
+          "desiredImageProject": {
+            "type": "string"
+          },
+          "desiredImageType": {
+            "type": "string"
+          },
+          "desiredInTransitEncryptionConfig": {
+            "enum": [
+              "IN_TRANSIT_ENCRYPTION_CONFIG_UNSPECIFIED",
+              "IN_TRANSIT_ENCRYPTION_DISABLED",
+              "IN_TRANSIT_ENCRYPTION_INTER_NODE_TRANSPARENT"
+            ],
+            "type": "string"
+          },
+          "desiredIntraNodeVisibilityConfig": {
+            "$ref": "#/components/schemas/IntraNodeVisibilityConfig"
+          },
+          "desiredK8sBetaApis": {
+            "$ref": "#/components/schemas/K8sBetaAPIConfig"
+          },
+          "desiredL4ilbSubsettingConfig": {
+            "$ref": "#/components/schemas/ILBSubsettingConfig"
+          },
+          "desiredLocations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "desiredLoggingConfig": {
+            "$ref": "#/components/schemas/LoggingConfig"
+          },
+          "desiredLoggingService": {
+            "type": "string"
+          },
+          "desiredManagedMachineLearningDiagnosticsConfig": {
+            "$ref": "#/components/schemas/ManagedMachineLearningDiagnosticsConfig"
+          },
+          "desiredManagedOpentelemetryConfig": {
+            "$ref": "#/components/schemas/ManagedOpenTelemetryConfig"
+          },
+          "desiredMasterAuthorizedNetworksConfig": {
+            "$ref": "#/components/schemas/MasterAuthorizedNetworksConfig"
+          },
+          "desiredMasterVersion": {
+            "type": "string"
+          },
+          "desiredMeshCertificates": {
+            "$ref": "#/components/schemas/MeshCertificates"
+          },
+          "desiredMonitoringConfig": {
+            "$ref": "#/components/schemas/MonitoringConfig"
+          },
+          "desiredMonitoringService": {
+            "type": "string"
+          },
+          "desiredNetworkPerformanceConfig": {
+            "$ref": "#/components/schemas/ClusterNetworkPerformanceConfig"
+          },
+          "desiredNetworkTierConfig": {
+            "$ref": "#/components/schemas/NetworkTierConfig"
+          },
+          "desiredNodeCreationConfig": {
+            "$ref": "#/components/schemas/NodeCreationConfig"
+          },
+          "desiredNodeKubeletConfig": {
+            "$ref": "#/components/schemas/NodeKubeletConfig"
+          },
+          "desiredNodePoolAutoConfigKubeletConfig": {
+            "$ref": "#/components/schemas/NodeKubeletConfig"
+          },
+          "desiredNodePoolAutoConfigLinuxNodeConfig": {
+            "$ref": "#/components/schemas/LinuxNodeConfig"
+          },
+          "desiredNodePoolAutoConfigNetworkTags": {
+            "$ref": "#/components/schemas/NetworkTags"
+          },
+          "desiredNodePoolAutoConfigResourceManagerTags": {
+            "$ref": "#/components/schemas/ResourceManagerTags"
+          },
+          "desiredNodePoolAutoscaling": {
+            "$ref": "#/components/schemas/NodePoolAutoscaling"
+          },
+          "desiredNodePoolId": {
+            "type": "string"
+          },
+          "desiredNodePoolLoggingConfig": {
+            "$ref": "#/components/schemas/NodePoolLoggingConfig"
+          },
+          "desiredNodeVersion": {
+            "type": "string"
+          },
+          "desiredNotificationConfig": {
+            "$ref": "#/components/schemas/NotificationConfig"
+          },
+          "desiredParentProductConfig": {
+            "$ref": "#/components/schemas/ParentProductConfig"
+          },
+          "desiredPodAutoscaling": {
+            "$ref": "#/components/schemas/PodAutoscaling"
+          },
+          "desiredPrivateClusterConfig": {
+            "$ref": "#/components/schemas/PrivateClusterConfig"
+          },
+          "desiredPrivateIpv6GoogleAccess": {
+            "enum": [
+              "PRIVATE_IPV6_GOOGLE_ACCESS_UNSPECIFIED",
+              "PRIVATE_IPV6_GOOGLE_ACCESS_DISABLED",
+              "PRIVATE_IPV6_GOOGLE_ACCESS_TO_GOOGLE",
+              "PRIVATE_IPV6_GOOGLE_ACCESS_BIDIRECTIONAL"
+            ],
+            "type": "string"
+          },
+          "desiredPrivilegedAdmissionConfig": {
+            "$ref": "#/components/schemas/PrivilegedAdmissionConfig"
+          },
+          "desiredRbacBindingConfig": {
+            "$ref": "#/components/schemas/RBACBindingConfig"
+          },
+          "desiredReleaseChannel": {
+            "$ref": "#/components/schemas/ReleaseChannel"
+          },
+          "desiredResourceUsageExportConfig": {
+            "$ref": "#/components/schemas/ResourceUsageExportConfig"
+          },
+          "desiredRollbackSafeUpgrade": {
+            "$ref": "#/components/schemas/RollbackSafeUpgrade"
+          },
+          "desiredSecretManagerConfig": {
+            "$ref": "#/components/schemas/SecretManagerConfig"
+          },
+          "desiredSecretSyncConfig": {
+            "$ref": "#/components/schemas/SecretSyncConfig"
+          },
+          "desiredSecurityPostureConfig": {
+            "$ref": "#/components/schemas/SecurityPostureConfig"
+          },
+          "desiredServiceExternalIpsConfig": {
+            "$ref": "#/components/schemas/ServiceExternalIPsConfig"
+          },
+          "desiredShieldedNodes": {
+            "$ref": "#/components/schemas/ShieldedNodes"
+          },
+          "desiredStackType": {
+            "enum": [
+              "STACK_TYPE_UNSPECIFIED",
+              "IPV4",
+              "IPV4_IPV6"
+            ],
+            "type": "string"
+          },
+          "desiredUserManagedKeysConfig": {
+            "$ref": "#/components/schemas/UserManagedKeysConfig"
+          },
+          "desiredVerticalPodAutoscaling": {
+            "$ref": "#/components/schemas/VerticalPodAutoscaling"
+          },
+          "desiredWorkloadIdentityConfig": {
+            "$ref": "#/components/schemas/WorkloadIdentityConfig"
+          },
+          "enableK8sBetaApis": {
+            "$ref": "#/components/schemas/K8sBetaAPIConfig"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "gkeAutoUpgradeConfig": {
+            "$ref": "#/components/schemas/GkeAutoUpgradeConfig"
+          },
+          "removedAdditionalPodRangesConfig": {
+            "$ref": "#/components/schemas/AdditionalPodRangesConfig"
+          },
+          "userManagedKeysConfig": {
+            "$ref": "#/components/schemas/UserManagedKeysConfig"
+          }
+        },
+        "type": "object"
+      },
+      "CompliancePostureConfig": {
+        "deprecated": true,
+        "properties": {
+          "complianceStandards": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceStandard"
+            },
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "DISABLED",
+              "ENABLED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ComplianceStandard": {
+        "properties": {
+          "standard": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ConfidentialNodes": {
+        "properties": {
+          "confidentialInstanceType": {
+            "enum": [
+              "CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED",
+              "SEV",
+              "SEV_SNP",
+              "TDX"
+            ],
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ConfigConnectorConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ConsumptionMeteringConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ContainerdConfig": {
+        "properties": {
+          "privateRegistryAccessConfig": {
+            "$ref": "#/components/schemas/PrivateRegistryAccessConfig"
+          },
+          "registryHosts": {
+            "items": {
+              "$ref": "#/components/schemas/RegistryHostConfig"
+            },
+            "type": "array"
+          },
+          "writableCgroups": {
+            "$ref": "#/components/schemas/WritableCgroups"
+          }
+        },
+        "type": "object"
+      },
+      "ControlPlaneEgress": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "VIA_CONTROL_PLANE",
+              "NONE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ControlPlaneEndpointsConfig": {
+        "properties": {
+          "dnsEndpointConfig": {
+            "$ref": "#/components/schemas/DNSEndpointConfig"
+          },
+          "ipEndpointsConfig": {
+            "$ref": "#/components/schemas/IPEndpointsConfig"
+          }
+        },
+        "type": "object"
+      },
+      "CostManagementConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CrashLoopBackOffConfig": {
+        "properties": {
+          "maxContainerRestartPeriod": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CreateClusterRequest": {
+        "properties": {
+          "cluster": {
+            "$ref": "#/components/schemas/Cluster"
+          },
+          "parent": {
+            "type": "string"
+          },
+          "projectId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "zone": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CreateNodePoolRequest": {
+        "properties": {
+          "clusterId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "nodePool": {
+            "$ref": "#/components/schemas/NodePool"
+          },
+          "parent": {
+            "type": "string"
+          },
+          "projectId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "zone": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomImageConfig": {
+        "properties": {
+          "image": {
+            "type": "string"
+          },
+          "imageProject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomNodeInit": {
+        "properties": {
+          "initScript": {
+            "$ref": "#/components/schemas/InitScript"
+          }
+        },
+        "type": "object"
+      },
+      "DNSConfig": {
+        "properties": {
+          "additiveVpcScopeDnsDomain": {
+            "type": "string"
+          },
+          "clusterDns": {
+            "enum": [
+              "PROVIDER_UNSPECIFIED",
+              "PLATFORM_DEFAULT",
+              "CLOUD_DNS",
+              "KUBE_DNS"
+            ],
+            "type": "string"
+          },
+          "clusterDnsDomain": {
+            "type": "string"
+          },
+          "clusterDnsScope": {
+            "enum": [
+              "DNS_SCOPE_UNSPECIFIED",
+              "CLUSTER_SCOPE",
+              "VPC_SCOPE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DNSEndpointConfig": {
+        "properties": {
+          "allowExternalTraffic": {
+            "type": "boolean"
+          },
+          "enableK8sCertsViaDns": {
+            "type": "boolean"
+          },
+          "enableK8sTokensViaDns": {
+            "type": "boolean"
+          },
+          "endpoint": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DailyMaintenanceWindow": {
+        "properties": {
+          "duration": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "startTime": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DatabaseEncryption": {
+        "properties": {
+          "currentState": {
+            "enum": [
+              "CURRENT_STATE_UNSPECIFIED",
+              "CURRENT_STATE_ENCRYPTED",
+              "CURRENT_STATE_DECRYPTED",
+              "CURRENT_STATE_ENCRYPTION_PENDING",
+              "CURRENT_STATE_ENCRYPTION_ERROR",
+              "CURRENT_STATE_DECRYPTION_PENDING",
+              "CURRENT_STATE_DECRYPTION_ERROR",
+              "CURRENT_STATE_ALL_OBJECTS_ENCRYPTION_ENABLED",
+              "CURRENT_STATE_ALL_OBJECTS_ENCRYPTION_PENDING",
+              "CURRENT_STATE_ALL_OBJECTS_ENCRYPTION_ERROR"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "decryptionKeys": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "keyName": {
+            "type": "string"
+          },
+          "lastOperationErrors": {
+            "items": {
+              "$ref": "#/components/schemas/OperationError"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "state": {
+            "enum": [
+              "UNKNOWN",
+              "ENCRYPTED",
+              "DECRYPTED",
+              "ALL_OBJECTS_ENCRYPTION_ENABLED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataplaneV2Config": {
+        "properties": {
+          "scalabilityMode": {
+            "enum": [
+              "SCALABILITY_MODE_UNSPECIFIED",
+              "DISABLED",
+              "SCALE_OPTIMIZED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Date": {
+        "properties": {
+          "day": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "month": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "year": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "DedicatedLocalSsdProfile": {
+        "properties": {
+          "diskCount": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultComputeClassConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultSnatStatus": {
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "DesiredAdditionalIPRangesConfig": {
+        "properties": {
+          "additionalIpRangesConfigs": {
+            "items": {
+              "$ref": "#/components/schemas/AdditionalIPRangesConfig"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DesiredEnterpriseConfig": {
+        "deprecated": true,
+        "properties": {
+          "desiredTier": {
+            "enum": [
+              "CLUSTER_TIER_UNSPECIFIED",
+              "STANDARD",
+              "ENTERPRISE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DiskIoScheduler": {
+        "properties": {
+          "nodeAttachedDiskIoScheduler": {
+            "type": "string"
+          },
+          "nodeSystemIoScheduler": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DisruptionBudget": {
+        "properties": {
+          "lastDisruptionTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastMinorVersionDisruptionTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          },
+          "minorVersionDisruptionInterval": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "patchVersionDisruptionInterval": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DnsCacheConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Empty": {
+        "properties": {},
+        "type": "object"
+      },
+      "EncryptionConfig": {
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "EnterpriseConfig": {
+        "deprecated": true,
+        "properties": {
+          "clusterTier": {
+            "enum": [
+              "CLUSTER_TIER_UNSPECIFIED",
+              "STANDARD",
+              "ENTERPRISE"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "desiredTier": {
+            "enum": [
+              "CLUSTER_TIER_UNSPECIFIED",
+              "STANDARD",
+              "ENTERPRISE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EphemeralLocalSsdProfile": {
+        "properties": {
+          "swapSizeGib": {
+            "format": "int64",
+            "type": "string"
+          },
+          "swapSizePercent": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EphemeralStorageLocalSsdConfig": {
+        "properties": {
+          "dataCacheCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "localSsdCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EvictionGracePeriod": {
+        "properties": {
+          "imagefsAvailable": {
+            "type": "string"
+          },
+          "imagefsInodesFree": {
+            "type": "string"
+          },
+          "memoryAvailable": {
+            "type": "string"
+          },
+          "nodefsAvailable": {
+            "type": "string"
+          },
+          "nodefsInodesFree": {
+            "type": "string"
+          },
+          "pidAvailable": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EvictionMinimumReclaim": {
+        "properties": {
+          "imagefsAvailable": {
+            "type": "string"
+          },
+          "imagefsInodesFree": {
+            "type": "string"
+          },
+          "memoryAvailable": {
+            "type": "string"
+          },
+          "nodefsAvailable": {
+            "type": "string"
+          },
+          "nodefsInodesFree": {
+            "type": "string"
+          },
+          "pidAvailable": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EvictionSignals": {
+        "properties": {
+          "imagefsAvailable": {
+            "type": "string"
+          },
+          "imagefsInodesFree": {
+            "type": "string"
+          },
+          "memoryAvailable": {
+            "type": "string"
+          },
+          "nodefsAvailable": {
+            "type": "string"
+          },
+          "nodefsInodesFree": {
+            "type": "string"
+          },
+          "pidAvailable": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExclusionUntilEndOfSupport": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "endTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          },
+          "startTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FastSocket": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Filter": {
+        "properties": {
+          "eventType": {
+            "items": {
+              "enum": [
+                "EVENT_TYPE_UNSPECIFIED",
+                "UPGRADE_AVAILABLE_EVENT",
+                "UPGRADE_EVENT",
+                "SECURITY_BULLETIN_EVENT",
+                "UPGRADE_INFO_EVENT"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Fleet": {
+        "properties": {
+          "membership": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "membershipType": {
+            "enum": [
+              "MEMBERSHIP_TYPE_UNSPECIFIED",
+              "LIGHTWEIGHT"
+            ],
+            "type": "string"
+          },
+          "preRegistered": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "project": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GCPSecretManagerCertificateConfig": {
+        "properties": {
+          "secretUri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GPUDirectConfig": {
+        "properties": {
+          "gpuDirectStrategy": {
+            "enum": [
+              "GPU_DIRECT_STRATEGY_UNSPECIFIED",
+              "RDMA"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GPUDriverInstallationConfig": {
+        "properties": {
+          "gpuDriverVersion": {
+            "enum": [
+              "GPU_DRIVER_VERSION_UNSPECIFIED",
+              "INSTALLATION_DISABLED",
+              "DEFAULT",
+              "LATEST"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GPUSharingConfig": {
+        "properties": {
+          "gpuSharingStrategy": {
+            "enum": [
+              "GPU_SHARING_STRATEGY_UNSPECIFIED",
+              "TIME_SHARING",
+              "MPS"
+            ],
+            "type": "string"
+          },
+          "maxSharedClientsPerGpu": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GatewayAPIConfig": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "CHANNEL_UNSPECIFIED",
+              "CHANNEL_DISABLED",
+              "CHANNEL_EXPERIMENTAL",
+              "CHANNEL_STANDARD"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GcePersistentDiskCsiDriverConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "GcfsConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "GcpFilestoreCsiDriverConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "GcsFuseCsiDriverConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "GkeAutoUpgradeConfig": {
+        "properties": {
+          "patchMode": {
+            "enum": [
+              "PATCH_MODE_UNSPECIFIED",
+              "ACCELERATED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GkeBackupAgentConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "HighScaleCheckpointingConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "HorizontalPodAutoscaling": {
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "HostConfig": {
+        "properties": {
+          "ca": {
+            "items": {
+              "$ref": "#/components/schemas/CertificateConfig"
+            },
+            "type": "array"
+          },
+          "capabilities": {
+            "items": {
+              "enum": [
+                "HOST_CAPABILITY_UNSPECIFIED",
+                "HOST_CAPABILITY_PULL",
+                "HOST_CAPABILITY_RESOLVE",
+                "HOST_CAPABILITY_PUSH"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "client": {
+            "items": {
+              "$ref": "#/components/schemas/CertificateConfigPair"
+            },
+            "type": "array"
+          },
+          "dialTimeout": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "header": {
+            "items": {
+              "$ref": "#/components/schemas/RegistryHeader"
+            },
+            "type": "array"
+          },
+          "host": {
+            "type": "string"
+          },
+          "overridePath": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "HttpLoadBalancing": {
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "HugepagesConfig": {
+        "properties": {
+          "hugepageSize1g": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "hugepageSize2m": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ILBSubsettingConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "IPAllocationPolicy": {
+        "properties": {
+          "additionalIpRangesConfigs": {
+            "items": {
+              "$ref": "#/components/schemas/AdditionalIPRangesConfig"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "additionalPodRangesConfig": {
+            "$ref": "#/components/schemas/AdditionalPodRangesConfig"
+          },
+          "autoIpamConfig": {
+            "$ref": "#/components/schemas/AutoIpamConfig"
+          },
+          "clusterIpv4Cidr": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "clusterIpv4CidrBlock": {
+            "type": "string"
+          },
+          "clusterSecondaryRangeName": {
+            "type": "string"
+          },
+          "createSubnetwork": {
+            "type": "boolean"
+          },
+          "defaultPodIpv4RangeUtilization": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "ipv6AccessType": {
+            "enum": [
+              "IPV6_ACCESS_TYPE_UNSPECIFIED",
+              "INTERNAL",
+              "EXTERNAL"
+            ],
+            "type": "string"
+          },
+          "networkTierConfig": {
+            "$ref": "#/components/schemas/NetworkTierConfig"
+          },
+          "nodeIpv4Cidr": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "nodeIpv4CidrBlock": {
+            "type": "string"
+          },
+          "podCidrOverprovisionConfig": {
+            "$ref": "#/components/schemas/PodCIDROverprovisionConfig"
+          },
+          "servicesIpv4Cidr": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "servicesIpv4CidrBlock": {
+            "type": "string"
+          },
+          "servicesIpv6CidrBlock": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "servicesSecondaryRangeName": {
+            "type": "string"
+          },
+          "stackType": {
+            "enum": [
+              "STACK_TYPE_UNSPECIFIED",
+              "IPV4",
+              "IPV4_IPV6"
+            ],
+            "type": "string"
+          },
+          "subnetIpv6CidrBlock": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "subnetworkName": {
+            "type": "string"
+          },
+          "tpuIpv4CidrBlock": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "useIpAliases": {
+            "type": "boolean"
+          },
+          "useRoutes": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "IPEndpointsConfig": {
+        "properties": {
+          "authorizedNetworksConfig": {
+            "$ref": "#/components/schemas/MasterAuthorizedNetworksConfig"
+          },
+          "enablePublicEndpoint": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "globalAccess": {
+            "type": "boolean"
+          },
+          "privateEndpoint": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "privateEndpointSubnetwork": {
+            "type": "string"
+          },
+          "publicEndpoint": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IdentityServiceConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "InitScript": {
+        "properties": {
+          "args": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gcpSecretManagerSecretUri": {
+            "type": "string"
+          },
+          "gcsGeneration": {
+            "format": "int64",
+            "type": "string"
+          },
+          "gcsUri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IntraNodeVisibilityConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "K8sBetaAPIConfig": {
+        "properties": {
+          "enabledApis": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "KubeletCertInfo": {
+        "properties": {
+          "nonTpmBootstrapCertExpireTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          },
+          "tpmBootstrapCertExpireTime": {
+            "format": "google-datetime",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "KubernetesDashboard": {
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "LegacyAbac": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "LinuxNodeConfig": {
+        "properties": {
+          "accurateTimeConfig": {
+            "$ref": "#/components/schemas/AccurateTimeConfig"
+          },
+          "cgroupMode": {
+            "enum": [
+              "CGROUP_MODE_UNSPECIFIED",
+              "CGROUP_MODE_V1",
+              "CGROUP_MODE_V2"
+            ],
+            "type": "string"
+          },
+          "customNodeInit": {
+            "$ref": "#/components/schemas/CustomNodeInit"
+          },
+          "diskIoScheduler": {
+            "$ref": "#/components/schemas/DiskIoScheduler"
+          },
+          "hugepages": {
+            "$ref": "#/components/schemas/HugepagesConfig"
+          },
+          "nodeKernelModuleLoading": {
+            "$ref": "#/components/schemas/NodeKernelModuleLoading"
+          },
+          "nodeVfioConfig": {
+            "$ref": "#/components/schemas/NodeVfioConfig"
+          },
+          "swapConfig": {
+            "$ref": "#/components/schemas/SwapConfig"
+          },
+          "sysctls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "transparentHugepageDefrag": {
+            "enum": [
+              "TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED",
+              "TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS",
+              "TRANSPARENT_HUGEPAGE_DEFRAG_DEFER",
+              "TRANSPARENT_HUGEPAGE_DEFRAG_DEFER_WITH_MADVISE",
+              "TRANSPARENT_HUGEPAGE_DEFRAG_MADVISE",
+              "TRANSPARENT_HUGEPAGE_DEFRAG_NEVER"
+            ],
+            "type": "string"
+          },
+          "transparentHugepageEnabled": {
+            "enum": [
+              "TRANSPARENT_HUGEPAGE_ENABLED_UNSPECIFIED",
+              "TRANSPARENT_HUGEPAGE_ENABLED_ALWAYS",
+              "TRANSPARENT_HUGEPAGE_ENABLED_MADVISE",
+              "TRANSPARENT_HUGEPAGE_ENABLED_NEVER"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListClustersResponse": {
+        "properties": {
+          "clusters": {
+            "items": {
+              "$ref": "#/components/schemas/Cluster"
+            },
+            "type": "array"
+          },
+          "missingZones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ListNodePoolsResponse": {
+        "properties": {
+          "nodePools": {
+            "items": {
+              "$ref": "#/components/schemas/NodePool"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ListOperationsResponse": {
+        "properties": {
+          "missingZones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LocalNvmeSsdBlockConfig": {
+        "properties": {
+          "localSsdCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LoggingComponentConfig": {
+        "properties": {
+          "enableComponents": {
+            "items": {
+              "enum": [
+                "COMPONENT_UNSPECIFIED",
+                "SYSTEM_COMPONENTS",
+                "WORKLOADS",
+                "APISERVER",
+                "SCHEDULER",
+                "CONTROLLER_MANAGER",
+                "KCP_SSHD",
+                "KCP_CONNECTION",
+                "KCP_HPA",
+                "KCP_VPA"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LoggingConfig": {
+        "properties": {
+          "componentConfig": {
+            "$ref": "#/components/schemas/LoggingComponentConfig"
+          }
+        },
+        "type": "object"
+      },
+      "LoggingVariantConfig": {
+        "properties": {
+          "variant": {
+            "enum": [
+              "VARIANT_UNSPECIFIED",
+              "DEFAULT",
+              "MAX_THROUGHPUT"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LustreCsiDriverConfig": {
+        "properties": {
+          "disableMultiNic": {
+            "type": "boolean"
+          },
+          "enableLegacyLustrePort": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "MaintenanceExclusionOptions": {
+        "properties": {
+          "endTimeBehavior": {
+            "enum": [
+              "END_TIME_BEHAVIOR_UNSPECIFIED",
+              "UNTIL_END_OF_SUPPORT"
+            ],
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "NO_UPGRADES",
+              "NO_MINOR_UPGRADES",
+              "NO_MINOR_OR_NODE_UPGRADES"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MaintenancePolicy": {
+        "properties": {
+          "disruptionBudget": {
+            "$ref": "#/components/schemas/DisruptionBudget"
+          },
+          "resourceVersion": {
+            "type": "string"
+          },
+          "window": {
+            "$ref": "#/components/schemas/MaintenanceWindow"
+          }
+        },
+        "type": "object"
+      },
+      "MaintenanceWindow": {
+        "properties": {
+          "dailyMaintenanceWindow": {
+            "$ref": "#/components/schemas/DailyMaintenanceWindow"
+          },
+          "maintenanceExclusions": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "type": "object"
+          },
+          "recurringMaintenanceWindow": {
+            "$ref": "#/components/schemas/RecurringMaintenanceWindow"
+          },
+          "recurringWindow": {
+            "$ref": "#/components/schemas/RecurringTimeWindow"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedMachineLearningDiagnosticsConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedOpenTelemetryConfig": {
+        "properties": {
+          "scope": {
+            "enum": [
+              "SCOPE_UNSPECIFIED",
+              "NONE",
+              "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedPrometheusConfig": {
+        "properties": {
+          "autoMonitoringConfig": {
+            "$ref": "#/components/schemas/AutoMonitoringConfig"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "MasterAuth": {
+        "properties": {
+          "clientCertificate": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "clientCertificateConfig": {
+            "$ref": "#/components/schemas/ClientCertificateConfig"
+          },
+          "clientKey": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "clusterCaCertificate": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "password": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "username": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MasterAuthorizedNetworksConfig": {
+        "properties": {
+          "cidrBlocks": {
+            "items": {
+              "$ref": "#/components/schemas/CidrBlock"
+            },
+            "type": "array"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "gcpPublicCidrsAccessEnabled": {
+            "type": "boolean"
+          },
+          "privateEndpointEnforcementEnabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "MaxPodsConstraint": {
+        "properties": {
+          "maxPodsPerNode": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MemoryManager": {
+        "properties": {
+          "policy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MeshCertificates": {
+        "properties": {
+          "enableCertificates": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Metric": {
+        "properties": {
+          "doubleValue": {
+            "format": "double",
+            "type": "number"
+          },
+          "intValue": {
+            "format": "int64",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "stringValue": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MonitoringComponentConfig": {
+        "properties": {
+          "enableComponents": {
+            "items": {
+              "enum": [
+                "COMPONENT_UNSPECIFIED",
+                "SYSTEM_COMPONENTS",
+                "APISERVER",
+                "SCHEDULER",
+                "CONTROLLER_MANAGER",
+                "STORAGE",
+                "HPA",
+                "POD",
+                "DAEMONSET",
+                "DEPLOYMENT",
+                "STATEFULSET",
+                "CADVISOR",
+                "KUBELET",
+                "DCGM",
+                "JOBSET"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MonitoringConfig": {
+        "properties": {
+          "advancedDatapathObservabilityConfig": {
+            "$ref": "#/components/schemas/AdvancedDatapathObservabilityConfig"
+          },
+          "componentConfig": {
+            "$ref": "#/components/schemas/MonitoringComponentConfig"
+          },
+          "managedPrometheusConfig": {
+            "$ref": "#/components/schemas/ManagedPrometheusConfig"
+          }
+        },
+        "type": "object"
+      },
+      "NetworkConfig": {
+        "properties": {
+          "datapathProvider": {
+            "enum": [
+              "DATAPATH_PROVIDER_UNSPECIFIED",
+              "LEGACY_DATAPATH",
+              "ADVANCED_DATAPATH"
+            ],
+            "type": "string"
+          },
+          "dataplaneV2Config": {
+            "$ref": "#/components/schemas/DataplaneV2Config"
+          },
+          "defaultEnablePrivateNodes": {
+            "type": "boolean"
+          },
+          "defaultSnatStatus": {
+            "$ref": "#/components/schemas/DefaultSnatStatus"
+          },
+          "disableL4LbFirewallReconciliation": {
+            "type": "boolean"
+          },
+          "dnsConfig": {
+            "$ref": "#/components/schemas/DNSConfig"
+          },
+          "enableCiliumClusterwideNetworkPolicy": {
+            "type": "boolean"
+          },
+          "enableFqdnNetworkPolicy": {
+            "type": "boolean"
+          },
+          "enableIntraNodeVisibility": {
+            "type": "boolean"
+          },
+          "enableL4ilbSubsetting": {
+            "type": "boolean"
+          },
+          "enableMultiNetworking": {
+            "type": "boolean"
+          },
+          "gatewayApiConfig": {
+            "$ref": "#/components/schemas/GatewayAPIConfig"
+          },
+          "inTransitEncryptionConfig": {
+            "enum": [
+              "IN_TRANSIT_ENCRYPTION_CONFIG_UNSPECIFIED",
+              "IN_TRANSIT_ENCRYPTION_DISABLED",
+              "IN_TRANSIT_ENCRYPTION_INTER_NODE_TRANSPARENT"
+            ],
+            "type": "string"
+          },
+          "network": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "networkPerformanceConfig": {
+            "$ref": "#/components/schemas/ClusterNetworkPerformanceConfig"
+          },
+          "privateIpv6GoogleAccess": {
+            "enum": [
+              "PRIVATE_IPV6_GOOGLE_ACCESS_UNSPECIFIED",
+              "PRIVATE_IPV6_GOOGLE_ACCESS_DISABLED",
+              "PRIVATE_IPV6_GOOGLE_ACCESS_TO_GOOGLE",
+              "PRIVATE_IPV6_GOOGLE_ACCESS_BIDIRECTIONAL"
+            ],
+            "type": "string"
+          },
+          "serviceExternalIpsConfig": {
+            "$ref": "#/components/schemas/ServiceExternalIPsConfig"
+          },
+          "subnetwork": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NetworkPerformanceConfig": {
+        "properties": {
+          "totalEgressBandwidthTier": {
+            "enum": [
+              "TIER_UNSPECIFIED",
+              "TIER_1"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NetworkPolicy": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "provider": {
+            "enum": [
+              "PROVIDER_UNSPECIFIED",
+              "CALICO"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NetworkPolicyConfig": {
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "NetworkTags": {
+        "properties": {
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NetworkTierConfig": {
+        "properties": {
+          "networkTier": {
+            "enum": [
+              "NETWORK_TIER_UNSPECIFIED",
+              "NETWORK_TIER_DEFAULT",
+              "NETWORK_TIER_PREMIUM",
+              "NETWORK_TIER_STANDARD"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NodeAffinity": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "OPERATOR_UNSPECIFIED",
+              "IN",
+              "NOT_IN"
+            ],
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NodeConfig": {
+        "properties": {
+          "accelerators": {
+            "items": {
+              "$ref": "#/components/schemas/AcceleratorConfig"
+            },
+            "type": "array"
+          },
+          "advancedMachineFeatures": {
+            "$ref": "#/components/schemas/AdvancedMachineFeatures"
+          },
+          "bootDisk": {
+            "$ref": "#/components/schemas/BootDisk"
+          },
+          "bootDiskKmsKey": {
+            "type": "string"
+          },
+          "confidentialNodes": {
+            "$ref": "#/components/schemas/ConfidentialNodes"
+          },
+          "consolidationDelay": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "containerdConfig": {
+            "$ref": "#/components/schemas/ContainerdConfig"
+          },
+          "diskSizeGb": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "diskType": {
+            "type": "string"
+          },
+          "effectiveCgroupMode": {
+            "enum": [
+              "EFFECTIVE_CGROUP_MODE_UNSPECIFIED",
+              "EFFECTIVE_CGROUP_MODE_V1",
+              "EFFECTIVE_CGROUP_MODE_V2"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "enableConfidentialStorage": {
+            "type": "boolean"
+          },
+          "ephemeralStorageLocalSsdConfig": {
+            "$ref": "#/components/schemas/EphemeralStorageLocalSsdConfig"
+          },
+          "fastSocket": {
+            "$ref": "#/components/schemas/FastSocket"
+          },
+          "flexStart": {
+            "type": "boolean"
+          },
+          "gcfsConfig": {
+            "$ref": "#/components/schemas/GcfsConfig"
+          },
+          "gpuDirectConfig": {
+            "$ref": "#/components/schemas/GPUDirectConfig"
+          },
+          "gvnic": {
+            "$ref": "#/components/schemas/VirtualNIC"
+          },
+          "imageType": {
+            "type": "string"
+          },
+          "kubeletConfig": {
+            "$ref": "#/components/schemas/NodeKubeletConfig"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "linuxNodeConfig": {
+            "$ref": "#/components/schemas/LinuxNodeConfig"
+          },
+          "localNvmeSsdBlockConfig": {
+            "$ref": "#/components/schemas/LocalNvmeSsdBlockConfig"
+          },
+          "localSsdCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "localSsdEncryptionMode": {
+            "enum": [
+              "LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED",
+              "STANDARD_ENCRYPTION",
+              "EPHEMERAL_KEY_ENCRYPTION"
+            ],
+            "type": "string"
+          },
+          "loggingConfig": {
+            "$ref": "#/components/schemas/NodePoolLoggingConfig"
+          },
+          "machineType": {
+            "type": "string"
+          },
+          "maxRunDuration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "minCpuPlatform": {
+            "type": "string"
+          },
+          "nodeGroup": {
+            "type": "string"
+          },
+          "nodeImageConfig": {
+            "$ref": "#/components/schemas/CustomImageConfig"
+          },
+          "oauthScopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "preemptible": {
+            "type": "boolean"
+          },
+          "reservationAffinity": {
+            "$ref": "#/components/schemas/ReservationAffinity"
+          },
+          "resourceLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "resourceManagerTags": {
+            "$ref": "#/components/schemas/ResourceManagerTags"
+          },
+          "sandboxConfig": {
+            "$ref": "#/components/schemas/SandboxConfig"
+          },
+          "secondaryBootDiskUpdateStrategy": {
+            "$ref": "#/components/schemas/SecondaryBootDiskUpdateStrategy"
+          },
+          "secondaryBootDisks": {
+            "items": {
+              "$ref": "#/components/schemas/SecondaryBootDisk"
+            },
+            "type": "array"
+          },
+          "serviceAccount": {
+            "type": "string"
+          },
+          "shieldedInstanceConfig": {
+            "$ref": "#/components/schemas/ShieldedInstanceConfig"
+          },
+          "soleTenantConfig": {
+            "$ref": "#/components/schemas/SoleTenantConfig"
+          },
+          "spot": {
+            "type": "boolean"
+          },
+          "storagePools": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taintConfig": {
+            "$ref": "#/components/schemas/TaintConfig"
+          },
+          "taints": {
+            "items": {
+              "$ref": "#/components/schemas/NodeTaint"
+            },
+            "type": "array"
+          },
+          "windowsNodeConfig": {
+            "$ref": "#/components/schemas/WindowsNodeConfig"
+          },
+          "workloadMetadataConfig": {
+            "$ref": "#/components/schemas/WorkloadMetadataConfig"
+          }
+        },
+        "type": "object"
+      },
+      "NodeConfigDefaults": {
+        "properties": {
+          "containerdConfig": {
+            "$ref": "#/components/schemas/ContainerdConfig"
+          },
+          "gcfsConfig": {
+            "$ref": "#/components/schemas/GcfsConfig"
+          },
+          "loggingConfig": {
+            "$ref": "#/components/schemas/NodePoolLoggingConfig"
+          },
+          "nodeKubeletConfig": {
+            "$ref": "#/components/schemas/NodeKubeletConfig"
+          }
+        },
+        "type": "object"
+      },
+      "NodeCreationConfig": {
+        "properties": {
+          "nodeCreationMode": {
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "VIA_KUBELET",
+              "VIA_CONTROL_PLANE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NodeDrainConfig": {
+        "properties": {
+          "graceTerminationDuration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "pdbTimeoutDuration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "respectPdbDuringNodePoolDeletion": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "NodeKernelModuleLoading": {
+        "properties": {
+          "policy": {
+            "enum": [
+              "POLICY_UNSPECIFIED",
+              "ENFORCE_SIGNED_MODULES",
+              "DO_NOT_ENFORCE_SIGNED_MODULES"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NodeKubeletConfig": {
+        "properties": {
+          "allowedUnsafeSysctls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "containerLogMaxFiles": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "containerLogMaxSize": {
+            "type": "string"
+          },
+          "cpuCfsQuota": {
+            "type": "boolean"
+          },
+          "cpuCfsQuotaPeriod": {
+            "type": "string"
+          },
+          "cpuManagerPolicy": {
+            "type": "string"
+          },
+          "crashLoopBackOff": {
+            "$ref": "#/components/schemas/CrashLoopBackOffConfig"
+          },
+          "evictionMaxPodGracePeriodSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evictionMinimumReclaim": {
+            "$ref": "#/components/schemas/EvictionMinimumReclaim"
+          },
+          "evictionSoft": {
+            "$ref": "#/components/schemas/EvictionSignals"
+          },
+          "evictionSoftGracePeriod": {
+            "$ref": "#/components/schemas/EvictionGracePeriod"
+          },
+          "imageGcHighThresholdPercent": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "imageGcLowThresholdPercent": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "imageMaximumGcAge": {
+            "type": "string"
+          },
+          "imageMinimumGcAge": {
+            "type": "string"
+          },
+          "insecureKubeletReadonlyPortEnabled": {
+            "type": "boolean"
+          },
+          "maxParallelImagePulls": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "memoryManager": {
+            "$ref": "#/components/schemas/MemoryManager"
+          },
+          "podPidsLimit": {
+            "format": "int64",
+            "type": "string"
+          },
+          "reservedResourcesConfig": {
+            "$ref": "#/components/schemas/ReservedResourcesConfig"
+          },
+          "shutdownGracePeriodCriticalPodsSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "shutdownGracePeriodSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "singleProcessOomKill": {
+            "type": "boolean"
+          },
+          "topologyManager": {
+            "$ref": "#/components/schemas/TopologyManager"
+          }
+        },
+        "type": "object"
+      },
+      "NodeManagement": {
+        "properties": {
+          "autoRepair": {
+            "type": "boolean"
+          },
+          "autoUpgrade": {
+            "type": "boolean"
+          },
+          "upgradeOptions": {
+            "$ref": "#/components/schemas/AutoUpgradeOptions"
+          }
+        },
+        "type": "object"
+      },
+      "NodeNetworkConfig": {
+        "properties": {
+          "acceleratorNetworkProfile": {
+            "type": "string"
+          },
+          "additionalNodeNetworkConfigs": {
+            "items": {
+              "$ref": "#/components/schemas/AdditionalNodeNetworkConfig"
+            },
+            "type": "array"
+          },
+          "additionalPodNetworkConfigs": {
+            "items": {
+              "$ref": "#/components/schemas/AdditionalPodNetworkConfig"
+            },
+            "type": "array"
+          },
+          "createPodRange": {
+            "type": "boolean"
+          },
+          "enablePrivateNodes": {
+            "type": "boolean"
+          },
+          "network": {
+            "type": "string"
+          },
+          "networkPerformanceConfig": {
+            "$ref": "#/components/schemas/NetworkPerformanceConfig"
+          },
+          "networkTierConfig": {
+            "$ref": "#/components/schemas/NetworkTierConfig"
+          },
+          "podCidrOverprovisionConfig": {
+            "$ref": "#/components/schemas/PodCIDROverprovisionConfig"
+          },
+          "podIpv4CidrBlock": {
+            "type": "string"
+          },
+          "podIpv4RangeUtilization": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "podRange": {
+            "type": "string"
+          },
+          "subnetwork": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NodePool": {
+        "properties": {
+          "autopilotConfig": {
+            "$ref": "#/components/schemas/AutopilotConfig"
+          },
+          "autoscaling": {
+            "$ref": "#/components/schemas/NodePoolAutoscaling"
+          },
+          "bestEffortProvisioning": {
+            "$ref": "#/components/schemas/BestEffortProvisioning"
+          },
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCondition"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "config": {
+            "$ref": "#/components/schemas/NodeConfig"
+          },
+          "etag": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "initialNodeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "instanceGroupUrls": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "kubeletCertInfo": {
+            "$ref": "#/components/schemas/KubeletCertInfo"
+          },
+          "locations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maintenancePolicy": {
+            "$ref": "#/components/schemas/NodePoolMaintenancePolicy"
+          },
+          "management": {
+            "$ref": "#/components/schemas/NodeManagement"
+          },
+          "maxPodsConstraint": {
+            "$ref": "#/components/schemas/MaxPodsConstraint"
+          },
+          "name": {
+            "type": "string"
+          },
+          "networkConfig": {
+            "$ref": "#/components/schemas/NodeNetworkConfig"
+          },
+          "nodeDrainConfig": {
+            "$ref": "#/components/schemas/NodeDrainConfig"
+          },
+          "placementPolicy": {
+            "$ref": "#/components/schemas/PlacementPolicy"
+          },
+          "podIpv4CidrSize": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "queuedProvisioning": {
+            "$ref": "#/components/schemas/QueuedProvisioning"
+          },
+          "selfLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "STATUS_UNSPECIFIED",
+              "PROVISIONING",
+              "RUNNING",
+              "RUNNING_WITH_ERROR",
+              "RECONCILING",
+              "STOPPING",
+              "ERROR"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "statusMessage": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "updateInfo": {
+            "$ref": "#/components/schemas/UpdateInfo"
+          },
+          "upgradeSettings": {
+            "$ref": "#/components/schemas/UpgradeSettings"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NodePoolAutoConfig": {
+        "properties": {
+          "linuxNodeConfig": {
+            "$ref": "#/components/schemas/LinuxNodeConfig"
+          },
+          "networkTags": {
+            "$ref": "#/components/schemas/NetworkTags"
+          },
+          "nodeKubeletConfig": {
+            "$ref": "#/components/schemas/NodeKubeletConfig"
+          },
+          "resourceManagerTags": {
+            "$ref": "#/components/schemas/ResourceManagerTags"
+          }
+        },
+        "type": "object"
+      },
+      "NodePoolAutoscaling": {
+        "properties": {
+          "autoprovisioned": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "locationPolicy": {
+            "enum": [
+              "LOCATION_POLICY_UNSPECIFIED",
+              "BALANCED",
+              "ANY"
+            ],
+            "type": "string"
+          },
+          "maxNodeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minNodeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalMaxNodeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "totalMinNodeCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NodePoolDefaults": {
+        "properties": {
+          "nodeConfigDefaults": {
+            "$ref": "#/components/schemas/NodeConfigDefaults"
+          }
+        },
+        "type": "object"
+      },
+      "NodePoolLoggingConfig": {
+        "properties": {
+          "variantConfig": {
+            "$ref": "#/components/schemas/LoggingVariantConfig"
+          }
+        },
+        "type": "object"
+      },
+      "NodePoolMaintenancePolicy": {
+        "properties": {
+          "exclusionUntilEndOfSupport": {
+            "$ref": "#/components/schemas/ExclusionUntilEndOfSupport"
+          }
+        },
+        "type": "object"
+      },
+      "NodeReadinessConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "NodeTaint": {
+        "properties": {
+          "effect": {
+            "enum": [
+              "EFFECT_UNSPECIFIED",
+              "NO_SCHEDULE",
+              "PREFER_NO_SCHEDULE",
+              "NO_EXECUTE"
+            ],
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NodeVfioConfig": {
+        "properties": {
+          "dmaEntryLimit": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationConfig": {
+        "properties": {
+          "pubsub": {
+            "$ref": "#/components/schemas/PubSub"
+          }
+        },
+        "type": "object"
+      },
+      "Operation": {
+        "properties": {
+          "clusterConditions": {
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/StatusCondition"
+            },
+            "type": "array"
+          },
+          "detail": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "endTime": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "location": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "nodepoolConditions": {
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/StatusCondition"
+            },
+            "type": "array"
+          },
+          "operationType": {
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "CREATE_CLUSTER",
+              "DELETE_CLUSTER",
+              "UPGRADE_MASTER",
+              "UPGRADE_NODES",
+              "REPAIR_CLUSTER",
+              "UPDATE_CLUSTER",
+              "CREATE_NODE_POOL",
+              "DELETE_NODE_POOL",
+              "SET_NODE_POOL_MANAGEMENT",
+              "AUTO_REPAIR_NODES",
+              "AUTO_UPGRADE_NODES",
+              "SET_LABELS",
+              "SET_MASTER_AUTH",
+              "SET_NODE_POOL_SIZE",
+              "SET_NETWORK_POLICY",
+              "SET_MAINTENANCE_POLICY",
+              "RESIZE_CLUSTER",
+              "FLEET_FEATURE_UPGRADE"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/OperationProgress"
+          },
+          "selfLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "startTime": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "STATUS_UNSPECIFIED",
+              "PENDING",
+              "RUNNING",
+              "DONE",
+              "ABORTING"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "statusMessage": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "targetLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "zone": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OperationError": {
+        "properties": {
+          "errorMessage": {
+            "type": "string"
+          },
+          "keyName": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "google-datetime",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OperationProgress": {
+        "properties": {
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/Metric"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/OperationProgress"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "STATUS_UNSPECIFIED",
+              "PENDING",
+              "RUNNING",
+              "DONE",
+              "ABORTING"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParallelstoreCsiDriverConfig": {
+        "deprecated": true,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ParentProductConfig": {
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "productName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PlacementPolicy": {
+        "properties": {
+          "policyName": {
+            "type": "string"
+          },
+          "tpuTopology": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "COMPACT"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PodAutoscaling": {
+        "properties": {
+          "hpaProfile": {
+            "enum": [
+              "HPA_PROFILE_UNSPECIFIED",
+              "NONE",
+              "PERFORMANCE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PodCIDROverprovisionConfig": {
+        "properties": {
+          "disable": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "PodSnapshotConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "PrivateClusterConfig": {
+        "properties": {
+          "enablePrivateEndpoint": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "enablePrivateNodes": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "masterGlobalAccessConfig": {
+            "$ref": "#/components/schemas/PrivateClusterMasterGlobalAccessConfig"
+          },
+          "masterIpv4CidrBlock": {
+            "type": "string"
+          },
+          "peeringName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "privateEndpoint": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "privateEndpointSubnetwork": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "publicEndpoint": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PrivateClusterMasterGlobalAccessConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "PrivateRegistryAccessConfig": {
+        "properties": {
+          "certificateAuthorityDomainConfig": {
+            "items": {
+              "$ref": "#/components/schemas/CertificateAuthorityDomainConfig"
+            },
+            "type": "array"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "PrivilegedAdmissionConfig": {
+        "properties": {
+          "allowlistPaths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PubSub": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "filter": {
+            "$ref": "#/components/schemas/Filter"
+          },
+          "topic": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "QueuedProvisioning": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "RBACBindingConfig": {
+        "properties": {
+          "enableInsecureBindingSystemAuthenticated": {
+            "type": "boolean"
+          },
+          "enableInsecureBindingSystemUnauthenticated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "RangeInfo": {
+        "properties": {
+          "rangeName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "utilization": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "RayClusterLoggingConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "RayClusterMonitoringConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "RayOperatorConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "rayClusterLoggingConfig": {
+            "$ref": "#/components/schemas/RayClusterLoggingConfig"
+          },
+          "rayClusterMonitoringConfig": {
+            "$ref": "#/components/schemas/RayClusterMonitoringConfig"
+          }
+        },
+        "type": "object"
+      },
+      "RecurringMaintenanceWindow": {
+        "properties": {
+          "delayUntil": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "recurrence": {
+            "type": "string"
+          },
+          "windowDuration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "windowStartTime": {
+            "$ref": "#/components/schemas/TimeOfDay"
+          }
+        },
+        "type": "object"
+      },
+      "RecurringTimeWindow": {
+        "properties": {
+          "recurrence": {
+            "type": "string"
+          },
+          "window": {
+            "$ref": "#/components/schemas/TimeWindow"
+          }
+        },
+        "type": "object"
+      },
+      "RegistryHeader": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RegistryHostConfig": {
+        "properties": {
+          "hosts": {
+            "items": {
+              "$ref": "#/components/schemas/HostConfig"
+            },
+            "type": "array"
+          },
+          "server": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReleaseChannel": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "UNSPECIFIED",
+              "RAPID",
+              "REGULAR",
+              "STABLE",
+              "EXTENDED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ReleaseChannelConfig": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "UNSPECIFIED",
+              "RAPID",
+              "REGULAR",
+              "STABLE",
+              "EXTENDED"
+            ],
+            "type": "string"
+          },
+          "customVersions": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "defaultVersion": {
+            "type": "string"
+          },
+          "previewVersions": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "upgradeTargetVersion": {
+            "type": "string"
+          },
+          "validVersions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ReservationAffinity": {
+        "properties": {
+          "consumeReservationType": {
+            "enum": [
+              "UNSPECIFIED",
+              "NO_RESERVATION",
+              "ANY_RESERVATION",
+              "SPECIFIC_RESERVATION",
+              "ANY_RESERVATION_THEN_FAIL"
+            ],
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ReservedResourcesConfig": {
+        "properties": {
+          "cpuReservedMillicore": {
+            "format": "int64",
+            "type": "string"
+          },
+          "effectiveCpuReservedMillicore": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "effectiveMemoryReservedMib": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "memoryReservedMib": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceLimit": {
+        "properties": {
+          "maximum": {
+            "format": "int64",
+            "type": "string"
+          },
+          "minimum": {
+            "format": "int64",
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceManagerTags": {
+        "properties": {
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceUsageExportConfig": {
+        "properties": {
+          "bigqueryDestination": {
+            "$ref": "#/components/schemas/BigQueryDestination"
+          },
+          "consumptionMeteringConfig": {
+            "$ref": "#/components/schemas/ConsumptionMeteringConfig"
+          },
+          "enableNetworkEgressMetering": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "RollbackNodePoolUpgradeRequest": {
+        "properties": {
+          "clusterId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nodePoolId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "projectId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "respectPdb": {
+            "type": "boolean"
+          },
+          "zone": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RollbackSafeUpgrade": {
+        "properties": {
+          "controlPlaneSoakDuration": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RotationConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "rotationInterval": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SandboxConfig": {
+        "properties": {
+          "type": {
+            "enum": [
+              "UNSPECIFIED",
+              "GVISOR",
+              "MICROVM"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScheduleUpgradeConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SecondaryBootDisk": {
+        "properties": {
+          "diskImage": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "CONTAINER_IMAGE_CACHE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SecondaryBootDiskUpdateStrategy": {
+        "properties": {},
+        "type": "object"
+      },
+      "SecretManagerConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "rotationConfig": {
+            "$ref": "#/components/schemas/RotationConfig"
+          }
+        },
+        "type": "object"
+      },
+      "SecretSyncConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "rotationConfig": {
+            "$ref": "#/components/schemas/SyncRotationConfig"
+          }
+        },
+        "type": "object"
+      },
+      "SecurityPostureConfig": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "DISABLED",
+              "BASIC",
+              "ENTERPRISE"
+            ],
+            "type": "string"
+          },
+          "vulnerabilityMode": {
+            "enum": [
+              "VULNERABILITY_MODE_UNSPECIFIED",
+              "VULNERABILITY_DISABLED",
+              "VULNERABILITY_BASIC",
+              "VULNERABILITY_ENTERPRISE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServerConfig": {
+        "properties": {
+          "channels": {
+            "items": {
+              "$ref": "#/components/schemas/ReleaseChannelConfig"
+            },
+            "type": "array"
+          },
+          "defaultClusterVersion": {
+            "type": "string"
+          },
+          "defaultImageType": {
+            "type": "string"
+          },
+          "validImageTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "validMasterVersions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "validNodeVersions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceExternalIPsConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SetNodePoolAutoscalingRequest": {
+        "properties": {
+          "autoscaling": {
+            "$ref": "#/components/schemas/NodePoolAutoscaling"
+          },
+          "clusterId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nodePoolId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "projectId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "zone": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SetNodePoolManagementRequest": {
+        "properties": {
+          "clusterId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "management": {
+            "$ref": "#/components/schemas/NodeManagement"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nodePoolId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "projectId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "zone": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SetNodePoolSizeRequest": {
+        "properties": {
+          "clusterId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nodeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "nodePoolId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "projectId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "zone": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ShieldedInstanceConfig": {
+        "properties": {
+          "enableIntegrityMonitoring": {
+            "type": "boolean"
+          },
+          "enableSecureBoot": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ShieldedNodes": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SliceControllerConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SlurmOperatorConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SoleTenantConfig": {
+        "properties": {
+          "minNodeCpus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "nodeAffinities": {
+            "items": {
+              "$ref": "#/components/schemas/NodeAffinity"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StandardRolloutPolicy": {
+        "properties": {
+          "batchNodeCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "batchPercentage": {
+            "format": "float",
+            "type": "number"
+          },
+          "batchSoakDuration": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StatefulHAConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Status": {
+        "properties": {
+          "code": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "details": {
+            "items": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StatusCondition": {
+        "properties": {
+          "canonicalCode": {
+            "enum": [
+              "OK",
+              "CANCELLED",
+              "UNKNOWN",
+              "INVALID_ARGUMENT",
+              "DEADLINE_EXCEEDED",
+              "NOT_FOUND",
+              "ALREADY_EXISTS",
+              "PERMISSION_DENIED",
+              "UNAUTHENTICATED",
+              "RESOURCE_EXHAUSTED",
+              "FAILED_PRECONDITION",
+              "ABORTED",
+              "OUT_OF_RANGE",
+              "UNIMPLEMENTED",
+              "INTERNAL",
+              "UNAVAILABLE",
+              "DATA_LOSS"
+            ],
+            "type": "string"
+          },
+          "code": {
+            "deprecated": true,
+            "enum": [
+              "UNKNOWN",
+              "GCE_STOCKOUT",
+              "GKE_SERVICE_ACCOUNT_DELETED",
+              "GCE_QUOTA_EXCEEDED",
+              "SET_BY_OPERATOR",
+              "CLOUD_KMS_KEY_ERROR",
+              "CA_EXPIRING",
+              "NODE_SERVICE_ACCOUNT_MISSING_PERMISSIONS",
+              "CLOUD_KMS_KEY_DESTROYED"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SwapConfig": {
+        "properties": {
+          "bootDiskProfile": {
+            "$ref": "#/components/schemas/BootDiskProfile"
+          },
+          "dedicatedLocalSsdProfile": {
+            "$ref": "#/components/schemas/DedicatedLocalSsdProfile"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "encryptionConfig": {
+            "$ref": "#/components/schemas/EncryptionConfig"
+          },
+          "ephemeralLocalSsdProfile": {
+            "$ref": "#/components/schemas/EphemeralLocalSsdProfile"
+          }
+        },
+        "type": "object"
+      },
+      "SyncRotationConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "rotationInterval": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaintConfig": {
+        "properties": {
+          "architectureTaintBehavior": {
+            "enum": [
+              "ARCHITECTURE_TAINT_BEHAVIOR_UNSPECIFIED",
+              "NONE",
+              "ARM"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimeOfDay": {
+        "properties": {
+          "hours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "nanos": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "seconds": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TimeWindow": {
+        "properties": {
+          "endTime": {
+            "format": "google-datetime",
+            "type": "string"
+          },
+          "maintenanceExclusionOptions": {
+            "$ref": "#/components/schemas/MaintenanceExclusionOptions"
+          },
+          "startTime": {
+            "format": "google-datetime",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TopologyManager": {
+        "properties": {
+          "policy": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateClusterRequest": {
+        "properties": {
+          "clusterId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectId": {
+            "deprecated": true,
+            "type": "string"
+          },
+          "update": {
+            "$ref": "#/components/schemas/ClusterUpdate"
+          },
+          "zone": {
+            "deprecated": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateInfo": {
+        "properties": {
+          "blueGreenInfo": {
+            "$ref": "#/components/schemas/BlueGreenInfo"
+          }
+        },
+        "type": "object"
+      },
+      "UpgradeSettings": {
+        "properties": {
+          "blueGreenSettings": {
+            "$ref": "#/components/schemas/BlueGreenSettings"
+          },
+          "maxSurge": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxUnavailable": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "strategy": {
+            "enum": [
+              "NODE_POOL_UPDATE_STRATEGY_UNSPECIFIED",
+              "BLUE_GREEN",
+              "SURGE",
+              "SHORT_LIVED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UserManagedKeysConfig": {
+        "properties": {
+          "aggregationCa": {
+            "type": "string"
+          },
+          "clusterCa": {
+            "type": "string"
+          },
+          "controlPlaneDiskEncryptionKey": {
+            "type": "string"
+          },
+          "controlPlaneDiskEncryptionKeyVersions": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "etcdApiCa": {
+            "type": "string"
+          },
+          "etcdPeerCa": {
+            "type": "string"
+          },
+          "gkeopsEtcdBackupEncryptionKey": {
+            "type": "string"
+          },
+          "serviceAccountSigningKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "serviceAccountVerificationKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "VerticalPodAutoscaling": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "VirtualNIC": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "WindowsNodeConfig": {
+        "properties": {
+          "osVersion": {
+            "enum": [
+              "OS_VERSION_UNSPECIFIED",
+              "OS_VERSION_LTSC2019",
+              "OS_VERSION_LTSC2022"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkloadIdentityConfig": {
+        "properties": {
+          "workloadPool": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkloadMetadataConfig": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "GCE_METADATA",
+              "GKE_METADATA"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkloadPolicyConfig": {
+        "properties": {
+          "allowNetAdmin": {
+            "type": "boolean"
+          },
+          "autopilotCompatibilityAuditingEnabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "WritableCgroups": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.",
+              "https://www.googleapis.com/auth/container": "See, edit, configure, and delete your Google Kubernetes Engine data and see the email address for your Google Account",
+              "https://www.googleapis.com/auth/container.read-only": "See your Google Kubernetes Engine data and the email address of your Google Account"
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Kubernetes Engine API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/v1/projects/{projectsId}/locations/{locationsId}/clusters": {
+      "get": {
+        "operationId": "container.projects.locations.clusters.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListClustersResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/container.read-only"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "operationId": "container.projects.locations.clusters.create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClusterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}": {
+      "delete": {
+        "operationId": "container.projects.locations.clusters.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "clusterId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "operationId": "container.projects.locations.clusters.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "clusterId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cluster"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/container.read-only"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "operationId": "container.projects.locations.clusters.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClusterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools": {
+      "get": {
+        "operationId": "container.projects.locations.clusters.nodePools.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "clusterId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListNodePoolsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/container.read-only"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "operationId": "container.projects.locations.clusters.nodePools.create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNodePoolRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}": {
+      "delete": {
+        "operationId": "container.projects.locations.clusters.nodePools.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "nodePoolsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "nodePoolId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "clusterId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "operationId": "container.projects.locations.clusters.nodePools.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "nodePoolsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "clusterId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "nodePoolId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodePool"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/container.read-only"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}:rollback": {
+      "post": {
+        "operationId": "container.projects.locations.clusters.nodePools.rollback",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "nodePoolsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RollbackNodePoolUpgradeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}:setAutoscaling": {
+      "post": {
+        "operationId": "container.projects.locations.clusters.nodePools.setAutoscaling",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "nodePoolsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetNodePoolAutoscalingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}:setManagement": {
+      "post": {
+        "operationId": "container.projects.locations.clusters.nodePools.setManagement",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "nodePoolsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetNodePoolManagementRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}:setSize": {
+      "post": {
+        "operationId": "container.projects.locations.clusters.nodePools.setSize",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "clustersId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "nodePoolsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetNodePoolSizeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+      "get": {
+        "operationId": "container.projects.locations.operations.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOperationsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/container.read-only"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+      "get": {
+        "operationId": "container.projects.locations.operations.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "operationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "operationId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/container.read-only"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel": {
+      "post": {
+        "operationId": "container.projects.locations.operations.cancel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "operationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOperationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/projects/{projectsId}/locations/{locationsId}/serverConfig": {
+      "get": {
+        "operationId": "container.projects.locations.getServerConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "locationsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "zone",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerConfig"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/container",
+              "https://www.googleapis.com/auth/container.read-only"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://container.googleapis.com"
+    }
+  ]
+}

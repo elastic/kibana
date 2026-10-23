@@ -1,0 +1,162 @@
+{
+  "operations": {
+    "cancelOperation": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel",
+        "source": "v1"
+      }
+    ],
+    "createCluster": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters",
+        "source": "v1"
+      }
+    ],
+    "createNodePool": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools",
+        "source": "v1"
+      }
+    ],
+    "deleteCluster": [
+      {
+        "method": "delete",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}",
+        "source": "v1"
+      }
+    ],
+    "deleteNodePool": [
+      {
+        "method": "delete",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}",
+        "source": "v1"
+      }
+    ],
+    "getCluster": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}",
+        "source": "v1"
+      }
+    ],
+    "getNodePool": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}",
+        "source": "v1"
+      }
+    ],
+    "getOperation": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
+        "source": "v1"
+      }
+    ],
+    "getServerConfig": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/serverConfig",
+        "source": "v1"
+      }
+    ],
+    "listClusters": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters",
+        "source": "v1"
+      }
+    ],
+    "listNodePools": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools",
+        "source": "v1"
+      }
+    ],
+    "listOperations": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/operations",
+        "source": "v1"
+      }
+    ],
+    "rollbackNodePoolUpgrade": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}:rollback",
+        "source": "v1"
+      }
+    ],
+    "setBinaryAuthorization": [
+      {
+        "method": "put",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}",
+        "source": "v1"
+      }
+    ],
+    "setMasterAuthorizedNetworks": [
+      {
+        "method": "put",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}",
+        "source": "v1"
+      }
+    ],
+    "setNetworkPolicy": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}",
+        "source": "v1"
+      },
+      {
+        "method": "put",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}",
+        "source": "v1"
+      }
+    ],
+    "setNodePoolAutoscaling": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}:setAutoscaling",
+        "source": "v1"
+      }
+    ],
+    "setNodePoolManagement": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}",
+        "source": "v1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}:setManagement",
+        "source": "v1"
+      }
+    ],
+    "setNodePoolSize": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/nodePools/{nodePoolsId}:setSize",
+        "source": "v1"
+      }
+    ],
+    "updateCluster": [
+      {
+        "method": "put",
+        "path": "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "v1",
+      "fetchedAt": "2026-10-07T20:49:17.597Z",
+      "format": "discovery",
+      "url": "https://container.googleapis.com/$discovery/rest?version=v1"
+    }
+  }
+}

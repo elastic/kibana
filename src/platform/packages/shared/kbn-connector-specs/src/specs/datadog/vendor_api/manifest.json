@@ -1,0 +1,144 @@
+{
+  "operations": {
+    "cancelDowntime": [
+      {
+        "method": "delete",
+        "path": "/api/v2/downtime/{downtime_id}",
+        "source": "v2"
+      }
+    ],
+    "createIncident": [
+      {
+        "method": "post",
+        "path": "/api/v2/incidents",
+        "source": "v2"
+      }
+    ],
+    "getAlertEvents": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "cursorParam": "page.cursor",
+            "in": "body",
+            "sizeParam": "page.limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.page.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/v2/events/search",
+        "source": "v2"
+      }
+    ],
+    "getMonitor": [
+      {
+        "method": "get",
+        "path": "/api/v1/monitor/{monitor_id}",
+        "source": "v1"
+      }
+    ],
+    "listMonitors": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "firstPage": 0,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v1/monitor",
+        "source": "v1"
+      }
+    ],
+    "muteMonitor": [],
+    "postEvent": [
+      {
+        "method": "post",
+        "path": "/api/v1/events",
+        "source": "v1"
+      }
+    ],
+    "queryTimeseries": [
+      {
+        "method": "get",
+        "path": "/api/v1/query",
+        "source": "v1"
+      }
+    ],
+    "scheduleDowntime": [
+      {
+        "method": "post",
+        "path": "/api/v2/downtime",
+        "source": "v2"
+      }
+    ],
+    "searchLogs": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "cursorParam": "page.cursor",
+            "in": "body",
+            "sizeParam": "page.limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.page.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/api/v2/logs/events/search",
+        "source": "v2"
+      }
+    ],
+    "unmuteMonitor": [],
+    "updateIncident": [
+      {
+        "method": "patch",
+        "path": "/api/v2/incidents/{incident_id}",
+        "source": "v2"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "1.0",
+      "fetchedAt": "2026-10-07T11:58:08.903Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/DataDog/datadog-api-client-typescript/master/.generator/schemas/v1/openapi.yaml"
+    },
+    "v2": {
+      "apiVersion": "1.0",
+      "fetchedAt": "2026-10-07T11:58:08.906Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/DataDog/datadog-api-client-typescript/master/.generator/schemas/v2/openapi.yaml"
+    }
+  },
+  "unmatched": {
+    "muteMonitor": [
+      {
+        "method": "post",
+        "path": "/api/v1/monitor/{monitor_id}/mute",
+        "reason": "Monitor mute is not in Datadog's v1 spec, which only documents host mute and downtimes (POST /api/v2/downtime, used by scheduleDowntime); see https://github.com/elastic/kibana/issues/296084"
+      }
+    ],
+    "unmuteMonitor": [
+      {
+        "method": "post",
+        "path": "/api/v1/monitor/{monitor_id}/unmute",
+        "reason": "Monitor unmute is not in Datadog's v1 spec, which only documents host mute and downtimes (POST /api/v2/downtime, used by scheduleDowntime); see https://github.com/elastic/kibana/issues/296084"
+      }
+    ]
+  }
+}

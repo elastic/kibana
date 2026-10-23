@@ -1,0 +1,81 @@
+{
+  "applyResource": {
+    "input": {
+      "apiVersion": "apps/v1",
+      "resource": "deployments",
+      "namespace": "default"
+    }
+  },
+  "createResource": {
+    "input": {
+      "apiVersion": "apps/v1",
+      "resource": "deployments",
+      "namespace": "default",
+      "manifest": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "web",
+          "namespace": "default"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "web"
+            }
+          },
+          "template": {
+            "metadata": {
+              "labels": {
+                "app": "web"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "web",
+                  "image": "nginx:1.27"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "deleteResource": {
+    "input": {
+      "apiVersion": "apps/v1",
+      "resource": "deployments",
+      "namespace": "default"
+    }
+  },
+  "getResource": {
+    "input": {
+      "apiVersion": "apps/v1",
+      "resource": "deployments",
+      "namespace": "default"
+    }
+  },
+  "listResources": {
+    "input": {
+      "apiVersion": "apps/v1",
+      "resource": "deployments",
+      "namespace": "default"
+    }
+  },
+  "patchResource": {
+    "input": {
+      "apiVersion": "apps/v1",
+      "resource": "deployments",
+      "namespace": "default"
+    }
+  },
+  "request": {
+    "input": {
+      "method": "GET",
+      "path": "/api/v1/namespaces/default/pods"
+    }
+  }
+}

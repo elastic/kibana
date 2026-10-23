@@ -194,7 +194,7 @@ export const PostHog: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Move a PostHog error-tracking issue to a new status (active, resolved, archived, suppressed, or pending_release). The core lifecycle action the connector exists to drive.',
+        'Move a PostHog error-tracking issue to a new status (active, resolved, or suppressed). The core lifecycle action the connector exists to drive.',
       input: PostHogUpdateIssueStatusInputSchema,
       handler: async (ctx, input: PostHogUpdateIssueStatusInput) => {
         try {
@@ -354,7 +354,7 @@ export const PostHog: ConnectorSpec = {
             params: {
               date_from: input.dateFrom,
               date_to: input.dateTo,
-              person_id: input.personId,
+              person_uuid: input.personId,
               limit: input.limit,
             },
           });

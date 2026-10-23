@@ -1,0 +1,3972 @@
+{
+  "components": {
+    "schemas": {
+      "activePatrolSlot": {
+        "title": "activePatrolSlot",
+        "type": "number"
+      },
+      "alarmHubStatus": {
+        "properties": {
+          "armed": {
+            "enum": [
+              "on",
+              "off"
+            ],
+            "type": "string"
+          },
+          "auxiliaryPowerTerminalStatus": {
+            "additionalProperties": {
+              "properties": {
+                "currentMa": {
+                  "type": "number"
+                },
+                "loadPercent": {
+                  "type": "number"
+                },
+                "minusPinStatus": {
+                  "enum": [
+                    "disabled",
+                    "idle",
+                    "not-connected",
+                    "tamper",
+                    "triggered",
+                    "cut",
+                    "short"
+                  ],
+                  "type": "string"
+                },
+                "plusPinStatus": {
+                  "enum": [
+                    "disabled",
+                    "idle",
+                    "not-connected",
+                    "tamper",
+                    "triggered",
+                    "cut",
+                    "short"
+                  ],
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "not-connected",
+                    "partially-connected",
+                    "connected"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "plusPinStatus",
+                "minusPinStatus",
+                "status"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "battery": {
+            "properties": {
+              "batteryStatus": {
+                "enum": [
+                  "ok",
+                  "low",
+                  "critical"
+                ],
+                "type": "string"
+              },
+              "charging": {
+                "enum": [
+                  "on",
+                  "off"
+                ],
+                "type": "string"
+              },
+              "connection": {
+                "enum": [
+                  "connected",
+                  "disconnected"
+                ],
+                "type": "string"
+              },
+              "voltage": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "buckboost": {
+            "enum": [
+              "on",
+              "off"
+            ],
+            "type": "string"
+          },
+          "connector": {
+            "properties": {
+              "12v": {
+                "additionalProperties": {
+                  "properties": {
+                    "+": {
+                      "enum": [
+                        "connected",
+                        "disconnected"
+                      ],
+                      "type": "string"
+                    },
+                    "-": {
+                      "enum": [
+                        "connected",
+                        "disconnected"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "+",
+                    "-"
+                  ],
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              "battery": {
+                "enum": [
+                  "connected",
+                  "disconnected"
+                ],
+                "type": "string"
+              },
+              "emergency": {
+                "properties": {
+                  "+": {
+                    "enum": [
+                      "connected",
+                      "disconnected"
+                    ],
+                    "type": "string"
+                  },
+                  "-": {
+                    "enum": [
+                      "connected",
+                      "disconnected"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "+",
+                  "-"
+                ],
+                "type": "object"
+              },
+              "poeout": {
+                "enum": [
+                  "connected",
+                  "disconnected"
+                ],
+                "type": "string"
+              },
+              "relay": {
+                "additionalProperties": {
+                  "properties": {
+                    "com": {
+                      "enum": [
+                        "connected",
+                        "disconnected"
+                      ],
+                      "type": "string"
+                    },
+                    "nc": {
+                      "enum": [
+                        "connected",
+                        "disconnected"
+                      ],
+                      "type": "string"
+                    },
+                    "no": {
+                      "enum": [
+                        "connected",
+                        "disconnected"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "com",
+                    "nc",
+                    "no"
+                  ],
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              "tb": {
+                "additionalProperties": {
+                  "properties": {
+                    "+": {
+                      "enum": [
+                        "connected",
+                        "disconnected"
+                      ],
+                      "type": "string"
+                    },
+                    "-": {
+                      "enum": [
+                        "connected",
+                        "disconnected"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "+",
+                    "-"
+                  ],
+                  "type": "object"
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "cover": {
+            "properties": {
+              "distance": {
+                "type": "integer"
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "close"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "currentMeterChannelStatus": {
+            "additionalProperties": {
+              "properties": {
+                "criticalAlarm": {
+                  "enum": [
+                    "normal",
+                    "alert"
+                  ],
+                  "type": "string"
+                },
+                "criticalThreshold": {
+                  "type": "number"
+                },
+                "value": {
+                  "type": "number"
+                },
+                "warningAlarm": {
+                  "enum": [
+                    "normal",
+                    "alert"
+                  ],
+                  "type": "string"
+                },
+                "warningThreshold": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "criticalAlarm",
+                "criticalThreshold",
+                "value",
+                "warningAlarm",
+                "warningThreshold"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "currentMeterStatus": {
+            "additionalProperties": {
+              "properties": {
+                "critical": {
+                  "enum": [
+                    "normal",
+                    "alert"
+                  ],
+                  "type": "string"
+                },
+                "efuse": {
+                  "enum": [
+                    "normal",
+                    "warning",
+                    "fault"
+                  ],
+                  "type": "string"
+                },
+                "enable": {
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "type": "string"
+                },
+                "powerValid": {
+                  "enum": [
+                    "normal",
+                    "alert"
+                  ],
+                  "type": "string"
+                },
+                "timingControl": {
+                  "enum": [
+                    "normal",
+                    "alert"
+                  ],
+                  "type": "string"
+                },
+                "warning": {
+                  "enum": [
+                    "normal",
+                    "alert"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "critical",
+                "efuse",
+                "enable",
+                "powerValid",
+                "timingControl",
+                "warning"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "emergencyTerminalStatus": {
+            "properties": {
+              "idleSubState": {
+                "enum": [
+                  "open",
+                  "closed"
+                ],
+                "type": "string"
+              },
+              "minusPinStatus": {
+                "enum": [
+                  "disabled",
+                  "idle",
+                  "not-connected",
+                  "tamper",
+                  "triggered",
+                  "cut",
+                  "short"
+                ],
+                "type": "string"
+              },
+              "plusPinStatus": {
+                "enum": [
+                  "disabled",
+                  "idle",
+                  "not-connected",
+                  "tamper",
+                  "triggered",
+                  "cut",
+                  "short"
+                ],
+                "type": "string"
+              },
+              "terminalStatus": {
+                "enum": [
+                  "disabled",
+                  "idle",
+                  "not-connected",
+                  "tamper",
+                  "triggered",
+                  "cut",
+                  "short",
+                  "partially-connected"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "plusPinStatus",
+              "minusPinStatus",
+              "terminalStatus"
+            ],
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "input": {
+            "additionalProperties": {
+              "properties": {
+                "allowedArmingProfiles": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "cameraId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "enable": {
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "type": "string"
+                },
+                "eolr": {
+                  "maximum": 2,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "inputType": {
+                  "enum": [
+                    "MOTION",
+                    "ENTRY",
+                    "SMOKE",
+                    "GLASS_BREAK",
+                    "EMERGENCY_BUTTON"
+                  ],
+                  "type": "string"
+                },
+                "lastTriggeredAt": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "powerReset": {
+                  "type": "boolean"
+                },
+                "resistor": {
+                  "maximum": 10,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "status": {
+                  "enum": [
+                    "normal",
+                    "alarm",
+                    "fault",
+                    "short",
+                    "cut"
+                  ],
+                  "type": "string"
+                },
+                "trigger": {
+                  "type": "integer"
+                },
+                "triggerOnCurrentArmingProfile": {
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "type": "string"
+                },
+                "triggerWhenDisarmed": {
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "type": "string"
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "const": "no",
+                      "type": "string"
+                    },
+                    {
+                      "const": "nc",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "enable",
+                "type",
+                "eolr",
+                "resistor",
+                "status",
+                "trigger"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "inputPower": {
+            "properties": {
+              "bt": {
+                "enum": [
+                  "low",
+                  "high"
+                ],
+                "type": "string"
+              },
+              "typ1": {
+                "enum": [
+                  "low",
+                  "high"
+                ],
+                "type": "string"
+              },
+              "typ2": {
+                "enum": [
+                  "low",
+                  "high"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "inputTerminalStatus": {
+            "additionalProperties": {
+              "properties": {
+                "idleSubState": {
+                  "enum": [
+                    "open",
+                    "closed"
+                  ],
+                  "type": "string"
+                },
+                "minusPinStatus": {
+                  "enum": [
+                    "disabled",
+                    "idle",
+                    "not-connected",
+                    "tamper",
+                    "triggered",
+                    "cut",
+                    "short"
+                  ],
+                  "type": "string"
+                },
+                "plusPinStatus": {
+                  "enum": [
+                    "disabled",
+                    "idle",
+                    "not-connected",
+                    "tamper",
+                    "triggered",
+                    "cut",
+                    "short"
+                  ],
+                  "type": "string"
+                },
+                "terminalStatus": {
+                  "enum": [
+                    "disabled",
+                    "idle",
+                    "not-connected",
+                    "tamper",
+                    "triggered",
+                    "cut",
+                    "short",
+                    "partially-connected"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "plusPinStatus",
+                "minusPinStatus",
+                "terminalStatus"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "output": {
+            "additionalProperties": {
+              "properties": {
+                "active": {
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "type": "string"
+                },
+                "delay": {
+                  "type": "integer"
+                },
+                "duration": {
+                  "type": "integer"
+                },
+                "enable": {
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "wet",
+                    "dry"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "enable",
+                "active",
+                "status"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "outputTerminalStatus": {
+            "additionalProperties": {
+              "properties": {
+                "efuseAlert": {
+                  "enum": [
+                    "none",
+                    "high-current",
+                    "over-current"
+                  ],
+                  "type": "string"
+                },
+                "mode": {
+                  "enum": [
+                    "dry-contact",
+                    "powered-12v"
+                  ],
+                  "type": "string"
+                },
+                "pins": {
+                  "properties": {
+                    "com": {
+                      "enum": [
+                        "disabled",
+                        "idle",
+                        "not-connected",
+                        "tamper",
+                        "triggered",
+                        "cut",
+                        "short"
+                      ],
+                      "type": "string"
+                    },
+                    "nc": {
+                      "enum": [
+                        "disabled",
+                        "idle",
+                        "not-connected",
+                        "tamper",
+                        "triggered",
+                        "cut",
+                        "short"
+                      ],
+                      "type": "string"
+                    },
+                    "no": {
+                      "enum": [
+                        "disabled",
+                        "idle",
+                        "not-connected",
+                        "tamper",
+                        "triggered",
+                        "cut",
+                        "short"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "no",
+                    "com",
+                    "nc"
+                  ],
+                  "type": "object"
+                },
+                "statusLabel": {
+                  "enum": [
+                    "disabled",
+                    "off",
+                    "active"
+                  ],
+                  "type": "string"
+                },
+                "wiredPins": {
+                  "items": {
+                    "enum": [
+                      "+",
+                      "-",
+                      "nc",
+                      "no",
+                      "com"
+                    ],
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "pins",
+                "statusLabel",
+                "mode",
+                "efuseAlert",
+                "wiredPins"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "poeout": {
+            "properties": {
+              "connection": {
+                "enum": [
+                  "connected",
+                  "disconnected"
+                ],
+                "type": "string"
+              },
+              "powerSupply": {
+                "enum": [
+                  "on",
+                  "off"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "powerMeter": {
+            "additionalProperties": {
+              "properties": {
+                "alarm": {
+                  "enum": [
+                    "normal",
+                    "alert"
+                  ],
+                  "type": "string"
+                },
+                "current": {
+                  "type": "number"
+                },
+                "efuse": {
+                  "enum": [
+                    "normal",
+                    "warning",
+                    "fault"
+                  ],
+                  "type": "string"
+                },
+                "enable": {
+                  "enum": [
+                    "on",
+                    "off"
+                  ],
+                  "type": "string"
+                },
+                "power": {
+                  "type": "number"
+                },
+                "powerThreshold": {
+                  "type": "number"
+                },
+                "voltage": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "alarm",
+                "current",
+                "efuse",
+                "enable",
+                "power",
+                "powerThreshold",
+                "voltage"
+              ],
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "armed",
+          "buckboost",
+          "currentMeterChannelStatus",
+          "currentMeterStatus",
+          "powerMeter",
+          "output",
+          "input"
+        ],
+        "title": "alarmHubStatus",
+        "type": "object"
+      },
+      "alarmSettings": {
+        "properties": {
+          "isEnabled": {
+            "type": "boolean"
+          }
+        },
+        "title": "alarmSettings",
+        "type": "object"
+      },
+      "audioTypes": {
+        "items": {
+          "enum": [
+            "alrmSmoke",
+            "alrmCmonx",
+            "alrmSiren",
+            "alrmBabyCry",
+            "alrmSpeak",
+            "alrmBark",
+            "alrmBurglar",
+            "alrmCarHorn",
+            "alrmGlassBreak"
+          ],
+          "type": "string"
+        },
+        "title": "objectTypes",
+        "type": "array"
+      },
+      "batteryStatus": {
+        "properties": {
+          "isLow": {
+            "type": "boolean"
+          },
+          "percentage": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "title": "batteryStatus",
+        "type": "object"
+      },
+      "bridge": {
+        "properties": {
+          "clients": {
+            "$ref": "#/components/schemas/bridgeClients"
+          },
+          "id": {
+            "$ref": "#/components/schemas/bridgeId"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "maxClients": {
+            "$ref": "#/components/schemas/bridgeMaxClients"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/bridgeModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "platform": {
+            "$ref": "#/components/schemas/bridgePlatform"
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "platform",
+          "clients",
+          "maxClients"
+        ],
+        "title": "bridge",
+        "type": "object"
+      },
+      "bridgeClients": {
+        "items": {
+          "type": "string"
+        },
+        "title": "bridgeClients",
+        "type": "array"
+      },
+      "bridgeId": {
+        "title": "bridgeId",
+        "type": "string"
+      },
+      "bridgeMaxClients": {
+        "title": "bridgeMaxClients",
+        "type": "number"
+      },
+      "bridgeModelKey": {
+        "const": "bridge",
+        "title": "bridgeModelKey",
+        "type": "string"
+      },
+      "bridgePlatform": {
+        "title": "bridgePlatform",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "camera": {
+        "properties": {
+          "activePatrolSlot": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/activePatrolSlot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "featureFlags": {
+            "$ref": "#/components/schemas/cameraFeatureFlags"
+          },
+          "hasPackageCamera": {
+            "$ref": "#/components/schemas/hasPackageCamera"
+          },
+          "hdrType": {
+            "$ref": "#/components/schemas/hdrType"
+          },
+          "id": {
+            "$ref": "#/components/schemas/cameraId"
+          },
+          "isMicEnabled": {
+            "$ref": "#/components/schemas/isMicEnabled"
+          },
+          "lcdMessage": {
+            "$ref": "#/components/schemas/lcdMessageUnion"
+          },
+          "ledSettings": {
+            "$ref": "#/components/schemas/ledSettings"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "micVolume": {
+            "$ref": "#/components/schemas/micVolume"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/cameraModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "osdSettings": {
+            "$ref": "#/components/schemas/osdSettings"
+          },
+          "smartDetectSettings": {
+            "$ref": "#/components/schemas/smartDetectSettings"
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          },
+          "videoMode": {
+            "$ref": "#/components/schemas/videoMode"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "isMicEnabled",
+          "osdSettings",
+          "ledSettings",
+          "lcdMessage",
+          "micVolume",
+          "activePatrolSlot",
+          "videoMode",
+          "hdrType",
+          "featureFlags",
+          "smartDetectSettings",
+          "hasPackageCamera"
+        ],
+        "title": "camera",
+        "type": "object"
+      },
+      "cameraFeatureFlags": {
+        "properties": {
+          "hasHdr": {
+            "type": "boolean"
+          },
+          "hasLedStatus": {
+            "type": "boolean"
+          },
+          "hasMic": {
+            "type": "boolean"
+          },
+          "hasSpeaker": {
+            "type": "boolean"
+          },
+          "smartDetectAudioTypes": {
+            "items": {
+              "enum": [
+                "alrmSmoke",
+                "alrmCmonx",
+                "alrmSiren",
+                "alrmBabyCry",
+                "alrmSpeak",
+                "alrmBark",
+                "alrmBurglar",
+                "alrmCarHorn",
+                "alrmGlassBreak"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "smartDetectTypes": {
+            "items": {
+              "enum": [
+                "person",
+                "vehicle",
+                "package",
+                "licensePlate",
+                "face",
+                "animal"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "supportFullHdSnapshot": {
+            "type": "boolean"
+          },
+          "videoModes": {
+            "items": {
+              "enum": [
+                "default",
+                "highFps",
+                "homekit",
+                "sport",
+                "slowShutter",
+                "lprReflex",
+                "lprNoneReflex"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "supportFullHdSnapshot",
+          "hasHdr",
+          "smartDetectTypes",
+          "smartDetectAudioTypes",
+          "videoModes",
+          "hasMic",
+          "hasLedStatus",
+          "hasSpeaker"
+        ],
+        "title": "cameraFeatureFlags",
+        "type": "object"
+      },
+      "cameraId": {
+        "title": "cameraId",
+        "type": "string"
+      },
+      "cameraModelKey": {
+        "const": "camera",
+        "title": "cameraModelKey",
+        "type": "string"
+      },
+      "chime": {
+        "properties": {
+          "cameraIds": {
+            "items": {
+              "$ref": "#/components/schemas/cameraId"
+            },
+            "type": "array"
+          },
+          "id": {
+            "$ref": "#/components/schemas/chimeId"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/chimeModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ringSettings": {
+            "items": {
+              "$ref": "#/components/schemas/ringSettings"
+            },
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "cameraIds",
+          "ringSettings"
+        ],
+        "title": "chime",
+        "type": "object"
+      },
+      "chimeId": {
+        "title": "chimeId",
+        "type": "string"
+      },
+      "chimeModelKey": {
+        "const": "chime",
+        "title": "chimeModelKey",
+        "type": "string"
+      },
+      "deviceState": {
+        "enum": [
+          "CONNECTED",
+          "CONNECTING",
+          "DISCONNECTED"
+        ],
+        "title": "deviceState",
+        "type": "string"
+      },
+      "doorbellSettings": {
+        "properties": {
+          "customImages": {
+            "items": {
+              "properties": {
+                "preview": {
+                  "type": "string"
+                },
+                "sprite": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "preview",
+                "sprite"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "customMessages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "defaultMessageResetTimeoutMs": {
+            "type": "number"
+          },
+          "defaultMessageText": {
+            "type": "string"
+          }
+        },
+        "title": "doorbellSettings",
+        "type": "object"
+      },
+      "enableAt": {
+        "anyOf": [
+          {
+            "const": "fulltime",
+            "type": "string"
+          },
+          {
+            "const": "dark",
+            "type": "string"
+          }
+        ],
+        "title": "enableAt"
+      },
+      "fob": {
+        "properties": {
+          "awayState": {
+            "$ref": "#/components/schemas/fobAwayState"
+          },
+          "buttonLabels": {
+            "$ref": "#/components/schemas/fobButtonLabels"
+          },
+          "featureFlags": {
+            "$ref": "#/components/schemas/fobFeatureFlags"
+          },
+          "id": {
+            "$ref": "#/components/schemas/fobId"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/fobModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          },
+          "wirelessConnectionState": {
+            "$ref": "#/components/schemas/wirelessConnectionState"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "awayState",
+          "buttonLabels",
+          "featureFlags",
+          "wirelessConnectionState"
+        ],
+        "title": "fob",
+        "type": "object"
+      },
+      "fobAwayState": {
+        "enum": [
+          "ONLINE",
+          "RECENTLY_SEEN",
+          "NO_RECENT_HEARTBEAT",
+          "DEVICE_LOST"
+        ],
+        "title": "fobAwayState",
+        "type": "string"
+      },
+      "fobButtonLabels": {
+        "enum": [
+          "securityActions",
+          "positionHint"
+        ],
+        "title": "fobButtonLabels",
+        "type": "string"
+      },
+      "fobButtons": {
+        "items": {
+          "enum": [
+            "function",
+            "alarmHubButton",
+            "arm",
+            "disarm",
+            "night",
+            "panic",
+            "left",
+            "right",
+            "input1",
+            "input2"
+          ],
+          "type": "string"
+        },
+        "title": "fobButtons",
+        "type": "array"
+      },
+      "fobFeatureFlags": {
+        "properties": {
+          "buttons": {
+            "$ref": "#/components/schemas/fobButtons"
+          }
+        },
+        "required": [
+          "buttons"
+        ],
+        "title": "fobFeatureFlags",
+        "type": "object"
+      },
+      "fobId": {
+        "title": "fobId",
+        "type": "string"
+      },
+      "fobModelKey": {
+        "const": "fob",
+        "title": "fobModelKey",
+        "type": "string"
+      },
+      "forceHighQuality": {
+        "enum": [
+          "true",
+          "false"
+        ],
+        "title": "forceHighQuality",
+        "type": "string"
+      },
+      "genericError": {
+        "properties": {
+          "cause": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "error": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "name"
+        ],
+        "title": "genericError",
+        "type": "object"
+      },
+      "glassBreakSettings": {
+        "properties": {
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "sensitivity": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "sensitivityWhenArmed": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "title": "glassBreakSettings",
+        "type": "object"
+      },
+      "hasPackageCamera": {
+        "title": "hasPackageCamera",
+        "type": "boolean"
+      },
+      "hdrType": {
+        "enum": [
+          "auto",
+          "on",
+          "off"
+        ],
+        "title": "hdrType",
+        "type": "string"
+      },
+      "humiditySettings": {
+        "properties": {
+          "highThreshold": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "lowThreshold": {
+            "maximum": 99,
+            "minimum": 1,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "margin": {
+            "type": "number"
+          }
+        },
+        "title": "humiditySettings",
+        "type": "object"
+      },
+      "isDark": {
+        "title": "isDark",
+        "type": "boolean"
+      },
+      "isLightForceEnabled": {
+        "title": "isLightForceEnabled",
+        "type": "boolean"
+      },
+      "isLightOn": {
+        "title": "isLightOn",
+        "type": "boolean"
+      },
+      "isMicEnabled": {
+        "title": "isMicEnabled",
+        "type": "boolean"
+      },
+      "isPirMotionDetected": {
+        "title": "isPirMotionDetected",
+        "type": "boolean"
+      },
+      "lastMotion": {
+        "title": "lastMotion",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "lcdMessageUnion": {
+        "properties": {
+          "resetAt": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "LEAVE_PACKAGE_AT_DOOR",
+              "DO_NOT_DISTURB",
+              "CUSTOM_MESSAGE",
+              "IMAGE"
+            ],
+            "type": "string"
+          }
+        },
+        "title": "lcdMessageUnion",
+        "type": "object"
+      },
+      "leakSettings": {
+        "properties": {
+          "isExternalEnabled": {
+            "type": "boolean"
+          },
+          "isInternalEnabled": {
+            "type": "boolean"
+          }
+        },
+        "title": "leakSettings",
+        "type": "object"
+      },
+      "ledFloodLed": {
+        "title": "ledFloodLed",
+        "type": "boolean"
+      },
+      "ledIsEnabled": {
+        "title": "ledIsEnabled",
+        "type": "boolean"
+      },
+      "ledSettings": {
+        "properties": {
+          "floodLed": {
+            "$ref": "#/components/schemas/ledFloodLed"
+          },
+          "isEnabled": {
+            "$ref": "#/components/schemas/ledIsEnabled"
+          },
+          "welcomeLed": {
+            "$ref": "#/components/schemas/ledWelcomeLed"
+          }
+        },
+        "required": [
+          "isEnabled",
+          "welcomeLed",
+          "floodLed"
+        ],
+        "title": "ledSettings",
+        "type": "object"
+      },
+      "ledWelcomeLed": {
+        "title": "ledWelcomeLed",
+        "type": "boolean"
+      },
+      "light": {
+        "properties": {
+          "camera": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cameraId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/lightId"
+          },
+          "isDark": {
+            "$ref": "#/components/schemas/isDark"
+          },
+          "isLightForceEnabled": {
+            "$ref": "#/components/schemas/isLightForceEnabled"
+          },
+          "isLightOn": {
+            "$ref": "#/components/schemas/isLightOn"
+          },
+          "isPirMotionDetected": {
+            "$ref": "#/components/schemas/isPirMotionDetected"
+          },
+          "lastMotion": {
+            "$ref": "#/components/schemas/lastMotion"
+          },
+          "lightDeviceSettings": {
+            "$ref": "#/components/schemas/lightDeviceSettings"
+          },
+          "lightModeSettings": {
+            "$ref": "#/components/schemas/lightModeSettings"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/lightModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "lightModeSettings",
+          "lightDeviceSettings",
+          "isDark",
+          "isLightOn",
+          "isLightForceEnabled",
+          "lastMotion",
+          "isPirMotionDetected",
+          "camera"
+        ],
+        "title": "light",
+        "type": "object"
+      },
+      "lightDeviceSettings": {
+        "properties": {
+          "isIndicatorEnabled": {
+            "type": "boolean"
+          },
+          "ledLevel": {
+            "maximum": 6,
+            "minimum": 1,
+            "type": "number"
+          },
+          "pirDuration": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "pirSensitivity": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "title": "lightDeviceSettings",
+        "type": "object"
+      },
+      "lightId": {
+        "title": "lightId",
+        "type": "string"
+      },
+      "lightMode": {
+        "anyOf": [
+          {
+            "const": "always",
+            "type": "string"
+          },
+          {
+            "const": "motion",
+            "type": "string"
+          },
+          {
+            "const": "off",
+            "type": "string"
+          }
+        ],
+        "title": "lightMode"
+      },
+      "lightModeSettings": {
+        "properties": {
+          "enableAt": {
+            "$ref": "#/components/schemas/enableAt"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/lightMode"
+          }
+        },
+        "title": "lightModeSettings",
+        "type": "object"
+      },
+      "lightModelKey": {
+        "const": "light",
+        "title": "lightModelKey",
+        "type": "string"
+      },
+      "lightSettings": {
+        "properties": {
+          "highThreshold": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "lowThreshold": {
+            "maximum": 503192,
+            "minimum": 1,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "margin": {
+            "type": "number"
+          }
+        },
+        "title": "lightSettings",
+        "type": "object"
+      },
+      "linkStation": {
+        "properties": {
+          "alarmHub": {
+            "$ref": "#/components/schemas/alarmHubStatus"
+          },
+          "id": {
+            "$ref": "#/components/schemas/linkStationId"
+          },
+          "isAlarmHub": {
+            "$ref": "#/components/schemas/linkStationIsAlarmHub"
+          },
+          "lastEvent": {
+            "$ref": "#/components/schemas/linkStationLastEvent"
+          },
+          "ledSettings": {
+            "$ref": "#/components/schemas/linkStationLedSettings"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/linkstationModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "isAlarmHub",
+          "ledSettings",
+          "lastEvent"
+        ],
+        "title": "linkStation",
+        "type": "object"
+      },
+      "linkStationId": {
+        "title": "linkStationId",
+        "type": "string"
+      },
+      "linkStationIsAlarmHub": {
+        "title": "linkStationIsAlarmHub",
+        "type": "boolean"
+      },
+      "linkStationLastEvent": {
+        "title": "linkStationLastEvent",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "linkStationLedIsEnabled": {
+        "title": "linkStationLedIsEnabled",
+        "type": "boolean"
+      },
+      "linkStationLedSettings": {
+        "properties": {
+          "isEnabled": {
+            "$ref": "#/components/schemas/linkStationLedIsEnabled"
+          }
+        },
+        "required": [
+          "isEnabled"
+        ],
+        "title": "linkStationLedSettings",
+        "type": "object"
+      },
+      "linkstationModelKey": {
+        "const": "linkstation",
+        "title": "linkstationModelKey",
+        "type": "string"
+      },
+      "liveviewId": {
+        "title": "liveviewId",
+        "type": "string"
+      },
+      "mac": {
+        "title": "mac",
+        "type": "string"
+      },
+      "micVolume": {
+        "maximum": 100,
+        "minimum": 0,
+        "title": "micVolume",
+        "type": "number"
+      },
+      "motionSettings": {
+        "properties": {
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "sensitivity": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "sensitivityWhenArmed": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "title": "motionSettings",
+        "type": "object"
+      },
+      "name": {
+        "title": "name",
+        "type": "string"
+      },
+      "nvr": {
+        "properties": {
+          "armMode": {
+            "$ref": "#/components/schemas/nvrArmMode"
+          },
+          "doorbellSettings": {
+            "$ref": "#/components/schemas/doorbellSettings"
+          },
+          "id": {
+            "$ref": "#/components/schemas/nvrId"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/nvrModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "name",
+          "doorbellSettings",
+          "armMode"
+        ],
+        "title": "nvr",
+        "type": "object"
+      },
+      "nvrArmMode": {
+        "properties": {
+          "armProfileId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "armedAt": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "breachDetectedAt": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "breachEventCount": {
+            "type": "number"
+          },
+          "breachEventId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "breachTriggerEventId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "arming",
+              "armed",
+              "breach",
+              "disabled"
+            ],
+            "type": "string"
+          },
+          "willBeArmedAt": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "armProfileId",
+          "armedAt",
+          "willBeArmedAt",
+          "breachDetectedAt",
+          "breachEventCount",
+          "breachTriggerEventId",
+          "breachEventId"
+        ],
+        "title": "nvrArmMode",
+        "type": "object"
+      },
+      "nvrId": {
+        "title": "nvrId",
+        "type": "string"
+      },
+      "nvrModelKey": {
+        "const": "nvr",
+        "title": "nvrModelKey",
+        "type": "string"
+      },
+      "objectTypes": {
+        "items": {
+          "enum": [
+            "person",
+            "vehicle",
+            "package",
+            "licensePlate",
+            "face",
+            "animal"
+          ],
+          "type": "string"
+        },
+        "title": "objectTypes",
+        "type": "array"
+      },
+      "osdIsDateEnabled": {
+        "title": "osdIsDateEnabled",
+        "type": "boolean"
+      },
+      "osdIsDebugEnabled": {
+        "title": "osdIsDebugEnabled",
+        "type": "boolean"
+      },
+      "osdIsLogoEnabled": {
+        "title": "osdIsLogoEnabled",
+        "type": "boolean"
+      },
+      "osdIsNameEnabled": {
+        "title": "osdIsNameEnabled",
+        "type": "boolean"
+      },
+      "osdOverlayLocation": {
+        "enum": [
+          "topLeft",
+          "topMiddle",
+          "topRight",
+          "bottomLeft",
+          "bottomMiddle",
+          "bottomRight"
+        ],
+        "title": "osdOverlayLocation",
+        "type": "string"
+      },
+      "osdSettings": {
+        "properties": {
+          "isDateEnabled": {
+            "$ref": "#/components/schemas/osdIsDateEnabled"
+          },
+          "isDebugEnabled": {
+            "$ref": "#/components/schemas/osdIsDebugEnabled"
+          },
+          "isLogoEnabled": {
+            "$ref": "#/components/schemas/osdIsLogoEnabled"
+          },
+          "isNameEnabled": {
+            "$ref": "#/components/schemas/osdIsNameEnabled"
+          },
+          "overlayLocation": {
+            "$ref": "#/components/schemas/osdOverlayLocation"
+          }
+        },
+        "required": [
+          "isNameEnabled",
+          "isDateEnabled",
+          "isLogoEnabled",
+          "isDebugEnabled",
+          "overlayLocation"
+        ],
+        "title": "osdSettings",
+        "type": "object"
+      },
+      "protectVersion": {
+        "title": "protectVersion",
+        "type": "string"
+      },
+      "relay": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/relayId"
+          },
+          "inputs": {
+            "$ref": "#/components/schemas/relayInputs"
+          },
+          "ledSettings": {
+            "$ref": "#/components/schemas/relayLedSettings"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/relayModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outputs": {
+            "$ref": "#/components/schemas/relayOutputs"
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          },
+          "wirelessConnectionState": {
+            "$ref": "#/components/schemas/wirelessConnectionState"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "ledSettings",
+          "outputs",
+          "inputs",
+          "wirelessConnectionState"
+        ],
+        "title": "relay",
+        "type": "object"
+      },
+      "relayId": {
+        "title": "relayId",
+        "type": "string"
+      },
+      "relayInput": {
+        "properties": {
+          "actionOutputId": {
+            "$ref": "#/components/schemas/relayInputActionOutputId"
+          },
+          "actionTrigger": {
+            "$ref": "#/components/schemas/relayInputActionTrigger"
+          },
+          "actionType": {
+            "$ref": "#/components/schemas/relayInputActionType"
+          },
+          "id": {
+            "$ref": "#/components/schemas/relayInputId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/relayInputName"
+          },
+          "state": {
+            "$ref": "#/components/schemas/relayInputState"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "state",
+          "actionTrigger",
+          "actionType",
+          "actionOutputId"
+        ],
+        "title": "relayInput",
+        "type": "object"
+      },
+      "relayInputActionOutputId": {
+        "title": "relayInputActionOutputId",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "relayInputActionTrigger": {
+        "enum": [
+          "switchedOn",
+          "switchedOff"
+        ],
+        "title": "relayInputActionTrigger",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "relayInputActionType": {
+        "enum": [
+          "setOutputOn",
+          "setOutputOff",
+          "toggleOutput",
+          "followInput"
+        ],
+        "title": "relayInputActionType",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "relayInputId": {
+        "title": "relayInputId",
+        "type": "number"
+      },
+      "relayInputName": {
+        "title": "relayInputName",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "relayInputState": {
+        "enum": [
+          "on",
+          "off"
+        ],
+        "title": "relayInputState",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "relayInputs": {
+        "items": {
+          "$ref": "#/components/schemas/relayInput"
+        },
+        "title": "relayInputs",
+        "type": "array"
+      },
+      "relayLedIsEnabled": {
+        "title": "relayLedIsEnabled",
+        "type": "boolean"
+      },
+      "relayLedSettings": {
+        "properties": {
+          "isEnabled": {
+            "$ref": "#/components/schemas/relayLedIsEnabled"
+          }
+        },
+        "required": [
+          "isEnabled"
+        ],
+        "title": "relayLedSettings",
+        "type": "object"
+      },
+      "relayModelKey": {
+        "const": "relay",
+        "title": "relayModelKey",
+        "type": "string"
+      },
+      "relayOutput": {
+        "properties": {
+          "delay": {
+            "$ref": "#/components/schemas/relayOutputDelay"
+          },
+          "id": {
+            "$ref": "#/components/schemas/relayOutputId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/relayOutputName"
+          },
+          "pulseDuration": {
+            "$ref": "#/components/schemas/relayOutputPulseDuration"
+          },
+          "rebootState": {
+            "$ref": "#/components/schemas/relayOutputRebootState"
+          },
+          "state": {
+            "$ref": "#/components/schemas/relayOutputState"
+          },
+          "type": {
+            "$ref": "#/components/schemas/relayOutputType"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "delay",
+          "pulseDuration",
+          "state",
+          "rebootState"
+        ],
+        "title": "relayOutput",
+        "type": "object"
+      },
+      "relayOutputDelay": {
+        "title": "relayOutputDelay",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "relayOutputId": {
+        "title": "relayOutputId",
+        "type": "number"
+      },
+      "relayOutputName": {
+        "title": "relayOutputName",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "relayOutputPulseDuration": {
+        "title": "relayOutputPulseDuration",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "relayOutputRebootState": {
+        "enum": [
+          "restore",
+          "on",
+          "off"
+        ],
+        "title": "relayOutputRebootState",
+        "type": "string"
+      },
+      "relayOutputState": {
+        "enum": [
+          "on",
+          "off",
+          "offOtp"
+        ],
+        "title": "relayOutputState",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "relayOutputType": {
+        "enum": [
+          "garageDoor",
+          "gate",
+          "valve",
+          "siren",
+          "custom"
+        ],
+        "title": "relayOutputType",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "relayOutputs": {
+        "items": {
+          "$ref": "#/components/schemas/relayOutput"
+        },
+        "title": "relayOutputs",
+        "type": "array"
+      },
+      "ringSettings": {
+        "properties": {
+          "cameraId": {
+            "$ref": "#/components/schemas/cameraId"
+          },
+          "repeatTimes": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "number"
+          },
+          "ringtoneId": {
+            "$ref": "#/components/schemas/ringtoneId"
+          },
+          "volume": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "cameraId",
+          "repeatTimes",
+          "ringtoneId",
+          "volume"
+        ],
+        "title": "ringSettings",
+        "type": "object"
+      },
+      "ringtoneId": {
+        "title": "ringtoneId",
+        "type": "string"
+      },
+      "sensor": {
+        "properties": {
+          "alarmSettings": {
+            "$ref": "#/components/schemas/alarmSettings"
+          },
+          "alarmTriggeredAt": {
+            "$ref": "#/components/schemas/sensorAlarmTriggeredAt"
+          },
+          "armProfileIds": {
+            "$ref": "#/components/schemas/sensorArmProfileIds"
+          },
+          "batteryStatus": {
+            "$ref": "#/components/schemas/batteryStatus"
+          },
+          "externalLeakDetectedAt": {
+            "$ref": "#/components/schemas/sensorExternalLeakDetectedAt"
+          },
+          "glassBreakSettings": {
+            "$ref": "#/components/schemas/glassBreakSettings"
+          },
+          "hasCustomSensitivityWhenArmed": {
+            "$ref": "#/components/schemas/sensorHasCustomSensitivityWhenArmed"
+          },
+          "humiditySettings": {
+            "$ref": "#/components/schemas/humiditySettings"
+          },
+          "id": {
+            "$ref": "#/components/schemas/sensorId"
+          },
+          "isMotionDetected": {
+            "$ref": "#/components/schemas/sensorIsMotionDetected"
+          },
+          "isOpened": {
+            "$ref": "#/components/schemas/sensorIsOpened"
+          },
+          "leakDetectedAt": {
+            "$ref": "#/components/schemas/sensorLeakDetectedAt"
+          },
+          "leakSettings": {
+            "$ref": "#/components/schemas/leakSettings"
+          },
+          "lightSettings": {
+            "$ref": "#/components/schemas/lightSettings"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/sensorModelKey"
+          },
+          "motionDetectedAt": {
+            "$ref": "#/components/schemas/sensorMotionDetectedAt"
+          },
+          "motionSettings": {
+            "$ref": "#/components/schemas/motionSettings"
+          },
+          "mountType": {
+            "$ref": "#/components/schemas/sensorMountType"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "openStatusChangedAt": {
+            "$ref": "#/components/schemas/sensorOpenStatusChangedAt"
+          },
+          "scheduleMode": {
+            "$ref": "#/components/schemas/sensorScheduleMode"
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/sensorStats"
+          },
+          "tamperingDetectedAt": {
+            "$ref": "#/components/schemas/tamperingDetectedAt"
+          },
+          "temperatureSettings": {
+            "$ref": "#/components/schemas/temperatureSettings"
+          },
+          "wirelessConnectionState": {
+            "$ref": "#/components/schemas/wirelessConnectionState"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "mountType",
+          "batteryStatus",
+          "stats",
+          "lightSettings",
+          "humiditySettings",
+          "temperatureSettings",
+          "isOpened",
+          "openStatusChangedAt",
+          "isMotionDetected",
+          "motionDetectedAt",
+          "motionSettings",
+          "glassBreakSettings",
+          "scheduleMode",
+          "armProfileIds",
+          "hasCustomSensitivityWhenArmed",
+          "alarmTriggeredAt",
+          "alarmSettings",
+          "leakDetectedAt",
+          "externalLeakDetectedAt",
+          "leakSettings",
+          "tamperingDetectedAt",
+          "wirelessConnectionState"
+        ],
+        "title": "sensor",
+        "type": "object"
+      },
+      "sensorAlarmTriggeredAt": {
+        "title": "sensorAlarmTriggeredAt",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "sensorArmProfileIds": {
+        "items": {
+          "maxLength": 64,
+          "type": "string"
+        },
+        "maxItems": 32,
+        "title": "sensorArmProfileIds",
+        "type": [
+          "array",
+          "null"
+        ]
+      },
+      "sensorExternalLeakDetectedAt": {
+        "title": "sensorExternalLeakDetectedAt",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "sensorHasCustomSensitivityWhenArmed": {
+        "title": "sensorHasCustomSensitivityWhenArmed",
+        "type": "boolean"
+      },
+      "sensorId": {
+        "title": "sensorId",
+        "type": "string"
+      },
+      "sensorIsMotionDetected": {
+        "title": "sensorIsMotionDetected",
+        "type": "boolean"
+      },
+      "sensorIsOpened": {
+        "title": "sensorIsOpened",
+        "type": [
+          "boolean",
+          "null"
+        ]
+      },
+      "sensorLeakDetectedAt": {
+        "title": "sensorLeakDetectedAt",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "sensorModelKey": {
+        "const": "sensor",
+        "title": "sensorModelKey",
+        "type": "string"
+      },
+      "sensorMotionDetectedAt": {
+        "title": "sensorMotionDetectedAt",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "sensorMountType": {
+        "enum": [
+          "door",
+          "window",
+          "garage",
+          "leak",
+          "none"
+        ],
+        "title": "sensorMountType",
+        "type": "string"
+      },
+      "sensorOpenStatusChangedAt": {
+        "title": "sensorOpenStatusChangedAt",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "sensorScheduleMode": {
+        "enum": [
+          "always",
+          "when_armed"
+        ],
+        "title": "sensorScheduleMode",
+        "type": "string"
+      },
+      "sensorStats": {
+        "properties": {
+          "humidity": {
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/sensorStatus"
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/sensorValue"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "light": {
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/sensorStatus"
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/sensorValue"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          },
+          "temperature": {
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/sensorStatus"
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/sensorValue"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        },
+        "title": "sensorStats",
+        "type": "object"
+      },
+      "sensorStatus": {
+        "enum": [
+          "neutral",
+          "low",
+          "safe",
+          "high",
+          "unknown"
+        ],
+        "title": "sensorStatus",
+        "type": "string"
+      },
+      "sensorValue": {
+        "title": "sensorValue",
+        "type": "number"
+      },
+      "signalQuality": {
+        "title": "signalQuality",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "signalState": {
+        "properties": {
+          "signalQuality": {
+            "$ref": "#/components/schemas/signalQuality"
+          },
+          "signalStrength": {
+            "$ref": "#/components/schemas/signalStrength"
+          }
+        },
+        "required": [
+          "signalQuality",
+          "signalStrength"
+        ],
+        "title": "signalState",
+        "type": "object"
+      },
+      "signalStrength": {
+        "title": "signalStrength",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "siren": {
+        "properties": {
+          "connectionType": {
+            "$ref": "#/components/schemas/sirenConnectionType"
+          },
+          "id": {
+            "$ref": "#/components/schemas/sirenId"
+          },
+          "ledSettings": {
+            "$ref": "#/components/schemas/sirenLedSettingsExternal"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/sirenModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sirenStatus": {
+            "$ref": "#/components/schemas/sirenStatus"
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/sirenVolume"
+          },
+          "wirelessConnectionState": {
+            "$ref": "#/components/schemas/wirelessConnectionState"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "volume",
+          "ledSettings",
+          "sirenStatus",
+          "connectionType",
+          "wirelessConnectionState"
+        ],
+        "title": "siren",
+        "type": "object"
+      },
+      "sirenConnectionType": {
+        "enum": [
+          "ucp4",
+          "lora"
+        ],
+        "title": "sirenConnectionType",
+        "type": "string"
+      },
+      "sirenDuration": {
+        "anyOf": [
+          {
+            "const": 5000,
+            "type": "number"
+          },
+          {
+            "const": 10000,
+            "type": "number"
+          },
+          {
+            "const": 20000,
+            "type": "number"
+          },
+          {
+            "const": 30000,
+            "type": "number"
+          }
+        ],
+        "title": "sirenDuration"
+      },
+      "sirenId": {
+        "title": "sirenId",
+        "type": "string"
+      },
+      "sirenLedIsEnabled": {
+        "title": "sirenLedIsEnabled",
+        "type": "boolean"
+      },
+      "sirenLedSettingsExternal": {
+        "properties": {
+          "isEnabled": {
+            "$ref": "#/components/schemas/sirenLedIsEnabled"
+          }
+        },
+        "required": [
+          "isEnabled"
+        ],
+        "title": "sirenLedSettingsExternal",
+        "type": "object"
+      },
+      "sirenModelKey": {
+        "const": "siren",
+        "title": "sirenModelKey",
+        "type": "string"
+      },
+      "sirenStatus": {
+        "properties": {
+          "activatedAt": {
+            "$ref": "#/components/schemas/sirenStatusActivatedAt"
+          },
+          "duration": {
+            "$ref": "#/components/schemas/sirenStatusDuration"
+          },
+          "isActive": {
+            "$ref": "#/components/schemas/sirenStatusIsActive"
+          }
+        },
+        "required": [
+          "isActive",
+          "activatedAt",
+          "duration"
+        ],
+        "title": "sirenStatus",
+        "type": "object"
+      },
+      "sirenStatusActivatedAt": {
+        "title": "sirenStatusActivatedAt",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "sirenStatusDuration": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/sirenDuration"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "sirenStatusDuration"
+      },
+      "sirenStatusIsActive": {
+        "title": "sirenStatusIsActive",
+        "type": "boolean"
+      },
+      "sirenVolume": {
+        "maximum": 100,
+        "minimum": 1,
+        "title": "sirenVolume",
+        "type": "integer"
+      },
+      "smartDetectSettings": {
+        "properties": {
+          "audioTypes": {
+            "$ref": "#/components/schemas/audioTypes"
+          },
+          "objectTypes": {
+            "$ref": "#/components/schemas/objectTypes"
+          }
+        },
+        "required": [
+          "objectTypes",
+          "audioTypes"
+        ],
+        "title": "smartDetectSettings",
+        "type": "object"
+      },
+      "snapshotChannel": {
+        "enum": [
+          "main",
+          "package"
+        ],
+        "title": "channel",
+        "type": "string"
+      },
+      "speaker": {
+        "properties": {
+          "featureFlags": {
+            "$ref": "#/components/schemas/speakerFeatureFlags"
+          },
+          "id": {
+            "$ref": "#/components/schemas/speakerId"
+          },
+          "isMicEnabled": {
+            "$ref": "#/components/schemas/speakerIsMicEnabled"
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "micVolume": {
+            "$ref": "#/components/schemas/speakerMicVolume"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/speakerModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "speakerState": {
+            "$ref": "#/components/schemas/speakerState"
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/speakerVolume"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "volume",
+          "micVolume",
+          "isMicEnabled",
+          "speakerState",
+          "featureFlags"
+        ],
+        "title": "speaker",
+        "type": "object"
+      },
+      "speakerFeatureFlags": {
+        "properties": {
+          "hasMic": {
+            "$ref": "#/components/schemas/speakerFeatureFlagsHasMic"
+          }
+        },
+        "required": [
+          "hasMic"
+        ],
+        "title": "speakerFeatureFlags",
+        "type": "object"
+      },
+      "speakerFeatureFlagsHasMic": {
+        "title": "speakerFeatureFlagsHasMic",
+        "type": "boolean"
+      },
+      "speakerId": {
+        "title": "speakerId",
+        "type": "string"
+      },
+      "speakerIsMicEnabled": {
+        "title": "speakerIsMicEnabled",
+        "type": "boolean"
+      },
+      "speakerMicVolume": {
+        "maximum": 100,
+        "minimum": 0,
+        "title": "speakerMicVolume",
+        "type": "integer"
+      },
+      "speakerModelKey": {
+        "const": "speaker",
+        "title": "speakerModelKey",
+        "type": "string"
+      },
+      "speakerState": {
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/speakerStateMode"
+          },
+          "status": {
+            "$ref": "#/components/schemas/speakerStateStatus"
+          }
+        },
+        "required": [
+          "status",
+          "mode"
+        ],
+        "title": "speakerState",
+        "type": "object"
+      },
+      "speakerStateMode": {
+        "enum": [
+          "listen",
+          "talk"
+        ],
+        "title": "speakerStateMode",
+        "type": "string"
+      },
+      "speakerStateStatus": {
+        "enum": [
+          "idle",
+          "streaming",
+          "playing",
+          "tts_playing",
+          "uploading"
+        ],
+        "title": "speakerStateStatus",
+        "type": "string"
+      },
+      "speakerVolume": {
+        "maximum": 100,
+        "minimum": 0,
+        "title": "speakerVolume",
+        "type": "integer"
+      },
+      "streamLimit": {
+        "title": "streamLimit",
+        "type": "number"
+      },
+      "tamperingDetectedAt": {
+        "title": "tamperingDetectedAt",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "temperatureSettings": {
+        "properties": {
+          "highThreshold": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "lowThreshold": {
+            "maximum": 124,
+            "minimum": -39,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "margin": {
+            "type": "number"
+          }
+        },
+        "title": "temperatureSettings",
+        "type": "object"
+      },
+      "videoMode": {
+        "enum": [
+          "default",
+          "highFps",
+          "sport",
+          "slowShutter",
+          "lprReflex",
+          "lprNoneReflex"
+        ],
+        "title": "videoMode",
+        "type": "string"
+      },
+      "viewer": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/viewerId"
+          },
+          "liveview": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/liveviewId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mac": {
+            "$ref": "#/components/schemas/mac"
+          },
+          "modelKey": {
+            "$ref": "#/components/schemas/viewerModelKey"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/name"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/deviceState"
+          },
+          "streamLimit": {
+            "$ref": "#/components/schemas/streamLimit"
+          }
+        },
+        "required": [
+          "id",
+          "modelKey",
+          "state",
+          "name",
+          "mac",
+          "liveview",
+          "streamLimit"
+        ],
+        "title": "viewer",
+        "type": "object"
+      },
+      "viewerId": {
+        "title": "viewerId",
+        "type": "string"
+      },
+      "viewerModelKey": {
+        "const": "viewer",
+        "title": "viewerModelKey",
+        "type": "string"
+      },
+      "wirelessBatteryIsLow": {
+        "title": "wirelessBatteryIsLow",
+        "type": "boolean"
+      },
+      "wirelessBatteryPercentage": {
+        "title": "wirelessBatteryPercentage",
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "wirelessBatteryStatus": {
+        "properties": {
+          "isLow": {
+            "$ref": "#/components/schemas/wirelessBatteryIsLow"
+          },
+          "percentage": {
+            "$ref": "#/components/schemas/wirelessBatteryPercentage"
+          }
+        },
+        "required": [
+          "percentage",
+          "isLow"
+        ],
+        "title": "wirelessBatteryStatus",
+        "type": "object"
+      },
+      "wirelessBridgeId": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/bridgeId"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "wirelessBridgeId"
+      },
+      "wirelessConnectionState": {
+        "properties": {
+          "batteryStatus": {
+            "$ref": "#/components/schemas/wirelessBatteryStatus"
+          },
+          "bridge": {
+            "$ref": "#/components/schemas/wirelessBridgeId"
+          },
+          "signalState": {
+            "$ref": "#/components/schemas/signalState"
+          }
+        },
+        "required": [
+          "signalState",
+          "batteryStatus",
+          "bridge"
+        ],
+        "title": "wirelessConnectionState",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "UniFi Protect API"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/alarm-hubs": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/linkStation"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/alarm-hubs/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/linkStationId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/linkStation"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/bridges": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/bridge"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/bridges/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/bridgeId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bridge"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cameras": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/camera"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cameras/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/cameraId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/camera"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cameras/{id}/ptz/goto/{slot}": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/cameraId"
+            }
+          },
+          {
+            "in": "path",
+            "name": "slot",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cameras/{id}/snapshot": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/cameraId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "schema": {
+              "$ref": "#/components/schemas/snapshotChannel"
+            }
+          },
+          {
+            "in": "query",
+            "name": "highQuality",
+            "schema": {
+              "$ref": "#/components/schemas/forceHighQuality"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chimes": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/chime"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chimes/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/chimeId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/chime"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/fobs": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/fob"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/fobs/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/fobId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/fob"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/lights": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/light"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/lights/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/lightId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/light"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/link-stations": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/linkStation"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/link-stations/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/linkStationId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/linkStation"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/meta/info": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "applicationVersion": {
+                      "$ref": "#/components/schemas/protectVersion"
+                    }
+                  },
+                  "required": [
+                    "applicationVersion"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nvrs": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/nvr"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/relays": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/relay"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/relays/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/relayId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/relay"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sensors": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/sensor"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sensors/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/sensorId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sensor"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sirens": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/siren"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sirens/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/sirenId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/siren"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/speakers": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/speaker"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/speakers/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/speakerId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/speaker"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/viewers": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/viewer"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/viewers/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/viewerId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/viewer"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/genericError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.ui.com/v1/connector/consoles/{consoleId}/proxy/protect/integration",
+      "variables": {
+        "consoleId": {
+          "default": "942A6FF664C0000000000964970E0000000009E710560000000068A9873F:9999999999"
+        }
+      }
+    },
+    {
+      "url": "https://{consoleIP}/proxy/protect/integration",
+      "variables": {
+        "consoleIP": {
+          "default": "192.168.0.1"
+        }
+      }
+    }
+  ]
+}

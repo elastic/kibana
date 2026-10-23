@@ -71,6 +71,8 @@ export interface ResponseEngineOptions {
 
 export interface ResponseEngine {
   readonly respond: Responder;
+  /** Whether the operation is answered with a fixture or a recording; undefined for the fallback. */
+  readonly servedFrom: (operation: ContractOperation) => RejectedResponse['source'] | undefined;
   readonly rejected: readonly RejectedResponse[];
   /**
    * The recorded success exchanges that conform to the spec, in recording order; none for
@@ -134,6 +136,7 @@ export const createResponseEngine = (
 ): ResponseEngine => {
   const findOperations = createOperationIndex(operations);
   const served = new Map<ContractOperation, ContractResponse>();
+  const servedFrom = new Map<ContractOperation, RejectedResponse['source']>();
   const recorded = new Map<ContractOperation, RecordedExchange[]>();
   const withFixture = new Set<ContractOperation>();
   const rejected: RejectedResponse[] = [];
@@ -176,6 +179,7 @@ export const createResponseEngine = (
         }
         if (!served.has(operation)) {
           served.set(operation, contractResponse);
+          servedFrom.set(operation, origin);
         }
       }
     }
@@ -189,7 +193,9 @@ export const createResponseEngine = (
     .forEach((exchange) => add('recording', exchange));
 
   return {
-    respond: (operation, request) => served.get(operation) ?? fallback(operation, request),
+    respond: (operation, request, context) =>
+      served.get(operation) ?? fallback(operation, request, context),
+    servedFrom: (operation) => servedFrom.get(operation),
     rejected,
     recordedExchanges: (operation) => recorded.get(operation) ?? [],
   };

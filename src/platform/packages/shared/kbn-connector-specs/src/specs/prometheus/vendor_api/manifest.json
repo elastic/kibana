@@ -1,0 +1,129 @@
+{
+  "operations": {
+    "createAlerts": [
+      {
+        "method": "post",
+        "path": "/alerts",
+        "source": "alertmanagerV2"
+      }
+    ],
+    "createSilence": [
+      {
+        "method": "post",
+        "path": "/silences",
+        "source": "alertmanagerV2"
+      }
+    ],
+    "expireSilence": [
+      {
+        "method": "delete",
+        "path": "/silence/{silenceID}",
+        "source": "alertmanagerV2"
+      }
+    ],
+    "getPrometheusSeries": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/series",
+        "source": "prometheusV1"
+      }
+    ],
+    "getSilence": [
+      {
+        "method": "get",
+        "path": "/silence/{silenceID}",
+        "source": "alertmanagerV2"
+      }
+    ],
+    "getStatus": [
+      {
+        "method": "get",
+        "path": "/status",
+        "source": "alertmanagerV2"
+      }
+    ],
+    "listAlertGroups": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/alerts/groups",
+        "source": "alertmanagerV2"
+      }
+    ],
+    "listAlerts": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/alerts",
+        "source": "alertmanagerV2"
+      }
+    ],
+    "listPrometheusAlerts": [
+      {
+        "method": "get",
+        "path": "/alerts",
+        "source": "prometheusV1"
+      }
+    ],
+    "listPrometheusLabelValues": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/label/{name}/values",
+        "source": "prometheusV1"
+      }
+    ],
+    "listPrometheusRules": [
+      {
+        "method": "get",
+        "path": "/rules",
+        "source": "prometheusV1"
+      }
+    ],
+    "listPrometheusTargets": [
+      {
+        "method": "get",
+        "path": "/targets",
+        "source": "prometheusV1"
+      }
+    ],
+    "listSilences": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/silences",
+        "source": "alertmanagerV2"
+      }
+    ],
+    "queryPrometheus": [
+      {
+        "method": "get",
+        "path": "/query",
+        "source": "prometheusV1"
+      }
+    ],
+    "queryRangePrometheus": [
+      {
+        "method": "get",
+        "path": "/query_range",
+        "source": "prometheusV1"
+      }
+    ]
+  },
+  "sources": {
+    "alertmanagerV2": {
+      "apiVersion": "0.0.1",
+      "fetchedAt": "2026-10-07T20:49:14.924Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/prometheus/alertmanager/main/api/v2/openapi.yaml"
+    },
+    "prometheusV1": {
+      "apiVersion": "0.0.1-undefined",
+      "fetchedAt": "2026-10-07T20:57:05.786Z",
+      "format": "openapi",
+      "note": "Prometheus publishes its HTTP API spec only as this golden test file, which its tests generate from the server's API definitions (web/api/v1/openapi.go). Pinned to a commit, since main changes with every API change; refresh by moving the pin.",
+      "url": "https://raw.githubusercontent.com/prometheus/prometheus/fa0e970a7c57f20733225ea44a7259b1b8b72a2c/web/api/v1/testdata/openapi_3.1_golden.yaml"
+    }
+  }
+}

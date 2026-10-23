@@ -1,0 +1,45 @@
+overlay: 1.0.0
+info:
+  title: Jina Reader API corrections
+  version: 1.0.0
+actions:
+  - target: $..properties.respondWith
+    description: >-
+      respondWith is "one of" its enum and any string, so every documented value (content, markdown,
+      html, text, screenshot, pageshot, ...) matches both branches and fails oneOf. The values are
+      documented at https://github.com/jina-ai/reader/blob/main/README.md (x-respond-with).
+    update:
+      anyOf:
+        - $ref: '#/components/schemas/enum@0x0f'
+        - type: string
+  - target: $..properties.respondWith.oneOf
+    description: Replaced by anyOf above.
+    remove: true
+
+  - target: $[?@ == $.paths && $.servers[0].url == 'https://s.jina.ai/']
+    description: >-
+      The s.jina.ai spec renders the optional query route as /{q}, which needs a segment.
+      https://jina.ai/reader/ documents searching at the root (https://s.jina.ai/?q=, GET or POST), and the
+      route is registered with an optional q (path '::q' in
+      https://github.com/jina-ai/reader/blob/main/src/api/searcher.ts), which reads q from the body.
+    update:
+      /:
+        post:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required: [q]
+                  properties:
+                    q:
+                      type: string
+                    respondWith:
+                      type: string
+          responses:
+            '200':
+              description: Search results
+              content:
+                application/json:
+                  schema:
+                    type: object

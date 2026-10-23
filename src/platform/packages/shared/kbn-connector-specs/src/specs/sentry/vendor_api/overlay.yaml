@@ -1,0 +1,54 @@
+overlay: 1.0.0
+info:
+  title: Sentry API corrections
+  version: 1.0.0
+actions:
+  - target: $.servers
+    description: >-
+      The spec names only the regional hosts (us.sentry.io, de.sentry.io), but Sentry's docs send
+      requests to https://sentry.io, e.g. "curl https://sentry.io/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/"
+      on https://docs.sentry.io/api/events/retrieve-an-issue/, and self-hosted Sentry serves the same
+      API from its own domain, which the connector takes as config. Without a fixed server, requests
+      to any of them match.
+    remove: true
+  - target: >-
+      $.paths['/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/'].put.requestBody.content['application/json'].schema.properties.statusDetails.allOf[0].required
+    description: >-
+      The spec marks every statusDetails field required, but the endpoint validates the body with
+      GroupValidator(data=data, partial=True, ...) in
+      https://github.com/getsentry/sentry/blob/master/src/sentry/api/helpers/group_index/update.py,
+      and partial validation applies to the nested statusDetails serializer too, so e.g.
+      {"ignoreDuration": 30} alone is accepted.
+    remove: true
+  - target: >-
+      $.paths['/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/'].put.requestBody.content['application/json'].schema.required
+    description: >-
+      The spec marks every body field required, but https://docs.sentry.io/api/events/update-an-issue/
+      says "Only the attributes submitted are modified" and its example sends -d '{}', and the
+      endpoint validates the body with GroupValidator(data=data, partial=True, ...) in
+      https://github.com/getsentry/sentry/blob/master/src/sentry/api/helpers/group_index/update.py.
+    remove: true
+  - target: $.paths['/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/'].get.parameters
+    description: >-
+      The spec omits environment, but the endpoint declares GlobalParams.ENVIRONMENT ("The name of
+      environments to filter by.", many=True) and documents ":qparam string environment: this
+      restricts the issues to ones containing events from this environment" in
+      https://github.com/getsentry/sentry/blob/master/src/sentry/issues/endpoints/project_group_index.py.
+    update:
+      - name: environment
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+  - target: $.paths['/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/'].put.parameters[2].schema
+    description: >-
+      The spec types id as one integer, but the endpoint documents ":qparam int id: a list of IDs of
+      the issues to be mutated. This parameter shall be repeated for each issue." in
+      https://github.com/getsentry/sentry/blob/master/src/sentry/issues/endpoints/project_group_index.py
+      (also on https://docs.sentry.io/api/events/bulk-mutate-a-list-of-issues/).
+    update:
+      type: array
+      items:
+        type: integer

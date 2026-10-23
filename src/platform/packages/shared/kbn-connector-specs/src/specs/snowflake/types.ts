@@ -16,6 +16,8 @@ const MAX_BINDING_VALUE_LENGTH = 1_048_576;
 const MAX_BINDING_KEY_LENGTH = 10;
 // https://docs.snowflake.com/en/sql-reference/parameters#query-tag
 const MAX_QUERY_TAG_LENGTH = 2000;
+// Statement handles are 8-4-4-4-12 hex strings (e.g. 019c06a4-0000-df4f-0000-00100006589e in
+// https://docs.snowflake.com/en/developer-guide/sql-api/reference) but not RFC 4122 UUIDs, so z.uuid() rejects them.
 const STATEMENT_HANDLE_LENGTH = 36;
 const MAX_SEARCH_QUERY_LENGTH = 2000;
 const MAX_FILTER_OPERATOR_LENGTH = 50;
@@ -205,8 +207,7 @@ export type RunQueryInput = z.infer<typeof RunQueryInputSchema>;
 export const GetStatementStatusInputSchema = lazySchema(() =>
   z.object({
     statementHandle: z
-      .string()
-      .min(1)
+      .guid()
       .max(STATEMENT_HANDLE_LENGTH)
       .describe(
         'The statement handle (UUID) returned by executeStatement. Used to poll for results or check execution progress.'
@@ -230,8 +231,7 @@ export type GetStatementStatusInput = z.infer<typeof GetStatementStatusInputSche
 export const CancelStatementInputSchema = lazySchema(() =>
   z.object({
     statementHandle: z
-      .string()
-      .min(1)
+      .guid()
       .max(STATEMENT_HANDLE_LENGTH)
       .describe(
         'The statement handle (UUID) of the running statement to cancel. Obtain this from the executeStatement response.'

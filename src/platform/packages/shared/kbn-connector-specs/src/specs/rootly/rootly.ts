@@ -416,12 +416,14 @@ export const Rootly: ConnectorSpec = {
         'List action items on a Rootly incident (or org-wide if incidentId is omitted), filtered by status or priority.',
       input: RootlyListActionItemsInputSchema,
       handler: async (ctx, input: RootlyListActionItemsInput) => {
+        const { incidentId, status, priority } = input;
+        // Only the org-wide endpoint documents filter[status] and filter[priority].
         const params: Record<string, string> = {};
-        if (input.status) params['filter[status]'] = input.status;
-        if (input.priority) params['filter[priority]'] = input.priority;
+        if (!incidentId && status) params['filter[status]'] = status;
+        if (!incidentId && priority) params['filter[priority]'] = priority;
 
-        const url = input.incidentId
-          ? `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/action_items`
+        const url = incidentId
+          ? `${ROOTLY_BASE_URL}/incidents/${incidentId}/action_items`
           : `${ROOTLY_BASE_URL}/action_items`;
 
         try {
@@ -429,7 +431,15 @@ export const Rootly: ConnectorSpec = {
             params,
             headers: JSON_API_HEADERS,
           });
-          return flattenList(response.data);
+          if (!incidentId) {
+            return flattenList(response.data);
+          }
+          const data = response.data.data.filter(
+            ({ attributes }) =>
+              (!status || attributes?.status === status) &&
+              (!priority || attributes?.priority === priority)
+          );
+          return flattenList({ ...response.data, data });
         } catch (error) {
           throw formatRootlyError('listActionItems', error);
         }
