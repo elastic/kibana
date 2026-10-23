@@ -42,7 +42,7 @@ export const RulesApp = () => {
       })}
     >
       <Routes>
-        <Route exact path={`${base}/sequence/create`}>
+        <Route exact path={[`${base}/sequence/create`, `${base}/sequence/:ruleId/edit`]}>
           {showExperimentalFeatures ? (
             <Suspense fallback={<SequenceBuilderFallback />}>
               <SequenceBuilderPage />
@@ -50,11 +50,6 @@ export const RulesApp = () => {
           ) : (
             <Redirect to={base} />
           )}
-        </Route>
-        <Route exact path={`${base}/sequence/:ruleId/edit`}>
-          <Suspense fallback={<SequenceBuilderFallback />}>
-            <SequenceBuilderPage />
-          </Suspense>
         </Route>
 
         <Route exact path={`${base}/:ruleId`}>

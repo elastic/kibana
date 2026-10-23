@@ -26,8 +26,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useAlertingLocators } from '../application/locator_context';
+import type { AlertingV2RulesLocatorParams } from '../../common/locators';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
-import { paths } from '../constants';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
 import { useCreateRule } from './use_create_rule';
@@ -68,14 +68,11 @@ interface UseComposeDiscoverFlyoutOptions {
   onDismiss?: () => void;
 }
 
-const PAGE_BUILDERS: Record<
-  string,
-  { getEditUrl: (id: string) => string; getCloneUrl: (id: string) => string }
-> = {
-  sequence: {
-    getEditUrl: (id) => paths.sequenceRuleEdit(id),
-    getCloneUrl: (id) => paths.sequenceRuleClone(id),
-  },
+type RulesLocatorPage = NonNullable<AlertingV2RulesLocatorParams['page']>;
+
+/** Builders that author on their own page instead of the flyout, keyed by builder type. */
+const PAGE_BUILDERS: Record<string, { editPage: RulesLocatorPage; clonePage: RulesLocatorPage }> = {
+  sequence: { editPage: 'sequence_edit', clonePage: 'sequence_clone' },
 };
 
 export const useComposeDiscoverFlyout = ({
@@ -99,7 +96,7 @@ export const useComposeDiscoverFlyout = ({
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
   const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
-  const { actionPolicyLocators } = useAlertingLocators();
+  const { actionPolicyLocators, rulesLocators } = useAlertingLocators();
   const getActionPolicyEditHref = useCallback(
     (actionPolicyId: string) =>
       actionPolicyLocators.getRedirectUrl({ page: 'edit', actionPolicyId }),
@@ -279,12 +276,12 @@ export const useComposeDiscoverFlyout = ({
         ? PAGE_BUILDERS[rule.metadata.builder.type]
         : undefined;
       if (pageBuilder) {
-        application.navigateToUrl(http.basePath.prepend(pageBuilder.getEditUrl(rule.id)));
+        rulesLocators.navigateSync({ page: pageBuilder.editPage, ruleId: rule.id });
         return;
       }
       openRuleFlyout(rule, 'edit');
     },
-    [openRuleFlyout, application, http]
+    [openRuleFlyout, rulesLocators]
   );
 
   const openCloneFlyout = useCallback(
@@ -293,12 +290,12 @@ export const useComposeDiscoverFlyout = ({
         ? PAGE_BUILDERS[rule.metadata.builder.type]
         : undefined;
       if (pageBuilder) {
-        application.navigateToUrl(http.basePath.prepend(pageBuilder.getCloneUrl(rule.id)));
+        rulesLocators.navigateSync({ page: pageBuilder.clonePage, ruleId: rule.id });
         return;
       }
       openRuleFlyout(rule, 'clone');
     },
-    [openRuleFlyout, application, http]
+    [openRuleFlyout, rulesLocators]
   );
 
   const openCreateFromTemplateFlyout = useCallback(
