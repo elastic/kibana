@@ -14,9 +14,12 @@ import type { AdditionalContext, GetAlertsTableProp } from '../types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '../constants';
 import { ExpandableContextMenuPanel } from './expandable_context_menu_panel';
 
-const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreActionsTextLabel', {
-  defaultMessage: 'More actions',
-});
+const actionsToolTip = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertsTable.moreActionsTextLabel',
+  {
+    defaultMessage: 'More actions',
+  }
+);
 
 /**
  * Cell containing contextual actions for a single alert row in the table

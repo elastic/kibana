@@ -102,12 +102,9 @@ export async function autocomplete(
       const availableParameters: MapParameters = {
         lambda: {
           type: 'number',
-          description: i18n.translate(
-            'kbn-esql-language.commands.mmr.autocomplete.lambdaDescription',
-            {
-              defaultMessage: 'MMR lambda value',
-            }
-          ),
+          description: i18n.translate('esqlLanguage.commands.mmr.autocomplete.lambdaDescription', {
+            defaultMessage: 'MMR lambda value',
+          }),
           suggestions: [mmrLambdaValueSuggestion],
         },
       };

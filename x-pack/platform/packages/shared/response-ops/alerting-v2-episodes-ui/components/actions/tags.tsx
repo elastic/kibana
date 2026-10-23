@@ -78,7 +78,7 @@ export function TagBadges({
                 color="hollow"
               >
                 <FormattedMessage
-                  id="xpack.observability.component.tags.moreTags"
+                  id="xpack.alertingV2EpisodesUi.component.tags.moreTags"
                   defaultMessage="+{number}"
                   values={{ number: hiddenTags.length }}
                 />
