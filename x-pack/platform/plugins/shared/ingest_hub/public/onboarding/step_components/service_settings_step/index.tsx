@@ -31,7 +31,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { DEFAULT_NAMESPACE } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import {
+  DEFAULT_NAMESPACE,
+  getSourcePolicyName,
+} from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { supportsIntegrationSettings } from './integration_settings';
 import {
   AWS_REGION_OPTIONS,
   getRegionFieldName,
@@ -40,6 +44,7 @@ import {
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
 import { ServiceSettingsFlyout } from './service_settings_flyout';
+import { SharedSettingsSection } from './shared_settings_section';
 import { DuplicateServiceModal } from './duplicate_service_modal';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
@@ -56,6 +61,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const {
     globalRegion,
     setGlobalRegion,
+    integrationName,
+    setIntegrationName,
+    integrationNameError,
+    description,
+    setDescription,
+    descriptionError,
+    bareNamePackage,
     instances,
     filteredInstances,
     incompleteInstances,
@@ -168,6 +180,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
+    if (integrationNameError || descriptionError) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
+          defaultMessage: 'Fix the integration settings',
+        })
+      );
+    }
     if (incompleteInstances.length > 0) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.incompleteServices', {
@@ -183,6 +202,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     hasUnloadedSelectedManifests,
     hasErroredSelectedManifests,
     globalRegion,
+    integrationNameError,
+    descriptionError,
     incompleteInstances,
   ]);
 
@@ -490,6 +511,16 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
       <EuiSpacer size="m" />
 
+      <SharedSettingsSection
+        integrationName={integrationName}
+        onIntegrationNameChange={setIntegrationName}
+        integrationNameError={integrationNameError}
+        description={description}
+        onDescriptionChange={setDescription}
+        descriptionError={descriptionError}
+      />
+      <EuiSpacer size="m" />
+
       {hasErroredSelectedManifests && (
         <>
           <EuiCallOut
@@ -613,7 +644,20 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         <DuplicateServiceModal
           service={duplicateSourceService}
           sourceConfig={getServiceVars(duplicateSourceInstance.instanceId)}
-          suggestedName={buildDuplicateName(duplicateSourceService.name, allInstanceNames)}
+          suggestedName={buildDuplicateName(
+            // The service name is the duplicate's policy name, so it starts from the name of the
+            // policy the service is deployed into.
+            integrationName.trim() &&
+              supportsIntegrationSettings(duplicateSourceService, deploymentMethod)
+              ? getSourcePolicyName(
+                  integrationName,
+                  duplicateSourceService.packageName,
+                  getServiceVars(duplicateSourceInstance.instanceId).namespace,
+                  bareNamePackage
+                )
+              : duplicateSourceService.name,
+            allInstanceNames
+          )}
           existingNames={allInstanceNames}
           globalRegion={globalRegion}
           onAdd={handleDuplicateAdd}
