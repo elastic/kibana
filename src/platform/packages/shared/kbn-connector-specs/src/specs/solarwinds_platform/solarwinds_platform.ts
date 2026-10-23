@@ -71,13 +71,10 @@ export const SolarWindsPlatform: ConnectorSpec = {
   metadata: {
     id: '.solarwinds_platform',
     displayName: 'SolarWinds Platform',
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.solarwindsPlatform.metadata.description',
-      {
-        defaultMessage:
-          'Run SWQL queries, list, read, and acknowledge active alerts, and look up nodes in SolarWinds Platform (formerly Orion)',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.solarwindsPlatform.metadata.description', {
+      defaultMessage:
+        'Run SWQL queries, list, read, and acknowledge active alerts, and look up nodes in SolarWinds Platform (formerly Orion)',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -92,17 +89,14 @@ export const SolarWindsPlatform: ConnectorSpec = {
         overrides: {
           meta: {
             username: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.solarwindsPlatform.auth.username.helpText',
-                {
-                  defaultMessage:
-                    'A SolarWinds Platform account, for example a local Orion account or DOMAIN\\user. The query action can read all data this account can read, so use an account with only the permissions you need. To acknowledge alerts, the account needs the "Allow Account to Clear Events, Acknowledge Alerts and Syslogs" permission.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.solarwindsPlatform.auth.username.helpText', {
+                defaultMessage:
+                  'A SolarWinds Platform account, for example a local Orion account or DOMAIN\\user. The query action can read all data this account can read, so use an account with only the permissions you need. To acknowledge alerts, the account needs the "Allow Account to Clear Events, Acknowledge Alerts and Syslogs" permission.',
+              }),
             },
             verificationMode: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.solarwindsPlatform.auth.verificationMode.helpText',
+                'connectorSpecs.solarwindsPlatform.auth.verificationMode.helpText',
                 {
                   defaultMessage:
                     'How to verify the SWIS TLS certificate. SolarWinds uses a self-signed certificate by default: paste its CA certificate above, or use "none" to turn off verification.',
@@ -120,16 +114,13 @@ export const SolarWindsPlatform: ConnectorSpec = {
       url: UISchemas.url('https://orion.example.com:17774')
         .describe('SolarWinds Information Service (SWIS) base URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.solarwindsPlatform.config.url.label', {
+          label: i18n.translate('connectorSpecs.solarwindsPlatform.config.url.label', {
             defaultMessage: 'SWIS URL',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.solarwindsPlatform.config.url.helpText',
-            {
-              defaultMessage:
-                'The protocol, host, and port of the SolarWinds Information Service on the main polling engine, for example https://orion.example.com:17774. Do not include a path.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.solarwindsPlatform.config.url.helpText', {
+            defaultMessage:
+              'The protocol, host, and port of the SolarWinds Information Service on the main polling engine, for example https://orion.example.com:17774. Do not include a path.',
+          }),
         }),
     })
   ),
