@@ -1,0 +1,85 @@
+{
+  "results_cluster": {
+    "es_url": "https://sep-perf-aws-metrics-ff28f3.es.us-central1.gcp.foundit.no:443",
+    "api_key": "ZG5waWhaOEI1RkpqTjUwUU44Qkw6QW9EWEtyeXJyT1B1QWZzN0hNQ2hlZw=="
+  },
+  "defaults": {
+    "iterations": 30,
+    "memory_sample_interval_ms": 1000,
+    "change_history_enabled": true
+  },
+  "max_parallel_environments": 3,
+  "environments": [
+    {
+      "id": "dex-perf-cold-1",
+      "role": "cold_boot",
+      "kibana_url": "https://dex-perf-cold-1-bce560.kb.us-central1.gcp.staging.elastic.cloud:443",
+      "es_url": "https://dex-perf-cold-1-bce560.es.us-central1.gcp.staging.elastic.cloud:443",
+      "credentials": "testing-internal:Q75G6Fdro2p9t72Bp82kqS2o",
+      "kibana_memory_mb": 0,
+      "es_heap_mb": 0,
+      "stack_version": "9.6.0",
+      "notes": "Fresh serverless project, consumed by cold boot"
+    },
+    {
+      "id": "dex-perf-cold-2",
+      "role": "cold_boot",
+      "kibana_url": "https://dex-perf-cold-2-dc79ea.kb.us-central1.gcp.staging.elastic.cloud:443",
+      "es_url": "https://dex-perf-cold-2-dc79ea.es.us-central1.gcp.staging.elastic.cloud:443",
+      "credentials": "testing-internal:4o8mzQET9Y8799Br2Fqji06f",
+      "kibana_memory_mb": 0,
+      "es_heap_mb": 0,
+      "stack_version": "9.6.0",
+      "notes": "Fresh serverless project, consumed by cold boot"
+    },
+    {
+      "id": "dex-perf-cold-3",
+      "role": "cold_boot",
+      "kibana_url": "https://dex-perf-cold-3-fcaca0.kb.us-central1.gcp.staging.elastic.cloud:443",
+      "es_url": "https://dex-perf-cold-3-fcaca0.es.us-central1.gcp.staging.elastic.cloud:443",
+      "credentials": "testing-internal:0dZ69r9MzHB7GE7X8r8ZPY76",
+      "kibana_memory_mb": 0,
+      "es_heap_mb": 0,
+      "stack_version": "9.6.0",
+      "notes": "Fresh serverless project, consumed by cold boot"
+    },
+    {
+      "id": "dex-perf-warm-1",
+      "role": "warm_boot",
+      "scenarios": [
+        "warm_boot",
+        "scalability",
+        "contention",
+        "double_click",
+        "memory_stability"
+      ],
+      "kibana_url": "https://dex-perf-warm-1-a144cc.kb.us-central1.gcp.staging.elastic.cloud:443",
+      "es_url": "https://dex-perf-warm-1-a144cc.es.us-central1.gcp.staging.elastic.cloud:443",
+      "credentials": "testing-internal:2u3M835sG0sAvd0JF6JO77ow",
+      "kibana_memory_mb": 0,
+      "es_heap_mb": 0,
+      "stack_version": "9.6.0",
+      "iterations": 30,
+      "notes": "Reusable serverless project for all warm scenarios"
+    },
+    {
+      "id": "dex-perf-warm-2",
+      "role": "warm_boot",
+      "scenarios": [
+        "warm_boot",
+        "scalability",
+        "contention",
+        "double_click",
+        "memory_stability"
+      ],
+      "kibana_url": "https://dex-perf-warm-2-f9b2da.kb.us-central1.gcp.staging.elastic.cloud:443",
+      "es_url": "https://dex-perf-warm-2-f9b2da.es.us-central1.gcp.staging.elastic.cloud:443",
+      "credentials": "testing-internal:ECKnvt4Pl4349f5KIj980LH0",
+      "kibana_memory_mb": 0,
+      "es_heap_mb": 0,
+      "stack_version": "9.6.0",
+      "iterations": 30,
+      "notes": "Reusable serverless project for all warm scenarios"
+    }
+  ]
+}
