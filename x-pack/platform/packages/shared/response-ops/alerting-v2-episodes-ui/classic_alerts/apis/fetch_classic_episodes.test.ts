@@ -145,6 +145,41 @@ describe('fetchClassicAlertsAsEpisodes', () => {
     expect(episodes[0].last_snooze_action).toBe(ALERT_EPISODE_ACTION_TYPE.SNOOZE);
     expect(episodes[0].snoozed_until).toBe(expiresAt);
     expect(episodes[0]).not.toHaveProperty('is_muted');
+    expect(episodes[0]).not.toHaveProperty('snooze_conditions');
+  });
+
+  it('sets the snooze conditions for condition-snoozed alerts without an expiry', async () => {
+    mockPost((url: string) => {
+      if (url === RAC_FIND_PATH) {
+        return Promise.resolve({ hits: { hits: [makeHit(makeAlertSource())] } });
+      }
+      if (url === FIND_MUTED_ALERTS_PATH) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 'rule-1',
+              muted_alert_instance_ids: [],
+              snoozed_alert_instances: [
+                {
+                  instance_id: 'instance-1',
+                  conditions: [{ type: 'severity_change' }],
+                  condition_operator: 'all',
+                  snoozed_at: '2024-01-01T00:00:00.000Z',
+                  snoozed_by: 'user-1',
+                },
+              ],
+            },
+          ],
+        });
+      }
+      return Promise.resolve(emptySnoozeResponse);
+    });
+
+    const episodes = await callFetch();
+    expect(episodes[0].last_snooze_action).toBe(ALERT_EPISODE_ACTION_TYPE.SNOOZE);
+    expect(episodes[0].snoozed_until).toBeNull();
+    expect(episodes[0].snooze_conditions).toEqual([{ type: 'severity_change' }]);
+    expect(episodes[0].snooze_condition_operator).toBe('all');
   });
 
   it('leaves snooze fields unset when alert is not muted or snoozed', async () => {

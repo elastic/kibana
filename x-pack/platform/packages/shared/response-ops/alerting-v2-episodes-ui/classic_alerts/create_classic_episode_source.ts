@@ -118,6 +118,8 @@ export const createClassicEpisodeSource = ({
 
   actionExtensions: classicActionExtensions,
 
+  supportsConditionalSnooze: true,
+
   getRuleDetailsHref: (ruleId) =>
     `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,
 });

@@ -108,6 +108,7 @@ const classicWorkflowActions = (): EpisodeAction[] => {
         ...compositeDeps,
         overlays: overlayServiceMock.createStartContract(),
         rendering: renderingServiceMock.create(),
+        queryClient,
       },
       extensionFor('ALERTING_V2_SNOOZE_EPISODE')
     ),

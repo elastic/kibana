@@ -163,11 +163,15 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
     },
     execute: async (eps, http, context) => {
       const snoozedUntil: string | null = context?.snoozedUntil ?? null;
+      const conditions = context?.conditions;
+      const conditionOperator = context?.conditionOperator;
       let succeeded = 0;
       let failed = 0;
       const errors: string[] = [];
 
-      if (snoozedUntil === null) {
+      // Only an expiry-less snooze with nothing to lift it is a plain mute; a
+      // conditions-only snooze still needs the snooze API to record them.
+      if (snoozedUntil === null && !conditions?.length) {
         const rules = groupByRule(eps);
         try {
           await bulkMuteAlerts({ http, rules });
@@ -194,7 +198,8 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
                   http,
                   id: ctx.ruleId,
                   instanceId: ctx.instanceId!,
-                  expiresAt: snoozedUntil,
+                  ...(snoozedUntil === null ? {} : { expiresAt: snoozedUntil }),
+                  ...(conditions?.length ? { conditions, conditionOperator } : {}),
                 });
                 succeeded++;
               } catch (e) {
