@@ -275,6 +275,39 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Clicks a row action in the row whose title matches `name` exactly.
+   *
+   * Prefer this over {@link clickActionButton} whenever the caller knows which
+   * item it wants: a listing that is still showing pre-search rows simply has
+   * no matching row yet, so the poll waits for the search result instead of
+   * acting on whichever item currently sits at a given index.
+   */
+  public async clickActionButtonForItem(
+    actionSelector: string,
+    appName: AppName,
+    name: string
+  ): Promise<void> {
+    this.log.debug(`ListingTable.clickActionButtonForItem: ${actionSelector} for ${name}`);
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the rows without an implicit wait.
+      const rows = await this.find.allByCssSelector('.euiTableRow', 0);
+      for (const row of rows) {
+        const [link] = await row.findAllByCssSelector(itemLinkSelector(appName), 0);
+        if (!link || (await link.getVisibleText()).trim() !== name) {
+          continue;
+        }
+        const [button] = await row.findAllByCssSelector(`[data-test-subj="${actionSelector}"]`, 0);
+        if (!button) {
+          throw new Error(`Action ${actionSelector} is not available in the row for "${name}".`);
+        }
+        await button.click();
+        return;
+      }
+      throw new Error(`No listing row found with name "${name}".`);
+    });
+  }
+
+  /**
    * Open the inspect flyout
    */
   public async inspectVisualization(index: number = 0) {
