@@ -36,11 +36,37 @@ const readPng = async (imageInfo: string | Buffer): Promise<PNG> => {
 };
 
 /**
- * Crops the top-left `width` x `height` region of a PNG
+ * Stretches a PNG to `width` x `height` with bilinear interpolation
  */
-const cropPng = (src: PNG, width: number, height: number): PNG => {
+const resizePng = (src: PNG, width: number, height: number): PNG => {
   const dst = new PNG({ width, height });
-  PNG.bitblt(src, dst, 0, 0, width, height, 0, 0);
+  const scaleX = src.width / width;
+  const scaleY = src.height / height;
+  for (let y = 0; y < height; y++) {
+    const srcY = Math.min((y + 0.5) * scaleY - 0.5, src.height - 1);
+    const y0 = Math.max(Math.floor(srcY), 0);
+    const y1 = Math.min(y0 + 1, src.height - 1);
+    const weightY = srcY - y0;
+    for (let x = 0; x < width; x++) {
+      const srcX = Math.min((x + 0.5) * scaleX - 0.5, src.width - 1);
+      const x0 = Math.max(Math.floor(srcX), 0);
+      const x1 = Math.min(x0 + 1, src.width - 1);
+      const weightX = srcX - x0;
+      const topLeft = (y0 * src.width + x0) * 4;
+      const topRight = (y0 * src.width + x1) * 4;
+      const bottomLeft = (y1 * src.width + x0) * 4;
+      const bottomRight = (y1 * src.width + x1) * 4;
+      const out = (y * width + x) * 4;
+      for (let channel = 0; channel < 4; channel++) {
+        const top =
+          src.data[topLeft + channel] * (1 - weightX) + src.data[topRight + channel] * weightX;
+        const bottom =
+          src.data[bottomLeft + channel] * (1 - weightX) +
+          src.data[bottomRight + channel] * weightX;
+        dst.data[out + channel] = Math.round(top * (1 - weightY) + bottom * weightY);
+      }
+    }
+  }
   return dst;
 };
 
@@ -78,8 +104,8 @@ export async function comparePngs(
   log.debug('session height ' + sessionHeight + ' and width ' + sessionWidth);
   log.debug('test height ' + testHeight + ' and width ' + testWidth);
   if (sessionWidth !== baselineWidth || sessionHeight !== baselineHeight) {
-    sessionTestImg = cropPng(sessionTestImg, testWidth, testHeight);
-    baselineTestImg = cropPng(baselineTestImg, testWidth, testHeight);
+    sessionTestImg = resizePng(sessionTestImg, testWidth, testHeight);
+    baselineTestImg = resizePng(baselineTestImg, testWidth, testHeight);
     await fs.writeFile(
       join(sessionDirectory, `${parse(sessionDescriptor.path).name}-session-resized.png`),
       PNG.sync.write(sessionTestImg)
@@ -108,10 +134,7 @@ export async function comparePngs(
     }
   );
 
-  // Pixels outside the compared region exist in only one of the images, so they count as mismatched.
-  const largestArea = Math.max(sessionWidth * sessionHeight, baselineWidth * baselineHeight);
-  const croppedPixels = largestArea - testWidth * testHeight;
-  const diffRatio = (mismatchedPixels + croppedPixels) / largestArea;
+  const diffRatio = mismatchedPixels / (testWidth * testHeight);
 
   log.debug(`percent different (ratio): ${diffRatio}`);
   if (diffRatio > 0) {
