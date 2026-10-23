@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { SLOOperationTimeout } from '../errors';
+
+export const REQUEST_DEADLINE_MS = 60_000;
 
 /**
  * Runs an operation with a signal aborted after `ms`.
@@ -24,8 +27,11 @@ export const withTimeoutSignal = async <T>(
   }
 };
 
+const isAbortError = (err: Error): boolean =>
+  err instanceof errors.RequestAbortedError || err.name === 'AbortError';
+
 /**
- * Runs an operation with a signal aborted after `ms`; any error raised once the deadline is exceeded becomes an SLOOperationTimeout.
+ * Runs an operation with a signal aborted after `ms`; an abort error raised once the deadline is exceeded becomes an SLOOperationTimeout.
  */
 export const withDeadline = <T>(
   ms: number,
@@ -35,10 +41,8 @@ export const withDeadline = <T>(
     try {
       return await operation(signal);
     } catch (err) {
-      if (signal.aborted) {
-        throw new SLOOperationTimeout(
-          `Operation did not complete within ${ms}ms and was rolled back`
-        );
+      if (signal.aborted && isAbortError(err)) {
+        throw new SLOOperationTimeout(`Operation did not complete within ${ms}ms`);
       }
       throw err;
     }

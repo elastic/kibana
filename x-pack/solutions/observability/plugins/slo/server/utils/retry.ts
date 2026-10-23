@@ -28,9 +28,6 @@ export const REQUEST_RETRY_OPTIONS: RetryOptions = {
   maxDelayMs: 2_000,
 };
 
-export const REQUEST_DEADLINE_MS = 60_000;
-export const ROLLBACK_DEADLINE_MS = 30_000;
-
 /**
  * Retries any transient network or configuration issues encountered from Elasticsearch with an exponential backoff.
  * Should only be used to wrap operations that are idempotent and can be safely executed more than once.

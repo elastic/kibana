@@ -26,10 +26,10 @@ import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_p
 import type { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
 import { allSettledOrThrow } from '../utils/all_settled_or_throw';
-import { REQUEST_DEADLINE_MS, REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
+import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 import type { RollbackOperation } from '../utils/run_rollback';
 import { runRollback } from '../utils/run_rollback';
-import { withDeadline } from '../utils/with_deadline';
+import { REQUEST_DEADLINE_MS, withDeadline } from '../utils/with_deadline';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';

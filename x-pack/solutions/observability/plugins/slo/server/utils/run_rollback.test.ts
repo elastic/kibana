@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ROLLBACK_DEADLINE_MS } from './retry';
-import { runRollback } from './run_rollback';
+import { ROLLBACK_DEADLINE_MS, runRollback } from './run_rollback';
 
 describe('runRollback', () => {
   beforeEach(() => {

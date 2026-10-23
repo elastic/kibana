@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
@@ -33,7 +34,7 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 import type { SLODefinition } from '../domain/models';
 import { SLOOperationTimeout } from '../errors';
-import { REQUEST_DEADLINE_MS } from '../utils/retry';
+import { REQUEST_DEADLINE_MS } from '../utils/with_deadline';
 
 const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
 
@@ -205,7 +206,9 @@ describe('ResetSLO', () => {
       mockTransformManager.install.mockImplementationOnce(
         (_slo, { signal } = {}) =>
           new Promise((_resolve, reject) => {
-            signal?.addEventListener('abort', () => reject(new Error('Request aborted')));
+            signal?.addEventListener('abort', () =>
+              reject(new errors.RequestAbortedError('Request aborted'))
+            );
           })
       );
       const resetedRollupTransformId = getSLOTransformId(slo.id, slo.revision + 1);

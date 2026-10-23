@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -19,7 +20,7 @@ import { SUMMARY_TEMP_INDEX_NAME } from '../../common/constants';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
 import type { SLODefinition } from '../domain/models';
 import { SLOOperationTimeout } from '../errors';
-import { REQUEST_DEADLINE_MS } from '../utils/retry';
+import { REQUEST_DEADLINE_MS } from '../utils/with_deadline';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -362,7 +363,9 @@ describe('CreateSLO', () => {
       mockTransformManager.install.mockImplementationOnce(
         (_slo, { signal } = {}) =>
           new Promise((_resolve, reject) => {
-            signal?.addEventListener('abort', () => reject(new Error('Request aborted')));
+            signal?.addEventListener('abort', () =>
+              reject(new errors.RequestAbortedError('Request aborted'))
+            );
           })
       );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });

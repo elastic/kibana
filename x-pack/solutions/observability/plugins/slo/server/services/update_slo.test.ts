@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
@@ -26,7 +27,7 @@ import {
 } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
 import { SLOOperationTimeout } from '../errors';
-import { REQUEST_DEADLINE_MS } from '../utils/retry';
+import { REQUEST_DEADLINE_MS } from '../utils/with_deadline';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -569,7 +570,9 @@ describe('UpdateSLO', () => {
         mockSummaryTransformManager.install.mockImplementationOnce(
           (_slo, { signal } = {}) =>
             new Promise((_resolve, reject) => {
-              signal?.addEventListener('abort', () => reject(new Error('Request aborted')));
+              signal?.addEventListener('abort', () =>
+                reject(new errors.RequestAbortedError('Request aborted'))
+              );
             })
         );
 

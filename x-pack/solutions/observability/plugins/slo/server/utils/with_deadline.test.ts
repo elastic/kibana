@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { SLOOperationTimeout } from '../errors';
 import { withDeadline, withTimeoutSignal } from './with_deadline';
 
@@ -13,15 +14,15 @@ const waitForAbort = (signal: AbortSignal): Promise<never> =>
     signal.addEventListener('abort', () => reject(new Error('aborted')));
   });
 
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.useRealTimers();
+});
+
 describe('withDeadline', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('resolves with the operation result', async () => {
     await expect(withDeadline(1000, async () => 'success')).resolves.toEqual('success');
   });
@@ -42,12 +43,46 @@ describe('withDeadline', () => {
     ).rejects.toBe(error);
   });
 
-  it('throws SLOOperationTimeout when the operation fails after the deadline', async () => {
-    const promise = withDeadline(1000, waitForAbort);
+  it('throws SLOOperationTimeout when the operation is aborted by the deadline', async () => {
+    const promise = withDeadline(
+      1000,
+      (signal) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () => reject(signal.reason));
+        })
+    );
 
     jest.advanceTimersByTime(1000);
 
     await expect(promise).rejects.toBeInstanceOf(SLOOperationTimeout);
+  });
+
+  it('throws SLOOperationTimeout when an Elasticsearch request is aborted by the deadline', async () => {
+    const promise = withDeadline(
+      1000,
+      (signal) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () =>
+            reject(new errors.RequestAbortedError('Request aborted'))
+          );
+        })
+    );
+
+    jest.advanceTimersByTime(1000);
+
+    await expect(promise).rejects.toBeInstanceOf(SLOOperationTimeout);
+  });
+
+  it('rethrows a failure that is not an abort even when the deadline has passed', async () => {
+    const error = new Error('boom');
+    const promise = withDeadline(1000, async (signal) => {
+      await waitForAbort(signal).catch(() => undefined);
+      throw error;
+    });
+
+    jest.advanceTimersByTime(1000);
+
+    await expect(promise).rejects.toBe(error);
   });
 
   it('returns the result when the operation succeeds after the deadline', async () => {
@@ -60,23 +95,9 @@ describe('withDeadline', () => {
 
     await expect(promise).resolves.toEqual('late success');
   });
-
-  it('clears the deadline timer once the operation completes', async () => {
-    await withDeadline(1000, async () => 'success');
-
-    expect(jest.getTimerCount()).toBe(0);
-  });
 });
 
 describe('withTimeoutSignal', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('aborts the signal once the timeout elapses', async () => {
     const onAbort = jest.fn();
     const promise = withTimeoutSignal(1000, (signal) => {

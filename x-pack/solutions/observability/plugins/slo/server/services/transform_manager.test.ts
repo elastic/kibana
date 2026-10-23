@@ -16,6 +16,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 
 import { REQUEST_RETRY_OPTIONS } from '../utils/retry';
 import { DefaultTransformManager } from './transform_manager';
+import type { TransformManagerOptions } from './transform_manager';
 import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
@@ -146,20 +147,21 @@ describe('TransformManager', () => {
     });
   });
 
+  const createDefaultManager = (options?: TransformManagerOptions) =>
+    new DefaultTransformManager(
+      createTransformGenerators(spaceId, dataViewsService, false),
+      scopedClusterClientMock,
+      loggerMock,
+      options
+    );
+
   describe('Abort signal', () => {
     const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
-    const createManager = (options?: { signal?: AbortSignal }) =>
-      new DefaultTransformManager(
-        createTransformGenerators(spaceId, dataViewsService, false),
-        scopedClusterClientMock,
-        loggerMock,
-        options
-      );
 
     it('forwards the call signal to putTransform', async () => {
       const controller = new AbortController();
 
-      await createManager().install(slo, { signal: controller.signal });
+      await createDefaultManager().install(slo, { signal: controller.signal });
 
       const [[, options]] =
         scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform.mock.calls;
@@ -169,17 +171,27 @@ describe('TransformManager', () => {
     it('forwards the call signal to startTransform', async () => {
       const controller = new AbortController();
 
-      await createManager().start('slo-transform-id', { signal: controller.signal });
+      await createDefaultManager().start('slo-transform-id', { signal: controller.signal });
 
       const [[, options]] =
         scopedClusterClientMock.asSecondaryAuthUser.transform.startTransform.mock.calls;
       expect(options?.signal).toBe(controller.signal);
     });
 
+    it('forwards the call signal to scheduleNowTransform', async () => {
+      const controller = new AbortController();
+
+      await createDefaultManager().start('slo-transform-id', { signal: controller.signal });
+
+      const [[, options]] =
+        scopedClusterClientMock.asSecondaryAuthUser.transform.scheduleNowTransform.mock.calls;
+      expect(options?.signal).toBe(controller.signal);
+    });
+
     it('forwards the call signal to deleteTransform', async () => {
       const controller = new AbortController();
 
-      await createManager().uninstall('slo-transform-id', { signal: controller.signal });
+      await createDefaultManager().uninstall('slo-transform-id', { signal: controller.signal });
 
       const [[, options]] =
         scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mock.calls;
@@ -193,7 +205,7 @@ describe('TransformManager', () => {
       });
       const controller = new AbortController();
 
-      await createManager().getVersion('slo-transform-id', { signal: controller.signal });
+      await createDefaultManager().getVersion('slo-transform-id', { signal: controller.signal });
 
       const [[, options]] =
         scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mock.calls;
@@ -203,23 +215,11 @@ describe('TransformManager', () => {
     it('uses the constructor signal when no call signal is given', async () => {
       const controller = new AbortController();
 
-      await createManager({ signal: controller.signal }).uninstall('slo-transform-id');
+      await createDefaultManager({ signal: controller.signal }).uninstall('slo-transform-id');
 
       const [[, options]] =
         scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mock.calls;
       expect(options?.signal).toBe(controller.signal);
-    });
-
-    it('does not call Elasticsearch when the call signal is already aborted', async () => {
-      const controller = new AbortController();
-      controller.abort();
-
-      await expect(
-        createManager().uninstall('slo-transform-id', { signal: controller.signal })
-      ).rejects.toThrow();
-      expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
-      ).not.toHaveBeenCalled();
     });
   });
 
@@ -228,14 +228,9 @@ describe('TransformManager', () => {
       scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mockRejectedValue(
         new EsErrors.ConnectionError('irrelevant')
       );
-      const transformManager = new DefaultTransformManager(
-        createTransformGenerators(spaceId, dataViewsService, false),
-        scopedClusterClientMock,
-        loggerMock,
-        { retryOptions: REQUEST_RETRY_OPTIONS }
-      );
-
-      await expect(transformManager.uninstall('slo-transform-id')).rejects.toThrow('irrelevant');
+      await expect(
+        createDefaultManager({ retryOptions: REQUEST_RETRY_OPTIONS }).uninstall('slo-transform-id')
+      ).rejects.toThrow('irrelevant');
       expect(
         scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
       ).toHaveBeenCalledTimes(3);

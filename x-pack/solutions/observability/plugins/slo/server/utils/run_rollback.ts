@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ROLLBACK_DEADLINE_MS } from './retry';
 import { withTimeoutSignal } from './with_deadline';
+
+export const ROLLBACK_DEADLINE_MS = 30_000;
 
 export type RollbackOperation = (signal: AbortSignal) => Promise<unknown>;
 
