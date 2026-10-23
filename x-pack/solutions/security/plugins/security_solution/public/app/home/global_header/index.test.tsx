@@ -197,6 +197,9 @@ describe('global header', () => {
     '/rules/add_rules',
     '/exceptions',
     '/get_started',
+    '/administration',
+    '/administration/endpoints',
+    '/administration/policy',
   ])(
     'does not mount the header action menu on %s, where the page app header owns the actions',
     (pathname) => {

@@ -6,9 +6,13 @@
  */
 
 import React from 'react';
+import type { RenderResult } from '@testing-library/react';
 import { act, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import {
+  APP_UI_ID,
   BLOCKLIST_PATH,
   CUSTOM_YARA_SIGNATURES_PATH,
   ENDPOINT_EXCEPTIONS_PATH,
@@ -19,7 +23,7 @@ import {
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import type { EndpointPrivileges } from '../../../../common/endpoint/types';
+import type { EndpointPrivileges, ListPageRouteState } from '../../../../common/endpoint/types';
 import { ArtifactsPage } from './artifacts_page';
 import {
   BLOCKLIST_TAB,
@@ -31,6 +35,7 @@ import {
   TRUSTED_DEVICES_TAB,
 } from '../../common/translations';
 import { useHostIsolationExceptionsAccess } from '../../hooks/artifacts/use_host_isolation_exceptions_access';
+import { mockAnchorClickNavigation } from '../../common/mock/mock_anchor_click_navigation';
 
 jest.mock('../../../common/components/user_privileges');
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
@@ -89,11 +94,17 @@ const fullArtifactReadPrivileges: Partial<EndpointPrivileges> = {
 describe('ArtifactsPage', () => {
   let mockedContext: AppContextTestRender;
   let history: AppContextTestRender['history'];
-  let renderResult: ReturnType<AppContextTestRender['render']>;
+  let renderResult: RenderResult;
+  let stopMockingAnchorClicks: () => void;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
+    // AppHeader tabs navigate via a plain `href` (no `onClick`/`preventDefault`, by API
+    // design — real Kibana intercepts the click globally via Core's `GlobalRedirectAppLink`).
+    // That global interceptor isn't part of this plugin's test harness, so clicking a tab
+    // in jsdom does nothing without this.
+    stopMockingAnchorClicks = mockAnchorClickNavigation(mockedContext.coreStart);
     mockedContext.setExperimentalFlag({
       endpointExceptionsMovedUnderManagement: true,
       trustedDevices: true,
@@ -111,6 +122,7 @@ describe('ArtifactsPage', () => {
   afterEach(() => {
     mockUseUserPrivileges.mockReset();
     mockUseHostIsolationExceptionsAccess.mockReset();
+    stopMockingAnchorClicks();
   });
 
   const renderArtifactsAtPath = (path: string) => {
@@ -334,5 +346,73 @@ describe('ArtifactsPage', () => {
       expect(renderResult.getByTestId('artifactsPage-hieAccessLoading')).toBeInTheDocument();
     });
     expect(renderResult.queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+  });
+
+  // Non-obvious edge: the in-content back link was removed, and the header's `back` only
+  // appears when this page was opened from a policy's artifact empty-state ("Manage" action) —
+  // never when reached from the side nav — so it must be absent by default.
+  it('does not show a header back button when opened without a policy-origin route state', async () => {
+    renderResult = renderArtifactsAtPath(TRUSTED_APPS_PATH);
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('artifacts-stub-trustedApps')).toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
+  });
+
+  it('shows and navigates a header back button to the originating policy when route state carries a policy origin', async () => {
+    const user = userEvent.setup();
+    const policyBackPath = '/administration/policy/abc123/trusted_apps';
+    const policyBackRouteState: ListPageRouteState = {
+      onBackButtonNavigateTo: [APP_UI_ID, { path: policyBackPath }],
+      backButtonUrl: `/app/security${policyBackPath}`,
+      backButtonLabel: 'Test policy policy',
+    };
+
+    act(() => {
+      history.push(TRUSTED_APPS_PATH, policyBackRouteState);
+    });
+    renderResult = mockedContext.render(<ArtifactsPage />);
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('artifacts-stub-trustedApps')).toBeInTheDocument();
+    });
+
+    const backButton = renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    expect(backButton).toHaveAccessibleName(`Back to ${policyBackRouteState.backButtonLabel}`);
+
+    await user.click(backButton);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(policyBackPath);
+    });
+  });
+
+  // Non-obvious edge: each artifact tab links to its own doc page; Custom YARA signatures has
+  // no dedicated doc page and intentionally falls back to the general endpoint-artifacts link.
+  it('uses a per-tab doc link, falling back to the endpoint artifacts link for custom YARA signatures', async () => {
+    renderResult = renderArtifactsAtPath(TRUSTED_APPS_PATH);
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('artifacts-stub-trustedApps')).toBeInTheDocument();
+    });
+    await openAppMenuOverflow();
+    expect(renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      mockedContext.coreStart.docLinks.links.securitySolution.trustedApps
+    );
+
+    act(() => {
+      history.push(CUSTOM_YARA_SIGNATURES_PATH);
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('artifacts-stub-customYaraSignatures')).toBeInTheDocument();
+    });
+    await openAppMenuOverflow();
+    expect(renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      mockedContext.coreStart.docLinks.links.securitySolution.endpointArtifacts
+    );
   });
 });

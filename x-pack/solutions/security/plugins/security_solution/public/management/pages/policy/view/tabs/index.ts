@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { PolicyTabs } from './policy_tabs';
+export { usePolicyTabs } from './policy_tabs';
+export type { UsePolicyTabsResult } from './policy_tabs';

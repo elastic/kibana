@@ -13,8 +13,10 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
   useSyncExternalStore,
 } from 'react';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { ConsoleDataState } from '../console_state/types';
 import { ConsolePageOverlay } from './components/console_page_overlay';
 import type {
@@ -27,11 +29,7 @@ import { Console } from '../../console';
 interface ManagedConsole
   extends Pick<
     ConsoleRegistrationInterface,
-    | 'consoleProps'
-    | 'PageTitleComponent'
-    | 'PageBodyComponent'
-    | 'ActionComponents'
-    | 'showCloseButton'
+    'consoleProps' | 'pageTitle' | 'PageBodyComponent' | 'HeaderActionsComponent'
   > {
   client: RegisteredConsoleClient;
   console: JSX.Element; // actual console component
@@ -284,8 +282,8 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 
       const managedConsole: ManagedConsole = {
         PageBodyComponent: undefined,
-        PageTitleComponent: undefined,
-        ActionComponents: undefined,
+        pageTitle: undefined,
+        HeaderActionsComponent: undefined,
         ...otherRegisterProps,
         client: {
           id,
@@ -368,39 +366,60 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     }
   }, [consoleManagerClient, visibleConsole]);
 
+  // The `AppMenuConfig` reported by the visible console's `HeaderActionsComponent` (if any), eg the
+  // "Response actions history" action. Tagged with the console's `key` so a stale menu from a
+  // console that's no longer visible is never shown for the next one - `HeaderActionsComponent`
+  // reports its menu from an effect, which runs a frame after the newly-visible console mounts.
+  const [headerMenuState, setHeaderMenuState] = useState<{
+    key: ManagedConsole['key'];
+    menu: AppMenuConfig | undefined;
+  }>();
+
+  const handleHeaderMenuChange = useCallback(
+    (menu: AppMenuConfig | undefined) => {
+      if (visibleConsole) {
+        setHeaderMenuState({ key: visibleConsole.key, menu });
+      }
+    },
+    [visibleConsole]
+  );
+
+  const headerMenu =
+    headerMenuState?.key === visibleConsole?.key ? headerMenuState?.menu : undefined;
+
   return (
     <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
 
       {isPrimaryRenderer && visibleConsole && (
-        <ConsolePageOverlay
-          onHide={handleOnHide}
-          console={
-            <Console
-              {...visibleConsole.consoleProps}
-              managedKey={visibleConsole.key}
-              key={visibleConsole.client.id}
+        <>
+          <ConsolePageOverlay
+            onHide={handleOnHide}
+            console={
+              <Console
+                {...visibleConsole.consoleProps}
+                managedKey={visibleConsole.key}
+                key={visibleConsole.client.id}
+              />
+            }
+            isHidden={!visibleConsole}
+            pageTitle={visibleConsole.pageTitle}
+            body={
+              visibleConsole.PageBodyComponent && (
+                <visibleConsole.PageBodyComponent meta={visibleConsoleMeta} />
+              )
+            }
+            menu={headerMenu}
+          />
+
+          {visibleConsole.HeaderActionsComponent && (
+            <visibleConsole.HeaderActionsComponent
+              key={visibleConsole.key.toString()}
+              meta={visibleConsoleMeta}
+              onMenuChange={handleHeaderMenuChange}
             />
-          }
-          isHidden={!visibleConsole}
-          pageTitle={
-            visibleConsole.PageTitleComponent && (
-              <visibleConsole.PageTitleComponent meta={visibleConsoleMeta} />
-            )
-          }
-          body={
-            visibleConsole.PageBodyComponent && (
-              <visibleConsole.PageBodyComponent meta={visibleConsoleMeta} />
-            )
-          }
-          actions={
-            visibleConsole.ActionComponents &&
-            visibleConsole.ActionComponents.map((ActionComponent) => {
-              return <ActionComponent meta={visibleConsoleMeta} />;
-            })
-          }
-          showCloseButton={visibleConsole.showCloseButton}
-        />
+          )}
+        </>
       )}
     </ConsoleManagerContext.Provider>
   );

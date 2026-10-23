@@ -29,7 +29,6 @@ export const NoDataEmptyState = memo<{
   canCreateItems?: boolean;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
-  backComponent?: React.ReactNode;
   secondaryAboutInfo?: React.ReactNode;
   'data-test-subj'?: string;
 }>(
@@ -37,7 +36,6 @@ export const NoDataEmptyState = memo<{
     onAdd,
     onImport,
     isAddDisabled = false,
-    backComponent,
     'data-test-subj': dataTestSubj,
     titleLabel,
     titleNoEntriesLabel,
@@ -91,8 +89,6 @@ export const NoDataEmptyState = memo<{
                     </EuiButtonEmpty>,
                   ]
                 : []),
-
-              ...(backComponent ? [backComponent] : []),
             ]}
           />
         ) : (

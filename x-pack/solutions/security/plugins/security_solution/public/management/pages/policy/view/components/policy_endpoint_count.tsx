@@ -44,8 +44,8 @@ export const PolicyEndpointCount = memo<
           path: policyListPath,
         },
       ],
-      label: i18n.translate('xpack.securitySolution.policy.backToPolicyList', {
-        defaultMessage: 'Back to policy list',
+      label: i18n.translate('xpack.securitySolution.policy.list.appHeaderBackLabel', {
+        defaultMessage: 'Policies',
       }),
       href: getAppUrl({ path: policyListPath }),
     };

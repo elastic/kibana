@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import {
   type AppContextTestRender,
@@ -155,13 +156,13 @@ describe('ScriptLibrary', () => {
       expect(getByTestId('test-no-data-empty-prompt-title-no-entries')).toBeInTheDocument();
     });
 
-    it('renders the `Script Library` page', () => {
+    it('renders the `Script library` page', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toBeInTheDocument();
     });
 
-    it('should show the page header when data is available and fetched', () => {
+    it('should show the page header with the correct title', () => {
       const scriptId = 'script-1';
       const script = scriptsGenerator.generate({ id: scriptId });
       getScriptsListMock([script]);
@@ -169,11 +170,20 @@ describe('ScriptLibrary', () => {
       render();
       const { getByTestId } = renderResult;
 
-      expect(getByTestId('test-header')).toBeInTheDocument();
-      expect(getByTestId('header-page-title').textContent).toEqual('Script Library');
-      expect(getByTestId('header-panel-subtitle').textContent).toEqual(
-        'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend. Learn more(external, opens in a new tab or window)'
-      );
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title).textContent).toEqual('Script library');
+    });
+
+    it('should show the page header even when there is no data yet', () => {
+      // header title should always be announced for the route, even in the empty state -
+      // only the header's primary action is suppressed to avoid duplicating the empty
+      // prompt's own "Upload script" button
+      render();
+      const { getByTestId, queryByTestId } = renderResult;
+
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title).textContent).toEqual('Script library');
+      expect(queryByTestId('test-upload-script-button')).not.toBeInTheDocument();
     });
   });
 

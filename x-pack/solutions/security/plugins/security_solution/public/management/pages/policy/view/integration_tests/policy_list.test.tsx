@@ -195,7 +195,7 @@ describe('When on the policy list page', () => {
               path: getPoliciesPath(),
             },
           ],
-          label: 'Back to policy list',
+          label: 'Policies',
           href: '/app/security/administration/policy',
         },
       };

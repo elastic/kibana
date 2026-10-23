@@ -21,7 +21,6 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
-import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import { useApi } from '@kbn/securitysolution-list-hooks';
@@ -55,14 +54,11 @@ import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { useUrlParams } from '../../hooks/use_url_params';
-import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { XOR } from '../../../../common/utility_types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { useMemoizedRouteState } from '../../common/hooks';
-import { BackToExternalAppLink } from '../back_to_external_app_link';
-import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ArtifactImportFlyout } from './components/artifact_import_flyout';
 import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
@@ -153,7 +149,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     );
     const { services } = useKibana();
     const { http } = services;
-    const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const isMounted = useIsMounted();
@@ -257,20 +252,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       allowCardEditAction,
       disabled: showAsSimpleTable,
     });
-
-    const memoizedRouteState = useMemoizedRouteState(routeState);
-
-    const backLinkComponent = useMemo(() => {
-      if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
-        return <BackToExternalAppLink {...memoizedRouteState} />;
-      }
-    }, [memoizedRouteState]);
-
-    const backButtonHeaderComponent = useMemo(() => {
-      if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
-        return <BackToExternalAppButton {...memoizedRouteState} />;
-      }
-    }, [memoizedRouteState]);
 
     const handleOpenCreateFlyoutClick = useCallback(() => {
       setUrlParams({ show: 'create' });
@@ -459,7 +440,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     return (
       <AdministrationListPage
-        headerBackComponent={backButtonHeaderComponent}
         hideHeader={true}
         title={labels.pageTitle}
         data-test-subj={getTestId('container')}
@@ -560,7 +540,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               aboutInfo={labels.emptyStateInfo}
               primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
               importButtonLabel={labels.emptyStateImportButtonLabel}
-              backComponent={backLinkComponent}
               data-test-subj={getTestId('emptyState')}
               secondaryAboutInfo={secondaryPageInfo}
               canCreateItems={allowCardCreateAction}
@@ -571,7 +550,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           </div>
         ) : (
           <>
-            {backButtonHeaderComponent}
             {description}
             <EuiSpacer size="m" />
             {callout}

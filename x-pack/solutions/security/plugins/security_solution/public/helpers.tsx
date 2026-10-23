@@ -25,6 +25,7 @@ import {
   CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
+  MANAGEMENT_PATH,
   RULES_ADD_PATH,
   RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
@@ -233,6 +234,17 @@ export const isSharedExceptionListsPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: EXCEPTIONS_PATH,
     exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches any Endpoint management route (Endpoints, Policies, Response actions history, Script
+ * library, Artifacts, Policy details, etc.), whose app headers (`AdministrationListPage` /
+ * `ArtifactListPage`) own the page actions, including "Add integrations".
+ */
+export const isManagementPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: MANAGEMENT_PATH,
     strict: false,
   });
 

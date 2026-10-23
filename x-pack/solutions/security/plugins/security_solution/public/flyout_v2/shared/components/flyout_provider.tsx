@@ -97,7 +97,9 @@ export const flyoutProviders = ({
   // TODO remove ExpandableFlyoutProvider when we're ready to drop the expandable flyout
   // ConsoleManager and AssistantProvider must live inside the Router because the Respond
   // PageOverlay they render calls `useLocation()` (for `hideOnUrlPathnameChange`).
-  const flyoutContent = (
+  // The Respond overlay header (`AppHeaderView`) needs the Chrome context, which system flyouts
+  // rendered in their own React root (eg. from Discover) don't provide.
+  const flyoutContent = services.chrome.withProvider(
     <FlyoutRouter history={history}>
       <ConsoleManager>
         <AssistantProvider>

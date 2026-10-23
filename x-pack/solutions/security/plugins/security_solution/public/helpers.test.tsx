@@ -14,6 +14,7 @@ import {
   getField,
   getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
+  isManagementPath,
   isSubPluginAvailable,
   parseRoute,
 } from './helpers';
@@ -296,5 +297,27 @@ describe('isDashboardViewPath', () => {
 
   it('returns false for dashboard listing path', () => {
     expect(isDashboardViewPath('/dashboards')).toEqual(false);
+  });
+});
+
+describe('isManagementPath', () => {
+  it('returns true for the administration landing path', () => {
+    expect(isManagementPath('/administration')).toEqual(true);
+  });
+
+  it('returns true for the endpoints list path', () => {
+    expect(isManagementPath('/administration/endpoints')).toEqual(true);
+  });
+
+  it('returns true for nested administration sub-routes', () => {
+    expect(isManagementPath('/administration/policy/abc-123/settings')).toEqual(true);
+  });
+
+  it('returns false for the manage landing path', () => {
+    expect(isManagementPath('/manage')).toEqual(false);
+  });
+
+  it('returns false for unrelated paths', () => {
+    expect(isManagementPath('/alerts')).toEqual(false);
   });
 });

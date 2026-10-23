@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiSpacer, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -99,13 +98,50 @@ interface PolicyTab {
   id: PolicyTabKeys;
   name: string;
   content: React.ReactNode;
+  'data-test-subj': string;
 }
 
-export const PolicyTabs = React.memo(() => {
+export interface UsePolicyTabsResult {
+  /** Tab definitions for the page's `AppHeader` `tabs` prop. */
+  tabs: AppHeaderTab[];
+  /** The content of the active tab (plus the unsaved-changes confirm modal when pending). */
+  body: React.ReactNode;
+}
+
+function getPathForPolicyTab(tabId: PolicyTabKeys, policyId: string): string {
+  switch (tabId) {
+    case PolicyTabKeys.SETTINGS:
+      return getPolicyDetailPath(policyId);
+    case PolicyTabKeys.TRUSTED_APPS:
+      return getPolicyTrustedAppsPath(policyId);
+    case PolicyTabKeys.TRUSTED_DEVICES:
+      return getPolicyTrustedDevicesPath(policyId);
+    case PolicyTabKeys.EVENT_FILTERS:
+      return getPolicyEventFiltersPath(policyId);
+    case PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS:
+      return getPolicyHostIsolationExceptionsPath(policyId);
+    case PolicyTabKeys.BLOCKLISTS:
+      return getPolicyBlocklistsPath(policyId);
+    case PolicyTabKeys.ENDPOINT_EXCEPTIONS:
+      return getPolicyEndpointExceptionsPath(policyId);
+    case PolicyTabKeys.CUSTOM_YARA_SIGNATURES:
+      return getPolicyCustomYaraSignaturesPath(policyId);
+    case PolicyTabKeys.PROTECTION_UPDATES:
+      return getPolicyProtectionUpdatesPath(policyId);
+    default:
+      return getPolicyDetailPath(policyId);
+  }
+}
+
+/**
+ * Builds the Policy details tabs (RBAC/flag-gated) and their content. Must only be called once
+ * the policy item has loaded (mirrors the previous `PolicyTabs` component's assumption).
+ */
+export const usePolicyTabs = (): UsePolicyTabsResult => {
   const history = useHistory();
   const http = useHttp();
   const toasts = useToasts();
-  const theme = useEuiTheme();
+  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
@@ -117,11 +153,6 @@ export const PolicyTabs = React.memo(() => {
   const isInEndpointExceptionsTab = usePolicyDetailsSelector(isOnEndpointExceptionsView);
   const isInProtectionUpdatesTab = usePolicyDetailsSelector(isOnProtectionUpdatesView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
-
-  const [unsavedChangesModal, setUnsavedChangesModal] = useState<{
-    showModal: boolean;
-    nextTab: EuiTabbedContentTab | null;
-  }>({ showModal: false, nextTab: null });
 
   const [unsavedChanges, setUnsavedChanges] = useState<
     Record<PolicyTabKeys.SETTINGS | PolicyTabKeys.PROTECTION_UPDATES, boolean>
@@ -162,7 +193,6 @@ export const PolicyTabs = React.memo(() => {
     canWriteCustomYaraSignatures,
     loading: isPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
-  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
   const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
   const isEndpointExceptionsMovedUnderManagementFeatureEnabled = useIsExperimentalFeatureEnabled(
@@ -602,14 +632,16 @@ export const PolicyTabs = React.memo(() => {
     isEnterprise,
   ]);
 
-  // convert tabs object into an array EuiTabbedContent can understand
+  // tabsList preserves the PolicyTabKeys declaration order (object literal key order above).
   const tabsList: PolicyTab[] = useMemo(
     () => Object.values(tabs).filter((tab): tab is PolicyTab => tab !== undefined),
     [tabs]
   );
 
-  const currentSelectedTab = useMemo(() => {
-    const defaultTab = tabs[PolicyTabKeys.SETTINGS];
+  // `PolicyTabKeys.SETTINGS` is always defined above (it's never gated behind a feature flag/RBAC
+  // check), so it's safe to use as the fallback.
+  const currentSelectedTab = useMemo((): PolicyTab => {
+    const defaultTab = tabs[PolicyTabKeys.SETTINGS] as PolicyTab;
     let selectedTab: PolicyTab | undefined;
 
     if (isInSettingsTab) {
@@ -632,7 +664,7 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.PROTECTION_UPDATES];
     }
 
-    return selectedTab || defaultTab;
+    return selectedTab ?? defaultTab;
   }, [
     tabs,
     isInSettingsTab,
@@ -646,105 +678,77 @@ export const PolicyTabs = React.memo(() => {
     isInProtectionUpdatesTab,
   ]);
 
-  const cancelUnsavedChangesModal = useCallback(() => {
-    setUnsavedChangesModal({ showModal: false, nextTab: null });
-  }, [setUnsavedChangesModal]);
+  const [unsavedChangesModal, setUnsavedChangesModal] = useState<{
+    showModal: boolean;
+    nextTabId: PolicyTabKeys | null;
+  }>({ showModal: false, nextTabId: null });
 
   const changeTab = useCallback(
-    (selectedTab: EuiTabbedContentTab) => {
-      if (unsavedChangesModal.showModal) {
-        cancelUnsavedChangesModal();
-      }
-      let path: string = '';
-      switch (selectedTab.id) {
-        case PolicyTabKeys.SETTINGS:
-          path = getPolicyDetailPath(policyId);
-          break;
-        case PolicyTabKeys.TRUSTED_APPS:
-          path = getPolicyTrustedAppsPath(policyId);
-          break;
-        case PolicyTabKeys.TRUSTED_DEVICES:
-          path = getPolicyTrustedDevicesPath(policyId);
-          break;
-        case PolicyTabKeys.EVENT_FILTERS:
-          path = getPolicyEventFiltersPath(policyId);
-          break;
-        case PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS:
-          path = getPolicyHostIsolationExceptionsPath(policyId);
-          break;
-        case PolicyTabKeys.BLOCKLISTS:
-          path = getPolicyBlocklistsPath(policyId);
-          break;
-        case PolicyTabKeys.ENDPOINT_EXCEPTIONS:
-          path = getPolicyEndpointExceptionsPath(policyId);
-          break;
-        case PolicyTabKeys.CUSTOM_YARA_SIGNATURES:
-          path = getPolicyCustomYaraSignaturesPath(policyId);
-          break;
-        case PolicyTabKeys.PROTECTION_UPDATES:
-          path = getPolicyProtectionUpdatesPath(policyId);
-          break;
-      }
-      history.push(path, routeState?.backLink ? { backLink: routeState.backLink } : null);
+    (tabId: PolicyTabKeys) => {
+      setUnsavedChangesModal({ showModal: false, nextTabId: null });
+      history.push(
+        getPathForPolicyTab(tabId, policyId),
+        routeState?.backLink ? { backLink: routeState.backLink } : null
+      );
     },
-    [
-      cancelUnsavedChangesModal,
-      history,
-      policyId,
-      routeState?.backLink,
-      unsavedChangesModal.showModal,
-    ]
+    [history, policyId, routeState?.backLink]
   );
 
-  const onTabClickHandler = useCallback(
-    (selectedTab: EuiTabbedContentTab) => {
+  // Header tabs navigate via `onClick` (not `href`) so that leaving a tab with unsaved changes can
+  // be confirmed before the URL changes.
+  const onTabClick = useCallback(
+    (tabId: PolicyTabKeys) => {
       if (
         (isInSettingsTab && unsavedChanges[PolicyTabKeys.SETTINGS]) ||
         (isInProtectionUpdatesTab && unsavedChanges[PolicyTabKeys.PROTECTION_UPDATES])
       ) {
-        setUnsavedChangesModal({ showModal: true, nextTab: selectedTab });
+        setUnsavedChangesModal({ showModal: true, nextTabId: tabId });
       } else {
-        changeTab(selectedTab);
+        changeTab(tabId);
       }
     },
     [changeTab, isInProtectionUpdatesTab, isInSettingsTab, unsavedChanges]
   );
 
+  const cancelUnsavedChangesModal = useCallback(() => {
+    setUnsavedChangesModal({ showModal: false, nextTabId: null });
+  }, []);
+
   const confirmUnsavedChangesModal = useCallback(() => {
-    if (unsavedChangesModal.nextTab) {
-      changeTab(unsavedChangesModal.nextTab);
+    if (unsavedChangesModal.nextTabId) {
+      changeTab(unsavedChangesModal.nextTabId);
     }
-  }, [changeTab, unsavedChangesModal.nextTab]);
+  }, [changeTab, unsavedChangesModal.nextTabId]);
+
+  const headerTabs: AppHeaderTab[] = useMemo(
+    () =>
+      tabsList.map((tab) => ({
+        id: tab.id,
+        label: tab.name,
+        isSelected: tab.id === currentSelectedTab.id,
+        onClick: () => onTabClick(tab.id),
+        'data-test-subj': tab['data-test-subj'],
+      })),
+    [tabsList, currentSelectedTab.id, onTabClick]
+  );
 
   // show loader for privileges validation
   if (isPrivilegesLoading || isHostIsolationExceptionsAccessLoading) {
-    return <ManagementPageLoader data-test-subj="privilegesLoading" />;
+    return { tabs: [], body: <ManagementPageLoader data-test-subj="privilegesLoading" /> };
   }
 
-  return (
-    <>
-      {unsavedChangesModal.showModal && (
-        <UnsavedChangesConfirmModal
-          onCancel={cancelUnsavedChangesModal}
-          onConfirm={confirmUnsavedChangesModal}
-        />
-      )}
-      <EuiTabbedContent
-        data-test-subj="policyTabs"
-        tabs={tabsList}
-        selectedTab={currentSelectedTab}
-        size="l"
-        onTabClick={onTabClickHandler}
-        css={css`
-          & [role='tablist'] {
-            flex-wrap: wrap;
-            row-gap: ${theme.euiTheme.size.xs};
-            column-gap: ${theme.euiTheme.size.l};
-          }
-        `}
-      />
-    </>
-  );
-});
-
-PolicyTabs.displayName = 'PolicyTabs';
+  return {
+    tabs: headerTabs,
+    body: (
+      <>
+        {unsavedChangesModal.showModal && (
+          <UnsavedChangesConfirmModal
+            onCancel={cancelUnsavedChangesModal}
+            onConfirm={confirmUnsavedChangesModal}
+          />
+        )}
+        {currentSelectedTab.content}
+      </>
+    ),
+  };
+};

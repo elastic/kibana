@@ -18,7 +18,7 @@ import { AgentInfo } from '../components/endpoint_responder/components/header_in
 
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
-  ActionLogButton,
+  ResponseActionsHistoryAppMenu,
   getEndpointConsoleCommands,
   OfflineCallout,
 } from '../components/endpoint_responder';
@@ -125,11 +125,9 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               platform,
             },
             consoleProps,
-            PageTitleComponent: () => {
-              return <>{RESPONDER_PAGE_TITLE}</>;
-            },
-            ActionComponents: endpointPrivileges.canReadActionsLogManagement
-              ? [ActionLogButton]
+            pageTitle: RESPONDER_PAGE_TITLE,
+            HeaderActionsComponent: endpointPrivileges.canReadActionsLogManagement
+              ? ResponseActionsHistoryAppMenu
               : undefined,
             PageBodyComponent: () => (
               <>
