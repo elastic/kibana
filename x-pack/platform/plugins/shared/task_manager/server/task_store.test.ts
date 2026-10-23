@@ -15,7 +15,7 @@ import type {
   SerializedConcreteTaskInstance,
   PartialConcreteTaskInstance,
 } from './task';
-import { TaskStatus, TaskLifecycleResult } from './task';
+import { TaskStatus, TaskLifecycleResult, TaskCost } from './task';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   coreMock,
@@ -273,6 +273,27 @@ describe('TaskStore', () => {
         .calls[0][1] as SerializedConcreteTaskInstance;
       expect(attributes.params).toEqual('{}');
       expect(attributes.state).toEqual('{}');
+    });
+
+    test('stores the instance cost as its string form and returns it as a TaskCost', async () => {
+      const result = await testSchedule({
+        taskType: 'report',
+        params: {},
+        state: {},
+        cost: TaskCost.Large,
+      });
+
+      const attributes = savedObjectsClient.create.mock
+        .calls[0][1] as SerializedConcreteTaskInstance;
+      expect(attributes.cost).toEqual('large');
+      expect(result.cost).toEqual(TaskCost.Large);
+    });
+
+    test('does not store a cost when the instance does not set one', async () => {
+      const result = await testSchedule({ taskType: 'report', params: {}, state: {} });
+
+      expect(savedObjectsClient.create.mock.calls[0][1]).not.toHaveProperty('cost');
+      expect(result).not.toHaveProperty('cost');
     });
 
     test('schedule a task without API key if request is provided but security disabled', async () => {
@@ -1070,6 +1091,43 @@ describe('TaskStore', () => {
       expect(result.docs[0]).not.toHaveProperty('state');
       expect(result.docs[0]).not.toHaveProperty('params');
       expect(result.docs[0]).not.toHaveProperty('apiKey');
+    });
+
+    test('returns the stored cost of claim candidates as a TaskCost', async () => {
+      const { result } = await testMsearch(
+        [{}],
+        [
+          {
+            hits: [
+              {
+                _index: '.kibana_task_manager_8.16.0_001',
+                _source: { task: { ...mockTask, cost: 'tiny' } },
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(result.docs[0].cost).toEqual(TaskCost.Tiny);
+    });
+
+    test('drops a stored cost of a claim candidate that it does not recognize', async () => {
+      const { result } = await testMsearch(
+        [{}],
+        [
+          {
+            hits: [
+              {
+                _index: '.kibana_task_manager_8.16.0_001',
+                // a cost tier added by a newer version of Kibana
+                _source: { task: { ...mockTask, cost: 'huge' } },
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(result.docs[0]).not.toHaveProperty('cost');
     });
 
     test('does not decrypt API keys, even when candidates carry one', async () => {
@@ -3017,6 +3075,45 @@ describe('TaskStore', () => {
       expect(result).toEqual([asOk({ ...task, version: 'Wzg0LDFd' })]);
     });
 
+    test(`should store the instance cost as its string form`, async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        cost: TaskCost.Tiny,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task]);
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { cost: 'tiny' } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+      expect(result).toEqual([asOk({ ...task, version: 'Wzg0LDFd' })]);
+    });
+
     test(`should not send the credential fields`, async () => {
       const task = {
         id: '324242',
@@ -3995,6 +4092,45 @@ describe('TaskStore', () => {
       expect(result).toEqual(task);
 
       expect(savedObjectsClient.get).toHaveBeenCalledWith('task', task.id);
+    });
+
+    function mockStoredCost(cost: string) {
+      savedObjectsClient.get.mockImplementation(async (type: string, objectId: string) => ({
+        id: objectId,
+        type,
+        attributes: {
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          retryAt: null,
+          params: '{}',
+          state: '{}',
+          taskType: 'report',
+          attempts: 0,
+          status: 'idle',
+          ownerId: null,
+          cost,
+        },
+        references: [],
+        version: '123',
+      }));
+    }
+
+    test('returns the stored cost as a TaskCost', async () => {
+      mockStoredCost('extralarge');
+
+      const result = await store.get(randomId());
+
+      expect(result.cost).toEqual(TaskCost.ExtraLarge);
+    });
+
+    test('drops a stored cost that it does not recognize', async () => {
+      // a cost tier added by a newer version of Kibana
+      mockStoredCost('huge');
+
+      const result = await store.get(randomId());
+
+      expect(result).not.toHaveProperty('cost');
     });
 
     test('pushes error from saved objects client to errors$', async () => {

@@ -14,7 +14,7 @@ A task type is registered in the **setup** lifecycle of a plugin via `taskManage
 Tasks are **scheduled** separately, usually on plugin **start**, via `taskManager.ensureScheduled` (recurring/idempotent) or `taskManager.schedule` / `bulkSchedule` (one-shot).
 
 **Source of truth:**
-- Definition shape: `x-pack/platform/plugins/shared/task_manager/server/task.ts` (`TaskDefinition`, `RunContext`, `TaskCost`, `TaskPriority`, `InstanceTaskCost`, `DEFAULT_TIMEOUT = '5m'`)
+- Definition shape: `x-pack/platform/plugins/shared/task_manager/server/task.ts` (`TaskDefinition`, `RunContext`, `TaskCost`, `TaskPriority`, `DEFAULT_TIMEOUT = '5m'`)
 - Error helpers: `x-pack/platform/plugins/shared/task_manager/server/task_running/errors.ts`
 - Plugin entry point exports: `@kbn/task-manager-plugin/server`
 
@@ -283,31 +283,18 @@ The memory budgets are the assumption capacity planning is built on; if the task
 
 The old positional names are deprecated aliases with unchanged numeric values — use the intent-based names in new code: `Low` → `Maintenance`, `NormalLongRunning` → `Deferrable`, `Normal` → `Standard`.
 
-### `TaskCost` vs `InstanceTaskCost`
+### Per-instance cost
 
-These are distinct enums for distinct contexts — confusing them is a recurring review finding (see [PR #260373](https://github.com/elastic/kibana/pull/260373)):
-
-- **`TaskCost`** — integer enum (`Tiny = 1`, `Normal = 2`, `Large = 4`, `ExtraLarge = 10`). Use for the **task type definition's** `cost` field and for the **per-instance `cost` override** in `TaskInstance.cost` *when the value is set in code* against the `TaskInstance` type. This is the value the capacity pool reads.
-- **`InstanceTaskCost`** — string enum (`'tiny'`, `'normal'`, `'large'`, `'extralarge'`). Use whenever cost travels through a **schema or saved-object attribute**: task params, persisted state, anything serialized. Convert to the numeric `TaskCost` with `getTaskCostFromInstance(...)` (exported from `@kbn/task-manager-plugin/server`) before comparing or feeding it back to capacity logic.
+`TaskCost` is the only cost type: use it for the task type definition's `cost` and for the per-instance override in `TaskInstance.cost`, which takes precedence over the definition. Task Manager converts the cost to and from its stored form on the task saved object, so task code never handles that form. If task params need to carry a cost, store the `TaskCost` value; params are serialized as JSON.
 
 ```ts
-import { TaskCost, InstanceTaskCost, getTaskCostFromInstance } from '@kbn/task-manager-plugin/server';
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 
-// Task type registration — integer enum
+// Task type registration
 { cost: TaskCost.ExtraLarge }
 
-// Task params schema — string enum, because it's serialized
-const paramsSchema = schema.object({
-  cost: schema.oneOf([
-    schema.literal(InstanceTaskCost.Tiny),
-    schema.literal(InstanceTaskCost.Normal),
-    schema.literal(InstanceTaskCost.Large),
-    schema.literal(InstanceTaskCost.ExtraLarge),
-  ]),
-});
-
-// Reading params back at run time
-const numericCost = getTaskCostFromInstance(taskInstance.params.cost);
+// Per-instance override
+await taskManager.schedule({ taskType, params, state: {}, cost: TaskCost.Tiny });
 ```
 
 ## 9. Scheduling — `ensureScheduled` vs `schedule` vs `bulkSchedule`
@@ -423,9 +410,7 @@ When registering a new task type:
    - [ ] No raw `throw new Error(...)` for classifiable failures
 
 4. **Cost type discipline**
-   - [ ] `TaskCost` is used for `definition.cost` and in-code `TaskInstance.cost`
-   - [ ] `InstanceTaskCost` is used in any persisted/serialised cost field
-   - [ ] The string cost is converted with `getTaskCostFromInstance(...)` before comparing to `TaskCost`
+   - [ ] `TaskCost` is used for `definition.cost`, `TaskInstance.cost`, and any cost carried in params
 
 5. **Scheduling**
    - [ ] Recurring tasks scheduled on plugin start use `ensureScheduled` with a stable `id`
@@ -461,8 +446,7 @@ When reviewing a PR that adds or modifies a task:
 
 ## Source references
 
-- Task definition schema, `TaskCost`, `TaskPriority`, `InstanceTaskCost`, `RunContext`, `DEFAULT_TIMEOUT`: `x-pack/platform/plugins/shared/task_manager/server/task.ts`
+- Task definition schema, `TaskCost`, `TaskPriority`, `RunContext`, `DEFAULT_TIMEOUT`: `x-pack/platform/plugins/shared/task_manager/server/task.ts`
 - Error helpers (`throwUnrecoverableError`, `throwRetryableError`, `createRetryableError`): `x-pack/platform/plugins/shared/task_manager/server/task_running/errors.ts`
 - Plugin public exports: `x-pack/platform/plugins/shared/task_manager/server/index.ts`
 - Monitoring guide: `x-pack/platform/plugins/shared/task_manager/server/MONITORING.md`
-- `InstanceTaskCost` introduction context: [PR #260373](https://github.com/elastic/kibana/pull/260373)
