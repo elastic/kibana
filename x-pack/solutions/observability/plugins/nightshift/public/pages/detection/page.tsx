@@ -89,10 +89,21 @@ export const DetectionPage = ({
   const overview = useDetectionOverview(timeRange);
   const selection = useEntitySelection();
   const [isOverviewCompact, setIsOverviewCompact] = React.useState(false);
+  const fullOverviewSlotRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => setIsOverviewCompact(false), [tab]);
   const handleTabBodyScroll = React.useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
-      setIsOverviewCompact(event.currentTarget.scrollTop > euiTheme.base / 2);
+      const { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
+      const collapseThreshold = euiTheme.base / 2;
+      setIsOverviewCompact((isCompact) => {
+        if (isCompact) {
+          return scrollTop > collapseThreshold;
+        }
+
+        const expandedOverviewHeight = fullOverviewSlotRef.current?.offsetHeight ?? 0;
+        const compactMaxScrollTop = scrollHeight - clientHeight - expandedOverviewHeight;
+        return scrollTop > collapseThreshold && compactMaxScrollTop > collapseThreshold;
+      });
     },
     [euiTheme.base]
   );
@@ -174,6 +185,7 @@ export const DetectionPage = ({
         }}
       >
         <div
+          ref={fullOverviewSlotRef}
           css={overviewSlotStyles(!isOverviewCompact)}
           data-test-subj="nightshiftDetectionOverviewFullSlot"
           data-collapsed={isOverviewCompact ? 'true' : undefined}

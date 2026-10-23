@@ -134,6 +134,11 @@ describe('DetectionPage', () => {
     expect(fullSlot).not.toHaveAttribute('data-collapsed');
     expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
 
+    Object.defineProperties(tabBody, {
+      clientHeight: { configurable: true, value: 200 },
+      scrollHeight: { configurable: true, value: 500 },
+    });
+    Object.defineProperty(fullSlot, 'offsetHeight', { configurable: true, value: 128 });
     Object.defineProperty(tabBody, 'scrollTop', { configurable: true, value: 9 });
     fireEvent.scroll(tabBody);
 
@@ -141,6 +146,25 @@ describe('DetectionPage', () => {
     expect(compactSlot).not.toHaveAttribute('data-collapsed');
 
     Object.defineProperty(tabBody, 'scrollTop', { configurable: true, value: 0 });
+    fireEvent.scroll(tabBody);
+
+    expect(fullSlot).not.toHaveAttribute('data-collapsed');
+    expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
+  });
+
+  it('keeps the overview expanded when collapsing it would remove the tab overflow', async () => {
+    renderPage();
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    const tabBody = screen.getByTestId('nightshiftDetectionTabBody');
+    const fullSlot = screen.getByTestId('nightshiftDetectionOverviewFullSlot');
+    const compactSlot = screen.getByTestId('nightshiftDetectionOverviewCompactSlot');
+
+    Object.defineProperties(tabBody, {
+      clientHeight: { configurable: true, value: 200 },
+      scrollHeight: { configurable: true, value: 320 },
+      scrollTop: { configurable: true, value: 9 },
+    });
+    Object.defineProperty(fullSlot, 'offsetHeight', { configurable: true, value: 128 });
     fireEvent.scroll(tabBody);
 
     expect(fullSlot).not.toHaveAttribute('data-collapsed');

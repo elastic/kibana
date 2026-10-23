@@ -8,7 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Detection } from '@kbn/significant-events-schema';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -93,8 +93,10 @@ describe('SignalsTab', () => {
     });
     mockUseDetectionById.mockReturnValue({
       data: undefined,
+      isError: false,
       isLoading: false,
       isSuccess: false,
+      refetch: jest.fn(),
     });
   });
 
@@ -145,5 +147,24 @@ describe('SignalsTab', () => {
     expect(history.action).toBe('REPLACE');
     expect(history.location.search).toBe('?changeType=spike');
     expect(screen.queryByTestId('detectionDetailsFlyoutStub')).not.toBeInTheDocument();
+  });
+
+  it('shows a retry action when a deep-linked signal cannot be loaded', () => {
+    const refetch = jest.fn();
+    mockUseDetectionById.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isLoading: false,
+      isSuccess: false,
+      refetch,
+    });
+
+    renderTab('/detections/signals?signalId=signal-failed');
+
+    expect(screen.getByTestId('nightshiftDetectionSignalError')).toHaveTextContent(
+      'Unable to open signal'
+    );
+    fireEvent.click(screen.getByTestId('nightshiftDetectionSignalRetryButton'));
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 });

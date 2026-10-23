@@ -73,3 +73,11 @@ export const SIGNAL_NOT_FOUND_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.detectionPage.signals.notFoundToastTitle',
   { defaultMessage: 'This signal no longer exists' }
 );
+export const SIGNAL_ERROR_TITLE = i18n.translate(
+  'xpack.nightshift.detectionPage.signals.signalErrorTitle',
+  { defaultMessage: 'Unable to open signal' }
+);
+export const SIGNAL_ERROR_MESSAGE = i18n.translate(
+  'xpack.nightshift.detectionPage.signals.signalErrorMessage',
+  { defaultMessage: 'There was a problem loading the selected signal.' }
+);
