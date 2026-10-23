@@ -63,6 +63,11 @@ export interface SnoozeModalOptions {
   /** Source backing the `field_change` condition dropdown. */
   dataSource?: ConditionFieldsSource;
   /**
+   * Rule types of the rows being snoozed, so the `field_change` dropdown only
+   * offers fields those alerts actually have.
+   */
+  ruleTypeIds?: string[];
+  /**
    * Why the condition-based tab cannot be used for the current selection, which
    * renders it disabled with the reason as its tooltip.
    */
@@ -89,6 +94,7 @@ const toSnoozePayload = ({
 const SnoozeModal = ({
   http,
   dataSource,
+  ruleTypeIds,
   conditionalTabDisabledReason,
   onConfirm,
   onCancel,
@@ -105,6 +111,7 @@ const SnoozeModal = ({
   const { fieldNames, isLoading } = useConditionFieldNames({
     http,
     dataSource,
+    ruleTypeIds,
     enabled: conditionalTabDisabledReason == null,
   });
 
@@ -168,6 +175,7 @@ export const openSnoozeModal = (
           <SnoozeModal
             http={deps.http}
             dataSource={options.dataSource}
+            ruleTypeIds={options.ruleTypeIds}
             conditionalTabDisabledReason={options.conditionalTabDisabledReason}
             onConfirm={(payload) => {
               ref.close();

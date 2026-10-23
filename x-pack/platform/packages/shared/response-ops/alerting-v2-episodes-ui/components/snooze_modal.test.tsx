@@ -272,4 +272,19 @@ describe('openSnoozeModal', () => {
 
     expect(fetchSearchFields).not.toHaveBeenCalled();
   });
+
+  it('scopes the field lookup to the rule types of the rows being snoozed', async () => {
+    const fetchSearchFields = jest.fn().mockResolvedValue([]);
+
+    openSnoozeModal(makeDeps(), {
+      dataSource: { id: 'classic-alerts', fetchSearchFields },
+      ruleTypeIds: ['observability.rules.custom_threshold'],
+    });
+
+    await waitFor(() => {
+      expect(fetchSearchFields).toHaveBeenCalledWith(
+        expect.objectContaining({ ruleTypeIds: ['observability.rules.custom_threshold'] })
+      );
+    });
+  });
 });

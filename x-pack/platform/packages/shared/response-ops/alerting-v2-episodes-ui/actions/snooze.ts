@@ -35,7 +35,7 @@ export interface SnoozeActionDeps {
   queryClient: QueryClient;
   additionalDataSource?: Pick<
     EpisodeDataSource,
-    'id' | 'fetchSearchFields' | 'supportsConditionalSnooze'
+    'id' | 'fetchSearchFields' | 'supportsConditionalSnooze' | 'getRuleTypeIds'
   >;
 }
 
@@ -72,6 +72,9 @@ export const createSnoozeAction = (
 
     const payload = await openSnoozeModal(deps, {
       dataSource: additionalDataSource,
+      ruleTypeIds: additionalDataSource?.getRuleTypeIds?.(
+        episodes.filter((ep) => ep.source_id != null)
+      ),
       conditionalTabDisabledReason: canUseConditions
         ? undefined
         : i18n.CONDITIONAL_SNOOZE_UNSUPPORTED,

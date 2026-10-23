@@ -17,6 +17,8 @@ export interface UseConditionFieldNamesOptions {
   http: HttpStart;
   /** Source whose searchable fields back the `field_change` condition dropdown. */
   dataSource?: ConditionFieldsSource;
+  /** Narrows the fields to the rule types of the rows being snoozed. */
+  ruleTypeIds?: string[];
   enabled?: boolean;
 }
 
@@ -32,14 +34,17 @@ export interface UseConditionFieldNamesResult {
 export const useConditionFieldNames = ({
   http,
   dataSource,
+  ruleTypeIds,
   enabled = true,
 }: UseConditionFieldNamesOptions): UseConditionFieldNamesResult => {
   const fetchSearchFields = dataSource?.fetchSearchFields;
 
   const { data, isLoading } = useQuery({
-    queryKey: queryKeys.conditionFieldNames(dataSource?.id ?? ''),
+    queryKey: queryKeys.conditionFieldNames(dataSource?.id ?? '', ruleTypeIds ?? []),
     queryFn: ({ signal }) =>
-      fetchSearchFields!({ services: { http }, abortSignal: signal }).then(toConditionFieldNames),
+      fetchSearchFields!({ services: { http }, abortSignal: signal, ruleTypeIds }).then(
+        toConditionFieldNames
+      ),
     enabled: enabled && fetchSearchFields != null,
     staleTime: Infinity,
     refetchOnWindowFocus: false,
