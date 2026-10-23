@@ -82,7 +82,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             toolTipContent={
               canOpenInvestigationDetails
                 ? undefined
-                : ACTIONS_TRANSLATIONS.tooltips.agentBuilderPrivilegeRequired
+                : ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired
             }
             isDisabled={!canOpenInvestigationDetails}
             aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}

@@ -12,7 +12,7 @@ import type { Investigation } from '../../types';
 import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 import { ConversationsActionsGroup } from './actions_group';
 
-const PRIVILEGE_TOOLTIP = ACTIONS_TRANSLATIONS.tooltips.agentBuilderPrivilegeRequired;
+const PRIVILEGE_TOOLTIP = ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired;
 
 const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigation => ({
   id: 'inv-1',

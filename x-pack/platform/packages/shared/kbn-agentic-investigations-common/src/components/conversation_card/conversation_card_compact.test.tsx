@@ -106,7 +106,7 @@ describe('ConversationCardCompact', () => {
     expect(screen.getByRole('button', { name: 'Open in chat' })).toBeDisabled();
     expect(
       screen.getByRole('button', {
-        name: ACTIONS_TRANSLATIONS.tooltips.agentBuilderPrivilegeRequired,
+        name: ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired,
       })
     ).toBeDisabled();
   });

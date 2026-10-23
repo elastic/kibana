@@ -133,7 +133,7 @@ export const BaseActions = memo<BaseActionsProps>(
         tooltipContent={
           canOpenInvestigationDetails
             ? ACTIONS_TRANSLATIONS.tooltips.openMenu
-            : ACTIONS_TRANSLATIONS.tooltips.agentBuilderPrivilegeRequired
+            : ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired
         }
         isDisabled={!canOpenInvestigationDetails}
         onClick={handleToggle}
