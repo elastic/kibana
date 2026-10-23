@@ -91,10 +91,18 @@ export class RuleChangesHistorySubscriber {
     }
     const sequence = rule.version;
 
+    const { request } = context;
+    if (!request) {
+      this.logger.debug({
+        message: () => `Skipping changes history for rule ${ruleId}: event has no request`,
+      });
+      return;
+    }
+
     const { action, eventType } = RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP[event.type];
 
     try {
-      const profile = await this.userProfile.getCurrent({ request: context.request });
+      const profile = await this.userProfile.getCurrent({ request });
       const author = {
         uid: profile?.uid ?? null,
         username: profile?.user.username ?? null,

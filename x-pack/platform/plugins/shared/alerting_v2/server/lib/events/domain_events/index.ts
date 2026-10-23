@@ -123,8 +123,12 @@ export interface AlertingPublisherContext {
    * construction, and Kibana's auth/spaces services key their state in
    * `WeakMap`s on the raw request object. Nothing on this path reads
    * from the live HTTP socket.
+   *
+   * Absent for events published outside a request (e.g. the dispatcher task,
+   * which runs without a fake request). Request-scoped subscribers must skip
+   * such events.
    */
-  readonly request: KibanaRequest;
+  readonly request?: KibanaRequest;
   /**
    * Who made the change. Subscribers that need the caller's credentials
    * (e.g. workflow scheduling) must skip `internal`.

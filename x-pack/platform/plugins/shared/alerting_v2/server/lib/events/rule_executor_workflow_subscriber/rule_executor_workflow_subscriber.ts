@@ -81,6 +81,15 @@ export class RuleExecutorWorkflowSubscriber {
     event: RuleExecutorEvent,
     context: AlertingPublisherContext
   ): Promise<void> {
+    const { request } = context;
+    if (!request) {
+      this.logger.debug({
+        message: () =>
+          `Skipping workflow trigger "${trigger.triggerId}" for event "${event.type}": event has no request`,
+      });
+      return;
+    }
+
     try {
       const payload = trigger.toPayload(event);
 
@@ -90,7 +99,7 @@ export class RuleExecutorWorkflowSubscriber {
         return;
       }
 
-      await this.workflows.emitEvent(context.request, trigger.triggerId, payload);
+      await this.workflows.emitEvent(request,trigger.triggerId, payload);
     } catch (err) {
       // The succeeded and failed payloads name the rule id differently.
       const { rule } = event.payload;

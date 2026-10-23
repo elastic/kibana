@@ -99,9 +99,18 @@ export class AlertActionWorkflowSubscriber {
     event: AlertActionEvent,
     context: AlertingPublisherContext
   ): Promise<void> {
+    const { request } = context;
+    if (!request) {
+      this.logger.debug({
+        message: () =>
+          `Skipping workflow trigger "${trigger.triggerId}" for event "${event.type}": event has no request`,
+      });
+      return;
+    }
+
     try {
       const payload = trigger.toPayload(event);
-      await this.workflows.emitEvent(context.request, trigger.triggerId, payload);
+      await this.workflows.emitEvent(request, trigger.triggerId, payload);
     } catch (err) {
       this.logger.error({
         error: err,
