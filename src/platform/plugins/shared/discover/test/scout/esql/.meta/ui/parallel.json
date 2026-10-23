@@ -1,5 +1,5 @@
 {
-  "sha1": "fd3e9e008282e8e793478ff306784517501c5e85",
+  "sha1": "5dbf2b2234c74ed687e292b6aa35b290de2fa10b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -435,6 +435,19 @@
       }
     },
     {
+      "id": "aee80964b1af3d9-2ec0d7705571eaa",
+      "title": "Discover ES|QL editor autocomplete drives the suggestion widget from the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts",
+        "line": 27,
+        "column": 64
+      }
+    },
+    {
       "id": "4b89e8e1b84f7b8-2215118da8ac58f",
       "title": "Discover ES|QL editor shows an error callout for a malformed query and clears it",
       "expectedStatus": "passed",
@@ -472,6 +485,66 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
         "line": 29,
         "column": 5
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-aac83d98d59bcd8",
+      "title": "Discover ES|QL editor prettifies the query when clicking the format button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 36,
+        "column": 22
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-489ac5c3585c009",
+      "title": "Discover ES|QL editor submits the query with the Ctrl+Enter keyboard shortcut",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 46,
+        "column": 18
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-272ab5ac1f9f0ca",
+      "title": "Discover ES|QL editor shows and updates validation errors in the footer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 57,
+        "column": 20
       }
     },
     {

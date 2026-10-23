@@ -7,7 +7,7 @@
 
 import { onFieldChange } from './field_selector';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 
 describe('onFieldChange', () => {
   let onChangeMock: jest.Mock;
