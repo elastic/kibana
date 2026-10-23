@@ -2660,7 +2660,8 @@
         }
       },
       "unscoredFields": [
-        "observer.vendor"
+        "observer.vendor",
+        "@timestamp"
       ]
     },
     {
@@ -2747,7 +2748,8 @@
         }
       },
       "unscoredFields": [
-        "observer.vendor"
+        "observer.vendor",
+        "@timestamp"
       ]
     },
     {

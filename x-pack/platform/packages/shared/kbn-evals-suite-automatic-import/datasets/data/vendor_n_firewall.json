@@ -100,7 +100,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -199,7 +200,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -295,7 +297,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -394,7 +397,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -473,7 +477,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -552,7 +557,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -653,7 +659,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -754,7 +761,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -855,7 +863,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -955,7 +964,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1043,7 +1053,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1118,7 +1129,8 @@
         }
       },
       "unscoredFields": [
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -1202,7 +1214,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1267,7 +1280,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1329,7 +1343,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1391,7 +1406,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1487,7 +1503,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1571,7 +1588,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1667,7 +1685,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1763,7 +1782,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1812,7 +1832,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -1939,7 +1960,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2037,7 +2059,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -2133,7 +2156,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -2232,7 +2256,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -2302,7 +2327,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -2372,7 +2398,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -2442,7 +2469,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -2521,7 +2549,8 @@
       "unscoredFields": [
         "network.community_id",
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2574,7 +2603,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2652,7 +2682,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2732,7 +2763,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2811,7 +2843,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2850,7 +2883,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2889,7 +2923,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2928,7 +2963,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -2968,7 +3004,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3008,7 +3045,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3094,7 +3132,10 @@
             "connection"
           ]
         }
-      }
+      },
+      "unscoredFields": [
+        "host.name"
+      ]
     },
     {
       "line": "<30>device=\"SFW\" date=2020-05-18 time=14:38:49 timezone=\"CEST\" device_name=\"XG230\" device_id=1234567890123457 log_id=041105613003 log_type=\"Anti-Spam\" log_component=\"SMTP\" log_subtype=\"Clean\" status=\"\" priority=Information fw_rule_id=22 user_name=\"\" av_policy_name=\"Default\" from_email_address=\"telekommunikation@constant-big.email\" to_email_address=\"info@pelasticuser.com\" email_subject=\"Telefonservice statt Anrufbeantworter\" mailid=\"<MzQ4NzU1ODA4Mw==.70c409993fe53cb7c5e32c9974adf8ff@constant-big\" mailsize=13371 spamaction=\"Accept\" reason=\"Mail is Clean.\" src_domainname=\"constant-big.email\" dst_domainname=\"\" src_ip=175.16.199.1 src_country_code=USA dst_ip=175.16.199.1 dst_country_code=DEU protocol=\"TCP\" src_port=52742 dst_port=25 sent_bytes=0 recv_bytes=0 quarantine_reason=\"Other\"",
@@ -3204,7 +3245,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -3317,7 +3359,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.vendor"
+        "observer.vendor",
+        "host.name"
       ]
     },
     {
@@ -3384,7 +3427,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3481,7 +3525,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3578,7 +3623,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3621,7 +3667,8 @@
         }
       },
       "unscoredFields": [
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3664,7 +3711,8 @@
         }
       },
       "unscoredFields": [
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3707,7 +3755,8 @@
         }
       },
       "unscoredFields": [
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3804,7 +3853,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3901,7 +3951,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     },
     {
@@ -3998,7 +4049,8 @@
       },
       "unscoredFields": [
         "network.community_id",
-        "observer.product"
+        "observer.product",
+        "host.name"
       ]
     }
   ]

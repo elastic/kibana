@@ -233,7 +233,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -282,7 +283,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -329,7 +331,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -376,7 +379,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -424,7 +428,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -472,7 +477,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -538,7 +544,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -905,7 +912,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -989,7 +997,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1058,7 +1067,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1145,7 +1155,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1221,7 +1232,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1306,7 +1318,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1397,7 +1410,10 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp",
+        "event.start",
+        "event.end"
       ]
     },
     {
@@ -1457,7 +1473,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1532,7 +1549,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1576,7 +1594,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1620,7 +1639,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1664,7 +1684,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1698,7 +1719,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1803,7 +1825,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -1909,7 +1932,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -2015,7 +2039,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -2121,7 +2146,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -2565,7 +2591,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -2604,7 +2631,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -2643,7 +2671,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -2683,7 +2712,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -2793,7 +2823,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -2903,7 +2934,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -3013,7 +3045,8 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp"
       ]
     },
     {
@@ -3692,7 +3725,10 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product"
+        "observer.product",
+        "@timestamp",
+        "event.start",
+        "event.end"
       ]
     },
     {

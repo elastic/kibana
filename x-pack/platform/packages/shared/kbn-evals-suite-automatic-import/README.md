@@ -66,7 +66,11 @@ Any change to the data files or the scoring rules changes the scores too, so re-
 
 The rules are in [`src/scoring/field_rules.ts`](src/scoring/field_rules.ts).
 
-- Every ECS field in the expected output is scored by value, except pipeline and framework metadata (`ecs.version`, `event.original`, `tags`, `data_stream.*`, and similar), `event.timezone` (which integrations set from a setting, not the log), GeoIP and ASN enrichment, `related.*`, and fields a sample lists in `unscoredFields`. A sample lists a field there when its expected value isn't stable, or when the integration hard-codes it instead of parsing it from the line: `observer.vendor` and `observer.product` are unscored on every line that doesn't contain their expected value. Non-ECS fields, such as the vendor namespace, aren't scored.
+- Every ECS field in the expected output is scored by value, except pipeline and framework metadata (`ecs.version`, `event.original`, `tags`, `data_stream.*`, and similar), `event.timezone` (which integrations set from a setting, not the log), GeoIP and ASN enrichment, `related.*`, and fields a sample lists in `unscoredFields`. A sample lists a field there when its expected value isn't stable, or when it comes from the integration rather than the line:
+  - `observer.vendor` and `observer.product`, which integrations hard-code, are unscored on every line that doesn't contain their expected value.
+  - `@timestamp`, `event.start`, and `event.end` are unscored where the expected time zone, or the time itself, comes from the integration's test settings rather than the line.
+  - `host.name` is unscored where the expected value is the integration's default host name, such as `testhost.local`.
+- Non-ECS fields, such as the vendor namespace, aren't scored.
 - Values are normalized, so numbers and numeric strings, timestamp precision and offsets (a timestamp without one is read as UTC), IPv6 notation, and array order don't cause false mismatches.
 - Arrays of objects, such as the ECS `nested` field `email.attachments`, are scored per sub-field: `email.attachments.file.name` is compared as the list of every attachment's name.
 - ECS allows some field groups for the same entity, so they count as the same field: `client.*` and `source.*`, `server.*` and `destination.*`, and `host.*` and `observer.*`. For example, `source.ip` matches an expected `client.ip`.
