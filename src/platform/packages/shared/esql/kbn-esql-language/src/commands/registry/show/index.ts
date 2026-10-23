@@ -24,7 +24,7 @@ export const showCommand = {
   methods: showCommandMethods,
   metadata: {
     type: 'source' as const,
-    description: i18n.translate('kbn-esql-language.esql.definitions.showDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
     declaration: 'SHOW item',
