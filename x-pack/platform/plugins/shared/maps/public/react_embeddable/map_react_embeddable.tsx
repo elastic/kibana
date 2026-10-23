@@ -155,7 +155,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         timeRangeManager.reinitializeState(nextState);
         titleManager.reinitializeState(nextState);
 
-        await savedMap.reset(nextState);
+        savedMap.reset(nextState);
         reduxSync.internalApi.syncWithStore();
       },
     });

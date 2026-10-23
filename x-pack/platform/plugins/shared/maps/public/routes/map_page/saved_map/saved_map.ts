@@ -143,14 +143,8 @@ export class SavedMap {
     return this._store;
   }
 
-  public async reset(mapEmbeddableState: MapEmbeddableState) {
+  public reset(mapEmbeddableState: MapEmbeddableState) {
     this._mapEmbeddableState = mapEmbeddableState;
-    // by-reference attributes are loaded from the library in `whenReady`; by-value attributes travel with the state
-    const byValueAttributes = (mapEmbeddableState as MapByValueState).attributes;
-    if (!(mapEmbeddableState as MapByReferenceState).savedObjectId && byValueAttributes) {
-      this._attributes = byValueAttributes;
-      await this.createAdHocDataViews();
-    }
     this.initializeStore();
   }
 
@@ -212,12 +206,6 @@ export class SavedMap {
     this._initialLayerListConfig = copyPersistentState(layerList);
   }
 
-  private async createAdHocDataViews() {
-    if (!this._attributes?.adHocDataViews?.length) return;
-    const dataViewService = getIndexPatternService();
-    await Promise.all(this._attributes.adHocDataViews.map((spec) => dataViewService.create(spec)));
-  }
-
   async whenReady() {
     await whenLicenseInitialized();
 
@@ -244,7 +232,13 @@ export class SavedMap {
 
     this._reportUsage();
 
-    await this.createAdHocDataViews();
+    if (this._attributes?.adHocDataViews?.length) {
+      const dataViewService = getIndexPatternService();
+      const promises = this._attributes.adHocDataViews.map((spec) => {
+        return dataViewService.create(spec);
+      });
+      await Promise.all(promises);
+    }
 
     this.initializeStore();
 
