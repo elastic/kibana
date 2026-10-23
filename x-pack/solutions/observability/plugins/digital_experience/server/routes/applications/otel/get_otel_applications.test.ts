@@ -154,7 +154,7 @@ describe('getOtelApplications', () => {
           lastSeen: '2021-01-18T12:12:00.000Z',
         },
       ],
-      environments: ['production', 'staging', 'canary'],
+      environments: ['production', 'staging'],
       pageLoadsOverTime: [],
     });
   });
@@ -195,17 +195,29 @@ describe('getOtelApplications', () => {
     });
   });
 
-  it('lists "Not defined" when logs or spans have documents without an environment', async () => {
+  it('lists "Not defined" when the logs have documents without an environment', async () => {
     const esClient = setup({
       logs: [pageLoadsOnly('web')],
       spans: [],
-      logEnvironments: envs(['production']),
-      spanEnvironments: envs([], [], 2),
+      logEnvironments: envs(['production'], [], 2),
     });
 
     const { environments } = await getOtelApplications({ esClient, start: 1, end: 2 });
 
     expect(environments).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
+  });
+
+  it('lists only the environments of the logs, which define the applications', async () => {
+    const esClient = setup({
+      logs: [pageLoadsOnly('web')],
+      spans: [],
+      logEnvironments: envs(['production']),
+      spanEnvironments: envs(['traces-only'], [], 2),
+    });
+
+    const { environments } = await getOtelApplications({ esClient, start: 1, end: 2 });
+
+    expect(environments).toEqual(['production']);
   });
 
   it('searches the HTTP requests of the applications found in the logs only', async () => {

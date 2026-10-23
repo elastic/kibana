@@ -13,7 +13,7 @@ import { SEARCH_SPAN_NAMES } from '../constants';
 import type { SourceApplications } from '../types';
 import type { SearchParams, SpansSearchParams } from './search_requests';
 import { logsSearch, spansSearch } from './search_requests';
-import type { LogsAggregations, SearchAggregations, SpansBucket } from './search_responses';
+import type { LogsAggregations, SpansAggregations } from './search_responses';
 import { environmentsOf, toApplication } from './to_application';
 
 interface GetOtelApplicationsParams extends SearchParams {
@@ -27,12 +27,12 @@ const searchSpans = async (
   esClient: ElasticsearchClient,
   params: SpansSearchParams,
   signal?: AbortSignal
-): Promise<SearchAggregations<SpansBucket> | undefined> => {
+): Promise<SpansAggregations | undefined> => {
   if (params.serviceNames.length === 0) {
     return undefined;
   }
   const response = await esClient.search(spansSearch(params), { signal });
-  return response.aggregations as unknown as SearchAggregations<SpansBucket> | undefined;
+  return response.aggregations as unknown as SpansAggregations | undefined;
 };
 
 const searchOtelApplications = async ({
@@ -59,12 +59,9 @@ const searchOtelApplications = async ({
     toApplication(bucket, spansByService.get(bucket.key))
   );
 
-  const notDefinedCount =
-    (logs?.environmentNotDefined.doc_count ?? 0) + (spans?.environmentNotDefined.doc_count ?? 0);
-
   return {
     applications,
-    environments: withNotDefined(environmentsOf(logs, spans), notDefinedCount),
+    environments: withNotDefined(environmentsOf(logs), logs?.environmentNotDefined.doc_count ?? 0),
     pageLoadsOverTime: toTimeSeries(logs?.inEnvironment.pageLoadsOverTime?.histogram),
   };
 };

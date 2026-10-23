@@ -71,7 +71,7 @@ describe('DigitalExperienceLayout', () => {
     const href =
       '/app/digital_experience/?environment=production&rangeFrom=now-7d&rangeTo=now&sourceFilter=otel';
     expect(useRouteBreadcrumb).toHaveBeenCalledWith([
-      { text: 'Digital Experience', href },
+      { text: 'Digital experience', href },
       { text: 'Applications', href },
     ]);
   });

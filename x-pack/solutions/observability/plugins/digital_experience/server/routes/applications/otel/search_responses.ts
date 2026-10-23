@@ -37,12 +37,16 @@ export type SpansBucket = EnvironmentAggregations & {
   lastSeen: { value: number | null };
 };
 
-export type SearchAggregations<TBucket> = EnvironmentAggregations & {
+/** `logsSearch`: the applications, the page loads over time and every environment for the picker. */
+export type LogsAggregations = EnvironmentAggregations & {
   environmentNotDefined: { doc_count: number };
-  inEnvironment: { applications: { buckets: TBucket[] } };
+  inEnvironment: {
+    applications: { buckets: LogsBucket[] };
+    pageLoadsOverTime: { histogram: DateHistogramAggregation };
+  };
 };
 
-/** `logsSearch` also counts the page loads over time. */
-export type LogsAggregations = SearchAggregations<LogsBucket> & {
-  inEnvironment: { pageLoadsOverTime: { histogram: DateHistogramAggregation } };
-};
+/** `spansSearch`: the applications in the selected environment only. */
+export interface SpansAggregations {
+  inEnvironment: { applications: { buckets: SpansBucket[] } };
+}

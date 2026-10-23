@@ -166,34 +166,44 @@ export const spansSearch = ({
       ],
     },
   },
-  aggs: applicationsByEnvironment(environment, {
-    applications: {
-      terms: { field: SERVICE_NAME, size: serviceNames.length, include: serviceNames },
+  // Only the selected environment: the picker's environments come from the logs, which define the
+  // applications.
+  aggs: {
+    inEnvironment: {
+      filter: environmentFilter(ENVIRONMENT_FIELDS, environment),
       aggs: {
-        ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
-        lastSeen: LAST_SEEN_AGGREGATION,
-        // Requests with a known outcome: a response status, or none because the request failed.
-        requests: {
-          filter: {
-            bool: {
-              should: [{ exists: { field: HTTP_RESPONSE_STATUS_CODE } }, ...requestWithoutResponse],
-              minimum_should_match: 1,
+        applications: {
+          terms: { field: SERVICE_NAME, size: serviceNames.length, include: serviceNames },
+          aggs: {
+            ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
+            lastSeen: LAST_SEEN_AGGREGATION,
+            // Requests with a known outcome: a response status, or none because the request failed.
+            requests: {
+              filter: {
+                bool: {
+                  should: [
+                    { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
+                    ...requestWithoutResponse,
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
             },
-          },
-        },
-        // Failed: an HTTP error status (4xx or 5xx), or no response.
-        failed: {
-          filter: {
-            bool: {
-              should: [
-                { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
-                ...requestWithoutResponse,
-              ],
-              minimum_should_match: 1,
+            // Failed: an HTTP error status (4xx or 5xx), or no response.
+            failed: {
+              filter: {
+                bool: {
+                  should: [
+                    { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
+                    ...requestWithoutResponse,
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
             },
           },
         },
       },
     },
-  }),
+  },
 });
