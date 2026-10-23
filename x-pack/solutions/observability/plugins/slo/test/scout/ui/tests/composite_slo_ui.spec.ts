@@ -14,21 +14,9 @@ test.describe.skip(
   'Composite SLO UI',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { 'slo.compositeSloEnabled': true },
-      });
-    });
-
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.slo.goto();
-    });
-
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { 'slo.compositeSloEnabled': false },
-      });
     });
 
     test('renders SLOs and Composite SLOs tabs', async ({ page }) => {

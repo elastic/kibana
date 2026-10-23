@@ -21,9 +21,6 @@ apiTest.describe(
     let headers: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { 'slo.compositeSloEnabled': true },
-      });
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
       await apiServices.compositeSlo.deleteAll();
@@ -31,12 +28,6 @@ apiTest.describe(
 
     apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.compositeSlo.deleteAll();
-    });
-
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { 'slo.compositeSloEnabled': false },
-      });
     });
 
     apiTest('deletes a composite SLO', async ({ apiClient }) => {
