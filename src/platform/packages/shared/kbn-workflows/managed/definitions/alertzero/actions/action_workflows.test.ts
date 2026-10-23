@@ -111,6 +111,13 @@ describe('AlertZero action workflows', () => {
         expect(trigger?.inputs?.properties?.actionInput?.additionalProperties).toBe(false);
       });
 
+      // elastic/security-team#20135: an auth proxy's sign-in redirect must fail the step.
+      it('refuses redirects on every Kibana request', () => {
+        for (const step of yaml.steps.filter(({ type }) => type === 'kibana.request')) {
+          expect(step.with?.fetcher).toEqual({ follow_redirects: false });
+        }
+      });
+
       it('ends in an explicit workflow.output', () => {
         expect(yaml.steps[yaml.steps.length - 1].type).toBe('workflow.output');
       });
