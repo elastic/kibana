@@ -32,7 +32,6 @@ import { buildCustomImages } from './util/build_custom_images';
 import { resolveEdotCollectorVersion } from './util/resolve_edot_collector_version';
 import type { DemoType, FailureScenario } from './types';
 import { applyCodeScenario, buildCodeScenarioImages } from './apply_code_scenario';
-import { seedCodeSearch } from './seed_code_search';
 import {
   getDemoConfig,
   getDemoManifests,
@@ -252,12 +251,11 @@ export async function deployDemo({
     log.write('');
   }
 
-  let codeScenarioRepoDir: string | undefined;
   let imageOverrides: Record<string, string> | undefined;
   if (activeCodeScenario) {
     log.info(`Applying code scenario: ${chalk.yellow(activeCodeScenario.name)}`);
     log.info(`  ${chalk.dim(activeCodeScenario.description)}`);
-    codeScenarioRepoDir = await applyCodeScenario({
+    const codeScenarioRepoDir = await applyCodeScenario({
       version: demoVersion,
       scenario: activeCodeScenario,
       log,
@@ -410,18 +408,6 @@ export async function deployDemo({
 
   await waitAndReport();
 
-  if (activeCodeScenario && codeScenarioRepoDir) {
-    await seedCodeSearch({
-      elasticsearch: elasticsearchConfig,
-      kibanaCredentials,
-      kibanaUrl,
-      version: demoVersion,
-      codeScenarioId: activeCodeScenario.id,
-      codeScenarioRepoDir,
-      log,
-    });
-  }
-
   return { namespace, kibanaUrl, elasticsearchHost, logsIndex };
 }
 
@@ -554,7 +540,6 @@ export async function patchScenarios({
   demoType = 'otel-demo',
   scenarioIds = [],
   codeScenarioId,
-  configPath,
   version,
   reset = false,
 }: {
@@ -562,7 +547,6 @@ export async function patchScenarios({
   demoType?: DemoType;
   scenarioIds?: string[];
   codeScenarioId?: string;
-  configPath?: string | undefined;
   version?: string;
   reset?: boolean;
 }) {
@@ -740,19 +724,6 @@ export async function patchScenarios({
         '--timeout=600s',
       ]);
     }
-
-    const { elasticsearch, server, kibanaCredentials } = readKibanaConfig(log, configPath);
-    const kibanaHostname = `http://${server.host}:${server.port}${server.basePath}`;
-    const kibanaUrl = await resolveKibanaUrl(kibanaHostname, log);
-    await seedCodeSearch({
-      elasticsearch,
-      kibanaCredentials,
-      kibanaUrl,
-      version: demoVersion,
-      codeScenarioId: activeCodeScenario.id,
-      codeScenarioRepoDir,
-      log,
-    });
 
     if (scenarioIds.length === 0) {
       log.write('');
