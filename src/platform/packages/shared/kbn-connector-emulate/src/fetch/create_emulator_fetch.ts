@@ -353,8 +353,9 @@ export const createEmulatorFetch = ({
       };
     }
 
-    const context = contextFor(operation, request);
-    const response = await contract.respond(operation, request, context);
+    const routedRequest = { ...request, pathParameters: routed.pathParameters };
+    const context = contextFor(operation, routedRequest);
+    const response = await contract.respond(operation, routedRequest, context);
     const responseViolations = contract.validateResponse(operation, response);
     record({
       request: description,
@@ -363,7 +364,7 @@ export const createEmulatorFetch = ({
       responseSource:
         respond && !deferred.has(context)
           ? 'responder'
-          : engine.servedFrom(operation) ?? 'generated',
+          : engine.servedFrom(operation, routedRequest) ?? 'generated',
       status: response.statusCode,
       requestViolations,
       responseViolations,

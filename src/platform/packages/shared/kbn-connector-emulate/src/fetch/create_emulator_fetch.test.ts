@@ -114,6 +114,24 @@ describe('createEmulatorFetch', () => {
     ]);
   });
 
+  it('records a fixture with `when` as the source only of the requests it matches', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [spec],
+      fixtures: [
+        {
+          operation: { method: 'GET', path: '/items' },
+          when: { query: { limit: '1' } },
+          response: { status: 200, body: [{ name: 'one' }] },
+        },
+      ],
+    });
+
+    await fetch(`${BASE_URL}/items?limit=1`);
+    await fetch(`${BASE_URL}/items?limit=2`);
+
+    expect(calls.map(({ responseSource }) => responseSource)).toEqual(['fixture', 'generated']);
+  });
+
   it('reports each call to onCall as it is recorded', async () => {
     const onCall = jest.fn();
     const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond: listResponder, onCall });
