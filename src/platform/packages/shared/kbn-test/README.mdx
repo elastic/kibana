@@ -35,6 +35,98 @@ Starts Elasticsearch and Kibana servers given a specified config.
 
 Allows users to start another process to run just the tests while keeping the servers running with this method. Start servers _and_ run tests using the same config file ([see how](../../../../../scripts/README.md)).
 
+### Recording FTR waits
+
+Set `FTR_RECORD_WAITS=1` when running `scripts/functional_tests` or
+`scripts/functional_test_runner` to record any existing config without modifying
+it:
+
+```sh
+FTR_RECORD_WAITS=1 TEST_BROWSER_HEADLESS=1 node scripts/functional_tests \
+  --config src/platform/test/functional/apps/visualize/group1/config.ts
+```
+
+The default output root is `target/ftr-wait-recordings`. Override it with
+`FTR_WAIT_RECORDING_DIRECTORY=/absolute/output/path`. Each config has its own
+directory matching its repository-relative config path, followed by a unique
+`<timestamp>-<pid>` execution directory. Configs outside the repository use a hash
+of their absolute path under `external/`.
+
+Each execution writes `waits.json` with config, file, test, and hook summaries,
+individual wait spans, and call stacks, plus `trace.json` for Chrome trace
+viewers such as Perfetto. Recording starts with Mocha execution and excludes
+server startup. Overlapping waits are counted once in aggregate totals.
+WebDriver waits and lookups include browser work and transport time, so they do
+not directly measure avoidable idle time. Custom test runners and dry runs do
+not produce Mocha recordings.
+
+Recording is disabled by default. Configs may also opt in with
+`waitRecording: { enabled: true, directory: '/absolute/output/root' }`.
+`FTR_RECORD_WAITS=1` enables recording even when the config leaves it disabled;
+`FTR_WAIT_RECORDING_DIRECTORY` overrides the configured output root.
+
+### Recording the browser and detecting unchanged screens
+
+Install FFmpeg with the `freezedetect` filter and `libx264` encoder, then enable
+video centrally for an existing UI config:
+
+```sh
+FTR_RECORD_VIDEO=1 TEST_BROWSER_HEADLESS=1 node scripts/functional_tests \
+  --config src/platform/test/functional/apps/visualize/group1/config.ts
+```
+
+`FTR_RECORD_VIDEO=1` also enables wait recording. No config edits are required.
+Use `FTR_FFMPEG_PATH` to select another FFmpeg executable and
+`FTR_WAIT_RECORDING_DIRECTORY` to change the output root. Video requires Chrome
+or Chromium Edge with a DevTools endpoint; it works headlessly and when Kibana
+runs remotely. It captures the active WebDriver window's viewport, including
+window switches and resizes, through a separate DevTools connection so a queued
+WebDriver lookup does not stop recording. Browser chrome and native OS dialogs
+are outside the captured viewport.
+
+Each execution additionally writes:
+
+- `session.mp4`: a continuous viewport video whose frame spacing preserves elapsed
+  time; frames are fitted into a 1600 × 1000 canvas.
+- `visual_idle.json`: unchanged-screen intervals, milliseconds, percentages, longest
+  intervals, and overlap with recorded waits, attributed to configs, files,
+  tests, and hooks. Wait overlaps preserve runnable ownership and exclude retry
+  wrappers to avoid double counting.
+- `frames.json`: capture timestamps and capture errors. Effective sample rate and
+  coverage metadata appear in `visual_idle.json`.
+- `ffmpeg.log`: FFmpeg's freeze boundaries. Freeze intervals also appear on the
+  `visualUnchanged` track in `trace.json`, using the same time origin as the video
+  and wait events.
+
+The defaults sample at up to five frames per second and detect freezes lasting
+at least one second with `freezedetect=n=0.001:d=1`. Detection runs before lossy
+video compression. Thresholds are starting values to calibrate against actual
+recordings; small animations may be below the noise threshold. Frames use the
+midpoint of the capture request/response, and timestamps are approximate within
+sampling and transport latency. Video duration can round to the nearest frame;
+report intervals are clipped to the Mocha execution. Server startup and encoding
+after the tests are excluded from the report duration.
+
+Capture errors, stalls, and long gaps are reported as unobserved time and excluded
+from unchanged-screen totals. A partial recording is diagnostic output. Raw PNG
+frames are removed after successful encoding; timestamps remain. Recording adds
+overhead, so compare recorded runs with other recorded runs. An unchanged screen
+does not establish that the browser is idle or a wait is avoidable.
+
+Configs can optionally configure capture and detection parameters:
+
+```ts
+waitRecording: {
+  video: {
+    enabled: true,
+    frameRate: 5,
+    noise: 0.001,
+    minimumFreezeSeconds: 1,
+    ffmpegPath: 'ffmpeg',
+  },
+},
+```
+
 ## Rationale
 
 ### Single config per setup
