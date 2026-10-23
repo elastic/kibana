@@ -13,7 +13,6 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { escapeKuery } from '@kbn/es-query';
 import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -1047,17 +1046,16 @@ describe('SourcesClient', () => {
       });
     });
 
-    it('trims the search and escapes KQL metacharacters in the title prefix filter', async () => {
+    it('trims the search, escapes KQL metacharacters and joins its words with a wildcard', async () => {
       const { client, soClient } = setup();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
 
-      await client.list({ page: 1, perPage: 25, search: '  foo AND "bar"  ', enabled: true });
+      await client.list({ page: 1, perPage: 25, search: '  foo AND  "bar"  ', enabled: true });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: `nightshift-source.attributes.title: ${escapeKuery(
-            'foo AND "bar"'
-          )}* AND nightshift-source.attributes.enabled: true`,
+          filter:
+            'nightshift-source.attributes.title: foo*AND*\\"bar\\"* AND nightshift-source.attributes.enabled: true',
         })
       );
 

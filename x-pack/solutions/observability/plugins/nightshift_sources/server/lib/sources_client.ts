@@ -276,7 +276,10 @@ export class SourcesClient {
 
     const filters: string[] = [];
     if (term) {
-      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(term)}*`);
+      // The wildcard becomes a `query_string` query, which splits on whitespace: a space would
+      // make a multi-word prefix match nothing, so the words are joined with `*` instead.
+      const prefix = term.split(/\s+/).map(escapeKuery).join('*');
+      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${prefix}*`);
     }
     if (enabled !== undefined) {
       filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: ${enabled}`);
