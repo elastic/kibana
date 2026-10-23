@@ -13,6 +13,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import { escapeKuery } from '@kbn/es-query';
 import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -968,7 +969,7 @@ describe('SourcesClient', () => {
       expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
     });
 
-    it('looks ids up directly, drops missing sources, and then applies the multi-word search and paging', async () => {
+    it('looks ids up directly, drops missing sources, and then applies search and paging', async () => {
       const { client, soClient } = setup();
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -979,15 +980,11 @@ describe('SourcesClient', () => {
             error: { statusCode: 404, error: 'Not Found', message: 'missing' },
           },
           makeSavedObject(
-            makeAttributes({ title: 'alpha lake', slug: 'alpha', view_name: NGINX_VIEW_NAME_2 }),
+            makeAttributes({ title: 'alpha', slug: 'alpha', view_name: NGINX_VIEW_NAME_2 }),
             'alpha'
           ),
           makeSavedObject(
-            makeAttributes({
-              title: 'alpine big lake',
-              slug: 'alpine',
-              view_name: TITLE_T_VIEW_NAME,
-            }),
+            makeAttributes({ title: 'alpine', slug: 'alpine', view_name: TITLE_T_VIEW_NAME }),
             'alpine'
           ),
         ],
@@ -996,7 +993,7 @@ describe('SourcesClient', () => {
       const response = await client.list({
         page: 2,
         perPage: 1,
-        search: ' alp  lake ',
+        search: 'alp',
         ids: ['zeta', 'missing', 'alpha', 'alpine', 'zeta'],
       });
 
@@ -1050,16 +1047,17 @@ describe('SourcesClient', () => {
       });
     });
 
-    it('trims the search, escapes KQL metacharacters and joins its words with a wildcard', async () => {
+    it('trims the search and escapes KQL metacharacters in the title prefix filter', async () => {
       const { client, soClient } = setup();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
 
-      await client.list({ page: 1, perPage: 25, search: '  foo AND  "bar"  ', enabled: true });
+      await client.list({ page: 1, perPage: 25, search: '  foo AND "bar"  ', enabled: true });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter:
-            'nightshift-source.attributes.title: foo*AND*\\"bar\\"* AND nightshift-source.attributes.enabled: true',
+          filter: `nightshift-source.attributes.title: ${escapeKuery(
+            'foo AND "bar"'
+          )}* AND nightshift-source.attributes.enabled: true`,
         })
       );
 

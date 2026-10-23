@@ -8,7 +8,6 @@
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
-import { escapeRegExp } from 'lodash';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   createSourceRequestSchema,
@@ -270,19 +269,14 @@ export class SourcesClient {
     enabled?: boolean;
     ids?: string[];
   }): Promise<ListSourcesResponse> {
-    // A title matches when it starts with the search words in order, with anything between them.
-    // The title wildcard becomes a `query_string` query, which splits on whitespace: a space would
-    // make a multi-word prefix match nothing, so the words are joined with `*` instead.
-    const term = search?.trim();
-    const words = term ? term.split(/\s+/) : undefined;
+    const term = search?.trim() || undefined;
     if (ids) {
-      return this.listByIds({ ids, page, perPage, words, enabled });
+      return this.listByIds({ ids, page, perPage, search: term, enabled });
     }
 
     const filters: string[] = [];
-    if (words) {
-      const prefix = words.map(escapeKuery).join('*');
-      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${prefix}*`);
+    if (term) {
+      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(term)}*`);
     }
     if (enabled !== undefined) {
       filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: ${enabled}`);
@@ -315,16 +309,15 @@ export class SourcesClient {
     ids,
     page,
     perPage,
-    words,
+    search,
     enabled,
   }: {
     ids: string[];
     page: number;
     perPage: number;
-    words?: string[];
+    search?: string;
     enabled?: boolean;
   }): Promise<ListSourcesResponse> {
-    const titlePattern = words && new RegExp(`^${words.map(escapeRegExp).join('[\\s\\S]*')}`);
     const uniqueIds = [...new Set(ids)];
     const { saved_objects: savedObjects } =
       await this.deps.soClient.bulkGet<NightshiftSourceAttributes>(
@@ -346,7 +339,7 @@ export class SourcesClient {
         if (enabled !== undefined && source.enabled !== enabled) {
           return false;
         }
-        if (titlePattern && !titlePattern.test(source.title)) {
+        if (search !== undefined && !source.title.startsWith(search)) {
           return false;
         }
         return true;

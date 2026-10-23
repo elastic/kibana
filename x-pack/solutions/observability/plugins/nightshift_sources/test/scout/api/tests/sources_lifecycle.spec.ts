@@ -56,7 +56,7 @@ apiTest.describe(
       'creates a source, tracks view health, repairs through PUT and deletes',
       async ({ apiClient, esClient }) => {
         const body = {
-          title: `${TITLE_PREFIX}-${suffix} nginx errors`,
+          title: `${TITLE_PREFIX}-${suffix}`,
           description: 'nginx 5xx',
           tags: ['nginx'],
           esql: `FROM ${index} | WHERE status >= 500`,
