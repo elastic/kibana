@@ -316,7 +316,7 @@ const findJoinedSeries = ({
 /**
  * The levels a verdict or review could have judged at: the last complete bucket before its own
  * (`seen`), and its own bucket (`own`), which can include matches that came after it. They differ
- * when a spike began inside that bucket, and which one it judged is unknown.
+ * when the count moved inside that bucket, up or down, and which one it judged is unknown.
  */
 interface JudgedLevels {
   seen: BaselineObservation | undefined;
@@ -324,9 +324,8 @@ interface JudgedLevels {
 }
 
 /**
- * The reason a count changed against the level a verdict or review saw, if it did. Where the level
- * is ambiguous the agent gets the change: a rise is read against the lower level, a recovery
- * against the higher one.
+ * The reason a count changed against the level a verdict or review saw, if it did. Which of the two
+ * levels it judged at is unknown, so a change against either reaches the agent.
  */
 const changeReason = ({
   observed,
@@ -336,12 +335,11 @@ const changeReason = ({
   judged: JudgedLevels;
 }): NeedsAgentReason | undefined => {
   if (!observed) return undefined;
-  if (changeSinceJudged({ observed, judged: judged.seen ?? judged.own }) === 'rose') {
-    return 'above_normal';
-  }
-  return changeSinceJudged({ observed, judged: judged.own ?? judged.seen }) === 'recovered'
-    ? 'below_judged'
-    : undefined;
+  const changes = [judged.seen, judged.own].map((level) =>
+    changeSinceJudged({ observed, judged: level })
+  );
+  if (changes.includes('rose')) return 'above_normal';
+  return changes.includes('recovered') ? 'below_judged' : undefined;
 };
 
 /** Whether a verdict is older than the limit; an untrusted verdict time falls back to the series' age. */

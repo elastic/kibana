@@ -359,6 +359,13 @@ describe('classifyBatch', () => {
         { decision: 'needs_agent', reason: 'below_judged' },
       ],
       [
+        // The count fell inside the verdict's own bucket: the bucket before is the abnormal level.
+        "a recovery after the count fell inside the verdict's own bucket",
+        [...repeat(50, 5), ...repeat(5, 200), ...repeat(6, 5)],
+        isoOfBucket(61, 55),
+        { decision: 'needs_agent', reason: 'below_judged' },
+      ],
+      [
         'a verdict older than the series, so any rise above normal escalates',
         plateau(210),
         hoursAgo(6),
