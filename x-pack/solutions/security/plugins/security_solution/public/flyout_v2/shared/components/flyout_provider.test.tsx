@@ -14,8 +14,6 @@ import { useLocation } from 'react-router-dom';
 import { createStore } from 'redux-v4';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { of } from 'rxjs';
-import { AppHeaderView, APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { StartServices } from '../../../types';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useConsoleManager } from '../../../management/components/console/components/console_manager';
@@ -81,7 +79,6 @@ const services = {
     theme$: of({ darkMode: false }),
   },
   http: {},
-  chrome: chromeServiceMock.createStartContract(),
 } as unknown as StartServices;
 
 const LocationProbe = () => {
@@ -176,24 +173,6 @@ describe('flyoutProviders', () => {
     );
 
     expect(screen.getByTestId('console-manager-probe')).toHaveTextContent('function');
-  });
-
-  // System flyouts render in their own React root without Chrome context; the Respond console
-  // overlay header (`AppHeaderView`) rendered by `ConsoleManager` needs it.
-  it('provides chrome context to children', () => {
-    const store = createStore(() => ({}));
-
-    render(
-      flyoutProviders({
-        services,
-        store,
-        children: <AppHeaderView title="Response console" />,
-      })
-    );
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
-      'Response console'
-    );
   });
 
   describe('TimeRangeSync', () => {

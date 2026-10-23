@@ -162,14 +162,19 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
                 `largeBleed` matches `PageOverlay`'s 24px padding, so the header spans the full
                 overlay width while the console content keeps its previous inset (overlay padding
                 plus `PageLayout`'s panel padding).
+
+                `chrome.withProvider`: the console can also render inside a system flyout's own
+                React root (eg. Discover → alert → Respond), which has no Chrome context.
               */}
-              <AppHeaderView
-                title={pageTitle}
-                back={back}
-                menu={headerMenu}
-                docLink={services.docLinks.links.securitySolution.responseActions}
-                spacing="largeBleed"
-              />
+              {services.chrome.withProvider(
+                <AppHeaderView
+                  title={pageTitle}
+                  back={back}
+                  menu={headerMenu}
+                  docLink={services.docLinks.links.securitySolution.responseActions}
+                  spacing="largeBleed"
+                />
+              )}
             </EuiFlexItem>
           )}
 

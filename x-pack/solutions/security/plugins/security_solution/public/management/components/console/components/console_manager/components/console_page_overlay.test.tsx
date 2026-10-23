@@ -11,7 +11,11 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
-import { TestProviders } from '../../../../../../common/mock';
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
+import { createMockStore, TestProviders } from '../../../../../../common/mock';
+import { createKibanaContextProviderMock } from '../../../../../../common/lib/kibana/kibana_react.mock';
 import { ConsolePageOverlay } from './console_page_overlay';
 import type { ConsolePageOverlayProps } from './console_page_overlay';
 
@@ -47,6 +51,29 @@ describe('ConsolePageOverlay', () => {
     renderOverlay();
 
     expect(screen.getByTestId('fakeConsole')).toBeInTheDocument();
+  });
+
+  // Eg. a system flyout opened from Discover renders in its own React root, with the Security
+  // providers from `flyoutProviders` but no Chrome context
+  it('renders its header without an outer Chrome context', () => {
+    const MockKibanaContextProvider = createKibanaContextProviderMock();
+    render(
+      <MockKibanaContextProvider>
+        <EuiProvider highContrastMode={false}>
+          <I18nProvider>
+            <ReduxStoreProvider store={createMockStore()}>
+              <MemoryRouter>
+                <ConsolePageOverlay {...defaultProps} />
+              </MemoryRouter>
+            </ReduxStoreProvider>
+          </I18nProvider>
+        </EuiProvider>
+      </MockKibanaContextProvider>
+    );
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Response console'
+    );
   });
 
   it('renders the page title in the AppHeaderView title', () => {
