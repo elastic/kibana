@@ -115,6 +115,20 @@ test.describe(
         `${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`
       );
 
+      // The operations table loads the fixture's PostgreSQL operation and opens its child flyout.
+      const operationLink = page.testSubj
+        .locator('requestFlyoutOperationNameLink')
+        .filter({ hasText: 'SELECT * FROM product' });
+      await expect(operationLink).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await operationLink.click();
+      await expect(page.testSubj.locator('requestFlyoutOperationDetailHeader')).toContainText(
+        'SELECT * FROM product',
+        { timeout: EXTENDED_TIMEOUT }
+      );
+
+      // The first Escape closes the operation child, the second the request flyout itself.
+      await page.keyboard.press('Escape');
+      await expect(page.testSubj.locator('requestFlyoutOperationDetailHeader')).toBeHidden();
       await page.keyboard.press('Escape');
       await expect(serviceMapPage.requestFlyout).toBeHidden();
     });

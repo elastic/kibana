@@ -46,6 +46,8 @@ interface Props {
   groupName: string;
   historyKey: symbol;
   onClose: () => void;
+  /** Overrides the map's environment: the target of a server failure may run in another one. */
+  environment?: string;
 }
 
 /**
@@ -58,10 +60,12 @@ export function RequestFlyoutApmErrorGroupFlyout({
   groupName,
   historyKey,
   onClose,
+  environment: environmentOverride,
 }: Props) {
   const {
-    filters: { environment, start, end, rangeFrom, rangeTo },
+    filters: { environment: mapEnvironment, start, end, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
+  const environment = environmentOverride ?? mapEnvironment;
   const { link } = useApmRouter();
 
   const [samplePage, setSamplePage] = useState(0);

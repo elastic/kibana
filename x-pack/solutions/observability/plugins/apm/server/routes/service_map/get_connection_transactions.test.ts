@@ -47,6 +47,7 @@ interface ExitSpanFixture {
   transactionId?: string;
   durationUs?: number;
   failed?: boolean;
+  outcome?: string;
 }
 
 /** Exit spans of the source: each carries the id of the transaction it belongs to. */
@@ -54,11 +55,11 @@ function exitSpansResponse(spans: ExitSpanFixture[], total = spans.length) {
   return {
     hits: {
       total: { value: total, relation: 'eq' },
-      hits: spans.map(({ transactionId, durationUs = 100_000, failed = false }) => ({
+      hits: spans.map(({ transactionId, durationUs = 100_000, failed = false, outcome }) => ({
         fields: {
           ...(transactionId ? { 'transaction.id': [transactionId] } : {}),
           'span.duration.us': [durationUs],
-          'event.outcome': [failed ? 'failure' : 'success'],
+          'event.outcome': [outcome ?? (failed ? 'failure' : 'success')],
         },
       })),
     },
@@ -195,6 +196,29 @@ describe('getConnectionTransactions', () => {
         timeConsumedPct: 0.8, // 400ms of 500ms
       });
       expect(transactionGroups[1]).toMatchObject({ callCount: 1, failedCallRate: 0 });
+    });
+
+    it('rates the failures over the calls with a known outcome only', async () => {
+      const { search, options } = setup();
+      search
+        .mockResolvedValueOnce(
+          exitSpansResponse([
+            { transactionId: 'tx-1', failed: true },
+            { transactionId: 'tx-1', outcome: 'unknown' },
+            { transactionId: 'tx-2', outcome: 'unknown' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          transactionNamesResponse([
+            { id: 'tx-1', name: 'GET /a' },
+            { id: 'tx-2', name: 'GET /b' },
+          ])
+        );
+
+      const { transactionGroups } = await getConnectionTransactions(options());
+
+      expect(transactionGroups[0]).toMatchObject({ name: 'GET /a', failedCallRate: 1 });
+      expect(transactionGroups[1]).toMatchObject({ name: 'GET /b', failedCallRate: null });
     });
 
     it('leaves out the calls whose transaction cannot be resolved', async () => {

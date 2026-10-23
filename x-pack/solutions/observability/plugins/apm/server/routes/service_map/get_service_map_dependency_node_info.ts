@@ -15,6 +15,7 @@ import type { NodeStats } from '@kbn/apm-types';
 import { LatencyAggregationType } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { calculateThroughputWithInterval } from '../../lib/helpers/calculate_throughput';
 import { ApmDocumentType } from '../../../common/document_type';
 import {
   AT_TIMESTAMP,
@@ -61,7 +62,7 @@ function getServiceMapDependencyNodeInfoForTimeRange({
       offset,
     });
 
-    const { intervalString } = getBucketSize({
+    const { intervalString, bucketSize } = getBucketSize({
       start: startWithOffset,
       end: endWithOffset,
       numBuckets: 20,
@@ -223,10 +224,10 @@ function getServiceMapDependencyNodeInfoForTimeRange({
           timeseries: rollupResponse.aggregations?.timeseries.buckets.map((bucket) => {
             return {
               x: bucket.key + offsetInMs,
-              // The summed span count of the bucket, not the number of metric documents.
-              y: calculateThroughputWithRange({
-                start,
-                end,
+              // The summed span count of the bucket (not the number of metric documents),
+              // normalized by the bucket interval, not by the whole range.
+              y: calculateThroughputWithInterval({
+                bucketSize,
                 value: bucket.count.value ?? 0,
               }),
             };

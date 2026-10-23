@@ -35,7 +35,7 @@ const MAX_TRANSACTION_GROUPS = 100;
 interface ExitSpanCall {
   transactionId: string;
   durationUs: number;
-  failed: boolean;
+  outcome: string | undefined;
 }
 
 /**
@@ -147,7 +147,7 @@ export function getConnectionTransactions({
       return {
         transactionId,
         durationUs: Number(fields[SPAN_DURATION]?.[0] ?? 0),
-        failed: fields[EVENT_OUTCOME]?.[0] === EventOutcome.failure,
+        outcome: fields[EVENT_OUTCOME]?.[0] as string | undefined,
       };
     });
 
@@ -189,7 +189,13 @@ export function getConnectionTransactions({
 
     const groups = new Map<
       string,
-      { transactionType: string; callCount: number; failedCount: number; totalDurationUs: number }
+      {
+        transactionType: string;
+        callCount: number;
+        failedCount: number;
+        knownOutcomeCount: number;
+        totalDurationUs: number;
+      }
     >();
     let totalCallTime = 0;
     for (const call of calls) {
@@ -201,10 +207,14 @@ export function getConnectionTransactions({
         transactionType: transaction.type,
         callCount: 0,
         failedCount: 0,
+        knownOutcomeCount: 0,
         totalDurationUs: 0,
       };
       group.callCount += 1;
-      group.failedCount += call.failed ? 1 : 0;
+      group.failedCount += call.outcome === EventOutcome.failure ? 1 : 0;
+      // Unknown outcomes are not successes: the rate only counts spans that reported one.
+      group.knownOutcomeCount +=
+        call.outcome === EventOutcome.failure || call.outcome === EventOutcome.success ? 1 : 0;
       group.totalDurationUs += call.durationUs;
       groups.set(transaction.name, group);
       totalCallTime += call.durationUs;
@@ -218,7 +228,8 @@ export function getConnectionTransactions({
         avgCallLatency: group.callCount > 0 ? group.totalDurationUs / group.callCount : null,
         callCount: group.callCount,
         callRate: rangeInMinutes > 0 ? group.callCount / rangeInMinutes : null,
-        failedCallRate: group.callCount > 0 ? group.failedCount / group.callCount : null,
+        failedCallRate:
+          group.knownOutcomeCount > 0 ? group.failedCount / group.knownOutcomeCount : null,
         timeConsumedPct: totalCallTime > 0 ? group.totalDurationUs / totalCallTime : null,
       }))
       .sort((a, b) => b.callCount - a.callCount)

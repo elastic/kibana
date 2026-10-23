@@ -74,6 +74,8 @@ export function RequestFlyoutOperations() {
         getHref: ({ spanName }) =>
           getDiscoverHref({
             serviceName: sourceServiceName,
+            // The same operation name can hit several resources: scope to this connection.
+            dependencyName,
             spanName,
             environment,
             sortDirection: 'DESC',

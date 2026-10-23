@@ -60,7 +60,7 @@ export function useRequestFlyoutLatencyDistribution() {
 
   // Failed-spans fetch: uses durationMin/durationMax of the first fetch, once it is done, to align
   // the bucket sizes.
-  const { data: errorHistogramData = {} } = useRequestFlyoutFetcher(
+  const { data: errorHistogramData = {}, status: errorHistogramStatus } = useRequestFlyoutFetcher(
     (callApmApi) => {
       if (
         overallLatencyStatus !== FETCH_STATUS.SUCCESS ||
@@ -114,6 +114,8 @@ export function useRequestFlyoutLatencyDistribution() {
     chartData,
     hasData,
     percentileThresholdValue: overallLatencyData.percentileThresholdValue,
-    status: overallLatencyStatus,
+    // A failed overlay fetch surfaces too: without it the chart silently loses the failed calls.
+    status:
+      errorHistogramStatus === FETCH_STATUS.FAILURE ? errorHistogramStatus : overallLatencyStatus,
   };
 }

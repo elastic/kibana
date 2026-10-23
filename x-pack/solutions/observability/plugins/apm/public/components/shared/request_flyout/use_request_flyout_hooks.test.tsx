@@ -174,22 +174,30 @@ describe('request flyout hooks', () => {
       );
     });
 
-    it('caps the rows but reports the total number of resources', () => {
+    it('caps the rows at ten resources, most time consumed first, and reports the total', () => {
       const groupedResources = Array.from({ length: 15 }, (_, i) => ({
         id: `resource-${i}`,
         label: `resource-${i}`,
+        resource: `resource-${i}`,
         spanType: 'external',
         spanSubtype: 'http',
       }));
       mockUseFetcher.mockReturnValue({
         data: {
           serviceDependencies: groupedResources.map(({ id }, i) => ({
-            location: { id, type: 'dependency', spanType: 'external', spanSubtype: 'http' },
+            location: {
+              id,
+              dependencyName: id,
+              type: 'dependency',
+              spanType: 'external',
+              spanSubtype: 'http',
+            },
             currentStats: {
               latency: { value: 10 },
               throughput: { value: 1 },
               errorRate: { value: 0 },
               totalTime: { value: 15 - i },
+              impact: 1,
             },
           })),
         },
@@ -200,7 +208,37 @@ describe('request flyout hooks', () => {
       });
 
       expect(result.current.totalResources).toBe(15);
-      expect(result.current.items.length).toBeLessThanOrEqual(10);
+      // The ten resources with the most time consumed, in order.
+      expect(result.current.items.map(({ resource }) => resource)).toEqual(
+        Array.from({ length: 10 }, (_, i) => `resource-${i}`)
+      );
+    });
+
+    it('drops the dependencies that are not resources of the grouped edge', () => {
+      mockUseFetcher.mockReturnValue({
+        data: {
+          serviceDependencies: [
+            {
+              location: { id: 'other', dependencyName: 'other', type: 'dependency' },
+              currentStats: {
+                latency: { value: 10 },
+                throughput: { value: 1 },
+                errorRate: { value: 0 },
+                totalTime: { value: 1 },
+                impact: 1,
+              },
+            },
+          ],
+        },
+        status: 'success',
+      });
+      const { result } = renderHook(() => useRequestFlyoutResources(), {
+        wrapper: wrapperWith({
+          groupedResources: [{ id: 'a', label: 'a', resource: 'a' }] as any,
+        }),
+      });
+
+      expect(result.current.items).toEqual([]);
     });
   });
 });

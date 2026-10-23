@@ -19,6 +19,7 @@ import type { FailedCallBucket } from '@kbn/apm-api-shared';
 import { Timestamp } from '@kbn/apm-ui-shared';
 import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useMemo, useState } from 'react';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
@@ -61,9 +62,12 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
     filters: { environment, start, end, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
 
-  // Server failures belong to the target service, the others to the source.
-  const serviceName =
-    bucket.type === 'server' && targetServiceName ? targetServiceName : sourceServiceName;
+  // Server failures belong to the target service, the others to the source. The failed-calls
+  // lookup matches the target through the parent id without filtering its environment, so the
+  // target's errors are not scoped to the map's environment either.
+  const targetBucketService = bucket.type === 'server' ? targetServiceName : undefined;
+  const serviceName = targetBucketService ?? sourceServiceName;
+  const errorsEnvironment = targetBucketService ? ENVIRONMENT_ALL.value : environment;
 
   const [selected, setSelected] = useState<SelectedChild | null>(null);
   const toggle = (child: SelectedChild) =>
@@ -84,10 +88,10 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
       callApmApi('GET /internal/apm/services/{serviceName}/errors/groups/main_statistics', {
         params: {
           path: { serviceName },
-          query: { environment, start, end, kuery: '' },
+          query: { environment: errorsEnvironment, start, end, kuery: '' },
         },
       }),
-    [serviceName, environment, start, end]
+    [serviceName, errorsEnvironment, start, end]
   );
 
   // The error group of the bucket comes first.
@@ -105,7 +109,7 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
     isLoading: logsLoading,
   } = useServiceErrorsFromLogs({
     serviceName,
-    environment,
+    environment: errorsEnvironment,
     kuery: '',
     rangeFrom,
     rangeTo,
@@ -311,6 +315,7 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
         <RequestFlyoutApmErrorGroupFlyout
           key={selected.key}
           serviceName={serviceName}
+          environment={errorsEnvironment}
           groupId={selected.groupId}
           groupName={selected.name}
           historyKey={historyKey}
