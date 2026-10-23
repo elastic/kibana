@@ -45,8 +45,6 @@ import { useDiscoverServices } from '../../../../../../hooks/use_discover_servic
 import {
   getCustomCascadeGridBodyStyle,
   cascadeToolbarPortalNodeTestSubjAttribute,
-  stickyHeaderActiveAttribute,
-  stickyHeaderSpacerHeightProperty,
 } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
@@ -78,7 +76,7 @@ interface CascadeGridBodyContextValue
   rowIndex: number;
   /**
    * Reverse portal node that the data grid toolbar is rendered into. The grid body outputs it
-   * ahead of the header row whenever the header is relocated into the cascade sticky header.
+   * alongside the column headers in the cascade row's persistent header host.
    */
   toolbarPortalNode: HtmlPortalNode;
   /**
@@ -91,6 +89,7 @@ interface CascadeGridBodyContextValue
    * sticky header extension point) instead of being rendered in place.
    */
   stickyHeaderPortalTarget: HTMLDivElement | null;
+  stickyEnabled: boolean;
   /**
    * Exposes scrolling of the custom virtualized body to the owning leaf cell, e.g. so that
    * in-table search can bring the active match into view.
@@ -135,6 +134,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     toolbarPortalNode,
     headerPortalNode,
     stickyHeaderPortalTarget,
+    stickyEnabled,
     scrollApiRef,
   } = context;
 
@@ -144,47 +144,6 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   );
 
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const customGridBodyWrapperRef = useRef<HTMLDivElement | null>(null);
-
-  const isStickyHeaderActive = stickyHeaderPortalTarget !== null;
-  const isStickyHeaderActiveRef = useRef(isStickyHeaderActive);
-  isStickyHeaderActiveRef.current = isStickyHeaderActive;
-
-  // While the toolbar and header row are rendered in place their heights are observed and written to
-  // a custom property on the body; a pseudo element reserves that height once they are relocated to
-  // the sticky header. Written outside of React so the value never triggers a render.
-  useEffect(() => {
-    if (typeof ResizeObserver === 'undefined') {
-      return;
-    }
-
-    const inlineHeights = { toolbar: 0, header: 0 };
-
-    const observer = new ResizeObserver((entries) => {
-      if (isStickyHeaderActiveRef.current) {
-        // only measurements taken in the inline position are representative
-        return;
-      }
-      for (const entry of entries) {
-        const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
-        if (entry.target === toolbarPortalNode.element) {
-          inlineHeights.toolbar = height;
-        } else if (entry.target === headerPortalNode.element) {
-          inlineHeights.header = height;
-        }
-      }
-      customGridBodyWrapperRef.current?.style.setProperty(
-        stickyHeaderSpacerHeightProperty,
-        `${inlineHeights.toolbar + inlineHeights.header}px`
-      );
-    });
-
-    observer.observe(toolbarPortalNode.element);
-    observer.observe(headerPortalNode.element);
-
-    return () => observer.disconnect();
-  }, [toolbarPortalNode, headerPortalNode]);
-
   const { euiTheme } = useEuiTheme();
 
   const customCascadeGridBodyStyle = useMemo(
@@ -245,31 +204,35 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   useLayoutEffect(() => {
     const bodyElement = customGridBodyScrollContainerRef.current;
     const rowElement = bodyElement?.closest<HTMLElement>('[role="row"]');
-    const bodyOffsetWithinRow =
-      bodyElement && rowElement
-        ? bodyElement.getBoundingClientRect().top - rowElement.getBoundingClientRect().top
+    const inlineHeader = stickyHeaderPortalTarget?.closest<HTMLElement>(
+      '[data-test-subj="dataCascadeInlineStickyHeader"]'
+    );
+
+    const measureGeometry = () => {
+      const bodyOffsetWithinRow =
+        bodyElement && rowElement
+          ? bodyElement.getBoundingClientRect().top - rowElement.getBoundingClientRect().top
+          : 0;
+      // Inline headers retain their full height in flow, independently of their current scroll position.
+      const stickyHeaderHeight = stickyEnabled
+        ? inlineHeader?.getBoundingClientRect().height ?? 0
         : 0;
 
-    const scrollElement = stickyHeaderPortalTarget?.closest<HTMLElement>(
-      '[data-test-subj="dataCascadeScrollContainer"]'
-    );
-    // the extension point is the last child of the sticky header, so its bottom edge is the overlay's
-    const stickyHeaderHeight =
-      stickyHeaderPortalTarget && scrollElement
-        ? Math.max(
-            0,
-            stickyHeaderPortalTarget.getBoundingClientRect().bottom -
-              scrollElement.getBoundingClientRect().top
-          )
-        : 0;
+      setScrollGeometry((previous) =>
+        previous.bodyOffsetWithinRow === bodyOffsetWithinRow &&
+        previous.stickyHeaderHeight === stickyHeaderHeight
+          ? previous
+          : { bodyOffsetWithinRow, stickyHeaderHeight }
+      );
+    };
 
-    setScrollGeometry((previous) =>
-      previous.bodyOffsetWithinRow === bodyOffsetWithinRow &&
-      previous.stickyHeaderHeight === stickyHeaderHeight
-        ? previous
-        : { bodyOffsetWithinRow, stickyHeaderHeight }
-    );
-  }, [stickyHeaderPortalTarget]);
+    measureGeometry();
+    if (inlineHeader && typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(measureGeometry);
+      observer.observe(inlineHeader);
+      return () => observer.disconnect();
+    }
+  }, [stickyHeaderPortalTarget, stickyEnabled]);
 
   const { virtualizer, handle, isDetached } = useConnectedChildVirtualizer({
     controller: virtualizerController,
@@ -304,8 +267,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       scrollToRow: (targetRowIndex) => {
         // 'auto' leaves rows that are already visible (between the sticky header and the bottom edge)
         // where they are, places rows above the viewport just below the sticky header, and rows below
-        // it at the bottom edge; it never scrolls above the leaf's own start, which would hide the
-        // sticky header and move its content back inline
+        // it at the bottom edge, accounting for the inline header's pinned height
         virtualizer.scrollToIndex(targetRowIndex, { align: 'auto', behavior: 'auto' });
       },
     }),
@@ -319,11 +281,9 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
 
   return (
     <div
-      ref={customGridBodyWrapperRef}
       data-test-subj="discoverCascadeCustomDataGridBody"
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
-      {...{ [stickyHeaderActiveAttribute]: isStickyHeaderActive }}
     >
       <InPortal node={headerPortalNode}>{headerRow}</InPortal>
       {stickyHeaderPortalTarget ? (
@@ -448,10 +408,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     // In full screen mode the grid is fixed-positioned above the cascade, so the sticky header
     // slot is not visible and the toolbar/header must stay in their default positions.
-    const stickyHeaderPortalTarget =
-      !isCellInFullScreenMode && stickyHeaderExtensionPoint.isDisplayed
-        ? stickyHeaderExtensionPoint.extensionPointElement
-        : null;
+    const stickyHeaderPortalTarget = !isCellInFullScreenMode
+      ? stickyHeaderExtensionPoint.extensionPointElement
+      : null;
 
     const isToolbarInStickyHeader = stickyHeaderPortalTarget !== null;
 
@@ -459,8 +418,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     // The data grid toolbar is rendered by EuiDataGrid outside of the custom grid body. To move it
     // into the cascade sticky header without remounting it, it is rendered into a reverse portal
-    // node; an `OutPortal` then places the toolbar DOM either in its default position or in the
-    // sticky header while its React subtree (and state) stays put.
+    // node; an `OutPortal` places it in the inline header, or inside the grid in fullscreen mode,
+    // while its React subtree and state stay mounted.
     const toolbarPortalNode = useMemo(
       () =>
         createHtmlPortalNode({
@@ -519,6 +478,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         toolbarPortalNode,
         headerPortalNode,
         stickyHeaderPortalTarget,
+        stickyEnabled: stickyHeaderExtensionPoint.stickyEnabled,
         scrollApiRef,
       }),
       [
@@ -530,6 +490,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         toolbarPortalNode,
         headerPortalNode,
         stickyHeaderPortalTarget,
+        stickyHeaderExtensionPoint.stickyEnabled,
       ]
     );
 
