@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { StreamsApiServicesFixture } from '../../fixtures';
 import { streamsApiTest as apiTest } from '../../fixtures';
 import {
   classicUpsertRequest,
@@ -21,11 +22,15 @@ const STREAMS = ['inherit', 'override', 'disable', 'update-retention'].map(
 );
 
 apiTest.describe('Failure store - classic streams', { tag: tags.deploymentAgnostic }, () => {
-  apiTest.afterEach(async ({ apiServices }) => {
+  const cleanup = async ({ apiServices }: { apiServices: StreamsApiServicesFixture }) => {
     for (const name of STREAMS) {
       await apiServices.streamsTest.deleteClassicDataStream(name);
     }
-  });
+  };
+
+  apiTest.beforeEach(cleanup);
+
+  apiTest.afterEach(cleanup);
 
   apiTest(
     'inherit defaults to disabled without an index template failure store',
