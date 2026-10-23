@@ -85,7 +85,10 @@ describe('ORCA telemetry evidence', () => {
     '14268',
     "[14268, 'checkout']",
     "{'@timestamp': '2026-04-19T16:30:00Z'}",
-  ])('accepts returned telemetry in JSON and sandbox Python formats: %s', (stdout) => {
+    '     count     \n---------------\n14268          ',
+    'service.name  |    count    \n--------------+-------------\ncheckout      |1203         ',
+    '      @timestamp       \n-----------------------\n2026-04-19T16:30:00.000Z',
+  ])('accepts returned telemetry in JSON, ES|QL text and sandbox Python formats: %s', (stdout) => {
     expect(
       hasOrcaTelemetryQuery([
         { steps: [{ ...call, results: [{ ...call.results[0], data: { stdout, exit_code: 0 } }] }] },
@@ -99,6 +102,13 @@ describe('ORCA telemetry evidence', () => {
       ...call,
       results: [{ ...call.results[0], data: { stdout: '{"values":[[0]]}', exit_code: 0 } }],
     },
+    ...[
+      '     count     \n---------------\n0              ',
+      'p95_ms | service.name\n-------+------------\n',
+    ].map((stdout) => ({
+      ...call,
+      results: [{ ...call.results[0], data: { stdout, exit_code: 0 } }],
+    })),
     {
       ...call,
       results: [

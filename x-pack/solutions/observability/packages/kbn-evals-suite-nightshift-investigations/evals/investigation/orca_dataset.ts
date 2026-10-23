@@ -106,14 +106,26 @@ const hasRows = (stdout: string): boolean => {
       )
     );
   } catch {
+    const lines = stdout.split('\n').map((line) => line.trim());
+    // ES|QL `format=txt` tables put a dashed separator under the header; any later row counts.
+    const separator = lines.findIndex((line) => /^-+(?:\+-+)*$/.test(line));
+    if (
+      separator > 0 &&
+      lines
+        .slice(separator + 1)
+        .some(
+          (line) =>
+            /(?<![\w.:-])[1-9]\d*(?:\.\d+)?(?![\w.:-])/.test(line) || /2026-04-\d{2}T/.test(line)
+        )
+    ) {
+      return true;
+    }
     // Some sandbox scripts print Python rows/dictionaries rather than the JSON response.
-    return stdout
-      .split('\n')
-      .some(
-        (line) =>
-          /^\[\s*(?:[1-9]\d*(?:\.\d+)?\s*,|['"]2026-04-\d{2}T)/.test(line.trim()) ||
-          /^\{.*['"]@timestamp['"]:\s*['"]2026-04-\d{2}T/.test(line.trim())
-      );
+    return lines.some(
+      (line) =>
+        /^\[\s*(?:[1-9]\d*(?:\.\d+)?\s*,|['"]2026-04-\d{2}T)/.test(line) ||
+        /^\{.*['"]@timestamp['"]:\s*['"]2026-04-\d{2}T/.test(line)
+    );
   }
 };
 
