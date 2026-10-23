@@ -27,7 +27,7 @@ export const grokCommand = {
   methods: grokCommandMethods,
   metadata: {
     docPreserving: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.grokDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.grokDoc', {
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),

@@ -122,7 +122,9 @@ class TableVis extends Component {
             ? createReactFieldFormatter(
                 getMetricsField(column.metrics),
                 fieldFormatMap,
-                hasColorRules
+                hasColorRules,
+                undefined,
+                this.props.isInteractive
               )
             : createTickFormatter(column.formatter, column.value_template, getConfig);
         const value = formatter(item.last);
@@ -171,7 +173,7 @@ class TableVis extends Component {
       const metric = last(item.metrics);
       const label = calculateHeaderLabel(metric, item);
       const handleClick = () => {
-        if (!isSortable(metric)) return;
+        if (!onUiState || !isSortable(metric)) return;
         let order;
         if (sort.column === item.id) {
           order = sort.order === 'asc' ? 'desc' : 'asc';
@@ -181,7 +183,7 @@ class TableVis extends Component {
         onUiState(stateKey, { column: item.id, order });
       };
       let sortComponent;
-      if (isSortable(metric)) {
+      if (onUiState && isSortable(metric)) {
         let sortIcon;
         if (sort.column === item.id) {
           sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';
@@ -225,6 +227,7 @@ class TableVis extends Component {
     }
     const sortComponent = <EuiIcon type={sortIcon} aria-hidden={true} />;
     const handleSortClick = () => {
+      if (!onUiState) return;
       let order;
       if (sort.column === '_default_') {
         order = sort.order === 'asc' ? 'desc' : 'asc';
@@ -246,7 +249,7 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model, indexPattern, initialRender } = this.props;
+    const { visData, model, indexPattern, initialRender, isInteractive } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
     const fields = (model.pivot_type ? [model.pivot_type ?? null].flat() : []).map(
       (type, index) => ({
@@ -258,7 +261,8 @@ class TableVis extends Component {
       indexPattern,
       fields,
       this.fieldFormatsService,
-      model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
+      model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : [],
+      isInteractive
     );
     const pivotIds = getFieldsForTerms(model.pivot_id);
     const header = this.renderHeader(pivotIds);
@@ -291,6 +295,7 @@ class TableVis extends Component {
 
 TableVis.defaultProps = {
   sort: {},
+  isInteractive: true,
 };
 
 TableVis.propTypes = {
@@ -303,6 +308,7 @@ TableVis.propTypes = {
   pageNumber: PropTypes.number,
   getConfig: PropTypes.func,
   indexPattern: PropTypes.object,
+  isInteractive: PropTypes.bool,
 };
 
 // default export required for React.Lazy

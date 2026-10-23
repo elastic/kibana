@@ -23,8 +23,9 @@ import type {
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 import { computeRuleId } from '../helpers/compute_rule_id';
 
-export function buildSearchEmbeddingFeature(feature: FeatureUpsert, sourceId: string): string {
-  const parts: string[] = [`Source: ${sourceId}`];
+// No source marker: it would bias cross-source semantic matches toward same-source features.
+export function buildSearchEmbeddingFeature(feature: FeatureUpsert): string {
+  const parts: string[] = [];
   if (feature.title) parts.push(`Title: ${feature.title}`);
   if (feature.description) parts.push(`Description: ${feature.description}`);
   if (feature.type) parts.push(`Type: ${feature.type}`);
@@ -65,7 +66,7 @@ export function toStoredFeature({
   includeEmbedding,
   expiresAt,
 }: ToStoredFeatureParams): StoredFeatureKnowledgeIndicator {
-  const embedding = buildSearchEmbeddingFeature(feature, sourceId);
+  const embedding = buildSearchEmbeddingFeature(feature);
   const timestamp = new Date().toISOString();
   const slug = normalizeFeatureSlug(feature.id);
   return {
@@ -129,6 +130,7 @@ export function toStoredQuery({
     query: {
       esql: query.esql.query,
       query_type: derivedType,
+      category: query.category,
       severity_score: query.severity_score,
       rule_backed: ruleBacked,
       rule_id: ruleId,
@@ -181,6 +183,7 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
 export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
   const {
     query_type: type,
+    category,
     rule_backed,
     rule_id,
     esql: esqlQuery,
@@ -201,6 +204,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
       title: doc.title,
       description: doc.description,
       esql: { query: esqlQuery },
+      category,
       severity_score,
       features,
       evidence: doc.evidence,

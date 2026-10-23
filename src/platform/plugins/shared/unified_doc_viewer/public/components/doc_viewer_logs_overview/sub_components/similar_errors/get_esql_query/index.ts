@@ -32,11 +32,13 @@ export function getEsqlQuery({
   culprit,
   message,
   type,
+  level,
 }: {
   serviceName?: string;
   culprit?: string;
   message?: ErrorField;
   type?: ErrorField;
+  level?: { fieldName: string; value: string };
 }): ESQLAstExpression | undefined {
   if (!serviceName) {
     return undefined;
@@ -69,6 +71,11 @@ export function getEsqlQuery({
     } else {
       conditions.push(esqlEquals(type.fieldName, type.value));
     }
+  }
+
+  // MATCH instead of == so documents with a multivalued level (e.g. ["error", "fatal"]) still match.
+  if (level?.value && level?.fieldName) {
+    conditions.push(esqlFunction('MATCH', [esqlColumn(level.fieldName), esqlString(level.value)]));
   }
 
   return esqlAnd(conditions);

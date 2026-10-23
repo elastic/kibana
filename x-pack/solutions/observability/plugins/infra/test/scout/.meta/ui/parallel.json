@@ -1,5 +1,5 @@
 {
-  "sha1": "240eaab3eabb902011fdef26b9ae358bdc4f0db3",
+  "sha1": "58c22b0864fa340b4f51604efd47e4728be9cbb8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -544,7 +544,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 307,
+        "line": 304,
         "column": 15
       }
     },
@@ -560,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 347,
+        "line": 344,
         "column": 9
       }
     },

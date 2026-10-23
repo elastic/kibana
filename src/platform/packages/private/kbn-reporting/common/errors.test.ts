@@ -9,7 +9,7 @@
 
 import * as errors from './errors';
 
-const { ReportingError: _, ...nonAbstractErrors } = errors;
+const { ReportingError: _, RenderServiceError: __, ...nonAbstractErrors } = errors;
 
 describe('Reporting error', () => {
   it('provides error code when stringified', () => {

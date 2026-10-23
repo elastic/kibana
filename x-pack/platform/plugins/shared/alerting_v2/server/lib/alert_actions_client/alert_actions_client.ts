@@ -21,6 +21,7 @@ import {
   type EpisodeAlertActionType,
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { encodeSeriesId, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import {
   getAlertEpisodeNotFoundMessage,
@@ -49,7 +50,7 @@ import {
   loadLastEpisodeAlertEventOrThrow,
   loadLastSeriesAlertEventOrThrow,
   loadLatestAlertEventsByEpisodeId,
-  loadLatestAlertEventsByGroupHash,
+  loadLatestAlertEventsBySeries,
 } from './context_loaders/load_latest_alert_events';
 import {
   EMPTY_ALERT_ACTION_STATE,
@@ -58,7 +59,7 @@ import {
 } from './context_loaders/load_alert_action_states';
 import {
   EMPTY_SERIES_ACTION_STATE,
-  loadSeriesActionStatesByGroupHash,
+  loadSeriesActionStatesBySeries,
   type SeriesActionState,
 } from './context_loaders/load_series_action_states';
 import type { AlertEventRecord } from './types';
@@ -69,6 +70,7 @@ import {
   requiresActionState,
   requiresSeriesActionState,
 } from './handlers';
+import { decodeSeriesIdOrThrow, getSeriesNotFoundError, toDecodedSeries } from './utils/series_id';
 
 /** A single per-item error in a bulk create alert actions response. */
 type BulkAlertActionError = BulkResponse['errors'][number];
@@ -81,7 +83,7 @@ interface AlertActionBoomData {
 
 /**
  * Builds a per-item bulk error keyed by the item's own identifier —
- * `group_hash` for series-level items, `alert_id` for episode-level items.
+ * `series_id` for series-level items, `alert_id` for episode-level items.
  * Handler-supplied context (e.g. `alert_status`) is carried in `details`.
  */
 const toBulkActionError = (
@@ -130,6 +132,24 @@ const EXPECTED_BULK_ITEM_STATUS_CODES = new Set([400, 404, 409]);
  * episode of the series. The other episode actions are pure audit records
  * and may target any existing episode.
  */
+/**
+ * The action body fields as stored on the document: a snooze keeps its expiry
+ * under `expiry`, and a tag clear (`tags: null`) is stored as the empty set so
+ * the state projection reads it like any other replacement.
+ */
+const toStorageActionData = (action: CreateAlertActionBody) => {
+  if (action.action_type === ALERT_EPISODE_ACTION_TYPE.SNOOZE) {
+    return {
+      ...omit(action, ['series_id', 'alert_id', 'action_type', 'snoozed_until']),
+      expiry: action.snoozed_until,
+    };
+  }
+  if (action.action_type === ALERT_EPISODE_ACTION_TYPE.TAG) {
+    return { ...omit(action, ['series_id', 'alert_id', 'action_type']), tags: action.tags ?? [] };
+  }
+  return omit(action, ['series_id', 'alert_id', 'action_type']);
+};
+
 const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
   actionType === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ||
   actionType === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
@@ -149,26 +169,32 @@ export class AlertActionsClient {
 
   /**
    * Creates a series-level action (`snooze` / `unsnooze`) for the
-   * series identified by `groupHash`. The series' latest event is still
+   * series identified by `seriesId`, which is decoded before any lookup: a
+   * malformed id is a 400 and an id of another space is a 404. The series' latest event is still
    * resolved — it fills `rule_id`, `source` and `last_series_event_timestamp`
    * on the audit doc — but the persisted `.alert-actions` document carries
    * `alert_id: null` and the emitted domain event `episodeId: null`: the action
    * targets the series as a whole, not whichever episode happened to be current.
    */
   public async createSeriesAction(params: {
-    groupHash: string;
+    seriesId: string;
     action: CreateSeriesAlertActionBody;
   }): Promise<void> {
-    const { groupHash, action } = params;
+    const { seriesId, action } = params;
+    const series = decodeSeriesIdOrThrow(seriesId);
+    if (!this.isInRequestSpace(series)) {
+      throw getSeriesNotFoundError(seriesId);
+    }
 
     const [userProfileUid, alertEvent, seriesActionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLastSeriesAlertEventOrThrow({
         queryService: this.queryService,
         spaceId: this.spaceId,
-        groupHash,
+        seriesId,
+        series,
       }),
-      this.loadSeriesActionStates(requiresSeriesActionState(action.action_type) ? [groupHash] : []),
+      this.loadSeriesActionStates(requiresSeriesActionState(action.action_type) ? [series] : []),
     ]);
 
     const prepared = this.prepareAction({
@@ -176,7 +202,8 @@ export class AlertActionsClient {
       alertEvent,
       userProfileUid,
       docAlertId: null,
-      seriesActionState: seriesActionStates.get(groupHash) ?? EMPTY_SERIES_ACTION_STATE,
+      seriesActionState:
+        seriesActionStates.get(encodeSeriesId(series) ?? seriesId) ?? EMPTY_SERIES_ACTION_STATE,
     });
 
     await this.persistPreparedActions([prepared]);
@@ -210,13 +237,9 @@ export class AlertActionsClient {
     ]);
 
     if (isLifecycleActionType(action.action_type)) {
-      const [latestOfGroup] = await loadLatestAlertEventsByGroupHash({
-        queryService: this.queryService,
-        spaceId: this.spaceId,
-        groupHashes: [alertEvent.group_hash],
-      });
+      const latestEpisodeId = await this.loadLatestEpisodeIdOfSeries(alertEvent);
 
-      if (latestOfGroup?.episode_id !== episodeId) {
+      if (latestEpisodeId !== episodeId) {
         throw Boom.conflict(getEpisodeNotLatestMessage(episodeId, alertEvent.group_hash), {
           code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
           details: { alert_id: episodeId, group_hash: alertEvent.group_hash },
@@ -249,15 +272,71 @@ export class AlertActionsClient {
     });
   }
 
-  /** Resolves the snooze of the series whose actions are preconditioned. */
+  /** Whether a decoded series id belongs to the space of the current request. */
+  private isInRequestSpace(series: DecodedSeriesId): boolean {
+    return series.space_id === this.spaceId;
+  }
+
+  /**
+   * Resolves the snooze of the series whose actions are preconditioned, keyed
+   * by the canonical series id. A series is identified by its owner and hash,
+   * so another rule's snooze on a shared `group_hash` is never read.
+   */
   private loadSeriesActionStates(
-    groupHashes: readonly string[]
+    series: readonly DecodedSeriesId[]
   ): Promise<Map<string, SeriesActionState>> {
-    return loadSeriesActionStatesByGroupHash({
+    return loadSeriesActionStatesBySeries({
       queryService: this.queryService,
       spaceId: this.spaceId,
-      groupHashes,
+      series,
     });
+  }
+
+  /**
+   * Resolves the id of the latest episode of the series `alertEvent` belongs
+   * to. The series is the event's owner plus its `group_hash`, not the hash
+   * alone: another rule sharing the hash must not decide which episode is
+   * the latest. An event without an owner has no series to compare against.
+   */
+  private async loadLatestEpisodeIdOfSeries(
+    alertEvent: AlertEventRecord
+  ): Promise<string | undefined> {
+    const latestEpisodeIds = await this.loadLatestEpisodeIdsBySeries([alertEvent]);
+    return latestEpisodeIds.get(alertEvent);
+  }
+
+  /**
+   * Resolves, in one query, the latest episode id of every series the given
+   * events belong to. The result is keyed by the event object itself, so
+   * callers look up an event's own series without recomputing identities.
+   */
+  private async loadLatestEpisodeIdsBySeries(
+    alertEvents: readonly AlertEventRecord[]
+  ): Promise<Map<AlertEventRecord, string>> {
+    const seriesByEvent = new Map<AlertEventRecord, DecodedSeriesId>();
+    alertEvents.forEach((alertEvent) => {
+      const series = toDecodedSeries(alertEvent);
+      if (series) {
+        seriesByEvent.set(alertEvent, series);
+      }
+    });
+
+    const latestEvents = await loadLatestAlertEventsBySeries({
+      queryService: this.queryService,
+      spaceId: this.spaceId,
+      series: [...seriesByEvent.values()],
+    });
+
+    const latestEpisodeIds = new Map<AlertEventRecord, string>();
+    seriesByEvent.forEach((series, alertEvent) => {
+      const seriesId = encodeSeriesId(series);
+      const latest = seriesId ? latestEvents.get(seriesId) : undefined;
+      if (latest) {
+        latestEpisodeIds.set(alertEvent, latest.episode_id);
+      }
+    });
+
+    return latestEpisodeIds;
   }
 
   /**
@@ -342,42 +421,50 @@ export class AlertActionsClient {
   }
 
   /**
-   * Bulk equivalent of {@link AlertActionsClient.createSeriesAction}: one
-   * latest-event query for every series referenced in the batch, one
-   * snooze-state query for the preconditioned items, per-item `errors[]` for
-   * missing series and failed preconditions, `alert_id: null` on every
+   * Bulk equivalent of {@link AlertActionsClient.createSeriesAction}: every
+   * `series_id` is decoded up front (a malformed one fails the whole request
+   * with a 400), then one latest-event query covers every series of the
+   * request's space and one snooze-state query covers the preconditioned
+   * items. Series that don't exist, or belong to another space, and failed
+   * preconditions get a per-item `errors[]` entry; `alert_id: null` on every
    * persisted audit doc and `episodeId: null` on every emitted domain event.
    */
   public async createBulkSeriesActions(
     items: BulkCreateSeriesAlertActionItemBody[]
   ): Promise<BulkResponse> {
+    const decodedItems = items.map((item) => {
+      const series = decodeSeriesIdOrThrow(item.series_id);
+      return { item, series, inRequestSpace: this.isInRequestSpace(series) };
+    });
+    const requestSpaceItems = decodedItems.filter(({ inRequestSpace }) => inRequestSpace);
+
     const [userProfileUid, latestEvents, seriesActionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
-      loadLatestAlertEventsByGroupHash({
+      loadLatestAlertEventsBySeries({
         queryService: this.queryService,
         spaceId: this.spaceId,
-        groupHashes: items.map((item) => item.group_hash),
+        series: requestSpaceItems.map(({ series }) => series),
       }),
       this.loadSeriesActionStates(
-        items
-          .filter((item) => requiresSeriesActionState(item.action_type))
-          .map((item) => item.group_hash)
+        requestSpaceItems
+          .filter(({ item }) => requiresSeriesActionState(item.action_type))
+          .map(({ series }) => series)
       ),
     ]);
-
-    const latestEventByGroupHash = new Map(latestEvents.map((event) => [event.group_hash, event]));
 
     const errors: BulkAlertActionError[] = [];
     const prepared: PreparedAction[] = [];
 
-    for (const item of items) {
-      const alertEvent = latestEventByGroupHash.get(item.group_hash);
+    for (const { item, series, inRequestSpace } of decodedItems) {
+      const canonicalSeriesId = inRequestSpace ? encodeSeriesId(series) : null;
+      const alertEvent = canonicalSeriesId ? latestEvents.get(canonicalSeriesId) : undefined;
 
       if (!alertEvent) {
         errors.push(
-          toBulkActionError(item.group_hash, {
+          toBulkActionError(item.series_id, {
             code: ALERTING_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
-            message: getAlertSeriesNotFoundMessage(item.group_hash),
+            message: getAlertSeriesNotFoundMessage(item.series_id),
+            details: { series_id: item.series_id },
           })
         );
         continue;
@@ -390,12 +477,13 @@ export class AlertActionsClient {
             alertEvent,
             userProfileUid,
             docAlertId: null,
-            seriesActionState: seriesActionStates.get(item.group_hash) ?? EMPTY_SERIES_ACTION_STATE,
+            seriesActionState:
+              seriesActionStates.get(canonicalSeriesId ?? '') ?? EMPTY_SERIES_ACTION_STATE,
           })
         );
       } catch (error) {
         if (Boom.isBoom(error) && EXPECTED_BULK_ITEM_STATUS_CODES.has(error.output.statusCode)) {
-          errors.push(boomToBulkActionError(item.group_hash, error));
+          errors.push(boomToBulkActionError(item.series_id, error));
           continue;
         }
         throw error;
@@ -440,18 +528,11 @@ export class AlertActionsClient {
 
     // Latest-episode guard for lifecycle items: resolve the latest episode of
     // every series a lifecycle item points at (see isLifecycleActionType).
-    const lifecycleGroupHashes = items
+    const lifecycleEvents = items
       .filter((item) => isLifecycleActionType(item.action_type))
-      .map((item) => eventByEpisodeId.get(item.alert_id)?.group_hash)
-      .filter((groupHash): groupHash is string => groupHash !== undefined);
-    const latestOfGroups = await loadLatestAlertEventsByGroupHash({
-      queryService: this.queryService,
-      spaceId: this.spaceId,
-      groupHashes: lifecycleGroupHashes,
-    });
-    const latestEpisodeIdByGroupHash = new Map(
-      latestOfGroups.map((event) => [event.group_hash, event.episode_id])
-    );
+      .map((item) => eventByEpisodeId.get(item.alert_id))
+      .filter((event): event is AlertEventRecord => event !== undefined);
+    const latestEpisodeIdByEvent = await this.loadLatestEpisodeIdsBySeries(lifecycleEvents);
 
     const errors: BulkAlertActionError[] = [];
     const prepared: PreparedAction[] = [];
@@ -471,7 +552,7 @@ export class AlertActionsClient {
 
       if (
         isLifecycleActionType(item.action_type) &&
-        latestEpisodeIdByGroupHash.get(alertEvent.group_hash) !== item.alert_id
+        latestEpisodeIdByEvent.get(alertEvent) !== item.alert_id
       ) {
         errors.push(
           toBulkActionError(item.alert_id, {
@@ -520,11 +601,7 @@ export class AlertActionsClient {
     docAlertId: string | null;
   }): AlertActionDocument {
     const { action, alertEvent, userProfileUid, docAlertId } = params;
-    const actionData = omit(action, ['group_hash', 'alert_id', 'action_type']);
-    const storageActionData =
-      action.action_type === ALERT_EPISODE_ACTION_TYPE.SNOOZE
-        ? { ...omit(actionData, ['snoozed_until']), expiry: action.snoozed_until }
-        : actionData;
+    const storageActionData = toStorageActionData(action);
 
     return {
       actor: {

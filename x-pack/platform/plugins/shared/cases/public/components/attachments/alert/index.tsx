@@ -77,6 +77,7 @@ export const getStackAlertAttachmentType = () =>
   defineAttachment({
     id: STACK_ALERT_ATTACHMENT_TYPE,
     getLabel: () => i18n.ALERT_DISPLAY_NAME,
+    getCountLabel: ({ count }) => i18n.ALERTS_COUNT(count),
     getIcon: () => 'bell',
     getCreationActivity,
     getRemovalActivity,

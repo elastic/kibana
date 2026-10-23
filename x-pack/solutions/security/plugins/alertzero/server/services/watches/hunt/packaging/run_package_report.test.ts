@@ -8,23 +8,25 @@
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import { buildHuntProposalId } from '../common/hunt_proposal_id';
 import {
-  PackageReportIdentityError,
+  buildProposalId,
+  buildProposalSubjectKey,
   computeExpectedProposalCount,
-  runPackageReport,
-} from './run_package_report';
+  type LiveProposal,
+  type ProposalSlot,
+  type WantedProposal,
+} from '../../../proposals/dedup';
+import { PackageReportIdentityError, runPackageReport } from './run_package_report';
 import type { RunPackageReportDeps } from './run_package_report';
-import { buildProposalSubjectKey } from './decide_package_report';
-import type { LiveProposal, ProposalSlot, WantedProposal } from './resolve_proposal_slot';
 import type { CoverageSubject } from './types';
 
 const reportId = 'rpt-package-1';
-const conversationId = buildHuntInvestigationConversationId(reportId);
+const conversationId = buildHuntInvestigationConversationId({ spaceId: 'default', reportId });
 const runId = 'run-abc';
 
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   inputSchema: {
@@ -38,6 +40,7 @@ const isolateHost: ActionCatalogEntry = {
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   inputSchema: {
@@ -52,6 +55,7 @@ const killProcess: ActionCatalogEntry = {
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   inputSchema: {
@@ -64,18 +68,15 @@ const suspendProcess: ActionCatalogEntry = {
   },
 };
 
-const setAssetCriticality: ActionCatalogEntry = {
+// An installed catalog can still carry the retired action; packaging must never fill it.
+const staleSetAssetCriticality: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-set-asset-criticality',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Set asset criticality',
   category: 'respond',
-  subjects: ['user', 'service'],
   inputSchema: {
     type: 'object',
-    properties: {
-      id_field: { type: 'string' },
-      id_value: { type: 'string' },
-      criticality_level: { type: 'string' },
-    },
+    properties: { id_field: { type: 'string' }, id_value: { type: 'string' } },
     required: ['id_field', 'id_value'],
   },
 };
@@ -199,13 +200,18 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
     written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
     skipped: [],
   }),
-  resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1', capabilities: [] }),
+  resolveHostEnrollment: async () => ({
+    enrolled: true,
+    agentId: 'agent-1',
+    capabilities: [],
+    capabilitiesSource: 'reported',
+  }),
   rehydrateProcessSelectors: async () => [],
   countExistingProposals: async () => 0,
   // Every subject is free by default, at the first generation, as it is in an empty space.
   resolveProposalSlot: async ({ subjectKey }) => ({
     kind: 'mint',
-    proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
+    proposalId: buildProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
   }),
   appendAlsoRaisedBy: async () => 'revised',
   hasOpenProposal: async () => false,
@@ -556,7 +562,7 @@ describe('runPackageReport', () => {
     expect(result.converged).toEqual([]);
     // Created under the id derived from what it proposes, which is what lets a second run meet it.
     expect(result.proposals[0].proposalId).toBe(
-      buildHuntProposalId({
+      buildProposalId({
         spaceId: 'default',
         subjectKey: result.proposals[0].subjectKey,
         generation: 0,
@@ -626,7 +632,7 @@ describe('runPackageReport', () => {
     }
   });
 
-  it('mints an asset-criticality proposal for an implicated user alongside the host action', async () => {
+  it('proposes only the host action for an implicated user, and never changes its criticality', async () => {
     const result = await runPackageReport({
       spaceId: 'default',
       reportId,
@@ -637,33 +643,24 @@ describe('runPackageReport', () => {
       expectedSseCount: 1,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a', userName: 'dev-user' })],
       deps: deps({
-        listRespondActions: async () => ({ ok: true, actions: [isolateHost, setAssetCriticality] }),
+        listRespondActions: async () => ({
+          ok: true,
+          actions: [isolateHost, staleSetAssetCriticality],
+        }),
       }),
     });
     expect(result.status).toBe('packaged');
     if (result.status !== 'packaged') {
       return;
     }
-    // Host action, identity action, then the recommendation that says credential
-    // revocation is still manual.
+    // The host action, then the recommendation that names the user a host action cannot reach.
     expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([
       isolateHost.workflowId,
-      setAssetCriticality.workflowId,
       undefined,
     ]);
-    expect(result.proposals[2].title).toBe('Analyst recommendation');
-    expect(result.proposals[2].comment).toContain(
-      'Asset criticality is proposed for dev-user (user)'
-    );
-    expect(result.expectedProposalCount).toBe(3);
-    const identity = result.proposals[1];
-    expect(identity.hostName).toBeUndefined();
-    expect(identity.subject).toEqual({ kind: 'user', value: 'dev-user' });
-    expect(identity.actionInput).toEqual({
-      id_field: 'user.name',
-      id_value: 'dev-user',
-      criticality_level: 'high_impact',
-    });
+    expect(result.proposals[1].title).toBe('Analyst recommendation');
+    expect(result.proposals[1].comment).toContain('Identity dev-user (user) is implicated');
+    expect(result.expectedProposalCount).toBe(2);
   });
 
   describe('open-Proposal dismiss guard', () => {
@@ -774,7 +771,7 @@ describe('runPackageReport', () => {
       const resolveProposalSlot = jest.fn(
         async ({ subjectKey }: WantedProposal): Promise<ProposalSlot> => ({
           kind: 'mint',
-          proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
+          proposalId: buildProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
         })
       );
 
@@ -839,14 +836,14 @@ describe('runPackageReport', () => {
         {
           listRespondActions: async () => ({
             ok: true,
-            actions: [isolateHost, setAssetCriticality],
+            actions: [isolateHost],
           }),
           resolveProposalSlot: async ({ subjectKey }) =>
             subjectKey === isolateKey
               ? { kind: 'converge', live }
               : {
                   kind: 'mint',
-                  proposalId: buildHuntProposalId({
+                  proposalId: buildProposalId({
                     spaceId: 'default',
                     subjectKey,
                     generation: 0,
@@ -856,10 +853,7 @@ describe('runPackageReport', () => {
         { userName: 'dev-user' }
       );
 
-      expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([
-        setAssetCriticality.workflowId,
-        undefined,
-      ]);
+      expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([undefined]);
       expect(result.converged.map((c) => c.proposalId)).toEqual([live.proposalId]);
     });
 
@@ -924,14 +918,14 @@ describe('runPackageReport', () => {
     });
 
     it('settles the Investigation only against what this run mints, never what converged', async () => {
-      // 2 Proposals already on this Investigation, 2 minted now, and a third finding that
-      // converged onto another Investigation's: the gate's all-time count has to reach 2 + 2.
+      // 2 Proposals already on this Investigation, 1 minted now, and another finding that
+      // converged onto another Investigation's: the gate's all-time count has to reach 2 + 1.
       // The converged one lives in the other Investigation's conversation, so it adds nothing.
       const result = await packaged(
         {
           listRespondActions: async () => ({
             ok: true,
-            actions: [isolateHost, setAssetCriticality],
+            actions: [isolateHost],
           }),
           countExistingProposals: async () => 2,
           resolveProposalSlot: async ({ subjectKey }) =>
@@ -939,7 +933,7 @@ describe('runPackageReport', () => {
               ? { kind: 'converge', live: liveProposal() }
               : {
                   kind: 'mint',
-                  proposalId: buildHuntProposalId({
+                  proposalId: buildProposalId({
                     spaceId: 'default',
                     subjectKey,
                     generation: 0,
@@ -949,8 +943,8 @@ describe('runPackageReport', () => {
         { userName: 'dev-user' }
       );
 
-      expect(result.proposals).toHaveLength(2);
-      expect(result.expectedProposalCount).toBe(2 + 2);
+      expect(result.proposals).toHaveLength(1);
+      expect(result.expectedProposalCount).toBe(2 + 1);
     });
 
     describe('when it cannot tell what already exists', () => {
@@ -989,7 +983,7 @@ describe('runPackageReport', () => {
           {
             listRespondActions: async () => ({
               ok: true,
-              actions: [isolateHost, setAssetCriticality],
+              actions: [isolateHost],
             }),
             resolveProposalSlot: async () => {
               calls += 1;

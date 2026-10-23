@@ -42,6 +42,24 @@ export const QUERY_TYPE_STATS = 'stats' as const;
 
 export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
 
+export const SIGNIFICANT_EVENT_TYPE_OPERATIONAL = 'operational' as const;
+export const SIGNIFICANT_EVENT_TYPE_CONFIGURATION = 'configuration' as const;
+export const SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH = 'resource_health' as const;
+export const SIGNIFICANT_EVENT_TYPE_ERROR = 'error' as const;
+export const SIGNIFICANT_EVENT_TYPE_SECURITY = 'security' as const;
+
+export const SIGNIFICANT_EVENT_TYPES = [
+  SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
+  SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
+  SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
+  SIGNIFICANT_EVENT_TYPE_ERROR,
+  SIGNIFICANT_EVENT_TYPE_SECURITY,
+] as const;
+
+export type SignificantEventType = (typeof SIGNIFICANT_EVENT_TYPES)[number];
+
+export const significantEventTypeSchema = lazySchema(() => z.enum(SIGNIFICANT_EVENT_TYPES));
+
 /**
  * Minimum severity score for auto-creating backing rules.
  * Severity bands: Low < 40, Medium [40, 60), High [60, 80), Critical >= 80.
@@ -69,6 +87,7 @@ export type QueryFeature = z.infer<typeof queryFeatureSchema>;
 export interface StreamQuery extends StreamQueryBase {
   type: QueryType;
   esql: EsqlQuery;
+  category?: SignificantEventType;
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];

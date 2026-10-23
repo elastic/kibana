@@ -20,3 +20,16 @@ responses:
             value:
               - id: param1-id
                 deleted: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/synthetics/params/_bulk_delete" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"ids":["param1-id","param2-id"]}'
+  - lang: Console
+    source: |
+      POST kbn://api/synthetics/params/_bulk_delete
+      {"ids":["param1-id","param2-id"]}

@@ -18,6 +18,7 @@ import type {
 import {
   AgentBuilderErrorCode,
   CONVERSATION_SCHEMA_VERSION,
+  ConversationActivityEventType,
   EventActorType,
   TimelineEventType,
   TimelineTriggerType,
@@ -390,6 +391,28 @@ export const customEventFixture = ({
   created_at: string;
   data?: Record<string, unknown>;
 }): ConversationEvent => ({ id, type, created_at, actor: userActor, data });
+
+/** A conversation activity event (`title_updated` by default), optionally tied to an execution. */
+export const activityEventFixture = ({
+  id,
+  type = ConversationActivityEventType.titleUpdated,
+  created_at,
+  execution_id,
+  data = { previous_title: 'Old', title: 'New' },
+}: {
+  id: string;
+  type?: ConversationActivityEventType;
+  created_at: string;
+  execution_id?: string;
+  data?: Record<string, unknown>;
+}): ConversationEvent => ({
+  id,
+  type,
+  created_at,
+  actor: userActor,
+  ...(execution_id ? { execution_id } : {}),
+  data,
+});
 
 /** A custom event with its LLM representation resolved, as `prepareConversation` emits it. */
 export const processedCustomEventFixture = ({

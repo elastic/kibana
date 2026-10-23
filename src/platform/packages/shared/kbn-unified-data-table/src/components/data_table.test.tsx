@@ -45,7 +45,6 @@ import { EuiButton, EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   mockRowAdditionalLeadingControls,
-  testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -1034,13 +1033,11 @@ describe('UnifiedDataTable', () => {
             },
             flattened: { test: jest.fn() },
           },
-          externalControlColumns: [testLeadingControlColumn],
           renderDocumentView: jest.fn(),
           rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
           setExpandedDoc: jest.fn(),
         });
 
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
         expect(screen.getAllByTestId('exampleRowControl-chartBarVerticalStack')[0]).toBeVisible();
 
         // The other actions are within the popover
@@ -1067,40 +1064,12 @@ describe('UnifiedDataTable', () => {
               _id: 'test',
             },
           },
-          externalControlColumns: [testLeadingControlColumn],
           renderDocumentView: jest.fn(),
           setExpandedDoc: jest.fn(),
           trailingControlColumns: testTrailingControlColumns,
         });
 
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
         expect(screen.getAllByTestId('test-trailing-column-popover-button')[0]).toBeVisible();
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
-  });
-
-  describe('externalControlColumns', () => {
-    it(
-      'should render external leading control columns',
-      async () => {
-        await renderComponent({
-          ...getProps(),
-          expandedDoc: {
-            id: 'test',
-            flattened: { test: jest.fn() },
-            raw: {
-              _index: 'test_i',
-              _id: 'test',
-            },
-          },
-          externalControlColumns: [testLeadingControlColumn],
-          renderDocumentView: jest.fn(),
-          setExpandedDoc: jest.fn(),
-        });
-
-        expect(screen.getAllByTestId('docTableExpandToggleColumn')[0]).toBeVisible();
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1127,7 +1096,6 @@ describe('UnifiedDataTable', () => {
       await renderComponent({
         ...getProps(),
         expandedDoc,
-        externalControlColumns: [testLeadingControlColumn],
         renderDocumentView: renderDocumentViewMock,
         setExpandedDoc: setExpandedDocMock,
       });
@@ -2236,6 +2204,104 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+  });
+
+  describe('renderMode', () => {
+    it('suppresses sorting, column/display selectors, and keyboard shortcuts in the toolbar', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        sort: [['bytes', 'desc']],
+        renderMode: 'print',
+        onUpdateDataGridDensity: jest.fn(),
+      });
+
+      expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+        showSortSelector: false,
+        showColumnSelector: false,
+        showKeyboardShortcuts: false,
+        showDisplaySelector: undefined,
+      });
+      // the current sort order is still shown, read-only, rather than hidden outright
+      expect(getLastEuiDataGridProps().sorting?.columns).toEqual([
+        { id: 'bytes', direction: 'desc' },
+      ]);
+    });
+
+    it('disables column resize and column/cell actions', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+      });
+
+      const column = getLastEuiDataGridProps().columns.find((col) => col.id === 'bytes');
+      expect(column?.isResizable).toBe(false);
+      expect(column?.actions).toBe(false);
+      expect(column?.cellActions).toEqual([]);
+    });
+
+    it('removes the row selection control column and disables drag-and-drop', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+        canDragAndDropColumns: true,
+      });
+
+      expect(getLastEuiDataGridProps().leadingControlColumns).toEqual([]);
+      expect(
+        (getLastEuiDataGridProps().columnVisibility as { canDragAndDropColumns?: boolean })
+          .canDragAndDropColumns
+      ).toBe(false);
+    });
+
+    it('removes additional leading controls', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+        rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
+      });
+
+      expect(getLastEuiDataGridProps().leadingControlColumns).toEqual([]);
+      expect(
+        screen.queryByTestId('exampleRowControl-chartBarVerticalStack')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the rows-per-page options while leaving pagination active', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+        rowsPerPageOptions: [5, 10],
+      });
+
+      expect(getLastEuiDataGridProps().pagination?.pageSizeOptions).toEqual([]);
+    });
+
+    it(
+      'disables in-table search',
+      async () => {
+        await renderDataTable({
+          columns: ['bytes'],
+          renderMode: 'print',
+          enableInTableSearch: true,
+        });
+
+        expect(screen.queryByTestId(BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it('defaults to interactive mode when renderMode is not set', async () => {
+      await renderComponent({ ...getProps(), columns: ['bytes'] });
+
+      expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+        showSortSelector: true,
+      });
+    });
   });
 
   describe('Refs', () => {

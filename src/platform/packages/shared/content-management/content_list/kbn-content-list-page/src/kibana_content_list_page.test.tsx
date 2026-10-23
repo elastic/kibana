@@ -163,6 +163,30 @@ describe('KibanaContentListPage', () => {
       expect(section).toHaveAttribute('aria-labelledby', 'custom-heading');
     });
 
+    it('names the section with `aria-label` when the heading is rendered elsewhere', () => {
+      render(
+        <KibanaContentListPage>
+          <KibanaContentListPage.Section aria-label="Dashboards">
+            <div>child</div>
+          </KibanaContentListPage.Section>
+        </KibanaContentListPage>
+      );
+      const section = screen.getByRole('region', { name: 'Dashboards' });
+      expect(section).not.toHaveAttribute('aria-labelledby');
+    });
+
+    it('prefers `aria-label` over `aria-labelledby`', () => {
+      render(
+        <KibanaContentListPage>
+          <KibanaContentListPage.Section aria-label="Dashboards" aria-labelledby="custom-heading">
+            <div>child</div>
+          </KibanaContentListPage.Section>
+        </KibanaContentListPage>
+      );
+      const section = screen.getByRole('region', { name: 'Dashboards' });
+      expect(section).not.toHaveAttribute('aria-labelledby');
+    });
+
     it('threads the page `data-test-subj` override into the default section subject', () => {
       render(
         <KibanaContentListPage data-test-subj="maps-page">

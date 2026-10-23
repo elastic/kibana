@@ -39,6 +39,7 @@ describe('Endpoint Policy Settings Form', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ perOsPolicySettings: false });
 
     upsellingService = mockedContext.startServices.upselling;
     storageMock = mockedContext.startServices.storage;

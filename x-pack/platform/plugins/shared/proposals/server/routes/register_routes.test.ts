@@ -76,7 +76,7 @@ describe('proposals routes', () => {
       [PROPOSALS_API_PRIVILEGE_READ]
     );
     // Dismissal releases the waiting worker, so it is not a lesser operation.
-    for (const suffix of ['/approve', '/dismiss']) {
+    for (const suffix of ['/approve', '/dismiss', '/reopen']) {
       expect(byPath(posts, suffix).config.security?.authz?.requiredPrivileges).toEqual([
         PROPOSALS_API_PRIVILEGE_MANAGE,
       ]);
@@ -275,6 +275,18 @@ describe('proposals routes', () => {
     );
 
     expect(response.notFound).toHaveBeenCalled();
+  });
+
+  it('should re-offer the proposal in the request space and answer with the successor', async () => {
+    const reopen = jest.fn().mockResolvedValue({ proposalId: 'proposal-2' });
+    const { posts, byPath } = registerAndCollect({ reopen });
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ params: { id: 'proposal-1' } });
+
+    await byPath(posts, '/reopen').handler({}, request, response);
+
+    expect(reopen).toHaveBeenCalledWith('proposal-1', 'default', request);
+    expect(response.ok).toHaveBeenCalledWith({ body: { proposalId: 'proposal-2' } });
   });
 
   it('should hand the dismiss reason to the gate release, which the gate itself discards', async () => {

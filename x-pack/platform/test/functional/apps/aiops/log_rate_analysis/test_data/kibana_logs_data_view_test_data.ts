@@ -18,7 +18,10 @@ export const kibanaLogsDataViewTestData: TestData = {
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'kibana_sample_data_logstsdb',
   brushIntervalFactor: 1,
-  chartClickCoordinates: [235, 0],
+  // Offset from the chart canvas center that hits the middle of the 2023-05-27 bar
+  // (the detected change point) so the analysis auto-runs. The bars are ~19px wide
+  // with ~1.5px gaps; aiming for the center keeps the click off the bar edges.
+  chartClickCoordinates: [245, 0],
   columnSelectorSearch: 'p-value',
   fieldSelectorSearch: 'referer',
   fieldSelectorApplyAvailable: true,

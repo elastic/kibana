@@ -11,9 +11,11 @@ import {
   isExecuteAsyncStepType,
   isExecuteStepType,
   isExecuteSyncStepType,
+  isTopLevelWorkflowExecution,
   WORKFLOW_EXECUTE_ASYNC_STEP_TYPE,
   WORKFLOW_EXECUTE_STEP_TYPE,
 } from './step_types';
+import { WORKFLOW_STEP_TRIGGER_SOURCE } from './well_known_trigger_sources';
 
 describe('step_types', () => {
   describe('isExecuteSyncStepType', () => {
@@ -67,6 +69,25 @@ describe('step_types', () => {
 
     it('returns false for case-different string', () => {
       expect(isExecuteStepType('WORKFLOW.EXECUTE')).toBe(false);
+    });
+  });
+
+  describe('isTopLevelWorkflowExecution', () => {
+    it('returns false for an execution a parent workflow step started', () => {
+      expect(isTopLevelWorkflowExecution({ triggeredBy: WORKFLOW_STEP_TRIGGER_SOURCE })).toBe(
+        false
+      );
+    });
+
+    it.each(['manual', 'scheduled', 'alert', 'cases.updated'])(
+      'returns true for an execution triggered by %s',
+      (triggeredBy) => {
+        expect(isTopLevelWorkflowExecution({ triggeredBy })).toBe(true);
+      }
+    );
+
+    it('returns true when triggeredBy is missing', () => {
+      expect(isTopLevelWorkflowExecution({})).toBe(true);
     });
   });
 });

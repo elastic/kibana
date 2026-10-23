@@ -8,18 +8,12 @@
  */
 
 import { esql, BasicPrettyPrinter } from '@elastic/esql';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { HistogramBounds, ParsedMetricItem } from '../../../types';
 import { firstNonNullable } from '../first_null_nullable';
-import { isLegacyHistogram } from '../legacy_histogram';
+import { isHistogramMetric, isLegacyHistogram } from '../histogram_metric';
 import { createTimeBucketAggregation } from './create_aggregation';
 import { fieldNameToColumn, resolveSource } from './helpers';
-
-const HISTOGRAM_FIELD_TYPES: ReadonlySet<ES_FIELD_TYPES> = new Set([
-  ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
-  ES_FIELD_TYPES.TDIGEST,
-  ES_FIELD_TYPES.HISTOGRAM,
-]);
+import { needsUnmappedFieldsNullify } from './needs_unmapped_fields_nullify';
 
 export const HISTOGRAM_BUCKET_COUNT = 10;
 export const HISTOGRAM_COUNT_COLUMN = 'count';
@@ -28,18 +22,17 @@ export const HISTOGRAM_BUCKET_COLUMN = 'bucket';
 export const getHistogramFieldExpression = (metricItem: ParsedMetricItem): string | undefined => {
   const fieldType = firstNonNullable(metricItem.fieldTypes);
   const instrument = firstNonNullable(metricItem.metricTypes);
-  const column = BasicPrettyPrinter.print(fieldNameToColumn(metricItem.metricName));
+  if (!isHistogramMetric(fieldType, instrument)) {
+    return undefined;
+  }
 
+  const column = BasicPrettyPrinter.print(fieldNameToColumn(metricItem.metricName));
   // `TS` aggregations do not accept the legacy `histogram` type, so cast it to tdigest first.
   if (isLegacyHistogram(fieldType, instrument)) {
     return `TO_TDIGEST(${column})`;
   }
 
-  if (instrument === 'histogram' && HISTOGRAM_FIELD_TYPES.has(fieldType)) {
-    return column;
-  }
-
-  return undefined;
+  return column;
 };
 
 /** Builds the distribution-over-time ES|QL query for a histogram chart, or `undefined` for non-histogram metrics. */
@@ -61,23 +54,33 @@ export const createHistogramDistributionQuery = ({
 
   const index = resolveSource(originalSource, metricItem.indexName);
   const query = esql.ts(index);
-  // User applied filters may reference a field the metric stream lacks of, so NULLIFY prevents throwing exceptions.
-  // TODO(https://github.com/elastic/kibana/issues/291132): add only when a WHERE references an unmapped field.
-  query.addSetCommand('unmapped_fields', 'NULLIFY');
+  const trimmedWhere = whereStatements
+    .map((statement) => statement.trim())
+    .filter((statement) => statement.length > 0);
 
-  for (const statement of whereStatements) {
-    const trimmed = statement.trim();
-    if (trimmed.length > 0) {
-      query.pipe(`WHERE ${trimmed}`);
-    }
+  // `metrics_info` guarantees the metric field is mapped. NULLIFY is only needed
+  // when WHERE can name a column this stream may not map.
+  if (needsUnmappedFieldsNullify({ whereStatements: trimmedWhere })) {
+    query.addSetCommand('unmapped_fields', 'NULLIFY');
+  }
+
+  for (const statement of trimmedWhere) {
+    query.pipe(`WHERE ${statement}`);
   }
 
   const timeBucket = createTimeBucketAggregation({});
+  // BUCKET emits a null bucket when from equals to. A tiny span still places the constant value in one bucket.
+  const max =
+    bounds.min < bounds.max
+      ? bounds.max
+      : bounds.min + Math.max(Math.abs(bounds.min) * 1e-6, Number.EPSILON);
   query.pipe(
     `STATS ${HISTOGRAM_COUNT_COLUMN} = COUNT(${expression}, ${HISTOGRAM_BUCKET_COLUMN}) ` +
-      `BY ${HISTOGRAM_BUCKET_COLUMN} = BUCKET(${expression}, ${HISTOGRAM_BUCKET_COUNT}, ${bounds.min}, ${bounds.max}), ${timeBucket}`
+      `BY ${HISTOGRAM_BUCKET_COLUMN} = BUCKET(${expression}, ${HISTOGRAM_BUCKET_COUNT}, ${bounds.min}, ${max}), ${timeBucket}`
   );
   query.pipe(`EVAL ${HISTOGRAM_BUCKET_COLUMN} = RANGE_MIN(${HISTOGRAM_BUCKET_COLUMN})`);
+  // Lens builder doesn't allow to change sorting. We need to keep the SORT part until the new API builder (Lens as a code) is implemented.
+  query.pipe(`SORT ${HISTOGRAM_BUCKET_COLUMN} DESC`);
 
   return query.print('pipe-multiline');
 };

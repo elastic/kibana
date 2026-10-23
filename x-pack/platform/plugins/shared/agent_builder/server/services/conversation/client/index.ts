@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { type ConversationClient, createClient } from './client';
+export { type ConversationClient, type ActivityContext, createClient } from './client';
