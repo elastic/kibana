@@ -10,11 +10,12 @@
 /**
  * Shared Liquid engine and parse cache for template string parsing.
  * Used by validate_liquid_template, extract_template_local_context, and
- * validate_workflow_yaml so that a single engine instance and a bounded
- * parse cache are reused across the app.
+ * validate_workflow_yaml so that a single engine instance and a parse cache
+ * bounded by total template length are reused across the app.
  */
 
 import type { Liquid, Template } from 'liquidjs';
+import { LRUCache } from 'lru-cache';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
 let liquidInstance: Liquid | null = null;
@@ -33,29 +34,33 @@ export function getLiquidInstance(): Liquid {
   return liquidInstance;
 }
 
-const MAX_PARSE_CACHE_SIZE = 64;
+/**
+ * Total template length the cache may hold. The parsed tree grows with the
+ * template, not with the entry count: the densest template the engine accepts
+ * under strict filters retains ~145 bytes per character, so this is a ceiling
+ * of roughly 16 MiB. The largest workflow shipped in this repo holds ~45,000
+ * characters of Liquid, so every realistic workflow stays cached in full.
+ */
+export const MAX_PARSE_CACHE_CHARS = 100_000;
 
-const parseCache = new Map<string, Template[]>();
+const parseCache = new LRUCache<string, Template[]>({
+  maxSize: MAX_PARSE_CACHE_CHARS,
+  // The cache rejects a size of zero, and an empty template is valid input.
+  sizeCalculation: (_templates, templateString) => Math.max(1, templateString.length),
+});
 
 /**
  * Parses a Liquid template string and caches the result.
- * Uses a bounded LRU cache: when the cache exceeds MAX_PARSE_CACHE_SIZE,
- * the least-recently-used entry is evicted.
+ * The cache is bounded by total template length: least-recently-used entries
+ * are evicted to make room, and a template longer than the whole budget is not
+ * retained.
  */
 export function parseTemplateString(templateString: string): Template[] {
   const cached = parseCache.get(templateString);
   if (cached) {
-    parseCache.delete(templateString);
-    parseCache.set(templateString, cached);
     return cached;
   }
   const result = getLiquidInstance().parse(templateString);
   parseCache.set(templateString, result);
-  if (parseCache.size > MAX_PARSE_CACHE_SIZE) {
-    const firstKey = parseCache.keys().next().value;
-    if (firstKey !== undefined) {
-      parseCache.delete(firstKey);
-    }
-  }
   return result;
 }
