@@ -42,6 +42,7 @@ import type { LegendSize } from '@kbn/chart-expressions-common';
 import { getRepresentativeQuery } from '@kbn/lens-common';
 import type {
   DefaultVisualizationOverrides,
+  TextBasedPrivateState,
   XYVisualizationState as XYConfiguration,
 } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -817,7 +818,9 @@ export class LensVisService {
         })
       ) {
         // using the external lens attributes
-        visContext = externalVisContext;
+        visContext = isTextBased
+          ? withSourceTimeFieldOnEsqlLayers(externalVisContext, timeFieldName)
+          : externalVisContext;
         externalVisContextStatus = UnifiedHistogramExternalVisContextStatus.applied;
       } else {
         // external vis is not compatible with the current suggestion
@@ -834,12 +837,15 @@ export class LensVisService {
           visContext: undefined,
         };
       }
-      const attributes = getLensAttributesFromSuggestion({
+      const suggestionAttributes = getLensAttributesFromSuggestion({
         query: currentQuery,
         filters,
         suggestion,
         dataView,
       }) as TypedLensByValueInput['attributes'];
+      const attributes = isTextBased
+        ? withEsqlLayersOnDataView(suggestionAttributes, dataView)
+        : suggestionAttributes;
 
       if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
         attributes.title = i18n.translate('unifiedHistogram.lensTitle', {
@@ -891,6 +897,102 @@ export class LensVisService {
     };
   };
 }
+
+/**
+ * Points ES|QL layers and index pattern refs at the data view stored in `adHocDataViews`, since a
+ * suggestion derived from saved attributes keeps the layer index of the routing it was saved with.
+ */
+const withEsqlLayersOnDataView = (
+  attributes: TypedLensByValueInput['attributes'],
+  dataView: DataView
+): TypedLensByValueInput['attributes'] => {
+  const { state } = attributes;
+  const textBased = state.datasourceStates.textBased as TextBasedPrivateState | undefined;
+  const { id: dataViewId } = dataView;
+  const adHocDataViews = state.adHocDataViews ?? {};
+
+  if (!dataViewId || !adHocDataViews[dataViewId] || !textBased?.layers) {
+    return attributes;
+  }
+
+  const layerEntries = Object.entries(textBased.layers);
+  const staleIndices = new Set(
+    layerEntries.map(([, layer]) => layer.index).filter((index) => index && !adHocDataViews[index])
+  );
+
+  if (!staleIndices.size) {
+    return attributes;
+  }
+
+  const alignedTextBased: TextBasedPrivateState = {
+    ...textBased,
+    layers: Object.fromEntries(
+      layerEntries.map(([layerId, layer]) => [
+        layerId,
+        staleIndices.has(layer.index) ? { ...layer, index: dataViewId } : layer,
+      ])
+    ),
+    ...(textBased.indexPatternRefs && {
+      indexPatternRefs: textBased.indexPatternRefs.map((ref) =>
+        staleIndices.has(ref.id)
+          ? { ...ref, id: dataViewId, timeField: dataView.timeFieldName }
+          : ref
+      ),
+    }),
+  };
+
+  return {
+    ...attributes,
+    state: {
+      ...state,
+      datasourceStates: { ...state.datasourceStates, textBased: alignedTextBased },
+    },
+  };
+};
+
+/**
+ * Gives the current source time field to saved ES|QL layers without one, so the chart applies the
+ * time range even when the saved ad-hoc data view (e.g. from another project routing) has no time field.
+ */
+const withSourceTimeFieldOnEsqlLayers = (
+  visContext: UnifiedHistogramVisContext,
+  timeFieldName: string | undefined
+): UnifiedHistogramVisContext => {
+  const { state } = visContext.attributes;
+  const textBased = state.datasourceStates.textBased;
+  const layers = textBased?.layers;
+
+  if (!timeFieldName || !textBased || !layers) {
+    return visContext;
+  }
+
+  const layerEntries = Object.entries(layers);
+  if (layerEntries.every(([, layer]) => layer.timeField)) {
+    return visContext;
+  }
+
+  return {
+    ...visContext,
+    attributes: {
+      ...visContext.attributes,
+      state: {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          textBased: {
+            ...textBased,
+            layers: Object.fromEntries(
+              layerEntries.map(([layerId, layer]) => [
+                layerId,
+                layer.timeField ? layer : { ...layer, timeField: timeFieldName },
+              ])
+            ),
+          },
+        },
+      },
+    },
+  };
+};
 
 function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   suggestionType,
