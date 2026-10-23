@@ -35,6 +35,7 @@ const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
 const defaultParams: Params = {
   name: null,
+  customLabel: null,
   index: null,
   script: null,
   document: null,
