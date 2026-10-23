@@ -2213,8 +2213,8 @@ export const getSavedObjectTypes = (
       mappings: {
         dynamic: false,
         properties: {
-          api_key_id: { type: 'keyword' },
-          status: { type: 'keyword' },
+          api_key_id: { type: 'keyword', ignore_above: 1024 },
+          status: { type: 'keyword', ignore_above: 1024 },
           expires_at: { type: 'date' },
         },
       },
