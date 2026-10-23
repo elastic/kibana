@@ -56,6 +56,7 @@ export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';
 export {
   edotBrowser,
   type BrowserProfileId,
+  type EdotBrowserClientOptions,
   type EdotBrowserDocument,
   type EdotBrowserEvent,
   type EdotBrowserSite,

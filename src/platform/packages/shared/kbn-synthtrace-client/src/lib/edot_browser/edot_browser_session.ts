@@ -89,6 +89,8 @@ export type EdotBrowserSessionOptions = SessionAnchor & {
   dwell?: Distribution;
   /** Probability that a page view after the first is a full document load, not an SPA route change. */
   hardNavigationRate?: number;
+  /** The user comes back to a session that is already running, which doesn't start a new one. */
+  resumed?: boolean;
   random?: () => number;
 };
 
@@ -306,7 +308,7 @@ const hideDocument = (
  */
 const sendRequest = (
   ctx: SessionContext,
-  { timeOrigin }: DocumentState,
+  { timeOrigin }: Pick<DocumentState, 'timeOrigin'>,
   request: EdotBrowserRequest,
   requestedTime: number,
   latestEnd: number
@@ -734,6 +736,7 @@ export const session = (options: EdotBrowserSessionOptions): EdotBrowserEvent[] 
     pageViews,
     dwell = DEFAULT_DWELL,
     hardNavigationRate = 0.2,
+    resumed = false,
     random = Math.random,
   } = options;
   if (site.pages.length === 0) {
@@ -752,9 +755,55 @@ export const session = (options: EdotBrowserSessionOptions): EdotBrowserEvent[] 
 
   return [
     // The distro announces a new session when the page loads
-    ...(client.hasSession && documents.length > 0 ? [client.sessionStart().timestamp(start)] : []),
+    ...(client.hasSession && !resumed && documents.length > 0
+      ? [client.sessionStart().timestamp(start)]
+      : []),
     ...documents
       .map((document) => shiftDocument(document, start))
       .flatMap((document) => simulateDocument(ctx, document)),
   ];
+};
+
+const IDLE_REQUEST_INTERVAL_MS = 30_000;
+
+/**
+ * Background requests of a tab that stays open after its session expired. They carry the tab ID
+ * but no session ID, until the user interacts with the page again. Use a client without `sessionId`.
+ */
+export const idleTab = ({
+  client,
+  site,
+  health,
+  start,
+  requestCount,
+  intervalMs = IDLE_REQUEST_INTERVAL_MS,
+  random = Math.random,
+}: {
+  client: EdotBrowserClient;
+  site: EdotBrowserSite;
+  health: HealthProfile;
+  start: number;
+  requestCount: number;
+  /** Time between two requests, in milliseconds. */
+  intervalMs?: number;
+  random?: () => number;
+}): EdotBrowserEvent[] => {
+  // Background requests are polls and prefetches, never what the user does
+  const requests = site.pages.flatMap(({ requests: pageRequests = [] }) =>
+    pageRequests.filter(({ method }) => method === 'GET')
+  );
+  if (requests.length === 0) {
+    return [];
+  }
+  const ctx: SessionContext = {
+    client,
+    site,
+    health,
+    random,
+    slowdown: client.isMobile ? MOBILE_SLOWDOWN : 1,
+  };
+  return Array.from({ length: requestCount }, (_, i) => {
+    const time = start + i * intervalMs;
+    return sendRequest(ctx, { timeOrigin: start }, pick(random, requests), time, time + intervalMs);
+  }).flat();
 };

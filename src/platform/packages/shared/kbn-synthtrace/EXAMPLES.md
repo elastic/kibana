@@ -927,6 +927,8 @@ Generates EDOT Browser data for five apps in different states of health:
 | `support-center-web` | critical | poor INP/CLS, high error and request failure rate   |
 | `docs-web`           | healthy  | low traffic, mostly desktop browsers                |
 
+With session IDs, most sessions are a single visit in a new tab. About 15% are a second visit to a session that is still running, in the same tab or in another one. Another 15% come back after the previous session expired: the tab kept sending background requests with `browser.tab.id` but no `session.id`, and the new session points to the expired one with `session.previous_id`. Each session has one `session.start` log. Earlier visits can be up to an hour and a half before the end of their session, so at the start of a run, where data before `--from` is cut off, some sessions have no `session.start` and some `session.previous_id` values point to nothing.
+
 **Usage:**
 
 ```sh

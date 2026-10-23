@@ -9,11 +9,12 @@
 
 import { BROWSER_PROFILES, pickBrowserProfile } from './browser_profiles';
 import { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
-import { session } from './edot_browser_session';
+import { idleTab, session } from './edot_browser_session';
 import { HEALTH_PROFILES } from './health_profiles';
 
 export type { BrowserProfileId } from './browser_profiles';
 export type { HealthProfileName } from './health_profiles';
+export type { EdotBrowserClientOptions } from './edot_browser_client';
 export type { EdotBrowserSpanDocument } from './edot_browser_span';
 export type {
   EdotBrowserDocument,
@@ -24,6 +25,7 @@ export type {
 export const edotBrowser = {
   app: (options: EdotBrowserAppOptions): EdotBrowserApp => new EdotBrowserApp(options),
   session,
+  idleTab,
   browserProfiles: BROWSER_PROFILES,
   pickBrowserProfile,
   healthProfiles: HEALTH_PROFILES,

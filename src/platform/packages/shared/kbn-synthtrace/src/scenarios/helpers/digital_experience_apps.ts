@@ -12,6 +12,7 @@ import {
   edotBrowser,
   type BrowserProfileId,
   type EdotBrowserDocument,
+  type EdotBrowserClientOptions,
   type EdotBrowserEvent,
   type EdotBrowserSite,
   type Fields,
@@ -474,11 +475,28 @@ const randomUuid = (random: () => number): string =>
 
 const getTimestamp = (event: EdotBrowserEvent) => Number(event.serialize()[0]['@timestamp']);
 
+const MINUTE_MS = 60_000;
+// EDOT Browser ends a session after 30 minutes without user activity
+const SESSION_IDLE_TIMEOUT_MS = 30 * MINUTE_MS;
+const RESUMED_SESSION_RATE = 0.15;
+const EXPIRED_SESSION_RATE = 0.15;
+const FOLLOW_UP_SESSION_RATE = 0.1;
+const SAME_TAB_RATE = 0.5;
+const EARLIER_VISIT_PAGE_VIEWS = 2;
+const IDLE_REQUEST_COUNT = 3;
+
 /**
  * One generator per app in the catalogue, each producing EDOT Browser sessions over `range`.
  * Sessions end at the time of their rate tick, so live mode never writes into the future.
  * Sessions that started before the run's `from` are cut off there, like traffic at the edge of any
  * window.
+ *
+ * Most sessions are a single visit in a new tab. Some are a second visit to a session that is
+ * still running, in the same tab (a reload) or in another one. Others come back after the previous
+ * session expired: the tab stayed open sending background requests with no session ID, and the
+ * user's return starts a new session that points to the expired one. The earlier visits of these
+ * sessions precede the one that ends at the rate tick by up to an hour and a half, so in short runs
+ * more of them are cut off at `from`: sessions then show up without their `session.start`.
  */
 export const generateEdotBrowserSessions = (
   range: Timerange,
@@ -494,6 +512,7 @@ export const generateEdotBrowserSessions = (
   DIGITAL_EXPERIENCE_APPS.map(
     ({ serviceName, serviceVersion, health, sessionsPerMinute, site, browserWeights }) => {
       const app = edotBrowser.app({ serviceName, serviceVersion, environment });
+      const healthProfile = edotBrowser.healthProfiles[health];
 
       return generatePerMinute<EdotBrowserDocument>(
         range,
@@ -503,22 +522,92 @@ export const generateEdotBrowserSessions = (
           const pageViews =
             MIN_PAGE_VIEWS + Math.floor(random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
           const profile = edotBrowser.pickBrowserProfile(random, browserWeights);
-          // Drawn even without session IDs, so that the option doesn't change the rest of the data
-          const sessionId = randomUuid(random);
+          // Everything below is drawn even when it isn't used, so that options and the kind of
+          // session don't change the rest of the draws of the session
+          const [sessionId, previousSessionId, tabId, otherTabId] = Array.from({ length: 4 }, () =>
+            randomUuid(random)
+          );
+          const visitKind = random();
+          const followsOtherSession = random() < FOLLOW_UP_SESSION_RATE;
+          const sameTab = random() < SAME_TAB_RATE;
+          const gap = random();
 
-          return edotBrowser
-            .session({
-              client: app.client(profile, {
-                sessionId: withSessionId ? sessionId : undefined,
-                includeRawAttribution,
-              }),
+          const client = (options: EdotBrowserClientOptions = {}) =>
+            app.client(profile, { includeRawAttribution, ...options });
+          const simulate = (
+            options: EdotBrowserClientOptions,
+            anchor: { end: number },
+            views: number,
+            resumed: boolean = false
+          ) =>
+            edotBrowser.session({
               site,
-              health: edotBrowser.healthProfiles[health],
-              end: time,
-              pageViews,
+              health: healthProfile,
               random,
-            })
-            .filter((event) => getTimestamp(event) >= from);
+              client: client(options),
+              pageViews: views,
+              resumed,
+              ...anchor,
+            });
+          const keep = (events: EdotBrowserEvent[]) =>
+            events.filter((event) => getTimestamp(event) >= from);
+
+          if (!withSessionId) {
+            return keep(simulate({}, { end: time }, pageViews));
+          }
+
+          const previous = followsOtherSession ? previousSessionId : undefined;
+          if (visitKind < RESUMED_SESSION_RATE) {
+            // A second visit to a session that is still running, less than 30 minutes after the
+            // first one, in the same tab or in another one
+            const visit = simulate(
+              { sessionId, previousSessionId: previous, tabId: sameTab ? tabId : otherTabId },
+              { end: time },
+              pageViews,
+              true
+            );
+            const firstVisitEnd =
+              Math.min(...visit.map(getTimestamp)) -
+              Math.round((0.05 + 0.9 * gap) * SESSION_IDLE_TIMEOUT_MS);
+            const firstVisit = simulate(
+              { sessionId, previousSessionId: previous, tabId },
+              { end: firstVisitEnd },
+              EARLIER_VISIT_PAGE_VIEWS
+            );
+            return keep([...firstVisit, ...visit]);
+          }
+
+          if (visitKind < RESUMED_SESSION_RATE + EXPIRED_SESSION_RATE) {
+            // The session expired while the tab stayed open, sending background requests with no
+            // session ID. The user's return starts a new session that points to the expired one.
+            const visit = simulate(
+              { sessionId, previousSessionId, tabId },
+              { end: time },
+              pageViews
+            );
+            const returnedAt = Math.min(...visit.map(getTimestamp));
+            const expiredFor = Math.round(SESSION_IDLE_TIMEOUT_MS * (1.05 + 2 * gap));
+            const expiredVisit = simulate(
+              { sessionId: previousSessionId, tabId },
+              { end: returnedAt - expiredFor },
+              EARLIER_VISIT_PAGE_VIEWS
+            );
+            const requestInterval = Math.floor((expiredFor - SESSION_IDLE_TIMEOUT_MS) / 3);
+            const idleRequests = edotBrowser.idleTab({
+              client: client({ tabId }),
+              site,
+              health: healthProfile,
+              random,
+              start: returnedAt - expiredFor + SESSION_IDLE_TIMEOUT_MS,
+              requestCount: IDLE_REQUEST_COUNT,
+              intervalMs: requestInterval,
+            });
+            return keep([...expiredVisit, ...idleRequests, ...visit]);
+          }
+
+          return keep(
+            simulate({ sessionId, previousSessionId: previous, tabId }, { end: time }, pageViews)
+          );
         }
       );
     }

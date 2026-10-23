@@ -118,8 +118,10 @@ describe('edotBrowser', () => {
 
     it('only sets browser.brands for Chromium-based browsers', () => {
       expect(BROWSER_PROFILES.chromeMacos.resourceAttributes['browser.brands']).toBeDefined();
-      expect(BROWSER_PROFILES.firefoxLinux.resourceAttributes).not.toHaveProperty('browser.brands');
-      expect(BROWSER_PROFILES.safariIos.resourceAttributes).not.toHaveProperty('browser.brands');
+      expect(BROWSER_PROFILES.firefoxLinux.resourceAttributes).not.toHaveProperty([
+        'browser.brands',
+      ]);
+      expect(BROWSER_PROFILES.safariIos.resourceAttributes).not.toHaveProperty(['browser.brands']);
     });
 
     it('picks a profile from the weighted set', () => {
@@ -175,7 +177,7 @@ describe('edotBrowser', () => {
         },
       });
       expect(doc).not.toHaveProperty('processor');
-      expect(doc.attributes).not.toHaveProperty('session.id');
+      expect(doc.attributes).not.toHaveProperty(['session.id']);
     });
 
     it('only sets browser.navigation.type for soft navigations', () => {
@@ -406,8 +408,8 @@ describe('edotBrowser', () => {
       });
       expect(doc.trace_id).toHaveLength(32);
       expect(doc.span_id).toHaveLength(16);
-      expect(doc.attributes).not.toHaveProperty('error.type');
-      expect(doc.attributes).not.toHaveProperty('event.outcome');
+      expect(doc.attributes).not.toHaveProperty(['error.type']);
+      expect(doc.attributes).not.toHaveProperty(['event.outcome']);
     });
 
     it('sets the instrumentation version on the scope of logs and spans', () => {
@@ -436,7 +438,7 @@ describe('edotBrowser', () => {
       const [withoutBody] = client.httpRequest({ method: 'GET', url, statusCode: 200 }).serialize();
 
       expect(withBody.attributes['http.request.body.size']).toBe(512);
-      expect(withoutBody.attributes).not.toHaveProperty('http.request.body.size');
+      expect(withoutBody.attributes).not.toHaveProperty(['http.request.body.size']);
     });
 
     it('marks failed XHR requests and network errors as errors', () => {
@@ -463,7 +465,7 @@ describe('edotBrowser', () => {
       });
       expect(networkError.status).toEqual({ code: 'Error' });
       expect(networkError.attributes).toMatchObject({ 'error.type': 'TypeError' });
-      expect(networkError.attributes).not.toHaveProperty('http.response.status_code');
+      expect(networkError.attributes).not.toHaveProperty(['http.response.status_code']);
     });
 
     it('stamps session.id on logs and spans when the client has a session', () => {
@@ -525,12 +527,12 @@ describe('edotBrowser', () => {
       // The tab outlives an expired session
       stamp({ tabId: 'tab-1' }).forEach((attributes) => {
         expect(attributes).toMatchObject({ 'browser.tab.id': 'tab-1' });
-        expect(attributes).not.toHaveProperty('session.id');
-        expect(attributes).not.toHaveProperty('session.previous_id');
+        expect(attributes).not.toHaveProperty(['session.id']);
+        expect(attributes).not.toHaveProperty(['session.previous_id']);
       });
       // A previous session ID only makes sense next to a session ID
       stamp({ previousSessionId: 's-1' }).forEach((attributes) =>
-        expect(attributes).not.toHaveProperty('session.previous_id')
+        expect(attributes).not.toHaveProperty(['session.previous_id'])
       );
     });
   });
@@ -1030,6 +1032,60 @@ describe('edotBrowser', () => {
       });
       expect(docs[0]).toBe(starts[0]);
       expect(Math.min(...timestamps(docs))).toBe(TIMESTAMP);
+    });
+
+    it('does not start a session again when the user comes back to it', () => {
+      const docs = edotBrowser
+        .session({
+          start: TIMESTAMP,
+          client: createClient('abc'),
+          site: SITE,
+          health: HEALTH_PROFILES.healthy,
+          pageViews: 2,
+          resumed: true,
+          random: seededRandom(1),
+        })
+        .flatMap((event) => event.serialize());
+
+      expect(eventNames(docs)).not.toContain('session.start');
+      docs.forEach((doc) => expect(doc.attributes?.['session.id']).toBe('abc'));
+    });
+
+    describe('idle tab', () => {
+      const tabClient = edotBrowser
+        .app({ serviceName: 'storefront-web', environment: 'production' })
+        .client(BROWSER_PROFILES.chromeMacos, { tabId: 'tab-1' });
+      const idleTab = (site: EdotBrowserSite = SITE) =>
+        edotBrowser
+          .idleTab({
+            client: tabClient,
+            site,
+            health: HEALTH_PROFILES.healthy,
+            start: TIMESTAMP,
+            requestCount: 3,
+            intervalMs: 60_000,
+            random: seededRandom(1),
+          })
+          .flatMap((event) => event.serialize());
+
+      it('sends background GET requests with the tab id and no session id', () => {
+        const docs = idleTab();
+        const spans = docs.filter(isSpan);
+
+        expect(spans).toHaveLength(3);
+        docs.forEach((doc) => {
+          expect(doc.attributes?.['browser.tab.id']).toBe('tab-1');
+          expect(doc.attributes).not.toHaveProperty(['session.id']);
+        });
+        spans.forEach((span, i) => {
+          expect(span.attributes['http.request.method']).toBe('GET');
+          expect(Number(span['@timestamp'])).toBe(TIMESTAMP + i * 60_000);
+        });
+      });
+
+      it('sends nothing for a site without GET requests', () => {
+        expect(idleTab({ ...SITE, pages: [{ path: '/' }] })).toEqual([]);
+      });
     });
 
     it('does not emit session.start without a session id', () => {

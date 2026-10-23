@@ -217,20 +217,141 @@ describe('digital experience apps', () => {
         expect(sorted(batched)).toEqual(sorted(generate('seed-a')));
       });
 
-      it('does not change the rest of the data without session IDs', () => {
+      it('does not change the sessions themselves without session IDs', () => {
         const withoutSessionIds = generate('seed-a', { withSessionId: false });
-        // session.start only exists for sessions that have an ID
-        const withSessionIds = generate('seed-a')
-          .filter((doc) => !('event_name' in doc && doc.event_name === 'session.start'))
-          .map(({ attributes, ...doc }) => ({
-            ...doc,
-            attributes: Object.fromEntries(
-              Object.entries(attributes ?? {}).filter(([key]) => key !== 'session.id')
-            ),
-          }));
+        // Without session IDs a session is a single visit. With them, some get more visits, an idle
+        // tab and a session.start log, and all get session attributes.
+        const withSessionIds = new Set(
+          sorted(
+            generate('seed-a').map(({ attributes, ...doc }) => ({
+              ...doc,
+              attributes: Object.fromEntries(
+                Object.entries(attributes ?? {}).filter(
+                  ([key]) => !['session.id', 'session.previous_id', 'browser.tab.id'].includes(key)
+                )
+              ),
+            }))
+          )
+        );
 
         expect(withoutSessionIds.length).toBeGreaterThan(0);
-        expect(sorted(withoutSessionIds)).toEqual(sorted(withSessionIds));
+        sorted(withoutSessionIds).forEach((doc) => expect(withSessionIds.has(doc)).toBe(true));
+        withoutSessionIds.forEach(({ attributes }) => {
+          expect(attributes).not.toHaveProperty(['browser.tab.id']);
+          expect(attributes).not.toHaveProperty(['session.previous_id']);
+        });
+      });
+
+      describe('visits', () => {
+        const hour = timerange(at(0), at(3600), {} as ToolingLog);
+        // From the epoch on, so that sessions that started before the run are kept whole
+        const docs = generate('seed-a', { timeRange: hour, from: 0, scale: 3 });
+        const attribute = (doc: EdotBrowserDocument, key: string) => doc.attributes?.[key];
+        const sessionIds = new Set(docs.map((doc) => attribute(doc, 'session.id')));
+        sessionIds.delete(undefined);
+
+        it('starts every session once, however many times the user comes back to it', () => {
+          const starts = docs.filter(
+            (doc) => 'event_name' in doc && doc.event_name === 'session.start'
+          );
+
+          expect(new Set(starts.map((doc) => attribute(doc, 'session.id')))).toEqual(sessionIds);
+          expect(starts).toHaveLength(sessionIds.size);
+        });
+
+        it('has sessions that span two tabs', () => {
+          const tabsBySession = new Map<unknown, Set<unknown>>();
+          docs.forEach((doc) => {
+            const id = attribute(doc, 'session.id');
+            if (id) {
+              tabsBySession.set(
+                id,
+                (tabsBySession.get(id) ?? new Set()).add(attribute(doc, 'browser.tab.id'))
+              );
+            }
+          });
+
+          expect([...tabsBySession.values()].some((tabs) => tabs.size > 1)).toBe(true);
+        });
+
+        it('never lets a session go idle for 30 minutes, which would end it', () => {
+          const timestampsBySession = new Map<unknown, number[]>();
+          docs.forEach((doc) => {
+            const id = attribute(doc, 'session.id');
+            if (id) {
+              timestampsBySession.set(id, [
+                ...(timestampsBySession.get(id) ?? []),
+                Number(doc['@timestamp']),
+              ]);
+            }
+          });
+
+          expect(timestampsBySession.size).toBeGreaterThan(500);
+          timestampsBySession.forEach((timestamps) => {
+            const ordered = [...timestamps].sort((a, b) => a - b);
+            ordered.slice(1).forEach((timestamp, i) => {
+              expect(timestamp - ordered[i]).toBeLessThan(30 * 60_000);
+            });
+          });
+        });
+
+        it('lets a session expire before the one that follows it, with the tab idle in between', () => {
+          const rangeOf = (predicate: (doc: EdotBrowserDocument) => boolean) => {
+            const times = docs.filter(predicate).map((doc) => Number(doc['@timestamp']));
+            return { first: Math.min(...times), last: Math.max(...times) };
+          };
+          const followers = new Map<string, string>(
+            docs.flatMap((doc) => {
+              const previousId = attribute(doc, 'session.previous_id');
+              return typeof previousId === 'string' && sessionIds.has(previousId)
+                ? [[String(attribute(doc, 'session.id')), previousId] as [string, string]]
+                : [];
+            })
+          );
+
+          expect(followers.size).toBeGreaterThan(10);
+          followers.forEach((expiredId, id) => {
+            const expired = rangeOf((doc) => attribute(doc, 'session.id') === expiredId);
+            const next = rangeOf((doc) => attribute(doc, 'session.id') === id);
+            const tabId = docs.find((doc) => attribute(doc, 'session.id') === id)?.attributes?.[
+              'browser.tab.id'
+            ];
+            const idle = rangeOf(
+              (doc) => !attribute(doc, 'session.id') && attribute(doc, 'browser.tab.id') === tabId
+            );
+
+            expect(next.first - expired.last).toBeGreaterThan(30 * 60_000);
+            expect(idle.first).toBeGreaterThanOrEqual(expired.last + 30 * 60_000);
+            expect(idle.last).toBeLessThan(next.first);
+          });
+        });
+
+        it('points sessions to the expired session they follow', () => {
+          const previousIds = docs.flatMap((doc) => attribute(doc, 'session.previous_id') ?? []);
+
+          expect(previousIds.length).toBeGreaterThan(0);
+          expect(previousIds.some((id) => sessionIds.has(id))).toBe(true);
+        });
+
+        it('keeps expired tabs sending requests without a session ID', () => {
+          const sessionTabs = new Set(
+            docs
+              .filter((doc) => attribute(doc, 'session.id'))
+              .map((doc) => attribute(doc, 'browser.tab.id'))
+          );
+          const idleDocs = docs.filter((doc) => !attribute(doc, 'session.id'));
+
+          expect(idleDocs.length).toBeGreaterThan(0);
+          idleDocs.forEach((doc) => {
+            expect(sessionTabs.has(attribute(doc, 'browser.tab.id'))).toBe(true);
+          });
+        });
+
+        it('never writes after the end of the run', () => {
+          docs.forEach((doc) => {
+            expect(Number(doc['@timestamp'])).toBeLessThan(hour.to.getTime());
+          });
+        });
       });
 
       it('does not repeat session, trace or span IDs', () => {
@@ -240,7 +361,8 @@ describe('digital experience apps', () => {
         const sessionCount = docs.filter(
           (doc) => 'event_name' in doc && doc.event_name === 'session.start'
         ).length;
-        const sessionIds = new Set(docs.map((doc) => doc.attributes?.['session.id']));
+        // Idle tabs have no session ID
+        const sessionIds = new Set(docs.flatMap((doc) => doc.attributes?.['session.id'] ?? []));
         // Resource timing logs of requests carry the IDs of their span, only count the spans
         const spans = docs.flatMap((doc) => ('kind' in doc ? [doc] : []));
 
@@ -284,8 +406,12 @@ describe('digital experience apps', () => {
 
       const withSessions = collect(true);
       const sessionIds = new Set(withSessions.map((doc) => doc.attributes?.['session.id']));
+      sessionIds.delete(undefined);
 
-      expect(sessionIds.has(undefined)).toBe(false);
+      // Only tabs whose session expired send data without a session ID
+      withSessions
+        .filter((doc) => !doc.attributes?.['session.id'])
+        .forEach((doc) => expect(doc.attributes).toHaveProperty(['browser.tab.id']));
       expect(sessionIds.size).toBeGreaterThan(DIGITAL_EXPERIENCE_APPS.length);
     });
   });
