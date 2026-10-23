@@ -206,6 +206,7 @@ describe('Forensics proposal gate', () => {
         'workflow-id': 'system-alertzero-journal-note',
         'run-as-mode': 'inherit',
         inputs: {
+          author_name: '{{ consts.author_name }}',
           conversation_id: '{{ inputs.investigationConversationId }}',
           message: '{{ variables.lost_race_note }}',
         },

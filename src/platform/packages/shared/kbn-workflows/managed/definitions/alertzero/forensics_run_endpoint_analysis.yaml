@@ -60,6 +60,9 @@ outputs:
       type: number
 
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Endpoint Analysis worker"
   # Journal notes call `system-alertzero-journal-note` by literal id, not a const:
   # `run-as-mode: inherit` runs the note as this workflow's service account, and the
   # engine only allows that for a literal `workflow-id`.
@@ -260,6 +263,7 @@ steps:
           workflow-id: system-alertzero-journal-note
           run-as-mode: inherit
           inputs:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: >-
               No Attack Discovery alert matching `{{ steps.resolve_request.output.attack_discovery_alert_id }}`
@@ -338,6 +342,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   No Elastic Defend telemetry was found for `{{ steps.resolve_host.output.host_name }}`
@@ -379,6 +384,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   Starting endpoint analysis of `{{ steps.resolve_host.output.host_name }}` for the
@@ -444,6 +450,7 @@ steps:
             timeout: "30m"
             create-conversation: false
             with:
+              author_name: "{{ consts.author_name }}"
               configuration_overrides:
                 skill_ids:
                   - endpoint-forensic-analysis
@@ -859,6 +866,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   Reconstructed forensic timeline for `{{ steps.resolve_host.output.host_name }}`.
@@ -886,6 +894,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   Extracted IoCs during forensic analysis of `{{ steps.resolve_host.output.host_name }}`.
@@ -915,6 +924,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 # `#` renders larger than the `##` sections inside `rationale`. A blank line
                 # after it keeps the first section on its own line. The journal renders
@@ -935,6 +945,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   Could not resolve a host for Attack Discovery alert `{{ steps.resolve_request.output.attack_discovery_alert_id }}`.
@@ -959,6 +970,7 @@ steps:
           workflow-id: system-alertzero-journal-note
           run-as-mode: inherit
           inputs:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: >-
               Indicator `{{ inputs.ki_id }}` names no Attack Discovery alert, so endpoint
@@ -1106,6 +1118,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: |-
           {%- assign new_count = steps.resolve_proposal_counts.output.new_count -%}
@@ -1199,6 +1212,7 @@ steps:
           workflow-id: system-alertzero-journal-note
           run-as-mode: inherit
           inputs:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: "{{ foreach.item.note }}"
 
@@ -1310,6 +1324,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           {%- if steps.resolve_proposal_counts.output.check_failed == true -%}
@@ -1367,6 +1382,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           An earlier endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its
@@ -1415,6 +1431,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` left no findings on this investigation.
