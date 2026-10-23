@@ -205,13 +205,14 @@ describe('ProfileDetailsPage', () => {
     expect(settings).toHaveTextContent('PinOff');
 
     expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('catalogs');
+    // Each rule shows where it applies the profile, not everything it matches.
+    expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('Applies to');
+    expect(screen.getByTestId('boostProfileRules')).not.toHaveTextContent('Matches');
     expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('Rows per page: 10');
-    // A higher-ranked rule keeps catalog-fall, so the profile only applies to catalog-spring.
-    const usedBy = screen.getByTestId('boostProfileUsedBy');
-    expect(usedBy).toHaveTextContent('catalog-spring');
-    expect(usedBy).not.toHaveTextContent('catalog-fall');
-    // The table always pages, however few use the profile.
-    expect(usedBy).toHaveTextContent('Rows per page: 10');
+    // A higher-ranked rule keeps catalog-fall, so the profile only applies to catalog-spring. The
+    // rules list what they apply it to on their own pages, so this page doesn't list them too.
+    expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('1 index');
+    expect(screen.queryByTestId('boostProfileUsedBy')).not.toBeInTheDocument();
     expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Applies to1 index');
     expect(screen.getByTestId('boostProfileStorageShare')).toHaveTextContent(/GB\d+% of project/);
   });
@@ -221,7 +222,11 @@ describe('ProfileDetailsPage', () => {
 
     // The same color as the badge in the profiles list, not the header's hollow default.
     expect(getHeader().getByText('Managed')).toHaveAttribute('data-color', 'default');
-    expect(getHeader().getByRole('button', { name: 'Duplicate' })).toBeInTheDocument();
+    // Copying waits in the menu, as it does for other profiles.
+    expect(getHeader().getByRole('button', { name: 'Duplicate' })).toHaveAttribute(
+      'data-overflow',
+      'true'
+    );
     expect(getHeader().queryByRole('button', { name: 'Edit profile' })).not.toBeInTheDocument();
     expect(getHeader().queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
   });
@@ -236,6 +241,41 @@ describe('ProfileDetailsPage', () => {
     expect(screen.getByTestId('boostProfileSettings')).not.toHaveTextContent('One extra copy');
     // The default rule applies it to logs-app, all of whose data counts as recent.
     expect(screen.getByTestId('boostAgeTimelinePeriods-recent')).toHaveTextContent('3 GB');
+  });
+
+  it('marks a standard phase that ends where the recent one does as skipped', () => {
+    renderAt(`/profiles/${BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days}`);
+
+    expect(screen.getByTestId('boostProfilePhase-recent')).toHaveTextContent('Up to 7 days');
+    expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent('Skipped');
+    // Background data starts where recent data ends.
+    expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent(
+      'Older than 7 days'
+    );
+  });
+
+  it("shows each phase's boost and the ages of its data", () => {
+    renderAt('/profiles/clicks');
+
+    expect(screen.getByTestId('boostProfilePhase-recent')).toHaveTextContent('2–100');
+    expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent('1 day–7 days');
+    expect(screen.getByTestId('boostProfilePhase-standard')).not.toHaveTextContent('Skipped');
+    expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent(
+      'Older than 7 days'
+    );
+    // Its only rule matches nothing, so it applies the profile nowhere.
+    expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('0 data streams');
+  });
+
+  it('offers to create a rule with a profile no rule uses', async () => {
+    renderAt(`/profiles/${BUILTIN_INDICES_PROFILE_NAMES.high_availability}`);
+
+    expect(screen.getByTestId('boostProfileUnused')).toHaveTextContent("This profile isn't in use");
+    expect(screen.queryByTestId('boostProfileRules')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('boostProfileUsedBy')).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostProfileDetailsCreateRule')).toHaveTextContent(
+      'Create boost rule'
+    );
   });
 
   it('leaves the timeline without sizes until the profile applies to a data stream', () => {

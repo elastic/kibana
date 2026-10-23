@@ -72,7 +72,8 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const [isOpen, setIsOpen] = useState(false);
-  const { matches, matchedNames, supersededBy } = coverage;
+  const { matches, matchedNames, appliesTo, supersededBy } = coverage;
+  const outranked = matches - appliesTo;
 
   // The title says how the rule chooses what it matches; the link already says how many.
   const [pattern] = patterns;
@@ -99,13 +100,25 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
       // The list sets its own padding, inside its scroll area, so its scroll fade covers only that.
       panelPaddingSize="none"
       button={
-        <EuiLink
-          onClick={() => setIsOpen(!isOpen)}
-          aria-expanded={isOpen}
-          data-test-subj="boostRuleMatches"
-        >
-          {formatDataSourceCount(type, matches)}
-        </EuiLink>
+        // What the rule applies to, with how many matches a higher-ranked rule takes after it, which
+        // the list shows struck through.
+        <span>
+          <EuiLink
+            onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            data-test-subj="boostRuleMatches"
+          >
+            {formatDataSourceCount(type, appliesTo)}
+          </EuiLink>
+          {outranked > 0 && (
+            <EuiTextColor color="subdued" data-test-subj="boostRuleOutranked">
+              {i18n.translate('xpack.boost.ruleMatches.outranked', {
+                defaultMessage: ' · {count} outranked',
+                values: { count: outranked },
+              })}
+            </EuiTextColor>
+          )}
+        </span>
       }
     >
       <EuiPopoverTitle paddingSize="s">

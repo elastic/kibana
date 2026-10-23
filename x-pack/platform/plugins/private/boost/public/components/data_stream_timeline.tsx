@@ -61,7 +61,10 @@ const toHours = (maxAge: string | undefined) => {
  * contrasts with it. They avoid the lifecycle phase colors, whose hot to frozen meanings don't apply.
  * The lightest step of the blend is left out, since it barely stands out from the timeline's track.
  */
-const usePeriodColors = (): Record<DataStreamPeriod, { background: string; text: string }> => {
+export const usePeriodColors = (): Record<
+  DataStreamPeriod,
+  { background: string; text: string }
+> => {
   const { euiTheme } = useEuiTheme();
   return useMemo(() => {
     const [, background, standard, recent] = colorPalette(

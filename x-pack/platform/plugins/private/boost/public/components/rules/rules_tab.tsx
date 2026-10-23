@@ -192,26 +192,26 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       dataType: 'number',
     },
     {
-      // Spelled out ("3 indices") and left-aligned; it still sorts numerically. It counts
-      // everything the rule matches; the list shows any that a higher-ranked rule takes.
-      field: 'matches',
-      name: i18n.translate('xpack.boost.rulesTab.matchesColumn', {
-        defaultMessage: 'Matches',
+      // Spelled out ("3 indices") and left-aligned; it still sorts numerically. It counts what the
+      // rule applies to, with any matches a higher-ranked rule takes after it, which its list shows.
+      field: 'appliesTo',
+      name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
+        defaultMessage: 'Applies to',
       }),
       // Fits "All unmatched data streams" on one line.
       width: '17em',
-      // A default rule applies to everything no other rule matches, so it sorts as matching the
+      // A default rule applies to everything no other rule matches, so it sorts as applying to the
       // most, whatever is left over for it today.
-      sortable: ({ matches, is_builtin: isBuiltin }: RuleRow) =>
-        isBuiltin ? Number.POSITIVE_INFINITY : matches,
+      sortable: ({ appliesTo, is_builtin: isBuiltin }: RuleRow) =>
+        isBuiltin ? Number.POSITIVE_INFINITY : appliesTo,
       render: (
-        matches: number,
+        appliesTo: number,
         {
           index_patterns: patterns,
           profileType,
           is_builtin: isBuiltin,
+          matches,
           matchedNames,
-          appliesTo,
           supersededBy,
         }: RuleRow
       ) => (

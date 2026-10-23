@@ -189,7 +189,7 @@ describe('RulesTab matches', () => {
     return within(row);
   };
 
-  it('sorts default rules as matching the most', async () => {
+  it('sorts default rules as applying to the most', async () => {
     renderTab('/rules');
     const isDefaultRow = (row: HTMLElement) => within(row).queryByText('Default') !== null;
     const getDefaultRowPositions = () =>
@@ -199,18 +199,20 @@ describe('RulesTab matches', () => {
         .flatMap((row, index) => (isDefaultRow(row) ? [index] : []));
     const rowCount = screen.getAllByRole('row').length - 1;
 
-    await userEvent.click(screen.getByRole('button', { name: /Matches/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Applies to/ }));
     expect(getDefaultRowPositions()).toEqual([rowCount - 2, rowCount - 1]);
 
-    await userEvent.click(screen.getByRole('button', { name: /Matches/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Applies to/ }));
     expect(getDefaultRowPositions()).toEqual([0, 1]);
   });
 
-  it('counts everything a rule matches, and lists it with what a higher-ranked rule takes', async () => {
+  it('counts what a rule applies to, and lists what it matches with what a higher-ranked rule takes', async () => {
     renderTab('/rules');
 
     const picked = getRow('picked');
-    expect(picked.getByTestId('boostRuleMatches')).toHaveTextContent('2 indices');
+    // Of its two matches, a higher-ranked rule takes one.
+    expect(picked.getByTestId('boostRuleMatches')).toHaveTextContent('1 index');
+    expect(picked.getByTestId('boostRuleOutranked')).toHaveTextContent('1 outranked');
     await userEvent.click(picked.getByTestId('boostRuleMatches'));
 
     const popover = within(screen.getByRole('dialog'));
@@ -241,6 +243,8 @@ describe('RulesTab matches', () => {
     expect(popover).toHaveTextContent('Using index pattern archives-*');
     expect(popover).not.toHaveTextContent('Using selected');
     expect(popover).toHaveTextContent('archives-2024');
+    // No higher-ranked rule takes any of its matches, so there's nothing outranked to note.
+    expect(getRow('archives').queryByTestId('boostRuleOutranked')).not.toBeInTheDocument();
   });
 
   it("doesn't show a pattern for a rule that names its targets", async () => {

@@ -10,12 +10,12 @@ import { useHistory, useParams } from 'react-router-dom';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTable,
   EuiButton,
+  EuiEmptyPrompt,
   EuiInMemoryTable,
   EuiLink,
-  EuiSpacer,
-  EuiText,
+  EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
 import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -23,14 +23,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_ID } from '../../../common/constants';
 import type { RuleCoverage } from '../../../common/resolution';
 import { getAppliedRules, getRuleCoverage } from '../../../common/resolution';
-import type {
-  BoostDataSource,
-  BoostPeriod,
-  BoostProfile,
-  BoostRule,
-  DataStreamsBoostProfile,
-  IndicesBoostProfile,
-} from '../../../common/types';
+import type { BoostProfile, BoostRule, IndicesBoostProfile } from '../../../common/types';
 import { estimateDataSourcesVcuRange, estimateProjectVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
@@ -43,17 +36,14 @@ import {
   DetailsSplitBand,
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
-import { TitleWithTip } from '../details/title_with_tip';
 import { ShareMeter, ShareMeterGroup } from '../details/share_meter';
 import { DetailsLink } from '../details_link';
-import { EmptyCell } from '../empty_cell';
-import { PROFILE_TYPE_LABELS, formatBoost, formatDataSourceCount, formatMaxAge } from '../format';
+import { PROFILE_TYPE_LABELS, formatBoost, formatDataSourceCount } from '../format';
 import { LoadError } from '../load_error';
 import { RuleFlyout } from '../rules/rule_flyout';
-import { RuleMatches } from '../rules/rule_matches';
 import { DEFAULT_BADGE_LABEL, getProfileRulesLocation } from '../rules/rules_tab';
 import { DeleteProfileModal } from './delete_profile_modal';
-import { PERIOD_LABELS } from './period_labels';
+import { PhaseCards } from './phase_cards';
 import { INDEX_OPTIONS, ProfileFlyout } from './profile_flyout';
 import { MANAGED_BADGE_LABEL, USED_BY_DEFAULT_RULE_DESCRIPTIONS } from './profiles_tab';
 
@@ -92,61 +82,10 @@ const IndicesSettings = ({ profile }: { profile: IndicesBoostProfile }) => {
   );
 };
 
-interface PeriodRow {
-  id: keyof typeof PERIOD_LABELS;
-  period: BoostPeriod;
-}
-
-// Data stream profiles only have periods, so there's nothing about copies, prewarm, or pinning.
-const DataStreamsSettings = ({ profile }: { profile: DataStreamsBoostProfile }) => {
-  const columns: Array<EuiBasicTableColumn<PeriodRow>> = [
-    {
-      field: 'id',
-      name: i18n.translate('xpack.boost.profileDetails.periodColumn', {
-        defaultMessage: 'Phase',
-      }),
-      render: (id: PeriodRow['id']) => (
-        <TitleWithTip title={PERIOD_LABELS[id].title} tip={PERIOD_LABELS[id].description} />
-      ),
-    },
-    {
-      name: MIN_BOOST_LABEL,
-      render: ({ period }: PeriodRow) => formatBoost(period.min_boost),
-    },
-    {
-      name: MAX_BOOST_LABEL,
-      render: ({ period }: PeriodRow) => formatBoost(period.max_boost),
-    },
-    {
-      name: i18n.translate('xpack.boost.profileDetails.maxAgeColumn', {
-        defaultMessage: 'Max age',
-      }),
-      // Background has no max age; it holds everything older.
-      render: ({ period }: PeriodRow) => formatMaxAge(period.max_age) ?? <EmptyCell />,
-    },
-  ];
-  return (
-    <EuiBasicTable
-      tableCaption={i18n.translate('xpack.boost.profileDetails.periodsCaption', {
-        defaultMessage: 'Boost for each phase of data',
-      })}
-      compressed
-      // Columns size to their content, so a phase name stays on one line with its icon.
-      tableLayout="auto"
-      items={[
-        { id: 'recent', period: profile.recent },
-        { id: 'standard', period: profile.standard },
-        { id: 'background', period: profile.background },
-      ]}
-      columns={columns}
-      data-test-subj="boostProfilePeriods"
-    />
-  );
-};
-
 /** A boost profile's settings, the rules that use it, and what it applies to. */
 export const ProfileDetailsPage = () => {
   const { application } = useBoostServices();
+  const { euiTheme } = useEuiTheme();
   const canEdit = application.capabilities[PLUGIN_ID]?.save === true;
   const history = useHistory();
   const { profileName: name } = useParams<{ profileName: string }>();
@@ -229,61 +168,22 @@ export const ProfileDetailsPage = () => {
       width: '7em',
       dataType: 'number',
     },
+    // Where each rule applies this profile, rather than all it matches, which can include what
+    // higher-ranked rules apply other profiles to.
     {
-      field: 'matches',
-      name: i18n.translate('xpack.boost.profileDetails.matchesColumn', {
-        defaultMessage: 'Matches',
+      field: 'appliesTo',
+      name: i18n.translate('xpack.boost.profileDetails.appliesToColumn', {
+        defaultMessage: 'Applies to',
       }),
-      width: '17em',
-      render: (
-        matches: number,
-        {
-          index_patterns: patterns,
-          is_builtin: isBuiltin,
-          matchedNames,
-          appliesTo,
-          supersededBy,
-        }: RuleRow
-      ) => (
-        <RuleMatches
-          patterns={patterns}
-          type={profile.type}
-          isDefaultRule={isBuiltin}
-          coverage={{ matches, matchedNames, appliesTo, supersededBy }}
-        />
-      ),
-    },
-  ];
-
-  const usedByColumns: Array<EuiBasicTableColumn<BoostDataSource>> = [
-    {
-      field: 'name',
-      name:
-        profile.type === 'indices'
-          ? i18n.translate('xpack.boost.profileDetails.indexColumn', { defaultMessage: 'Index' })
-          : i18n.translate('xpack.boost.profileDetails.dataStreamColumn', {
-              defaultMessage: 'Data stream',
-            }),
-      sortable: true,
-    },
-    {
-      name: i18n.translate('xpack.boost.profileDetails.appliedByColumn', {
-        defaultMessage: 'Applied by rule',
-      }),
-      render: ({ name: dataSourceName }: BoostDataSource) => {
-        const rule = appliedRules.get(dataSourceName);
-        return rule && <DetailsLink kind="rule" name={rule.name} />;
-      },
-    },
-    {
-      field: 'size_in_bytes',
-      name: i18n.translate('xpack.boost.profileDetails.storageSizeColumn', {
-        defaultMessage: 'Storage size',
-      }),
-      width: '9em',
-      sortable: true,
-      dataType: 'number',
-      render: formatSize,
+      width: '12em',
+      render: (appliesTo: number) =>
+        appliesTo > 0 ? (
+          formatDataSourceCount(profile.type, appliesTo)
+        ) : (
+          <EuiTextColor color={euiTheme.colors.textDisabled}>
+            {formatDataSourceCount(profile.type, 0)}
+          </EuiTextColor>
+        ),
     },
   ];
 
@@ -297,12 +197,13 @@ export const ProfileDetailsPage = () => {
         // The same color as the badge in the profiles list.
         ...(profile.is_builtin ? [{ label: MANAGED_BADGE_LABEL, color: 'default' as const }] : []),
       ]}
-      // Elastic-managed profiles can't change, so they can only be copied.
+      // Elastic-managed profiles can't change, so they can only be copied, which waits in the menu
+      // as it does for other profiles.
       menu={
         !canEdit
           ? undefined
           : profile.is_builtin
-          ? { primaryActionItem: duplicateItem }
+          ? { items: [{ ...duplicateItem, overflow: true }] }
           : {
               primaryActionItem: {
                 id: 'edit',
@@ -344,7 +245,7 @@ export const ProfileDetailsPage = () => {
             {profile.type === 'indices' ? (
               <IndicesSettings profile={profile} />
             ) : (
-              <DataStreamsSettings profile={profile} />
+              <PhaseCards profile={profile} />
             )}
           </DetailsSection>
         }
@@ -373,6 +274,10 @@ export const ProfileDetailsPage = () => {
                 {
                   title: i18n.translate('xpack.boost.profileDetails.appliesTo', {
                     defaultMessage: 'Applies to',
+                  }),
+                  tip: i18n.translate('xpack.boost.profileDetails.appliesToTip', {
+                    defaultMessage:
+                      'What the rules using this profile match, less any that higher-ranked rules apply other profiles to.',
                   }),
                   description: formatDataSourceCount(profile.type, usedBy.length),
                 },
@@ -432,82 +337,82 @@ export const ProfileDetailsPage = () => {
         </DetailsBand>
       )}
 
-      <DetailsBand>
-        <DetailsSection
-          title={i18n.translate('xpack.boost.profileDetails.rulesTitle', {
-            defaultMessage: 'Boost rules using this profile',
-          })}
-          titleAppend={
-            canEdit && (
-              <EuiButton
-                size="s"
-                onClick={() => setFlyout('createRule')}
-                data-test-subj="boostProfileDetailsCreateRule"
-              >
-                {i18n.translate('xpack.boost.profileDetails.createRule', {
-                  defaultMessage: 'Create boost rule',
+      {/* Until a rule uses the profile, there are no rules to list, just a way to start. */}
+      {profileRules.length === 0 ? (
+        <DetailsBand hasDivider={false}>
+          <EuiEmptyPrompt
+            titleSize="xs"
+            title={
+              <h2>
+                {i18n.translate('xpack.boost.profileDetails.unusedTitle', {
+                  defaultMessage: "This profile isn't in use",
                 })}
-              </EuiButton>
-            )
-          }
-          data-test-subj="boostProfileRules"
-        >
-          <EuiInMemoryTable
-            tableCaption={i18n.translate('xpack.boost.profileDetails.rulesCaption', {
+              </h2>
+            }
+            body={
+              <p>
+                {profile.type === 'indices'
+                  ? i18n.translate('xpack.boost.profileDetails.unusedIndicesBody', {
+                      defaultMessage:
+                        'No boost rules use it yet. Create one to boost indices with this profile.',
+                    })
+                  : i18n.translate('xpack.boost.profileDetails.unusedDataStreamsBody', {
+                      defaultMessage:
+                        'No boost rules use it yet. Create one to boost data streams with this profile.',
+                    })}
+              </p>
+            }
+            actions={
+              canEdit && (
+                <EuiButton
+                  fill
+                  onClick={() => setFlyout('createRule')}
+                  data-test-subj="boostProfileDetailsCreateRule"
+                >
+                  {i18n.translate('xpack.boost.profileDetails.createRule', {
+                    defaultMessage: 'Create boost rule',
+                  })}
+                </EuiButton>
+              )
+            }
+            data-test-subj="boostProfileUnused"
+          />
+        </DetailsBand>
+      ) : (
+        <DetailsBand hasDivider={false}>
+          <DetailsSection
+            title={i18n.translate('xpack.boost.profileDetails.rulesTitle', {
               defaultMessage: 'Boost rules using this profile',
             })}
-            items={profileRules}
-            columns={rulesColumns}
-            pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
-            noItemsMessage={i18n.translate('xpack.boost.profileDetails.noRules', {
-              defaultMessage: 'No boost rules use this profile yet.',
-            })}
-          />
-        </DetailsSection>
-      </DetailsBand>
-
-      <DetailsBand hasDivider={false}>
-        <DetailsSection
-          title={
-            profile.type === 'indices'
-              ? i18n.translate('xpack.boost.profileDetails.indicesTitle', {
-                  defaultMessage: 'Indices using this profile',
-                })
-              : i18n.translate('xpack.boost.profileDetails.dataStreamsTitle', {
-                  defaultMessage: 'Data streams using this profile',
-                })
-          }
-          data-test-subj="boostProfileUsedBy"
-        >
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.boost.profileDetails.usedByDescription', {
-                defaultMessage:
-                  'Where a rule using this profile ranks highest among the rules that match.',
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiInMemoryTable
-            tableCaption={i18n.translate('xpack.boost.profileDetails.usedByCaption', {
-              defaultMessage: 'Indices or data streams using this profile',
-            })}
-            items={usedBy}
-            columns={usedByColumns}
-            sorting={{ sort: { field: 'name', direction: 'asc' } }}
-            pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
-            noItemsMessage={
-              profile.type === 'indices'
-                ? i18n.translate('xpack.boost.profileDetails.noIndices', {
-                    defaultMessage: 'No indices use this profile.',
-                  })
-                : i18n.translate('xpack.boost.profileDetails.noDataStreams', {
-                    defaultMessage: 'No data streams use this profile.',
-                  })
+            titleAppend={
+              canEdit && (
+                <EuiButton
+                  size="s"
+                  onClick={() => setFlyout('createRule')}
+                  data-test-subj="boostProfileDetailsCreateRule"
+                >
+                  {i18n.translate('xpack.boost.profileDetails.createRule', {
+                    defaultMessage: 'Create boost rule',
+                  })}
+                </EuiButton>
+              )
             }
-          />
-        </DetailsSection>
-      </DetailsBand>
+            data-test-subj="boostProfileRules"
+          >
+            <EuiInMemoryTable
+              tableCaption={i18n.translate('xpack.boost.profileDetails.rulesCaption', {
+                defaultMessage: 'Boost rules using this profile',
+              })}
+              items={profileRules}
+              columns={rulesColumns}
+              pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+              noItemsMessage={i18n.translate('xpack.boost.profileDetails.noRules', {
+                defaultMessage: 'No boost rules use this profile yet.',
+              })}
+            />
+          </DetailsSection>
+        </DetailsBand>
+      )}
 
       {(flyout === 'edit' || flyout === 'duplicate') && (
         <ProfileFlyout
