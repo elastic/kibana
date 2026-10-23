@@ -28,10 +28,12 @@ import type {
   ContextEngineStartDependencies,
   DeleteWorkflowsApi,
   GetAiIndexDataReadServiceParams,
+  GetAiIndexMemoryWriteServiceParams,
 } from './types';
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerMemoryRoutes } from './routes/memories';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -39,6 +41,7 @@ import type {
 } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
+import { AiIndexMemoryWriteService } from './ai_indices/memory_write_service';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
@@ -75,6 +78,9 @@ export class ContextEnginePlugin
   private createAiIndexDataReadService?: (
     params: GetAiIndexDataReadServiceParams
   ) => AiIndexDataReadService;
+  private createAiIndexMemoryWriteService?: (
+    params: GetAiIndexMemoryWriteServiceParams
+  ) => AiIndexMemoryWriteService;
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
@@ -263,6 +269,16 @@ export class ContextEnginePlugin
         return startDeps.spaces;
       },
     });
+    registerMemoryRoutes({
+      router,
+      logger: this.logger.get('routes'),
+      getAiIndexMemoryWriteService: (params) => {
+        if (!this.createAiIndexMemoryWriteService) {
+          throw new Error('AI index memory write service not available — plugin has not started');
+        }
+        return this.createAiIndexMemoryWriteService(params);
+      },
+    });
 
     const isContextEngineEnabled = async (spaceId: string) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -408,6 +424,21 @@ export class ContextEnginePlugin
         },
       });
     const createAiIndexDataReadService = this.createAiIndexDataReadService;
+    this.createAiIndexMemoryWriteService = ({ esClient, request }) =>
+      new AiIndexMemoryWriteService({
+        esClient,
+        spaceId: resolveSpaceId(startDeps.spaces, request),
+        auditLogger: coreStart.security.audit.asScoped(request),
+        aiIndexService,
+        isMemoryEnabled: async () => {
+          const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+          const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+          return (
+            (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false
+          );
+        },
+      });
+    const createAiIndexMemoryWriteService = this.createAiIndexMemoryWriteService;
 
     // Installed as Kibana, with the cluster privilege it already holds. The index is left for the
     // first user write to create from it, so the store needs no grant on the internal user.
@@ -450,6 +481,7 @@ export class ContextEnginePlugin
         return this.aiIndexService;
       },
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
+      getAiIndexMemoryWriteService: (params) => createAiIndexMemoryWriteService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
     };

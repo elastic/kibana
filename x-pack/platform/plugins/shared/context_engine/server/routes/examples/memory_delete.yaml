@@ -1,0 +1,50 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          deleted:
+            value:
+              id: 98c33351-2504-49da-a390-89e59b30b27e
+  400:
+    content:
+      application/json:
+        examples:
+          invalid:
+            value: { statusCode: 400, error: Bad Request, message: "Document '98c33351-2504-49da-a390-89e59b30b27e' in AI index 'support' is not a memory." }
+  403:
+    content:
+      application/json:
+        examples:
+          forbidden:
+            value: { statusCode: 403, error: Forbidden, message: Elasticsearch denied the memory write. }
+  404:
+    content:
+      application/json:
+        examples:
+          missing:
+            value: { statusCode: 404, error: Not Found, message: "Memory '98c33351-2504-49da-a390-89e59b30b27e' was not found in AI index 'support'." }
+  409:
+    content:
+      application/json:
+        examples:
+          conflict:
+            value: { statusCode: 409, error: Conflict, message: The memory write conflicted with another operation. }
+  429:
+    content:
+      application/json:
+        examples:
+          throttled:
+            value: { statusCode: 429, error: Too Many Requests, message: Elasticsearch is temporarily unable to process the memory write. }
+  503:
+    content:
+      application/json:
+        examples:
+          unavailable:
+            value: { statusCode: 503, error: Service Unavailable, message: Elasticsearch is temporarily unavailable. }
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories/98c33351-2504-49da-a390-89e59b30b27e" \
+        -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
+        -H "kbn-xsrf: true"

@@ -25511,6 +25511,789 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/context_engine/ai_index/{aiIndexId}/memories:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}/memories</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a memory in a memory-enabled AI Index using the caller's destination write privileges. New memories expire after 90 days unless another expiry is supplied. If the destination index does not exist, Elasticsearch's normal auto-creation rules and the caller's create-index privileges apply. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; Memory documents are not space-stamped, so spaces that register the same destination share them. Returns 404 when Context Engine is turned off in the space or Memory is disabled.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+      operationId: create-context-engine-memory
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createMemoryRequest:
+                value:
+                  content: Use TO_DOUBLE(duration_ms) before numeric comparisons.
+                  description: duration_ms is mapped as a keyword.
+                  tags:
+                    - observability
+                    - esql
+                  title: Cast duration fields before comparison
+                  type: memory.session_fact
+            schema:
+              additionalProperties: false
+              properties:
+                content:
+                  description: Enough context to use the memory without re-deriving it.
+                  maxLength: 65536
+                  minLength: 1
+                  type: string
+                description:
+                  description: A concise summary of the memory and its immediate consequence.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                expires_at:
+                  description: ISO 8601 expiry timestamp. On create, omit to expire after 90 days. On revision, omit to preserve the existing expiry. Pass null for a non-expiring memory.
+                  format: date-time
+                  maxLength: 64
+                  minLength: 1
+                  nullable: true
+                  type: string
+                session_id:
+                  description: An opaque caller-chosen correlation ID, not an authorization boundary. On create, omit to generate an ID. On revision, omit to preserve the existing ID, generating one only when the memory has none.
+                  maxLength: 512
+                  minLength: 1
+                  type: string
+                tags:
+                  description: Optional index names, feature areas, or tools associated with the memory. On revision, omit to preserve existing tags or pass an empty array to clear them.
+                  items:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  type: array
+                title:
+                  description: A short label for the memory.
+                  maxLength: 512
+                  minLength: 1
+                  type: string
+                type:
+                  description: Use memory.session_fact for a granular fact or memory.session for a session synthesis.
+                  enum:
+                    - memory.session
+                    - memory.session_fact
+                  type: string
+              required:
+                - type
+                - title
+                - description
+                - content
+              type: object
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                created:
+                  value:
+                    id: 98c33351-2504-49da-a390-89e59b30b27e
+                    session_id: 73008bd7-f4e1-4052-a42c-e29483d06f47
+              schema:
+                additionalProperties: false
+                properties:
+                  id:
+                    description: The memory identifier.
+                    type: string
+                  session_id:
+                    description: The memory session identifier.
+                    type: string
+                required:
+                  - id
+                  - session_id
+                type: object
+          description: The memory was created.
+        '400':
+          content:
+            application/json:
+              examples:
+                disabled:
+                  value:
+                    error: Bad Request
+                    message: AI index 'support' does not have memory enabled.
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The memory cannot be written.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: Elasticsearch denied the memory write.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Elasticsearch denied the write.
+        '404':
+          content:
+            application/json:
+              examples:
+                missing:
+                  value:
+                    error: Not Found
+                    message: Context Engine memory is not enabled.
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The AI Index was not found, Context Engine is turned off, or Memory is disabled.
+        '409':
+          content:
+            application/json:
+              examples:
+                conflict:
+                  value:
+                    error: Conflict
+                    message: The memory write conflicted with another operation.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The memory write conflicted.
+        '429':
+          content:
+            application/json:
+              examples:
+                throttled:
+                  value:
+                    error: Too Many Requests
+                    message: Elasticsearch is temporarily unable to process the memory write.
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Too many requests.
+        '503':
+          content:
+            application/json:
+              examples:
+                unavailable:
+                  value:
+                    error: Service Unavailable
+                    message: Elasticsearch is temporarily unavailable.
+                    statusCode: 503
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Elasticsearch is unavailable.
+      summary: Create a memory
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories" \
+              -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
+              -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+              -d '{
+                "type": "memory.session_fact",
+                "title": "Cast duration fields before comparison",
+                "description": "duration_ms is mapped as a keyword.",
+                "content": "Use TO_DOUBLE(duration_ms) before numeric comparisons.",
+                "tags": ["observability", "esql"]
+              }'
+      x-state: Experimental; added in 9.6.0
+  /api/context_engine/ai_index/{aiIndexId}/memories/{memoryId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}/memories/{memoryId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Deleting an already-deleted memory succeeds without writing another revision. Subsequent revision attempts return a conflict. Concurrent operations on the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; Memory documents are not space-stamped, so spaces that register the same destination share them. Returns 404 when Context Engine is turned off in the space or Memory is disabled.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+      operationId: delete-context-engine-memory
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+        - description: The memory identifier.
+          in: path
+          name: memoryId
+          required: true
+          schema:
+            maxLength: 512
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleted:
+                  value:
+                    id: 98c33351-2504-49da-a390-89e59b30b27e
+              schema:
+                additionalProperties: false
+                properties:
+                  id:
+                    description: The tombstoned memory identifier.
+                    type: string
+                required:
+                  - id
+                type: object
+          description: The memory was tombstoned or was already tombstoned.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalid:
+                  value:
+                    error: Bad Request
+                    message: Document '98c33351-2504-49da-a390-89e59b30b27e' in AI index 'support' is not a memory.
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The memory cannot be deleted.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: Elasticsearch denied the memory write.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Elasticsearch denied the write.
+        '404':
+          content:
+            application/json:
+              examples:
+                missing:
+                  value:
+                    error: Not Found
+                    message: Memory '98c33351-2504-49da-a390-89e59b30b27e' was not found in AI index 'support'.
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The AI Index or memory was not found, Context Engine is turned off, or Memory is disabled.
+        '409':
+          content:
+            application/json:
+              examples:
+                conflict:
+                  value:
+                    error: Conflict
+                    message: The memory write conflicted with another operation.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The memory write conflicted.
+        '429':
+          content:
+            application/json:
+              examples:
+                throttled:
+                  value:
+                    error: Too Many Requests
+                    message: Elasticsearch is temporarily unable to process the memory write.
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Too many requests.
+        '503':
+          content:
+            application/json:
+              examples:
+                unavailable:
+                  value:
+                    error: Service Unavailable
+                    message: Elasticsearch is temporarily unavailable.
+                    statusCode: 503
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Elasticsearch is unavailable.
+      summary: Delete a memory
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories/98c33351-2504-49da-a390-89e59b30b27e" \
+              -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
+              -H "kbn-xsrf: true"
+      x-state: Experimental; added in 9.6.0
+    patch:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/ai_index/{aiIndexId}/memories/{memoryId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Writes a partial revision using the caller's destination read and write privileges. Supply at least one memory field. Omitted fields are preserved, and a supplied type must match the existing memory. Concurrent revisions of the same data-stream-backed memory are unsupported. The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; Memory documents are not space-stamped, so spaces that register the same destination share them. Returns 404 when Context Engine is turned off in the space or Memory is disabled.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+      operationId: revise-context-engine-memory
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the AI Index.
+          in: path
+          name: aiIndexId
+          required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+        - description: The memory identifier.
+          in: path
+          name: memoryId
+          required: true
+          schema:
+            maxLength: 512
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              reviseMemoryRequest:
+                value:
+                  content: Use TO_DOUBLE(duration_ms) before numeric comparisons.
+            schema:
+              additionalProperties: false
+              properties:
+                content:
+                  description: Enough context to use the memory without re-deriving it.
+                  maxLength: 65536
+                  minLength: 1
+                  type: string
+                description:
+                  description: A concise summary of the memory and its immediate consequence.
+                  maxLength: 2048
+                  minLength: 1
+                  type: string
+                expires_at:
+                  description: ISO 8601 expiry timestamp. On create, omit to expire after 90 days. On revision, omit to preserve the existing expiry. Pass null for a non-expiring memory.
+                  format: date-time
+                  maxLength: 64
+                  minLength: 1
+                  nullable: true
+                  type: string
+                session_id:
+                  description: An opaque caller-chosen correlation ID, not an authorization boundary. On create, omit to generate an ID. On revision, omit to preserve the existing ID, generating one only when the memory has none.
+                  maxLength: 512
+                  minLength: 1
+                  type: string
+                tags:
+                  description: Optional index names, feature areas, or tools associated with the memory. On revision, omit to preserve existing tags or pass an empty array to clear them.
+                  items:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  type: array
+                title:
+                  description: A short label for the memory.
+                  maxLength: 512
+                  minLength: 1
+                  type: string
+                type:
+                  description: Use memory.session_fact for a granular fact or memory.session for a session synthesis.
+                  enum:
+                    - memory.session
+                    - memory.session_fact
+                  type: string
+              type: object
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                revised:
+                  value:
+                    id: 98c33351-2504-49da-a390-89e59b30b27e
+                    session_id: 73008bd7-f4e1-4052-a42c-e29483d06f47
+              schema:
+                additionalProperties: false
+                properties:
+                  id:
+                    description: The memory identifier.
+                    type: string
+                  session_id:
+                    description: The memory session identifier.
+                    type: string
+                required:
+                  - id
+                  - session_id
+                type: object
+          description: The memory was revised.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalid:
+                  value:
+                    error: Bad Request
+                    message: Document '98c33351-2504-49da-a390-89e59b30b27e' in AI index 'support' is not a memory.
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The memory cannot be written.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: Elasticsearch denied the memory write.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Elasticsearch denied the write.
+        '404':
+          content:
+            application/json:
+              examples:
+                missing:
+                  value:
+                    error: Not Found
+                    message: Memory '98c33351-2504-49da-a390-89e59b30b27e' was not found in AI index 'support'.
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The AI Index or memory was not found, Context Engine is turned off, or Memory is disabled.
+        '409':
+          content:
+            application/json:
+              examples:
+                conflict:
+                  value:
+                    error: Conflict
+                    message: Memory '98c33351-2504-49da-a390-89e59b30b27e' was deleted and cannot be revised.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: The memory write conflicted.
+        '429':
+          content:
+            application/json:
+              examples:
+                throttled:
+                  value:
+                    error: Too Many Requests
+                    message: Elasticsearch is temporarily unable to process the memory write.
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Too many requests.
+        '503':
+          content:
+            application/json:
+              examples:
+                unavailable:
+                  value:
+                    error: Service Unavailable
+                    message: Elasticsearch is temporarily unavailable.
+                    statusCode: 503
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+                type: object
+          description: Elasticsearch is unavailable.
+      summary: Revise a memory
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PATCH "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories/98c33351-2504-49da-a390-89e59b30b27e" \
+              -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
+              -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+              -d '{
+                "content": "Use TO_DOUBLE(duration_ms) before numeric comparisons."
+              }'
+      x-state: Experimental; added in 9.6.0
   /api/dashboards:
     get:
       tags:

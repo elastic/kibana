@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-interface MemoryReference {
+import type { KiLifecycleStatus } from '../../common/step_types/ki';
+
+export interface MemoryReference {
   uri: string;
   relation?: string;
   description?: string;
 }
 
-interface MemoryWriter {
+export interface MemoryWriter {
   uri: string;
   metadata: Record<string, string | number>;
 }
 
-type MemoryLifecycleStatus = 'active' | 'deleted';
-
-interface MemoryGovernance {
+export interface MemoryGovernance {
   provenance?: {
     created_by?: MemoryWriter;
     updated_by?: MemoryWriter;
   };
   lifecycle?: {
-    status?: MemoryLifecycleStatus;
+    status?: KiLifecycleStatus;
   };
 }
 
@@ -44,15 +44,15 @@ export interface StoredMemoryDocument {
 }
 
 export const createMemoryWriter = ({
-  toolId,
+  source,
   runId,
   agentId,
 }: {
-  toolId: string;
+  source: string;
   runId: string;
   agentId?: string;
 }): MemoryWriter => ({
-  uri: `tool://${toolId}`,
+  uri: source,
   metadata: {
     run_id: runId,
     ...(agentId !== undefined && { agent_id: agentId }),
@@ -78,7 +78,7 @@ export const createConversationReferences = (
 export const updateMemoryProvenance = (
   governance: MemoryGovernance | undefined,
   writer: MemoryWriter,
-  recordCreation: boolean
+  { recordCreation }: { recordCreation: boolean }
 ): MemoryGovernance => ({
   ...governance,
   provenance: {

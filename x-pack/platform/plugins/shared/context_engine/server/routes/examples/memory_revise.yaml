@@ -1,0 +1,65 @@
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          expires_at:
+            format: date-time
+      examples:
+        reviseMemoryRequest:
+          value:
+            content: Use TO_DOUBLE(duration_ms) before numeric comparisons.
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          revised:
+            value:
+              id: 98c33351-2504-49da-a390-89e59b30b27e
+              session_id: 73008bd7-f4e1-4052-a42c-e29483d06f47
+  400:
+    content:
+      application/json:
+        examples:
+          invalid:
+            value: { statusCode: 400, error: Bad Request, message: "Document '98c33351-2504-49da-a390-89e59b30b27e' in AI index 'support' is not a memory." }
+  403:
+    content:
+      application/json:
+        examples:
+          forbidden:
+            value: { statusCode: 403, error: Forbidden, message: Elasticsearch denied the memory write. }
+  404:
+    content:
+      application/json:
+        examples:
+          missing:
+            value: { statusCode: 404, error: Not Found, message: "Memory '98c33351-2504-49da-a390-89e59b30b27e' was not found in AI index 'support'." }
+  409:
+    content:
+      application/json:
+        examples:
+          conflict:
+            value: { statusCode: 409, error: Conflict, message: "Memory '98c33351-2504-49da-a390-89e59b30b27e' was deleted and cannot be revised." }
+  429:
+    content:
+      application/json:
+        examples:
+          throttled:
+            value: { statusCode: 429, error: Too Many Requests, message: Elasticsearch is temporarily unable to process the memory write. }
+  503:
+    content:
+      application/json:
+        examples:
+          unavailable:
+            value: { statusCode: 503, error: Service Unavailable, message: Elasticsearch is temporarily unavailable. }
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X PATCH "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories/98c33351-2504-49da-a390-89e59b30b27e" \
+        -H "Authorization: ApiKey ${API_KEY}" -H "elastic-api-version: 2023-10-31" \
+        -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+        -d '{
+          "content": "Use TO_DOUBLE(duration_ms) before numeric comparisons."
+        }'
