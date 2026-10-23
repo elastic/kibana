@@ -243,8 +243,8 @@ export const CollectStep: React.FC<{
                 description={pkg.description ?? ''}
                 badge={pkg.isDefault ? 'Recommended' : undefined}
                 checked={pkg.selected}
-                // At least one package stays selected.
-                disabled={pkg.selected && selectedPackages.length === 1}
+                // At least one package stays selected: unchecking the last one is a no-op
+                // (wizard state), not a disabled card - that greyed out its data streams too.
                 onChange={() => props.onPackageToggle(pkg.packageName, !pkg.selected)}
                 data-test-subj={`groupWizardPackage-${pkg.packageName}`}
               >

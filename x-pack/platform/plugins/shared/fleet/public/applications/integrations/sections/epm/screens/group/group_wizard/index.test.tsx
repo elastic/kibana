@@ -261,7 +261,7 @@ describe('GroupOnboardingWizard', () => {
     expect(
       within(result.getByTestId('groupWizardSchema-prometheus')).getByRole('radio')
     ).toBeDisabled();
-    // Default member checked (and can't be the last one unchecked), the other opt-in
+    // Default member checked, the other opt-in
     await waitFor(() =>
       expect(
         within(result.getByTestId('groupWizardPackage-nginx')).getAllByRole('checkbox').length
@@ -270,7 +270,10 @@ describe('GroupOnboardingWizard', () => {
     const nginxCard = result.getByTestId('groupWizardPackage-nginx');
     const apacheCard = result.getByTestId('groupWizardPackage-apache');
     expect(within(nginxCard).getAllByRole('checkbox')[0]).toBeChecked();
-    expect(within(nginxCard).getAllByRole('checkbox')[0]).toBeDisabled();
+    expect(within(nginxCard).getAllByRole('checkbox')[0]).not.toBeDisabled();
+    // Unchecking the only selected package is a no-op
+    click(within(nginxCard).getAllByRole('checkbox')[0]);
+    expect(within(nginxCard).getAllByRole('checkbox')[0]).toBeChecked();
     expect(within(apacheCard).getAllByRole('checkbox')).toHaveLength(1);
     click(within(apacheCard).getAllByRole('checkbox')[0]);
     await waitFor(() =>
