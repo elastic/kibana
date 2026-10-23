@@ -97,7 +97,7 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
 }
 
 // Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
-const SML_LINK_PATTERN = /\]\(sml:\/\/([^)?\s]+)/g;
+const SML_LINK_PATTERN = /\[((?:\\.|[^\]\\])+)\]\(sml:\/\/([^)?\s]+)/g;
 
 export const createAgentExecutionService = (
   deps: AgentExecutionServiceDeps
@@ -975,11 +975,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /** The items linked in the message that can be attached, as by-reference attachment inputs. */
   private getReferencedAttachments(message: string | undefined): AttachmentInput[] {
     const inputs = new Map<string, AttachmentInput>();
-    for (const [, encodedId] of (message ?? '').matchAll(SML_LINK_PATTERN)) {
+    for (const [, label, encodedId] of (message ?? '').matchAll(SML_LINK_PATTERN)) {
       const entry = parseSmlEntryId(decodeSmlLinkId(encodedId));
       const type = entry && this.deps.getSmlTypeDefinition(entry.type)?.attachmentType;
-      if (entry && type) {
-        inputs.set(`${type}:${entry.originId}`, { type, origin: entry.originId });
+      const key = entry && `${type}:${entry.originId}`;
+      if (entry && type && key && !inputs.has(key)) {
+        // The label, without its trigger, tells the agent which attachment a link in the message is.
+        const description = label.replace(/\\([\\[\]])/g, '$1').replace(/^[#@]/, '');
+        inputs.set(key, { type, origin: entry.originId, description });
       }
     }
     return Array.from(inputs.values());

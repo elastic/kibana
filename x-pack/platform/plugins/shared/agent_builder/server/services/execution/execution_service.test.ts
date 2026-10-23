@@ -466,8 +466,8 @@ describe('AgentExecutionService', () => {
         );
 
         expect(validated()).toEqual([
-          { type: 'dashboard-attachment', origin: 'dash-1' },
-          { type: 'dashboard-attachment', origin: 'dash-2' },
+          { type: 'dashboard-attachment', origin: 'dash-1', description: 'dashboard/Sales' },
+          { type: 'dashboard-attachment', origin: 'dash-2', description: 'x' },
         ]);
       });
 
@@ -478,7 +478,7 @@ describe('AgentExecutionService', () => {
 
         expect(validated()).toEqual([
           attachment,
-          { type: 'dashboard-attachment', origin: 'dash-1' },
+          { type: 'dashboard-attachment', origin: 'dash-1', description: 'a' },
         ]);
       });
 

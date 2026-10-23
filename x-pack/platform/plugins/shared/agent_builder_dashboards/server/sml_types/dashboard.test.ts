@@ -373,8 +373,10 @@ describe('dashboardSmlType', () => {
         type: 'dashboard',
         fields: ['title'],
         perPage: 5,
+        sort: [{ field: 'updated_at', order: 'desc' }],
         search: 'sal*',
         searchFields: ['title'],
+        defaultSearchOperator: 'AND',
       });
       expect(results).toEqual([
         { originId: 'dash-1', title: 'Sales overview' },

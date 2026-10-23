@@ -84,7 +84,10 @@ export const visualizationSmlType: SmlTypeDefinition = {
       type: 'lens',
       fields: ['title'],
       perPage: size,
-      ...(term ? { search: `${term}*`, searchFields: ['title'] } : {}),
+      sort: [{ field: 'updated_at', order: 'desc' }],
+      ...(term
+        ? { search: `${term}*`, searchFields: ['title'], defaultSearchOperator: 'AND' as const }
+        : {}),
     });
     return visualizations.map(({ id, attributes }) => ({
       originId: id,

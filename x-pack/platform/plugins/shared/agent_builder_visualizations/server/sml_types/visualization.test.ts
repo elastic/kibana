@@ -466,8 +466,10 @@ describe('visualizationSmlType', () => {
         type: 'lens',
         fields: ['title'],
         perPage: 5,
+        sort: [{ field: 'updated_at', order: 'desc' }],
         search: 'cpu*',
         searchFields: ['title'],
+        defaultSearchOperator: 'AND',
       });
     });
   });

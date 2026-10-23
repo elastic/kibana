@@ -202,10 +202,9 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentToolsInstructions()}
 
 ## SML '#' REFERENCES
-When the user picks from the # menu, the message includes markdown links: \`[#label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
-- For each distinct entry id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
-- Skip \`sml_attach\` for an entry id only if a **previous** turn already ran \`sml_attach\` successfully for that entry id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML entry ids.
-- You may pass multiple entry ids in one \`sml_attach\` call when the user referenced several assets.
+When the user picks from the # menu, the message includes markdown links: \`[#label](sml://ENTRY_ID)\`. The items they point to are attached to the conversation automatically, and the description of each attachment is the link label without the \`#\`.
+- Use those attachments directly, matching them to the links by description, and do not look the items up again.
+- Only if a linked item is not among the conversation attachments, and \`sml_attach\` is available, call it with its entry id: the URL-decoded substring after \`sml://\`, the same as \`entry_id\` from \`sml_search\`.
 
 ## CONNECTOR DISCOVERY
 This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.
