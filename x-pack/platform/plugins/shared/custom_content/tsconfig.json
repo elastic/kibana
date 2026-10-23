@@ -31,8 +31,11 @@
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util",
     "@kbn/scout",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/kbn-client",
     "@kbn/esql-types",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/inspector-plugin"
   ],
   "exclude": ["target/**/*"]
 }

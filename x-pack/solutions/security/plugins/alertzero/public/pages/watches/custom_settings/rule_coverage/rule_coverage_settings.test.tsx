@@ -26,6 +26,7 @@ const ruleCoverage: Worker = {
   state: 'ok',
   settingsRevision: 1,
   workflowId: `${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}-default`,
+  blockingReasons: [],
   settings: {
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
     autonomy: 'manual',
@@ -77,18 +78,19 @@ describe('RuleCoverageSettings', () => {
   });
 
   it.each(FIELDS)(
-    'hands back the complete extras object when a valid $fieldName is committed on blur',
+    'hands back the complete extras object as soon as a valid $fieldName is typed',
     ({ testSubj, valid, key }) => {
       const onExtrasChange = jest.fn();
       renderSettings(onExtrasChange);
       const field = screen.getByTestId(testSubj);
 
       fireEvent.change(field, { target: { value: String(valid) } });
-      expect(onExtrasChange).not.toHaveBeenCalled();
+      expect(onExtrasChange).toHaveBeenLastCalledWith({ ...SAVED_EXTRAS, [key]: valid });
+
+      // Blurring afterwards still leaves the complete object as the last thing handed back.
       fireEvent.blur(field);
 
-      expect(onExtrasChange).toHaveBeenCalledTimes(1);
-      expect(onExtrasChange).toHaveBeenCalledWith({ ...SAVED_EXTRAS, [key]: valid });
+      expect(onExtrasChange).toHaveBeenLastCalledWith({ ...SAVED_EXTRAS, [key]: valid });
     }
   );
 

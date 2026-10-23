@@ -1,7 +1,7 @@
 # @kbn/lint-cli
 
 CLI that wraps [oxlint](https://oxc.rs/docs/guide/usage/linter.html) for use within the Kibana repo.
-Rules are loaded from `.oxlintrc.json` at the repo root.
+Rules are loaded from `oxlint.config.mjs` at the repo root, which re-exports the typed config in `.oxlint/index.mts`.
 
 ## Usage
 
@@ -9,7 +9,7 @@ Rules are loaded from `.oxlintrc.json` at the repo root.
 node scripts/lint [paths...] [--fix] [--watch]
 ```
 
-- `paths` — optional list of paths to lint; defaults to the whole repo
+- `paths` — optional list of paths to lint; defaults to the whole repo. A whole-repo run (without `--watch`) is split across several oxlint processes, because JS plugin rules run on a single thread per process; each process's output is printed as one block.
 - `--fix` / `-f` — auto-fix violations where oxlint supports it
 - `--watch` / `-w` — re-lint on every save; scoped to `paths` when provided
 

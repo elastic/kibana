@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 
@@ -39,11 +39,7 @@ export const Main: FunctionComponent = () => {
   const history = useHistory();
   const { pathname } = useLocation();
 
-  const {
-    items: dataSources,
-    hasLoaded: hasLoadedDataSources,
-    reload: reloadDataSources,
-  } = useLoadList<DataSource>(
+  const { items: dataSources, reload: reloadDataSources } = useLoadList<DataSource>(
     useCallback(async () => await dataSourcesClient.get(), [dataSourcesClient])
   );
 
@@ -59,30 +55,8 @@ export const Main: FunctionComponent = () => {
   const selectedTabId = useMemo<'datasets' | 'data_sources'>(() => {
     return pathname.startsWith(DATA_SOURCES_PATH) ? 'data_sources' : 'datasets';
   }, [pathname]);
-  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
-
-  useEffect(() => {
-    if (isWizardPath || hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
-      return;
-    }
-
-    if (dataSources.length === 0 && dataSets.length === 0 && selectedTabId !== 'data_sources') {
-      history.replace(DATA_SOURCES_PATH);
-    }
-  }, [
-    dataSets.length,
-    history,
-    hasLoadedDataSets,
-    hasLoadedDataSources,
-    hasUserSelectedTab,
-    dataSources.length,
-    isWizardPath,
-    selectedTabId,
-  ]);
-
   const onTabClick = useCallback(
     (id: 'datasets' | 'sources') => {
-      setHasUserSelectedTab(true);
       history.push(id === 'sources' ? DATA_SOURCES_PATH : DATASETS_PATH);
     },
     [history]

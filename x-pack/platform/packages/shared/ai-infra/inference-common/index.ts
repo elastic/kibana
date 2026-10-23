@@ -32,7 +32,10 @@ export {
   type ChatCompleteAPI,
   type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
+  type ChatCompleteTemplate,
+  parseTemplateJson,
   type ChatCompleteCompositeResponse,
+  chatCompletionReasoningEfforts,
   type ChatCompletionReasoning,
   type ChatCompletionReasoningEffort,
   type ChatCompletionTokenCountEvent,
@@ -64,18 +67,12 @@ export {
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
   type ChatCompleteAnonymizationMetadata,
-  type ChatCompleteAnonymizationTarget,
-  type AnonymizationRule,
-  type RegexAnonymizationRule,
-  type NamedEntityRecognitionRule,
   type AnonymizationEntity,
   type Anonymization,
   type Deanonymization,
   type AnonymizationOutput,
   type DeanonymizationOutput,
   type DeanonymizedMessage,
-  type AnonymizationSettings,
-  type AnonymizationEntityClass,
   type AnonymizationResponseMetadata,
   type DeanonymizedMessageData,
   type CustomToolChoice,
@@ -152,6 +149,9 @@ export {
   getModelDefinition,
   getContextWindowSize,
   contextWindowFromModelName,
+  getSupportedReasoningEffortLevels,
+  isTemplateRequiredConnector,
+  validateReasoningEffort,
   type InferenceConnector,
   type InferenceConnectorCapabilities,
   type RawConnector,
@@ -163,6 +163,7 @@ export {
   InferenceEndpointProvider,
   elasticModelIds,
   type EisInferenceEndpointMetadata,
+  type EisInferenceEndpointCapabilities,
   type CspRegion,
   type InferenceEndpointRequestBody,
 } from './src/inference_endpoints';
@@ -181,6 +182,8 @@ export {
   type ConfigProperties,
   type FieldsConfiguration,
   type InferenceProvider,
+  type InferenceServiceFeatures,
+  supportsNonStreamingChat,
 } from './src/inference_services_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
@@ -201,5 +204,3 @@ export {
 } from './src/prompt';
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
-
-export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';

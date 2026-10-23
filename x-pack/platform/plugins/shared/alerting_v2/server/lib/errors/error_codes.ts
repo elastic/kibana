@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  ALERT_ACTION_NO_OP_CODE,
+  INVALID_ALERT_STATE_TRANSITION_CODE,
+} from '@kbn/alerting-v2-schemas';
+
 /**
  * This file hosts two distinct catalogs:
  *
@@ -55,11 +60,13 @@ export const ALERTING_ERROR_CODES = {
   BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
   /**
    * A builder rule's query was changed without explicitly clearing
-   * `metadata.builder_type`. The transition to ES|QL mode must be explicit.
+   * `metadata.builder`. The transition to ES|QL mode must be explicit.
    */
   BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
+  /** Filter expression is not valid KQL. */
+  INVALID_FILTER_SYNTAX: 'INVALID_FILTER_SYNTAX',
   /** Filter expression referenced an unknown field. */
   INVALID_FILTER_FIELD: 'INVALID_FILTER_FIELD',
   /** Filter expression used an unsupported KQL function. */
@@ -123,29 +130,57 @@ export const ALERTING_ERROR_CODES = {
    * snoozing and deleting existing policies stay available.
    */
   ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
+  /**
+   * An action policy was written with a user-created Cloud API key (a raw `essu_`
+   * credential). Such a key has no key id and cannot be stored or used by the
+   * dispatcher, so create / update / upsert / API key rotation are rejected.
+   */
+  ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
-  /** No alert event matched the supplied `group_hash` (and `episode_id`). */
+  /**
+   * The supplied `series_id` is not a well-formed series identifier: not
+   * base64url, an unsupported version or an unparseable payload.
+   */
+  INVALID_SERIES_ID: 'INVALID_SERIES_ID',
+  /**
+   * No alert event matched the supplied `series_id` in the request's space
+   * (this includes a series id minted for another space).
+   */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
   /**
-   * No alert event matched the supplied `group_hash`. Bulk-only refinement of
-   * `ALERT_EVENT_NOT_FOUND` that pins the miss to the group (rather than a
-   * superseded episode) so a client can tell the two apart per item.
+   * No alert event matched the supplied `series_id` in the request's space.
+   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND` that pins the miss to the
+   * series (rather than a superseded episode) so a client can tell the two
+   * apart per item.
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
-   * No alert event matched the supplied `episode_id`. On the legacy bulk
-   * route it also covers a targeted `episode_id` superseded by a newer
+   * No alert event matched the supplied `alert_id`. On the legacy bulk
+   * route it also covers a targeted `alert_id` superseded by a newer
    * episode of the group.
    */
-  ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
+  ALERT_EPISODE_NOT_FOUND: 'ALERT_NOT_FOUND',
   /**
    * The episode exists but is not the latest episode of its series. Lifecycle
    * actions (`activate` / `deactivate`) only accept the latest episode.
    */
-  ALERT_EPISODE_NOT_LATEST: 'ALERT_EPISODE_NOT_LATEST',
-  /** The requested action is incompatible with the episode's current `episode.status`. */
-  INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
+  ALERT_EPISODE_NOT_LATEST: 'ALERT_NOT_LATEST',
+  /**
+   * The requested action is a no-op against the alert's current state machine:
+   * `activate` / `deactivate` of an alert already in that lifecycle state,
+   * `ack` / `unack` of an alert already on that side of acknowledgement, or
+   * `unsnooze` of a series with no snooze in effect.
+   */
+  INVALID_EPISODE_STATE_TRANSITION: INVALID_ALERT_STATE_TRANSITION_CODE,
+  /**
+   * The requested action would write the value the alert already carries —
+   * `assign` to the current assignee, `tag` with the current set, or `snooze`
+   * with the expiry of the snooze already in effect. Distinct
+   * from `INVALID_ALERT_STATE_TRANSITION` because no state machine is
+   * involved: the write is simply identical to what is already recorded.
+   */
+  ALERT_ACTION_NO_OP: ALERT_ACTION_NO_OP_CODE,
 
   // ──────────────────── Rule doctor insights ─────────────────
   /** A rule doctor insight with the given identifier does not exist. */
@@ -179,7 +214,7 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
  * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
  * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `MAINTENANCE_WINDOW_*`,
- * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`.
+ * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
@@ -190,14 +225,14 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
 export const ALERTING_LOG_CODES = {
   // ─────────────────────────────── Dispatcher steps ──────────────────────
   /**
-   * Hydrate episode data step: some episodes had no matching .rule-events row;
-   * data will be absent for those episodes
+   * Hydrate alert data step: some alerts had no matching .rule-events row;
+   * data will be absent for those alerts
    */
-  HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
-    'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
+  HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW:
+    'HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   /**
    * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
-   * limit, so rows past it were dropped. Episodes whose ack, snooze or
+   * limit, so rows past it were dropped. Alerts whose ack, snooze or
    * deactivate state was in the dropped rows may be dispatched.
    */
   FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED: 'FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED',
@@ -280,6 +315,11 @@ export const ALERTING_LOG_CODES = {
    */
   EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED: 'EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED',
   /**
+   * Releasing a per-space DI scope after an internal disable failed. The
+   * disable itself already succeeded; only the scope cleanup was lost.
+   */
+  INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED: 'INTERNAL_RULES_CLIENT_SCOPE_RELEASE_FAILED',
+  /**
    * The alert-action → workflow subscriber failed to emit a workflow event
    * for an alert-action domain event. The originating action already
    * succeeded; only the workflow fan-out for this event was lost.
@@ -310,6 +350,14 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+
+  // ───────────────────── Event-based telemetry (EBT) ─────────────────────
+  /**
+   * Core analytics refused an EBT event: the event type was not registered or,
+   * in dev mode, the payload did not match its schema. The operation that
+   * produced the event already succeeded; only the telemetry event was lost.
+   */
+  TELEMETRY_EBT_REPORT_FAILED: 'TELEMETRY_EBT_REPORT_FAILED',
 
   // ──────────────────────────── Dispatcher ───────────────────────────
   /**
@@ -359,12 +407,6 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
   /**
-   * The dispatcher has no persisted event watermark (cold start or wiped task
-   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
-   * Rule events older than that will not be dispatched.
-   */
-  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
-  /**
    * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
    * completed. The pipeline was aborted cooperatively; the returned watermark is
    * safe. This is expected under sustained high load — it is not an error.
@@ -373,7 +415,7 @@ export const ALERTING_LOG_CODES = {
   /**
    * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
    * The dispatcher will write terminal `unmatched` records for the blocking
-   * episodes (which will NOT be dispatched) and force-advance the watermark.
+   * alerts (which will NOT be dispatched) and force-advance the watermark.
    */
   DISPATCHER_WATERMARK_STUCK: 'DISPATCHER_WATERMARK_STUCK',
   /**
@@ -382,8 +424,8 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
   /**
-   * The escape hatch fired but no episodes were fetched for the window (the
-   * pipeline was aborted before or during FetchEpisodesStep, or the scan query
+   * The escape hatch fired but no alerts were fetched for the window (the
+   * pipeline was aborted before or during FetchAlertsStep, or the scan query
    * was rejected, e.g. `inline_stats_too_large`), and watermark lag is still
    * within one max scan window. The watermark is held; the stuck counter is
    * reset so the scan can recover without dropping the window. The message
@@ -391,16 +433,16 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
   /**
-   * The escape hatch fired with no fetched episodes and watermark lag already
+   * The escape hatch fired with no fetched alerts and watermark lag already
    * exceeds one max scan window. The window is force-advanced without knowing
-   * its episodes; unread events in that window are skipped so the dispatcher
+   * its alerts; unread events in that window are skipped so the dispatcher
    * cannot stall indefinitely. The message carries the tick's `halt_reason`.
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
     'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
   /**
    * The escape hatch attempted to write `unmatched` records but the bulkIndexDocs
-   * call failed. The watermark is held so episodes will be retried next tick.
+   * call failed. The watermark is held so alerts will be retried next tick.
    */
   DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
   /**
@@ -551,9 +593,14 @@ export const ALERTING_LOG_CODES = {
    * page; get maps it to not-found. Operator should investigate package drift.
    */
   RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
+  /**
+   * Counting the rules created from each listed template failed. Find returns the
+   * templates without `rule_count` instead of failing the whole listing.
+   */
+  RULE_TEMPLATE_RULE_COUNT_FAILED: 'RULE_TEMPLATE_RULE_COUNT_FAILED',
 
   // ─────────────────────────── Agent Builder ─────────────────────────
-  /** `refresh_episode` failed; tool returns an error result. */
+  /** `refresh_alert` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
   /** `get_rule` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
@@ -561,9 +608,9 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED',
   /** `get_rule_events` existence lookup (`get`) failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_LOOKUP_FAILED: 'AGENT_BUILDER_EPISODE_LOOKUP_FAILED',
-  /** Episode attachment resolve failed; returns undefined. */
+  /** Alert attachment resolve failed; returns undefined. */
   AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
-  /** Episode attachment isStale check failed; returns false. */
+  /** Alert attachment isStale check failed; returns false. */
   AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
   /** Rule attachment resolve failed; returns undefined. */
   AGENT_BUILDER_RULE_RESOLVE_FAILED: 'AGENT_BUILDER_RULE_RESOLVE_FAILED',
@@ -578,6 +625,9 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+  /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
+  AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED:
+    'AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED',
   /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 

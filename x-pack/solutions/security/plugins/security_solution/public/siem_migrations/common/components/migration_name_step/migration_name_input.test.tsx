@@ -84,4 +84,12 @@ describe('MigrationNameInput', () => {
 
     expect(document.activeElement).toBe(input);
   });
+
+  it('has an accessible name for assistive technology', () => {
+    render(<MigrationNameInput {...defaultProps} />);
+
+    expect(
+      screen.getByRole('textbox', { name: i18n.MIGRATION_NAME_INPUT_TITLE })
+    ).toBeInTheDocument();
+  });
 });

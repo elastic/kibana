@@ -91,9 +91,12 @@ export async function resumeSyncParentIfNeeded({
         );
         await delay(PARENT_WAKE_RETRY_DELAY_MS);
       } else {
-        logger.error(
+        // Fail-close may still recover (parent already running / active resume task).
+        // Keep this at warn so error only fire on unrecoverable outcomes.
+        logger.warn(
           `Failed to resume parent under its own identity after child completion ` +
-            `(parent=${parentExecId}, child=${childExecution.id}): ${reason}.`
+            `(parent=${parentExecId}, child=${childExecution.id}): ${reason}. ` +
+            `Attempting fail-close recovery.`
         );
       }
     }

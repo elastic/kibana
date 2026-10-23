@@ -23,7 +23,7 @@ import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../../common/constants';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
-import { useKiList } from '../../hooks/use_ki_list';
+import { useListKi } from '../../hooks/use_list_ki';
 import { useNavigation } from '../../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../../paths';
 
@@ -31,16 +31,12 @@ interface AiIndexManagedRowProps {
   aiIndex: AiIndexHttpItem;
 }
 
-const getManagedIntegratedViaLabel = () =>
-  i18n.translate('xpack.contextEngine.landing.managedRow.integratedVia.elastic', {
-    defaultMessage: 'Elastic (built-in)',
-  });
-
 export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
   const { navigateToContextEngine } = useNavigation();
-  const { summary, isLoading: isKiLoading } = useKiList({
+  const { summary, isLoading: isKiLoading } = useListKi({
     aiIndexId: aiIndex.id,
     size: KI_SUMMARY_PAGE_SIZE,
+    lifecycleStatus: ['active'],
   });
 
   const viewDetailsLabel = i18n.translate('xpack.contextEngine.landing.managedRow.viewDetails', {
@@ -61,7 +57,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
       })}
     >
       <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-        <EuiFlexItem css={{ minWidth: 0 }}>
+        <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
@@ -89,7 +85,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
             {aiIndex.description !== undefined && (
               <EuiFlexItem grow={false}>
                 <EuiText
-                  size="s"
+                  size="xs"
                   color="subdued"
                   data-test-subj="contextAiIndexManagedRowDescription"
                 >
@@ -100,7 +96,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false} css={{ width: 160 }}>
+        <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.contextEngine.landing.managedRow.knowledgeIndicatorsLabel"
@@ -109,18 +105,6 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
           </EuiText>
           <EuiText size="s" data-test-subj="contextAiIndexManagedRowKnowledgeIndicators">
             {isKiLoading ? '' : String(summary.total)}
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false} css={{ width: 160 }}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.contextEngine.landing.managedRow.integratedViaLabel"
-              defaultMessage="Integration"
-            />
-          </EuiText>
-          <EuiText size="s" data-test-subj="contextAiIndexManagedRowIntegratedVia">
-            {getManagedIntegratedViaLabel()}
           </EuiText>
         </EuiFlexItem>
 

@@ -36,8 +36,6 @@ import type {
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -54,6 +52,7 @@ import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BehaviorSubject } from 'rxjs';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import {
@@ -83,6 +82,7 @@ import { getGridRequestId } from '../../../../utils/get_grid_request_id';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
+  useCurrentDataSource,
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
@@ -158,6 +158,7 @@ function DiscoverDocumentsComponent({
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const currentDataSource = useCurrentDataSource();
   const isWarningCalloutDismissed = useCurrentTabSelector(
     (state) => state.isWarningCalloutDismissed
   );
@@ -328,13 +329,6 @@ function DiscoverDocumentsComponent({
     [uiSettings, query]
   );
 
-  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-    () =>
-      documentState.esqlQueryColumns
-        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
-        : undefined,
-    [documentState.esqlQueryColumns]
-  );
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const cellActionsMetadata = useAdditionalCellActions({
@@ -346,6 +340,21 @@ function DiscoverDocumentsComponent({
   });
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onOpenInNewTab = useCallback<NonNullable<UnifiedDataTableProps['onOpenInNewTab']>>(
+    ({ query: newQuery, filters: newFilters, dataViewId, timeRange, tabLabel }) =>
+      dispatch(
+        internalStateActions.openInNewTab({
+          tabLabel,
+          appState: {
+            query: newQuery,
+            filters: newFilters,
+            ...(dataViewId ? { dataSource: createDataViewDataSource({ dataViewId }) } : {}),
+          },
+          globalState: { timeRange },
+        })
+      ),
+    [dispatch]
+  );
   const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
     (queryOrUpdater) => {
       dispatch(updateESQLQuery({ queryOrUpdater }));
@@ -380,13 +389,23 @@ function DiscoverDocumentsComponent({
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   // Same ES|QL table the histogram uses, so Summary cells can fetch without waiting for the chart.
+  const {
+    result: documentsResult,
+    dataSource: documentsDataSource,
+    fetchStatus: documentsFetchStatus,
+    approximationApplied: documentsApproximationApplied,
+  } = documentState;
   const { table: esqlTable } = useMemo(
     () =>
       getEsqlDatatableFromDocuments({
-        documentsValue: documentState,
-        isEsqlMode,
+        documentsValue: {
+          result: documentsResult,
+          dataSource: documentsDataSource,
+          fetchStatus: documentsFetchStatus,
+          approximationApplied: documentsApproximationApplied,
+        },
       }),
-    [documentState, isEsqlMode]
+    [documentsResult, documentsDataSource, documentsFetchStatus, documentsApproximationApplied]
   );
   // New result identity after refresh - keeps sparkline cache from reusing a stale series.
   const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
@@ -502,11 +521,12 @@ function DiscoverDocumentsComponent({
   const latestCascadedDocumentsDataGridsUiState = useLatest(
     useCurrentTabSelector((tab) => tab.uiState.cascadedDocumentsDataGridMap)
   );
-  const {
-    availableCascadeGroups,
-    selectedCascadeGroups,
-    columnsMeta: cascadedColumnsMeta,
-  } = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
+  const cascadedLeafDataSource = useCurrentTabRuntimeState(
+    (runtimeState) => runtimeState.cascadedLeafDataSource$
+  );
+  const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
+    (tab) => tab.cascadedDocumentsState
+  );
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
@@ -526,7 +546,7 @@ function DiscoverDocumentsComponent({
       cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
-      cascadedColumnsMeta,
+      cascadedLeafDataSource,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
@@ -551,7 +571,7 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
-    cascadedColumnsMeta,
+    cascadedLeafDataSource,
     dispatch,
     esqlVariables,
     expandedDoc$,
@@ -601,9 +621,9 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
-            columnsMeta={columnsMeta}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
+            dataSource={currentDataSource}
             loadingState={
               isDataLoading
                 ? DataLoadingState.loading
@@ -619,6 +639,7 @@ function DiscoverDocumentsComponent({
             showTimeCol={showTimeCol}
             settings={grid}
             onFilter={onAddFilter as DocViewFilterFn}
+            onOpenInNewTab={onOpenInNewTab}
             onSetColumns={onSetColumns}
             onSort={onSort}
             onResize={onResizeDataGrid}
@@ -628,7 +649,6 @@ function DiscoverDocumentsComponent({
             rowHeightState={rowHeight}
             onUpdateRowHeight={onUpdateRowHeight}
             isSortEnabled={true}
-            isPlainRecord={isEsqlMode}
             isPaginationEnabled={!isEsqlMode}
             rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
             onUpdateRowsPerPage={onUpdateRowsPerPage}
@@ -659,6 +679,7 @@ function DiscoverDocumentsComponent({
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             query={query}
+            filters={filters}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"

@@ -33,21 +33,33 @@ const parseYaml = (content) => {
 module.exports = async ({ github, context }) => {
   const pr = context.payload.pull_request;
 
-  const [baseContent, headContent] = await Promise.all([
-    getContent({ github, context }, pr.base.sha, LIMITS_PATH),
-    getContent({ github, context }, pr.head.sha, LIMITS_PATH),
-  ]);
-
-  const baseMap = parseYaml(baseContent);
-  const headMap = parseYaml(headContent);
+  // The workflow runs on every push and base change, so check here whether the PR's diff
+  // against its current base touches the limits file. A retarget can drop it from the diff.
+  const files = await github.paginate(github.rest.pulls.listFiles, {
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: pr.number,
+    per_page: 100,
+  });
+  const touchesLimits = files.some(({ filename }) => filename === LIMITS_PATH);
 
   const bigIncreases = [];
-  for (const [plugin, headSize] of Object.entries(headMap)) {
-    const baseSize = baseMap[plugin];
-    if (baseSize != null && headSize > baseSize) {
-      const pct = (headSize - baseSize) / baseSize;
-      if (pct >= THRESHOLD) {
-        bigIncreases.push({ plugin, baseSize, headSize, pct });
+  if (touchesLimits) {
+    const [baseContent, headContent] = await Promise.all([
+      getContent({ github, context }, pr.base.sha, LIMITS_PATH),
+      getContent({ github, context }, pr.head.sha, LIMITS_PATH),
+    ]);
+
+    const baseMap = parseYaml(baseContent);
+    const headMap = parseYaml(headContent);
+
+    for (const [plugin, headSize] of Object.entries(headMap)) {
+      const baseSize = baseMap[plugin];
+      if (baseSize != null && headSize > baseSize) {
+        const pct = (headSize - baseSize) / baseSize;
+        if (pct >= THRESHOLD) {
+          bigIncreases.push({ plugin, baseSize, headSize, pct });
+        }
       }
     }
   }

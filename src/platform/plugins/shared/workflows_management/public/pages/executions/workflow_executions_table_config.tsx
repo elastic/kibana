@@ -46,31 +46,31 @@ export const WORKFLOW_EXECUTIONS_TABLE_COLUMN_SETTINGS: Record<
   WorkflowExecutionsGridColumnSettings
 > = {
   workflow: {
-    display: i18n.translate('workflowsManagement.executionsPage.column.workflow', {
+    display: i18n.translate('workflows.executionsPage.column.workflow', {
       defaultMessage: 'Workflow',
     }),
     isResizable: false,
   },
   tags: {
-    display: i18n.translate('workflowsManagement.executionsPage.column.tags', {
+    display: i18n.translate('workflows.executionsPage.column.tags', {
       defaultMessage: 'Tags',
     }),
     initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS,
   },
   triggers: {
-    display: i18n.translate('workflowsManagement.executionsPage.column.trigger', {
+    display: i18n.translate('workflows.executionsPage.column.trigger', {
       defaultMessage: 'Trigger',
     }),
     initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER,
   },
   startedAt: {
-    display: i18n.translate('workflowsManagement.executionsPage.column.started', {
+    display: i18n.translate('workflows.executionsPage.column.started', {
       defaultMessage: 'Started',
     }),
     initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED,
   },
   duration: {
-    display: i18n.translate('workflowsManagement.executionsPage.column.duration', {
+    display: i18n.translate('workflows.executionsPage.column.duration', {
       defaultMessage: 'Duration',
     }),
     initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION,

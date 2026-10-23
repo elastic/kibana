@@ -20,12 +20,14 @@ const setup = ({
   subscription = 'available',
   billingUrl,
   billingRejected = false,
+  serviceAccountsEnabled = true,
 }: {
   enabled?: boolean;
   canRead?: boolean;
   subscription?: SubscriptionAvailability;
   billingUrl?: string;
   billingRejected?: boolean;
+  serviceAccountsEnabled?: boolean;
 } = {}) => {
   const core = coreMock.createStart();
   const enabled$ = new BehaviorSubject(enabled);
@@ -58,7 +60,10 @@ const setup = ({
           proposals: {},
         }}
       >
-        <AccessBoundary availability$={availability$}>
+        <AccessBoundary
+          availability$={availability$}
+          serviceAccountsEnabled={serviceAccountsEnabled}
+        >
           <Content />
         </AccessBoundary>
       </KibanaContextProvider>
@@ -91,6 +96,12 @@ describe('AlertZero access boundary', () => {
     setup({ canRead: false, subscription: 'license' });
     expect(screen.getByText('Upgrade your license')).toBeInTheDocument();
     expect(screen.queryByText('Contact your administrator for access')).not.toBeInTheDocument();
+  });
+
+  it('shows the unavailable prompt when service accounts are disabled', () => {
+    const { contentMounted } = setup({ serviceAccountsEnabled: false });
+    expect(contentMounted).not.toHaveBeenCalled();
+    expect(screen.getByText('AlertZero is unavailable')).toBeInTheDocument();
   });
 
   it('allows other pages without Proposals privileges', () => {

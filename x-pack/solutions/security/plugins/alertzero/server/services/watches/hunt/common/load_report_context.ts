@@ -17,10 +17,23 @@ export interface ReportHuntContext {
   techniques: string[];
   text?: string;
   /**
+   * True when the enrich workflow has not finished with the report: its
+   * `lineage.extraction_method` is absent, blank or `pending`, so `extracted.*` is not
+   * written yet and a hunt would have nothing to search. `workflow_v4_rejected` is
+   * deliberately not pending: a rejected report has been through extraction and must
+   * retire.
+   */
+  extraction_pending: boolean;
+  /** Descriptive fields the Investigation narratives cite; absent when the report does not carry them. */
+  title?: string;
+  source_name?: string;
+  published_at?: string;
+  severity?: string;
+  /**
    * KEV-shaped vendor and product the report names, when the extraction found them.
-   * Scope resolution matches them against the datasets present in the space, so a report
-   * about a product no known technology covers can still find the indices that hold its
-   * telemetry. Only set when the stored value is a non-empty string.
+   * Scope resolution matches them against the datasets present in the hunt universe, so a
+   * report about any product can find the indices that hold its telemetry. Only set when
+   * the stored value is a non-empty string.
    */
   vendor?: string;
   product?: string;
@@ -43,7 +56,10 @@ export interface ReportHuntContext {
 }
 
 interface StoredReportSource {
-  content?: { body_text?: string };
+  content?: { title?: string; body_text?: string; published_at?: string };
+  source?: { name?: string };
+  lineage?: { extraction_method?: string };
+  severity?: { level?: string };
   extracted?: {
     iocs?: Array<{ type?: string; value?: string }>;
     ttps?: { techniques?: string[] };
@@ -76,6 +92,13 @@ const isSearchableIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc
 
 const isWithinIocValueBound = ({ value }: HuntIoc): boolean =>
   value.length <= MAX_HUNT_IOC_VALUE_CHARS;
+
+const MAX_REPORT_LABEL_CHARS = 512;
+
+const asLabel = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0
+    ? value.slice(0, MAX_REPORT_LABEL_CHARS)
+    : undefined;
 
 const isHuntTechnique = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= MAX_HUNT_TECHNIQUE_CHARS;
@@ -119,7 +142,12 @@ export const loadReportHuntContext = async ({
       },
     },
     _source: [
+      'content.published_at',
+      'content.title',
       'content.body_text',
+      'source.name',
+      'severity.level',
+      'lineage.extraction_method',
       'extracted.iocs',
       'extracted.ttps.techniques',
       'extracted.vulnerability.vendor',
@@ -169,7 +197,23 @@ export const loadReportHuntContext = async ({
       }),
   };
 
+  const title = asLabel(source.content?.title);
+  const sourceName = asLabel(source.source?.name);
+  // Publication date only. Ingest time is not a fallback: showing it as "Published" is the
+  // defect, and candidate selection keeps its own fallback for reports without a date.
+  const publishedAt = asLabel(source.content?.published_at);
+  const severity = asLabel(source.severity?.level);
+  const method =
+    typeof source.lineage?.extraction_method === 'string'
+      ? source.lineage.extraction_method.trim()
+      : '';
+  const extractionPending = method.length === 0 || method === 'pending';
   return {
+    extraction_pending: extractionPending,
+    ...(title !== undefined ? { title } : {}),
+    ...(sourceName !== undefined ? { source_name: sourceName } : {}),
+    ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),
+    ...(severity !== undefined ? { severity } : {}),
     iocs: mappableIocs.slice(0, MAX_HUNT_REPORT_IOCS).map(({ type, value }) => ({ type, value })),
     techniques: validTechniques.slice(0, MAX_HUNT_REPORT_TECHNIQUES),
     ...(text !== undefined ? { text } : {}),

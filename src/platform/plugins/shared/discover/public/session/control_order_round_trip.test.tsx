@@ -71,7 +71,6 @@ describe('control order after saving a Discover session', () => {
             column_order: [],
             hide_chart: true,
             hide_table: false,
-            chart_interval: 'auto',
             breakdown_field: '',
             control_panels: ['first', 'last'].map((id) => ({
               id,

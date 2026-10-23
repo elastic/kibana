@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { switchMap, from, firstValueFrom } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
@@ -46,7 +47,7 @@ import {
   resumeExecutionId,
   roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
-import type { ConversationClient } from '../../conversation';
+import type { ActivityContext, ConversationClient } from '../../conversation';
 import {
   roundToEvents,
   userMessageEvent,
@@ -135,6 +136,8 @@ export const persistUserMessage = async ({
   user,
   additionalEvents = [],
   attachments,
+  activity,
+  appendRefresh,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -148,6 +151,13 @@ export const persistUserMessage = async ({
   /** Attachment change events to store in the same write, after the message. */
   additionalEvents?: TimelineEvent[];
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Attribution of the `conversation_created` activity when this write creates the conversation. */
+  activity?: ActivityContext;
+  /**
+   * Refresh of the write onto an existing conversation. Creating one always refreshes: the
+   * origin lookup finds conversations by search.
+   */
+  appendRefresh?: Refresh;
 }): Promise<string> => {
   const event = userMessageEvent(
     {
@@ -170,22 +180,27 @@ export const persistUserMessage = async ({
     const hasResolvedParentUser =
       Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
     try {
-      await conversationClient.create({
-        id: conversation.id,
-        title: DEFAULT_CONVERSATION_TITLE,
-        agent_id: conversation.agent_id,
-        access_control: conversation.access_control,
-        origin: conversation.origin,
-        read_only: conversation.read_only,
-        rounds: [],
-        events,
-        // Nothing is stored yet, so the produced list needs no reconciliation.
-        ...(attachments ? { attachments: attachments.produced } : {}),
-        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-        ...(conversation.parent_conversation
-          ? { parent_conversation: conversation.parent_conversation }
-          : {}),
-      });
+      await conversationClient.create(
+        {
+          id: conversation.id,
+          title: DEFAULT_CONVERSATION_TITLE,
+          agent_id: conversation.agent_id,
+          access_control: conversation.access_control,
+          origin: conversation.origin,
+          read_only: conversation.read_only,
+          rounds: [],
+          events,
+          // Nothing is stored yet, so the produced list needs no reconciliation.
+          ...(attachments ? { attachments: attachments.produced } : {}),
+          ...(isPersistentSubagentCreate && hasResolvedParentUser
+            ? { user: conversation.user }
+            : {}),
+          ...(conversation.parent_conversation
+            ? { parent_conversation: conversation.parent_conversation }
+            : {}),
+        },
+        { source: 'execution', ...(activity ? { activity } : {}) }
+      );
       return event.id;
     } catch (error) {
       if (!isConversationAlreadyExistsError(error)) {
@@ -196,7 +211,11 @@ export const persistUserMessage = async ({
 
   await conversationClient.appendEvents(
     { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
-    { access: 'converse' }
+    {
+      access: 'converse',
+      source: 'execution',
+      ...(appendRefresh !== undefined ? { refresh: appendRefresh } : {}),
+    }
   );
 
   return event.id;
@@ -250,7 +269,7 @@ export const appendRoundTerminated$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, events, round };
@@ -376,7 +395,7 @@ export const appendResumeExecution$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, executionEvents, round, resumeIndex };
@@ -570,7 +589,7 @@ export const persistExecutionInterruption = async (
           ...workspaceUpdate,
           ...stateUpdate,
         },
-        { access: 'converse' }
+        { access: 'converse', source: 'execution' }
       );
       return writtenTerminals(persisted, executionEvents);
     }
@@ -615,7 +634,7 @@ export const persistExecutionInterruption = async (
         ...workspaceUpdate,
         ...stateUpdate,
       },
-      { access: 'converse' }
+      { access: 'converse', source: 'execution' }
     );
     return writtenTerminals(persisted, executionEvents);
   } catch (writeError) {
@@ -654,15 +673,6 @@ export const getConversation = async ({
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
-    const conversation = origin ? await conversationClient.getByOrigin(origin) : undefined;
-
-    if (conversation) {
-      return {
-        ...conversation,
-        operation: 'UPDATE',
-      };
-    }
-
     return {
       ...placeholderConversation({ agentId, accessControl, origin, readOnly }),
       operation: 'CREATE',

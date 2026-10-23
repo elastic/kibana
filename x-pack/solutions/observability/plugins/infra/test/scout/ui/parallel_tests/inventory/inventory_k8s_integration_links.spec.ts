@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
-import { DATE_WITH_POD_DATA } from '../../fixtures/constants';
+import { DATE_WITH_POD_DATA, EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const KUBERNETES_PACKAGE_NAME = 'kubernetes';
 
@@ -43,6 +43,9 @@ test.describe.serial(
         await inventoryPage.goToTime(DATE_WITH_POD_DATA);
         await inventoryPage.showPods();
         await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+        await expect(inventoryPage.schemaSelect).toContainText('Elastic System Integration', {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
 
       await test.step('click integration link and verify navigation', async () => {
@@ -75,6 +78,9 @@ test.describe.serial(
         await inventoryPage.goToTime(DATE_WITH_POD_DATA);
         await inventoryPage.showPods();
         await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+        await expect(inventoryPage.schemaSelect).toContainText('Elastic System Integration', {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
 
       await test.step('click dashboards link and verify navigation', async () => {
