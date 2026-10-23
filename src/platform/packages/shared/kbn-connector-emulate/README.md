@@ -82,10 +82,19 @@ const rejected = await control.setFixtures([
 | `PUT /_mock/fixtures` | Sets runtime fixtures from `{ fixtures }`, replacing those of the operations they name, and answers `{ fixtures }` in effect; or **400** with `rejected` when the spec rejects one, setting none |
 | `GET /_mock/fixtures` | `{ fixtures }`: the runtime fixtures in effect |
 | `DELETE /_mock/fixtures[?operation=<id>&source=<name>]` | **204** after dropping the runtime fixtures of one OpenAPI operation, or all of them |
+| `POST /_mock/mcp` | An MCP server with tools for the same (see below) |
 
 Only requests sent to the proxy itself (a path, not an absolute URL) reach them: requests through the proxy, plain or tunnelled, always go to the mock, so a vendor path under `/_mock` can't collide with them. Other paths sent to the proxy itself still get **400**. The endpoints take no credentials; like the proxy, they are for local and CI test runs.
 
 **Runtime fixtures** (`mock.runtimeFixtures`, or the `/_mock/fixtures` endpoints) let a test or an agent pick a scenario while the emulator runs: an empty list, a 429, a third page, a value the vendor just added. They are `ResponseFixture`s, with `when` to answer only some requests, and take precedence over the fixtures the emulator was created with until they are cleared or `reset()`. Unlike those, they are checked when set: a response the spec doesn't allow is rejected with its violations, so a test can't pass on answers the vendor never gives. The exception is an error status the spec doesn't declare, such as a 429 or a 503, which vendors answer with anyway; its body isn't checked. Runtime fixtures answer OpenAPI operations.
+
+**MCP server.** The same control is offered to agents as an MCP server at `/_mock/mcp` on the proxy (Streamable HTTP, stateless, JSON responses), so an agent testing a connector in a running Kibana can steer the vendor's answers:
+
+```bash
+claude mcp add --transport http emulator http://localhost:8080/_mock/mcp
+```
+
+Its tools are `list_operations` (with a `search`), `describe_operation`, `set_fixtures`, `list_fixtures`, `clear_fixtures`, `list_calls` and `reset`, over the same emulator and checks as the endpoints: a fixture the spec rejects comes back as a tool error with its violations. `createEmulatorControlHandler(mock, { exportFixtures })` adds `export_fixtures`, which hands the runtime fixtures to `exportFixtures` to save them somewhere lasting, such as a connector's committed fixtures, and reports where. `createEmulatorMcpHandler` serves the MCP server on its own. It is a control server for the emulator, unrelated to the vendor MCP servers the emulator emulates (see "MCP" below), and like the endpoints it is for local and CI test runs.
 
 Each call says where its response came from in `responseSource`: `runtime-fixture`, `fixture`, `recording`, `generated` for the spec's examples and samples, or `responder` when a `respond` answered without deferring to the default chain. `createEmulatorFetch({ onCall })` is called with each call as it is recorded, e.g. to log requests as they arrive.
 
