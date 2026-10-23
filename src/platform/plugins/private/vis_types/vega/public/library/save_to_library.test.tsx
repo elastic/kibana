@@ -43,7 +43,7 @@ const state = { spec: { format: 'hjson' as const, value: '{ mark: bar }' } };
 
 const createClient = () =>
   ({
-    create: jest.fn().mockResolvedValue({ id: 'new-id' }),
+    create: jest.fn().mockResolvedValue({ id: 'new-id', data: { title: 'My chart' }, meta: {} }),
     search: jest.fn().mockResolvedValue({ data: [] }),
   } as unknown as jest.Mocked<VegaLibraryClient>);
 
@@ -93,7 +93,7 @@ describe('saveVegaToLibrary', () => {
       });
     });
 
-    await expect(result).resolves.toEqual({ id: 'new-id', title: 'My chart' });
+    await expect(result).resolves.toEqual({ id: 'new-id', data: { title: 'My chart' } });
     expect(client.create).toHaveBeenCalledWith({
       ...state,
       title: 'My chart',

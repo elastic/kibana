@@ -15,6 +15,7 @@ import {
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { VegaCreateResponseBody } from '../../server';
 import type { VegaEditableState } from '../lib/library_draft';
 import type { VegaLibraryClient } from './vega_library_client';
 import { hasVegaLibraryItemWithTitle } from './vega_library_client';
@@ -89,20 +90,20 @@ export const saveVegaToLibrary = ({
   state: VegaEditableState;
   initialDetails?: Partial<VegaLibraryDetails>;
   savedObjectsTagging?: SavedObjectsTaggingApi;
-}): Promise<{ id: string; title: string } | undefined> =>
+}): Promise<Pick<VegaCreateResponseBody, 'id' | 'data'> | undefined> =>
   new Promise((resolve, reject) => {
     const onSave = async (
       { newTitle, newDescription }: OnSaveProps,
       tags: string[]
     ): Promise<SaveResult> => {
       try {
-        const { id } = await client.create({
+        const { id, data } = await client.create({
           ...state,
           title: newTitle,
           description: newDescription || undefined,
           tags,
         });
-        resolve({ id, title: newTitle });
+        resolve({ id, data });
         return { id };
       } catch (error) {
         reject(error);

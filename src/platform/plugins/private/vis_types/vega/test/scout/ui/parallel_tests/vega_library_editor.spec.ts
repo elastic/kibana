@@ -68,7 +68,9 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
 
       await page.testSubj.click('vegaLibraryEditorSaveButtonPrimary');
 
-      await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeHidden();
+      // The editor stays open, with nothing left to save.
+      await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
+      await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
       const { data } = await kbnClient.request<VegaItemResponse>({
         method: 'GET',
         path: `/s/${scoutSpace.id}/api/vega/${item.id}`,
@@ -96,7 +98,10 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       await page.testSubj.fill('savedObjectTitle', copyTitle);
       await page.testSubj.click('confirmSaveSavedObjectButton');
 
-      await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeHidden();
+      // The editor stays open and switches to the copy.
+      await expect(
+        page.getByRole('heading', { name: `Edit Vega visualization: ${copyTitle}` })
+      ).toBeVisible();
       expect(await findItems(kbnClient, scoutSpace.id, copyTitle)).toHaveLength(1);
       expect(await findItems(kbnClient, scoutSpace.id, title)).toHaveLength(1);
     }

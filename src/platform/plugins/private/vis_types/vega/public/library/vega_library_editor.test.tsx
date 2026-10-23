@@ -90,7 +90,7 @@ const renderEditor = ({
 } = {}) => {
   const core = coreMock.createStart();
   const client = {
-    update: jest.fn().mockResolvedValue({}),
+    update: jest.fn(async (id: string, data: VegaReadResponseBody['data']) => ({ id, data })),
   } as unknown as VegaLibraryClient;
   const closeFlyout = jest.fn();
   const SearchBar = jest.fn((_props: StatefulSearchBarProps): null => null);
@@ -162,23 +162,29 @@ describe('VegaLibraryEditor', () => {
       expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeEnabled();
     });
 
-    it('saves the changes in place and keeps the title, description and tags', async () => {
+    it('saves the changes in place, keeps the title, description and tags, and stays open', async () => {
       const { client, core, closeFlyout } = renderEditor();
 
       await userEvent.click(await screen.findByText('changeSpec'));
       await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary'));
 
-      await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Saved "My chart"')
+      );
       expect(client.update).toHaveBeenCalledWith('item-1', {
         ...item.data,
         spec: { format: 'hjson', value: '{ mark: bar }' },
       });
       expect(saveVegaToLibrary).not.toHaveBeenCalled();
-      expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Saved "My chart"');
+      expect(closeFlyout).not.toHaveBeenCalled();
+      // The saved draft has no unsaved changes, so Cancel closes without asking.
+      expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorCancelButton'));
+      expect(closeFlyout).toHaveBeenCalledTimes(1);
     });
 
     it('saves the query and filters with the item', async () => {
-      const { client, getSearchBarProps, closeFlyout } = renderEditor();
+      const { client, getSearchBarProps } = renderEditor();
       await screen.findByText('changeSpec');
 
       await act(async () => {
@@ -189,10 +195,11 @@ describe('VegaLibraryEditor', () => {
       });
       await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary'));
 
-      await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
-      expect(client.update).toHaveBeenCalledWith(
-        'item-1',
-        expect.objectContaining({ query: { expression: 'status:active', language: 'kql' } })
+      await waitFor(() =>
+        expect(client.update).toHaveBeenCalledWith(
+          'item-1',
+          expect.objectContaining({ query: { expression: 'status:active', language: 'kql' } })
+        )
       );
     });
 
@@ -226,8 +233,13 @@ describe('VegaLibraryEditor', () => {
       expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
     });
 
-    it('saves a copy with the current draft and the details of the item', async () => {
-      jest.mocked(saveVegaToLibrary).mockResolvedValue({ id: 'copy', title: 'Copy' });
+    it('saves a copy with the current draft and the details of the item, and edits the copy', async () => {
+      const copy = {
+        ...item.data,
+        title: 'Copy',
+        spec: { format: 'hjson' as const, value: '{ mark: bar }' },
+      };
+      jest.mocked(saveVegaToLibrary).mockResolvedValue({ id: 'copy', data: copy });
       const { client, core, closeFlyout } = renderEditor();
 
       await userEvent.click(await screen.findByText('changeSpec'));
@@ -235,7 +247,9 @@ describe('VegaLibraryEditor', () => {
       // The menu's popover ignores pointer events while it animates in.
       fireEvent.click(await screen.findByTestId('vegaLibraryEditorSaveAsNewButton'));
 
-      await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
+      expect(
+        await screen.findByRole('heading', { name: 'Edit Vega visualization: Copy' })
+      ).toBeInTheDocument();
       expect(saveVegaToLibrary).toHaveBeenCalledWith(
         expect.objectContaining({
           state: { spec: { format: 'hjson', value: '{ mark: bar }' } },
@@ -244,6 +258,8 @@ describe('VegaLibraryEditor', () => {
       );
       expect(client.update).not.toHaveBeenCalled();
       expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Saved "Copy"');
+      expect(closeFlyout).not.toHaveBeenCalled();
+      expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
     });
 
     it('can save a copy of an unchanged item', async () => {
@@ -385,6 +401,17 @@ describe('VegaLibraryEditor', () => {
         spec: { format: 'hjson', value: '{ mark: bar }' },
       });
       expect(screen.queryByTestId('mockPreview')).not.toBeInTheDocument();
+    });
+
+    // The panel reloads the item once the editor closes.
+    it('closes after saving', async () => {
+      const { client, closeFlyout } = renderEditor({ onPreview: jest.fn(), allowSaveAsNew: false });
+
+      await userEvent.click(await screen.findByText('changeSpec'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButton'));
+
+      await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
+      expect(client.update).toHaveBeenCalledTimes(1);
     });
 
     it('follows query changes right away, keeping the previewed spec', async () => {

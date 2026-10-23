@@ -109,6 +109,9 @@ export const VegaLibraryEditor = ({
 }: VegaLibraryEditorProps) => {
   const initialDraft = useMemo<VegaDraft>(() => toDraft(item.data), [item]);
   const [draft, setDraft] = useState(initialDraft);
+  // The item and draft as last saved. Save as new switches the editor to the copy.
+  const [savedItem, setSavedItem] = useState(item);
+  const [savedDraft, setSavedDraft] = useState(initialDraft);
   // Only the spec waits for Run preview; the preview follows query and filter changes right away.
   const [previewedSpec, setPreviewedSpec] = useState<Pick<VegaDraft, 'spec' | 'format'>>({
     spec: initialDraft.spec,
@@ -120,7 +123,7 @@ export const VegaLibraryEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
 
-  const isDirty = !isSameDraft(draft, initialDraft);
+  const isDirty = !isSameDraft(draft, savedDraft);
   const canPreview = draft.spec !== previewedSpec.spec;
   const dataViews = specDataViews.length ? specDataViews : defaultDataView ? [defaultDataView] : [];
 
@@ -165,22 +168,32 @@ export const VegaLibraryEditor = ({
       }),
     });
 
+  // A panel reloads the item once the editor closes. The library keeps the editor open.
+  const onSaved = (saved: VegaLibraryEditorProps['item'], savedFrom: VegaDraft) => {
+    core.notifications.toasts.addSuccess(savedMessage(saved.data.title));
+    if (onPreview) {
+      closeFlyout();
+      return;
+    }
+    setSavedItem(saved);
+    setSavedDraft(savedFrom);
+  };
+
   const saveAsNewItem = async () => {
+    const savedFrom = draft;
     setIsSaving(true);
     try {
       const created = await saveVegaToLibrary({
         client,
-        state: fromDraft(draft),
+        state: fromDraft(savedFrom),
         initialDetails: {
-          title: item.data.title,
-          description: item.data.description,
-          tags: item.data.tags,
+          title: savedItem.data.title,
+          description: savedItem.data.description,
+          tags: savedItem.data.tags,
         },
         savedObjectsTagging,
       });
-      if (!created) return;
-      core.notifications.toasts.addSuccess(savedMessage(created.title));
-      closeFlyout();
+      if (created) onSaved(created, savedFrom);
     } catch (error) {
       reportSaveError(error);
     } finally {
@@ -189,12 +202,15 @@ export const VegaLibraryEditor = ({
   };
 
   const saveChanges = async () => {
+    const savedFrom = draft;
     setIsSaving(true);
     try {
       // The API replaces the whole item, so keep what the editor doesn't change.
-      await client.update(item.id, { ...item.data, ...fromDraft(draft) });
-      core.notifications.toasts.addSuccess(savedMessage(item.data.title));
-      closeFlyout();
+      const { id, data } = await client.update(savedItem.id, {
+        ...savedItem.data,
+        ...fromDraft(savedFrom),
+      });
+      onSaved({ id, data }, savedFrom);
     } catch (error) {
       reportSaveError(error);
     } finally {
@@ -219,7 +235,7 @@ export const VegaLibraryEditor = ({
               <h2 id={ariaLabelledBy}>
                 {i18n.translate('visTypeVega.libraryEditor.editTitle', {
                   defaultMessage: 'Edit Vega visualization: {title}',
-                  values: { title: item.data.title },
+                  values: { title: savedItem.data.title },
                 })}
               </h2>
             </EuiTitle>
