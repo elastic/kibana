@@ -37,7 +37,6 @@ function makeService(
   return {
     id,
     name: `Service ${id}`,
-    category: 'security_identity_compliance',
     signalTypes: ['logs'],
     dataStreams: [],
     packageName: 'aws',

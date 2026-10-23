@@ -57,7 +57,6 @@ function makeEntry(
   return {
     id,
     name: id,
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: [],
     deploymentMethods: [],
