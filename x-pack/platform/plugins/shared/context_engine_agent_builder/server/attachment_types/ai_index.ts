@@ -6,7 +6,6 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { AiIndexTraceWithQuery } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../common/agent_builder_attachments';
 import {
   aiIndexAttachmentDataSchema,
@@ -53,6 +52,11 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
       'sources, workflow automations, and traces). Use it to scope the conversation to this index — do not',
       're-run discovery for destination or sources already listed here.',
+      'When a source carries `fields` or `sample_documents`, an automation carries `yaml`, or',
+      '`signals_summary`/a trace carries `row_count`, that is already the result of inspecting it —',
+      'use it directly rather than calling `get_index_mapping`, `execute_esql` or `get_workflow` for',
+      'the same thing again. Their absence (or an `inspection_error`/`fetch_error`/`count_error`)',
+      'means the attempt was made and did not produce it, not that it was skipped.',
       'This attachment authorizes you to apply changes to this index, not only to propose them: it',
       `provides \`${CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID}\` and`,
       `\`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\` for this index.`,
@@ -74,15 +78,15 @@ const formatAiIndex = (data: AiIndexAttachmentData): string => {
 
   parts.push(
     data.sources.length > 0
-      ? `Sources: ${data.sources.map((source) => `${source.type}:${source.value}`).join(', ')}`
+      ? `Sources:\n${data.sources.map((source) => `- ${formatSource(source)}`).join('\n')}`
       : 'Sources: none configured'
   );
 
   parts.push(
     data.automations.length > 0
-      ? `Existing automations (workflow ids): ${data.automations
-          .map((automation) => automation.value)
-          .join(', ')}`
+      ? `Existing automations:\n${data.automations
+          .map((automation) => `- ${formatAutomation(automation)}`)
+          .join('\n')}`
       : 'Existing automations: none'
   );
 
@@ -92,13 +96,58 @@ const formatAiIndex = (data: AiIndexAttachmentData): string => {
       : 'Traces: none configured'
   );
 
+  if (data.signals_summary) {
+    parts.push(formatSignalsSummary(data.signals_summary));
+  }
+
   return parts.join('\n');
 };
 
-// For 'esql' traces, value is already the query, so showing both would just repeat it.
-const formatTrace = (trace: AiIndexTraceWithQuery): string => {
-  if (trace.type === 'esql') {
-    return `esql: ${trace.query.replace(/\n/g, ' ')}`;
+const formatSource = (source: AiIndexAttachmentData['sources'][number]): string => {
+  const header = `${source.type}:${source.value}`;
+  if (source.inspection_error) {
+    return `${header} (could not be inspected: ${source.inspection_error})`;
   }
-  return `${trace.type}:${trace.value} -> ${trace.query.replace(/\n/g, ' ')}`;
+  if (source.row_count === undefined) {
+    return header;
+  }
+  const fields = (source.fields ?? []).map((field) => `${field.path}: ${field.type}`).join(', ');
+  const sample =
+    source.sample_documents && source.sample_documents.length > 0
+      ? `\n  sample: ${JSON.stringify(source.sample_documents)}`
+      : '';
+  return `${header} — ${source.row_count} row(s)${fields ? `, fields: ${fields}` : ''}${sample}`;
+};
+
+const formatAutomation = (automation: AiIndexAttachmentData['automations'][number]): string => {
+  if (automation.fetch_error) {
+    return `${automation.value} (definition could not be read: ${automation.fetch_error})`;
+  }
+  if (!automation.yaml) {
+    return automation.value;
+  }
+  return `${automation.value}:\n${automation.yaml
+    .split('\n')
+    .map((line) => `  ${line}`)
+    .join('\n')}`;
+};
+
+// For 'esql' traces, value is already the query, so showing both would just repeat it.
+const formatTrace = (trace: AiIndexAttachmentData['traces'][number]): string => {
+  const base =
+    trace.type === 'esql'
+      ? `esql: ${trace.query.replace(/\n/g, ' ')}`
+      : `${trace.type}:${trace.value} -> ${trace.query.replace(/\n/g, ' ')}`;
+  if (trace.count_error) {
+    return `${base} (count failed: ${trace.count_error})`;
+  }
+  return trace.row_count === undefined ? base : `${base} — ${trace.row_count} row(s)`;
+};
+
+const formatSignalsSummary = (summary: NonNullable<AiIndexAttachmentData['signals_summary']>) => {
+  if (summary.total === 0) {
+    return 'Signals: none yet.';
+  }
+  const byTag = summary.by_tag.map(({ tag, count }) => `${tag}: ${count}`).join(', ');
+  return `Signals: ${summary.total} (${byTag})`;
 };

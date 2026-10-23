@@ -19,6 +19,10 @@ export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexI
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
+export const AI_INDEX_SUGGEST_AUTOMATION_CONTEXT_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/_suggest_automation_context`;
+
+/** Version of the internal suggest-automation-context API, shared between route registration and the browser client. */
+export const SUGGEST_AUTOMATION_CONTEXT_INTERNAL_API_VERSION = '1';
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;

@@ -16,6 +16,10 @@ Choosing the data an automation draws on is `ai-index-sources`.
 because a useful change names one: what it samples and how much, what it asks the model for, how
 many indicators it can emit, and what it writes into which fields.
 
+When the `ai_index` attachment already carries an automation's `yaml`, that is this call already
+made — read it from there instead of calling `get_workflow` again for the same automation. A
+`fetch_error` on it there means the attempt was made and failed, not that it was skipped.
+
 A pipeline's *shape* often bounds what it could ever produce, however well its prompts are worded —
 an automation that samples twenty documents cannot describe a corpus of ten thousand, no matter how
 the prompt is phrased. Look for that before looking at wording.
