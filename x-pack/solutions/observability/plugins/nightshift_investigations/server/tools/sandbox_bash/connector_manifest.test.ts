@@ -51,6 +51,7 @@ const createSessionMock = (): jest.Mocked<Pick<SandboxSession, 'writeFiles' | 'i
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
   request: httpServerMock.createKibanaRequest(),
   allowedConnectorIds,
+  resolvedCredentials: new Map(),
 });
 
 const createGetActionsClient = (connectors: Array<Record<string, unknown>>) => {
@@ -111,8 +112,10 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('# Sandbox Connectors');
       expect(content).toContain('`connector_id` parameter of the bash tool');
       expect(content).toContain('CONNECTOR_CONFIG_<KEY>');
-      expect(content).toContain('CONNECTOR_SECRET_<KEY>');
+      expect(content).toContain('CONNECTOR_HEADER_<NAME>');
+      expect(content).toContain('CONNECTOR_HEADER_AUTHORIZATION');
       expect(content).toContain('env | grep ^CONNECTOR_ | cut -d= -f1');
+      expect(content).toContain('Authorization: $CONNECTOR_HEADER_AUTHORIZATION');
     });
 
     it('does not advertise an in-sandbox connector callback CLI', async () => {

@@ -15,16 +15,16 @@ import {
 import { getTriggerLabel } from '../../widgets/worflows_triggers_list/worflows_triggers_list';
 
 const WELL_KNOWN_TRIGGER_LABELS: Record<WellKnownWorkflowTriggerSource, string> = {
-  manual: i18n.translate('workflowsManagement.executionsPage.trigger.manual', {
+  manual: i18n.translate('workflows.executionsPage.trigger.manual', {
     defaultMessage: 'Manual',
   }),
-  scheduled: i18n.translate('workflowsManagement.executionsPage.trigger.schedule', {
+  scheduled: i18n.translate('workflows.executionsPage.trigger.schedule', {
     defaultMessage: 'Schedule',
   }),
-  alert: i18n.translate('workflowsManagement.executionsPage.trigger.alert', {
+  alert: i18n.translate('workflows.executionsPage.trigger.alert', {
     defaultMessage: 'Alert',
   }),
-  'workflow-step': i18n.translate('workflowsManagement.executionsPage.trigger.workflowStep', {
+  'workflow-step': i18n.translate('workflows.executionsPage.trigger.workflowStep', {
     defaultMessage: 'Workflow step',
   }),
 };

@@ -34,6 +34,17 @@ describe('getWorkflowConnectorTypes', () => {
     expect(getWorkflowConnectorTypes(definition)).toEqual(['slack']);
   });
 
+  it('includes console steps', () => {
+    const definition = {
+      steps: [
+        { type: 'console', name: 'log' },
+        { type: '.slack', name: 'slack' },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(getWorkflowConnectorTypes(definition)).toEqual(['console', 'slack']);
+  });
+
   it('returns an empty array when definition is missing', () => {
     expect(getWorkflowConnectorTypes(undefined)).toEqual([]);
   });

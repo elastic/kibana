@@ -68,6 +68,9 @@ export interface IRulesManagementClient {
   /** Best-effort enable or disable. Missing rules are ignored; other failures are reported. */
   setRulesEnabled(ids: string[], enabled: boolean): Promise<void>;
 
+  /** Returns the enabled state of live rules; missing IDs have no live rule. */
+  findRuleEnabledStates(ids: string[]): Promise<Map<string, boolean>>;
+
   /** Returns the subset of IDs that still resolve to live rules. */
   findExistingRuleIds(ids: string[]): Promise<string[]>;
 

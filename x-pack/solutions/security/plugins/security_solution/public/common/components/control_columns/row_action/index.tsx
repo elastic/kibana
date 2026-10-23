@@ -52,6 +52,7 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
+  onRemoveFromCase?: (eventId: string) => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   pageRowIndex: number;
@@ -90,6 +91,7 @@ const RowActionComponent = ({
   isEventViewer,
   loadingEventIds,
   onExpandFlyout,
+  onRemoveFromCase,
   onRowSelected,
   onRuleChange,
   pageRowIndex,
@@ -288,6 +290,7 @@ const RowActionComponent = ({
           isEventViewer={isEventViewer}
           loadingEventIds={loadingEventIds}
           onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
+          onRemoveFromCase={onRemoveFromCase}
           onRowSelected={onRowSelected}
           onRuleChange={onRuleChange}
           refetch={refetch}

@@ -10,6 +10,7 @@ import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
+  createAgentNotFoundError,
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
@@ -26,6 +27,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { StartInvestigationRequest } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
+import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   InvalidInvestigationContextError,
@@ -38,11 +40,18 @@ import { NightshiftInvestigationsClient } from './investigations_client';
 jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
+jest.mock('../lib/install_assistant_agent', () => ({
+  installAssistantAgent: jest.fn().mockResolvedValue(undefined),
+}));
 
-jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => 'inv-new' }));
+const mockNewInvestigationId = jest.fn(() => 'inv-new');
+jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => mockNewInvestigationId() }));
 
 const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
   typeof installInvestigationAgent
+>;
+const installAssistantAgentMock = installAssistantAgent as jest.MockedFunction<
+  typeof installAssistantAgent
 >;
 
 const SPACE_ID = 'test-space';
@@ -182,8 +191,21 @@ beforeEach(() => {
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
   withConversations();
   // Like Agent Builder, a conversation created without a title carries the placeholder.
-  conversations.create.mockImplementation(async ({ id, title }: { id: string; title?: string }) =>
-    makeConversation({ id, title: title ?? DEFAULT_CONVERSATION_TITLE })
+  conversations.create.mockImplementation(
+    async ({
+      id,
+      title,
+      metadata,
+    }: {
+      id: string;
+      title?: string;
+      metadata?: { workflow_execution_ids?: string[] };
+    }) =>
+      makeConversation({
+        id,
+        title: title ?? DEFAULT_CONVERSATION_TITLE,
+        workflowExecutionIds: metadata?.workflow_execution_ids,
+      })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
   subjectsClient.upsertSubjects.mockResolvedValue([]);
@@ -334,6 +356,89 @@ describe('NightshiftInvestigationsClient.start()', () => {
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'inv-new' });
+    expect(installAssistantAgentMock).not.toHaveBeenCalled();
+  });
+
+  it('installs the assistant in the investigation space when it is enabled', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await makeClient({ assistantEnabled: true }).start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: 'Why did payment timeouts increase?',
+    });
+
+    expect(installAssistantAgentMock).toHaveBeenCalledWith({
+      agentBuilder: mockAgentBuilder,
+      spaceId: SPACE_ID,
+      availability: mockAgentAvailability,
+    });
+  });
+
+  it('starts the investigation when installing the assistant fails', async () => {
+    installAssistantAgentMock.mockRejectedValueOnce(new Error('assistant install failed'));
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await expect(
+      makeClient({ assistantEnabled: true }).start({
+        subject: { type: 'manual', id: 'manual' },
+        trigger_type: 'manual',
+        message: 'Why did payment timeouts increase?',
+      })
+    ).resolves.toEqual({ investigation_id: 'inv-new' });
+  });
+
+  it('applies a per-run timeout without mutating the installed investigation workflow', async () => {
+    const workflow = {
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [], settings: { timeout: '60m', concurrency: { max: 1 } } },
+    };
+    mockManagement.getWorkflow.mockResolvedValue(workflow);
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'automatic',
+      message: 'Review errors.',
+      timeout_seconds: 20,
+    });
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        definition: { steps: [], settings: { timeout: '20s', concurrency: { max: 1 } } },
+      }),
+      SPACE_ID,
+      expect.anything(),
+      mockRequest,
+      'nightshift-investigations'
+    );
+    expect(workflow.definition.settings.timeout).toBe('60m');
+  });
+
+  it('starts fresh investigations for repeated automatic questions without matching an open conversation', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockNewInvestigationId.mockReturnValueOnce('inv-one').mockReturnValueOnce('inv-two');
+    const client = makeClient();
+    const request = {
+      subject: { type: 'manual' as const, id: 'manual' },
+      trigger_type: 'automatic' as const,
+      message: 'Review checkout health.',
+    };
+    expect(await client.start(request)).toEqual({ investigation_id: 'inv-one' });
+    expect(await client.start(request)).toEqual({ investigation_id: 'inv-two' });
+    expect(agenticInvestigationsClient.findOpenBySubjects).not.toHaveBeenCalled();
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
   });
 
   it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
@@ -969,12 +1074,16 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
   it('creates the conversation of a new investigation once the start is accepted, with the run recorded', async () => {
     await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
 
+    // The run is recorded in the creating write, so the investigation never reads as not in
+    // progress between its creation and a separate metadata patch.
     expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'inv-new', templateId: 'investigation' })
+      expect.objectContaining({
+        id: 'inv-new',
+        templateId: 'investigation',
+        metadata: { severity: 'medium', workflow_execution_ids: ['exec-1'] },
+      })
     );
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-new', {
-      workflow_execution_ids: ['exec-1'],
-    });
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
     // After the claim and the run, so a denied or failed start creates nothing.
     expect(subjectsClient.claimSubjects.mock.invocationCallOrder[0]).toBeLessThan(
       conversations.create.mock.invocationCallOrder[0]
@@ -1270,14 +1379,18 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
       accessControl: { access_mode: 'public' },
+      metadata: {
+        // Starts at medium; the agent re-rates it when it concludes.
+        severity: 'medium',
+        // The run is recorded in the creating write, so the investigation reads as in progress
+        // from the moment it exists.
+        workflow_execution_ids: ['exec-1'],
+      },
     });
     // A conversation this call created holds no subjects yet.
     expect(subjectsClient.listByConversationIds).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    // The run is recorded, so the investigation reads as in progress while it runs.
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
-      workflow_execution_ids: ['exec-1'],
-    });
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
   it('appends the run to the runs an investigation already records, once', async () => {
@@ -1332,6 +1445,57 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       workflow_execution_ids: ['exec-1'],
     });
   });
+
+  it.each(['open', 'closed'] as const)(
+    'preserves %s status when recording a failed run',
+    async (status) => {
+      withExecution();
+      withConversations(makeConversation({ id: 'inv-1', status }));
+      installInvestigationAgentMock.mockRejectedValue(new Error('Agent setup unavailable'));
+      await makeClient().ensureForFailure('inv-1', 'exec-1');
+      expect(installInvestigationAgentMock).not.toHaveBeenCalled();
+      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+        workflow_execution_ids: ['exec-1'],
+      });
+    }
+  );
+
+  it('materializes an early failure and allows failed-run replay', async () => {
+    withExecution({ status: ExecutionStatus.FAILED });
+    await makeClient().ensureForFailure('inv-1', 'exec-1');
+    expect(installInvestigationAgentMock).toHaveBeenCalledWith({
+      agentBuilder: mockAgentBuilder,
+      spaceId: SPACE_ID,
+      availability: mockAgentAvailability,
+    });
+    expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
+      conversations.create.mock.invocationCallOrder[0]
+    );
+    expect(conversations.create).toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+  });
+
+  it('waits for a newly installed agent to become visible when recording an early failure', async () => {
+    withExecution();
+    conversations.create.mockRejectedValueOnce(
+      createAgentNotFoundError({ agentId: 'nightshift.investigation' })
+    );
+    await makeClient().ensureForFailure('inv-1', 'exec-1');
+    expect(installInvestigationAgentMock).toHaveBeenCalledTimes(1);
+    expect(conversations.create).toHaveBeenCalledTimes(2);
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+  });
+
+  it.each([ExecutionStatus.COMPLETED, ExecutionStatus.CANCELLED, ExecutionStatus.TIMED_OUT])(
+    'does not materialize failure for an execution already %s',
+    async (status) => {
+      withExecution({ status });
+      await expect(makeClient().ensureForFailure('inv-1', 'exec-1')).rejects.toThrow(
+        InvestigationNotFoundError
+      );
+      expect(conversations.create).not.toHaveBeenCalled();
+    }
+  );
 
   it('reopens an investigation another identity owns', async () => {
     withExecution();
@@ -1449,7 +1613,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
 describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   const THREAD = { workspace: 'T1', channel: 'C1', threadTs: '1712345678.000100' };
-  const THREAD_KEY = 'team:T1/channel:C1/thread:1712345678.000100';
+  const THREAD_KEY = 'slack:T1:C1:1712345678.000100';
   const threadSubject = (slack: Partial<SlackThreadSubject> = {}) =>
     makeStoredSubject({
       subjectType: 'slack_thread',
@@ -1679,6 +1843,8 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
       id: 'inv-new',
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
+      // Starts at medium; the agent re-rates it when it concludes.
+      metadata: { severity: 'medium' },
       accessControl: { access_mode: 'public' },
     });
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [
@@ -1748,7 +1914,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     await makeClient().findOrCreateSlackThread({ ...THREAD, workspace: 'T2', create: false });
 
     expect(subjectsClient.findConversationIdsBySubjects).toHaveBeenCalledWith([
-      { type: 'slack_thread', id: 'team:T2/channel:C1/thread:1712345678.000100' },
+      { type: 'slack_thread', id: 'slack:T2:C1:1712345678.000100' },
     ]);
   });
 
@@ -1782,14 +1948,29 @@ describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
     expect(subjectsClient.listByConversationIds).toHaveBeenCalledWith(['inv-1']);
   });
 
-  it('reports a Slack thread as a manual subject, after any other subject', async () => {
+  it('reports a Slack thread as a slack_thread subject', async () => {
     subjectsClient.listByConversationIds.mockResolvedValue([
-      makeStoredSubject({ subjectType: 'slack_thread', subjectId: 'team:T/channel:C/thread:1' }),
+      makeStoredSubject({ subjectType: 'slack_thread', subjectId: 'slack:T:C:1' }),
     ]);
 
     await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
-      subject: { type: 'manual', id: 'team:T/channel:C/thread:1' },
+      subject: { type: 'slack_thread', id: 'slack:T:C:1' },
       triggerType: 'manual',
+    });
+  });
+
+  it('prefers any other subject to a Slack thread recorded before it', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject({
+        subjectType: 'slack_thread',
+        subjectId: 'slack:T:C:1',
+        createdAt: '2026-08-24T12:00:00.000Z',
+      }),
+      makeStoredSubject({ subjectId: 'alert-1', createdAt: '2026-08-24T13:00:00.000Z' }),
+    ]);
+
+    await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
+      subject: { type: 'alert', id: 'alert-1' },
     });
   });
 
@@ -1952,5 +2133,52 @@ describe('NightshiftInvestigationsClient notification destinations', () => {
         makeClient().getInvestigationExecutionContext('inv-1', 'exec-1')
       ).rejects.toThrow(InvestigationNotFoundError);
     });
+  });
+});
+
+describe('NightshiftInvestigationsClient.recordSlackThreadStatusMessage()', () => {
+  const THREAD_KEY = 'team:T1/channel:C1/thread:1.1';
+  const MESSAGE = { investigationId: 'inv-1', channel: 'C1', threadTs: '1.1', messageTs: '1.2' };
+  const threadSubject = (slack: Partial<SlackThreadSubject> = {}) =>
+    makeStoredSubject({
+      subjectType: 'slack_thread',
+      subjectId: THREAD_KEY,
+      slack: { channel: 'C1', thread_ts: '1.1', ...slack },
+    });
+
+  it("records the message on the investigation's subject for the thread", async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject(), threadSubject()]);
+
+    await makeClient().recordSlackThreadStatusMessage(MESSAGE);
+
+    expect(subjectsClient.listByConversationIds).toHaveBeenCalledWith(['inv-1']);
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: THREAD_KEY,
+        slack: { channel: 'C1', thread_ts: '1.1', status_message_ts: '1.2' },
+      },
+    ]);
+  });
+
+  it('keeps a status message the thread already has', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ status_message_ts: '1.0' }),
+    ]);
+
+    await makeClient().recordSlackThreadStatusMessage(MESSAGE);
+
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
+  it('records nothing when the investigation is not about that thread', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject(),
+      threadSubject({ thread_ts: '9.9' }),
+    ]);
+
+    await makeClient().recordSlackThreadStatusMessage(MESSAGE);
+
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 });

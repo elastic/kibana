@@ -14,6 +14,7 @@ import { escapeKuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import type { ScopedEndpointArtifactListClient } from '../../../../../endpoint/services/scoped_endpoint_artifact_list_client';
 import {
@@ -22,13 +23,20 @@ import {
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { GET_ENDPOINT_ARTIFACTS_TOOL_ID } from '../..';
 
+const BASE_ARTIFACT_TYPES = [
+  'endpoint_exceptions',
+  'trusted_apps',
+  'trusted_devices',
+  'event_filters',
+  'host_isolation_exceptions',
+  'blocklists',
+] as const;
+
+const CUSTOM_YARA_SIGNATURES_ARTIFACT_TYPE = 'custom_yara_signatures';
+
 type ArtifactType =
-  | 'endpoint_exceptions'
-  | 'trusted_apps'
-  | 'trusted_devices'
-  | 'event_filters'
-  | 'host_isolation_exceptions'
-  | 'blocklists';
+  | (typeof BASE_ARTIFACT_TYPES)[number]
+  | typeof CUSTOM_YARA_SIGNATURES_ARTIFACT_TYPE;
 
 const ARTIFACT_TYPE_TO_LIST_ID: Record<ArtifactType, string> = {
   endpoint_exceptions: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
@@ -37,9 +45,28 @@ const ARTIFACT_TYPE_TO_LIST_ID: Record<ArtifactType, string> = {
   event_filters: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
   host_isolation_exceptions: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
   blocklists: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+  custom_yara_signatures: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
 };
 
-const ARTIFACT_TYPE_KEYS = Object.keys(ARTIFACT_TYPE_TO_LIST_ID) as ArtifactType[];
+const ARTIFACT_TYPE_LABELS: Record<ArtifactType, string> = {
+  endpoint_exceptions: 'endpoint exceptions',
+  trusted_apps: 'trusted apps',
+  trusted_devices: 'trusted devices',
+  event_filters: 'event filters',
+  host_isolation_exceptions: 'host isolation exceptions',
+  blocklists: 'blocklists',
+  custom_yara_signatures: 'custom YARA signatures',
+};
+
+const getEnabledArtifactTypes = ({
+  customYaraSignaturesEnabled,
+}: ExperimentalFeatures): readonly ArtifactType[] =>
+  customYaraSignaturesEnabled
+    ? [...BASE_ARTIFACT_TYPES, CUSTOM_YARA_SIGNATURES_ARTIFACT_TYPE]
+    : BASE_ARTIFACT_TYPES;
+
+const CUSTOM_YARA_SIGNATURES_DESCRIPTION =
+  ' Custom YARA signature items include the artifact `id`, which custom YARA signature alerts reference as `rule.custom_yara_signature.entry_id`; it is not the `item_id`. Their rule text is a truncated preview, not the full rule. When a rule entry has `string_truncated: true`, do not explain why the signature matches or does not match based on that preview; say that the full rule needs to be reviewed in Kibana. The `search` filter also matches rule text, so results can include signatures whose rule merely mentions the search term. When the user names a signature, only treat items whose `name` matches it as that signature. If none match, say so instead of substituting a text match.';
 
 type ArtifactErrorType = 'not_authorized' | 'feature_disabled' | 'unknown_error';
 
@@ -47,47 +74,43 @@ const DEFAULT_PER_PAGE = 20;
 const MAX_ARRAY_VALUES = 50;
 const MAX_STRING_LENGTH = 512;
 
-const getEndpointArtifactsSchema = lazySchema(() =>
-  z.object({
-    artifactType: z
-      .enum([
-        'endpoint_exceptions',
-        'trusted_apps',
-        'trusted_devices',
-        'event_filters',
-        'host_isolation_exceptions',
-        'blocklists',
-      ])
-      .optional()
-      .describe('The type of artifact to retrieve. Omit to get summary counts for all types.'),
-    search: z
-      .string()
-      .max(256)
-      .optional()
-      .describe(
-        'Free text search across artifact fields (name, description, tags, and others). Best suited for searching by artifact name or description. Uses simple query string search.'
-      ),
-    osType: z
-      .enum(['windows', 'linux', 'macos'])
-      .optional()
-      .describe('Filter artifacts by operating system.'),
-    policyId: z
-      .string()
-      .max(128)
-      .optional()
-      .describe(
-        'Filter to artifacts assigned to this policy ID (includes globally-assigned artifacts).'
-      ),
-    perPage: z
-      .number()
-      .int()
-      .min(1)
-      .max(50)
-      .optional()
-      .describe('Number of items per page. Default 20, max 50.'),
-    page: z.number().int().min(1).optional().describe('Page number for pagination. Default 1.'),
-  })
-);
+const createGetEndpointArtifactsSchema = (artifactTypes: readonly ArtifactType[]) =>
+  lazySchema(() =>
+    z.object({
+      artifactType: z
+        .enum(artifactTypes)
+        .optional()
+        .describe('The type of artifact to retrieve. Omit to get summary counts for all types.'),
+      search: z
+        .string()
+        .max(256)
+        .optional()
+        .describe(
+          'Free text search across artifact fields (name, description, tags, and others). Best suited for searching by artifact name or description. Uses simple query string search.'
+        ),
+      osType: z
+        .enum(['windows', 'linux', 'macos'])
+        .optional()
+        .describe('Filter artifacts by operating system.'),
+      policyId: z
+        .string()
+        .max(128)
+        .optional()
+        .describe(
+          'Filter to artifacts assigned to this policy ID (includes globally-assigned artifacts).'
+        ),
+      perPage: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe('Number of items per page. Default 20, max 50.'),
+      page: z.number().int().min(1).optional().describe('Page number for pagination. Default 1.'),
+    })
+  );
+
+type GetEndpointArtifactsSchema = ReturnType<typeof createGetEndpointArtifactsSchema>;
 
 export const classifyArtifactError = (error: unknown): ArtifactErrorType => {
   if (error instanceof Error) {
@@ -201,9 +224,14 @@ const truncateEntries = (
   return { entries: processed, truncatedCount };
 };
 
-const trimItem = (item: ExceptionListItemSchema): Record<string, unknown> => {
+const trimItem = (
+  item: ExceptionListItemSchema,
+  { includeId }: { includeId: boolean }
+): Record<string, unknown> => {
   const { entries, truncatedCount } = truncateEntries(item.entries);
   return {
+    // Custom YARA signature alerts reference the saved object id as `rule.custom_yara_signature.entry_id`
+    ...(includeId ? { id: item.id } : {}),
     item_id: item.item_id,
     list_id: item.list_id,
     name: item.name,
@@ -235,12 +263,13 @@ const logAndClassifyError = (
 
 const fetchSummary = async (
   client: ScopedEndpointArtifactListClient,
+  artifactTypes: readonly ArtifactType[],
   filter: string | undefined,
   search: string | undefined,
   logger: Logger
 ): Promise<Record<string, { total: number } | { error: ArtifactErrorType }>> => {
   const entries = await Promise.all(
-    ARTIFACT_TYPE_KEYS.map(async (artifactType) => {
+    artifactTypes.map(async (artifactType) => {
       const listId = ARTIFACT_TYPE_TO_LIST_ID[artifactType];
       try {
         const result = await client.findEndpointArtifactListItems({
@@ -292,19 +321,29 @@ const fetchDetail = async (
     total,
     page,
     perPage,
-    items: data.map(trimItem),
+    items: data.map((item) =>
+      trimItem(item, { includeId: artifactType === CUSTOM_YARA_SIGNATURES_ARTIFACT_TYPE })
+    ),
   };
 };
 
 export const getEndpointArtifactsTool = (
-  endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool<typeof getEndpointArtifactsSchema> => {
+  endpointAppContextService: EndpointAppContextService,
+  experimentalFeatures: ExperimentalFeatures
+): BuiltinSkillBoundedTool<GetEndpointArtifactsSchema> => {
+  const artifactTypes = getEnabledArtifactTypes(experimentalFeatures);
+  const artifactTypesText = artifactTypes
+    .map((artifactType) => ARTIFACT_TYPE_LABELS[artifactType])
+    .join(', ');
+  const customYaraSignaturesDescription = experimentalFeatures.customYaraSignaturesEnabled
+    ? CUSTOM_YARA_SIGNATURES_DESCRIPTION
+    : '';
+
   return {
     id: GET_ENDPOINT_ARTIFACTS_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Query endpoint artifacts (endpoint exceptions, trusted apps, trusted devices, event filters, host isolation exceptions, blocklists). Call without artifactType to get a summary of all types, or with artifactType to get details for a specific type.',
-    schema: getEndpointArtifactsSchema,
+    description: `Query endpoint artifacts (${artifactTypesText}). Call without artifactType to get a summary of all types, or with artifactType to get details for a specific type.${customYaraSignaturesDescription}`,
+    schema: createGetEndpointArtifactsSchema(artifactTypes),
     handler: async (params, { request, savedObjectsClient, esClient, logger }) => {
       try {
         const { username } = await esClient.asCurrentUser.security.authenticate();
@@ -321,7 +360,7 @@ export const getEndpointArtifactsTool = (
         const search = params.search;
 
         if (!params.artifactType) {
-          const summary = await fetchSummary(client, filter, search, logger);
+          const summary = await fetchSummary(client, artifactTypes, filter, search, logger);
           return {
             results: [
               {

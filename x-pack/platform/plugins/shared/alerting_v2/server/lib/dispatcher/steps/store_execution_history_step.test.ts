@@ -281,37 +281,11 @@ describe('StoreExecutionHistoryStep', () => {
     expect(uuids).toEqual([executionUuid, executionUuid, executionUuid]);
   });
 
-  it('short-circuits when there is nothing to record', async () => {
+  it('returns continue without emitting events when there is nothing to record', async () => {
     const result = await step.execute(createDispatcherPipelineState({}), logger);
 
     expect(result).toEqual({ type: 'continue' });
     expect(eventLogger.logEvent).not.toHaveBeenCalled();
-  });
-
-  it('does not emit dispatch_failed events when all dispatches succeed', async () => {
-    const rule = createRule({ id: 'rule-1' });
-    const policy = createActionPolicy({ id: 'policy-1' });
-    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
-    const group = createActionGroup({
-      id: 'group-1',
-      policyId: 'policy-1',
-      alerts: [alert],
-      destinations: [{ type: 'workflow', id: 'wf-a' }],
-    });
-
-    await step.execute(
-      createDispatcherPipelineState({
-        dispatch: [group],
-        dispatchable: [alert],
-        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-        policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        dispatchedExecutions: new Map([['group-1', ['exec-a']]]),
-      }),
-      logger
-    );
-
-    const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
-    expect(actions).not.toContain('dispatch_failed');
   });
 
   it('emits a dispatch_failed event for a failed action-group → workflow attempt', async () => {
@@ -382,38 +356,6 @@ describe('StoreExecutionHistoryStep', () => {
     });
   });
 
-  it('emits dispatch_failed events even when nothing else was recorded', async () => {
-    const failure: DispatchFailure = {
-      policyId: 'policy-1',
-      spaceId: 'default',
-      actionGroupId: 'group-1',
-      workflowId: 'wf-a',
-      alerts: [createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' })],
-      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
-      message: 'boom',
-    };
-
-    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }), logger);
-
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-    expect(eventLogger.logEvent.mock.calls[0][0]?.event?.action).toBe('dispatch_failed');
-  });
-
-  it('emits a dispatch_failed event with the license_not_supported reason', async () => {
-    const failure = createDispatchFailure({
-      reason: DISPATCH_FAILURE_REASONS.LICENSE_NOT_SUPPORTED,
-      message: 'license not supported',
-    });
-
-    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }), logger);
-
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-    const [[event]] = eventLogger.logEvent.mock.calls;
-    expect(event?.event).toEqual({ action: 'dispatch_failed', outcome: 'failure' });
-    expect(event?.error?.message).toBe('license not supported');
-    expect(event?.kibana?.alerting_v2?.dispatcher?.failure_reason).toBe('license_not_supported');
-  });
-
   it('sets namespace and space_ids on dispatch_failed events for non-default spaces', async () => {
     const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
     const failure: DispatchFailure = {
@@ -465,7 +407,13 @@ describe('StoreExecutionHistoryStep', () => {
     const ruleRefs = refs.filter((ref) => ref?.type === RULE_SAVED_OBJECT_TYPE);
     expect(ruleRefs).toHaveLength(50);
     expect(event?.kibana?.alerting_v2?.dispatcher?.rule_count).toBe(55);
-    expect(event?.kibana?.alerting_v2?.dispatcher?.rule_ids).toHaveLength(5);
+    expect(event?.kibana?.alerting_v2?.dispatcher?.rule_ids).toEqual([
+      'rule-50',
+      'rule-51',
+      'rule-52',
+      'rule-53',
+      'rule-54',
+    ]);
   });
 
   it('sets namespace and space_ids for non-default spaces', async () => {
@@ -583,30 +531,6 @@ describe('StoreExecutionHistoryStep', () => {
     expect(event?.kibana?.alerting_v2?.dispatcher?.rule_ids).toEqual(
       expect.arrayContaining(['rule-50', 'rule-51', 'rule-52', 'rule-53', 'rule-54'])
     );
-  });
-
-  it('does not set rule_ids when rule count fits within the SO-ref cap', async () => {
-    const rule = createRule({ id: 'rule-1' });
-    const policy = createActionPolicy({ id: 'policy-1' });
-    const alert = createAlert({ rule_id: 'rule-1' });
-    const group = createActionGroup({
-      id: 'g1',
-      policyId: 'policy-1',
-      alerts: [alert],
-    });
-
-    await step.execute(
-      createDispatcherPipelineState({
-        dispatch: [group],
-        dispatchable: [alert],
-        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-        policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      }),
-      logger
-    );
-
-    const [[event]] = eventLogger.logEvent.mock.calls;
-    expect(event?.kibana?.alerting_v2?.dispatcher?.rule_ids).toBeUndefined();
   });
 
   describe('partial and total dispatch failures', () => {

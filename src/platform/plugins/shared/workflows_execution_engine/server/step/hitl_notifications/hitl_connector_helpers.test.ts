@@ -10,10 +10,13 @@
 import {
   assertConnectorSucceeded,
   escapeServiceNowCommentText,
+  escapeTeamsHtml,
   fitHitlTextPreservingSuffix,
   SERVICENOW_COMMENT_MAX_LENGTH,
   serviceNowCommentLink,
   slackApiChannelTarget,
+  TEAMS_CONTENT_MAX_LENGTH,
+  teamsHtmlLink,
 } from './hitl_connector_helpers';
 
 describe('assertConnectorSucceeded', () => {
@@ -71,20 +74,36 @@ describe('serviceNowCommentLink', () => {
 describe('fitHitlTextPreservingSuffix', () => {
   const suffix = 'Approve: https://kibana.example/approve\nDecline: https://kibana.example/reject';
 
-  it('shortens the prompt so the links still fit the ServiceNow comment limit', () => {
+  it('shortens the prompt so the links still fit the connector limit', () => {
     const comment = fitHitlTextPreservingSuffix(
       'a'.repeat(SERVICENOW_COMMENT_MAX_LENGTH),
       suffix,
       SERVICENOW_COMMENT_MAX_LENGTH
     );
+    const content = fitHitlTextPreservingSuffix(
+      'a'.repeat(TEAMS_CONTENT_MAX_LENGTH),
+      suffix,
+      TEAMS_CONTENT_MAX_LENGTH
+    );
 
     expect(comment.length).toBe(SERVICENOW_COMMENT_MAX_LENGTH);
     expect(comment.endsWith(suffix)).toBe(true);
+    expect(content.length).toBe(TEAMS_CONTENT_MAX_LENGTH);
+    expect(content.endsWith(suffix)).toBe(true);
   });
 
   it('throws when the links alone exceed the limit', () => {
     expect(() => fitHitlTextPreservingSuffix('prompt', 'x'.repeat(11), 10)).toThrow(
       'exceed the 10 character connector limit'
+    );
+  });
+});
+
+describe('teamsHtmlLink', () => {
+  it('escapes the step text and keeps the href intact', () => {
+    expect(escapeTeamsHtml('Host <web-01> & "q"')).toBe('Host &lt;web-01&gt; &amp; &quot;q&quot;');
+    expect(teamsHtmlLink('Approve', 'https://kibana.example/resume?token=abc&approved=true')).toBe(
+      '<a href="https://kibana.example/resume?token=abc&amp;approved=true">Approve</a>'
     );
   });
 });

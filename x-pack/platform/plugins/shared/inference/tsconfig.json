@@ -44,6 +44,7 @@
     "@kbn/setup-node-env",
     "@kbn/ai-anonymization-common",
     "@kbn/ai-anonymization-server",
+    "@kbn/ai-anonymization-settings-plugin",
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
     "@kbn/utility-types",

@@ -95,7 +95,7 @@ describe('createKiIdentificationStartTool', () => {
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
-        kibanaPath: '/app/significant_events/knowledge_indicators?source=logs.nginx',
+        kibanaPath: '/app/nightshift/sources',
         slug: 'logs.nginx',
         title: 'logs.nginx',
         view_name: '$.nightshift.sources.default.logs.nginx',

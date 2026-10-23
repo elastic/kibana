@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
+  getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
   type IconType,
 } from '@elastic/eui';
@@ -29,6 +30,10 @@ interface ApprovalContentBodyProps {
   actionError?: string;
   'data-test-subj'?: string;
 }
+
+const processingPluginList = getDefaultEuiMarkdownProcessingPlugins({
+  linkProps: { target: '_blank' },
+});
 
 const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
   color === 'success' ? 'check' : color === 'danger' ? 'warning' : 'clock';
@@ -58,6 +63,7 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
           <div css={css({ marginBottom: euiTheme.size.m })}>
             <EuiMarkdownFormat
               textSize="s"
+              processingPluginList={processingPluginList}
               data-test-subj={dataTestSubj ? `${dataTestSubj}-comment` : undefined}
             >
               {comment}
@@ -73,7 +79,7 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
             color={banner.color}
             iconType={banner.isLoading ? EuiLoadingSpinner : bannerIconFor(banner.color)}
             title={
-              // The reason/hint suffix reads as detail, not part of the state word itself — the
+              // The reason suffix reads as detail, not part of the state word itself — the
               // callout's own title styling would otherwise bold all of it.
               bannerSuffix ? (
                 <>

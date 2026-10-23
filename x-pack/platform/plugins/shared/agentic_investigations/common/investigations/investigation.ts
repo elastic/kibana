@@ -63,6 +63,13 @@ export const investigationFiltersSchema = z.object({
   status: multiValued(z.enum(INVESTIGATION_METADATA_STATUSES)),
   /** `none` matches investigations whose severity has not been set. */
   severity: multiValued(z.enum([...INVESTIGATION_SEVERITIES, INVESTIGATION_SEVERITY_NONE])),
+  /**
+   * True: only investigations a worker is running for now (see `in_progress`). False: the rest.
+   * `true`/`false` from a query string, or a boolean from an in-process caller.
+   */
+  in_progress: z
+    .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
+    .optional(),
   subject_type: multiValued(z.enum(INVESTIGATION_SUBJECT_TYPES)),
   subject_id: multiValued(z.string().min(1).max(MAX_SUBJECT_ID_LENGTH)),
   /** Impacted entity id or name, matched exactly. */

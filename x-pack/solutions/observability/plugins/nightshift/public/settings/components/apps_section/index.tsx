@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   RELAY_APP_CONNECTION_STATUS,
@@ -134,6 +135,8 @@ export function SlackAppCard({
     status,
     error,
     workspace,
+    createdBy,
+    createdAt,
     isMutating,
     connect,
     confirm,
@@ -167,6 +170,8 @@ export function SlackAppCard({
             status={status}
             error={error}
             workspace={workspace}
+            createdBy={createdBy}
+            createdAt={createdAt}
             canEdit={canEdit}
             isMutating={isMutating}
             onConnect={connect}
@@ -189,6 +194,8 @@ interface SlackCardFooterProps {
   status: RelayAppConnectionStatus;
   error?: string;
   workspace?: SlackAppWorkspace;
+  createdBy?: string;
+  createdAt?: string;
   canEdit: boolean;
   isMutating: boolean;
   onConnect: () => void;
@@ -200,6 +207,8 @@ function SlackCardFooter({
   status,
   error,
   workspace,
+  createdBy,
+  createdAt,
   canEdit,
   isMutating,
   onConnect,
@@ -264,6 +273,11 @@ function SlackCardFooter({
         {workspace && (
           <EuiFlexItem grow={false}>
             <WorkspaceLabel workspace={workspace} />
+          </EuiFlexItem>
+        )}
+        {createdAt && (
+          <EuiFlexItem grow={false}>
+            <ConnectedByLabel createdBy={createdBy} createdAt={createdAt} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false} css={{ width: '100%' }}>
@@ -372,6 +386,27 @@ function WorkspaceLabel({ workspace: { tenantKey, name, url } }: { workspace: Sl
       </strong>{' '}
       {name ?? host ?? tenantKey}
       {name && host && <EuiTextColor color="subdued">{` (${host})`}</EuiTextColor>}
+    </EuiText>
+  );
+}
+
+function ConnectedByLabel({ createdBy, createdAt }: { createdBy?: string; createdAt: string }) {
+  const date = <FormattedDate value={createdAt} year="numeric" month="short" day="numeric" />;
+  return (
+    <EuiText size="s" color="subdued" data-test-subj="streamsSlackAppConnectedBy">
+      {createdBy ? (
+        <FormattedMessage
+          id="xpack.nightshift.settings.apps.slackSetUpByOn"
+          defaultMessage="Set up by {user} on {date}"
+          values={{ user: createdBy, date }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.nightshift.settings.apps.slackSetUpOn"
+          defaultMessage="Set up on {date}"
+          values={{ date }}
+        />
+      )}
     </EuiText>
   );
 }

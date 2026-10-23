@@ -49,12 +49,15 @@ export const useListEscalations = ({
   page,
   perPage,
   searchQuery,
+  entity,
   enabled = true,
 }: {
   status?: 'open' | 'closed' | 'all';
   page?: number;
   perPage?: number;
   searchQuery?: string;
+  /** Only escalations whose linked investigations impact this entity id. */
+  entity?: string | null;
   /** Set to false to skip fetching (e.g. when the current user lacks escalation read access). */
   enabled?: boolean;
 } = {}) => {
@@ -63,7 +66,7 @@ export const useListEscalations = ({
   useDebounce(() => setDebouncedSearch(searchQuery), 300, [searchQuery]);
 
   return useQuery({
-    queryKey: escalationQueryKeys.list(status, page, perPage, debouncedSearch),
+    queryKey: escalationQueryKeys.list(status, page, perPage, debouncedSearch, entity),
     queryFn: async (): Promise<ListEscalationsResponse> =>
       services.http.get<ListEscalationsResponse>(ESCALATIONS_INTERNAL_URL, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
@@ -72,6 +75,7 @@ export const useListEscalations = ({
           ...(page !== undefined ? { page } : {}),
           ...(perPage !== undefined ? { per_page: perPage } : {}),
           ...(debouncedSearch ? { search: debouncedSearch } : {}),
+          ...(entity ? { entity } : {}),
         },
       }),
     enabled,

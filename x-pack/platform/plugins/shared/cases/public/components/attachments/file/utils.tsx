@@ -104,25 +104,29 @@ export const getFilesFromComments = (
   return files;
 };
 
+const getCommentFileIds = (comment: AttachmentUIV2, owner: string): string[] => {
+  if (!isFileAttachment(comment, owner) || !('attachmentId' in comment)) {
+    return [];
+  }
+  return Array.isArray(comment.attachmentId) ? comment.attachmentId : [comment.attachmentId];
+};
+
 /**
  * Collects the set of file ids referenced by a case's comments. Used by
  * `CaseViewFiles` to intersect the files-API response against the (possibly
  * filtered) comment list so the badge and the file table stay in sync.
  */
-export const getFileIdsFromComments = (
+export const getFileIdsFromComments = (comments: CaseUI['comments'], owner: string): Set<string> =>
+  new Set(comments.flatMap((comment) => getCommentFileIds(comment, owner)));
+
+/** Ids of the file attachments that reference any of the file ids. */
+export const getFileAttachmentIds = (
   comments: CaseUI['comments'],
-  owner: string
-): Set<string> => {
-  const ids = new Set<string>();
-  for (const comment of comments) {
-    if (isFileAttachment(comment, owner) && 'attachmentId' in comment) {
-      const attachmentIds = Array.isArray(comment.attachmentId)
-        ? comment.attachmentId
-        : [comment.attachmentId];
-      for (const id of attachmentIds) {
-        ids.add(id);
-      }
-    }
-  }
-  return ids;
+  owner: string,
+  fileIds: string[]
+): string[] => {
+  const requestedIds = new Set(fileIds);
+  return comments.flatMap((comment) =>
+    getCommentFileIds(comment, owner).some((id) => requestedIds.has(id)) ? [comment.id] : []
+  );
 };

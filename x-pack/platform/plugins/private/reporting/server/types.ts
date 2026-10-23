@@ -91,6 +91,8 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   screenshotting?: ScreenshottingStart;
+  /** Takes precedence over `screenshotting` when enabled. */
+  pageRenderScreenshotting?: ScreenshottingStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{

@@ -6,15 +6,19 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useInfiniteQuery, useQuery } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
-import { isAbortError } from '../../../../../common/utils/exceptions';
-import type { PageCursor, QueryArgs, Row, SortValue } from '../common';
-import { ANOMALY_COUNT_FIELD, getEntityId, getNumber } from '../common';
+import type { QueryArgs, Row } from '../common';
+import { ANOMALY_COUNT_FIELD, getNumber } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 import { createEsqlRunner } from '../queries/esql';
+import {
+  applyResolvedEntityFilterOverrides,
+  fetchResolvedEntityFilterOverrides,
+  isFilteringByGroupValue,
+} from '../queries/resolved_entities';
 import { useEntityGridRowsEnrichment } from './use_entity_grid_rows_enrichment';
 import {
   buildQueryArgs,
@@ -26,7 +30,6 @@ import {
 import type {
   EntityGridKeyScope,
   GridContext,
-  RowsBatch,
   UseEntityGridDataOptions,
 } from './use_entity_grid_context';
 
@@ -35,11 +38,8 @@ const GRID_QUERY_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Error loading entities table' }
 );
 
-/**
- * Most rows the grid loads: its custom body renders every loaded row (no virtualization), so
- * it caps them. Not yet profiled in Chrome; raise it if rendering 1k rows stays smooth.
- */
-export const MAX_LOADED_ROWS = 500;
+/** The body renders and enriches only the rows in view, so the grid can load this many. */
+export const MAX_LOADED_ROWS = 1_000;
 
 /** Prefix of every query of expanded groups' records, e.g. for `useIsFetching`. */
 export const ENTITY_GRID_CHILDREN_QUERY_KEY = ['entity-grid', 'children'] as const;
@@ -55,24 +55,6 @@ const ROWS_STALE_TIME_MS: Readonly<Record<EntityGridKeyScope, number>> = {
 
 const isAnomalySort = ({ sortField }: UseEntityGridDataOptions) =>
   sortField === ANOMALY_COUNT_FIELD;
-
-// ── helpers ───────────────────────────────────────────────────────────────────
-
-/**
- * Resolves to `null` when the request fails, so the caller can fall back instead of failing.
- * An abort still rejects: the query key changed and the caller drops the result.
- */
-const nullOnFailure = <T>(request: Promise<T>): Promise<T | null> =>
-  request.catch((err) => {
-    if (isAbortError(err)) throw err;
-    return null;
-  });
-
-/** Narrows a sort column value for a cursor. */
-const toSortValue = (value: unknown): SortValue =>
-  typeof value === 'string' || typeof value === 'number' ? value : null;
-
-// ── query keys ────────────────────────────────────────────────────────────────
 
 const getRowsKey = (context: GridContext, options: UseEntityGridDataOptions) =>
   [
@@ -93,186 +75,204 @@ const getRowsKey = (context: GridContext, options: UseEntityGridDataOptions) =>
  * The count is keyed by its query text: every sort counts the entities in view, so they share
  * one cached total per filter set. It must not embed time-dependent values.
  */
-const getCountKey = (context: GridContext, options: UseEntityGridDataOptions, countQuery: string) =>
-  ['entity-grid', getKeyScope(options), 'count', { spaceId: context.spaceId, countQuery }] as const;
+const getCountKey = (
+  context: GridContext,
+  options: UseEntityGridDataOptions,
+  countQuery: readonly string[]
+) =>
+  [
+    'entity-grid',
+    getKeyScope(options),
+    'count',
+    { spaceId: context.spaceId, countQuery: countQuery.join('\n') },
+  ] as const;
 
-// ── requests ──────────────────────────────────────────────────────────────────
+const getFilterOverridesKey = (context: GridContext, options: OverridesOptions) =>
+  [
+    'entity-grid',
+    getKeyScope(options),
+    'resolved-entity-filter-overrides',
+    {
+      spaceId: context.spaceId,
+      concreteEntityIndexName: context.concreteEntityIndexName,
+      entityExpression: options.entityExpression,
+      // Individual rows never read overrides, so their key never holds the resolved rows' ones.
+      rowsMode: options.rowsMode,
+    },
+  ] as const;
+
+const getQueryArgs = (context: GridContext, options: UseEntityGridDataOptions): QueryArgs => {
+  const ready = getReadyContext(context);
+  if (!ready) throw new Error('entities index not resolved');
+  return buildQueryArgs(ready, options);
+};
 
 /** The count query of the view, or `null` until the space and the index resolve. */
-const buildCountQuery = (context: GridContext, options: UseEntityGridDataOptions) => {
-  const ready = getReadyContext(context);
-  return ready && buildEntitiesInViewCountQuery(buildQueryArgs(ready, options, null));
-};
+const buildCountQuery = (context: GridContext, options: UseEntityGridDataOptions) =>
+  getReadyContext(context) ? buildEntitiesInViewCountQuery(getQueryArgs(context, options)) : null;
 
 const fetchCount = async (
   { searchService }: GridContext,
-  countQuery: string,
+  countQuery: readonly string[],
   signal?: AbortSignal
 ): Promise<number> => {
   const [countRow] = await createEsqlRunner(searchService, signal)(countQuery);
   return (countRow && getNumber(countRow, 'total')) ?? 0;
 };
 
-/**
- * The number of entities in view, which picks the sort query of a large view. Shares the
- * count query's cache. Without a count the view reads as small (0).
- */
-const fetchViewSize = async (context: GridContext, options: UseEntityGridDataOptions) => {
-  const countQuery = buildCountQuery(context, options);
-  if (!countQuery) return 0;
-  const count = await nullOnFailure(
-    context.queryClient.fetchQuery({
-      queryKey: getCountKey(context, options, countQuery),
-      queryFn: ({ signal }) => fetchCount(context, countQuery, signal),
-      staleTime: Infinity,
-    })
-  );
-  return count ?? 0;
-};
-
-/** One load of rows plus one, from the sort column's query. */
-const fetchSortRows = async (
+/** The sort query reads one extra row, only to tell whether the view has more. */
+const fetchRows = async (
   context: GridContext,
   options: UseEntityGridDataOptions,
-  args: QueryArgs,
   signal?: AbortSignal
-): Promise<Row[]> => {
+): Promise<{ rows: Row[]; isAtLoadLimit: boolean }> => {
   const fetchSortPage = findSortPageFetcher(options.sortField);
   if (!fetchSortPage) throw new Error(`Column ${options.sortField} is not sortable`);
-  return fetchSortPage(args, {
+  const args = getQueryArgs(context, options);
+  const rowsWithLookahead = await fetchSortPage(args, {
     runQuery: createEsqlRunner(context.searchService, signal),
-    fetchViewSize: () => fetchViewSize(context, options),
   });
-};
-
-const getCursorAfter = (row: Row, { sort }: QueryArgs): PageCursor => ({
-  sortField: sort.field,
-  sortDirection: sort.direction,
-  sortValue: toSortValue(row[sort.field]),
-  entityId: getEntityId(row) ?? '',
-});
-
-/**
- * The batch and the cursor of the next one, from a load that asked for one row more than it
- * shows: that extra (lookahead) row only tells whether another batch exists.
- */
-const getBatch = (rowsWithLookahead: Row[], args: QueryArgs): RowsBatch => {
-  if (rowsWithLookahead.length <= args.pageSize)
-    return { rows: rowsWithLookahead, nextCursor: null };
-  const rows = rowsWithLookahead.slice(0, args.pageSize);
-  return { rows, nextCursor: getCursorAfter(rows[rows.length - 1], args) };
-};
-
-const fetchRowsBatch = async (
-  context: GridContext,
-  options: UseEntityGridDataOptions,
-  cursor: PageCursor | null,
-  signal?: AbortSignal
-): Promise<RowsBatch> => {
-  const ready = getReadyContext(context);
-  if (!ready) throw new Error('entities index not resolved');
-  const args = buildQueryArgs(ready, options, cursor);
-  return getBatch(await fetchSortRows(context, options, args, signal), args);
-};
-
-// ── rows ──────────────────────────────────────────────────────────────────────
-
-/** Whether another batch fits under the row limit, or the grid holds as many as it loads. */
-const getLoadMoreState = (loadedRows: number, hasNextBatch: boolean, pageSize: number) => {
-  const fitsAnotherBatch = loadedRows + pageSize <= MAX_LOADED_ROWS;
   return {
-    canLoadMore: hasNextBatch && fitsAnotherBatch,
-    isAtLoadLimit: hasNextBatch && !fitsAnotherBatch,
+    rows: rowsWithLookahead.slice(0, args.pageSize),
+    isAtLoadLimit: rowsWithLookahead.length > args.pageSize,
   };
 };
 
-/** The options with a batch no larger than the row limit. */
-const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
-  options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
+type OverridesOptions = Pick<
+  UseEntityGridDataOptions,
+  'rowsMode' | 'entityExpression' | 'keyScope'
+>;
 
-// ── hooks ─────────────────────────────────────────────────────────────────────
-
-const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions) =>
-  useInfiniteQuery(
-    getRowsKey(context, options),
-    ({ pageParam = null, signal }) => fetchRowsBatch(context, options, pageParam, signal),
+const fetchFilterOverrides = (
+  context: GridContext,
+  { rowsMode, entityExpression }: OverridesOptions,
+  signal?: AbortSignal
+) => {
+  const ready = getReadyContext(context);
+  if (!ready) throw new Error('entities index not resolved');
+  return fetchResolvedEntityFilterOverrides(
     {
-      enabled:
-        getReadyContext(context) != null &&
-        !(isAnomalySort(options) && context.isAnomalyJobsLoading),
-      getNextPageParam: ({ nextCursor }) => nextCursor ?? undefined,
-      // Keep painting the loaded rows while a new sort or filter loads.
-      keepPreviousData: true,
-      staleTime: ROWS_STALE_TIME_MS[getKeyScope(options)],
-    }
-  );
-
-const useCountQuery = (context: GridContext, options: UseEntityGridDataOptions) => {
-  const countQuery = buildCountQuery(context, options);
-  return useQuery(
-    getCountKey(context, options, countQuery ?? ''),
-    ({ signal }) => (countQuery ? fetchCount(context, countQuery, signal) : Promise.resolve(0)),
-    // No keepPreviousData: a stale unfiltered total would show next to filtered rows.
-    { enabled: countQuery != null }
+      namespace: ready.spaceId,
+      concreteEntityIndexName: ready.concreteEntityIndexName,
+      rowsMode,
+      entityExpression,
+    },
+    createEsqlRunner(context.searchService, signal)
   );
 };
 
-/** Fetches the first batch of any view ahead of time, e.g. a group's records on hover. */
+const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
+  options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
+
+/** The resolved entities the entity filters add or remove, read before any query uses them. */
+const useResolvedEntityFilterOverrides = (context: GridContext, options: OverridesOptions) =>
+  useQuery(
+    getFilterOverridesKey(context, options),
+    ({ signal }) => fetchFilterOverrides(context, options, signal),
+    { enabled: getReadyContext(context) != null && isFilteringByGroupValue(options) }
+  );
+
+const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions, isReady: boolean) =>
+  useQuery(getRowsKey(context, options), ({ signal }) => fetchRows(context, options, signal), {
+    enabled:
+      isReady &&
+      getReadyContext(context) != null &&
+      !(isAnomalySort(options) && context.isAnomalyJobsLoading),
+    // Keep painting the loaded rows while a new sort or filter loads.
+    keepPreviousData: true,
+    staleTime: ROWS_STALE_TIME_MS[getKeyScope(options)],
+  });
+
+const useCountQuery = (
+  context: GridContext,
+  options: UseEntityGridDataOptions,
+  isReady: boolean
+) => {
+  const countQuery = buildCountQuery(context, options);
+  return useQuery(
+    getCountKey(context, options, countQuery ?? []),
+    ({ signal }) => fetchCount(context, countQuery ?? [], signal),
+    // No keepPreviousData: a stale unfiltered total would show next to filtered rows.
+    { enabled: isReady && countQuery != null }
+  );
+};
+
+/** Fetches the rows of any view ahead of time, e.g. a group's records on hover. */
 const usePrefetch = (context: GridContext) =>
   useCallback(
     (viewOptions: UseEntityGridDataOptions) => {
       if (!getReadyContext(context)) return;
       const options = limitPageSize(viewOptions);
-      void context.queryClient.prefetchInfiniteQuery({
+      void context.queryClient.prefetchQuery({
         queryKey: getRowsKey(context, options),
-        queryFn: ({ signal }) => fetchRowsBatch(context, options, null, signal),
+        queryFn: ({ signal }) => fetchRows(context, options, signal),
         staleTime: ROWS_STALE_TIME_MS[getKeyScope(options)],
       });
     },
     [context]
   );
 
-/**
- * The grid's rows, loaded a batch at a time:
- * 1. Rows: the sort column's query (see queries/README.md), one batch plus one row. Each Load
- *    More starts after the last loaded row (its cursor).
- * 2. Count: the entities in view, shared by every sort.
- * 3. Enrich: each batch's computed columns, after its rows arrive (see the enrichment hook).
- * A new sort or filter starts over from the first batch, painting the previous rows until it
- * arrives. `prefetch` warms the first batch of another view, e.g. a group's records on hover.
- */
-export const useEntityGridData = (viewOptions: UseEntityGridDataOptions) => {
-  const options = useMemo(() => limitPageSize(viewOptions), [viewOptions]);
+/** The rows of the sort column's query, the count of the view, and the computed columns of rows in view. */
+/** The overrides the grid's rows read, for another view of the same rows (Group by). */
+export const useEntityFilterOverrides = (options: OverridesOptions) =>
+  useResolvedEntityFilterOverrides(useGridContext(), options);
+
+export const useEntityGridData = (
+  requestedOptions: UseEntityGridDataOptions,
+  /** Enrich only the rows the grid reports in view, through `onRowsInViewChange`. */
+  { enrichRowsInView = false }: { enrichRowsInView?: boolean } = {}
+) => {
+  const options = useMemo(() => limitPageSize(requestedOptions), [requestedOptions]);
   const context = useGridContext();
-  const rowsQuery = useRowsQuery(context, options);
-  const countQuery = useCountQuery(context, options);
-  const batches = useMemo(() => rowsQuery.data?.pages ?? [], [rowsQuery.data]);
+  const resolvedEntityFilterOverrides = useResolvedEntityFilterOverrides(context, options);
+  // Every query of the view waits for the overrides of its filters.
+  const isReady = !isFilteringByGroupValue(options) || resolvedEntityFilterOverrides.data != null;
+  // The filters judge resolved entities by their group's values, so the overrides join the filter.
+  const viewOptions = useMemo(
+    () => ({
+      ...options,
+      entityExpression:
+        options.entityExpression &&
+        applyResolvedEntityFilterOverrides(
+          options.entityExpression,
+          resolvedEntityFilterOverrides.data
+        ),
+    }),
+    [options, resolvedEntityFilterOverrides.data]
+  );
+  const rowsQuery = useRowsQuery(context, viewOptions, isReady);
+  const countQuery = useCountQuery(context, viewOptions, isReady);
   const enrichment = useEntityGridRowsEnrichment(
     context,
-    options,
-    batches,
-    rowsQuery.isPreviousData
+    viewOptions,
+    rowsQuery.data?.rows,
+    rowsQuery.isPreviousData,
+    enrichRowsInView
   );
-  const { rows } = enrichment;
+  const { rows, onRowsInViewChange } = enrichment;
   const prefetch = usePrefetch(context);
   useErrorToast(
     GRID_QUERY_ERROR_TITLE,
-    context.entitiesIndexError ?? rowsQuery.error ?? countQuery.error ?? enrichment.error
+    context.entitiesIndexError ??
+      resolvedEntityFilterOverrides.error ??
+      rowsQuery.error ??
+      countQuery.error ??
+      enrichment.error
   );
 
   return {
+    prefetch,
+    onRowsInViewChange,
     rows,
     isEnriching: enrichment.isEnriching,
-    total: countQuery.data ?? rows.length,
+    total: countQuery.data,
     updatedAt: Math.max(rowsQuery.dataUpdatedAt, enrichment.dataUpdatedAt) || null,
+    isAtLoadLimit: !!rowsQuery.data?.isAtLoadLimit,
     isFetching:
+      resolvedEntityFilterOverrides.isFetching ||
       rowsQuery.isFetching ||
       countQuery.isFetching ||
       enrichment.isFetching ||
       context.isEntitiesIndexLoading,
-    ...getLoadMoreState(rows.length, !!rowsQuery.hasNextPage, options.pageSize),
-    isLoadingMore: rowsQuery.isFetchingNextPage,
-    loadMore: rowsQuery.fetchNextPage,
-    prefetch,
   };
 };

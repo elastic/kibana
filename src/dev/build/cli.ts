@@ -35,10 +35,11 @@ if (showHelp) {
 
       options:
         --all-platforms                      {dim Produce archives for all platforms, not just this one}
+        --cloud                              {dim Only build the cloud packages}
         --deb                                {dim Only build the deb packages}
         --docker-context-use-local-artifact  {dim Use a local artifact when building the Docker context}
         --docker-contexts                    {dim Only build the Docker build contexts}
-        --docker-cross-compile               {dim Produce arm64 and amd64 Docker images}
+        --docker-cross-compile               {dim Produce arm64 and amd64 Docker images and cloud/serverless archives}
         --docker-images                      {dim Only build the Docker images}
         --docker-namespace                   {dim Specify the registry namespace for image pushing}
         --docker-push                        {dim Enable pushing after building each docker image}
@@ -50,7 +51,7 @@ if (showHelp) {
         --rpm                                {dim Only build the rpm packages}
         --serverless                         {dim Only build the serverless packages}
         --skip-archives                      {dim Don't produce tar/zip archives}
-        --skip-cloud-dependencies-download   {dim Don't download cloud dependencies (beats)}
+        --skip-cloud-dependencies-download   {dim Don't download cloud dependencies}
         --skip-cdn-assets                    {dim Don't build CDN assets}
         --skip-docker-cloud                  {dim Don't build the docker cloud image}
         --skip-docker-cloud-fips             {dim Don't build the docker cloud fips image}
@@ -59,6 +60,7 @@ if (showHelp) {
         --skip-docker-serverless             {dim Don't build the docker serverless image}
         --skip-docker-ubi                    {dim Don't build the docker ubi image}
         --skip-docker-wolfi                  {dim Don't build the docker wolfi image}
+        --skip-fips-provider                 {dim Skip building and bundling the OpenSSL FIPS provider}
         --skip-initialize                    {dim Skip environment cleanup and verification}
         --skip-generic-folders               {dim Skip building package, plugins, etc from source}
         --skip-platform-folders              {dim Skip platform specific folder creation and operations}

@@ -18,7 +18,8 @@ export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
 export const visorStyles = (
   euiThemeContext: UseEuiTheme,
   isInline: boolean,
-  isVisible: boolean = true
+  isVisible: boolean = true,
+  hasOutline: boolean = false
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
@@ -46,9 +47,12 @@ export const visorStyles = (
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
           overflow: ${isVisible ? 'visible' : 'hidden'};
-          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)${
+            hasOutline ? ', margin-top 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)' : ''
+          };
         `
         : `min-height: ${euiTheme.size.xl};`}
+      ${hasOutline ? `margin-top: ${isVisible ? euiTheme.size.s : '0'};` : ''}
     `,
     inputSlot: css`
       flex: 1;
@@ -87,7 +91,7 @@ export const visorStyles = (
       flex-shrink: 0;
       box-sizing: border-box;
       gap: ${euiTheme.size.xs};
-      margin-inline-start: ${euiTheme.size.xs};
+      margin-inline-start: ${hasOutline ? '0' : euiTheme.size.xs};
       block-size: ${euiTheme.size.xl};
       max-block-size: ${euiTheme.size.xl};
       padding: ${euiTheme.size.xs};

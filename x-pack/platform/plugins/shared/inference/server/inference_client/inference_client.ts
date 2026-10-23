@@ -43,6 +43,7 @@ export function createInferenceClient({
   isDefaultConnectorOnly,
   getDefaultConnectorId,
   resolveConnectorId,
+  shouldStreamInferenceEndpoint,
 }: {
   request: KibanaRequest;
   namespace: string;
@@ -60,6 +61,7 @@ export function createInferenceClient({
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -85,6 +87,7 @@ export function createInferenceClient({
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
+    shouldStreamInferenceEndpoint,
   });
 
   const chatComplete = createChatCompleteApi({

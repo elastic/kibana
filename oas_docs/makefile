@@ -60,7 +60,8 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 	@bump overlay "output/kibana.serverless.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.serverless.tmp5.yaml"
 	@bump overlay "output/kibana.serverless.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.serverless.tmp6.yaml"
 	@bump overlay "output/kibana.serverless.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.serverless.tmp7.yaml"
-	@bump overlay "output/kibana.serverless.tmp7.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.serverless.tmp8.yaml"
+	@bump overlay "output/kibana.serverless.tmp7.yaml" "overlays/discover_sessions.overlays.yaml" > "output/kibana.serverless.tmp8.yaml"
+	@bump overlay "output/kibana.serverless.tmp8.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.serverless.tmp9.yaml"
 	@bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
 	@bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
 	@bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
@@ -68,9 +69,10 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 	@bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
 	@bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
 	@bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
-	@bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.tmp8.yaml"
-	@redocly bundle output/kibana.serverless.tmp8.yaml --ext yaml -o output/kibana.serverless.yaml
-	@redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.yaml
+	@bump overlay "output/kibana.tmp7.yaml" "overlays/discover_sessions.overlays.yaml" > "output/kibana.tmp8.yaml"
+	@bump overlay "output/kibana.tmp8.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.tmp9.yaml"
+	@redocly bundle output/kibana.serverless.tmp9.yaml --ext yaml -o output/kibana.serverless.yaml
+	@redocly bundle output/kibana.tmp9.yaml --ext yaml -o output/kibana.yaml
 	rm -f output/kibana.tmp*.yaml
 	rm -f output/kibana.serverless.tmp*.yaml
 
@@ -110,8 +112,9 @@ api-docs-overlay-external: merge-api-docs-stateful ## Apply all overlays except 
 	@bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
 	@bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
 	@bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
-	@bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.strip_request_examples.yaml" > "output/kibana.tmp8.yaml"
-	@redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.external.yaml
+	@bump overlay "output/kibana.tmp7.yaml" "overlays/discover_sessions.overlays.yaml" > "output/kibana.tmp8.yaml"
+	@bump overlay "output/kibana.tmp8.yaml" "overlays/kibana.overlays.strip_request_examples.yaml" > "output/kibana.tmp9.yaml"
+	@redocly bundle output/kibana.tmp9.yaml --ext yaml -o output/kibana.external.yaml
 	rm -f output/kibana.tmp*.yaml
 
 .PHONY: api-docs-preview

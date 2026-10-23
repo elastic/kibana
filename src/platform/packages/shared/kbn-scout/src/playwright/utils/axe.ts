@@ -11,6 +11,7 @@ import type { Frame, Page } from '@playwright/test';
 import type { AxeResults, Result, RunOptions } from 'axe-core';
 import axe from 'axe-core';
 import { AXE_OPTIONS, AXE_IMPACT_LEVELS } from '@kbn/axe-config';
+import { withTimeout } from '@kbn/std';
 
 export interface RunA11yScanOptions {
   /** Optional CSS selectors to include in analysis */
@@ -65,22 +66,11 @@ const runA11yScan = async (
 ) => {
   const context: SelectorContext = { include, exclude };
 
-  const analysisPromise = analyze(page, context, AXE_OPTIONS);
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  const result = await Promise.race([
-    analysisPromise,
-    new Promise<never>((_, reject) => {
-      timeoutId = setTimeout(
-        () => reject(new Error(`Axe accessibility scan timed out after ${timeoutMs}ms`)),
-        timeoutMs
-      );
-    }),
-  ]);
-
-  if (timeoutId) {
-    clearTimeout(timeoutId);
+  const outcome = await withTimeout({ promise: analyze(page, context, AXE_OPTIONS), timeoutMs });
+  if (outcome.timedout) {
+    throw new Error(`Axe accessibility scan timed out after ${timeoutMs}ms`);
   }
+  const result = outcome.value;
 
   let violations: Result[] = result.violations;
 

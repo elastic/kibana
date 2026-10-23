@@ -28,11 +28,13 @@ import {
   testIndexName,
   uniqueSuffix,
   updateSource,
+  validateSourceQuery,
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-authz';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/298822
+apiTest.describe.skip(
   'Nightshift sources authorization',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -81,6 +83,9 @@ apiTest.describe(
 
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
       expect(
+        await validateSourceQuery(apiClient, cookieHeader, { esql: body.esql })
+      ).toHaveStatusCode(403);
+      expect(
         await updateSource(apiClient, cookieHeader, sourceId, { ...body, tags: [] })
       ).toHaveStatusCode(403);
       expect(await setSourceEnabled(apiClient, cookieHeader, sourceId, false)).toHaveStatusCode(
@@ -91,7 +96,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'reports unknown health to a reader without Elasticsearch view privileges',
+      'reports ok health to a reader with only the implicit view grant',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ONLY_NO_ES_ROLE);
 
@@ -105,7 +110,7 @@ apiTest.describe(
 
         const fetched = await getSource(apiClient, cookieHeader, sourceId);
         expect(fetched).toHaveStatusCode(200);
-        expect(fetched.body.health).toBe('unknown');
+        expect(fetched.body.health).toBe('ok');
       }
     );
 

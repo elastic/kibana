@@ -18,6 +18,7 @@ const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
 const createDelegate = (): jest.Mocked<ServiceAccountsServiceContract> => ({
   isEnabled: jest.fn().mockReturnValue(true),
   create: jest.fn(),
+  delete: jest.fn(),
   bindWorkload: jest.fn(),
   unbindWorkload: jest.fn(),
   getWorkloadBinding: jest.fn(),
@@ -37,17 +38,19 @@ describe('createPluginScopedServiceAccounts', () => {
   const scopedTo = (pluginId: string) =>
     createPluginScopedServiceAccounts({ pluginId, delegate, workloadTypes });
 
-  it('passes `isEnabled` and `create` straight through', () => {
+  it('passes `isEnabled`, `create`, and `delete` straight through', () => {
     const scoped = scopedTo('alerting');
 
     expect(scoped.isEnabled).toBe(delegate.isEnabled);
     expect(scoped.create).toBe(delegate.create);
+    expect(scoped.delete).toBe(delegate.delete);
   });
 
   it('exposes exactly the public service accounts contract', () => {
     expect(Object.keys(scopedTo('alerting')).sort()).toEqual([
       'bindWorkload',
       'create',
+      'delete',
       'getWorkloadBinding',
       'isEnabled',
       'unbindWorkload',
@@ -92,6 +95,35 @@ describe('createPluginScopedServiceAccounts', () => {
         WORKLOAD_IN_SPACE,
         fn
       );
+    });
+
+    it('passes the execution id of a scoped request through', async () => {
+      const fn = jest.fn();
+      const params = { ...WORKLOAD_IN_SPACE, executionId: 'x'.repeat(512) };
+
+      await scopedTo('alerting').withScopedRequestForWorkload(params, fn);
+      expect(delegate.withScopedRequestForWorkload).toHaveBeenCalledWith('alerting', params, fn);
+    });
+
+    it.each([
+      [
+        'an empty execution id',
+        '',
+        'Plugin [alerting] supplied an empty service account workload execution ID; execution IDs must be non-empty strings when supplied.',
+      ],
+      [
+        'an execution id longer than 512 characters',
+        'x'.repeat(513),
+        'Plugin [alerting] supplied a service account workload execution ID that is too long: it must be at most 512 characters, but got 513.',
+      ],
+    ])('rejects %s without reaching the delegate', async (_name, executionId, expectedMessage) => {
+      await expect(
+        scopedTo('alerting').withScopedRequestForWorkload(
+          { ...WORKLOAD_IN_SPACE, executionId },
+          jest.fn()
+        )
+      ).rejects.toThrow(expectedMessage);
+      expect(delegate.withScopedRequestForWorkload).not.toHaveBeenCalled();
     });
   });
 
