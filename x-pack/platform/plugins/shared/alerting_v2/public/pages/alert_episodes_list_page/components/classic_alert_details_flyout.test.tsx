@@ -201,9 +201,11 @@ describe('ClassicAlertDetailsFlyout', () => {
 
     expect(screen.getByTestId('classicAlertEpisodeFieldsTab')).toBeInTheDocument();
 
-    const detailsButton = screen.getByTestId('classicAlertEpisodeDetailsViewDetailsButton');
-    expect(detailsButton).toHaveAttribute('href', '/base/app/observability/alerts/alert-1');
-    expect(detailsButton).toHaveTextContent('View details');
+    await openTakeActionMenu();
+    const viewDetails = await screen.findByTestId('alertingV2EpisodeTakeAction-viewDetails');
+    expect(viewDetails).toHaveAttribute('href', '/base/app/observability/alerts/alert-1');
+    expect(viewDetails).not.toHaveAttribute('target');
+    expect(viewDetails).toHaveTextContent('View details');
   });
 
   it('omits the "View details" button for non-observability (stack) alerts', async () => {
@@ -222,8 +224,20 @@ describe('ClassicAlertDetailsFlyout', () => {
     });
 
     expect(
-      screen.queryByTestId('classicAlertEpisodeDetailsViewDetailsButton')
+      screen.queryByTestId('alertingV2EpisodeFlyoutTakeActionButton')
     ).not.toBeInTheDocument();
+  });
+
+  it('leaves View details out of the take action menu for rule types without an observability details page', async () => {
+    mockFetchClassicAlertById.mockResolvedValue(activeClassicAlert);
+
+    renderFlyout({ actions: classicWorkflowActions() });
+    await openTakeActionMenu();
+
+    expect(
+      await screen.findByTestId('alertingV2EpisodeTakeAction-ALERTING_V2_SNOOZE_EPISODE')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeTakeAction-viewDetails')).not.toBeInTheDocument();
   });
 
   it('renders an error state when the fetch fails', async () => {
@@ -262,10 +276,60 @@ describe('ClassicAlertDetailsFlyout', () => {
     });
 
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
-    expect(await screen.findByTestId('alertingV2EpisodeFlyoutTakeAction')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('alertingV2EpisodeFlyoutTakeActionButtonPanel')
+    ).toBeInTheDocument();
     expect(mockAction.isCompatible).toHaveBeenCalledWith({
       episodes: [expect.objectContaining({ source_id: 'v1' })],
     });
+  });
+
+  it('lists View details first, then the workflow actions, for observability rule types', async () => {
+    mockFetchClassicAlertById.mockResolvedValue({
+      ...activeClassicAlert,
+      _index: '.internal.alerts-observability.apm.alerts-default-000001',
+      'kibana.alert.rule.rule_type_id': 'apm.error_rate',
+    });
+
+    renderFlyout({ actions: classicWorkflowActions() });
+    await openTakeActionMenu();
+
+    const panel = await screen.findByTestId('alertingV2EpisodeFlyoutTakeActionButtonPanel');
+    const itemSubjects = Array.from(
+      panel.querySelectorAll('[data-test-subj^="alertingV2EpisodeTakeAction-"]')
+    ).map((item) => item.getAttribute('data-test-subj'));
+    expect(itemSubjects).toEqual([
+      'alertingV2EpisodeTakeAction-viewDetails',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_RESOLVE_EPISODE',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_SNOOZE_EPISODE',
+    ]);
+    expect(panel.querySelectorAll('.euiHorizontalRule')).toHaveLength(1);
+  });
+
+  it('keeps a take action menu with only View details for observability rule types without compatible actions', async () => {
+    mockFetchClassicAlertById.mockResolvedValue({
+      ...activeClassicAlert,
+      _index: '.internal.alerts-observability.apm.alerts-default-000001',
+      'kibana.alert.rule.rule_type_id': 'apm.error_rate',
+    });
+    const incompatible = {
+      id: 'incompatible-action',
+      order: 1,
+      displayName: 'Incompatible',
+      iconType: 'star',
+      isCompatible: () => false,
+      execute: jest.fn(async () => {}),
+    };
+
+    renderFlyout({ actions: [incompatible] });
+    await openTakeActionMenu();
+
+    const panel = await screen.findByTestId('alertingV2EpisodeFlyoutTakeActionButtonPanel');
+    expect(
+      Array.from(panel.querySelectorAll('[data-test-subj^="alertingV2EpisodeTakeAction-"]')).map(
+        (item) => item.getAttribute('data-test-subj')
+      )
+    ).toEqual(['alertingV2EpisodeTakeAction-viewDetails']);
   });
 
   it('disables Unresolve for a resolved classic alert, matching the alerts table', async () => {
