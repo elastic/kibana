@@ -16,6 +16,8 @@ import {
   isStateTransitionAllowed,
   putRuleDataSchema,
   updateRuleDataSchema,
+  type BulkCreateError,
+  type BulkGetRulesResponse,
   type PutRuleData,
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
@@ -152,17 +154,29 @@ const toBulkCreateError = (
   },
 });
 
-const toPerItemBoomError = (id: string, err: Boom.Boom): BulkOperationError => {
+const toPerItemError = (err: Boom.Boom): BulkOperationError['error'] => {
   const data = err.data as { code?: string; details?: Record<string, unknown> } | undefined;
   return {
-    id,
-    error: {
-      code: data?.code ?? ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
-      message: err.message,
-      ...(data?.details ? { details: data.details } : {}),
-    },
+    code: data?.code ?? ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
+    message: err.message,
+    ...(data?.details ? { details: data.details } : {}),
   };
 };
+
+const toRuleNotFoundError = (id: string): BulkOperationError => ({
+  id,
+  error: {
+    code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
+    message: getRuleNotFoundMessage(id),
+    details: { rule_id: id },
+  },
+});
+
+/** Where a prepared bulk-create item came from, so its errors are reported by request position. */
+interface BulkCreateItemPosition {
+  index: number;
+  id?: string;
+}
 
 const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
@@ -708,7 +722,13 @@ export class RulesClient {
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+        templateId: persisted.attributes.metadata.template?.id,
+      },
     ]);
     return rule;
   }
@@ -721,30 +741,35 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
     const ruleVersion = this.getNextVersion();
 
-    const errors: BulkOperationError[] = [];
+    const errors: BulkCreateError[] = [];
     const prepared: PreparedRule[] = [];
+    // Persist-time errors come back keyed by the stored id, which for an item
+    // without a client-supplied id is one the caller never saw; map them back
+    // to the request position instead.
+    const positions = new Map<string, BulkCreateItemPosition>();
 
-    for (const item of parsed.items) {
+    parsed.items.forEach((item, index) => {
       const { id, enabled, ...data } = item;
+      const position: BulkCreateItemPosition = { index, ...(id ? { id } : {}) };
       try {
-        prepared.push(
-          this.prepareRuleForCreate({
-            data,
-            id,
-            enabled,
-            actor,
-            nowIso,
-            version: ruleVersion,
-          })
-        );
+        const rule = this.prepareRuleForCreate({
+          data,
+          id,
+          enabled,
+          actor,
+          nowIso,
+          version: ruleVersion,
+        });
+        prepared.push(rule);
+        positions.set(rule.id, position);
       } catch (e) {
         if (Boom.isBoom(e)) {
-          errors.push(toPerItemBoomError(id ?? SavedObjectsUtils.generateId(), e));
-          continue;
+          errors.push({ ...position, error: toPerItemError(e) });
+          return;
         }
         throw e;
       }
-    }
+    });
 
     await this.validateSchedule(
       prepared
@@ -756,7 +781,16 @@ export class RulesClient {
     );
 
     const persisted = await this.persistPreparedRules(prepared);
-    errors.push(...persisted.errors);
+    for (const error of persisted.errors) {
+      const position = positions.get(error.id);
+      if (!position) {
+        throw Boom.badImplementation(
+          `Bulk create reported an error for unknown rule "${error.id}"`
+        );
+      }
+      errors.push({ ...position, error: error.error });
+    }
+    errors.sort((a, b) => a.index - b.index);
 
     const items: RuleResponse[] = [];
     const createdRules: EventRule[] = [];
@@ -772,6 +806,7 @@ export class RulesClient {
         spaceId,
         rule,
         origin: this.resolveRuleEventOrigin(),
+        templateId: doc.attributes.metadata.template?.id,
       });
     }
 
@@ -846,7 +881,13 @@ export class RulesClient {
     });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+        templateId: nextAttrs.metadata.template?.id,
+      },
     ]);
 
     return rule;
@@ -858,15 +899,33 @@ export class RulesClient {
     return this.toRuleApiResponse({ id, attrs, references });
   }
 
+  /**
+   * Resolves rules by id with per-item errors: a missing rule is reported as
+   * `RULE_NOT_FOUND` in `errors` and never fails the request, so `_bulk_get`
+   * behaves like every other bulk route.
+   */
   @withApm
-  public async getRules(ids: string[]): Promise<RuleResponse[]> {
+  public async getRules(ids: string[]): Promise<BulkGetRulesResponse> {
     const result = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
     const rulesById = new Map<string, RuleResponse>();
+    const errors: BulkOperationError[] = [];
 
     for (const doc of result) {
       if ('error' in doc) {
-        throw new Boom.Boom(doc.error.message, { statusCode: doc.error.statusCode });
+        errors.push(
+          doc.error.statusCode === 404
+            ? toRuleNotFoundError(doc.id)
+            : {
+                id: doc.id,
+                error: {
+                  code: bulkErrorCodeForStatus(doc.error.statusCode),
+                  message: doc.error.message,
+                  details: { statusCode: doc.error.statusCode },
+                },
+              }
+        );
+        continue;
       }
       rulesById.set(
         doc.id,
@@ -878,7 +937,9 @@ export class RulesClient {
       );
     }
 
-    return ids.map((id) => rulesById.get(id)!).filter(Boolean);
+    const items = ids.map((id) => rulesById.get(id)).filter((rule) => rule !== undefined);
+
+    return { items, errors };
   }
 
   @withApm
@@ -916,7 +977,13 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
-      { ruleId: id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      {
+        ruleId: id,
+        spaceId: this.spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+        templateId: existingAttrs.metadata.template?.id,
+      },
     ]);
   }
 
@@ -1014,7 +1081,13 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+        templateId: nextAttrs.metadata.template?.id,
+      },
     ]);
     return rule;
   }
@@ -1054,7 +1127,13 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+        templateId: nextAttrs.metadata.template?.id,
+      },
     ]);
     return rule;
   }
@@ -1266,8 +1345,14 @@ export class RulesClient {
                 references: doc.references,
               }),
               origin: this.resolveRuleEventOrigin(),
+              templateId: doc.attrs.metadata.template?.id,
             }
-          : { ruleId: result.id, spaceId, origin: this.resolveRuleEventOrigin() }
+          : {
+              ruleId: result.id,
+              spaceId,
+              origin: this.resolveRuleEventOrigin(),
+              templateId: undefined,
+            }
       );
     }
 
@@ -1393,6 +1478,7 @@ export class RulesClient {
           spaceId,
           rule,
           origin: this.resolveRuleEventOrigin(),
+          templateId: item.attrs.metadata.template?.id,
         });
       }
 
@@ -1479,6 +1565,7 @@ export class RulesClient {
           spaceId,
           rule,
           origin: this.resolveRuleEventOrigin(),
+          templateId: item.attrs.metadata.template?.id,
         });
       }
     }
@@ -1608,6 +1695,7 @@ export class RulesClient {
         spaceId,
         rule,
         origin: this.resolveRuleEventOrigin(),
+        templateId: item.attrs.metadata.template?.id,
       });
     }
 
@@ -1924,7 +2012,13 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+        templateId: nextAttrs.metadata.template?.id,
+      },
     ]);
     return { rule, created: false };
   }

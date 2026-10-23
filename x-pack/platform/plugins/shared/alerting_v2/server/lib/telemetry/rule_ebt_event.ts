@@ -142,11 +142,16 @@ const toEventOrigin = ({
   ...(app ? { app } : {}),
 });
 
-/** Projects a rule-change telemetry payload. Rule fields are omitted when `rule` is absent. */
+/**
+ * Projects a rule-change telemetry payload. Rule fields are omitted when `rule`
+ * is absent. `templateId` is passed separately because the public response no
+ * longer carries `metadata.template`; the lifecycle event supplies it.
+ */
 export const buildRuleChangedEventData = (
   rule: RuleResponse | undefined,
   origin: RuleChangedEventOrigin,
-  ruleId: string
+  ruleId: string,
+  templateId?: string
 ): RuleChangedEbtData => {
   const eventOrigin = toEventOrigin(origin);
 
@@ -155,7 +160,6 @@ export const buildRuleChangedEventData = (
   }
 
   const { kind, enabled, created_at: createdAt, metadata } = rule;
-  const templateId = metadata.template?.id;
   const builderType = metadata.builder?.type;
 
   return {
