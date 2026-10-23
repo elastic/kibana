@@ -8,8 +8,8 @@
 import type { IacProvisionerRenderFlow } from '../../telemetry/iac_provisioner_events';
 import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 
-/** IaCP workflow name for the AWS federated-identity connector. */
-export const IAC_FEDERATED_IDENTITY_WORKFLOW = 'federated_identity' as const;
+/** IaCP workflow name for the AWS federated-identity connector (the `aws/workload_identity_federation` blueprint). */
+export const IAC_FEDERATED_IDENTITY_WORKFLOW = 'workload_identity_federation' as const;
 
 /**
  * Upper bound on packages per render. Each entry costs a registry fetch, so the cap bounds abuse;

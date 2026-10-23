@@ -9,10 +9,8 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
-import {
-  CONTEXT_ENGINE_SETUP_AGENT_ID,
-  CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
-} from './agent/context_engine_agent';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from './agent/context_engine_agent';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
   AI_INDEX_AUTOMATIONS_SKILL_ID,
@@ -133,22 +131,34 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
           id: 'my-custom',
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
+          memory_enabled: true,
         },
       ],
     });
 
     expect(await resolver({ ids: ['my-custom'], request })).toEqual([
-      { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
+      {
+        id: 'my-custom',
+        esqlTarget: 'ai-index-idx-custom',
+        description: 'Support tickets.',
+        memoryEnabled: true,
+      },
     ]);
   });
 
   it('asks the service for the requested ids only, so just those are probed', async () => {
     const { resolver, list } = setup({
-      aiIndices: [{ id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } }],
+      aiIndices: [
+        {
+          id: 'wanted',
+          dest: { type: 'index', value: 'idx-wanted' },
+          memory_enabled: false,
+        },
+      ],
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
-      { id: 'wanted', esqlTarget: 'idx-wanted' },
+      { id: 'wanted', esqlTarget: 'idx-wanted', memoryEnabled: false },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
     expect(list).toHaveBeenCalledWith(['wanted', 'unknown']);
@@ -192,7 +202,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: CONTEXT_ENGINE_SETUP_AGENT_ID,
-        type: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
+        type: chatAgentTypeId,
         availability: expect.objectContaining({
           cacheMode: 'space',
           handler: expect.any(Function),

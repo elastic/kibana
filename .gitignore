@@ -37,8 +37,7 @@ target
 .windsurf
 *.iml
 *.log
-types.eslint.config.js
-types.eslint.config.cjs
+.oxlintrc.with_types.json
 __tmp__
 .bug-fixer-session/
 .playwright-mcp/
@@ -84,7 +83,6 @@ webpackstats.json
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
-!/config/serverless.workplaceai.yml
 !/config/serverless.vectordb.yml
 !/config/serverless.oblt.yml
 !/config/serverless.oblt.complete.yml

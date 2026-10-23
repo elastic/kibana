@@ -188,8 +188,8 @@ describe(`VegaParser._setDefaultColors`, () => {
         range: { category: { scheme: 'elastic' } },
         arc: { fill: VegaThemeColors.borealis.light.default },
         area: {
-          fill: getDefaultAreaGradientFill(VegaThemeColors.borealis.light.default),
-          fillOpacity: 0.3,
+          fill: VegaThemeColors.borealis.light.default,
+          fillOpacity: 0.5,
           line: true,
         },
         line: { stroke: VegaThemeColors.borealis.light.default },
@@ -198,6 +198,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         rule: { stroke: VegaThemeColors.borealis.light.default },
         shape: { stroke: VegaThemeColors.borealis.light.default },
         symbol: { fill: VegaThemeColors.borealis.light.default },
+        text: { fill: VegaThemeColors.borealis.light.text },
         trail: { fill: VegaThemeColors.borealis.light.default },
         view: { stroke: null },
         style: {

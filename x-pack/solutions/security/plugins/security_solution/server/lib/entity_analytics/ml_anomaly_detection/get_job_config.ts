@@ -98,7 +98,8 @@ export const getJobConfig = async ({
     let tacticNameById = new Map<string, string>();
     let techniqueNameById = new Map<string, string>();
     try {
-      const mitreBuckets = await resolveMitreBuckets(mitreDataClient);
+      // ML job custom settings carry ATT&CK ids only.
+      const mitreBuckets = await resolveMitreBuckets(mitreDataClient, 'enterprise');
       tacticNameById = new Map(mitreBuckets.tactics.map(({ id, name }) => [id, name]));
       techniqueNameById = new Map(
         [...mitreBuckets.techniques, ...mitreBuckets.subtechniques].map(({ id, name }) => [

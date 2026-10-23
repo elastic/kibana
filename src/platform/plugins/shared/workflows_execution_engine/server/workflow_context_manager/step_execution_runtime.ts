@@ -24,9 +24,9 @@ import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
-import { extractConnectorId, extractTokenUsage, parseDuration } from '../utils';
+import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } from '../utils';
 
-import type { IWorkflowEventLogger, WorkflowEventFlushOptions } from '../workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -115,6 +115,25 @@ export class StepExecutionRuntime {
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
   }
 
+  /** Returns the rendered step `timeout` in milliseconds, or undefined when the node has none. */
+  public getStepTimeoutMs(): number | undefined {
+    if (
+      !('configuration' in this.node) ||
+      this.node.configuration == null ||
+      typeof this.node.configuration !== 'object' ||
+      !('timeout' in this.node.configuration) ||
+      typeof this.node.configuration.timeout !== 'string'
+    ) {
+      return undefined;
+    }
+
+    return parseDuration(
+      renderDuration(this.node.configuration.timeout, (value) =>
+        this.contextManager.renderValueAccordingToContext(value)
+      )
+    );
+  }
+
   public get error(): ExecutionError | undefined {
     const errorInStep = this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.error;
     return errorInStep ? new ExecutionError(errorInStep) : undefined;
@@ -191,6 +210,9 @@ export class StepExecutionRuntime {
   public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
+    // Capture before upsert: the write below sets startedAt, so a later read cannot
+    // tell a first start from a durable poll resume of the same step execution.
+    const alreadyStarted = this.stepExecution?.startedAt != null;
 
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -201,7 +223,9 @@ export class StepExecutionRuntime {
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
     });
-    this.logStepStart(stepId, this.stepExecutionId);
+    if (!alreadyStarted) {
+      this.logStepStart(stepId, this.stepExecutionId);
+    }
   }
 
   public setInput(input: Record<string, unknown>): void {
@@ -379,10 +403,6 @@ export class StepExecutionRuntime {
       });
     }
     return usage;
-  }
-
-  public async flushEventLogs(options?: WorkflowEventFlushOptions): Promise<void> {
-    await this.stepLogger?.flushEvents(options);
   }
 
   /**

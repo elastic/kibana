@@ -21,6 +21,8 @@ import { AgentBuilderServicesContext } from './context/agent_builder_services_co
 import { ActiveSpaceProvider } from './context/active_space_context';
 import { PageWrapper } from './page_wrapper';
 import { StreamingProvider } from './context/streaming/streaming_context';
+import { ConversationStreamService } from '../services/events';
+import { refreshListsOnAgentChanges } from './utils/refresh_lists_on_agent_changes';
 
 export const mountApp = async ({
   core,
@@ -41,6 +43,11 @@ export const mountApp = async ({
   const queryClient = new QueryClient();
   await services.accessChecker.initAccess();
   const activeSpaceId = (await plugins.spaces?.getActiveSpace())?.id ?? DEFAULT_SPACE_ID;
+  const conversationStreamService = new ConversationStreamService(services.eventsService);
+  const listRefresh = refreshListsOnAgentChanges({
+    eventsService: services.eventsService,
+    queryClient,
+  });
 
   ReactDOM.render(
     core.rendering.addContext(
@@ -53,7 +60,7 @@ export const mountApp = async ({
                   <RedirectAppLinks coreStart={core}>
                     <PageWrapper>
                       <Router history={history}>
-                        <StreamingProvider>
+                        <StreamingProvider conversationStreamService={conversationStreamService}>
                           <AgentBuilderRoutes />
                         </StreamingProvider>
                       </Router>
@@ -70,6 +77,8 @@ export const mountApp = async ({
   );
 
   return () => {
+    listRefresh.unsubscribe();
+    conversationStreamService.dispose();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

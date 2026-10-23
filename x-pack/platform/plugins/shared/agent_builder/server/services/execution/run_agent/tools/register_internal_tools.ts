@@ -28,6 +28,7 @@ import { createAskUserQuestionTool } from './ask_user_question';
 import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
+import { createExecuteDynamicTool } from './execute_dynamic_tool';
 import {
   createDiscoverApisTool,
   createDescribeApiTool,
@@ -110,6 +111,7 @@ export const registerInternalTools = async ({
     todoStateManager,
     selfClient,
     parentExecutionId,
+    conversationAccess,
   } = context;
 
   // Sub-agent spawning is reserved for top-level, non-standalone runs
@@ -139,12 +141,12 @@ export const registerInternalTools = async ({
     tools.push(createDiscoverApisTool());
   }
 
-  // run_subagent + send_message + sleep — experimental; reserved for top-level
-  // runs (see `canSpawnSubagents` above for why sub-agents can't nest-spawn).
+  // run_subagent + send_message + sleep — reserved for top-level runs (see
+  // `canSpawnSubagents` above for why sub-agents can't nest-spawn).
   // All three share the same registration gate: the parent agent's resolved
   // `subagent_ids` allowlist must be non-empty. Per-call reachability for
   // `send_message` is enforced in the handler (§3.5 of the design).
-  if (experimentalFeatures.subagents && canSpawnSubagents) {
+  if (canSpawnSubagents) {
     const allowedSubagents = await resolveAllowedSubagents({
       configuredIds: agentConfiguration.subagent_ids ?? [],
       agentRegistry,
@@ -153,6 +155,9 @@ export const registerInternalTools = async ({
 
     if (allowedSubagents.length > 0) {
       const allowedIds = new Set(allowedSubagents.map((a) => a.id));
+      const inferenceFeatureIdBySubagent = new Map(
+        allowedSubagents.map(({ id, inferenceFeatureId }) => [id, inferenceFeatureId])
+      );
       const ownerAgentId = agentId ?? agentBuilderDefaultAgentId;
 
       tools.push(
@@ -167,20 +172,26 @@ export const registerInternalTools = async ({
           parentConversationId,
           subagentTracker,
           conversationExists,
+          transientOnly: conversationAccess !== 'readWrite',
+          discoveryEnabled,
         })
       );
-      tools.push(
-        createSendMessageTool({
-          agentId: ownerAgentId,
-          executionId: executionId ?? '',
-          subAgentExecutor,
-          abortSignal,
-          backgroundExecutionService,
-          subagentTracker,
-          allowedIds,
-        })
-      );
-      tools.push(createSleepTool());
+      // send_message and sleep only serve persistent and background sub-agents.
+      if (conversationAccess === 'readWrite') {
+        tools.push(
+          createSendMessageTool({
+            agentId: ownerAgentId,
+            executionId: executionId ?? '',
+            subAgentExecutor,
+            abortSignal,
+            backgroundExecutionService,
+            subagentTracker,
+            allowedIds,
+            inferenceFeatureIdBySubagent,
+          })
+        );
+        tools.push(createSleepTool());
+      }
     }
   }
 
@@ -214,10 +225,13 @@ export const registerInternalTools = async ({
 
   await toolManager.addTools({
     type: ToolManagerToolType.executable,
-    tools: tools.map((tool) => ({
-      ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
-      origin: ToolOrigin.internal,
-    })),
+    tools: [
+      ...tools.map((tool) => ({
+        ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
+        origin: ToolOrigin.internal,
+      })),
+      ...(experimentalFeatures.dynamicTools ? [createExecuteDynamicTool({ toolManager })] : []),
+    ],
     logger,
   });
 };

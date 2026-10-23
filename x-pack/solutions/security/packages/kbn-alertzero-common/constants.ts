@@ -6,12 +6,23 @@
  */
 
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import {
+  REVIEW_GATED_AUTONOMY_LEVELS,
+  WORKER_AUTONOMY_LEVELS,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 
 export const ALERTZERO_FEATURE_ID = 'alertzero' as const;
 export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
 /** Mirrored as `ALERTZERO_APP_ID` in `@kbn/security-solution-navigation`; keep the two in sync. */
 export const ALERTZERO_APP_ID = 'alertzero' as const;
 export const ALERTZERO_APP_PATH = '/app/alertzero' as const;
+
+/**
+ * Per-space advanced setting gating the AlertZero app, its Security navigation nodes, and its
+ * internal API. Registered by the AlertZero server plugin (`server/ui_settings.ts`), and only when
+ * the `xpack.alertzero.enabled` deployment kill switch is on.
+ */
+export const ALERTZERO_ENABLED_SETTING_ID = 'securitySolution:enableAlertZero' as const;
 
 export const ALERTZERO_INTERNAL_URL = '/internal/alertzero' as const;
 
@@ -20,6 +31,12 @@ export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}`
 
 export const buildWatchUrl = (watchId: string) =>
   `${ALERTZERO_WATCHES_URL}/${encodeURIComponent(watchId)}`;
+
+/** Security's service-account directory. The id is opaque and may contain `/`. */
+export const SECURITY_SERVICE_ACCOUNT_URL = '/internal/security/service_account' as const;
+
+export const buildServiceAccountUrl = (serviceAccountId: string) =>
+  `${SECURITY_SERVICE_ACCOUNT_URL}/${encodeURIComponent(serviceAccountId)}`;
 
 /** Global worker catalog — shared across watches. */
 export const ALERTZERO_WORKERS_URL = `${ALERTZERO_INTERNAL_URL}/workers` as const;
@@ -38,12 +55,118 @@ export const ALERTZERO_PROPOSALS_CLOSED_URL = `${ALERTZERO_INTERNAL_URL}/proposa
 
 /** Action catalog — category-scoped discovery of installed action workflows. */
 export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
+export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
+  `${ALERTZERO_INTERNAL_URL}/investigations/count` as const;
+
+// --- Hunt services ---
+// Exported here, not just from the alertzero plugin's own common/constants.ts, so the
+// platform-level kbn-workflows managed-definitions tests can assert Hunt Watch's managed
+// YAML never references a route path string that isn't one of these, without reaching into
+// a private solution plugin's server modules.
+
+/** Internal route namespace for the hunt services. */
+export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
+
+/** The hunt scope for the space: the default data view Tier 1 searches and what resolved in it. */
+export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
+
+/** Candidate report selection for the tagged Worker's scheduled sweep and manual trigger. */
+export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
+
+/** Two-tier hunt pipeline for a single report, called by the hunt child (`hunt.yaml`). */
+export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
+
+/** Mints or verifies the Hunt Watch Investigation for a report, called by its own child workflow. */
+export const FIND_OR_CREATE_INVESTIGATION_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/find_or_create_investigation` as const;
+
+/** Stamps the hunt-once gate on a report after a completed `run_hunt_coordinator` call. */
+export const WRITE_HUNT_EVIDENCE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/write_hunt_evidence` as const;
+
+/** Failed managed scans in the trailing 24 hours, folded onto Workers. */
+export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
+
+/** Read-only Hunt Watch threat-intel supply status for the current space. */
+export const HUNT_THREAT_INTEL_SUPPLY_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/threat_intel_supply` as const;
+
+/** Re-enable drifted TI supply while Continuous Threat Hunt is on. */
+export const HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL =
+  `${HUNT_THREAT_INTEL_SUPPLY_URL}/restore` as const;
+
+export type HuntThreatIntelSupplyScope = 'deployment' | 'space';
+export type HuntThreatIntelSupplyWorkflowKey = 'ingest' | 'enrich' | 'attribute';
+
+export interface HuntThreatIntelSupplyWorkflowStatus {
+  key: HuntThreatIntelSupplyWorkflowKey;
+  workflowId: string;
+  enabled: boolean;
+  installed: boolean;
+  scope: HuntThreatIntelSupplyScope;
+  inUseElsewhere?: boolean;
+}
+
+export interface HuntThreatIntelSupplyHardGate {
+  ok: boolean;
+  reasonCodes: string[];
+}
+
+/** The AlertZero model tiers Hunt runs on. */
+export type HuntModelTierId = 'efficient' | 'balanced' | 'frontier';
+
+/**
+ * Where a tier's model comes from, as the requesting user sees it:
+ *  - `configured`: an operator picked a model for the tier in Feature Settings.
+ *  - `recommended`: no pick, so the tier runs on its first provisioned recommended model.
+ *  - `configured_missing`: an operator picked models for the tier but none of them exist any
+ *    more (deleted, or the list was cleared). Hunt runs on a deployment default meanwhile, and
+ *    the pick needs repairing.
+ *  - `default_fallback`: nothing is configured for the tier, so it runs on a deployment default
+ *    (the platform default, or the connector the operator set as the default). Hunt works, but
+ *    the tier may be on a model much bigger or smaller than intended. This also covers a
+ *    deployment set to use the default connector only, which is a deliberate choice.
+ *  - `unavailable`: nothing resolves, so the consumers of this tier degrade.
+ */
+export type HuntModelTierState =
+  | 'configured'
+  | 'recommended'
+  | 'configured_missing'
+  | 'default_fallback'
+  | 'unavailable';
+
+export interface HuntModelTierStatus {
+  tier: HuntModelTierId;
+  state: HuntModelTierState;
+}
+
+export interface HuntThreatIntelSupplyStatus {
+  workflows: HuntThreatIntelSupplyWorkflowStatus[];
+  hardGate: HuntThreatIntelSupplyHardGate;
+  drift: boolean;
+  huntEnabled: boolean;
+  /**
+   * One entry per Hunt model tier, in tier order. Informational: it never feeds the hard gate,
+   * because Hunt degrades rather than fails when a tier has no model.
+   */
+  modelTiers: HuntModelTierStatus[];
+}
+
+export interface ScanFailureWorker {
+  workerId: string;
+  watchId: string;
+  /** The newest failed workflow: the Worker's own, or the child it went on past. */
+  workflowId: string;
+  lastFailedAt: string;
+}
+
+export interface ScanFailuresResponse {
+  workers: ScanFailureWorker[];
+  unknown: boolean;
+  lastFailedAt: string | null;
+}
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
-
-/** Agent Builder builtin tool that appends a revision to a proposal chain — see elastic/security-team#19289. */
-export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.revise' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
@@ -56,7 +179,7 @@ export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
 export const SYSTEM_SECURITY_WATCH_HUNT_ID = 'system-security-watch-hunt' as const;
-export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
+export const SYSTEM_SECURITY_WATCH_FORENSICS_ID = 'system-security-watch-forensics' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
@@ -64,7 +187,7 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
 ] as const;
 
 /**
@@ -74,14 +197,13 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
  * watch, composed with per-callable gates and the org-wide floor. Only the *selected* level varies
  * per watch. See https://github.com/elastic/security-team/issues/18718.
  */
-export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as const;
+export const WATCH_AUTONOMY_LEVELS = WORKER_AUTONOMY_LEVELS;
 
 /**
  * The review-gated subset of the dial: every action passes a human review gate, so the Worker
- * offers no unattended (supervised) level. Declared once here so narrowing the shared scale can
- * never leave these declarations behind.
+ * offers no unattended (supervised) level.
  */
-export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
+export const WATCH_AUTONOMY_REVIEW_GATED = REVIEW_GATED_AUTONOMY_LEVELS;
 
 /**
  * Presentation metadata for the managed watch catalog.
@@ -122,20 +244,18 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     color: 'textAssistance',
   },
   {
-    id: SYSTEM_SECURITY_WATCH_DEEP_ID,
-    deepLinkId: SecurityPageName.alertZeroWatchDeep,
+    id: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    deepLinkId: SecurityPageName.alertZeroWatchForensics,
     name: 'Forensics Watch',
     color: 'euiColorVis4',
   },
 ] as const;
 
-export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
-
 export const WATCH_TAG = 'watch' as const;
 export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_HUNT_TAG = 'watch-hunt' as const;
-export const WATCH_DEEP_TAG = 'watch-deep' as const;
+export const WATCH_FORENSICS_TAG = 'watch-forensics' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 
 export const WATCH_TIER_TAGS = [
@@ -143,28 +263,42 @@ export const WATCH_TIER_TAGS = [
   WATCH_OFFICER_TAG,
   WATCH_HUNT_TAG,
   WATCH_DETECTION_TAG,
-  WATCH_DEEP_TAG,
+  WATCH_FORENSICS_TAG,
 ] as const;
+
+export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
 
 /** Managed Worker workflow ids — tagged Watch members. Hunt CTH is the externally settled id. */
 export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
+export const SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID =
+  'system-security-forensics-endpoint-analysis' as const;
 export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
   'system-security-detection-rule-tuning' as const;
-export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
-  'system-security-detection-rule-creation' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID =
+  'system-security-detection-rule-coverage' as const;
 
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
+
+/**
+ * Hunt Watch's two feature children (tagged `security` + `continuous-threat-hunt`),
+ * dispatched by the tagged Worker above. `find_or_create_investigation` and the hunt
+ * child itself stay untagged Worker-branch plumbing and have no id here.
+ */
+export const SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID =
+  'system-security-hunt-package-report' as const;
+export const SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID = 'system-security-hunt-proposal-gate' as const;
 
 /**
  * Static Worker catalog: Watch membership and display names for not-yet-installed Workers.
@@ -196,10 +330,16 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchTag: WATCH_DETECTION_TAG,
   },
   {
-    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-    name: 'Rule Creation',
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+    name: 'Rule Coverage',
     watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     watchTag: WATCH_DETECTION_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+    name: 'Endpoint Analysis',
+    watchId: SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+    watchTag: WATCH_FORENSICS_TAG,
   },
 ] as const;
 
@@ -223,18 +363,24 @@ export type WorkerScheduleUnit = (typeof WORKER_SCHEDULE_UNITS)[number];
  * names its own tier wherever it sits in the call tree, so nothing has to be threaded through
  * `workflow.execute` inputs. A new Worker usually costs no new tier.
  *
- * Tiers are named for the execution profile a model needs rather than the task it happens to serve
+ * Tiers are named for the class of model a call needs rather than the task it happens to serve
  * today, so a step is not pushed toward the wrong rung by a name that reads like a job title: the
- * same fast model that gates an alert also enriches a threat report. Other Security features are
- * expected to pin to these rather than register per-feature rows of their own.
+ * same efficient model that checks detection coverage also gates a threat report. Other Security
+ * features are expected to pin to these rather than register per-feature rows of their own.
  */
 export const ALERTZERO_INFERENCE_PARENT_FEATURE_ID = 'alertzero_parent' as const;
-/** Low latency, high volume, lightweight judgment. */
-export const ALERTZERO_FAST_INFERENCE_FEATURE_ID = 'alertzero_fast' as const;
-/** Deeper single-shot thinking on a self-contained task. */
-export const ALERTZERO_REASONING_INFERENCE_FEATURE_ID = 'alertzero_reasoning' as const;
-/** Multi-step work over tools and iteration, where cost multiplies by the round count. */
-export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as const;
+/** Quick, lightweight judgment on calls that run often. Small, low-cost model. */
+export const ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID = 'alertzero_efficient' as const;
+/** Accuracy matters but the call runs often or uses tools over many steps. Strong mid-size model. */
+export const ALERTZERO_BALANCED_INFERENCE_FEATURE_ID = 'alertzero_balanced' as const;
+/** Complex, single-pass work where output quality matters most. Most capable model. */
+export const ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID = 'alertzero_frontier' as const;
+/**
+ * Optional model for the calls that can send an EIS prompt template: Attack Discovery,
+ * alert triage, and the FP/TP judge. Empty until an operator saves a model. Those calls
+ * list this id first in `connector-id-by-feature` and keep their tier until a model is saved.
+ */
+export const ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID = 'alertzero_template_models' as const;
 
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;

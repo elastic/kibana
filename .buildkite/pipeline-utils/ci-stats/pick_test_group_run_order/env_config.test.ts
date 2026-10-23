@@ -143,25 +143,46 @@ describe('loadRunOrderConfig', () => {
     expect(cfg.useSelectiveTesting).toBe(false);
   });
 
-  it('disables selective testing when neither GITHUB_PR_NUMBER nor MERGE_QUEUE_MERGE_BASE is set', () => {
+  it('disables selective testing outside PR and merge-queue pipelines', () => {
     const cfg = loadRunOrderConfig();
     expect(cfg.useSelectiveTesting).toBe(false);
   });
 
-  it('enables selective testing on merge-queue builds via MERGE_QUEUE_MERGE_BASE', () => {
-    process.env.MERGE_QUEUE_MERGE_BASE = 'abc123';
+  it('uses the pinned merge-group base while preserving the ci-stats coverage base', () => {
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-merge-queue';
+    process.env.BUILDKITE_MERGE_QUEUE_BASE_COMMIT = 'group-base';
+    process.env.MERGE_QUEUE_MERGE_BASE = 'older-main-base';
     const cfg = loadRunOrderConfig();
     expect(cfg.useSelectiveTesting).toBe(true);
-    expect(cfg.selectiveMergeBase).toBe('abc123');
+    expect(cfg.isMergeQueue).toBe(true);
+    expect(cfg.selectionBase).toBe('group-base');
+    expect(cfg.timingBase).toBe('older-main-base');
   });
 
-  // This should never happen, but it's worth documenting
-  it('prefers GITHUB_PR_MERGE_BASE over MERGE_QUEUE_MERGE_BASE for selectiveMergeBase', () => {
+  it('does not fall back to the coverage base when the pinned merge-group base is missing', () => {
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-merge-queue';
+    process.env.MERGE_QUEUE_MERGE_BASE = 'older-main-base';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.useSelectiveTesting).toBe(true);
+    expect(cfg.selectionBase).toBeUndefined();
+    expect(cfg.timingBase).toBe('older-main-base');
+  });
+
+  it('honors the prevent label on merge-queue builds', () => {
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-merge-queue';
+    process.env.BUILDKITE_MERGE_QUEUE_BASE_COMMIT = 'group-base';
+    process.env.GITHUB_PR_LABELS = PREVENT_SELECTIVE_TESTS_LABEL;
+    expect(loadRunOrderConfig().useSelectiveTesting).toBe(false);
+  });
+
+  // PR and merge-queue base variables should never be set together.
+  it('prefers the PR base when both base variables are set', () => {
     process.env.GITHUB_PR_NUMBER = '99';
     process.env.GITHUB_PR_MERGE_BASE = 'pr-base';
     process.env.MERGE_QUEUE_MERGE_BASE = 'mq-base';
     const cfg = loadRunOrderConfig();
-    expect(cfg.selectiveMergeBase).toBe('pr-base');
+    expect(cfg.selectionBase).toBe('pr-base');
+    expect(cfg.timingBase).toBe('pr-base');
   });
 
   it('uses TEST_GROUP_TYPE_* overrides when provided', () => {

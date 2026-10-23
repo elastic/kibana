@@ -16,15 +16,15 @@ import {
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
 } from './register_tools';
 import { createMockGetScopedClients } from '../utils/test_helpers';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 
-const createMockServer = (): Pick<StreamsServer, 'isServerless' | 'core'> => ({
+const createMockServer = (): Pick<SignificantEventsServer, 'isServerless' | 'core'> => ({
   isServerless: false,
   core: {
     elasticsearch: { client: { asInternalUser: {} } },
     security: {},
-  } as StreamsServer['core'],
+  } as SignificantEventsServer['core'],
 });
 
 describe('registerAgentBuilderTools', () => {
@@ -39,7 +39,7 @@ describe('registerAgentBuilderTools', () => {
     registerAgentBuilderTools({
       agentBuilder,
       getScopedClients,
-      server: createMockServer() as StreamsServer,
+      server: createMockServer() as SignificantEventsServer,
       logger: loggerMock.create(),
       telemetry,
     });
@@ -60,7 +60,7 @@ describe('registerAgentBuilderTools', () => {
     registerAgentBuilderTools({
       agentBuilder,
       getScopedClients,
-      server: createMockServer() as StreamsServer,
+      server: createMockServer() as SignificantEventsServer,
       logger: loggerMock.create(),
       telemetry,
     });
@@ -79,7 +79,7 @@ describe('registerAgentBuilderTools', () => {
     registerAgentBuilderTools({
       agentBuilder: undefined!,
       getScopedClients,
-      server: createMockServer() as StreamsServer,
+      server: createMockServer() as SignificantEventsServer,
       logger: loggerMock.create(),
       telemetry,
     });

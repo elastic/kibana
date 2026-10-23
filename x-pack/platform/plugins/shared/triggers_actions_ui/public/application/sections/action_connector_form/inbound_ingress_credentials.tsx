@@ -70,11 +70,14 @@ const CopyableField: React.FC<CopyableFieldProps> = ({
 export interface InboundIngressCredentialsProps {
   connector: ActionConnector;
   allowRotate?: boolean;
+  /** Parent retains the one-time token until close; a later rotate must replace it. */
+  onIngestTokenRotated?: (ingestToken: string) => void;
 }
 
 const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProps> = ({
   connector,
   allowRotate = false,
+  onIngestTokenRotated,
 }) => {
   const { url: webhookUrl, isPublicBaseUrlConfigured } = useInboundEventsUrl(
     connector.actionTypeId,
@@ -90,12 +93,13 @@ const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProp
     try {
       const rotated = await rotateIngress(connector.id);
       setIngestToken(rotated.ingestToken);
+      onIngestTokenRotated?.(rotated.ingestToken);
     } catch {
       // Danger toast is shown by the rotate hook.
     } finally {
       setShowRotateConfirm(false);
     }
-  }, [connector.id, rotateIngress]);
+  }, [connector.id, onIngestTokenRotated, rotateIngress]);
 
   return (
     <div data-test-subj="inbound-ingress-credentials">

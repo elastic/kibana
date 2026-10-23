@@ -25,4 +25,7 @@ export const NoAuth: AuthTypeSpec<AuthSchemaType> = {
   configure: async (_: AuthContext, axiosInstance: AxiosInstance): Promise<AxiosInstance> => {
     return axiosInstance;
   },
+  getAuthHeaders: async (): Promise<Record<string, string>> => {
+    return {};
+  },
 };

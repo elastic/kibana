@@ -16,7 +16,6 @@ import {
 } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
-import type { PluginInitializerContext } from '@kbn/core/server';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { EpisodesClient } from '../lib/episodes_client';
@@ -34,6 +33,9 @@ import {
   ExecutionHistoryClient,
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
+import { EventOriginActorToken } from '../lib/event_origin/token';
+import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
+import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import {
@@ -74,6 +76,8 @@ import {
   ActionPolicySavedObjectServiceInternalToken,
   ActionPolicySavedObjectServiceScopedToken,
 } from '../lib/services/action_policy_saved_object_service/tokens';
+import { EsqlResponseFormatService } from '../lib/services/esql_response_format_service/esql_response_format_service';
+import { EsqlResponseFormatServiceToken } from '../lib/services/esql_response_format_service/tokens';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
@@ -101,6 +105,10 @@ import {
 import { UserService } from '../lib/services/user_service/user_service';
 import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
 import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
+import { LicenseService } from '../lib/services/license_service/license_service';
+import { LicenseServiceToken } from '../lib/services/license_service/tokens';
+import { EbtService } from '../lib/services/ebt_service/ebt_service';
+import { EbtServiceToken } from '../lib/services/ebt_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -115,7 +123,6 @@ import {
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
-import type { PluginConfig } from '../config';
 import { SpaceUiSettingsClientToken } from '../settings/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -123,6 +130,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(InternalRulesClientProvider).toSelf().inSingletonScope();
+  bind(InternalRulesClient).toSelf().inSingletonScope();
+  bind(EventOriginActorToken).toConstantValue('user');
+  bind(RulesClientOptionsToken).toConstantValue({});
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
@@ -187,6 +198,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(EventLogServiceToken).toService(EventLogService);
   bind(WorkflowService).toSelf().inSingletonScope();
   bind(WorkflowServiceToken).toService(WorkflowService);
+  bind(LicenseService).toSelf().inSingletonScope();
+  bind(LicenseServiceToken).toService(LicenseService);
+  bind(EbtService).toSelf().inSingletonScope();
+  bind(EbtServiceToken).toService(EbtService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -315,14 +330,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  // Singleton so the feature flag is subscribed to once per process, and every
+  // QueryService flavor plus the rule-executor step read the same resolved format.
+  bind(EsqlResponseFormatService).toSelf().inSingletonScope();
+  bind(EsqlResponseFormatServiceToken).toService(EsqlResponseFormatService);
+
   bind(QueryServiceScopedToken)
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
-      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
-        PluginInitializer('config')
-      );
-      return new QueryService(esClient, loggerService, pluginConfigAccessor);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inRequestScope();
 
@@ -331,10 +348,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       // Rule-execution queries run against user data and must respect the space project routing.
       const esClient = get(EsServiceScopedSpaceRoutingToken);
-      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
-        PluginInitializer('config')
-      );
-      return new QueryService(esClient, loggerService, pluginConfigAccessor);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inRequestScope();
 
@@ -342,10 +356,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
-        PluginInitializer('config')
-      );
-      return new QueryService(esClient, loggerService, pluginConfigAccessor);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inSingletonScope();
 

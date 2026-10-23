@@ -55,15 +55,50 @@ const REPORT_INDEX = '.kibana-threat-reports';
 const fullyMigratedReportMappings = () => ({
   properties: {
     content: {
-      properties: {},
+      properties: {
+        article_url: { ignore_above: 2048 },
+        published_at: {},
+      },
     },
     lineage: { properties: { content_scrubbed_at: {} } },
     // v30: evidence is a space-keyed nested array; the guard checks the leaf.
     evidence: { properties: { space_id: {} } },
     extracted: {
       properties: {
-        diamond: {},
-        gate: {},
+        core: {
+          properties: {
+            model_id: {},
+            context_mode: {},
+            context_coverage: {},
+            context_chars: {},
+            source_chars: {},
+            adjudication: {
+              properties: {
+                provider: {},
+                reviewed: {},
+                approved: {},
+                downgraded: {},
+                deterministic_references: {},
+                deferred_unreviewed: {},
+              },
+            },
+          },
+        },
+        diamond: {
+          properties: {
+            context_mode: {},
+            context_coverage: {},
+            context_chars: {},
+            source_chars: {},
+          },
+        },
+        gate: {
+          properties: {
+            context_mode: {},
+            context_coverage: {},
+          },
+        },
+        artifacts: {},
         vulnerability: {},
         iocs: {
           properties: {
@@ -73,6 +108,7 @@ const fullyMigratedReportMappings = () => ({
             port: {},
             reference: { ignore_above: 2048 },
             block_index: {},
+            deferred_unreviewed: {},
             // v26 bounds these by value, not just existence.
             value: { ignore_above: 2048 },
             defanged: { ignore_above: 2048 },
@@ -124,10 +160,13 @@ const runMigrations = async ({
    * for a pre-migration index. Not `undefined`, which would re-trigger this default.
    */
   indicatorNestedLimit = '10000' as string | null,
+  /** KEV reports still missing `rank_score`; `undefined` leaves the count mock unset. */
+  pendingKevReports,
 }: {
   reportMappings?: Record<string, unknown>;
   indicatorMappings?: Record<string, unknown>;
   indicatorNestedLimit?: string | null;
+  pendingKevReports?: number;
 } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.indices.exists.mockResolvedValue(true);
@@ -151,6 +190,9 @@ const runMigrations = async ({
       mappings: args.index === THREAT_INTEL_INDICATORS_INDEX ? indicatorMappings : reportMappings,
     },
   })) as never);
+  if (pendingKevReports !== undefined) {
+    esClient.count.mockResolvedValue({ count: pendingKevReports } as never);
+  }
 
   // The mock returns the same deficient mapping on every read, so the
   // post-migration schema check sees the field as still missing even though the
@@ -199,6 +241,7 @@ describe('index_templates — migrations', () => {
   });
 
   it.each([
+    ['extracted.core', 'core'],
     ['extracted.diamond', 'diamond'],
     ['extracted.gate', 'gate'],
     ['extracted.vulnerability', 'vulnerability'],
@@ -226,6 +269,29 @@ describe('index_templates — migrations', () => {
     expect(patchedPaths).toContain(expectedPath);
   });
 
+  // Elasticsearch defaults an omitted `type` on a mapping-update fragment to
+  // `object`, and rejects merging that into an existing `nested` field with
+  // `can't merge a non-nested mapping [extracted.iocs] with a nested mapping`.
+  // That failure fails this whole migration, which fails
+  // `assertMigratedSchemaIsUsable`, which keeps threat-intel bootstrap (and
+  // everything gated on it) permanently unready on every restart.
+  it('declares extracted.iocs nested when the consolidated core migration patches it', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties as Record<string, unknown>).core;
+
+    const { putMappingArgs } = await runMigrations({ reportMappings: mappings });
+
+    const iocsFragment = putMappingArgs
+      .map(
+        (arg) =>
+          (arg.properties as { extracted?: { properties?: Record<string, unknown> } })?.extracted
+            ?.properties?.iocs
+      )
+      .find((iocs): iocs is { type?: string } => iocs !== undefined);
+
+    expect(iocsFragment?.type).toBe('nested');
+  });
+
   it('adds lineage.content_scrubbed_at when absent', async () => {
     const mappings = fullyMigratedReportMappings();
     delete (mappings.properties.lineage.properties as Record<string, unknown>).content_scrubbed_at;
@@ -233,6 +299,29 @@ describe('index_templates — migrations', () => {
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 
     expect(patchedPaths).toContain('lineage.content_scrubbed_at');
+  });
+
+  it('adds content.published_at when absent', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>).published_at;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toContain('content.published_at');
+  });
+
+  it('repairs a partial Diamond context mapping missing char leaves', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>)
+      .context_chars;
+    delete (mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>)
+      .source_chars;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toEqual(
+      expect.arrayContaining(['extracted.diamond.context_chars', 'extracted.diamond.source_chars'])
+    );
   });
 
   it('adds space_id to the indicators index when absent', async () => {
@@ -461,7 +550,7 @@ describe('index_templates — mapping coverage guard', () => {
     expect(reportsTemplate).not.toContain('data_stream:');
   });
 
-  it('extracted.iocs includes reference and block_index fields (v19 maltrail adapter fields)', () => {
+  it('extracted.iocs includes historical reference and block_index fields', () => {
     // `reference` also carries an `ignore_above`, so match the declaration prefix.
     expect(src).toContain("reference: { type: 'keyword' as const");
     expect(src).toContain("block_index: { type: 'integer' as const }");
@@ -497,6 +586,59 @@ describe('index_templates — mapping coverage guard', () => {
 
     const callIdx = src.indexOf('await migrateExistingVulnerabilityMappings', installIdx);
     expect(callIdx).toBeGreaterThan(installIdx);
+  });
+
+  it('backfillKevRankScore is wired into installIndexTemplates', () => {
+    expect(src).toContain('const backfillKevRankScore');
+
+    const installIdx = src.indexOf('export const installIndexTemplates');
+    const callIdx = src.indexOf('await backfillKevRankScore', installIdx);
+    expect(callIdx).toBeGreaterThan(installIdx);
+  });
+
+  it('backfills rank_score only onto KEV reports that still lack it', async () => {
+    // The migrations helper mocks a live report index; the template-only helper has none.
+    const { esClient } = await runMigrations({ reportMappings: fullyMigratedReportMappings() });
+
+    const kevBackfill = esClient.updateByQuery.mock.calls
+      .map(([arg]) => arg)
+      .find((arg) => JSON.stringify(arg.query).includes('"lineage.extraction_method":"kev"'));
+    expect(kevBackfill).toBeDefined();
+    expect(kevBackfill?.index).toBe(REPORT_INDEX);
+    expect(kevBackfill?.conflicts).toBe('proceed');
+    expect(kevBackfill).not.toHaveProperty('refresh');
+    expect(kevBackfill?.query).toEqual({
+      bool: {
+        filter: [{ term: { 'lineage.extraction_method': 'kev' } }],
+        must_not: [{ exists: { field: 'rank_score' } }],
+      },
+    });
+    // The enrich workflow's own formula: severity.score * relevance, at the neutral 0.5.
+    expect(kevBackfill?.script).toEqual(
+      expect.objectContaining({ source: expect.stringContaining('score * relevance') })
+    );
+  });
+
+  it('skips the KEV backfill when the count says nothing is left to stamp, so boots stay cheap', async () => {
+    const { esClient } = await runMigrations({
+      reportMappings: fullyMigratedReportMappings(),
+      pendingKevReports: 0,
+    });
+
+    expect(esClient.count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [{ term: { 'lineage.extraction_method': 'kev' } }],
+            must_not: [{ exists: { field: 'rank_score' } }],
+          },
+        },
+      })
+    );
+    const kevBackfill = esClient.updateByQuery.mock.calls
+      .map(([arg]) => arg)
+      .find((arg) => JSON.stringify(arg.query).includes('"lineage.extraction_method":"kev"'));
+    expect(kevBackfill).toBeUndefined();
   });
 
   it('reports template declares evidence as a space-keyed nested array (v30)', async () => {
@@ -584,6 +726,19 @@ describe('index_templates — post-migration schema check', () => {
     expect(verificationError).toBeUndefined();
   });
 
+  it('fails when content.published_at is still missing after migrating', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>).published_at;
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/content\.published_at/);
+  });
+
+  it('declares content.published_at as a date in the reports template', () => {
+    expect(src).toContain("published_at: { type: 'date' as const }");
+  });
+
   it('fails when a report field is still missing after migrating', async () => {
     const mappings = fullyMigratedReportMappings();
     delete (mappings.properties.extracted.properties as Record<string, unknown>).diamond;
@@ -654,7 +809,7 @@ describe('index_templates — post-migration schema check', () => {
 
   // v19 writes `reference` and `block_index` in one putMapping, but a failed v19 then a
   // successful v26 keyword-bounds putMapping re-adds `reference` without `block_index`,
-  // so checking `reference` alone passed while strict rejected Maltrail reports.
+  // so checking `reference` alone passed while strict rejected indicator-list reports.
   it('fails when the v19 leaf extracted.iocs.block_index is missing', async () => {
     const mappings = fullyMigratedReportMappings();
     delete (mappings.properties.extracted.properties.iocs.properties as Record<string, unknown>)

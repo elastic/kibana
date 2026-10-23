@@ -37,6 +37,11 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
+import {
+  connectorAuthCounter,
+  connectorExecuteCounter,
+  connectorExecuteDuration,
+} from './connector_metrics';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 
 const mockRateLimiterLog = jest.fn();
@@ -65,7 +70,7 @@ const executeUnsecuredParams = {
   actionExecutionId: ACTION_EXECUTION_ID,
   actionId: CONNECTOR_ID,
   params: ACTION_PARAMS,
-  spaceId: 'some-namespace',
+  spaceId: asSpaceId('some-namespace'),
 };
 
 const executeParams = {
@@ -311,7 +316,7 @@ beforeEach(() => {
 });
 
 describe('Action Executor', () => {
-  test('passes saved-object version only to spec connector executors', async () => {
+  test('passes saved-object version to connector executors', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...connectorSavedObject,
       version: 'WzEsMV0=',
@@ -354,7 +359,7 @@ describe('Action Executor', () => {
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
   });
 
-  test('does not pass connectorVersion to non-spec connector executors', async () => {
+  test('passes saved-object version to non-spec connector executors', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...connectorSavedObject,
       version: 'WzEsMV0=',
@@ -363,8 +368,8 @@ describe('Action Executor', () => {
 
     await actionExecutor.execute(executeParams);
 
-    expect(connectorType.executor).not.toHaveBeenCalledWith(
-      expect.objectContaining({ connectorVersion: expect.anything() })
+    expect(connectorType.executor).toHaveBeenCalledWith(
+      expect.objectContaining({ connectorVersion: 'WzEsMV0=' })
     );
   });
 
@@ -673,6 +678,7 @@ describe('Action Executor', () => {
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
       });
 
       expect(loggerMock.debug).toHaveBeenCalledWith(
@@ -769,6 +775,7 @@ describe('Action Executor', () => {
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
           profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
           ...(executeUnsecure ? {} : { source: SOURCE }),
+          connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
         });
       }
 
@@ -1350,6 +1357,7 @@ describe('Action Executor', () => {
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
       });
 
       expect(loggerMock.debug).toHaveBeenCalledWith(
@@ -1458,6 +1466,7 @@ describe('Action Executor', () => {
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         source: SOURCE,
         profileUid: mockUser?.profile_uid,
+        connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
       });
 
       expect(loggerMock.debug).toHaveBeenCalledWith(
@@ -2015,6 +2024,140 @@ describe('Action Executor', () => {
           }),
         })
       );
+    });
+  });
+});
+
+describe('Connector metrics', () => {
+  beforeEach(() => {
+    jest.spyOn(connectorExecuteCounter, 'add').mockImplementation(() => {});
+    jest.spyOn(connectorExecuteDuration, 'record').mockImplementation(() => {});
+    jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const mockConnector = () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+  };
+
+  test('records a successful execution with its duration', async () => {
+    mockConnector();
+    (
+      connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+    ).mockResolvedValueOnce({ actionId: CONNECTOR_ID, status: 'ok' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledTimes(1);
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+      'connector.type': 'test',
+      success: true,
+    });
+    expect(connectorExecuteDuration.record).toHaveBeenCalledWith(expect.any(Number), {
+      'connector.type': 'test',
+      success: true,
+    });
+  });
+
+  test('records a failed execution with its error source', async () => {
+    mockConnector();
+    (
+      connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+    ).mockResolvedValueOnce({ actionId: CONNECTOR_ID, status: 'error' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+      'connector.type': 'test',
+      success: false,
+      'error.type': 'other',
+      'error.source': 'user',
+    });
+  });
+
+  test('records an execution of a disabled connector type', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.isActionExecutable.mockReturnValueOnce(false);
+    connectorTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
+      throw new Error('Connector type is disabled');
+    });
+
+    await expect(actionExecutor.execute(executeParams)).rejects.toThrow(
+      'Connector type is disabled'
+    );
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+      'connector.type': 'test',
+      success: false,
+      'error.type': 'disabled',
+      'error.source': 'framework',
+    });
+    expect(connectorExecuteDuration.record).not.toHaveBeenCalled();
+  });
+
+  test('records a rate limited execution without a duration', async () => {
+    mockRateLimiterIsRateLimited.mockReturnValueOnce(true);
+    mockConnector();
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+      'connector.type': 'test',
+      success: false,
+      'error.type': 'rate_limited',
+      'error.source': 'user',
+    });
+    expect(connectorExecuteDuration.record).not.toHaveBeenCalled();
+  });
+
+  test('records an execution with invalid params without a sub-action or duration', async () => {
+    mockConnector();
+
+    await actionExecutor.execute({ ...executeParams, params: { foo: 'not-a-boolean' } });
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+      'connector.type': 'test',
+      success: false,
+      'error.type': 'invalid',
+      'error.source': 'user',
+    });
+    expect(connectorExecuteDuration.record).not.toHaveBeenCalled();
+  });
+
+  test('records connector authorization errors as execute failures and auth failures', async () => {
+    mockConnector();
+    (
+      connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+    ).mockRejectedValueOnce(
+      new ConnectorAuthorizationError({
+        authMethod: 'oauth_authorization_code',
+        reason: 'refresh_token_expired',
+        message: 'Refresh token expired. User must re-authorize.',
+      })
+    );
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'execute',
+      'connector.auth_type': 'none',
+      'connector.type': 'test',
+      success: false,
+      'error.type': 'authorization_failed',
+    });
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+      'connector.type': 'test',
+      success: false,
+      'error.type': 'auth_failed',
+      'error.source': 'user',
     });
   });
 });
@@ -2678,7 +2821,7 @@ describe('execute() - spaceId override', () => {
 
     await actionExecutor.execute({
       ...executeParams,
-      spaceId: 'override-space',
+      spaceId: asSpaceId('override-space'),
     });
 
     // spacesMock.getSpaceId should not be called when spaceId is provided

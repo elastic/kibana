@@ -12,7 +12,7 @@ import type { AlertingOasOperationObject } from '../oas_types';
 import { BULK_OPERATION_REQUEST, RULE_RESPONSE } from './rule_oas_shared_examples';
 
 export const BULK_GET_RULES_RESPONSE: BulkGetRulesResponse = {
-  rules: [RULE_RESPONSE],
+  items: [RULE_RESPONSE],
 };
 
 const INVALID_BULK_GET_RULES_RESPONSE = invalidResponseExample({

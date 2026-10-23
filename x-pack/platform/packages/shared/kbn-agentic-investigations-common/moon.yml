@@ -23,6 +23,10 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/flyout-info-blocks'
   - '@kbn/test-jest-helpers'
+  - '@kbn/ui-ai-components'
+  - '@kbn/user-profile-components'
+  - '@kbn/proposals-ui'
+  - '@kbn/ui-ai-components'
 tags:
   - shared-browser
   - package
@@ -35,6 +39,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`id compiler on a core-only definition single-field identity compiles Painless 1`] = `"if (doc.containsKey('kubernetes.pod.uid') && doc['kubernetes.pod.uid'].size() > 0 && doc['kubernetes.pod.uid'].value != null && doc['kubernetes.pod.uid'].value != \\"\\") { return \\"k8s.pod:\\" + doc['kubernetes.pod.uid'].value; } return null;"`;
+
+exports[`id compiler on a core-only definition two-field ranking compiles ES|QL 1`] = `
+"kubernetes_pod_uid_present = TO_STRING(kubernetes.pod.uid) IS NOT NULL AND TO_STRING(kubernetes.pod.uid) != \\"\\",
+ kubernetes_pod_name_present = TO_STRING(kubernetes.pod.name) IS NOT NULL AND TO_STRING(kubernetes.pod.name) != \\"\\",
+ kubernetes_pod_uid_present_or_null = CASE(kubernetes_pod_uid_present, TO_STRING(kubernetes.pod.uid)),
+ kubernetes_pod_name_present_or_null = CASE(kubernetes_pod_name_present, TO_STRING(kubernetes.pod.name)),
+ entity.id = CONCAT(\\"k8s.pod:\\", COALESCE(kubernetes_pod_uid_present_or_null, kubernetes_pod_name_present_or_null))"
+`;
+
+exports[`id compiler on a core-only definition two-field ranking compiles Painless 1`] = `"if (!((doc.containsKey('kubernetes.pod.uid') && doc['kubernetes.pod.uid'].size() > 0 && doc['kubernetes.pod.uid'].value != null && doc['kubernetes.pod.uid'].value != \\"\\" || doc.containsKey('kubernetes.pod.name') && doc['kubernetes.pod.name'].size() > 0 && doc['kubernetes.pod.name'].value != null && doc['kubernetes.pod.name'].value != \\"\\"))) { return null; } if (doc.containsKey('kubernetes.pod.uid') && doc['kubernetes.pod.uid'].size() > 0 && doc['kubernetes.pod.uid'].value != null && doc['kubernetes.pod.uid'].value != \\"\\") { return \\"k8s.pod:\\" + doc['kubernetes.pod.uid'].value; } if (doc.containsKey('kubernetes.pod.name') && doc['kubernetes.pod.name'].size() > 0 && doc['kubernetes.pod.name'].value != null && doc['kubernetes.pod.name'].value != \\"\\") { return \\"k8s.pod:\\" + doc['kubernetes.pod.name'].value; } return null;"`;

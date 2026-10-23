@@ -14,7 +14,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient, ExecutionPeek } from './persistence';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { EventActorType, ExecutionStatus } from '@kbn/agent-builder-common';
 import { followExecution$ } from './execution_follower';
 import * as constants from './constants';
 
@@ -216,6 +216,36 @@ describe('followExecution$', () => {
     expect(executionClient.readEvents).toHaveBeenCalledTimes(3);
   });
 
+  it('does not drain when roundComplete was read on an earlier poll', async () => {
+    const executionClient = createMockExecutionClient();
+
+    const complete = roundCompleteEvent();
+    const trailing = messageChunkEvent('after');
+
+    // Poll 1: roundComplete lands while the status is still running
+    executionClient.peek.mockResolvedValueOnce(peekResult(ExecutionStatus.running, 1));
+    executionClient.readEvents.mockResolvedValueOnce(
+      readEventsResult([complete], ExecutionStatus.running)
+    );
+
+    // Poll 2: completed, with the events written after roundComplete
+    executionClient.peek.mockResolvedValueOnce(peekResult(ExecutionStatus.completed, 2));
+    executionClient.readEvents.mockResolvedValueOnce(
+      readEventsResult([trailing], ExecutionStatus.completed)
+    );
+
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+
+    await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
+
+    const result = await promise;
+
+    expect(result.error).toBeUndefined();
+    expect(result.events).toEqual([complete, trailing]);
+    // One read per poll, no drain retries
+    expect(executionClient.readEvents).toHaveBeenCalledTimes(2);
+  });
+
   it('errors with structured error on failed execution with error details', async () => {
     const executionClient = createMockExecutionClient();
 
@@ -381,7 +411,7 @@ describe('followExecution$', () => {
       const persistedError = {
         code: AgentBuilderErrorCode.requestAborted,
         message: 'Converse request was aborted',
-        meta: { abort_reason: { source: 'api', actor: { id: 'u1' } } },
+        meta: { abort_reason: { source: 'api', actor: { type: EventActorType.user, id: 'u1' } } },
       };
 
       // first poll: aborted, error not recorded yet; the peek after the drain has it
@@ -406,7 +436,7 @@ describe('followExecution$', () => {
         (result.error as unknown as { meta: Record<string, unknown> }).meta.abort_reason
       ).toEqual({
         source: 'api',
-        actor: { id: 'u1' },
+        actor: { type: EventActorType.user, id: 'u1' },
       });
     });
 
@@ -531,8 +561,11 @@ describe('followExecution$', () => {
 
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
-    // Advance past the total timeout
-    await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_TIMEOUT_MS + 1000);
+    await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS * 2);
+    // Move the clock past the total timeout without running every poll in between: the
+    // advancing event count keeps the liveness checks satisfied until then.
+    jest.setSystemTime(Date.now() + constants.FOLLOW_EXECUTION_TIMEOUT_MS);
+    await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
 
     const result = await promise;
 
@@ -568,11 +601,13 @@ describe('followExecution$', () => {
 
     // Simulate a long silent step: many polls with 0 new events but an advancing heartbeat,
     // spanning well past the heartbeat timeout window, then a terminal completed status.
-    // Completion after ~150 polls (~75s at a 500ms poll interval) exceeds the 60s timeout.
+    const silentPolls = Math.ceil(
+      (constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 1.25) / constants.FOLLOW_POLL_INTERVAL_MS
+    );
     let pollCount = 0;
     executionClient.peek.mockImplementation(async () => {
       pollCount++;
-      if (pollCount < 150) {
+      if (pollCount < silentPolls) {
         return peekResult(ExecutionStatus.running, 0, undefined, `hb-${pollCount}`);
       }
       return peekResult(ExecutionStatus.completed, 1, undefined, `hb-${pollCount}`);
@@ -596,10 +631,13 @@ describe('followExecution$', () => {
     const executionClient = createMockExecutionClient();
 
     const complete = roundCompleteEvent();
+    const queuedPolls = Math.ceil(
+      (constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 1.25) / constants.FOLLOW_POLL_INTERVAL_MS
+    );
     let pollCount = 0;
     executionClient.peek.mockImplementation(async () => {
       pollCount++;
-      if (pollCount < 150) {
+      if (pollCount < queuedPolls) {
         return peekResult(ExecutionStatus.scheduled, 0, undefined, 'hb-created');
       }
       return peekResult(ExecutionStatus.completed, 1, undefined, 'hb-run');
@@ -610,7 +648,7 @@ describe('followExecution$', () => {
 
     const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
 
-    // ~75s queued (150 polls) — past the heartbeat window, within the scheduled grace.
+    // ~75s queued — past the heartbeat window, within the scheduled grace.
     await jest.advanceTimersByTimeAsync(constants.FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS * 2);
 
     const result = await promise;

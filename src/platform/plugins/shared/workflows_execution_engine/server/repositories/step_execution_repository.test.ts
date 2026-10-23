@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionsDataClient } from './data_access_layer';
 import {
   createMockGetExecutionsByIdsResponse,
@@ -22,6 +24,32 @@ describe('StepExecutionRepository', () => {
     stepExecutionsDataClient = createMockStepDataClient();
     stepExecutionsDataClient.bulk.mockResolvedValue({ errors: false, items: [] });
     underTest = new StepExecutionRepository(stepExecutionsDataClient);
+  });
+
+  it('still finalizes legacy steps without a persisted ID list', async () => {
+    const step = {
+      id: 'legacy-step',
+      workflowRunId: 'run',
+      status: ExecutionStatus.WAITING,
+    } as EsWorkflowStepExecution;
+    stepExecutionsDataClient.search.mockResolvedValue({
+      hits: { hits: [{ _source: step }] },
+    } as never);
+    const error = { type: 'IdentityError', message: 'Binding changed' };
+    await underTest.markNonTerminalStepsFailed('run', error);
+    expect(stepExecutionsDataClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          expect.objectContaining({
+            document: expect.objectContaining({
+              id: step.id,
+              status: ExecutionStatus.FAILED,
+              error,
+            }),
+          }),
+        ],
+      })
+    );
   });
 
   describe('bulkUpsert', () => {

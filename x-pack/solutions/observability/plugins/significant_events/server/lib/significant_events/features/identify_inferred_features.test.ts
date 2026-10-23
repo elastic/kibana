@@ -6,17 +6,26 @@
  */
 
 import type { Feature } from '@kbn/significant-events-schema';
+import { loggerMock } from '@kbn/logging-mocks';
+import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
 import {
   buildKnownFeatureIds,
   buildTelemetry,
   findSimilarFeatures,
+  identifyInferredFeatures,
   selectPreviouslyIdentifiedFeatures,
 } from './identify_inferred_features';
+
+jest.mock('./identify_features_via_agent', () => ({
+  executeFeatureIdentificationAgent: jest.fn(),
+}));
+
+const mockExecuteFeatureIdentificationAgent = jest.mocked(executeFeatureIdentificationAgent);
 
 const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
   id,
   uuid: `uuid-${overrides.type ?? 'technology'}-${id}`,
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   type: 'technology',
   subtype: 'library',
   title: id,
@@ -122,7 +131,7 @@ describe('findSimilarFeatures', () => {
 
     const result = await findSimilarFeatures({
       kiClient,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       args: {
         candidate_id: 'okta-sdk',
         title: 'Okta SDK',
@@ -164,7 +173,7 @@ describe('findSimilarFeatures', () => {
 
     const result = await findSimilarFeatures({
       kiClient,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       args: {
         candidate_id: 'tech-x',
         title: 'Tech X',
@@ -185,7 +194,7 @@ describe('findSimilarFeatures', () => {
     await expect(
       findSimilarFeatures({
         kiClient,
-        streamName: 'logs.test',
+        sourceId: 'logs.test',
         args: {
           candidate_id: 'okta',
           title: 'Okta',
@@ -202,8 +211,7 @@ describe('buildTelemetry', () => {
     run_id: 'run-1',
     connector_id: 'connector-1',
     iteration: 1,
-    stream_name: 'logs.test',
-    stream_type: 'wired' as const,
+    source_id: 'logs.test',
     docs_count: 20,
     excluded_features_count: 2,
     total_filters: 5,
@@ -238,6 +246,45 @@ describe('buildTelemetry', () => {
       expect.objectContaining({
         features_remapped: 2,
       })
+    );
+  });
+});
+
+describe('identifyInferredFeatures', () => {
+  it('passes the run id to feature identification as the interaction id', async () => {
+    mockExecuteFeatureIdentificationAgent.mockResolvedValue({
+      features: [],
+      ignoredFeatures: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+    });
+
+    const kiClient = {
+      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      getExcludedFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      bulk: jest.fn(),
+      getDefaultExpiresAt: jest.fn(),
+    };
+
+    await identifyInferredFeatures({
+      esClient: {},
+      kiClient,
+      agentBuilder: {},
+      request: {},
+      connectorId: 'connector-1',
+      logger: loggerMock.create(),
+      signal: new AbortController().signal,
+      sourceId: 'logs.test',
+      streamType: 'wired',
+      definition: { name: 'logs.test' },
+      runId: 'run-1',
+      documents: [{ _id: 'doc-1', fields: { message: 'hello' } }],
+      totalFilters: 0,
+      filtersCapped: false,
+      hasFilteredDocuments: false,
+    } as unknown as Parameters<typeof identifyInferredFeatures>[0]);
+
+    expect(mockExecuteFeatureIdentificationAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ interactionId: 'run-1' })
     );
   });
 });

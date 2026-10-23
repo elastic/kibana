@@ -61,6 +61,9 @@
     "@kbn/tooling-log",
     "@kbn/test",
     "@kbn/ui-callout",
-    "@kbn/response-ops-alerts-apis"
+    "@kbn/flyout-template",
+    "@kbn/flyout-sections",
+    "@kbn/response-ops-alerts-apis",
+    "@kbn/connector-specs"
   ]
 }
