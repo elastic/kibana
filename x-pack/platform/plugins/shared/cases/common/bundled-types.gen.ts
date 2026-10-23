@@ -2174,6 +2174,126 @@ export const AlertResponseProperties = lazySchema(() =>
 export type AlertResponseProperties = z.infer<typeof AlertResponseProperties>;
 
 /**
+  * The ID or IDs of the referenced entities, such as alert document IDs. Required for reference attachment types, such as alerts and events.
+
+  */
+export const UnifiedAttachmentAttachmentId = lazySchema(() =>
+  z.union([z.string(), z.array(z.string())])
+);
+export type UnifiedAttachmentAttachmentId = z.infer<typeof UnifiedAttachmentAttachmentId>;
+
+/**
+  * Type-specific content for the attachment. Required for value attachment types, such as comments. For the `comment` type, this is an object with a `content` string of up to 30,000 characters.
+
+  */
+export const UnifiedAttachmentData = lazySchema(() =>
+  z.object({}).catchall(z.unknown()).nullable()
+);
+export type UnifiedAttachmentData = z.infer<typeof UnifiedAttachmentData>;
+
+/**
+  * Type-specific metadata for the attachment. For alert types, this includes the alert `index` and the `rule` that generated the alert.
+
+  */
+export const UnifiedAttachmentMetadata = lazySchema(() =>
+  z.object({}).catchall(z.unknown()).nullable()
+);
+export type UnifiedAttachmentMetadata = z.infer<typeof UnifiedAttachmentMetadata>;
+
+/**
+  * The attachment type. The type must be registered in Kibana and determines the accepted shape of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`. Legacy attachment types such as `user` or `alert` are not accepted.
+
+  */
+export const UnifiedAttachmentType = lazySchema(() => z.string());
+export type UnifiedAttachmentType = z.infer<typeof UnifiedAttachmentType>;
+
+export const UnifiedAttachmentResponse = lazySchema(() =>
+  z.object({
+    attachmentId: UnifiedAttachmentAttachmentId.optional(),
+    created_at: isoDateTime(),
+    created_by: CaseResponseCreatedByProperties,
+    data: UnifiedAttachmentData.optional(),
+    /**
+     * The attachment identifier.
+     */
+    id: z.string().describe('The attachment identifier.'),
+    metadata: UnifiedAttachmentMetadata.optional(),
+    owner: Owner,
+    pushed_at: isoDateTime().nullable(),
+    pushed_by: CaseResponsePushedByProperties,
+    type: UnifiedAttachmentType,
+    updated_at: isoDateTime().nullable(),
+    updated_by: CaseResponseUpdatedByProperties,
+    /**
+     * The attachment version. Use it to replace the attachment.
+     */
+    version: z.string().describe('The attachment version. Use it to replace the attachment.'),
+  })
+);
+export type UnifiedAttachmentResponse = z.infer<typeof UnifiedAttachmentResponse>;
+
+export const UnifiedAttachmentsFindResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The attachments on the requested page.
+     */
+    data: z.array(UnifiedAttachmentResponse).describe('The attachments on the requested page.'),
+    /**
+     * The current page number.
+     */
+    page: z.number().int().describe('The current page number.'),
+    /**
+     * The number of items per page.
+     */
+    per_page: z.number().int().describe('The number of items per page.'),
+    /**
+     * The total number of attachments that match the query.
+     */
+    total: z.number().int().describe('The total number of attachments that match the query.'),
+  })
+);
+export type UnifiedAttachmentsFindResponse = z.infer<typeof UnifiedAttachmentsFindResponse>;
+
+/**
+  * The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data`. The `owner` must match the owner of the case. Unknown properties are rejected.
+
+  */
+export const UnifiedAttachmentRequest = lazySchema(() =>
+  z.object({
+    attachmentId: UnifiedAttachmentAttachmentId.optional(),
+    data: UnifiedAttachmentData.optional(),
+    metadata: UnifiedAttachmentMetadata.optional(),
+    owner: Owner,
+    type: UnifiedAttachmentType,
+  })
+);
+export type UnifiedAttachmentRequest = z.infer<typeof UnifiedAttachmentRequest>;
+
+/**
+  * The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId` and value attachment types require `data`. Unknown properties are rejected.
+
+  */
+export const UnifiedAttachmentPutRequest = lazySchema(() =>
+  z.object({
+    attachmentId: UnifiedAttachmentAttachmentId.optional(),
+    data: UnifiedAttachmentData.optional(),
+    metadata: UnifiedAttachmentMetadata.optional(),
+    owner: Owner,
+    type: UnifiedAttachmentType,
+    /**
+      * The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.
+
+      */
+    version: z
+      .string()
+      .describe(
+        'The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.\n'
+      ),
+  })
+);
+export type UnifiedAttachmentPutRequest = z.infer<typeof UnifiedAttachmentPutRequest>;
+
+/**
   * The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
   */
