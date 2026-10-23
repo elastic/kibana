@@ -539,7 +539,11 @@ const isPipelineGrounded = (
  */
 export const assertEsqlGroundedInReport = (
   query: string,
-  { reportText, iocValues }: { reportText: string; iocValues: string[] }
+  {
+    reportText,
+    iocValues,
+    excludedIocValues,
+  }: { reportText: string; iocValues: string[]; excludedIocValues?: string[] }
 ): EsqlGroundedResult => {
   const { root, errors } = Parser.parse(query);
   if (errors.length > 0) {
@@ -561,6 +565,41 @@ export const assertEsqlGroundedInReport = (
 
   const haystack = normalize(reportText);
   const groundingIocs = new Set(iocValues.map(normalize).filter((value) => value.length > 0));
+  // Adjudicated-out values must not ground a query even when they appear in report text. A value
+  // still listed in `iocValues` wins (eligible to hunt), so it is removed from the denylist.
+  const excludedSet = new Set(
+    (excludedIocValues ?? [])
+      .map(normalize)
+      .filter((value) => value.length >= MIN_GROUNDING_LENGTH && !groundingIocs.has(value))
+  );
+  if (excludedSet.size > 0) {
+    for (const predicate of predicates) {
+      let rejected: string | undefined;
+      Walker.walk(predicate, {
+        visitFunction: (fn) => {
+          if (rejected !== undefined) {
+            return;
+          }
+          const literals = listValuesOf(fn.args) ?? literalsOf(fn.args);
+          for (const literal of literals) {
+            for (const candidate of groundingRequirements(fn.name.toLowerCase(), literal).flat()) {
+              const value = normalize(candidate);
+              if (value.length >= MIN_GROUNDING_LENGTH && excludedSet.has(value)) {
+                rejected = value;
+                return;
+              }
+            }
+          }
+        },
+      });
+      if (rejected !== undefined) {
+        return {
+          ok: false,
+          reason: `query filters on a value intel review rejected (${rejected})`,
+        };
+      }
+    }
+  }
 
   const qualifies = (candidate: string, standalone: boolean): boolean => {
     const value = normalize(candidate);
