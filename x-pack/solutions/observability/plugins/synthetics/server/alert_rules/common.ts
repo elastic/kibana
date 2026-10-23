@@ -163,12 +163,50 @@ function findConfigKeyByAlertId<T>(
   return Object.keys(configs).find((key) => key.startsWith(`${alertId}-`));
 }
 
+const PENDING_RECOVERY_STATUS = i18n.translate(
+  'xpack.synthetics.alerts.monitorStatus.pendingRecovery.status',
+  {
+    defaultMessage: `is no longer pending`,
+  }
+);
+
+const PENDING_RECOVERY_REASON = i18n.translate(
+  'xpack.synthetics.alerts.monitorStatus.pendingRecovery.reason',
+  {
+    defaultMessage: `the monitor is reporting data again`,
+  }
+);
+
+/**
+ * Returns true when the recovered alert was raised because the monitor had no data (pending)
+ * in the previous run, rather than because it was down.
+ */
+const isPendingRecovery = ({
+  configId,
+  locationIds,
+  prevDownConfigs,
+  prevPendingConfigs,
+}: {
+  configId: string;
+  locationIds: string[];
+  prevDownConfigs: AlertOverviewStatus['downConfigs'];
+  prevPendingConfigs: AlertOverviewStatus['pendingConfigs'];
+}): boolean => {
+  const keys = locationIds.map((locationId) => `${configId}-${locationId}`);
+  return (
+    keys.some((key) => Boolean(prevPendingConfigs[key])) &&
+    !keys.some((key) => Boolean(prevDownConfigs[key]))
+  );
+};
+
 export const setRecoveredAlertsContext = ({
   alertsClient,
   basePath,
   spaceId,
   staleDownConfigs = {},
   stalePendingConfigs = {},
+  prevDownConfigs = {},
+  prevPendingConfigs = {},
   upConfigs,
   dateFormat,
   tz,
@@ -186,6 +224,8 @@ export const setRecoveredAlertsContext = ({
   params?: StatusRuleParams;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
   stalePendingConfigs: AlertOverviewStatus['stalePendingConfigs'];
+  prevDownConfigs?: AlertOverviewStatus['downConfigs'];
+  prevPendingConfigs?: AlertOverviewStatus['pendingConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
@@ -199,9 +239,21 @@ export const setRecoveredAlertsContext = ({
     const alertState = recoveredAlert.alert.getState();
     const configId = alertHit?.configId;
     const locationIds = alertHit?.['location.id'] ? [alertHit?.['location.id']].flat() : [];
-    const locationName = alertHit?.['observer.geo.name']
+    const wasPending = configId
+      ? isPendingRecovery({ configId, locationIds, prevDownConfigs, prevPendingConfigs })
+      : false;
+    const hitLocationNames: string[] = alertHit?.['observer.geo.name']
       ? [alertHit?.['observer.geo.name']].flat()
       : [];
+    // Pending alerts have no ping, so take location labels from the monitor info kept in rule state.
+    const locationName = wasPending
+      ? locationIds.map(
+          (locationId, index) =>
+            prevPendingConfigs[`${configId}-${locationId}`]?.monitorInfo?.observer?.geo?.name ||
+            hitLocationNames[index] ||
+            locationId
+        )
+      : hitLocationNames;
     let syntheticsStateId = alertHit?.['monitor.state.id'];
 
     let recoveryReason = i18n.translate(
@@ -229,6 +281,7 @@ export const setRecoveredAlertsContext = ({
       tz,
       dateFormat,
       params,
+      locationNames: wasPending ? locationName : undefined,
     });
     let lastErrorMessage = alertHit?.['error.message'];
 
@@ -265,6 +318,9 @@ export const setRecoveredAlertsContext = ({
       }
       // Cannot display link message for deleted monitors or deleted locations
       linkMessage = '';
+    } else if (wasPending) {
+      recoveryStatus = PENDING_RECOVERY_STATUS;
+      recoveryReason = PENDING_RECOVERY_REASON;
     }
 
     const upConfigKey = findConfigKeyByAlertId(upConfigs, recoveredAlertId);
@@ -352,6 +408,7 @@ export const getDefaultRecoveredSummary = ({
   tz,
   dateFormat,
   params,
+  locationNames,
 }: {
   recoveredAlert: RecoveredAlertData<
     MonitorStatusAlertDocument,
@@ -362,6 +419,7 @@ export const getDefaultRecoveredSummary = ({
   tz: string;
   dateFormat: string;
   params?: StatusRuleParams;
+  locationNames?: string[];
 }) => {
   if (!recoveredAlert.hit) return; // TODO: handle this case
   const hit = recoveredAlert.hit;
@@ -381,7 +439,9 @@ export const getDefaultRecoveredSummary = ({
       config_id: configId,
       observer: {
         geo: {
-          name: hit['observer.geo.name'] || hit['location.name'],
+          name: locationNames?.length
+            ? locationNames
+            : hit['observer.geo.name'] || hit['location.name'],
         },
         name: locationId,
       },

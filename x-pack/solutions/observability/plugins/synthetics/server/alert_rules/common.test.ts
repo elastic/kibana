@@ -1140,3 +1140,140 @@ describe('setRecoveredAlertsContext', () => {
     });
   });
 });
+
+describe('setRecoveredAlertsContext for pending alerts', () => {
+  const privateLocationId = '6e5323c1-aa6e-4f87-a80f-31164cfa71b6';
+  const privateLocationLabel = 'My private location';
+  const basePath = {
+    publicBaseUrl: 'https://localhost:5601',
+  } as IBasePath;
+
+  const prevPendingConfigs: AlertOverviewStatus['pendingConfigs'] = {
+    [`${configId}-${privateLocationId}`]: {
+      configId,
+      monitorQueryId: monitorId,
+      status: 'pending',
+      locationId: privateLocationId,
+      monitorInfo: {
+        monitor: { name: monitorName, id: monitorId, type: 'browser' },
+        observer: { geo: { name: privateLocationLabel } },
+        tags: [],
+      },
+    },
+  };
+
+  const getAlertsClientMock = (alertId: string) => ({
+    report: jest.fn(),
+    getAlertLimitValue: jest.fn().mockReturnValue(10),
+    setAlertLimitReached: jest.fn(),
+    getRecoveredAlerts: jest.fn().mockReturnValue([
+      {
+        alert: {
+          getId: () => alertId,
+          getUuid: () => 'alert-uuid',
+          getState: () => ({}),
+          setContext: jest.fn(),
+        },
+        hit: {
+          'kibana.alert.instance.id': alertId,
+          'location.id': [privateLocationId],
+          // Alerts written before the fix stored the location ID as its name
+          'observer.geo.name': [privateLocationId],
+          'monitor.name': monitorName,
+          'monitor.type': 'browser',
+          'monitor.id': monitorId,
+          '@timestamp': new Date().toISOString(),
+          configId,
+        },
+      },
+    ]),
+    setAlertData: jest.fn(),
+    isTrackedAlert: jest.fn(),
+  });
+
+  it('restores the location label and explains the pending recovery for ungrouped alerts', () => {
+    const alertsClientMock = getAlertsClientMock(configId);
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs: {},
+      stalePendingConfigs: {},
+      prevDownConfigs: {},
+      prevPendingConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: false,
+    });
+
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
+      id: configId,
+      context: expect.objectContaining({
+        monitorName,
+        locationId: privateLocationId,
+        locationName: privateLocationLabel,
+        locationNames: privateLocationLabel,
+        reason: expect.stringContaining(`from ${privateLocationLabel} is recovered`),
+        recoveryStatus: 'is no longer pending',
+        recoveryReason: 'the monitor is reporting data again',
+      }),
+    });
+  });
+
+  it('restores the location label for per-location alerts', () => {
+    const alertId = `${configId}-${privateLocationId}`;
+    const alertsClientMock = getAlertsClientMock(alertId);
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs: {},
+      stalePendingConfigs: {},
+      prevDownConfigs: {},
+      prevPendingConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: true,
+    });
+
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
+      id: alertId,
+      context: expect.objectContaining({
+        locationName: privateLocationLabel,
+        locationNames: privateLocationLabel,
+        recoveryStatus: 'is no longer pending',
+        recoveryReason: 'the monitor is reporting data again',
+      }),
+    });
+  });
+
+  it('keeps the default recovery message when the alert was down', () => {
+    const alertsClientMock = getAlertsClientMock(configId);
+    const prevDownConfigs = {
+      [`${configId}-${privateLocationId}`]: {},
+    } as unknown as AlertOverviewStatus['downConfigs'];
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs: {},
+      stalePendingConfigs: {},
+      prevDownConfigs,
+      prevPendingConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: false,
+    });
+
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
+      id: configId,
+      context: expect.objectContaining({
+        recoveryStatus: 'has recovered',
+        recoveryReason: 'the alert condition is no longer met',
+      }),
+    });
+  });
+});

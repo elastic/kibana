@@ -86,11 +86,14 @@ export const registerSyntheticsStatusCheckRule = (
 
       const statusRule = new StatusRuleExecutor(esClient, server, syntheticsMonitorClient, options);
 
+      const prevDownConfigs = ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'];
+      const prevPendingConfigs = ruleState.meta
+        ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'];
+
       const { downConfigs, staleDownConfigs, upConfigs, pendingConfigs, stalePendingConfigs } =
         await statusRule.getConfigs({
-          prevDownConfigs: ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'],
-          prevPendingConfigs: ruleState.meta
-            ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'],
+          prevDownConfigs,
+          prevPendingConfigs,
         });
 
       await statusRule.handleDownMonitorThresholdAlert({
@@ -111,6 +114,8 @@ export const registerSyntheticsStatusCheckRule = (
         groupByLocation,
         staleDownConfigs,
         stalePendingConfigs,
+        prevDownConfigs,
+        prevPendingConfigs,
         upConfigs,
       });
 
