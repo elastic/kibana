@@ -78,12 +78,11 @@ export function CasesTableServiceProvider(
     return dataTestSubj.replace('case-action-popover-button-', '');
   };
 
-  const waitForStatusOptionToStopMoving = async (status: CaseStatuses) => {
-    const optionSubj = `cases-bulk-action-status-${status}`;
+  const waitForMenuOptionToStopMoving = async (optionSubj: string) => {
     let stableSamples = 0;
     let previousPosition = await (await testSubjects.find(optionSubj)).getPosition();
 
-    await retry.waitFor(`status option ${status} to stop animating`, async () => {
+    await retry.waitFor(`menu option ${optionSubj} to stop animating`, async () => {
       const currentPosition = await (await testSubjects.find(optionSubj)).getPosition();
       stableSamples =
         currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y
@@ -376,7 +375,7 @@ export function CasesTableServiceProvider(
       await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
-      await waitForStatusOptionToStopMoving(status);
+      await waitForMenuOptionToStopMoving(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
       await header.waitUntilLoadingHasFinished();
       await this.waitForTableToFinishLoading();
@@ -386,6 +385,7 @@ export function CasesTableServiceProvider(
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
+      const caseId = await getCaseIdByRowIndex(index);
       await this.openRowActions(index);
 
       await retry.waitFor('severity panel exists', async () => {
@@ -399,10 +399,13 @@ export function CasesTableServiceProvider(
       await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+      await waitForMenuOptionToStopMoving(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
       await header.waitUntilLoadingHasFinished();
       await this.waitForTableToFinishLoading();
-      await testSubjects.existOrFail(`case-severity-badge-${severity}`);
+      await find.byCssSelector(
+        `[data-test-subj="cases-table-row-${caseId}"] [data-test-subj="case-severity-badge-${severity}"]`
+      );
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
