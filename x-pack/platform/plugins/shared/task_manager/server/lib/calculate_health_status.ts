@@ -12,11 +12,15 @@ import type { RawMonitoringStats } from '../monitoring';
 import { HealthStatus } from '../monitoring';
 import type { TaskManagerConfig } from '../config';
 
+const ES_BACKPRESSURE_REASON =
+  'Task Manager is throttling itself because of Elasticsearch-driven backpressure, health stats may be stale';
+
 export function calculateHealthStatus(
   summarizedStats: RawMonitoringStats,
   config: TaskManagerConfig,
   shouldRunTasks: boolean,
-  logger: Logger
+  logger: Logger,
+  esBackpressureActive = false
 ): { status: HealthStatus; reason?: string } {
   const now = Date.now();
 
@@ -45,15 +49,25 @@ export function calculateHealthStatus(
   }
 
   // Hot timestamps look at runtime stats which are not available when tasks are not running
-  if (shouldRunTasks) {
-    if (hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness)) {
-      const reason = 'setting HealthStatus.Error because of expired hot timestamps';
-      logger.debug(reason);
-      return { status: HealthStatus.Error, reason };
-    }
+  const hotTimestampsExpired =
+    shouldRunTasks && hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness);
+  const coldTimestampsExpired = hasExpiredColdTimestamps(
+    summarizedStats,
+    now,
+    requiredColdStatsFreshness
+  );
+
+  // Backpressure slows polling and stats collection on purpose, so stale stats are expected
+  const staleStatsCausedByBackpressure =
+    esBackpressureActive && (hotTimestampsExpired || coldTimestampsExpired);
+
+  if (hotTimestampsExpired && !esBackpressureActive) {
+    const reason = 'setting HealthStatus.Error because of expired hot timestamps';
+    logger.debug(reason);
+    return { status: HealthStatus.Error, reason };
   }
 
-  if (hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)) {
+  if (coldTimestampsExpired && !esBackpressureActive) {
     const reason = 'setting HealthStatus.Error because of expired cold timestamps';
     logger.debug(reason);
     return { status: HealthStatus.Error, reason };
@@ -64,6 +78,10 @@ export function calculateHealthStatus(
       status: HealthStatus.Warning,
       reason: summarizedStats.stats.capacity_estimation?.reason,
     };
+  }
+
+  if (staleStatsCausedByBackpressure) {
+    return { status: HealthStatus.OK, reason: ES_BACKPRESSURE_REASON };
   }
 
   return { status: HealthStatus.OK };

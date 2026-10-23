@@ -644,6 +644,50 @@ describe('estimateCapacity', () => {
     );
   });
 
+  test('logs unhealthy capacity as debug instead of warn when Elasticsearch-driven backpressure is active', async () => {
+    const unhealthyStats = () =>
+      mockStats(
+        { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+        {
+          owner_ids: 1,
+          overdue_non_recurring: 0,
+          capacity_requirements: {
+            per_minute: 210,
+            per_hour: 0,
+            per_day: 0,
+          },
+        },
+        {
+          load: {
+            p50: 80,
+            p90: 100,
+            p95: 100,
+            p99: 100,
+          },
+          execution: {
+            duration: {},
+            duration_by_persistence: {
+              non_recurring: { p50: 400, p90: 500, p95: 1200, p99: 1500 },
+              recurring: { p50: 400, p90: 500, p95: 1200, p99: 1500 },
+            },
+            persistence: {
+              non_recurring: 20,
+              recurring: 80,
+            },
+            result_frequency_percent_as_number: {},
+          },
+        }
+      );
+    const unhealthyReason =
+      'Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) > capacityPerMinutePerKibana (200)';
+
+    const estimate = estimateCapacity(logger, unhealthyStats(), 1, true);
+
+    expect(estimate).toMatchObject({ status: 'OK', reason: unhealthyReason });
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(unhealthyReason);
+  });
+
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks forces recurring task capacity to zero', async () => {
     expect(
       estimateCapacity(

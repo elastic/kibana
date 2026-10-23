@@ -132,12 +132,19 @@ export function createMonitoringStatsStream(
   );
 }
 
+export const isEsBackpressureActive = ({ stats: { utilization } }: MonitoringStats): boolean =>
+  utilization?.value.es_backpressure_active === 1;
+
 export function summarizeMonitoringStats(
   logger: Logger,
-  { last_update, stats: { runtime, workload, configuration, utilization } }: MonitoringStats,
+  monitoringStats: MonitoringStats,
   config: TaskManagerConfig,
   assumedKibanaInstances: number
 ): RawMonitoringStats {
+  const {
+    last_update,
+    stats: { runtime, workload, configuration },
+  } = monitoringStats;
   const summarizedStats = withCapacityEstimate(
     logger,
     {
@@ -166,7 +173,8 @@ export function summarizeMonitoringStats(
           }
         : {}),
     },
-    assumedKibanaInstances
+    assumedKibanaInstances,
+    isEsBackpressureActive(monitoringStats)
   );
 
   return {

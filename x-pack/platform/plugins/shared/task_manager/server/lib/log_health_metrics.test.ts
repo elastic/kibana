@@ -423,6 +423,19 @@ describe('logHealthMetrics', () => {
     expect(calculateHealthStatus).toHaveBeenCalledTimes(1);
     expect(calculateHealthStatus.mock.calls[0][0].stats.capacity_estimation).toBeUndefined();
   });
+
+  it('should pass whether Elasticsearch-driven backpressure is active to the health status calculation', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig();
+    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+
+    logHealthMetrics(getMockMonitoredHealth(), logger, config, true, docLinks);
+    logHealthMetrics(getMockMonitoredHealth(), logger, config, true, docLinks, true);
+
+    expect(calculateHealthStatus).toHaveBeenCalledTimes(2);
+    expect(calculateHealthStatus.mock.calls[0][4]).toBe(false);
+    expect(calculateHealthStatus.mock.calls[1][4]).toBe(true);
+  });
 });
 
 function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
