@@ -34,6 +34,7 @@ import { installInvestigationWorkflow } from './lib/managed_workflows/install_in
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
+import { installMemoryScheduledJudgesWorkflow } from './lib/managed_workflows/install_memory_scheduled_judges';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { installAssistantAgent } from './lib/install_assistant_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
@@ -60,6 +61,7 @@ import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_t
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
+import { memoryScheduledJudgesStepDefinition } from './step_definitions/memory_scheduled_judges';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { registerMemoryAiIndex } from './memory/register_memory';
 import { registerCortexTelemetryEvents } from './telemetry';
@@ -467,6 +469,12 @@ export class NightshiftInvestigationsPlugin
             isEnabled: () => this.decisionTreesEnabled,
           })
         );
+        plugins.workflowsExtensions.registerStepDefinition(
+          memoryScheduledJudgesStepDefinition({
+            logger: this.logger.get('memory_judges'),
+            isEnabled: () => this.cortexEnabled || this.memoryEnabled,
+          })
+        );
       }
 
       registerRoutes({
@@ -752,6 +760,7 @@ export class NightshiftInvestigationsPlugin
     if (this.cortexEnabled || this.memoryEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });
+      await installMemoryScheduledJudgesWorkflow({ client });
     }
     if (this.decisionTreesEnabled) {
       await installDecisionTreeWorkflows({ client });

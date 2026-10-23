@@ -1,0 +1,72 @@
+version: '1'
+name: Nightshift Memory Scheduled Judges
+description: >
+  Scheduled cron workflow that asynchronously subsamples completed Nightshift
+  T_background traces and writes versioned read and write judge scores to
+  .evaluation-online-scores. Decoupled from agent_optimize so judge execution
+  adds zero latency or failure coupling to live investigation rounds.
+enabled: false
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - cortex
+  - semantic-memory
+  - decision-tree
+  - evals-online
+  - scheduled
+
+settings:
+  concurrency:
+    key: 'nightshift-memory-scheduled-judges'
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: '15m'
+  - type: manual
+    inputs:
+      properties:
+        window_minutes:
+          type: integer
+          minimum: 1
+          maximum: 10080
+          default: 60
+          description: Sliding lookback window in minutes.
+        lag_minutes:
+          type: integer
+          minimum: 0
+          maximum: 1440
+          default: 2
+          description: Lag buffer in minutes before sampling completed traces.
+        max_traces_per_run:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 20
+          description: Maximum candidate T_background traces evaluated per tick.
+        sample_rate:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 1
+          description: Deterministic subsample rate in [0, 1].
+        evaluator_version:
+          type: string
+          maxLength: 64
+          default: 'v1'
+          description: Evaluator version stamped in .evaluation-online-scores.
+      additionalProperties: false
+
+steps:
+  - name: run_scheduled_judges
+    type: nightshift.memoryScheduledJudges
+    timeout: 180s
+    with:
+      window_minutes: '${{ inputs.window_minutes | default: 60 }}'
+      lag_minutes: '${{ inputs.lag_minutes | default: 2 }}'
+      max_traces_per_run: '${{ inputs.max_traces_per_run | default: 20 }}'
+      sample_rate: '${{ inputs.sample_rate | default: 1 }}'
+      evaluator_version: '{{ inputs.evaluator_version | default: "v1" }}'
