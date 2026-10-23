@@ -70,19 +70,20 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
   });
 
-  it('renders a Tags row with a badge per tag when the group has tags', () => {
+  it('renders a Tags row with a badge per tag when the alert has tags', () => {
     render(
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
-          groupAction={{
-            groupHash: 'gh-1',
+          episodeAction={{
+            episodeId: 'ep-1',
             ruleId: 'rule-1',
+            groupHash: 'gh-1',
+            lastAckAction: null,
+            lastAssigneeUid: null,
+            lastAckActor: null,
             lastDeactivateAction: null,
             lastDeactivateActor: null,
-            lastSnoozeAction: null,
-            lastSnoozeActor: null,
-            snoozedUntil: null,
             tags: ['tag-a', 'tag-b'],
           }}
         />
@@ -194,7 +195,6 @@ describe('AlertEpisodeOverviewList', () => {
             lastDeactivateActor: null,
             lastSnoozeAction: null,
             snoozedUntil: null,
-            tags: [],
             lastSnoozeActor: null,
           }}
         />
@@ -245,7 +245,6 @@ describe('AlertEpisodeOverviewList', () => {
             snoozedUntil: '2030-01-01T00:00:00.000Z',
             lastDeactivateAction: null,
             lastDeactivateActor: null,
-            tags: [],
           }}
         />
       </I18nProvider>
@@ -273,7 +272,6 @@ describe('AlertEpisodeOverviewList', () => {
             snoozedUntil: null,
             lastDeactivateAction: null,
             lastDeactivateActor: null,
-            tags: [],
           }}
         />
       </I18nProvider>
@@ -297,7 +295,6 @@ describe('AlertEpisodeOverviewList', () => {
             snoozedUntil: '2020-01-01T00:00:00.000Z',
             lastDeactivateAction: null,
             lastDeactivateActor: null,
-            tags: [],
           }}
         />
       </I18nProvider>

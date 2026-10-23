@@ -1,5 +1,5 @@
 {
-  "sha1": "db939c50303b70dbe57419bd26963ee0475866d6",
+  "sha1": "99e49e6aecb8e36ba9a4f61ec2b948c549fa6ef4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -178,6 +178,62 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
         "line": 128,
         "column": 23
+      }
+    },
+    {
+      "id": "4faba1e7d6efba7-0ef4b960ce20b01",
+      "title": "Rule attachment canvas in Agent Builder renders every canvas section for a proposed rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 247,
+        "column": 32
+      }
+    },
+    {
+      "id": "4faba1e7d6efba7-b0dfc3e0b40706b",
+      "title": "Rule attachment canvas in Agent Builder Create rule persists the rule and switches to persisted actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 256,
+        "column": 25
+      }
+    },
+    {
+      "id": "4faba1e7d6efba7-de6b2a2f1de3f9c",
+      "title": "Rule attachment canvas in Agent Builder View in Rules navigates to the persisted rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 282,
+        "column": 20
+      }
+    },
+    {
+      "id": "4faba1e7d6efba7-ea6c6a959b8bc0e",
+      "title": "Rule attachment canvas in Agent Builder closes and reopens the canvas without losing its content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 297,
+        "column": 8
       }
     },
     {

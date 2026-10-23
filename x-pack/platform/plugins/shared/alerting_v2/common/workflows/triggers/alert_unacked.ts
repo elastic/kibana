@@ -22,15 +22,15 @@ export const alertUnackedTriggerCommonDefinition: CommonTriggerDefinition<
   id: ALERT_UNACKED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: alertUnackedPayloadSchema,
-  title: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertUnacked.title', {
+  title: i18n.translate('xpack.alertingV2.workflowTriggers.alertUnacked.title', {
     defaultMessage: 'Alerting - Alert unacknowledged',
   }),
-  description: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertUnacked.description', {
+  description: i18n.translate('xpack.alertingV2.workflowTriggers.alertUnacked.description', {
     defaultMessage: 'Emitted when acknowledgement is removed from an alert.',
   }),
   documentation: {
     details: i18n.translate(
-      'xpack.alertingVTwo.workflowTriggers.alertUnacked.documentation.details',
+      'xpack.alertingV2.workflowTriggers.alertUnacked.documentation.details',
       {
         defaultMessage:
           'Emitted after an alert unack action is persisted. The payload includes event.alertId, event.ruleId, and event.spaceId for trigger conditions.',

@@ -18,7 +18,6 @@ import {
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
   type CardActionType,
-  type ImpactPill,
   type Investigation,
   InvestigationActionModals,
   type EscalationModalRenderProps,
@@ -129,8 +128,6 @@ export const ConversationsPage: React.FC = () => {
   return <ConversationsPageContent />;
 };
 
-const NO_PILLS: readonly ImpactPill[] = [];
-
 const POLLED_QUERY_KEYS = [
   ...OPEN_PROPOSAL_CATEGORIES.flatMap((category) => [
     queryKeys.proposals.byCategory(category),
@@ -139,19 +136,25 @@ const POLLED_QUERY_KEYS = [
   queryKeys.proposals.closed(),
   queryKeys.proposals.closedCount(),
   queryKeys.proposals.chartsSummaryAll(),
-  impactPillsQueryKeys.proposals(),
 ];
+
+/** Pills load a page at a time and re-rank as a whole, so a poll refreshes every loaded page. */
+const POLLED_ALL_PAGES_QUERY_KEYS = [impactPillsQueryKeys.proposals()];
 
 const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
-  useQueuePolling(POLLED_QUERY_KEYS);
-  const { data: impactPills = NO_PILLS } = useProposalImpactPills({
+  useQueuePolling(POLLED_QUERY_KEYS, POLLED_ALL_PAGES_QUERY_KEYS);
+  const impactPills = useProposalImpactPills({
     origin: ALERTZERO_PROPOSAL_ORIGIN,
     categories: OPEN_PROPOSAL_CATEGORIES,
     decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
   });
-  const { entityFilter: effectiveEntityFilter, setEntityFilter } = useEntityFilter(impactPills);
+  const {
+    entityFilter: effectiveEntityFilter,
+    selectedPill,
+    setEntityFilter,
+  } = useEntityFilter(impactPills);
   const {
     sections,
     proposalsById,
@@ -570,7 +573,8 @@ const ConversationsPageContent: React.FC = () => {
         )}
         <EuiFlexItem>
           <Impact
-            pills={impactPills}
+            impact={impactPills}
+            selectedPill={selectedPill}
             entityFilter={effectiveEntityFilter}
             onEntityFilterChange={onEntityFilterChange}
           />
