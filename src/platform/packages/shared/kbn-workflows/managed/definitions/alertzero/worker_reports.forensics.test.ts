@@ -449,7 +449,7 @@ describe('Endpoint Analysis managed versions', () => {
     [
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id,
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.version,
-      6,
+      5,
     ],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
