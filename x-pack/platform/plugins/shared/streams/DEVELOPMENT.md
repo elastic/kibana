@@ -63,6 +63,7 @@ Important consequences:
 - `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest. `unit_id` and `sealed_credentials` are in AAD, so the cache stays readable but is authenticated: editing or swapping a cached blob makes `secrets` fail to decrypt, and the next save fails before anything is sent. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document, and do not `soClient.update` encrypted or AAD attributes.
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
 - Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
+- `streams:republish-units` re-sends every stored unit every 30 minutes and re-seals after a key rotation. See "Republish and key rotation".
 - Without `xpack.streams.distributor.url`, validate and publish are no-ops.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
 
@@ -95,7 +96,7 @@ A JSON envelope that stores a secret references it from the node and sends the v
 | Unit YAML / `unit` attribute | `{ credential: <name> }` reference only |
 | SO `secrets` (ESO) | Plaintext, encrypted at rest with Kibana's ESO key |
 | SO `sealed_credentials` (plain, in ESO AAD) | `{ name, target, ciphertext }` from the last save, reused while nothing changed |
-| Distributor `PUT /v1/units/{id}` and `POST /v1/validate` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]` |
+| Distributor `PUT /v1/units/{id}` and `POST /v1/units/validate` | Authored `unit_yaml` + `credentials: [{ name, ciphertext }]` |
 
 `GET /internal/streams/unit/{id}` omits `secrets` and `sealed_credentials`. Canvas saves that omit `secrets` keep the stored bag. A PUT that includes `secrets` **merges** those keys onto what is stored instead of replacing them, because the UI only sends newly entered values.
 
@@ -125,7 +126,28 @@ Without a client certificate (a local fake distributor), set `xpack.cloud.server
 
 The distributor's main branch ignores `credentials` on validate and cannot compile `{ credential }` references yet, so a local tilt run with a reference fails validation until the backend catches up (ingest-dev#9480).
 
-Kibana re-seals a unit's secrets only when the unit is saved. A unit that is not saved again after a key rotation keeps blobs under the previous kid, which the collector still accepts while that key stays in the Secret.
+#### Republish and key rotation
+
+The task type `streams:republish-units` is always registered. When `xpack.streams.canvas.enabled` and `xpack.streams.distributor.url` are both set, it runs every 30 minutes and once after Kibana starts. Otherwise Kibana removes the scheduled task on start, and a run that still starts does nothing. For each stored unit it runs the same credential preparation as a save, with the stored secrets as input.
+
+- Same kid and target: the stored blobs are reused and the task only sends `PUT /v1/units/{id}` again, without validate or an SO write. The distributor answers `unchanged`. This is the periodic re-issue the distributor expects, and it recreates a missing `StreamUnit`.
+- New kid, or new target (read from the client certificate at startup): the task re-seals, validates, writes the SO with the version it read, and publishes. If the PUT fails, times out or Kibana stops, the re-seal stays and the next run only sends the PUT. A rollback would roll the collector twice when a timed-out PUT was in fact applied.
+- Right before the PUT the task reads the version again. If a user save landed in between, it skips the unit.
+- Errors are logged per unit, and the next run is the retry. A missing or unreadable key, an unset `xpack.streams.encryptionKey.path` or a missing target id (all 503) is logged at error, because only an operator can fix it. So is a document from an earlier build whose cached blobs are not in the AAD, which keeps failing until `POST /internal/streams/unit/<id>/_reset`. Distributor and network errors are logged at warn, and a request cut off by a stop or timeout at debug.
+
+A save can still race a task PUT in either direction. The distributor briefly holds the older unit, or the save gets a 409 from the distributor and rolls back. Every run sends the stored document again, so the distributor converges on the next sweep. An ordering token on the PUT is a spec follow-up.
+
+The task uses `getUnsafeInternalClient`, which keeps the encrypted saved objects extension, so a re-seal stores `secrets` encrypted.
+
+To check a rotation locally, write a new key file, then point `current-kid` at it:
+
+```bash
+KID2="$(date -u +%Y%m%d_%H%M%S)_$(openssl rand -hex 4)"
+openssl rand 32 > "/tmp/streams-encryption-key/streams-encryption-key.$KID2"
+printf '%s' "$KID2" > /tmp/streams-encryption-key/current-kid
+```
+
+Restart Kibana or wait for the next run. The log shows `Re-sealed credentials of Streams unit [default] and republished it`.
 
 ### Reset map saved objects
 
@@ -272,7 +294,7 @@ curl -sS -X PUT "$KIBANA_URL/internal/streams/unit/default" \
   --data-binary @good-unit.yaml
 ```
 
-Unit writes require a running config-distributor. Validation calls `POST /v1/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)). Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. When `xpack.streams.distributor.url` is unset, Kibana logs an error, does not call the distributor, and does not store the unit (HTTP 503).
+Unit writes require a running config-distributor. Validation calls `POST /v1/units/validate` ([ingest-dev#9430](https://github.com/elastic/ingest-dev/issues/9430)) and falls back to the pre-rename `POST /v1/validate` when the distributor answers 405. Invalid units return 400 with `{ valid: false, diagnostics }` and are not written. When `xpack.streams.distributor.url` is unset, Kibana logs an error, does not call the distributor, and does not store the unit (HTTP 503).
 
 The distributor (via `transpiler.Compile()`) is the authority on whether a unit is valid. The unit HTTP routes do not schema-check the document. 
 

@@ -26,6 +26,7 @@ import type {
   PreparedCredentials,
   PrepareUnitCredentials,
   PublishUnitConfig,
+  RepublishUnitOutcome,
   StoredUnitCredential,
   UnitValidationResult,
   ValidateUnitConfig,
@@ -104,6 +105,17 @@ const pickReferencedSecrets = (
   referencedNames: Set<string>
 ): StreamsUnit.Secrets =>
   Object.fromEntries(Object.entries(secrets).filter(([name]) => referencedNames.has(name)));
+
+const isSameSealed = (left: StoredUnitCredential[], right: StoredUnitCredential[]): boolean => {
+  const rightByName = new Map(right.map((credential) => [credential.name, credential]));
+  return (
+    left.length === right.length &&
+    left.every(({ name, target, ciphertext }) => {
+      const other = rightByName.get(name);
+      return other?.target === target && other.ciphertext === ciphertext;
+    })
+  );
+};
 
 export class StreamsUnitService {
   private readonly soClient: SavedObjectsClientContract;
@@ -268,6 +280,83 @@ export class StreamsUnitService {
     return validation;
   }
 
+  async listUnitIds(): Promise<string[]> {
+    const finder = this.soClient.createPointInTimeFinder<StreamsConfigurationSavedObjectAttributes>(
+      {
+        type: STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
+        namespaces: [ALL_SPACES_ID],
+        perPage: 100,
+      }
+    );
+    const ids: string[] = [];
+    try {
+      for await (const { saved_objects: savedObjects } of finder.find()) {
+        ids.push(...savedObjects.map(({ id }) => id));
+      }
+    } finally {
+      await finder.close();
+    }
+    return ids;
+  }
+
+  async republishUnit(unitId: string, signal?: AbortSignal): Promise<RepublishUnitOutcome> {
+    const stored = await this.getDecryptedConfigurationSavedObject(unitId);
+    if (!stored) {
+      return 'not_found';
+    }
+
+    const { unit, secrets, sealed_credentials: storedSealed = [] } = stored.attributes;
+    const { credentials, sealed } = await this.prepareUnitCredentials({
+      secrets,
+      previous: { secrets, sealed: storedSealed },
+    });
+    const resealed = !isSameSealed(sealed, storedSealed);
+
+    let committedVersion = stored.version;
+    if (resealed) {
+      if (signal?.aborted) {
+        return 'aborted';
+      }
+      await this.validateUnit({ unit, credentials, signal });
+      if (signal?.aborted) {
+        return 'aborted';
+      }
+      try {
+        committedVersion = await this.writeConfiguration({
+          savedObjectId: unitId,
+          unitId,
+          unit,
+          secrets,
+          sealedCredentials: sealed,
+          version: stored.version,
+        });
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+          return 'conflict';
+        }
+        throw error;
+      }
+    }
+
+    // A timed-out run must not PUT alongside the run task manager starts next. A re-seal write
+    // stays: the next run reuses those blobs, so a PUT that did land does not roll the collector twice.
+    if (signal?.aborted) {
+      return 'aborted';
+    }
+
+    const current = await this.getConfigurationSavedObject(unitId);
+    if (current?.version !== committedVersion) {
+      return 'conflict';
+    }
+    if (signal?.aborted) {
+      return 'aborted';
+    }
+
+    await this.publishUnit({ unitId, unit, credentials, signal });
+
+    return resealed ? 'resealed' : 'republished';
+  }
+
   private async prepareUnitCredentials(
     input: PrepareCredentialsInput
   ): Promise<PreparedCredentials> {
@@ -386,19 +475,23 @@ export class StreamsUnitService {
     unit,
     secrets,
     sealedCredentials,
+    version,
   }: {
     savedObjectId: string;
     unitId: string;
     unit: StreamsUnit.Configuration;
     secrets: StreamsUnit.Secrets;
     sealedCredentials: StoredUnitCredential[];
-  }): Promise<void> {
-    await this.soClient.create<StreamsConfigurationSavedObjectAttributes>(
+    /** When set, the write fails with 409 if the document changed since that version. */
+    version?: string;
+  }): Promise<string | undefined> {
+    const written = await this.soClient.create<StreamsConfigurationSavedObjectAttributes>(
       STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
       { unit_id: unitId, unit, secrets, sealed_credentials: sealedCredentials },
       {
         id: savedObjectId,
         overwrite: true,
+        ...(version ? { version } : {}),
         // One unit per cluster (distributor `/v1/units/default`). Share to all
         // spaces so they see the same document instead of colliding on the id.
         initialNamespaces: [ALL_SPACES_ID],
@@ -411,6 +504,7 @@ export class StreamsUnitService {
         ],
       }
     );
+    return written.version;
   }
 
   private async writeUiMetadata({
