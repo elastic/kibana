@@ -29,7 +29,11 @@ import { getEbtProps } from '@kbn/ebt-click';
 import type { DetectionEntity } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useState } from 'react';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
 import { useDetectionEntities } from '../../../data/detection_entities/use_detection_entities';
 import type { DetectionTimeRange } from '../use_detection_time_range';
 import type { EntitySelection } from '../use_entity_selection';
@@ -126,7 +130,9 @@ export const EntitiesPanel = ({
     ...getEbtProps({
       action: NIGHTSHIFT_EBT_ACTIONS.FILTER_DETECTIONS_BY_ENTITY,
       element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_ENTITIES_PANEL,
-      detail: isUnassigned ? 'unassigned' : entity.id,
+      detail: isUnassigned
+        ? NIGHTSHIFT_EBT_DETAILS.UNASSIGNED_ENTITIES
+        : NIGHTSHIFT_EBT_DETAILS.ENTITY,
     }),
   });
   const options: EntityOption[] = [];

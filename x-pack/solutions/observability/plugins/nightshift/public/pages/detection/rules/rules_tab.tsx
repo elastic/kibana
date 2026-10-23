@@ -19,7 +19,6 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { useDebounceFn } from '@kbn/react-hooks';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -32,7 +31,6 @@ import {
 import { RuleFlyout } from '../../../components/entities/rule/rule_flyout';
 import type { DetectionRule } from '../../../data/rules/use_detection_rules';
 import { useDetectionRuleById, useDetectionRules } from '../../../data/rules/use_detection_rules';
-import { useDetectionEntities } from '../../../data/detection_entities/use_detection_entities';
 import { useRulesDemote } from '../../../data/rules/use_rules_demote';
 import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -57,8 +55,6 @@ import {
 
 // Its own param, so the Rules search and the Events search both survive tab switches.
 const RULES_SEARCH_QUERY_PARAM = 'rulesSearch';
-// Module-level so useDebounceFn keeps one debounced function across renders.
-const SEARCH_DEBOUNCE_OPTIONS = { wait: 300 };
 
 export const RulesTab = ({
   timeRange,
@@ -75,66 +71,46 @@ export const RulesTab = ({
   const location = useLocation();
   const { application, notifications } = useKibana().services;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
-  const rulesQuery = useDetectionRules(timeRange);
-  const entitiesQuery = useDetectionEntities(timeRange);
-  // A truncated entity list can't classify unassigned rules, so Unassigned is ignored then.
-  const applyUnassigned = unassigned && !entitiesQuery.data?.truncated;
-  const hasEntityFilter = entities.length > 0 || applyUnassigned;
-  const isEntityLoading = applyUnassigned && entitiesQuery.isLoading;
-  const isEntityError = applyUnassigned && entitiesQuery.isError && !entitiesQuery.data;
+  const rulesQuery = useDetectionRules(timeRange, { entities, unassigned });
+  const hasEntityFilter = entities.length > 0 || unassigned;
   const { demoteRules, isPending } = useRulesDemote({});
   const [search, setSearch] = useState(
     () => new URLSearchParams(location.search).get(RULES_SEARCH_QUERY_PARAM) ?? ''
   );
-  const { run: writeSearch, cancel: cancelSearchWrite } = useDebounceFn((value: string) => {
-    const params = new URLSearchParams(history.location.search);
-    if (value.trim()) params.set(RULES_SEARCH_QUERY_PARAM, value);
-    else params.delete(RULES_SEARCH_QUERY_PARAM);
-    history.replace({ ...history.location, search: `?${params.toString()}` });
-  }, SEARCH_DEBOUNCE_OPTIONS);
-  // Back/Forward restores that entry's search and drops a pending write for the old one.
+  // Back/Forward restores that entry's search.
   useEffect(
     () =>
       history.listen((nextLocation, action) => {
         if (action !== 'POP') return;
-        cancelSearchWrite();
         setSearch(new URLSearchParams(nextLocation.search).get(RULES_SEARCH_QUERY_PARAM) ?? '');
       }),
-    [cancelSearchWrite, history]
+    [history]
   );
+  // The search filters in the browser, so the URL is written at once: a tab switch can't lose it.
   const updateSearch = (value: string) => {
     setSearch(value);
-    writeSearch(value);
+    const params = new URLSearchParams(history.location.search);
+    if (value.trim()) params.set(RULES_SEARCH_QUERY_PARAM, value);
+    else params.delete(RULES_SEARCH_QUERY_PARAM);
+    history.replace({ ...history.location, search: `?${params.toString()}` });
   };
   const [selected, setSelected] = useState<DetectionRule[]>([]);
   const [pendingDelete, setPendingDelete] = useState<DetectionRule[]>();
   const openLinks = useRef(new Map<string, HTMLAnchorElement | HTMLButtonElement | null>());
   const ruleId = getNightshiftRuleIdFromSearch(location.search);
   const loadedRule = rulesQuery.rules.find(({ query }) => query.id === ruleId);
-  // A deep link can point past the loaded first page; look that rule up on its own.
-  const needsLookup = Boolean(ruleId) && !loadedRule && rulesQuery.isTruncated;
+  // A deep link can point past the loaded first page or outside the entity selection; look that
+  // rule up on its own.
+  const needsLookup = Boolean(ruleId) && !loadedRule && (rulesQuery.isTruncated || hasEntityFilter);
   const ruleLookup = useDetectionRuleById(timeRange, ruleId, needsLookup);
   const activeRule = loadedRule ?? (needsLookup ? ruleLookup.rule : undefined);
-  const entityRules = useMemo(() => {
-    if (!hasEntityFilter) return rulesQuery.rules;
-    const liveIds = new Set(entitiesQuery.data?.entities.map(({ id }) => id) ?? []);
-    return rulesQuery.rules.filter(({ query }) => {
-      const features = query.features ?? [];
-      return (
-        features.some(({ id }) => entities.includes(id)) ||
-        (applyUnassigned &&
-          Boolean(entitiesQuery.data) &&
-          !features.some(({ id }) => liveIds.has(id)))
-      );
-    });
-  }, [hasEntityFilter, rulesQuery.rules, entitiesQuery.data, entities, applyUnassigned]);
   const filteredRules = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return entityRules.filter(
+    return rulesQuery.rules.filter(
       ({ query }) =>
         query.title.toLowerCase().includes(term) || query.description.toLowerCase().includes(term)
     );
-  }, [entityRules, search]);
+  }, [rulesQuery.rules, search]);
 
   const updateRuleId = useCallback(
     (id?: string, replace = false) => {
@@ -223,7 +199,7 @@ export const RulesTab = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {(rulesQuery.isError && !rulesQuery.hasData) || isEntityError ? (
+      {rulesQuery.isError && !rulesQuery.hasData ? (
         <KbnDangerCallout
           announceOnMount
           title={ERROR_TITLE}
@@ -233,10 +209,7 @@ export const RulesTab = ({
             primary: {
               children: RETRY_LABEL,
               iconType: 'refresh',
-              onClick: () => {
-                void rulesQuery.refetch();
-                void entitiesQuery.refetch();
-              },
+              onClick: () => void rulesQuery.refetch(),
             },
           }}
         />
@@ -249,7 +222,7 @@ export const RulesTab = ({
         />
       ) : (
         <>
-          <RuleMatchesChart rules={entityRules} loading={rulesQuery.isLoading || isEntityLoading} />
+          <RuleMatchesChart rules={rulesQuery.rules} loading={rulesQuery.isLoading} />
           <EuiSpacer size="m" />
           {rulesQuery.isTruncated ? (
             <>
@@ -320,7 +293,7 @@ export const RulesTab = ({
             ) : null}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          {rulesQuery.hasData && !isEntityLoading && filteredRules.length === 0 ? (
+          {rulesQuery.hasData && filteredRules.length === 0 ? (
             <EuiEmptyPrompt
               iconType="magnify"
               title={
@@ -344,7 +317,7 @@ export const RulesTab = ({
           ) : (
             <RulesTable
               rules={filteredRules}
-              loading={rulesQuery.isFetching || isEntityLoading}
+              loading={rulesQuery.isFetching}
               selectedRuleId={ruleId}
               selected={selected}
               canManage={canManage}

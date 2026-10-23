@@ -39,6 +39,11 @@ jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alert
   }),
 }));
 
+const mockGetLiveEntities = jest.fn();
+jest.mock('../../../../lib/significant_events/entities/get_live_entities', () => ({
+  getLiveEntities: (...args: unknown[]) => mockGetLiveEntities(...args),
+}));
+
 jest.mock('../../../../lib/significant_events/ki_queries_generation_service', () => ({
   generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
 }));
@@ -558,6 +563,49 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
     );
     expect(findRuleEnabledStates).toHaveBeenCalledWith(['rule-q1', 'rule-q2']);
     expect(result.queries.map(({ rule_enabled }) => rule_enabled)).toEqual([true, false]);
+  });
+
+  describe('entity selection', () => {
+    const linkTo = (id: string, entityId: string): QueryLink => {
+      const link = makeQueryLink(id, 50);
+      return { ...link, query: { ...link.query, features: [{ id: entityId, run_id: 'run' }] } };
+    };
+
+    beforeEach(() => {
+      mockFetchQueryLinks.mockResolvedValue([
+        linkTo('q1', 'checkout'),
+        linkTo('q2', 'payment'),
+        linkTo('q3', 'expired'),
+      ]);
+      mockGetLiveEntities.mockResolvedValue({
+        entities: [{ id: 'checkout' }, { id: 'payment' }],
+        truncated: false,
+      });
+    });
+
+    it.each([
+      ['a selected entity', { entityIds: ['checkout'] }, ['q1']],
+      ['Unassigned', { unassignedEntities: true }, ['q3']],
+      [
+        'an entity plus Unassigned',
+        { entityIds: ['checkout'], unassignedEntities: true },
+        ['q1', 'q3'],
+      ],
+    ])('keeps queries for %s before paging', async (_, selection, ids) => {
+      const result = await discoveryQueriesRoute.handler(
+        makeDiscoveryHandlerParams({ ...discoveryBaseQuery, ...selection })
+      );
+      expect(result.queries.map(({ id }) => id)).toEqual(ids);
+      expect(result.total).toBe(ids.length);
+    });
+
+    it('ignores Unassigned when the live entity list is truncated', async () => {
+      mockGetLiveEntities.mockResolvedValue({ entities: [{ id: 'checkout' }], truncated: true });
+      const result = await discoveryQueriesRoute.handler(
+        makeDiscoveryHandlerParams({ ...discoveryBaseQuery, unassignedEntities: true })
+      );
+      expect(result.total).toBe(3);
+    });
   });
 
   it('returns the list without enabled states if the lookup fails', async () => {

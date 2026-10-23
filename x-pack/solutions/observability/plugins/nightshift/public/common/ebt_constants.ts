@@ -90,9 +90,12 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
 } as const;
 
 export const NIGHTSHIFT_EBT_DETAILS = {
+  // Entity filters report the row kind, never the slug: slugs are customer service names.
+  ENTITY: 'entity',
   EXISTING_CONVERSATION: 'existingConversation',
   IMPACTED_SERVICE_TYPE: 'entity',
   NEW_CONVERSATION: 'newConversation',
   NEEDS_ACTION: 'needsAction',
   RESOLVED: 'resolved',
+  UNASSIGNED_ENTITIES: 'unassigned',
 } as const;
