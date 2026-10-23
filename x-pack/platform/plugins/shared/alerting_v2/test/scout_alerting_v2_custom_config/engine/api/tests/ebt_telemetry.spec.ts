@@ -10,13 +10,7 @@
  * `alerting_v2_workflow_dispatched` EBT event. A breaching rule is matched by
  * an action policy whose destination is a real workflow, and the event carries
  * the ids and counts of that dispatch.
- *
- * We exclude `@kbn/eslint/scout_require_api_client_in_api_test` because this
- * spec does not target an HTTP endpoint. It drives the alerting_v2 background
- * tasks via source data and observes the reported EBT events.
  */
-
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { expect } from '@kbn/scout/api';
 import {
