@@ -41,7 +41,7 @@ if (base != null && base.toString().length() > 0) {
 if (doc.containsKey('united.agent.policy_id') && doc['united.agent.policy_id'].size() > 0) {
   def policyId = doc['united.agent.policy_id'].value;
   if (policyId != null) {
-    emit(policyId.toString().replaceAll(/#\\d+\\.\\d+$/, m -> ''));
+    emit(policyId.toString().replaceAll(/#(?:sentinel|\\d+\\.\\d+)$/, m -> ''));
     return;
   }
 }
