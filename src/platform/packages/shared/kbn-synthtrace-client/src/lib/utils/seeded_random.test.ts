@@ -36,9 +36,15 @@ describe('createSeededRandom', () => {
     expect(mean).toBeLessThan(0.52);
   });
 
-  it('does not repeat itself across blocks', () => {
-    const values = draw('blocks', 1_000);
+  it('does not repeat itself', () => {
+    const values = draw('long run', 1_000);
 
     expect(new Set(values).size).toBe(values.length);
+  });
+
+  it('uses the whole seed', () => {
+    const prefix = 'x'.repeat(300);
+
+    expect(draw(`${prefix}a`, 5)).not.toEqual(draw(`${prefix}b`, 5));
   });
 });

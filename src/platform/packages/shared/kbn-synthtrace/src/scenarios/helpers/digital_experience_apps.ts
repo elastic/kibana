@@ -9,6 +9,7 @@
 
 import { v4 as generateUuid } from 'uuid';
 import {
+  createSeededRandom,
   edotBrowser,
   type BrowserProfileId,
   type EdotBrowserDocument,
@@ -21,7 +22,6 @@ import {
   type SynthtraceGenerator,
   type Timerange,
 } from '@kbn/synthtrace-client';
-import { createSeededRandom } from '../../lib/utils/seeded_random';
 
 export interface DigitalExperienceApp {
   serviceName: string;

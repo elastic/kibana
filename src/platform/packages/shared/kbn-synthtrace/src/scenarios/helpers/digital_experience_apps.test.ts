@@ -374,7 +374,8 @@ describe('digital experience apps', () => {
 
       it('derives UUID v4 session IDs and trace IDs from the seed', () => {
         const docs = generate('seed-a');
-        const sessionIds = new Set(docs.map((doc) => String(doc.attributes?.['session.id'])));
+        // Idle tabs have no session ID
+        const sessionIds = new Set(docs.flatMap((doc) => doc.attributes?.['session.id'] ?? []));
 
         expect(sessionIds.size).toBeGreaterThan(1);
         sessionIds.forEach((id) =>

@@ -906,7 +906,7 @@ These scenarios generate browser Real User Monitoring data for Digital Experienc
 
 Non-zero timings and web vital values always have a fractional part, so dynamic mapping types them as `float`. Like EDOT Browser, timings of phases that didn't happen are written as `0`.
 
-The data is written through the `otelEsClient`, which indexes documents as-is. In code and Scout tests, use the `edotBrowser` DSL from `@kbn/synthtrace-client` (`edotBrowser.app()`, `edotBrowser.session()`) with the `otelSynthtraceEsClient` fixture from `@kbn/scout-synthtrace`.
+The data is written through the `otelEsClient`, which indexes documents as-is. In code and Scout tests, use the `edotBrowser` DSL from `@kbn/synthtrace-client` (`edotBrowser.app()`, `edotBrowser.session()`) with the `otelSynthtraceEsClient` fixture from `@kbn/scout-synthtrace`. For exact values in a test, pass `random: createSeededRandom('my-test')` (from `@kbn/synthtrace-client`) and a fixed `start` or `end` to `edotBrowser.session()`, which makes the whole session, trace and span IDs included, reproducible. Unlike the scenarios' `seed` option, it doesn't fix the session and tab IDs: pass those to `app.client()` yourself.
 
 > **Warning:** `--clean` (and `otelEsClient.clean()` in code and Scout tests) deletes every `logs-*.otel-*` and `traces-*.otel-*` data stream, not only the EDOT Browser data. On a shared cluster, that also removes other OTel data.
 

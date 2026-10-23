@@ -28,12 +28,11 @@
  *   node scripts/synthtrace digital_experience_mixed --from=now-30m --to=now
  */
 
-import { apm, type ApmFields } from '@kbn/synthtrace-client';
+import { apm, createSeededRandom, type ApmFields } from '@kbn/synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import type { OtelDocument } from '../lib/otel/otel_synthtrace_es_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
-import { createSeededRandom } from '../lib/utils/seeded_random';
 import {
   generateEdotBrowserSessions,
   generatePerMinute,

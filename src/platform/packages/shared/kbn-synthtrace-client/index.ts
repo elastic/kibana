@@ -43,6 +43,7 @@ export {
   setIdGeneratorStrategy,
 } from './src/lib/utils/generate_id';
 export { appendHash, hashKeysOf } from './src/lib/utils/hash';
+export { createSeededRandom } from './src/lib/utils/seeded_random';
 export {
   type ESDocumentWithOperation,
   type SynthtraceESAction,

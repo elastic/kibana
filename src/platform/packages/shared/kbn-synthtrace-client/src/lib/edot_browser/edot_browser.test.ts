@@ -16,6 +16,7 @@ import {
   type HealthProfile,
 } from './health_profiles';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
+import { createSeededRandom } from '../utils/seeded_random';
 import { edotBrowser, type EdotBrowserDocument, type EdotBrowserSite } from '.';
 
 const LOGS_INDEX = 'logs-generic.otel-default';
@@ -1044,6 +1045,24 @@ describe('edotBrowser', () => {
       });
       expect(docs[0]).toBe(starts[0]);
       expect(Math.min(...timestamps(docs))).toBe(TIMESTAMP);
+    });
+
+    it('generates the same session for the same seeded random, trace and span IDs included', () => {
+      const generate = (seed: string) =>
+        edotBrowser
+          .session({
+            start: TIMESTAMP,
+            client: createClient('abc'),
+            site: SITE,
+            health: HEALTH_PROFILES.critical,
+            pageViews: 4,
+            random: createSeededRandom(seed),
+          })
+          .flatMap((event) => event.serialize());
+
+      expect(generate('spec-a')).toEqual(generate('spec-a'));
+      expect(generate('spec-a')).not.toEqual(generate('spec-b'));
+      expect(generate('spec-a').some(isSpan)).toBe(true);
     });
 
     it('does not start a session again when the user comes back to it', () => {
