@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  EncryptionError,
+  EncryptionErrorOperation,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
@@ -14,6 +18,7 @@ import {
   REPUBLISH_UNITS_TASK_ID,
   REPUBLISH_UNITS_TASK_TYPE,
   registerRepublishUnitsTask,
+  removeRepublishUnitsTask,
   runRepublishUnits,
   scheduleRepublishUnitsTask,
   type UnitRepublisher,
@@ -40,10 +45,10 @@ describe('runRepublishUnits', () => {
     ]);
   });
 
-  it('keeps going after a unit fails and logs a warning', async () => {
+  it('keeps going after a unit fails and logs a distributor failure as a warning', async () => {
     const republisher = createRepublisher(['default', 'unit-2']);
     republisher.republishUnit.mockRejectedValueOnce(
-      new StatusError('Cannot seal Streams unit credentials: cannot read current-kid (ENOENT)', 503)
+      new StatusError('Failed to reach streams-config-distributor', 502)
     );
     const logger = loggerMock.create();
 
@@ -51,7 +56,58 @@ describe('runRepublishUnits', () => {
 
     expect(republisher.republishUnit).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[default]'));
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cannot read current-kid'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to reach'));
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs a missing key as an error, because retrying does not fix it', async () => {
+    const republisher = createRepublisher();
+    republisher.republishUnit.mockRejectedValueOnce(
+      new StatusError('Cannot seal Streams unit credentials: cannot read current-kid (ENOENT)', 503)
+    );
+    const logger = loggerMock.create();
+
+    await runRepublishUnits({ republisher, logger, signal: new AbortController().signal });
+
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('cannot read current-kid'));
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs a document that fails to decrypt as an error, because it needs a reset', async () => {
+    const republisher = createRepublisher();
+    republisher.republishUnit.mockRejectedValueOnce(
+      new EncryptionError(
+        'Unable to decrypt attribute "secrets"',
+        'secrets',
+        EncryptionErrorOperation.Decryption
+      )
+    );
+    const logger = loggerMock.create();
+
+    await runRepublishUnits({ republisher, logger, signal: new AbortController().signal });
+
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Unable to decrypt'));
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs a request aborted by the run signal at debug and stops', async () => {
+    const republisher = createRepublisher(['default', 'unit-2']);
+    const abortController = new AbortController();
+    republisher.republishUnit.mockImplementationOnce(async () => {
+      abortController.abort();
+      throw new StatusError(
+        'Failed to reach streams-config-distributor: This operation was aborted',
+        502
+      );
+    });
+    const logger = loggerMock.create();
+
+    await runRepublishUnits({ republisher, logger, signal: abortController.signal });
+
+    expect(republisher.republishUnit).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('[default] aborted'));
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('logs a re-seal at info', async () => {
@@ -96,13 +152,14 @@ describe('runRepublishUnits', () => {
 });
 
 describe('registerRepublishUnitsTask', () => {
-  const register = (republisher: UnitRepublisher) => {
+  const register = (republisher: UnitRepublisher, enabled = true) => {
     const taskManager = taskManagerMock.createSetup();
     const logger = loggerMock.create();
     const stopController = new AbortController();
     registerRepublishUnitsTask({
       taskManager,
       logger,
+      enabled,
       getRepublisher: async () => republisher,
       stopSignal: stopController.signal,
     });
@@ -125,6 +182,14 @@ describe('registerRepublishUnitsTask', () => {
 
     await expect(runTask()).resolves.toEqual({ state: {} });
     expect(republisher.republishUnit).toHaveBeenCalledWith('default', expect.any(AbortSignal));
+  });
+
+  it('does nothing when republish is disabled', async () => {
+    const republisher = createRepublisher();
+    const { runTask } = register(republisher, false);
+
+    await expect(runTask()).resolves.toEqual({ state: {} });
+    expect(republisher.listUnitIds).not.toHaveBeenCalled();
   });
 
   it.each(['task timeout', 'plugin stop'])('aborts the unit signal on %s', async (source) => {
@@ -199,5 +264,25 @@ describe('scheduleRepublishUnitsTask', () => {
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('no task store'));
     expect(taskManager.runSoon).not.toHaveBeenCalled();
+  });
+});
+
+describe('removeRepublishUnitsTask', () => {
+  it('removes the scheduled task', async () => {
+    const taskManager = taskManagerMock.createStart();
+
+    await removeRepublishUnitsTask({ taskManager, logger: loggerMock.create() });
+
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(REPUBLISH_UNITS_TASK_ID);
+  });
+
+  it('logs a warning when the removal fails', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.removeIfExists.mockRejectedValue(new Error('no task store'));
+    const logger = loggerMock.create();
+
+    await removeRepublishUnitsTask({ taskManager, logger });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no task store'));
   });
 });

@@ -6,12 +6,15 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { EncryptionError } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
+import { StatusError } from '../streams/errors/status_error';
+import { combineAbortSignals } from './combine_abort_signals';
 import type { RepublishUnitOutcome } from './types';
 
 export const REPUBLISH_UNITS_TASK_TYPE = 'streams:republish-units';
@@ -24,6 +27,9 @@ export interface UnitRepublisher {
   listUnitIds: () => Promise<string[]>;
   republishUnit: (unitId: string, signal: AbortSignal) => Promise<RepublishUnitOutcome>;
 }
+
+const isOperatorError = (error: unknown): boolean =>
+  (error instanceof StatusError && error.statusCode === 503) || error instanceof EncryptionError;
 
 /** Republishes every stored unit once. A failing unit is logged and the next run retries it. */
 export const runRepublishUnits = async ({
@@ -50,19 +56,33 @@ export const runRepublishUnits = async ({
         logger.debug(`Republish of Streams unit [${unitId}]: ${outcome}`);
       }
     } catch (error) {
-      logger.warn(`Failed to republish Streams unit [${unitId}], the next run retries: ${error}`);
+      // A stop or timeout mid-request rejects the fetch, which is not a distributor failure.
+      if (signal.aborted) {
+        logger.debug(`Republish of Streams unit [${unitId}] aborted: ${error}`);
+        return;
+      }
+      const message = `Failed to republish Streams unit [${unitId}], the next run retries: ${error}`;
+      // A 503 (missing key, key path or target id) or an undecryptable document needs an operator. Retrying does not help.
+      if (isOperatorError(error)) {
+        logger.error(message);
+      } else {
+        logger.warn(message);
+      }
     }
   }
 };
 
+/** Registers the task type whether or not republish is enabled, so a leftover scheduled task stays recognized. */
 export const registerRepublishUnitsTask = ({
   taskManager,
   logger,
+  enabled,
   getRepublisher,
   stopSignal,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
+  enabled: boolean;
   getRepublisher: () => Promise<UnitRepublisher>;
   /** Aborted when the plugin stops. Task manager aborts the run signal only on timeout. */
   stopSignal: AbortSignal;
@@ -77,25 +97,22 @@ export const registerRepublishUnitsTask = ({
       cost: TaskCost.Normal,
       createTaskRunner: ({ signal }: RunContext) => ({
         run: async () => {
-          const runController = new AbortController();
-          const abortRun = () => runController.abort();
-          signal.addEventListener('abort', abortRun);
-          stopSignal.addEventListener('abort', abortRun);
-          if (signal.aborted || stopSignal.aborted) {
-            abortRun();
+          // Start removes the task when disabled, but a run can be claimed before that.
+          if (!enabled) {
+            return { state: {} };
           }
+          const runSignal = combineAbortSignals([signal, stopSignal]);
           try {
             await runRepublishUnits({
               republisher: await getRepublisher(),
               logger,
-              signal: runController.signal,
+              signal: runSignal.signal,
             });
           } catch (error) {
             logger.warn(`Streams unit republish run failed, the next run retries: ${error}`);
           } finally {
             // The stop signal lives as long as the plugin, so a run must not leave a listener on it.
-            signal.removeEventListener('abort', abortRun);
-            stopSignal.removeEventListener('abort', abortRun);
+            runSignal.dispose();
           }
           return { state: {} };
         },
@@ -129,5 +146,19 @@ export const scheduleRepublishUnitsTask = async ({
     await taskManager.runSoon(REPUBLISH_UNITS_TASK_ID);
   } catch (error) {
     logger.debug(`Did not run ${REPUBLISH_UNITS_TASK_ID} on start: ${error}`);
+  }
+};
+
+export const removeRepublishUnitsTask = async ({
+  taskManager,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+}): Promise<void> => {
+  try {
+    await taskManager.removeIfExists(REPUBLISH_UNITS_TASK_ID);
+  } catch (error) {
+    logger.warn(`Failed to remove ${REPUBLISH_UNITS_TASK_ID}: ${error}`);
   }
 };

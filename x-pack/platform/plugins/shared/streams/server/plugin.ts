@@ -62,6 +62,7 @@ import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
 import type { UnitConfigHooks } from './lib/unit_config/types';
 import {
   registerRepublishUnitsTask,
+  removeRepublishUnitsTask,
   scheduleRepublishUnitsTask,
 } from './lib/unit_config/republish_units_task';
 import { StreamsUnitService } from './lib/saved_objects/streams_unit_service';
@@ -100,6 +101,7 @@ export class StreamsPlugin
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
   private republishUnitsEnabled = false;
+  private readonly republishLogger: Logger;
   private readonly stopController = new AbortController();
   private attachmentService?: AttachmentService;
   private streamsService?: StreamsService;
@@ -112,6 +114,7 @@ export class StreamsPlugin
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.republishLogger = this.logger.get('republish-units');
     this.processorSuggestionsService = new ProcessorSuggestionsService();
     this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
@@ -309,31 +312,29 @@ export class StreamsPlugin
     };
 
     this.republishUnitsEnabled = this.config.canvas.enabled && Boolean(this.config.distributor.url);
-    if (this.republishUnitsEnabled) {
-      const republishLogger = this.logger.get('republish-units');
-      registerRepublishUnitsTask({
-        taskManager: plugins.taskManager,
-        logger: republishLogger,
-        stopSignal: this.stopController.signal,
-        getRepublisher: async () => {
-          const [coreStart, pluginsStart] = await core.getStartServices();
-          return new StreamsUnitService({
-            soClient: coreStart.savedObjects.getUnsafeInternalClient({
-              includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
-              excludedExtensions: [SPACES_EXTENSION_ID],
-            }),
-            logger: republishLogger,
-            validateUnit: unitConfigHooks.validate,
-            publishUnit: unitConfigHooks.publish,
-            prepareCredentials: unitConfigHooks.prepareCredentials,
-            encryptedSavedObjectsClient: pluginsStart.encryptedSavedObjects.getClient({
-              includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
-            }),
-            canEncrypt: this.canEncrypt,
-          });
-        },
-      });
-    }
+    registerRepublishUnitsTask({
+      taskManager: plugins.taskManager,
+      logger: this.republishLogger,
+      enabled: this.republishUnitsEnabled,
+      stopSignal: this.stopController.signal,
+      getRepublisher: async () => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        return new StreamsUnitService({
+          soClient: coreStart.savedObjects.getUnsafeInternalClient({
+            includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
+            excludedExtensions: [SPACES_EXTENSION_ID],
+          }),
+          logger: this.republishLogger,
+          validateUnit: unitConfigHooks.validate,
+          publishUnit: unitConfigHooks.publish,
+          prepareCredentials: unitConfigHooks.prepareCredentials,
+          encryptedSavedObjectsClient: pluginsStart.encryptedSavedObjects.getClient({
+            includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
+          }),
+          canEncrypt: this.canEncrypt,
+        });
+      },
+    });
 
     const routeRegistrationOptions = {
       dependencies: {
@@ -526,11 +527,12 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
+    const republishTaskDeps = { taskManager: plugins.taskManager, logger: this.republishLogger };
     if (this.republishUnitsEnabled) {
-      void scheduleRepublishUnitsTask({
-        taskManager: plugins.taskManager,
-        logger: this.logger.get('republish-units'),
-      });
+      void scheduleRepublishUnitsTask(republishTaskDeps);
+    } else {
+      // Assumes every node has the same config, so a disabled node never removes a task another node needs.
+      void removeRepublishUnitsTask(republishTaskDeps);
     }
 
     return {};

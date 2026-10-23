@@ -381,13 +381,16 @@ describe('StreamsPlugin unit republish task', () => {
   it.each([
     ['canvas is disabled', { distributor: { url: 'http://localhost:18081', ssl: {} } }],
     ['the distributor URL is unset', { canvas: { enabled: true } }],
-  ])('neither registers nor schedules the task when %s', async (_, overrides) => {
+  ])('registers the task but removes instead of scheduling it when %s', async (_, overrides) => {
     const { taskManagerSetup, taskManagerStart } = startPlugin(
       getConfig(overrides as Partial<StreamsConfig>)
     );
     await flushPromises();
 
-    expect(taskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
+    expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
+      'streams:republish-units': expect.objectContaining({ timeout: '2m' }),
+    });
     expect(taskManagerStart.ensureScheduled).not.toHaveBeenCalled();
+    expect(taskManagerStart.removeIfExists).toHaveBeenCalledWith('streams:republish-units');
   });
 });

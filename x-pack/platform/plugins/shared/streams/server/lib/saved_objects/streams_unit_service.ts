@@ -106,14 +106,16 @@ const pickReferencedSecrets = (
 ): StreamsUnit.Secrets =>
   Object.fromEntries(Object.entries(secrets).filter(([name]) => referencedNames.has(name)));
 
-const isSameSealed = (left: StoredUnitCredential[], right: StoredUnitCredential[]): boolean =>
-  left.length === right.length &&
-  left.every(
-    ({ name, target, ciphertext }, index) =>
-      name === right[index].name &&
-      target === right[index].target &&
-      ciphertext === right[index].ciphertext
+const isSameSealed = (left: StoredUnitCredential[], right: StoredUnitCredential[]): boolean => {
+  const rightByName = new Map(right.map((credential) => [credential.name, credential]));
+  return (
+    left.length === right.length &&
+    left.every(({ name, target, ciphertext }) => {
+      const other = rightByName.get(name);
+      return other?.target === target && other.ciphertext === ciphertext;
+    })
   );
+};
 
 export class StreamsUnitService {
   private readonly soClient: SavedObjectsClientContract;
@@ -300,7 +302,7 @@ export class StreamsUnitService {
       if (signal?.aborted) {
         return 'aborted';
       }
-      await this.validateUnit({ unit, credentials });
+      await this.validateUnit({ unit, credentials, signal });
       if (signal?.aborted) {
         return 'aborted';
       }
@@ -335,7 +337,7 @@ export class StreamsUnitService {
       return 'aborted';
     }
 
-    await this.publishUnit({ unitId, unit, credentials });
+    await this.publishUnit({ unitId, unit, credentials, signal });
 
     return resealed ? 'resealed' : 'republished';
   }

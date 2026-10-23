@@ -872,6 +872,44 @@ describe('StreamsUnitService', () => {
       });
     });
 
+    it('does not re-seal when the stored blobs are in a different order', async () => {
+      const soClient = soClientAt('v1');
+      const validateUnit = jest.fn();
+      const twoSecrets = { 'es-prod': 's3cret', 's3-key': 'k3y' };
+
+      const service = createService({
+        soClient,
+        publishUnit: jest.fn(),
+        validateUnit,
+        encryptedSavedObjectsClient: decrypting(
+          storedAt(storedFor(['es-prod', 's3-key']).reverse(), { secrets: twoSecrets })
+        ),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('republished');
+
+      expect(validateUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('passes the run signal to validate and publish', async () => {
+      const { signal } = new AbortController();
+      const validateUnit = jest.fn().mockResolvedValue({});
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient: soClientAt('v2'),
+        validateUnit,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default', signal)).resolves.toBe('resealed');
+
+      expect(validateUnit).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+      expect(publishUnit).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+    });
+
     it('publishes a unit without secrets without calling the preparer', async () => {
       const soClient = soClientAt('v1');
       const publishUnit = jest.fn();
@@ -1307,7 +1345,7 @@ describe('StreamsUnitService', () => {
       });
       const unitPuts = () =>
         fetchImpl.mock.calls
-          .filter(([url]) => String(url).includes('/v1/units/'))
+          .filter(([, init]) => init.method === 'PUT')
           .map(([, init]) => JSON.parse(init.body));
 
       return { service, soClient, unitPuts };
