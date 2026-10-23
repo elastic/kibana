@@ -7,6 +7,7 @@
 
 import type { FpTpWorld } from '../../world';
 import { buildFpTpExampleWorld } from '..';
+import { FP_TP_RAW_EVENT_PAGE_SIZE } from '../../world';
 import { MIMICRAT_STAGE2_DOMAIN } from './chain';
 import { MIMICRAT_EXAMPLES } from './examples';
 
@@ -77,7 +78,7 @@ const rawEventText = (id: string): string =>
   JSON.stringify(buildFpTpExampleWorld(id, 'run1').events.map(({ source }) => source));
 
 describe('mimicrat-clickfix examples', () => {
-  it.each(MIMICRAT_EXAMPLES.map(({ id, checks }) => [id, checks]))(
+  it.each(MIMICRAT_EXAMPLES.filter(({ checks }) => checks).map(({ id, checks }) => [id, checks]))(
     'returns the declared checks for %s from its seeded world',
     (id, checks) => {
       expect(observedChecks(buildFpTpExampleWorld(id as string, 'run1'))).toEqual(checks);
@@ -92,6 +93,72 @@ describe('mimicrat-clickfix examples', () => {
       );
     }
   );
+
+  it('returns tp-host-name-only with alerts that have no host.id but keep their raw events findable by host.name', () => {
+    const base = buildFpTpExampleWorld('mimicrat-clickfix.tp', 'run1');
+    const world = buildFpTpExampleWorld('mimicrat-clickfix.tp-host-name-only', 'run1');
+    expect(world.alerts.length).toBeGreaterThan(0);
+    for (const alert of world.alerts) {
+      const host = alert.source.host as Record<string, unknown>;
+      expect(host.id).toBeUndefined();
+      expect(typeof host.name).toBe('string');
+    }
+    expect(world.events).toEqual(base.events);
+  });
+
+  it('returns tp-multiday-span with cited-alert original_time spread over three days while its raw events stay within the chain hour', () => {
+    const world = buildFpTpExampleWorld('mimicrat-clickfix.tp-multiday-span', 'run1');
+    const originalTimes = world.alerts.map((alert) =>
+      Date.parse(String(alert.source['kibana.alert.original_time']))
+    );
+    const spanDays = (Math.max(...originalTimes) - Math.min(...originalTimes)) / 86_400_000;
+    expect(spanDays).toBeCloseTo(3, 5);
+    const eventTimes = world.events.map((event) => Date.parse(String(event.source['@timestamp'])));
+    expect(Math.max(...eventTimes) - Math.min(...eventTimes)).toBeLessThan(2 * 3_600_000);
+  });
+
+  it('returns every alert still anchored after its cited events for tp-multiday-span', () => {
+    const world = buildFpTpExampleWorld('mimicrat-clickfix.tp-multiday-span', 'run1');
+    const eventTime = new Map(
+      world.events.map((event) => [event.id, Date.parse(String(event.source['@timestamp']))])
+    );
+    for (const alert of world.alerts) {
+      const ancestors = alert.source['kibana.alert.ancestors'] as Array<{ id: string }>;
+      const cited = Math.max(
+        ...ancestors.map(({ id }) => eventTime.get(id) ?? Number.NEGATIVE_INFINITY)
+      );
+      expect(Date.parse(String(alert.source['kibana.alert.original_time']))).toBeGreaterThanOrEqual(
+        cited
+      );
+    }
+  });
+
+  // The dilution arithmetic the truncation example's gold stands on: under the workflow's
+  // page (50, oldest first) across the 3-day window, the benign fill evicts the deciding
+  // events of every stage after the first.
+  it('returns fp-multiday-span-truncated whose oldest-first page holds only benign fill and the earliest stage', () => {
+    const world = buildFpTpExampleWorld('mimicrat-clickfix.fp-multiday-span-truncated', 'run1');
+    const pageSize = FP_TP_RAW_EVENT_PAGE_SIZE;
+    const page = [...world.events]
+      .sort(
+        (left, right) =>
+          Date.parse(String(left.source['@timestamp'])) -
+          Date.parse(String(right.source['@timestamp']))
+      )
+      .slice(0, pageSize);
+    const benign = page.filter(({ source }) => {
+      const process = source.process as { name?: string } | undefined;
+      return process?.name === 'svchost.exe';
+    });
+    const chainEvents = page.filter((event) => !benign.includes(event));
+    expect(page.length).toBe(pageSize);
+    expect(benign.length).toBeGreaterThan(0);
+    // The later stages' deciding events are off the page.
+    const onPageProcesses = new Set(
+      chainEvents.map(({ source }) => (source.process as { name?: string }).name)
+    );
+    expect(onPageProcesses.has('zbuild.exe')).toBe(false);
+  });
 
   it.each([
     ['mimicrat-clickfix.fp-benign-mimic', MIMICRAT_STAGE2_DOMAIN],

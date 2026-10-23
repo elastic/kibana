@@ -46,11 +46,13 @@ export {
   withCommandLine,
   withFilePath,
   withNetworkDestination,
+  withoutAlertHostId,
   withoutEventCategory,
   withoutEventIds,
   withoutProcessParent,
   withProcessExecutable,
   withProcessParent,
+  withStageSpan,
 } from './mutations';
 export {
   assertBulkOk,

@@ -25,6 +25,15 @@ Each example declares the result each world check should reach (`checks`). Its g
 | `role-swap-mdm` | U2 | The host is an Intune provisioning host | contradicts / supports / supports | `inconclusive` |
 | `parent-spoof` | U1 | The Intune management extension starts PowerShell | supports / contradicts / supports | `inconclusive` |
 | `all-neutral` | U5 | No entity role, no parents, no network events | neutral / neutral / neutral | `inconclusive` |
+| `tp-host-name-only` | U6 | Cited alerts carry `host.name` but no `host.id` | supports / supports / supports | `true_positive` |
+| `tp-multiday-span` | U6 | Cited-alert `original_time` spread across three days, raw events still in the chain hour | supports / supports / supports | `true_positive` |
+| `fp-multiday-span-truncated` | U1 | 3-day span plus more than a page of benign service starts at the window's oldest end | — (no checks; the rules do not model eviction) | `inconclusive` |
+
+### The #299995 follow-up examples
+
+`tp-host-name-only` covers the workflow's `load_events_by_host_name` gate: with no `host.id` on any cited alert, the id-matched search is skipped and the name-matched one must find the same raw events, so the gold is `tp`'s. It is a `perturbation` — the checks the rules read are unchanged.
+
+`tp-multiday-span` and `fp-multiday-span-truncated` measure whether a multi-day cited-alert span dilutes the oldest-first 50-event page. The span alone does not: with the chain hour's own volume, every deciding event stays on the page (`tp-multiday-span`, gold `tp`'s). Dilution is corpus volume inside the widened window, not width: `fp-multiday-span-truncated` places more than a page of benign service starts at the window's oldest end, so the page holds only fill plus the earliest stage, every alert-adjacent event is evicted, and the gold is `inconclusive` — the same downgrade as `encoded-powershell.fp-events-truncated`, reached by eviction rather than in-window truncation. Conclusion for the workflow: the current single shared window is sufficient for chains whose own volume fits a page; a host that produces a page of ordinary telemetry early in a multi-day window can hide the deciding events. If that pattern is real in production traffic, per-host or per-alert windows are the fix — tracked as a follow-up card, not changed here.
 
 `explorer.exe` is the user's shell, so the replay's process parent supports. Examples that need a neutral parent remove the parents of both `powershell.exe` and `zbuild.exe` rather than pick a process whose reading is uncertain; with only PowerShell's removed, the analysis reads `zbuild.exe`'s parent as a user shell. The `unknown` entity role keeps the host and user records but drops their sub-type, asset, and risk, so the store answers without saying what the host is.
 

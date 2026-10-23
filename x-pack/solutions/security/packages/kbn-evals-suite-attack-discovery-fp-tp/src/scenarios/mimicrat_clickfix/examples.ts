@@ -7,11 +7,14 @@
 
 import {
   getChainIds,
+  withoutAlertHostId,
   withoutEntities,
   withoutEventCategory,
   withoutEventIds,
   withoutEvents,
   withProcessParent,
+  withStageSpan,
+  withTruncatingBenignEvents,
 } from '../../world';
 import type { FpTpExample } from '../types';
 import { MIMICRAT_CHAIN } from './chain';
@@ -242,6 +245,54 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
       networkDestination: 'supports',
     },
     buildWorld: (runMarker) => tpWorld(runMarker, 'mdm_management'),
+  },
+  {
+    id: 'mimicrat-clickfix.tp-host-name-only',
+    situation: 'U6',
+    evidenceState: 'complete',
+    expectedOutcome: 'true_positive',
+    provenance: 'replay',
+    variant: {
+      kind: 'perturbation',
+      of: TP_ID,
+      description: 'cited alerts carry host.name but no host.id',
+    },
+    checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
+    buildWorld: (runMarker) => withoutAlertHostId(tpWorld(runMarker)),
+  },
+  {
+    id: 'mimicrat-clickfix.tp-multiday-span',
+    situation: 'U6',
+    evidenceState: 'complete',
+    expectedOutcome: 'true_positive',
+    provenance: 'replay',
+    variant: {
+      kind: 'perturbation',
+      of: TP_ID,
+      description: 'cited-alert original_time spread across three days',
+    },
+    checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
+    buildWorld: (runMarker) => withStageSpan(tpWorld(runMarker), 3),
+  },
+  // The dilution measurement the #299995 review asked for. The 3-day span widens the
+  // raw-event window to three days while the page stays 50, oldest first. More than a
+  // page of benign service starts sit at the window's oldest end, so the page holds only
+  // benign fill: every alert-adjacent event, including the C2 beacons, is evicted, and
+  // the analysis can neither cite the deciding events nor clear the alerts — gold
+  // `inconclusive`, the same downgrade as `encoded-powershell.fp-events-truncated` but
+  // caused by dilution across the widened window rather than a dense chain hour. With no
+  // such early-window volume the deciding events always fit (`tp-multiday-span`): a
+  // multi-day span alone does not dilute; corpus volume inside the window does. No
+  // `checks`: the verdict rules do not model truncation or eviction, so the gold would
+  // not follow from them.
+  {
+    id: 'mimicrat-clickfix.fp-multiday-span-truncated',
+    situation: 'U1',
+    evidenceState: 'events_truncated',
+    expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    buildWorld: (runMarker) =>
+      withTruncatingBenignEvents(withStageSpan(fpWorld(runMarker), 3), runMarker, undefined, 'before'),
   },
   {
     id: 'mimicrat-clickfix.parent-spoof',

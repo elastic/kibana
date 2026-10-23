@@ -126,6 +126,58 @@ export const withNetworkDestination = (
     (event) => ({ ...event, source: { ...event.source, destination } })
   );
 
+/**
+ * Removes `host.id` from every alert, leaving `host.name`. The workflow gates its two
+ * raw-event searches on the cited alerts' host ids, so with none it must run the
+ * name-matched search. Raw events keep their ids: only the alerts drive the gate.
+ */
+export const withoutAlertHostId = (world: FpTpWorld): FpTpWorld => ({
+  ...world,
+  alerts: world.alerts.map((alert) => {
+    const { id: _hostId, ...host } = asRecord(alert.source.host);
+    return { ...alert, source: { ...alert.source, host } };
+  }),
+});
+
+/**
+ * Rewrites the stage timestamps of a chain world so its alerts' `kibana.alert.original_time`
+ * span `days`. Spreads the stage anchor times evenly across the span, keeping each stage
+ * after its cited events: a stage's alert is its latest cited event plus the delay. Events
+ * keep their relative offsets within the chain hour, and the first stage keeps its time, so
+ * the chain and the attack still start an hour before it.
+ */
+export const withStageSpan = (world: FpTpWorld, days: number): FpTpWorld => {
+  const alerts = [...world.alerts].sort(
+    (left, right) =>
+      Date.parse(String(left.source['kibana.alert.original_time'])) -
+      Date.parse(String(right.source['kibana.alert.original_time']))
+  );
+  if (alerts.length === 0) {
+    return world;
+  }
+  const spanMs = days * 24 * 60 * 60 * 1000;
+  // Anchored on the earliest alert so the span the alerts cover is exactly `days`.
+  const firstMs = Date.parse(String(alerts[0].source['kibana.alert.original_time']));
+  const anchored = new Map<string, number>();
+  alerts.forEach((alert, position) => {
+    anchored.set(alert.id, firstMs + (spanMs * position) / (alerts.length - 1 || 1));
+  });
+  const retime = (source: Record<string, unknown>): Record<string, unknown> => {
+    const ancestors = source['kibana.alert.ancestors'];
+    const citedTimes = Array.isArray(ancestors)
+      ? ancestors
+          .map((ancestor) => anchored.get(String((ancestor as Record<string, unknown>).id)))
+          .filter((time): time is number => time !== undefined)
+      : [];
+    const time = citedTimes.length > 0 ? Math.max(...citedTimes) : anchored.get(String(source['kibana.alert.uuid']));
+    return time === undefined ? source : { ...source, '@timestamp': new Date(time).toISOString(), 'kibana.alert.original_time': new Date(time).toISOString() };
+  };
+  return {
+    ...world,
+    alerts: world.alerts.map((alert) => ({ ...alert, source: retime(alert.source) })),
+  };
+};
+
 /** Drops the raw events with the given ids. Alerts still cite them, as they would after data loss. */
 export const withoutEventIds = (world: FpTpWorld, eventIds: readonly string[]): FpTpWorld => {
   const missing = eventIds.filter((eventId) => !world.events.some(({ id }) => id === eventId));
