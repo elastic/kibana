@@ -30,10 +30,14 @@ describe('createFindingsWriter', () => {
   const user = { username: 'elastic' };
 
   const setup = ({ canManage = true }: { canManage?: boolean } = {}) => {
-    const hypothesesService = { setWithPublicClient: jest.fn().mockResolvedValue(undefined) };
+    const hypothesesService = {
+      setWithPublicClient: jest.fn().mockResolvedValue(undefined),
+      findByConversationId: jest.fn(),
+    };
     const impactService = {
       set: jest.fn().mockResolvedValue({}),
       getByConversationId: jest.fn(),
+      findByConversationId: jest.fn(),
       revertAttach: jest.fn(),
     };
     const privileges = {
@@ -58,6 +62,27 @@ describe('createFindingsWriter', () => {
     jest.mocked(attachImpactToInvestigation).mockImplementation(async ({ writeImpact }) => {
       await writeImpact();
       return {} as never;
+    });
+  });
+
+  it('reads the stored hypotheses and impact summary', async () => {
+    const { writer, hypothesesService, impactService } = setup();
+    hypothesesService.findByConversationId.mockResolvedValue({ hypotheses });
+    impactService.findByConversationId.mockResolvedValue({ summary: 'Checkout is slow' });
+
+    await expect(writer.getFindings({ conversationId: 'conv-1' })).resolves.toEqual({
+      hypotheses,
+      impactSummary: 'Checkout is slow',
+    });
+    expect(hypothesesService.findByConversationId).toHaveBeenCalledWith('conv-1', 'space-a');
+  });
+
+  it('reads nothing as an empty record', async () => {
+    const { writer } = setup();
+
+    await expect(writer.getFindings({ conversationId: 'conv-1' })).resolves.toEqual({
+      hypotheses: [],
+      impactSummary: undefined,
     });
   });
 

@@ -68,6 +68,7 @@ export const buildCycleHookExecutionContext = ({
     input: cloneDeep(processedConversation.nextInput),
     conversation: {
       id: conversationId,
+      access: context.conversationAccess,
       get events() {
         return getHistory().events;
       },

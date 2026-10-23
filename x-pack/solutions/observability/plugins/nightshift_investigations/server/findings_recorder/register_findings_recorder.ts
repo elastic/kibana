@@ -53,7 +53,8 @@ export const registerFindingsRecorder = ({
     boundAgents: [NIGHTSHIFT_INVESTIGATION_AGENT_ID],
     getHandler: ({ conversation, request, abortSignal, input }) => {
       const conversationId = conversation.id;
-      if (!conversationId) return undefined;
+      // A read-only run must not write findings, as in the final pass below.
+      if (!conversationId || conversation.access === 'readOnly') return undefined;
       const question = typeof input?.message === 'string' ? input.message : undefined;
 
       const memory = coordinator.memory(conversationId);

@@ -62,6 +62,7 @@ describe('runFindingsPass', () => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
+      getFindings: jest.fn().mockResolvedValue({ hypotheses: [] }),
     };
     const patchMetadata = jest.fn().mockResolvedValue(undefined);
     const chatComplete = jest.fn();
@@ -141,6 +142,59 @@ describe('runFindingsPass', () => {
     expect(notice?.content).toContain('from "high" to "low"');
     expect(notice?.content).toContain('Do not set the severity');
     expect(patchMetadata).toHaveBeenCalledWith('c1', { summary: output.summary });
+  });
+
+  it('does not write a severity a user changed while the model was answering', async () => {
+    const events: Array<Record<string, unknown>> = [];
+    const { deps, patchMetadata, chatComplete, memory } = setup({ events });
+    chatComplete.mockReset();
+    chatComplete.mockImplementationOnce(async () => {
+      events.push({ type: 'investigation_severity_changed', data: { severity: 'low' } });
+      return answerWith(output);
+    });
+
+    await expect(run(deps, memory)).resolves.toBe(true);
+
+    expect(patchMetadata).toHaveBeenCalledWith('c1', { summary: output.summary });
+  });
+
+  it('starts a follow-up round from the stored record, in its own conversation only', async () => {
+    const { deps, writer, memory } = setup();
+    writer.getFindings.mockResolvedValue({
+      hypotheses: [
+        {
+          candidate: 'Pool leak',
+          confidence: 0.4,
+          status: 'investigating',
+          reason: 'Not ruled out',
+        },
+      ],
+      impactSummary: 'Checkout is slow',
+    });
+
+    await run(deps, memory);
+
+    expect(memory.remember).toHaveBeenCalledWith(
+      expect.objectContaining({
+        atGroups: 0,
+        final: false,
+        answer: expect.objectContaining({
+          impact_summary: 'Checkout is slow',
+          hypotheses: [
+            expect.objectContaining({ candidate: 'Pool leak', reason: 'Not ruled out' }),
+          ],
+        }),
+      })
+    );
+  });
+
+  it('does not seed the recorder when nothing is stored yet', async () => {
+    const { deps, memory } = setup();
+
+    await run(deps, memory);
+
+    // Only the record this pass wrote is remembered.
+    expect(memory.remember).toHaveBeenCalledTimes(1);
   });
 
   it('writes summary, severity, hypotheses and impact from a live pass, without a verdict', async () => {

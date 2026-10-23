@@ -37,6 +37,32 @@ const answerOf = (toolCalls: InvestigationToolCall[], response: string): string 
   return reply ?? response;
 };
 
+/**
+ * Whether the round is a follow-up: not the first round of its conversation. When the conversation
+ * or the round cannot be read it counts as a first round, so nothing is reinforced as confirmed
+ * without a person's follow-up behind it.
+ */
+const isFollowUpRound = async ({
+  agentBuilder,
+  request,
+  conversationId,
+  roundId,
+}: {
+  agentBuilder?: AgentBuilderPluginStart;
+  request: Parameters<AgentBuilderPluginStart['conversations']['getScopedClient']>[0]['request'];
+  conversationId?: string;
+  roundId?: string;
+}): Promise<boolean> => {
+  if (!agentBuilder || !conversationId || !roundId) return false;
+  try {
+    const conversations = await agentBuilder.conversations.getScopedClient({ request });
+    const { rounds } = await conversations.get(conversationId);
+    return rounds.findIndex(({ id }) => id === roundId) > 0;
+  } catch {
+    return false;
+  }
+};
+
 export const decisionTreePrepareStepDefinition = ({
   getTelemetryConnectorId,
   getAgentBuilder,
@@ -76,6 +102,12 @@ export const decisionTreePrepareStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Agent id that produced the round. Rounds from other agents are skipped.'),
+      conversation_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Conversation of the round, to tell a first round from a follow-up.'),
+      round_id: z.string().max(1024).optional().describe('Id of the completed round.'),
       tool_calls: toolCallsSchema.describe(
         'Investigator tool calls from this round. Used to see which decision-tree files were read.'
       ),
@@ -89,7 +121,14 @@ export const decisionTreePrepareStepDefinition = ({
       skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
     }),
     handler: async (context) => {
-      const { response, prompt, agent_id: agentId, tool_calls: toolCalls } = context.input;
+      const {
+        response,
+        prompt,
+        agent_id: agentId,
+        conversation_id: conversationId,
+        round_id: roundId,
+        tool_calls: toolCalls,
+      } = context.input;
       const skippedOutput = {
         output: {
           message: '',
@@ -118,36 +157,49 @@ export const decisionTreePrepareStepDefinition = ({
       const investigatorToolCalls = (toolCalls ?? []) as InvestigationToolCall[];
       const answer = answerOf(investigatorToolCalls, response);
 
-      // The causal check reads the whole round, so a confirmed cause no longer has to appear as
-      // a status line in the answer. The text match stays as a floor if the check cannot run.
-      let causalConfirmed = deriveCausalConfirmed(answer);
-      try {
-        const model = await createOptimizeModel({
-          request: context.contextManager.getFakeRequest(),
+      // Whether a cause was confirmed needs ground truth, and a first round has none: only a
+      // person's follow-up on the investigation can confirm or correct its cause. So the causal
+      // check runs on follow-up rounds only, and a first round is never reinforced as confirmed.
+      let causalConfirmed = false;
+      if (
+        await isFollowUpRound({
           agentBuilder: getAgentBuilder?.(),
-          inference: getInference?.(),
-          savedObjects: getSavedObjects?.(),
-          uiSettings: getUiSettings?.(),
-          telemetryMetadata: createInvestigationUsageTelemetry(workflowContext.execution.id),
-          logger,
-        });
-        if (model) {
-          const check = await checkCausalConfirmation({
-            inferenceClient: model.inferenceClient,
-            transcript: renderMemoryTranscript({
-              task: prompt ?? '',
-              answer,
-              toolCalls: investigatorToolCalls,
-            }),
+          request: context.contextManager.getFakeRequest(),
+          conversationId,
+          roundId,
+        })
+      ) {
+        // The check reads the whole round, so a confirmed cause no longer has to appear as a
+        // status line in the answer. The text match stays as a floor if the check cannot run.
+        causalConfirmed = deriveCausalConfirmed(answer);
+        try {
+          const model = await createOptimizeModel({
+            request: context.contextManager.getFakeRequest(),
+            agentBuilder: getAgentBuilder?.(),
+            inference: getInference?.(),
+            savedObjects: getSavedObjects?.(),
+            uiSettings: getUiSettings?.(),
+            telemetryMetadata: createInvestigationUsageTelemetry(workflowContext.execution.id),
+            logger,
           });
-          causalConfirmed = (check?.causalConfirmed ?? false) || causalConfirmed;
+          if (model) {
+            const check = await checkCausalConfirmation({
+              inferenceClient: model.inferenceClient,
+              transcript: renderMemoryTranscript({
+                task: prompt ?? '',
+                answer,
+                toolCalls: investigatorToolCalls,
+              }),
+            });
+            causalConfirmed = (check?.causalConfirmed ?? false) || causalConfirmed;
+          }
+        } catch (error) {
+          logger.warn(
+            `Causal check unavailable, using the text match: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
         }
-      } catch (error) {
-        logger.warn(
-          `Causal check unavailable, using the text match: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
       }
 
       const { message, treeCount, turnKind } = await prepareReinforcementTurn({

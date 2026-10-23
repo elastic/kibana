@@ -53,7 +53,7 @@ describe('registerFindingsRecorder', () => {
 
     const abort = new AbortController();
     const handler = definition.getHandler({
-      conversation: { id: 'c1' },
+      conversation: { id: 'c1', access: 'readWrite' },
       request,
       abortSignal: abort.signal,
       input: { message: 'Why is checkout failing?' },
@@ -74,6 +74,19 @@ describe('registerFindingsRecorder', () => {
     expect(
       definition.getHandler({
         conversation: {},
+        request,
+        abortSignal: new AbortController().signal,
+      })
+    ).toBeUndefined();
+  });
+
+  it('sits the cycle hook out when the run is read-only', () => {
+    const { registerCycleHook } = setup();
+
+    const [definition] = registerCycleHook.mock.calls[0];
+    expect(
+      definition.getHandler({
+        conversation: { id: 'c1', access: 'readOnly' },
         request,
         abortSignal: new AbortController().signal,
       })

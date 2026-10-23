@@ -69,43 +69,83 @@ export const limitToOneConfirmed = (hypotheses: FindingsOutput['hypotheses']): H
   });
 };
 
-/**
- * One recorder pass: replays the agent's conversation to the model with its own earlier records
- * in it, asks for the updated record, and writes the result. Returns whether it wrote. Never
- * throws for a model or write failure; it logs and returns false, because the investigation must
- * not depend on it.
- */
 interface ConversationEventLike {
   type: string;
   data?: { severity?: string; previous_severity?: string };
   actor?: Parameters<typeof getEventActorDisplayName>[0];
 }
 
-/** What a person changing the severity looks like to the recorder, one notice per change. */
-const readSeverityChanges = async (
+interface ConversationLike {
+  events?: ConversationEventLike[];
+  metadata?: { summary?: unknown; severity?: unknown; verdict?: unknown };
+}
+
+const readConversation = async (
   agentBuilder: AgentBuilderPluginStart,
   request: KibanaRequest,
   conversationId: string
-): Promise<string[]> => {
+): Promise<ConversationLike> => {
   try {
     const conversations = await agentBuilder.conversations.getScopedClient({ request });
-    const conversation = (await conversations.get(conversationId)) as {
-      events?: ConversationEventLike[];
-    };
-    return (conversation.events ?? [])
-      .filter(({ type }) => type === INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE)
-      .map(
-        ({ data, actor }) =>
-          `${getEventActorDisplayName(actor) ?? 'A user'} (a human) changed the investigation ` +
-          `severity ${data?.previous_severity ? `from "${data.previous_severity}" ` : ''}to "${
-            data?.severity
-          }". Do not set the severity.`
-      );
+    return ((await conversations.get(conversationId)) as ConversationLike) ?? {};
   } catch {
-    return [];
+    return {};
   }
 };
 
+/** What a person changing the severity looks like to the recorder, one notice per change. */
+const severityNotices = ({ events = [] }: ConversationLike): string[] =>
+  events
+    .filter(({ type }) => type === INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE)
+    .map(
+      ({ data, actor }) =>
+        `${(actor && getEventActorDisplayName(actor)) ?? 'A user'} (a human) changed the ` +
+        `investigation severity ${
+          data?.previous_severity ? `from "${data.previous_severity}" ` : ''
+        }to "${data?.severity}". Do not set the severity.`
+    );
+
+/**
+ * The record already stored for the investigation, as an earlier answer of the recorder's own.
+ * A follow-up round starts with none of the recorder's memory, and without this it would replace
+ * the stored hypotheses with whatever the follow-up looked at. It lives only in the recorder's
+ * conversation: nothing is added to the agent's.
+ */
+const storedRecord = async (
+  agenticInvestigations: AgenticInvestigationsPluginStart,
+  request: KibanaRequest,
+  conversationId: string,
+  conversation: ConversationLike
+): Promise<Record<string, unknown> | undefined> => {
+  try {
+    const { hypotheses, impactSummary } = await agenticInvestigations
+      .getFindingsWriter(request)
+      .getFindings({ conversationId });
+    const { summary, severity, verdict } = conversation.metadata ?? {};
+    if (hypotheses.length === 0 && typeof summary !== 'string') return undefined;
+    return {
+      summary: typeof summary === 'string' && summary ? summary : '(none recorded yet)',
+      ...(typeof verdict === 'string' && verdict ? { verdict } : {}),
+      ...(typeof severity === 'string' && severity ? { severity } : {}),
+      ...(impactSummary ? { impact_summary: impactSummary } : {}),
+      hypotheses: hypotheses.map(({ candidate, confidence, status, reason }) => ({
+        candidate,
+        confidence,
+        status,
+        ...(reason ? { reason } : {}),
+      })),
+    };
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * One recorder pass: replays the agent's conversation to the model with its own earlier records
+ * in it, asks for the updated record, and writes the result. Returns whether it wrote. Never
+ * throws for a model or write failure; it logs and returns false, because the investigation must
+ * not depend on it.
+ */
 export const runFindingsPass = async (
   deps: FindingsPassDeps,
   { request, conversationId, steps, guard, memory, question, answer }: FindingsPassParams
@@ -117,7 +157,6 @@ export const runFindingsPass = async (
   if (!agentBuilder || !agenticInvestigations) return false;
 
   let output: FindingsOutput | undefined;
-  let severityChosenByUser = false;
   try {
     const model = await createOptimizeModel({
       request,
@@ -130,8 +169,17 @@ export const runFindingsPass = async (
     });
     if (!model) return false;
 
-    const notices = await readSeverityChanges(agentBuilder, request, conversationId);
-    severityChosenByUser = notices.length > 0;
+    const conversation = await readConversation(agentBuilder, request, conversationId);
+    if (memory.turns().length === 0) {
+      const stored = await storedRecord(
+        agenticInvestigations,
+        request,
+        conversationId,
+        conversation
+      );
+      if (stored) memory.remember({ atGroups: 0, final: false, answer: stored });
+    }
+    const notices = severityNotices(conversation);
     const messages = buildRecorderMessages({
       question,
       steps,
@@ -213,6 +261,9 @@ export const runFindingsPass = async (
   const writer = agenticInvestigations.getFindingsWriter(request);
   const conversations = await agentBuilder.conversations.getScopedClient({ request });
   // A severity a user chose is theirs: the recorder is told so, and never replaces it either way.
+  // Read again here, not before the model call: a user may change it while the model is answering.
+  const severityChosenByUser =
+    severityNotices(await readConversation(agentBuilder, request, conversationId)).length > 0;
   const verdict = final ? output?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH) : undefined;
 
   const writes: Array<[string, () => Promise<unknown>]> = [

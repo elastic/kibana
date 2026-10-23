@@ -104,10 +104,20 @@ describe('decisionTreePrepareStepDefinition', () => {
       params: { response: 'Root cause: the 01:00 deploy doubled DB latency.' },
     };
 
+    // The conversation has two rounds: r0 started the investigation, r1 is a person's follow-up.
+    const agentBuilderWithRounds = () =>
+      ({
+        conversations: {
+          getScopedClient: async () => ({
+            get: async () => ({ rounds: [{ id: 'r0' }, { id: 'r1' }] }),
+          }),
+        },
+      } as never);
+
     const runWithModel = (input: Record<string, unknown>) =>
       decisionTreePrepareStepDefinition({
         getTelemetryConnectorId: () => undefined,
-        getAgentBuilder: () => ({} as never),
+        getAgentBuilder: agentBuilderWithRounds,
         getInference: () => ({} as never),
         getSavedObjects: () => ({} as never),
         getUiSettings: () => ({} as never),
@@ -117,6 +127,8 @@ describe('decisionTreePrepareStepDefinition', () => {
           response: 'Done.',
           prompt: 'The cause was the deploy.',
           agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+          conversation_id: 'c1',
+          round_id: 'r1',
           ...input,
         })
       );
@@ -173,6 +185,24 @@ describe('decisionTreePrepareStepDefinition', () => {
       expect(prepareReinforcementTurn).toHaveBeenCalledWith(
         expect.objectContaining({ causalConfirmed: false })
       );
+    });
+
+    it('does not check a first round: there is no ground truth yet', async () => {
+      await runWithModel({
+        round_id: 'r0',
+        tool_calls: [{ tool_id: 'reply_user', params: { response: 'status: confirmed' } }],
+      });
+
+      expect(checkCausalConfirmation).not.toHaveBeenCalled();
+      expect(prepareReinforcementTurn).toHaveBeenCalledWith(
+        expect.objectContaining({ causalConfirmed: false })
+      );
+    });
+
+    it('treats a round it cannot place in its conversation as a first round', async () => {
+      await runWithModel({ conversation_id: undefined, tool_calls: [replyUserCall] });
+
+      expect(checkCausalConfirmation).not.toHaveBeenCalled();
     });
 
     it('does not fail the round when the model cannot be loaded', async () => {
