@@ -407,6 +407,8 @@ export class DatasetQualityDetailsPage {
   }
 
   async openIntegrationActionsMenu(): Promise<void> {
+    // The details section is a skeleton, so the button is absent, until the Fleet check resolves.
+    await this.getIntegrationRow('integration').waitFor({ state: 'visible', timeout: 30_000 });
     await this.integrationActionsButton.click();
   }
 
