@@ -14,7 +14,7 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { isAbortError } from '../../../../../common/utils/exceptions';
 import type { QueryArgs, Row } from '../common';
 import { getEntityId, getEntityIds } from '../common';
-import { PAGE_ENRICHERS } from '../grid_columns';
+import { getPageEnrichers } from '../grid_columns';
 import { createEsqlRunner } from '../queries/esql';
 import type { EnrichedFields, PageEnricher, RunContext } from '../queries/types';
 import {
@@ -98,6 +98,7 @@ const getEnrichKey = (
       sortDirection: options.sortDirection,
       entityIds: getEntityIds(chunk).join('\0'),
       anomalyJobIds: context.anomalyJobIds.join('\0'),
+      columnIds: options.columnIds.join('\0'),
     },
   ] as const;
 
@@ -113,7 +114,7 @@ const fetchEnrichedChunk = (
     chunk,
     buildQueryArgs(ready, options),
     { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },
-    PAGE_ENRICHERS[options.rowsMode]
+    getPageEnrichers(options.rowsMode, options.columnIds)
   );
 };
 

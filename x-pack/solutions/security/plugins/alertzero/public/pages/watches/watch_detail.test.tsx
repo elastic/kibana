@@ -44,7 +44,7 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
-jest.mock('../../hooks/use_hunt_threat_intel_supply', () => ({
+jest.mock('../../hooks/hunt/use_hunt_threat_intel_supply', () => ({
   useHuntThreatIntelSupplyStatus: jest.fn(() => ({
     data: {
       huntEnabled: false,
@@ -80,10 +80,12 @@ jest.mock('@kbn/unsaved-changes-prompt', () => ({
     return jest.requireActual('@kbn/unsaved-changes-prompt').useUnsavedChangesPrompt(props);
   },
 }));
+const mockReportEvent = jest.fn();
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: () => ({
     services: {
+      analytics: { reportEvent: mockReportEvent },
       http: {
         get: jest.fn().mockResolvedValue(undefined),
         basePath: { prepend: (p: string) => p },
@@ -565,6 +567,173 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
     ).not.toBeInTheDocument();
+    expect(mockReportEvent.mock.calls).toEqual([
+      ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'watch_detail' }],
+    ]);
+  });
+
+  it('reports a Watch that does not exist as a not-found error, once', () => {
+    mockUseWatch.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: Object.assign(new Error('Not Found'), {
+        name: 'Error',
+        request: {},
+        response: { status: 404 },
+      }),
+      refetch: jest.fn(),
+    } as never);
+    mockUseWorkers.mockReturnValue({
+      data: { workers: [] },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+
+    const { rerender } = render(
+      <MemoryRouter initialEntries={['/watches/missing-watch']}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+    rerender(
+      <MemoryRouter initialEntries={['/watches/missing-watch']}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    expect(mockReportEvent.mock.calls).toEqual([
+      ['alertzero_ui_error_shown', { error_class: 'not_found', surface: 'watch_detail' }],
+    ]);
+  });
+
+  it('reports a missing Watch once while its refetches fail again', () => {
+    const notFound = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      error: Object.assign(new Error('Not Found'), { request: {}, response: { status: 404 } }),
+      refetch: jest.fn(),
+    };
+    mockUseWatch.mockReturnValue(notFound as never);
+    mockUseWorkers.mockReturnValue({
+      data: { workers: [] },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    const page = () => (
+      <MemoryRouter initialEntries={['/watches/missing-watch']}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    const { rerender } = render(page());
+    // A query without data drops its error while it refetches, so the page loads again.
+    mockUseWatch.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    rerender(page());
+    mockUseWatch.mockReturnValue(notFound as never);
+    rerender(page());
+
+    expect(mockReportEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a second Watch that fails after switching from one that failed', () => {
+    const notFound = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      error: Object.assign(new Error('Not Found'), { request: {}, response: { status: 404 } }),
+      refetch: jest.fn(),
+    };
+    mockUseWatch.mockReturnValue(notFound as never);
+    mockUseWorkers.mockReturnValue({
+      data: { workers: [] },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    const history = createMemoryHistory({ initialEntries: ['/watches/missing-watch-a'] });
+    render(
+      <Router history={history}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </Router>
+    );
+
+    // The page stays mounted, and the next Watch's first load is a fetch in flight.
+    mockUseWatch.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    act(() => history.push('/watches/missing-watch-b'));
+    mockUseWatch.mockReturnValue(notFound as never);
+    act(() => history.replace('/watches/missing-watch-b'));
+
+    expect(mockReportEvent).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports a Worker-load error once while its refetches fail again', () => {
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    const failed = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      error: new Error('workers unavailable'),
+      refetch: jest.fn(),
+    };
+    mockUseWorkers.mockReturnValue(failed as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    const page = () => (
+      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    const { rerender } = renderWithI18n(page());
+    mockUseWorkers.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    rerender(page());
+    mockUseWorkers.mockReturnValue(failed as never);
+    rerender(page());
+
+    expect(mockReportEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports no error for a Watch that loaded', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    expect(mockReportEvent).not.toHaveBeenCalled();
   });
 
   it('shows Officer as an empty grouping without a load error', () => {
