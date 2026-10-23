@@ -107,7 +107,7 @@ export const Rootly: ConnectorSpec = {
   metadata: {
     id: '.rootly',
     displayName: 'Rootly',
-    description: i18n.translate('core.kibanaConnectorSpecs.rootly.metadata.description', {
+    description: i18n.translate('connectorSpecs.rootly.metadata.description', {
       defaultMessage:
         'Declare, read, and drive Rootly incidents through their lifecycle, and triage, acknowledge, and resolve Rootly alerts.',
     }),
@@ -125,15 +125,12 @@ export const Rootly: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.rootly.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.rootly.auth.bearer.token.label', {
                 defaultMessage: 'API Key',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.rootly.auth.bearer.token.helpText',
-                {
-                  defaultMessage: 'A Rootly API key (Organization Settings > API Keys).',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.rootly.auth.bearer.token.helpText', {
+                defaultMessage: 'A Rootly API key (Organization Settings > API Keys).',
+              }),
             },
           },
         },
@@ -615,7 +612,7 @@ export const Rootly: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.rootly.test.description', {
+    description: i18n.translate('connectorSpecs.rootly.test.description', {
       defaultMessage: 'Verifies the Rootly connection by listing severities',
     }),
     handler: async (ctx) => {

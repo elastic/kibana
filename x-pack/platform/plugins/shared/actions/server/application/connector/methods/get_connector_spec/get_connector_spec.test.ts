@@ -8,7 +8,9 @@
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { connectorsSpecs } from '@kbn/connector-specs';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
+import type { ActionType } from '../../../../../common';
 import type { ActionsClientContext } from '../../../../actions_client';
 import type { ActionsConfigurationUtilities } from '../../../../actions_config';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
@@ -73,6 +75,32 @@ const specsById: Record<string, ConnectorSpec> = {
   [catalogOnly.metadata.id]: catalogOnly,
 };
 
+const listRow = (spec: ConnectorSpec): ActionType => ({
+  id: spec.metadata.id,
+  name: spec.metadata.displayName,
+  enabled: true,
+  enabledInConfig: true,
+  enabledInLicense: true,
+  minimumLicenseRequired: spec.metadata.minimumLicense,
+  supportedFeatureIds: spec.metadata.supportedFeatureIds,
+  isSystemActionType: false,
+  source: ACTION_TYPE_SOURCES.spec,
+  isDeprecated: false,
+});
+
+const serverLogRow: ActionType = {
+  id: '.server-log',
+  name: 'Server log',
+  enabled: true,
+  enabledInConfig: true,
+  enabledInLicense: true,
+  minimumLicenseRequired: 'basic',
+  supportedFeatureIds: ['alerting'],
+  isSystemActionType: false,
+  source: ACTION_TYPE_SOURCES.stack,
+  isDeprecated: false,
+};
+
 const configurationUtilities = {
   getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
   isEarsEnabled: () => false,
@@ -88,6 +116,10 @@ describe('getConnectorSpecAsJsonSchema', () => {
     jest.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     actionTypeRegistry.getSpec.mockImplementation((id: string) => specsById[id]);
+    actionTypeRegistry.list.mockReturnValue([
+      ...Object.values(specsById).map(listRow),
+      serverLogRow,
+    ]);
   });
 
   describe('authorization', () => {
@@ -181,6 +213,8 @@ describe('getConnectorSpecAsJsonSchema', () => {
       expect(typeof action.name).toBe('string');
       expect(action).toHaveProperty('isTool');
       expect(typeof action.isTool).toBe('boolean');
+      expect(typeof action.scope).toBe('string');
+      expect(action).not.toHaveProperty('inputSchema');
     }
   });
 
@@ -223,6 +257,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result).toHaveProperty('isTestable', true);
     expect(result.actions).toHaveLength(1);
     expect(actionTypeRegistry.getSpec).toHaveBeenCalledWith('.catalog-only');
+    expect(actionTypeRegistry.getSpec).toHaveBeenCalledTimes(1);
   });
 
   it('rejects with 404 for a classic connector type without a spec', async () => {
