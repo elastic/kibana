@@ -59,6 +59,12 @@ const config = {
     monitor: true,
     warn_threshold: 5000,
   },
+  event_loop_watchdog: {
+    enabled: false,
+    flag_threshold_ms: 5000,
+    min_cpu_ratio: 0.5,
+    live_report_interval_ms: 3000,
+  },
   worker_utilization_running_average_window: 5,
   metrics_reset_interval: 3000,
   claim_strategy: 'mget',

@@ -14,6 +14,7 @@ import type { ClaimAndFillPoolResult } from './lib/fill_pool';
 import type { PollingError } from './polling';
 import type { DecoratedError, TaskRunResult } from './task_running';
 import type { EventLoopDelayConfig } from './config';
+import type { EventLoopBlockReport, FlagEvidence } from './event_loop_watchdog/types';
 import type { TaskManagerMetrics } from './metrics/task_metrics_collector';
 import type { BackpressureReason } from './lib/backpressure_reason';
 
@@ -31,12 +32,15 @@ export enum TaskEventType {
   TASK_MANAGER_METRIC = 'TASK_MANAGER_METRIC',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
   TASK_MANAGER_BACKPRESSURE = 'TASK_MANAGER_BACKPRESSURE',
+  TASK_EVENT_LOOP_BLOCK = 'TASK_EVENT_LOOP_BLOCK',
 }
 
 export interface TaskTiming {
   start: number;
   stop: number;
   eventLoopBlockMs?: number;
+  /** Watchdog flag naming this run as the cause of an event loop block. */
+  eventLoopBlock?: FlagEvidence;
 }
 export type WithTaskTiming<T> = T & { timing: TaskTiming };
 
@@ -98,6 +102,7 @@ export interface TaskManagerBackpressureStats {
   reason: BackpressureReason | null;
 }
 export type TaskManagerBackpressure = TaskEvent<TaskManagerBackpressureStats, never>;
+export type TaskEventLoopBlock = TaskEvent<EventLoopBlockReport, never>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
   ? OkResult
@@ -235,6 +240,18 @@ export function isTaskManagerMetricEvent(
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_METRIC;
 }
+export function asTaskEventLoopBlockEvent(
+  event: Result<EventLoopBlockReport, never>
+): TaskEventLoopBlock {
+  return { type: TaskEventType.TASK_EVENT_LOOP_BLOCK, event };
+}
+
+export function isTaskEventLoopBlockEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskEventLoopBlock {
+  return taskEvent.type === TaskEventType.TASK_EVENT_LOOP_BLOCK;
+}
+
 export function isTaskManagerBackpressureEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerBackpressure {

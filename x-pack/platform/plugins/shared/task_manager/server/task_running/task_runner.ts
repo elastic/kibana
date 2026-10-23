@@ -24,6 +24,12 @@ import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, eitherAsync, isErr, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
 import { getExecutionContextRunner } from '../lib/execution_context';
+import { runWithCurrentTask } from '../event_loop_watchdog';
+import type {
+  EventLoopRunObservation,
+  EventLoopRunObserver,
+  FlagEvidence,
+} from '../event_loop_watchdog';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
   asTaskRunEvent,
@@ -145,6 +151,8 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  /** Learns whether a run blocked the event loop, before its results are written. */
+  eventLoopWatchdog?: EventLoopRunObserver;
 } & Pick<Middleware, 'beforeRun'>;
 
 export enum TaskRunResult {
@@ -206,6 +214,7 @@ export class TaskManagerRunner implements TaskRunner {
   private isCancelled = false;
   private scheduleAtRunStart?: IntervalSchedule | RruleSchedule;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
+  private readonly eventLoopWatchdog?: EventLoopRunObserver;
   private taskRunEventCustomFields?: Record<string, unknown>;
 
   /**
@@ -234,6 +243,7 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    eventLoopWatchdog,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -255,6 +265,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.eventLoopWatchdog = eventLoopWatchdog;
   }
 
   /**
@@ -411,10 +422,11 @@ export class TaskManagerRunner implements TaskRunner {
           childOf: this.instance.task.traceparent,
         });
         const stopEventLoopMonitoring = startEventLoopMonitoring(this.config.event_loop_delay);
-        const makeTaskTiming = (): TaskTiming => ({
+        const makeTaskTiming = (eventLoopBlock?: FlagEvidence): TaskTiming => ({
           start: startedAt.getTime(),
           stop: Date.now(),
           eventLoopBlockMs: stopEventLoopMonitoring(),
+          ...(eventLoopBlock ? { eventLoopBlock } : {}),
         });
         this.logTaskRunStartEvent(this.instance.task, startedAt);
 
@@ -453,6 +465,8 @@ export class TaskManagerRunner implements TaskRunner {
         // For long running tasks, update retryAt on an interval to allow for quicker task recovery
         const stopUpdatingLongRunningTasks =
           this.updateRetryAtOnIntervalForLongRunningTasks(startedAt);
+
+        let observation: EventLoopRunObservation | undefined;
 
         try {
           const { credential } = this.instance.task;
@@ -566,21 +580,29 @@ export class TaskManagerRunner implements TaskRunner {
             description: 'run task',
           });
 
+          observation = this.eventLoopWatchdog?.beginRun(this.uuid);
           const result = await runner.run(() =>
-            withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+            withSpan({ name: 'run', type: 'task manager' }, () =>
+              runWithCurrentTask(
+                { taskId: this.id, taskType: this.taskType, executionUuid: this.uuid },
+                () => this.task!.run()
+              )
+            )
           );
 
           stopUpdatingLongRunningTasks();
+          const eventLoopBlock = await this.endEventLoopObservation(observation);
 
           const validatedResult = this.validateResult(result);
           const processedResult = await withSpan(
             { name: 'process result', type: 'task manager' },
-            () => this.processResult(validatedResult, makeTaskTiming())
+            () => this.processResult(validatedResult, makeTaskTiming(eventLoopBlock))
           );
           if (apmTrans) apmTrans.end('success');
           return processedResult;
         } catch (err) {
           stopUpdatingLongRunningTasks();
+          const eventLoopBlock = await this.endEventLoopObservation(observation);
 
           const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
           const errorMessage =
@@ -600,7 +622,7 @@ export class TaskManagerRunner implements TaskRunner {
             () =>
               this.processResult(
                 asErr({ error: err, state: modifiedContext.taskInstance.state }),
-                makeTaskTiming()
+                makeTaskTiming(eventLoopBlock)
               )
           );
           if (apmTrans) apmTrans.end('failure');
@@ -610,6 +632,23 @@ export class TaskManagerRunner implements TaskRunner {
         }
       }
     );
+  }
+
+  /**
+   * The watchdog's flag for this run, if it blocked the event loop. Must be known before the run's
+   * results are written. A diagnostic never fails a run.
+   */
+  private async endEventLoopObservation(
+    observation?: EventLoopRunObservation
+  ): Promise<FlagEvidence | undefined> {
+    if (!observation) return;
+    try {
+      for (const { flag } of await observation.end()) {
+        if (flag.flagged && flag.executionUuid === this.uuid) return flag.evidence;
+      }
+    } catch (error) {
+      this.logger.debug(`Task ${this} event loop block lookup failed: ${error}`);
+    }
   }
 
   /**
@@ -1181,7 +1220,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
     );
 
-    const { eventLoopBlockMs = 0 } = taskTiming;
+    const { eventLoopBlockMs = 0, eventLoopBlock } = taskTiming;
     const taskLabel = `${this.taskType} ${this.instance.task.id}`;
     if (eventLoopBlockMs > this.config.event_loop_delay.warn_threshold) {
       this.logger.warn(
@@ -1189,6 +1228,13 @@ export class TaskManagerRunner implements TaskRunner {
         {
           tags: [this.taskType, taskLabel, 'event-loop-blocked'],
         }
+      );
+    }
+    if (eventLoopBlock) {
+      const sampledMs = eventLoopBlock.blockedMs - eventLoopBlock.unsampledMs;
+      this.logger.warn(
+        `Task ${taskLabel} blocked the event loop for ~${eventLoopBlock.blockedMs}ms (observed ~${eventLoopBlock.observedMs}ms of ~${sampledMs}ms sampled, cpu ${eventLoopBlock.cpuRatio})`,
+        { tags: [this.taskType, taskLabel, 'event-loop-blocked', 'event-loop-watchdog'] }
       );
     }
     return result;

@@ -136,6 +136,12 @@ describe('TaskPollingLifecycle', () => {
         monitor: true,
         warn_threshold: 5000,
       },
+      event_loop_watchdog: {
+        enabled: false,
+        flag_threshold_ms: 5000,
+        min_cpu_ratio: 0.5,
+        live_report_interval_ms: 3000,
+      },
       worker_utilization_running_average_window: 5,
       metrics_reset_interval: 3000,
       claim_strategy: 'mget',
@@ -802,6 +808,57 @@ describe('TaskPollingLifecycle', () => {
       expect(TaskManagerRunner).toHaveBeenCalledTimes(1);
       expect(TaskManagerRunner).toHaveBeenCalledWith(
         expect.objectContaining({ enrichFakeRequest })
+      );
+    });
+  });
+
+  describe('event loop watchdog', () => {
+    test('re-emits flagged or reportable blocks, not rate limited unattributed ones', () => {
+      const eventLoopBlocks$ = new Subject<unknown>();
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+        eventLoopBlocks$: eventLoopBlocks$ as never,
+      });
+      const received: Array<{ type: string }> = [];
+      lifecycle.events.subscribe((event) => received.push(event));
+
+      eventLoopBlocks$.next({ flag: { flagged: false, reason: 'no-context' }, reportable: false });
+      expect(received.filter((e) => e.type === 'TASK_EVENT_LOOP_BLOCK')).toHaveLength(0);
+      eventLoopBlocks$.next({ flag: { flagged: false, reason: 'no-context' }, reportable: true });
+      eventLoopBlocks$.next({ flag: { flagged: true }, reportable: false });
+      expect(received.filter((e) => e.type === 'TASK_EVENT_LOOP_BLOCK')).toHaveLength(2);
+    });
+
+    test('forwards the per-run observer to TaskManagerRunner when creating a runner for a task', () => {
+      const eventLoopWatchdog = { beginRun: jest.fn() };
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+        eventLoopWatchdog,
+      });
+
+      (
+        lifecycle as unknown as {
+          createTaskRunnerForTask: (instance: ConcreteTaskInstance) => void;
+        }
+      ).createTaskRunnerForTask({
+        id: 'foo',
+        taskType: 'bar',
+        runAt: new Date(),
+        scheduledAt: new Date(),
+        startedAt: new Date(),
+        retryAt: null,
+        attempts: 0,
+        params: {},
+        state: {},
+        status: 'idle' as ConcreteTaskInstance['status'],
+        ownerId: null,
+        traceparent: '',
+      });
+
+      expect(TaskManagerRunner).toHaveBeenCalledWith(
+        expect.objectContaining({ eventLoopWatchdog })
       );
     });
   });
