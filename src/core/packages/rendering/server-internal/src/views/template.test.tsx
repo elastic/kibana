@@ -35,6 +35,9 @@ describe('Template (boot splash)', () => {
     const $ = render(baseMetadata);
     expect($('#kbn_loading_message .kbnLoaderWrap > svg.kbnLoader')).toHaveLength(1);
     expect($('#kbn_loading_message .kbnLoaderWrap > img')).toHaveLength(0);
+    expect($('#kbn_loading_message .kbnProgress')).toHaveLength(0);
+    expect($('#kbn_loading_message .kbnLoginScreen img')).toHaveLength(4);
+    expect($('#kbn_loading_message').attr('data-kbn-login-screen')).toBeUndefined();
   });
 
   it('renders the custom-branded <img> inside .kbnLoaderWrap when configured', () => {
@@ -78,12 +81,11 @@ describe('Template (boot splash)', () => {
   });
 
   describe('splash color mode', () => {
-    // Select only the inline splash <style> (the block that defines the loader
-    // colors, identified by `.kbnProgress`) rather than every <style> in the
-    // head, so the assertions validate the splash rules specifically.
+    // Select only the inline splash <style> (the block that colors the welcome
+    // text) rather than every <style> in the head.
     const getSplashCss = ($: ReturnType<typeof render>) =>
       $('head style')
-        .filter((_i, el) => $(el).text().includes('.kbnProgress'))
+        .filter((_i, el) => $(el).text().includes('.kbnWelcomeText'))
         .text();
 
     it('inlines a single set of splash colors for an explicit dark mode', () => {

@@ -29,12 +29,17 @@ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 /** Page enter length for inspection. This is not an EUI motion token. */
 export const PAGE_ENTER_DURATION = '1.5s';
 
+/** Spinner spin length. EUI uses 0.6s; this is 25% slower. */
+export const SPINNER_DURATION = '0.75s';
+
 /**
  * Prototype motions mounted once for the whole Kibana UI.
  * Tooltips reuse the popover reveal. Tab bars slide one indicator between selections.
  * Accordions rotate a custom arrow glyph and slide their content open.
  * Callouts and banners fade and collapse their height only when dismissed.
  * Switching apps fades the new page in and lifts its content blocks a short distance.
+ * Every loading spinner keeps its spin and paints the ring as a primary-to-teal blend.
+ * The log in screen uses the boot pattern behind /login and /mock_idp/login.
  */
 export const MotionPrototype = () => {
   const { euiTheme, highContrastMode } = useEuiTheme();
@@ -74,6 +79,7 @@ let styleElement: HTMLStyleElement | undefined;
 let stopTabs: (() => void) | undefined;
 let stopCallouts: (() => void) | undefined;
 let stopPages: (() => void) | undefined;
+let stopLogin: (() => void) | undefined;
 
 const applyMotionPrototype = () => {
   if (!styleElement || !motionTokens) return;
@@ -105,6 +111,13 @@ const applyMotionPrototype = () => {
     stopPages();
     stopPages = undefined;
   }
+
+  if (settings.login && !stopLogin) {
+    stopLogin = startLoginPattern();
+  } else if (!settings.login && stopLogin) {
+    stopLogin();
+    stopLogin = undefined;
+  }
 };
 
 const startMotionPrototype = (tokens: MotionTokens): (() => void) => {
@@ -115,7 +128,7 @@ const startMotionPrototype = (tokens: MotionTokens): (() => void) => {
   document.head.appendChild(style);
   document.documentElement.setAttribute(
     'data-kbn-motion-prototype',
-    'tooltip-tabs-accordion-callout-page'
+    'tooltip-tabs-accordion-callout-page-spinner'
   );
   applyMotionPrototype();
   const unsubscribe = subscribeMotionRefreshSettings(applyMotionPrototype);
@@ -128,6 +141,8 @@ const startMotionPrototype = (tokens: MotionTokens): (() => void) => {
     stopCallouts = undefined;
     stopPages?.();
     stopPages = undefined;
+    stopLogin?.();
+    stopLogin = undefined;
     style.remove();
     styleElement = undefined;
     motionTokens = undefined;
@@ -162,6 +177,8 @@ const buildMotionCss = (tokens: MotionTokens, settings: MotionRefreshSettings): 
     calloutEasing,
     pageEasing,
     pageRise,
+    spinnerPrimary,
+    spinnerTeal,
   } = tokens;
 
   const tooltipCss = settings.tooltip
@@ -310,9 +327,38 @@ const buildMotionCss = (tokens: MotionTokens, settings: MotionRefreshSettings): 
 `
     : '';
 
+  // Every EuiLoadingSpinner already rotates. This slows that spin by 25%
+  // and repaints the ring. Primary is held 45° each side of the seam, so the
+  // primary stretch is 225° — 25% longer than half the ring — then it fades
+  // to teal and back. The mask keeps each size's own border width.
+  const spinnerCss = settings.spinner
+    ? `
+  .euiLoadingSpinner {
+    border-color: transparent !important;
+    animation-duration: ${SPINNER_DURATION} !important;
+    background: conic-gradient(
+      from 0deg,
+      ${spinnerPrimary} 0deg,
+      ${spinnerPrimary} 45deg,
+      ${spinnerTeal} 180deg,
+      ${spinnerPrimary} 315deg,
+      ${spinnerPrimary} 360deg
+    ) !important;
+    -webkit-mask:
+      linear-gradient(#000 0 0) padding-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) padding-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+`
+    : '';
+
   return `
 @media (prefers-reduced-motion: no-preference) {
-${tooltipCss}${tabsCss}${accordionCss}${calloutCss}${pageCss}}
+${tooltipCss}${tabsCss}${accordionCss}${calloutCss}${pageCss}${spinnerCss}}
 `;
 };
 
@@ -837,5 +883,91 @@ const startPageMotion = (): (() => void) => {
     document.querySelectorAll<HTMLElement>(`[${PAGE_ENTER_ATTR}]`).forEach((node) => {
       node.removeAttribute(PAGE_ENTER_ATTR);
     });
+  };
+};
+
+const LOGIN_PATTERN_ID = 'kbn-login-pattern';
+
+const isLoginScreenPath = (): boolean => /\/login\/?$/.test(window.location.pathname);
+
+const loginAssetBase = (): string => {
+  const link = document.querySelector('link[rel="stylesheet"][href*="legacy_styles.css"]');
+  const href = link?.getAttribute('href') ?? '';
+  return href.replace(/legacy_styles\.css(?:\?.*)?$/, '');
+};
+
+const readSplashBackground = (): string => {
+  const htmlBackground = getComputedStyle(document.documentElement).backgroundColor;
+  if (htmlBackground && htmlBackground !== 'transparent' && htmlBackground !== 'rgba(0, 0, 0, 0)') {
+    return htmlBackground;
+  }
+  return '#ECF1F9';
+};
+
+const createLoginPattern = (): HTMLDivElement => {
+  const pattern = document.createElement('div');
+  pattern.id = LOGIN_PATTERN_ID;
+  pattern.className = 'kbnLoginPattern';
+  pattern.setAttribute('aria-hidden', 'true');
+  pattern.style.backgroundColor = readSplashBackground();
+
+  const base = loginAssetBase();
+  const addBlob = (className: string, file: string, width: string, height: string) => {
+    const image = document.createElement('img');
+    image.className = className;
+    image.alt = '';
+    image.setAttribute('width', width);
+    image.setAttribute('height', height);
+    image.src = `${base}login_screen/${file}`;
+    pattern.append(image);
+  };
+  addBlob('kbnLoginBlobStart', 'blob_start.svg', '1218', '1219.55');
+  addBlob('kbnLoginBlobEnd', 'blob_end.svg', '1270', '1219');
+  return pattern;
+};
+
+/** Puts the boot-screen corner pattern behind /login and /mock_idp/login. */
+const startLoginPattern = (): (() => void) => {
+  let frame = 0;
+
+  const sync = () => {
+    const enabled = isLoginScreenPath();
+    const root = document.documentElement;
+    const current = document.getElementById(LOGIN_PATTERN_ID);
+    if (enabled && current && root.hasAttribute('data-kbn-login-pattern')) return;
+    if (!enabled && !current && !root.hasAttribute('data-kbn-login-pattern')) return;
+
+    root.toggleAttribute('data-kbn-login-pattern', enabled);
+    if (!enabled) {
+      current?.remove();
+      return;
+    }
+    if (!current) {
+      const anchor = document.getElementById('kibana-body');
+      const pattern = createLoginPattern();
+      if (anchor) document.body.insertBefore(pattern, anchor);
+      else document.body.prepend(pattern);
+    }
+  };
+
+  const schedule = () => {
+    if (frame) return;
+    frame = window.requestAnimationFrame(() => {
+      frame = 0;
+      sync();
+    });
+  };
+
+  const observer = new MutationObserver(schedule);
+  observer.observe(document.body, { childList: true, subtree: true });
+  window.addEventListener('popstate', schedule);
+  sync();
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('popstate', schedule);
+    if (frame) window.cancelAnimationFrame(frame);
+    document.getElementById(LOGIN_PATTERN_ID)?.remove();
+    document.documentElement.removeAttribute('data-kbn-login-pattern');
   };
 };

@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { SidebarBody, SidebarHeader } from '@kbn/core-chrome-sidebar-components';
 import {
   PAGE_ENTER_DURATION,
+  SPINNER_DURATION,
   resolveMotionTokens,
   setMotionRefreshEnabled,
   setMotionRefreshItem,
@@ -46,10 +47,6 @@ const panelTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshT
   defaultMessage: 'Motion refresh',
 });
 
-const panelDescription = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshDescription', {
-  defaultMessage:
-    'These updates are on across Kibana. Turn one off to compare it with the current motion, or turn them all off together.',
-});
 
 const allMotionsLabel = i18n.translate(
   'core.ui.chrome.headerGlobalNav.motionRefreshAllMotionsToggleSwitch',
@@ -260,6 +257,79 @@ const pageRiseUseLabel = i18n.translate(
   }
 );
 
+const spinnerTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshSpinnerTitle', {
+  defaultMessage: 'Spinner',
+});
+
+const spinnerDescription = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshSpinnerDescription',
+  {
+    defaultMessage:
+      'Every loading spinner fades from the primary color into teal around the ring. The primary color covers a quarter more of the ring, and the spin is a quarter slower.',
+  }
+);
+
+const spinnerSwitchLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshSpinnerToggleSwitch',
+  {
+    defaultMessage: 'Enable spinner',
+  }
+);
+
+const spinnerSpinUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshSpinnerSpinUseLabel',
+  {
+    defaultMessage: 'Spin',
+  }
+);
+
+const spinnerPrimaryUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshSpinnerPrimaryUseLabel',
+  {
+    defaultMessage: 'Primary',
+  }
+);
+
+const spinnerTealUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshSpinnerTealUseLabel',
+  {
+    defaultMessage: 'Teal',
+  }
+);
+
+const loginTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshLoginTitle', {
+  defaultMessage: 'Log in screen',
+});
+
+const loginDescription = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshLoginDescription',
+  {
+    defaultMessage:
+      'The boot screen and the log in page share the dotted corner pattern. The boot screen also shows the Elastic wordmark and a primary line that fades into the teal track.',
+  }
+);
+
+const loginSwitchLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshLoginToggleSwitch',
+  {
+    defaultMessage: 'Enable log in screen',
+  }
+);
+
+const loginTrackUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshLoginTrackUseLabel',
+  {
+    defaultMessage: 'Track',
+  }
+);
+
+const loginLineUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshLoginLineUseLabel',
+  {
+    defaultMessage: 'Line',
+  }
+);
+
 interface TokenRow {
   id: string;
   token: string;
@@ -314,7 +384,7 @@ const MotionSection = ({
     id={`motionRefresh-${id}`}
     buttonContent={title}
     borders="horizontal"
-    paddingSize="m"
+    paddingSize="s"
     extraAction={
       <EuiSwitch
         label={switchLabel}
@@ -352,7 +422,13 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
   const settings = useMotionRefreshSettings();
   const tokens = resolveMotionTokens(euiTheme, Boolean(highContrastMode));
   const allOn =
-    settings.tooltip && settings.tabs && settings.accordion && settings.callout && settings.page;
+    settings.tooltip &&
+    settings.tabs &&
+    settings.accordion &&
+    settings.callout &&
+    settings.page &&
+    settings.spinner &&
+    settings.login;
 
   const tooltipRows: TokenRow[] = [
     { id: 'delay', token: 'animation.extraFast', value: tokens.tooltipDelay, use: delayUseLabel },
@@ -422,14 +498,37 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
     { id: 'rise', token: '2px', value: tokens.pageRise, use: pageRiseUseLabel },
   ];
 
+  const spinnerRows: TokenRow[] = [
+    {
+      id: 'duration',
+      token: SPINNER_DURATION,
+      value: SPINNER_DURATION,
+      use: spinnerSpinUseLabel,
+    },
+    {
+      id: 'primary',
+      token: 'colors.borderStrongPrimary',
+      value: tokens.spinnerPrimary,
+      use: spinnerPrimaryUseLabel,
+    },
+    {
+      id: 'teal',
+      token: 'colors.borderStrongAccentSecondary',
+      value: tokens.spinnerTeal,
+      use: spinnerTealUseLabel,
+    },
+  ];
+
+  const loginRows: TokenRow[] = [
+    { id: 'track', token: '#48EFCF', value: '#48EFCF', use: loginTrackUseLabel },
+    { id: 'line', token: '#0B64DD', value: '#0B64DD', use: loginLineUseLabel },
+  ];
+
   return (
     <>
       <SidebarHeader title={panelTitle} onClose={onClose} />
       <SidebarBody scrollable>
-        <div data-test-subj="motionRefreshSidebar">
-          <EuiText size="s">
-            <p>{panelDescription}</p>
-          </EuiText>
+        <div data-test-subj="motionRefreshSidebar">          
           <EuiSpacer size="m" />
           <EuiSwitch
             label={allMotionsLabel}
@@ -487,8 +586,56 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
             rows={pageRows}
             caption={pageTitle}
           />
+          <MotionSection
+            id="spinner"
+            title={spinnerTitle}
+            description={spinnerDescription}
+            switchLabel={spinnerSwitchLabel}
+            checked={settings.spinner}
+            rows={spinnerRows}
+            caption={spinnerTitle}
+          />
+          <MotionSection
+            id="login"
+            title={loginTitle}
+            description={loginDescription}
+            switchLabel={loginSwitchLabel}
+            checked={settings.login}
+            rows={loginRows}
+            caption={loginTitle}
+          />
         </div>
       </SidebarBody>
+      <div
+        aria-hidden={true}
+        css={css`
+          flex-shrink: 0;
+          display: flex;
+          justify-content: flex-start;
+          align-items: flex-end;
+          line-height: 0;
+          pointer-events: none;
+        `}
+      >
+        <img
+          src={catLoveSrc()}
+          alt=""
+          width={138}
+          height={138}
+          css={css`
+            display: block;
+            width: 164px;
+            height: 164px;
+          `}
+        />
+      </div>
     </>
   );
+};
+
+const catLoveSrc = (): string => {
+  const link = document.querySelector('link[rel="stylesheet"][href*="legacy_styles.css"]');
+  const href = link?.getAttribute('href') ?? '';
+  const base = href.replace(/legacy_styles\.css(?:\?.*)?$/, '');
+  return `${base}login_screen/cat_love.gif`;
 };

@@ -178,8 +178,43 @@ export class LoginPage extends Component<Props, State> {
     );
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
+    const loginForm = this.getLoginForm({
+      ...loginState,
+      isSecureConnection,
+      isCookiesEnabled,
+    });
+
+    if (loginIsSupported) {
+      return (
+        <div
+          className="kbnLoginPage"
+          data-test-subj="loginForm"
+          css={[
+            kbnFullScreenBgCss,
+            css`
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 24px;
+            `,
+          ]}
+        >
+          <div
+            css={css`
+              position: relative;
+              z-index: 10;
+              width: 400px;
+              max-width: 100%;
+            `}
+          >
+            {loginForm}
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div data-test-subj="loginForm" css={kbnFullScreenBgCss}>
+      <div className="kbnLoginPage" data-test-subj="loginForm" css={kbnFullScreenBgCss}>
         <header
           css={({ euiTheme }) => css`
             margin-top: calc(${euiTheme.size.xxl} * 3);
@@ -204,13 +239,7 @@ export class LoginPage extends Component<Props, State> {
         </header>
         <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
           <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem>
-              {this.getLoginForm({
-                ...loginState,
-                isSecureConnection,
-                isCookiesEnabled,
-              })}
-            </EuiFlexItem>
+            <EuiFlexItem>{loginForm}</EuiFlexItem>
           </EuiFlexGroup>
         </div>
       </div>

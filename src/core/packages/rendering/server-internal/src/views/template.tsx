@@ -45,6 +45,7 @@ export const Template: FunctionComponent<Props> = ({
   // drift apart. The `width`/`height` attrs here just give the browser
   // a stable intrinsic size to avoid layout shift while the custom logo
   // image loads.
+  const loginAsset = (file: string) => `${uiPublicUrl}/login_screen/${file}`;
   const logo = customBranding.logo ? (
     <img src={customBranding.logo} width="40" height="40" alt="logo" />
   ) : (
@@ -107,6 +108,47 @@ export const Template: FunctionComponent<Props> = ({
            * loading announcement so the inline SVG in `<Logo />` can
            * stay decorative (`aria-hidden`).
            */}
+          <div className="kbnLoginScreen">
+            <img
+              className="kbnLoginBlobStart"
+              src={loginAsset('blob_start.svg')}
+              width="1218"
+              height="1219.55"
+              alt=""
+            />
+            <img
+              className="kbnLoginBlobEnd"
+              src={loginAsset('blob_end.svg')}
+              width="1270"
+              height="1219"
+              alt=""
+            />
+            <div
+              className="kbnLoginCenter"
+              role="progressbar"
+              aria-label={i18n.translate('core.ui.loadingElasticAriaLabel', {
+                defaultMessage: 'Loading Elastic',
+              })}
+            >
+              <div className="kbnLoginMark">
+                <img
+                  className="kbnLoginSymbol"
+                  src={loginAsset('elastic_logo.svg')}
+                  width="36"
+                  height="36"
+                  alt=""
+                />
+                <img
+                  className="kbnLoginWord"
+                  src={loginAsset('elastic_wordmark.svg')}
+                  width="64"
+                  height="20"
+                  alt=""
+                />
+              </div>
+              <div className="kbnLoginBar" />
+            </div>
+          </div>
           <div
             className="kbnLoaderWrap"
             role="progressbar"
@@ -132,7 +174,6 @@ export const Template: FunctionComponent<Props> = ({
                 defaultMessage: 'Loading Elastic',
               })}
             </div>
-            <div className="kbnProgress" />
           </div>
         </div>
 

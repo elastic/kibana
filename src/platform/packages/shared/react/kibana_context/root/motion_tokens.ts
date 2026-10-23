@@ -38,6 +38,8 @@ export interface MotionTokens {
   calloutEasing: string;
   pageEasing: string;
   pageRise: string;
+  spinnerPrimary: string;
+  spinnerTeal: string;
 }
 
 /** Resolves the motion-study tokens from the active EUI theme. */
@@ -68,5 +70,10 @@ export const resolveMotionTokens = (
     calloutEasing: resistance,
     pageEasing: resistance,
     pageRise: '2px',
+    spinnerPrimary: cssToken(euiTheme.colors.borderStrongPrimary, euiTheme.colors.primary),
+    spinnerTeal: cssToken(
+      euiTheme.colors.borderStrongAccentSecondary,
+      euiTheme.colors.accentSecondary
+    ),
   };
 };

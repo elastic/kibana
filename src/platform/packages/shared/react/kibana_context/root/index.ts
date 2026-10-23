@@ -17,6 +17,6 @@ export {
   useMotionRefreshSettings,
 } from './motion_settings';
 export type { MotionRefreshId, MotionRefreshSettings } from './motion_settings';
-export { PAGE_ENTER_DURATION } from './motion_prototype';
+export { PAGE_ENTER_DURATION, SPINNER_DURATION } from './motion_prototype';
 export { resolveMotionTokens } from './motion_tokens';
 export type { MotionTokens } from './motion_tokens';

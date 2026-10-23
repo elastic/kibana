@@ -73,7 +73,7 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
 
   return (
     <FormikProvider value={formik}>
-      <EuiPageTemplate panelled={false}>
+      <EuiPageTemplate panelled={false} data-test-subj="mockIdpLogin">
         <EuiPageTemplate.Section alignment="center">
           <Form>
             <EuiEmptyPrompt

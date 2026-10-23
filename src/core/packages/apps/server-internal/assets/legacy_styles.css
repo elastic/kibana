@@ -132,39 +132,128 @@ body, html {
   .kbnLoaderWrap .kbnLoader path:nth-of-type(6) { animation-delay: 0.06s; }
 }
 
-.kbnProgress {
-  display: inline-block;
-  position: relative;
-  width: 32px;
-  height: 4px;
-  overflow: hidden;
-  line-height: 1;
+/*
+ * Visual-refresh boot screen. Hidden until the bootstrap script sets
+ * data-kbn-login-screen from localStorage. The artwork keeps the sizes
+ * exported from the design.
+ */
+.kbnLoginScreen {
+  display: none;
 }
 
-.kbnProgress:before {
+#kbn_loading_message[data-kbn-login-screen] {
+  position: relative;
+  overflow: hidden;
+}
+
+#kbn_loading_message[data-kbn-login-screen] .kbnLoaderWrap {
+  display: none;
+}
+
+#kbn_loading_message[data-kbn-login-screen] .kbnLoginScreen {
+  display: block;
   position: absolute;
+  inset: 0;
+}
+
+.kbnLoginBlobStart,
+.kbnLoginBlobEnd {
+  position: absolute;
+  pointer-events: none;
+}
+
+.kbnLoginBlobStart {
+  left: -690.35px;
+  top: -62.55px;
+  transform: rotate(180deg);
+}
+
+.kbnLoginBlobEnd {
+  top: 61px;
+  right: -228px;
+}
+
+.kbnLoginPattern {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+html[data-kbn-login-pattern] #kibana-body {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-kbn-login-pattern] .kbnAppWrapper,
+html[data-kbn-login-pattern] .kbnLoginPage,
+html[data-kbn-login-pattern] [data-test-subj='mockIdpLogin'],
+html[data-kbn-login-pattern] :has(> [data-test-subj='kbnChromeLayoutApplication']) {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.kbnLoginCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.kbnLoginMark {
+  position: relative;
+  width: 105px;
+  height: 36px;
+}
+
+.kbnLoginSymbol {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.kbnLoginWord {
+  position: absolute;
+  left: 41px;
+  top: 8px;
+}
+
+.kbnLoginBar {
+  width: 96px;
+  height: 2px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.kbnLoginBar::before {
   content: '';
-  height: 4px;
-  width: 100%;
+  position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-  transform: scaleX(0) translateX(0%);
-  animation: kbnProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
+  width: 90%;
+  transform: translateX(-100%);
 }
 
-@keyframes kbnProgress {
-  0% {
-    transform: scaleX(1) translateX(-100%);
-  }
+@keyframes kbnLoginBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(calc(100% / 0.75)); }
+}
 
-  100% {
-    transform: scaleX(1) translateX(100%);
+@media not (prefers-reduced-motion: reduce) {
+  .kbnLoginBar::before {
+    animation: kbnLoginBar 1.75s cubic-bezier(0.32, 0.72, 0, 1) infinite;
   }
 }
 
-@media (prefers-reduced-motion) {
-  .kbnProgress {
-    display: none;
+@media (prefers-reduced-motion: reduce) {
+  .kbnLoginBar::before {
+    transform: none;
   }
 }
