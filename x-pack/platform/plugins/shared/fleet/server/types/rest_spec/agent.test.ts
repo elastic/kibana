@@ -6,6 +6,8 @@
  */
 
 import {
+  AGENT_ID_MAX_LENGTH,
+  AGENTS_KUERY_MAX_LENGTH,
   BulkChangeAgentsPrivilegeLevelRequestSchema,
   BulkMigrateAgentsRequestSchema,
   GetAgentsRequestSchema,
@@ -87,11 +89,27 @@ describe('bulk action request schemas validate the `agents` KQL string', () => {
     expect(() => schema.body.validate({ agents: ['agent-1', 'agent-2'], ...extra })).not.toThrow();
   });
 
-  it.each(bulkSchemas)('%s bounds the length of the agents input', (_name, schema, extra) => {
+  const kueryOfLength = (length: number) => `status:${'a'.repeat(length - 'status:'.length)}`;
+
+  it.each(bulkSchemas)('%s allows a KQL string at the maximum length', (_name, schema, extra) => {
     expect(() =>
-      schema.body.validate({ agents: `status:${'a'.repeat(1_000_000)}`, ...extra })
+      schema.body.validate({ agents: kueryOfLength(AGENTS_KUERY_MAX_LENGTH), ...extra })
+    ).not.toThrow();
+  });
+
+  it.each(bulkSchemas)(
+    '%s rejects a KQL string over the maximum length',
+    (_name, schema, extra) => {
+      expect(() =>
+        schema.body.validate({ agents: kueryOfLength(AGENTS_KUERY_MAX_LENGTH + 1), ...extra })
+      ).toThrow();
+    }
+  );
+
+  it.each(bulkSchemas)('%s rejects an agent id over the maximum length', (_name, schema, extra) => {
+    expect(() =>
+      schema.body.validate({ agents: ['a'.repeat(AGENT_ID_MAX_LENGTH + 1)], ...extra })
     ).toThrow();
-    expect(() => schema.body.validate({ agents: ['a'.repeat(513)], ...extra })).toThrow();
   });
 
   it('rejects fields outside the agent mappings when dryRun is set', () => {
