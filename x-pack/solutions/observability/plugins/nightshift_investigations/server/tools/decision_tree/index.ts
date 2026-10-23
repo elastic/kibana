@@ -11,6 +11,7 @@ import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { createDecisionTreeStore } from '../../decision_trees/store';
 import { createLearningStore } from '../../decision_trees/learning_store';
+import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
 import {
   RECORD_REMEDIATION_TOOL_ID,
   RECORD_SYSTEM_LEARNING_TOOL_ID,
@@ -48,6 +49,75 @@ export const DECISION_TREE_TOOL_IDS = [
   DECISION_TREE_SUBMIT_TOOL_ID,
 ] as const;
 
+export interface ReinforcementSessionState {
+  provenance?: WriteProvenance;
+  learnings: LearningRecord[];
+  appliedWrites: AppliedWriteRecord[];
+}
+
+/**
+ * In-memory registry keyed by the space-scoped reinforcement conversation id
+ * (`<spaceId>__<reinforcementConversationId>`). Bridges the standalone `agentBuilder.agents.runAgent`
+ * boundary so `decisionTreeReinforce` can pass the investigator's `{ conversationId, roundId, workflowExecutionId }`
+ * provenance into the reinforcement tools and collect their `applied_writes` when the turn finishes.
+ */
+class ReinforcementSessionRegistry {
+  private readonly sessions = new Map<string, ReinforcementSessionState>();
+
+  private getOrCreate(scopedConversationId: string): ReinforcementSessionState {
+    let existing = this.sessions.get(scopedConversationId);
+    if (!existing) {
+      existing = { learnings: [], appliedWrites: [] };
+      this.sessions.set(scopedConversationId, existing);
+    }
+    return existing;
+  }
+
+  registerSession(scopedConversationId: string, provenance: WriteProvenance): void {
+    const state = this.getOrCreate(scopedConversationId);
+    state.provenance = provenance;
+  }
+
+  getProvenance(scopedConversationId: string): WriteProvenance | undefined {
+    return this.sessions.get(scopedConversationId)?.provenance;
+  }
+
+  recordLearning(scopedConversationId: string, record: LearningRecord): void {
+    const state = this.getOrCreate(scopedConversationId);
+    state.learnings.push(record);
+  }
+
+  peekLearnings(scopedConversationId: string): LearningRecord[] {
+    return this.sessions.get(scopedConversationId)?.learnings ?? [];
+  }
+
+  drainLearnings(scopedConversationId: string): LearningRecord[] {
+    const state = this.sessions.get(scopedConversationId);
+    if (!state) {
+      return [];
+    }
+    const buffered = state.learnings;
+    state.learnings = [];
+    if (!state.provenance && state.appliedWrites.length === 0) {
+      this.sessions.delete(scopedConversationId);
+    }
+    return buffered;
+  }
+
+  recordAppliedWrite(scopedConversationId: string, write: AppliedWriteRecord): void {
+    const state = this.getOrCreate(scopedConversationId);
+    state.appliedWrites.push(write);
+  }
+
+  drainSession(scopedConversationId: string): ReinforcementSessionState {
+    const state = this.sessions.get(scopedConversationId);
+    this.sessions.delete(scopedConversationId);
+    return state ?? { learnings: [], appliedWrites: [] };
+  }
+}
+
+export const reinforcementSessionRegistry = new ReinforcementSessionRegistry();
+
 export const createDecisionTreeTools = ({
   getSandboxStart,
   connectorNames,
@@ -66,33 +136,43 @@ export const createDecisionTreeTools = ({
   const getLearningStore = (esClient: ElasticsearchClient, request: KibanaRequest) =>
     createLearningStore({ esClient, logger, spaceId: getSpaceId(request) });
 
-  // Shared between the learning tools (which fill it) and the submit tool (which drains it), so a
-  // committed tree version records the learnings the agent captured during the same turn. Keyed by
-  // the scoped conversation id so concurrent reinforcement rounds never see each other's learnings.
-  const learningBuffer = new Map<string, LearningRecord[]>();
-  const onRecord = (conversationId: string, record: LearningRecord) => {
-    const existing = learningBuffer.get(conversationId) ?? [];
-    existing.push(record);
-    learningBuffer.set(conversationId, existing);
-  };
+  const onRecord = (conversationId: string, record: LearningRecord) =>
+    reinforcementSessionRegistry.recordLearning(conversationId, record);
   const peekLearnings = (conversationId: string): LearningRecord[] =>
-    learningBuffer.get(conversationId) ?? [];
-  const drainLearnings = (conversationId: string): LearningRecord[] => {
-    const buffered = learningBuffer.get(conversationId) ?? [];
-    learningBuffer.delete(conversationId);
-    return buffered;
-  };
+    reinforcementSessionRegistry.peekLearnings(conversationId);
+  const drainLearnings = (conversationId: string): LearningRecord[] =>
+    reinforcementSessionRegistry.drainLearnings(conversationId);
+  const getProvenance = (conversationId: string): WriteProvenance | undefined =>
+    reinforcementSessionRegistry.getProvenance(conversationId);
+  const onAppliedWrite = (conversationId: string, write: AppliedWriteRecord): void =>
+    reinforcementSessionRegistry.recordAppliedWrite(conversationId, write);
 
   return [
-    createRecordSystemLearningTool({ getStore: getLearningStore, logger, getSpaceId, onRecord }),
+    createRecordSystemLearningTool({
+      getStore: getLearningStore,
+      logger,
+      getSpaceId,
+      onRecord,
+      getProvenance,
+      onAppliedWrite,
+    }),
     createRecordToolLearningTool({
       getStore: getLearningStore,
       logger,
       connectorNames,
       getSpaceId,
       onRecord,
+      getProvenance,
+      onAppliedWrite,
     }),
-    createRecordRemediationTool({ getStore: getLearningStore, logger, getSpaceId, onRecord }),
+    createRecordRemediationTool({
+      getStore: getLearningStore,
+      logger,
+      getSpaceId,
+      onRecord,
+      getProvenance,
+      onAppliedWrite,
+    }),
     createSubmitOptimizerResultTool({
       getSandboxStart,
       getStore: getTreeStore,
@@ -100,6 +180,8 @@ export const createDecisionTreeTools = ({
       getUsername,
       peekLearnings,
       drainLearnings,
+      getProvenance,
+      onAppliedWrite,
       logger,
     }),
   ] as Array<BuiltinToolDefinition<never>>;

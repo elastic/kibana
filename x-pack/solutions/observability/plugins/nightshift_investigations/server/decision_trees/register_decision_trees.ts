@@ -66,7 +66,7 @@ export const hydrateDecisionTreeWorkspace = async ({
   spaceId: string;
   prompt?: string;
   signal?: AbortSignal;
-}): Promise<number> => {
+}): Promise<number | { treeCount: number; hydratedIds: string[] }> => {
   const store = createDecisionTreeStore({ esClient, logger, spaceId, signal });
   const accessedTreeIds = parseAccessedTreesMarker(prompt);
   const trees = await materializeDecisionTrees({
@@ -76,7 +76,10 @@ export const hydrateDecisionTreeWorkspace = async ({
     signal,
     ...(accessedTreeIds ? { treeIds: accessedTreeIds } : {}),
   });
-  return trees.length;
+  return {
+    treeCount: trees.length,
+    hydratedIds: trees.map((tree) => tree.tree_id),
+  };
 };
 
 /**
@@ -100,7 +103,12 @@ export const prepareReinforcementTurn = async ({
   spaceId: string;
   signal?: AbortSignal;
   toolCalls?: InvestigationToolCall[];
-}): Promise<{ message: string; treeCount: number; turnKind: DecisionTreeTurnKind }> => {
+}): Promise<{
+  message: string;
+  treeCount: number;
+  turnKind: DecisionTreeTurnKind;
+  openedTreeIds?: string[];
+}> => {
   const [trees, learnings] = await Promise.all([
     createDecisionTreeStore({ esClient, logger, spaceId, signal }).list(),
     createLearningStore({ esClient, logger, spaceId, signal }).list(),
@@ -120,5 +128,6 @@ export const prepareReinforcementTurn = async ({
     message: [embedAccessedTreesMarker(accessed.map((tree) => tree.tree_id)), message].join('\n'),
     treeCount: accessed.length,
     turnKind,
+    openedTreeIds: accessed.map((tree) => tree.tree_id),
   };
 };

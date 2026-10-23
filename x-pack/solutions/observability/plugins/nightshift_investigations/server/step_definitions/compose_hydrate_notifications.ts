@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { composeHydrateNotificationContext } from '../lib/hydrate_notification';
+import { withNightshiftBackgroundSpan } from '../tracing';
 
 export const composeHydrateNotificationsStepDefinition = () =>
   createServerStepDefinition({
@@ -56,6 +57,8 @@ export const composeHydrateNotificationsStepDefinition = () =>
           version: z.literal(1),
           data: z.object({
             recalled_ids: z.array(z.string()).max(100),
+            materialize_execution_id: z.string().optional(),
+            background_trace_id: z.string().optional(),
           }),
         }),
       }),
@@ -64,6 +67,31 @@ export const composeHydrateNotificationsStepDefinition = () =>
       const { model_context: modelContext } = composeHydrateNotificationContext({
         writers: context.input.writers,
       });
+      const workflowCtx = context.contextManager.getContext();
+      const executionId = workflowCtx?.execution?.id;
+      const spaceId = workflowCtx?.workflow?.spaceId ?? 'default';
+      const candidateTraceId =
+        typeof executionId === 'string' ? executionId.replace(/-/g, '').toLowerCase() : undefined;
+      const isValidOtelTraceId = Boolean(
+        candidateTraceId &&
+          /^[0-9a-f]{32}$/.test(candidateTraceId) &&
+          candidateTraceId !== '00000000000000000000000000000000'
+      );
+      if (isValidOtelTraceId && executionId) {
+        await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.composeHydrateNotifications',
+            traceId: candidateTraceId,
+            spaceId,
+            workflowExecutionId: executionId,
+            logger: context.logger,
+            attributes: {
+              'nightshift.recalled_ids': JSON.stringify(context.input.recalled_ids),
+            },
+          },
+          async () => undefined
+        );
+      }
       return {
         output: {
           ...(modelContext ? { model_context: modelContext } : {}),
@@ -72,6 +100,12 @@ export const composeHydrateNotificationsStepDefinition = () =>
               version: 1 as const,
               data: {
                 recalled_ids: context.input.recalled_ids,
+                ...(isValidOtelTraceId && executionId
+                  ? {
+                      materialize_execution_id: executionId,
+                      background_trace_id: candidateTraceId,
+                    }
+                  : {}),
               },
             },
           },

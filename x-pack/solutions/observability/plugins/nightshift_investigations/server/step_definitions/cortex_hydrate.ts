@@ -13,6 +13,7 @@ import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -61,6 +62,10 @@ export const cortexHydrateStepDefinition = ({
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
       conversation_id: z.string().describe('Unscoped conversation id for legacy consumers.'),
+      hydrated_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical Cortex page ids materialized into the sandbox.'),
       skipped: z.boolean().optional(),
       failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
       notification: z
@@ -72,7 +77,9 @@ export const cortexHydrateStepDefinition = ({
     }),
     handler: async (context) => {
       const { sandbox_id: providedSandboxId, conversation_id: conversationId } = context.input;
-      const { spaceId } = context.contextManager.getContext().workflow;
+      const workflowContext = context.contextManager.getContext();
+      const { spaceId } = workflowContext.workflow;
+      const executionId = workflowContext.execution?.id;
       const sandboxId =
         providedSandboxId ??
         (conversationId !== undefined ? scopeConversationId(spaceId, conversationId) : undefined);
@@ -113,20 +120,37 @@ export const cortexHydrateStepDefinition = ({
       // this is a before-agent hook, and aborting the investigator round because one
       // writer could not reach the sandbox is worse than telling the model the
       // directory may be incomplete.
+      let hydrateResult: Awaited<ReturnType<typeof hydrateCortexWorkspace>> | undefined;
       try {
-        await withTimeout(
-          (signal) =>
-            hydrateCortexWorkspace({
-              session,
-              esClient: context.contextManager.getScopedEsClient(),
-              spaceId,
-              signal,
-              analytics,
-              conversationId: resolvedConversationId,
-              logger,
-            }),
-          HYDRATE_TIMEOUT_MS,
-          `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+        hydrateResult = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.cortexHydrate',
+            traceId: executionId,
+            conversationId: resolvedConversationId,
+            spaceId,
+            workflowExecutionId: executionId,
+            logger,
+          },
+          async (span) => {
+            const res = await withTimeout(
+              (signal) =>
+                hydrateCortexWorkspace({
+                  session,
+                  esClient: context.contextManager.getScopedEsClient(),
+                  spaceId,
+                  signal,
+                  analytics,
+                  conversationId: resolvedConversationId,
+                  logger,
+                }),
+              HYDRATE_TIMEOUT_MS,
+              `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+            );
+            if (res && Array.isArray(res.hydratedIds)) {
+              span?.setAttribute('nightshift.hydrated_ids', JSON.stringify(res.hydratedIds));
+            }
+            return res;
+          }
         );
       } catch (error) {
         return {
@@ -144,11 +168,19 @@ export const cortexHydrateStepDefinition = ({
         };
       }
 
+      const hydratedIds =
+        typeof hydrateResult === 'object' &&
+        hydrateResult !== null &&
+        Array.isArray(hydrateResult.hydratedIds)
+          ? hydrateResult.hydratedIds
+          : undefined;
+
       return {
         output: {
           sandbox_id: sandboxId,
           conversation_id: resolvedConversationId,
           notification: '',
+          ...(hydratedIds ? { hydrated_ids: hydratedIds } : {}),
         },
       };
     },

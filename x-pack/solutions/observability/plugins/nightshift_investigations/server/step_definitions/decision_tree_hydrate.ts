@@ -13,6 +13,7 @@ import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import { withTimeout } from './with_timeout';
@@ -65,6 +66,10 @@ export const decisionTreeHydrateStepDefinition = ({
         .string()
         .describe('Unscoped conversation id derived from the sandbox key.'),
       tree_count: z.number().describe('Number of decision trees written into the sandbox.'),
+      hydrated_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical symptom:<slug> tree ids materialized into the sandbox.'),
       skipped: z.boolean().optional(),
       failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
       notification: z
@@ -76,7 +81,9 @@ export const decisionTreeHydrateStepDefinition = ({
     }),
     handler: async (context) => {
       const { sandbox_id: sandboxId, prompt, agent_id: agentId } = context.input;
-      const { spaceId } = context.contextManager.getContext().workflow;
+      const workflowContext = context.contextManager.getContext();
+      const { spaceId } = workflowContext.workflow;
+      const executionId = workflowContext.execution?.id;
       const conversationId = unscopeConversationId(spaceId, sandboxId);
 
       // The combined materialize workflow installs with Cortex or Memory, so this step is
@@ -119,20 +126,38 @@ export const decisionTreeHydrateStepDefinition = ({
       // A failed write degrades to a system_update line rather than a failed step: this
       // step is also a before-agent hook for the reinforcement agent, so throwing would
       // abort that round over one writer.
-      let treeCount: number;
+      let hydrateResult: Awaited<ReturnType<typeof hydrateDecisionTreeWorkspace>>;
       try {
-        treeCount = await withTimeout(
-          (signal) =>
-            hydrateDecisionTreeWorkspace({
-              session,
-              esClient: context.contextManager.getScopedEsClient(),
-              logger,
-              spaceId,
-              prompt,
-              signal,
-            }),
-          HYDRATE_TIMEOUT_MS,
-          `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+        hydrateResult = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.decisionTreeHydrate',
+            traceId: executionId,
+            conversationId,
+            spaceId,
+            workflowExecutionId: executionId,
+            logger,
+          },
+          async (span) => {
+            const res = await withTimeout(
+              (signal) =>
+                hydrateDecisionTreeWorkspace({
+                  session,
+                  esClient: context.contextManager.getScopedEsClient(),
+                  logger,
+                  spaceId,
+                  prompt,
+                  signal,
+                }),
+              HYDRATE_TIMEOUT_MS,
+              `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+            );
+            const count = typeof res === 'number' ? res : res.treeCount;
+            span?.setAttribute('nightshift.tree_count', count);
+            if (typeof res === 'object' && res !== null && Array.isArray(res.hydratedIds)) {
+              span?.setAttribute('nightshift.hydrated_ids', JSON.stringify(res.hydratedIds));
+            }
+            return res;
+          }
         );
       } catch (error) {
         return {
@@ -151,12 +176,21 @@ export const decisionTreeHydrateStepDefinition = ({
         };
       }
 
+      const treeCount = typeof hydrateResult === 'number' ? hydrateResult : hydrateResult.treeCount;
+      const hydratedIds =
+        typeof hydrateResult === 'object' &&
+        hydrateResult !== null &&
+        Array.isArray(hydrateResult.hydratedIds)
+          ? hydrateResult.hydratedIds
+          : undefined;
+
       return {
         output: {
           sandbox_id: sandboxId,
           conversation_id: conversationId,
           tree_count: treeCount,
           notification: '',
+          ...(hydratedIds ? { hydrated_ids: hydratedIds } : {}),
         },
       };
     },

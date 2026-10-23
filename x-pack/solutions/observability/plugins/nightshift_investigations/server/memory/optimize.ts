@@ -14,7 +14,11 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { extractWorkspaceReads, extractWorkspaceReadsFromToolCalls } from '../investigation_round';
+import {
+  extractWorkspaceReads,
+  extractWorkspaceReadsFromToolCalls,
+  type AppliedWriteRecord,
+} from '../investigation_round';
 import { hasToolEvidence, renderMemoryTranscript, type TranscriptStep } from './transcript';
 import type { MemoryPageStore, MemoryPageWrite, VersionedMemoryPage } from './page_store';
 import {
@@ -112,11 +116,13 @@ export interface MemoryEditSummary {
   harmfulArchiveCount: number;
   mergedSourceArchiveCount: number;
   writeFailureCount: number;
+  appliedWrites?: AppliedWriteRecord[];
 }
 
 export interface MemoryOptimizeSummary extends MemoryEditSummary {
   recalledCount: number;
   loadedCount: number;
+  openedIds?: string[];
 }
 
 const emptyMemoryEditSummary = (): MemoryEditSummary => ({
@@ -602,6 +608,8 @@ export const applyMemoryEdits = async ({
   transcript,
   agentId,
   conversationId,
+  roundId,
+  workflowExecutionId,
   synthesizeMemoryGroup,
   now = () => Date.now() / 1000,
   logger,
@@ -615,6 +623,8 @@ export const applyMemoryEdits = async ({
   transcript?: string;
   agentId?: string;
   conversationId?: string;
+  roundId?: string;
+  workflowExecutionId?: string;
   synthesizeMemoryGroup?: SynthesizeMemoryGroup;
   now?: () => number;
   logger: Logger;
@@ -658,10 +668,30 @@ export const applyMemoryEdits = async ({
       `extractContext=${JSON.stringify(previewText(context))}`
   );
 
+  const appliedWrites: AppliedWriteRecord[] = [];
+  const recalledById = new Map(recalledMemories.map((page) => [page.id, page]));
+  const provenance = {
+    conversationId,
+    roundId,
+    workflowExecutionId,
+  };
+  const hasProvenance = Boolean(roundId || workflowExecutionId);
   const harmful = new Set(harmfulIds);
   for (const id of archiveIds) {
-    await store.archive(id, 'harmful');
+    const beforePage = recalledById.get(id);
+    const archivedPage = hasProvenance
+      ? await store.archive(id, 'harmful', undefined, provenance)
+      : await store.archive(id, 'harmful');
     summary.harmfulArchiveCount += 1;
+    appliedWrites.push({
+      store: 'semantic_memory',
+      item_id: id,
+      action: 'archive_harmful',
+      before_status: 'active',
+      after_status: 'archived',
+      ...(beforePage ? { before_content: beforePage.content } : {}),
+      ...(archivedPage ? { after_content: archivedPage.content } : {}),
+    });
     logger.debug(`Memory archived ${id} reason=harmful`);
   }
   await store.applyCounterUpdates(updates);
@@ -751,10 +781,15 @@ export const applyMemoryEdits = async ({
       otherTopics: otherTopicsOf(group.extract),
       agentId,
       conversationId,
+      roundId,
+      workflowExecutionId,
       synthesizeMemoryGroup,
       now,
       logger,
     });
+    if (result.appliedWrite) {
+      appliedWrites.push(result.appliedWrite);
+    }
     if (result.writtenId && result.mergedFromCount === 0) {
       summary.standaloneUpsertCount += 1;
     } else if (result.writtenId) {
@@ -763,6 +798,9 @@ export const applyMemoryEdits = async ({
     }
     summary.mergedSourceArchiveCount += result.archivedSourceCount;
     summary.writeFailureCount += result.writeFailureCount;
+  }
+  if (appliedWrites.length > 0) {
+    summary.appliedWrites = appliedWrites;
   }
   logger.info(
     `Memory edits completed: standalone=${summary.standaloneUpsertCount}, ` +
@@ -779,6 +817,7 @@ interface MergeMemoryGroupResult {
   mergedFromCount: number;
   archivedSourceCount: number;
   writeFailureCount: number;
+  appliedWrite?: AppliedWriteRecord;
 }
 
 const mergeMemoryGroup = async ({
@@ -791,6 +830,8 @@ const mergeMemoryGroup = async ({
   otherTopics,
   agentId,
   conversationId,
+  roundId,
+  workflowExecutionId,
   synthesizeMemoryGroup,
   now,
   logger,
@@ -804,6 +845,8 @@ const mergeMemoryGroup = async ({
   otherTopics: string[];
   agentId?: string;
   conversationId?: string;
+  roundId?: string;
+  workflowExecutionId?: string;
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
   now: () => number;
   logger: Logger;
@@ -812,6 +855,9 @@ const mergeMemoryGroup = async ({
   let canonicalId = initialCanonicalId;
   let canonicalIsSource = initialCanonicalId !== undefined;
   let writtenCanonicalId: string | undefined;
+  let writtenContent: string | undefined;
+  let beforeContent: string | undefined;
+  let beforeStatus: string | undefined;
   let committedSources: VersionedMemoryPage[] = [];
 
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -916,6 +962,8 @@ const mergeMemoryGroup = async ({
       references: unionStrings(currentSources.flatMap((page) => page.references)),
       agent_id: agentId,
       conversation_id: conversationId,
+      ...(roundId ? { round_id: roundId } : {}),
+      ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
       user: 'nightshift-optimizer',
       ...(currentSources.length > 0
         ? {
@@ -965,13 +1013,20 @@ const mergeMemoryGroup = async ({
 
     try {
       if (versionedCanonical) {
+        beforeContent = versionedCanonical.page.content;
+        beforeStatus = 'active';
         await store.update(targetCanonicalId, write, versionedCanonical);
       } else if (archivedTarget) {
+        beforeContent = archivedTarget.page.content;
+        beforeStatus = 'archived';
         await writeOverArchived(store, archivedTarget, write, nowSec);
       } else {
+        beforeContent = undefined;
+        beforeStatus = undefined;
         await store.create(write);
       }
       writtenCanonicalId = targetCanonicalId;
+      writtenContent = content;
       committedSources = revalidatedSources;
       break;
     } catch (err) {
@@ -1001,7 +1056,15 @@ const mergeMemoryGroup = async ({
       continue;
     }
     try {
-      await store.archiveVersioned(source, 'merged');
+      if (roundId || workflowExecutionId) {
+        await store.archiveVersioned(source, 'merged', undefined, {
+          conversationId,
+          roundId,
+          workflowExecutionId,
+        });
+      } else {
+        await store.archiveVersioned(source, 'merged');
+      }
       archivedSourceCount += 1;
     } catch (err) {
       writeFailureCount += 1;
@@ -1018,11 +1081,24 @@ const mergeMemoryGroup = async ({
           `${writtenCanonicalId} (entry ${extract.slug})`
       : `Rewrote ${writtenCanonicalId} in place (entry ${extract.slug})`
   );
+  const replacedIds = committedSources
+    .map(({ page }) => page.id)
+    .filter((id) => id !== writtenCanonicalId);
   return {
     writtenId: writtenCanonicalId,
     mergedFromCount,
     archivedSourceCount,
     writeFailureCount,
+    appliedWrite: {
+      store: 'semantic_memory',
+      item_id: writtenCanonicalId,
+      action: mergedFromCount > 0 ? 'merge' : beforeStatus !== undefined ? 'update' : 'create',
+      ...(beforeStatus !== undefined ? { before_status: beforeStatus } : {}),
+      after_status: 'active',
+      ...(beforeContent !== undefined ? { before_content: beforeContent } : {}),
+      ...(writtenContent !== undefined ? { after_content: writtenContent } : {}),
+      ...(replacedIds.length > 0 ? { replaced_ids: replacedIds } : {}),
+    },
   };
 };
 
@@ -1038,6 +1114,8 @@ export const optimizeMemory = async ({
   investigation,
   agentId,
   conversationId,
+  roundId,
+  workflowExecutionId,
   logger,
   signal,
 }: {
@@ -1052,6 +1130,8 @@ export const optimizeMemory = async ({
   investigation?: TranscriptStep[];
   agentId?: string;
   conversationId?: string;
+  roundId?: string;
+  workflowExecutionId?: string;
   logger: Logger;
   signal?: AbortSignal;
 }): Promise<MemoryOptimizeSummary> => {
@@ -1158,6 +1238,7 @@ export const optimizeMemory = async ({
       ...emptyMemoryEditSummary(),
       recalledCount: recalledIds.length,
       loadedCount: recalledMemories.length,
+      ...(reads.memoryIds.length > 0 ? { openedIds: reads.memoryIds } : {}),
     };
   }
 
@@ -1172,6 +1253,8 @@ export const optimizeMemory = async ({
     transcript: evidenceTranscript,
     agentId,
     conversationId,
+    roundId,
+    workflowExecutionId,
     synthesizeMemoryGroup,
     logger,
   });
@@ -1179,5 +1262,6 @@ export const optimizeMemory = async ({
     ...editSummary,
     recalledCount: recalledIds.length,
     loadedCount: recalledMemories.length,
+    ...(reads.memoryIds.length > 0 ? { openedIds: reads.memoryIds } : {}),
   };
 };

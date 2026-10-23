@@ -17,7 +17,11 @@ import {
 import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { isSeededWorkspaceAccess } from '../investigation_round';
+import {
+  isSeededWorkspaceAccess,
+  type AppliedWriteRecord,
+  type WriteProvenance,
+} from '../investigation_round';
 import type { CortexPageStore } from './page_store';
 import {
   canonicalizeSlug,
@@ -283,13 +287,15 @@ export const applyCortexEdits = async ({
   store,
   edits,
   telemetry,
+  provenance,
   logger,
 }: {
   store: CortexPageStore;
   edits: CortexEditProposal[];
   telemetry: CortexTelemetry;
+  provenance?: WriteProvenance;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<AppliedWriteRecord[]> => {
   const { pages } = await store.list();
   logger.info(`Applying ${edits.length} Cortex edit(s)`);
   logger.debug(
@@ -298,6 +304,10 @@ export const applyCortexEdits = async ({
       .join(', ')}`
   );
   const applied: AppliedCortexEdit[] = [];
+  const appliedWrites: AppliedWriteRecord[] = [];
+  const hasProvenance = Boolean(
+    provenance?.conversationId || provenance?.roundId || provenance?.workflowExecutionId
+  );
   // A run confirms a page at most once, and never one it created: promotion needs a confirmation
   // from a later run.
   const touchedIds = new Set<string>();
@@ -318,19 +328,43 @@ export const applyCortexEdits = async ({
         if (touchedIds.has(id)) {
           continue;
         }
-        const updated = await store.corroborate(id);
+        const before = await store.get(id);
+        const updated = hasProvenance
+          ? await store.corroborate(id, provenance)
+          : await store.corroborate(id);
         if (updated) {
           touchedIds.add(id);
           applied.push({ action: 'corroborate', entityType: edit.entity_type });
+          appliedWrites.push({
+            store: 'cortex',
+            item_id: id,
+            action: 'corroborate',
+            version: updated.doc_version ?? updated.version ?? 1,
+            ...(before ? { before_status: before.status, before_content: before.content } : {}),
+            after_status: updated.status,
+            after_content: updated.content,
+          });
           logger.debug(`Corroborated Cortex page ${id}`);
         }
         continue;
       }
 
       if (edit.action === 'archive') {
-        const updated = await store.archive(id);
+        const before = await store.get(id);
+        const updated = hasProvenance
+          ? await store.archive(id, undefined, provenance)
+          : await store.archive(id);
         if (updated) {
           applied.push({ action: 'archive', entityType: edit.entity_type });
+          appliedWrites.push({
+            store: 'cortex',
+            item_id: id,
+            action: 'archive',
+            version: updated.doc_version ?? updated.version ?? 1,
+            ...(before ? { before_status: before.status, before_content: before.content } : {}),
+            after_status: updated.status,
+            after_content: updated.content,
+          });
           logger.debug(`Archived Cortex page ${id}`);
         }
         continue;
@@ -350,21 +384,38 @@ export const applyCortexEdits = async ({
         : alreadyTouched
         ? existing.status
         : statusAfterCorroboration(existing.status, corroborations ?? 0);
-      await store.upsert({
+      const afterContent = edit.content ?? existing?.content ?? '';
+      const written = await store.upsert({
         entityType: edit.entity_type,
         slug,
         title: edit.title,
         description: edit.description ?? existing?.description,
-        content: edit.content ?? existing?.content ?? '',
+        content: afterContent,
         status,
         corroborations,
+        ...(hasProvenance || existing?.doc_version !== undefined
+          ? { docVersion: (existing?.doc_version ?? 0) + 1 }
+          : {}),
+        conversationId: provenance?.conversationId ?? existing?.conversation_id,
+        roundId: provenance?.roundId ?? existing?.round_id,
+        workflowExecutionId: provenance?.workflowExecutionId ?? existing?.workflow_execution_id,
       });
       applied.push({ action: 'upsert', entityType: edit.entity_type });
+      appliedWrites.push({
+        store: 'cortex',
+        item_id: id,
+        action: 'upsert',
+        version: written?.doc_version ?? written?.version ?? 1,
+        ...(existing ? { before_status: existing.status, before_content: existing.content } : {}),
+        after_status: status,
+        after_content: afterContent,
+      });
       logger.debug(`Upserted Cortex page ${id}`);
     }
   } finally {
     telemetry.reportEditsApplied(applied);
   }
+  return appliedWrites;
 };
 
 export const optimizeCortex = async ({
@@ -374,6 +425,7 @@ export const optimizeCortex = async ({
   assistantMessage,
   toolCalls,
   telemetry,
+  provenance,
   logger,
 }: {
   store: CortexPageStore;
@@ -382,8 +434,9 @@ export const optimizeCortex = async ({
   assistantMessage: string;
   toolCalls: InvestigationToolCall[];
   telemetry: CortexTelemetry;
+  provenance?: WriteProvenance;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<AppliedWriteRecord[]> => {
   await store.pruneDuplicates();
   const { pages: allPages } = await store.list();
   // Reinforcement-owned pages are kept out of the catalog so the model never proposes edits to them.
@@ -404,8 +457,8 @@ export const optimizeCortex = async ({
   const { edits } = await proposeEdits({ transcript, catalog: pages });
   logger.info(`Cortex optimizer proposed ${edits.length} edit(s)`);
   if (edits.length === 0) {
-    return;
+    return [];
   }
 
-  await applyCortexEdits({ store, edits, telemetry, logger });
+  return applyCortexEdits({ store, edits, telemetry, provenance, logger });
 };

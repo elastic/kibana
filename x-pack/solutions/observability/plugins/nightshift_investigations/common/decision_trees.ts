@@ -82,6 +82,9 @@ export interface DecisionTreeSummary {
   edge_count: number;
   learning_count: number;
   updated_at: string;
+  conversation_id?: string;
+  round_id?: string;
+  workflow_execution_id?: string;
 }
 
 export interface DecisionTreeDetail extends DecisionTreeSummary {
@@ -103,6 +106,9 @@ export interface DecisionTreeVersionSummary {
   edge_count: number;
   learning_count: number;
   created_at: string;
+  conversation_id?: string;
+  round_id?: string;
+  workflow_execution_id?: string;
 }
 
 export interface DecisionTreeVersionDetail extends DecisionTreeVersionSummary {

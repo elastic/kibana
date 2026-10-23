@@ -76,6 +76,9 @@ export interface MemoryPageWrite {
   /** Provenance. Metadata only — Space remains the tenancy boundary. */
   agent_id?: string;
   conversation_id?: string;
+  round_id?: string;
+  workflow_execution_id?: string;
+  version?: number;
   telemetry?: {
     impressions: number;
     conversions: number;
@@ -120,12 +123,14 @@ export interface MemoryPageStore {
   archive: (
     id: string,
     reason: MemoryArchiveReason,
-    user?: string
+    user?: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
   ) => Promise<MemoryPage | undefined>;
   archiveVersioned: (
     version: VersionedMemoryPage,
     reason: MemoryArchiveReason,
-    user?: string
+    user?: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
   ) => Promise<MemoryPage>;
   /** Clears `archive_reason`, returning the memory to active recall. */
   unarchive: (id: string, user?: string) => Promise<MemoryPage | undefined>;
@@ -227,6 +232,9 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
     merged_from: source.attributes?.merged_from,
     archive_reason: archiveReason,
     conversation_id: source.attributes?.conversation_id,
+    round_id: source.attributes?.round_id,
+    workflow_execution_id: source.attributes?.workflow_execution_id,
+    version: source.attributes?.version,
     agent_id: source.attributes?.agent_id,
     categories: source.attributes?.categories ?? [],
     references: source.attributes?.references ?? [],
@@ -289,6 +297,11 @@ export const createMemoryPageStore = ({
         space_id: spaceId,
         ...(page.agent_id !== undefined ? { agent_id: page.agent_id } : {}),
         ...(page.conversation_id !== undefined ? { conversation_id: page.conversation_id } : {}),
+        ...(page.round_id !== undefined ? { round_id: page.round_id } : {}),
+        ...(page.workflow_execution_id !== undefined
+          ? { workflow_execution_id: page.workflow_execution_id }
+          : {}),
+        version: page.version ?? (existing?.version !== undefined ? existing.version + 1 : 1),
         categories: page.categories,
         ...(page.source !== undefined ? { source: page.source } : {}),
         ...(page.merged_from !== undefined ? { merged_from: page.merged_from } : {}),
@@ -347,6 +360,8 @@ export const createMemoryPageStore = ({
     references: page.references,
     agent_id: page.agent_id,
     conversation_id: page.conversation_id,
+    round_id: page.round_id,
+    workflow_execution_id: page.workflow_execution_id,
     source: page.source,
     merged_from: page.merged_from,
     telemetry: page.telemetry,
@@ -356,9 +371,17 @@ export const createMemoryPageStore = ({
   const toArchiveWrite = (
     version: VersionedMemoryPage,
     reason: MemoryArchiveReason,
-    user?: string
+    user?: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
   ): MemoryPageWrite => ({
     ...toWrite(version.page),
+    ...(provenance?.conversationId !== undefined
+      ? { conversation_id: provenance.conversationId }
+      : {}),
+    ...(provenance?.roundId !== undefined ? { round_id: provenance.roundId } : {}),
+    ...(provenance?.workflowExecutionId !== undefined
+      ? { workflow_execution_id: provenance.workflowExecutionId }
+      : {}),
     archive_reason: reason,
     user: user ?? version.page.updated_by,
   });
@@ -867,7 +890,7 @@ export const createMemoryPageStore = ({
       );
     },
 
-    async archive(id, reason, user) {
+    async archive(id, reason, user, provenance) {
       for (let attempt = 0; attempt < MAX_ARCHIVE_ATTEMPTS; attempt++) {
         const versioned = await this.getVersioned(id);
         if (!versioned) {
@@ -878,7 +901,7 @@ export const createMemoryPageStore = ({
           return versioned.page;
         }
         try {
-          return await this.archiveVersioned(versioned, reason, user);
+          return await this.archiveVersioned(versioned, reason, user, provenance);
         } catch (err) {
           if (!isElasticsearchWriteConflict(err)) {
             throw err;
@@ -894,8 +917,12 @@ export const createMemoryPageStore = ({
       return undefined;
     },
 
-    async archiveVersioned(version, reason, user) {
-      return writeVersionedPage(version.page.id, toArchiveWrite(version, reason, user), version);
+    async archiveVersioned(version, reason, user, provenance) {
+      return writeVersionedPage(
+        version.page.id,
+        toArchiveWrite(version, reason, user, provenance),
+        version
+      );
     },
 
     /** Clears `archive_reason`, returning the memory to active recall. */

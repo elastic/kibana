@@ -15,6 +15,7 @@ import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import type { NightshiftTelemetryClient } from '../telemetry';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -131,20 +132,35 @@ export const memoryMaterializeToSandboxStepDefinition = ({
 
       let result: Awaited<ReturnType<typeof hydrateMemoryWorkspace>>;
       try {
-        result = await withTimeout(
-          async (signal) =>
-            hydrateMemoryWorkspace({
-              session,
-              esClient: context.contextManager.getScopedEsClient(),
-              spaceId,
-              agentId: trimmedAgentId,
-              query: prompt,
-              signal,
-              logger,
-            }),
-          MATERIALIZE_TIMEOUT_MS,
-          `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`,
-          context.abortSignal
+        result = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.memoryRecallAndWrite',
+            traceId: workflowExecutionId,
+            conversationId,
+            spaceId,
+            workflowExecutionId,
+            logger,
+          },
+          async (span) => {
+            const res = await withTimeout(
+              async (signal) =>
+                hydrateMemoryWorkspace({
+                  session,
+                  esClient: context.contextManager.getScopedEsClient(),
+                  spaceId,
+                  agentId: trimmedAgentId,
+                  query: prompt,
+                  signal,
+                  logger,
+                }),
+              MATERIALIZE_TIMEOUT_MS,
+              `Memory materialize to sandbox timed out after ${MATERIALIZE_TIMEOUT_MS}ms`,
+              context.abortSignal
+            );
+            span?.setAttribute('nightshift.recalled_ids', JSON.stringify(res.recalledIds));
+            span?.setAttribute('nightshift.recall_mode', res.summary.retrievalMode);
+            return res;
+          }
         );
       } catch (error) {
         telemetry.reportSemanticMemoryMaterialized({

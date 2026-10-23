@@ -90,7 +90,7 @@ export const materializeCortex = async ({
   store: CortexPageStore;
   telemetry: CortexTelemetry;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<{ hydratedIds: string[] } | void> => {
   await store.pruneDuplicates();
   const { pages: allPages } = await store.list();
   // Archived means the optimizer retired the fact as stale, so materializing it would feed the
@@ -127,4 +127,5 @@ export const materializeCortex = async ({
       ? `Materialized ${fullPages.length} Cortex page(s) into sandbox`
       : 'Materialized 0 Cortex page(s) into sandbox — store.list returned no live pages'
   );
+  return { hydratedIds: fullPages.map((page) => page.id) };
 };
