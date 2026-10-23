@@ -6,8 +6,8 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { errorBudgetSchemaZod } from '@kbn/slo-schema';
+import type { errorBudgetSchema } from '@kbn/slo-schema';
 
-type ErrorBudget = z.output<typeof errorBudgetSchemaZod>;
+type ErrorBudget = z.output<typeof errorBudgetSchema>;
 
 export type { ErrorBudget };

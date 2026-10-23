@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { transformHealthSchemaZod } from '@kbn/slo-schema';
+import type { transformHealthSchema } from '@kbn/slo-schema';
 import type { z } from '@kbn/zod';
 
-type TransformHealth = z.input<typeof transformHealthSchemaZod>;
+type TransformHealth = z.input<typeof transformHealthSchema>;
 
 export type { TransformHealth };

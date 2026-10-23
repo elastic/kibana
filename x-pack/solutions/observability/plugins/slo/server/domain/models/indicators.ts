@@ -6,21 +6,21 @@
  */
 
 import type {
-  apmTransactionDurationIndicatorSchemaZod,
-  apmTransactionErrorRateIndicatorSchemaZod,
-  indicatorSchemaZod,
-  indicatorTypesSchemaZod,
-  kqlCustomIndicatorSchemaZod,
-  metricCustomIndicatorSchemaZod,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  indicatorSchema,
+  indicatorTypesSchema,
+  kqlCustomIndicatorSchema,
+  metricCustomIndicatorSchema,
 } from '@kbn/slo-schema';
 import type { z } from '@kbn/zod';
 
-type APMTransactionErrorRateIndicator = z.output<typeof apmTransactionErrorRateIndicatorSchemaZod>;
-type APMTransactionDurationIndicator = z.output<typeof apmTransactionDurationIndicatorSchemaZod>;
-type KQLCustomIndicator = z.output<typeof kqlCustomIndicatorSchemaZod>;
-type MetricCustomIndicator = z.output<typeof metricCustomIndicatorSchemaZod>;
-type Indicator = z.output<typeof indicatorSchemaZod>;
-type IndicatorTypes = z.output<typeof indicatorTypesSchemaZod>;
+type APMTransactionErrorRateIndicator = z.output<typeof apmTransactionErrorRateIndicatorSchema>;
+type APMTransactionDurationIndicator = z.output<typeof apmTransactionDurationIndicatorSchema>;
+type KQLCustomIndicator = z.output<typeof kqlCustomIndicatorSchema>;
+type MetricCustomIndicator = z.output<typeof metricCustomIndicatorSchema>;
+type Indicator = z.output<typeof indicatorSchema>;
+type IndicatorTypes = z.output<typeof indicatorTypesSchema>;
 
 export type {
   Indicator,
