@@ -44,6 +44,5 @@ export const isUserProfileId = (id: string | undefined): id is string =>
  */
 export interface CurrentUser extends UserIdAndName {
   isAdmin: boolean;
-  /** Holds the Elasticsearch `manage_security` cluster privilege, which gates service account bindings. Absent means false. */
   canManageSecurity?: boolean;
 }
