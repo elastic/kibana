@@ -6,24 +6,17 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiDescriptionList, EuiEmptyPrompt } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 import { FlyoutTemplate, type FlyoutTabBarProps, type FlyoutTabProps } from '@kbn/flyout-template';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import {
-  FLYOUT_INFO_BLOCK_SOURCE,
   FLYOUT_TAKE_ACTION,
   formatMetadataListDuration,
 } from '@kbn/alerting-v2-episodes-ui/components/details/translations';
 import { buildEpisodeMenuPanels } from '@kbn/alerting-v2-episodes-ui/components/details/build_episode_menu_panels';
+import { AlertEpisodeDescriptionListSkeleton } from '@kbn/alerting-v2-episodes-ui/components/details/section_skeletons';
 import { useAlertDetailsFlyoutWidth } from '@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_flyout_width';
 import {
   CLASSIC_SOURCE_LABEL,
@@ -80,6 +73,9 @@ const TABS: FlyoutTabProps[] = [
 ];
 
 const TAB_BAR_PROPS: FlyoutTabBarProps = { 'data-test-subj': 'classicAlertEpisodeDetailsTabs' };
+
+/** Matches the Overview tab's field count, so the skeleton has the shape of the loaded list. */
+const OVERVIEW_ROW_COUNT = 8;
 
 export interface ClassicAlertDetailsFlyoutProps {
   alertId: string;
@@ -276,28 +272,21 @@ export const ClassicAlertDetailsFlyout = ({
       onTabChange={(tabId) => setSelectedTabId(tabId as TabId)}
     >
       <FlyoutTemplate.Header title={title} isLoading={isLoading}>
-        <FlyoutTemplate.Header.InfoBlock title={FLYOUT_INFO_BLOCK_SOURCE}>
-          <EuiBadge
-            color="hollow"
-            iconType={ELASTIC_SOURCE_ICON}
-            data-test-subj="classicAlertEpisodeSourceBadge"
-          >
-            {CLASSIC_SOURCE_LABEL}
-          </EuiBadge>
-        </FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.Badge
+          color="hollow"
+          iconType={ELASTIC_SOURCE_ICON}
+          data-test-subj="classicAlertEpisodeSourceBadge"
+        >
+          {CLASSIC_SOURCE_LABEL}
+        </FlyoutTemplate.Header.Badge>
       </FlyoutTemplate.Header>
 
       <FlyoutTemplate.Body>
         {isLoading ? (
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner
-                size="xl"
-                aria-label={i18n.CLASSIC_ALERT_DETAILS_LOADING}
-                data-test-subj="classicAlertEpisodeDetailsLoading"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <AlertEpisodeDescriptionListSkeleton
+            rows={OVERVIEW_ROW_COUNT}
+            data-test-subj="classicAlertEpisodeDetailsLoading"
+          />
         ) : !loadedAlert ? (
           <EuiEmptyPrompt
             iconType="alert"
