@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import { isValidNumber } from '../helpers';
+
+/**
+ * Range boundaries are arbitrary `range` aggregation bounds: unlike other numeric
+ * inputs sharing `isValidNumber` (e.g. percentiles), any number of decimal digits is valid.
+ */
+export const isValidRangeBound = (value: string | number | null | undefined): boolean =>
+  isValidNumber(value, false, undefined, undefined, Infinity);
+
 export const TYPING_DEBOUNCE_TIME = 256;
 // Taken from the Visualize editor
 export const FROM_PLACEHOLDER = '\u2212\u221E';
