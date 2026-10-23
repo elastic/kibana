@@ -65,66 +65,6 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
         description: 'The Nightshift source id the queries were generated for',
       },
     },
-    external_content_tool_continuations: {
-      type: 'long',
-      _meta: {
-        description:
-          'Reasoning turns that contained external content and pending task tools and were correctly continued',
-        optional: true,
-      },
-    },
-    tool_usage: {
-      _meta: {
-        description: 'Tool usage statistics for the inference steps',
-        optional: true,
-      },
-      properties: {
-        get_stream_features: {
-          properties: {
-            calls: {
-              type: 'long',
-              _meta: {
-                description: 'The number of calls to the get_stream_features tool',
-              },
-            },
-            failures: {
-              type: 'long',
-              _meta: {
-                description: 'The number of failures to the get_stream_features tool',
-              },
-            },
-            latency_ms: {
-              type: 'long',
-              _meta: {
-                description: 'The latency of the get_stream_features tool in milliseconds',
-              },
-            },
-          },
-        },
-        add_queries: {
-          properties: {
-            calls: {
-              type: 'long',
-              _meta: {
-                description: 'The number of calls to the add_queries tool',
-              },
-            },
-            failures: {
-              type: 'long',
-              _meta: {
-                description: 'The number of failures to the add_queries tool',
-              },
-            },
-            latency_ms: {
-              type: 'long',
-              _meta: {
-                description: 'The latency of the add_queries tool in milliseconds',
-              },
-            },
-          },
-        },
-      },
-    },
   };
 
 const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorFeaturesIdentifiedProps> =

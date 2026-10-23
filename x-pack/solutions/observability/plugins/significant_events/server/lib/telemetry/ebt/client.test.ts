@@ -39,19 +39,6 @@ describe('EbtTelemetryClient', () => {
         cached_tokens_used: 20,
         duration_ms: 1200,
         source_id: 'test-stream',
-        tool_usage: {
-          get_stream_features: {
-            calls: 1,
-            failures: 0,
-            latency_ms: 100,
-          },
-          add_queries: {
-            calls: 1,
-            failures: 0,
-            latency_ms: 100,
-          },
-        },
-        external_content_tool_continuations: 3,
       });
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
@@ -64,19 +51,6 @@ describe('EbtTelemetryClient', () => {
           cached_tokens_used: 20,
           duration_ms: 1200,
           source_id: 'test-stream',
-          tool_usage: {
-            get_stream_features: {
-              calls: 1,
-              failures: 0,
-              latency_ms: 100,
-            },
-            add_queries: {
-              calls: 1,
-              failures: 0,
-              latency_ms: 100,
-            },
-          },
-          external_content_tool_continuations: 3,
         }
       );
     });

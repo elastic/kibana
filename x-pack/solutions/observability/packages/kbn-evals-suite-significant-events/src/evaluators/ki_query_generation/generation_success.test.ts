@@ -30,7 +30,7 @@ describe('generation_success evaluator', () => {
     expect((result.metadata as Record<string, unknown>).acceptedQueryCount).toBe(1);
   });
 
-  it('scores 0 and reports no attempts when add_queries was never called', async () => {
+  it('scores 0 and reports no attempts when validate_queries was never called', async () => {
     const result = await evaluate({ queries: [], query_attempts: [] });
 
     expect(result.score).toBe(0);

@@ -14,7 +14,6 @@ import {
   type AnalysisTarget,
   type ExistingQuerySummary,
   type QueryAttempt,
-  type SignificantEventsToolUsage,
 } from '@kbn/nightshift-ai';
 import { createAgentBuilderClient, type ConverseStep } from '@kbn/evals';
 import {
@@ -22,6 +21,7 @@ import {
   SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
 } from '@kbn/significant-events-plugin/common';
 import type { AcceptedQuery } from '@kbn/significant-events-plugin/server';
+import type { KIQueryGenerationToolUsage } from './evaluators/ki_query_generation/types';
 
 export interface RunKIQueryGenerationAgentParams {
   fetch: HttpHandler;
@@ -37,7 +37,7 @@ export interface RunKIQueryGenerationAgentResult {
   queries: AcceptedQuery[];
   queryAttempts: QueryAttempt[];
   tokensUsed: ChatCompletionTokenCount;
-  toolUsage: SignificantEventsToolUsage;
+  toolUsage: KIQueryGenerationToolUsage;
 }
 
 const GET_FEATURES_STEP_TOOL_ID = 'platform_sig_events_ki_features_get';
@@ -67,8 +67,7 @@ export const buildKIQueryGenerationEvalUserMessage = ({
     .filter((part): part is string => Boolean(part))
     .join('\n\n');
 
-/** Adapts Agent Builder tool events to the legacy evaluator telemetry shape. */
-export const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUsage => {
+export const computeToolUsage = (steps: ConverseStep[]): KIQueryGenerationToolUsage => {
   const usageFor = (
     toolId: string,
     isSuccess: (data: Record<string, unknown>) => boolean,
@@ -93,14 +92,12 @@ export const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUs
             isSuccess((result as { data: Record<string, unknown> }).data)
         )
     ).length;
-    return { calls: calls.length, failures, latency_ms: 0 };
+    return { calls: calls.length, failures };
   };
 
   return {
-    get_stream_features: usageFor(GET_FEATURES_STEP_TOOL_ID, (data) =>
-      Array.isArray(data.features)
-    ),
-    add_queries: usageFor(
+    get_features: usageFor(GET_FEATURES_STEP_TOOL_ID, (data) => Array.isArray(data.features)),
+    validate_queries: usageFor(
       SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
       (data) => data.finalized === true && Array.isArray(data.finalized_queries),
       (step) =>

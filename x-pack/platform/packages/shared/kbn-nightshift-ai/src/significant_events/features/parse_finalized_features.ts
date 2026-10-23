@@ -16,7 +16,7 @@ import {
 import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
 
 const MAX_EVIDENCE_ITEMS = 5;
-const MAX_IDENTIFIED_FEATURES_PER_ITERATION = 100;
+export const MAX_IDENTIFIED_FEATURES_PER_ITERATION = 100;
 
 export interface RawFinalizeFeaturesParams {
   features?: unknown;

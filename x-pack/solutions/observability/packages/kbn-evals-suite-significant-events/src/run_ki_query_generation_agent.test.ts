@@ -51,12 +51,12 @@ describe('computeToolUsage', () => {
         },
       ])
     ).toEqual({
-      get_stream_features: { calls: 1, failures: 0, latency_ms: 0 },
-      add_queries: { calls: 1, failures: 0, latency_ms: 0 },
+      get_features: { calls: 1, failures: 0 },
+      validate_queries: { calls: 1, failures: 0 },
     });
   });
 
-  it('treats a finalized empty batch as abstention rather than add_queries usage', () => {
+  it('treats a finalized empty batch as abstention rather than validate_queries usage', () => {
     expect(
       computeToolUsage([
         {
@@ -65,8 +65,8 @@ describe('computeToolUsage', () => {
           params: { queries: [] },
           results: [{ type: 'other', data: { finalized: true, finalized_queries: [] } }],
         },
-      ]).add_queries
-    ).toEqual({ calls: 0, failures: 0, latency_ms: 0 });
+      ]).validate_queries
+    ).toEqual({ calls: 0, failures: 0 });
   });
 });
 
