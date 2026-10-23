@@ -199,6 +199,18 @@ export class GithubApi {
     );
   }
 
+  /** The issue as GitHub has it right now; undefined in dry-run mode, where nothing is fetched. */
+  async getIssue(issueNumber: number): Promise<GithubIssueMini | undefined> {
+    const resp = await this.request<GithubIssueMini | undefined>(
+      {
+        method: 'GET',
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
+      },
+      undefined
+    );
+    return resp.data ? { ...resp.data, body: resp.data.body ?? '' } : undefined;
+  }
+
   /**
    * Fetch all comments on an issue, following pagination. Returns an empty
    * list in dry-run mode so update flows behave sensibly without hitting the

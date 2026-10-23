@@ -36,7 +36,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/evals/_evaluate
+          path: /s/{{ workflow.spaceId }}/internal/evals/_evaluate
           headers:
             kbn-xsrf: \\"true\\"
             elastic-api-version: \\"1\\"
@@ -56,7 +56,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/evals/online_scores
+          path: /s/{{ workflow.spaceId }}/internal/evals/online_scores
           headers:
             kbn-xsrf: \\"true\\"
             elastic-api-version: \\"1\\"

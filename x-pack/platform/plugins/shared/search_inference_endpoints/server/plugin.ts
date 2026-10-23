@@ -194,8 +194,11 @@ export class SearchInferenceEndpointsPlugin
             core.savedObjects.getScopedClient(request)
           );
 
+          // `onlyReturnConfigured` has to reach endpoint-id resolution. Otherwise a
+          // feature with no saved row and no recommended endpoints answers with the
+          // platform default, and a caller cannot tell that nothing was configured.
           const resolveFeatureEndpoints = (fId: string) =>
-            getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
+            getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger, opts);
           const getConnectorList = () => plugins.inference.getConnectorList(request);
           const feature = featureRegistry.get(featureId);
 

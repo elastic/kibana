@@ -1773,8 +1773,12 @@ describe('Attack Discovery worker chain', () => {
         expect(JSON.stringify(readback?.with)).toContain('steps.escalation_gate.output.proposalId');
       });
 
-      it('calls the versioned internal proposals route', () => {
-        expect(JSON.stringify(readback?.with)).toContain('/internal/proposals/');
+      // Raw kibana.request is sent verbatim. An unprefixed path 404s in a named
+      // space, and the journal then falls back to "unspecified".
+      it('reads the proposal in the executing space', () => {
+        expect(JSON.stringify(readback?.with)).toContain(
+          '/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.escalation_gate.output.proposalId }}'
+        );
       });
 
       // The two axes are what separate a decline from a lapse, so the read-back is no
@@ -2463,21 +2467,17 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the Investigation journal helper', () => {
     const append = stepIn(journalNoteSteps, 'append_note');
-    const request = append?.with as { body?: { trigger_mode?: string }; path?: string } | undefined;
 
-    it('POSTs the chat converse route, not the agent_builder converse route', () => {
-      expect(request?.path).toContain('/api/chat/converse');
+    it('persists a user_message without running the agent, named after the calling Worker', () => {
+      expect(append?.type).toBe('ai.conversation.add_user_message');
+      expect(append?.with).toEqual({
+        conversation_id: '{{ inputs.conversation_id }}',
+        message: '{{ inputs.message }}',
+        author_name: '{{ inputs.author_name | default: workflow.name }}',
+      });
     });
 
-    it('prefixes the converse path with the executing space', () => {
-      expect(request?.path).toContain('/s/{{ workflow.spaceId }}/');
-    });
-
-    it('persists a user_message without running the agent', () => {
-      expect(request?.body?.trigger_mode).toBe('never');
-    });
-
-    it('continues when the converse call fails', () => {
+    it('continues when the note fails', () => {
       expect(append?.['on-failure']?.continue).toBe(true);
     });
 
@@ -3490,13 +3490,13 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Both are fixed `yaml` definitions, so the hash alone would upgrade them; the
-      // bump is the deliberate signal that the report steps shipped.
+      // bump is the deliberate signal of what shipped.
       it('bumps the runner to version 5 for its report step', () => {
         expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(5);
       });
 
-      it('bumps the review to version 10 for its report steps, including both close reports', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(10);
+      it('bumps the review to version 11 so the proposal read-back is space-scoped', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(11);
       });
     });
   });

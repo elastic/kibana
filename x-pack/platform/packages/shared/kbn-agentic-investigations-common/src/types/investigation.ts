@@ -29,6 +29,8 @@ export interface Investigation {
   proposalCreatedAt?: string;
   /** ISO 8601 timestamp. Set once a proposal is decided; dates the closed rows. */
   proposalDecidedAt?: string;
+  /** True when the proposal is approved and its action has not finished. Set only for a proposal. */
+  isProposalSettling?: boolean;
   worker_execution_ids: string[];
   watch_tier?: string;
   severity?: string;

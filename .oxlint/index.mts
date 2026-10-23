@@ -22,11 +22,11 @@
 // ESLint plugins run here through `jsPlugins` stay registered (with no rules) in the ESLint
 // config, because ESLint rejects `eslint-disable` directives that name rules it does not know.
 
-import { defineConfig, type OxlintConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig, type OxlintOverride } from 'oxlint';
 
-import { javascriptRules } from './javascript.mts';
-import { typescriptRules } from './typescript.mts';
-import { jestRules } from './jest.mts';
+import { javascriptOverrides, javascriptRules, kbnConfigRules } from './javascript.mts';
+import { typescriptOverrides, typescriptRules } from './typescript.mts';
+import { jestOverrides, jestRules } from './jest.mts';
 import { reactOverrides, reactRules } from './react.mts';
 import { kibanaOverrides, kibanaRules } from './kibana.mts';
 import { licenseHeaderOverrides } from './license_headers.mts';
@@ -47,9 +47,23 @@ import { playwrightOverrides, playwrightSettings } from './playwright.mts';
 import { testingLibraryOverrides } from './testing_library.mts';
 import { unusedVarsOverrides } from './unused_vars.mts';
 import { importPluginOverrides } from './import_plugin.mts';
+import { nestedConfigOverrides, teamOverrides } from './team_overrides.mts';
+
+const movedFromEslintOverrides: OxlintOverride[] = [
+  ...javascriptOverrides,
+  ...typescriptOverrides,
+  ...jestOverrides,
+  ...teamOverrides,
+  ...nestedConfigOverrides,
+];
+
+const movedFromEslintRuleNames = new Set([
+  ...Object.keys(kbnConfigRules),
+  ...movedFromEslintOverrides.flatMap(({ rules }) => Object.keys(rules ?? {})),
+]);
 
 export default defineConfig<OxlintConfig>({
-  plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
+  plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest', 'unicorn'],
   jsPlugins: [
     {
       name: '@kbn/eslint',
@@ -94,6 +108,7 @@ export default defineConfig<OxlintConfig>({
   settings: playwrightSettings,
   rules: {
     ...javascriptRules,
+    ...kbnConfigRules,
     ...typescriptRules,
     ...jestRules,
     ...reactRules,
@@ -121,6 +136,14 @@ export default defineConfig<OxlintConfig>({
     ...playwrightOverrides,
     ...testingLibraryOverrides,
     ...unusedVarsOverrides,
+    ...movedFromEslintOverrides,
+    {
+      // ESLint skips hidden files and directories, except nested `.eslintrc.js` files and the
+      // directories `.eslintignore` re-includes. Rules moved from ESLint stay off there.
+      files: ['**/.*/**', '**/.*'],
+      excludeFiles: ['**/.buildkite/**', '**/.github/**', '**/.storybook/**', '**/.eslintrc.js'],
+      rules: Object.fromEntries([...movedFromEslintRuleNames].map((name) => [name, 'off'])),
+    },
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.
