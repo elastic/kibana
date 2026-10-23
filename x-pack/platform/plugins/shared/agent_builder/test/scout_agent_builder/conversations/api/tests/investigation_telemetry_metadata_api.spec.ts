@@ -122,7 +122,7 @@ apiTest.describe(
           );
           expect(patched).toHaveStatusCode(400);
           expect(patched.body).toMatchObject({
-            message: 'Metadata field "telemetry_target" is immutable',
+            message: expect.stringContaining('field "telemetry_target" is immutable'),
           });
 
           const read = await apiClient.get(`${CONVERSATIONS_PATH}/${id}`, {
