@@ -29,10 +29,6 @@ export interface ProposalItem extends ProposalWithMetadata {
    * empty when unset or the conversation is unreadable — so callers need no fallback.
    */
   conversationAssignees: string[];
-  /** Absent when the conversation has no Impact document. */
-  entityIds?: string[];
-  /** Entity type (`host`, `user`, …) by entity id, for the ids that have one. */
-  entityTypes?: Record<string, string>;
 }
 
 export interface ProposalsPageResponse {
