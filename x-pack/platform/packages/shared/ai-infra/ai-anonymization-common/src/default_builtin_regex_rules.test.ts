@@ -321,6 +321,18 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       expectSpans(id, input, expected);
     });
 
+    // Tool results nest JSON inside JSON: each layer doubles the backslashes (finding from the
+    // real-model run: an alert read by a tool reached the model with eight).
+    it.each([4, 8, 16])('finds the account behind %s backslashes', (count) => {
+      const account = `QACORP${'\\'.repeat(count)}jdoe.sentinel`;
+      expectSpans(id, `/user:${account}", "x"`, [account]);
+    });
+
+    it.each([2, 4, 8])('does not match a newline escape nested %s backslashes deep', (count) => {
+      expectSpans(id, `SORT count DESC${'\\'.repeat(count)}n| LIMIT 20`, []);
+      expectSpans(id, `NOW() - 7 DAYS${'\\'.repeat(count)}nFROM logs`, []);
+    });
+
     // An upper-case word before an escape sequence is text, not a domain (ES|QL, SQL, SPL).
     it.each([
       'WHERE @timestamp >= NOW() - 7 DAYS\\nFROM logs',

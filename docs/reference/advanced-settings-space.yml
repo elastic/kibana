@@ -666,7 +666,7 @@ groups:
                 "name": "Account and login names",
                 "entityClass": "USER_NAME",
                 "type": "RegExp",
-                "pattern": "\\b[A-Z][A-Z0-9-]{1,14}(?:\\\\\\\\[A-Za-z0-9][A-Za-z0-9._$-]{0,63}|\\\\[A-Zac-eg-mo-qsw-z1-9][A-Za-z0-9._$-]{0,63}|\\\\[nrtbfuv0][a-z0-9][A-Za-z0-9._$-]{0,62})",
+                "pattern": "\\b[A-Z][A-Z0-9-]{1,14}\\\\{1,16}(?:[A-Zac-eg-mo-qsw-z1-9][A-Za-z0-9._$-]{0,63}|[nrtbfuv0][a-z0-9][A-Za-z0-9._$-]{0,62})",
                 "enabled": false,
                 "builtIn": true
               },

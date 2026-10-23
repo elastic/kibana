@@ -183,17 +183,18 @@ const HOST_PATTERN =
 
 // `DOMAIN\account` with an upper-case NetBIOS-style domain of at least two characters, so drive
 // letters (`C:\`) and lower-case path segments are not matched. The separator is one backslash
-// (plain text) or two (JSON strings, Splunk SPL, tool results). After a single backslash an
+// (plain text) or a run of them: every JSON or string layer doubles the count, and tool results
+// nest several layers (an alert read by a tool arrives with eight). After the backslashes an
 // escape letter (`n r t b f u v 0`) only starts an account when a lower-case letter or digit
-// follows, so `DESC\n| LIMIT` and `DAYS\nFROM` are left alone while `CORP\nancy` still matches.
-// Path segments (`C:\WINDOWS\System32`) are rejected by `shouldKeepBuiltInMatch`, which needs the
-// character before the match and so cannot be a lookbehind in a pattern that must also run on RE2.
+// follows, so `DESC\n| LIMIT` and `DAYS\nFROM` (at any depth) are left alone while `CORP\nancy`
+// still matches. Path segments (`C:\WINDOWS\System32`) are rejected by `shouldKeepBuiltInMatch`,
+// which needs the character before the match and so cannot be a lookbehind in a pattern that
+// must also run on RE2.
 const ACCOUNT_NAME = String.raw`[A-Za-z0-9._$-]`;
 const ACCOUNT_LOGIN_PATTERN =
-  String.raw`\b[A-Z][A-Z0-9-]{1,14}(?:` +
-  String.raw`\\\\[A-Za-z0-9]${ACCOUNT_NAME}{0,63}` +
-  String.raw`|\\[A-Zac-eg-mo-qsw-z1-9]${ACCOUNT_NAME}{0,63}` +
-  String.raw`|\\[nrtbfuv0][a-z0-9]${ACCOUNT_NAME}{0,62})`;
+  String.raw`\b[A-Z][A-Z0-9-]{1,14}\\{1,16}(?:` +
+  String.raw`[A-Zac-eg-mo-qsw-z1-9]${ACCOUNT_NAME}{0,63}` +
+  String.raw`|[nrtbfuv0][a-z0-9]${ACCOUNT_NAME}{0,62})`;
 
 /**
  * Canonical, currently-shipped definitions of every built-in regex anonymization rule.
