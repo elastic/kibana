@@ -12,7 +12,5 @@ export { useServiceAccountDirectory } from './model/use_service_account_director
 export type {
   ServiceAccountDirectory,
   ServiceAccountDirectoryError,
-  ServiceAccountWorkload,
   WorkflowServiceAccount,
-  WorkflowServiceAccountSummary,
 } from './model/service_account_directory';

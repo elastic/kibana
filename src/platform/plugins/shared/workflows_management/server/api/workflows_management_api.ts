@@ -18,7 +18,6 @@ import type {
 } from '@kbn/agent-builder-sml-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
-import type { ServiceAccountSummary } from '@kbn/core-security-server';
 import type { AccessControlInput } from '@kbn/entity-access-control';
 import { i18n } from '@kbn/i18n';
 import {
@@ -461,64 +460,6 @@ export class WorkflowsManagementApi {
     const access = await this.workflowsService.getAccessControl();
     if (!(await access.checkAccess(workflow, 'read', request))) return null;
     return access.toDto(workflow, request);
-  }
-
-  /**
-   * Names the service account a workflow is bound to. Resolves `undefined` when the user cannot
-   * read the workflow, and `null` when it has no binding or its account no longer exists.
-   *
-   * The account is read as Kibana, so the user needs no service account privilege, only read
-   * access to the workflow. It is the account from the verified binding, never the `run_as` in the
-   * definition, which an editor can change without changing what the workflow runs as.
-   */
-  public async getWorkflowServiceAccount(
-    id: string,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<{ workflow: WorkflowDetailDto; serviceAccount: ServiceAccountSummary | null } | null> {
-    const workflow = await this.getWorkflow(id, spaceId, request);
-    if (!workflow) return null;
-    const { serviceAccountBindings: bindings } = await this.getWorkflowsExecutionEngine();
-    if (!bindings.isEnabled()) return { workflow, serviceAccount: null };
-    const binding = await bindings.getWorkloadBinding({
-      workloadType: 'workflow',
-      workloadId: id,
-      spaceId,
-    });
-    return {
-      workflow,
-      serviceAccount: binding
-        ? await bindings.getServiceAccountSummary(binding.serviceAccountId)
-        : null,
-    };
-  }
-
-  /**
-   * Names the service account a workflow execution ran as, including one it inherited from a
-   * parent workflow. Resolves `null` when the user cannot read the execution.
-   *
-   * This is the account recorded on the execution, which may since have been unbound from the
-   * workflow. Naming it reveals nothing beyond the id the execution already shows its readers.
-   */
-  public async getWorkflowExecutionServiceAccount(
-    executionId: string,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<{
-    execution: WorkflowExecutionDto;
-    serviceAccount: ServiceAccountSummary | null;
-  } | null> {
-    const execution = await this.getWorkflowExecution(executionId, spaceId, {
-      request,
-      omitStepExecutions: true,
-    });
-    if (!execution) return null;
-    const identity = execution.effectiveIdentity;
-    const { serviceAccountBindings: bindings } = await this.getWorkflowsExecutionEngine();
-    if (identity?.type !== 'service_account' || !bindings.isEnabled()) {
-      return { execution, serviceAccount: null };
-    }
-    return { execution, serviceAccount: await bindings.getServiceAccountSummary(identity.id) };
   }
 
   public async getHistoryForWorkflow(

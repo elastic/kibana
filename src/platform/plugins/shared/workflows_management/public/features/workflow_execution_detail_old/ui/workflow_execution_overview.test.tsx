@@ -80,9 +80,7 @@ describe('WorkflowExecutionOverview', () => {
   it('resolves the execution identity rather than a workflow definition account', async () => {
     const services = createStartServicesMock();
     services.security.serviceAccounts.isEnabled.mockReturnValue(true);
-    services.http.get.mockResolvedValue({
-      serviceAccount: { id: 'original-account', name: 'Original reader' },
-    });
+    services.http.get.mockResolvedValue({ id: 'original-account', name: 'Original reader' });
     jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
     const stepExecution = createMockStepExecution({
       input: {
@@ -90,13 +88,10 @@ describe('WorkflowExecutionOverview', () => {
         workflow: { settings: { run_as: 'replacement-account' } },
       },
     });
-    renderWithIntl(
-      <WorkflowExecutionOverview stepExecution={stepExecution} executionId="run-123" />
-    );
+    renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
     expect(await screen.findByText('Original reader')).toBeInTheDocument();
     expect(services.http.get).toHaveBeenCalledWith(
-      '/internal/workflows/executions/run-123/service_account',
-      { version: '1' }
+      '/internal/security/service_account/original-account'
     );
   });
 

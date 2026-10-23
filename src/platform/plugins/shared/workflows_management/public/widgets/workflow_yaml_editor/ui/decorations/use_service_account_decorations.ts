@@ -13,7 +13,7 @@ import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type {
   ServiceAccountDirectory,
-  WorkflowServiceAccountSummary,
+  WorkflowServiceAccount,
 } from '../../../../entities/service_accounts';
 import { useServiceAccountDirectory } from '../../../../entities/service_accounts';
 
@@ -68,7 +68,7 @@ const getReference = (model: monaco.editor.ITextModel): ServiceAccountReference 
 
 const createDecoration = (
   reference: ServiceAccountReference,
-  account: WorkflowServiceAccountSummary
+  account: WorkflowServiceAccount
 ): monaco.editor.IModelDeltaDecoration => {
   const available = account.enabled && account.assumable;
   return {
@@ -86,15 +86,10 @@ const createDecoration = (
   };
 };
 
-/**
- * Keeps the resolved-account badge separate from the YAML and ignores stale lookups. `workflowId`
- * is the saved workflow, if any: a user who cannot manage service accounts only sees the name of
- * the account it is bound to.
- */
+/** Keeps the resolved-account badge separate from the YAML and ignores stale lookups. */
 export const registerServiceAccountDecorations = (
   editor: monaco.editor.IStandaloneCodeEditor,
-  directory: ServiceAccountDirectory,
-  workflowId?: string
+  directory: ServiceAccountDirectory
 ): monaco.IDisposable => {
   const decorations = editor.createDecorationsCollection();
   let revision = 0;
@@ -132,7 +127,7 @@ export const registerServiceAccountDecorations = (
       return;
     }
     const version = model.getVersionId();
-    const account = await directory.describe(reference.id, workflowId);
+    const account = await directory.get(reference.id);
     if (
       currentRevision !== revision ||
       editor.getModel() !== model ||
@@ -171,16 +166,14 @@ export const registerServiceAccountDecorations = (
 export const useServiceAccountDecorations = ({
   editor,
   isEditorMounted,
-  workflowId,
 }: {
   editor: monaco.editor.IStandaloneCodeEditor | null;
   isEditorMounted: boolean;
-  workflowId?: string;
 }): void => {
   const directory = useServiceAccountDirectory();
   useEffect(() => {
     if (!editor || !isEditorMounted) return;
-    const registration = registerServiceAccountDecorations(editor, directory, workflowId);
+    const registration = registerServiceAccountDecorations(editor, directory);
     return () => registration.dispose();
-  }, [editor, isEditorMounted, directory, workflowId]);
+  }, [editor, isEditorMounted, directory]);
 };

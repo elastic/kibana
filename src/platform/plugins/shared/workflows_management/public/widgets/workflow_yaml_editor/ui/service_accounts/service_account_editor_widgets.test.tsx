@@ -65,9 +65,7 @@ const mouseEvent = (position: monaco.Position | null): monaco.editor.IEditorMous
 const setup = (enabled = true, yaml = 'settings:\n  run_as: ', canManage = false) => {
   const directory = {
     isEnabled: () => enabled,
-    canManage: () => true,
     get: jest.fn().mockResolvedValue(account),
-    describe: jest.fn().mockResolvedValue(account),
     list: jest.fn().mockResolvedValue({ serviceAccounts: [account] }),
   };
   jest.mocked(useServiceAccountEditor).mockReturnValue(createServiceAccountEditor(directory));

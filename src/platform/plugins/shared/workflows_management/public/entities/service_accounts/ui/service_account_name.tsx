@@ -17,22 +17,10 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ServiceAccountWorkload } from '../model/service_account_directory';
-import { useWorkloadServiceAccount } from '../model/use_service_account_directory';
+import { useServiceAccount } from '../model/use_service_account_directory';
 
-/**
- * Shows the account `id`, with its name when the workload reports that account. The name comes
- * from the workload rather than the service account directory, so users who can see the workload
- * but cannot manage service accounts still see it.
- */
-export const ServiceAccountName = ({
-  id,
-  workload,
-}: {
-  id: string;
-  workload?: ServiceAccountWorkload;
-}) => {
-  const account = useWorkloadServiceAccount(id, workload);
+export const ServiceAccountName = ({ id }: { id: string }) => {
+  const account = useServiceAccount(id);
   const { euiTheme } = useEuiTheme();
   const available = account?.enabled && account.assumable;
   const copyLabel = i18n.translate('workflows.serviceAccount.copyIdButtonLabel', {

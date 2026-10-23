@@ -10,7 +10,6 @@
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -52,8 +51,6 @@ describe('Internal Routes', () => {
     >;
     getHistoryForWorkflow: jest.Mock;
     restoreWorkflowVersion: jest.Mock;
-    getWorkflowServiceAccount: jest.Mock;
-    getWorkflowExecutionServiceAccount: jest.Mock;
   };
   let mockAudit: {
     logWorkflowAccessed: jest.Mock;
@@ -106,8 +103,6 @@ describe('Internal Routes', () => {
       disableAllWorkflows: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
       restoreWorkflowVersion: jest.fn(),
-      getWorkflowServiceAccount: jest.fn(),
-      getWorkflowExecutionServiceAccount: jest.fn(),
     };
     mockAudit = {
       logWorkflowAccessed: jest.fn(),
@@ -229,147 +224,6 @@ describe('Internal Routes', () => {
     expect(
       routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`]
     ).toBeDefined();
-  });
-
-  describe('GET /internal/workflows/workflow/{id}/service_account', () => {
-    const path = 'GET:/internal/workflows/workflow/{id}/service_account';
-    const serviceAccount = { id: 'ns/runner', name: 'runner', enabled: true, assumable: true };
-    const requestWith = (authzResult: Record<string, boolean>) =>
-      Object.assign(httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } }), {
-        authzResult,
-      });
-
-    it('names the account bound to a workflow the caller can read', async () => {
-      mockApi.getWorkflowServiceAccount.mockResolvedValue({
-        workflow: { id: 'wf-1' },
-        serviceAccount,
-      });
-      const request = requestWith({ [WorkflowsManagementApiActions.read]: true });
-      const response = httpServerMock.createResponseFactory();
-
-      await routeHandlers[path].handler(mockContext, request, response);
-
-      expect(mockApi.getWorkflowServiceAccount).toHaveBeenCalledWith('wf-1', 'default', request);
-      expect(response.ok).toHaveBeenCalledWith({ body: { serviceAccount } });
-    });
-
-    it('reports `null` for a workflow with no account', async () => {
-      mockApi.getWorkflowServiceAccount.mockResolvedValue({
-        workflow: { id: 'wf-1' },
-        serviceAccount: null,
-      });
-      const response = httpServerMock.createResponseFactory();
-
-      await routeHandlers[path].handler(
-        mockContext,
-        requestWith({ [WorkflowsManagementApiActions.read]: true }),
-        response
-      );
-
-      expect(response.ok).toHaveBeenCalledWith({ body: { serviceAccount: null } });
-    });
-
-    it('answers 404 for a workflow the caller cannot read', async () => {
-      mockApi.getWorkflowServiceAccount.mockResolvedValue(null);
-      const response = httpServerMock.createResponseFactory();
-
-      await routeHandlers[path].handler(
-        mockContext,
-        requestWith({ [WorkflowsManagementApiActions.read]: true }),
-        response
-      );
-
-      expect(response.notFound).toHaveBeenCalled();
-      expect(response.ok).not.toHaveBeenCalled();
-    });
-
-    it('refuses a caller with only managed read, without looking anything up', async () => {
-      const response = httpServerMock.createResponseFactory();
-
-      await routeHandlers[path].handler(
-        mockContext,
-        requestWith({ [WorkflowsManagementApiActions.readManaged]: true }),
-        response
-      );
-
-      expect(response.forbidden).toHaveBeenCalled();
-      expect(mockApi.getWorkflowServiceAccount).not.toHaveBeenCalled();
-    });
-
-    it('refuses a managed workflow to a caller who cannot read managed workflows', async () => {
-      mockApi.getWorkflowServiceAccount.mockResolvedValue({
-        workflow: { id: 'wf-1', managed: true },
-        serviceAccount,
-      });
-      const response = httpServerMock.createResponseFactory();
-
-      await routeHandlers[path].handler(
-        mockContext,
-        requestWith({ [WorkflowsManagementApiActions.read]: true }),
-        response
-      );
-
-      expect(response.forbidden).toHaveBeenCalled();
-      expect(response.ok).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('GET /internal/workflows/executions/{executionId}/service_account', () => {
-    const path = 'GET:/internal/workflows/executions/{executionId}/service_account';
-    const serviceAccount = { id: 'ns/runner', name: 'runner', enabled: false, assumable: true };
-    const requestWith = (authzResult: Record<string, boolean>) =>
-      Object.assign(httpServerMock.createKibanaRequest({ params: { executionId: 'ex-1' } }), {
-        authzResult,
-      });
-
-    it('names the account an execution the caller can read ran as', async () => {
-      mockApi.getWorkflowExecutionServiceAccount.mockResolvedValue({
-        execution: { id: 'ex-1' },
-        serviceAccount,
-      });
-      const request = requestWith({ [WorkflowsManagementApiActions.readExecution]: true });
-      const response = httpServerMock.createResponseFactory();
-
-      await routeHandlers[path].handler(mockContext, request, response);
-
-      expect(mockApi.getWorkflowExecutionServiceAccount).toHaveBeenCalledWith(
-        'ex-1',
-        'default',
-        request
-      );
-      expect(response.ok).toHaveBeenCalledWith({ body: { serviceAccount } });
-    });
-
-    it('answers 404 for an execution the caller cannot read', async () => {
-      mockApi.getWorkflowExecutionServiceAccount.mockResolvedValue(null);
-      const response = httpServerMock.createResponseFactory();
-
-      await routeHandlers[path].handler(
-        mockContext,
-        requestWith({ [WorkflowsManagementApiActions.readExecution]: true }),
-        response
-      );
-
-      expect(response.notFound).toHaveBeenCalled();
-      expect(response.ok).not.toHaveBeenCalled();
-    });
-
-    it('refuses a managed execution to a caller who cannot read managed executions', async () => {
-      mockApi.getWorkflowExecutionServiceAccount.mockResolvedValue({
-        execution: { id: 'ex-1', managed: true },
-        serviceAccount,
-      });
-      const response = httpServerMock.createResponseFactory();
-
-      await routeHandlers[path].handler(
-        mockContext,
-        requestWith({ [WorkflowsManagementApiActions.readExecution]: true }),
-        response
-      );
-
-      expect(response.forbidden).toHaveBeenCalled();
-      expect(response.ok).not.toHaveBeenCalled();
-    });
   });
 
   it('should call api.getHistoryForWorkflow with page/per_page defaults', async () => {

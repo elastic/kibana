@@ -11,7 +11,6 @@ import type { HttpStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { QueryClient } from '@kbn/react-query';
 import type { ServiceAccountPickerStatus } from '@kbn/security-plugin/public';
-import { INTERNAL_API_VERSION } from '../../../../common/lib/api_constants';
 
 export interface WorkflowServiceAccount {
   id: string;
@@ -22,15 +21,6 @@ export interface WorkflowServiceAccount {
   assumable: boolean;
 }
 
-/** What a user who cannot manage service accounts may see of the account a workload runs as. */
-export type WorkflowServiceAccountSummary = Pick<
-  WorkflowServiceAccount,
-  'id' | 'name' | 'enabled' | 'assumable'
->;
-
-/** A workflow, or one of its executions, whose service account the user can read. */
-export type ServiceAccountWorkload = { workflowId: string } | { executionId: string };
-
 export interface ServiceAccountPage {
   serviceAccounts: WorkflowServiceAccount[];
   nextPage?: string;
@@ -40,7 +30,6 @@ export interface ServiceAccountDirectoryError {
   error: Exclude<ServiceAccountPickerStatus, 'loading' | 'ready'>;
 }
 
-/** Reads any account from the directory. Only for users who can manage service accounts. */
 export const serviceAccountQueryOptions = (http: HttpStart, id: string) => ({
   queryKey: ['workflows', 'serviceAccounts', 'account', id],
   queryFn: async (): Promise<WorkflowServiceAccount | null> => {
@@ -49,35 +38,7 @@ export const serviceAccountQueryOptions = (http: HttpStart, id: string) => ({
         `/internal/security/service_account/${encodeURIComponent(id)}`
       );
     } catch {
-      return null;
-    }
-  },
-  retry: false,
-  staleTime: 30_000,
-  cacheTime: 60_000,
-});
-
-const getWorkloadPath = (workload: ServiceAccountWorkload): string =>
-  'workflowId' in workload
-    ? `/internal/workflows/workflow/${encodeURIComponent(workload.workflowId)}/service_account`
-    : `/internal/workflows/executions/${encodeURIComponent(workload.executionId)}/service_account`;
-
-/**
- * Reads the account a workflow is bound to, or an execution ran as. Any user who can read the
- * workload can make this read, so it is how names reach users without `manage_security`.
- */
-export const workloadServiceAccountQueryOptions = (
-  http: HttpStart,
-  workload: ServiceAccountWorkload
-) => ({
-  queryKey: ['workflows', 'serviceAccounts', 'workload', workload],
-  queryFn: async (): Promise<WorkflowServiceAccountSummary | null> => {
-    try {
-      const { serviceAccount } = await http.get<{
-        serviceAccount: WorkflowServiceAccountSummary | null;
-      }>(getWorkloadPath(workload), { version: INTERNAL_API_VERSION });
-      return serviceAccount;
-    } catch {
+      // Directory access is optional: workflow executors need not have manage_security.
       return null;
     }
   },
@@ -89,35 +50,13 @@ export const workloadServiceAccountQueryOptions = (
 export const createServiceAccountDirectory = (
   http: HttpStart,
   queryClient: QueryClient,
-  isEnabled: () => boolean,
-  canManage: () => boolean
+  isEnabled: () => boolean
 ) => ({
   isEnabled,
-  canManage,
-  /**
-   * Reads any account by id, for users who can manage service accounts. Everyone else gets `null`
-   * without a request, since Elasticsearch would refuse it and Kibana would log the refusal.
-   */
   get: (id: string): Promise<WorkflowServiceAccount | null> =>
-    isEnabled() && canManage() && id
+    isEnabled() && id
       ? queryClient.fetchQuery(serviceAccountQueryOptions(http, id))
       : Promise.resolve(null),
-  /**
-   * Names the account `id` for display. A user who cannot manage service accounts only sees the
-   * name when `id` is the account the saved workflow is bound to.
-   */
-  describe: async (
-    id: string,
-    workflowId?: string
-  ): Promise<WorkflowServiceAccountSummary | null> => {
-    if (!isEnabled() || !id) return null;
-    if (canManage()) return queryClient.fetchQuery(serviceAccountQueryOptions(http, id));
-    if (!workflowId) return null;
-    const bound = await queryClient.fetchQuery(
-      workloadServiceAccountQueryOptions(http, { workflowId })
-    );
-    return bound?.id === id ? bound : null;
-  },
   list: async (
     after?: string,
     refresh = false

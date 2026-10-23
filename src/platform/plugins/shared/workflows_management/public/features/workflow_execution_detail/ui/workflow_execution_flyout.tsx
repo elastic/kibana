@@ -1524,10 +1524,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                                   defaultMessage: 'Run as',
                                 })}
                             {': '}
-                            <ServiceAccountName
-                              id={workflowExecution.effectiveIdentity.id}
-                              workload={{ executionId: workflowExecution.id }}
-                            />
+                            <ServiceAccountName id={workflowExecution.effectiveIdentity.id} />
                           </EuiText>
                         )}
                       </div>

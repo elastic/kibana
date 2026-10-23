@@ -9,10 +9,9 @@
 
 import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import type { ServiceAccountWorkload } from './service_account_directory';
 import {
   createServiceAccountDirectory,
-  workloadServiceAccountQueryOptions,
+  serviceAccountQueryOptions,
 } from './service_account_directory';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -21,26 +20,14 @@ export const useServiceAccountDirectory = () => {
   const queryClient = useQueryClient();
   return useMemo(
     () =>
-      createServiceAccountDirectory(
-        http,
-        queryClient,
-        () => security.serviceAccounts.isEnabled(),
-        () => security.serviceAccounts.canCreate()
-      ),
+      createServiceAccountDirectory(http, queryClient, () => security.serviceAccounts.isEnabled()),
     [http, queryClient, security]
   );
 };
 
-/**
- * The account `id` as the workload reports it, or `null` when the workload names no account or a
- * different one.
- */
-export const useWorkloadServiceAccount = (id: string, workload?: ServiceAccountWorkload) => {
+export const useServiceAccount = (id: string) => {
   const { http, security } = useKibana().services;
-  const enabled = security.serviceAccounts.isEnabled() && !!id && !!workload;
-  const result = useQuery({
-    ...workloadServiceAccountQueryOptions(http, workload ?? { workflowId: '' }),
-    enabled,
-  });
-  return enabled && result.data?.id === id ? result.data : null;
+  const enabled = security.serviceAccounts.isEnabled();
+  const result = useQuery({ ...serviceAccountQueryOptions(http, id), enabled: enabled && !!id });
+  return enabled ? result.data : null;
 };

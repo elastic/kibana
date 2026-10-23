@@ -32,9 +32,7 @@ const setup = (markedYaml: string) => {
   const document = parseDocument(yaml);
   const directory: jest.Mocked<ServiceAccountDirectory> = {
     isEnabled: jest.fn().mockReturnValue(true),
-    canManage: jest.fn().mockReturnValue(true),
     get: jest.fn().mockResolvedValue(account),
-    describe: jest.fn(),
     list: jest.fn().mockResolvedValue({ serviceAccounts: [account] }),
   };
   const editor = createServiceAccountEditor(directory);
