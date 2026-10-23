@@ -511,11 +511,6 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
 
   const handleNext = useCallback(() => {
-    // Flush instances to session storage so step 4 can read them without going through step 2 again.
-    setPersisted({
-      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-      instances,
-    });
     setServiceSettingsMethod(deploymentMethod);
     // The name and description stay editable after a deploy, and a later deploy may find nothing
     // to do, so save them to the onboarding record here. Best-effort: the next deploy writes them
@@ -528,8 +523,6 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   }, [
     onContinue,
     persisted,
-    setPersisted,
-    instances,
     deploymentMethod,
     setServiceSettingsMethod,
     detectAndReviewStep?.onboardingDeploymentId,
