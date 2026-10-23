@@ -325,23 +325,36 @@ describe('useConnectedChildVirtualizer', () => {
     });
   });
 
-  describe('persistScrollAnchor', () => {
-    const stabilizedInstance = {
-      range: { startIndex: 0, endIndex: 5 },
-      scrollOffset: 120,
-      getTotalSize: () => 1000,
-      options: { count: 50 },
-      getVirtualItemForOffset: () => ({ index: 3 }),
-    } as unknown as UseVirtualizerReturnType;
+  describe('scroll anchor persistence', () => {
+    const createStabilizedInstance = (scrollOffset: number) =>
+      ({
+        range: { startIndex: 0, endIndex: 5 },
+        scrollOffset,
+        scrollRect: { width: 800, height: 400 },
+        getTotalSize: () => 1000,
+        options: { count: 50 },
+        // items of 40px, starting at 0
+        measurementsCache: Array.from({ length: 50 }, (_, index) => ({
+          index,
+          start: index * 40,
+          end: index * 40 + 40,
+          size: 40,
+        })),
+        getVirtualItemForOffset: (offset: number) => {
+          const index = Math.max(0, Math.min(49, Math.floor(offset / 40)));
+          return { index, start: index * 40 };
+        },
+      } as unknown as UseVirtualizerReturnType);
+    // the scroll offset sits 20px into item 3
+    const stabilizedInstance = createStabilizedInstance(140);
 
-    const renderActiveHook = (persistScrollAnchor?: boolean) => {
+    const renderActiveHook = () => {
       const hook = renderHook(() =>
         useConnectedChildVirtualizer({
           controller,
           cellId: 'cell-a',
           rowIndex: 2,
           rows: createMockRows(50),
-          persistScrollAnchor,
         })
       );
       act(() => {
@@ -351,10 +364,10 @@ describe('useConnectedChildVirtualizer', () => {
       return hook;
     };
 
-    const reportStabilizedState = () => {
+    const reportStabilizedState = (instance = stabilizedInstance) => {
       const { onStateChange } = useCascadeVirtualizerMock.mock.calls.at(-1)![0];
       act(() => {
-        onStateChange!(stabilizedInstance, true, true);
+        onStateChange!(instance, true, true);
       });
     };
 
@@ -387,40 +400,48 @@ describe('useConnectedChildVirtualizer', () => {
       expect(controller.getConnectedChildren().get('cell-a')?.hasStabilized).toBe(true);
     });
 
-    it('persists the scroll anchor by default', () => {
+    it('anchors to the first item with a negative offset when the viewport starts above it', () => {
+      renderActiveHook();
+      reportStabilizedState(createStabilizedInstance(-30));
+
+      const state = controller.getConnectedChildren().get('cell-a');
+      expect(state?.scrollAnchorItemIndex).toBe(0);
+      expect(state?.scrollAnchorItemOffset).toBe(-30);
+    });
+
+    it('reports no anchor while the items do not intersect the viewport', () => {
+      renderActiveHook();
+
+      // viewport entirely above the items
+      reportStabilizedState(createStabilizedInstance(-500));
+      expect(controller.getConnectedChildren().get('cell-a')?.scrollAnchorItemIndex).toBeNull();
+
+      // viewport entirely below the items
+      reportStabilizedState(createStabilizedInstance(2500));
+      expect(controller.getConnectedChildren().get('cell-a')?.scrollAnchorItemIndex).toBeNull();
+    });
+
+    it('persists the scroll anchor and the offset within its item once stabilized, and restores them on reconnect', () => {
       const { unmount } = renderActiveHook();
       reportStabilizedState();
 
-      expect(controller.getConnectedChildren().get('cell-a')?.scrollAnchorItemIndex).toBe(3);
+      const state = controller.getConnectedChildren().get('cell-a');
+      expect(state?.scrollAnchorItemIndex).toBe(3);
+      expect(state?.scrollAnchorItemOffset).toBe(20);
 
       unmount();
       expect(controller.getPersistedAnchor('cell-a')).toBe(3);
-    });
+      expect(controller.getPersistedAnchorOffset('cell-a')).toBe(20);
 
-    it('does not report a scroll anchor when disabled', () => {
-      const { unmount } = renderActiveHook(false);
-      reportStabilizedState();
-
-      const state = controller.getConnectedChildren().get('cell-a');
-      expect(state?.scrollAnchorItemIndex).toBeNull();
-      expect(state?.hasStabilized).toBe(true);
-
-      unmount();
-      expect(controller.getPersistedAnchor('cell-a')).toBeNull();
-    });
-
-    it('does not restore a persisted anchor when disabled', () => {
-      const previousHandle = controller.connect('cell-a', 2);
-      previousHandle.reportState({ scrollAnchorItemIndex: 10 });
-      previousHandle.disconnect();
-      expect(controller.getPersistedAnchor('cell-a')).toBe(10);
-
-      renderActiveHook(false);
-
+      // scroll restoration records performance marks, which jsdom does not provide
+      Object.defineProperty(window, 'performance', {
+        value: { mark: jest.fn(), measure: jest.fn(), now: jest.fn() },
+        writable: true,
+      });
+      renderActiveHook();
       expect(useCascadeVirtualizerMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({ initialAnchorItemIndex: undefined })
+        expect.objectContaining({ initialAnchorItemIndex: 3, initialAnchorItemOffset: 20 })
       );
-      expect(controller.getPersistedAnchor('cell-a')).toBeNull();
     });
   });
 });

@@ -121,6 +121,7 @@ import { WithNewIndicator } from './custom_toolbar/with_new_indicator';
 import { useViewModeNewBadge } from '../hooks/use_view_mode_new_badge';
 import { RowHeightType, useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
+import type { UnifiedDataTableRenderCustomComparisonToolbar } from './compare_documents/types';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import type { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
@@ -452,6 +453,11 @@ interface InternalUnifiedDataTableProps {
    */
   renderCustomComparisonGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
   /**
+   * Optional decorator for the toolbar of the comparison grid shown when comparing selected documents,
+   * e.g. to relocate it; render the given `toolbar` to keep its controls.
+   */
+  renderCustomComparisonToolbar?: UnifiedDataTableRenderCustomComparisonToolbar;
+  /**
    * Optional render for the grid toolbar
    * @param toolbarProps
    * @param gridProps
@@ -655,6 +661,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       services,
       renderCustomGridBody,
       renderCustomComparisonGridBody,
+      renderCustomComparisonToolbar,
       renderCustomToolbar,
       showSummaryColumnToggle = false,
       trailingControlColumns,
@@ -1723,6 +1730,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 replaceSelectedDocs={replaceSelectedDocs}
                 setIsCompareActive={setIsCompareActive}
                 renderCustomGridBody={renderCustomComparisonGridBody}
+                renderCustomToolbar={renderCustomComparisonToolbar}
                 onFullScreenChange={onDataGridFullScreenChange}
               />
             ) : (

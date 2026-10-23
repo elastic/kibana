@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
+import { act } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -82,12 +83,12 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
 const renderLeafCellWithContext = ({
   contextValue,
   services,
+  virtualizerController = createVirtualizerController(),
 }: {
   contextValue: CascadedDocumentsContext;
   services: DiscoverServices;
+  virtualizerController?: ReturnType<typeof createVirtualizerController>;
 }) => {
-  const virtualizerController = createVirtualizerController();
-
   return (
     <DiscoverTestProvider services={services}>
       <CascadedDocumentsProvider value={contextValue}>
@@ -246,5 +247,90 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(unifiedDataTableProps.setRenderDocumentViewMeta).toBe(
       ownerBoundSetRenderDocumentViewMeta
     );
+  });
+  describe('bringing the comparison into view', () => {
+    type CascadeRootVirtualizer = NonNullable<
+      ReturnType<Parameters<typeof createChildVirtualizerController>[0]['getRootVirtualizer']>
+    >;
+    type GridView = 'documents' | 'comparison';
+
+    const gridBodyProps = {
+      Cell: () => null,
+      visibleColumns: [],
+      visibleRowData: { startRow: 0, endRow: 0, visibleRowCount: 0 },
+      headerRow: null,
+      footerRow: null,
+      gridWidth: 800,
+      setCustomGridBodyProps: jest.fn(),
+    };
+
+    /**
+     * Renders the leaf with a `UnifiedDataTable` that mounts the custom body of the given view, the
+     * way `EuiDataGrid` does, against a cascade scroll element whose scrolling is observed.
+     */
+    const renderLeafWithGridBody = (initialView: GridView) => {
+      let view = initialView;
+      const listeners = new Set<() => void>();
+      const subscribe = (listener: () => void) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      };
+      unifiedDataTableMock.mockImplementation((props) => {
+        const currentView = useSyncExternalStore(subscribe, () => view);
+        return currentView === 'comparison'
+          ? props.renderCustomComparisonGridBody!(gridBodyProps)
+          : props.renderCustomGridBody!(gridBodyProps);
+      });
+
+      // The cascade is scrolled to 500; a body mounting on it scrolls it back to its row, which
+      // has no layout in jsdom, i.e. to 500. The virtualizer's own scroll on attaching targets 0.
+      const scrollElement = document.createElement('div');
+      Object.defineProperty(scrollElement, 'scrollTop', { value: 500, writable: true });
+      const scrollTo = jest.fn();
+      Object.assign(scrollElement, { scrollTo });
+      const rootVirtualizer = {
+        scrollOffset: 0,
+        scrollElement,
+        measurementsCache: [],
+      } as unknown as CascadeRootVirtualizer;
+      const virtualizerController = createChildVirtualizerController({
+        getRootVirtualizer: () => rootVirtualizer,
+      });
+
+      const services = createDiscoverServicesMock();
+      const { contextValue } = createContextValue({
+        currentOwner: cellId,
+        ownerBoundSetExpandedDoc: jest.fn(),
+        ownerBoundSetRenderDocumentViewMeta: jest.fn(),
+        services,
+      });
+      renderWithI18n(renderLeafCellWithContext({ contextValue, services, virtualizerController }));
+
+      return {
+        scrolledIntoView: () =>
+          scrollTo.mock.calls.some(([options]: [{ top?: number }]) => options.top === 500),
+        showView: (nextView: GridView) => {
+          act(() => {
+            view = nextView;
+            listeners.forEach((listener) => listener());
+          });
+        },
+      };
+    };
+
+    it('scrolls the group into view when the comparison replaces the documents', () => {
+      const { scrolledIntoView, showView } = renderLeafWithGridBody('documents');
+      expect(scrolledIntoView()).toBe(false);
+
+      showView('comparison');
+
+      expect(scrolledIntoView()).toBe(true);
+    });
+
+    it('keeps the cascade scroll position when an active comparison is mounted again', () => {
+      const { scrolledIntoView } = renderLeafWithGridBody('comparison');
+
+      expect(scrolledIntoView()).toBe(false);
+    });
   });
 });

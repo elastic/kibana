@@ -32,6 +32,7 @@ import { useComparisonCss } from './hooks/use_comparison_css';
 import { useComparisonFields } from './hooks/use_comparison_fields';
 import { useRestorableLocalStorage } from '../../restorable_state';
 import type { DocMap } from '../../types';
+import type { UnifiedDataTableRenderCustomComparisonToolbar } from './types';
 
 export interface CompareDocumentsProps {
   id: string;
@@ -54,6 +55,10 @@ export interface CompareDocumentsProps {
    * Optional custom body renderer for the comparison grid, whose rows are the compared fields.
    */
   renderCustomGridBody?: EuiDataGridProps['renderCustomGridBody'];
+  /**
+   * Optional decorator for the comparison grid's toolbar, e.g. to relocate it.
+   */
+  renderCustomToolbar?: UnifiedDataTableRenderCustomComparisonToolbar;
   onFullScreenChange?: EuiDataGridProps['onFullScreenChange'];
 }
 
@@ -86,6 +91,7 @@ const CompareDocumentsComponent = (
     replaceSelectedDocs: originalReplaceSelectedDocs,
     setIsCompareActive,
     renderCustomGridBody,
+    renderCustomToolbar,
     onFullScreenChange,
   }: CompareDocumentsProps,
   ref: ForwardedRef<EuiDataGridRefProps>
@@ -199,15 +205,20 @@ const CompareDocumentsComponent = (
     }),
     [showFullScreenButton]
   );
-  const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar'] | undefined>(
-    () =>
-      renderComparisonToolbar({
-        additionalControls,
-        comparisonFields,
-        totalFields,
-      }),
-    [additionalControls, comparisonFields, totalFields]
-  );
+  const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar'] | undefined>(() => {
+    const renderToolbar = renderComparisonToolbar({
+      additionalControls,
+      comparisonFields,
+      totalFields,
+    });
+
+    if (!renderCustomToolbar) {
+      return renderToolbar;
+    }
+
+    return (toolbarProps) =>
+      renderCustomToolbar({ toolbar: renderToolbar(toolbarProps), toolbarProps });
+  }, [additionalControls, comparisonFields, totalFields, renderCustomToolbar]);
   const renderCellValue = useComparisonCellValue({
     dataView,
     dataSource,

@@ -161,6 +161,32 @@ describe('CompareDocuments', () => {
     expect(mockDataGridProps?.onFullScreenChange).toBe(onFullScreenChange);
   });
 
+  it('should let a custom toolbar renderer decorate the comparison toolbar', () => {
+    const renderCustomToolbar = jest.fn(({ toolbar }) => (
+      <div data-test-subj="decorated">{toolbar}</div>
+    ));
+    const { rerender } = renderCompareDocuments();
+    rerender({ renderCustomToolbar });
+    const toolbarProps = {
+      hasRoomForGridControls: true,
+      columnControl: null,
+      columnSortingControl: null,
+      keyboardShortcutsControl: null,
+      displayControl: null,
+      fullScreenControl: null,
+    };
+
+    const decorated = mockDataGridProps?.renderCustomToolbar?.(toolbarProps);
+
+    expect(renderCustomToolbar).toHaveBeenCalledWith({
+      toolbar: expect.anything(),
+      toolbarProps,
+    });
+    expect(decorated).toEqual(
+      expect.objectContaining({ props: expect.objectContaining({ 'data-test-subj': 'decorated' }) })
+    );
+  });
+
   it('should get values from local storage', () => {
     renderCompareDocuments();
     expect(mockLocalStorage).toEqual({

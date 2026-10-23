@@ -295,43 +295,6 @@ describe('ChildVirtualizerController', () => {
     });
   });
 
-  describe('connect with persistScrollAnchor: false', () => {
-    it('discards an existing anchor and never hydrates, reports or persists one', () => {
-      const previousHandle = controller.connect('cell-a', 2);
-      previousHandle.reportState({ scrollAnchorItemIndex: 10 });
-      previousHandle.disconnect();
-      expect(controller.getPersistedAnchor('cell-a')).toBe(10);
-
-      const handle = controller.connect('cell-a', 2, { persistScrollAnchor: false });
-      expect(controller.getPersistedAnchor('cell-a')).toBeNull();
-      expect(controller.isReturningCell('cell-a')).toBe(false);
-      expect(controller.getConnectedChildren().get('cell-a')?.scrollAnchorItemIndex).toBeNull();
-
-      handle.reportState({ scrollAnchorItemIndex: 7, hasStabilized: true });
-      const state = controller.getConnectedChildren().get('cell-a');
-      expect(state?.scrollAnchorItemIndex).toBeNull();
-      expect(state?.hasStabilized).toBe(true);
-
-      handle.detachScrollElement();
-      handle.reattachScrollElement();
-      handle.disconnect();
-      expect(controller.getPersistedAnchor('cell-a')).toBeNull();
-    });
-
-    it('drops a cell seeded with an anchor from the restoring set', () => {
-      const seededController = createChildVirtualizerController({
-        getRootVirtualizer: () => mockRoot,
-        initialPersistedAnchors: { 'cell-a': 5 },
-      });
-      expect(seededController.haveAllRestoringChildrenStabilized()).toBe(false);
-
-      seededController.connect('cell-a', 2, { persistScrollAnchor: false });
-
-      expect(seededController.haveAllRestoringChildrenStabilized()).toBe(true);
-      seededController.destroy();
-    });
-  });
-
   describe('preRegister', () => {
     it('adds a child to connected children without creating a handle', () => {
       controller.enqueue('cell-a', 2);
@@ -446,6 +409,25 @@ describe('ChildVirtualizerController', () => {
 
     it('returns null for unknown cellIds', () => {
       expect(controller.getPersistedAnchor('nonexistent')).toBeNull();
+      expect(controller.getPersistedAnchorOffset('nonexistent')).toBe(0);
+    });
+
+    it('persists the offset within the anchor item and restores it on reconnect', () => {
+      controller.markRootStable();
+      const handle = controller.connect('cell-a', 2);
+      handle.reportState({ scrollAnchorItemIndex: 15, scrollAnchorItemOffset: 24 });
+      handle.disconnect();
+
+      expect(controller.getPersistedAnchor('cell-a')).toBe(15);
+      expect(controller.getPersistedAnchorOffset('cell-a')).toBe(24);
+
+      controller.connect('cell-a', 2);
+      const state = controller.getConnectedChildren().get('cell-a');
+      expect(state?.scrollAnchorItemIndex).toBe(15);
+      expect(state?.scrollAnchorItemOffset).toBe(24);
+
+      controller.clearPersistedAnchor('cell-a');
+      expect(controller.getPersistedAnchorOffset('cell-a')).toBe(0);
     });
 
     it('restores persisted anchor into child state on reconnect', () => {
@@ -464,6 +446,27 @@ describe('ChildVirtualizerController', () => {
       handle.disconnect();
 
       expect(controller.getPersistedAnchor('cell-a')).toBeNull();
+    });
+
+    it('drops an earlier anchor when the connection reports none once stabilized', () => {
+      controller.markRootStable();
+      const handle = controller.connect('cell-a', 2);
+      handle.reportState({ scrollAnchorItemIndex: 15, scrollAnchorItemOffset: 24 });
+      handle.disconnect();
+      expect(controller.getPersistedAnchor('cell-a')).toBe(15);
+
+      const nextHandle = controller.connect('cell-a', 2);
+      // hydrated from the persisted anchor until the connection reports
+      expect(controller.getConnectedChildren().get('cell-a')?.scrollAnchorItemIndex).toBe(15);
+      nextHandle.reportState({
+        scrollAnchorItemIndex: null,
+        scrollAnchorItemOffset: null,
+        hasStabilized: true,
+      });
+      nextHandle.disconnect();
+
+      expect(controller.getPersistedAnchor('cell-a')).toBeNull();
+      expect(controller.getPersistedAnchorOffset('cell-a')).toBe(0);
     });
   });
 
@@ -658,6 +661,25 @@ describe('ChildVirtualizerController', () => {
       expect(activatedCount).toBe(2);
 
       limitedController.destroy();
+    });
+  });
+
+  describe('rows awaiting measurement', () => {
+    it('retains a row from connect or reattach until the root measures it, and releases it with its last connection', () => {
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([]);
+
+      const handle = controller.connect('cell-a', 2);
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([2]);
+
+      controller.markRowMeasured(2);
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([]);
+
+      handle.detachScrollElement();
+      handle.reattachScrollElement();
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([2]);
+
+      handle.disconnect();
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([]);
     });
   });
 
