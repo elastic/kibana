@@ -582,7 +582,8 @@ const executeEntityTypeRun = async ({
           writer: runConfig.writer,
           entityStoreRefresh: false,
           skipUnchangedStoreWrites: true,
-          entityStoreWriteChunks: 5,
+          entityStoreWriteChunks: 4,
+          pagesInFlight: 2,
           pageTimings: basePageTimings,
         }),
     });
@@ -659,7 +660,10 @@ const executeEntityTypeRun = async ({
             writer: runConfig.writer,
             alertFilters,
             entityStoreRefresh: false,
-            entityStoreWriteChunks: 5,
+            entityStoreWriteChunks: 4,
+            pagesInFlight: 2,
+            joinEntityStore: true,
+            preAggregateByEntity: true,
             pageTimings: resolutionPageTimings,
           }),
       });
