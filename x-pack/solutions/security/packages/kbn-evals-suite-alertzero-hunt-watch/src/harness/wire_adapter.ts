@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
+import type { HuntCoordinatorResult } from '@kbn/alertzero-common';
 import type { CoordinatorRun, Tier1HitRef } from '../types';
 
 /**
  * The single place the suite touches the coordinator wire shape
- * (`HuntCoordinatorResponse`, hunt_coordinator_route.gen.ts). Everything
+ * (`HuntCoordinatorResult`, hunt_coordinator_route.gen.ts — the completed body
+ * the hunt child reads back from the hidden result attachment). Everything
  * downstream (M1/M2/M3) reads `CoordinatorRun`, so a schema drift fails
  * type_check here and in the adapter test, not silently in the scores.
  *
@@ -21,7 +22,7 @@ import type { CoordinatorRun, Tier1HitRef } from '../types';
  *   `execution.{executed,hit,inconclusive_reason}` and `hits[]`.
  * - Top level: `completeness`, `tier2_skipped_reason`, `tier2_target_sources`.
  */
-export const wireToCoordinatorRun = (wire: HuntCoordinatorResponse): CoordinatorRun => {
+export const wireToCoordinatorRun = (wire: HuntCoordinatorResult): CoordinatorRun => {
   const tier1Hits: Tier1HitRef[] = wire.tier1.hits.map((h) => ({ _id: h.id, _index: h.index }));
 
   const byIoc = new Map<string, Tier1HitRef[]>();
@@ -55,11 +56,13 @@ export const wireToCoordinatorRun = (wire: HuntCoordinatorResponse): Coordinator
 };
 
 /**
- * Narrow check that a step output looks like a coordinator response before it
- * is adapted. A failed step (the `on-failure` fallback emits `status: failed`)
- * or a skipped step has no `tier1`; that report is an INVALID cell.
+ * Narrow check that a value looks like a completed coordinator result before
+ * it is adapted. A failed attachment read (carries `data.error`, no
+ * `data.result`) or an async run that never finished leaves no result to
+ * read at all; either way there is no `tier1` here and that report is an
+ * INVALID cell.
  */
-export const isCoordinatorResponse = (value: unknown): value is HuntCoordinatorResponse => {
+export const isCoordinatorResult = (value: unknown): value is HuntCoordinatorResult => {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
   const tier1 = v.tier1 as Record<string, unknown> | undefined;

@@ -88,16 +88,24 @@ describe('hunt tier feature id', () => {
     expect(HUNT_TIER_FEATURE_ID).toBe('alertzero_frontier');
   });
 
-  it.each(['hunt_coordinator.ts', 'hunt_behavior.ts'])(
-    'is the feature %s resolves its scoped model from',
-    (routeFile) => {
-      const source = readFileSync(
-        join(__dirname, '../../../plugins/alertzero/server/routes/hunt', routeFile),
-        'utf8'
-      );
-      expect(source).toContain('featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID');
-    }
-  );
+  it('is the feature hunt_models.ts resolves each hunt tier from', () => {
+    const source = readFileSync(
+      join(__dirname, '../../../plugins/alertzero/server/routes/hunt/lib/hunt_models.ts'),
+      'utf8'
+    );
+    expect(source).toContain('featureId: HUNT_MODEL_TIER_FEATURE_IDS[tier]');
+  });
+
+  it('is the frontier entry HUNT_MODEL_TIER_FEATURE_IDS maps (hunt_model_tiers.ts)', () => {
+    const source = readFileSync(
+      join(
+        __dirname,
+        '../../../plugins/alertzero/server/services/watches/hunt/common/hunt_model_tiers.ts'
+      ),
+      'utf8'
+    );
+    expect(source).toContain('frontier: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID');
+  });
 });
 
 describe('assertTierRegistered', () => {

@@ -7,10 +7,10 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
-import { isCoordinatorResponse, wireToCoordinatorRun } from './wire_adapter';
+import type { HuntCoordinatorResult } from '@kbn/alertzero-common';
+import { isCoordinatorResult, wireToCoordinatorRun } from './wire_adapter';
 
-type Tier1 = HuntCoordinatorResponse['tier1'];
+type Tier1 = HuntCoordinatorResult['tier1'];
 
 const DNS_INDEX = '.ds-logs-dns-default-2026.10.09-000001';
 const ENDPOINT_INDEX = '.ds-logs-endpoint-default-1';
@@ -54,7 +54,7 @@ const tier1Base: Tier1 = {
  * live run. Hand-written to the schema; it is NOT captured from a real stack
  * execution (that needs the live run).
  */
-const wire: HuntCoordinatorResponse = {
+const wire: HuntCoordinatorResult = {
   status: 'tier1_and_tier2',
   report_id: 'r1',
   run_id: 'run-1',
@@ -204,31 +204,32 @@ describe('wireToCoordinatorRun', () => {
   });
 });
 
-describe('isCoordinatorResponse', () => {
-  it('accepts a coordinator response', () => {
-    expect(isCoordinatorResponse(wire)).toBe(true);
+describe('isCoordinatorResult', () => {
+  it('accepts a coordinator result', () => {
+    expect(isCoordinatorResult(wire)).toBe(true);
   });
 
   /**
-   * Captured from a real completed `run_hunt_coordinator` step output (the
-   * inner `kibana.request` step of a `system-security-hunt-execute` child,
+   * A real completed coordinator body (system-security-hunt-execute child,
    * E+ / R-ioc[encoded-powershell], 1 tier1 hit), read over
-   * GET /api/workflows/executions/{id}?includeInput&includeOutput. Pins the
+   * GET /api/workflows/executions/{id}?includeInput&includeOutput. Captured
+   * before the coordinator went async; the body is unchanged and now arrives
+   * as the `result` of the `read_hunt_result` step's completed read. Pins the
    * real wire shape: raw coordinator body, no kibana.request {data}/{body}
-   * wrapper — isCoordinatorResponse would drop a wrapped output and every
-   * cell would score INVALID.
+   * wrapper — isCoordinatorResult would drop a wrapped output and every cell
+   * would score INVALID.
    */
   const captured = JSON.parse(
     readFileSync(resolve(__dirname, '__fixtures__/coordinator_output.captured.json'), 'utf8')
   );
 
   it('type-checks the captured output against the wire type', () => {
-    const typed: HuntCoordinatorResponse = captured;
+    const typed: HuntCoordinatorResult = captured;
     expect(typeof typed.run_id === 'string').toBe(true);
   });
 
   it('accepts the captured real output (no kibana.request wrapper)', () => {
-    expect(isCoordinatorResponse(captured)).toBe(true);
+    expect(isCoordinatorResult(captured)).toBe(true);
   });
 
   it('adapts the captured real output to a CoordinatorRun', () => {
@@ -249,6 +250,6 @@ describe('isCoordinatorResponse', () => {
     ['tier1 without hits', { tier1: { status: 'x' }, completeness: 'complete' }],
     ['no completeness', { tier1: { status: 'x', hits: [] } }],
   ])('rejects %s', (_name, value) => {
-    expect(isCoordinatorResponse(value)).toBe(false);
+    expect(isCoordinatorResult(value)).toBe(false);
   });
 });

@@ -10,7 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
 import type { CoordinatorRun } from '../types';
 import { nestDottedKeys } from './nest_document';
-import { isCoordinatorResponse, wireToCoordinatorRun } from './wire_adapter';
+import { isCoordinatorResult, wireToCoordinatorRun } from './wire_adapter';
 
 const WORKFLOWS_API_VERSION = '2023-10-31';
 const ALERTZERO_API_VERSION = '1';
@@ -22,6 +22,9 @@ const INGEST_THREAT_REPORT_URL = '/internal/threat_intel/ingest_threat_report';
 const HUNT_EXECUTE_WORKFLOW_ID = 'system-security-hunt-execute';
 const CANDIDATES_URL = '/internal/alertzero/hunt/candidates';
 const REPORT_IDS_CAP = 10; // candidates_route.gen.ts: report_ids max 10
+// The coordinator run is async (hunt.yaml): `run_hunt_coordinator` returns only
+// a run envelope and the body arrives via this step's completed attachment read.
+const READ_HUNT_RESULT_STEP_ID = 'read_hunt_result';
 
 export interface HuntWatchClientOptions {
   huntWorkerWorkflowId: string;
@@ -77,6 +80,26 @@ const TERMINAL_STATUSES = new Set<string>(TerminalExecutionStatuses);
 export const isTerminal = (status: string | undefined): boolean =>
   status !== undefined && TERMINAL_STATUSES.has(status);
 
+/**
+ * The coordinator body from the hunt child's poll loop. `read_hunt_result`
+ * runs once per iteration and only the `completed` read carries `data.result`;
+ * a `failed` read carries `data.error` instead, and a run that never finished
+ * has no completed read at all — both yield `undefined`, same as a coordinator
+ * that was never started.
+ */
+export const readHuntResultOutput = (steps: readonly unknown[]): unknown => {
+  for (const step of steps) {
+    if (isRecord(step) && step.stepId === READ_HUNT_RESULT_STEP_ID) {
+      const output = isRecord(step.output) ? step.output : undefined;
+      const data = output !== undefined && isRecord(output.data) ? output.data : undefined;
+      if (data !== undefined && data.state === 'completed' && isRecord(data.result)) {
+        return data.result;
+      }
+    }
+  }
+  return undefined;
+};
+
 /** The one ES call the client makes: an explicit refresh of the reports index. */
 export interface ReportsIndexRefresher {
   indices: { refresh: (params: { index: string }) => Promise<unknown> };
@@ -88,7 +111,7 @@ export interface ReportsIndexRefresher {
  * (ES mints the id; `op_type: create`), the candidates route for the
  * per-batch selection assertion, and the Worker manual trigger with
  * `reportIds`, polling the sweep to a terminal status and reading each hunt's
- * coordinator output from the `run_hunt_coordinator` STEP output of the
+ * coordinator body via readHuntResultOutput of the
  * `system-security-hunt-execute` child execution (never the execution-level
  * output — the context.output trap).
  */
@@ -142,8 +165,9 @@ export class HuntWatchClient {
   /**
    * Triggers the Hunt Worker manually with `reportIds` (batches of 10, the
    * route cap), polls each sweep to a terminal status, and returns the
-   * coordinator output per report id, read from the run_hunt_coordinator step
-   * output of the child executions. A per-batch candidates violation is
+   * coordinator output per report id, read from the read_hunt_result step
+   * output of the child executions (the coordinator run itself is async). A
+   * per-batch candidates violation is
    * surfaced as `invalidBatches` — it is an INVALID cell, never a skip.
    */
   async runHunts(
@@ -234,12 +258,13 @@ export class HuntWatchClient {
    * executions. `GET .../children` returns a summary only (step `input` and
    * `output` are excluded server-side and the child `context` is absent), so
    * each hunt child is fetched individually with `includeInput` and
-   * `includeOutput`. The coordinator result is the `run_hunt_coordinator`
-   * step's output; the report id is the child's `context.inputs.reportId`
-   * (passed by the Worker as `reportId: "{{ foreach.item }}"`).
+   * `includeOutput`. The coordinator run is async: `run_hunt_coordinator`
+   * returns only a run envelope and the body is read back by the
+   * `read_hunt_result` step; the report id is the child's
+   * `context.inputs.reportId` (passed by the Worker as
+   * `reportId: "{{ foreach.item }}"`).
    *
-   * A child with no readable coordinator output (failed or skipped step, or an
-   * output that is not a coordinator response) is absent from the returned
+   * A child with no readable coordinator output is absent from the returned
    * map; the caller records that report as INVALID.
    */
   private async readSweepCoordinatorOutputs(
@@ -267,15 +292,8 @@ export class HuntWatchClient {
       const inputs = isRecord(context?.inputs) ? context?.inputs : undefined;
       const reportId = typeof inputs?.reportId === 'string' ? inputs.reportId : undefined;
       const steps = Array.isArray(execution.stepExecutions) ? execution.stepExecutions : [];
-      // `run_hunt_coordinator` names TWO step executions: a `fallback` wrapper (output null)
-      // that comes first, and the inner `kibana.request` step holding the raw coordinator
-      // body. Taking the first match read the wrapper and dropped every output; pick the
-      // step whose output is the coordinator response.
-      const output = steps
-        .filter((s) => isRecord(s) && s.stepId === 'run_hunt_coordinator')
-        .map((s) => (s as Record<string, unknown>).output)
-        .find(isCoordinatorResponse);
-      if (reportId !== undefined && isCoordinatorResponse(output)) {
+      const output = readHuntResultOutput(steps);
+      if (reportId !== undefined && isCoordinatorResult(output)) {
         runs.set(reportId, wireToCoordinatorRun(output));
       }
     }

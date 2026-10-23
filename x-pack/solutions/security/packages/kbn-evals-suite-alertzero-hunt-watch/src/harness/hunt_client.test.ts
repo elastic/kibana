@@ -44,7 +44,7 @@ const makeServer = ({
   children,
 }: {
   sweepStatuses?: string[];
-  children: Array<{ executionId: string; reportId: string; output: unknown }>;
+  children: Array<{ executionId: string; reportId: string; output?: unknown }>;
 }) => {
   const requests: Req[] = [];
   let sweepPolls = 0;
@@ -60,7 +60,7 @@ const makeServer = ({
           workflowId: 'system-security-hunt-execute',
           executionId: c.executionId,
           status: 'completed',
-          stepExecutions: [{ stepId: 'run_hunt_coordinator' }], // no output: stripped server-side
+          stepExecutions: [{ stepId: 'read_hunt_result' }], // no output: stripped server-side
         })),
       };
     }
@@ -75,15 +75,27 @@ const makeServer = ({
         data: {
           status: 'completed',
           context: full ? { inputs: { reportId: child.reportId } } : undefined,
-          // Real shape (captured live): `run_hunt_coordinator` names a `fallback` wrapper step
-          // with a null output, THEN the inner `kibana.request` step holding the coordinator body.
+          // Real shape (current main): `run_hunt_coordinator` returns only the async run
+          // envelope; the coordinator body arrives through the `read_hunt_result` step,
+          // which runs once per poll iteration — earlier reads see `running`, and only
+          // the completed read carries `data.result` (a child with no `output` models a
+          // run whose read never completed).
           stepExecutions: [
-            { stepId: 'run_hunt_coordinator', stepType: 'fallback', output: null },
             {
               stepId: 'run_hunt_coordinator',
-              stepType: 'kibana.request',
-              output: full ? child.output : undefined,
+              output: { run_id: 'run', state: 'running', result_attachment_id: 'att-1' },
             },
+            { stepId: 'read_hunt_result', output: { data: { state: 'running' } } },
+            ...(child.output === undefined
+              ? []
+              : [
+                  {
+                    stepId: 'read_hunt_result',
+                    output: full
+                      ? { data: { state: 'completed', result: child.output } }
+                      : undefined,
+                  },
+                ]),
           ],
         },
       };
@@ -183,6 +195,20 @@ describe('HuntWatchClient.runHunts', () => {
     const { client } = makeServer({
       children: [
         { executionId: 'c1', reportId: 'rep-1', output: { status: 'failed', error: 'boom' } },
+        { executionId: 'c2', reportId: 'rep-2', output: coordinatorOutput('d2') },
+      ],
+    });
+    const { runs } = await client.runHunts(['rep-1', 'rep-2']);
+    expect([...runs.keys()]).toEqual(['rep-2']);
+  });
+
+  it('a child whose attachment read never completed (async run unfinished) is absent from runs', async () => {
+    // Since the coordinator went async, a hunt can still be polling when the
+    // sweep ends: no `read_hunt_result` step ever saw state `completed`, so
+    // there is no coordinator body to read at all.
+    const { client } = makeServer({
+      children: [
+        { executionId: 'c1', reportId: 'rep-1' },
         { executionId: 'c2', reportId: 'rep-2', output: coordinatorOutput('d2') },
       ],
     });

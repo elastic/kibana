@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { HuntIncompleteReason as WireHuntIncompleteReason } from '@kbn/alertzero-common';
+
 /** Report fixture classes of the ad2-v1 corpus (design v1 §1, v5 T2 applicability). */
 export type ReportClass = 'R-ioc' | 'R-beh-A' | 'R-beh-B' | 'R-decoy(a)' | 'R-decoy(bcd)-A';
 
@@ -14,23 +16,15 @@ export type HuntTier1Status =
   | 'no_searchable_terms'
   | 'scope_blocked';
 
-export type HuntIncompleteReason =
-  | 'search_partial'
-  | 'index_unavailable'
-  | 'generation_failed'
-  | 'query_out_of_scope'
-  | 'query_ungrounded'
-  | 'quote_ungrounded'
-  | 'execute_failed'
-  | 'tier2_failed'
-  | 'no_inference'
-  | 'no_report_text'
-  | 'nothing_searched'
-  | 'generation_budget'
-  | 'unknown_technique_id'
-  | 'rows_unclassifiable'
-  | 'refs_unavailable'
-  | 'input_truncated';
+/**
+ * Straight from the wire (components/hunt.gen.ts): a hand-rolled copy here
+ * drifted once when the server enum grew (`collapsed`, `catalog_unavailable`,
+ * `extraction_pending`) and failed the adapter's type_check instead of the
+ * scores. Suite-local names for Tier 2 skip reasons (`tier2_failed`,
+ * `no_inference`, `no_report_text`) are NOT in this enum — on the wire they
+ * travel as free strings in `tier2_skipped_reason`.
+ */
+export type HuntIncompleteReason = WireHuntIncompleteReason;
 
 export type HuntCompleteness = 'complete' | 'incomplete_retryable' | 'incomplete_final';
 
