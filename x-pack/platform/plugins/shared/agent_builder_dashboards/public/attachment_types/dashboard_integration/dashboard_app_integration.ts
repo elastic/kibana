@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { debounceTime, Observable } from 'rxjs';
+import { debounceTime, merge, Observable } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
+import type { AttachmentVersion } from '@kbn/agent-builder-common/attachments';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type {
   DashboardAttachment,
@@ -24,7 +25,7 @@ import {
   isAttachmentAppliedToDashboard,
   MANUAL_CHANGES_DEBOUNCE_MS,
 } from './apply_attachment';
-import type { AppliedAttachmentsStore } from './applied_attachments_store';
+import { toShownVersionKey, type AppliedAttachmentsStore } from './applied_attachments_store';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
@@ -50,8 +51,14 @@ export interface DashboardAppIntegrationParams {
   ) => ((origin: string) => Promise<UpdateOriginResponse | undefined>) | undefined;
 }
 
+interface DashboardAttachmentVersions {
+  id: string;
+  versions: Array<AttachmentVersion<DashboardAttachmentData>>;
+}
+
 interface State {
   attachments: DashboardAttachment[] | undefined;
+  attachmentVersions: DashboardAttachmentVersions[];
   conversationId: string | undefined;
 }
 
@@ -65,12 +72,41 @@ export const registerDashboardAppIntegration = ({
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
+    attachmentVersions: [],
     conversationId: undefined,
   };
 
   // dashboard data last staged in the chat input, per attachment id
   const stagedAttachmentData = new Map<string, DashboardAttachmentData>();
   let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  // marks every attachment version in the conversation whose content the dashboard shows
+  const updateShownVersions = () => {
+    if (appliedAttachments.pendingApplies.size > 0) {
+      return;
+    }
+    const isShownByContentHash = new Map<string, boolean>();
+    const shownVersions = new Set<string>();
+    for (const { id, versions } of state.attachmentVersions) {
+      for (const { version, data, content_hash: contentHash } of versions) {
+        const cacheKey = `${id}:${contentHash}`;
+        const isShown =
+          isShownByContentHash.get(cacheKey) ??
+          isAttachmentAppliedToDashboard({
+            store: appliedAttachments,
+            api,
+            attachment: { id, type: DASHBOARD_ATTACHMENT_TYPE, data },
+          });
+        isShownByContentHash.set(cacheKey, isShown);
+        if (isShown) {
+          shownVersions.add(toShownVersionKey(id, version));
+        }
+      }
+    }
+    if (!isEqual(shownVersions, appliedAttachments.shownVersions$.getValue())) {
+      appliedAttachments.shownVersions$.next(shownVersions);
+    }
+  };
 
   const addAttachmentFromDashboard = () => {
     // the dashboard is still settling after applying an attachment, so its state is not a manual change
@@ -117,14 +153,17 @@ export const registerDashboardAppIntegration = ({
     (change) => {
       if (!change) {
         state.attachments = undefined;
+        state.attachmentVersions = [];
         state.conversationId = undefined;
+        updateShownVersions();
         return;
       }
 
       const { id: conversationId, conversation } = change;
-      const dashboardAttachments = conversation?.attachments
-        ?.filter(isDashboardAttachment)
-        ?.flatMap((attachment): DashboardAttachment[] => {
+      const versionedDashboardAttachments =
+        conversation?.attachments?.filter(isDashboardAttachment);
+      const dashboardAttachments = versionedDashboardAttachments?.flatMap(
+        (attachment): DashboardAttachment[] => {
           const latestVersionData = getLatestVersion(attachment)?.data;
 
           return latestVersionData
@@ -137,10 +176,16 @@ export const registerDashboardAppIntegration = ({
                 },
               ]
             : [];
-        });
+        }
+      );
 
       state.attachments = dashboardAttachments;
+      state.attachmentVersions = (versionedDashboardAttachments ?? []).map(({ id, versions }) => ({
+        id,
+        versions,
+      }));
       state.conversationId = conversationId;
+      updateShownVersions();
       // we have to defer adding the attachment from the dashboard until after the active conversation change has fully propagated, otherwise sidebarCallbacks from agent builder are null
       if (pendingAddAttachmentTimeout !== undefined) {
         clearTimeout(pendingAddAttachmentTimeout);
@@ -178,17 +223,25 @@ export const registerDashboardAppIntegration = ({
     .pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS))
     .subscribe(addAttachmentFromDashboard);
 
+  const shownVersionsSubscription = merge(
+    api.anyStateChange$.pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS)),
+    appliedAttachments.applyFinished$
+  ).subscribe(updateShownVersions);
+
   return () => {
     agentLiveUpdatesSubscription.unsubscribe();
     newAttachmentIdRegenerationSubscription.unsubscribe();
     originSyncSubscription.unsubscribe();
     manualChangesSubscription.unsubscribe();
     conversationChangesSubscription.unsubscribe();
+    shownVersionsSubscription.unsubscribe();
+    appliedAttachments.shownVersions$.next(new Set());
     if (pendingAddAttachmentTimeout !== undefined) {
       clearTimeout(pendingAddAttachmentTimeout);
       pendingAddAttachmentTimeout = undefined;
     }
     state.attachments = undefined;
+    state.attachmentVersions = [];
     state.conversationId = undefined;
     stagedAttachmentData.clear();
   };

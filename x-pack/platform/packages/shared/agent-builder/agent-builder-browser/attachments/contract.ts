@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
+import type { Observable } from 'rxjs';
 import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
@@ -72,9 +73,14 @@ export interface InlineRenderCallbacks {
 /**
  * Parameters passed when requesting action buttons for an inline-rendered attachment.
  */
-export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
+export interface GetActionButtonsParams<
+  TAttachment extends UnknownAttachment = UnknownAttachment,
+  TActionButtonsState = unknown
+> {
   /** The attachment for which to provide action buttons */
   attachment: TAttachment;
+  /** Latest value of the definition's `actionButtonsState$` (inline attachments only) */
+  actionButtonsState?: TActionButtonsState;
   /** Whether the attachment is being rendered in a sidebar context */
   isSidebar: boolean;
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
@@ -108,6 +114,8 @@ export interface ActionButton {
   type: ActionButtonType;
   /** Optional EUI button color override (defaults to 'text') */
   color?: EuiButtonColor;
+  /** Whether the button gets a tinted background, e.g. to mark an action as currently active */
+  highlighted?: boolean;
   /** Whether the action is currently unavailable */
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */
@@ -177,7 +185,10 @@ export interface HeaderBadge {
 /**
  * UI definition for rendering attachments of a specific type.
  */
-export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = UnknownAttachment> {
+export interface AttachmentUIDefinition<
+  TAttachment extends UnknownAttachment = UnknownAttachment,
+  TActionButtonsState = unknown
+> {
   /**
    * Returns a human-readable label for the attachment.
    */
@@ -248,7 +259,14 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Optional function to provide action buttons for inline-rendered attachments.
    * Buttons will appear alongside or below the rendered content.
    */
-  getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  getActionButtons?: (
+    params: GetActionButtonsParams<TAttachment, TActionButtonsState>
+  ) => ActionButton[];
+  /**
+   * Optional state outside the attachment that the buttons depend on (e.g. the app it is
+   * applied to). Each new value is passed to `getActionButtons` as `actionButtonsState`.
+   */
+  actionButtonsState$?: Observable<TActionButtonsState>;
   /**
    * Optional max-width (in px) for the inline attachment panel.
    * When provided, the outer panel will not exceed this width.
@@ -334,9 +352,12 @@ export interface AttachmentServiceStartContract {
    * @param attachmentType - The unique identifier for the attachment type
    * @param definition - The UI definition for rendering this attachment type
    */
-  addAttachmentType: <TAttachment extends UnknownAttachment = UnknownAttachment>(
+  addAttachmentType: <
+    TAttachment extends UnknownAttachment = UnknownAttachment,
+    TActionButtonsState = unknown
+  >(
     attachmentType: string,
-    definition: AttachmentUIDefinition<TAttachment>
+    definition: AttachmentUIDefinition<TAttachment, TActionButtonsState>
   ) => void;
 
   /**

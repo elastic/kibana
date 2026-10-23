@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common/types';
 
 export interface AppliedAttachmentBaseline {
@@ -22,9 +23,18 @@ export interface AppliedAttachmentBaseline {
 export interface AppliedAttachmentsStore {
   baselines: Map<string, AppliedAttachmentBaseline>;
   pendingApplies: Set<string>;
+  /** Emits when an apply finished, so the dashboard can be compared with the conversation again. */
+  applyFinished$: Subject<void>;
+  /** Conversation attachment versions the dashboard shows, as keys from `toShownVersionKey`. */
+  shownVersions$: BehaviorSubject<ReadonlySet<string>>;
 }
+
+export const toShownVersionKey = (attachmentId: string, version: number): string =>
+  `${attachmentId}:${version}`;
 
 export const createAppliedAttachmentsStore = (): AppliedAttachmentsStore => ({
   baselines: new Map(),
   pendingApplies: new Set(),
+  applyFinished$: new Subject(),
+  shownVersions$: new BehaviorSubject<ReadonlySet<string>>(new Set()),
 });

@@ -97,5 +97,6 @@ export const applyAttachmentToDashboard = async ({
     });
   } finally {
     store.pendingApplies.delete(attachment.id);
+    store.applyFinished$.next();
   }
 };

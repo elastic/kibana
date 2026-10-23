@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { EMPTY } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
@@ -93,6 +95,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     attachment.id,
     attachment.versionData?.version
   );
+  const actionButtonsState = useObservable(uiDefinition?.actionButtonsState$ ?? EMPTY);
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -109,6 +112,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     () =>
       uiDefinition?.getActionButtons?.({
         attachment,
+        actionButtonsState,
         isSidebar,
         agentId,
         updateOrigin,
@@ -131,6 +135,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       setPreviewedAttachmentKey,
       attachmentPreviewKey,
       openSidebarConversation,
+      actionButtonsState,
     ]
   );
 

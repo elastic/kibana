@@ -50,9 +50,12 @@ export class AttachmentsService {
    * @param definition - The UI definition for rendering this attachment type
    * @throws Error if the attachment type is already registered
    */
-  addAttachmentType<TAttachment extends UnknownAttachment = UnknownAttachment>(
+  addAttachmentType<
+    TAttachment extends UnknownAttachment = UnknownAttachment,
+    TActionButtonsState = unknown
+  >(
     attachmentType: string,
-    definition: AttachmentUIDefinition<TAttachment>
+    definition: AttachmentUIDefinition<TAttachment, TActionButtonsState>
   ): void {
     if (this.registry.has(attachmentType)) {
       throw new Error(`Attachment type "${attachmentType}" is already registered.`);

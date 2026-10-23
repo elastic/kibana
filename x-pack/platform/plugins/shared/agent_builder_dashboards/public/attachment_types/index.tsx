@@ -23,7 +23,10 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardCanvasAttachmentProps } from './async_services';
-import { createAppliedAttachmentsStore } from './dashboard_integration/applied_attachments_store';
+import {
+  createAppliedAttachmentsStore,
+  toShownVersionKey,
+} from './dashboard_integration/applied_attachments_store';
 
 export interface IdGenerator {
   readonly current: string;
@@ -117,69 +120,94 @@ export const registerDashboardAttachmentUiDefinition = ({
       })
     )
     .subscribe();
-  agentBuilder.attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
-    getLabel: (attachment) => {
-      return (
-        attachment.data?.title ||
-        i18n.translate('xpack.agentBuilderDashboards.attachments.dashboard.label', {
-          defaultMessage: 'New Dashboard',
-        })
-      );
-    },
-    getIcon: () => 'productDashboard',
-    renderCanvasContent: (props, callbacks) => (
-      <React.Suspense fallback={null}>
-        <LazyDashboardCanvasAttachment
-          {...(props as DashboardCanvasAttachmentProps)}
-          {...callbacks}
-          dashboardLocator={dashboardLocator}
-          searchBarComponent={unifiedSearch.ui.SearchBar}
-          data={data}
-          checkSavedDashboardExist={checkSavedDashboardExist}
-          canWriteDashboards={canWriteDashboards}
-        />
-      </React.Suspense>
-    ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
-      // Capture the framework-provided updater keyed by attachment id so that
-      // dashboard-save origin sync (outside the React tree) can reuse it.
-      updateOriginByAttachmentId.set(attachment.id, updateOrigin);
-      if (isCanvas) {
-        return [];
-      }
-      return [
-        {
-          label: i18n.translate(
-            'xpack.agentBuilderDashboards.attachments.dashboard.previewActionLabel',
-            {
-              defaultMessage: 'Preview',
-            }
-          ),
-          icon: 'eye',
-          type: ActionButtonType.SECONDARY,
-          handler: async () => {
-            const { handlePreview } = await import('./async_services');
+  agentBuilder.attachments.addAttachmentType<DashboardAttachment, ReadonlySet<string>>(
+    DASHBOARD_ATTACHMENT_TYPE,
+    {
+      getLabel: (attachment) => {
+        return (
+          attachment.data?.title ||
+          i18n.translate('xpack.agentBuilderDashboards.attachments.dashboard.label', {
+            defaultMessage: 'New Dashboard',
+          })
+        );
+      },
+      getIcon: () => 'productDashboard',
+      renderCanvasContent: (props, callbacks) => (
+        <React.Suspense fallback={null}>
+          <LazyDashboardCanvasAttachment
+            {...(props as DashboardCanvasAttachmentProps)}
+            {...callbacks}
+            dashboardLocator={dashboardLocator}
+            searchBarComponent={unifiedSearch.ui.SearchBar}
+            data={data}
+            checkSavedDashboardExist={checkSavedDashboardExist}
+            canWriteDashboards={canWriteDashboards}
+          />
+        </React.Suspense>
+      ),
+      actionButtonsState$: appliedAttachments.shownVersions$,
+      getActionButtons: ({
+        attachment,
+        actionButtonsState: shownVersions,
+        openCanvas,
+        isCanvas,
+        isSidebar,
+        updateOrigin,
+      }) => {
+        // Capture the framework-provided updater keyed by attachment id so that
+        // dashboard-save origin sync (outside the React tree) can reuse it.
+        updateOriginByAttachmentId.set(attachment.id, updateOrigin);
+        if (isCanvas) {
+          return [];
+        }
+        const version = attachment.versionData?.version;
+        const isShownOnDashboard =
+          version !== undefined &&
+          Boolean(shownVersions?.has(toShownVersionKey(attachment.id, version)));
+        return [
+          {
+            label: isShownOnDashboard
+              ? i18n.translate(
+                  'xpack.agentBuilderDashboards.attachments.dashboard.shownOnDashboardActionLabel',
+                  {
+                    defaultMessage: 'Shown on the dashboard',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.agentBuilderDashboards.attachments.dashboard.previewActionLabel',
+                  {
+                    defaultMessage: 'Preview',
+                  }
+                ),
+            icon: 'eye',
+            type: ActionButtonType.SECONDARY,
+            color: isShownOnDashboard ? 'primary' : undefined,
+            highlighted: isShownOnDashboard,
+            handler: async () => {
+              const { handlePreview } = await import('./async_services');
 
-            return handlePreview({
-              attachment,
-              dashboardApi,
-              appliedAttachments,
-              canWriteDashboards,
-              isSidebar,
-              dashboardLocator,
-              checkSavedDashboardExist,
-              openCanvas,
-            });
+              return handlePreview({
+                attachment,
+                dashboardApi,
+                appliedAttachments,
+                canWriteDashboards,
+                isSidebar,
+                dashboardLocator,
+                checkSavedDashboardExist,
+                openCanvas,
+              });
+            },
           },
-        },
-      ];
-    },
-  });
+        ];
+      },
+    }
+  );
 
   return () => {
     dashboardAppApiSubscription.unsubscribe();
     dashboardApi = undefined;
     appliedAttachments.baselines.clear();
+    appliedAttachments.shownVersions$.next(new Set());
     updateOriginByAttachmentId.clear();
   };
 };
