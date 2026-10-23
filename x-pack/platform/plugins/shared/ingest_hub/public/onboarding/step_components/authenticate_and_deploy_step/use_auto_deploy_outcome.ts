@@ -60,6 +60,13 @@ export function useAutoDeployOutcome({
         policyIdsByInstance,
         failedInstances,
         deployErrors,
+        // The deployment id is in the flow from Launch, so the drift check re-ran the moment the
+        // identity was created, against a deployment the server had not written the connector
+        // to yet, and marked the session dirty. The finished deploy holds exactly what the
+        // session holds, and the id does not change, so nothing else would clear that.
+        isDirty: false,
+        isAuthDirty: false,
+        isPolicySelectionDirty: false,
       });
       setFailedInstances(failedInstances);
       persistDeploymentId(outcome.onboardingDeploymentId);

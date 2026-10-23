@@ -65,6 +65,11 @@ describe('useAutoDeployOutcome', () => {
       policyIdsByInstance: { a: 'pp-1', b: 'pp-1', c: 'pp-2' },
       failedInstances: [],
       deployErrors: {},
+      // The drift check that ran while the server was still writing the deployment compared the
+      // session's identity against an object without one; the finished deploy settles that.
+      isDirty: false,
+      isAuthDirty: false,
+      isPolicySelectionDirty: false,
     });
     expect(setFailedInstances).toHaveBeenCalledWith([]);
     // Now the URL may carry the id: the deploy is done and edit mode is correct.
@@ -96,6 +101,9 @@ describe('useAutoDeployOutcome', () => {
       policyIdsByInstance: { a: 'pp-1', b: 'pp-1' },
       failedInstances: ['c'],
       deployErrors: { c: 'Deploy failed for c: package not installed' },
+      isDirty: false,
+      isAuthDirty: false,
+      isPolicySelectionDirty: false,
     });
     expect(setFailedInstances).toHaveBeenCalledWith(['c']);
     expect(persistDeploymentId).toHaveBeenCalledWith('dep-1');
