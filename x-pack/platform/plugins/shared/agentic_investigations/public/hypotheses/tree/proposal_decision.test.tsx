@@ -16,6 +16,8 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useIsReopeningProposal,
+  useReopenProposal,
   useProposal,
 } from '@kbn/proposals-plugin/public';
 import { useCurrentUserProfile } from '../../user_profiles';
@@ -28,6 +30,7 @@ jest.mock('../../user_profiles');
 
 const approve = jest.fn();
 const dismiss = jest.fn();
+const reopen = jest.fn();
 
 const proposal = {
   id: 'p-1',
@@ -40,18 +43,24 @@ const proposal = {
   createdAt: '2026-07-28T14:00:00.000Z',
 };
 
-const setup = ({ canDecide = true, isMissing = false } = {}) => {
+const setup = ({
+  canDecide = true,
+  isMissing = false,
+  data = proposal as Record<string, unknown>,
+} = {}) => {
   (useKibana as jest.Mock).mockReturnValue({
     services: { application: { capabilities: { proposals: { decideProposals: canDecide } } } },
   });
   (useProposal as jest.Mock).mockReturnValue({
-    data: isMissing ? undefined : proposal,
+    data: isMissing ? undefined : data,
     isLoading: false,
   });
   (useApproveProposal as jest.Mock).mockReturnValue({ mutateAsync: approve });
   (useDismissProposal as jest.Mock).mockReturnValue({ mutateAsync: dismiss });
   (useIsApprovingProposal as jest.Mock).mockReturnValue(false);
   (useIsDecliningProposal as jest.Mock).mockReturnValue(false);
+  (useReopenProposal as jest.Mock).mockReturnValue({ mutateAsync: reopen });
+  (useIsReopeningProposal as jest.Mock).mockReturnValue(false);
   (useCurrentUserProfile as jest.Mock).mockReturnValue({ data: undefined });
   const queryClient = new QueryClient();
   const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
@@ -90,6 +99,28 @@ describe('ProposalDecision', () => {
     setup();
 
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')).toBeEnabled();
+  });
+
+  it("offers only I've applied for a to-do proposal", () => {
+    setup({ data: { ...proposal, category: 'todo' } });
+
+    expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toHaveTextContent(
+      "I've applied"
+    );
+    expect(
+      screen.queryByTestId('investigationHypothesisTreeProposal-p-1-dismiss')
+    ).not.toBeInTheDocument();
+  });
+
+  it('marks a to-do proposal marked as applied as not applied, and reads the investigation again', async () => {
+    const { invalidate } = setup({
+      data: { ...proposal, category: 'todo', decision: 'approved', status: 'no_action' },
+    });
+
+    fireEvent.click(screen.getByTestId('investigationHypothesisTreeProposal-p-1-reopen'));
+
+    await waitFor(() => expect(reopen).toHaveBeenCalledWith({ id: 'p-1' }));
+    await waitFor(() => expect(invalidate).toHaveBeenCalled());
   });
 
   it('disables the decision without the decide capability', () => {

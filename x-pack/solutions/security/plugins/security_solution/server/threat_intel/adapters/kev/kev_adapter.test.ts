@@ -191,6 +191,27 @@ describe('kevAdapter', () => {
     });
   });
 
+  it('stamps content.published_at from dateAdded', async () => {
+    const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
+    expect(reports.map((r) => r.content.published_at)).toEqual([
+      '2021-12-10T00:00:00.000Z',
+      '2022-06-01T00:00:00.000Z',
+    ]);
+  });
+
+  it('omits content.published_at when dateAdded does not parse', async () => {
+    const [report] = await kevAdapter.run(
+      makeSource(),
+      makeContext(makeEnvelope([{ ...VULN_1, dateAdded: 'not-a-date' }]))
+    );
+    expect(report.content).not.toHaveProperty('published_at');
+  });
+
+  it('does not drop entries by age', async () => {
+    const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
+    expect(reports).toHaveLength(2);
+  });
+
   it('extracted.categories is ["vulnerability"]', async () => {
     const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
     for (const r of reports) {

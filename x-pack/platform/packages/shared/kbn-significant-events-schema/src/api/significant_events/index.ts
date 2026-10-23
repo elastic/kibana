@@ -43,6 +43,8 @@ type QueryWithOccurrences = StreamQuery & {
     type: Partial<Record<ChangePointType, ChangePointsValue>>;
   };
   rule_backed: boolean;
+  /** Enabled state of the backing alerting rule, omitted when lookup fails. */
+  rule_enabled?: boolean;
 };
 
 interface QueryOccurrencesResponse {
