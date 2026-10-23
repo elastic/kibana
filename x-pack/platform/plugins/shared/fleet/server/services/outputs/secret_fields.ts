@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BEATS_OUTPUT_TYPES, outputType } from '../../../common/constants';
+import { BEATS_OUTPUT_TYPES, kafkaAuthType, outputType } from '../../../common/constants';
 import type { OutputType, ValueOf } from '../../../common/types';
 import type { SecretFieldDefinition } from '../secrets/preserve';
 
@@ -16,8 +16,8 @@ import type { SecretFieldDefinition } from '../secrets/preserve';
  * The secrets of the Kafka authentication methods are left out on purpose: `withSavedKafkaAuth`
  * keeps the settings and the secrets of the method of an output together. The TLS credentials of
  * an OTLP output have no plain text counterpart, they are only accepted under `secrets`: they are
- * removed by clearing the TLS settings they belong to (`otlp_exporter.tls: null`, or
- * `otlp_exporter.tls.tpm: null` for the TPM ones).
+ * removed with an explicit `null` of the credential, or by clearing the TLS settings they belong to
+ * (`otlp_exporter.tls: null`, or `otlp_exporter.tls.tpm: null` for the TPM ones).
  */
 export function getOutputSecretFields(type: ValueOf<OutputType>): SecretFieldDefinition[] {
   const fields: SecretFieldDefinition[] = [];
@@ -26,7 +26,16 @@ export function getOutputSecretFields(type: ValueOf<OutputType>): SecretFieldDef
     fields.push({ secretPath: 'secrets.ssl.key', plainPath: 'ssl.key', clearedBy: ['ssl'] });
   }
   if (type === outputType.Kafka) {
-    fields.push({ secretPath: 'secrets.password', plainPath: 'password', clearedBy: ['password'] });
+    fields.push({
+      secretPath: 'secrets.password',
+      plainPath: 'password',
+      clearedBy: ['password'],
+      // the password belongs to user_pass: switching to another method without sending it drops it
+      clearedWhen: (update) => {
+        const { auth_type: authType } = update as { auth_type?: unknown };
+        return authType !== undefined && authType !== kafkaAuthType.Userpass;
+      },
+    });
   }
   if (type === outputType.RemoteElasticsearch) {
     fields.push({

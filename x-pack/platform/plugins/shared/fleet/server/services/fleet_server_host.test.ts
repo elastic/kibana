@@ -356,6 +356,71 @@ describe('create', () => {
   });
 });
 
+describe('bulkCreateForPreconfiguration', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+      canEncrypt: true,
+    } as any);
+    (isSecretStorageEnabled as jest.Mock).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('warns about a preconfigured host that sends both a plain text key and a secret', async () => {
+    const soClientMock = getMockedSoClient();
+    soClientMock.bulkCreate.mockResolvedValue({ saved_objects: [] });
+
+    await fleetServerHostService.bulkCreateForPreconfiguration(
+      soClientMock,
+      elasticsearchServiceMock.createInternalClient(),
+      [
+        {
+          id: 'preconfigured-host',
+          name: 'Preconfigured',
+          host_urls: ['https://fleet.example.com:8220'],
+          is_default: false,
+          is_preconfigured: true,
+          ssl: { es_key: 'PLAIN KEY' },
+          secrets: { ssl: { es_key: 'SECRET KEY' } },
+        },
+      ],
+      { fromPreconfiguration: true }
+    );
+
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      'Preconfigured Fleet Server host failed validation: Cannot specify both ssl.es_key and secrets.ssl.es_key'
+    );
+    expect(soClientMock.bulkCreate).toHaveBeenCalled();
+  });
+
+  it('rejects a host that is not preconfigured and sends both a plain text key and a secret', async () => {
+    const soClientMock = getMockedSoClient();
+
+    await expect(
+      fleetServerHostService.bulkCreateForPreconfiguration(
+        soClientMock,
+        elasticsearchServiceMock.createInternalClient(),
+        [
+          {
+            id: 'host',
+            name: 'Host',
+            host_urls: ['https://fleet.example.com:8220'],
+            is_default: false,
+            is_preconfigured: false,
+            ssl: { key: 'PLAIN KEY' },
+            secrets: { ssl: { key: 'SECRET KEY' } },
+          },
+        ]
+      )
+    ).rejects.toThrowError('Cannot specify both ssl.key and secrets.ssl.key');
+    expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
+  });
+});
+
 describe('delete fleetServerHost', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();

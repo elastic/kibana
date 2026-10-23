@@ -19,6 +19,8 @@ export interface SecretFieldDefinition {
   plainPath?: string;
   /** The paths whose explicit `null` in an update removes the credential, e.g. `ssl`. */
   clearedBy?: string[];
+  /** Whether an update that does not name the credential removes it, e.g. by changing its owner. */
+  clearedWhen?: (update: object) => boolean;
 }
 
 /** Whether a value is a stored secret, i.e. a reference rather than a plain text value. */
@@ -42,8 +44,8 @@ const isExplicitlyCleared = (update: object, clearedBy: string[] | undefined): b
  * - the plain text value the update sends, moved under `secretPath`, so that a credential the
  *   object keeps as a secret stays a secret (an update that sends both is left alone and rejected
  *   by the validation of the object);
- * - nothing, when the update names the credential, or removes it with an explicit `null`: the
- *   update is authoritative.
+ * - nothing, when the update names the credential, or removes it with an explicit `null` or a
+ *   change that `clearedWhen` matches: the update is authoritative.
  *
  * The update is not modified, a copy is returned when there is anything to change.
  */
@@ -54,13 +56,17 @@ export function withSavedSecrets<T extends object>(opts: {
 }): T {
   const { fields, original, update } = opts;
 
-  const changes = fields.flatMap(({ secretPath, plainPath, clearedBy }) => {
+  const changes = fields.flatMap(({ secretPath, plainPath, clearedBy, clearedWhen }) => {
     const saved = get(original, secretPath);
     // nothing is stored as a secret: a plain text value is stored as plain text, as before
     if (!isSecretReference(saved)) {
       return [];
     }
-    if (has(update, secretPath) || isExplicitlyCleared(update, clearedBy)) {
+    if (
+      has(update, secretPath) ||
+      isExplicitlyCleared(update, clearedBy) ||
+      clearedWhen?.(update)
+    ) {
       return [];
     }
 

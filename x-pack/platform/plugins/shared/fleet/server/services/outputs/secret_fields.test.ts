@@ -49,6 +49,21 @@ describe('getOutputSecretFields', () => {
       expect(withSavedSecrets({ fields, original, update })).toEqual(update);
     });
 
+    it('removes the TLS key, and only it, when it is cleared with an explicit null', () => {
+      const update = { secrets: { otlp_exporter: { tls: { key_pem: null } } } };
+
+      expect(withSavedSecrets({ fields, original, update })).toEqual({
+        secrets: {
+          otlp_exporter: {
+            tls: {
+              key_pem: null,
+              tpm: { owner_auth: { id: 'owner-auth-id' }, auth: { id: 'auth-id' } },
+            },
+          },
+        },
+      });
+    });
+
     it('removes the TPM credentials, and only those, when the TPM settings are cleared', () => {
       const update = { otlp_exporter: { tls: { tpm: null } } };
 
@@ -56,6 +71,33 @@ describe('getOutputSecretFields', () => {
         ...update,
         secrets: { otlp_exporter: { tls: { key_pem: { id: 'key-pem-id' } } } },
       });
+    });
+  });
+
+  describe('Kafka password', () => {
+    const original = { auth_type: 'user_pass', secrets: { password: { id: 'password-id' } } };
+    const fields = getOutputSecretFields(outputType.Kafka);
+
+    it('keeps the password when the update does not change the authentication type', () => {
+      expect(withSavedSecrets({ fields, original, update: { name: 'renamed' } })).toEqual({
+        name: 'renamed',
+        secrets: { password: { id: 'password-id' } },
+      });
+    });
+
+    it('keeps the password when the update names user_pass', () => {
+      const update = { auth_type: 'user_pass' };
+
+      expect(withSavedSecrets({ fields, original, update })).toEqual({
+        ...update,
+        secrets: { password: { id: 'password-id' } },
+      });
+    });
+
+    it('removes the password when the update switches to another authentication type', () => {
+      const update = { auth_type: 'ssl' };
+
+      expect(withSavedSecrets({ fields, original, update })).toEqual(update);
     });
   });
 });

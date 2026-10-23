@@ -160,6 +160,27 @@ describe('withSavedSecrets', () => {
       expect(withSavedSecrets({ fields: [SSL_KEY], original, update })).toEqual(update);
     });
 
+    it('leaves the credential alone when clearedWhen matches the update', () => {
+      const original = { secrets: { service_token: { id: 'secret-1' } } };
+      const update = { mode: 'other' };
+      const field: SecretFieldDefinition = {
+        ...SERVICE_TOKEN,
+        clearedWhen: (sent) => (sent as { mode?: string }).mode === 'other',
+      };
+
+      expect(withSavedSecrets({ fields: [field], original, update })).toEqual(update);
+    });
+
+    it('keeps the saved secret when clearedWhen does not match the update', () => {
+      const original = { secrets: { service_token: { id: 'secret-1' } } };
+      const field: SecretFieldDefinition = { ...SERVICE_TOKEN, clearedWhen: () => false };
+
+      expect(withSavedSecrets({ fields: [field], original, update: { name: 'renamed' } })).toEqual({
+        name: 'renamed',
+        secrets: { service_token: { id: 'secret-1' } },
+      });
+    });
+
     it('leaves the credential alone when the update clears the plain text path', () => {
       const original = { secrets: { service_token: { id: 'secret-1' } } };
       const update = { service_token: null };

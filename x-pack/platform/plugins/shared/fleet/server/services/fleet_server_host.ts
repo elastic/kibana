@@ -196,6 +196,13 @@ class FleetServerHostService {
   ): Promise<void> {
     if (hosts.length === 0) return;
 
+    hosts.forEach((host) =>
+      ensureNoDuplicateSecrets(
+        host,
+        (options?.fromPreconfiguration || host.is_preconfigured) ?? false
+      )
+    );
+
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
         `Fleet server host needs encrypted saved object api key to be set`
@@ -518,10 +525,11 @@ class FleetServerHostService {
     }
 
     logger.debug(`Updated fleet server host ${id}`);
-    return {
+    // the secrets the update removed are `null`, as they are in the saved object
+    return omitNullSecrets({
       ...originalItem,
       ...updateData,
-    };
+    });
   }
 
   public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {

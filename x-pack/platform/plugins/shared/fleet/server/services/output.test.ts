@@ -5487,6 +5487,60 @@ describe('Output Service', () => {
 
           expect(sentSecrets().secrets).toEqual({ ssl: { key: 'NEW_KEY' } });
         });
+
+        it('lets an explicit null secret remove the stored key and keep the other ssl settings', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: { certificate: 'NEW_CERT' },
+            secrets: { ssl: { key: null } },
+          } as any);
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: null } });
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({ ssl: JSON.stringify({ certificate: 'NEW_CERT' }) })
+          );
+        });
+
+        it('lets an explicit null remove the TLS key of an OTLP output', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output-with-secret', {
+            secrets: { otlp_exporter: { tls: { key_pem: null } } },
+          } as any);
+
+          expect(sentSecrets().secrets).toEqual({ otlp_exporter: { tls: { key_pem: null } } });
+        });
+
+        it('removes the Kafka password when the authentication type changes', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { auth_type: 'ssl' } as any
+          );
+
+          expect(sentSecrets().secrets).toBeUndefined();
+        });
+
+        it('keeps the Kafka password when the update names user_pass again', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { auth_type: 'user_pass', username: 'kafka' } as any
+          );
+
+          expect(sentSecrets().secrets).toEqual({
+            password: { id: 'kafka-password-secret-id' },
+          });
+        });
       });
     });
   });

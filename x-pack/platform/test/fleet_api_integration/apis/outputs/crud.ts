@@ -896,6 +896,50 @@ export default function (providerContext: FtrProviderContext) {
           await expectSecretDeleted(secretId);
         });
 
+        it('removes only the ssl key when it is cleared with an explicit null', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: { certificate: 'CERTIFICATE', certificate_authorities: ['CA1', 'CA2'] },
+              secrets: { ssl: { key: null } },
+            })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('CERTIFICATE');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the password of a kafka output when the authentication type changes', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ auth_type: 'none' })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.password).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
         it('keeps the password of a kafka output when only the name is updated', async function () {
           const res = await supertest
             .post(`/api/fleet/outputs`)
