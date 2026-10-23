@@ -40,8 +40,8 @@ type FindAndTransformLegacyActionsReturn = Promise<{
 // ruleThrottle can have special values 'no_actions' or 'rule', or a duration like e.g. '1h'
 // 'rule' means actions fire each time the rule runs, whereas a duration means the actions are
 // throttled to only fire once per the specified time duration
-const hasNoThrottledActions = ({ ruleThrottle }: LegacyIRuleActionsAttributes): boolean =>
-  ruleThrottle === 'no_actions' || ruleThrottle === 'rule';
+const hasThrottledActions = ({ ruleThrottle }: LegacyIRuleActionsAttributes): boolean =>
+  ruleThrottle !== 'no_actions' && ruleThrottle !== 'rule';
 
 const getConnectorId = (
   references: SavedObjectReference[],
@@ -244,10 +244,10 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
         throw new Error('Failed to find rule reference on legacy action Saved Object');
       }
 
-      if (hasNoThrottledActions(savedObject.attributes)) {
-        // Still register the rule so that bulkMigrateLegacyActions resets
-        // notifyWhen/throttle and adds per-action frequency to existing actions,
-        // even though there are no new throttled actions to migrate from the sidecar.
+      if (!hasThrottledActions(savedObject.attributes)) {
+        // There are no actions to copy: the actions that run are the ones already on the rule.
+        // The rule is still part of the result, with nothing to add, because its legacy notify
+        // setting still has to be applied to those actions.
         transformedActionsByRuleId[ruleId] = { transformedActions: [], transformedReferences: [] };
         return;
       }
