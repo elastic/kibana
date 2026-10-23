@@ -49861,8 +49861,6 @@
     "xpack.significantEventsApp.detectionsTab.fetchError": "Erkennungen konnten nicht geladen werden",
     "xpack.significantEventsApp.detectionsTab.minimizeDetailsAriaLabel": "Details ausblenden",
     "xpack.significantEventsApp.detectionsTab.ruleColumn": "Regel",
-    "xpack.significantEventsApp.detectionsTab.statusPending": "Ausstehend",
-    "xpack.significantEventsApp.detectionsTab.statusProcessed": "Verarbeitet",
     "xpack.significantEventsApp.detectionsTab.tableCaption": "Erkennungen",
     "xpack.significantEventsApp.detectionsTab.timestampColumn": "Zeitstempel",
     "xpack.significantEventsApp.detectionsTab.viewDetailsAriaLabel": "Details anzeigen",
