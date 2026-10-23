@@ -8,7 +8,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,6 +29,7 @@ import {
   useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
 
+import { AgentBuilderPrivilegeCallout } from '../../components/agent_builder_privilege_callout/agent_builder_privilege_callout';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
@@ -37,7 +37,6 @@ import { useQueuePolling } from '../../hooks/use_queue_polling';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
-import { AGENT_BUILDER_PRIVILEGE_REQUIRED } from '../conversations/translations';
 import { EscalationsOpenNote } from './escalations_open_note';
 import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
@@ -215,15 +214,7 @@ export const EscalationsPage: React.FC = () => {
 
         {!canAccessAgentBuilder && (
           <EuiFlexItem grow={false}>
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              color="warning"
-              iconType="lock"
-              data-test-subj="alertZeroAgentBuilderPrivilegeCallout"
-            >
-              {AGENT_BUILDER_PRIVILEGE_REQUIRED.callout}
-            </EuiCallOut>
+            <AgentBuilderPrivilegeCallout />
           </EuiFlexItem>
         )}
 

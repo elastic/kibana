@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiCallOut } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   PROPOSALS_UI_CAPABILITY_SHOW,
@@ -81,6 +81,7 @@ import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
+import { AgentBuilderPrivilegeCallout } from '../../components/agent_builder_privilege_callout/agent_builder_privilege_callout';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import {
   ALERTZERO_UI_EVENTS,
@@ -551,15 +552,7 @@ const ConversationsPageContent: React.FC = () => {
         </EuiFlexItem>
         {!canAccessAgentBuilder && (
           <EuiFlexItem grow={false}>
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              color="warning"
-              iconType="lock"
-              data-test-subj="alertZeroAgentBuilderPrivilegeCallout"
-            >
-              {AGENT_BUILDER_PRIVILEGE_REQUIRED.callout}
-            </EuiCallOut>
+            <AgentBuilderPrivilegeCallout />
           </EuiFlexItem>
         )}
         <ScanFailureCallout surface="queue" wrapper={wrapScanFailureCallout} />
