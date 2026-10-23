@@ -77,6 +77,7 @@
     "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/es-types",
+    "@kbn/es-errors",
     "@kbn/lazy-object",
     "@kbn/maintenance-windows-plugin",
     "@kbn/config",
