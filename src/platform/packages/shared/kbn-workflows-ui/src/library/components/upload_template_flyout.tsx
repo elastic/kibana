@@ -65,7 +65,7 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
 
       if (file.size > MAX_FILE_BYTES) {
         setError(
-          i18n.translate('workflows.library.upload.tooLargeError', {
+          i18n.translate('workflowsUi.library.upload.tooLargeError', {
             defaultMessage: 'The file is too large (limit {limit} KB).',
             values: { limit: Math.floor(MAX_FILE_BYTES / 1024) },
           })
@@ -86,7 +86,7 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
           setError(
             err instanceof TemplateParseError
               ? err.message
-              : i18n.translate('workflows.library.upload.readError', {
+              : i18n.translate('workflowsUi.library.upload.readError', {
                   defaultMessage: 'The file could not be read.',
                 })
           );
@@ -108,7 +108,7 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id={titleId}>
-              {i18n.translate('workflows.library.upload.title', {
+              {i18n.translate('workflowsUi.library.upload.title', {
                 defaultMessage: 'Install template from file',
               })}
             </h2>
@@ -118,7 +118,7 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
         <EuiFlyoutBody>
           <EuiText size="s" color="subdued">
             <p>
-              {i18n.translate('workflows.library.upload.description', {
+              {i18n.translate('workflowsUi.library.upload.description', {
                 defaultMessage:
                   'Upload a workflow template YAML file. It is validated in your browser and never uploaded until you install it.',
               })}
@@ -127,13 +127,13 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
           <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
-            label={i18n.translate('workflows.library.upload.filePickerLabel', {
+            label={i18n.translate('workflowsUi.library.upload.filePickerLabel', {
               defaultMessage: 'Template file',
             })}
           >
             <EuiFilePicker
               fullWidth
-              initialPromptText={i18n.translate('workflows.library.upload.filePickerPrompt', {
+              initialPromptText={i18n.translate('workflowsUi.library.upload.filePickerPrompt', {
                 defaultMessage: 'Select or drag and drop a .yml file',
               })}
               accept=".yml,.yaml"
@@ -167,7 +167,7 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
                 color="success"
                 iconType="check"
                 size="s"
-                title={i18n.translate('workflows.library.upload.validTitle', {
+                title={i18n.translate('workflowsUi.library.upload.validTitle', {
                   defaultMessage: '"{name}" is ready to install',
                   values: { name: parsed.name },
                 })}
@@ -186,7 +186,7 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
                 flush="left"
                 data-test-subj="workflowLibraryUploadCancel"
               >
-                {i18n.translate('workflows.library.upload.cancel', { defaultMessage: 'Cancel' })}
+                {i18n.translate('workflowsUi.library.upload.cancel', { defaultMessage: 'Cancel' })}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -196,7 +196,7 @@ export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
                 disabled={!parsed}
                 data-test-subj="workflowLibraryUploadContinue"
               >
-                {i18n.translate('workflows.library.upload.continue', {
+                {i18n.translate('workflowsUi.library.upload.continue', {
                   defaultMessage: 'Continue',
                 })}
               </EuiButton>

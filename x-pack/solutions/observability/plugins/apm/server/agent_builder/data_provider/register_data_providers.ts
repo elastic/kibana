@@ -247,7 +247,12 @@ export function registerDataProviders({
         };
 
         if ('serviceName' in location) {
-          return { type: 'service' as const, serviceName: location.serviceName, metrics };
+          return {
+            type: 'service' as const,
+            serviceName: location.serviceName,
+            agentName: location.agentName,
+            metrics,
+          };
         }
 
         return {

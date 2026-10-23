@@ -43,6 +43,10 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     statusMessage?: string;
     deploymentId?: string;
     deploymentName?: string;
+    /** Integration name used by the last deploy, before any per-package suffix. */
+    integrationName?: string;
+    /** Set to null to clear the description. */
+    description?: string | null;
     services?: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     attemptCount?: number;

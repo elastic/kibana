@@ -37,6 +37,7 @@ import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
   extractInheritedViewModeObservable,
+  getParentContext,
   saveUpdatedLinkedAnnotationsToLibrary,
 } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
@@ -148,6 +149,7 @@ export function initializeEditApi(
           valueInput: currentState,
           originatingApp: parentApiContext.currentAppId ?? 'dashboards',
           originatingPath: parentApiContext.getCurrentPath?.(),
+          originatingContainer: getParentContext(parentApi)?.type,
           searchSessionId: currentState.searchSessionId,
         },
         skipAppLeave,

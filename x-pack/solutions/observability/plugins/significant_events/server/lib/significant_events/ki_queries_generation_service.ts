@@ -17,6 +17,7 @@ export interface GenerateKIQueriesParams {
   source: NightshiftSource;
   connectorId?: string;
   runId: string;
+  maxExistingQueriesForContext: number;
 }
 
 export interface GenerateKIQueriesDependencies {
@@ -33,7 +34,7 @@ export async function generateKIQueries(
   params: GenerateKIQueriesParams,
   deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
-  const { source, connectorId: connectorIdOverride, runId } = params;
+  const { source, connectorId: connectorIdOverride, runId, maxExistingQueriesForContext } = params;
   const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
 
   const connectorId = await resolveModel(connectorIdOverride);
@@ -58,6 +59,7 @@ export async function generateKIQueries(
     interactionId: runId,
     source,
     existingQueries,
+    maxExistingQueriesForContext,
     signal,
     logger: logger.get('significant_events_queries_generation'),
   });

@@ -33,6 +33,7 @@ import {
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { AddOtherFilterHandler } from '@kbn/unified-field-list';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -240,6 +241,12 @@ export function DiscoverLayout() {
   const onAddFilter = useCallback<DocViewFilterFn>(
     (field, values, operation) => {
       dispatch(addFilter({ field, value: values, mode: operation }));
+    },
+    [addFilter, dispatch]
+  );
+  const onAddOtherFilter = useCallback<AddOtherFilterHandler>(
+    (field, terms, { negate }) => {
+      dispatch(addFilter({ field, value: terms, mode: negate ? '-' : '+', otherBucket: true }));
     },
     [addFilter, dispatch]
   );
@@ -453,6 +460,7 @@ export function DiscoverLayout() {
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onAddFilter}
+                onAddOtherFilter={onAddOtherFilter}
                 onChangeDataView={onChangeDataView}
                 onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}

@@ -18,7 +18,8 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
-import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
+import { bindLocatorsToHost, getAlertingV2Locators } from '../../application/bind_locators_to_host';
+import { LocatorProvider } from '../../application/locator_context';
 import {
   RuleSummaryAboutSection,
   RuleSummaryArtifactsSection,
@@ -43,6 +44,10 @@ export const RuleCanvasContent = ({
   const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
   const [queryClient] = React.useState(() => new QueryClient());
+  const locators = useMemo(
+    () => bindLocatorsToHost(getAlertingV2Locators(share), OBSERVABILITY_ALERTING_HOST),
+    [share]
+  );
 
   const { data, origin: savedObjectId } = attachment;
   const isPersisted = isPersistedSavedObject(savedObjectId);
@@ -132,14 +137,16 @@ export const RuleCanvasContent = ({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <EuiPanel paddingSize="l" hasShadow={false}>
-        <RuleSummaryBody rule={summaryRule}>
-          <RuleSummaryAboutSection />
-          <RuleSummaryQueryPreviewSection />
-          <RuleSummaryInvestigationSection />
-          <RuleSummaryArtifactsSection />
-        </RuleSummaryBody>
-      </EuiPanel>
+      <LocatorProvider locators={locators}>
+        <EuiPanel paddingSize="l" hasShadow={false}>
+          <RuleSummaryBody rule={summaryRule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryQueryPreviewSection />
+            <RuleSummaryInvestigationSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
+        </EuiPanel>
+      </LocatorProvider>
     </QueryClientProvider>
   );
 };

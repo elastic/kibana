@@ -43,6 +43,7 @@ export const getRenderCellValueFn = ({
   documentsDisplayMode,
   jsonModeSettings,
   selectedColumns,
+  isInteractive = true,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -56,6 +57,7 @@ export const getRenderCellValueFn = ({
   documentsDisplayMode: DocumentsDisplayMode;
   jsonModeSettings?: JsonModeSettings;
   selectedColumns?: string[];
+  isInteractive?: boolean;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -184,6 +186,7 @@ export const getRenderCellValueFn = ({
         fieldFormats,
         closePopover,
         dataSource,
+        isInteractive,
       });
     }
 
@@ -199,6 +202,7 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isCompressed={isCompressed}
           dataSource={dataSource}
+          isInteractive={isInteractive}
         />
       );
     }
@@ -211,6 +215,7 @@ export const getRenderCellValueFn = ({
           fieldFormats,
           dataView,
           field,
+          options: { isInteractive },
         })}
       </span>
     );
@@ -237,6 +242,7 @@ function renderPopoverContent({
   fieldFormats,
   closePopover,
   dataSource,
+  isInteractive = true,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -246,6 +252,7 @@ function renderPopoverContent({
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
   dataSource: DataSource | undefined;
+  isInteractive?: boolean;
 }) {
   const closeButton = (
     <EuiToolTip
@@ -312,6 +319,7 @@ function renderPopoverContent({
               fieldFormats,
               dataView,
               field,
+              options: { isInteractive },
             })}
           </div>
         </DataTablePopoverCellValue>

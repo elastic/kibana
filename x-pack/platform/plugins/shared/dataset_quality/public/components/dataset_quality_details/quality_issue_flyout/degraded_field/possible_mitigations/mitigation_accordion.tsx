@@ -51,7 +51,6 @@ export function MitigationAccordion({
           paddingSize="none"
           initialIsOpen={initialIsOpen}
           data-test-subj={`${dataTestSubjPrefix}Accordion`}
-          arrowProps={{ color: 'primary' }}
         >
           <EuiHorizontalRule margin="s" />
           {children}

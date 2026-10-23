@@ -10,7 +10,10 @@ import { schema } from '@kbn/config-schema';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  isVersionedAttachmentWithOrigin,
+} from '@kbn/agent-builder-common/attachments';
 import { CONVERSATION_ID_MAX_LENGTH, isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -723,7 +726,11 @@ export function registerAttachmentRoutes({
     .put({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments/{attachment_id}/origin`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+        authz: {
+          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+          // Not enforced: surfaced in `request.authzResult` for attachment type hooks that edit agents.
+          extendedPrivileges: [apiPrivileges.manageAgents],
+        },
       },
       access: 'public',
       summary: 'Update attachment origin',
@@ -823,10 +830,29 @@ export function registerAttachmentRoutes({
           { access: 'converse', source: 'http_api' }
         );
 
+        const { onOriginUpdated } = attachmentsService.getTypeDefinition(updated.type) ?? {};
+        const warnings: string[] = [];
+        if (onOriginUpdated && isVersionedAttachmentWithOrigin(updated)) {
+          try {
+            await onOriginUpdated(updated, {
+              request,
+              conversationId,
+              agentId: conversation.agent_id,
+              canManageAgents: request.authzResult?.[apiPrivileges.manageAgents] === true,
+            });
+          } catch (e) {
+            logger.warn(
+              `onOriginUpdated hook failed for attachment '${attachmentId}' (${updated.type}): ${e.message}`
+            );
+            warnings.push(e.message);
+          }
+        }
+
         return response.ok<UpdateOriginResponse>({
           body: {
             success: true,
             attachment: updated,
+            ...(warnings.length > 0 ? { warnings } : {}),
           },
         });
       })

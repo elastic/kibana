@@ -715,6 +715,7 @@ export class AlertingPlugin {
     changeTrackingService?.initialize({
       elasticsearchClient: core.elasticsearch.client.asInternalUser,
       authService: core.security.authc,
+      userProfileService: core.userProfile,
     });
 
     rulesClientFactory.initialize({

@@ -56,8 +56,8 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
 };
 
 /**
- * Legacy fetch used undici's default 300s wait for response headers. The step `timeout` and
- * workflow cancellation abort sooner through the step's abort signal.
+ * Undici's default wait for response headers. Used when the step has no `timeout`; legacy fetch
+ * raises it only for a longer step `timeout`.
  */
 const KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS = 300_000;
 
@@ -292,7 +292,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         maxErrorBodyBytes: KIBANA_STEP_ERROR_BODY_MAX_BYTES,
         target,
         signal: this.stepExecutionRuntime.abortController.signal,
-        timeout: KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS,
+        timeout:
+          this.stepExecutionRuntime.getStepTimeoutMs() ?? KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS,
       });
     } catch (error) {
       if (error instanceof CallKibanaApiResponseTooLargeError) {
@@ -581,10 +582,19 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       method,
       headers: outboundHeaders,
       body: fetchBody,
+      signal: this.stepExecutionRuntime.abortController.signal,
     };
 
-    // Apply undici Agent with fetcher options
-    if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
+    const stepTimeoutMs = this.stepExecutionRuntime.getStepTimeoutMs();
+    // Shorter step timeouts abort through the signal before undici's default headers timeout.
+    const headersTimeout =
+      stepTimeoutMs !== undefined && stepTimeoutMs > KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS
+        ? stepTimeoutMs
+        : undefined;
+    const hasFetcherOptions = fetcherOptions && Object.keys(fetcherOptions).length > 0;
+
+    // Apply undici Agent with fetcher options and the step timeout
+    if (hasFetcherOptions || headersTimeout !== undefined) {
       const { Agent } = await import('undici');
 
       const {
@@ -593,9 +603,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         max_redirects,
         keep_alive,
         ...otherOptions
-      } = fetcherOptions;
+      } = fetcherOptions ?? {};
 
-      const agentOptions: any = { ...otherOptions };
+      const agentOptions: any = {
+        ...(headersTimeout !== undefined ? { headersTimeout } : {}),
+        ...otherOptions,
+      };
 
       // Map our options to undici Agent options
       if (skip_ssl_verification) {

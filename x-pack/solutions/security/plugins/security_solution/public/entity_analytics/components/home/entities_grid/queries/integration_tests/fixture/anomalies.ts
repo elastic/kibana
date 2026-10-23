@@ -26,6 +26,9 @@ const ANOMALY_IDENTITIES: ReadonlyArray<Record<string, string>> = [
   { 'user.name': 'alice', 'event.module': 'okta' },
   { 'user.name': 'alice', 'event.module': 'okta' },
   { 'host.id': 'h2', 'host.name': 'web-2' },
+  // Records of an alias of host:h1 and of an alias of user:bob@okta.
+  { 'host.id': 'h4', 'host.name': 'web-4' },
+  { 'user.name': 'carol', 'event.module': 'okta' },
 ];
 
 /** Final records of an installed security job; matches the queries' `.ml-anomalies-shared*`. */

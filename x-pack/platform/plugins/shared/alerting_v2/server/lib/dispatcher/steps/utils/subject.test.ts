@@ -32,13 +32,12 @@ describe('alertSubject', () => {
     );
   });
 
-  it('returns rule_id when source is null (treated as internal)', () => {
-    expect(alertSubject({ source: null, rule_id: 'rule-1' })).toBe('rule-1');
-  });
-
-  it('returns rule_id when source is undefined (treated as internal)', () => {
-    expect(alertSubject({ source: undefined, rule_id: 'rule-1' })).toBe('rule-1');
-  });
+  it.each([null, undefined])(
+    'returns rule_id when source is %s (treated as internal)',
+    (source) => {
+      expect(alertSubject({ source, rule_id: 'rule-1' })).toBe('rule-1');
+    }
+  );
 
   it('throws when source is null/internal and rule_id is also null (malformed data)', () => {
     expect(() => alertSubject({ source: null, rule_id: null })).toThrow(

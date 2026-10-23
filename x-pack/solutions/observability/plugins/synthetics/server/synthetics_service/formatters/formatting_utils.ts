@@ -144,6 +144,10 @@ function frequencyToString(value?: number): string | undefined {
   return name ? name.toLowerCase() : 'unknown';
 }
 
+// A one-off window created through the public API is stored without a freq, and Heartbeat cannot
+// unpack a window without one. Send it as a single yearly occurrence, the shape the UI stores.
+const ONE_OFF_RULE_DEFAULTS = { freq: 'yearly', count: 1 } as const;
+
 export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
   if (!mws) {
     return;
@@ -151,9 +155,10 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
   const formatted = mws.map((mw) => {
     const mwRule = mw?.rRule;
     if (mw && mwRule) {
+      const freq = frequencyToString(mwRule.freq);
       return {
         ...mwRule,
-        freq: frequencyToString(mwRule.freq),
+        ...(freq === undefined ? ONE_OFF_RULE_DEFAULTS : { freq }),
         duration: `${mw.duration}ms`,
       };
     }

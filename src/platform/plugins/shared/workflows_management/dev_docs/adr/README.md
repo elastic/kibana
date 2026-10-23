@@ -47,4 +47,5 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 | [0009](0009_alignment_ignored_edges.md) | `alignmentIgnoredEdges`: excluding failure edges from cross-axis alignment | Accepted |
 | [0010](0010_fallback_lane_graph_model.md) | Fallback lane graph model | Accepted (Decision 2 superseded by ADR-0012) |
 | [0011](0011_post_dagre_positioning_pipeline.md) | Post-dagre positioning pipeline | Superseded by ADR-0012 |
-| [0012](0012_reserved_side_lanes.md) | Reserved side lanes | Accepted |
+| [0012](0012_reserved_side_lanes.md) | Reserved side lanes | Accepted (pipeline and post-dagre passes superseded by ADR-0013) |
+| [0013](0013_structure_driven_cross_axis_packing.md) | Structure-driven cross-axis packing | Accepted |
