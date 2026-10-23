@@ -4182,14 +4182,14 @@ importers:
         specifier: 1.5.5
         version: 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(ws@8.22.0)
       '@launchdarkly/js-client-sdk':
-        specifier: 4.10.4
-        version: 4.10.4
+        specifier: 4.11.2
+        version: 4.11.2
       '@launchdarkly/node-server-sdk':
-        specifier: 9.13.8
-        version: 9.13.8(supports-color@10.2.2)
+        specifier: 9.14.3
+        version: 9.14.3(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.7
-        version: 2.0.7(@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.0.11
+        version: 2.0.11(@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -4218,14 +4218,14 @@ importers:
         specifier: 1.32.1
         version: 1.32.1(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.6.5)
       '@moonrepo/cli':
-        specifier: 2.4.6
-        version: 2.4.6
+        specifier: 2.6.2
+        version: 2.6.2
       '@openfeature/core':
         specifier: 1.12.0
         version: 1.12.0
       '@openfeature/launchdarkly-client-provider':
         specifier: 0.4.0
-        version: 0.4.0(@launchdarkly/js-client-sdk@4.10.4)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
+        version: 0.4.0(@launchdarkly/js-client-sdk@4.11.2)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk':
         specifier: 1.23.0
         version: 1.23.0(@openfeature/core@1.12.0)
@@ -12560,28 +12560,28 @@ packages:
     peerDependencies:
       '@langchain/core': 1.2.3
 
-  '@launchdarkly/js-client-sdk-common@1.32.2':
-    resolution: {integrity: sha512-1m5cI3lVbuXmrP74Nz+1+ZUV8qEPGZzvUYpvoynowdweWX5EEuUK3vHtqC9umhSe2Z/Ujxy/vcmPgH3Q+5BHQA==}
+  '@launchdarkly/js-client-sdk-common@1.32.5':
+    resolution: {integrity: sha512-NrgHgztMHaxrw58/3QV+vFfCRy1K/yW8gikAClRQz4Y2+anpeURiKVmD4lBbkxet+IfBIZ7Fxcl42+xXJ01t2Q==}
 
-  '@launchdarkly/js-client-sdk@4.10.4':
-    resolution: {integrity: sha512-n1gvH/Or8/M2bR2HNqyLKrZ7x7lJOQx7WOaWnSibqf9hmtauE169HgtbtdMoUA9s22Z5MvSmNF6eBCJbetHlKA==}
+  '@launchdarkly/js-client-sdk@4.11.2':
+    resolution: {integrity: sha512-BDOb0U5xCT+cBcXLD97T9OlK7YgRfGFH4zDW0hXO6Zxkr3RjBs6OBd3NXM+RTb8jizEWIsvuU+b2dUSKNLFtaQ==}
 
-  '@launchdarkly/js-sdk-common@2.27.0':
-    resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
+  '@launchdarkly/js-sdk-common@2.29.0':
+    resolution: {integrity: sha512-WBW4ajbfJO6RGEB4Ax44d7/6jl/HhZOi61dNnCJ3HdHS5znwGV1eh8dUnRFISiIfnodWbpDRaVv4fG8QdKeFWw==}
 
-  '@launchdarkly/js-server-sdk-common@2.21.6':
-    resolution: {integrity: sha512-WyfcBG1oun5cgvZSTUzpFZFtgBd0uk9WVolt0sQTcYfBA0nS6A1bhdgGtM8FjdCq+6ZRKQeiwvjkQdVoHLrvBw==}
+  '@launchdarkly/js-server-sdk-common@2.24.0':
+    resolution: {integrity: sha512-htPGkkvxiurlOoyNG6oKywg+dC/OV3uEt+Qg0QX2MVgK7VtAw24q1aXIFxItdJ+dS0IMLKbiOho1MQqKAS2btA==}
 
-  '@launchdarkly/node-server-sdk@9.13.8':
-    resolution: {integrity: sha512-E4grvdy7TKYvG3RqjrpCNoH2O1XWmTU0YDIm4UMBCXfM2Hf7w10aPGWM/tqtyViBiODmc36Pf3ILntZJYpaWlA==}
+  '@launchdarkly/node-server-sdk@9.14.3':
+    resolution: {integrity: sha512-d0UbbtBqW5g+XjFNKv/JksQKr37B8cMG+ASyg0RlD/Af7YcSoqNScMto2oXHc8LQ9y6aiCd8VDoANgyWMhJ4cA==}
 
-  '@launchdarkly/openfeature-js-server-common@2.0.3':
-    resolution: {integrity: sha512-EIGgztosblBCkDDPiYJ1ke8BnHQz+9D+qHHyr58TRv+4JLpU/3O9zwMQMooUXw2nHWdYphcxI62Rb3AoS2IjFQ==}
+  '@launchdarkly/openfeature-js-server-common@2.0.6':
+    resolution: {integrity: sha512-1zXgkEyChB5OO43WGIIi4TaeMATqVOFYLkv+dijlLGlZIUyRgAZdfbWCr8Ssz+Jeq6aZ/cXOtub7SuEEHSxKjQ==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.7':
-    resolution: {integrity: sha512-wwDm4yiGdl35aLzKZXDkcmKQfr90ZUadsu1zB1LoeQCfhbUvjaWmmi5deUmPpYI5LxP/rmvbo7dB5DM9cIBBUA==}
+  '@launchdarkly/openfeature-node-server@2.0.11':
+    resolution: {integrity: sha512-z949UpCpv3CHxq0URY5cTbfLAVZT1aoU1yQI+3Cr6SPplZ1i+ZIW0+amPUBc/jhXCr7Nzjh/rrWwl1jKIPigWQ==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -12747,46 +12747,46 @@ packages:
     resolution: {integrity: sha512-mQ2s0pYYiav+tzCDR05Zptem8Ey2v8s11lri5RKGhTtL4COVCvVCk5vtyRYNT+9L8qSfyOqqefF9UtnW8mC5jA==}
     engines: {node: '>= 20.19.0'}
 
-  '@moonrepo/cli@2.4.6':
-    resolution: {integrity: sha512-HtkRuq+ACiIVP9VCjSoFb4+eAqPRm2LHP+O4w6BV3vBe1l5L0tsiqiu5kBOQXjQLY8amcg9YHRdi2eAnt9nUgA==}
+  '@moonrepo/cli@2.6.2':
+    resolution: {integrity: sha512-P+iqrVlYBLJb5CK+OFTXDu8AJ72kGT+dOdzsEFzC1hwx2N34RUvxXlaxBRBhRTkYIHL9Zg0SyN6EGoF1l++wjA==}
     hasBin: true
 
-  '@moonrepo/core-linux-arm64-gnu@2.4.6':
-    resolution: {integrity: sha512-0ebdsO6QphnWNIkDcr/G9utPQzWCHzvhekAf5W4F5/UlzemhFkeHgPzPMeq00IBfRBr2HKgfVrbxdT3dq2mSWQ==}
+  '@moonrepo/core-linux-arm64-gnu@2.6.2':
+    resolution: {integrity: sha512-u3nYPxD5Zr+FKmdAG/GDSPEwAkVwxCDhhYx0eIbRApry/vlNm1SYidoP3B5LFSQubtfP63fk2RP0LYzBMk2tFw==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@moonrepo/core-linux-arm64-musl@2.4.6':
-    resolution: {integrity: sha512-I92xgOYIjKud4O/R+jiw2owDRZ0ZJdNy6VKpZ+hrq7bFmw2I7mPNRUCz0f6k/Khdr0MhrpD1T320qNk4mbkUaA==}
+  '@moonrepo/core-linux-arm64-musl@2.6.2':
+    resolution: {integrity: sha512-0Xq9JnJ0FjRmM47OZe0d35W+Vm5SJD/V4DxG0TqkVLFVpwijqYtNyrzrBde3ay/FBkkZ+psLy4OIaa7z10S24g==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@moonrepo/core-linux-x64-gnu@2.4.6':
-    resolution: {integrity: sha512-6ADpz7l/mVra6enk7ktfL5Mhe6m6byOGZ2UD3RO+K++sURnP72G51WcRsw5TceMyPJYQ1h/21f1F/CGf18oZ8Q==}
+  '@moonrepo/core-linux-x64-gnu@2.6.2':
+    resolution: {integrity: sha512-Ocb3m2ogfHCmX1DzEuWXctNRdf7qgiMVW4eE0wN5gxD663xUndgiR+hj07ed/32/0MNo3rXI79V4C4scLvvNLA==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@moonrepo/core-linux-x64-musl@2.4.6':
-    resolution: {integrity: sha512-irQGyg4aMDNp5vBtel6bijTAujchNZjw3RJDWQtDREnd/6HHpHlq0MRhFgQvx9ddU7QaZDAsiXdF5zWgxb6Uew==}
+  '@moonrepo/core-linux-x64-musl@2.6.2':
+    resolution: {integrity: sha512-BDAFwAppz2lMd/zcKqA9BIbL8eX2NceuJN0UNyLy2DWopqyguAA0fbkxOmYXTOtIMllK6Q7zX6fRT38I06Kp1A==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@moonrepo/core-macos-arm64@2.4.6':
-    resolution: {integrity: sha512-JOpEN4cyZK6RjrheCXS2iYUeeyi58xRcoE0pi22Q7nMqB55BHQ2VDDXas/XXA32M143IaQQrLu8+fcH0ypmeQw==}
+  '@moonrepo/core-macos-arm64@2.6.2':
+    resolution: {integrity: sha512-B5zVp9Wr0MJ4kgjJFJpUOPCNFKJblUzON4TA+SnlhuqC3X8ep6FBCszpsyc5YKCFa4sIJcKUt4CJGfOtvSrrbA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@moonrepo/core-macos-x64@2.4.6':
-    resolution: {integrity: sha512-6Nxlc3KRGpRleTui2a7hiDnlnA2Er3ZYUHlxbQyJottTSRVl4iroo9c0WPcPTRM0j8Kgrkk0plskkZfcTQhbCQ==}
+  '@moonrepo/core-macos-x64@2.6.2':
+    resolution: {integrity: sha512-Rj4gUI3SJwhgu8tCaixbqAyYBiXTzNVlXXhv9xcUoAm9pYQUoAluPh7FLPd5ubXGpDnHReftT58Miq3sI5SilA==}
     cpu: [x64]
     os: [darwin]
 
-  '@moonrepo/core-windows-x64-msvc@2.4.6':
-    resolution: {integrity: sha512-bIyOiXQT7Pk8hOxLPHmJTVQL1CD4ZkSmQmv/l597fgiYbC9O1AzVzMi83LfZwxf9l/Czg5RgjhXMzgCLxeGXzg==}
+  '@moonrepo/core-windows-x64-msvc@2.6.2':
+    resolution: {integrity: sha512-ABfBlco/Qbn8ed6SvTL4bqqD5dMUrbCCkIthaWfNrviM8WHjnbaFt8oYpGwInC/S2zmyWuxoEroV3gjkFNfrTg==}
     cpu: [x64]
     os: [win32]
 
@@ -20021,8 +20021,8 @@ packages:
     peerDependencies:
       fp-ts: ^2.5.0
 
-  ip-address@10.7.2:
-    resolution: {integrity: sha512-7H/2gFSIitxc0hG3nOI1glS8QLo/EHBFFLk8vEUjXY/xu0AdL8jZ9U1IzO2PUm0d2D/ofQcAifb0g6OBkt8U7w==}
+  ip-address@10.7.4:
+    resolution: {integrity: sha512-DWBMKyeM25D70nrIiTkgQth59/G+naKOTep6huF9j+GmeK3DMD60Zvxg5d5qQnz+38AHgou6ean2LECX+lrKDg==}
     engines: {node: '>= 12'}
 
   ip-regex@2.1.0:
@@ -20880,11 +20880,11 @@ packages:
   language-tags@1.0.5:
     resolution: {integrity: sha512-qJhlO9cGXi6hBGKoxEG/sKZDAHD5Hnu9Hs4WbOY3pCWXDhw0N8x1NenNzm2EnNLkLkk7J2SdxAkDSbb6ftT+UQ==}
 
-  launch-editor@2.14.1:
-    resolution: {integrity: sha512-QWBrQsMpH7gPr965dsKD/3cKWiNoTjpATQf++Xq63N6sKRGMwlVXz41O1IZTMfZQgBctD/K5Zt06+/I6pP6+HA==}
+  launch-editor@2.14.2:
+    resolution: {integrity: sha512-NHJEb30MGBCkmZXLZwz25t37QR4aY03ZzPYUJXOJaOa92uWwExI9SBQUuIznBYc1xkD7cJNGX7oc3Nl3sq2kQQ==}
 
-  launchdarkly-eventsource@2.2.0:
-    resolution: {integrity: sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==}
+  launchdarkly-eventsource@2.3.0:
+    resolution: {integrity: sha512-q0uiciHQVFJLhVwE0/mJzBCiuw6mkBv9kB414IlHTZE1VEoU8pkwt9P2n6w6vyT7rDlA6xZm2LSTjdMBigqbjQ==}
     engines: {node: '>=0.12.0'}
 
   lazy-ass@2.0.3:
@@ -25168,8 +25168,8 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
-  undici@6.29.0:
-    resolution: {integrity: sha512-R+RODBqp6i2pPflGdq+xIOUkl+RNfGgHwoinecKu/JCuf2uO06cOKoDbI2P7Dn6KcswdKwrczbU6IYJ6K8X+wg==}
+  undici@6.29.1:
+    resolution: {integrity: sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA==}
     engines: {node: '>=18.17'}
 
   undici@7.30.1:
@@ -26168,7 +26168,7 @@ snapshots:
   '@actions/http-client@3.0.2':
     dependencies:
       tunnel: 0.0.6
-      undici: 6.29.0
+      undici: 6.29.1
 
   '@actions/io@2.0.0': {}
 
@@ -27999,7 +27999,7 @@ snapshots:
   '@elastic/opamp-client-node@0.5.0':
     dependencies:
       '@bufbuild/protobuf': 2.5.2
-      undici: 6.29.0
+      undici: 6.29.1
       uuid: 11.1.1
 
   '@elastic/opentelemetry-node@1.20.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)':
@@ -28159,7 +28159,7 @@ snapshots:
       ms: 2.1.3
       secure-json-parse: 3.0.2
       tslib: 2.8.1
-      undici: 6.29.0
+      undici: 6.29.1
     transitivePeerDependencies:
       - supports-color
 
@@ -29698,38 +29698,38 @@ snapshots:
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
       js-tiktoken: 1.0.21
 
-  '@launchdarkly/js-client-sdk-common@1.32.2':
+  '@launchdarkly/js-client-sdk-common@1.32.5':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.27.0
+      '@launchdarkly/js-sdk-common': 2.29.0
 
-  '@launchdarkly/js-client-sdk@4.10.4':
+  '@launchdarkly/js-client-sdk@4.11.2':
     dependencies:
-      '@launchdarkly/js-client-sdk-common': 1.32.2
+      '@launchdarkly/js-client-sdk-common': 1.32.5
 
-  '@launchdarkly/js-sdk-common@2.27.0': {}
+  '@launchdarkly/js-sdk-common@2.29.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.21.6':
+  '@launchdarkly/js-server-sdk-common@2.24.0':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.27.0
+      '@launchdarkly/js-sdk-common': 2.29.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.21.6
+      '@launchdarkly/js-server-sdk-common': 2.24.0
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
-      launchdarkly-eventsource: 2.2.0
+      launchdarkly-eventsource: 2.3.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.0.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.27.0
+      '@launchdarkly/js-sdk-common': 2.29.0
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.7(@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.0.11(@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.13.8(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.0.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/node-server-sdk': 9.14.3(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@leichtgewicht/ip-codec@2.0.5':
@@ -29928,37 +29928,37 @@ snapshots:
       prebuild-install: 7.1.3
     optional: true
 
-  '@moonrepo/cli@2.4.6':
+  '@moonrepo/cli@2.6.2':
     dependencies:
       detect-libc: 2.1.2
     optionalDependencies:
-      '@moonrepo/core-linux-arm64-gnu': 2.4.6
-      '@moonrepo/core-linux-arm64-musl': 2.4.6
-      '@moonrepo/core-linux-x64-gnu': 2.4.6
-      '@moonrepo/core-linux-x64-musl': 2.4.6
-      '@moonrepo/core-macos-arm64': 2.4.6
-      '@moonrepo/core-macos-x64': 2.4.6
-      '@moonrepo/core-windows-x64-msvc': 2.4.6
+      '@moonrepo/core-linux-arm64-gnu': 2.6.2
+      '@moonrepo/core-linux-arm64-musl': 2.6.2
+      '@moonrepo/core-linux-x64-gnu': 2.6.2
+      '@moonrepo/core-linux-x64-musl': 2.6.2
+      '@moonrepo/core-macos-arm64': 2.6.2
+      '@moonrepo/core-macos-x64': 2.6.2
+      '@moonrepo/core-windows-x64-msvc': 2.6.2
 
-  '@moonrepo/core-linux-arm64-gnu@2.4.6':
+  '@moonrepo/core-linux-arm64-gnu@2.6.2':
     optional: true
 
-  '@moonrepo/core-linux-arm64-musl@2.4.6':
+  '@moonrepo/core-linux-arm64-musl@2.6.2':
     optional: true
 
-  '@moonrepo/core-linux-x64-gnu@2.4.6':
+  '@moonrepo/core-linux-x64-gnu@2.6.2':
     optional: true
 
-  '@moonrepo/core-linux-x64-musl@2.4.6':
+  '@moonrepo/core-linux-x64-musl@2.6.2':
     optional: true
 
-  '@moonrepo/core-macos-arm64@2.4.6':
+  '@moonrepo/core-macos-arm64@2.6.2':
     optional: true
 
-  '@moonrepo/core-macos-x64@2.4.6':
+  '@moonrepo/core-macos-x64@2.6.2':
     optional: true
 
-  '@moonrepo/core-windows-x64-msvc@2.4.6':
+  '@moonrepo/core-windows-x64-msvc@2.6.2':
     optional: true
 
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
@@ -30218,9 +30218,9 @@ snapshots:
 
   '@openfeature/core@1.12.0': {}
 
-  '@openfeature/launchdarkly-client-provider@0.4.0(@launchdarkly/js-client-sdk@4.10.4)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))':
+  '@openfeature/launchdarkly-client-provider@0.4.0(@launchdarkly/js-client-sdk@4.11.2)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-client-sdk': 4.10.4
+      '@launchdarkly/js-client-sdk': 4.11.2
       '@openfeature/web-sdk': 1.10.0(@openfeature/core@1.12.0)
       lodash.isempty: 4.4.0
 
@@ -31475,7 +31475,7 @@ snapshots:
       '@rsdoctor/graph': 1.6.1(@rspack/core@2.1.8(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/types': 1.6.1(@rspack/core@2.1.8(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/utils': 1.6.1(@rspack/core@2.1.8(@swc/helpers@0.5.19))(webpack@5.96.1)
-      launch-editor: 2.14.1
+      launch-editor: 2.14.2
       safer-buffer: 2.1.2
       socket.io: 4.8.1(supports-color@10.2.2)
       tapable: 2.3.3
@@ -36803,7 +36803,7 @@ snapshots:
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       express: 5.2.1(supports-color@10.2.2)
-      ip-address: 10.7.2
+      ip-address: 10.7.4
     transitivePeerDependencies:
       - supports-color
 
@@ -38312,7 +38312,7 @@ snapshots:
     dependencies:
       fp-ts: 2.16.11
 
-  ip-address@10.7.2: {}
+  ip-address@10.7.4: {}
 
   ip-regex@2.1.0: {}
 
@@ -39333,12 +39333,12 @@ snapshots:
     dependencies:
       language-subtag-registry: 0.3.23
 
-  launch-editor@2.14.1:
+  launch-editor@2.14.2:
     dependencies:
       picocolors: 1.1.1
       shell-quote: 1.11.0
 
-  launchdarkly-eventsource@2.2.0: {}
+  launchdarkly-eventsource@2.3.0: {}
 
   lazy-ass@2.0.3: {}
 
@@ -43403,7 +43403,7 @@ snapshots:
 
   socks@2.8.10:
     dependencies:
-      ip-address: 10.7.2
+      ip-address: 10.7.4
       smart-buffer: 4.2.0
 
   sonic-boom@3.8.1:
@@ -44509,7 +44509,7 @@ snapshots:
 
   undici-types@7.16.0: {}
 
-  undici@6.29.0: {}
+  undici@6.29.1: {}
 
   undici@7.30.1: {}
 
@@ -45246,7 +45246,7 @@ snapshots:
       graceful-fs: 4.2.11
       http-proxy-middleware: 2.0.10(@types/express@4.17.25)(debug@4.4.3(supports-color@10.2.2))
       ipaddr.js: 2.3.0
-      launch-editor: 2.14.1
+      launch-editor: 2.14.2
       open: 10.2.0
       p-retry: 6.2.1
       schema-utils: 4.5.0

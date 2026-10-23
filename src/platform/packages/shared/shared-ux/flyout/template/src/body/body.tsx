@@ -9,7 +9,7 @@
 
 import React, { Fragment, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { ParsedItem, ParsedPart } from '@kbn/ui-react-assembly';
 import type { FlyoutTabDescriptor } from '../context/tabs_context';
@@ -128,14 +128,33 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
 
   const bodyTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body');
 
+  const isTabbedMode = tabs.length > 0;
+
   // Keyed on `items`, which holds its identity across a tab switch, so `EuiFlyoutBody` receives
   // the same banner element and React skips the subtree.
-  const banner = useMemo(
-    () => renderCalloutBanner(items, resolveZoneTestSubj(undefined, bodyTestSubj, 'Banner')),
-    [items, bodyTestSubj]
-  );
-
-  const isTabbedMode = tabs.length > 0;
+  const banner = useMemo(() => {
+    const callouts = renderCalloutBanner(
+      items,
+      resolveZoneTestSubj(undefined, bodyTestSubj, 'Banner')
+    );
+    // Only tab panels render below the tab bar, so sections and accordions under `Body` join the
+    // banner to stay visible on every tab.
+    const sections = isTabbedMode
+      ? items.filter(
+          (item): item is ParsedPart =>
+            item.type === 'part' &&
+            (item.part === SECTION_PART_NAME || item.part === ACCORDION_PART_NAME)
+        )
+      : [];
+    if (sections.length === 0) return callouts;
+    return (
+      <>
+        {callouts}
+        {callouts && <EuiSpacer size="m" />}
+        <KibanaErrorBoundary>{renderBodyItems(sections)}</KibanaErrorBoundary>
+      </>
+    );
+  }, [items, bodyTestSubj, isTabbedMode]);
   const activeTab = isTabbedMode ? tabs.find((tab) => tab.id === selectedTabId) : undefined;
 
   // The body stays mounted across tab switches, so its scroll position has to be reset by hand.
