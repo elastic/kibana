@@ -6,10 +6,11 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
+import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { buildReinforcementSystemPrompt } from '@kbn/nightshift-decision-trees';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
+import type { ResolveHookWorkflowId } from '../investigation';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
 import {
@@ -37,6 +38,17 @@ export const DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION =
   'Distills a finished investigation into a reusable Mermaid decision tree, merging this run ' +
   'into the existing tree for the symptom and recording what a human had to correct.';
 
+const getBaseConfiguration = (hydrateWorkflowId: string): AgentBaseConfiguration => ({
+  instructions: buildReinforcementSystemPrompt(DECISION_TREE_PROMPT_TOOLS),
+  skill_ids: [],
+  tools: [{ tool_ids: [...SANDBOX_FILE_TOOL_IDS, DECISION_TREE_SUBMIT_TOOL_ID] }],
+  enable_elastic_capabilities: false,
+  connector_ids: [],
+  // Hydration has to run inside this agent's own conversation: the sandbox workspace is
+  // namespaced per conversation, and this agent runs in a different one than the investigator.
+  workflow_ids: [hydrateWorkflowId],
+});
+
 /**
  * Builds the decision-tree reinforcement agent type. It runs after an investigation rather than
  * during one: the reinforce step hands it the investigator's round as conversation history, its
@@ -44,25 +56,28 @@ export const DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION =
  * edits them with the sandbox file tools before `nightshift_submit_optimizer_result` validates
  * and persists the result. The learning tools are added per turn, on follow-up turns only.
  */
-export const getDecisionTreeReinforcementAgentType = (): AgentTypeDefinition => ({
+export const getDecisionTreeReinforcementAgentType = ({
+  resolveHookWorkflowId,
+}: {
+  /** See the investigation agent's option of the same name. */
+  resolveHookWorkflowId?: ResolveHookWorkflowId;
+} = {}): AgentTypeDefinition => ({
   id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
   name: DECISION_TREE_REINFORCEMENT_AGENT_NAME,
   description: DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION,
   avatar_icon: 'logoElastic',
-  baseConfiguration: {
-    instructions: buildReinforcementSystemPrompt(DECISION_TREE_PROMPT_TOOLS),
-    skill_ids: [],
-    tools: [{ tool_ids: [...SANDBOX_FILE_TOOL_IDS, DECISION_TREE_SUBMIT_TOOL_ID] }],
-    enable_elastic_capabilities: false,
-    connector_ids: [],
-    // Hydration has to run inside this agent's own conversation: the sandbox workspace is
-    // namespaced per conversation, and this agent runs in a different one than the investigator.
-    workflow_ids: [NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID],
-  },
+  // Static unless the hook varies by space.
+  baseConfiguration: resolveHookWorkflowId
+    ? async (ctx) =>
+        getBaseConfiguration(
+          await resolveHookWorkflowId(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID, ctx)
+        )
+    : getBaseConfiguration(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID),
 });
 
 export const registerDecisionTreeReinforcementAgentType = (
-  agentBuilder: AgentBuilderPluginSetup
+  agentBuilder: AgentBuilderPluginSetup,
+  options: Parameters<typeof getDecisionTreeReinforcementAgentType>[0] = {}
 ): void => {
-  agentBuilder.agents.registerType(getDecisionTreeReinforcementAgentType());
+  agentBuilder.agents.registerType(getDecisionTreeReinforcementAgentType(options));
 };

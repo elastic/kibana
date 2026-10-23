@@ -28,6 +28,9 @@ jest.mock('@kbn/unsaved-changes-prompt', () => ({
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({ services: mockKibanaServices }),
 }));
+jest.mock('./components/investigation_identity_section', () => ({
+  InvestigationIdentitySection: () => <div data-test-subj="investigation-identity-section" />,
+}));
 jest.mock('./components/run_limits_section', () => ({
   RunLimitsSection: () => <div data-test-subj="run-limits-section" />,
 }));

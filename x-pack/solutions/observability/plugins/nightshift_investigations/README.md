@@ -65,6 +65,89 @@ Starting an investigation also needs Agent Builder `all` (the start route's own 
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
 
+## Service accounts
+
+Nightshift runs investigations only as the agent service account, `nightshift_agent`. There is no fallback that runs them as the user who starts them, so a space can use Nightshift only after an admin sets it up. Until then, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step: users with `manage_security` get the button, others are told to ask an administrator, and the step says so when service accounts are turned off. The plan and the remaining PRs are tracked in elastic/obs-execution#570.
+
+### Accounts and roles
+
+There is one account of each kind per deployment, shared by every space. Each holds a role that Nightshift never creates or changes. On Serverless, where Nightshift ships, the roles are elasticsearch-controller predefined roles, whose names start with `_`. Stateful Elasticsearch has no such roles, so on stateful they are created by whoever sets up the deployment, named like the account. Their definitions are in `common/service_account_roles.ts`. Scout tests and evals create them with `ensureNightshiftServiceAccountRoles`, so they also run against Elastic Cloud Hosted.
+
+| Account name | Role (stateful / Serverless) | Used by |
+|---|---|---|
+| `nightshift_agent` | `nightshift_agent` / `_nightshift_agent` | Investigations, their sandbox tools and Agent Builder hooks |
+| `nightshift_automations` | `nightshift_automations` / `_nightshift_automations` | Automation workflows |
+
+The roles cover every space. Where an account acts is decided by the workflows bound to it, which are installed per space.
+
+### Setting up a space
+
+On a local stateful stack, create the roles once (Serverless has its own):
+
+```bash
+node -r @kbn/setup-node-env x-pack/solutions/observability/plugins/nightshift_investigations/scripts/create_service_account_roles.ts
+```
+
+Pass `--es-url` and `--auth` for a stack that is not on `http://localhost:9200` with `elastic:changeme`.
+
+On a local Serverless project (`yarn es serverless --projectType observability --productTier complete` and `yarn start --serverless=oblt`) the roles come from Serverless itself, and Kibana presents the project type's UIAM certificate (`kibana_serverless_observability.crt`, elastic/kibana#299809), without which UIAM lists no accounts and refuses to let Kibana run as one. One setting is still needed:
+
+- `--server.publicBaseUrl=http://localhost:5601`, so the investigation's `kibana.request` steps reach Kibana instead of a cloud URL that does not resolve locally.
+
+Then enable service accounts and set the space up:
+
+```yaml
+xpack.security.serviceAccounts.enabled: true
+xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
+```
+
+```
+POST /internal/nightshift/investigations/service_account/_enable   # needs manage_security
+GET  /internal/nightshift/investigations/service_account           # status, agentBuilder:read
+POST /internal/nightshift/investigations/service_account/_disable  # teardown
+```
+
+Only the service accounts backend assigns account ids: `kibana/<name>` on stateful, a generated id on Serverless (UIAM). So the caller finds or creates the accounts first, as the current user, with `ensureNightshiftServiceAccounts` from `common`, and passes their ids to `_enable` as `{ "serviceAccountIds": { "agent": "...", "automations": "..." } }`. The setup step in the app does both on one click.
+
+Every space does that: the account directory is the one source of which account a space binds to, so an account recreated outside Kibana is picked up on the next setup. The accounts are shared, so the lookup finds the ones the first space created and later spaces reuse them. `ensureNightshiftServiceAccounts` lists the accounts by name and reuses one Kibana can run as. It creates a missing account only after checking that its role exists, so a stateful deployment without the roles gets a clear error instead of an account without privileges.
+
+`_enable`:
+
+1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
+2. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
+3. Turns bound workflows an admin disabled back on.
+4. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
+
+Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed, disabled, or bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
+
+A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
+
+### What setup changes
+
+- Starting an investigation, automatic significant-event investigations, and the investigation agent's Agent Builder availability require `xpack.security.serviceAccounts.enabled` and the space's bound entry point.
+- The investigations client starts the entry point with `triggeredBy: nightshift-investigations` (`NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE`). The entry point fails any other run, so the generic workflow run API cannot start an investigation as the agent account.
+- The entry point calls the global `system-nightshift-investigation` with `run-as-mode: inherit`. A change to the investigation YAML updates that one global copy on the next boot.
+- `_ensure` rejects any run that does not execute as the agent account. Anyone allowed to run workflows can start the global investigation directly, but such a run executes as them and fails before it touches an investigation.
+- The Slack thread workflow is installed per space, bound to the agent account (`system-nightshift-slack-thread-bound-<space>`), and no longer globally. It only runs when a `slack2.message` event starts it.
+
+### Automations
+
+An automation's workflow runs as the space's automations account (`settings.run_as`), the one kept on its entry point when the space was set up, so it keeps working whoever created it. Its `nightshift.triggerInvestigation` step starts the investigation through the space's entry point, which runs it as the agent account.
+
+The workflows plugin requires `manage_security` for every create, update and delete of a workflow bound to a service account. Creating, changing (including enabling or disabling) and deleting automations therefore requires `manage_security` in addition to Nightshift manage, and the routes refuse other callers before writing anything. The Automations page shows the edit actions disabled for them, with a callout that says why. Creating or changing an automation also requires the space to be set up. `_enable` binds automations that already exist. When service accounts are off, automations keep running as their authors.
+
+### Agent Builder hooks
+
+Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. In a set-up space, the investigation agent and the decision-tree reinforcement agent therefore name the space's bound hook entry points instead of the global hooks, so hooks run as the agent account:
+
+- `system-nightshift-sandbox-materialize-workspace-bound-<space>`
+- `system-nightshift-agent-optimize-bound-<space>`
+- `system-nightshift-decision-tree-hydrate-bound-<space>`
+
+Each calls its global hook with `run-as-mode: inherit`. A hook entry point only runs when Agent Builder starts it as a hook (`triggeredBy: agent-builder-hook`, which only server code sets), so nobody can run it directly with made-up round content and plant knowledge as the agent account. Spaces that are not set up, and spaces whose setup cannot be read, keep running the global hooks.
+
+The decision-tree reinforcement agent is shared: everyone can run it, so agent optimize can run it as the agent account, and only admins can change it. Agent Builder still hides it from UI listings, and its submit tool writes decision trees as the caller.
+
 ## How investigations are stored and run
 
 An investigation is an Agent Builder conversation with the `investigation` template. The investigation id is the conversation id. The `agenticInvestigations` plugin owns everything around it:

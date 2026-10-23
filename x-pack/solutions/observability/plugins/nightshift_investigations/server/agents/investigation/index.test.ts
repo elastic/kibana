@@ -190,6 +190,29 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
   });
 
+  it('runs its hooks through the workflows the resolver names for the space', async () => {
+    const type = getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: true,
+      ...ALL_PLUGINS,
+      resolveHookWorkflowId: async (id, { spaceId }) => `${id}-bound-${spaceId}`,
+    });
+    if (typeof type.baseConfiguration !== 'function') {
+      throw new Error('expected a dynamic base configuration');
+    }
+    const base = await type.baseConfiguration({
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'sa-a',
+    });
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-sa-a',
+    ]);
+  });
+
   describe('custom context', () => {
     const ctx = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-a' };
     const CUSTOM_CONTEXT =
