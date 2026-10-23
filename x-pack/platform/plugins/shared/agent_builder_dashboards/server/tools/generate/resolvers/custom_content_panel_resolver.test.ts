@@ -26,8 +26,6 @@ const addRequest = (
   overrides: Partial<CustomContentPanelAddRequest> = {}
 ): CustomContentPanelAddRequest => ({
   renderer: 'custom_content',
-  operationType: 'add_panels',
-  identifier: 'Show KPI',
   nlQuery: 'Show KPI',
   ...overrides,
 });
@@ -37,8 +35,6 @@ const editRequest = (
   overrides: Partial<CustomContentPanelEditRequest> = {}
 ): CustomContentPanelEditRequest => ({
   renderer: 'custom_content',
-  operationType: 'edit_panels',
-  identifier: existingPanel.id,
   existingPanel,
   ...overrides,
 });
@@ -78,20 +74,16 @@ describe('createCustomContentPanelResolver', () => {
       });
     });
 
-    it('returns a failure attributed to the operation when template generation throws', async () => {
+    it('returns a failure when template generation throws', async () => {
       resolveTemplate.mockRejectedValue(
         new Error('Generated template was rejected: contains a <script> tag.')
       );
 
-      const result = await resolve(addRequest({ operationType: 'add_section' }));
+      const result = await resolve(addRequest());
 
       expect(result).toEqual({
         type: 'failure',
-        failure: {
-          type: 'add_section',
-          identifier: 'Show KPI',
-          error: 'Generated template was rejected: contains a <script> tag.',
-        },
+        error: 'Generated template was rejected: contains a <script> tag.',
       });
     });
   });

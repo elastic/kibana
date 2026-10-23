@@ -31,10 +31,10 @@ interface ParamsEditorProps {
 
 export const ParamsEditor = ({ value, onChange, height = 200, errors = [] }: ParamsEditorProps) => (
   <EuiFormRow
-    label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.label', {
+    label={i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.params.label', {
       defaultMessage: 'Parameters',
     })}
-    helpText={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.helpText', {
+    helpText={i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.params.helpText', {
       defaultMessage:
         'Use {syntax} to reference dispatcher payload values such as {policyId}, {groupKey}, or {alerts}.',
       values: {
@@ -58,7 +58,7 @@ export const ParamsEditor = ({ value, onChange, height = 200, errors = [] }: Par
       options={EDITOR_OPTIONS}
       dataTestSubj="singleStepWorkflowParamsEditor"
       aria-label={i18n.translate(
-        'xpack.responseOps.alertingV2RuleForm.actionForm.params.ariaLabel',
+        'xpack.alertingV2.alertingV2RuleForm.actionForm.params.ariaLabel',
         {
           defaultMessage: 'Workflow parameters editor',
         }
