@@ -23,8 +23,8 @@ export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-  // Boot disk (GB). The image uses ~58 GB before a job starts and PR jobs peak at ~62 GB,
-  // so 72 leaves ~10 GB of headroom. Steps that need more set their own `diskSizeGb`.
+  // Boot disk (GB). The image uses ~58 GB before a job starts and PR jobs peak at ~62 GB; a 72 GB
+  // disk formats to ~69 GB, leaving ~7 GB of headroom. Steps that need more set their own `diskSizeGb`.
   diskSizeGb: 72,
 };
 
