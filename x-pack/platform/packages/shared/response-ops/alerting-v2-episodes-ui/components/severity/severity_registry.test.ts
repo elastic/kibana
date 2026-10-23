@@ -26,9 +26,9 @@ describe('severity_registry', () => {
       expect(values).toEqual([
         'info',
         'low',
-        'warning',
-        'medium',
         'minor',
+        'medium',
+        'warning',
         'high',
         'major',
         'critical',
@@ -43,7 +43,7 @@ describe('severity_registry', () => {
         value: 'warning',
         label: 'Warning',
         color: 'warning',
-        sortRank: 1,
+        sortRank: 4,
         filterDotColor: 'textWarning',
       });
     });
@@ -65,7 +65,7 @@ describe('severity_registry', () => {
       const map = toSeverityRegistryMap(buildSeverityRegistry());
       const resolver = createSeverityRankResolver(map);
 
-      expect(resolver('critical')).toBe(4);
+      expect(resolver('critical')).toBe(7);
       expect(resolver('info')).toBe(0);
     });
 
@@ -73,7 +73,7 @@ describe('severity_registry', () => {
       const entries = buildSeverityRegistry(CLASSIC_SEVERITY_EXTENSIONS);
       const resolver = createSeverityRankResolver(toSeverityRegistryMap(entries));
 
-      expect(resolver('warning')).toBe(1);
+      expect(resolver('warning')).toBe(4);
     });
 
     it('returns -1 for unknown severities', () => {

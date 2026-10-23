@@ -49,12 +49,26 @@ export const EPISODE_SEVERITY_BADGE_COLORS: Record<
 > = {
   [EpisodeSeverity.Critical]: 'danger',
   [EpisodeSeverity.High]: 'risk',
-  [EpisodeSeverity.Medium]: 'success',
-  [EpisodeSeverity.Low]: 'primary',
+  [EpisodeSeverity.Medium]: 'warning',
+  [EpisodeSeverity.Low]: 'neutral',
   [EpisodeSeverity.Info]: 'default',
 };
 
-/** Heatmap cell fill colors aligned with `EuiBadge` fill backgrounds for each severity. */
+/**
+ * Display and table-sort rank, lowest to highest. Leaves gaps for classic
+ * Major / Minor / Warning so the merged filter and sort share one scale.
+ * Distinct from {@link EPISODE_SEVERITY_CHART_VALUE}, which stays on the
+ * five-level chart axis.
+ */
+export const EPISODE_SEVERITY_SORT_RANK: Record<EpisodeSeverity, number> = {
+  [EpisodeSeverity.Info]: 0,
+  [EpisodeSeverity.Low]: 1,
+  [EpisodeSeverity.Medium]: 3,
+  [EpisodeSeverity.High]: 5,
+  [EpisodeSeverity.Critical]: 7,
+};
+
+/** Heatmap and timeline fills aligned with the same color family as the severity badge. */
 export const getEpisodeSeverityColor = (
   euiTheme: EuiThemeComputed,
   severity: EpisodeSeverity
@@ -65,9 +79,9 @@ export const getEpisodeSeverityColor = (
     case EpisodeSeverity.High:
       return euiTheme.colors.backgroundFilledRisk;
     case EpisodeSeverity.Medium:
-      return euiTheme.colors.backgroundFilledSuccess;
+      return euiTheme.colors.backgroundFilledWarning;
     case EpisodeSeverity.Low:
-      return euiTheme.colors.backgroundFilledPrimary;
+      return euiTheme.colors.backgroundFilledNeutral;
     case EpisodeSeverity.Info:
       return euiTheme.components.badgeBackground;
     default:
