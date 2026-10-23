@@ -121,12 +121,13 @@ describe('GET /internal/significant_events/detection/_entities', () => {
     ]);
   });
 
-  it('reports truncation when the feature limit is reached', async () => {
+  it('reports truncation and withholds unassigned counts when the feature limit is reached', async () => {
     const { resources } = setup(
       Array.from({ length: MAX_ENTITIES }, (_, index) => feature({ id: `entity-${index}` }))
     );
     const response = await route.handler(resources as never);
     expect(response.entities).toHaveLength(MAX_ENTITIES);
     expect(response.truncated).toBe(true);
+    expect(response.unassigned).toBeNull();
   });
 });

@@ -16,6 +16,7 @@ export interface DetectionEntity {
 
 export interface DetectionEntitiesResponse {
   entities: DetectionEntity[];
-  unassigned: { rules: number; active_events: number };
+  // Null when the entity list is truncated: entities past the cap would count as unassigned.
+  unassigned: { rules: number; active_events: number } | null;
   truncated: boolean;
 }

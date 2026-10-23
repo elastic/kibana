@@ -77,9 +77,11 @@ export const RulesTab = ({
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const rulesQuery = useDetectionRules(timeRange);
   const entitiesQuery = useDetectionEntities(timeRange);
-  const hasEntityFilter = entities.length > 0 || unassigned;
-  const isEntityLoading = unassigned && entitiesQuery.isLoading;
-  const isEntityError = unassigned && entitiesQuery.isError && !entitiesQuery.data;
+  // A truncated entity list can't classify unassigned rules, so Unassigned is ignored then.
+  const applyUnassigned = unassigned && !entitiesQuery.data?.truncated;
+  const hasEntityFilter = entities.length > 0 || applyUnassigned;
+  const isEntityLoading = applyUnassigned && entitiesQuery.isLoading;
+  const isEntityError = applyUnassigned && entitiesQuery.isError && !entitiesQuery.data;
   const { demoteRules, isPending } = useRulesDemote({});
   const [search, setSearch] = useState(
     () => new URLSearchParams(location.search).get(RULES_SEARCH_QUERY_PARAM) ?? ''
@@ -120,10 +122,12 @@ export const RulesTab = ({
       const features = query.features ?? [];
       return (
         features.some(({ id }) => entities.includes(id)) ||
-        (unassigned && Boolean(entitiesQuery.data) && !features.some(({ id }) => liveIds.has(id)))
+        (applyUnassigned &&
+          Boolean(entitiesQuery.data) &&
+          !features.some(({ id }) => liveIds.has(id)))
       );
     });
-  }, [hasEntityFilter, rulesQuery.rules, entitiesQuery.data, entities, unassigned]);
+  }, [hasEntityFilter, rulesQuery.rules, entitiesQuery.data, entities, applyUnassigned]);
   const filteredRules = useMemo(() => {
     const term = search.trim().toLowerCase();
     return entityRules.filter(

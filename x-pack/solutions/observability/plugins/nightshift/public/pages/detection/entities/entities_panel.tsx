@@ -146,16 +146,21 @@ export const EntitiesPanel = ({
     }
   }
   const liveIds = new Set(entities.map(({ id }) => id));
-  const unknown = query.data ? selected.filter((id) => !liveIds.has(id) && matches(id, 0, 0)) : [];
+  // A truncated list can't tell an expired slug from one past the cap.
+  const unknown =
+    query.data && !query.data.truncated
+      ? selected.filter((id) => !liveIds.has(id) && matches(id, 0, 0))
+      : [];
   if (unknown.length) {
     options.push({ key: 'group:unknown', label: UNKNOWN_LABEL, isGroupLabel: true });
     options.push(
       ...unknown.map((id) => makeOption({ id, name: id, active_events: 0 }, 'tokenKey'))
     );
   }
+  const unassignedCounts = query.data?.unassigned;
   if (
-    query.data &&
-    matches(UNASSIGNED_LABEL, query.data.unassigned.rules, query.data.unassigned.active_events)
+    unassignedCounts &&
+    matches(UNASSIGNED_LABEL, unassignedCounts.rules, unassignedCounts.active_events)
   ) {
     // Its own section, so it doesn't read as part of the last entity group.
     options.push({ key: 'group:no-entity', label: NO_ENTITY_GROUP_LABEL, isGroupLabel: true });
@@ -164,7 +169,7 @@ export const EntitiesPanel = ({
         {
           id: 'unassigned:',
           name: UNASSIGNED_LABEL,
-          active_events: query.data.unassigned.active_events,
+          active_events: unassignedCounts.active_events,
         },
         'question',
         true

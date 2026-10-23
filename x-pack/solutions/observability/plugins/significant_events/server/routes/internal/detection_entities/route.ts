@@ -74,7 +74,9 @@ const detectionEntitiesRoute = createServerRoute({
           ? eventCounts.entities[entity.id]
           : 0,
       })),
-      unassigned: { rules: unassignedRules, active_events: eventCounts.unassigned },
+      unassigned: truncated
+        ? null
+        : { rules: unassignedRules, active_events: eventCounts.unassigned },
       truncated,
     };
   },

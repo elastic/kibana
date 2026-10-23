@@ -167,8 +167,14 @@ const toEventsFilterOptions = async (
       sources.map(({ id }) => id),
       sourcesClient
     );
-    const { entities } = await getLiveEntities(await getKnowledgeIndicatorClient(), sourceIds);
-    unassignedEntityIds = entities.map(({ id }) => id);
+    const { entities, truncated } = await getLiveEntities(
+      await getKnowledgeIndicatorClient(),
+      sourceIds
+    );
+    // A truncated live set would misreport entities past the cap as unassigned, so skip the filter.
+    if (!truncated) {
+      unassignedEntityIds = entities.map(({ id }) => id);
+    }
   }
   return {
     from,
