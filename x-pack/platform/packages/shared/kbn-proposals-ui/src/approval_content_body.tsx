@@ -46,6 +46,13 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
   ({ mode, comment, banner, bannerReason, actionError, 'data-test-subj': dataTestSubj }) => {
     const { euiTheme } = useEuiTheme();
 
+    // Nothing to show (declining, with no banner or error): no empty padded box between the
+    // header and the reason form.
+    const hasContent = (mode === 'view' && comment !== undefined) || banner || actionError;
+    if (!hasContent) {
+      return null;
+    }
+
     return (
       <div
         css={css({

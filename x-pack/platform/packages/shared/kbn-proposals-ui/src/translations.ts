@@ -13,9 +13,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   /** The single decision a to-do proposal offers: the human did what it proposes. */
   markApplied: i18n.translate('xpack.proposals.approvalModal.markApplied', {
-    defaultMessage: 'I applied',
+    defaultMessage: 'Mark as applied',
   }),
-  /** Takes back a to-do proposal's "I've applied", re-offering it. */
+  /** Takes back a to-do proposal's "Mark as applied", re-offering it. */
   markNotApplied: i18n.translate('xpack.proposals.approvalModal.markNotApplied', {
     defaultMessage: 'Mark as not applied',
   }),

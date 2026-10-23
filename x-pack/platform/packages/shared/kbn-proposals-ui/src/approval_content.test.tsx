@@ -291,12 +291,12 @@ describe('ApprovalContent', () => {
   });
 
   describe('to-do proposal', () => {
-    it('offers a single I applied button instead of Approve and Decline', () => {
+    it('offers Mark as applied and Decline instead of Approve', () => {
       renderContent({ proposal: todoProposal, secondaryActions: undefined, onDismiss: jest.fn() });
 
-      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('I applied');
+      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Mark as applied');
       expect(screen.queryByText('Approve')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeInTheDocument();
     });
 
     const appliedTodo: ApprovalProposal = {
@@ -349,7 +349,7 @@ describe('ApprovalContent', () => {
       expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
     });
 
-    it('records the application through onApprove when I applied is clicked', async () => {
+    it('records the application through onApprove when Mark as applied is clicked', async () => {
       const onApprove = jest.fn();
       renderContent({ proposal: todoProposal, onApprove });
 
@@ -519,6 +519,18 @@ describe('ApprovalContent', () => {
       renderContent({
         proposal: { ...baseProposal, status: 'pending', expiresAt: '2026-10-25T12:00:00.000Z' },
       });
+      expect(screen.queryByTestId('approvalContent-expires')).not.toBeInTheDocument();
+    });
+
+    it('hides the deadline warning while the decline form is open', () => {
+      renderContent({
+        proposal: { ...baseProposal, status: 'pending', expiresAt: '2026-10-22T18:00:00.000Z' },
+        onDismiss: jest.fn(),
+      });
+      expect(screen.getByTestId('approvalContent-expires')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('approvalContent-dismiss'));
+
       expect(screen.queryByTestId('approvalContent-expires')).not.toBeInTheDocument();
     });
 

@@ -63,7 +63,7 @@ export interface ApprovalContentProps {
    */
   readOnly?: boolean;
   /**
-   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve" ("I applied" for a
+   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve" ("Mark as applied" for a
    * to-do proposal, see `isTodoProposal`), disabled once the
    * proposal has expired — both derived here rather than supplied by the caller, so every host's
    * Approve button behaves and reads identically. Omit for a host that cannot record an approval,
@@ -77,8 +77,8 @@ export interface ApprovalContentProps {
    * button; clicking it swaps the body for `DeclineReasonForm` and the footer for Cancel/Decline,
    * entirely within this component — so a host never renders `DeclineReasonForm` itself or tracks
    * its own declining mode. The same flow renders identically whether this is placed inside a
-   * modal or an Agent Builder chat card. Disabled whenever the Approve button is. Not offered
-   * for a to-do proposal (`isTodoProposal`), whose only decision is "I applied".
+   * modal or an Agent Builder chat card. Disabled whenever the Approve button is. A to-do
+   * proposal (`isTodoProposal`) offers it next to "Mark as applied".
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
   /**
@@ -155,8 +155,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
-    // A to-do is the analyst's to carry out, so there is nothing to approve or decline: the one
-    // decision left is the human confirming they did it.
+    // A to-do is the analyst's to carry out, so there is nothing to approve: confirming they did
+    // it takes the place of Approve. They can still decline it.
     const isTodo = isTodoProposal(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
@@ -223,7 +223,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           ]
         : [
             ...(secondaryActions ?? []),
-            ...(onDismiss && !isTodo
+            ...(onDismiss
               ? [
                   {
                     label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
@@ -373,23 +373,25 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         )}
 
         {/* A replaced card's only callout is why its own attempt failed; the rest belong to the
-            live successor. */}
-        <ApprovalStatusCallouts
-          isPending={!isReplaced && !isRestricted && approvalPhase === 'pending'}
-          previousExecutionError={proposal.previousExecutionError}
-          failedAttemptError={
-            isReplacedFailure ? settledDescription ?? proposal.executionError : undefined
-          }
-          isExpired={isExpired}
-          expiredCaption={isExpired ? getExpiredCaption(proposal) : undefined}
-          expiresAt={proposal.expiresAt}
-          upcomingExpiry={
-            !isReplaced && approvalPhase === 'pending' ? proposal.expiresAt : undefined
-          }
-          isRestricted={isRestricted}
-          isReplaced={isReplaced}
-          data-test-subj={dataTestSubj}
-        />
+            live successor. Hidden while declining: the reason form takes its place. */}
+        {!showDeclineForm && (
+          <ApprovalStatusCallouts
+            isPending={!isReplaced && !isRestricted && approvalPhase === 'pending'}
+            previousExecutionError={proposal.previousExecutionError}
+            failedAttemptError={
+              isReplacedFailure ? settledDescription ?? proposal.executionError : undefined
+            }
+            isExpired={isExpired}
+            expiredCaption={isExpired ? getExpiredCaption(proposal) : undefined}
+            expiresAt={proposal.expiresAt}
+            upcomingExpiry={
+              !isReplaced && approvalPhase === 'pending' ? proposal.expiresAt : undefined
+            }
+            isRestricted={isRestricted}
+            isReplaced={isReplaced}
+            data-test-subj={dataTestSubj}
+          />
+        )}
 
         {showDeclineForm && (
           <DeclineReasonForm
