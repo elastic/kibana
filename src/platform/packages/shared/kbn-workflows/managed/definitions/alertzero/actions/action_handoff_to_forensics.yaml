@@ -200,7 +200,7 @@ steps:
               conversation_id: "{{ inputs.actionInput.investigation_id }}"
               message: >-
                 Forensics handoff failed: knowledge indicator write failed.
-                {{ steps.write_analyze_endpoint_ki.error }}
+                {{ steps.write_analyze_endpoint_ki.error.message }}
           on-failure:
             continue: true
         - name: fail_handoff
@@ -208,7 +208,7 @@ steps:
           with:
             message: >-
               Forensics handoff failed: knowledge indicator write failed.
-              {{ steps.write_analyze_endpoint_ki.error }}
+              {{ steps.write_analyze_endpoint_ki.error.message }}
 
   - name: journal_handoff_succeeded
     type: workflow.execute
