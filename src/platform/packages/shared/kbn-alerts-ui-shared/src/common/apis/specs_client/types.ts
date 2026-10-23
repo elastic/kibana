@@ -9,6 +9,11 @@
 
 import type { ConnectorSpecDetail, ConnectorSpecSummary } from '@kbn/actions-plugin/common';
 
+/**
+ * Single-spec detail returned by the browser GET. The HTTP GET omits `availability` and `skill`.
+ */
+export type BrowserConnectorSpecDetail = Omit<ConnectorSpecDetail, 'availability' | 'skill'>;
+
 export interface BrowserGetSpecParams {
   id: string;
   signal?: AbortSignal;
@@ -20,6 +25,6 @@ export interface BrowserGetAllSpecsParams {
 }
 
 export interface SpecsClient {
-  get(params: BrowserGetSpecParams): Promise<ConnectorSpecDetail>;
+  get(params: BrowserGetSpecParams): Promise<BrowserConnectorSpecDetail>;
   getAll(params?: BrowserGetAllSpecsParams): Promise<ConnectorSpecSummary[]>;
 }

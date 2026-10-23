@@ -10,4 +10,9 @@
 export { createSpecsClient } from './specs_client';
 export { transformConnectorSpecDetailResponse } from './transform_connector_spec_detail_response';
 export { transformConnectorSpecSummaryResponse } from './transform_connector_spec_summary_response';
-export type { SpecsClient, BrowserGetSpecParams, BrowserGetAllSpecsParams } from './types';
+export type {
+  SpecsClient,
+  BrowserConnectorSpecDetail,
+  BrowserGetSpecParams,
+  BrowserGetAllSpecsParams,
+} from './types';
