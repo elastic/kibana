@@ -74,7 +74,13 @@ const useBadgeStyle = () => {
   }, []);
 };
 
-export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
+export interface AppBadgeProps {
+  badge: AppHeaderBadge;
+  /** Called after a badge with an `onClick` handler is clicked. */
+  onBadgeClick?: () => void;
+}
+
+export const AppBadge = ({ badge, onBadgeClick }: AppBadgeProps) => {
   const { badge: badgeStyle } = useBadgeStyle();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const label = asPlainText(badge.label);
@@ -106,6 +112,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
       return;
     }
     badge?.onClick?.();
+    onBadgeClick?.();
   };
 
   const interactionProps = isClickable
