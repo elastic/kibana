@@ -192,7 +192,7 @@ export const AzureFunctions: ConnectorSpec = {
   metadata: {
     id: '.azure_functions',
     displayName: 'Azure Functions',
-    description: i18n.translate('core.kibanaConnectorSpecs.azureFunctions.metadata.description', {
+    description: i18n.translate('connectorSpecs.azureFunctions.metadata.description', {
       defaultMessage:
         'Invoke HTTP-triggered Azure Functions, read function keys, and start, stop, or restart function apps',
     }),
@@ -215,30 +215,20 @@ export const AzureFunctions: ConnectorSpec = {
           meta: {
             scope: { hidden: true },
             tokenUrl: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.azureFunctions.auth.tokenUrl.label',
-                {
-                  defaultMessage: 'Token URL',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.azureFunctions.auth.tokenUrl.label', {
+                defaultMessage: 'Token URL',
+              }),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.azureFunctions.auth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    "Replace '{tenantId}' with your Microsoft Entra tenant ID. The app registration (service principal) needs the Reader role on the subscription for getFunctionApp, listFunctionApps, listFunctions, and getFunction; the Website Contributor role to restart, stop, or start an app, to re-sync triggers with listSyncFunctionTriggers, and to read keys with listFunctionKeys or listHostKeys. The invoke action does not use this token — it authenticates with a function or host key.",
-                  values: { tenantId: '{tenant-id}' },
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.azureFunctions.auth.tokenUrl.helpText', {
+                defaultMessage:
+                  "Replace '{tenant-id}' with your Microsoft Entra tenant ID. The app registration (service principal) needs the Reader role on the subscription for getFunctionApp, listFunctionApps, listFunctions, and getFunction; the Website Contributor role to restart, stop, or start an app, to re-sync triggers with listSyncFunctionTriggers, and to read keys with listFunctionKeys or listHostKeys. The invoke action does not use this token — it authenticates with a function or host key.",
+              }),
             },
             clientId: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.azureFunctions.auth.clientId.helpText',
-                {
-                  defaultMessage:
-                    'The Application (client) ID of the Microsoft Entra app registration.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.azureFunctions.auth.clientId.helpText', {
+                defaultMessage:
+                  'The Application (client) ID of the Microsoft Entra app registration.',
+              }),
             },
           },
         },
@@ -257,26 +247,20 @@ export const AzureFunctions: ConnectorSpec = {
           'Must be a valid Azure subscription ID (GUID).'
         )
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.azureFunctions.config.subscriptionId', {
+          i18n.translate('connectorSpecs.azureFunctions.config.subscriptionId', {
             defaultMessage: 'Azure subscription ID',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate(
-            'core.kibanaConnectorSpecs.azureFunctions.config.subscriptionId.label',
-            {
-              defaultMessage: 'Subscription ID',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.azureFunctions.config.subscriptionId.label', {
+            defaultMessage: 'Subscription ID',
+          }),
           placeholder: '00000000-0000-0000-0000-000000000000',
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.azureFunctions.config.subscriptionId.helpText',
-            {
-              defaultMessage:
-                'The Azure subscription that every action in this connector operates against.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.azureFunctions.config.subscriptionId.helpText', {
+            defaultMessage:
+              'The Azure subscription that every action in this connector operates against.',
+          }),
         }),
     })
   ),
@@ -635,7 +619,7 @@ export const AzureFunctions: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.azureFunctions.test.description', {
+    description: i18n.translate('connectorSpecs.azureFunctions.test.description', {
       defaultMessage:
         'Verifies Azure Functions connectivity by listing App Service sites in the subscription',
     }),
