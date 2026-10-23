@@ -227,9 +227,20 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               {isShownInApp && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary" iconType="eye">
-                    {SHOWN_IN_APP_LABEL}
-                  </EuiBadge>
+                  {isCompact ? (
+                    <EuiToolTip content={SHOWN_IN_APP_LABEL} disableScreenReaderOutput>
+                      <EuiBadge
+                        color="primary"
+                        iconType="eye"
+                        aria-label={SHOWN_IN_APP_LABEL}
+                        tabIndex={0}
+                      />
+                    </EuiToolTip>
+                  ) : (
+                    <EuiBadge color="primary" iconType="eye">
+                      {SHOWN_IN_APP_LABEL}
+                    </EuiBadge>
+                  )}
                 </EuiFlexItem>
               )}
               {previewBadgeState !== 'previewing' && !isShownInApp && hasActionButtons && (
