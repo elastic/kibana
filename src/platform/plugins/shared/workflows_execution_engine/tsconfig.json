@@ -23,6 +23,7 @@
     "@kbn/workflows",
     "@kbn/entity-access-control",
     "@kbn/task-manager-plugin",
+    "@kbn/datemath",
     "@kbn/es-query",
     "@kbn/eval-kql",
     "@kbn/core-elasticsearch-server",

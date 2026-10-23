@@ -35,7 +35,6 @@ import {
   buildWorkflowExecutionsSpaceFilter,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
-import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import {
   getExecutionStepExecutions,
   type GetExecutionStepExecutionsResult,
@@ -132,8 +131,7 @@ export class WorkflowExecutionQueryService {
     options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
-      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+      workflowsExecutionEngine: this.deps.workflowsExecutionEngine,
       logger: this.deps.logger,
       workflowExecutionId: executionId,
       spaceId,
@@ -152,22 +150,21 @@ export class WorkflowExecutionQueryService {
     if (ids.length === 0) {
       return [];
     }
-    const { items } = await this.deps.workflowExecutionsDataClient.getByIds(ids, {
+
+    const items = await this.deps.workflowsExecutionEngine.getStepExecutionsByIds({
+      ids,
+      spaceId,
       sourceIncludes: ['spaceId', 'workflowId', 'status'],
     });
-    return items
-      .map(({ document }) => document)
-      .filter((execution) => execution.spaceId === spaceId)
-      .map(({ id, workflowId, status }) => ({ id, workflowId, status }));
+
+    return items.map(({ id, workflowId, status }) => ({ id, workflowId, status }));
   }
 
   async getChildWorkflowExecutions(
     parentExecutionId: string,
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
-    return getChildWorkflowExecutions({
-      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+    return this.deps.workflowsExecutionEngine.getChildExecutions({
       parentExecutionId,
       spaceId,
     });
@@ -178,9 +175,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<GetExecutionStepExecutionsResult> {
     return getExecutionStepExecutions({
-      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
-      logger: this.deps.logger,
+      workflowsExecutionEngine: this.deps.workflowsExecutionEngine,
       workflowExecutionId: params.executionId,
       spaceId,
       page: params.page,

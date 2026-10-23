@@ -8,20 +8,11 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
-import type {
-  StepExecutionsDataClient,
-  WorkflowExecutionsDataClient,
-} from '@kbn/workflows-execution-engine/server';
-import {
-  createMockGetExecutionsByIdsResponse,
-  createMockStepDataClient,
-  createMockWorkflowDataClient,
-} from '@kbn/workflows-execution-engine/server/mocks';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { getExecutionStepExecutions } from './get_execution_step_executions';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import { WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE } from '../../lib/workflow_history_pagination_error';
 
 const sizeExceededError = () =>
@@ -38,9 +29,7 @@ const stepDoc = (id: string): EsWorkflowStepExecution =>
   } as EsWorkflowStepExecution);
 
 describe('getExecutionStepExecutions', () => {
-  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
-  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
-  let mockLogger: ReturnType<typeof loggerMock.create>;
+  let workflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
 
   const baseParams = {
     workflowExecutionId: 'exec-1',
@@ -50,40 +39,39 @@ describe('getExecutionStepExecutions', () => {
   };
 
   beforeEach(() => {
-    mockWorkflowDataClient = createMockWorkflowDataClient();
-    mockStepDataClient = createMockStepDataClient();
-    mockLogger = loggerMock.create();
-    jest.clearAllMocks();
+    workflowsExecutionEngine = workflowsExecutionEngineMock.createStart();
+    workflowsExecutionEngine.getWorkflowExecutionsById.mockReset();
+    workflowsExecutionEngine.getStepExecutionsByIds.mockReset();
+    workflowsExecutionEngine.searchSteps.mockReset();
   });
 
-  const mockParent = (stepExecutionIds?: string[]) => {
-    mockWorkflowDataClient.getByIds.mockResolvedValue(
-      createMockGetExecutionsByIdsResponse([
-        { spaceId: 'default', stepExecutionIds },
-      ] as unknown as EsWorkflowExecution[])
-    );
+  const load = (overrides: Partial<typeof baseParams> = {}) =>
+    getExecutionStepExecutions({
+      workflowsExecutionEngine,
+      ...baseParams,
+      ...overrides,
+    });
+
+  const mockParent = (stepExecutionIds?: string[], managed?: boolean) => {
+    workflowsExecutionEngine.getWorkflowExecutionsById.mockResolvedValue([
+      { spaceId: 'default', managed, stepExecutionIds } as EsWorkflowExecution,
+    ]);
   };
 
-  it('mgets a page of step ids and returns total from the id list', async () => {
+  it('loads a page of step ids and returns total from the id list', async () => {
     mockParent(['a', 'b', 'c']);
-    mockStepDataClient.getByIds.mockResolvedValue(
-      createMockGetExecutionsByIdsResponse([stepDoc('a'), stepDoc('b')], {
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      })
-    );
+    workflowsExecutionEngine.getStepExecutionsByIds.mockResolvedValue([stepDoc('a'), stepDoc('b')]);
 
-    const result = await getExecutionStepExecutions({
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      logger: mockLogger,
-      ...baseParams,
-      size: 2,
-    });
+    const result = await load({ size: 2 });
 
-    expect(mockWorkflowDataClient.getByIds).toHaveBeenCalledWith(['exec-1'], {
+    expect(workflowsExecutionEngine.getWorkflowExecutionsById).toHaveBeenCalledWith({
+      ids: ['exec-1'],
+      spaceId: 'default',
       sourceIncludes: ['spaceId', 'managed', 'stepExecutionIds'],
     });
-    expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(['a', 'b'], {
+    expect(workflowsExecutionEngine.getStepExecutionsByIds).toHaveBeenCalledWith({
+      ids: ['a', 'b'],
+      spaceId: 'default',
       sourceExcludes: ['input', 'output'],
     });
     expect(result.workflowExecution.spaceId).toBe('default');
@@ -95,69 +83,41 @@ describe('getExecutionStepExecutions', () => {
 
   it('slices the requested page of ids', async () => {
     mockParent(['a', 'b', 'c']);
-    mockStepDataClient.getByIds.mockResolvedValue(
-      createMockGetExecutionsByIdsResponse([stepDoc('c')], {
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      })
-    );
+    workflowsExecutionEngine.getStepExecutionsByIds.mockResolvedValue([stepDoc('c')]);
 
-    const result = await getExecutionStepExecutions({
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      logger: mockLogger,
-      ...baseParams,
-      page: 2,
-      size: 2,
-    });
+    const result = await load({ page: 2, size: 2 });
 
-    expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(['c'], {
+    expect(workflowsExecutionEngine.getStepExecutionsByIds).toHaveBeenCalledWith({
+      ids: ['c'],
+      spaceId: 'default',
       sourceExcludes: ['input', 'output'],
     });
     expect(result.stepExecutionListResult.results.map((step) => step.id)).toEqual(['c']);
     expect(result.stepExecutionListResult.total).toBe(3);
   });
 
-  it('does not mget when the page is past the end of the id list', async () => {
+  it('does not load steps when the page is past the end of the id list', async () => {
     mockParent(['a']);
 
-    const result = await getExecutionStepExecutions({
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      logger: mockLogger,
-      ...baseParams,
-      page: 2,
-      size: 100,
-    });
+    const result = await load({ page: 2, size: 100 });
 
-    expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+    expect(workflowsExecutionEngine.getStepExecutionsByIds).not.toHaveBeenCalled();
     expect(result.stepExecutionListResult).toEqual({ results: [], total: 1, page: 2, size: 100 });
   });
 
-  it('propagates a page mget size error instead of returning a successful empty page', async () => {
+  it('propagates a page load size error instead of returning a successful empty page', async () => {
     mockParent(['a', 'b']);
     const error = sizeExceededError();
-    mockStepDataClient.getByIds.mockRejectedValue(error);
+    workflowsExecutionEngine.getStepExecutionsByIds.mockRejectedValue(error);
 
-    await expect(
-      getExecutionStepExecutions({
-        workflowExecutionsDataClient: mockWorkflowDataClient,
-        stepExecutionsDataClient: mockStepDataClient,
-        logger: mockLogger,
-        ...baseParams,
-      })
-    ).rejects.toBe(error);
+    await expect(load()).rejects.toBe(error);
   });
 
-  it('preserves a successful empty mget page when step documents are missing', async () => {
+  it('preserves a successful empty page when step documents are missing', async () => {
     mockParent(['a', 'b']);
-    mockStepDataClient.getByIds.mockResolvedValue(createMockGetExecutionsByIdsResponse([]));
+    workflowsExecutionEngine.getStepExecutionsByIds.mockResolvedValue([]);
 
-    const result = await getExecutionStepExecutions({
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      logger: mockLogger,
-      ...baseParams,
-    });
+    const result = await load();
 
     expect(result.stepExecutionListResult).toEqual({ results: [], total: 2, page: 1, size: 100 });
   });
@@ -165,33 +125,19 @@ describe('getExecutionStepExecutions', () => {
   it('throws WorkflowHistoryPaginationError when legacy from plus size exceeds the result window', async () => {
     mockParent(undefined);
 
-    await expect(
-      getExecutionStepExecutions({
-        workflowExecutionsDataClient: mockWorkflowDataClient,
-        stepExecutionsDataClient: mockStepDataClient,
-        logger: mockLogger,
-        ...baseParams,
-        page: 3,
-        size: 5000,
-      })
-    ).rejects.toThrow(WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE);
+    await expect(load({ page: 3, size: 5000 })).rejects.toThrow(
+      WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE
+    );
 
-    expect(mockStepDataClient.search).not.toHaveBeenCalled();
+    expect(workflowsExecutionEngine.searchSteps).not.toHaveBeenCalled();
   });
 
-  it('does not throw for mget paging past the Elasticsearch result window', async () => {
+  it('does not throw for id-list paging past the Elasticsearch result window', async () => {
     mockParent(['a']);
 
-    const result = await getExecutionStepExecutions({
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      logger: mockLogger,
-      ...baseParams,
-      page: 3,
-      size: 5000,
-    });
+    const result = await load({ page: 3, size: 5000 });
 
-    expect(mockStepDataClient.search).not.toHaveBeenCalled();
+    expect(workflowsExecutionEngine.searchSteps).not.toHaveBeenCalled();
     expect(result.stepExecutionListResult).toEqual({
       results: [],
       total: 1,
@@ -202,27 +148,25 @@ describe('getExecutionStepExecutions', () => {
 
   it('falls back to search when stepExecutionIds are missing', async () => {
     mockParent(undefined);
-    mockStepDataClient.search.mockResolvedValue({
-      hits: {
-        hits: [{ _source: stepDoc('legacy') }],
-        total: { value: 1 },
-      },
-    } as never);
-
-    const result = await getExecutionStepExecutions({
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      logger: mockLogger,
-      ...baseParams,
+    workflowsExecutionEngine.searchSteps.mockResolvedValue({
+      results: [stepDoc('legacy')],
+      total: 1,
+      page: 1,
+      size: 100,
     });
 
-    expect(mockStepDataClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _source: { excludes: ['input', 'output'] },
-        sort: 'startedAt:asc',
-      })
-    );
-    expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+    const result = await load();
+
+    expect(workflowsExecutionEngine.searchSteps).toHaveBeenCalledWith({
+      executionId: 'exec-1',
+      spaceId: 'default',
+      page: 1,
+      size: 100,
+      includeInput: false,
+      includeOutput: false,
+      sort: 'startedAt:asc',
+    });
+    expect(workflowsExecutionEngine.getStepExecutionsByIds).not.toHaveBeenCalled();
     expect(result.stepExecutionListResult.results).toHaveLength(1);
     expect(result.stepExecutionListResult.total).toBe(1);
     expect(result.stepExecutionListResult.page).toBe(1);
@@ -232,50 +176,23 @@ describe('getExecutionStepExecutions', () => {
   it('propagates a size error from the legacy search fallback', async () => {
     mockParent(undefined);
     const error = sizeExceededError();
-    mockStepDataClient.search.mockRejectedValue(error);
+    workflowsExecutionEngine.searchSteps.mockRejectedValue(error);
 
-    await expect(
-      getExecutionStepExecutions({
-        workflowExecutionsDataClient: mockWorkflowDataClient,
-        stepExecutionsDataClient: mockStepDataClient,
-        logger: mockLogger,
-        ...baseParams,
-      })
-    ).rejects.toBe(error);
+    await expect(load()).rejects.toBe(error);
   });
 
   it('throws when the execution is missing or in another space', async () => {
-    mockWorkflowDataClient.getByIds.mockResolvedValue(createMockGetExecutionsByIdsResponse([]));
+    workflowsExecutionEngine.getWorkflowExecutionsById.mockResolvedValue([]);
 
-    await expect(
-      getExecutionStepExecutions({
-        workflowExecutionsDataClient: mockWorkflowDataClient,
-        stepExecutionsDataClient: mockStepDataClient,
-        logger: mockLogger,
-        ...baseParams,
-      })
-    ).rejects.toBeInstanceOf(WorkflowExecutionNotFoundError);
-    expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+    await expect(load()).rejects.toBeInstanceOf(WorkflowExecutionNotFoundError);
+    expect(workflowsExecutionEngine.getStepExecutionsByIds).not.toHaveBeenCalled();
   });
 
   it('returns managed from the projected parent document', async () => {
-    mockWorkflowDataClient.getByIds.mockResolvedValue(
-      createMockGetExecutionsByIdsResponse([
-        { spaceId: 'default', managed: true, stepExecutionIds: ['a'] },
-      ] as unknown as EsWorkflowExecution[])
-    );
-    mockStepDataClient.getByIds.mockResolvedValue(
-      createMockGetExecutionsByIdsResponse([stepDoc('a')], {
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      })
-    );
+    mockParent(['a'], true);
+    workflowsExecutionEngine.getStepExecutionsByIds.mockResolvedValue([stepDoc('a')]);
 
-    const result = await getExecutionStepExecutions({
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      logger: mockLogger,
-      ...baseParams,
-    });
+    const result = await load();
 
     expect(result.workflowExecution.managed).toBe(true);
     expect(result.stepExecutionListResult.results.map((step) => step.id)).toEqual(['a']);
@@ -283,15 +200,8 @@ describe('getExecutionStepExecutions', () => {
 
   it('rethrows unexpected errors', async () => {
     mockParent(['a']);
-    mockStepDataClient.getByIds.mockRejectedValue(new Error('boom'));
+    workflowsExecutionEngine.getStepExecutionsByIds.mockRejectedValue(new Error('boom'));
 
-    await expect(
-      getExecutionStepExecutions({
-        workflowExecutionsDataClient: mockWorkflowDataClient,
-        stepExecutionsDataClient: mockStepDataClient,
-        logger: mockLogger,
-        ...baseParams,
-      })
-    ).rejects.toThrow('boom');
+    await expect(load()).rejects.toThrow('boom');
   });
 });

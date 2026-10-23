@@ -563,7 +563,7 @@ export interface WorkflowListItemAction {
 
 export interface WorkflowExecutionsHistoryStats {
   date: string;
-  timestamp: string;
+  timestamp: number;
   completed: number;
   failed: number;
   cancelled: number;
