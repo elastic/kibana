@@ -11,3 +11,4 @@ export {
   type NodeDrawOptions,
   defineElasticChartsNodeEngine,
 } from './src/node';
+export { defineElasticChartsInlineEngine } from './src/inline';
