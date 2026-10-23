@@ -29,6 +29,7 @@ import {
   useDataCascadeActions,
 } from '../../../store_provider';
 import type { ChildVirtualizerController } from '../../../lib/core/virtualizer/child_virtualizer_controller';
+import { useCascadeRowVirtualIndex } from '../data_cascade_row/row_virtual_index_context';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
@@ -70,11 +71,15 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     [getVirtualizer]
   );
 
+  // The controller keys per-row state by the root virtualizer's row index (the row's position in the
+  // flattened, expanded row model), which differs from TanStack's within-parent `row.index` for nested rows.
+  const rootRowIndex = useCascadeRowVirtualIndex() ?? row.index;
+
   // Subscribe to the controller's activation state.
   // This is the coordination signal — the stagger decides when heavy content should mount.
   const isActivated = useSyncExternalStore(
     childController.subscribe,
-    () => childController.shouldActivate(row.index),
+    () => childController.shouldActivate(rootRowIndex),
     () => false
   );
 
@@ -86,14 +91,14 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   useEffect(() => {
     if (!childController) return;
     const rafId = requestAnimationFrame(() => {
-      enqueueCleanupRef.current = childController.enqueue(leafCacheKey, row.index);
+      enqueueCleanupRef.current = childController.enqueue(leafCacheKey, rootRowIndex);
     });
     return () => {
       cancelAnimationFrame(rafId);
       enqueueCleanupRef.current?.();
       enqueueCleanupRef.current = null;
     };
-  }, [childController, leafCacheKey, row.index]);
+  }, [childController, leafCacheKey, rootRowIndex]);
 
   const fetchGroupLeafData = useCallback(() => {
     const dataFetchFn = async () => {
@@ -158,9 +163,9 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       nodePath,
       nodePathMap,
       virtualizerController: childController,
-      rowIndex: row.index,
+      rowIndex: rootRowIndex,
     });
-  }, [children, leafData, leafCacheKey, nodePath, nodePathMap, childController, row.index]);
+  }, [children, leafData, leafCacheKey, nodePath, nodePathMap, childController, rootRowIndex]);
 
   return (
     <EuiFlexGroup>

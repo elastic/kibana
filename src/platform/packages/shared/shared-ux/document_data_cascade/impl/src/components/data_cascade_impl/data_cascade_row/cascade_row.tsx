@@ -26,6 +26,7 @@ import {
   childRowAttribute,
 } from './cascade_row.styles';
 import { CascadeRowHeaderPrimitive } from './components/cascade_row_header';
+import { CascadeRowVirtualIndexProvider } from './row_virtual_index_context';
 
 export { CascadeRowHeaderPrimitive };
 
@@ -138,9 +139,11 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
         <React.Fragment>
           {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">
-              {rowVisibleCells.map((cell) => (
-                <TableCellRender key={cell.id} cell={cell} />
-              ))}
+              <CascadeRowVirtualIndexProvider value={virtualRow.index}>
+                {rowVisibleCells.map((cell) => (
+                  <TableCellRender key={cell.id} cell={cell} />
+                ))}
+              </CascadeRowVirtualIndexProvider>
             </EuiFlexItem>
           )}
         </React.Fragment>

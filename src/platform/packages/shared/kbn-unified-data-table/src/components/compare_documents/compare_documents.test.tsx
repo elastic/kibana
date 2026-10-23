@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridProps } from '@elastic/eui';
+import type { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { act, render } from '@testing-library/react';
@@ -31,14 +31,19 @@ jest.mock('../../restorable_state', () => {
 });
 
 let mockDataGridProps: EuiDataGridProps | undefined;
+let mockDataGridRef: unknown;
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiDataGrid: jest.fn((props) => {
-    mockDataGridProps = props;
-    return <></>;
-  }),
-}));
+jest.mock('@elastic/eui', () => {
+  const { forwardRef } = jest.requireActual('react');
+  return {
+    ...jest.requireActual('@elastic/eui'),
+    EuiDataGrid: forwardRef((props: EuiDataGridProps, ref: unknown) => {
+      mockDataGridProps = props;
+      mockDataGridRef = ref;
+      return <></>;
+    }),
+  };
+});
 
 jest.mock('./hooks/use_comparison_fields', () => {
   const originalModule = jest.requireActual('./hooks/use_comparison_fields');
@@ -57,10 +62,12 @@ const createDocMap = (currentDocs = docs) =>
 
 const renderCompareDocuments = ({
   forceShowAllFields = false,
-}: { forceShowAllFields?: boolean } = {}) => {
+  ref,
+}: { forceShowAllFields?: boolean; ref?: React.Ref<EuiDataGridRefProps> } = {}) => {
   const replaceSelectedDocs = jest.fn();
   const getCompareDocuments = (props?: Partial<CompareDocumentsProps>) => (
     <CompareDocuments
+      ref={ref}
       id="test"
       wrapper={document.body}
       consumer="test"
@@ -90,6 +97,7 @@ describe('CompareDocuments', () => {
   beforeEach(() => {
     mockLocalStorage = {};
     mockDataGridProps = undefined;
+    mockDataGridRef = undefined;
   });
 
   it('should pass expected grid props', () => {
@@ -123,7 +131,9 @@ describe('CompareDocuments', () => {
         "inMemory": Object {
           "level": "sorting",
         },
+        "onFullScreenChange": undefined,
         "renderCellValue": [Function],
+        "renderCustomGridBody": undefined,
         "renderCustomToolbar": [Function],
         "rowCount": 3,
         "rowHeightsOptions": Object {
@@ -137,6 +147,18 @@ describe('CompareDocuments', () => {
         },
       }
     `);
+  });
+
+  it('should forward the ref, custom grid body and full screen callback to the grid', () => {
+    const ref = React.createRef<EuiDataGridRefProps>();
+    const renderCustomGridBody = jest.fn();
+    const onFullScreenChange = jest.fn();
+    const { rerender } = renderCompareDocuments({ ref });
+    rerender({ renderCustomGridBody, onFullScreenChange });
+
+    expect(mockDataGridRef).toBe(ref);
+    expect(mockDataGridProps?.renderCustomGridBody).toBe(renderCustomGridBody);
+    expect(mockDataGridProps?.onFullScreenChange).toBe(onFullScreenChange);
   });
 
   it('should get values from local storage', () => {

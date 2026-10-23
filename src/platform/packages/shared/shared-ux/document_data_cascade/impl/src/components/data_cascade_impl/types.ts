@@ -63,6 +63,10 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   nodePath: string[];
   nodePathMap: Record<string, string>;
   virtualizerController: ChildVirtualizerController;
+  /**
+   * Index of the row in the cascade's root virtualizer (its position in the flattened, expanded
+   * row model). Pass it as `rowIndex` to `useConnectedChildVirtualizer`.
+   */
   rowIndex: number;
 }
 

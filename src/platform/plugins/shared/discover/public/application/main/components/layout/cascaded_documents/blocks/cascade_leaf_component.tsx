@@ -49,14 +49,18 @@ interface ESQLDataCascadeLeafCellProps
 
 interface CustomCascadeGridBodyProps
   extends EuiDataGridCustomBodyProps,
-    Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'> {
-  data: DataTableRecord[];
+    Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'>,
+    Pick<
+      Parameters<typeof useConnectedChildVirtualizer>[0],
+      'cellId' | 'rowIndex' | 'estimatedRowHeight' | 'persistScrollAnchor'
+    > {
   isFullScreenMode?: boolean;
-  cellId: string;
-  rowIndex: number;
+  'data-test-subj': string;
 }
 
 const EMPTY_SORT: SortOrder[] = [];
+const DOCUMENT_ROW_ESTIMATED_HEIGHT = 65;
+const COMPARISON_ROW_ESTIMATED_HEIGHT = 40;
 
 /**
  * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
@@ -64,19 +68,23 @@ const EMPTY_SORT: SortOrder[] = [];
  */
 export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
   isFullScreenMode,
-  data,
   virtualizerController,
   cellId,
   rowIndex,
+  estimatedRowHeight,
+  persistScrollAnchor,
+  'data-test-subj': dataTestSubj,
   Cell,
   visibleColumns,
   visibleRowData,
   headerRow,
   footerRow,
 }: CustomCascadeGridBodyProps) {
-  const visibleRows = useMemo(
-    () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
-    [data, visibleRowData.startRow, visibleRowData.endRow]
+  // the connected virtualizer only needs to know how many rows the grid renders
+  const rowCount = visibleRowData.endRow - visibleRowData.startRow;
+  const rows = useMemo(
+    () => Array.from({ length: rowCount }, (_, index) => ({ id: String(index) })),
+    [rowCount]
   );
 
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -92,11 +100,11 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     controller: virtualizerController,
     cellId,
     rowIndex,
-    // @ts-expect-error - required to allow the use of the visibleRows array
-    rows: visibleRows,
-    estimatedRowHeight: 65,
+    rows,
+    estimatedRowHeight,
     overscan: 10,
     privateScrollElement: customGridBodyScrollContainerRef,
+    persistScrollAnchor,
   });
 
   useLayoutEffect(() => {
@@ -113,11 +121,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   const translateY = items.length > 0 ? items[0].start - scrollMargin : 0;
 
   return (
-    <div
-      data-test-subj="discoverCascadeCustomDataGridBody"
-      role="rowgroup"
-      css={customCascadeGridBodyStyle.wrapper}
-    >
+    <div data-test-subj={dataTestSubj} role="rowgroup" css={customCascadeGridBodyStyle.wrapper}>
       <>{headerRow}</>
       <div
         ref={customGridBodyScrollContainerRef}
@@ -241,32 +245,41 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const renderCustomCascadeGridBodyCallback = useCallback<
       NonNullable<UnifiedDataTableProps['renderCustomGridBody']>
     >(
-      ({
-        Cell,
-        visibleColumns,
-        visibleRowData,
-        setCustomGridBodyProps,
-        gridWidth,
-        headerRow,
-        footerRow,
-      }) => (
+      (gridBodyProps) => (
         <CustomCascadeGridBodyMemoized
+          {...gridBodyProps}
           key={cellId}
-          Cell={Cell}
-          data={cellData}
-          visibleColumns={visibleColumns}
-          visibleRowData={visibleRowData}
-          headerRow={headerRow}
-          footerRow={footerRow}
-          gridWidth={gridWidth}
-          setCustomGridBodyProps={setCustomGridBodyProps}
+          data-test-subj="discoverCascadeCustomDataGridBody"
           virtualizerController={virtualizerController}
           cellId={cellId}
           rowIndex={rowIndex}
+          estimatedRowHeight={DOCUMENT_ROW_ESTIMATED_HEIGHT}
           isFullScreenMode={isCellInFullScreenMode}
         />
       ),
-      [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
+      [virtualizerController, isCellInFullScreenMode, cellId, rowIndex]
+    );
+
+    // The comparison grid's rows are the compared fields rather than documents, so it connects to the
+    // cascade under its own id and, since it doesn't share the document grid's index space, without
+    // persisting a scroll anchor
+    const renderCustomComparisonGridBodyCallback = useCallback<
+      NonNullable<UnifiedDataTableProps['renderCustomComparisonGridBody']>
+    >(
+      (gridBodyProps) => (
+        <CustomCascadeGridBodyMemoized
+          {...gridBodyProps}
+          key={`${cellId}/comparison`}
+          data-test-subj="discoverCascadeComparisonGridBody"
+          virtualizerController={virtualizerController}
+          cellId={`${cellId}/comparison`}
+          rowIndex={rowIndex}
+          estimatedRowHeight={COMPARISON_ROW_ESTIMATED_HEIGHT}
+          persistScrollAnchor={false}
+          isFullScreenMode={isCellInFullScreenMode}
+        />
+      ),
+      [virtualizerController, isCellInFullScreenMode, cellId, rowIndex]
     );
     return (
       <UnifiedDataTable
@@ -292,6 +305,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         renderDocumentView="external"
         setRenderDocumentViewMeta={setRenderDocumentViewMeta}
         renderCustomGridBody={renderCustomCascadeGridBodyCallback}
+        renderCustomComparisonGridBody={renderCustomComparisonGridBodyCallback}
         onFullScreenChange={setIsCellInFullScreenMode}
         externalCustomRenderers={externalCustomRenderers}
         paginationMode="infinite"

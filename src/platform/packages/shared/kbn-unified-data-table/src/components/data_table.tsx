@@ -447,6 +447,11 @@ interface InternalUnifiedDataTableProps {
    */
   renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
   /**
+   * Like `renderCustomGridBody`, but for the comparison grid shown when comparing selected documents.
+   * Its rows are the compared fields rather than documents.
+   */
+  renderCustomComparisonGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
+  /**
    * Optional render for the grid toolbar
    * @param toolbarProps
    * @param gridProps
@@ -649,6 +654,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onFieldEdited,
       services,
       renderCustomGridBody,
+      renderCustomComparisonGridBody,
       renderCustomToolbar,
       showSummaryColumnToggle = false,
       trailingControlColumns,
@@ -730,6 +736,19 @@ const InternalUnifiedDataTable = React.forwardRef<
         dataGridRef.current?.setIsFullScreen(true);
       }
     }, [documentsDisplayMode]);
+
+    // Toggling comparison mode also remounts the grid (see the wrapper key) and thereby exits full screen,
+    // so keep the tracked state and the consumer in sync instead of restoring it
+    const prevIsCompareActiveRef = useRef(isCompareActive);
+    useLayoutEffect(() => {
+      if (prevIsCompareActiveRef.current === isCompareActive) {
+        return;
+      }
+      prevIsCompareActiveRef.current = isCompareActive;
+      if (isFullScreenRef.current) {
+        onDataGridFullScreenChange(false);
+      }
+    }, [isCompareActive, onDataGridFullScreenChange]);
 
     useLayoutEffect(() => {
       if (isFullScreenRef.current && !dataGridRef.current) {
@@ -1686,6 +1705,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           >
             {isCompareActive ? (
               <CompareDocuments
+                ref={dataGridRef}
                 id={dataGridId}
                 wrapper={dataGridWrapper}
                 consumer={consumer}
@@ -1702,6 +1722,8 @@ const InternalUnifiedDataTable = React.forwardRef<
                 docMap={docMap}
                 replaceSelectedDocs={replaceSelectedDocs}
                 setIsCompareActive={setIsCompareActive}
+                renderCustomGridBody={renderCustomComparisonGridBody}
+                onFullScreenChange={onDataGridFullScreenChange}
               />
             ) : (
               <EuiDataGridMemoized

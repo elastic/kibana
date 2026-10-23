@@ -163,6 +163,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     initialRect: initialState?.scrollRect,
     initialAnchorItemIndex: initialState?.scrollAnchorItemIndex ?? undefined,
     initialPersistedAnchors,
+    initialRetainedAnchors: initialState?.retainedAnchors,
   });
 
   const isVirtualizerStable = virtualizerInstance.current.isStable;
