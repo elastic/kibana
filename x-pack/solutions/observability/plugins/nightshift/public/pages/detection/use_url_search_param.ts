@@ -21,6 +21,7 @@ export const useUrlSearchParam = (paramName: string, maxLength: number) => {
     [maxLength, paramName, search]
   );
   const [value, setValue] = useState(urlValue);
+  const [query, setQuery] = useState(urlValue.trim());
 
   const updateParam = useCallback(
     (nextValue: string) => {
@@ -36,12 +37,11 @@ export const useUrlSearchParam = (paramName: string, maxLength: number) => {
     [history, paramName, pathname, search]
   );
 
-  // Only typing writes the search to the URL, so Back/Forward can't be overwritten by a stale value.
   const pendingValue = useRef<string>();
-  const { run: debouncedUpdateParam, cancel: cancelDebouncedUpdate } = useDebounceFn(
+  const { run: debouncedSetQuery, cancel: cancelDebouncedUpdate } = useDebounceFn(
     (nextValue: string) => {
       pendingValue.current = undefined;
-      updateParam(nextValue);
+      setQuery(nextValue.trim());
     },
     SEARCH_DEBOUNCE_OPTIONS
   );
@@ -50,22 +50,14 @@ export const useUrlSearchParam = (paramName: string, maxLength: number) => {
     cancelDebouncedUpdate();
   }, [cancelDebouncedUpdate]);
 
-  // A tab switch inside the debounce unmounts this hook; keep the typed search on the new URL.
-  useEffect(
-    () => () => {
-      const nextValue = pendingValue.current;
-      if (nextValue === undefined || !history.location.pathname.startsWith('/detections/')) return;
-      const nextParams = new URLSearchParams(history.location.search);
-      if (nextValue.trim()) nextParams.set(paramName, nextValue);
-      else nextParams.delete(paramName);
-      history.replace({ ...history.location, search: nextParams.toString() });
-    },
-    [history, paramName]
-  );
-
   useEffect(() => {
+    // The local URL write should not bypass the query debounce.
+    if (pendingValue.current === urlValue) {
+      return;
+    }
     cancelPendingUpdate();
     setValue(urlValue);
+    setQuery(urlValue.trim());
   }, [cancelPendingUpdate, urlValue]);
 
   // Back/Forward within the debounce window must drop the pending write.
@@ -74,7 +66,12 @@ export const useUrlSearchParam = (paramName: string, maxLength: number) => {
       history.listen((location, action) => {
         if (action === 'POP') {
           cancelPendingUpdate();
-          setValue((new URLSearchParams(location.search).get(paramName) ?? '').slice(0, maxLength));
+          const nextValue = (new URLSearchParams(location.search).get(paramName) ?? '').slice(
+            0,
+            maxLength
+          );
+          setValue(nextValue);
+          setQuery(nextValue.trim());
         }
       }),
     [cancelPendingUpdate, history, maxLength, paramName]
@@ -85,15 +82,17 @@ export const useUrlSearchParam = (paramName: string, maxLength: number) => {
       const nextValue = event.target.value.slice(0, maxLength);
       setValue(nextValue);
       pendingValue.current = nextValue;
-      debouncedUpdateParam(nextValue);
+      updateParam(nextValue);
+      debouncedSetQuery(nextValue);
     },
-    [debouncedUpdateParam, maxLength]
+    [debouncedSetQuery, maxLength, updateParam]
   );
 
   const clear = useCallback(() => {
     cancelPendingUpdate();
     setValue('');
+    setQuery('');
   }, [cancelPendingUpdate]);
 
-  return { value, query: urlValue.trim(), onChange, clear };
+  return { value, query, onChange, clear };
 };

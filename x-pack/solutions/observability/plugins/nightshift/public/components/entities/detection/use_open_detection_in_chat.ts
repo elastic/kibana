@@ -6,18 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
-import type { Detection, LifecycleDetection } from '@kbn/significant-events-schema';
-import { useCallback } from 'react';
+import {
+  SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  toLifecycleDetection,
+  type LifecycleDetectionInput,
+} from '@kbn/significant-events-plugin/common';
+import { useCallback, useMemo } from 'react';
 import { formatChatAttachmentDescription } from '../../../chat/chat_attachment_description';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export const useOpenDetectionInChat = (
-  detection: Detection | LifecycleDetection
+  detection: LifecycleDetectionInput
 ): (() => void) | undefined => {
   const { agentBuilder } = useKibana().services;
-  const title = detection.rule_name ?? detection.rule_uuid ?? detection.detection_id;
+  const attachment = useMemo(() => toLifecycleDetection(detection), [detection]);
+  const title = attachment?.rule_name ?? detection.rule_uuid ?? detection.detection_id;
   const openInChat = useCallback(() => {
+    if (!attachment) {
+      return;
+    }
+
     agentBuilder?.openChat({
       newConversation: true,
       autoSendInitialMessage: false,
@@ -31,11 +39,11 @@ export const useOpenDetectionInChat = (
           type: SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
           origin: detection.detection_id,
           description: formatChatAttachmentDescription('Detection', title),
-          data: detection,
+          data: attachment,
         },
       ],
     });
-  }, [agentBuilder, detection, title]);
+  }, [agentBuilder, attachment, detection.detection_id, title]);
 
-  return agentBuilder ? openInChat : undefined;
+  return agentBuilder && attachment ? openInChat : undefined;
 };
