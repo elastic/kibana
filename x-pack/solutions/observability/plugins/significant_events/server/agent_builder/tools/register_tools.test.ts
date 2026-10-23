@@ -21,12 +21,20 @@ import {
   SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID,
 } from './register_tools';
 import { coreMock } from '@kbn/core/server/mocks';
-import { createMockGetScopedClients, createMockRequest } from '../utils/test_helpers';
+import type { NightshiftFeaturePrivilege } from '../utils/test_helpers';
+import {
+  createMockGetScopedClients,
+  createMockRequest,
+  createSignificantEventsServer,
+} from '../utils/test_helpers';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
 import type { SignificantEventsServer } from '../../types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 
-const createMockServer = (): Pick<SignificantEventsServer, 'isServerless' | 'core'> => ({
+const createMockServer = (
+  featurePrivilege: NightshiftFeaturePrivilege = 'all'
+): Pick<SignificantEventsServer, 'isServerless' | 'core' | 'security'> => ({
+  ...createSignificantEventsServer({ featurePrivilege }),
   isServerless: false,
   core: {
     elasticsearch: { client: { asInternalUser: {} } },
@@ -123,6 +131,48 @@ describe('registerAgentBuilderTools', () => {
         reason: 'feature disabled',
       });
     }
+  });
+
+  it('hides the source change tools from users without the manage privilege', async () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+    const { getScopedClients } = createMockGetScopedClients();
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+
+    registerAgentBuilderTools({
+      agentBuilder,
+      getScopedClients,
+      server: createMockServer('read') as SignificantEventsServer,
+      logger: loggerMock.create(),
+      telemetry,
+      maintenanceService,
+    });
+
+    const availabilityContext = {
+      request: createMockRequest(),
+      uiSettings: coreMock.createRequestHandlerContext().uiSettings.client,
+      spaceId: 'default',
+    };
+    const expectedStatusById: Record<string, string> = {
+      [SIGNIFICANT_EVENTS_SOURCE_LIST_TOOL_ID]: 'available',
+      [SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID]: 'available',
+      [SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID]: 'unavailable',
+      [SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID]: 'unavailable',
+      [SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID]: 'unavailable',
+    };
+    const statusById = Object.fromEntries(
+      await Promise.all(
+        agentBuilder.tools.register.mock.calls
+          .map(([tool]) => tool)
+          .filter(({ id }) => id in expectedStatusById)
+          .map(async (tool) => {
+            const availability = 'availability' in tool ? tool.availability : undefined;
+            const result = await availability?.handler(availabilityContext);
+            return [tool.id, result?.status];
+          })
+      )
+    );
+
+    expect(statusById).toEqual(expectedStatusById);
   });
 
   it('does not register any tools when agentBuilder is falsy', () => {

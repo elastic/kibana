@@ -17,6 +17,7 @@ import { createSignificantEventsAvailability } from '../significant_events_avail
 import {
   getOnboardingPausedFlag,
   ONBOARDING_PAUSED_DESCRIPTION,
+  ONBOARDING_PROGRESS_DESCRIPTION,
 } from '../sources/onboarding_paused';
 import { runSourceTool } from '../sources/run_source_tool';
 import { SOURCE_ESQL_RULES } from '../sources/source_esql_rules';
@@ -68,7 +69,8 @@ export const createSourceUpdateTool = ({
     A new query is validated and run as the current user, so the user needs read access to the
     indices it targets. An invalid query returns an error that says why, and nothing is changed.
     Changing the query deletes the source's Knowledge Indicators and rules and stops any running
-    onboarding, because they describe the old query. Tell the user before changing it.
+    onboarding, because they describe the old query. An enabled source is then onboarded again with
+    the new query. ${ONBOARDING_PROGRESS_DESCRIPTION}
 
     Returns the updated source. ${ONBOARDING_PAUSED_DESCRIPTION} When other fields are changed together
     with \`enabled\` and only setting \`enabled\` fails, the other changes are kept and
@@ -103,7 +105,7 @@ export const createSourceUpdateTool = ({
               'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.queryChangeMessage',
               {
                 defaultMessage:
-                  'Update source "{source}" ({changeList})? Its knowledge indicators and rules describe the old query, so they are deleted and any running onboarding is stopped. Onboard the source again to rebuild them.',
+                  'Update source "{source}" ({changeList})? Its knowledge indicators and rules describe the old query, so they are deleted and any running onboarding is stopped. An enabled source is then onboarded again with the new query.',
                 values: { source, changeList },
               }
             )
@@ -136,7 +138,11 @@ export const createSourceUpdateTool = ({
       };
     },
   },
-  availability: createSignificantEventsAvailability({ server, logger }),
+  availability: createSignificantEventsAvailability({
+    server,
+    logger,
+    requireManagePrivilege: true,
+  }),
   handler: async ({ source: slugOrId, enabled, ...changes }, { request }) =>
     runSourceTool({
       action: 'update source',

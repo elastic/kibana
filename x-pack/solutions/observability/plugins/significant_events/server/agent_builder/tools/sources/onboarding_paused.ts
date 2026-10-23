@@ -6,7 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
 import type { MaintenanceStateReader } from './source_tool_deps';
+
+/** Where onboarding progress shows, for the tool descriptions of the tools that start it. */
+export const ONBOARDING_PROGRESS_DESCRIPTION = `Onboarding progress shows on the Nightshift Sources page (\`${NIGHTSHIFT_SOURCES_APP_PATH}\`).`;
 
 /** What the flag means, for the tool descriptions of the tools that return it. */
 export const ONBOARDING_PAUSED_DESCRIPTION =

@@ -15,6 +15,7 @@ import { createSignificantEventsAvailability } from '../significant_events_avail
 import {
   getOnboardingPausedFlag,
   ONBOARDING_PAUSED_DESCRIPTION,
+  ONBOARDING_PROGRESS_DESCRIPTION,
 } from '../sources/onboarding_paused';
 import { runSourceTool } from '../sources/run_source_tool';
 import { SOURCE_ESQL_RULES } from '../sources/source_esql_rules';
@@ -49,7 +50,8 @@ export const createSourceCreateTool = ({
     user, so the user needs read access to the indices it targets. An invalid query returns an
     error that says why.
 
-    The source is created enabled. Returns the created source, including its \`slug\`.
+    The source is created enabled, and its onboarding starts on its own.
+    ${ONBOARDING_PROGRESS_DESCRIPTION} Returns the created source, including its \`slug\`.
     ${ONBOARDING_PAUSED_DESCRIPTION}
   `,
   annotations: {
@@ -91,7 +93,11 @@ export const createSourceCreateTool = ({
       ),
     }),
   },
-  availability: createSignificantEventsAvailability({ server, logger }),
+  availability: createSignificantEventsAvailability({
+    server,
+    logger,
+    requireManagePrivilege: true,
+  }),
   handler: async (toolParams, { request }) =>
     runSourceTool({
       action: 'create source',

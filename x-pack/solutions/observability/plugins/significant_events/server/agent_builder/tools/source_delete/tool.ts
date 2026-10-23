@@ -78,7 +78,11 @@ export const createSourceDeleteTool = ({
       ),
     }),
   },
-  availability: createSignificantEventsAvailability({ server, logger }),
+  availability: createSignificantEventsAvailability({
+    server,
+    logger,
+    requireManagePrivilege: true,
+  }),
   handler: async ({ source: slugOrId }, { request }) =>
     runSourceTool({
       action: 'delete source',
