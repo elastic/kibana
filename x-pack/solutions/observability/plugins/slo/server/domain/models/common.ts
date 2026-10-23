@@ -7,28 +7,28 @@
 import type { z } from '@kbn/zod';
 
 import type {
-  dateRangeSchemaZod,
-  groupBySchemaZod,
-  groupingsSchemaZod,
-  groupSummarySchemaZod,
-  metaSchemaZod,
-  objectiveSchemaZod,
-  sloSettingsSchemaZod,
-  statusSchemaZod,
-  storedSloSettingsSchemaZod,
-  summarySchemaZod,
+  dateRangeSchema,
+  groupBySchema,
+  groupingsSchema,
+  groupSummarySchema,
+  metaSchema,
+  objectiveSchema,
+  sloSettingsSchema,
+  statusSchema,
+  storedSloSettingsSchema,
+  summarySchema,
 } from '@kbn/slo-schema';
 
-type Objective = z.output<typeof objectiveSchemaZod>;
-type Status = z.output<typeof statusSchemaZod>;
-type DateRange = z.output<typeof dateRangeSchemaZod>;
-type Summary = z.output<typeof summarySchemaZod>;
-type Groupings = z.output<typeof groupingsSchemaZod>;
-type Meta = z.output<typeof metaSchemaZod>;
-type GroupSummary = z.output<typeof groupSummarySchemaZod>;
-type GroupBy = z.output<typeof groupBySchemaZod>;
-type StoredSLOSettings = z.input<typeof storedSloSettingsSchemaZod>;
-type SLOSettings = z.output<typeof sloSettingsSchemaZod>;
+type Objective = z.output<typeof objectiveSchema>;
+type Status = z.output<typeof statusSchema>;
+type DateRange = z.output<typeof dateRangeSchema>;
+type Summary = z.output<typeof summarySchema>;
+type Groupings = z.output<typeof groupingsSchema>;
+type Meta = z.output<typeof metaSchema>;
+type GroupSummary = z.output<typeof groupSummarySchema>;
+type GroupBy = z.output<typeof groupBySchema>;
+type StoredSLOSettings = z.input<typeof storedSloSettingsSchema>;
+type SLOSettings = z.output<typeof sloSettingsSchema>;
 
 export type {
   Objective,

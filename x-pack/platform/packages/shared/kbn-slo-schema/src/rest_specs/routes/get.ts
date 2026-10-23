@@ -7,7 +7,7 @@
 import { z } from '@kbn/zod';
 import { allOrAnyString } from '../../schema/common';
 import { sloIdSchema } from '../../schema/slo';
-import { sloWithDataResponseSchemaZod } from '../slo';
+import { sloWithDataResponseSchema } from '../slo';
 
 const getSLOQuerySchema = z.object({
   instanceId: allOrAnyString.optional(),
@@ -21,7 +21,7 @@ const getSLOParamsSchema = z.object({
   query: getSLOQuerySchema.optional(),
 });
 
-const getSLOResponseSchema = sloWithDataResponseSchemaZod;
+const getSLOResponseSchema = sloWithDataResponseSchema;
 
 type GetSLOParams = z.output<typeof getSLOQuerySchema>;
 type GetSLOResponse = z.input<typeof getSLOResponseSchema>;
