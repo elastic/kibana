@@ -156,7 +156,6 @@ describe('find()', () => {
                 "uuid": 100,
               },
             ],
-            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -279,7 +278,6 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
-            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -392,7 +390,6 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
-            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -687,7 +684,6 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
-            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -725,7 +721,6 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
-            "activeSnoozes": undefined,
             "alertTypeId": "123",
             "artifacts": Object {
               "dashboards": Array [],
@@ -1113,23 +1108,21 @@ describe('find()', () => {
           "data": Array [
             Object {
               "actions": Array [],
-              "activeSnoozes": undefined,
               "artifacts": Object {
                 "dashboards": Array [],
                 "investigation_guide": Object {
                   "blob": "",
                 },
               },
+              "createdAt": 2019-02-12T21:01:22.479Z,
               "id": "1",
               "isSnoozedUntil": null,
-              "notifyWhen": undefined,
-              "params": undefined,
-              "schedule": undefined,
               "snoozeSchedule": Array [],
               "systemActions": Array [],
               "tags": Array [
                 "myTag",
               ],
+              "updatedAt": 2019-02-12T21:01:22.479Z,
             },
           ],
           "page": 1,
@@ -1528,7 +1521,6 @@ describe('find()', () => {
                   "uuid": 100,
                 },
               ],
-              "activeSnoozes": undefined,
               "alertTypeId": "myType",
               "artifacts": Object {
                 "dashboards": Array [
