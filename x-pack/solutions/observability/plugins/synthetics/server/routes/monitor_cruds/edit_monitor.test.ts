@@ -115,6 +115,43 @@ describe('syncEditedMonitor', () => {
     );
   });
 
+  it('rolls back without writing a plaintext secret left on the previous monitor', async () => {
+    // The rollback restores the previous document as-is. If a secret ever ended up at the top
+    // level of that document, restoring it verbatim would write it to the saved object in the
+    // clear — `secrets` is the only encrypted attribute on the type.
+    const previousMonitorWithStraySecret = {
+      ...previousMonitor,
+      attributes: {
+        ...previousMonitor.attributes,
+        secrets: JSON.stringify({ params: 'existing-param' }),
+        password: 'leaked-password',
+      } as any,
+    } as SavedObject<EncryptedSyntheticsMonitorAttributes>;
+
+    routeContext.syntheticsMonitorClient.editMonitors = jest
+      .fn()
+      .mockRejectedValue(new Error('sync failed'));
+
+    await expect(
+      syncEditedMonitor({
+        normalizedMonitor: editedMonitor,
+        decryptedPreviousMonitor:
+          previousMonitorWithStraySecret as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+        routeContext,
+        spaceId: 'test-space',
+      })
+    ).rejects.toThrow('sync failed');
+
+    // The guard refuses the rollback rather than persisting the secret in the clear. Its own
+    // catch keeps that from masking the original sync failure, asserted above.
+    const writes = (serverMock.authSavedObjectsClient?.update as jest.Mock).mock.calls;
+    expect(writes.every(([, , written]) => !('password' in written))).toBe(true);
+    expect(serverMock.logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Unable to rollback edit'),
+      expect.anything()
+    );
+  });
+
   it('passes package policy references when monitor has private locations', async () => {
     const monitorWithPrivateLocation = {
       ...editedMonitor,
