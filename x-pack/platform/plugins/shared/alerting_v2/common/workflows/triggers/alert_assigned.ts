@@ -19,7 +19,7 @@ export const alertAssignedPayloadSchema = lazySchema(() =>
       .min(1)
       .max(256)
       .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.alertAssigned.schema.assigneeUid', {
+        i18n.translate('xpack.alertingV2.triggers.alertAssigned.schema.assigneeUid', {
           defaultMessage: 'User-profile UID of the new assignee.',
         })
       ),
@@ -34,22 +34,22 @@ export const alertAssignedTriggerCommonDefinition: CommonTriggerDefinition<
   id: ALERT_ASSIGNED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: alertAssignedPayloadSchema,
-  title: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertAssigned.title', {
+  title: i18n.translate('xpack.alertingV2.workflowTriggers.alertAssigned.title', {
     defaultMessage: 'Alerting - Alert assigned',
   }),
-  description: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertAssigned.description', {
+  description: i18n.translate('xpack.alertingV2.workflowTriggers.alertAssigned.description', {
     defaultMessage: 'Emitted when an alert is assigned to a user.',
   }),
   documentation: {
     details: i18n.translate(
-      'xpack.alertingVTwo.workflowTriggers.alertAssigned.documentation.details',
+      'xpack.alertingV2.workflowTriggers.alertAssigned.documentation.details',
       {
         defaultMessage:
           'Emitted after an alert assign action is persisted with a non-null assignee. The payload includes event.alertId, event.ruleId, event.spaceId, and event.assigneeUid for trigger conditions.',
       }
     ),
     examples: [
-      i18n.translate('xpack.alertingVTwo.workflowTriggers.alertAssigned.documentation.example', {
+      i18n.translate('xpack.alertingV2.workflowTriggers.alertAssigned.documentation.example', {
         defaultMessage: `## Run for a specific rule
 \`\`\`yaml
 triggers:
