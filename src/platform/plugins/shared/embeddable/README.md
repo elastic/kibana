@@ -146,6 +146,7 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | FILTER_BY_MAP_EXTENT | Filters page by map bounds | ON_OPEN_PANEL_MENU | |
 | generateCsvReport | Starts CSV reporting job for Discover session | ON_OPEN_PANEL_MENU | PublishesSavedSearch, PublishesTitle |
 | open-change-point-in-ml-app | Open change point chart embeddable in AIOps Labs | ON_OPEN_PANEL_MENU | |
+| ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER | Opens a change point charts panel in Discover with its current context | ON_OPEN_PANEL_MENU | |
 | open-in-anomaly-explorer | Open in Anomaly Explorer | ON_OPEN_PANEL_MENU | |
 | open-in-single-metric-viewer | Open in Single Metric Viewer | ON_OPEN_PANEL_MENU | |
 | CUSTOM_TIME_RANGE_BADGE | Displays custom time range badge | PANEL_BADGE_TRIGGER | PublishesTimeRange |

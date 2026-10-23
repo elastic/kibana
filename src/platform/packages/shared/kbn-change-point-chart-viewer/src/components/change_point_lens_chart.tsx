@@ -16,10 +16,11 @@ import type {
 } from '@kbn/lens-embeddable-utils/config_builder';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { useMemo, useRef } from 'react';
 import {
+  ACTION_ADD_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_FOCUSED_VIEW,
   ACTION_INSPECT_PANEL,
@@ -42,11 +43,12 @@ const focusedViewLabel = i18n.translate('changePointChartViewer.lens.focusedView
 
 const EMBEDDABLE_QUICK_ACTIONS = {
   quickActions: {
-    view: [ACTION_FOCUSED_VIEW, ACTION_INSPECT_PANEL, ADD_TO_EXISTING_CASE_ACTION_ID] as [
-      string,
-      string,
-      string
-    ],
+    view: [
+      ACTION_ADD_TO_DASHBOARD,
+      ACTION_FOCUSED_VIEW,
+      ACTION_INSPECT_PANEL,
+      ADD_TO_EXISTING_CASE_ACTION_ID,
+    ] as [string, string, string, string],
   },
 };
 
@@ -85,6 +87,12 @@ export interface ChangePointLensChartProps
   cardIndex: number;
   valueColumn: string;
   timeColumn: string;
+  /** Discover charts keep panel actions. The dashboard grid turns them off. */
+  showPanelActions?: boolean;
+  searchContext?: {
+    filters: Filter[];
+    query?: Query;
+  };
 }
 
 export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
@@ -98,6 +106,8 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   onBrushEnd,
   onFilter,
   actions,
+  showPanelActions = true,
+  searchContext,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -165,70 +175,109 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     chartRef,
     chartLayers,
     timeRange: chartTimeRange,
+    searchContext,
   });
 
   const { EmbeddableComponent } = services.lens;
 
   const extraActions = useMemo((): Action[] => {
-    if (!actions?.openInNewTab || !lensProps || !card.annotationEvents.length) return [];
+    const chartActions: Action[] = [];
+    const dashboardEsql = card.dashboardEsql;
+
+    if (actions?.addPageToDashboard && dashboardEsql) {
+      chartActions.push({
+        id: ACTION_ADD_TO_DASHBOARD,
+        order: 1,
+        type: 'actionButton',
+        getDisplayName() {
+          return i18n.translate('changePointChartViewer.lens.addToDashboardLabel', {
+            defaultMessage: 'Add to dashboard',
+          });
+        },
+        getIconType() {
+          return 'addToDashboard';
+        },
+        async isCompatible() {
+          return true;
+        },
+        async execute() {
+          actions.addPageToDashboard?.({ esql: dashboardEsql, singleSeries: true });
+        },
+      });
+    }
+
+    if (!actions?.openInNewTab || !lensProps || !card.annotationEvents.length) {
+      return chartActions;
+    }
 
     const timeRange = buildFocusedViewTimeRange(
       card.annotationEvents,
       lensProps.timeRange ?? fetchParams.timeRange
     );
+    if (!timeRange) {
+      return chartActions;
+    }
 
-    return timeRange
-      ? [
-          {
-            id: ACTION_FOCUSED_VIEW,
-            order: 22,
-            type: 'actionButton',
-            getDisplayName() {
-              return i18n.translate('changePointChartViewer.lens.focusedView', {
-                defaultMessage: 'Open in a new Discover tab',
-              });
-            },
-            getIconType() {
-              return 'productDiscover';
-            },
-            async isCompatible() {
-              return true;
-            },
-            async execute() {
-              const rawEsql = buildFocusedViewRawQuery(card.lineEsql, card.entityValues);
-              actions.openInNewTab?.({
-                query: rawEsql ? { esql: rawEsql } : lensProps.attributes.state.query,
-                tabLabel: `${lensProps.attributes.title} - ${focusedViewLabel}`,
-                timeRange,
-              });
-            },
-          },
-        ]
-      : [];
+    chartActions.push({
+      id: ACTION_FOCUSED_VIEW,
+      order: 22,
+      type: 'actionButton',
+      getDisplayName() {
+        return i18n.translate('changePointChartViewer.lens.focusedView', {
+          defaultMessage: 'Open in a new Discover tab',
+        });
+      },
+      getIconType() {
+        return 'productDiscover';
+      },
+      async isCompatible() {
+        return true;
+      },
+      async execute() {
+        const rawEsql = buildFocusedViewRawQuery(card.lineEsql, card.entityValues);
+        actions.openInNewTab?.({
+          query: rawEsql ? { esql: rawEsql } : lensProps.attributes.state.query,
+          tabLabel: `${lensProps.attributes.title} - ${focusedViewLabel}`,
+          timeRange,
+        });
+      },
+    });
+
+    return chartActions;
   }, [
     actions,
     card.annotationEvents,
+    card.dashboardEsql,
     card.entityValues,
     card.lineEsql,
     fetchParams.timeRange,
     lensProps,
   ]);
 
+  const chart = lensProps ? (
+    <EmbeddableComponent
+      {...lensProps}
+      extraActions={showPanelActions ? extraActions : undefined}
+      {...(fetchParams.abortController ? { abortController: fetchParams.abortController } : {})}
+      disabledActions={showPanelActions ? DEFAULT_DISABLED_ACTIONS : undefined}
+      hidePanelTitles={!showPanelActions}
+      withDefaultActions={showPanelActions}
+      onBrushEnd={showPanelActions ? onBrushEnd : undefined}
+      onFilter={showPanelActions ? onFilter : undefined}
+    />
+  ) : undefined;
+
   const renderChartBody = () => {
-    if (lensProps) {
+    if (chart) {
       return (
         <div css={chartContainerCss}>
-          <EmbeddableRendererContext.Provider value={EMBEDDABLE_QUICK_ACTIONS}>
-            <EmbeddableComponent
-              {...lensProps}
-              extraActions={extraActions}
-              abortController={fetchParams.abortController}
-              disabledActions={DEFAULT_DISABLED_ACTIONS}
-              withDefaultActions
-              onBrushEnd={onBrushEnd}
-              onFilter={onFilter}
-            />
-          </EmbeddableRendererContext.Provider>
+          {showPanelActions ? (
+            <EmbeddableRendererContext.Provider value={EMBEDDABLE_QUICK_ACTIONS}>
+              {chart}
+            </EmbeddableRendererContext.Provider>
+          ) : (
+            chart
+          )}
         </div>
       );
     }
@@ -284,6 +333,27 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
       ref={chartRef}
       data-test-subj={`changePointLensChart-${cardIndex}`}
     >
+      {!showPanelActions && card.title ? (
+        <EuiText
+          size="xs"
+          css={css`
+            flex-shrink: 0;
+            padding: ${euiTheme.size.xs} ${euiTheme.size.s} 0;
+            font-weight: ${euiTheme.font.weight.semiBold};
+          `}
+        >
+          <p
+            title={card.title}
+            css={css`
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            `}
+          >
+            {card.title}
+          </p>
+        </EuiText>
+      ) : null}
       {renderChartBody()}
 
       {/* Badge row — sits below the chart, right-aligned, never overlaps chart content */}

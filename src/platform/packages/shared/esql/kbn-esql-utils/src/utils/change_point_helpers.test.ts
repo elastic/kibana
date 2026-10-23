@@ -12,6 +12,7 @@ import {
   getChangePointSeriesColumns,
   getChangePointByColumns,
   buildChangePointLineDataQuery,
+  narrowChangePointEsqlToEntity,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlEntityPredicate,
   formatEsqlIdentifier,
@@ -265,5 +266,58 @@ describe('appendEntityFiltersToChangePointLineEsql', () => {
     expect(
       appendEntityFiltersToChangePointLineEsql(line, { clientip: '5.255.253.75' }, ['clientip'])
     ).toBe(`${line} | WHERE clientip == "5.255.253.75"`);
+  });
+});
+
+describe('narrowChangePointEsqlToEntity', () => {
+  const query =
+    'FROM idx | STATS m = AVG(x) BY host, bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT m ON bucket BY host';
+
+  it('inserts WHERE immediately before CHANGE_POINT', () => {
+    expect(narrowChangePointEsqlToEntity(query, { host: 'pod-a' }, ['host'])).toBe(
+      'FROM idx | STATS m = AVG(x) BY host, bucket = BUCKET(@timestamp, 1 day) | SORT bucket | WHERE host == "pod-a" | CHANGE_POINT m ON bucket BY host'
+    );
+  });
+
+  it('combines predicates for multiple entity columns', () => {
+    expect(
+      narrowChangePointEsqlToEntity(query, { host: 'pod-a', other: 1 }, ['host', 'other'])
+    ).toBe(
+      'FROM idx | STATS m = AVG(x) BY host, bucket = BUCKET(@timestamp, 1 day) | SORT bucket | WHERE host == "pod-a" AND other == 1 | CHANGE_POINT m ON bucket BY host'
+    );
+  });
+
+  it('keeps null and empty string values', () => {
+    expect(narrowChangePointEsqlToEntity(query, { host: null }, ['host'])).toContain(
+      'WHERE host IS NULL | CHANGE_POINT'
+    );
+    expect(narrowChangePointEsqlToEntity(query, { host: '' }, ['host'])).toContain(
+      'WHERE host == "" | CHANGE_POINT'
+    );
+  });
+
+  it('returns the original query when there are no entity columns', () => {
+    expect(narrowChangePointEsqlToEntity(query, {}, [])).toBe(query);
+  });
+
+  it('keeps an existing WHERE and inserts the entity filter before CHANGE_POINT', () => {
+    const withWhere = 'FROM idx | WHERE region == "east" | CHANGE_POINT m ON @timestamp BY host';
+    expect(narrowChangePointEsqlToEntity(withWhere, { host: 'a' }, ['host'])).toBe(
+      'FROM idx | WHERE region == "east" | WHERE host == "a" | CHANGE_POINT m ON @timestamp BY host'
+    );
+  });
+
+  it('returns undefined for invalid queries, queries without CHANGE_POINT, and FORK queries', () => {
+    expect(narrowChangePointEsqlToEntity('not esql', { host: 'a' }, ['host'])).toBeUndefined();
+    expect(
+      narrowChangePointEsqlToEntity('FROM idx | STATS m = AVG(x)', { host: 'a' }, ['host'])
+    ).toBeUndefined();
+    expect(
+      narrowChangePointEsqlToEntity(
+        'FROM idx | FORK (WHERE host == "a" | CHANGE_POINT m ON @timestamp)',
+        { host: 'a' },
+        ['host']
+      )
+    ).toBeUndefined();
   });
 });

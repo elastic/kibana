@@ -10,6 +10,7 @@
 import {
   appendEntityFiltersToChangePointLineEsql,
   buildChangePointLineDataQuery,
+  narrowChangePointEsqlToEntity,
   getChangePointByColumns,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
@@ -23,6 +24,11 @@ export interface ChangePointCardModel {
   readonly id: string;
   readonly title: string;
   readonly lineEsql: string;
+  /**
+   * The CHANGE_POINT query limited to this card's series. Absent when the query cannot be
+   * safely limited, so the per-chart dashboard action stays hidden.
+   */
+  readonly dashboardEsql?: string;
   /** The BY grouping column names when the query uses `CHANGE_POINT ... BY col[, col]`. */
   readonly byColumns?: readonly string[];
   readonly annotationEvents: Array<{ name: string; datetime: string }>;
@@ -350,11 +356,21 @@ export const buildChangePointCards = (params: {
         ? entityColumnIds.map((col) => `${col}: ${entityValues[col]}`).join(', ')
         : undefined;
 
+    const byColumnIds = byColumns ?? [];
+    const canNarrowToSeries =
+      byColumnIds.length === 0 ||
+      (byColumnIds.length === entityColumnIds.length &&
+        byColumnIds.every((columnId) => entityColumnIds.includes(columnId)));
+    const dashboardEsql = canNarrowToSeries
+      ? narrowChangePointEsqlToEntity(esql, firstRow, entityColumnIds)
+      : undefined;
+
     cards.push({
       // Use entity label as the stable card ID so React remounts when the entity changes.
       id: getChangePointCardId(entityLabel),
       title,
       lineEsql,
+      dashboardEsql,
       byColumns: byColumns ? [...byColumns] : undefined,
       annotationEvents,
       minPvalue,

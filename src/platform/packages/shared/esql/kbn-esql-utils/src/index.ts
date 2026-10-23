@@ -51,6 +51,7 @@ export {
   getChangePointSeriesColumns,
   getChangePointByColumns,
   buildChangePointLineDataQuery,
+  narrowChangePointEsqlToEntity,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
