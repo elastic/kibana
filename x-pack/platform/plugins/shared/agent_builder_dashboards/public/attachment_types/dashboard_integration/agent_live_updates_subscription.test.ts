@@ -15,6 +15,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
+import { createAppliedAttachmentsStore } from './applied_attachments_store';
 
 const buildAttachment = (origin?: string): DashboardAttachment => ({
   id: 'attachment-1',
@@ -44,7 +45,14 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     agentBuilder: {
       events: { ui: { activeConversation$ }, getChatEvents$ },
     } as unknown as AgentBuilderPluginStart,
-    api: { savedObjectId$: { getValue: () => savedObjectId }, setState } as unknown as DashboardApi,
+    api: {
+      savedObjectId$: { getValue: () => savedObjectId },
+      setState,
+      getSerializedState: () => ({ attributes: { title: '', panels: [] } }),
+      layout$: new BehaviorSubject({ panels: {}, pinnedPanels: {} }),
+      getChildApi: jest.fn(),
+    } as unknown as DashboardApi,
+    appliedAttachments: createAppliedAttachmentsStore(),
     upsertAttachment,
   });
 

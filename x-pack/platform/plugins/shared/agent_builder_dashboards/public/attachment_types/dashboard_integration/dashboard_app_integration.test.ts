@@ -18,6 +18,7 @@ import {
   MANUAL_CHANGES_DEBOUNCE_MS,
   registerDashboardAppIntegration,
 } from './dashboard_app_integration';
+import { createAppliedAttachmentsStore } from './applied_attachments_store';
 import type { IdGenerator } from '..';
 
 const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
@@ -131,16 +132,25 @@ describe('registerDashboardAppIntegration', () => {
   }) => void;
   let cleanup: () => void;
   let simulateDashboardStateChange: () => void;
+  let removeAttachment: jest.Mock;
 
   beforeEach(() => {
     const mockAnyStateChange$ = new BehaviorSubject(undefined);
     simulateDashboardStateChange = () => {
+      mockApi.getSerializedState.mockReturnValue({
+        attributes: {
+          title: 'Edited Dashboard',
+          description: 'Test Description',
+          panels: [],
+        },
+      });
       mockAnyStateChange$.next(undefined);
     };
     jest.useFakeTimers();
     mockApi = createMockDashboardApi(mockAnyStateChange$.pipe(skip(1)));
     chatEventsByConversationId = new Map();
     addAttachment = jest.fn();
+    removeAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
     getUpdateOrigin = jest.fn(
       (attachmentId: string) => async (origin: string) =>
@@ -168,6 +178,7 @@ describe('registerDashboardAppIntegration', () => {
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const agentBuilder = {
       addAttachment,
+      removeAttachment,
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) => {
@@ -192,6 +203,7 @@ describe('registerDashboardAppIntegration', () => {
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
       draftAttachmentId,
+      appliedAttachments: createAppliedAttachmentsStore(),
       checkSavedDashboardExist,
       getUpdateOrigin,
     });

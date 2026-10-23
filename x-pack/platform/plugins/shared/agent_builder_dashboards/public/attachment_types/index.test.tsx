@@ -106,6 +106,8 @@ const createMockDashboardApi = (
     timeRange$,
     setState,
     getSerializedState,
+    layout$: new BehaviorSubject({ panels: {}, pinnedPanels: {} }),
+    getChildApi: jest.fn(),
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     emitSave: (event: DashboardSaveEvent) => onSave$.next(event),
   } as unknown as DashboardApi & {

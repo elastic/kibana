@@ -9,11 +9,13 @@ import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-co
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
+import type { AppliedAttachmentsStore } from './dashboard_integration/applied_attachments_store';
 import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
 export const handlePreview = async ({
   attachment,
   dashboardApi,
+  appliedAttachments,
   canWriteDashboards,
   isSidebar,
   dashboardLocator,
@@ -22,6 +24,7 @@ export const handlePreview = async ({
 }: {
   attachment: DashboardAttachment;
   dashboardApi?: DashboardApi;
+  appliedAttachments: AppliedAttachmentsStore;
   canWriteDashboards: boolean;
   isSidebar: boolean;
   dashboardLocator?: DashboardRendererProps['locator'];
@@ -33,6 +36,7 @@ export const handlePreview = async ({
     return previewAttachmentInDashboard({
       attachment,
       dashboardApi,
+      appliedAttachments,
       dashboardLocator,
       checkSavedDashboardExist,
     });

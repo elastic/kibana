@@ -9,13 +9,15 @@ import { EMPTY, filter, switchMap, type Subscription } from 'rxjs';
 import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
-import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../../common';
+import { applyAttachmentToDashboard } from './apply_attachment';
+import type { AppliedAttachmentsStore } from './applied_attachments_store';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
+  appliedAttachments: AppliedAttachmentsStore;
   upsertAttachment: (attachment: DashboardAttachment) => void;
 }
 
@@ -31,6 +33,7 @@ const isDashboardUpdatedUiEvent = (
 export const createAgentLiveUpdatesSubscription = ({
   agentBuilder,
   api,
+  appliedAttachments,
   upsertAttachment,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.ui.activeConversation$
@@ -54,5 +57,5 @@ export const createAgentLiveUpdatesSubscription = ({
         return;
       }
 
-      api.setState(attachmentDataToDashboardState(attachment.data), { changedBy: ['agent'] });
+      void applyAttachmentToDashboard({ store: appliedAttachments, api, attachment });
     });

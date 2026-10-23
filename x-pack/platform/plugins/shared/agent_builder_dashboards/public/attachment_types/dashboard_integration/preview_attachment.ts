@@ -8,10 +8,13 @@
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import { applyAttachmentToDashboard } from './apply_attachment';
+import type { AppliedAttachmentsStore } from './applied_attachments_store';
 
 interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
   dashboardApi: DashboardApi;
+  appliedAttachments: AppliedAttachmentsStore;
   dashboardLocator?: DashboardRendererProps['locator'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
@@ -19,6 +22,7 @@ interface PreviewAttachmentInDashboardParams {
 export const previewAttachmentInDashboard = async ({
   attachment,
   dashboardApi,
+  appliedAttachments,
   dashboardLocator,
   checkSavedDashboardExist,
 }: PreviewAttachmentInDashboardParams) => {
@@ -28,7 +32,7 @@ export const previewAttachmentInDashboard = async ({
   // a) Viewing saved dashboard + attachment linked to same dashboard -> apply state
   // Also handles both being undefined (unsaved dashboard, unlinked attachment)
   if (attachment.origin === currentSavedObjectId) {
-    dashboardApi.setState(dashboardState, { changedBy: ['agent'] });
+    await applyAttachmentToDashboard({ store: appliedAttachments, api: dashboardApi, attachment });
     return;
   }
 
@@ -39,7 +43,7 @@ export const previewAttachmentInDashboard = async ({
 
   if (!currentSavedObjectId && !linkedDashboardExists) {
     // b) Viewing unsaved dashboard + attachment linked to deleted dashboard
-    dashboardApi.setState(dashboardState, { changedBy: ['agent'] });
+    await applyAttachmentToDashboard({ store: appliedAttachments, api: dashboardApi, attachment });
     return;
   }
 

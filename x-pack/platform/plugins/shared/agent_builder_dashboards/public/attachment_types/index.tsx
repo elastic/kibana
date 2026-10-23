@@ -23,6 +23,7 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardCanvasAttachmentProps } from './async_services';
+import { createAppliedAttachmentsStore } from './dashboard_integration/applied_attachments_store';
 
 export interface IdGenerator {
   readonly current: string;
@@ -70,6 +71,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   draftAttachmentId: IdGenerator;
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
+  const appliedAttachments = createAppliedAttachmentsStore();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
   const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
@@ -105,6 +107,7 @@ export const registerDashboardAttachmentUiDefinition = ({
                   agentBuilder,
                   api,
                   draftAttachmentId,
+                  appliedAttachments,
                   checkSavedDashboardExist,
                   getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
                 })
@@ -160,6 +163,7 @@ export const registerDashboardAttachmentUiDefinition = ({
             return handlePreview({
               attachment,
               dashboardApi,
+              appliedAttachments,
               canWriteDashboards,
               isSidebar,
               dashboardLocator,
@@ -175,6 +179,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   return () => {
     dashboardAppApiSubscription.unsubscribe();
     dashboardApi = undefined;
+    appliedAttachments.baselines.clear();
     updateOriginByAttachmentId.clear();
   };
 };

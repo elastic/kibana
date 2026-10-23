@@ -10,33 +10,33 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
+import type {
+  DashboardAttachment,
+  DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common/types';
 import {
   isDashboardAttachment,
-  dashboardStateToAttachmentData,
   DASHBOARD_ATTACHMENT_TYPE,
 } from '@kbn/agent-builder-dashboards-common';
+import { isEqual } from 'lodash';
 import {
-  CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
-  UNSAVED_CHANGES_DEBOUNCE,
-} from '@kbn/presentation-publishing';
+  getDashboardAttachmentData,
+  isAttachmentAppliedToDashboard,
+  MANUAL_CHANGES_DEBOUNCE_MS,
+} from './apply_attachment';
+import type { AppliedAttachmentsStore } from './applied_attachments_store';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import type { IdGenerator } from '..';
 
-/**
- * Layout manager refreshes `getSerializedState()` panel configs only after
- * `UNSAVED_CHANGES_DEBOUNCE` then `CHILDREN_UNSAVED_CHANGES_DEBOUNCE`. Wait that
- * long (+ buffer) so manual sync is not one edit behind.
- */
-export const MANUAL_CHANGES_DEBOUNCE_MS =
-  UNSAVED_CHANGES_DEBOUNCE + CHILDREN_UNSAVED_CHANGES_DEBOUNCE + 50;
+export { MANUAL_CHANGES_DEBOUNCE_MS };
 
 export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
   draftAttachmentId: IdGenerator;
+  appliedAttachments: AppliedAttachmentsStore;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   /**
    * Lookup for the framework-provided `updateOrigin` callback bound to a specific
@@ -59,6 +59,7 @@ export const registerDashboardAppIntegration = ({
   agentBuilder,
   api,
   draftAttachmentId,
+  appliedAttachments,
   checkSavedDashboardExist,
   getUpdateOrigin,
 }: DashboardAppIntegrationParams): (() => void) => {
@@ -67,22 +68,49 @@ export const registerDashboardAppIntegration = ({
     conversationId: undefined,
   };
 
+  // dashboard data last staged in the chat input, per attachment id
+  const stagedAttachmentData = new Map<string, DashboardAttachmentData>();
   let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
 
   const addAttachmentFromDashboard = () => {
+    // the dashboard is still settling after applying an attachment, so its state is not a manual change
+    if (appliedAttachments.pendingApplies.size > 0) {
+      return;
+    }
+
     const dashboardId = api.savedObjectId$.getValue();
     const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
-    const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
 
     // update an existing linked attachment, or add a draft attachment only when the conversation is new
-    if (syncAttachment || !state.conversationId) {
-      agentBuilder.addAttachment({
-        id: syncAttachment?.id ?? draftAttachmentId.current,
-        origin: dashboardId,
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardData,
-      });
+    if (!syncAttachment && state.conversationId) {
+      return;
     }
+
+    const attachmentId = syncAttachment?.id ?? draftAttachmentId.current;
+
+    if (
+      syncAttachment &&
+      isAttachmentAppliedToDashboard({ store: appliedAttachments, api, attachment: syncAttachment })
+    ) {
+      // the chat already has this state, so drop an edit staged before it was reverted, even one
+      // staged before the integration re-registered
+      stagedAttachmentData.delete(attachmentId);
+      agentBuilder.removeAttachment(attachmentId);
+      return;
+    }
+
+    const dashboardData = getDashboardAttachmentData(api);
+    if (isEqual(stagedAttachmentData.get(attachmentId), dashboardData)) {
+      return;
+    }
+
+    stagedAttachmentData.set(attachmentId, dashboardData);
+    agentBuilder.addAttachment({
+      id: attachmentId,
+      origin: dashboardId,
+      type: DASHBOARD_ATTACHMENT_TYPE,
+      data: dashboardData,
+    });
   };
 
   const conversationChangesSubscription = agentBuilder.events.ui.activeConversation$.subscribe(
@@ -127,6 +155,7 @@ export const registerDashboardAppIntegration = ({
   const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
     agentBuilder,
     api,
+    appliedAttachments,
     upsertAttachment: (attachment: DashboardAttachment) => {
       const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
       state.attachments = [...otherAttachments, attachment];
@@ -161,6 +190,7 @@ export const registerDashboardAppIntegration = ({
     }
     state.attachments = undefined;
     state.conversationId = undefined;
+    stagedAttachmentData.clear();
   };
 };
 
