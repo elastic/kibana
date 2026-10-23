@@ -84,15 +84,30 @@ export interface ResponseEngineOptions {
   readonly fallback: Responder;
 }
 
+/** Where an answer came from, when not from the fallback. */
+export type ResponseOrigin = RejectedResponse['source'] | 'runtime-fixture';
+
+/** Fixtures set while the mock runs, which take precedence over the ones it was created with. */
+export interface RuntimeFixtures {
+  /**
+   * Sets the fixtures for the operations they name, replacing the runtime fixtures those
+   * operations had. Returns the fixtures it rejects, and then sets none of them.
+   */
+  readonly set: (fixtures: readonly ResponseFixture[]) => readonly RejectedResponse[];
+  /** The runtime fixtures in effect, in the order they were set. */
+  readonly list: () => readonly ResponseFixture[];
+  /** Drops the runtime fixtures of the given operations, or all of them. */
+  readonly clear: (operations?: readonly ContractOperation[]) => void;
+}
+
 export interface ResponseEngine {
   readonly respond: Responder;
-  /**
-   * Whether a request is answered with a fixture or a recording; undefined for the fallback.
-   */
+  /** Where a request's answer comes from; undefined for the fallback. */
   readonly servedFrom: (
     operation: ContractOperation,
     request: ContractRequest
-  ) => RejectedResponse['source'] | undefined;
+  ) => ResponseOrigin | undefined;
+  readonly runtime: RuntimeFixtures;
   readonly rejected: readonly RejectedResponse[];
   /**
    * The recorded success exchanges that conform to the spec, in recording order; none for
@@ -146,7 +161,7 @@ export const NOT_IN_SPEC: Violation = {
 };
 
 interface Candidate {
-  readonly origin: RejectedResponse['source'];
+  readonly origin: ResponseOrigin;
   readonly when?: RequestMatcher;
   readonly conditions: number;
   readonly response: ContractResponse;
@@ -182,8 +197,24 @@ const bestMatch = (entries: readonly Candidate[], request: ContractRequest) =>
       undefined
     );
 
+const toCandidate = (
+  origin: ResponseOrigin,
+  when: RequestMatcher | undefined,
+  response: ContractResponse
+): Candidate => ({
+  origin,
+  ...(when === undefined ? {} : { when }),
+  conditions: when === undefined ? 0 : countConditions(when),
+  response,
+});
+
+// Vendors often leave error statuses such as 429 out of their specs, and still answer with them.
+const isUndeclaredError = ({ code }: Violation, { status }: StoredResponse) =>
+  code === 'status' && status >= 400;
+
 /**
- * Answers each request with, in order of preference: the most specific fixture whose `when` it
+ * Answers each request with, in order of preference: the runtime fixtures (see
+ * `RuntimeFixtures`), chosen like fixtures; the most specific fixture whose `when` it
  * matches, else a fixture without `when`; the most specific recording of the same request, else
  * the operation's first recording; or the fallback. Recordings that no longer conform to the spec
  * are drift on the vendor's side, so they are listed in `rejected` instead of being served.
@@ -238,12 +269,7 @@ export const createResponseEngine = (
         } else if (origin === 'recording' && !withFixture.has(operation)) {
           recorded.set(operation, [...(recorded.get(operation) ?? []), entry]);
         }
-        const candidate: Candidate = {
-          origin,
-          ...(when === undefined ? {} : { when }),
-          conditions: when === undefined ? 0 : countConditions(when),
-          response: contractResponse,
-        };
+        const candidate = toCandidate(origin, when, contractResponse);
         candidates.set(operation, [...(candidates.get(operation) ?? []), candidate]);
       }
     }
@@ -256,11 +282,101 @@ export const createResponseEngine = (
     .filter(({ response: { status } }) => isSuccessStatus(status))
     .forEach((exchange) => add('recording', exchange));
 
+  // Each operation's runtime fixtures, with their candidates.
+  const runtime = new Map<
+    ContractOperation,
+    { readonly fixtures: readonly ResponseFixture[]; readonly candidates: readonly Candidate[] }
+  >();
+
+  // Runtime fixtures must conform to the spec, but may answer with an undeclared error status.
+  const checkRuntimeFixture = (fixture: ResponseFixture) => {
+    const { operation: ref, response, when } = fixture;
+    if (isNamedOperationRef(ref)) {
+      const violation: Violation = {
+        path: ['operation'],
+        code: 'operation',
+        message: 'Runtime fixtures answer OpenAPI operations; name one by method and path',
+      };
+      return {
+        matched: [],
+        rejected: [{ source: 'fixture' as const, operation: ref.name, violations: [violation] }],
+      };
+    }
+    const key = toOperationKey(ref);
+    const matched = findOperations(ref);
+    if (matched.length === 0) {
+      const notFound: RejectedResponse = {
+        source: 'fixture',
+        operation: key,
+        ...(ref.source === undefined ? {} : { spec: ref.source }),
+        violations: [NOT_IN_SPEC],
+      };
+      return { matched, rejected: [notFound] };
+    }
+    const contractResponse = toContractResponse(response);
+    const rejectedHere = matched.flatMap((operation): RejectedResponse[] => {
+      const violations = [
+        ...unknownPathParameters(operation, when),
+        ...validateResponse(operation, contractResponse).filter(
+          (violation) => !isUndeclaredError(violation, response)
+        ),
+      ];
+      const { source } = operation.spec;
+      return violations.length === 0
+        ? []
+        : [
+            {
+              source: 'fixture',
+              operation: key,
+              ...(source === undefined ? {} : { spec: source }),
+              violations,
+            },
+          ];
+    });
+    return { matched, rejected: rejectedHere };
+  };
+
+  const runtimeFixtures: RuntimeFixtures = {
+    set: (entries) => {
+      const checked = entries.map((fixture) => ({ fixture, ...checkRuntimeFixture(fixture) }));
+      const rejectedFixtures = checked.flatMap(({ rejected: found }) => found);
+      if (rejectedFixtures.length > 0) {
+        return rejectedFixtures;
+      }
+      const byOperation = new Map<ContractOperation, ResponseFixture[]>();
+      for (const { fixture, matched } of checked) {
+        for (const operation of matched) {
+          byOperation.set(operation, [...(byOperation.get(operation) ?? []), fixture]);
+        }
+      }
+      for (const [operation, operationFixtures] of byOperation) {
+        runtime.set(operation, {
+          fixtures: operationFixtures,
+          candidates: operationFixtures.map(({ when, response }) =>
+            toCandidate('runtime-fixture', when, toContractResponse(response))
+          ),
+        });
+      }
+      return [];
+    },
+    list: () => [...new Set([...runtime.values()].flatMap((entry) => entry.fixtures))],
+    clear: (cleared) => {
+      if (cleared === undefined) {
+        runtime.clear();
+      } else {
+        cleared.forEach((operation) => runtime.delete(operation));
+      }
+    },
+  };
+
   const select = (operation: ContractOperation, request: ContractRequest) => {
+    const set = runtime.get(operation)?.candidates ?? [];
     const entries = candidates.get(operation) ?? [];
     const overrides = entries.filter(({ origin }) => origin === 'fixture');
     const replays = entries.filter(({ origin }) => origin === 'recording');
     return (
+      bestMatch(set, request) ??
+      set.find(({ when }) => when === undefined) ??
       bestMatch(overrides, request) ??
       overrides.find(({ when }) => when === undefined) ??
       bestMatch(replays, request) ??
@@ -272,6 +388,7 @@ export const createResponseEngine = (
     respond: (operation, request, context) =>
       select(operation, request)?.response ?? fallback(operation, request, context),
     servedFrom: (operation, request) => select(operation, request)?.origin,
+    runtime: runtimeFixtures,
     rejected,
     recordedExchanges: (operation) => recorded.get(operation) ?? [],
   };
