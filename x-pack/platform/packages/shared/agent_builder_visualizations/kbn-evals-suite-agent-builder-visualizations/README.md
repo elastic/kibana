@@ -48,6 +48,22 @@ Seed examples live in `evals/visualization_creation/datasets/`, one file per dat
 
 Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Examples are built with the factories in `datasets/factories.ts` (`xyExample`, `metricExample`, `partitionExample`, …) over the query builders `categoricalQuery`, `timeSeriesQuery`, and `totalsQuery`, so adding an example is one call and every gold query follows the same idiom by construction. Every example carries `metadata.chartFamily` (set by its factory), `metadata.dataSource` (set per dataset file), and, when the gold pins Config API surface beyond basic column roles, `metadata.configFeatures` (`breakdown_by`, `secondary_metric`, `multi_series`), so golden-cluster results can be sliced by chart family or data source instead of only by suite average.
 
+### Custom content
+
+`evals/custom_content/custom_content.spec.ts` runs its own dataset (`evals/custom_content/datasets/custom_content.ts`) through `evaluateCustomContentDataset` (`src/custom_content/`), separate from the Lens/Vega evaluators above, which do not apply to an HTML panel. The create_visualization tool result deliberately carries neither the template nor the height, so the task reads the panel back from the conversation's visualization attachment (first and latest stored version) and the evaluators score that. The examples are status cards, a funnel, a flow, a top-5 ranking, KPI cards, a user-supplied query, two static panels (banner, legend) and four two-turn edits (style and data, on a data panel and a static one). Every prompt says "custom panel" so the agent does not pick Lens or Vega.
+
+- **Custom Content Template** (`CODE`) — the stored template is present, has no `<script>` tag, is within the 500 KB limit, and any declared height is within 200–1200.
+- **Custom Content Data** (`CODE`) — a static example ends with no query and a data example ends with one. A stray query on a static panel scores 0 (the generator always returns a query, so a data-free request can produce a `ROW` literal).
+- **ES|QL Execution Validity** (`CODE`, shared) — the stored query parses and runs.
+- **Custom Content Query Contents** (`CODE`) — the final query contains the expected text (a user-supplied query verbatim, or a grouping kept across a data edit); case and whitespace are ignored.
+- **Custom Content Row Limit** (`CODE`) — with a declared limit the query ends with exactly it; otherwise only the chart default `LIMIT 10`, which truncates a board or diagram, is rejected.
+- **Custom Content Row Order** (`CODE`) — runs the query and checks that a text column lists the expected labels, as rows, in the requested order (a funnel sorted by value or returned as one wide row scores 0).
+- **Custom Content Template Columns** (`CODE`) — every `row["…"]` / `max["…"]` the template reads is a column the query returns.
+- **Custom Content Edit** (`CODE`) — the follow-up stored a new version of the same panel; a style edit changed the template and kept the query, a data edit changed the query.
+- **Trajectory** and **Trace-based** — as above (tokens, latency, tool calls), which makes the cost of a custom panel repeatable.
+
+Run only this spec with `node scripts/evals run --suite agent-builder-visualizations --grep "Custom Content"`.
+
 ### What a gold `config` can assert
 
 The gold is split between two evaluators. Chart Type vs Intent (LLM) reads `type`, `layers[].type`, `spec.mark`, and `spec.layer[].mark` and asks a judge whether the produced chart form satisfies the prompt, with the gold as a reference for intent. Config vs Intent (code) walks every other leaf and turns it into one deterministic assertion. Keys the gold does not mention are never checked, so the gold only needs to spell out what the prompt actually pins down.
