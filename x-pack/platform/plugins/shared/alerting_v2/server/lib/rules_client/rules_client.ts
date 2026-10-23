@@ -36,8 +36,8 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
-import type { RuleEventOrigin } from '../event_origin/origin_schemas';
+import type { EventOriginActor } from '../event_origin/origin_schemas';
+import { toEventOrigin } from '../event_origin/event_origin';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {
@@ -59,7 +59,7 @@ import {
   getRuleExecutorTaskId,
 } from '../rule_executor/schedule';
 import type { AlertingPublisherContext } from '../events/domain_events';
-import { EventOriginToken, type EventOrigin } from '../event_origin/token';
+import { EventOriginActorToken } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -223,7 +223,6 @@ export class RulesClient {
   private readonly config: PluginConfig;
   private readonly logger: LoggerServiceContract;
   private readonly eventContext: AlertingPublisherContext;
-  private readonly rulesClientOptions: CreateRulesClientOptions;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -240,22 +239,16 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginToken) origin: EventOrigin,
+    @inject(EventOriginActorToken) actor: EventOriginActor,
     @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
   ) {
-    this.eventContext = { request, origin };
-    this.rulesClientOptions = rulesClientOptions;
+    this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };
     this.config = pluginConfigAccessor.get<PluginConfig>();
     this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   private getSpaceContext(): { spaceId: string } {
     return { spaceId: this.spaceId };
-  }
-
-  /** Channel and app for a rule-change event. */
-  private resolveRuleEventOrigin(): RuleEventOrigin {
-    return resolveRuleEventOrigin(this.request, this.rulesClientOptions);
   }
 
   /**
@@ -727,7 +720,6 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: persisted.attributes.metadata.template?.id,
-        origin: this.resolveRuleEventOrigin(),
       },
     ]);
     return rule;
@@ -806,7 +798,6 @@ export class RulesClient {
         spaceId,
         rule,
         templateId: doc.attributes.metadata.template?.id,
-        origin: this.resolveRuleEventOrigin(),
       });
     }
 
@@ -886,7 +877,6 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
-        origin: this.resolveRuleEventOrigin(),
       },
     ]);
 
@@ -982,7 +972,6 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: existingAttrs.metadata.template?.id,
-        origin: this.resolveRuleEventOrigin(),
       },
     ]);
   }
@@ -1086,7 +1075,6 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
-        origin: this.resolveRuleEventOrigin(),
       },
     ]);
     return rule;
@@ -1132,7 +1120,6 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
-        origin: this.resolveRuleEventOrigin(),
       },
     ]);
     return rule;
@@ -1345,13 +1332,11 @@ export class RulesClient {
                 references: doc.references,
               }),
               templateId: doc.attrs.metadata.template?.id,
-              origin: this.resolveRuleEventOrigin(),
             }
           : {
               ruleId: result.id,
               spaceId,
               templateId: undefined,
-              origin: this.resolveRuleEventOrigin(),
             }
       );
     }
@@ -1478,7 +1463,6 @@ export class RulesClient {
           spaceId,
           rule,
           templateId: item.attrs.metadata.template?.id,
-          origin: this.resolveRuleEventOrigin(),
         });
       }
 
@@ -1565,7 +1549,6 @@ export class RulesClient {
           spaceId,
           rule,
           templateId: item.attrs.metadata.template?.id,
-          origin: this.resolveRuleEventOrigin(),
         });
       }
     }
@@ -1695,7 +1678,6 @@ export class RulesClient {
         spaceId,
         rule,
         templateId: item.attrs.metadata.template?.id,
-        origin: this.resolveRuleEventOrigin(),
       });
     }
 
@@ -2017,7 +1999,6 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
-        origin: this.resolveRuleEventOrigin(),
       },
     ]);
     return { rule, created: false };
