@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiCode,
   EuiCopy,
   EuiFlexGroup,
@@ -19,6 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
@@ -36,7 +38,7 @@ import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import { EMPTY_VALUE } from '../constants';
-import { useEpisodeSource } from '../source_labels';
+import { getConnectorSource, useEpisodeSource } from '../source_labels';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -65,8 +67,43 @@ const getEpisodeGroupingFromRow = (
   };
 };
 
+/** The connector an alert came from: its icon, when one exists, followed by its name. */
+const EpisodeConnectorSource = ({ source }: { source: string }) => {
+  const IconComponent = ConnectorIconsMap.get(`.${source}`);
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      {IconComponent && (
+        <EuiFlexItem grow={false}>
+          <Suspense fallback={null}>
+            <EuiIcon
+              type={IconComponent}
+              size="m"
+              aria-hidden={true}
+              data-test-subj="episodeConnectorSourceIcon"
+            />
+          </Suspense>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <span data-test-subj="episodeConnectorSourceName">{source}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+/**
+ * Where an episode came from: the connector for alerts ingested from an external source,
+ * otherwise the alerting system (Classic or Universal).
+ */
 export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
   const { label, icon } = useEpisodeSource(row.flattened.source_id as string | undefined);
+  const connectorSource = getConnectorSource((row.flattened as unknown as AlertEpisode).source);
+
+  if (connectorSource) {
+    return <EpisodeConnectorSource source={connectorSource} />;
+  }
+
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {icon && (
@@ -160,6 +197,20 @@ export const EpisodeRuleTagsCell = ({
   }
 
   return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
+};
+
+export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
+  const ids = row.flattened.maintenance_window_ids;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return <>{EMPTY_VALUE}</>;
+  }
+
+  return (
+    <EuiBadge color="hollow" data-test-subj="episodeSuppressedCell">
+      {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
+    </EuiBadge>
+  );
 };
 
 export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {

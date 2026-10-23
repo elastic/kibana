@@ -23,7 +23,7 @@ const body = {
   name: 'Triage',
   trigger: { rows: [{ kind: 'alert' as const }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: { dailyDispatchLimit: 20 },
 };
 
@@ -76,8 +76,8 @@ it('stores tags and the requested enabled state', async () => {
 
 it('turns the UI channel action into an investigation lifecycle destination', async () => {
   const completion = { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' };
-  const result = await call({ completion });
-  expect(result.completion).toEqual(completion);
+  const result = await call({ completions: [completion] });
+  expect(result.completions).toEqual([completion]);
   const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
   expect(workflow.steps[0].with.notificationDestinations).toEqual([
     {
@@ -114,4 +114,88 @@ describe('request validation', () => {
   it('rejects Slack events other than message', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
+
+  it('rejects oversized instructions during request parsing before writes', () => {
+    expect(() =>
+      params.parse({
+        body: {
+          ...body,
+          trigger: { rows: [dailySchedule] },
+          execution: { promptTemplate: 'x'.repeat(5001) },
+        },
+      })
+    ).toThrow('Too big');
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(createWorkflow).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['no filters', {}],
+    ['empty filter lists', { channels: [], users: [], bots: [] }],
+    ['blank filter values', { channels: [' '], users: [''], messageFilter: '  ' }],
+  ])('rejects a Slack trigger row with %s', (_name, filters) => {
+    expect(() => parseRows([{ kind: 'slack', event: 'message', ...filters }])).toThrow(
+      'at least one of channels, users, bots or messageFilter'
+    );
+  });
+
+  it.each([
+    ['channels', { channels: ['C123'] }],
+    ['users', { users: ['U123'] }],
+    ['bots', { bots: ['PagerDuty'] }],
+    ['messageFilter', { messageFilter: 'outage' }],
+  ])('accepts a Slack trigger row with only %s', (_name, filters) => {
+    const row = { kind: 'slack', event: 'message', ...filters };
+    expect(parseRows([row]).body.trigger.rows).toEqual([row]);
+  });
+
+  it.each([
+    { kind: 'schedule', schedulePreset: 'hourly', hourWindow: { start: 9, end: 17 } },
+    { kind: 'schedule', schedulePreset: 'daily', time: '09:30', timezone: 'Europe/Berlin' },
+    { kind: 'schedule', schedulePreset: 'weekly', time: '09:30', daysOfWeek: [0, 1, 5] },
+  ])('keeps structured schedule fields: %j', (row) => {
+    expect(parseRows([row]).body.trigger.rows).toEqual([row]);
+  });
+
+  it.each([
+    { kind: 'schedule', schedulePreset: 'daily', time: '25:60' },
+    { kind: 'schedule', schedulePreset: 'custom' },
+    { kind: 'schedule', schedulePreset: 'weekly', time: '09:00', daysOfWeek: [] },
+    { kind: 'schedule', schedulePreset: 'hourly', hourWindow: { start: 17, end: 9 } },
+  ])('rejects invalid structured schedules before writes: %j', (row) => {
+    expect(() => parseRows([row])).toThrow();
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(createWorkflow).not.toHaveBeenCalled();
+  });
+});
+
+const dailySchedule = {
+  kind: 'schedule',
+  schedulePreset: 'daily',
+  time: '09:00',
+  timezone: 'Europe/Berlin',
+};
+
+it('creates a scheduled workflow with instructions', async () => {
+  await call({
+    trigger: { rows: [dailySchedule] },
+    execution: { promptTemplate: 'Review errors over the last hour.' },
+  });
+  const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
+  expect(workflow.triggers[0].type).toBe('scheduled');
+  expect(workflow.steps[0].with.subject_type).toBe('manual');
+  expect(soClient.create.mock.calls[0][1].trigger.rows).toEqual([dailySchedule]);
+});
+
+it.each([
+  { trigger: { rows: [dailySchedule] }, execution: {} },
+  { trigger: { rows: [dailySchedule] }, execution: { promptTemplate: '   ' } },
+  { trigger: { rows: [dailySchedule, dailySchedule] } },
+  { trigger: { rows: [{ ...dailySchedule, timezone: 'Not/AZone' }] } },
+])('rejects unusable scheduled configuration before writes: %j', async (overrides) => {
+  await expect(
+    call({ execution: { promptTemplate: 'Review health.' }, ...overrides })
+  ).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(soClient.create).not.toHaveBeenCalled();
+  expect(createWorkflow).not.toHaveBeenCalled();
 });

@@ -25,7 +25,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/inference-plugin'
   - '@kbn/agent-builder-server'
-  - '@kbn/isomer'
+  - '@kbn/isomer-plugin'
   - '@kbn/agent-builder-skill-loader'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-visualizations'
@@ -173,6 +173,4 @@ fileGroups:
     - test/scout_agent_builder_shared/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

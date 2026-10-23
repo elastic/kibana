@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/streamlang'
   - '@kbn/inference-common'
-  - '@kbn/workflows'
   - '@kbn/i18n'
 tags:
   - shared-common
@@ -35,6 +34,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

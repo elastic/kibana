@@ -13,6 +13,7 @@ See the package README for the tab bar.
 - `title` — required `ReactNode`. Rendered as an `<h3>` with a generated id. That id labels the flyout (see the package README's [Labeling](../../README.md#labeling-and-the-flyout-menu-title)).
 - `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip`, it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip`. It uses `titleIcon` as its type, or `info` if `titleIcon` is not set.
+- `isLoading` — shows a loading spinner after the title and any title icon, in both the expanded and the compact layout. The spinner sits outside the `<h3>`, so it does not change the flyout's accessible name.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. It is not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — always renders the compact layout, regardless of scroll position. See [Starting collapsed](#starting-collapsed).
 - `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Anything else, such as elements, components, or bare text, is not rendered. The assembly library warns in development about unrecognized children.
@@ -77,9 +78,9 @@ The collapsible region uses a CSS grid trick (`grid-template-rows: 0fr / 1fr`) t
 
 ### Wheel forwarding
 
-The header does not scroll, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, the hook's `headerRef` callback adds one non-passive `wheel` listener to the `EuiFlyoutHeader` element. Listening on this outer element also covers the header's padding.
+The header does not scroll, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, `header.tsx` passes the hook's `headerRef` callback to `EuiFlyoutHeader`, which adds one non-passive `wheel` listener to the header element. Listening on this outer element also covers the header's padding.
 
-`EuiFlyoutHeader` does not forward a ref, so the callback finds it with `closest()`, using the Kibana-owned `FLYOUT_HEADER_CLASS_NAME` class applied in `header.tsx`. EUI's internal `euiFlyoutHeader` class is deliberately not used. The listener calls `event.preventDefault()` and forwards the scroll to the body's scroll container. The header component has no scroll logic of its own. Normal scrolling and forwarded wheel events both reach the same scroll container and run the same RAF-throttled `evaluate()` callback.
+The listener calls `event.preventDefault()` and forwards the scroll to the body's scroll container. The header component has no scroll logic of its own. Normal scrolling and forwarded wheel events both reach the same scroll container and run the same RAF-throttled `evaluate()` callback.
 
 The unit of `WheelEvent.deltaY` depends on `deltaMode`, but `scrollBy` only accepts pixels. Firefox's line-mode and page-mode deltas are therefore converted to pixels before being forwarded.
 

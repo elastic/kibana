@@ -28,6 +28,7 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   executeWorkflow: platformCoreTool('execute_workflow'),
   createVisualization: platformCoreTool('create_visualization'),
+  createDiscoverSession: platformCoreTool('create_discover_session'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   listWorkflowExecutions: platformCoreTool('list_workflow_executions'),
@@ -79,7 +80,6 @@ export const platformSignificantEventsTools = {
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
-  reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;
 
 /** AI-index tools, registered by the Context Engine Agent Builder plugin. */
@@ -126,6 +126,7 @@ export const internalTools = {
   describeApi: 'describe_api',
   describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
+  executeDynamicTool: 'execute_dynamic_tool',
 };
 
 export const isAttachmentTool = (toolName: string) =>
