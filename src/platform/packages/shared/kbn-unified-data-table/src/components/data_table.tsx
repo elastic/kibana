@@ -1101,7 +1101,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       rows: displayedRows,
       renderCellValue,
       cellContext,
-      pagination: paginationObj,
+      pagination: paginationMode === 'multiPage' ? paginationObj : undefined,
       initialState: inTableSearchLatestStateRef.current,
       onInitialStateChange: onInTableSearchInitialStateChange,
     });

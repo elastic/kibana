@@ -29,6 +29,7 @@ import {
 } from '@kbn/discover-utils/src/__mocks__';
 import {
   BUTTON_NEXT_TEST_SUBJ,
+  BUTTON_PREV_TEST_SUBJ,
   BUTTON_TEST_SUBJ,
   COUNTER_TEST_SUBJ,
   HIGHLIGHT_CLASS_NAME,
@@ -2147,6 +2148,80 @@ describe('UnifiedDataTable', () => {
         await renderDataTable({ columns: ['bytes'], enableInTableSearch: false });
 
         expect(screen.queryByTestId(BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it.each(['infinite', 'singlePage', 'multiPage'] as const)(
+      'navigates search matches using the correct row index in %s mode',
+      async (paginationMode) => {
+        const scrollToCell = jest.fn();
+        const onUpdatePageIndex = jest.fn();
+        const searchTerm = '987654';
+        const rows = Array.from({ length: 8 }, (_, index) =>
+          buildDataTableRecord(
+            {
+              ...esHitsMock[0],
+              _id: `search-${index}`,
+              _source: {
+                ...esHitsMock[0]._source,
+                bytes: index === 1 || index === 6 ? Number(searchTerm) : 0,
+              },
+            },
+            dataViewMock
+          )
+        );
+
+        await renderComponent({
+          ...getProps(),
+          rows,
+          columns: ['bytes'],
+          showTimeCol: false,
+          enableInTableSearch: true,
+          paginationMode,
+          rowsPerPageState: 2,
+          rowsPerPageOptions: [2, 10],
+          scrollToCell,
+          onUpdatePageIndex,
+        });
+
+        onUpdatePageIndex.mockClear();
+        await userEvent.click(screen.getByTestId(BUTTON_TEST_SUBJ));
+        await userEvent.click(screen.getByTestId(INPUT_TEST_SUBJ));
+        await userEvent.paste(searchTerm);
+
+        await waitFor(() => {
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/2');
+          expect(scrollToCell).toHaveBeenLastCalledWith(expect.objectContaining({ rowIndex: 1 }));
+        });
+
+        await userEvent.click(screen.getByTestId(BUTTON_NEXT_TEST_SUBJ));
+
+        await waitFor(() => {
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('2/2');
+          expect(scrollToCell).toHaveBeenLastCalledWith(
+            expect.objectContaining({ rowIndex: paginationMode === 'multiPage' ? 0 : 6 })
+          );
+        });
+
+        if (paginationMode === 'multiPage') {
+          expect(onUpdatePageIndex).toHaveBeenLastCalledWith(3);
+        } else {
+          expect(onUpdatePageIndex).not.toHaveBeenCalled();
+        }
+
+        await userEvent.click(screen.getByTestId(BUTTON_PREV_TEST_SUBJ));
+
+        await waitFor(() => {
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/2');
+          expect(scrollToCell).toHaveBeenLastCalledWith(expect.objectContaining({ rowIndex: 1 }));
+        });
+
+        if (paginationMode === 'multiPage') {
+          expect(onUpdatePageIndex).toHaveBeenLastCalledWith(0);
+        } else {
+          expect(onUpdatePageIndex).not.toHaveBeenCalled();
+        }
       },
       EXTENDED_JEST_TIMEOUT
     );
