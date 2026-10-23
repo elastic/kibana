@@ -153,13 +153,27 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
       return [name, isRecord(scheme) ? toCredential(resolve(scheme, pointer).value) : undefined];
     })
   );
+  const scoped = new Set(
+    entriesOf(securitySchemes).flatMap(([name, scheme]) => {
+      const pointer = appendPointer('/components/securitySchemes', name);
+      const { type } = isRecord(scheme) ? resolve(scheme, pointer).value : {};
+      return type === 'oauth2' || type === 'openIdConnect' ? [name] : [];
+    })
+  );
   // Operation `security` replaces the document's, and `[]` removes it.
   const toSecurity = (requirements: unknown): SecurityRequirement[] =>
-    (Array.isArray(requirements) ? requirements : [])
-      .filter(isRecord)
-      .map((requirement) =>
-        Object.keys(requirement).map((name) => ({ name, credential: schemes.get(name) }))
-      );
+    (Array.isArray(requirements) ? requirements : []).filter(isRecord).map((requirement) =>
+      Object.entries(requirement).map(([name, scopes]) => {
+        const listed = Array.isArray(scopes)
+          ? scopes.filter((scope): scope is string => typeof scope === 'string')
+          : [];
+        return {
+          name,
+          credential: schemes.get(name),
+          ...(scoped.has(name) && listed.length > 0 ? { scopes: listed } : {}),
+        };
+      })
+    );
   const rootSecurity = toSecurity(document.security);
 
   const toParameters = (parameters: unknown, pointer: string): OperationParameter[] =>

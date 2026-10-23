@@ -107,6 +107,8 @@ export interface SecurityScheme {
   readonly name: string;
   /** Undefined for schemes that can't be checked on a request, such as `mutualTLS`. */
   readonly credential?: Credential;
+  /** For OAuth 2 and OpenID Connect schemes: the scopes the requirement lists, if any. */
+  readonly scopes?: readonly string[];
 }
 
 /** Schemes that must all be satisfied; an empty list allows anonymous requests. */
