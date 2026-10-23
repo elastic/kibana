@@ -24,10 +24,12 @@ const runHandler = ({
   isServerless,
   query = { start: START, end: END },
   withApmDataAccess = true,
+  isUxEnabled = !isServerless,
 }: {
   isServerless: boolean;
   query?: { start: string; end: string; environment?: string };
   withApmDataAccess?: boolean;
+  isUxEnabled?: boolean;
 }) => {
   const context = {
     core: Promise.resolve({
@@ -49,6 +51,7 @@ const runHandler = ({
     request: { events: { aborted$: NEVER } },
     plugins: { apmDataAccess: withApmDataAccess ? { getApmIndices } : undefined },
     isServerless,
+    isUxEnabled,
     logger: loggingSystemMock.createLogger(),
   });
   return { result, getApmIndices };
@@ -108,6 +111,13 @@ describe('GET /internal/digital_experience/applications', () => {
     const response = await runHandler({ isServerless: false, withApmDataAccess: false }).result;
 
     expect(mockedOtel).toHaveBeenCalledTimes(1);
+    expect(mockedClassic).not.toHaveBeenCalled();
+    expect(response.environments).toEqual(['production']);
+  });
+
+  it('skips Classic without the ux plugin, as the browser then offers no Classic RUM rows', async () => {
+    const response = await runHandler({ isServerless: false, isUxEnabled: false }).result;
+
     expect(mockedClassic).not.toHaveBeenCalled();
     expect(response.environments).toEqual(['production']);
   });

@@ -13,6 +13,8 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   /** Optional: only the Classic source needs it. */
   plugins: { apmDataAccess?: ApmDataAccessPluginSetup };
   isServerless: boolean;
+  /** Whether the ux plugin is enabled; the Classic RUM source needs it, like the browser does. */
+  isUxEnabled: boolean;
 }
 
 export const createDigitalExperienceServerRoute = createServerRouteFactory<

@@ -20,6 +20,13 @@ const PARAMS = { start: 10, end: 20 };
 
 const SPANS_PARAMS = { ...PARAMS, serviceNames: ['web', 'shop'] };
 
+describe('logsSearch and spansSearch', () => {
+  it('fail instead of returning partial results', () => {
+    expect(logsSearch(PARAMS).allow_partial_search_results).toBe(false);
+    expect(spansSearch(SPANS_PARAMS).allow_partial_search_results).toBe(false);
+  });
+});
+
 describe('logsSearch', () => {
   it('reads only the events the metrics count', () => {
     expect(logsSearch(PARAMS).query?.bool?.filter).toContainEqual({

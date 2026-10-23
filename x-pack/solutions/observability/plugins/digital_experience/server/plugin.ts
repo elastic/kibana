@@ -16,6 +16,8 @@ interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
   /** Optional: only the Classic RUM source (stateful) needs it. */
   apmDataAccess?: ApmDataAccessPluginSetup;
+  /** Optional: only its presence is read, as the Classic RUM source needs it. */
+  ux?: unknown;
 }
 
 export class Plugin implements PluginType<void, void, DigitalExperienceSetupDeps> {
@@ -32,6 +34,7 @@ export class Plugin implements PluginType<void, void, DigitalExperienceSetupDeps
       dependencies: {
         plugins: { apmDataAccess: plugins.apmDataAccess },
         isServerless: buildFlavor === 'serverless',
+        isUxEnabled: plugins.ux !== undefined,
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,
     });

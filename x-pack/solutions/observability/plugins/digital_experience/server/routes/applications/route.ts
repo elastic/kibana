@@ -48,6 +48,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     request,
     plugins,
     isServerless,
+    isUxEnabled,
     logger,
   }): Promise<ApplicationsResponse> => {
     const { environment } = params.query;
@@ -60,9 +61,10 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     const signal = getRequestAbortedSignal(request.events.aborted$);
 
     const { apmDataAccess } = plugins;
-    // Classic RUM is APM data: stateful only, and only with the APM data access plugin.
+    // Classic RUM is APM data shown with the ux plugin: stateful only, with both plugins enabled, as
+    // the browser only offers the source with ux.
     const getClassic =
-      isServerless || !apmDataAccess
+      isServerless || !isUxEnabled || !apmDataAccess
         ? undefined
         : async () =>
             getClassicApplications({

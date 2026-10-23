@@ -54,5 +54,3 @@ page shows the Classic RUM application.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`) with its own
   components, hooks and utils; what several pages share is in `public/components/`, `public/hooks/`
   and `public/utils/`. `public/application/` is the app shell.
-
-See `AGENTS.md` for the decisions behind the code and how to load local test data.

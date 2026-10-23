@@ -107,6 +107,8 @@ export const logsSearch = ({ start, end, environment }: SearchParams): estypes.S
   size: 0,
   track_total_hits: false,
   ignore_unavailable: true,
+  // A shard that fails fails the search, so the source is reported as unavailable, not incomplete.
+  allow_partial_search_results: false,
   query: {
     bool: {
       filter: [
@@ -157,6 +159,7 @@ export const spansSearch = ({
   size: 0,
   track_total_hits: false,
   ignore_unavailable: true,
+  allow_partial_search_results: false,
   query: {
     bool: {
       filter: [
