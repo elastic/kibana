@@ -20,12 +20,14 @@ export {
   createEmulatorControlHandler,
 } from './src/server/emulator_control';
 export type {
-  ControlledEmulator,
   EmulatorCalls,
   EmulatorControl,
   EmulatorControlHandler,
   EmulatorControlOptions,
 } from './src/server/emulator_control';
+export { createEmulatorMcpHandler } from './src/server/emulator_mcp';
+export type { EmulatorMcpOptions } from './src/server/emulator_mcp';
+export type { ControlledEmulator } from './src/server/controlled_emulator';
 export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
@@ -40,6 +42,7 @@ export type {
   EmulatorNamedOperation,
   EmulatorOperation,
 } from './src/fetch/list_operations';
+export type { DescribedContent, OperationDescription } from './src/fetch/describe_operation';
 export { isGraphQLSpec } from './src/graphql/graphql_protocol';
 export type { GraphQLSpec } from './src/graphql/graphql_protocol';
 export { isMcpSpec } from './src/mcp/mcp_protocol';
@@ -61,6 +64,7 @@ export type {
   Recording,
   RejectedResponse,
   ResponseFixture,
+  ResponseOrigin,
   StoredResponse,
 } from './src/engine/response_engine';
 export type { RequestMatcher } from './src/engine/request_match';

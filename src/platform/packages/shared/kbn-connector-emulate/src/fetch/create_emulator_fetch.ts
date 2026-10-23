@@ -21,6 +21,7 @@ import type {
   Recording,
   RejectedResponse,
   ResponseFixture,
+  ResponseOrigin,
 } from '../engine/response_engine';
 import type { NamedResponse } from '../engine/named_responses';
 import { collectNamedResponses, rejectUnknownNamedResponses } from '../engine/named_responses';
@@ -36,6 +37,8 @@ import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import type { OperationDescription } from './describe_operation';
+import { describeOperation } from './describe_operation';
 import type { EmulatorOperation, LoadedProtocol } from './list_operations';
 import { listOperations } from './list_operations';
 
@@ -60,11 +63,12 @@ export interface ContractCall {
   /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
   readonly token?: true;
   /**
-   * Set for answered OpenAPI operations: whether the response came from a fixture, a recording,
-   * the spec's examples and samples (`generated`), or a `respond` that answered without
-   * deferring to the default chain (`responder`).
+   * Set for answered OpenAPI operations: whether the response came from a fixture set while the
+   * emulator runs (`runtime-fixture`), a fixture, a recording, the spec's examples and samples
+   * (`generated`), or a `respond` that answered without deferring to the default chain
+   * (`responder`).
    */
-  readonly responseSource?: 'fixture' | 'recording' | 'generated' | 'responder';
+  readonly responseSource?: ResponseOrigin | 'generated' | 'responder';
   /** Set by `combineEmulators`: the connector whose emulator answered the request. */
   readonly connector?: string;
   readonly status: number;
@@ -116,7 +120,27 @@ export interface Emulator {
   readonly operations: readonly EmulatorOperation[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
-  /** Empties `calls` and the responder state, e.g. between tests; `calls` keeps its identity. */
+  /**
+   * Fixtures set while the emulator runs, e.g. for a test or an agent to pick a scenario. They
+   * take precedence over `fixtures`, are checked against the spec when set (an undeclared error
+   * status, such as a 429, is allowed), and are dropped by `reset()`.
+   */
+  readonly runtimeFixtures: {
+    /** Replaces the runtime fixtures of the operations they name; sets none if one is rejected. */
+    readonly set: (fixtures: readonly ResponseFixture[]) => readonly RejectedResponse[];
+    readonly list: () => readonly ResponseFixture[];
+    /** Drops the runtime fixtures of the OpenAPI operation with this `id`, or all of them. */
+    readonly clear: (options?: { readonly id?: string; readonly source?: string }) => void;
+  };
+  /** Describes an OpenAPI operation by its `id`, as `operations` lists it, to write a fixture. */
+  readonly describeOperation: (
+    id: string,
+    options?: { readonly source?: string }
+  ) => OperationDescription | undefined;
+  /**
+   * Empties `calls`, the responder state and the runtime fixtures, e.g. between tests; `calls`
+   * keeps its identity.
+   */
   readonly reset: () => void;
 }
 
@@ -372,6 +396,12 @@ export const createEmulatorFetch = ({
     return response;
   };
 
+  const findById = (id: string, source?: string) =>
+    operations.filter(
+      (operation) =>
+        operation.id === id && (source === undefined || operation.spec.source === source)
+    );
+
   const mockFetch: typeof fetch = async (input, init) =>
     toResponse(await handle(await toContractRequest(new Request(input, init))));
 
@@ -396,9 +426,20 @@ export const createEmulatorFetch = ({
     calls,
     operations: listOperations(operations, loadedProtocols),
     rejectedResponses,
+    runtimeFixtures: {
+      set: engine.runtime.set,
+      list: engine.runtime.list,
+      clear: ({ id, source } = {}) =>
+        engine.runtime.clear(id === undefined ? undefined : findById(id, source)),
+    },
+    describeOperation: (id, { source } = {}) => {
+      const [operation] = findById(id, source);
+      return operation && describeOperation(operation);
+    },
     reset: () => {
       calls.length = 0;
       state.clear();
+      engine.runtime.clear();
     },
   };
 };

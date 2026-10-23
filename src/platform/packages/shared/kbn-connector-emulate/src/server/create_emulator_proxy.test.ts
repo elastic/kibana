@@ -14,6 +14,9 @@ import { request as httpsRequest } from 'https';
 import type { CustomHostSettings } from '@kbn/actions-utils';
 import { getCustomAgents } from '@kbn/actions-utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
 import type { OpenApiDocument } from '../openapi';
 import { combineEmulators, emulatorCredential } from '../fetch/combine_emulators';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
@@ -292,6 +295,63 @@ describe('createEmulatorProxy', () => {
 
       await control.reset();
       expect(await control.calls()).toEqual({ calls: [], total: 0 });
+    });
+
+    it('serves an MCP server at /_mock/mcp that an MCP client can steer the emulator with', async () => {
+      const client = new Client(
+        { name: 'test', version: '1.0.0' },
+        { jsonSchemaValidator: new CfWorkerJsonSchemaValidator() }
+      );
+      await client.connect(new StreamableHTTPClientTransport(new URL('/_mock/mcp', proxyUrl)));
+      try {
+        const { tools } = await client.listTools();
+        expect(tools.map(({ name }) => name)).toContain('set_fixtures');
+
+        const set = await client.callTool({
+          name: 'set_fixtures',
+          arguments: {
+            fixtures: [
+              {
+                operation: { method: 'GET', path: '/items/{id}' },
+                response: { status: 200, body: { id: 99 } },
+              },
+            ],
+          },
+        });
+        expect(set.isError).toBeFalsy();
+
+        const url = 'https://api.vendor.example/v1/items/42';
+        const response = await send(url, { agent: trustingCa(url).httpsAgent });
+        expect(JSON.parse(response.body)).toEqual({ id: 99 });
+      } finally {
+        await client.close();
+      }
+    });
+
+    it('sets, lists and clears runtime fixtures, and describes operations, for a client', async () => {
+      const control = createEmulatorControl(proxyUrl);
+      const url = 'https://api.vendor.example/v1/items/42';
+      const getItem = { method: 'GET', path: '/items/{id}' };
+
+      expect((await control.describeOperation('getItem')).responses[0].contents[0].sample).toEqual({
+        id: 0,
+      });
+      expect(
+        await control.setFixtures([{ operation: getItem, response: { status: 200, body: {} } }])
+      ).toEqual([expect.objectContaining({ operation: 'GET /items/{id}' })]);
+      expect(
+        await control.setFixtures([
+          { operation: getItem, response: { status: 200, body: { id: 42 } } },
+        ])
+      ).toEqual([]);
+      expect(await control.getFixtures()).toHaveLength(1);
+
+      const response = await send(url, { agent: trustingCa(url).httpsAgent });
+      expect(JSON.parse(response.body)).toEqual({ id: 42 });
+      expect((await control.calls()).calls[0].responseSource).toBe('runtime-fixture');
+
+      await control.clearFixtures({ id: 'getItem' });
+      expect(await control.getFixtures()).toEqual([]);
     });
 
     it('keeps answering 400 to other requests sent to the proxy itself', async () => {

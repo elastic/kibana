@@ -232,6 +232,101 @@ describe('combineEmulators', () => {
     expect(answers('GET', new URL('https://unknown.example/'))).toBe(false);
   });
 
+  describe('runtime fixtures', () => {
+    const getMe = { method: 'GET', path: '/me' };
+    const listTickets = { method: 'GET', path: '/tickets' };
+
+    it('go to the one connector whose specs have the operation, and list with it', async () => {
+      const { runtimeFixtures, fetch, calls } = createCombined();
+
+      expect(runtimeFixtures.set([{ operation: listTickets, response: { status: 503 } }])).toEqual(
+        []
+      );
+
+      expect((await fetch('https://acme.tenant.example/api/tickets')).status).toBe(503);
+      expect(calls[0]).toMatchObject({ connector: 'tenant', responseSource: 'runtime-fixture' });
+      expect(runtimeFixtures.list()).toEqual([
+        { operation: listTickets, response: { status: 503 }, connector: 'tenant' },
+      ]);
+      expect(runtimeFixtures.list({ connector: 'outlook' })).toEqual([]);
+    });
+
+    it('need the connector when several connectors have the operation', async () => {
+      const { runtimeFixtures, fetch } = createCombined();
+      const runtime = { operation: getMe, response: { status: 200, body: { name: 'runtime' } } };
+
+      expect(runtimeFixtures.set([runtime])).toEqual([
+        {
+          source: 'fixture',
+          operation: 'GET /me',
+          violations: [expect.objectContaining({ code: 'connector' })],
+        },
+      ]);
+      expect(runtimeFixtures.set([runtime], { connector: 'outlook' })).toEqual([]);
+      expect(runtimeFixtures.set([{ ...runtime, connector: 'one_drive' }])).toEqual([]);
+
+      const outlook = await fetch(`${GRAPH}/me`, bearer(emulatorCredential('outlook')));
+      expect(await outlook.json()).toEqual({ name: 'runtime' });
+      expect(runtimeFixtures.list().map(({ connector }) => connector)).toEqual([
+        'outlook',
+        'one_drive',
+      ]);
+    });
+
+    it('set none on any connector when one connector rejects a fixture', () => {
+      const { runtimeFixtures } = createCombined();
+      const earlier = { operation: listTickets, response: { status: 503 } };
+      runtimeFixtures.set([earlier]);
+
+      const rejected = runtimeFixtures.set([
+        { operation: listTickets, response: { status: 429 } },
+        { operation: getMe, connector: 'outlook', response: { status: 200, body: { name: 1 } } },
+      ]);
+
+      expect(rejected).toEqual([
+        expect.objectContaining({ operation: 'GET /me', connector: 'outlook' }),
+      ]);
+      expect(runtimeFixtures.list()).toEqual([{ ...earlier, connector: 'tenant' }]);
+    });
+
+    it('reject operations no connector has, and unknown connectors', () => {
+      const { runtimeFixtures } = createCombined();
+
+      expect(
+        runtimeFixtures
+          .set([
+            { operation: { method: 'GET', path: '/teams' }, response: { status: 200 } },
+            { operation: listTickets, connector: 'zendesk', response: { status: 200 } },
+          ])
+          .map(({ violations }) => violations[0].code)
+      ).toEqual(['operation', 'connector']);
+    });
+
+    it('are cleared and reset per connector', () => {
+      const { runtimeFixtures, reset } = createCombined();
+      runtimeFixtures.set([{ operation: listTickets, response: { status: 503 } }]);
+      runtimeFixtures.set([{ operation: getMe, response: { status: 200, body: {} } }], {
+        connector: 'outlook',
+      });
+
+      runtimeFixtures.clear({ connector: 'tenant' });
+      expect(runtimeFixtures.list().map(({ connector }) => connector)).toEqual(['outlook']);
+
+      reset('outlook');
+      expect(runtimeFixtures.list()).toEqual([]);
+    });
+  });
+
+  it('describes an operation of a connector, or of the first that has it', () => {
+    const { describeOperation } = createCombined();
+
+    expect(describeOperation('getMe')).toMatchObject({ id: 'getMe', connector: 'outlook' });
+    expect(describeOperation('getMe', { connector: 'one_drive' })).toMatchObject({
+      connector: 'one_drive',
+    });
+    expect(describeOperation('getmedrive', { connector: 'outlook' })).toBeUndefined();
+  });
+
   it('refuses connector names a credential cannot carry', () => {
     expect(() =>
       combineEmulators({ '.outlook': createEmulatorFetch({ specs: [tenantSpec] }) })

@@ -7,14 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Violation } from '../contract/types';
+import type { RejectedResponse, ResponseFixture } from '../engine/response_engine';
+import { isNamedOperationRef, toOperationKey } from '../engine/response_engine';
 import type { ContractCall, Emulator } from './create_emulator_fetch';
+import type { OperationDescription } from './describe_operation';
 
 /** Several connectors' emulators behind one `fetch`, e.g. for one Kibana running all of them. */
 export interface CombinedEmulator extends Emulator {
   /** The connectors, in the order requests that match several of them are routed. */
   readonly connectors: readonly string[];
-  /** Empties the calls and responder state of one connector, or of all when none is given. */
+  /**
+   * Empties the calls and responder state, and drops the runtime fixtures, of one connector, or
+   * of all when none is given.
+   */
   readonly reset: (connector?: string) => void;
+  readonly runtimeFixtures: {
+    /**
+     * Sets each fixture on its `connector`'s emulator, else `connector`'s, else on the one
+     * connector whose specs have its operation. Fixtures that match no connector or several are
+     * rejected; when any is, none is set.
+     */
+    readonly set: (
+      fixtures: readonly ResponseFixture[],
+      options?: { readonly connector?: string }
+    ) => readonly RejectedResponse[];
+    /** The runtime fixtures in effect, each with its `connector`. */
+    readonly list: (options?: { readonly connector?: string }) => readonly ResponseFixture[];
+    readonly clear: (options?: {
+      readonly id?: string;
+      readonly source?: string;
+      readonly connector?: string;
+    }) => void;
+  };
+  /** Describes an OpenAPI operation of `connector`, or of the first connector that has it. */
+  readonly describeOperation: (
+    id: string,
+    options?: { readonly source?: string; readonly connector?: string }
+  ) => (OperationDescription & { readonly connector: string }) | undefined;
 }
 
 const CONNECTOR_NAME = /^[a-z0-9][a-z0-9_-]*$/;
@@ -125,6 +155,51 @@ export const combineEmulators = (
     collected.set(connector, own.length);
   };
 
+  const checkConnector = (connector: string): string => {
+    if (!(connector in emulators)) {
+      throw new Error(`No emulator for connector ${connector}`);
+    }
+    return connector;
+  };
+
+  // The connector a fixture is for: the one it names, else the one whose specs have its operation.
+  const routeFixture = (
+    { operation: ref }: ResponseFixture,
+    named: string | undefined
+  ): { connector?: string; rejected?: RejectedResponse } => {
+    const label = isNamedOperationRef(ref) ? ref.name : toOperationKey(ref);
+    const reject = (code: string, message: string) => {
+      const violation: Violation = { path: ['connector'], code, message };
+      return {
+        rejected: { source: 'fixture' as const, operation: label, violations: [violation] },
+      };
+    };
+    if (named !== undefined) {
+      return named in emulators
+        ? { connector: named }
+        : reject(
+            'connector',
+            `No emulator for connector ${named}; there are ${connectors.join(', ')}`
+          );
+    }
+    const having = connectors.filter((name) =>
+      emulators[name].operations.some((operation) =>
+        isNamedOperationRef(ref)
+          ? 'name' in operation && operation.name === ref.name
+          : 'method' in operation &&
+            operation.method === ref.method.toUpperCase() &&
+            operation.path === ref.path &&
+            (ref.source === undefined || operation.source === ref.source)
+      )
+    );
+    if (having.length === 1) {
+      return { connector: having[0] };
+    }
+    return having.length === 0
+      ? reject('operation', `No connector's specs have ${label}`)
+      : reject('connector', `${having.join(', ')} all have ${label}; name the connector`);
+  };
+
   const findTagged = async (request: Request): Promise<string | undefined> => {
     for (const text of await credentialTexts(request)) {
       const match = tagPattern.exec(text);
@@ -181,6 +256,57 @@ export const combineEmulators = (
     rejectedResponses: connectors.flatMap((connector) =>
       emulators[connector].rejectedResponses.map((rejected) => ({ ...rejected, connector }))
     ),
+    runtimeFixtures: {
+      set: (fixtures, { connector: given } = {}) => {
+        const routed = fixtures.map((fixture) => ({
+          fixture,
+          ...routeFixture(fixture, fixture.connector ?? given),
+        }));
+        const unrouted = routed.flatMap(({ rejected }) => (rejected ? [rejected] : []));
+        if (unrouted.length > 0) {
+          return unrouted;
+        }
+        const byConnector = new Map<string, ResponseFixture[]>();
+        for (const { fixture, connector } of routed) {
+          if (connector !== undefined) {
+            byConnector.set(connector, [...(byConnector.get(connector) ?? []), fixture]);
+          }
+        }
+        // Each emulator sets all or none of its fixtures; undo the others when one rejects.
+        const before = new Map(
+          [...byConnector.keys()].map((name) => [name, emulators[name].runtimeFixtures.list()])
+        );
+        const rejected = [...byConnector].flatMap(([name, own]) =>
+          emulators[name].runtimeFixtures
+            .set(own)
+            .map((entry): RejectedResponse => ({ ...entry, connector: name }))
+        );
+        if (rejected.length > 0) {
+          for (const [name, previous] of before) {
+            emulators[name].runtimeFixtures.clear();
+            emulators[name].runtimeFixtures.set(previous);
+          }
+        }
+        return rejected;
+      },
+      list: ({ connector } = {}) =>
+        (connector === undefined ? connectors : [checkConnector(connector)]).flatMap((name) =>
+          emulators[name].runtimeFixtures.list().map((fixture) => ({ ...fixture, connector: name }))
+        ),
+      clear: ({ connector, ...options } = {}) =>
+        (connector === undefined ? connectors : [checkConnector(connector)]).forEach((name) =>
+          emulators[name].runtimeFixtures.clear(options)
+        ),
+    },
+    describeOperation: (id, { connector, source } = {}) => {
+      for (const name of connector === undefined ? connectors : [checkConnector(connector)]) {
+        const description = emulators[name].describeOperation(id, { source });
+        if (description) {
+          return { ...description, connector: name };
+        }
+      }
+      return undefined;
+    },
     reset: (connector) => {
       if (connector === undefined) {
         connectors.forEach((name) => emulators[name].reset());
@@ -188,10 +314,7 @@ export const combineEmulators = (
         calls.length = 0;
         return;
       }
-      if (!(connector in emulators)) {
-        throw new Error(`No emulator for connector ${connector}`);
-      }
-      emulators[connector].reset();
+      emulators[checkConnector(connector)].reset();
       collected.set(connector, 0);
       const kept = calls.filter((call) => call.connector !== connector);
       calls.splice(0, calls.length, ...kept);

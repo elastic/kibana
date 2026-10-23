@@ -29,6 +29,13 @@ const spec: OpenApiDocument = {
 const control = (path: string, method = 'GET') =>
   new Request(new URL(path, 'http://emulator.invalid'), { method });
 
+const putJson = (path: string, body: unknown) =>
+  new Request(new URL(path, 'http://emulator.invalid'), {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
 describe('createEmulatorControlHandler', () => {
   let emulator: ReturnType<typeof createEmulatorFetch>;
   let handle: ReturnType<typeof createEmulatorControlHandler>;
@@ -96,6 +103,69 @@ describe('createEmulatorControlHandler', () => {
     expect(emulator.calls).toHaveLength(2);
   });
 
+  it('sets, lists and drops runtime fixtures on PUT, GET and DELETE /_mock/fixtures', async () => {
+    const fixture = {
+      operation: { method: 'GET', path: '/items' },
+      response: { status: 429, headers: { 'retry-after': '1' } },
+    };
+
+    const put = await handle(putJson('/_mock/fixtures', { fixtures: [fixture] }));
+    expect(put.status).toBe(200);
+    expect(await put.json()).toEqual({ fixtures: [fixture] });
+    expect((await emulator.fetch('https://api.vendor.example/v1/items')).status).toBe(429);
+    expect(await (await handle(control('/_mock/fixtures'))).json()).toEqual({
+      fixtures: [fixture],
+    });
+
+    expect((await handle(control('/_mock/fixtures?operation=listItems', 'DELETE'))).status).toBe(
+      204
+    );
+    expect(emulator.runtimeFixtures.list()).toEqual([]);
+  });
+
+  it('answers 400 with the rejected fixtures, and sets none, when the spec rejects one', async () => {
+    const response = await handle(
+      putJson('/_mock/fixtures', {
+        fixtures: [{ operation: { method: 'GET', path: '/teams' }, response: { status: 200 } }],
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).rejected).toEqual([
+      expect.objectContaining({ operation: 'GET /teams' }),
+    ]);
+    expect(emulator.runtimeFixtures.list()).toEqual([]);
+  });
+
+  it.each([
+    ['not JSON', 'nope', 'not JSON'],
+    ['no fixtures list', { fixture: {} }, '"fixtures"'],
+    ['a fixture without an operation', { fixtures: [{ response: { status: 200 } }] }, 'operation'],
+    [
+      'a fixture without a status',
+      { fixtures: [{ operation: { name: 'query boards' }, response: {} }] },
+      'response',
+    ],
+  ])('answers 400 to a body with %s', async (_case, body, detail) => {
+    const response = await handle(
+      new Request(new URL('/_mock/fixtures', 'http://emulator.invalid'), {
+        method: 'PUT',
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).detail).toContain(detail);
+  });
+
+  it('describes an operation on GET /_mock/operations/<id>', async () => {
+    const response = await handle(control('/_mock/operations/listItems'));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ id: 'listItems', method: 'GET', path: '/items' });
+    expect((await handle(control('/_mock/operations/deleteItem'))).status).toBe(404);
+  });
+
   it('answers 404 naming the endpoints to unknown paths', async () => {
     const response = await handle(control('/_mock/unknown'));
 
@@ -154,6 +224,64 @@ describe('createEmulatorControlHandler with combined emulators', () => {
     expect((await response.json()).detail).toBe(
       'connector=third: the emulator serves first, second'
     );
+  });
+
+  it('sets, lists and drops one connector’s runtime fixtures with ?connector=', async () => {
+    const fixture = { operation: { method: 'GET', path: '/items' }, response: { status: 429 } };
+
+    const ambiguous = await handle(putJson('/_mock/fixtures', { fixtures: [fixture] }));
+    expect(ambiguous.status).toBe(400);
+    expect((await ambiguous.json()).rejected[0].violations[0].code).toBe('connector');
+
+    const put = await handle(putJson('/_mock/fixtures?connector=second', { fixtures: [fixture] }));
+    expect(await put.json()).toEqual({ fixtures: [{ ...fixture, connector: 'second' }] });
+    expect((await combined.fetch('https://second.example/v1/items')).status).toBe(429);
+    expect((await combined.fetch('https://first.example/v1/items')).status).toBe(200);
+    expect(await (await handle(control('/_mock/fixtures?connector=first'))).json()).toEqual({
+      fixtures: [],
+    });
+
+    await handle(control('/_mock/fixtures?connector=second', 'DELETE'));
+    expect(combined.runtimeFixtures.list()).toEqual([]);
+  });
+
+  it('describes one connector’s operation with ?connector=', async () => {
+    const response = await handle(control('/_mock/operations/listItems?connector=second'));
+
+    expect(await response.json()).toMatchObject({ id: 'listItems', connector: 'second' });
+  });
+
+  it('serves MCP tools that take the connector', async () => {
+    const callTool = async (name: string, args: Record<string, unknown>) => {
+      const response = await handle(
+        new Request(new URL('/_mock/mcp', 'http://emulator.invalid'), {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            accept: 'application/json, text/event-stream',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'tools/call',
+            params: { name, arguments: args },
+          }),
+        })
+      );
+      return (await response.json()).result;
+    };
+    const fixtures = [{ operation: { method: 'GET', path: '/items' }, response: { status: 503 } }];
+
+    expect((await callTool('set_fixtures', { fixtures })).isError).toBe(true);
+    expect((await callTool('set_fixtures', { fixtures, connector: 'first' })).isError).toBeFalsy();
+    expect((await combined.fetch('https://first.example/v1/items')).status).toBe(503);
+    expect(
+      JSON.parse((await callTool('list_calls', { connector: 'first' })).content[0].text)
+    ).toEqual({
+      calls: [expect.anything(), expect.objectContaining({ status: 503 })],
+      total: 2,
+    });
+    expect((await callTool('reset', { connector: 'third' })).isError).toBe(true);
   });
 
   it('answers 400 to ?connector= when the emulator serves one connector', async () => {

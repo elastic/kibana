@@ -67,17 +67,36 @@ const control = createEmulatorControl(proxyUrl);
 const { calls, total } = await control.calls(); // GET /_mock/calls?since=0
 await control.reset(); // POST /_mock/reset
 const operations = await control.operations(); // GET /_mock/operations
+const getItem = await control.describeOperation('getItem'); // GET /_mock/operations/getItem
+const rejected = await control.setFixtures([
+  { operation: { method: 'GET', path: '/items' }, response: { status: 429 } },
+]); // PUT /_mock/fixtures
 ```
 
 | Endpoint | Answer |
 | --- | --- |
 | `GET /_mock/calls?since=<n>` | `{ calls, total }`: the calls from index `n` on (default 0); pass `total` as the next `since` to read only later calls |
-| `POST /_mock/reset` | **204** after emptying the calls (`mock.reset()`) |
+| `POST /_mock/reset` | **204** after emptying the calls and responder state and dropping the runtime fixtures (`mock.reset()`) |
 | `GET /_mock/operations` | `{ operations }`: each OpenAPI operation's method, path template, server URLs and spec name, and each GraphQL root field or MCP tool by the name calls give it |
+| `GET /_mock/operations/<id>[?source=<name>]` | An OpenAPI operation's parameters, request body and responses (`mock.describeOperation(id)`): each status with its headers and media types, the schemas with their `$ref`s inlined a few levels deep, the examples, and a `sample` that conforms, to start a fixture from. `id` is the operation's `id` from `GET /_mock/operations`, URL-encoded |
+| `PUT /_mock/fixtures` | Sets runtime fixtures from `{ fixtures }`, replacing those of the operations they name, and answers `{ fixtures }` in effect; or **400** with `rejected` when the spec rejects one, setting none |
+| `GET /_mock/fixtures` | `{ fixtures }`: the runtime fixtures in effect |
+| `DELETE /_mock/fixtures[?operation=<id>&source=<name>]` | **204** after dropping the runtime fixtures of one OpenAPI operation, or all of them |
+| `POST /_mock/mcp` | An MCP server with tools for the same (see below) |
 
 Only requests sent to the proxy itself (a path, not an absolute URL) reach them: requests through the proxy, plain or tunnelled, always go to the mock, so a vendor path under `/_mock` can't collide with them. Other paths sent to the proxy itself still get **400**. The endpoints take no credentials; like the proxy, they are for local and CI test runs.
 
-Each call says where its response came from in `responseSource`: `fixture`, `recording`, `generated` for the spec's examples and samples, or `responder` when a `respond` answered without deferring to the default chain. `createEmulatorFetch({ onCall })` is called with each call as it is recorded, e.g. to log requests as they arrive.
+**Runtime fixtures** (`mock.runtimeFixtures`, or the `/_mock/fixtures` endpoints) let a test or an agent pick a scenario while the emulator runs: an empty list, a 429, a third page, a value the vendor just added. They are `ResponseFixture`s, with `when` to answer only some requests, and take precedence over the fixtures the emulator was created with until they are cleared or `reset()`. Unlike those, they are checked when set: a response the spec doesn't allow is rejected with its violations, so a test can't pass on answers the vendor never gives. The exception is an error status the spec doesn't declare, such as a 429 or a 503, which vendors answer with anyway; its body isn't checked. Runtime fixtures answer OpenAPI operations.
+
+**MCP server.** The same control is offered to agents as an MCP server at `/_mock/mcp` on the proxy (Streamable HTTP, stateless, JSON responses), so an agent testing a connector in a running Kibana can steer the vendor's answers:
+
+```bash
+claude mcp add --transport http emulator http://localhost:8080/_mock/mcp
+```
+
+Its tools are `list_operations` (with a `search`), `describe_operation`, `set_fixtures`, `list_fixtures`, `clear_fixtures`, `list_calls` and `reset`, over the same emulator and checks as the endpoints: a fixture the spec rejects comes back as a tool error with its violations. `createEmulatorControlHandler(mock, { exportFixtures })` adds `export_fixtures`, which hands the runtime fixtures to `exportFixtures` to save them somewhere lasting, such as a connector's committed fixtures, and reports where. `createEmulatorMcpHandler` serves the MCP server on its own. It is a control server for the emulator, unrelated to the vendor MCP servers the emulator emulates (see "MCP" below), and like the endpoints it is for local and CI test runs.
+
+Each call says where its response came from in `responseSource`: `runtime-fixture`, `fixture`, `recording`, `generated` for the spec's examples and samples, or `responder` when a `respond` answered without deferring to the default chain. `createEmulatorFetch({ onCall })` is called with each call as it is recorded, e.g. to log requests as they arrive.
 
 ### Several connectors
 
@@ -103,6 +122,8 @@ emulatorCredential('one_drive'); // 'emulate-one_drive'
 A request goes to the connector whose credential it carries: in any header, in Basic auth, the query, the body, or a claim of a JWT assertion. Token URLs answering a request with the credential issue tokens that carry it too, so later requests with the token reach the same connector. Other requests go to the first connector whose specs match the URL (`emulator.answers(method, url)`), and requests no connector matches get **404**. Connectors that share a vendor host therefore need the credential to get their own responses.
 
 Every call is recorded in the combined `calls` with its `connector`, and `operations` and `rejectedResponses` say whose they are. The control endpoints take `?connector=<id>` to see, reset or list only one connector's (`createEmulatorControl(proxyUrl, { connector })`), so tests running in parallel don't read or clear each other's calls; an unknown connector gets **400**.
+
+Runtime fixtures and `describeOperation` are per connector too. A fixture goes to its `connector` (or the `?connector=` of `PUT /_mock/fixtures`, or `runtimeFixtures.set(fixtures, { connector })`), else to the one connector whose specs have its operation; when several have it, as Outlook and OneDrive both have Graph's `GET /me`, it is rejected until one is named, and when any fixture is rejected none is set on any connector. Listed fixtures carry their `connector`, and `GET /_mock/operations/<id>?connector=<id>` describes one connector's operation (without it, the first connector's that has it). The MCP server's tools take a `connector` argument, listing the connectors in their schemas.
 
 ## GraphQL
 
