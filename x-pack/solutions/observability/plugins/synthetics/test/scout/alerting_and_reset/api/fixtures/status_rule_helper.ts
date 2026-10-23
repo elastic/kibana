@@ -7,12 +7,13 @@
 
 import { randomUUID } from 'crypto';
 import moment from 'moment';
-import type { ApiClientFixture, EsClient, KbnClient } from '@kbn/scout-oblt';
+import type { ApiClientFixture, EsClient, KbnClient, SamlAuth } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
 import {
+  KIBANA_HEADERS,
   SYNTHETICS_ALERTS_INDEX,
   SYNTHETICS_API_URLS,
   SYNTHETICS_MONITOR_SO_TYPES,
@@ -23,6 +24,7 @@ import { enableSynthetics, saveMonitorInternal } from '../../../common/fixtures/
 import { delay, tryForTime } from '../../../common/fixtures/retry';
 
 export const SYNTHETICS_DOCS_INDEX = 'synthetics-http-default';
+const OUT_OF_WINDOW_MINUTES = 30;
 export const STATUS_RULE_TYPE_ID = 'xpack.synthetics.alerts.monitorStatus';
 
 export const DEV_LOCATIONS = [
@@ -67,17 +69,21 @@ export async function setupStatusRuleTestEnv({
   apiClient,
   apiServices,
   esClient,
+  samlAuth,
   editorHeaders,
 }: {
   env: StatusRuleTestEnv;
   apiClient: ApiClientFixture;
   apiServices: SyntheticsApiServicesFixture;
   esClient: EsClient;
+  samlAuth: SamlAuth;
   editorHeaders: Record<string, string>;
 }) {
   env.editorHeaders = editorHeaders;
 
-  await enableSynthetics(apiClient, editorHeaders);
+  // Enabling creates a nested service API key, which fails under API-key auth.
+  const { cookieHeader: adminCookie } = await samlAuth.asInteractiveUser('admin');
+  await enableSynthetics(apiClient, { ...KIBANA_HEADERS, ...adminCookie });
 
   await esClient.indices.create({
     index: env.alertActionIndex,
@@ -435,14 +441,9 @@ export async function runAndSearchActiveStatusAlerts({
   sinceTimestamp: string;
 }) {
   const dateStart = new Date();
-  const waitExecution = apiServices.alerting.waiting.waitForNextExecution(
-    ruleId,
-    undefined,
-    60_000,
-    dateStart
-  );
   await apiServices.alerting.rules.runSoon(ruleId);
-  await waitExecution;
+  // Timeout exceeds the 1m rule interval so a scheduled run covers a dropped runSoon.
+  await apiServices.alerting.waiting.waitForExecutionCount(ruleId, 1, undefined, 90_000, dateStart);
   await delay(1_000);
 
   return esClient.search<SyntheticsAlertDoc>({
@@ -462,9 +463,9 @@ export async function runAndSearchActiveStatusAlerts({
 }
 
 /**
- * Ages out a single down check document for `locationId` so that fewer than
- * `downThreshold` down checks remain within the 5-minute time window, without
- * waiting 30s of wall-clock time.
+ * Moves the oldest down check for `locationId` outside the time window, leaving
+ * it indexed, so recovery depends on the rule's time-range filter rather than a
+ * lower document count.
  */
 export async function ageOutOldestDownCheck({
   esClient,
@@ -475,7 +476,7 @@ export async function ageOutOldestDownCheck({
   monitorId: string;
   locationId: string;
 }) {
-  const searchRes = await esClient.search({
+  const searchRes = await esClient.search<Record<string, unknown>>({
     index: `${SYNTHETICS_DOCS_INDEX}*`,
     size: 1,
     sort: [{ '@timestamp': 'asc' }],
@@ -490,13 +491,18 @@ export async function ageOutOldestDownCheck({
     },
   });
   const oldestHit = searchRes.hits.hits[0];
-  if (oldestHit?._id && oldestHit?._index) {
-    await esClient.delete({
-      index: oldestHit._index,
-      id: oldestHit._id,
-      refresh: true,
-    });
-  }
+  expect(oldestHit?._id).toBeDefined();
+
+  // Data streams only accept new documents, so re-index a copy.
+  await esClient.delete({ index: oldestHit._index, id: oldestHit._id!, refresh: true });
+  await esClient.index({
+    index: SYNTHETICS_DOCS_INDEX,
+    refresh: true,
+    document: {
+      ...oldestHit._source,
+      '@timestamp': moment().subtract(OUT_OF_WINDOW_MINUTES, 'minutes').toISOString(),
+    },
+  });
 }
 
 export async function waitUntilMonitorLocationsPending({

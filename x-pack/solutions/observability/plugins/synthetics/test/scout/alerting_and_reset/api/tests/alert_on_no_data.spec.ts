@@ -40,7 +40,7 @@ apiTest.describe(
     const env = createStatusRuleTestEnv('alert-on-no-data');
     const createdMonitorIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices, esClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices, esClient, samlAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('editor');
       const editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader);
       await setupStatusRuleTestEnv({
@@ -48,6 +48,7 @@ apiTest.describe(
         apiClient,
         apiServices,
         esClient,
+        samlAuth,
         editorHeaders,
       });
     });

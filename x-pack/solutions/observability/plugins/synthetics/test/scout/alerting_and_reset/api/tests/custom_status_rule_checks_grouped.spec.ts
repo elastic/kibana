@@ -40,18 +40,21 @@ apiTest.describe(
     const createdMonitorIds: string[] = [];
     let kibanaBaseUrl: string;
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices, esClient, config }) => {
-      kibanaBaseUrl = config.hosts.kibana;
-      const { apiKeyHeader } = await requestAuth.getApiKey('editor');
-      const editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader);
-      await setupStatusRuleTestEnv({
-        env,
-        apiClient,
-        apiServices,
-        esClient,
-        editorHeaders,
-      });
-    });
+    apiTest.beforeAll(
+      async ({ requestAuth, apiClient, apiServices, esClient, config, samlAuth }) => {
+        kibanaBaseUrl = config.hosts.kibana;
+        const { apiKeyHeader } = await requestAuth.getApiKey('editor');
+        const editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader);
+        await setupStatusRuleTestEnv({
+          env,
+          apiClient,
+          apiServices,
+          esClient,
+          samlAuth,
+          editorHeaders,
+        });
+      }
+    );
 
     apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
       await teardownStatusRuleTestEnv({
