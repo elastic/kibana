@@ -137,15 +137,16 @@ describe('FP/TP scenario registry', () => {
         expect(first.attackId).not.toBe(second.attackId);
       });
 
-      it('returns raw events within the workflow window around the attack', () => {
-        const attackTimestamp = Date.parse(String(first.attack?.['@timestamp']));
-        const outside = !first.attack
-          ? []
-          : first.events.filter(
-              (event) =>
-                Math.abs(Date.parse(String(event.source['@timestamp'])) - attackTimestamp) >
-                FP_TP_RAW_EVENT_WINDOW_MS
-            );
+      it('returns raw events within the workflow window around the cited alerts', () => {
+        const originalTimes = first.alerts
+          .map((alert) => Date.parse(String(alert.source['kibana.alert.original_time'])))
+          .filter((time) => !Number.isNaN(time));
+        const start = Math.min(...originalTimes) - FP_TP_RAW_EVENT_WINDOW_MS;
+        const end = Math.max(...originalTimes) + FP_TP_RAW_EVENT_WINDOW_MS;
+        const outside = first.events.filter((event) => {
+          const time = Date.parse(String(event.source['@timestamp']));
+          return time < start || time > end;
+        });
         expect(outside).toEqual([]);
       });
     }

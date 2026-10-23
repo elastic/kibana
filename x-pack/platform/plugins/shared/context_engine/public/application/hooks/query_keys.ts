@@ -15,7 +15,8 @@ export const contextEngineQueryKeys = {
       aiIndexId: string,
       size: number,
       type: string | undefined,
-      lifecycleStatus: readonly KiLifecycleStatus[]
+      query: string | undefined,
+      lifecycleStatus?: readonly KiLifecycleStatus[]
     ) =>
       [
         'context_engine',
@@ -24,7 +25,8 @@ export const contextEngineQueryKeys = {
         'list_ki',
         size,
         type ?? '',
-        lifecycleStatus.join(','),
+        query ?? '',
+        lifecycleStatus?.join(',') ?? '',
       ] as const,
     viewKi: (
       aiIndexId: string,
