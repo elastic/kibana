@@ -11,6 +11,7 @@ import type {
   EuiDataGridColumnVisibility,
   EuiDataGridInMemory,
   EuiDataGridProps,
+  EuiDataGridRefProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSchemaDetector,
   EuiDataGridStyle,
@@ -19,7 +20,8 @@ import type {
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useMemo, useState } from 'react';
+import type { ForwardedRef } from 'react';
 import type { DataSource } from '@kbn/data-source';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
@@ -48,6 +50,11 @@ export interface CompareDocumentsProps {
   docMap: DocMap;
   replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
+  /**
+   * Optional custom body renderer for the comparison grid, whose rows are the compared fields.
+   */
+  renderCustomGridBody?: EuiDataGridProps['renderCustomGridBody'];
+  onFullScreenChange?: EuiDataGridProps['onFullScreenChange'];
 }
 
 const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
@@ -60,24 +67,29 @@ const COMPARISON_GRID_STYLE: EuiDataGridStyle = {
 
 const getStorageKey = (consumer: string, key: string) => `${consumer}:dataGridComparison${key}`;
 
-const CompareDocuments = ({
-  id,
-  wrapper,
-  consumer,
-  ariaDescribedBy,
-  ariaLabelledBy,
-  dataView,
-  dataSource,
-  selectedFieldNames,
-  selectedDocIds: originalSelectedDocIds,
-  schemaDetectors,
-  forceShowAllFields,
-  showFullScreenButton,
-  fieldFormats,
-  docMap: originalDocMap,
-  replaceSelectedDocs: originalReplaceSelectedDocs,
-  setIsCompareActive,
-}: CompareDocumentsProps) => {
+const CompareDocumentsComponent = (
+  {
+    id,
+    wrapper,
+    consumer,
+    ariaDescribedBy,
+    ariaLabelledBy,
+    dataView,
+    dataSource,
+    selectedFieldNames,
+    selectedDocIds: originalSelectedDocIds,
+    schemaDetectors,
+    forceShowAllFields,
+    showFullScreenButton,
+    fieldFormats,
+    docMap: originalDocMap,
+    replaceSelectedDocs: originalReplaceSelectedDocs,
+    setIsCompareActive,
+    renderCustomGridBody,
+    onFullScreenChange,
+  }: CompareDocumentsProps,
+  ref: ForwardedRef<EuiDataGridRefProps>
+) => {
   // Snapshot docMap and selectedDocIds to ensure we don't lose access to the comparison docs
   // or their selection state if, for example, a time range change or auto refresh changes them.
   const [docMap] = useState<DocMap>(originalDocMap);
@@ -213,6 +225,7 @@ const CompareDocuments = ({
 
   return (
     <EuiDataGrid
+      ref={ref}
       id={id}
       aria-describedby={ariaDescribedBy}
       aria-labelledby={ariaLabelledBy}
@@ -226,11 +239,15 @@ const CompareDocuments = ({
       schemaDetectors={schemaDetectors}
       renderCellValue={renderCellValue}
       renderCustomToolbar={renderCustomToolbarFn}
+      renderCustomGridBody={renderCustomGridBody}
+      onFullScreenChange={onFullScreenChange}
       data-test-subj="unifiedDataTableCompareDocuments"
       css={comparisonCss}
     />
   );
 };
+
+const CompareDocuments = forwardRef(CompareDocumentsComponent);
 
 // eslint-disable-next-line import/no-default-export
 export default CompareDocuments;

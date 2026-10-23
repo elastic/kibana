@@ -1648,6 +1648,43 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
+      'should render a custom comparison grid body when provided',
+      async () => {
+        await renderDataTable({
+          enableComparisonMode: true,
+          renderCustomComparisonGridBody: () => (
+            <div data-test-subj="test-custom-comparison-grid-body" />
+          ),
+        });
+
+        await goToComparisonMode();
+
+        expect(screen.getByTestId('test-custom-comparison-grid-body')).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should exit full screen when entering comparison mode',
+      async () => {
+        const onFullScreenChange = jest.fn();
+        await renderDataTable({ enableComparisonMode: true, onFullScreenChange });
+
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+        expect(onFullScreenChange).toHaveBeenLastCalledWith(true);
+
+        await goToComparisonMode();
+
+        expect(onFullScreenChange).toHaveBeenLastCalledWith(false);
+        expect(screen.getByTestId('dataGridFullScreenButton')).toHaveAttribute(
+          'aria-pressed',
+          'false'
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
       'should show full screen button if showFullScreenButton is true',
       async () => {
         await renderDataTable({ enableComparisonMode: true, showFullScreenButton: true });

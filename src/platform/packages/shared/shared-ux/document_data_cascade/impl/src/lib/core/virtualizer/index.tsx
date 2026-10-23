@@ -75,6 +75,17 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
    * Only meaningful when {@link isRoot} is true.
    */
   initialPersistedAnchors?: Record<string, number | null>;
+  /**
+   * Pre-seeds the anchors of cells that had no connection when the restored state was
+   * captured; they are restored when the cells reconnect, without being awaited.
+   * Only meaningful when {@link isRoot} is true.
+   */
+  initialRetainedAnchors?: Record<string, number | null>;
+  /**
+   * Restarts scroll restoration (to {@link initialAnchorItemIndex}) whenever it changes,
+   * e.g. when a child virtualizer's connection identity changes.
+   */
+  scrollRestorationKey?: string;
 }
 
 export interface UseVirtualizedRowScrollStateStoreOptions {
@@ -252,6 +263,10 @@ export const useAnchorVirtualizerToItemIndex = (
     hasRestoredScrollPositionRef?: React.MutableRefObject<boolean>;
     hasStabilizedRef?: React.MutableRefObject<boolean>;
     skipCorrections?: boolean;
+    /**
+     * Restarts the restoration whenever it changes.
+     */
+    restorationKey?: string;
   }
 ) => {
   const internalRestoredRef = useRef<boolean>(false);
@@ -260,14 +275,22 @@ export const useAnchorVirtualizerToItemIndex = (
   const stabilizedRef = options?.hasStabilizedRef ?? internalStabilizedRef;
   const itemCount = virtualizer.options.count;
   const skipCorrections = options?.skipCorrections ?? false;
+  const restorationKey = options?.restorationKey;
+  // an anchor beyond the current item count (e.g. the items shrank meanwhile) resolves to the last item
+  const anchorIndex = Math.min(itemIndex, Math.max(itemCount - 1, 0));
+
+  const previousRestorationKeyRef = useRef(restorationKey);
 
   const restoreScrollOffset = useCallback(() => {
-    if (resolvedRef.current || !virtualizer || itemCount === 0) return;
+    if (resolvedRef.current || !virtualizer) return;
 
+    // nothing to restore, which also holds for a virtualizer without items
     if (!Boolean(itemIndex)) {
       resolvedRef.current = true;
       return;
     }
+
+    if (itemCount === 0) return;
 
     performance.mark('anchorVirtualizerToItemIndex:start', {
       detail: {
@@ -278,7 +301,7 @@ export const useAnchorVirtualizerToItemIndex = (
         },
       },
     });
-    const offsetItemCache = virtualizer.measurementsCache[itemIndex];
+    const offsetItemCache = virtualizer.measurementsCache[anchorIndex];
 
     if (!offsetItemCache) return;
 
@@ -305,7 +328,17 @@ export const useAnchorVirtualizerToItemIndex = (
       start: 'anchorVirtualizerToItemIndex:start',
       end: performance.now(),
     });
-  }, [itemIndex, itemCount, resolvedRef, virtualizer]);
+  }, [itemIndex, anchorIndex, itemCount, resolvedRef, virtualizer]);
+
+  // A new restoration key restarts the restoration from scratch (e.g. when a child
+  // virtualizer's connection identity changes)
+  useLayoutEffect(() => {
+    if (previousRestorationKeyRef.current === restorationKey) return;
+    previousRestorationKeyRef.current = restorationKey;
+    resolvedRef.current = false;
+    stabilizedRef.current = false;
+    restoreScrollOffset();
+  }, [restorationKey, resolvedRef, stabilizedRef, restoreScrollOffset]);
 
   useLayoutEffect(() => {
     restoreScrollOffset();
@@ -333,11 +366,12 @@ export const useAnchorVirtualizerToItemIndex = (
       rafId = null;
 
       if (budget <= 0) {
+        resolvedRef.current = true;
         stabilizedRef.current = true;
         return;
       }
 
-      const offsetItemCache = virtualizer.measurementsCache[itemIndex];
+      const offsetItemCache = virtualizer.measurementsCache[anchorIndex];
       if (!offsetItemCache) {
         budget -= 1;
         rafId = requestAnimationFrame(correct);
@@ -370,7 +404,17 @@ export const useAnchorVirtualizerToItemIndex = (
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
-  }, [skipCorrections, itemIndex, itemCount, virtualizer, resolvedRef, stabilizedRef]);
+    // `restorationKey` restarts the corrections, see the layout effect above
+  }, [
+    skipCorrections,
+    itemIndex,
+    anchorIndex,
+    itemCount,
+    virtualizer,
+    resolvedRef,
+    stabilizedRef,
+    restorationKey,
+  ]);
 };
 
 /**
@@ -427,6 +471,8 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
   observeElementOffset,
   observeElementRect,
   initialPersistedAnchors,
+  initialRetainedAnchors,
+  scrollRestorationKey,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
   const hasRestoredScrollPositionRef = useRef(false);
   const hasStabilizedRef = useRef(false);
@@ -466,6 +512,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     childControllerRef.current = createChildVirtualizerController({
       getRootVirtualizer: () => virtualizerReturnValueRef.current,
       initialPersistedAnchors,
+      initialRetainedAnchors,
     });
   }
 
@@ -525,6 +572,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     hasRestoredScrollPositionRef,
     hasStabilizedRef,
     skipCorrections: hasPersistedChildAnchorsRef.current,
+    restorationKey: scrollRestorationKey,
   });
 
   useEffect(() => {
@@ -551,6 +599,13 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
   // correction loop converges, imperceptible while content is hidden.
   const needsRestore = Boolean(initialAnchorItemIndex);
   const [rootStabilized, setRootStabilized] = useState(!needsRestore);
+
+  const previousRestorationKeyRef = useRef(scrollRestorationKey);
+  useLayoutEffect(() => {
+    if (previousRestorationKeyRef.current === scrollRestorationKey) return;
+    previousRestorationKeyRef.current = scrollRestorationKey;
+    setRootStabilized(!needsRestore);
+  }, [scrollRestorationKey, needsRestore]);
 
   useEffect(() => {
     if (rootStabilized) return;
@@ -592,7 +647,13 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
   // correction loop is still converging.
   virtualizerImpl.shouldAdjustScrollPositionOnItemSizeChange = (item) => {
     if (!hasStabilizedRef.current) return false;
-    if (childController && !childController.haveAllRestoringChildrenStabilized()) return false;
+    // waiting for restoring children is bounded by the same timeout as `isStable`
+    if (!timedOut && childController && !childController.haveAllRestoringChildrenStabilized()) {
+      return false;
+    }
+    // A connected child virtualizer that has synced its state owns scroll compensation for its row,
+    // so the root does not fight the child's own corrections (e.g. when its content is swapped).
+    if (childController && !childController.shouldAdjustScrollForRow(item.index)) return false;
     return item.start < (virtualizerImpl.scrollOffset ?? 0);
   };
 

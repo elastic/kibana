@@ -22,6 +22,7 @@ import {
   EuiHealth,
   EuiStat,
   EuiDataGrid,
+  EuiButtonGroup,
   EuiPanel,
   useEuiTheme,
   type HorizontalAlignment,
@@ -45,14 +46,23 @@ import {
 } from '../../..';
 import type { MockGroupData } from '../../__fixtures__/types';
 
-type ChildVirtualizerRows = Parameters<typeof useConnectedChildVirtualizer>[0]['rows'];
-
 interface CustomCascadeGridBodyProps
   extends EuiDataGridCustomBodyProps,
-    Pick<CascadeLeafCellContentProps, 'virtualizerController' | 'cellId' | 'rowIndex'> {
+    Pick<CascadeLeafCellContentProps, 'virtualizerController' | 'cellId' | 'rowIndex'>,
+    Pick<
+      Parameters<typeof useConnectedChildVirtualizer>[0],
+      'estimatedRowHeight' | 'persistScrollAnchor'
+    > {
   data: LeafNode[];
   isFullScreenMode?: boolean;
 }
+
+type CellView = 'grid' | 'summary';
+
+const CELL_VIEW_OPTIONS = [
+  { id: 'grid', label: 'All columns' },
+  { id: 'summary', label: 'Summary' },
+];
 
 interface CascadeLeafCellContentProps {
   data: LeafNode[];
@@ -73,6 +83,8 @@ const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody(
   cellId,
   rowIndex,
   isFullScreenMode,
+  estimatedRowHeight = 34,
+  persistScrollAnchor,
   Cell,
   visibleColumns,
   visibleRowData,
@@ -91,11 +103,11 @@ const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody(
     controller: virtualizerController,
     cellId,
     rowIndex,
-    // The hook requires Row<G>[] but only uses rows.length for child virtualizers
-    rows: visibleRows as unknown as ChildVirtualizerRows,
-    estimatedRowHeight: 34,
+    rows: visibleRows,
+    estimatedRowHeight,
     overscan: 10,
     privateScrollElement: customGridBodyScrollContainerRef,
+    persistScrollAnchor,
   });
 
   useLayoutEffect(() => {
@@ -185,7 +197,13 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
   virtualizerController,
   columns,
 }: CascadeLeafCellContentProps) {
+  const { euiTheme } = useEuiTheme();
+  const [view, setView] = useState<CellView>('grid');
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
+  const summaryColumns = useMemo(() => columns.slice(0, 2), [columns]);
+  const [summaryVisibleColumns, setSummaryVisibleColumns] = useState(() =>
+    summaryColumns.map(({ id }) => id)
+  );
 
   const renderCellValue = useCallback<
     NonNullable<ComponentProps<typeof EuiDataGrid>['renderCellValue']>
@@ -212,16 +230,58 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
     [data, virtualizerController, cellId, rowIndex]
   );
 
+  // The summary grid is an alternate view of the same cell: it connects to the cascade with its own
+  // connection id, and since its rows do not share the primary view's heights it does not persist a
+  // scroll anchor. The row stays activated while the two views are swapped.
+  const renderSummaryGridBody = useCallback<
+    NonNullable<ComponentProps<typeof EuiDataGrid>['renderCustomGridBody']>
+  >(
+    (gridBodyProps) => (
+      <CustomCascadeGridBodyMemoized
+        {...gridBodyProps}
+        data={data}
+        virtualizerController={virtualizerController}
+        cellId={`${cellId}/summary`}
+        rowIndex={rowIndex}
+        estimatedRowHeight={28}
+        persistScrollAnchor={false}
+      />
+    ),
+    [data, virtualizerController, cellId, rowIndex]
+  );
+
   return (
     <EuiPanel paddingSize="none">
-      <EuiDataGrid
-        aria-label="Nested virtualized data grid"
-        columns={columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={data.length}
-        renderCellValue={renderCellValue}
-        renderCustomGridBody={renderCustomGridBody}
+      <EuiButtonGroup
+        legend="Cell view"
+        options={CELL_VIEW_OPTIONS}
+        idSelected={view}
+        onChange={(id) => setView(id as CellView)}
+        buttonSize="compressed"
+        css={css({ padding: euiTheme.size.s })}
       />
+      {view === 'grid' ? (
+        <EuiDataGrid
+          aria-label="Nested virtualized data grid"
+          columns={columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          rowCount={data.length}
+          renderCellValue={renderCellValue}
+          renderCustomGridBody={renderCustomGridBody}
+        />
+      ) : (
+        <EuiDataGrid
+          aria-label="Nested virtualized summary grid"
+          columns={summaryColumns}
+          columnVisibility={{
+            visibleColumns: summaryVisibleColumns,
+            setVisibleColumns: setSummaryVisibleColumns,
+          }}
+          rowCount={data.length}
+          renderCellValue={renderCellValue}
+          renderCustomGridBody={renderSummaryGridBody}
+        />
+      )}
     </EuiPanel>
   );
 });
