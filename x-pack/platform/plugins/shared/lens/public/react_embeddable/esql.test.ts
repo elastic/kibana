@@ -8,6 +8,7 @@
 import { loadESQLAttributes } from './esql';
 import { makeEmbeddableServices } from './mocks';
 import type { LensEmbeddableStartServices } from './types';
+import type { StructuredDatasourceStates } from '@kbn/lens-common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import * as suggestionModule from '../lens_suggestions_api';
@@ -25,6 +26,12 @@ const mockCreateEsqlAdHocDataView = createEsqlAdHocDataView as jest.MockedFuncti
   typeof createEsqlAdHocDataView
 >;
 
+function getTextBasedLayer(attributes: Awaited<ReturnType<typeof loadESQLAttributes>>) {
+  const layers = (attributes?.state.datasourceStates as StructuredDatasourceStates).textBased
+    ?.layers;
+  return Object.values(layers ?? {})[0];
+}
+
 function getUiSettingsOverrides() {
   const core = coreMock.createStart({ basePath: '/testbasepath' });
   return core.uiSettings;
@@ -41,24 +48,49 @@ describe('ES|QL attributes creation', () => {
       ...servicesOverrides,
     };
   }
-  it('should not update the attributes if no index is available and no suggestions generated', async () => {
+  it('keeps a ROW-backed document when no index is available and no suggestions are generated', async () => {
     jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce(null);
     mockCreateEsqlAdHocDataView.mockResolvedValueOnce(dataViewMock);
     jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
     jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
 
     const attributes = await loadESQLAttributes(getServices());
-    expect(attributes).toBeUndefined();
+    expect(attributes?.visualizationType).toBe('lnsDatatable');
+    const layer = getTextBasedLayer(attributes);
+    expect(layer?.query?.esql).toBe('ROW x = 1');
+    expect(layer?.errors).toBeUndefined();
   });
 
-  it('should not update the attributes if no suggestion is generated', async () => {
+  it('keeps an editable ES|QL document when no suggestion is generated', async () => {
     jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
+    jest.spyOn(esqlUtils, 'getInitialESQLQuery').mockReturnValueOnce('FROM index');
     mockCreateEsqlAdHocDataView.mockResolvedValueOnce(dataViewMock);
     jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
     jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
 
     const attributes = await loadESQLAttributes(getServices());
-    expect(attributes).toBeUndefined();
+    expect(attributes?.visualizationType).toBe('lnsDatatable');
+    const layer = getTextBasedLayer(attributes);
+    expect(layer?.query?.esql).toBe('FROM index');
+    expect(layer?.errors).toBeUndefined();
+  });
+
+  it('keeps an editable ES|QL document when the starting query fails', async () => {
+    jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('logs*');
+    jest.spyOn(esqlUtils, 'getInitialESQLQuery').mockReturnValueOnce('FROM logs*');
+    mockCreateEsqlAdHocDataView.mockResolvedValueOnce(dataViewMock);
+    jest
+      .spyOn(esqlUtils, 'getESQLQueryColumns')
+      .mockRejectedValueOnce(new Error('Unable to load columns. index closed'));
+
+    const attributes = await loadESQLAttributes(getServices());
+
+    expect(attributes?.visualizationType).toBe('lnsDatatable');
+    const layer = getTextBasedLayer(attributes);
+    expect(layer?.query?.esql).toBe('FROM logs*');
+    expect(layer?.errors?.map((error) => error.message)).toEqual([
+      'Unable to load columns. index closed',
+    ]);
   });
 
   it('should fall back to ROW x=1 attributes when the main path times out', async () => {
