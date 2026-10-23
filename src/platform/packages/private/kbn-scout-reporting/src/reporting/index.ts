@@ -14,6 +14,7 @@ import type { ScoutPlaywrightReporterOptions } from './playwright/scout_playwrig
 export * from './report';
 export * from './stats';
 export * from './flaky_tests';
+export * from './consistent_failures';
 
 // Playwright event-based reporting
 export const scoutPlaywrightReporter = (
