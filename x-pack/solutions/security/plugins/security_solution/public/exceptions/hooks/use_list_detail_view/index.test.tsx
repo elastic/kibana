@@ -77,47 +77,41 @@ describe('useListDetailsView', () => {
   };
 
   describe('onEditListDetails', () => {
-    it('resolves true and updates the list when the save succeeds', async () => {
+    it('resolves and updates the list when the save succeeds', async () => {
       const updated = { ...list, ...listDetails };
       (updateList as jest.Mock).mockResolvedValue(updated);
       const { result } = await renderLoadedHook();
 
-      let saved: boolean | undefined;
       await act(async () => {
-        saved = await result.current.onEditListDetails(listDetails);
+        await result.current.onEditListDetails(listDetails);
       });
 
-      expect(saved).toBe(true);
       expect(result.current.list).toEqual(updated);
       expect(mockAddError).not.toHaveBeenCalled();
     });
 
-    it('resolves false, keeps the list and reports the error when the save fails', async () => {
+    it('rejects, keeps the list and reports the error when the save fails', async () => {
       const error = new Error('Internal Server Error');
       (updateList as jest.Mock).mockRejectedValue(error);
       const { result } = await renderLoadedHook();
 
-      let saved: boolean | undefined;
       await act(async () => {
-        saved = await result.current.onEditListDetails(listDetails);
+        await expect(result.current.onEditListDetails(listDetails)).rejects.toThrow(error);
       });
 
-      expect(saved).toBe(false);
       expect(result.current.list).toEqual(list);
       expect(mockAddError).toHaveBeenCalledWith(error, expect.anything());
     });
 
-    it('resolves false without calling the API when the list is not loaded', async () => {
+    it('resolves without calling the API when the list is not loaded', async () => {
       (getListById as jest.Mock).mockRejectedValue(new Error('boom'));
       const { result } = renderHook(() => useListDetailsView('list-1'));
       await waitFor(() => expect(result.current.viewerStatus).toBe(ViewerStatus.ERROR));
 
-      let saved: boolean | undefined;
       await act(async () => {
-        saved = await result.current.onEditListDetails(listDetails);
+        await result.current.onEditListDetails(listDetails);
       });
 
-      expect(saved).toBe(false);
       expect(updateList).not.toHaveBeenCalled();
     });
   });

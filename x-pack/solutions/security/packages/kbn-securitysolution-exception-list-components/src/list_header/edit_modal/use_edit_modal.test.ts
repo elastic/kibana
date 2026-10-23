@@ -41,8 +41,8 @@ describe('useEditModal', () => {
     expect(preventDefault).toHaveBeenCalled();
   });
   it('should show progress while saving and reset it once a failed save settles', async () => {
-    let resolveSave: (isSaved: boolean) => void = () => {};
-    const pendingSave = jest.fn(() => new Promise<boolean>((resolve) => (resolveSave = resolve)));
+    let rejectSave: (error: Error) => void = () => {};
+    const pendingSave = jest.fn(() => new Promise<void>((_, reject) => (rejectSave = reject)));
     const { result } = renderHook(() => useEditModal({ listDetails, onSave: pendingSave }));
 
     act(() => {
@@ -50,7 +50,7 @@ describe('useEditModal', () => {
     });
     expect(result.current.showProgress).toBe(true);
 
-    await act(async () => resolveSave(false));
+    await act(async () => rejectSave(new Error('save failed')));
     expect(result.current.showProgress).toBe(false);
   });
 });

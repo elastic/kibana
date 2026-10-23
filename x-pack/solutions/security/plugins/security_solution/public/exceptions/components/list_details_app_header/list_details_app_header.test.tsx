@@ -45,7 +45,7 @@ const defaultProps = {
   linkedRules,
   isReadOnly: false,
   canUserEditList: true,
-  onEditListDetails: jest.fn().mockResolvedValue(true),
+  onEditListDetails: jest.fn().mockResolvedValue(undefined),
   onExportList: jest.fn(),
   onDuplicateList: jest.fn(),
   onDeleteList: jest.fn(),
@@ -188,7 +188,7 @@ describe('ListDetailsAppHeader', () => {
   });
 
   it('keeps the edit modal open when saving fails', async () => {
-    (defaultProps.onEditListDetails as jest.Mock).mockResolvedValueOnce(false);
+    (defaultProps.onEditListDetails as jest.Mock).mockRejectedValueOnce(new Error('save failed'));
     renderHeader();
 
     await openAppMenuOverflow();

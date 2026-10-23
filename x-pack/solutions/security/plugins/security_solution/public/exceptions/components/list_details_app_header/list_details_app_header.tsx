@@ -26,7 +26,8 @@ interface ListDetailsAppHeaderProps {
   linkedRules: Rule[];
   isReadOnly: boolean;
   canUserEditList: boolean;
-  onEditListDetails: (listDetails: ListDetails) => Promise<boolean>;
+  /** Resolves when the update succeeded; rejects when it failed. */
+  onEditListDetails: (listDetails: ListDetails) => Promise<void>;
   onExportList: () => void;
   onDuplicateList: () => void;
   onDeleteList: () => void;
@@ -58,8 +59,8 @@ export const ListDetailsAppHeader = React.memo<ListDetailsAppHeaderProps>(
     const closeEditModal = useCallback(() => setIsEditModalVisible(false), []);
     const saveListDetails = useCallback(
       async (listDetails: ListDetails) => {
-        const isSaved = await onEditListDetails(listDetails);
-        if (isSaved) closeEditModal();
+        await onEditListDetails(listDetails);
+        closeEditModal();
       },
       [closeEditModal, onEditListDetails]
     );
@@ -93,37 +94,25 @@ export const ListDetailsAppHeader = React.memo<ListDetailsAppHeaderProps>(
     }, [description, listId]);
 
     const menu = useMemo<AppHeaderMenu>(() => {
-      const items: MenuItem[] = [
-        {
-          id: 'linkedRules',
-          label: i18n.LINKED_RULES(linkedRules.length),
-          iconType: 'check',
-          disableButton: linkedRules.length === 0,
-          popoverWidth: LINKED_RULES_POPOVER_WIDTH,
-          testId: `${TEST_SUBJ_PREFIX}LinkedRulesMenu`,
-          items: linkedRules.map((rule) => ({
-            id: `linkedRule-${rule.id}`,
-            label: rule.name,
-            href: getSecuritySolutionUrl({
-              deepLinkId: SecurityPageName.rules,
-              path: getRuleDetailsUrl(rule.id),
-            }),
-            target: '_blank',
-            testId: `${TEST_SUBJ_PREFIX}LinkedRule${rule.id}`,
-          })),
-        },
-        ...(canEdit
-          ? [
-              {
-                id: 'editDetails',
-                label: i18n.EDIT_DETAILS,
-                iconType: 'pencil',
-                overflow: true,
-                run: openEditModal,
-                testId: `${TEST_SUBJ_PREFIX}EditDetailsAction`,
-              },
-            ]
-          : []),
+      const linkedRulesItem: MenuItem = {
+        id: 'linkedRules',
+        label: i18n.LINKED_RULES(linkedRules.length),
+        iconType: 'check',
+        disableButton: linkedRules.length === 0,
+        popoverWidth: LINKED_RULES_POPOVER_WIDTH,
+        testId: `${TEST_SUBJ_PREFIX}LinkedRulesMenu`,
+        items: linkedRules.map((rule) => ({
+          id: `linkedRule-${rule.id}`,
+          label: rule.name,
+          href: getSecuritySolutionUrl({
+            deepLinkId: SecurityPageName.rules,
+            path: getRuleDetailsUrl(rule.id),
+          }),
+          target: '_blank',
+          testId: `${TEST_SUBJ_PREFIX}LinkedRule${rule.id}`,
+        })),
+      };
+      const listActionItems: MenuItem[] = [
         {
           id: 'exportList',
           label: i18n.EXPORT_LIST,
@@ -153,11 +142,22 @@ export const ListDetailsAppHeader = React.memo<ListDetailsAppHeaderProps>(
       ];
 
       if (!canEdit) {
-        return { items };
+        return { items: [linkedRulesItem, ...listActionItems] };
       }
 
       return {
-        items,
+        items: [
+          linkedRulesItem,
+          {
+            id: 'editDetails',
+            label: i18n.EDIT_DETAILS,
+            iconType: 'pencil',
+            overflow: true,
+            run: openEditModal,
+            testId: `${TEST_SUBJ_PREFIX}EditDetailsAction`,
+          },
+          ...listActionItems,
+        ],
         primaryActionItem: {
           id: 'linkRules',
           label: i18n.LINK_RULES,

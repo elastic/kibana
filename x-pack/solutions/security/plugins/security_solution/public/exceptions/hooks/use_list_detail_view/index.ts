@@ -163,9 +163,9 @@ export const useListDetailsView = (exceptionListId: string) => {
   const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
 
   const onEditListDetails = useCallback(
-    async (listDetails: ListDetails): Promise<boolean> => {
+    async (listDetails: ListDetails): Promise<void> => {
+      if (!list) return;
       try {
-        if (!list) return false;
         const updated = await updateList({
           http,
           list: {
@@ -178,10 +178,10 @@ export const useListDetailsView = (exceptionListId: string) => {
           },
         });
         setList(updated);
-        return true;
       } catch (error) {
         handleErrorStatus(error);
-        return false;
+        // Rethrow so the caller knows the update failed (e.g. to keep the edit modal open).
+        throw error;
       }
     },
     [exceptionListId, handleErrorStatus, http, list]
