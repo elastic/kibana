@@ -274,7 +274,7 @@ describe('createConcreteWriteIndex', () => {
         expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
       });
 
-      it(`should log and throw error if ES throws resource_already_exists_exception error and existing index is not the write index`, async () => {
+      it(`should promote the existing index to the write index if ES throws resource_already_exists_exception error and existing index is not the write index`, async () => {
         if (useDataStream) return;
 
         clusterClient.indices.getAlias.mockImplementation(async () => ({}));
@@ -290,12 +290,12 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.get.mockImplementationOnce(async () => ({
           '.internal.alerts-test.alerts-default-000001': {
             aliases: {
-              '.alerts-test.alerts-default': { is_write_index: false },
+              '.alerts-test.alerts-default': { is_write_index: false, is_hidden: true },
             },
           },
         }));
 
-        const ccwiPromise = createConcreteWriteIndex({
+        await createConcreteWriteIndex({
           logger,
           esClient: clusterClient,
           indexPatterns: IndexPatterns,
@@ -303,11 +303,26 @@ describe('createConcreteWriteIndex', () => {
           dataStreamAdapter,
         });
 
-        await expect(() => ccwiPromise).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Attempted to create index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default, but the index already exists and is not the write index for the alias"`
-        );
-
         expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
+        // The existing index is promoted to the write index instead of throwing.
+        expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
+          actions: [
+            {
+              remove: {
+                index: '.internal.alerts-test.alerts-default-000001',
+                alias: '.alerts-test.alerts-default',
+              },
+            },
+            {
+              add: {
+                index: '.internal.alerts-test.alerts-default-000001',
+                alias: '.alerts-test.alerts-default',
+                is_write_index: true,
+                is_hidden: true,
+              },
+            },
+          ],
+        });
       });
 
       it(`should call esClient to put index template if get alias throws 404`, async () => {
