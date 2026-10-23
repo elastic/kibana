@@ -1256,7 +1256,7 @@ export function registerConnectorRoutes({
         indexExists = await client.asCurrentUser.indices.exists({ index: indexName });
       } catch (e) {
         log.warn(
-          i18n.translate('xpack.enterpriseSearch.server.routes.indices.existsErrorLogMessage', {
+          i18n.translate('xpack.contentConnectors.server.routes.indices.existsErrorLogMessage', {
             defaultMessage: 'An error occurred while resolving request to {requestUrl}',
             values: {
               requestUrl: request.url.toString(),
@@ -1304,7 +1304,7 @@ export function registerConnectorRoutes({
         return createError({
           errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
           message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createApiIndex.indexExistsError',
+            'xpack.contentConnectors.server.routes.createApiIndex.indexExistsError',
             {
               defaultMessage: 'This index already exists',
             }
@@ -1325,7 +1325,7 @@ export function registerConnectorRoutes({
         return createError({
           errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
           message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createApiIndex.connectorExistsError',
+            'xpack.contentConnectors.server.routes.createApiIndex.connectorExistsError',
             {
               defaultMessage: 'A connector for this index already exists',
             }
