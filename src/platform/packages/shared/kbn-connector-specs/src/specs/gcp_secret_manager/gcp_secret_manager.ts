@@ -216,7 +216,7 @@ export const GcpSecretManager: ConnectorSpec = {
   metadata: {
     id: '.gcp_secret_manager',
     displayName: 'Google Cloud Secret Manager',
-    description: i18n.translate('core.kibanaConnectorSpecs.gcpSecretManager.metadata.description', {
+    description: i18n.translate('connectorSpecs.gcpSecretManager.metadata.description', {
       defaultMessage:
         'List and inspect secrets, add and disable versions, and read access policy in Google Cloud Secret Manager',
     }),
@@ -237,17 +237,13 @@ export const GcpSecretManager: ConnectorSpec = {
         .optional()
         .describe('Optional default Google Cloud project id used when an action omits one')
         .meta({
-          label: i18n.translate(
-            'core.kibanaConnectorSpecs.gcpSecretManager.config.defaultProjectId',
-            { defaultMessage: 'Default project ID' }
-          ),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.gcpSecretManager.config.defaultProjectIdHelp',
-            {
-              defaultMessage:
-                'Optional, for example my-project-123. Every action takes an explicit project id, but the Test connector button needs this field to have a project to list secrets in.',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.gcpSecretManager.config.defaultProjectId', {
+            defaultMessage: 'Default project ID',
+          }),
+          helpText: i18n.translate('connectorSpecs.gcpSecretManager.config.defaultProjectIdHelp', {
+            defaultMessage:
+              'Optional, for example my-project-123. Every action takes an explicit project id, but the Test connector button needs this field to have a project to list secrets in.',
+          }),
           placeholder: 'my-project-123',
         }),
     })
@@ -671,7 +667,7 @@ Gotchas:
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.gcpSecretManager.test.description', {
+    description: i18n.translate('connectorSpecs.gcpSecretManager.test.description', {
       defaultMessage:
         'Verifies the Google Cloud Secret Manager connection by listing secrets in the configured project',
     }),
