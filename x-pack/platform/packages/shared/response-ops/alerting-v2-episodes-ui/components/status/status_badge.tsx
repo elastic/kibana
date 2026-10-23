@@ -13,6 +13,8 @@ import { alertTimelineStatusColor } from '../../alert_timeline/alert_timeline_st
 
 export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
+  children?: React.ReactNode;
+  'data-test-subj'?: string;
 }
 
 const STATUS_LABELS: Record<AlertEpisodeStatus, string> = {
@@ -50,17 +52,33 @@ export const getEpisodeStatusBadgeLabel = (status: AlertEpisodeStatus): string =
   });
 
 /**
- * Renders a hollow badge with a Lifecycle-colored health dot for an alerting episode status.
+ * Lifecycle-colored health dot and status label, for hosts that already own the hollow badge chrome.
  */
-export function AlertEpisodeStatusBadge({ status }: AlertEpisodeStatusBadgeProps) {
+export function AlertEpisodeStatusHealth({
+  status,
+  children,
+}: Pick<AlertEpisodeStatusBadgeProps, 'status' | 'children'>) {
   const { euiTheme } = useEuiTheme();
   const color = alertTimelineStatusColor(euiTheme, status);
 
   return (
-    <EuiBadge color="hollow">
-      <EuiHealth color={color} textSize="inherit">
-        {getEpisodeStatusBadgeLabel(status)}
-      </EuiHealth>
+    <EuiHealth color={color} textSize="inherit">
+      {children ?? getEpisodeStatusBadgeLabel(status)}
+    </EuiHealth>
+  );
+}
+
+/**
+ * Renders a hollow badge with a Lifecycle-colored health dot for an alerting episode status.
+ */
+export function AlertEpisodeStatusBadge({
+  status,
+  children,
+  'data-test-subj': dataTestSubj,
+}: AlertEpisodeStatusBadgeProps) {
+  return (
+    <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+      <AlertEpisodeStatusHealth status={status}>{children}</AlertEpisodeStatusHealth>
     </EuiBadge>
   );
 }
