@@ -23,6 +23,7 @@ import { vegaPack } from '@kbn/isomer-primitives-vega';
 import { fromRoot } from '@kbn/repo-info';
 
 import { hoistStyles, withoutMasks } from './hoist_styles';
+import { createPdfWriter } from './pdf_writer';
 
 const FONTS = fromRoot('src/core/packages/apps/server-internal/assets/fonts');
 
@@ -87,7 +88,7 @@ export interface ChartsDrawing extends IsomerDrawing {
     page: { html: string; css: string; width: number; height: number },
     scale: number
   ): Promise<Buffer>;
-  /** Stops the drawing thread. */
+  /** Stops the chart drawing and PDF threads. */
   close(): Promise<void>;
   render(
     composition: Composition,
@@ -130,6 +131,8 @@ export const createChartsDrawing = async ({
   const takumi = createTakumiImageBackend({
     fonts: FACES.map(([, file]) => readFileSync(join(FONTS, file))),
   });
+  // takumi's PDF writer is wasm on the calling thread, so it writes on its own (elastic/isomer#268).
+  const pdfWriter = createPdfWriter({ fonts: FACES.map(([, file]) => join(FONTS, file)) });
   // Draws every chart the composition holds, runs `render`, then lets the drawings go.
   const withCharts = async <T>(
     composition: Composition,
@@ -170,7 +173,7 @@ export const createChartsDrawing = async ({
       withCharts(composition, options, () => {
         // The PDF writer drops content under a mask (request 15).
         const { html, css, width, height } = withoutMasks(snapshot(composition, options));
-        return takumi.pdf(
+        return pdfWriter.write(
           { pages: [{ html }], css, width, height },
           { uncoveredText: 'placeholder', ...(metadata ? { metadata } : {}) }
         );
@@ -198,7 +201,9 @@ export const createChartsDrawing = async ({
       }
     },
     rasterize: (page, scale) => takumi.png(page, { scale }),
-    close: () => engine.close(),
+    close: async () => {
+      await Promise.all([engine.close(), pdfWriter.close()]);
+    },
     render: async (composition, surface, { width, height } = DEFAULT_CHART_SIZE) => {
       const started = performance.now();
       const { release } = await prepareCharts(engine, composition, {
