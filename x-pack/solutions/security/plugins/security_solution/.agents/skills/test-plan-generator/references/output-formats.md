@@ -173,7 +173,7 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 - [ ] Footer is present at the end of the file with the correct model identifier and today's date
 - [ ] **Verbosity invariants hold across levels.** Same scenario count, same priorities, same set of ⚠️ entries in *Known Limitations*, same *Out of scope* reasons, same always-evaluated coverage decisions as would be produced at any other level. Verbosity is prose-density-only. See [Verbosity levels § Non-negotiable constraint](#non-negotiable-constraint).
 - [ ] **Level-appropriate prose sections.** `Overview` and `Feature Background` render at the length prescribed for `VERBOSITY_LEVEL`. `Assumptions` under `lean` uses the compact inline form (or the *See Known Limitations* one-liner when no bullet was confirmed); under `detailed` every confirmed value carries a provenance suffix.
-- [ ] **Verbosity marker present.** `<!-- verbosity: <level> -->` is at the top of the draft file, together with `<!-- tokens: … -->` and `<!-- cost: … -->` when they were captured.
+- [ ] **Verbosity marker present.** `<!-- verbosity: <level> -->` is the first line of the draft. Do not add `<!-- tokens: … -->` or `<!-- cost: … -->` yet; they are added after the draft is saved.
 
 If any item fails, fix the scenario before saving. If fixing requires information that is not available, apply the Core rule: stop and ask the user.
 

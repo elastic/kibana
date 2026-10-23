@@ -684,7 +684,30 @@ class SessionMetricsParserTests(unittest.TestCase):
 
             catalog = fetch_price_catalog(models.as_uri(), "2026-10-22")
 
-            self.assertEqual(list(catalog.models), ["claude-sonnet-5-5"])
+            self.assertIsNotNone(find_model_price(catalog, "claude-sonnet-5-5"))
+            self.assertIsNone(find_model_price(catalog, "claude-no-cost"))
+            self.assertIsNone(find_model_price(catalog, "claude-bad-output"))
+
+    def test_unpriced_remote_entry_does_not_fall_through_to_a_shorter_id(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            shorter_id_priced = {
+                "providers": {
+                    "anthropic": {
+                        "models": {
+                            "claude-sonnet-5": {"cost": {"input": "2e-06", "output": "1e-05"}},
+                            "claude-sonnet-5-5": {"provider_type": "anthropic"},
+                        }
+                    }
+                }
+            }
+            models = Path(raw_dir) / "models.json"
+            models.write_text(json.dumps(shorter_id_priced), encoding="utf-8")
+
+            catalog = fetch_price_catalog(models.as_uri(), "2026-10-22")
+
+            self.assertIsNotNone(find_model_price(catalog, "claude-sonnet-5"))
+            self.assertIsNone(find_model_price(catalog, "claude-sonnet-5-5"))
+            self.assertIsNone(find_model_price(catalog, "claude-sonnet-5-5-20261001"))
 
     def test_fetch_price_catalog_turns_a_broken_download_into_a_value_error(self):
         broken = http.client.IncompleteRead(b"{")

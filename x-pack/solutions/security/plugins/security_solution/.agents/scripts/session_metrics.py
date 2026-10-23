@@ -121,7 +121,7 @@ class ModelPrice:
 class PriceCatalog:
     source: str
     checked: str
-    models: Mapping[str, ModelPrice]
+    models: Mapping[str, ModelPrice | None]
 
 
 @dataclass(frozen=True)
@@ -319,23 +319,23 @@ def fetch_price_catalog(url: str, checked: str) -> PriceCatalog:
         model: entry.get("cost") if isinstance(entry, dict) else None
         for model, entry in models.items()
     }
-    # A remote entry without a valid price only leaves that model unpriced.
-    prices = _parse_model_prices(costs, skip_invalid=True)
-    if not prices:
+    # A remote entry without a valid price stays as unpriced, so its id cannot fall
+    # through to a shorter id's prices in find_model_price.
+    prices = _parse_model_prices(costs, keep_unpriced=True)
+    if not any(price is not None for price in prices.values()):
         raise ValueError(f"Price catalog has no valid Anthropic prices: {url}")
     return PriceCatalog(source=url, checked=checked, models=prices)
 
 
 def _parse_model_prices(
-    raw_models: Mapping[str, Any], skip_invalid: bool = False
-) -> dict[str, ModelPrice]:
-    models: dict[str, ModelPrice] = {}
+    raw_models: Mapping[str, Any], keep_unpriced: bool = False
+) -> dict[str, ModelPrice | None]:
+    models: dict[str, ModelPrice | None] = {}
     for model, prices in raw_models.items():
         price = _model_price(prices)
-        if price is not None:
-            models[model] = price
-        elif not skip_invalid:
+        if price is None and not keep_unpriced:
             raise ValueError(f"Price catalog entry needs valid input and output prices: {model}")
+        models[model] = price
     return models
 
 
@@ -404,16 +404,17 @@ def estimate_session_cost(
 ) -> SessionCost:
     """Return the session cost, leaving out usage with no model id when it is at most 1% of it."""
     named = {model: usage for model, usage in usage_by_model.items() if model is not None}
-    cost = estimate_cost_usd(named, catalog)
-    if cost is None:
+    prices = _resolve_prices(named, catalog)
+    if prices is None:
         reason = "No price for every model in the session" if named else "No usage with a model id"
         return SessionCost(usd=None, unavailable_reason=reason)
+    cost = _priced_cost(named, prices)
     model_less = usage_by_model.get(None)
     if model_less is None:
         return SessionCost(usd=cost)
     # Priced at the session's highest prices, the left-out share is an upper bound.
-    named_prices = [find_model_price(catalog, model) for model in named]
-    highest = _highest_prices([price for price in named_prices if price is not None])
+    # When the named models cost $0 (e.g. aborted responses), any model-less usage is over 1%.
+    highest = _highest_prices(list(prices.values()))
     if _usage_cost(model_less, highest) > cost * MAX_MODEL_LESS_COST_SHARE:
         return SessionCost(
             usd=None,
@@ -436,16 +437,32 @@ def estimate_cost_usd(
     catalog: PriceCatalog,
 ) -> float | None:
     """Return the list-price cost in USD, or None when any model has no price."""
+    prices = _resolve_prices(usage_by_model, catalog)
+    if prices is None:
+        return None
+    return _priced_cost(usage_by_model, prices)
+
+
+def _resolve_prices(
+    usage_by_model: Mapping[str | None, ModelUsage],
+    catalog: PriceCatalog,
+) -> dict[str | None, ModelPrice] | None:
     if not usage_by_model:
         return None
-
-    cost = 0.0
-    for model, usage in usage_by_model.items():
+    prices: dict[str | None, ModelPrice] = {}
+    for model in usage_by_model:
         price = find_model_price(catalog, model) if model else None
         if price is None:
             return None
-        cost += _usage_cost(usage, price)
-    return cost
+        prices[model] = price
+    return prices
+
+
+def _priced_cost(
+    usage_by_model: Mapping[str | None, ModelUsage],
+    prices: Mapping[str | None, ModelPrice],
+) -> float:
+    return sum(_usage_cost(usage_by_model[model], price) for model, price in prices.items())
 
 
 def _usage_cost(usage: ModelUsage, price: ModelPrice) -> float:
