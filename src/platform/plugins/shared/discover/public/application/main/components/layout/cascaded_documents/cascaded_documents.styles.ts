@@ -12,11 +12,24 @@ import type { EuiThemeShape } from '@elastic/eui';
 
 export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape }) => ({
   wrapper: css({
+    '--kbn-data-cascade-cell-border-radius': '0px',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
     width: '100%',
     padding: `0 ${euiTheme.size.s} ${euiTheme.size.s}`,
+
+    '& [role="row"] [data-test-subj="dataCascadeInlineStickyHeader"]:has([data-test-subj="discoverCascadeToolbarPortalNode"])':
+      {
+        paddingBottom: 0,
+      },
+
+    '& [role="row"] [data-test-subj="sticky-header-extension-point"]': {
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+      borderRadius: `${euiTheme.border.radius.inline} ${euiTheme.border.radius.inline} 0 0`,
+      clipPath: `inset(0px round ${euiTheme.border.radius.inline} ${euiTheme.border.radius.inline} 0 0)`,
+      overflow: 'hidden',
+    },
 
     // EUI Data Grid uses fixed positioning to render
     // full screen mode, and since data cascade rows have a transform applied on them
@@ -39,10 +52,8 @@ export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape 
       contain: 'none',
     },
 
-    // This is also required because we clip the rendered content
-    // in the cascade grid cells to have rounded corners
-    // but in full screen mode we want to disable that clipping,
-    // so that content can extend to the full width of the screen
+    // Disable cascade cell content clipping in full screen mode so the grid
+    // can extend to the full width of the screen.
     '&:has(.euiDataGrid--fullScreen) [role="gridcell"] *:not(.euiDataGrid--fullScreen *)': {
       clipPath: 'unset',
     },

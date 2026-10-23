@@ -12,32 +12,12 @@ import type { UseEuiTheme } from '@elastic/eui';
 
 export const cascadeToolbarPortalNodeTestSubjAttribute = 'discoverCascadeToolbarPortalNode';
 
-/**
- * Set on the grid body while its toolbar and header row are relocated into the cascade sticky header.
- */
-export const stickyHeaderActiveAttribute = 'data-sticky-header-active';
-/**
- * Custom property on the grid body holding the combined inline height of the toolbar and header row,
- * which the body reserves while they are relocated so the grid does not collapse.
- */
-export const stickyHeaderSpacerHeightProperty = '--discoverCascadeStickyHeaderSpacer';
-
 export const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme']) => ({
   wrapper: css({
     overflow: 'hidden',
     position: 'relative',
     height: '100%',
     contain: 'content',
-
-    // stands in for the toolbar and header row while they are relocated to the cascade sticky header,
-    // holding their space (and matching the band they leave behind) so neither the grid nor the cascade
-    // row changes height at the moment the sticky header takes over
-    [`&[${stickyHeaderActiveAttribute}="true"]::before`]: {
-      content: '""',
-      display: 'block',
-      height: `var(${stickyHeaderSpacerHeightProperty}, 0px)`,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    },
 
     '& .euiDataGridHeader': {
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
