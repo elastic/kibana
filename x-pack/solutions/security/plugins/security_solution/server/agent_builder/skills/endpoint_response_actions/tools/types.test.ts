@@ -186,8 +186,12 @@ describe('response action error helpers', () => {
   });
 
   it('responseActionsProductFeatureEnabled reports the feature and tolerates an unconfigured service', () => {
-    expect(responseActionsProductFeatureEnabled({ isEnabled: () => true })).toBe(true);
-    expect(responseActionsProductFeatureEnabled({ isEnabled: () => false })).toBe(false);
+    expect(responseActionsProductFeatureEnabled({ isEnabled: () => true }, 'canIsolateHost')).toBe(
+      true
+    );
+    expect(responseActionsProductFeatureEnabled({ isEnabled: () => false }, 'canIsolateHost')).toBe(
+      false
+    );
     // `isEnabled` throws before `setProductFeaturesConfigurator` has run; the
     // helper must surface "unknown", not crash the gate it feeds.
     const unconfigured = {
@@ -195,7 +199,18 @@ describe('response action error helpers', () => {
         throw new Error('not configured');
       },
     };
-    expect(responseActionsProductFeatureEnabled(unconfigured)).toBeUndefined();
+    expect(responseActionsProductFeatureEnabled(unconfigured, 'canIsolateHost')).toBeUndefined();
+  });
+
+  it('responseActionsProductFeatureEnabled is privilege-specific: release registers under host isolation too', () => {
+    const essentialsFeatures = {
+      isEnabled: (key: string) => key === 'endpoint_host_isolation',
+    };
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canUnIsolateHost')).toBe(true);
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canIsolateHost')).toBe(false);
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canWriteScanOperations')).toBe(
+      false
+    );
   });
 
   it('endpointNotFoundData reports a hostname miss without fabricating host state', () => {

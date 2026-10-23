@@ -238,16 +238,36 @@ export function licenseUnavailableResult(privilege: string, expired: boolean) {
 }
 
 /**
+ * The product feature(s) a gated privilege registers under, mirroring how
+ * `hasAuth` gates on action registration. Not uniform: the shared
+ * `hostIsolation` sub-feature — which registers `writeHostIsolationRelease` —
+ * is contributed by both `endpointHostIsolation` and
+ * `endpointResponseActions`, while isolate, scan, running-processes, and the
+ * actions log register only under `endpointResponseActions`. Serverless
+ * Security Essentials enables `endpointHostIsolation` but not
+ * `endpointResponseActions`, so there a missing release privilege is a role
+ * gap (grantable), not a product-tier limit.
+ */
+const PRIVILEGE_PRODUCT_FEATURES: Record<string, readonly ProductFeatureSecurityKey[]> = {
+  canIsolateHost: [ProductFeatureSecurityKey.endpointResponseActions],
+  canUnIsolateHost: [
+    ProductFeatureSecurityKey.endpointHostIsolation,
+    ProductFeatureSecurityKey.endpointResponseActions,
+  ],
+  canWriteScanOperations: [ProductFeatureSecurityKey.endpointResponseActions],
+  canGetRunningProcesses: [ProductFeatureSecurityKey.endpointResponseActions],
+  canAccessEndpointActionsLogManagement: [ProductFeatureSecurityKey.endpointResponseActions],
+};
+
+/**
  * Standard tool result returned when the deployment's product configuration —
  * not the caller's role, not the license tier — is what withholds the
- * privilege. On serverless, response-action privileges derive from the
- * `endpointResponseActions` product feature, which only the Endpoint Complete
- * tier includes; `calculateEndpointAuthz.hasAuth` returns false for every role
- * (including superuser/admin) when the feature is off, while the serverless
- * license is always Enterprise. Reporting that as
- * `insufficient_privileges` or `license_tier_required` would both be wrong:
- * no grant and no license change can enable it — only the deployment's
- * product tier can.
+ * privilege: no product feature that registers the privilege's action is
+ * enabled (see `PRIVILEGE_PRODUCT_FEATURES`), so `calculateEndpointAuthz.hasAuth`
+ * returns false for every role while the serverless license is always
+ * Enterprise. Reporting that as `insufficient_privileges` or
+ * `license_tier_required` would both be wrong: no grant and no license change
+ * can enable it — only the deployment's product tier can.
  */
 export function productFeatureDisabledResult(privilege: string) {
   return responseActionErrorResult(
@@ -258,20 +278,27 @@ export function productFeatureDisabledResult(privilege: string) {
 }
 
 /**
- * Whether the deployment's product configuration includes response actions
- * (`isEnabled(endpointResponseActions)`). All response-action privileges
- * derive from that feature on serverless, so when `authz[privilege]` is false
- * and neither a role nor a license explains it, this is the remaining cause.
+ * Whether any product feature that registers this privilege's action is
+ * enabled (see `PRIVILEGE_PRODUCT_FEATURES`). `false` means no enabled feature
+ * can grant the privilege, so the product configuration — not the role — is
+ * the honest explanation when `authz[privilege]` is false and the license
+ * raises no objection.
  *
  * `undefined` when the check cannot be answered (the product-features service
  * has not been configured, e.g. some test contexts): callers treat that as
- * "not the explanation" rather than guessing.
+ * "not the explanation" rather than picking a feature.
  */
-export function responseActionsProductFeatureEnabled(productFeaturesService: {
-  isEnabled(key: string): boolean;
-}): boolean | undefined {
+export function responseActionsProductFeatureEnabled(
+  productFeaturesService: {
+    isEnabled(key: string): boolean;
+  },
+  privilege: string
+): boolean | undefined {
+  const features = PRIVILEGE_PRODUCT_FEATURES[privilege] ?? [
+    ProductFeatureSecurityKey.endpointResponseActions,
+  ];
   try {
-    return productFeaturesService.isEnabled(ProductFeatureSecurityKey.endpointResponseActions);
+    return features.some((feature) => productFeaturesService.isEnabled(feature));
   } catch {
     // `isEnabled` throws before `setProductFeaturesConfigurator` has run;
     // an unconfigured service says nothing about the feature.

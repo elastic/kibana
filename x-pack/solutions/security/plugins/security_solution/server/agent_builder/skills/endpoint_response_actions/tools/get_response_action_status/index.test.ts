@@ -124,11 +124,8 @@ describe('getResponseActionStatusTool', () => {
   });
 
   it('reports product_feature_disabled when the deployment omits the response-actions feature (serverless Essentials)', async () => {
-    // On serverless Essentials every role fails the actions-log privilege (it
-    // derives from the `endpointResponseActions` product feature) while the
-    // license is always Enterprise — so neither a grant nor a license
-    // explains the refusal. The default license mock is Platinum+, so
-    // disabling only the feature isolates it as the cause.
+    // Essentials-shaped: host isolation on, response actions off. The actions
+    // log registers only under `endpointResponseActions` (see PRIVILEGE_PRODUCT_FEATURES).
     service.getEndpointAuthz = jest.fn().mockResolvedValue(
       getEndpointAuthzInitialStateMock({
         canAccessEndpointActionsLogManagement: false,
@@ -136,9 +133,9 @@ describe('getResponseActionStatusTool', () => {
     );
     service.getProductFeaturesService = jest.fn(
       () =>
-        ({ isEnabled: () => false } as unknown as ReturnType<
-          EndpointAppContextService['getProductFeaturesService']
-        >)
+        ({
+          isEnabled: (key: string) => key === 'endpoint_host_isolation',
+        } as unknown as ReturnType<EndpointAppContextService['getProductFeaturesService']>)
     ) as unknown as EndpointAppContextService['getProductFeaturesService'];
 
     const tool = getResponseActionStatusTool(service);

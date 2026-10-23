@@ -241,11 +241,11 @@ const resolveTarget = async (request: DispatchRequest): Promise<ResolvedDispatch
  * could not be read — in which case no tier comparison is meaningful and the
  * answer is renewal or restoration, not an upgrade.
  *
- * On serverless, all response-action privileges also derive from the
- * `endpointResponseActions` product feature (only Endpoint Complete includes
- * it), and the license is always Enterprise — so when the license raises no
- * objection but the feature is disabled, the deployment's product tier is the
- * honest explanation, not a role grant or a license upgrade.
+ * On serverless, response-action privileges also derive from product features
+ * (see `PRIVILEGE_PRODUCT_FEATURES`), and the license is always Enterprise —
+ * so when the license raises no objection
+ * but none of the privilege's features is enabled, the deployment's product
+ * tier is the honest explanation, not a role grant or a license upgrade.
  */
 const privilegeRefusal = (
   endpointAppContextService: EndpointAppContextService,
@@ -268,7 +268,8 @@ const privilegeRefusal = (
     }
     if (
       responseActionsProductFeatureEnabled(
-        endpointAppContextService.getProductFeaturesService()
+        endpointAppContextService.getProductFeaturesService(),
+        privilege
       ) === false
     ) {
       return { kind: 'product_feature', privilege };

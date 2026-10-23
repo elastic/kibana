@@ -76,8 +76,8 @@ export const getResponseActionStatusTool = (
           // `isPlatinumPlusLicense` in `calculateEndpointAuthz`, so below
           // Platinum the license, not the role, is what withholds it —
           // same split as the dispatch gate in `dispatch_action.ts`. The
-          // privilege also derives from the `endpointResponseActions`
-          // product feature (serverless Essentials omits it), checked last.
+          // privilege also derives from product features (`endpointResponseActions`
+          // registers the actions-log sub-feature), checked last.
           const limit = licenseLimitOf(endpointAppContextService.getLicenseService(), 'platinum');
           if (limit?.kind === 'tier') {
             return licenseTierRequiredResult('canAccessEndpointActionsLogManagement', 'platinum');
@@ -87,7 +87,8 @@ export const getResponseActionStatusTool = (
           }
           if (
             responseActionsProductFeatureEnabled(
-              endpointAppContextService.getProductFeaturesService()
+              endpointAppContextService.getProductFeaturesService(),
+              'canAccessEndpointActionsLogManagement'
             ) === false
           ) {
             return productFeatureDisabledResult('canAccessEndpointActionsLogManagement');
