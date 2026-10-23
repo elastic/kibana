@@ -21,7 +21,6 @@ import {
   useAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements,
 } from '../../hooks/use_are_agent_builder_skills_available';
-import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
 import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
 import { getCreateActionPolicyWithAgentTooltipText } from '../../components/action_policy/create_options/action_policy_create_options_panel';
 import { ActionPoliciesLicenseCallout } from '../../components/action_policy/action_policies_license_callout';
@@ -35,14 +34,12 @@ const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
 const getActionPoliciesListMenu = ({
   onCreatePolicy,
   onCreateWithAgent,
-  showCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
   isLicenseValid,
 }: {
   onCreatePolicy: () => void;
   onCreateWithAgent: () => void;
-  showCreateWithAgent: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
   isLicenseValid: boolean;
@@ -58,30 +55,28 @@ const getActionPoliciesListMenu = ({
     popoverTestId: 'createActionPolicyPopoverPanel',
     disableButton: !isLicenseValid,
     tooltipContent: isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
-    splitButtonProps: showCreateWithAgent
-      ? {
-          iconType: 'chevronSingleDown',
-          isSecondaryButtonDisabled: !isLicenseValid,
-          secondaryButtonAriaLabel: i18n.translate(
-            'xpack.alertingV2.actionPoliciesList.createPolicyMoreOptions',
-            { defaultMessage: 'More create options' }
-          ),
-          items: [
-            {
-              id: 'createWithAgent',
-              label: i18n.translate('xpack.alertingV2.actionPoliciesList.createWithAgentButton', {
-                defaultMessage: 'Create with agent (Experimental)',
-              }),
-              iconType: 'sparkles' as const,
-              order: 0,
-              run: onCreateWithAgent,
-              testId: 'createActionPolicyWithAgentButton',
-              disableButton: createWithAgentDisabled,
-              tooltipContent: createWithAgentTooltipText,
-            },
-          ],
-        }
-      : undefined,
+    splitButtonProps: {
+      iconType: 'chevronSingleDown',
+      isSecondaryButtonDisabled: !isLicenseValid,
+      secondaryButtonAriaLabel: i18n.translate(
+        'xpack.alertingV2.actionPoliciesList.createPolicyMoreOptions',
+        { defaultMessage: 'More create options' }
+      ),
+      items: [
+        {
+          id: 'createWithAgent',
+          label: i18n.translate('xpack.alertingV2.actionPoliciesList.createWithAgentButton', {
+            defaultMessage: 'Create with agent',
+          }),
+          iconType: 'sparkles' as const,
+          order: 0,
+          run: onCreateWithAgent,
+          testId: 'createActionPolicyWithAgentButton',
+          disableButton: createWithAgentDisabled,
+          tooltipContent: createWithAgentTooltipText,
+        },
+      ],
+    },
   },
 });
 
@@ -112,7 +107,6 @@ export const ActionPoliciesListHeader = ({
   const phase = useContentListPhase();
   const { links } = useService(CoreStart('docLinks'));
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
-  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
   const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
@@ -125,7 +119,6 @@ export const ActionPoliciesListHeader = ({
         ? getActionPoliciesListMenu({
             onCreatePolicy,
             onCreateWithAgent,
-            showCreateWithAgent,
             createWithAgentDisabled,
             createWithAgentTooltipText,
             isLicenseValid,
@@ -135,7 +128,6 @@ export const ActionPoliciesListHeader = ({
       showHeaderMenu,
       onCreatePolicy,
       onCreateWithAgent,
-      showCreateWithAgent,
       createWithAgentDisabled,
       createWithAgentTooltipText,
       isLicenseValid,

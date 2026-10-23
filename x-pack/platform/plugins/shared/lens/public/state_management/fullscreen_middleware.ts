@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI, Action } from 'redux-toolkit-v1';
-import type { LensStoreDeps } from '@kbn/lens-common';
-import type { LensGetState } from '.';
+import type { Middleware } from '@reduxjs/toolkit';
+import type { LensState, LensStoreDeps } from '@kbn/lens-common';
 
 import { setToggleFullscreen } from './lens_slice';
 
-export const fullscreenMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
-  return (next: Dispatch) => (action: Action) => {
-    if (setToggleFullscreen.match(action)) {
-      const isFullscreen = (store.getState as LensGetState)().lens.isFullscreenDatasource;
-      storeDeps.lensServices.chrome.setIsVisible(Boolean(isFullscreen));
-    }
-    next(action);
+export const fullscreenMiddleware =
+  (storeDeps: LensStoreDeps): Middleware<{}, LensState> =>
+  (store) => {
+    return (next) => (action) => {
+      if (setToggleFullscreen.match(action)) {
+        const isFullscreen = store.getState().lens.isFullscreenDatasource;
+        storeDeps.lensServices.chrome.setIsVisible(Boolean(isFullscreen));
+      }
+      next(action);
+    };
   };
-};

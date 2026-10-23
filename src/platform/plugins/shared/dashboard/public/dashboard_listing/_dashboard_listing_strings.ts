@@ -72,7 +72,7 @@ export const noItemsStrings = {
     }),
   getCreateNewDashboardText: () =>
     i18n.translate('dashboard.listing.createNewDashboard.createButtonLabel', {
-      defaultMessage: `Create a dashboard`,
+      defaultMessage: `Create dashboard`,
     }),
 };
 
