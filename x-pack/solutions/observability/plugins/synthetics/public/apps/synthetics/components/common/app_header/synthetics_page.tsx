@@ -8,6 +8,7 @@
 import {
   AppHeader,
   type AppHeaderBack,
+  type AppHeaderBadge,
   type AppHeaderDescription,
   type AppHeaderTab,
 } from '@kbn/app-header';
@@ -49,6 +50,7 @@ export function SyntheticsPage({
   title,
   tabs,
   back,
+  badges,
   toolbar,
   menu,
   description,
@@ -58,6 +60,7 @@ export function SyntheticsPage({
   title: string;
   tabs?: AppHeaderTab[];
   back?: AppHeaderBack;
+  badges?: AppHeaderBadge[];
   toolbar?: React.ReactNode;
   menu?: SyntheticsAppHeaderMenuOptions;
   description?: AppHeaderDescription;
@@ -80,6 +83,7 @@ export function SyntheticsPage({
         title={title}
         tabs={tabs}
         back={back}
+        badges={badges}
         menu={headerMenu}
         description={description}
         spacing="standard"

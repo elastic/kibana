@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MonitorSelector } from './monitor_selector/monitor_selector';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import {
   isHeartbeatSyntheticsMonitor,
@@ -18,6 +17,16 @@ import { SyntheticsHeartbeatBadge } from '../common/components/synthetics_heartb
 
 export const MonitorDetailsPageTitle = ({ hideName = false }: { hideName?: boolean } = {}) => {
   const { monitor } = useSelectedMonitor();
+  const showRemote = isRemoteSyntheticsMonitor(monitor);
+  const showHeartbeat = isHeartbeatSyntheticsMonitor(monitor);
+
+  if (hideName && !showRemote && !showHeartbeat) {
+    return (
+      <span data-test-subj="monitorNameTitle" hidden>
+        {monitor?.name}
+      </span>
+    );
+  }
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -40,9 +49,6 @@ export const MonitorDetailsPageTitle = ({ hideName = false }: { hideName?: boole
           <SyntheticsHeartbeatBadge origin={monitor.origin} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        <MonitorSelector />
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
