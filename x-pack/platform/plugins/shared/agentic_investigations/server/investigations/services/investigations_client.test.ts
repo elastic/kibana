@@ -18,7 +18,6 @@ const setup = (privileges: Partial<InvestigationsPrivilegesChecker> = {}) => {
   const queryService = {
     get: jest.fn().mockResolvedValue({ id: 'conv-1' }),
     list: jest.fn().mockResolvedValue({ results: [] }),
-    severityCounts: jest.fn().mockResolvedValue({}),
     findOpenBySubjects: jest.fn().mockResolvedValue([]),
   };
   const deleteAllInSpace = jest.fn().mockResolvedValue({
@@ -72,13 +71,11 @@ describe('createInvestigationsClient', () => {
 
     await expect(client.get('conv-1')).rejects.toBeInstanceOf(InvestigationsForbiddenError);
     await expect(client.list()).rejects.toBeInstanceOf(InvestigationsForbiddenError);
-    await expect(client.severityCounts()).rejects.toBeInstanceOf(InvestigationsForbiddenError);
     await expect(client.findOpenBySubjects([{ type: 'alert', id: 'a' }])).rejects.toBeInstanceOf(
       InvestigationsForbiddenError
     );
     expect(queryService.get).not.toHaveBeenCalled();
     expect(queryService.list).not.toHaveBeenCalled();
-    expect(queryService.severityCounts).not.toHaveBeenCalled();
     expect(queryService.findOpenBySubjects).not.toHaveBeenCalled();
   });
 

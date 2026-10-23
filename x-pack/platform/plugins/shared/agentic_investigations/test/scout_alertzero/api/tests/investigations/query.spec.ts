@@ -13,13 +13,15 @@ import {
   INTERNAL_HEADERS,
   INVESTIGATION_BY_ID_PATH,
   INVESTIGATIONS_PATH,
-  INVESTIGATIONS_SEVERITY_COUNTS_PATH,
   PUBLIC_HEADERS,
   cleanupSubjects,
   deleteConversations,
   expectCreated,
+  getSectionCounts,
+  sectionCountsOf,
   seedInvestigation,
   seedSubject,
+  type SectionCountsBody,
 } from '../../fixtures';
 
 interface InvestigationSummaryBody {
@@ -310,14 +312,18 @@ apiTest.describe(
       expect((response.body as ListBody).results.map(({ id }) => id)).not.toContain(escalationId);
     });
 
-    apiTest('counts the filtered investigations per severity', async ({ apiClient }) => {
-      const response = await apiClient.get(`${INVESTIGATIONS_SEVERITY_COUNTS_PATH}?query=${RUN}`, {
-        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
+    apiTest('counts the investigations the query matches per group', async ({ apiClient }) => {
+      const response = await getSectionCounts(apiClient, cookieHeader, { query: RUN });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ low: 1, medium: 0, high: 1, critical: 1 });
+      expect(sectionCountsOf(response.body as SectionCountsBody, 'matching')).toStrictEqual({
+        critical: 0,
+        high: 1,
+        medium: 0,
+        low: 1,
+        none: 0,
+        closed: 1,
+      });
     });
 
     apiTest('reads the requested ids', async ({ apiClient }) => {

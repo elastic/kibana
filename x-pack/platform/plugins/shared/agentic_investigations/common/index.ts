@@ -152,7 +152,6 @@ export {
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
   INVESTIGATIONS_SECTION_COUNTS_URL,
-  INVESTIGATIONS_SEVERITY_COUNTS_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
@@ -180,7 +179,6 @@ export type {
   InvestigationSectionCounts,
   InvestigationSectionCountsQuery,
   InvestigationSeverity,
-  InvestigationSeverityCounts,
   InvestigationSeverityFilterValue,
   InvestigationsSortField,
   InvestigationSubjectResponse,

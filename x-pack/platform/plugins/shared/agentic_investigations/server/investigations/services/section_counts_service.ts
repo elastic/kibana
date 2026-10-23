@@ -82,8 +82,8 @@ const isMissingIndex = (error: unknown): boolean => {
 
 /**
  * Counts the investigations of each home page group in one ES|QL query: open ones per severity,
- * and closed ones, each with and without the text query. Unlike the severity counts, nothing is
- * read into memory, so there is no candidate cap.
+ * and closed ones, each with and without the text query. Nothing is read into memory, so unlike
+ * the list there is no candidate cap.
  */
 export class InvestigationSectionCountsService {
   constructor(private readonly deps: InvestigationSectionCountsServiceDeps) {}

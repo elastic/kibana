@@ -15,7 +15,6 @@ import {
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
   INVESTIGATIONS_SECTION_COUNTS_URL,
-  INVESTIGATIONS_SEVERITY_COUNTS_URL,
 } from '../../../common/investigations/constants';
 import { WrongTemplateError } from '../../assignments/assignments_service';
 import type { AssignmentsService } from '../../assignments/assignments_service';
@@ -287,20 +286,14 @@ describe('investigation query routes', () => {
       find('get', INVESTIGATIONS_INTERNAL_URL).config.security?.authz?.requiredPrivileges
     ).toEqual(READ_AUTHZ);
     expect(
-      find('get', INVESTIGATIONS_SEVERITY_COUNTS_URL).config.security?.authz?.requiredPrivileges
-    ).toEqual(READ_AUTHZ);
-    expect(
       find('get', INVESTIGATIONS_SECTION_COUNTS_URL).config.security?.authz?.requiredPrivileges
     ).toEqual(READ_AUTHZ);
   });
 
-  it('registers the severity and section counts before the by-id route', () => {
+  it('registers the section counts before the by-id route', () => {
     const { routes } = register();
     const paths = routes.map(({ config }) => config.path);
 
-    expect(paths.indexOf(INVESTIGATIONS_SEVERITY_COUNTS_URL)).toBeLessThan(
-      paths.indexOf(INVESTIGATION_BY_ID_URL)
-    );
     expect(paths.indexOf(INVESTIGATIONS_SECTION_COUNTS_URL)).toBeLessThan(
       paths.indexOf(INVESTIGATION_BY_ID_URL)
     );
@@ -355,10 +348,9 @@ describe('investigation query routes', () => {
     }
   });
 
-  it('passes the validated list query and the severity count filters to the service', async () => {
+  it('passes the validated list query to the service', async () => {
     const list = jest.fn().mockResolvedValue({ results: [] });
-    const severityCounts = jest.fn().mockResolvedValue({});
-    const { find } = register({ queryService: { list, severityCounts } });
+    const { find } = register({ queryService: { list } });
     const query = { status: ['open'], page: 1, per_page: 20 };
 
     await find('get', INVESTIGATIONS_INTERNAL_URL).handler(
@@ -366,14 +358,8 @@ describe('investigation query routes', () => {
       httpServerMock.createKibanaRequest({ query }),
       httpServerMock.createResponseFactory()
     );
-    await find('get', INVESTIGATIONS_SEVERITY_COUNTS_URL).handler(
-      {},
-      httpServerMock.createKibanaRequest({ query: { severity: ['high'] } }),
-      httpServerMock.createResponseFactory()
-    );
 
     expect(list).toHaveBeenCalledWith(expect.anything(), query);
-    expect(severityCounts).toHaveBeenCalledWith(expect.anything(), { severity: ['high'] });
   });
 
   it('maps an invalid read to a 400', async () => {

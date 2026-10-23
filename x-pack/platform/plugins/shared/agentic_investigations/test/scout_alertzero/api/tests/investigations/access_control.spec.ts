@@ -15,10 +15,13 @@ import {
   INVESTIGATIONS_PATH,
   INVESTIGATIONS_PRIVILEGES_PATH,
   INVESTIGATIONS_READ_ROLE,
-  INVESTIGATIONS_SEVERITY_COUNTS_PATH,
+  INVESTIGATIONS_SECTION_COUNTS_PATH,
   NO_INVESTIGATIONS_ROLE,
   deleteConversations,
+  getSectionCounts,
+  sectionCountsOf,
   seedInvestigation,
+  type SectionCountsBody,
 } from '../../fixtures';
 
 // The `_privileges` response shape; spelled out because the Scout project cannot import plugin code.
@@ -68,7 +71,7 @@ apiTest.describe(
         for (const path of [
           INVESTIGATION_BY_ID_PATH(investigationId),
           INVESTIGATIONS_PATH,
-          INVESTIGATIONS_SEVERITY_COUNTS_PATH,
+          INVESTIGATIONS_SECTION_COUNTS_PATH,
         ]) {
           const response = await apiClient.get(path, { headers, responseType: 'json' });
           expect(response).toHaveStatusCode(403);
@@ -101,12 +104,16 @@ apiTest.describe(
           investigationId,
         ]);
 
-        const counts = await apiClient.get(`${INVESTIGATIONS_SEVERITY_COUNTS_PATH}?query=${RUN}`, {
-          headers,
-          responseType: 'json',
-        });
+        const counts = await getSectionCounts(apiClient, cookieHeader, { query: RUN });
         expect(counts).toHaveStatusCode(200);
-        expect(counts.body).toStrictEqual({ low: 0, medium: 1, high: 0, critical: 0 });
+        expect(sectionCountsOf(counts.body as SectionCountsBody, 'matching')).toStrictEqual({
+          critical: 0,
+          high: 0,
+          medium: 1,
+          low: 0,
+          none: 0,
+          closed: 0,
+        });
       }
     );
 
@@ -134,11 +141,13 @@ apiTest.describe(
           investigationId,
         ]);
 
-        const counts = await apiClient.get(`${INVESTIGATIONS_SEVERITY_COUNTS_PATH}?query=${RUN}`, {
-          headers,
-          responseType: 'json',
+        // The counts copy Agent Builder's read filter: the private high one is not counted.
+        const counts = await getSectionCounts(apiClient, cookieHeader, { query: RUN });
+        expect(counts).toHaveStatusCode(200);
+        expect(sectionCountsOf(counts.body as SectionCountsBody, 'matching')).toMatchObject({
+          medium: 1,
+          high: 0,
         });
-        expect(counts.body).toStrictEqual({ low: 0, medium: 1, high: 0, critical: 0 });
 
         const get = await apiClient.get(INVESTIGATION_BY_ID_PATH(privateInvestigationId), {
           headers,
@@ -154,6 +163,11 @@ apiTest.describe(
         expect(owner.body.results.map(({ id }: { id: string }) => id)).toStrictEqual([
           privateInvestigationId,
         ]);
+        const ownerCounts = await getSectionCounts(apiClient, adminCookieHeader, { query: RUN });
+        expect(sectionCountsOf(ownerCounts.body as SectionCountsBody, 'matching')).toMatchObject({
+          medium: 1,
+          high: 1,
+        });
       }
     );
 

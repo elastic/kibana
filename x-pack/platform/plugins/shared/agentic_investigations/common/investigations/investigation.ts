@@ -56,7 +56,7 @@ export const investigationIdSchema = z.string().min(1).max(MAX_ID_LENGTH);
 
 export const investigationIdParamsSchema = z.object({ id: investigationIdSchema });
 
-/** Filters shared by the list and the severity counts. All of them are ANDed. */
+/** The list's filters. All of them are ANDed. */
 export const investigationFiltersSchema = z.object({
   /** Investigation (conversation) ids, for reading a known set such as the cards on screen. */
   id: multiValued(investigationIdSchema, MAX_INVESTIGATION_ID_FILTER_VALUES),
@@ -205,9 +205,6 @@ export interface ListInvestigationsResponse {
   /** `total` counts at most {@link MAX_INVESTIGATION_CANDIDATES} investigations. */
   pagination: { total: number; page: number; per_page: number };
 }
-
-/** Filtered investigations per severity. Investigations without a severity are not counted. */
-export type InvestigationSeverityCounts = Record<InvestigationSeverity, number>;
 
 /** Investigations in a group: all of them, and the ones the text query matches. */
 export interface InvestigationSectionCount {
