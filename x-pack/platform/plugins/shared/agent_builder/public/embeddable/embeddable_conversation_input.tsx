@@ -59,7 +59,8 @@ const SubmitInterceptor: React.FC<Pick<PublicEmbeddableConversationInputProps, '
     [attachments, targetAgentId, navigateToAgentBuilderUrl, onSubmit]
   );
 
-  return <ConversationInput onSubmitOverride={handleSubmit} />;
+  // The host page owns focus: this input can mount long after the page is interactive.
+  return <ConversationInput onSubmitOverride={handleSubmit} autoFocus={false} />;
 };
 
 export const EmbeddableConversationInputInternal = forwardRef<

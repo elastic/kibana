@@ -213,6 +213,12 @@ interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
   onSubmitOverride?: (message: string) => void;
+  /**
+   * Whether to move focus into the message editor once it is ready. Defaults to `true` for the
+   * conversation view, where typing is why the user is there. Hosts that embed the input next to
+   * their own content should opt out, so it does not take focus away from the page.
+   */
+  autoFocus?: boolean;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -252,6 +258,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
   onSubmitOverride,
+  autoFocus = true,
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
@@ -442,7 +449,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
 
   // Skip auto-focus while a HITL prompt is open, it should own focus instead
   useEffect(() => {
-    if (isAwaitingPrompt || isConversationReadOnly) return;
+    if (!autoFocus || isAwaitingPrompt || isConversationReadOnly) return;
     const timeoutId = setTimeout(() => {
       messageEditorController.focus();
     }, 200);
@@ -450,7 +457,13 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [conversationId, messageEditorController, isAwaitingPrompt, isConversationReadOnly]);
+  }, [
+    autoFocus,
+    conversationId,
+    messageEditorController,
+    isAwaitingPrompt,
+    isConversationReadOnly,
+  ]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
