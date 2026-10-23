@@ -30,30 +30,38 @@ globalSetupHook(
     // before the first spec runs instead of racing the propagation window.
     log.debug('[setup] Waiting for the composite SLO feature flag to propagate...');
     let enabledSince: number | undefined;
-    let lastStatus: number | undefined;
+    let lastOutcome = 'no response';
     try {
       await pollUntilTrue(
         async () => {
-          const { status } = await kbnClient.request({
-            path: COMPOSITE_SLO_PATH,
-            method: 'GET',
-            headers: { 'x-elastic-internal-origin': 'kibana' },
-            ignoreErrors: [404],
-          });
-          lastStatus = status;
-          if (status !== 200) {
+          try {
+            const { status } = await kbnClient.request({
+              path: COMPOSITE_SLO_PATH,
+              method: 'GET',
+              headers: { 'x-elastic-internal-origin': 'kibana' },
+              ignoreErrors: [404],
+            });
+            lastOutcome = `status ${status}`;
+            if (status !== 200) {
+              enabledSince = undefined;
+              return false;
+            }
+            enabledSince = enabledSince ?? Date.now();
+            return Date.now() - enabledSince >= PROPAGATION_STABLE_WINDOW_MS;
+          } catch (error) {
+            // A warming-up deployment can answer with a transient error; keep polling rather than
+            // failing every spec in the run, and report it if the gate never converges.
+            lastOutcome = `error: ${(error as Error).message}`;
             enabledSince = undefined;
             return false;
           }
-          enabledSince = enabledSince ?? Date.now();
-          return Date.now() - enabledSince >= PROPAGATION_STABLE_WINDOW_MS;
         },
         { timeoutMs: PROPAGATION_TIMEOUT_MS, intervalMs: PROPAGATION_POLL_INTERVAL_MS }
       );
     } catch {
       throw new Error(
         `Composite SLO routes did not stay enabled for ${PROPAGATION_STABLE_WINDOW_MS}ms within ` +
-          `${PROPAGATION_TIMEOUT_MS}ms of setting slo.compositeSloEnabled. Last status: ${lastStatus}`
+          `${PROPAGATION_TIMEOUT_MS}ms of setting slo.compositeSloEnabled. Last outcome: ${lastOutcome}`
       );
     }
     log.debug('[setup] Composite SLO feature flag confirmed');
