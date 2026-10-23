@@ -14,6 +14,12 @@ export const ALERT_OVERLAP_MIN = 2;
 /** A fingerprint matches only until this long after its newest alert. */
 export const FINGERPRINT_TTL_MS = 24 * 60 * 60 * 1000;
 /**
+ * How long a fingerprint may point at an Investigation that does not exist yet.
+ * The review is dispatched after the fingerprint is written, so a competing run
+ * can observe that gap. Older than this, the Investigation was never created.
+ */
+export const INVESTIGATION_PENDING_MS = 15 * 60 * 1000;
+/**
  * A later phase or a repeat of the same host and user joins the chain while the
  * gap since the previous alerts is inside the fingerprint lifetime.
  */
@@ -54,6 +60,8 @@ export interface StoredFingerprint extends AttackMatchFields {
   investigationId: string;
   /** Uncapped count. `alertIds` itself stops at `STORED_ALERT_ID_CAP`. */
   alertCount?: number;
+  /** When the fingerprint document was written. Absent on a record read without `@timestamp`. */
+  writtenAt?: string;
   expiresAt?: string;
   seqNo?: number;
   primaryTerm?: number;
@@ -149,7 +157,16 @@ export const entityMatch = (
   const leftPairs = left.entityPairs ?? [];
   const rightPairs = right.entityPairs ?? [];
   if (leftPairs.length > 0 && rightPairs.length > 0) {
-    return timeClose(left, right) && intersectionSize(leftPairs, rightPairs) >= 1;
+    const sharePair = timeClose(left, right) && intersectionSize(leftPairs, rightPairs) >= 1;
+    if (!sharePair) {
+      return false;
+    }
+    // A local `Administrator@host` and a directory `Administrator` build the same
+    // raw pair. The normalized user ids still differ, so both are required.
+    if (left.userEntityIds.length > 0 && right.userEntityIds.length > 0) {
+      return intersectionSize(left.userEntityIds, right.userEntityIds) >= 1;
+    }
+    return true;
   }
   const shareHost = intersectionSize(left.hostEntityIds, right.hostEntityIds) >= 1;
   const shareUser = intersectionSize(left.userEntityIds, right.userEntityIds) >= 1;
@@ -329,6 +346,22 @@ export const journalAlertsRetired = (investigation: InvestigationMeta | undefine
   (investigation?.verdict ?? '').includes(HANDED_OFF_VERDICT);
 
 /**
+ * True while the review that wrote this fingerprint may not have created the
+ * Investigation yet. A missing Investigation older than that is not in flight.
+ */
+export const investigationStillPending = (stored: StoredFingerprint, now: Date): boolean => {
+  if (stored.writtenAt === undefined) {
+    return false;
+  }
+  const written = Date.parse(stored.writtenAt);
+  if (Number.isNaN(written)) {
+    return false;
+  }
+  const age = Math.abs(now.getTime() - written);
+  return age <= INVESTIGATION_PENDING_MS;
+};
+
+/**
  * `review` opens a new Investigation and runs FP/TP. `review_linked` does that and
  * journals the closed false-positive it did not join. `attach` skips FP/TP.
  */
@@ -338,17 +371,30 @@ export const disposition = (
   investigation: InvestigationMeta | undefined,
   // Members of the same-run group. A match on any member stands: the union of their
   // alerts can fall under the overlap ratio even though one phase already matched.
-  group: readonly AttackMatchFields[] = [canonical]
+  group: readonly AttackMatchFields[] = [canonical],
+  now: Date = new Date()
 ): Disposition => {
   const freshInvestigationId = investigationIdFromAttackId(canonical.attackId);
   const matched = stored !== undefined && group.some((member) => sameAttack(member, stored, false));
-  // A missing Investigation is not a match to attach to. The fingerprint can outlive
-  // the review that was supposed to create it, and attaching would open an Investigation
-  // that never runs FP/TP.
-  if (!matched || stored === undefined || investigation === undefined) {
+  const review = {
+    kind: 'review' as const,
+    investigationId: freshInvestigationId,
+    relatedInvestigationId: '',
+    tagCorrelatedAlerts: false,
+    journalAlertsRetired: false,
+  };
+  // A missing Investigation is not a match to attach to, unless this fingerprint
+  // was just written and its review has not created the conversation yet.
+  if (!matched || stored === undefined) {
+    return review;
+  }
+  if (investigation === undefined) {
+    if (!investigationStillPending(stored, now)) {
+      return review;
+    }
     return {
-      kind: 'review',
-      investigationId: freshInvestigationId,
+      kind: 'attach',
+      investigationId: stored.investigationId,
       relatedInvestigationId: '',
       tagCorrelatedAlerts: false,
       journalAlertsRetired: false,

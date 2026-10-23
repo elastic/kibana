@@ -175,6 +175,25 @@ describe('entityMatch', () => {
     ).toBe(true);
   });
 
+  it('returns false when a local user and a directory user share only the raw name', () => {
+    expect(
+      entityMatch(
+        attack({
+          hostEntityIds: ['SRVWIN01'],
+          userEntityIds: ['Administrator@SRVWIN01'],
+          entityPairs: ['Administrator@SRVWIN01'],
+        }),
+        attack({
+          hostEntityIds: ['SRVWIN01'],
+          userEntityIds: ['Administrator'],
+          entityPairs: ['Administrator@SRVWIN01'],
+          alertIds: ['c1', 'c2'],
+        }),
+        false
+      )
+    ).toBe(false);
+  });
+
   it('returns false when the shared host and user were not seen together', () => {
     expect(
       entityMatch(
@@ -470,6 +489,34 @@ describe('disposition', () => {
 
     expect(decision.kind).toBe('review');
     expect(decision.investigationId).toBe(investigationIdFromAttackId(canonical.attackId));
+  });
+
+  it('attaches when the unread Investigation was written moments ago', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const decision = disposition(
+      canonical,
+      stored({ writtenAt: now.toISOString() }),
+      undefined,
+      [canonical],
+      now
+    );
+
+    expect(decision.kind).toBe('attach');
+    expect(decision.investigationId).toBe('11111111-1111-8111-8111-111111111111');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+  });
+
+  it('returns a new review when the unread Investigation is no longer pending', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const decision = disposition(
+      canonical,
+      stored({ writtenAt: '2026-10-21T10:00:00.000Z' }),
+      undefined,
+      [canonical],
+      now
+    );
+
+    expect(decision.kind).toBe('review');
   });
 
   it('returns attach and tags an open in-analysis investigation', () => {

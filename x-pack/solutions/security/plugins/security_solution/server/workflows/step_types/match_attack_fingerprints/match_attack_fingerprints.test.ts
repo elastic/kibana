@@ -649,6 +649,105 @@ describe('matchAttackFingerprints', () => {
     expect(output.reviews).toHaveLength(1);
   });
 
+  it('attaches when the winning run has not created the Investigation yet', async () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const index = jest.fn().mockRejectedValue({ statusCode: 409, message: 'conflict' });
+    const { esClient, contextManager } = createHarness({
+      index,
+      get: jest.fn().mockResolvedValue({
+        _id: 'stored-fp',
+        _source: {
+          id: 'stored-fp',
+          '@timestamp': now.toISOString(),
+          attributes: {
+            investigation_id: '11111111-1111-8111-8111-111111111111',
+            alert_ids: ['old-1', 'old-2'],
+            host_entity_ids: ['host-1'],
+            user_entity_ids: ['user-1'],
+            mitre_attack_tactics: ['TA0008'],
+            first_alert_at: '2026-10-21T10:00:00.000Z',
+            last_alert_at: '2026-10-21T10:30:00.000Z',
+          },
+        },
+      }),
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({ status: 404, headers: {}, body: {}, message: 'Not Found' })
+    );
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['new-1', 'new-2'])],
+      contextManager,
+      esClient,
+      logger,
+      now,
+      spaceId: 'default',
+    });
+
+    expect(output.reviews).toEqual([]);
+    expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
+    expect(index).toHaveBeenCalledTimes(1);
+  });
+
+  it('saves the host and user pairs read from the alerts', async () => {
+    const { esClient, contextManager, index } = createHarness({
+      alertHits: [
+        { fields: { 'host.name': ['repro-host-8a'], 'user.name': ['root'] } },
+        { fields: { 'host.name': ['repro-host-8b'], 'user.name': ['deploy'] } },
+      ],
+    });
+
+    await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['repro-8-1', 'repro-8-2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          attributes: expect.objectContaining({
+            entity_pairs: ['deploy@repro-host-8b', 'root@repro-host-8a'],
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('merges a new host and user pair into the saved fingerprint', async () => {
+    const { esClient, contextManager, update } = createHarness({
+      hits: [fingerprintHit({ entity_pairs: ['user-1@host-1'] })],
+      alertHits: [
+        { fields: { 'host.name': ['host-1'], 'user.name': ['user-1'] } },
+        { fields: { 'host.name': ['host-1'], 'user.name': ['user-2'] } },
+      ],
+    });
+
+    await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['n1', 'n2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          attributes: expect.objectContaining({
+            entity_pairs: ['user-1@host-1', 'user-2@host-1'],
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   it('keeps the stored alert count when the saved id list is capped', async () => {
     const { esClient, contextManager, update } = createHarness({
       hits: [fingerprintHit({ alert_ids: ['a1', 'a2'], alert_count: 150 })],

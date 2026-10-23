@@ -26,6 +26,7 @@ import {
   disposition,
   fingerprintId,
   hostUserPair,
+  investigationStillPending,
   journalAlertsRetired,
   sameAttack,
   tagCorrelatedAlerts,
@@ -316,6 +317,7 @@ const toStored = (hit: {
     lastAlertAt:
       typeof attributes.last_alert_at === 'string' ? attributes.last_alert_at : undefined,
     expiresAt: typeof source.expires_at === 'string' ? source.expires_at : undefined,
+    writtenAt: typeof source['@timestamp'] === 'string' ? source['@timestamp'] : undefined,
     alertCount: typeof attributes.alert_count === 'number' ? attributes.alert_count : undefined,
     seqNo: hit._seq_no,
     primaryTerm: hit._primary_term,
@@ -498,20 +500,22 @@ const createFingerprint = async (
 /**
  * A create conflict is the race for one fingerprint only when this run was about to
  * open a new review and the stored record still matches across runs. A closed false
- * positive with new alerts, a host-only repeat, and a missing Investigation keep the
- * decision `disposition` already made.
+ * positive with new alerts and a host-only repeat keep the decision `disposition`
+ * already made. A missing Investigation is the same race while the fingerprint is
+ * still new, and an orphan once that window has passed.
  */
 const canAdoptConflict = (
   decision: Disposition,
   stored: StoredFingerprint | undefined,
   investigation: InvestigationMeta | undefined,
-  group: readonly AttackSignals[]
+  group: readonly AttackSignals[],
+  now: Date
 ): stored is StoredFingerprint =>
   decision.kind === 'review' &&
   stored !== undefined &&
-  investigation !== undefined &&
+  (investigation !== undefined || investigationStillPending(stored, now)) &&
   !(
-    investigation.status === 'closed' &&
+    investigation?.status === 'closed' &&
     investigation.closeReason === 'false_positive' &&
     !group.some((member) => alertOverlap(member.alertIds, stored.alertIds))
   ) &&
@@ -809,7 +813,8 @@ export const matchAttackFingerprints = async ({
       span,
       match,
       match === undefined ? undefined : investigations.get(match.investigationId),
-      group
+      group,
+      now
     );
 
     if (decision.kind === 'attach' && match !== undefined) {
@@ -836,7 +841,7 @@ export const matchAttackFingerprints = async ({
           conflicting === undefined
             ? undefined
             : await readInvestigation(contextManager, conflicting.investigationId, logger);
-        if (canAdoptConflict(decision, conflicting, meta, group)) {
+        if (canAdoptConflict(decision, conflicting, meta, group, now)) {
           decision = {
             kind: 'attach',
             investigationId: conflicting.investigationId,
