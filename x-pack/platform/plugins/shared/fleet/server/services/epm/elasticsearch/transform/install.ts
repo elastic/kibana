@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setTimeout } from 'timers/promises';
+
 import type {
   ElasticsearchClient,
   Logger,
@@ -888,6 +890,68 @@ interface TransformEsAssetReference extends EsAssetReference {
   version?: string;
 }
 
+const MAX_PUT_TRANSFORM_CONFLICT_RETRIES = 5;
+const PUT_TRANSFORM_CONFLICT_RETRY_DELAY_MS = 500;
+
+const isVersionConflict = (err: unknown) => {
+  if (!(err instanceof errors.ResponseError)) {
+    return false;
+  }
+  const esError = err.body?.error;
+
+  return [
+    esError?.type,
+    esError?.caused_by?.type,
+    ...(esError?.root_cause ?? []).map((cause: { type?: string }) => cause?.type),
+  ].some((type?: string) => type?.includes('version_conflict_engine_exception'));
+};
+
+/**
+ * Creates the transform, re-issuing the idempotent `putTransform` while Elasticsearch still reports
+ * a version conflict on the transform's internal state document, which it does until it finishes
+ * removing the same-named transform the install deleted moments earlier.
+ */
+async function putTransformUntilCreated({
+  esClient,
+  logger,
+  transform,
+  secondaryAuth,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  transform: TransformInstallation;
+  secondaryAuth?: SecondaryAuthorizationHeader;
+}) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await retryTransientEsErrors(
+        () =>
+          // defer_validation: true on put if the source index is not available
+          // but will check if API Key has sufficient permission
+          esClient.transform.putTransform(
+            {
+              transform_id: transform.installationName,
+              defer_validation: true,
+              ...transform.content,
+            },
+            // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
+            secondaryAuth ? { ...secondaryAuth } : {}
+          ),
+        { logger }
+      );
+    } catch (err) {
+      if (attempt >= MAX_PUT_TRANSFORM_CONFLICT_RETRIES || !isVersionConflict(err)) {
+        throw err;
+      }
+
+      logger.debug(
+        `Transform ${transform.installationName} was not created because Elasticsearch has not removed its previous state yet, retrying`
+      );
+      await setTimeout(PUT_TRANSFORM_CONFLICT_RETRY_DELAY_MS * 2 ** attempt);
+    }
+  }
+}
+
 /**
  * Create transform and optionally start transform
  * Note that we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
@@ -912,21 +976,7 @@ async function handleTransformInstall({
 
   let isUnauthorizedAPIKey = false;
   try {
-    await retryTransientEsErrors(
-      () =>
-        // defer_validation: true on put if the source index is not available
-        // but will check if API Key has sufficient permission
-        esClient.transform.putTransform(
-          {
-            transform_id: transform.installationName,
-            defer_validation: true,
-            ...transform.content,
-          },
-          // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
-          { ignore: [409], ...(secondaryAuth ? { ...secondaryAuth } : {}) }
-        ),
-      { logger }
-    );
+    await putTransformUntilCreated({ esClient, logger, transform, secondaryAuth });
     logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {
     const isResponseError = err instanceof errors.ResponseError;
@@ -936,9 +986,7 @@ async function handleTransformInstall({
       err?.body?.error?.reason?.includes('unauthorized for API key');
 
     const isAlreadyExistError =
-      isResponseError &&
-      (err?.body?.error?.type === 'resource_already_exists_exception' ||
-        err?.body?.error?.caused_by?.type?.includes('version_conflict_engine_exception'));
+      isResponseError && err?.body?.error?.type === 'resource_already_exists_exception';
 
     // swallow the error if the transform already exists or if API key has insufficient permissions
     if (!isUnauthorizedAPIKey && !isAlreadyExistError) {

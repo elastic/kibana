@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -424,9 +425,7 @@ _meta:
     // Destination index is not created before transform is created
     expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([
-      [expectedData.TRANSFORM, { ignore: [409] }],
-    ]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM, {}]]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -871,9 +870,7 @@ _meta:
     // Destination index is not created before transform is created
     expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([
-      [expectedData.TRANSFORM, { ignore: [409] }],
-    ]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM, {}]]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -1138,9 +1135,7 @@ _meta:
     // Destination index is not created before transform is created
     expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([
-      [expectedData.TRANSFORM, { ignore: [409] }],
-    ]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM, {}]]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -1287,11 +1282,98 @@ _meta:
       request: mockRequest,
     });
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([
-      [expectedData.TRANSFORM, { ignore: [409] }],
-    ]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM, {}]]);
     // Does not start transform because start is set to false in manifest.yml
     expect(esClient.transform.startTransform.mock.calls).toEqual([]);
+  });
+
+  describe('when Elasticsearch has not removed the deleted transform state yet', () => {
+    const versionConflictError = () =>
+      new errors.ResponseError({
+        statusCode: 409,
+        body: {
+          error: {
+            type: 'version_conflict_engine_exception',
+            root_cause: [
+              {
+                type: 'version_conflict_engine_exception',
+                reason:
+                  '[data_frame_transform_state_and_stats-logs-endpoint.metadata_current-default-0.2.0]: version conflict, document already exists (current version [1])',
+              },
+            ],
+          },
+        },
+      } as any);
+
+    const installOneTransform = async () => {
+      const sourceData = getYamlTestData(false, '0.2.0');
+
+      const previousInstallation = { installed_es: [] } as unknown as Installation;
+      const currentInstallation = {
+        installed_es: [
+          {
+            id: `logs-endpoint.metadata_current-default-0.2.0`,
+            type: ElasticsearchAssetType.transform,
+          },
+        ],
+      } as unknown as Installation;
+
+      (getInstallation as jest.MockedFunction<typeof getInstallation>)
+        .mockReturnValueOnce(Promise.resolve(previousInstallation))
+        .mockReturnValueOnce(Promise.resolve(currentInstallation));
+      currentAttributes = { installed_es: [] };
+
+      return installTransforms({
+        packageInstallContext: {
+          packageInfo: {
+            name: 'endpoint',
+            version: '0.16.0-dev.0',
+          },
+          paths: [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+          ],
+          archiveIterator: createArchiveIteratorFromMap(
+            new Map([
+              [
+                'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+                sourceData.MANIFEST,
+              ],
+              [
+                'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+                sourceData.TRANSFORM,
+              ],
+            ]) as any
+          ),
+        } as unknown as PackageInstallContext,
+        esClient,
+        savedObjectsClient,
+        logger: loggerMock.create(),
+        esReferences: previousInstallation.installed_es,
+        request: mockRequest,
+      });
+    };
+
+    test('re-issues putTransform until the transform is created', async () => {
+      esClient.transform.putTransform.mockImplementationOnce(() => {
+        throw versionConflictError();
+      });
+
+      await expect(installOneTransform()).resolves.not.toThrow();
+      expect(esClient.transform.putTransform).toHaveBeenCalledTimes(2);
+    });
+
+    test('does not re-issue putTransform for a transform that already exists', async () => {
+      esClient.transform.putTransform.mockImplementationOnce(() => {
+        throw new errors.ResponseError({
+          statusCode: 409,
+          body: { error: { type: 'resource_already_exists_exception' } },
+        } as any);
+      });
+
+      await expect(installOneTransform()).resolves.not.toThrow();
+      expect(esClient.transform.putTransform).toHaveBeenCalledTimes(1);
+    });
   });
 
   test('can downgrade to older version when force: true', async () => {
@@ -1402,9 +1484,7 @@ _meta:
         { ignore: [404] },
       ],
     ]);
-    expect(esClient.transform.putTransform.mock.calls).toEqual([
-      [expectedData.TRANSFORM, { ignore: [409] }],
-    ]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM, {}]]);
   });
 
   test('retain old transforms and do nothing if fleet_transform_version is the same', async () => {
