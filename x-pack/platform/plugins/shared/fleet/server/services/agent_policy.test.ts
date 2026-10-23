@@ -14,6 +14,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { createSavedObjectClientMock } from '../mocks';
@@ -74,6 +75,7 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
   mock.get.mockImplementation(async (type: string, id: string) => {
     return {
       id,
+      version: 'WzEsMV0=',
       ...mockPolicy,
     };
   });
@@ -82,6 +84,7 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
       saved_objects: options.map(({ id }) => {
         return {
           id,
+          version: 'WzEsMV0=',
           ...mockPolicy,
         };
       }),
@@ -1277,7 +1280,8 @@ describe('Agent policy', () => {
             { name: 'apache', title: 'Apache', version_condition: '>=9.3.0' },
             { name: 'nginx', title: 'Nginx', version_condition: '>=8.0.0' },
           ],
-        })
+        }),
+        expect.objectContaining({ retryOnConflict: 0, version: 'WzEsMV0=' })
       );
     });
 
@@ -1360,7 +1364,8 @@ describe('Agent policy', () => {
           has_agent_version_conditions: false,
           min_agent_version: null,
           package_agent_version_conditions: null,
-        })
+        }),
+        expect.objectContaining({ retryOnConflict: 0 })
       );
     });
 
@@ -1396,6 +1401,33 @@ describe('Agent policy', () => {
       );
       expect(mockedPackagePolicyService.findAllForAgentPolicy).not.toHaveBeenCalled();
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries the revision bump when the agent policy SO update conflicts', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.update
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(
+            AGENT_POLICY_SAVED_OBJECT_TYPE,
+            'agent-policy'
+          )
+        )
+        .mockResolvedValueOnce({} as any);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        asyncDeploy: true,
+      });
+
+      expect(soClient.update).toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({ revision: 2 }),
+        expect.objectContaining({ retryOnConflict: 0, version: 'WzEsMV0=' })
+      );
     });
   });
 
@@ -2412,7 +2444,8 @@ describe('Agent policy', () => {
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         'agent-policy',
-        expect.objectContaining({ has_agent_version_conditions: true })
+        expect.objectContaining({ has_agent_version_conditions: true }),
+        expect.objectContaining({ retryOnConflict: 0 })
       );
     });
 
@@ -2434,7 +2467,8 @@ describe('Agent policy', () => {
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         'agent-policy',
-        expect.objectContaining({ has_agent_version_conditions: false })
+        expect.objectContaining({ has_agent_version_conditions: false }),
+        expect.objectContaining({ retryOnConflict: 0 })
       );
     });
 
@@ -3154,6 +3188,58 @@ describe('Agent policy', () => {
 
       expect(mockedLogger.warn).not.toHaveBeenCalledWith(
         expect.stringContaining('has mismatched revisions after deploy')
+      );
+    });
+
+    it('schedules a follow-up deploy when the agent policy is bumped during deploy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue({
+        id: 'policy123',
+        revision: 2,
+        namespaces: ['default'],
+        inputs: [{ id: 'input-1' }],
+      } as FullAgentPolicy);
+
+      let bulkGetCount = 0;
+      soClient.bulkGet.mockImplementation(async () => {
+        bulkGetCount += 1;
+        return {
+          saved_objects: [
+            {
+              attributes: { revision: bulkGetCount === 1 ? 2 : 3 },
+              id: 'policy123',
+              type: 'mocked',
+              references: [],
+            },
+          ],
+        };
+      });
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        page: 0,
+        per_page: 0,
+        total: 0,
+      });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [{ _source: { policy_id: 'policy123', revision_idx: 2 } }],
+        },
+        aggregations: {
+          policies: { buckets: [{ key: 'policy123', latest_revision: { value: 2 } }] },
+        },
+      } as any);
+
+      await agentPolicyService.deployPolicy(soClient, 'policy123');
+
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledWith(
+        undefined,
+        [expect.objectContaining({ id: 'policy123' })],
+        { coalesce: false }
       );
     });
   });
