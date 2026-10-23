@@ -74,7 +74,7 @@ const fillContextInstructions = ({
       includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
     );
 
-interface InvestigationAgentTypeOptions {
+export interface InvestigationAgentTypeOptions {
   sandboxEnabled: boolean;
   cortexEnabled: boolean;
   memoryEnabled?: boolean;
@@ -127,35 +127,33 @@ const appendCustomContext = async ({
   }
 };
 
+/** Options of the Nightshift agent types that share the investigator's tools and hooks. */
+export type NightshiftAgentTypeOptions = Omit<
+  InvestigationAgentTypeOptions,
+  'decisionTreesEnabled'
+>;
+
 /**
- * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
+ * Memory hooks and the space's custom context. Only the instructions differ between types.
  */
-export const getInvestigationAgentType = ({
+export const buildNightshiftAgentConfiguration = ({
+  instructions: agentInstructions,
   sandboxEnabled,
   cortexEnabled,
   memoryEnabled = false,
-  decisionTreesEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
   getCustomContextInstructions,
   resolveHookWorkflowId,
   logger,
-}: InvestigationAgentTypeOptions): AgentTypeDefinition => {
-  const getBaseConfiguration = ({
-    materializeWorkflowId,
-    optimizeWorkflowId,
-  }: {
-    materializeWorkflowId: string;
-    optimizeWorkflowId: string;
-  }) =>
+}: NightshiftAgentTypeOptions & {
+  instructions: string;
+}): AgentTypeDefinition['baseConfiguration'] => {
+  const configurationFor = ({ materializeWorkflowId, optimizeWorkflowId }: typeof GLOBAL_HOOKS) =>
     ({
-      instructions: fillContextInstructions({
-        includeDecisionTrees: sandboxEnabled && decisionTreesEnabled,
-        includeMemory: sandboxEnabled && memoryEnabled,
-      }),
+      instructions: agentInstructions,
       skill_ids: [],
       tools: [
         {
@@ -186,40 +184,54 @@ export const getInvestigationAgentType = ({
         : {}),
     } satisfies AgentBaseConfiguration);
 
-  return {
-    id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
-    name: INVESTIGATION_AGENT_NAME,
-    description: INVESTIGATION_AGENT_DESCRIPTION,
-    avatar_icon: 'logoElastic',
-    // Static unless something varies by space or request.
-    baseConfiguration:
-      !getCustomContextInstructions && !resolveHookWorkflowId
-        ? getBaseConfiguration(GLOBAL_HOOKS)
-        : async (ctx) => {
-            const [materializeWorkflowId, optimizeWorkflowId] = resolveHookWorkflowId
-              ? await Promise.all([
-                  resolveHookWorkflowId(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID, ctx),
-                  resolveHookWorkflowId(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, ctx),
-                ])
-              : [GLOBAL_HOOKS.materializeWorkflowId, GLOBAL_HOOKS.optimizeWorkflowId];
-            const baseConfiguration = getBaseConfiguration({
-              materializeWorkflowId,
-              optimizeWorkflowId,
-            });
-            return getCustomContextInstructions
-              ? {
-                  ...baseConfiguration,
-                  instructions: await appendCustomContext({
-                    instructions: baseConfiguration.instructions,
-                    ctx,
-                    getCustomContextInstructions,
-                    logger,
-                  }),
-                }
-              : baseConfiguration;
-          },
+  // Static unless something varies by space or request.
+  if (!getCustomContextInstructions && !resolveHookWorkflowId) {
+    return configurationFor(GLOBAL_HOOKS);
+  }
+
+  return async (ctx) => {
+    const [materializeWorkflowId, optimizeWorkflowId] = resolveHookWorkflowId
+      ? await Promise.all([
+          resolveHookWorkflowId(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID, ctx),
+          resolveHookWorkflowId(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, ctx),
+        ])
+      : [GLOBAL_HOOKS.materializeWorkflowId, GLOBAL_HOOKS.optimizeWorkflowId];
+    const baseConfiguration = configurationFor({ materializeWorkflowId, optimizeWorkflowId });
+    return getCustomContextInstructions
+      ? {
+          ...baseConfiguration,
+          instructions: await appendCustomContext({
+            instructions: baseConfiguration.instructions,
+            ctx,
+            getCustomContextInstructions,
+            logger,
+          }),
+        }
+      : baseConfiguration;
   };
 };
+
+/**
+ * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
+ * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
+ * described in `/workspace/elastic.md`.
+ */
+export const getInvestigationAgentType = ({
+  decisionTreesEnabled = false,
+  ...options
+}: InvestigationAgentTypeOptions): AgentTypeDefinition => ({
+  id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+  name: INVESTIGATION_AGENT_NAME,
+  description: INVESTIGATION_AGENT_DESCRIPTION,
+  avatar_icon: 'logoElastic',
+  baseConfiguration: buildNightshiftAgentConfiguration({
+    ...options,
+    instructions: fillContextInstructions({
+      includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
+      includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),
+    }),
+  }),
+});
 
 export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
