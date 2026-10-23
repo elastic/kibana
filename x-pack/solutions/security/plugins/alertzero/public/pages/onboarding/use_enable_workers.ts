@@ -47,18 +47,14 @@ export const useEnableWorkers = (
     // the server response are not sent a PATCH that would return 404.
     const cached = queryClient.getQueryData<ListWorkersResponse>(queryKeys.workers.list());
     if (!cached) {
-      // Cache miss: we cannot safely determine which workers exist server-side.
-      // Bail out rather than blindly PATCHing all IDs and hitting 404s.
       return;
     }
     const visibleIds = new Set(cached.workers.map((w) => w.id));
     const workerById = new Map(cached.workers.map((worker) => [worker.id, worker]));
-    // A retry must not re-send the fan-out for workers the previous press already
-    // committed. The cached list is refetched between presses (invalidated on partial
-    // success), so it is the truth about what is already on: a worker that is
-    // already enabled, and already bound to a service account when turning on, has
-    // nothing left to save. Turning a worker off is always sent: `enabled` alone
-    // does not distinguish "off, user wants it off" from "off, the enable failed".
+    // A retry must not re-send what the previous press already committed: the list is
+    // refetched between presses, so a worker already on — and already bound to an
+    // account, when turning on — has nothing left to save. Turning off is always
+    // sent: `enabled` alone cannot distinguish "wants it off" from "enable failed".
     const idsToUpdate = workerIds.filter(
       (id) =>
         visibleIds.has(id) &&
@@ -159,8 +155,8 @@ export const useEnableWorkers = (
       return;
     }
 
-    // Full success: release the save lock, invalidate the cache, and navigate.
-    // Invalidate first so the Watches page gets fresh state on mount.
+    // Full success: release the save lock and navigate. Invalidate first so the
+    // Watches page gets fresh state on mount.
     queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
     onSavingChange?.(false);
     onSuccess?.();

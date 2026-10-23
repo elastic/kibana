@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file requires acceptance of the Elastic
- * License 2.0. See LICENSE.txt for details.
- */
-
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -123,7 +117,6 @@ describe('useEnableWorkers', () => {
       await firstHook.result.current.handleEnableAndContinue();
     });
 
-    // The failed worker never gets a PATCH on press 1 (its account setup failed).
     const pressOneUrls = patch.mock.calls.map(([url]) => String(url));
     expect(pressOneUrls).not.toContainEqual(expect.stringContaining(failedId));
     expect(patch).toHaveBeenCalledTimes(workerIds.length - 1);
@@ -131,7 +124,6 @@ describe('useEnableWorkers', () => {
     // The refetch between presses reports the landed workers as on with accounts.
     first.queryClient.setQueryData(queryKeys.workers.list(), workersResponse({ ...landed }));
 
-    // Press 2: only the worker that did not land is still worth sending.
     patch.mockClear();
     mockEnsureWorkerServiceAccounts.mockResolvedValue(accounts([failedId]));
     const second = setup({
