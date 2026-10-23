@@ -33,6 +33,8 @@ export type {
   AppHeaderTab,
   AppHeaderTabAction,
   AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
   AppHeaderDescription,
   AppHeaderEditableTitle,
   AppHeaderFavoriteAction,

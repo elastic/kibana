@@ -20,6 +20,7 @@ import type {
   SLO_APP_ID,
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
+  OBLT_DIGITAL_EXPERIENCE_APP_ID,
   OBLT_PROFILING_APP_ID,
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
@@ -42,6 +43,7 @@ type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
 type SloApp = typeof SLO_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
 type ObltUxApp = typeof OBLT_UX_APP_ID;
+type ObltDigitalExperienceApp = typeof OBLT_DIGITAL_EXPERIENCE_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
@@ -64,6 +66,7 @@ export type AppId =
   | SloApp
   | AiAssistantApp
   | ObltUxApp
+  | ObltDigitalExperienceApp
   | ObltProfilingApp
   | InventoryApp
   | StreamsApp
@@ -108,9 +111,9 @@ export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type StreamsLinkId = 'overview';
 
-export type SignificantEventsLinkId = 'sources' | 'events' | 'rules';
+export type SignificantEventsLinkId = 'events' | 'rules';
 
-export type NightshiftLinkId = 'knowledge_indicators';
+export type NightshiftLinkId = 'knowledge_indicators' | 'sources';
 
 export type ObservabilityAlertingLinkId =
   | 'alerts'

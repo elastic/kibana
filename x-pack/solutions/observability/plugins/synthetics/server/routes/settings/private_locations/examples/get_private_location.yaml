@@ -19,3 +19,12 @@ responses:
               namespace: default
   404:
     description: No private location matches the given ID or label.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/synthetics/private_locations/location-id" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/synthetics/private_locations/location-id

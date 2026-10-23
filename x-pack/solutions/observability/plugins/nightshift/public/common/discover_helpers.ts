@@ -6,11 +6,10 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { TimeState } from '@kbn/es-query';
+import type { TimeRange, TimeState } from '@kbn/es-query';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
 import type { Condition } from '@kbn/streamlang';
-import type { TimeRange } from '@kbn/es-query';
 
 export function buildDiscoverParams(esqlQuery: string, timeRange: TimeRange) {
   return {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { QueryFunctionContext } from '@kbn/react-query';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   stateBlocksNewActivity,
   type SignificantEventsMaintenanceStatus,
@@ -18,6 +18,7 @@ import { getActivityBlockTooltip } from '../../common/activity_block_tooltip';
 import { getFormattedError } from '../../common/errors';
 
 const MAINTENANCE_STATUS_QUERY_KEY = ['nightshiftMaintenanceStatus'] as const;
+const MAINTENANCE_MUTATION_KEY = ['nightshiftMaintenance'] as const;
 
 const PAUSE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.settings.maintenance.pauseSuccessToastTitle',
@@ -37,6 +38,19 @@ const RESUME_SUCCESS_TOAST_TITLE = i18n.translate(
 const RESUME_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.settings.maintenance.resumeErrorToastTitle',
   { defaultMessage: 'Failed to resume significant events activity' }
+);
+
+const RESET_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.nightshift.settings.maintenance.resetSuccessToastTitle',
+  { defaultMessage: 'Reset Significant Events data' }
+);
+const RESET_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.nightshift.settings.maintenance.resetErrorToastTitle',
+  { defaultMessage: 'Failed to reset Significant Events data' }
+);
+const RESET_WARNINGS_TOAST_TITLE = i18n.translate(
+  'xpack.nightshift.settings.maintenance.resetWarningsToastTitle',
+  { defaultMessage: 'Reset Significant Events data with warnings' }
 );
 
 const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
@@ -103,20 +117,21 @@ export const useBlocksNewActivity = (): {
   return { blocksActivity, isBlocked, isLoading, isError, status, activityBlockTooltip };
 };
 
-/** Pause and resume actions. Each is a single synchronous API call that returns
- * the resulting summary; both invalidate the shared status query so the UI
- * reflects the new state (and re-enables/disables the guarded toggles). */
+/** Maintenance actions share mutation status and invalidate the persisted status query. */
 export const useSignificantEventsMaintenanceActions = () => {
   const {
     notifications: { toasts },
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
   const queryClient = useQueryClient();
+  const isMutating = useIsMutating({ mutationKey: MAINTENANCE_MUTATION_KEY }) > 0;
 
-  const invalidateStatus = () =>
-    queryClient.invalidateQueries({ queryKey: MAINTENANCE_STATUS_QUERY_KEY });
+  const invalidateStatus = () => {
+    void queryClient.invalidateQueries({ queryKey: MAINTENANCE_STATUS_QUERY_KEY });
+  };
 
   const pauseMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
+    mutationKey: MAINTENANCE_MUTATION_KEY,
     mutationFn: () =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/maintenance/_pause',
@@ -141,6 +156,7 @@ export const useSignificantEventsMaintenanceActions = () => {
   });
 
   const resumeMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
+    mutationKey: MAINTENANCE_MUTATION_KEY,
     mutationFn: () =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/maintenance/_resume',
@@ -166,10 +182,56 @@ export const useSignificantEventsMaintenanceActions = () => {
     onSettled: invalidateStatus,
   });
 
+  const resetMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
+    mutationKey: MAINTENANCE_MUTATION_KEY,
+    mutationFn: () =>
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/maintenance/_reset',
+        { signal: null }
+      ),
+    onSuccess: (summary) => {
+      const { deleted } = summary;
+      const deletedText = deleted
+        ? i18n.translate('xpack.nightshift.settings.maintenance.resetDeletedDescription', {
+            defaultMessage:
+              'Deleted {knowledgeIndicators, number} knowledge indicators, {storedQueries, number} stored queries, and {rules, number} rules in this space; removed documents from {dataStreams, number} data streams.',
+            values: {
+              knowledgeIndicators: deleted.knowledgeIndicators,
+              storedQueries: deleted.storedQueries,
+              rules: deleted.rules,
+              dataStreams: deleted.dataStreams,
+            },
+          })
+        : undefined;
+      if (summary.partialFailures.length > 0) {
+        toasts.addWarning({
+          title: RESET_WARNINGS_TOAST_TITLE,
+          text: [deletedText, partialFailuresText(summary.partialFailures.length)]
+            .filter(Boolean)
+            .join(' '),
+        });
+      } else {
+        toasts.addSuccess({ title: RESET_SUCCESS_TOAST_TITLE, text: deletedText });
+      }
+    },
+    onError: (error) => {
+      toasts.addError(getFormattedError(error), { title: RESET_ERROR_TOAST_TITLE });
+    },
+    onSettled: (_summary, error) => {
+      if (error) {
+        invalidateStatus();
+      } else {
+        void queryClient.invalidateQueries({ type: 'active' });
+      }
+    },
+  });
+
   return {
     pause: () => pauseMutation.mutate(),
     resume: () => resumeMutation.mutate(),
     isPausing: pauseMutation.isLoading,
-    isResuming: resumeMutation.isLoading,
+    reset: () => resetMutation.mutate(),
+    isResetting: resetMutation.isLoading,
+    isMutating,
   };
 };

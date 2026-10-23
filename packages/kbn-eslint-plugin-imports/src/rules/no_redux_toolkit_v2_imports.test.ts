@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { NoReduxToolkitV2ImportsRule } from './no_redux_toolkit_v2_imports';
+import { rules } from '../..';
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -24,7 +24,7 @@ const ruleTester = new RuleTester({
 const msg = (v1: string, v2: string) =>
   `Import from "${v1}" instead of "${v2}". See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx for details.`;
 
-ruleTester.run('@kbn/imports/no_redux_toolkit_v2_imports', NoReduxToolkitV2ImportsRule, {
+ruleTester.run('@kbn/imports/no_redux_toolkit_v2_imports', rules.no_redux_toolkit_v2_imports, {
   valid: [
     // v1 aliased imports are fine
     { code: `import { createSlice } from 'redux-toolkit-v1';` },

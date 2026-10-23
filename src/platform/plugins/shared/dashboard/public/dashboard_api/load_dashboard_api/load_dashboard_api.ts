@@ -22,6 +22,7 @@ import {
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardUserActivityService } from '../../services/user_activity_service';
+import { parseChangeSources } from '../../../common/change_sources';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
@@ -74,17 +75,18 @@ export async function loadDashboardApi({
   }
 
   await initializeDashboardApiServices();
-  const unsavedChanges = creationOptions?.useSessionStorageIntegration
-    ? getDashboardBackupService().getState(savedObjectId)
-    : undefined;
+  const { changedBy: restoredChangedBy, ...unsavedChanges } =
+    (creationOptions?.useSessionStorageIntegration
+      ? getDashboardBackupService().getState(savedObjectId)
+      : undefined) ?? {};
 
   const { viewMode, ...overrideState } = creationOptions?.getInitialInput?.() ?? {};
   if (overrideState.panels) {
     overrideState.panels = await transformPanels(overrideState.panels, overrideState.references);
   }
 
-  // Back up any view mode passed in explicitly.
-  if (viewMode) {
+  // Back up view mode passed in explicitly; do not back up non-interactive mode because it should never be restored
+  if (viewMode && viewMode !== 'non-interactive') {
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
@@ -101,6 +103,8 @@ export async function loadDashboardApi({
     savedObjectId,
     user,
     isAccessControlEnabled,
+    changedBy: [...(creationOptions?.changedBy ?? []), ...parseChangeSources(restoredChangedBy)],
+    viewMode,
   });
   const userActivityService = getDashboardUserActivityService(api);
 

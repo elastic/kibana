@@ -6,14 +6,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { investigationNotificationDestinationSchema } from '../../../common';
+import {
+  investigationNotificationDestinationSchema,
+  MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
+} from '../../../common';
 
 /**
  * The prompt template is sent to the investigation step as its `message`, which the step limits to
  * 10,000 characters. A Slack-triggered run appends up to SLACK_MESSAGE_TEXT_LIMIT characters of the
  * message plus a short heading, so the template has to leave room for both.
  */
-export const MAX_PROMPT_TEMPLATE_LENGTH = 5000;
+export const MAX_PROMPT_TEMPLATE_LENGTH = MAX_AUTOMATION_INSTRUCTIONS_LENGTH;
 
 export const promptTemplateSchema = z.string().max(MAX_PROMPT_TEMPLATE_LENGTH);
 

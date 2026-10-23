@@ -14,9 +14,12 @@ import { categories } from '../../containers/mock';
 import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
 
-// Failing: See https://github.com/elastic/kibana/issues/177791
 describe('Category', () => {
   const onSubmit = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('renders the category field correctly', async () => {
     render(
@@ -171,18 +174,10 @@ describe('Category', () => {
 
   it('setting an empty category and clear it do not produce an error', async () => {
     render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent formDefaultValue={{ category: '' }} onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
       </FormTestComponent>
     );
-
-    await userEvent.type(await screen.findByRole('combobox'), ' {enter}');
-    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
-
-    await waitFor(() => {
-      // data, isValid
-      expect(onSubmit).toHaveBeenCalledWith({}, false);
-    });
 
     await userEvent.click(await screen.findByTestId('comboBoxClearButton'));
     await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));

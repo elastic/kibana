@@ -85,6 +85,8 @@ dependsOn:
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/context-engine-plugin'
   - '@kbn/task-manager-plugin'
+  - '@kbn/unsaved-changes-prompt'
+  - '@kbn/telemetry-plugin'
 tags:
   - plugin
   - prod
@@ -97,6 +99,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

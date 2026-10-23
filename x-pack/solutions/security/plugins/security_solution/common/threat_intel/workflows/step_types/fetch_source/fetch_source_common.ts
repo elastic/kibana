@@ -75,6 +75,8 @@ export const normalizedReportSchema = lazySchema(() =>
       body_text: z.string(),
       language: z.string().default('en'),
       article_url: z.string().optional(),
+      // Must match the `content.published_at` mapping. Absent means the feed gave no date.
+      published_at: z.string().optional(),
     }),
     severity: z.object({
       level: z.enum(SEVERITY_LEVELS),
@@ -161,7 +163,7 @@ export const fetchSourceStepCommonDefinition: BaseStepDefinition<
         // Braces are wrapped in single quotes so ICU MessageFormat treats them
         // as literal text instead of parsing `{{ foreach.item }}` as an argument.
         defaultMessage:
-          "Runs the adapter for `source._source.adapter_type` (RSS, KEV, or text list). Pass `source` as `$'{{ foreach.item }}'` so the hit stays an object. `'{{ foreach.item }}'` stringifies it.",
+          "Runs the adapter for `source._source.adapter_type` (RSS or KEV). Pass `source` as `$'{{ foreach.item }}'` so the hit stays an object. `'{{ foreach.item }}'` stringifies it.",
       }
     ),
     examples: [

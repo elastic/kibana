@@ -89,6 +89,34 @@ Object {
         "strip": 1,
       },
     ],
+    Array [
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+      Object {
+        "strip": 1,
+      },
+    ],
+    Array [
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+      Object {
+        "strip": 1,
+      },
+    ],
+    Array [
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+      Object {
+        "strip": 1,
+      },
+    ],
+    Array [
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+      Object {
+        "strip": 1,
+      },
+    ],
   ],
 }
 `;
@@ -154,6 +182,20 @@ Object {
         "strip": 1,
       },
     ],
+    Array [
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+      Object {
+        "strip": 1,
+      },
+    ],
+    Array [
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+      Object {
+        "strip": 1,
+      },
+    ],
   ],
 }
 `;
@@ -201,6 +243,20 @@ Object {
     Array [
       <absolute path>/.node_binaries/<node version>/<node variant>/darwin-arm64/download/node-v<node version>-darwin-arm64.tar.gz,
       <absolute path>/.node_binaries/<node version>/<node variant>/darwin-arm64/extract,
+      Object {
+        "strip": 1,
+      },
+    ],
+    Array [
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+      Object {
+        "strip": 1,
+      },
+    ],
+    Array [
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+      <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
       Object {
         "strip": 1,
       },

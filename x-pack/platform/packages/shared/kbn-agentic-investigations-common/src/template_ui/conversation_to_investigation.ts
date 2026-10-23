@@ -151,7 +151,6 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
     template_id: 'investigation',
     title: conversation.title,
     createdAt: conversation.created_at,
-    updatedAt: conversation.updated_at,
     worker_execution_ids: readStringArray(metadata.workflow_execution_ids),
     status: readString(metadata.status),
     severity: readString(metadata.severity),

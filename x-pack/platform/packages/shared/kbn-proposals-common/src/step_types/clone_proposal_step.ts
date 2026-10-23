@@ -50,7 +50,7 @@ export const cloneProposalStepCommonDefinition: BaseStepDefinition<
   type: proposals.cloneProposal
   with:
     proposalId: "{{ variables.current_proposal_id }}"
-    executionError: "{{ steps.execute_action.error.message }}"`,
+    executionError: "{{ variables.action_error_message }}"`,
     ],
   },
 };

@@ -57,7 +57,8 @@ export interface ResolveHuntModelsOutcome {
  * only when that chain finds nothing too, or when the first connector it finds cannot be built
  * and the rest of the chain cannot either. In practice the tiers tend to fail together.
  *
- * @param tiers - The tiers the caller needs. Defaults to all three. A caller that only runs
+ * @param tiers - The tiers the caller needs. Defaults to the tiers hunts have a consumer for
+ *   (`HUNT_MODEL_TIERS`). A caller that only runs
  *   some consumers (the standalone Tier 2 route) names just those, so it neither resolves nor
  *   reports on a tier it never uses.
  */

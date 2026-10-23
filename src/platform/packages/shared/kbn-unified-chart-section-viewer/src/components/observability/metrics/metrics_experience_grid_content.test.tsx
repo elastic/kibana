@@ -284,6 +284,15 @@ describe('MetricsExperienceGridContent', () => {
         profileId: 'test-profile-id',
       })
     );
+
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    expect(MetricsGrid).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        histogramBounds: expect.any(Map),
+        histogramBoundsLoading: false,
+      }),
+      expect.anything()
+    );
   });
 
   it('builds the histogram bounds fetch from the loaded fetch params, not the in-flight ones', () => {

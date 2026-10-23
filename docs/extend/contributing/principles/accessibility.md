@@ -17,7 +17,7 @@ For the underlying commitment, see the [Build accessible software by default](./
 {{kib}} maintains accessibility quality using a layered, hybrid approach:
 
 ### 1. Code‑level checks
-- **Tool:** `@elastic/eslint-plugin-eui` – custom rules for the ESLint library
+- **Tool:** `@elastic/eslint-plugin-eui` – custom EUI lint rules, run by oxlint (`node scripts/lint`)
 - **Enforces:** Correct ARIA usage, required labels, prohibited patterns, and safer EUI practices
 - **Action:** Resolve all warnings before committing (treat warnings as blockers)
 

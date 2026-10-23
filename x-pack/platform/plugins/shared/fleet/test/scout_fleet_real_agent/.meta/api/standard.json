@@ -1,5 +1,5 @@
 {
-  "sha1": "473b65fc6c64f2f959c979ecaf2633cd85be13e1",
+  "sha1": "40529a58896645089959cac869bc926a76bb9f0e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,6 +80,58 @@
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
         "line": 261,
         "column": 11
+      }
+    },
+    {
+      "id": "12c11dd64def676-a9c4d0c86bc680d",
+      "title": "Version conditional inputs with a real Elastic Agent: a package with an agent version condition moves the agent to the policy of its minor version, compiled for its version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/version_conditional_inputs.spec.ts",
+        "line": 251,
+        "column": 33
+      }
+    },
+    {
+      "id": "12c11dd64def676-02733923ffe27a7",
+      "title": "Version conditional inputs with a real Elastic Agent: a package with an agent version condition the agent applies the compiled policy and runs the input of the package",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/version_conditional_inputs.spec.ts",
+        "line": 272,
+        "column": 13
+      }
+    },
+    {
+      "id": "12c11dd64def676-3343412d96b3c3f",
+      "title": "Version conditional inputs with a real Elastic Agent: a package with an agent version condition in an input template moves the agent to the policy of its minor version, compiled for its version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/version_conditional_inputs.spec.ts",
+        "line": 251,
+        "column": 33
+      }
+    },
+    {
+      "id": "12c11dd64def676-34883afabfc8c2d",
+      "title": "Version conditional inputs with a real Elastic Agent: a package with an agent version condition in an input template the agent applies the compiled policy and runs the input of the package",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/version_conditional_inputs.spec.ts",
+        "line": 272,
+        "column": 13
       }
     }
   ]

@@ -18,6 +18,7 @@ import type {
   WorkflowsServerPluginSetup,
   WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
+import { getUiamApiKeySecret } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
 import { ACTION_POLICIES_REQUIRED_LICENSE } from '../../../../common/action_policies_license';
@@ -462,7 +463,7 @@ export class DispatchStep implements DispatcherStep {
 
   private craftFakeRequest(apiKey: string): KibanaRequest {
     const requestHeaders: Headers = {
-      authorization: `ApiKey ${apiKey}`,
+      authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
     };
 
     const fakeRawRequest: FakeRawRequest = {

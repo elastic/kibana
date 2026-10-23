@@ -8,7 +8,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/chart-expressions-common';
+import { LENS_DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/chart-expressions-common';
 
 export interface LegendSizeSettingsProps {
   legendSize?: LegendSize;
@@ -58,7 +58,8 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option: LegendSize) => onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : option),
+    (option: LegendSize) =>
+      onLegendSizeChange(option === LENS_DEFAULT_LEGEND_SIZE ? undefined : option),
     [onLegendSizeChange]
   );
 
@@ -84,7 +85,7 @@ export const LegendSizeSettings = ({
     >
       <EuiSuperSelect
         compressed
-        valueOfSelected={legendSize ?? DEFAULT_LEGEND_SIZE}
+        valueOfSelected={legendSize ?? LENS_DEFAULT_LEGEND_SIZE}
         options={options}
         onChange={onLegendSizeOptionChange}
       />

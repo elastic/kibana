@@ -38,6 +38,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/app-header",
+    "@kbn/app-menu",
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-context",
     "@kbn/i18n-react",
@@ -80,6 +81,7 @@
     "@kbn/react-hooks",
     "@kbn/datemath",
     "@kbn/esql-utils",
-    "@kbn/ebt-click"
+    "@kbn/ebt-click",
+    "@kbn/usage-collection-plugin"
   ]
 }

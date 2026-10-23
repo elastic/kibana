@@ -10,14 +10,23 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsAgentBuilderConfig } from '../../evals_agent_builder/stateful/classic.stateful.config';
 
+const AGENT_BUILDER_EXPERIMENTAL_FEATURES_ARG =
+  '--uiSettings.overrides.agentBuilder:experimentalFeatures=';
+
 export const servers: ScoutServerConfig = {
   ...evalsAgentBuilderConfig,
+  esTestCluster: {
+    ...evalsAgentBuilderConfig.esTestCluster,
+    serverArgs: [...evalsAgentBuilderConfig.esTestCluster.serverArgs, 'xpack.ml.enabled=false'],
+  },
   kbnTestServer: {
     ...evalsAgentBuilderConfig.kbnTestServer,
     serverArgs: [
-      ...evalsAgentBuilderConfig.kbnTestServer.serverArgs,
+      ...evalsAgentBuilderConfig.kbnTestServer.serverArgs.filter(
+        (arg) => !arg.startsWith(AGENT_BUILDER_EXPERIMENTAL_FEATURES_ARG)
+      ),
       '--uiSettings.overrides.alerting:v2:enabled=true',
-      '--uiSettings.overrides.alerting:v2:experimentalFeatures=true',
+      '--uiSettings.overrides.agentBuilder:experimentalFeatures=false',
       /* Disable tracing redaction so exported spans carry real prompt/response
        * content when inspecting eval runs in Phoenix or Kibana's Tracing UI. */
       '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',

@@ -567,6 +567,7 @@ export function registerChatRoutes({
           request,
           executionService,
           executionOptions: resolveExecutionOptions(payload, spaceId),
+          autoCreateConversationWithId: false,
         });
 
         if (!conversationId) {

@@ -117,6 +117,9 @@ steps:
   - name: fetch_rule
     type: kibana.request
     with:
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.actionInput.rule_id | url_encode }}"
       headers:

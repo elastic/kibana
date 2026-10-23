@@ -8,7 +8,6 @@
 import type { DataSourceWithSecrets } from '../../common/datasource_types';
 import {
   applyAuthenticationModeToDataSource,
-  getCreateDataSourceAuthenticationOptions,
   getDefaultAuthenticationMode,
   showsAuthenticationCredentialFields,
 } from './create_data_source_flyout_authentication';
@@ -31,61 +30,6 @@ describe('create_data_source_flyout_authentication', () => {
       expect(getDefaultAuthenticationMode('azure', { enableFederatedIdentity: true })).toBe(
         'federated_identity'
       );
-    });
-  });
-
-  describe('getCreateDataSourceAuthenticationOptions', () => {
-    it('lists Federated Identity first for s3/gcs/azure', () => {
-      expect(
-        getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: true }).map(
-          (o) => o.value
-        )
-      ).toEqual(['federated_identity', 'access_and_secret_keys', 'anonymous']);
-      expect(
-        getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: true }).map(
-          (o) => o.value
-        )
-      ).toEqual(['federated_identity', 'access_and_secret_keys', 'anonymous']);
-      expect(
-        getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: true }).map(
-          (o) => o.value
-        )
-      ).toEqual(['federated_identity', 'credentials', 'anonymous']);
-    });
-
-    it('marks only Federated Identity as recommended', () => {
-      expect(
-        getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: true })
-          .filter((o) => o.recommended)
-          .map((o) => o.value)
-      ).toEqual(['federated_identity']);
-    });
-
-    it('gives every option a description', () => {
-      for (const dataSourceType of ['s3', 'gcs', 'azure'] as const) {
-        const options = getCreateDataSourceAuthenticationOptions(dataSourceType, {
-          enableFederatedIdentity: true,
-        });
-        expect(options.every((o) => o.description.length > 0)).toBe(true);
-      }
-    });
-
-    it('omits Federated Identity when disabled', () => {
-      expect(
-        getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: false }).map(
-          (o) => o.value
-        )
-      ).toEqual(['access_and_secret_keys', 'anonymous']);
-      expect(
-        getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: false }).map(
-          (o) => o.value
-        )
-      ).toEqual(['access_and_secret_keys', 'anonymous']);
-      expect(
-        getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: false }).map(
-          (o) => o.value
-        )
-      ).toEqual(['credentials', 'anonymous']);
     });
   });
 
@@ -168,7 +112,7 @@ describe('create_data_source_flyout_authentication', () => {
       expect(applied.settings).not.toHaveProperty('secret_key');
     });
 
-    it('preserves non-auth s3 settings when switching auth modes', () => {
+    it('keeps known non-auth s3 settings and drops unknown settings', () => {
       const data: DataSourceWithSecrets = {
         type: 's3',
         name: 's3',
@@ -186,19 +130,13 @@ describe('create_data_source_flyout_authentication', () => {
       };
 
       const applied = applyAuthenticationModeToDataSource(data, 'access_and_secret_keys');
-      expect(applied.settings).toEqual(
-        expect.objectContaining({
-          region: 'us-east-1',
-          endpoint: 'https://s3.example',
-          path_style_access: 'true',
-          access_key: 'AKIA',
-          secret_key: 'SECRET',
-          auth: 'static_credentials',
-        })
-      );
-      // it does not have auth fields
-      expect(applied.settings).not.toHaveProperty('role_arn');
-      expect(applied.settings).not.toHaveProperty('jwt_audience');
+      expect(applied.settings).toEqual({
+        region: 'us-east-1',
+        endpoint: 'https://s3.example',
+        access_key: 'AKIA',
+        secret_key: 'SECRET',
+        auth: 'static_credentials',
+      });
     });
 
     it('keeps no credentials or federated fields when anonymous selected (s3)', () => {

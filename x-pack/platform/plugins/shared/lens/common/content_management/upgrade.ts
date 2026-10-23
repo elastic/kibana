@@ -8,12 +8,13 @@
 import {
   LENS_ITEM_VERSION_V1,
   LENS_ITEM_VERSION_V2,
+  LENS_ITEM_VERSION_V3,
 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes as LatestLensItemAttributes } from '../../server/content_management/latest';
 import type { LensAttributesV0 } from './v0';
 import { transformToV1LensItemAttributes, type LensAttributesV1 } from './v1';
 import { transformToV2LensItemAttributes, type LensAttributesV2 } from './v2';
-import { type LensAttributesV3 } from './v3';
+import { transformToV3LensItemAttributes, type LensAttributesV3 } from './v3';
 
 export type AnyLensItemAttributes =
   | LensAttributesV0
@@ -36,11 +37,10 @@ const LENS_ITEM_UPGRADES: readonly LensItemUpgrade[] = [
     version: LENS_ITEM_VERSION_V2,
     up: (attributes) => transformToV2LensItemAttributes(attributes as LensAttributesV1),
   },
-  // TODO: apply after read support for v3 is released, to be rollback safe.
-  /* {
+  {
     version: LENS_ITEM_VERSION_V3,
     up: (attributes) => transformToV3LensItemAttributes(attributes as LensAttributesV2),
-  }, */
+  },
 ];
 
 /**

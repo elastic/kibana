@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 import { MlAuditIcon } from './ml_audit_icon';
 
@@ -20,7 +19,7 @@ describe('MlAuditIcon', () => {
   it('should render tooltip with message text when hover over the icon', async () => {
     render(<MlAuditIcon message={{ text: 'mock audit text' }} />);
 
-    await userEvent.hover(screen.getByTestId('mlJobAuditIcon'));
+    fireEvent.mouseOver(screen.getByTestId('mlJobAuditIcon'));
 
     expect(await screen.findByText('mock audit text')).toBeInTheDocument();
   });
