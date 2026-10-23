@@ -134,6 +134,10 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   replacedCalloutTitle: i18n.translate('xpack.proposals.approvalModal.replacedCallout', {
     defaultMessage: 'Replaced by a newer proposal, and can no longer be applied',
   }),
+  failedAndReplacedCalloutTitle: i18n.translate(
+    'xpack.proposals.approvalModal.failedAndReplacedCallout',
+    { defaultMessage: 'Failed and replaced by a newer proposal' }
+  ),
   expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
     defaultMessage: 'Expired and can no longer be applied',
   }),

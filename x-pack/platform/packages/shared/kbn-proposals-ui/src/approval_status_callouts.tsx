@@ -164,7 +164,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
           />
         )}
 
-        {isReplaced && !isExpired && (
+        {isReplaced && !isExpired && !failedAttemptError && (
           // Looks exactly like the callout of a replaced proposal nobody decided.
           <StatusCallout
             color="warning"
@@ -176,7 +176,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
         {failedAttemptError && (
           <StatusCallout
             color="danger"
-            title={APPROVAL_MODAL_TRANSLATIONS.failedBannerTitle}
+            title={APPROVAL_MODAL_TRANSLATIONS.failedAndReplacedCalloutTitle}
             description={failedAttemptError}
             data-test-subj={testSubj('failed-attempt')}
           />

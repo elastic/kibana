@@ -138,9 +138,10 @@ describe('ApprovalContent', () => {
       },
     });
     expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveTextContent(
-      /^Failed • elastic on .+\. HTTP 500: host unreachable$/
+      /^Failed and replaced by a newer proposal • elastic on .+\. HTTP 500: host unreachable$/
     );
     expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveClass('euiCallOut--danger');
+    expect(screen.queryByTestId('approvalContent-replaced')).not.toBeInTheDocument();
   });
 
   it('leaves the error to the outcome banner when a failed proposal was not replaced', () => {
