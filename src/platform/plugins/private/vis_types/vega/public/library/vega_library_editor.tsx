@@ -23,7 +23,11 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializableState, HasSerializedChildState } from '@kbn/presentation-publishing';
+import type {
+  HasSerializableState,
+  HasSerializedChildState,
+  PublishesTimeRange,
+} from '@kbn/presentation-publishing';
 import { EmbeddableEditorPreview, ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
 import { parse } from 'hjson';
 import { BehaviorSubject } from 'rxjs';
@@ -43,9 +47,7 @@ import type { VegaLibraryClient } from './vega_library_client';
 
 type VegaPreviewApi = DefaultEmbeddableApi<VegaByValueState> &
   HasSerializableState<VegaByValueState>;
-type VegaPreviewParentApi = HasSerializedChildState<VegaByValueState> & {
-  timeRange$: BehaviorSubject<TimeRange>;
-};
+type VegaPreviewParentApi = HasSerializedChildState<VegaByValueState> & PublishesTimeRange;
 
 const saveLabel = i18n.translate('visTypeVega.libraryEditor.saveButtonLabel', {
   defaultMessage: 'Save',
