@@ -14,6 +14,7 @@ import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
 } from '@kbn/alerting-v2-schemas';
+import { buildSnoozeSummary } from '@kbn/response-ops-alert-snooze';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../../types/action';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import { AlertEpisodeStatusBadge } from './status_badge';
@@ -37,6 +38,7 @@ export function AlertEpisodeStatusBadges({
 }: AlertEpisodeStatusBadgesProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
+  const hasSnoozeConditions = Boolean(groupAction?.snoozeConditions?.length);
 
   return (
     <EuiFlexGroup
@@ -66,7 +68,13 @@ export function AlertEpisodeStatusBadges({
           <EuiToolTip
             anchorProps={tooltipAnchorProps}
             content={
-              groupAction?.snoozedUntil ? (
+              hasSnoozeConditions ? (
+                buildSnoozeSummary({
+                  expiresAt: groupAction?.snoozedUntil,
+                  conditions: groupAction?.snoozeConditions,
+                  conditionOperator: groupAction?.snoozeConditionOperator,
+                })
+              ) : groupAction?.snoozedUntil ? (
                 <FormattedMessage
                   id="xpack.alertingV2EpisodesUi.snoozedUntilTooltip"
                   defaultMessage="Notifications snoozed until {expiry}."

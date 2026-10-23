@@ -117,6 +117,11 @@ export interface EpisodeDataSource {
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
   fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
+  /**
+   * Whether the source's backend can evaluate snooze conditions, which gates the
+   * condition based tab of the snooze modal. Defaults to `false` when omitted.
+   */
+  supportsConditionalSnooze?: boolean;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   severityExtensions?: SeverityExtension[];
   getRuleDetailsHref?: (ruleId: string) => string | null;
