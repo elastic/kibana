@@ -19,7 +19,7 @@ export const SESSIONS_PIPELINE_NAME = `digital-experience-sessions-${SESSIONS_VE
 export const SESSIONS_FREQUENCY = '1m';
 export const SESSIONS_SYNC_DELAY = '60s';
 export const SESSIONS_LOOKBACK_DAYS = 30;
-/** Max pages kept on the session journey (cluster default `index.top_metrics_max_size`). */
+/** Max page views kept, in order, for the session journey. */
 export const SESSIONS_JOURNEY_SIZE = 10;
 
 /** EDOT Browser re-stamps `session.id` on every span and log after rotation. */

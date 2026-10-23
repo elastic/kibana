@@ -121,15 +121,19 @@ const latestOf = (fields: readonly string[]) => ({
   },
 });
 
-/** First `size` page URLs in time order. The exists filter avoids unmapped-field shard errors. */
-const pageUrls = (order: 'asc' | 'desc', size: number) => ({
-  filter: { bool: { filter: [PAGE_VIEW_FILTER, { exists: { field: SOURCE_URL_FIELD } }] } },
+/**
+ * Distinct page-view URLs with their first and last view time. `url.full` is mapped as
+ * `wildcard` in the OTel templates, which `top_metrics` cannot collect, and `scripted_metric`
+ * is not available on serverless, so the journey is built from `terms` buckets instead.
+ */
+const pageUrls = (size: number, order: { first: 'asc' } | { last: 'desc' }) => ({
+  filter: PAGE_VIEW_FILTER,
   aggs: {
-    latest: {
-      top_metrics: {
-        metrics: { field: SOURCE_URL_FIELD },
-        sort: { '@timestamp': order },
-        size,
+    urls: {
+      terms: { field: SOURCE_URL_FIELD, size, order },
+      aggs: {
+        first: { min: { field: '@timestamp' } },
+        last: { max: { field: '@timestamp' } },
       },
     },
   },
@@ -206,7 +210,11 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
     {
       script: {
         lang: 'painless',
-        params: { fields: SESSION_ATTRIBUTE_FIELDS, vitals: [...WEB_VITAL_NAMES] },
+        params: {
+          fields: SESSION_ATTRIBUTE_FIELDS,
+          vitals: [...WEB_VITAL_NAMES],
+          journeySize: SESSIONS_JOURNEY_SIZE,
+        },
         source: `
           long countOf(def v) {
             if (v instanceof Map) { v = v.doc_count; }
@@ -286,16 +294,33 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.has_error = ctx.error_count > 0;
           ctx.bounced = ctx.page_view_count <= 1;
 
-          def journey = [];
-          for (metrics in metricsOf(ctx.pages)) {
-            String page = pathOf(metrics['${SOURCE_URL_FIELD}']);
-            if (page != null && (journey.isEmpty() || journey[journey.size() - 1] != page)) {
-              journey.add(page);
+          // Pages in first-view order; the exit page is the one viewed last.
+          def views = [];
+          for (agg in [ctx.pages, ctx.exit]) {
+            def urls = agg instanceof Map ? agg.urls : null;
+            if (urls instanceof Map) {
+              for (entry in urls.entrySet()) {
+                def times = entry.getValue();
+                if (times instanceof Map) {
+                  views.add(['url': entry.getKey(), 'first': millisOf(times.first), 'last': millisOf(times.last)]);
+                }
+              }
             }
           }
+          views.sort((a, b) -> Long.compare((long) a.first, (long) b.first));
+          def journey = [];
           String exitPage = null;
-          for (metrics in metricsOf(ctx.exit)) {
-            exitPage = pathOf(metrics['${SOURCE_URL_FIELD}']);
+          long exitAt = -1L;
+          for (view in views) {
+            String page = pathOf(view.url);
+            if (page == null) { continue; }
+            if (journey.size() < params.journeySize && journey.contains(page) == false) {
+              journey.add(page);
+            }
+            if ((long) view.last > exitAt) {
+              exitAt = (long) view.last;
+              exitPage = page;
+            }
           }
           ctx.journey = journey;
           ctx.entry_page = journey.isEmpty() ? exitPage : journey[0];
@@ -368,8 +393,8 @@ export const buildSessionsTransform = (): TransformPutTransformRequest => ({
       page_view_count: { filter: PAGE_VIEW_FILTER },
       click_count: { filter: CLICK_FILTER },
       error_count: { filter: ERROR_FILTER },
-      pages: pageUrls('asc', SESSIONS_JOURNEY_SIZE),
-      exit: pageUrls('desc', 1),
+      pages: pageUrls(SESSIONS_JOURNEY_SIZE, { first: 'asc' }),
+      exit: pageUrls(1, { last: 'desc' }),
       user_seen: latestOf(USER_FIELDS),
       client_seen: latestOf(CLIENT_FIELDS),
       ...Object.fromEntries(WEB_VITAL_NAMES.map((name) => [name, webVitalAgg(name)])),

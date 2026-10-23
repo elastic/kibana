@@ -8,6 +8,7 @@
 import {
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
+  SESSIONS_JOURNEY_SIZE,
   SESSIONS_MANAGED_BY,
   SESSIONS_PIPELINE_NAME,
   SESSIONS_TRANSFORM_ID,
@@ -69,9 +70,18 @@ describe('sessions transform spec', () => {
         ...WEB_VITAL_NAMES,
       ])
     );
-    expect(aggregations.pages.aggs?.latest.top_metrics?.metrics).toEqual({
+    // url.full is a wildcard field in the OTel templates: terms works, top_metrics does not.
+    expect(aggregations.pages.aggs?.urls.terms).toEqual({
       field: SOURCE_URL_FIELD,
+      size: SESSIONS_JOURNEY_SIZE,
+      order: { first: 'asc' },
     });
+    expect(aggregations.exit.aggs?.urls.terms).toEqual({
+      field: SOURCE_URL_FIELD,
+      size: 1,
+      order: { last: 'desc' },
+    });
+    expect(JSON.stringify(aggregations)).not.toContain('scripted_metric');
     expect(aggregations.user_seen.aggs?.latest.top_metrics?.metrics).toEqual(
       SESSION_ATTRIBUTE_FIELDS.user.map((field) => ({ field }))
     );
@@ -109,7 +119,7 @@ describe('sessions transform spec', () => {
     expect(script?.params).toEqual({
       fields: SESSION_ATTRIBUTE_FIELDS,
       vitals: [...WEB_VITAL_NAMES],
+      journeySize: SESSIONS_JOURNEY_SIZE,
     });
-    expect(script?.source).toContain(`metrics['${SOURCE_URL_FIELD}']`);
   });
 });

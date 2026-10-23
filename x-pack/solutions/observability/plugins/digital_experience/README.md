@@ -16,6 +16,10 @@ An Elasticsearch continuous transform summarizes EDOT Browser sessions from
 `service.name` + `session.id`: start/end time and duration, page views with entry/exit page and
 journey, click and error counts, p75 Core Web Vitals, and user, browser, OS and geo attributes.
 
+The journey lists distinct pages in first-view order (revisits are not repeated). The OTel templates
+map `url.*` fields as `wildcard`, which `top_metrics` cannot collect, and `scripted_metric` is not
+available on serverless, so the pages come from `terms` buckets with first/last view times.
+
 ### Enabling sessions
 
 Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,
