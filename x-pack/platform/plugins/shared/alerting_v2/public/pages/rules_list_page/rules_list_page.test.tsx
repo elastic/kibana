@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { contentListQueryClient } from '@kbn/content-list-provider';
-import { ListPageTestProviders } from '../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
+import { getRulesLocation } from '../../locator_get_location';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListPage } from './rules_list_page';
 
@@ -72,6 +73,13 @@ jest.mock('@kbn/core-di-browser', () => {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
           tours: { isEnabled: () => false },
         },
+        docLinks: {
+          links: {
+            alerting: {
+              viewManageRules: 'https://docs.test/view-manage-rules',
+            },
+          },
+        },
       };
 
       return services[token as string] ?? {};
@@ -80,13 +88,44 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
-    <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
-      Compose Discover flyout
-    </button>
-  ),
-}));
+let latestComposeHistoryBack: (() => void) | undefined;
+
+jest.mock('@kbn/alerting-v2-rule-form', () => {
+  const ReactActual = jest.requireActual('react') as typeof import('react');
+  return {
+    ComposeDiscoverFlyout: ({
+      onCreateRule,
+      onClose,
+      onHistoryBack,
+      closeRequestRef,
+    }: {
+      onCreateRule: (payload: unknown) => void;
+      onClose: () => void;
+      onHistoryBack: () => void;
+      closeRequestRef?: { current: (() => void) | null };
+    }) => {
+      latestComposeHistoryBack = onHistoryBack;
+      ReactActual.useEffect(() => {
+        if (!closeRequestRef) {
+          return;
+        }
+        closeRequestRef.current = onClose;
+        return () => {
+          closeRequestRef.current = null;
+        };
+      }, [closeRequestRef, onClose]);
+      return ReactActual.createElement(
+        'button',
+        { 'data-test-subj': 'composeDiscoverFlyout', onClick: () => onCreateRule({}) },
+        'Compose Discover flyout'
+      );
+    },
+    RULE_BUILDER_REGISTRY: { threshold: {} },
+    STACKED_FLYOUT_SIZE: 540,
+    STACKED_FLYOUT_MIN_WIDTH: 480,
+    useEuiFlyoutReregister: () => ({ flyoutKey: 0, reregister: jest.fn() }),
+  };
+});
 
 jest.mock('./rules_data_source', () => ({
   ...jest.requireActual('./rules_data_source'),
@@ -219,6 +258,7 @@ describe('RulesListPage', () => {
     mockExperimentalFeaturesEnabled = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
+    latestComposeHistoryBack = undefined;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -231,35 +271,51 @@ describe('RulesListPage', () => {
     resolveRules();
   });
 
-  it('renders the experimental badge in the page header', async () => {
-    renderPage();
-    await waitForRules();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
-  it('marks the sequence builder entry point as experimental', async () => {
-    renderPage();
-    await waitForRules();
-
-    const overflowButton = screen.queryByTestId('app-menu-overflow-button');
-    if (overflowButton) {
-      fireEvent.click(overflowButton);
-    }
-
-    await waitFor(() =>
-      expect(screen.getByTestId('createSequenceRuleButton')).toHaveTextContent(
-        'Build a sequence (Experimental)'
-      )
-    );
-  });
-
-  it('hides the sequence builder entry point when Alerting V2 experimental features are disabled', async () => {
-    mockAlertingV2ExperimentalFeaturesEnabled = false;
+  it('does not render a sequence builder entry point in the header', async () => {
     renderPage();
     await waitForRules();
 
     expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
+  });
+
+  it('shows an experimental "Build a sequence" card in the create rule flyout', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    const card = screen.getByTestId('createSequenceRuleCard');
+    expect(card).toHaveTextContent('Build a sequence');
+    expect(screen.getByTestId('createSequenceRuleExperimentalBadge')).toHaveTextContent(
+      'Experimental'
+    );
+  });
+
+  it('closes the flyout and navigates to the sequence builder when the card is clicked', async () => {
+    const locators = createMockLocators();
+    render(
+      <ListPageTestProviders locators={locators}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createSequenceRuleCard'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({ page: 'sequence_create' });
+  });
+
+  it('hides the sequence card when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('createSequenceRuleCard')).not.toBeInTheDocument();
   });
 
   it('renders loading state', async () => {
@@ -491,6 +547,42 @@ describe('RulesListPage', () => {
     });
   });
 
+  it('passes the template from a ?q=template:"<id>" link to findItems', async () => {
+    render(
+      <ListPageTestProviders initialEntries={['/?q=template:"nginx-error-rate"']}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitForRules();
+
+    await waitFor(() => {
+      expect(lastFindItemsArgs().filters.template).toMatchObject({
+        include: ['nginx-error-rate'],
+      });
+    });
+  });
+
+  it.each(['kubernetes_otel-1.2.0-pod.crashloop', 'with space/and:colon', 'quote"and\\slash'])(
+    'applies the template filter from the locator link for template id %s',
+    async (templateId) => {
+      const { path } = getRulesLocation({
+        derivedFromTemplateId: templateId,
+        host: { app: 'alerting', pathPrefix: '/' },
+      });
+
+      render(
+        <ListPageTestProviders initialEntries={[path]}>
+          <RulesListPage />
+        </ListPageTestProviders>
+      );
+      await waitForRules();
+
+      await waitFor(() => {
+        expect(lastFindItemsArgs().filters.template).toMatchObject({ include: [templateId] });
+      });
+    }
+  );
+
   it('uses name ascending as the default sort', async () => {
     renderPage();
     await waitForRules();
@@ -582,9 +674,41 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton'));
     fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
-    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('can reopen the ES|QL form after going back to the option picker', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    act(() => {
+      latestComposeHistoryBack?.();
+    });
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('opens the threshold builder on top of the create rule options flyout', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /threshold rule/i }));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   it('stays on the rules list after creating a rule from the flyout', async () => {
@@ -604,8 +728,25 @@ describe('RulesListPage', () => {
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('closes both flyouts when the option picker is dismissed after opening the form', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
   });
 
   it('opens the rule creation flow from the split button dropdown', async () => {
@@ -639,9 +780,7 @@ describe('RulesListPage', () => {
     expect(
       screen.getByTestId('createWithAgentButton').querySelector('[data-euiicon-type="sparkles"]')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent(
-      'Create with agent (Experimental)'
-    );
+    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent('Create with agent');
 
     fireEvent.click(screen.getByTestId('createWithAgentButton'));
 
@@ -651,18 +790,20 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('hides all Create with AI Agent entry points when Alerting V2 experimental features are disabled', async () => {
+  it('still shows Create with AI Agent entry points when experimental features are disabled', async () => {
+    mockExperimentalFeaturesEnabled = false;
     mockAlertingV2ExperimentalFeaturesEnabled = false;
     resolveRules([], 0);
 
     renderPage();
 
     await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
-    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentCard')).toBeInTheDocument();
     expect(screen.queryByTestId('createWithAgentExperimentalBadge')).not.toBeInTheDocument();
   });
 
-  it('hides the populated-list Create with AI Agent menu option when Alerting V2 experimental features are disabled', async () => {
+  it('still shows the populated-list Create with AI Agent menu option when experimental features are disabled', async () => {
+    mockExperimentalFeaturesEnabled = false;
     mockAlertingV2ExperimentalFeaturesEnabled = false;
     renderPage();
 
@@ -672,12 +813,11 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument());
-    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentButton')).toBeEnabled();
   });
 
   it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
-    mockExperimentalFeaturesEnabled = false;
 
     renderPage();
     await waitFor(() =>
@@ -700,7 +840,6 @@ describe('RulesListPage', () => {
 
   it('disables the empty state agent card (does not hide it) when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
-    mockExperimentalFeaturesEnabled = false;
     resolveRules([], 0);
 
     renderPage();

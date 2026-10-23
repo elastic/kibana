@@ -107,8 +107,6 @@ describe('getCreateServiceAccount UI API', () => {
     await renderComponent(options);
     const selector = await screen.findByTestId('serviceAccountRolesSelector');
     await waitFor(() => expect(selector).toBeEnabled());
-    fireEvent.click(selector);
-    await screen.findByText('Custom roles');
     const link = screen.queryByTestId('createServiceAccountRoleLink');
     if (options.roleManagementEnabled && options.canSaveRole) {
       expect(link).toHaveAttribute('href', '/app/management/security/roles/edit');

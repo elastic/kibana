@@ -18,13 +18,17 @@ export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
 export const visorStyles = (
   euiThemeContext: UseEuiTheme,
   isInline: boolean,
-  isVisible: boolean = true
+  isVisible: boolean = true,
+  hasOutline: boolean = false
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
-  const inlinePaddingTop = euiTheme.size.xs;
-  const inlineHeight = isVisible ? `calc(${euiTheme.size.xl} + ${inlinePaddingTop})` : '0';
-  const inlineTransitionEasing = 'cubic-bezier(0.25, 0.1, 0.25, 1)';
+  // Outlined AiButton hover fill. Selected keeps it; idle applies it only while hovering.
+  const aiButtonHoverBackground = `linear-gradient(
+    180deg,
+    ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+    ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+  )`;
 
   return {
     visorContainer: css`
@@ -46,12 +50,12 @@ export const visorStyles = (
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
           overflow: ${isVisible ? 'visible' : 'hidden'};
-          transition: min-height 0.3s ${inlineTransitionEasing}, max-height 0.3s ${inlineTransitionEasing}, padding-block-start 0.3s ${inlineTransitionEasing}, opacity 0.3s ${inlineTransitionEasing};
+          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)${
+            hasOutline ? ', margin-top 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)' : ''
+          };
         `
-        : `
-          padding-inline-start: ${euiTheme.size.xs};
-          min-height: ${euiTheme.size.xl};
-        `}
+        : `min-height: ${euiTheme.size.xl};`}
+      ${hasOutline ? `margin-top: ${isVisible ? euiTheme.size.s : '0'};` : ''}
     `,
     inputSlot: css`
       flex: 1;
@@ -90,6 +94,7 @@ export const visorStyles = (
       flex-shrink: 0;
       box-sizing: border-box;
       gap: ${euiTheme.size.xs};
+      margin-inline-start: ${hasOutline ? '0' : euiTheme.size.xs};
       block-size: ${euiTheme.size.xl};
       max-block-size: ${euiTheme.size.xl};
       padding: ${euiTheme.size.xs};
@@ -138,12 +143,6 @@ export const visorStyles = (
       block-size: ${euiTheme.size.l};
       max-block-size: ${euiTheme.size.l};
 
-      /* The group already draws the border. Keep the outlined gradient on the icon and label. */
-      &::after {
-        content: none;
-      }
-
-      /* Starts at the resting icon so hover eases in instead of snapping to the dim frame. */
       @keyframes esqlVisorSparkleTwinkle {
         0%,
         100% {
@@ -178,13 +177,31 @@ export const visorStyles = (
         }
       }
     `,
+    aiButtonIdleHover: css`
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus-visible {
+        background: ${aiButtonHoverBackground} !important;
+
+        /* EUI paints hover with an opaque ::before overlay. Drop it so the AI gradient shows. */
+        &::before {
+          background-color: transparent !important;
+        }
+      }
+    `,
     aiButtonSelected: css`
-      /* Same gradient AiButton outlined uses on hover, so the selected fill stays visible at size xs. */
-      background: linear-gradient(
-        180deg,
-        ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
-        ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
-      ) !important;
+      /* Same gradient AiButton outlined uses on hover, held while this mode is active. */
+      background: ${aiButtonHoverBackground} !important;
+
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus,
+      &.euiButtonIcon:focus-visible,
+      &.euiButtonIcon:active {
+        background: ${aiButtonHoverBackground} !important;
+
+        &::before {
+          background-color: transparent !important;
+        }
+      }
     `,
     nlInput: css`
       position: relative;

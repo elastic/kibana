@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
@@ -14,15 +14,14 @@ import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
   MAX_TEXT_LENGTH,
-  NO_RAW_SENSITIVE_VALUES_RULE,
   MAX_ARRAY_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-  SUMMARY_ROLE_RULE,
+  NO_RAW_SENSITIVE_VALUES_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,
+  SUMMARY_ROLE_RULE,
 } from './constants';
 import { detectionSchema } from './detections';
+
+const FEATURE_ID_COPY_RULE = 'Copy it exactly as ki_search returns it.';
 
 const blastRadiusDependencySchema = lazySchema(() =>
   z.object({
@@ -31,7 +30,7 @@ const blastRadiusDependencySchema = lazySchema(() =>
       .string()
       .max(MAX_ID_LENGTH)
       .describe(
-        'The feature.id value of the Knowledge Indicator this dependency entry is based on.'
+        `The feature.id value of the Knowledge Indicator this dependency entry is based on. ${FEATURE_ID_COPY_RULE}`
       ),
     subtype: z
       .string()
@@ -59,10 +58,10 @@ const blastRadiusDependencySchema = lazySchema(() =>
       .describe(
         'Communication protocol used between source and target (e.g. "HTTP", "gRPC", "TCP").'
       ),
-    stream_name: z
+    source_id: z
       .string()
       .max(MAX_ID_LENGTH)
-      .describe('Data stream associated with this dependency.'),
+      .describe('Nightshift source id associated with this dependency.'),
   })
 );
 
@@ -73,7 +72,7 @@ const blastRadiusInfrastructureSchema = lazySchema(() =>
       .string()
       .max(MAX_ID_LENGTH)
       .describe(
-        'The feature.id value of the Knowledge Indicator this infrastructure entry is based on.'
+        `The feature.id value of the Knowledge Indicator this infrastructure entry is based on. ${FEATURE_ID_COPY_RULE}`
       ),
     subtype: z
       .string()
@@ -94,10 +93,10 @@ const blastRadiusInfrastructureSchema = lazySchema(() =>
       .max(MAX_ARRAY_LENGTH)
       .optional()
       .describe('Workload names (pods, services) that make up this infrastructure component.'),
-    stream_name: z
+    source_id: z
       .string()
       .max(MAX_ID_LENGTH)
-      .describe('Data stream associated with this infrastructure component.'),
+      .describe('Nightshift source id associated with this infrastructure component.'),
   })
 );
 
@@ -107,7 +106,9 @@ const blastRadiusEntitySchema = lazySchema(() =>
     feature_id: z
       .string()
       .max(MAX_ID_LENGTH)
-      .describe('The feature.id value of the Knowledge Indicator this entity entry is based on.'),
+      .describe(
+        `The feature.id value of the Knowledge Indicator this entity entry is based on. ${FEATURE_ID_COPY_RULE}`
+      ),
     subtype: z
       .string()
       .max(MAX_ID_LENGTH)
@@ -116,7 +117,10 @@ const blastRadiusEntitySchema = lazySchema(() =>
         "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
       ),
     name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
-    stream_name: z.string().max(MAX_ID_LENGTH).describe('Data stream associated with this entity.'),
+    source_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe('Nightshift source id associated with this entity.'),
   })
 );
 
@@ -146,7 +150,7 @@ export const causalFeatureSchema = lazySchema(() =>
       .string()
       .max(MAX_ID_LENGTH)
       .describe(
-        'The feature.id value of the Knowledge Indicator identified as a symptom hypothesis.'
+        `The feature.id value of the Knowledge Indicator identified as a symptom hypothesis. ${FEATURE_ID_COPY_RULE}`
       ),
     type: z
       .string()
@@ -168,11 +172,11 @@ export const causalFeatureSchema = lazySchema(() =>
       .describe(
         'Human-readable name of the causal entity (e.g. service or component name). Not a UUID.'
       ),
-    stream_name: z
+    source_id: z
       .string()
       .max(MAX_ID_LENGTH)
       .optional()
-      .describe('Data stream associated with this causal feature.'),
+      .describe('Nightshift source id associated with this causal feature.'),
   })
 );
 export type CausalFeature = z.infer<typeof causalFeatureSchema>;
@@ -191,10 +195,8 @@ export const signalEvidenceSchema = lazySchema(() =>
       ),
     time_range: z
       .object({
-        from: z.iso
-          .datetime({ offset: true })
-          .describe('Inclusive window start bound to ?_tstart.'),
-        to: z.iso.datetime({ offset: true }).describe('Exclusive window end bound to ?_tend.'),
+        from: isoDateTime({ offset: true }).describe('Inclusive window start bound to ?_tstart.'),
+        to: isoDateTime({ offset: true }).describe('Exclusive window end bound to ?_tend.'),
       })
       .optional()
       .describe(
@@ -214,16 +216,16 @@ export type SignalVerdict = (typeof SIGNAL_VERDICTS)[number];
 
 const signalBaseSchema = lazySchema(() =>
   z.object({
-    stream_name: z
+    source_id: z
       .string()
       .max(MAX_ID_LENGTH)
-      .describe('Data stream this signal was collected from.'),
+      .describe('Nightshift source id this signal was collected from.'),
     description: z
       .string()
       .max(MAX_TEXT_LENGTH)
       .describe(
         dedent`
-      What this signal's queries observed and what it affects, in plain prose a reader can act on. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars.
+      What this signal's queries observed and what it affects, in plain prose a reader can act on, in at most three sentences.
 
       Name the concrete row signature and failing target — or, when nothing matched, what was looked for and what was found instead — then who or what is affected, how badly, for how long, and how broadly (the share of the operation, the number and share of parties, regions), using the numbers measured. Say whether the rows show the operation failing, slow, completing, or not settled, and name any sensitive data the rows expose by type. Report only what the queries observed: the verdict is recorded separately, and this text neither states it nor depends on it. Never say only that rows were returned.
 
@@ -236,8 +238,7 @@ const signalBaseSchema = lazySchema(() =>
       .describe(
         'Conclusion for the authored rule hypothesis: confirms = a found row directly showing the failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion from the evidence (empty, errored, or found rows that do not directly show the outcome); not_checked = no query was available.'
       ),
-    collected_at: z.iso
-      .datetime({ offset: true })
+    collected_at: isoDateTime({ offset: true })
       .optional()
       .describe('ISO timestamp when this signal was collected.'),
     evidence: signalEvidenceSchema
@@ -256,18 +257,32 @@ const detectionSignalMetadataSchema = lazySchema(() =>
       alert_index: true,
       workflow_execution_id: true,
       processed: true,
-      stream_name: true,
+      source_id: true,
     })
     .describe(
       'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
     )
 );
 
-const detectionSignalSchema = lazySchema(() =>
+/**
+ * What an agent sends to identify a detection: its `detection_id` and `rule_uuid`, copied from the
+ * input detection. The writer fills the rest of the metadata from the stored detection, so a field
+ * the agent drops or mistypes cannot reach storage.
+ */
+const detectionSignalInputMetadataSchema = lazySchema(() =>
+  detectionSignalMetadataSchema
+    .partial()
+    .required({ detection_id: true, rule_uuid: true })
+    .describe(
+      'Identifies the detection: copy detection_id and rule_uuid from the matching input detection. The other detection fields are filled in from the stored detection.'
+    )
+);
+
+const buildDetectionSignalSchema = <TMetadata extends z.ZodType>(metadata: TMetadata) =>
   signalBaseSchema
     .extend({
       type: z.literal('detection'),
-      metadata: detectionSignalMetadataSchema,
+      metadata,
     })
     .superRefine((signal, context) => {
       const result = signal.evidence?.result;
@@ -311,7 +326,14 @@ const detectionSignalSchema = lazySchema(() =>
           message: 'A not-checked verdict cannot include query evidence.',
         });
       }
-    })
+    });
+
+const detectionSignalSchema = lazySchema(() =>
+  buildDetectionSignalSchema(detectionSignalMetadataSchema)
+);
+
+const detectionSignalInputSchema = lazySchema(() =>
+  buildDetectionSignalSchema(detectionSignalInputMetadataSchema)
 );
 
 /** Extensible discriminated union of signal sources accepted from agents. */
@@ -319,6 +341,12 @@ export const signalEntrySchema = lazySchema(() =>
   z.discriminatedUnion('type', [detectionSignalSchema])
 );
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
+
+/** The same union as agents send it: detection metadata is only identified, not spelled out. */
+export const signalInputEntrySchema = lazySchema(() =>
+  z.discriminatedUnion('type', [detectionSignalInputSchema])
+);
+export type SignalInputEntry = z.infer<typeof signalInputEntrySchema>;
 
 /** Canonical severity values in descending severity order (critical → low). info is not supported yet */
 export const SEVERITY_OPTIONS = [
@@ -328,24 +356,27 @@ export const SEVERITY_OPTIONS = [
   'low',
 ] as const satisfies readonly AlertEventSeverity[];
 
+/** The most confidence an event can carry while no signal on it confirms anything. */
+export const UNCONFIRMED_EVENT_MAX_CONFIDENCE = 0.3;
+
 /**
  * Severity field contract — single source of truth for schema `.describe()`, the discovery agent
  * and eval judges. It is the ladder the investigation agent applies. Order of `SEVERITY_OPTIONS`
  * is part of this contract (most-severe first).
  */
 export const SEVERITY_CONTRACT_RULE = dedent`
-    Severity rates the situation the grounding evidence confirms, whatever triggered the detection. It is the assessing agent's own verdict, decided from the confirming signals and the queries run — never from p_value, change_point_type, alert volume, the rule's severity_score or how alarming the rule looks. A concrete non-benign error in a found off-topic row evidences its own observed-error event; assess it from that row's error signature and impact.
+    Severity rates the situation the grounding evidence confirms.
 
     Decide in order and stop at the first match:
     - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example balance, history, and payment together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
-    - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it.
-    - "medium": minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails versus only slows.
+    - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
+    - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing. Not for a confirmed failing operation.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
-    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled, and the ladder rates unsettled evidence "medium"; it is never grounds for "low". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate that operation from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
-    A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply. A breadth figure that could not be measured does not lower the tier that the confirmed failure gives.
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. A signal's evidence that could not be collected (a query that timed out or returned nothing) is no evidence, not ambiguous evidence: it adds nothing to the rating and is never grounds for "medium". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
+    A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
-    Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when the evidence leaves genuinely unresolved whether the operation still completes, and never below "medium" on that ground.
+    Tie-break: when two adjacent tiers fit the same evidence, choose the lower only when it is genuinely unresolved whether the operation still completes.
   `;
 
 /** Canonical severity used by storage, APIs, and tools. */
@@ -388,7 +419,7 @@ export const significantEventBaseSchema = lazySchema(() =>
       .describe(
         dedent`
       Stable incident label. Format: "<Affected scope> — <observed condition>".
-      Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic stream name.
+      Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic source name.
       The observed condition names the concrete failure, degradation, or exposure shown in grounding — a specific operation, endpoint, error class, or connection path. Do not use broad umbrellas such as "backend connection failures", "transaction flows", or "submission flows" when evidence names a narrower mechanism. Do not state lifecycle or tense (e.g. "continues", "detected", "active", "resolved").
       Preserve the title verbatim across continuation and recovery when no new detection rule UUIDs are introduced; a continuation that adds related rules may update title and symptom_hypothesis. Exclude IPs, counts, measurements, and current-cycle-only details.
 
@@ -402,11 +433,10 @@ export const significantEventBaseSchema = lazySchema(() =>
       .optional()
       .describe(
         dedent`
-        Provisional, evidence-grounded technical mechanism for this incident. Max ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} chars.
-        In one sentence, name the deepest supported failing component or dependency, its concrete failure signature or mechanism, and how it propagates to the affected operation.
-
+        Provisional, evidence-grounded technical mechanism for this incident.
         ${SYMPTOM_HYPOTHESIS_ROLE_RULE}
-        Do not restate the title or summary. Do not use generic terms such as "backend unavailability" or "dependency failure" when the evidence identifies a component, resource, endpoint, protocol, or error signature.
+        Good: "inventory-db refuses connections on port 5432, so checkout stock reads fail." Bad: "A backend connectivity issue is impacting multiple flows."
+        Do not use generic terms such as "backend unavailability" or "dependency failure" when the evidence identifies a component, resource, endpoint, protocol, or error signature.
         On a continuation, extend the stored hypothesis: keep its existing wording for the mechanism it already establishes and add only what the new evidence supports; leave it unchanged when nothing new is evidenced. A single healthy or unrelated signal never replaces a mechanism that other signals on the event still confirm.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
@@ -416,14 +446,10 @@ export const significantEventBaseSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .describe(
         dedent`
-        Objective, self-contained account of the observed state and potential impact. Max ${MAX_SUMMARY_LENGTH} chars.
-        Lead with the normalized observed error signature — including the error type or code, operation, protocol, endpoint, port, and relevant non-sensitive address — and the affected component or dependency path, then state whether impact is confirmed, possible, or not established. When no failure signature is observed, lead with the concise observed success, health, or off-topic signature instead. Include onset, current or recovery state, and magnitude only when known, stating magnitude in plain words (for example "about half of the operation's log lines"); exact counts and percentages belong in the signal descriptions and assessment_note.
-
+        Objective, self-contained account of the observed state and potential impact.
         ${SUMMARY_ROLE_RULE}
-        Use matched query KI descriptions or resolved feature metadata to name the observed component or dependency path when it clarifies the failure for an operator. Possible impact may come from the same context, but must be conditional and scoped.
-
-        On a continuation, build on the stored summary: keep its existing wording for the signatures and paths it already covers (rephrase only to fit the limit), add new sentences only for what is newly confirmed, and leave it unchanged when nothing new matters to an operator. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
-        Do not repeat the title or symptom_hypothesis narrative. Preserve decisive technical details from the canonical error signature when they identify the observed state. Evidence limitations may qualify the conclusion, but do not narrate queries, detections, or analysis steps. Do not include actions, urgency language, detection artifacts (p_value or severity_score), memory-page presence, or unsupported impact claims.
+        Good: "inventory-db refuses connections on port 5432 (SQLState 08001), failing checkout stock reads. Impact is confirmed for 18.5% of the operation's log lines; first seen 40 minutes ago and still active." Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
+        On a continuation, build on the stored summary: keep its existing wording, including its opening sentence, for the signatures and paths it already covers (rephrase only to stay within three sentences), add sentences only for what is newly confirmed, and never rewrite it; leave it unchanged when nothing new matters to an operator. Counts and timestamps change every cycle, so keep them out of it. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
       ),
@@ -435,12 +461,13 @@ export const significantEventBaseSchema = lazySchema(() =>
       .max(1)
       .describe(
         'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
-          'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only).'
+          'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only). ' +
+          `When the evidence establishes nothing, at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`
       ),
-    stream_names: z
+    source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))
       .max(MAX_ARRAY_LENGTH)
-      .describe('Data streams associated with this event.'),
+      .describe('Nightshift source ids associated with this event.'),
 
     // entities that may contribute to the incident
     causal_features: z

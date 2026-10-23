@@ -10,7 +10,7 @@ import React from 'react';
 
 /**
  * Bordered metadata card used in flyout second-headers to display
- * a labelled piece of metadata (confidence, severity, type, stream, …).
+ * a labelled piece of metadata (confidence, severity, type, source, …).
  */
 export function FlyoutMetadataCard({
   title,

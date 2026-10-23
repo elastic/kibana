@@ -23,7 +23,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createToken } from '@kbn/core-di';
-import type { EventOrigin } from '../../event_origin/token';
+import type { EventOrigin } from '../../event_origin/origin_schemas';
 import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
@@ -126,8 +126,9 @@ export interface AlertingPublisherContext {
    */
   readonly request: KibanaRequest;
   /**
-   * Who made the change. Subscribers that need the caller's credentials
-   * (e.g. workflow scheduling) must skip `internal`.
+   * Who published the event, and where it came from. `channel` comes from the
+   * request. `app` is set when one is known. Subscribers that need the caller's
+   * credentials (e.g. workflow scheduling) must skip `actor: 'internal'`.
    */
   readonly origin: EventOrigin;
 }
