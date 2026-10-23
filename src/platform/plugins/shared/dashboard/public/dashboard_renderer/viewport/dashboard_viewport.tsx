@@ -114,6 +114,8 @@ const dashboardViewportStyles = {
     },
     '&.dshDashboardViewport--panelExpanded': {
       flex: 1,
+      display: 'flex',
+      flexDirection: 'column' as 'column',
     },
     '&.dshDashboardViewport--print': {
       '.kbnGrid': {
