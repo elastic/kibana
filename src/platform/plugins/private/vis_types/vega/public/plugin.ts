@@ -182,7 +182,7 @@ export class VegaPlugin implements Plugin<void, void> {
             description: attributes.description,
             updatedAt,
             managed,
-            icon: 'visualizeApp',
+            icon: VegaIcon,
             typeTitle: vegaTitleInWizard,
             stage: 'production',
             savedObjectType: type,

@@ -31,6 +31,7 @@ import {
 } from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
+import { VegaIcon } from './vega_icon';
 
 const mockOpenVegaLibraryEditor = jest.fn();
 const mockCreateVegaFn = jest.fn();
@@ -181,6 +182,7 @@ describe('VegaPlugin', () => {
           description: 'A chart',
           updatedAt: '2026-10-23T19:44:56.091Z',
           managed: true,
+          icon: VegaIcon,
           savedObjectType: VEGA_SAVED_OBJECT_TYPE,
         })
       );

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type {
   VisualizationListItem,
@@ -34,7 +35,7 @@ export const toTableListViewSavedObject = (
     managed: savedObject.managed as boolean,
     references: savedObject.references as Array<{ id: string; type: string; name: string }>,
     type: savedObject.savedObjectType as string,
-    icon: savedObject.icon as string,
+    icon: savedObject.icon as IconType,
     stage: savedObject.stage as VisualizationStage,
     savedObjectType: savedObject.savedObjectType as string,
     typeTitle: savedObject.typeTitle as string,
