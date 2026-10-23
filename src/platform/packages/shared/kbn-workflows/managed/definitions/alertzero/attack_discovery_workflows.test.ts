@@ -3595,6 +3595,9 @@ describe('Attack Discovery worker chain', () => {
           'attach_discovery',
           'attach_alerts',
           'journal_evidence_attached',
+          'collect_impact_entities',
+          'attach_impact',
+          'journal_impact_recorded',
           'tag_correlated_alerts',
           'journal_alerts_retired',
         ]);
@@ -3650,8 +3653,14 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 2 for the journal notes', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(2);
+      it('bumps the attach workflow to version 3 so a continuation records impact', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(3);
+      });
+
+      it('records the continuation hosts and users on the matched investigation', () => {
+        expect(stepIn(attachSteps, 'attach_impact')?.with?.conversationId).toBe(
+          '{{ inputs.investigation_id }}'
+        );
       });
 
       it('does not run FP/TP analysis', () => {

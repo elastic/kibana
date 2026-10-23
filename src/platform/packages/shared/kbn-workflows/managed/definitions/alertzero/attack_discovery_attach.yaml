@@ -71,6 +71,7 @@ consts:
   no_alert_ids: []
   alerts_per_attachment: 20
   ad_correlated_tag: az:ad_correlated
+  impact_entity_cap: 50
 steps:
   # Create-or-409. A same-run sibling can arrive before the canonical review; the
   # review's own create then 409s onto this conversation. A 409 here is that race
@@ -157,6 +158,46 @@ steps:
           Attempted attachment of Attack Discovery {{ inputs.attack_discovery_id }}
           and {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection
           alert(s). See the attachment list for what landed.
+    on-failure:
+      continue: true
+
+  # A continuation no longer gets its own review, so the hosts and users its alerts
+  # add have to be recorded here. Merged by id onto the impact already stored.
+  - name: collect_impact_entities
+    type: security.getAlertEntities
+    if: "${{ inputs.alert_ids != blank }}"
+    timeout: "60s"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      max_entities: "${{ consts.impact_entity_cap }}"
+    on-failure:
+      continue: true
+
+  - name: attach_impact
+    type: investigations.attachImpact
+    if: "${{ steps.collect_impact_entities.output.entities != blank }}"
+    with:
+      conversationId: "{{ inputs.investigation_id }}"
+      entities: "${{ steps.collect_impact_entities.output.entities }}"
+    on-failure:
+      continue: true
+
+  - name: journal_impact_recorded
+    type: workflow.execute
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigation_id }}"
+        message: >-
+          {% if steps.attach_impact.output.entities != blank %}Recorded impact:
+          {{ steps.collect_impact_entities.output.entities | size }} host(s) and user(s).{% elsif
+          steps.attach_impact.error != blank %}Could not record impact. See attach execution
+          {{ execution.id }}.{% elsif steps.collect_impact_entities.error != blank %}Could not read
+          the correlated alerts' hosts and users, so no impact was recorded. See attach execution
+          {{ execution.id }}.{% elsif inputs.alert_ids == blank %}No impact recorded: the attach
+          was given no correlated alerts.{% else %}No impact recorded: the correlated alert(s)
+          name no host or user.{% endif %}
     on-failure:
       continue: true
 

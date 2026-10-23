@@ -47,6 +47,8 @@ export interface AttackSignals extends AttackMatchFields {
 export interface StoredFingerprint extends AttackMatchFields {
   id: string;
   investigationId: string;
+  /** Uncapped count. `alertIds` itself stops at `STORED_ALERT_ID_CAP`. */
+  alertCount?: number;
   expiresAt?: string;
   seqNo?: number;
   primaryTerm?: number;
@@ -269,9 +271,15 @@ const hourBucket = (iso: string | undefined): string => {
 
 /**
  * Create-only document id. Attacks with no host and no user include the attack id so
- * unrelated entity-less attacks do not share one document.
+ * unrelated entity-less attacks do not share one document. `distinctKey` is the new
+ * Investigation id when that canonical key already belongs to a fingerprint this run
+ * must not join.
  */
-export const fingerprintId = (spaceId: string, attack: AttackSignals): string => {
+export const fingerprintId = (
+  spaceId: string,
+  attack: AttackSignals,
+  distinctKey?: string
+): string => {
   const hosts = uniqueSorted(attack.hostEntityIds);
   const users = uniqueSorted(attack.userEntityIds);
   const material =
@@ -280,7 +288,9 @@ export const fingerprintId = (spaceId: string, attack: AttackSignals): string =>
       : `${spaceId}|${hosts.join(',')}|${users.join(',')}|${uniqueSorted(attack.tactics).join(
           ','
         )}|${hourBucket(attack.firstAlertAt)}`;
-  return createHash('sha256').update(material).digest('hex');
+  const keyed =
+    distinctKey === undefined || distinctKey.length === 0 ? material : `${material}|${distinctKey}`;
+  return createHash('sha256').update(keyed).digest('hex');
 };
 
 /**
@@ -317,7 +327,10 @@ export const disposition = (
 ): Disposition => {
   const freshInvestigationId = investigationIdFromAttackId(canonical.attackId);
   const matched = stored !== undefined && group.some((member) => sameAttack(member, stored, false));
-  if (!matched || stored === undefined) {
+  // A missing Investigation is not a match to attach to. The fingerprint can outlive
+  // the review that was supposed to create it, and attaching would open an Investigation
+  // that never runs FP/TP.
+  if (!matched || stored === undefined || investigation === undefined) {
     return {
       kind: 'review',
       investigationId: freshInvestigationId,

@@ -357,6 +357,14 @@ describe('fingerprintId', () => {
     expect(fingerprintId('default', left)).toBe(fingerprintId('default', right));
   });
 
+  it('returns a different id when the canonical key is already taken', () => {
+    const attackSignals = attack();
+
+    expect(fingerprintId('default', attackSignals, 'new-investigation')).not.toBe(
+      fingerprintId('default', attackSignals)
+    );
+  });
+
   it('returns different ids when neither attack has a host or a user', () => {
     const left = attack({ hostEntityIds: [], userEntityIds: [], attackId: 'attack-a' });
     const right = attack({ hostEntityIds: [], userEntityIds: [], attackId: 'attack-b' });
@@ -424,6 +432,13 @@ describe('disposition', () => {
     );
 
     expect(decision.kind).toBe('attach');
+  });
+
+  it('returns a new review when the matched Investigation cannot be read', () => {
+    const decision = disposition(canonical, stored(), undefined);
+
+    expect(decision.kind).toBe('review');
+    expect(decision.investigationId).toBe(investigationIdFromAttackId(canonical.attackId));
   });
 
   it('returns attach and tags an open in-analysis investigation', () => {

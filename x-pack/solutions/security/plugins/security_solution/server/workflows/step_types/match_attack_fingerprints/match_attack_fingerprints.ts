@@ -19,12 +19,14 @@ import type { AttackSignals, Disposition, InvestigationMeta, StoredFingerprint }
 import {
   FINGERPRINT_TTL_MS,
   STORED_ALERT_ID_CAP,
+  alertOverlap,
   bestStoredForGroup,
   chainSpan,
   clusterNewAttacks,
   disposition,
   fingerprintId,
   journalAlertsRetired,
+  sameAttack,
   tagCorrelatedAlerts,
   uniqueSorted,
 } from './cluster';
@@ -39,7 +41,6 @@ const SEARCH_PAGE_CAP = 20;
 const ENRICH_CONCURRENCY = 4;
 const TERMS_CAP = 100;
 const EXTEND_ATTEMPTS = 3;
-const CONTENT_MAX = 4000;
 
 export interface MatchReview {
   attack_discovery_id: string;
@@ -120,8 +121,6 @@ const statusCode = (error: unknown): number | undefined => {
 
 const isConflict = (error: unknown): boolean =>
   statusCode(error) === 409 || /version_conflict_engine_exception/i.test(errorText(error));
-
-const isInferenceError = (error: unknown): boolean => /inference/i.test(errorText(error));
 
 const parseAttack = (raw: Record<string, unknown>): AttackSignals | undefined => {
   const attackId = stringField(raw, 'kibana.alert.uuid');
@@ -267,6 +266,7 @@ const toStored = (hit: {
     lastAlertAt:
       typeof attributes.last_alert_at === 'string' ? attributes.last_alert_at : undefined,
     expiresAt: typeof source.expires_at === 'string' ? source.expires_at : undefined,
+    alertCount: typeof attributes.alert_count === 'number' ? attributes.alert_count : undefined,
     seqNo: hit._seq_no,
     primaryTerm: hit._primary_term,
   };
@@ -353,59 +353,13 @@ const searchFingerprints = async (
         searchAfter = sort;
       }
     }
-    if (byId.size > 0) {
-      return [...byId.values()];
-    }
+    return [...byId.values()];
   } catch (error) {
     if (!isNotFoundError(error)) {
       logger.warn(`Attack fingerprint search failed: ${errorText(error)}`);
     }
     return [];
   }
-
-  // Attribute terms are the match. Semantic retrieval only runs when they found
-  // nothing, and a failure here leaves the run on alert and entity comparison alone.
-  try {
-    const response = await esClient.search(
-      {
-        index: ATTACK_FINGERPRINT_INDEX,
-        ignore_unavailable: true,
-        seq_no_primary_term: true,
-        timeout: '2s',
-        size: SEARCH_SIZE,
-        query: {
-          bool: {
-            filter: [
-              { term: { type: ATTACK_FINGERPRINT_TYPE } },
-              { term: { 'attributes.space_id': spaceId } },
-              { range: { expires_at: { gt: now } } },
-            ],
-            should: attacks.slice(0, 5).map((attack) => ({
-              semantic: { field: 'content.semantic', query: signatureOf(attack).slice(0, 500) },
-            })),
-            minimum_should_match: 1,
-          },
-        } as QueryDslQueryContainer,
-      },
-      { signal: abortSignal }
-    );
-    return (response.hits?.hits ?? [])
-      .map((hit) => toStored(hit as { _id?: string; _source?: Record<string, unknown> }))
-      .filter((item): item is StoredFingerprint => item !== undefined);
-  } catch (error) {
-    logger.warn(`Attack fingerprint semantic search failed: ${errorText(error)}`);
-    return [];
-  }
-};
-
-const signatureOf = (attack: AttackSignals): string => {
-  const line = `host:${uniqueSorted(attack.hostEntityIds).join(' ')} user:${uniqueSorted(
-    attack.userEntityIds
-  ).join(' ')} tactic:${uniqueSorted(attack.tactics).join(' ')} alerts:${
-    attack.firstAlertAt ?? ''
-  }/${attack.lastAlertAt ?? ''}`;
-  const summary = attack.fingerprintSummary ?? attack.summaryMarkdown;
-  return `${line}\n${summary}`.slice(0, CONTENT_MAX);
 };
 
 const fingerprintDocument = (
@@ -414,8 +368,7 @@ const fingerprintDocument = (
   spaceId: string,
   investigationId: string,
   parentRunId: string | undefined,
-  now: Date,
-  includeContent: boolean
+  now: Date
 ) => {
   const last = attack.lastAlertAt === undefined ? Number.NaN : Date.parse(attack.lastAlertAt);
   const expiresAt = new Date(
@@ -430,7 +383,6 @@ const fingerprintDocument = (
     expires_at: expiresAt,
     // Context Engine shows a document with no privileges element in every space.
     permissions: { kibana: { privileges: [{ space: spaceId }] } },
-    ...(includeContent ? { content: signatureOf(attack) } : {}),
     attributes: {
       space_id: spaceId,
       investigation_id: investigationId,
@@ -448,24 +400,11 @@ const fingerprintDocument = (
   };
 };
 
-const readStoredInvestigationId = async (
-  esClient: ElasticsearchClient,
-  id: string,
-  abortSignal: AbortSignal | undefined
-): Promise<string | undefined> => {
-  const response = await esClient.get(
-    { index: ATTACK_FINGERPRINT_INDEX, id },
-    { signal: abortSignal }
-  );
-  const source = response._source as Record<string, unknown> | undefined;
-  const attributes = (source?.attributes ?? {}) as Record<string, unknown>;
-  return typeof attributes.investigation_id === 'string' ? attributes.investigation_id : undefined;
-};
-
 /**
- * Writes the canonical fingerprint with `op_type: create`. A 409 means another run won
- * the same entity key; the caller attaches to that document's Investigation.
- * An inference failure is retried without `content` so the attributes still persist.
+ * Writes the fingerprint with `op_type: create`. A 409 means that document id is taken.
+ * The caller attaches only when the existing record is still a match it should join.
+ * `distinctKey` gives a new review its own document when the canonical id belongs to
+ * a fingerprint this run must not join.
  */
 const createFingerprint = async (
   esClient: ElasticsearchClient,
@@ -475,66 +414,56 @@ const createFingerprint = async (
   parentRunId: string | undefined,
   now: Date,
   abortSignal: AbortSignal | undefined,
-  logger: StepHandlerContext['logger']
-): Promise<{ conflictInvestigationId?: string }> => {
+  logger: StepHandlerContext['logger'],
+  distinctKey?: string
+): Promise<{ conflict: boolean }> => {
   const canonical = group[0];
+  if (canonical === undefined) {
+    return { conflict: false };
+  }
   const span = chainSpan(group);
-  const id = fingerprintId(spaceId, canonical);
-  const write = (includeContent: boolean) =>
-    esClient.index(
+  const id = fingerprintId(spaceId, canonical, distinctKey);
+  try {
+    await esClient.index(
       {
         index: ATTACK_FINGERPRINT_INDEX,
         id,
         op_type: 'create',
-        document: fingerprintDocument(
-          span,
-          id,
-          spaceId,
-          investigationId,
-          parentRunId,
-          now,
-          includeContent
-        ),
+        document: fingerprintDocument(span, id, spaceId, investigationId, parentRunId, now),
       },
       { signal: abortSignal }
     );
-
-  try {
-    await write(true);
-    return {};
+    return { conflict: false };
   } catch (error) {
     if (isConflict(error)) {
-      const conflictInvestigationId = await readStoredInvestigationId(
-        esClient,
-        id,
-        abortSignal
-      ).catch(() => undefined);
-      return { conflictInvestigationId };
+      return { conflict: true };
     }
-    if (!isInferenceError(error)) {
-      logger.warn(`Attack fingerprint write failed for ${canonical.attackId}: ${errorText(error)}`);
-      return {};
-    }
-  }
-
-  try {
-    await write(false);
-    return {};
-  } catch (error) {
-    if (isConflict(error)) {
-      const conflictInvestigationId = await readStoredInvestigationId(
-        esClient,
-        id,
-        abortSignal
-      ).catch(() => undefined);
-      return { conflictInvestigationId };
-    }
-    logger.warn(
-      `Attack fingerprint attribute write failed for ${canonical.attackId}: ${errorText(error)}`
-    );
-    return {};
+    logger.warn(`Attack fingerprint write failed for ${canonical.attackId}: ${errorText(error)}`);
+    return { conflict: false };
   }
 };
+
+/**
+ * A create conflict is the race for one fingerprint only when this run was about to
+ * open a new review and the stored record still matches across runs. A closed false
+ * positive with new alerts, a host-only repeat, and a missing Investigation keep the
+ * decision `disposition` already made.
+ */
+const canAdoptConflict = (
+  decision: Disposition,
+  stored: StoredFingerprint | undefined,
+  investigation: InvestigationMeta | undefined,
+  group: readonly AttackSignals[]
+): stored is StoredFingerprint =>
+  decision.kind === 'review' &&
+  stored !== undefined &&
+  investigation !== undefined &&
+  !(
+    investigation.status === 'closed' &&
+    investigation.closeReason === 'false_positive' &&
+    !group.some((member) => alertOverlap(member.alertIds, stored.alertIds))
+  ) &&
+  group.some((member) => sameAttack(member, stored, false));
 
 const extensionDoc = (current: StoredFingerprint, span: AttackSignals, now: Date) => {
   const lastMs = span.lastAlertAt === undefined ? Number.NaN : Date.parse(span.lastAlertAt);
@@ -553,11 +482,13 @@ const extensionDoc = (current: StoredFingerprint, span: AttackSignals, now: Date
     .sort()
     .at(-1);
   const alertIds = uniqueSorted([...current.alertIds, ...span.alertIds]);
+  const storedIds = new Set(current.alertIds);
+  const added = uniqueSorted(span.alertIds).filter((id) => !storedIds.has(id)).length;
   return {
     expires_at: nextExpires,
     attributes: {
       alert_ids: alertIds.slice(0, STORED_ALERT_ID_CAP),
-      alert_count: alertIds.length,
+      alert_count: (current.alertCount ?? current.alertIds.length) + added,
       host_entity_ids: uniqueSorted([...current.hostEntityIds, ...span.hostEntityIds]).slice(
         0,
         STORED_ALERT_ID_CAP
@@ -827,19 +758,39 @@ export const matchAttackFingerprints = async ({
         abortSignal,
         logger
       );
-      if (written.conflictInvestigationId !== undefined) {
-        const meta = await readInvestigation(
-          contextManager,
-          written.conflictInvestigationId,
-          logger
-        );
-        decision = {
-          kind: 'attach',
-          investigationId: written.conflictInvestigationId,
-          relatedInvestigationId: '',
-          journalAlertsRetired: journalAlertsRetired(meta),
-          tagCorrelatedAlerts: tagCorrelatedAlerts(meta),
-        };
+      const canonical = group[0];
+      if (written.conflict && canonical !== undefined) {
+        const conflicting = await readStoredFingerprint(
+          esClient,
+          fingerprintId(spaceId, canonical),
+          abortSignal
+        ).catch(() => undefined);
+        const meta =
+          conflicting === undefined
+            ? undefined
+            : await readInvestigation(contextManager, conflicting.investigationId, logger);
+        if (canAdoptConflict(decision, conflicting, meta, group)) {
+          decision = {
+            kind: 'attach',
+            investigationId: conflicting.investigationId,
+            relatedInvestigationId: '',
+            journalAlertsRetired: journalAlertsRetired(meta),
+            tagCorrelatedAlerts: tagCorrelatedAlerts(meta),
+          };
+          await extendFingerprint(esClient, conflicting, group, now, abortSignal, logger);
+        } else {
+          await createFingerprint(
+            esClient,
+            group,
+            spaceId,
+            decision.investigationId,
+            parentRunId,
+            now,
+            abortSignal,
+            logger,
+            decision.investigationId
+          );
+        }
       }
     }
 

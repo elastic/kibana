@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { getAlertEntities } from '../get_alert_entities_step/get_alert_entities';
 import { ATTACK_FINGERPRINT_INDEX, matchAttackFingerprints } from './match_attack_fingerprints';
@@ -112,7 +113,6 @@ describe('matchAttackFingerprints', () => {
         index: ATTACK_FINGERPRINT_INDEX,
         op_type: 'create',
         document: expect.objectContaining({
-          content: expect.stringContaining('host:host-1'),
           permissions: { kibana: { privileges: [{ space: 'default' }] } },
         }),
       }),
@@ -310,7 +310,19 @@ describe('matchAttackFingerprints', () => {
   it('returns an attachment when the fingerprint create conflicts', async () => {
     const index = jest.fn().mockRejectedValue({ statusCode: 409, message: 'conflict' });
     const get = jest.fn().mockResolvedValue({
-      _source: { attributes: { investigation_id: '22222222-2222-8222-8222-222222222222' } },
+      _id: 'stored-fp',
+      _source: {
+        id: 'stored-fp',
+        attributes: {
+          investigation_id: '22222222-2222-8222-8222-222222222222',
+          alert_ids: ['a1', 'a2'],
+          host_entity_ids: ['host-1'],
+          user_entity_ids: ['user-1'],
+          mitre_attack_tactics: ['TA0008'],
+          first_alert_at: '2026-10-21T10:00:00.000Z',
+          last_alert_at: '2026-10-21T10:30:00.000Z',
+        },
+      },
     });
     const { esClient, contextManager } = createHarness({
       index,
@@ -505,7 +517,6 @@ describe('matchAttackFingerprints', () => {
       expect.objectContaining({
         document: expect.objectContaining({
           title: 'Excel on SRVWIN01',
-          content: expect.stringContaining('host:SRVWIN01'),
           attributes: expect.objectContaining({
             host_entity_ids: ['SRVWIN01'],
             user_entity_ids: ['Administrator@SRVWIN01'],
@@ -514,18 +525,107 @@ describe('matchAttackFingerprints', () => {
       }),
       expect.anything()
     );
-    const written = index.mock.calls[0]?.[0] as { document: { content: string } };
-    expect(written.document.content).toContain('Excel on SRVWIN01 decoded a file.');
+    const written = index.mock.calls[0]?.[0] as { document: { content?: string } };
+    expect(written.document.content).toBeUndefined();
   });
 
-  it('returns a review when the content write fails inference and the attribute write succeeds', async () => {
-    const index = jest.fn(async (params: { document?: { content?: string } }) => {
-      if (params.document?.content !== undefined) {
-        throw new Error('inference timed out');
-      }
-      return { result: 'created' };
+  it('keeps a linked review when the closed false positive already owns the fingerprint id', async () => {
+    const index = jest
+      .fn()
+      .mockRejectedValueOnce({ statusCode: 409, message: 'conflict' })
+      .mockResolvedValue({ result: 'created' });
+    const { esClient, contextManager } = createHarness({
+      hits: [fingerprintHit({ alert_ids: ['old-1', 'old-2'] })],
+      index,
+      get: jest.fn().mockResolvedValue({
+        _id: 'stored-fp',
+        _source: {
+          id: 'stored-fp',
+          attributes: {
+            investigation_id: '11111111-1111-8111-8111-111111111111',
+            alert_ids: ['old-1', 'old-2'],
+            host_entity_ids: ['host-1'],
+            user_entity_ids: ['user-1'],
+            mitre_attack_tactics: ['TA0008'],
+            first_alert_at: '2026-10-21T10:00:00.000Z',
+            last_alert_at: '2026-10-21T10:30:00.000Z',
+          },
+        },
+      }),
+      conversation: { metadata: { status: 'closed', close_reason: 'false_positive', verdict: '' } },
     });
-    const { esClient, contextManager } = createHarness({ index });
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['new-1', 'new-2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews[0]?.related_investigation_id).toBe(
+      '11111111-1111-8111-8111-111111111111'
+    );
+  });
+
+  it('does not attach a later host-only attack when the fingerprint id collides', async () => {
+    getAlertEntitiesMock.mockResolvedValue({
+      entities: [{ id: 'host-1', name: 'host-1', type: 'host' }],
+      total: 1,
+      truncated: false,
+    });
+    const index = jest
+      .fn()
+      .mockRejectedValueOnce({ statusCode: 409, message: 'conflict' })
+      .mockResolvedValue({ result: 'created' });
+    const { esClient, contextManager } = createHarness({
+      index,
+      get: jest.fn().mockResolvedValue({
+        _id: 'stored-fp',
+        _source: {
+          id: 'stored-fp',
+          attributes: {
+            investigation_id: '11111111-1111-8111-8111-111111111111',
+            alert_ids: ['old-1', 'old-2'],
+            host_entity_ids: ['host-1'],
+            user_entity_ids: [],
+            mitre_attack_tactics: ['TA0008'],
+            first_alert_at: '2026-10-21T10:00:00.000Z',
+            last_alert_at: '2026-10-21T10:30:00.000Z',
+          },
+        },
+      }),
+    });
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['new-1', 'new-2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews).toHaveLength(1);
+  });
+
+  it('reviews a match whose Investigation was never created', async () => {
+    const index = jest.fn().mockResolvedValue({ result: 'created' });
+    const { esClient, contextManager } = createHarness({
+      hits: [fingerprintHit()],
+      index,
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({
+        status: 404,
+        headers: {},
+        body: {},
+        message: 'Not Found',
+      })
+    );
 
     const output = await matchAttackFingerprints({
       attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
@@ -536,10 +636,29 @@ describe('matchAttackFingerprints', () => {
       spaceId: 'default',
     });
 
+    expect(output.attachments).toEqual([]);
     expect(output.reviews).toHaveLength(1);
-    expect(index).toHaveBeenLastCalledWith(
+  });
+
+  it('keeps the stored alert count when the saved id list is capped', async () => {
+    const { esClient, contextManager, update } = createHarness({
+      hits: [fingerprintHit({ alert_ids: ['a1', 'a2'], alert_count: 150 })],
+    });
+
+    await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['n1', 'n2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
-        document: expect.not.objectContaining({ content: expect.anything() }),
+        doc: expect.objectContaining({
+          attributes: expect.objectContaining({ alert_count: 152 }),
+        }),
       }),
       expect.anything()
     );

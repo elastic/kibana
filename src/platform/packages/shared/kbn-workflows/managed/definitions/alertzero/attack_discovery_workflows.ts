@@ -87,15 +87,18 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  *
  * Version 2 journals the match, the attachment attempt, and alert retirement as
  * separate notes. The retirement note follows the review: it is written only for
- * a handed-off true positive or inconclusive. The YAML change rolls out through
- * `definitionHash`; the bump is the deliberate signal.
+ * a handed-off true positive or inconclusive.
+ *
+ * Version 3 records the continuation's hosts and users on the Investigation,
+ * because an attached attack no longer gets its own review. The YAML change rolls
+ * out through `definitionHash`; the bump is the deliberate signal.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: ATTACK_DISCOVERY_ATTACH_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
