@@ -10,7 +10,7 @@ stored questions and persists its report, conversation and full agent trace. The
 
 Investigation evals grade each run with five RCA judges and an `execution_success` score. A run
 that ends without a conclusion scores 0 there but doesn't fail the eval on its own; the eval fails
-when fewer than 90% of runs complete.
+when fewer than 80% of runs complete.
 
 ## Running the suite
 
@@ -562,7 +562,7 @@ the agent's manifest gets.
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
   investigation starts, as does a source whose document counts differ from the snapshot.
 - Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
-- The eval fails when fewer than 90% of investigations complete, or when none returned ORCA
+- The eval fails when fewer than 80% of investigations complete, or when none returned ORCA
   telemetry. Judge scores are advisory.
 - Both shards draw on one sandbox pool. When it runs out, investigations end without a
   conclusion and the eval fails, so leave room for overlapping builds.

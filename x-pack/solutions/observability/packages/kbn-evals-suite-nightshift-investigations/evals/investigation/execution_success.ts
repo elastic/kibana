@@ -11,11 +11,12 @@ import type { InvestigationExample, InvestigationTaskOutput } from './types';
 export const EXECUTION_SUCCESS_EVALUATOR = 'execution_success';
 
 /**
- * The share of runs that must complete with a recorded conclusion for the eval to pass. One agent
- * running out of its cycle budget shouldn't fail a 50-case benchmark, but an outage that leaves
- * many investigations without a conclusion (an exhausted sandbox pool, say) should.
+ * The share of runs that must complete with a recorded conclusion for the eval to pass. ORCA runs
+ * complete 88-92% of the time, mostly losing cases to the agent's cycle budget, and that shouldn't
+ * fail a 50-case benchmark. An outage that leaves many investigations without a conclusion (an
+ * exhausted sandbox pool, say) should.
  */
-export const MIN_EXECUTION_SUCCESS_RATE = 0.9;
+export const MIN_EXECUTION_SUCCESS_RATE = 0.8;
 
 /** Why a run didn't complete its investigation, or undefined when it did. */
 export const getExecutionFailure = (

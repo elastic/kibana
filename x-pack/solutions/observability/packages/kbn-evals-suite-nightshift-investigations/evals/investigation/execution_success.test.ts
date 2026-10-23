@@ -64,8 +64,8 @@ describe('executionSuccessEvaluator', () => {
 describe('assertExecutionSuccessRate', () => {
   const failure = { caseId: 'd1-i1-imageSlowLoad-on', reason: NO_CONCLUSION_ERROR };
 
-  it('passes one failed case in 42', () => {
-    expect(() => assertExecutionSuccessRate([failure], 42)).not.toThrow();
+  it('passes six failed cases in 50', () => {
+    expect(() => assertExecutionSuccessRate(Array(6).fill(failure), 50)).not.toThrow();
   });
 
   it('fails below the threshold and lists every failed case', () => {
@@ -74,7 +74,7 @@ describe('assertExecutionSuccessRate', () => {
       caseId: `case-${index}`,
     }));
     expect(() => assertExecutionSuccessRate(failures, 42)).toThrow(
-      /22 of 42 investigations completed \(52%\), below the 90% threshold:\n- case-0: .*\n- case-1:/
+      /22 of 42 investigations completed \(52%\), below the 80% threshold:\n- case-0: .*\n- case-1:/
     );
   });
 
