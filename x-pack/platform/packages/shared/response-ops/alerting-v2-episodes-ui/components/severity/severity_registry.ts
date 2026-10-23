@@ -17,7 +17,6 @@ export interface SeverityRegistryEntry {
   label: string;
   color: NonNullable<EuiBadgeProps['color']>;
   sortRank: number;
-  filterDotColor?: string;
 }
 
 /** Lookup map keyed by severity value for O(1) access. */
@@ -31,23 +30,11 @@ const EPISODE_SEVERITY_LABELS: Record<EpisodeSeverity, string> = {
   [EpisodeSeverity.Critical]: i18n.EPISODE_SEVERITY_CRITICAL_LABEL,
 };
 
-// Resolved theme color keys per severity (rather than named tokens like `danger`) so the filter
-// dot keeps its color when its row is highlighted/selected: `EuiIcon` applies custom color values
-// inline, which beats `EuiSelectable`'s highlighted-row recolor.
-const BUILTIN_DOT_COLORS: Record<EpisodeSeverity, string> = {
-  [EpisodeSeverity.Critical]: 'textDanger',
-  [EpisodeSeverity.High]: 'textRisk',
-  [EpisodeSeverity.Medium]: 'textWarning',
-  [EpisodeSeverity.Low]: 'textNeutral',
-  [EpisodeSeverity.Info]: 'textParagraph',
-};
-
 const BUILTIN_ENTRIES: SeverityRegistryEntry[] = EPISODE_SEVERITIES.map((severity) => ({
   value: severity,
   label: EPISODE_SEVERITY_LABELS[severity],
   color: EPISODE_SEVERITY_BADGE_COLORS[severity],
   sortRank: EPISODE_SEVERITY_SORT_RANK[severity],
-  filterDotColor: BUILTIN_DOT_COLORS[severity],
 }));
 
 /**
@@ -63,7 +50,6 @@ export const buildSeverityRegistry = (
     label: ext.label,
     color: ext.color,
     sortRank: ext.sortRank,
-    filterDotColor: ext.filterDotColor,
   }));
 
   return [...BUILTIN_ENTRIES, ...extensionEntries].sort((a, b) => a.sortRank - b.sortRank);

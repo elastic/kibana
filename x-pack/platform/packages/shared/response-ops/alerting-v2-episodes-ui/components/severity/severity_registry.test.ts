@@ -44,7 +44,6 @@ describe('severity_registry', () => {
         label: 'Warning',
         color: 'warning',
         sortRank: 4,
-        filterDotColor: 'textWarning',
       });
     });
   });
