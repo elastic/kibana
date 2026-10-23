@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useLatest from 'react-use/lib/useLatest';
@@ -43,6 +43,11 @@ const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
  * until the list shows it, for at most this long.
  */
 const PENDING_START_TIMEOUT_MS = 2 * 60_000;
+
+type AlertInvestigationStart =
+  | { status: 'starting' }
+  | { status: 'started'; id: string; at: number }
+  | null;
 
 const getAlertInvestigationsQuery = (alertId: string) => ({
   subject_type: 'alert',
@@ -97,7 +102,16 @@ export const useInvestigateAlert = ({
   const statusQueryKey = ['alertInvestigations', basePath, alertId] as const;
   const queryClient = useQueryClient();
   const { data: availability } = useInvestigationAvailability();
-  const [pendingStart, setPendingStart] = useState<{ id: string; at: number } | undefined>();
+  const startQueryKey = ['alertInvestigationStart', basePath, alertId] as const;
+  // The responsive page header remounts its actions at breakpoints. Keep starts in the cache
+  // until the shared list catches up so remounting cannot lose the link or allow another start.
+  const { data: start } = useQuery<AlertInvestigationStart>({
+    queryKey: startQueryKey,
+    initialData: null,
+    enabled: false,
+    cacheTime: PENDING_START_TIMEOUT_MS,
+  });
+  const pendingStart = start?.status === 'started' ? start : undefined;
   const canInvestigate = Boolean(enabled && alertId && investigationsClient && http);
   const isAwaitingStartIn = (data: ListInvestigationsResponse | undefined): boolean =>
     pendingStart !== undefined &&
@@ -124,16 +138,17 @@ export const useInvestigateAlert = ({
     []
   );
   const viewedInvestigationIdsRef = useLatest(viewedInvestigationIds);
-  const [isStarting, setIsStarting] = useState(false);
+  const isStarting = start?.status === 'starting';
   const latestInvestigation = pickAlertInvestigation(investigations?.results);
-  const hasOngoingInvestigation =
-    latestInvestigation?.in_progress === true || isAwaitingStartIn(investigations);
+  const isAwaitingStart = isAwaitingStartIn(investigations);
+  const hasOngoingInvestigation = latestInvestigation?.in_progress === true || isAwaitingStart;
   const isInvestigating = isStarting || hasOngoingInvestigation;
   // In the vocabulary of the run statuses this replaced: an investigation nothing works on reads as
   // completed.
-  const viewedInvestigationState = latestInvestigation?.in_progress ? 'running' : 'completed';
+  const viewedInvestigationState = hasOngoingInvestigation ? 'running' : 'completed';
   const showInvestigateAction = availability?.available === true;
-  const investigationId = alertId && latestInvestigation ? latestInvestigation.id : '';
+  const listedInvestigationId = alertId && isStatusLoaded ? latestInvestigation?.id : undefined;
+  const investigationId = isAwaitingStart ? pendingStart?.id : listedInvestigationId;
   const viewInvestigationUrl = useMemo(
     () => (investigationId ? investigationLocator?.getRedirectUrl({ investigationId }) : undefined),
     [investigationId, investigationLocator]
@@ -188,9 +203,16 @@ export const useInvestigateAlert = ({
   }
 
   const handleInvestigate = async () => {
-    if (!alertId || !investigationsClient || isInvestigating) return;
+    if (
+      !alertId ||
+      !investigationsClient ||
+      isInvestigating ||
+      queryClient.getQueryData<AlertInvestigationStart>(startQueryKey)?.status === 'starting'
+    ) {
+      return;
+    }
 
-    setIsStarting(true);
+    queryClient.setQueryData<AlertInvestigationStart>(startQueryKey, { status: 'starting' });
     try {
       // An open investigation that already holds the alert is continued, not duplicated.
       const { investigation_id: startedId } = await investigationsClient.fetch(
@@ -200,7 +222,11 @@ export const useInvestigateAlert = ({
           params: { body: { subject: { type: 'alert', id: alertId } } },
         }
       );
-      setPendingStart({ id: startedId, at: Date.now() });
+      queryClient.setQueryData<AlertInvestigationStart>(startQueryKey, {
+        status: 'started',
+        id: startedId,
+        at: Date.now(),
+      });
       const startedInvestigationUrl = investigationLocator?.getRedirectUrl({
         investigationId: startedId,
       });
@@ -239,14 +265,13 @@ export const useInvestigateAlert = ({
       await queryClient.invalidateQueries(statusQueryKey);
       onInvestigate?.();
     } catch (error) {
+      queryClient.setQueryData<AlertInvestigationStart>(startQueryKey, null);
       services?.notifications?.toasts?.addDanger({
         title: i18n.translate('xpack.observability.alerts.investigationFailed', {
           defaultMessage: 'Failed to start investigation',
         }),
         text: error instanceof Error ? error.message : String(error),
       });
-    } finally {
-      setIsStarting(false);
     }
   };
 
@@ -254,8 +279,10 @@ export const useInvestigateAlert = ({
     showInvestigateAction,
     showInvestigateButton,
     showViewInvestigation,
+    hasInvestigation: latestInvestigation !== undefined || isAwaitingStart,
     handleInvestigate,
     isInvestigating,
+    isStarting,
     investigateActionLabel,
     investigateEbtProps: getEbtProps({
       action: EBT_CLICK_ACTIONS.START_INVESTIGATION,
@@ -267,7 +294,7 @@ export const useInvestigateAlert = ({
     viewInvestigationEbtProps: getEbtProps({
       action: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
       element: ebtElement,
-      detail: latestInvestigation ? viewedInvestigationState : undefined,
+      detail: investigationId ? viewedInvestigationState : undefined,
     }),
     markInvestigationViewed,
   };

@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { noop } from 'lodash';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -173,10 +174,11 @@ export function HeaderActions({
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
   const {
+    showInvestigateAction,
     showInvestigateButton,
-    showViewInvestigation,
+    hasInvestigation,
     handleInvestigate,
-    isInvestigating,
+    isStarting,
     investigateActionLabel,
     investigateEbtProps,
     viewInvestigationUrl,
@@ -186,9 +188,14 @@ export function HeaderActions({
   } = useInvestigateAlert({
     alertId,
     ebtElement: 'alertDetailsPageActions',
-    enabled: isPopoverOpen,
     onInvestigate: () => setIsPopoverOpen(false),
   });
+
+  const showViewButton = Boolean(viewInvestigationUrl) && !isStarting;
+  const showHeaderButton =
+    alertId &&
+    showInvestigateAction &&
+    (isStarting || viewInvestigationUrl || (showInvestigateButton && !hasInvestigation));
 
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
@@ -206,6 +213,26 @@ export function HeaderActions({
   return (
     <ObsCasesContext>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        {showHeaderButton && (
+          <EuiFlexItem grow={false}>
+            <AiButton
+              variant="outlined"
+              size="m"
+              iconType="sparkles"
+              isLoading={isStarting}
+              disabled={isStarting}
+              aria-busy={isStarting}
+              href={showViewButton ? viewInvestigationUrl : undefined}
+              onClick={showViewButton ? markInvestigationViewed : handleInvestigate}
+              data-test-subj={
+                showViewButton ? 'alertDetailsViewInvestigation' : 'alertDetailsInvestigate'
+              }
+              {...(showViewButton ? viewInvestigationEbtProps : investigateEbtProps)}
+            >
+              {showViewButton ? viewInvestigationActionLabel : investigateActionLabel}
+            </AiButton>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiPopover
             panelPaddingSize="none"
@@ -257,50 +284,17 @@ export function HeaderActions({
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
 
-                    {isInvestigating && (
+                    {showInvestigateButton && viewInvestigationUrl && (
                       <EuiButtonEmpty
                         size="s"
                         color="text"
-                        isLoading
-                        disabled
-                        data-test-subj="alertDetailsInvestigate"
+                        iconType="inspect"
+                        onClick={handleInvestigate}
+                        data-test-subj="alertDetailsReinvestigate"
+                        {...investigateEbtProps}
                       >
                         <EuiText size="s">{investigateActionLabel}</EuiText>
                       </EuiButtonEmpty>
-                    )}
-
-                    {!isInvestigating && (
-                      <>
-                        {showViewInvestigation && (
-                          <EuiButtonEmpty
-                            size="s"
-                            color="text"
-                            iconType="eye"
-                            href={viewInvestigationUrl}
-                            onClick={() => {
-                              markInvestigationViewed();
-                              handleClosePopover();
-                            }}
-                            data-test-subj="alertDetailsViewInvestigation"
-                            {...viewInvestigationEbtProps}
-                          >
-                            <EuiText size="s">{viewInvestigationActionLabel}</EuiText>
-                          </EuiButtonEmpty>
-                        )}
-
-                        {showInvestigateButton && (
-                          <EuiButtonEmpty
-                            size="s"
-                            color="text"
-                            iconType="inspect"
-                            onClick={handleInvestigate}
-                            data-test-subj="alertDetailsInvestigate"
-                            {...investigateEbtProps}
-                          >
-                            <EuiText size="s">{investigateActionLabel}</EuiText>
-                          </EuiButtonEmpty>
-                        )}
-                      </>
                     )}
 
                     {cases && canAddToCase && (
