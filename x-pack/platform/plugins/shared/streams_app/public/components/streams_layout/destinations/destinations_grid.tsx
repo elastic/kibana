@@ -236,14 +236,16 @@ const DestinationsGridTable = ({
     failureStoreByIndex,
   });
 
-  const toggleExpanded = useCallback((destinationId: string) => {
-    setStatsRequested(true);
+  const toggleExpanded = useCallback((destination: DestinationViewModel) => {
+    if (destination.type !== 's3') {
+      setStatsRequested(true);
+    }
     setExpandedDestinationIds((current) => {
       const next = new Set(current);
-      if (next.has(destinationId)) {
-        next.delete(destinationId);
+      if (next.has(destination.id)) {
+        next.delete(destination.id);
       } else {
-        next.add(destinationId);
+        next.add(destination.id);
       }
       return next;
     });
@@ -274,7 +276,7 @@ const DestinationsGridTable = ({
             <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
-                onClick={() => toggleExpanded(destination.id)}
+                onClick={() => toggleExpanded(destination)}
                 aria-label={ariaLabel}
                 iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                 iconSize="m"

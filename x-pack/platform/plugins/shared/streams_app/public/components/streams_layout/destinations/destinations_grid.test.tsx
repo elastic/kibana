@@ -15,8 +15,13 @@ import {
 } from './destinations_grid';
 import type { ElasticsearchDestinationViewModel, S3DestinationViewModel } from './types';
 
+const mockUseDestinationIndexStats = jest.fn((_options: { enabled: boolean }) => ({}));
 jest.mock('./use_destination_index_stats', () => ({
-  useDestinationIndexStats: () => ({}),
+  useDestinationIndexStats: (options: { enabled: boolean }) =>
+    mockUseDestinationIndexStats(options),
+}));
+jest.mock('./destination_indices_table', () => ({
+  DestinationIndicesTable: () => null,
 }));
 
 const destination = (
@@ -53,11 +58,13 @@ describe('DestinationsGrid', () => {
     prefix: 'otel/',
   };
 
-  it('expands an S3 row to show its bucket, region, prefix and key status', async () => {
+  const renderGrid = (
+    destinations: Array<ElasticsearchDestinationViewModel | S3DestinationViewModel>
+  ) =>
     render(
       <DestinationsGrid
         status="ready"
-        destinations={[s3Destination]}
+        destinations={destinations}
         resolvedIndicesByDestination={{}}
         resolvedIndicesStatus="ready"
         hasActiveFilters={false}
@@ -72,6 +79,15 @@ describe('DestinationsGrid', () => {
       />
     );
 
+  const isStatsEnabled = () => mockUseDestinationIndexStats.mock.lastCall?.[0].enabled;
+
+  beforeEach(() => {
+    mockUseDestinationIndexStats.mockClear();
+  });
+
+  it('expands an S3 row to show its bucket, region, prefix and key status', async () => {
+    renderGrid([s3Destination]);
+
     await userEvent.click(screen.getByRole('button', { name: 'Expand details for Archive' }));
 
     const details = within(screen.getByTestId('streamsS3DestinationDetails'));
@@ -80,5 +96,21 @@ describe('DestinationsGrid', () => {
     expect(details.getByText('otel/')).toBeInTheDocument();
     expect(details.getAllByText('Configured')).toHaveLength(2);
     expect(details.queryByRole('heading')).not.toBeInTheDocument();
+  });
+
+  it('does not fetch index stats when only an S3 row is expanded', async () => {
+    renderGrid([s3Destination, destination()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand details for Archive' }));
+
+    expect(isStatsEnabled()).toBe(false);
+  });
+
+  it('fetches index stats once an Elasticsearch row is expanded', async () => {
+    renderGrid([s3Destination, destination()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand indices for Prod logs' }));
+
+    expect(isStatsEnabled()).toBe(true);
   });
 });
