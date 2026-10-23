@@ -4,6 +4,10 @@ inheritedBy:
   tags:
     - jest-unit-tests
 
+fileGroups:
+  jestConfig:
+    - jest.config.js
+
 tasks:
   jest:
     command: node
@@ -11,7 +15,7 @@ tasks:
       - scripts/jest.js
       - '--passWithNoTests'
       - '--config'
-      - '@files(jest-config)'
+      - '@files(jestConfig)'
     deps:
       # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
       # local/upstream source changes invalidate the jest cache.
