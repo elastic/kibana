@@ -21,6 +21,12 @@ export const REMOVED_DISCOVER_SESSION = i18n.translate(
   }
 );
 
+export const DISCOVER_SESSIONS_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.attachment.savedObject.discoverSessionsCount', {
+    defaultMessage: '{count, plural, one {# Discover session} other {# Discover sessions}}',
+    values: { count },
+  });
+
 export const ADDED_DISCOVER_SESSION = i18n.translate(
   'xpack.cases.attachment.savedObject.addedDiscoverSession',
   {

@@ -7,9 +7,11 @@
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
+import { PREBUILT_PACK_UNAVAILABLE_REASON } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { listPrebuiltPacksRoute } from './list_prebuilt_packs_route';
+import { PREBUILT_PACK_LOOKUP_PAGE_SIZE } from './find_prebuilt_pack_asset';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 jest.mock('../../utils/get_internal_saved_object_client', () => ({
@@ -18,7 +20,7 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
 
 interface FakePack {
   id: string;
-  attributes: { name: string; description?: string; queries: unknown };
+  attributes: { name?: string; description?: string; queries: unknown };
   references: Array<{ type: string; id: string; name: string }>;
 }
 
@@ -56,13 +58,14 @@ describe('listPrebuiltPacksRoute', () => {
     packs = [];
     // Behaves like the saved-objects client: the pack read honours the OR reference filter.
     find = jest.fn(async (options) => {
-      if (options.type === 'osquery-pack-asset') return { saved_objects: assets };
+      if (options.type === 'osquery-pack-asset') {
+        return { total: assets.length, saved_objects: assets };
+      }
 
       const wanted = new Set(options.hasReference.map(({ id }: { id: string }) => id));
+      const savedObjects = packs.filter((pack) => pack.references.some(({ id }) => wanted.has(id)));
 
-      return {
-        saved_objects: packs.filter((pack) => pack.references.some(({ id }) => wanted.has(id))),
-      };
+      return { total: savedObjects.length, saved_objects: savedObjects };
     });
     (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue({ find });
   });
@@ -101,6 +104,7 @@ describe('listPrebuiltPacksRoute', () => {
             name: 'forensic-persistence-elastic',
             description: 'Persistence',
             query_count: 2,
+            copies: 1,
           },
         ],
       },
@@ -171,6 +175,150 @@ describe('listPrebuiltPacksRoute', () => {
     const response = await run();
 
     expect(response.ok).toHaveBeenCalledWith({ body: { data: [] } });
+  });
+
+  it('uses the asset name when linked packs have no name', async () => {
+    assets = [
+      { id: 'asset-a', attributes: { name: 'alpha' } },
+      { id: 'asset-b', attributes: { name: 'zeta' } },
+    ];
+    packs = [
+      { id: 'copy-a', attributes: { queries: [] }, references: [assetRef('asset-a')] },
+      { id: 'copy-b', attributes: { queries: [] }, references: [assetRef('asset-b')] },
+    ];
+    setupRoute();
+
+    const response = await run();
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        data: [
+          expect.objectContaining({ pack_id: 'copy-a', name: 'alpha', asset_name: 'alpha' }),
+          expect.objectContaining({ pack_id: 'copy-b', name: 'zeta', asset_name: 'zeta' }),
+        ],
+      },
+    });
+  });
+
+  it('keeps one row when an asset has more than one copy, marked so the picker can explain the 409', async () => {
+    assets = [
+      { id: 'asset-a', attributes: { name: 'alpha' } },
+      { id: 'asset-b', attributes: { name: 'beta' } },
+    ];
+    packs = [
+      {
+        id: 'copy-a1',
+        attributes: { name: 'alpha-elastic', queries: [] },
+        references: [assetRef('asset-a')],
+      },
+      {
+        id: 'copy-a2',
+        attributes: { name: 'alpha-again', queries: [{ id: 'q' }] },
+        references: [assetRef('asset-a')],
+      },
+      {
+        id: 'copy-b',
+        attributes: { name: 'beta-elastic', queries: [] },
+        references: [assetRef('asset-b')],
+      },
+    ];
+    setupRoute();
+
+    const response = await run();
+
+    const { data } = response.ok.mock.calls[0][0]?.body as {
+      data: Array<{ pack_id: string; copies: number; unavailable_reason?: string }>;
+    };
+    expect(data).toEqual([
+      expect.objectContaining({
+        asset_id: 'asset-a',
+        asset_name: 'alpha',
+        pack_id: 'copy-a1',
+        name: 'alpha-elastic',
+        copies: 2,
+        unavailable_reason: PREBUILT_PACK_UNAVAILABLE_REASON.duplicateCopies,
+      }),
+      expect.objectContaining({
+        asset_id: 'asset-b',
+        pack_id: 'copy-b',
+        copies: 1,
+      }),
+    ]);
+    expect(data[1]).not.toHaveProperty('unavailable_reason');
+  });
+
+  it('marks every asset that shares a package name', async () => {
+    assets = [
+      { id: 'asset-a', attributes: { name: 'alpha' } },
+      { id: 'asset-b', attributes: { name: 'alpha' } },
+      { id: 'asset-c', attributes: { name: 'beta' } },
+    ];
+    packs = [
+      {
+        id: 'copy-a',
+        attributes: { name: 'alpha-a', queries: [] },
+        references: [assetRef('asset-a')],
+      },
+      {
+        id: 'copy-b',
+        attributes: { name: 'alpha-b', queries: [] },
+        references: [assetRef('asset-b')],
+      },
+      {
+        id: 'copy-c',
+        attributes: { name: 'beta', queries: [] },
+        references: [assetRef('asset-c')],
+      },
+    ];
+    setupRoute();
+
+    const response = await run();
+
+    const { data } = response.ok.mock.calls[0][0]?.body as {
+      data: Array<{ asset_id: string; unavailable_reason?: string; copies: number }>;
+    };
+    expect(data).toEqual([
+      expect.objectContaining({
+        asset_id: 'asset-a',
+        copies: 1,
+        unavailable_reason: PREBUILT_PACK_UNAVAILABLE_REASON.duplicateAssetName,
+      }),
+      expect.objectContaining({
+        asset_id: 'asset-b',
+        copies: 1,
+        unavailable_reason: PREBUILT_PACK_UNAVAILABLE_REASON.duplicateAssetName,
+      }),
+      expect.objectContaining({ asset_id: 'asset-c', copies: 1 }),
+    ]);
+  });
+
+  it('returns 500 when the pack page is truncated', async () => {
+    assets = [{ id: 'asset-a', attributes: { name: 'alpha' } }];
+    find.mockImplementation(async (options) => {
+      if (options.type === 'osquery-pack-asset') {
+        return { total: assets.length, saved_objects: assets };
+      }
+
+      return {
+        total: PREBUILT_PACK_LOOKUP_PAGE_SIZE + 1,
+        saved_objects: [
+          {
+            id: 'copy-a',
+            attributes: { name: 'alpha', queries: [] },
+            references: [assetRef('asset-a')],
+          },
+        ],
+      };
+    });
+    setupRoute();
+
+    const response = await run();
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: expect.stringContaining('osquery-pack results were truncated') },
+    });
+    expect(response.ok).not.toHaveBeenCalled();
   });
 
   it('skips an asset without a name', async () => {

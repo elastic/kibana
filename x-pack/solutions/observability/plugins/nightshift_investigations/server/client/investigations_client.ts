@@ -394,6 +394,7 @@ export class NightshiftInvestigationsClient {
     title,
     trigger_type,
     message,
+    timeout_seconds,
     source_ids,
     connector_id,
     context = {},
@@ -509,7 +510,16 @@ export class NightshiftInvestigationsClient {
     };
 
     const executionId = await workflowsManagement.management.runWorkflow(
-      { ...workflow, definition: workflow.definition },
+      {
+        ...workflow,
+        definition:
+          timeout_seconds === undefined
+            ? workflow.definition
+            : {
+                ...workflow.definition,
+                settings: { ...workflow.definition.settings, timeout: `${timeout_seconds}s` },
+              },
+      },
       spaceId,
       inputs,
       this.request,
@@ -548,15 +558,13 @@ export class NightshiftInvestigationsClient {
     executionId: string;
   }): Promise<void> {
     try {
-      const { workflowExecutionIds } = await getOrCreateInvestigationConversation({
+      // Records the run in the creating write. If the run's `_ensure` step created the
+      // conversation first, it already recorded itself, so there is nothing to add.
+      await getOrCreateInvestigationConversation({
         conversations,
         id: investigationId,
+        workflowExecutionId: executionId,
       });
-      if (!workflowExecutionIds.includes(executionId)) {
-        await conversations.patchMetadata(investigationId, {
-          workflow_execution_ids: [...workflowExecutionIds, executionId],
-        });
-      }
     } catch (error) {
       this.logger.warn(
         `Could not create the conversation of investigation "${investigationId}" on start; its run creates it: ${
@@ -733,6 +741,7 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
+      workflowExecutionId: executionId,
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {
