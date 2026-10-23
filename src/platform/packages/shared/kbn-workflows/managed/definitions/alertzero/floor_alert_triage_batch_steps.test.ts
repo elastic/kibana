@@ -780,6 +780,7 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
 
   const renderNote = (contributingFactors: string[]) =>
     renderString(noteTemplate, {
+      kibanaUrl: 'https://kibana.example.com/kbn',
       workflow: { spaceId: 'default' },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
       steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
@@ -795,7 +796,10 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
 
   it('links the Investigation and the execution, and carries the supporting details', () => {
     const note = renderNote(['Signed parent', 'Known admin host']);
-    expect(note).toContain('/s/default/app/agent_builder/conversations/conv-1');
+    // Absolute so the link survives a `server.basePath` and renders outside Kibana (Slack, email).
+    expect(note).toContain(
+      '(https://kibana.example.com/kbn/s/default/app/agent_builder/conversations/conv-1)'
+    );
     expect(note).toContain('(https://kibana.example.com/app/exec/1)');
     expect(note).toContain('**Verdict:** false_positive');
     expect(note).toContain('Signed SCCM parent process.');
