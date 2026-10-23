@@ -9,20 +9,20 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { openLazySystemFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { openVegaEditor } from './open_vega_editor';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 jest.mock('@kbn/presentation-util', () => ({
-  openLazySystemFlyout: jest.fn(() => ({ onClose: new Promise(() => {}), close: jest.fn() })),
+  openLazyFlyout: jest.fn(() => ({ onClose: new Promise(() => {}), close: jest.fn() })),
 }));
 
-const mockOpenLazySystemFlyout = jest.mocked(openLazySystemFlyout);
+const mockOpenLazyFlyout = jest.mocked(openLazyFlyout);
 
 describe('openVegaEditor', () => {
   beforeEach(() => {
-    mockOpenLazySystemFlyout.mockClear();
+    mockOpenLazyFlyout.mockClear();
   });
 
   it('opens a flyout that does not close on outside clicks', () => {
@@ -32,7 +32,7 @@ describe('openVegaEditor', () => {
       loadApi: jest.fn(),
     });
 
-    expect(mockOpenLazySystemFlyout).toHaveBeenCalledWith(
+    expect(mockOpenLazyFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
         flyoutProps: expect.objectContaining({
           focusedPanelId: 'vega-panel',
@@ -44,7 +44,7 @@ describe('openVegaEditor', () => {
 
   it('removes a new panel when the flyout closes while the editor content is loading', async () => {
     let closeFlyout: () => void = () => {};
-    mockOpenLazySystemFlyout.mockReturnValueOnce({
+    mockOpenLazyFlyout.mockReturnValueOnce({
       onClose: new Promise<void>((resolve) => {
         closeFlyout = resolve;
       }),
@@ -68,7 +68,7 @@ describe('openVegaEditor', () => {
       loadApi: async () => api as VegaEmbeddableApi,
       isNewPanel: true,
     });
-    const { loadContent } = mockOpenLazySystemFlyout.mock.calls[0][0];
+    const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
     const content = loadContent({ ariaLabelledBy: 'vegaEditorTitle', closeFlyout: jest.fn() });
 
     await Promise.resolve();
@@ -96,7 +96,7 @@ describe('openVegaEditor', () => {
       loadApi: async () => api as VegaEmbeddableApi,
       isNewPanel: true,
     });
-    const { loadContent } = mockOpenLazySystemFlyout.mock.calls[0][0];
+    const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
 
     await expect(
       loadContent({ ariaLabelledBy: 'vegaEditorTitle', closeFlyout: jest.fn() })

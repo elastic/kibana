@@ -47,27 +47,9 @@ describe('openLazySystemFlyout', () => {
     );
   });
 
-  it('tracks the managed flyout for compatible parents', () => {
-    const parentApi = { openOverlay: jest.fn(), clearOverlays: jest.fn() };
+  it('closes and notifies when loading fails', async () => {
     openLazySystemFlyout({
       core,
-      parentApi,
-      loadContent: async () => <div>Content</div>,
-      flyoutProps: { focusedPanelId: 'panel-1' },
-    });
-
-    expect(parentApi.openOverlay).toHaveBeenCalledWith(overlayRef, {
-      focusedPanelId: 'panel-1',
-    });
-  });
-
-  it('closes, clears tracking, notifies, and restores focus after loading fails', async () => {
-    const parentApi = { openOverlay: jest.fn(), clearOverlays: jest.fn() };
-    const returnFocus = jest.fn();
-    openLazySystemFlyout({
-      core,
-      parentApi,
-      returnFocus,
       loadContent: async () => {
         throw new Error('Failed');
       },
@@ -76,8 +58,24 @@ describe('openLazySystemFlyout', () => {
 
     await waitFor(() => expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1));
     expect(overlayRef.close).toHaveBeenCalledTimes(1);
-    expect(parentApi.clearOverlays).toHaveBeenCalledTimes(1);
-    await waitFor(() => expect(returnFocus).toHaveBeenCalledTimes(1));
+  });
+
+  it('returns focus to the trigger, re-queried after closing re-renders it', async () => {
+    const trigger = document.createElement('button');
+    trigger.id = 'editTrigger';
+    document.body.appendChild(trigger);
+    trigger.focus();
+    openLazySystemFlyout({ core, loadContent: async () => <div>Content</div> });
+
+    openSystemFlyout.mock.calls[0][1]?.onClose?.();
+    // The trigger re-renders after the flyout closes.
+    trigger.remove();
+    const refreshed = document.createElement('button');
+    refreshed.id = 'editTrigger';
+    document.body.appendChild(refreshed);
+
+    await waitFor(() => expect(document.activeElement).toBe(refreshed));
+    refreshed.remove();
   });
 
   it.each(['resolve', 'reject'] as const)('ignores a late %s after closing', async (outcome) => {

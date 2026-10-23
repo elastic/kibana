@@ -52,13 +52,6 @@ export class DashboardAddPanelService extends FtrService {
     await this.clickAddNewPanelFromUIActionLink('Vega');
   }
 
-  /** Opens the Visualize editor for a new TSVB visualization, linked back to the dashboard. */
-  async clickAddTsvb() {
-    this.log.debug('DashboardAddPanel.clickAddTsvb');
-    await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('TSVB');
-  }
-
   async clickAddMapPanel() {
     this.log.debug('DashboardAddPanel.clickAddMapPanel');
     await this.openAddPanelFlyout();

@@ -85,15 +85,10 @@ describe('VegaPlugin', () => {
     return { core, embeddable, expressions, plugin, startCore, startDeps, visualizations };
   };
 
-  const startSetUpPlugin = (
-    setupResult: ReturnType<typeof setup>,
-    isLibraryApiEnabled: boolean
-  ) => {
+  const startSetUpPlugin = (setupResult: ReturnType<typeof setup>, enabledFlags: string[]) => {
     setupResult.startCore.featureFlags.getBooleanValue$ = jest
       .fn()
-      .mockImplementation(
-        (flag: string) => new BehaviorSubject(isLibraryApiEnabled && flag === VEGA_API_ENABLED_FLAG)
-      );
+      .mockImplementation((flag: string) => new BehaviorSubject(enabledFlags.includes(flag)));
     setupResult.plugin.start(setupResult.startCore, {
       data: dataPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
@@ -110,7 +105,7 @@ describe('VegaPlugin', () => {
   it('registers the Vega embeddable definition', async () => {
     const setupResult = setup();
     const { embeddable } = setupResult;
-    startSetUpPlugin(setupResult, false);
+    startSetUpPlugin(setupResult, []);
     const embeddableLoader = jest.mocked(embeddable.registerEmbeddablePublicDefinition).mock
       .calls[0][1];
 
@@ -135,7 +130,7 @@ describe('VegaPlugin', () => {
   describe('Vega library', () => {
     const startPluginWithLibraryApi = async (isLibraryApiEnabled: boolean) => {
       const setupResult = setup();
-      startSetUpPlugin(setupResult, isLibraryApiEnabled);
+      startSetUpPlugin(setupResult, isLibraryApiEnabled ? [VEGA_API_ENABLED_FLAG] : []);
       // The alias waits for the feature flag.
       await Promise.resolve();
       return setupResult;
@@ -197,20 +192,7 @@ describe('VegaPlugin', () => {
   describe('Add from library', () => {
     const startPluginWithFlags = async (enabledFlags: string[]) => {
       const setupResult = setup();
-      setupResult.startCore.featureFlags.getBooleanValue$ = jest
-        .fn()
-        .mockImplementation((flag: string) => new BehaviorSubject(enabledFlags.includes(flag)));
-      setupResult.plugin.start(setupResult.startCore, {
-        data: dataPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-        embeddable: embeddablePluginMock.createStartContract(),
-        expressions: expressionsPluginMock.createStartContract(),
-        inspector: inspectorPluginMock.createStartContract(),
-        uiActions: uiActionsPluginMock.createStartContract(),
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        mapsEms: {} as MapsEmsPluginPublicStart,
-        usageCollection: {} as UsageCollectionStart,
-      });
+      startSetUpPlugin(setupResult, enabledFlags);
       // Registration waits for the feature flags.
       await new Promise(process.nextTick);
       return setupResult;

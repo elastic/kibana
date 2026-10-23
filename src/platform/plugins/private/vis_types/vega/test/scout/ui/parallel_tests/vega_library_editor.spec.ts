@@ -28,16 +28,6 @@ const seedItem = async (kbnClient: KbnClient, spaceId: string, title: string) =>
   return data;
 };
 
-const findItems = async (kbnClient: KbnClient, spaceId: string, title: string) => {
-  const { data } = await kbnClient.request<{ data: Array<VegaItemResponse['data']> }>({
-    method: 'GET',
-    path: `/s/${spaceId}/api/vega`,
-    headers: { 'elastic-api-version': VEGA_API_VERSION },
-    query: { query: `"${title}"` },
-  });
-  return data.data.filter((item) => item.title === title);
-};
-
 spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, () => {
   let counter = 0;
   const getTitle = (name: string) => `Vega library ${name} ${Date.now()}-${counter++}`;
@@ -58,15 +48,15 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
 
       // Nothing changed yet, so there is nothing to save.
-      await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
+      await expect(page.testSubj.locator('vegaLibraryEditorSaveButton')).toBeDisabled();
 
       // The search bar puts its test subject on the query input itself.
       const queryInput = page.testSubj.locator('editorFlyoutSearchBar');
       await queryInput.fill('status:active');
       await queryInput.press('Enter');
-      await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeEnabled();
+      await expect(page.testSubj.locator('vegaLibraryEditorSaveButton')).toBeEnabled();
 
-      await page.testSubj.click('vegaLibraryEditorSaveButtonPrimary');
+      await page.testSubj.click('vegaLibraryEditorSaveButton');
 
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeHidden();
       const { data } = await kbnClient.request<VegaItemResponse>({
@@ -76,29 +66,6 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       });
       expect(data.data.title).toBe(title);
       expect(data.data.query).toStrictEqual({ expression: 'status:active', language: 'kql' });
-    }
-  );
-
-  spaceTest(
-    'saves a copy and leaves the original unchanged',
-    async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
-      const title = getTitle('original');
-      const copyTitle = getTitle('copy');
-      await seedItem(kbnClient, scoutSpace.id, title);
-      await browserAuth.loginAsPrivilegedUser();
-
-      await pageObjects.visualize.goto();
-      await pageObjects.visualize.clickSavedVisualization(title);
-      await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
-
-      await page.testSubj.click('vegaLibraryEditorSaveButtonMenu');
-      await page.testSubj.click('vegaLibraryEditorSaveAsNewButton');
-      await page.testSubj.fill('savedObjectTitle', copyTitle);
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-
-      await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeHidden();
-      expect(await findItems(kbnClient, scoutSpace.id, copyTitle)).toHaveLength(1);
-      expect(await findItems(kbnClient, scoutSpace.id, title)).toHaveLength(1);
     }
   );
 
@@ -142,7 +109,6 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
       await expect(page.testSubj.locator('vegaLibraryEditorReadOnlyBadge')).toBeVisible();
       await expect(page.testSubj.locator('vegaLibraryEditorSaveButton')).toBeHidden();
-      await expect(page.testSubj.locator('vegaLibraryEditorSaveButtonPrimary')).toBeHidden();
     }
   );
 });

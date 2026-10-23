@@ -875,7 +875,7 @@ describe('vegaEmbeddableFactory', () => {
       await api.onEdit();
 
       expect(mockOpenVegaLibraryEditor).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'library-item', allowSaveAsNew: false })
+        expect.objectContaining({ id: 'library-item' })
       );
       expect(mockOpenVegaEditor).not.toHaveBeenCalled();
       expect(api.defaultTitle$?.getValue()).toBe('Updated title');

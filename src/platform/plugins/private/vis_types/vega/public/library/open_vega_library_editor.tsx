@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { openLazySystemFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout, openLazySystemFlyout } from '@kbn/presentation-util';
 import type { VegaEditableState } from '../lib/library_draft';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { vegaTitleInWizard } from '../vega_icon';
@@ -22,32 +22,64 @@ export const openVegaLibraryEditor = async ({
   core,
   deps,
   id,
-  allowSaveAsNew,
   panel,
 }: {
   core: CoreStart;
-  deps: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'>;
+  deps: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch'>;
   id: string;
-  allowSaveAsNew?: boolean;
   /** The dashboard or Canvas panel being edited, which shows the preview instead of a flyout. */
   panel?: { parentApi: unknown; uuid: string; onPreview: (state: VegaEditableState) => void };
 }): Promise<void> => {
   const client = createVegaLibraryClient(core.http);
 
-  const flyoutRef = openLazySystemFlyout({
-    core,
-    parentApi: panel?.parentApi,
-    flyoutProps: panel
-      ? {
+  const loadContent = async ({
+    closeFlyout,
+    ariaLabelledBy,
+  }: {
+    closeFlyout: () => void;
+    ariaLabelledBy: string;
+  }) => {
+    const [item, defaultDataView, { VegaLibraryEditor }] = await Promise.all([
+      client.get(id).then(({ data }) => ({ id, data })),
+      // A missing default data view shouldn't block editing.
+      deps.dataViews.getDefault().catch((): null => null),
+      import('./vega_library_editor'),
+    ]);
+
+    return (
+      <VegaLibraryEditor
+        core={core}
+        client={client}
+        SearchBar={deps.unifiedSearch.ui.SearchBar}
+        item={item}
+        defaultDataView={defaultDataView ?? undefined}
+        canSave={Boolean(core.application.capabilities.visualize_v2?.save)}
+        onPreview={panel?.onPreview}
+        closeFlyout={closeFlyout}
+        ariaLabelledBy={ariaLabelledBy}
+      />
+    );
+  };
+
+  const flyoutRef = panel
+    ? openLazyFlyout({
+        core,
+        parentApi: panel.parentApi,
+        loadContent,
+        flyoutProps: {
           // Placed like the by-value editor, next to the panel it previews in.
           focusedPanelId: panel.uuid,
-          title: vegaTitleInWizard,
           size: 'm',
           // A stray click would otherwise discard unsaved edits.
           outsideClickCloses: false,
           'data-test-subj': 'vegaLibraryEditorFlyout',
-        }
-      : {
+        },
+      })
+    : // A system flyout, so the preview can open beside the editor as a child flyout.
+      openLazySystemFlyout({
+        core,
+        loadContent,
+        flyoutProps: {
           // No `size`: the default width pairs with the size `m` preview flyout, while EUI doesn't
           // allow a parent and child flyout to both be `m`.
           title: vegaTitleInWizard,
@@ -58,31 +90,7 @@ export const openVegaLibraryEditor = async ({
           outsideClickCloses: false,
           'data-test-subj': 'vegaLibraryEditorFlyout',
         },
-    loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-      const [item, defaultDataView, { VegaLibraryEditor }] = await Promise.all([
-        client.get(id).then(({ data }) => ({ id, data })),
-        // A missing default data view shouldn't block editing.
-        deps.dataViews.getDefault().catch((): null => null),
-        import('./vega_library_editor'),
-      ]);
-
-      return (
-        <VegaLibraryEditor
-          core={core}
-          client={client}
-          SearchBar={deps.unifiedSearch.ui.SearchBar}
-          savedObjectsTagging={deps.savedObjectsTaggingOss?.getTaggingApi()}
-          item={item}
-          defaultDataView={defaultDataView ?? undefined}
-          canSave={Boolean(core.application.capabilities.visualize_v2?.save)}
-          allowSaveAsNew={allowSaveAsNew}
-          onPreview={panel?.onPreview}
-          closeFlyout={closeFlyout}
-          ariaLabelledBy={ariaLabelledBy}
-        />
-      );
-    },
-  });
+      });
 
   await flyoutRef.onClose;
 };

@@ -23,7 +23,7 @@ import type {
 } from '../../server';
 
 /** The details and spec of a library item as the API returns them, minus the tags. */
-export type VegaLibraryAttributes = Omit<VegaReadResponseBody['data'], 'tags'>;
+type VegaLibraryAttributes = Omit<VegaReadResponseBody['data'], 'tags'>;
 
 const getItemPath = (id: string) => `${VEGA_API_PATH}/${encodeURIComponent(id)}`;
 

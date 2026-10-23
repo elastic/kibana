@@ -9,11 +9,11 @@
 
 import { globalTeardownHook } from '@kbn/scout';
 
-globalTeardownHook('Disable the Vega feature flags', async ({ apiServices }) => {
+globalTeardownHook('Reset the Vega feature flags', async ({ apiServices }) => {
   await apiServices.core.settings({
     'feature_flags.overrides': {
-      'vega.apiEnabled': false,
-      'vega.standaloneEmbeddable': false,
+      'vega.apiEnabled': null,
+      'vega.standaloneEmbeddable': null,
     },
   });
 });

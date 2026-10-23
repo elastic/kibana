@@ -25,14 +25,12 @@
       "usageCollection"
     ],
     "optionalPlugins": [
-      "home",
-      "savedObjectsTaggingOss"
+      "home"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "visDefaultEditor",
-      "savedObjects"
+      "visDefaultEditor"
     ],
     "extraPublicDirs": ["common"]
   }

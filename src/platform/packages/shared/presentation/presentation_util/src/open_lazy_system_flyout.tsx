@@ -7,53 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { htmlIdGenerator } from '@elastic/eui';
-import {
-  createLazyFlyoutLifecycle,
-  LazyFlyoutContent,
-  resolvePanelFlyoutDefaults,
-  type LoadContentArgs,
-} from './lazy_flyout_common';
+import { i18n } from '@kbn/i18n';
+import { focusFirstFocusable } from './focus_helpers';
+import { LoadingFlyout } from './loading_flyout';
 
 const htmlId = htmlIdGenerator('systemFlyoutTitleId');
 
-export interface OpenLazySystemFlyoutParams {
-  core: CoreStart;
-  parentApi?: unknown;
-  returnFocus?: () => void;
-  loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
-  flyoutProps?: Partial<OverlaySystemFlyoutOpenOptions> & { focusedPanelId?: string };
+interface LoadContentArgs {
+  closeFlyout: () => void;
+  ariaLabelledBy: string;
 }
 
-/** Opens a system-managed flyout with lazily loaded content. */
-export const openLazySystemFlyout = (params: OpenLazySystemFlyoutParams) => {
-  const { core, parentApi, returnFocus, loadContent, flyoutProps: allFlyoutProps } = params;
-  const { focusedPanelId, ...flyoutProps } = allFlyoutProps ?? {};
-  const ariaLabelledBy = flyoutProps['aria-labelledby'] ?? htmlId();
-  const { closeFlyout, overlayTracker, setFlyoutRef } = createLazyFlyoutLifecycle({
-    focusedPanelId,
-    parentApi,
-    returnFocus,
-  });
-  const { type, ownFocus } = resolvePanelFlyoutDefaults(overlayTracker, flyoutProps);
+interface OpenLazySystemFlyoutParams {
+  core: CoreStart;
+  loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
+  flyoutProps?: Partial<OverlaySystemFlyoutOpenOptions>;
+}
+
+/**
+ * Opens a system-managed flyout with lazily loaded content, so the content can open child
+ * flyouts. Focus returns to the element that opened it when it closes.
+ */
+export const openLazySystemFlyout = ({
+  core,
+  loadContent,
+  flyoutProps,
+}: OpenLazySystemFlyoutParams) => {
+  const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
+  const previouslyFocusedElement =
+    document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+      ? document.activeElement
+      : null;
+
+  const closeFlyout = () => {
+    flyoutRef.close();
+    // Resolve lazily: closing can re-render the trigger, so it is looked up by id after that
+    // render (inside focusFirstFocusable's deferred callback).
+    focusFirstFocusable(() => {
+      if (!previouslyFocusedElement) return null;
+      if (previouslyFocusedElement.id) {
+        const refreshed = document.getElementById(previouslyFocusedElement.id);
+        if (refreshed) return refreshed;
+      }
+      return document.body.contains(previouslyFocusedElement) ? previouslyFocusedElement : null;
+    });
+  };
 
   const flyoutRef = core.overlays.openSystemFlyout(
-    <LazyFlyoutContent
-      closeFlyout={closeFlyout}
-      loadContent={loadContent}
+    <LazySystemFlyout
       core={core}
+      loadContent={loadContent}
+      closeFlyout={closeFlyout}
       ariaLabelledBy={ariaLabelledBy}
-      flyoutClassName="kbnPresentationLazySystemFlyout"
     />,
     {
       size: 500,
-      type,
       paddingSize: 'm',
       maxWidth: 800,
-      ownFocus,
       resizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazySystemFlyout',
@@ -63,6 +77,44 @@ export const openLazySystemFlyout = (params: OpenLazySystemFlyoutParams) => {
       ...flyoutProps,
     }
   );
-  setFlyoutRef(flyoutRef);
   return flyoutRef;
+};
+
+const LazySystemFlyout = ({
+  core,
+  loadContent,
+  closeFlyout,
+  ariaLabelledBy,
+}: LoadContentArgs & Pick<OpenLazySystemFlyoutParams, 'core' | 'loadContent'>) => {
+  const [loadedContent, setLoadedContent] = useState<JSX.Element | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    loadContent({ closeFlyout, ariaLabelledBy })
+      .catch(() => null)
+      .then((content) => {
+        if (!isMounted) return;
+        if (content) {
+          setLoadedContent(content);
+          return;
+        }
+        closeFlyout();
+        core.notifications.toasts.addWarning(
+          i18n.translate('presentationUtils.openLazyFlyout.unableToLoad', {
+            defaultMessage: 'Unable to load edit flyout content',
+          })
+        );
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [ariaLabelledBy, closeFlyout, core.notifications.toasts, loadContent]);
+
+  useEffect(() => {
+    if (loadedContent) {
+      focusFirstFocusable(document.querySelector('.kbnPresentationLazySystemFlyout'));
+    }
+  }, [loadedContent]);
+
+  return loadedContent ?? LoadingFlyout;
 };

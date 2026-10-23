@@ -143,10 +143,7 @@ interface VegaEmbeddableDependencies {
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
   /** Used to edit the library item of a by-reference panel. */
-  libraryEditorDependencies: Pick<
-    VegaPluginStartDependencies,
-    'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'
-  >;
+  libraryEditorDependencies: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch'>;
   /** Whether panels can be linked to and unlinked from the library. */
   isLibraryEnabled: boolean;
 }
@@ -277,7 +274,7 @@ export const vegaEmbeddableFactory = (
       parentApi,
       serializeState: () =>
         isByReference
-          ? { ...serializePanelOwnedState(), ...serializePanelSearch(), ref_id: libraryId }
+          ? { ...serializeByReference(libraryId), ...serializePanelSearch() }
           : { ...serializePanelOwnedState(), ...serializePanelSearch(), spec: spec$.getValue() },
       anyStateChange$: merge(
         titleManager.anyStateChange$,
@@ -318,6 +315,7 @@ export const vegaEmbeddableFactory = (
         defaultDescription$.next(data.description);
         spec$.next(data.spec);
         libraryItem$.next(data);
+        blockingError$.next(undefined);
       } catch (error) {
         blockingError$.next(error);
       }
@@ -410,12 +408,10 @@ export const vegaEmbeddableFactory = (
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         if (isByReference) {
           const { openVegaLibraryEditor } = await import('../library/open_vega_library_editor');
-          // A new copy couldn't replace the item this panel references.
           await openVegaLibraryEditor({
             core,
             deps: deps.libraryEditorDependencies,
             id: libraryId,
-            allowSaveAsNew: false,
             panel: {
               parentApi,
               uuid,

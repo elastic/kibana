@@ -10,14 +10,26 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+const getTestSpec = (text = 'Test') => `
+{
+config: { "kibana": {"renderer": "svg"} }
+$schema: https://vega.github.io/schema/vega/v5.json
+marks: [{
+  type: text
+  encode: { update: { text: { value: "${text}" } } }
+}]}`;
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, header, visualize, visualBuilder, timePicker } = getPageObjects([
-    'dashboard',
-    'header',
-    'visualize',
-    'visualBuilder',
-    'timePicker',
-  ]);
+  const { dashboard, header, visualize, visEditor, vegaChart, visChart, timePicker } =
+    getPageObjects([
+      'dashboard',
+      'header',
+      'visualize',
+      'visEditor',
+      'vegaChart',
+      'visChart',
+      'timePicker',
+    ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
@@ -25,25 +37,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const retry = getService('retry');
 
-  const setMarkdown = async (markdown: string) => {
-    await visualBuilder.markdownSwitchSubTab('markdown');
-    await visualBuilder.enterMarkdown(markdown);
+  const fillSpecAndGo = async (newSpec: string) => {
+    await vegaChart.fillSpec(newSpec);
+    await visEditor.clickGo();
   };
 
-  const expectMarkdownText = async (text: string) => {
+  const expectVegaText = async (text: string) => {
     await retry.try(async () => {
-      expect(await visualBuilder.getMarkdownText()).to.eql(text);
+      const vegaText = await (await vegaChart.getViewContainer()).findByTagName('text');
+      expect(await vegaText.getVisibleText()).to.eql(text);
     });
   };
 
-  const createTsvbVis = async (title?: string) => {
-    await dashboardAddPanel.clickAddTsvb();
-    await visualBuilder.checkVisualBuilderIsPresent();
-    await visualBuilder.clickMarkdown();
-    await setMarkdown('Test');
-    // TSVB applies edits as you type; wait for it so the saved vis has the new text.
-    await expectMarkdownText('Test');
+  const createVegaVis = async (title?: string) => {
+    await dashboardAddPanel.clickAddVega();
+    await fillSpecAndGo(getTestSpec());
 
+    await visChart.waitForVisualizationRenderingStabilized();
     if (title) {
       await visualize.saveVisualizationExpectSuccess(title, {
         saveAsNew: true,
@@ -55,12 +65,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  const editTsvbVis = async () => {
+  const editVegaVis = async () => {
     await dashboardPanelActions.clickEdit();
     await header.waitUntilLoadingHasFinished();
-    await visualBuilder.checkVisualBuilderIsPresent();
-    await setMarkdown('Modified');
-    await expectMarkdownText('Modified');
+    await fillSpecAndGo(getTestSpec('Modified'));
+    await visChart.waitForVisualizationRenderingStabilized();
   };
 
   describe('edit visualizations from dashboard', () => {
@@ -84,11 +93,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
 
-      await createTsvbVis('test save');
-      await expectMarkdownText('Test');
-      await editTsvbVis();
+      await createVegaVis('test save');
+      await expectVegaText('Test');
+      await editVegaVis();
       await visualize.saveVisualizationAndReturn();
-      await expectMarkdownText('Modified');
+      await expectVegaText('Modified');
     });
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
@@ -96,25 +105,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.cancelAndReturn(false);
-      await expectMarkdownText('Modified');
+      await expectVegaText('Modified');
     });
 
     it('cancel button returns to dashboard after editing visualization without saving', async () => {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
 
-      await createTsvbVis('test cancel');
+      await createVegaVis('test cancel');
 
-      await editTsvbVis();
+      await editVegaVis();
       await visualize.cancelAndReturn(true);
-      await expectMarkdownText('Test');
+      await expectVegaText('Test');
     });
 
     it('visualize app menu navigates to the visualize listing page if the last opened visualization was by value', async () => {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-      await createTsvbVis();
-      await editTsvbVis();
+      await createVegaVis();
+      await editVegaVis();
       await visualize.saveVisualizationAndReturn();
 
       await header.waitUntilLoadingHasFinished();
@@ -126,8 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-      await createTsvbVis('by reference');
-      await editTsvbVis();
+      await createVegaVis('by reference');
+      await editVegaVis();
       await visualize.saveVisualizationAndReturn();
 
       await header.waitUntilLoadingHasFinished();
@@ -140,11 +149,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
 
-        await createTsvbVis();
+        await createVegaVis();
         const originalPanelCount = await dashboard.getPanelCount();
-        await editTsvbVis();
+        await editVegaVis();
         await visualize.saveVisualizationAndReturn();
-        await expectMarkdownText('Modified');
+        await expectVegaText('Modified');
 
         const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(originalPanelCount);
@@ -154,27 +163,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
 
-        await createTsvbVis();
+        await createVegaVis();
 
-        await editTsvbVis();
+        await editVegaVis();
         await visualize.cancelAndReturn(true);
-        await expectMarkdownText('Test');
+        await expectVegaText('Test');
       });
 
       it('save to library button returns to dashboard after editing visualization with changes saved', async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
 
-        await createTsvbVis();
+        await createVegaVis();
 
         const originalPanelCount = await dashboard.getPanelCount();
 
-        await editTsvbVis();
+        await editVegaVis();
         await visualize.saveVisualization('test save to library', {
           redirectToOrigin: true,
         });
 
-        await expectMarkdownText('Modified');
+        await expectVegaText('Modified');
 
         const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(originalPanelCount);

@@ -17,7 +17,7 @@ import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { VegaByReferenceState, VegaByValueState, VegaEmbeddableState } from './schema';
 
-export const VEGA_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
+const VEGA_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
 /**
  * Panel filters are stored in their as code shape, with each `data_view_id` replaced by a reference

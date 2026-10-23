@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -27,7 +26,7 @@ import { useSearchApi } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
-export interface EmbeddableEditorPreviewProps<
+interface EmbeddableEditorPreviewProps<
   SerializedState extends object,
   Api extends DefaultEmbeddableApi<SerializedState> & HasSerializableState<SerializedState>,
   ParentApi extends HasSerializedChildState<SerializedState>
@@ -39,15 +38,6 @@ export interface EmbeddableEditorPreviewProps<
    * It is read once on mount, so the returned subjects must be stable.
    */
   getParentApi?: () => Partial<ParentApi>;
-  /** Rendered above the embeddable, e.g. a time range picker. */
-  toolbar?: ReactNode;
-  title?: string;
-  /**
-   * A named size, as child flyouts require. EUI rejects `m` when the editor flyout is `m` too, so
-   * pick a size that pairs with the editor's.
-   */
-  size?: 's' | 'm';
-  verticalAlignment?: 'stretch' | 'top';
   /**
    * Called when the preview closes. The close button is only shown while EUI stacks the preview over
    * the editor flyout on narrow screens, where it is the only way back to the editor.
@@ -61,7 +51,7 @@ const useIsFlyoutLayoutStacked = (): boolean => {
   return useSyncExternalStore(store.subscribe, () => store.getState().layoutMode === 'stacked');
 };
 
-const defaultPreviewTitle = i18n.translate('presentationUtil.embeddableEditorPreview.flyoutTitle', {
+const previewTitle = i18n.translate('presentationUtil.embeddableEditorPreview.flyoutTitle', {
   defaultMessage: 'Preview',
 });
 
@@ -74,10 +64,6 @@ export const EmbeddableEditorPreview = <
   type,
   serializedState,
   getParentApi,
-  toolbar,
-  title = defaultPreviewTitle,
-  size = 'm',
-  verticalAlignment = 'stretch',
   onClose,
 }: EmbeddableEditorPreviewProps<SerializedState, Api, ParentApi>) => {
   const titleId = useGeneratedHtmlId({ prefix: 'embeddableEditorPreviewTitle' });
@@ -95,7 +81,7 @@ export const EmbeddableEditorPreview = <
   const parentApi = useMemo(() => {
     const baseApi: HasSerializedChildState<SerializedState> & Record<string, unknown> = {
       ...searchApi,
-      ...(getParentApi?.() ?? {}),
+      ...getParentApi?.(),
       getSerializedStateForChild: () => latestStateRef.current,
     };
     return baseApi as ParentApi;
@@ -122,12 +108,13 @@ export const EmbeddableEditorPreview = <
       ownFocus={false}
       resizable
       session="inherit"
-      size={size}
-      flyoutMenuProps={{ title }}
+      // A named size, as child flyouts require. EUI rejects `m` when the editor flyout is `m` too.
+      size="m"
+      flyoutMenuProps={{ title: previewTitle }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id={titleId}>{title}</h2>
+          <h2 id={titleId}>{previewTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
@@ -135,9 +122,8 @@ export const EmbeddableEditorPreview = <
           '.euiFlyoutBody__overflowContent': { blockSize: '100%' },
         })}
       >
-        {/* The embeddable takes the height left by the toolbar and callout, so the body doesn't scroll. */}
+        {/* The embeddable takes the height left by the callout, so the body doesn't scroll. */}
         <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={{ height: '100%' }}>
-          {toolbar ? <EuiFlexItem grow={false}>{toolbar}</EuiFlexItem> : null}
           {updateError ? (
             <EuiFlexItem grow={false}>
               <KbnDangerCallout
@@ -152,10 +138,7 @@ export const EmbeddableEditorPreview = <
               />
             </EuiFlexItem>
           ) : null}
-          <EuiFlexItem
-            grow={verticalAlignment !== 'top'}
-            css={verticalAlignment === 'top' ? undefined : { minHeight: 240 }}
-          >
+          <EuiFlexItem css={{ minHeight: 240 }}>
             <EmbeddableRenderer<SerializedState, Api, ParentApi>
               type={type}
               getParentApi={() => parentApi}

@@ -85,4 +85,19 @@ export class DashboardVisualizationsService extends FtrService {
     await this.dashboardAddPanel.addSavedSearch(name);
     await this.dashboard.waitForRenderComplete();
   }
+
+  async createAndAddVega(name: string) {
+    this.log.debug(`createAndAddVega`);
+    const inViewMode = await this.dashboard.getIsInViewMode();
+    if (inViewMode) {
+      await this.dashboard.switchToEditMode();
+    }
+    await this.dashboardAddPanel.clickAddVega();
+    await this.visualize.saveVisualizationExpectSuccess(name, {
+      saveAsNew: false,
+      redirectToOrigin: true,
+    });
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
+  }
 }

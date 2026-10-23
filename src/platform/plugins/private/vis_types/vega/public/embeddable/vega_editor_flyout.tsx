@@ -119,7 +119,6 @@ export const VegaEditorFlyout = ({
     onSave(specFromEditor(spec, format));
     closeFlyout();
   };
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>

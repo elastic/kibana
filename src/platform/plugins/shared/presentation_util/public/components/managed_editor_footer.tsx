@@ -7,46 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiPopover,
-  EuiSplitButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-const defaultCancelLabel = i18n.translate(
-  'presentationUtil.managedEditorFooter.cancelButtonLabel',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
-
-const defaultRunPreviewLabel = i18n.translate(
-  'presentationUtil.managedEditorFooter.runPreviewButtonLabel',
-  {
-    defaultMessage: 'Run preview',
-  }
-);
-
-const moreSaveOptionsLabel = i18n.translate(
-  'presentationUtil.managedEditorFooter.moreSaveOptionsAriaLabel',
-  {
-    defaultMessage: 'More save options',
-  }
-);
-
-export interface ManagedEditorFooterSaveMenuItem {
-  name: string;
-  onClick: () => void;
-  'data-test-subj'?: string;
-}
 
 export interface ManagedEditorFooterProps {
   onCancel: () => void;
@@ -59,7 +28,6 @@ export interface ManagedEditorFooterProps {
    */
   previewAction?: {
     onPreview: () => void;
-    label?: string;
     isEnabled: boolean;
     'data-test-subj'?: string;
   };
@@ -71,76 +39,14 @@ export interface ManagedEditorFooterProps {
   saveButtonDataTestSubj?: string;
   /** Hides the save action, e.g. for users who can't save. */
   hideSave?: boolean;
-  /**
-   * When provided, the save action renders as a split button whose menu holds these items,
-   * e.g. "Save as new…".
-   */
-  saveMenuItems?: ManagedEditorFooterSaveMenuItem[];
 }
-
-const SaveSplitButton = ({
-  onSave,
-  saveButtonLabel,
-  isSaveDisabled,
-  isSaving,
-  saveButtonDataTestSubj,
-  saveMenuItems,
-}: Pick<
-  ManagedEditorFooterProps,
-  'onSave' | 'saveButtonLabel' | 'isSaveDisabled' | 'isSaving' | 'saveButtonDataTestSubj'
-> & { saveMenuItems: ManagedEditorFooterSaveMenuItem[] }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isDisabled = isSaveDisabled || isSaving;
-
-  return (
-    <EuiPopover
-      aria-label={moreSaveOptionsLabel}
-      isOpen={isMenuOpen}
-      closePopover={() => setIsMenuOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="upRight"
-      button={
-        <EuiSplitButton fill data-test-subj={saveButtonDataTestSubj}>
-          <EuiSplitButton.ActionPrimary
-            isLoading={isSaving}
-            isDisabled={isDisabled}
-            onClick={onSave}
-            data-test-subj={saveButtonDataTestSubj ? `${saveButtonDataTestSubj}Primary` : undefined}
-          >
-            {saveButtonLabel}
-          </EuiSplitButton.ActionPrimary>
-          <EuiSplitButton.ActionSecondary
-            iconType="chevronSingleDown"
-            aria-label={moreSaveOptionsLabel}
-            isDisabled={isSaving}
-            onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
-            data-test-subj={saveButtonDataTestSubj ? `${saveButtonDataTestSubj}Menu` : undefined}
-          />
-        </EuiSplitButton>
-      }
-    >
-      <EuiContextMenuPanel
-        items={saveMenuItems.map(({ name, onClick, 'data-test-subj': dataTestSubj }) => (
-          <EuiContextMenuItem
-            key={name}
-            data-test-subj={dataTestSubj}
-            onClick={() => {
-              setIsMenuOpen(false);
-              onClick();
-            }}
-          >
-            {name}
-          </EuiContextMenuItem>
-        ))}
-      />
-    </EuiPopover>
-  );
-};
 
 /** Shared flyout footer for managed library editors. */
 export const ManagedEditorFooter = ({
   onCancel,
-  cancelButtonLabel = defaultCancelLabel,
+  cancelButtonLabel = i18n.translate('presentationUtil.managedEditorFooter.cancelButtonLabel', {
+    defaultMessage: 'Cancel',
+  }),
   cancelButtonDataTestSubj,
   previewAction,
   onSave,
@@ -149,7 +55,6 @@ export const ManagedEditorFooter = ({
   isSaving,
   saveButtonDataTestSubj,
   hideSave,
-  saveMenuItems,
 }: ManagedEditorFooterProps) => {
   return (
     <EuiFlyoutFooter>
@@ -170,32 +75,23 @@ export const ManagedEditorFooter = ({
                   onClick={previewAction.onPreview}
                   data-test-subj={previewAction['data-test-subj']}
                 >
-                  {previewAction.label ?? defaultRunPreviewLabel}
+                  {i18n.translate('presentationUtil.managedEditorFooter.runPreviewButtonLabel', {
+                    defaultMessage: 'Run preview',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             ) : null}
             {hideSave ? null : (
               <EuiFlexItem grow={false}>
-                {saveMenuItems?.length ? (
-                  <SaveSplitButton
-                    onSave={onSave}
-                    saveButtonLabel={saveButtonLabel}
-                    isSaveDisabled={isSaveDisabled}
-                    isSaving={isSaving}
-                    saveButtonDataTestSubj={saveButtonDataTestSubj}
-                    saveMenuItems={saveMenuItems}
-                  />
-                ) : (
-                  <EuiButton
-                    fill
-                    isLoading={isSaving}
-                    disabled={isSaveDisabled || isSaving}
-                    onClick={onSave}
-                    data-test-subj={saveButtonDataTestSubj}
-                  >
-                    {saveButtonLabel}
-                  </EuiButton>
-                )}
+                <EuiButton
+                  fill
+                  isLoading={isSaving}
+                  disabled={isSaveDisabled || isSaving}
+                  onClick={onSave}
+                  data-test-subj={saveButtonDataTestSubj}
+                >
+                  {saveButtonLabel}
+                </EuiButton>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

@@ -12,12 +12,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, header, visualize, visualBuilder } = getPageObjects([
-    'dashboard',
-    'header',
-    'visualize',
-    'visualBuilder',
-  ]);
+  const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -93,8 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('loses originatingApp connection after first save when redirectToOrigin is false', async () => {
       const newTitle = 'test create panel originatingApp';
       await dashboard.loadDashboardInEditMode('few panels');
-      await dashboardAddPanel.clickAddTsvb();
-      await visualBuilder.checkVisualBuilderIsPresent();
+      await dashboardAddPanel.clickAddVega();
       await visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
         redirectToOrigin: false,
