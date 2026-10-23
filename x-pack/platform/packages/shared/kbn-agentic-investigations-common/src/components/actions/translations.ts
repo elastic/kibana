@@ -31,6 +31,9 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     close: i18n.translate('xpack.alertzero.baseActions.closeInvestigation', {
       defaultMessage: 'Close investigation',
     }),
+    reopen: i18n.translate('xpack.alertzero.baseActions.reopenInvestigation', {
+      defaultMessage: 'Open investigation',
+    }),
   },
   tooltips: {
     linkCopied: i18n.translate('xpack.alertzero.baseActions.tooltips.linkCopied', {
