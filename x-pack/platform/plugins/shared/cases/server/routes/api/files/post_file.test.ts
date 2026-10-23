@@ -15,7 +15,10 @@ describe('getCaseRoute', () => {
   const sub = { unsubscribe: jest.fn() };
 
   beforeEach(() => {
-    casesClientMock.attachments.addFile.mockResolvedValue({ comments: [] } as never);
+    casesClientMock.attachments.addFile.mockResolvedValue({ id: 'file-attachment' } as never);
+    casesClientMock.attachments.getCaseWithAttachments.mockResolvedValue({
+      comments: [],
+    } as never);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -42,6 +45,10 @@ describe('getCaseRoute', () => {
         mimeType: 'text/plain',
       })
     );
+    expect(casesClientMock.attachments.getCaseWithAttachments).toHaveBeenCalledWith({
+      caseId: 'bar',
+      writeOperation: 'create',
+    });
 
     expect(sub.unsubscribe).toHaveBeenCalled();
   });

@@ -687,14 +687,18 @@ export class AttachmentService {
     savedObjectId,
     updatedAttributes,
     options,
+    savedObjectType,
   }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(`Attempting to UPDATE attachment ${savedObjectId}`);
 
-      const [soType] = await resolveAttachmentSavedObjectTypes(
-        this.context.unsecuredSavedObjectsClient,
-        [savedObjectId]
-      );
+      const soType =
+        savedObjectType ??
+        (
+          await resolveAttachmentSavedObjectTypes(this.context.unsecuredSavedObjectsClient, [
+            savedObjectId,
+          ])
+        )[0];
       if (soType === null) {
         throw Boom.notFound(`Attachment ${savedObjectId} not found`);
       }

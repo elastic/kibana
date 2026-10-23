@@ -8,7 +8,10 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Owner } from '../../../common/constants/types';
-import { FileAttachmentMetadataPayloadRt, type Case } from '../../../common/types/domain';
+import {
+  FileAttachmentMetadataPayloadRt,
+  type UnifiedAttachment,
+} from '../../../common/types/domain';
 import type { CasesClient, CasesClientArgs } from '..';
 import type { AddFileArgs } from './types';
 
@@ -20,6 +23,8 @@ import { Operations } from '../../authorization';
 import { validateUnifiedAttachments } from './validators';
 import { buildAttachmentRequestFromFileJSON } from '../utils';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { flattenAttachmentSavedObject } from '../../common/utils';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 
 /**
  * Create a file attachment to a case.
@@ -28,7 +33,7 @@ export const addFile = async (
   addFileArgs: AddFileArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<Case> => {
+): Promise<UnifiedAttachment> => {
   const { caseId, file, filename, mimeType, $abort } = addFileArgs;
   const {
     logger,
@@ -86,13 +91,17 @@ export const addFile = async (
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
 
-    const updatedModel = await model.createComment({
+    const createdAttachment = await model.createComment({
       createdDate,
       commentReq,
       id: savedObjectID,
     });
 
-    return await updatedModel.encodeWithComments();
+    if (createdAttachment == null) {
+      throw new Error(`Failed to create the file attachment ${savedObjectID}`);
+    }
+
+    return toUnifiedAttachment(flattenAttachmentSavedObject(createdAttachment));
   } catch (error) {
     if (createdFile?.id) {
       await fileService.delete({ id: createdFile.id });

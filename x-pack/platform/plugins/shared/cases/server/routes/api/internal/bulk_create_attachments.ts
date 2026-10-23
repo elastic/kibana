@@ -33,9 +33,14 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
       const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
       const attachments = request.body as attachmentApiV2.BulkCreateUnifiedAttachmentsRequest;
-      const created: caseDomainV1.Case = await casesClient.attachments.bulkCreate({
+      await casesClient.attachments.bulkCreate({
         caseId,
         attachments,
+      });
+
+      const created: caseDomainV1.Case = await casesClient.attachments.getCaseWithAttachments({
+        caseId,
+        writeOperation: 'create',
       });
 
       return response.ok({

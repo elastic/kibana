@@ -66,13 +66,17 @@ export const addAlertsStepDefinition = (
           };
         });
 
-        const updatedCase = await client.attachments.bulkCreate({
+        await client.attachments.bulkCreate({
           caseId: input.case_id,
           attachments,
         });
+        const updatedCase = await client.attachments.getCaseWithAttachments({
+          caseId: input.case_id,
+          writeOperation: 'create',
+        });
 
-        // The client returns unified comments; the output schema mirrors the
-        // public (legacy) wire shape, so convert back before validating.
+        // The output schema mirrors the public (legacy) wire shape, so convert
+        // back before validating.
         return safeParseCaseForWorkflowOutput(
           addAlertsStepCommonDefinition.outputSchema.shape.case,
           toLegacyCaseResponse(updatedCase)
