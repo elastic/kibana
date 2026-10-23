@@ -6145,9 +6145,6 @@ importers:
       find-cypress-specs:
         specifier: 1.54.12
         version: 1.54.12(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
-      fix-esm:
-        specifier: 1.0.1
-        version: 1.0.1(supports-color@10.2.2)
       form-data:
         specifier: 4.0.6
         version: 4.0.6
@@ -6472,9 +6469,6 @@ importers:
       webpack-cli:
         specifier: 5.1.4
         version: 5.1.4(webpack-bundle-analyzer@5.3.2)(webpack-dev-server@5.2.6)(webpack@5.96.1)
-      webpack-dev-server:
-        specifier: 5.2.6
-        version: 5.2.6(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(webpack-cli@5.1.4)(webpack@5.96.1)
       webpack-merge:
         specifier: 6.0.1
         version: 6.0.1
@@ -18298,9 +18292,6 @@ packages:
   find-yarn-workspace-root@2.0.0:
     resolution: {integrity: sha512-1IMnbjt4KzsQfnhnzNd8wUEgXZ44IzZaZmnLYx7D5FZlaHt2gW20Cri8Q+E/t5tIj4+epTBub+2Zxu/vNILzqQ==}
 
-  fix-esm@1.0.1:
-    resolution: {integrity: sha512-EZtb7wPXZS54GaGxaWxMlhd1DUDCnAg5srlYdu/1ZVeW+7wwR3Tp59nu52dXByFs3MBRq+SByx1wDOJpRvLEXw==}
-
   flat-cache@3.2.0:
     resolution: {integrity: sha512-CYcENa+FtcUKLmhhqyctpclsq7QF38pKjZHsGNiSQF5r4FtoKDWabFDl3hzaEQMvT1LHEysw5twgLvpYYb4vbw==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -28704,26 +28695,32 @@ snapshots:
   '@jsonjoy.com/base64@1.1.2(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/base64@17.67.0(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/buffers@1.2.1(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/buffers@17.67.0(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/codegen@1.0.0(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/codegen@17.67.0(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/fs-core@4.69.1(tslib@2.8.1)':
     dependencies:
@@ -28731,6 +28728,7 @@ snapshots:
       '@jsonjoy.com/fs-node-utils': 4.69.1(tslib@2.8.1)
       thingies: 2.6.1(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/fs-fsa@4.69.1(tslib@2.8.1)':
     dependencies:
@@ -28739,10 +28737,12 @@ snapshots:
       '@jsonjoy.com/fs-node-utils': 4.69.1(tslib@2.8.1)
       thingies: 2.6.1(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/fs-node-builtins@4.69.1(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/fs-node-to-fsa@4.69.1(tslib@2.8.1)':
     dependencies:
@@ -28750,12 +28750,14 @@ snapshots:
       '@jsonjoy.com/fs-node-builtins': 4.69.1(tslib@2.8.1)
       '@jsonjoy.com/fs-node-utils': 4.69.1(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/fs-node-utils@4.69.1(tslib@2.8.1)':
     dependencies:
       '@jsonjoy.com/fs-node-builtins': 4.69.1(tslib@2.8.1)
       glob-to-regex.js: 1.2.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/fs-node@4.69.1(tslib@2.8.1)':
     dependencies:
@@ -28767,12 +28769,14 @@ snapshots:
       glob-to-regex.js: 1.2.0(tslib@2.8.1)
       thingies: 2.6.1(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/fs-print@4.69.1(tslib@2.8.1)':
     dependencies:
       '@jsonjoy.com/fs-node-utils': 4.69.1(tslib@2.8.1)
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/fs-snapshot@4.69.1(tslib@2.8.1)':
     dependencies:
@@ -28781,6 +28785,7 @@ snapshots:
       '@jsonjoy.com/json-pack': 17.67.0(tslib@2.8.1)
       '@jsonjoy.com/util': 17.67.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/json-pack@1.21.0(tslib@2.8.1)':
     dependencies:
@@ -28793,6 +28798,7 @@ snapshots:
       thingies: 2.6.1(tslib@2.8.1)
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/json-pack@17.67.0(tslib@2.8.1)':
     dependencies:
@@ -28805,29 +28811,34 @@ snapshots:
       thingies: 2.6.1(tslib@2.8.1)
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/json-pointer@1.0.2(tslib@2.8.1)':
     dependencies:
       '@jsonjoy.com/codegen': 1.0.0(tslib@2.8.1)
       '@jsonjoy.com/util': 1.9.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/json-pointer@17.67.0(tslib@2.8.1)':
     dependencies:
       '@jsonjoy.com/util': 17.67.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/util@1.9.0(tslib@2.8.1)':
     dependencies:
       '@jsonjoy.com/buffers': 1.2.1(tslib@2.8.1)
       '@jsonjoy.com/codegen': 1.0.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@jsonjoy.com/util@17.67.0(tslib@2.8.1)':
     dependencies:
       '@jsonjoy.com/buffers': 17.67.0(tslib@2.8.1)
       '@jsonjoy.com/codegen': 17.67.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   '@juggle/resize-observer@3.4.0': {}
 
@@ -28999,7 +29010,8 @@ snapshots:
       '@launchdarkly/node-server-sdk': 9.10.14(supports-color@10.2.2)
       '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
-  '@leichtgewicht/ip-codec@2.0.5': {}
+  '@leichtgewicht/ip-codec@2.0.5':
+    optional: true
 
   '@ljharb/resumer@0.1.3':
     dependencies:
@@ -29342,7 +29354,8 @@ snapshots:
     dependencies:
       eslint-scope: 5.1.1
 
-  '@noble/hashes@1.4.0': {}
+  '@noble/hashes@1.4.0':
+    optional: true
 
   '@noble/hashes@1.8.0': {}
 
@@ -30494,6 +30507,7 @@ snapshots:
       '@peculiar/asn1-x509-attr': 2.9.4
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-csr@2.9.4':
     dependencies:
@@ -30501,6 +30515,7 @@ snapshots:
       '@peculiar/asn1-x509': 2.9.4
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-ecc@2.9.4':
     dependencies:
@@ -30508,6 +30523,7 @@ snapshots:
       '@peculiar/asn1-x509': 2.9.4
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-pfx@2.9.4':
     dependencies:
@@ -30517,6 +30533,7 @@ snapshots:
       '@peculiar/asn1-schema': 2.9.4
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-pkcs8@2.9.4':
     dependencies:
@@ -30524,6 +30541,7 @@ snapshots:
       '@peculiar/asn1-x509': 2.9.4
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-pkcs9@2.9.4':
     dependencies:
@@ -30535,6 +30553,7 @@ snapshots:
       '@peculiar/asn1-x509-attr': 2.9.4
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-rsa@2.9.4':
     dependencies:
@@ -30542,12 +30561,14 @@ snapshots:
       '@peculiar/asn1-x509': 2.9.4
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-schema@2.9.4':
     dependencies:
       '@peculiar/utils': 2.0.3
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-x509-attr@2.9.4':
     dependencies:
@@ -30555,6 +30576,7 @@ snapshots:
       '@peculiar/asn1-x509': 2.9.4
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/asn1-x509@2.9.4':
     dependencies:
@@ -30562,10 +30584,12 @@ snapshots:
       '@peculiar/utils': 2.0.3
       asn1js: 3.0.10
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/utils@2.0.3':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@peculiar/x509@1.14.3':
     dependencies:
@@ -30580,6 +30604,7 @@ snapshots:
       reflect-metadata: 0.2.2
       tslib: 2.8.1
       tsyringe: 4.10.0
+    optional: true
 
   '@peggyjs/from-mem@1.3.5':
     dependencies:
@@ -31715,6 +31740,7 @@ snapshots:
   '@types/bonjour@3.5.13':
     dependencies:
       '@types/node': 24.10.13
+    optional: true
 
   '@types/braces@3.0.5': {}
 
@@ -31760,6 +31786,7 @@ snapshots:
     dependencies:
       '@types/express-serve-static-core': 5.1.3
       '@types/node': 24.10.13
+    optional: true
 
   '@types/connect@3.4.38':
     dependencies:
@@ -31867,6 +31894,7 @@ snapshots:
       '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
+    optional: true
 
   '@types/express@4.17.21':
     dependencies:
@@ -31881,6 +31909,7 @@ snapshots:
       '@types/express-serve-static-core': 4.19.9
       '@types/qs': 6.15.1
       '@types/serve-static': 1.15.10
+    optional: true
 
   '@types/fetch-mock@7.3.1': {}
 
@@ -32056,7 +32085,8 @@ snapshots:
 
   '@types/mime-types@2.1.0': {}
 
-  '@types/mime@1.3.5': {}
+  '@types/mime@1.3.5':
+    optional: true
 
   '@types/mime@2.0.1': {}
 
@@ -32270,7 +32300,8 @@ snapshots:
 
   '@types/retry@0.12.0': {}
 
-  '@types/retry@0.12.2': {}
+  '@types/retry@0.12.2':
+    optional: true
 
   '@types/seedrandom@2.4.28': {}
 
@@ -32285,6 +32316,7 @@ snapshots:
     dependencies:
       '@types/mime': 1.3.5
       '@types/node': 24.10.13
+    optional: true
 
   '@types/send@1.2.1':
     dependencies:
@@ -32293,12 +32325,14 @@ snapshots:
   '@types/serve-index@1.9.4':
     dependencies:
       '@types/express': 4.17.21
+    optional: true
 
   '@types/serve-static@1.15.10':
     dependencies:
       '@types/http-errors': 2.0.5
       '@types/node': 24.10.13
       '@types/send': 0.17.6
+    optional: true
 
   '@types/serve-static@2.2.0':
     dependencies:
@@ -32322,6 +32356,7 @@ snapshots:
   '@types/sockjs@0.3.36':
     dependencies:
       '@types/node': 24.10.13
+    optional: true
 
   '@types/source-list-map@0.1.6': {}
 
@@ -33261,6 +33296,7 @@ snapshots:
       pvtsutils: 1.3.6
       pvutils: 1.2.0
       tslib: 2.8.1
+    optional: true
 
   assert-plus@1.0.0: {}
 
@@ -33581,7 +33617,8 @@ snapshots:
 
   basic-ftp@5.3.1: {}
 
-  batch@0.6.1: {}
+  batch@0.6.1:
+    optional: true
 
   bcrypt-pbkdf@1.0.2:
     dependencies:
@@ -33674,6 +33711,7 @@ snapshots:
     dependencies:
       fast-deep-equal: 3.1.3
       multicast-dns: 7.2.5
+    optional: true
 
   boolbase@1.0.0: {}
 
@@ -33848,7 +33886,8 @@ snapshots:
 
   bytesish@0.4.4: {}
 
-  bytestreamjs@2.0.1: {}
+  bytestreamjs@2.0.1:
+    optional: true
 
   c12@3.3.3:
     dependencies:
@@ -34342,6 +34381,7 @@ snapshots:
   compressible@2.0.18:
     dependencies:
       mime-db: 1.54.0
+    optional: true
 
   compression@1.8.1(supports-color@10.2.2):
     dependencies:
@@ -34354,6 +34394,7 @@ snapshots:
       vary: 1.1.2
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   compute-gcd@1.2.1:
     dependencies:
@@ -34401,7 +34442,8 @@ snapshots:
       graceful-fs: 4.2.11
       xdg-basedir: 5.1.0
 
-  connect-history-api-fallback@2.0.0: {}
+  connect-history-api-fallback@2.0.0:
+    optional: true
 
   consola@3.4.2: {}
 
@@ -35217,7 +35259,8 @@ snapshots:
 
   delayed-stream@1.0.0: {}
 
-  depd@1.1.2: {}
+  depd@1.1.2:
+    optional: true
 
   depd@2.0.0: {}
 
@@ -35291,7 +35334,8 @@ snapshots:
 
   detect-node-es@1.1.0: {}
 
-  detect-node@2.1.0: {}
+  detect-node@2.1.0:
+    optional: true
 
   detective-amd@6.1.0:
     dependencies:
@@ -35399,6 +35443,7 @@ snapshots:
   dns-packet@5.6.1:
     dependencies:
       '@leichtgewicht/ip-codec': 2.0.5
+    optional: true
 
   doctrine@2.1.0:
     dependencies:
@@ -36359,6 +36404,7 @@ snapshots:
       vary: 1.1.2
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   express@5.2.1(supports-color@10.2.2):
     dependencies:
@@ -36489,6 +36535,7 @@ snapshots:
   faye-websocket@0.11.4:
     dependencies:
       websocket-driver: 0.7.5
+    optional: true
 
   fb-watchman@2.0.2:
     dependencies:
@@ -36669,14 +36716,6 @@ snapshots:
   find-yarn-workspace-root@2.0.0:
     dependencies:
       micromatch: 4.0.8
-
-  fix-esm@1.0.1(supports-color@10.2.2):
-    dependencies:
-      '@babel/core': 7.29.7(supports-color@10.2.2)
-      '@babel/plugin-proposal-export-namespace-from': 7.18.9(@babel/core@7.29.7(supports-color@10.2.2))
-      '@babel/plugin-transform-modules-commonjs': 7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
-    transitivePeerDependencies:
-      - supports-color
 
   flat-cache@3.2.0:
     dependencies:
@@ -37013,6 +37052,7 @@ snapshots:
   glob-to-regex.js@1.2.0(tslib@2.8.1):
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   glob-to-regexp@0.4.1: {}
 
@@ -37189,7 +37229,8 @@ snapshots:
     dependencies:
       duplexer: 0.1.2
 
-  handle-thing@2.0.1: {}
+  handle-thing@2.0.1:
+    optional: true
 
   handlebars@4.7.10:
     dependencies:
@@ -37475,6 +37516,7 @@ snapshots:
       obuf: 1.1.2
       readable-stream: 2.3.8
       wbuf: 1.7.3
+    optional: true
 
   hpagent@1.2.0: {}
 
@@ -37546,7 +37588,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  http-deceiver@1.2.7: {}
+  http-deceiver@1.2.7:
+    optional: true
 
   http-errors@1.8.1:
     dependencies:
@@ -37555,6 +37598,7 @@ snapshots:
       setprototypeof: 1.2.0
       statuses: 1.5.0
       toidentifier: 1.0.1
+    optional: true
 
   http-errors@2.0.1:
     dependencies:
@@ -37572,7 +37616,8 @@ snapshots:
 
   http-link-header@1.1.4: {}
 
-  http-parser-js@0.5.10: {}
+  http-parser-js@0.5.10:
+    optional: true
 
   http-proxy-agent@5.0.0(supports-color@10.2.2):
     dependencies:
@@ -37609,6 +37654,7 @@ snapshots:
       '@types/express': 4.17.25
     transitivePeerDependencies:
       - debug
+    optional: true
 
   http-proxy@1.18.1(debug@4.4.3(supports-color@10.2.2)):
     dependencies:
@@ -37666,7 +37712,8 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  hyperdyperid@1.2.0: {}
+  hyperdyperid@1.2.0:
+    optional: true
 
   hyphenate-style-name@1.1.0: {}
 
@@ -38076,7 +38123,8 @@ snapshots:
 
   is-plain-obj@2.1.0: {}
 
-  is-plain-obj@3.0.0: {}
+  is-plain-obj@3.0.0:
+    optional: true
 
   is-plain-obj@4.1.0: {}
 
@@ -38939,6 +38987,7 @@ snapshots:
     dependencies:
       picocolors: 1.1.1
       shell-quote: 1.11.0
+    optional: true
 
   launchdarkly-eventsource@2.2.0: {}
 
@@ -39623,6 +39672,7 @@ snapshots:
       thingies: 2.6.1(tslib@2.8.1)
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
+    optional: true
 
   memoize-one@5.2.1: {}
 
@@ -40171,6 +40221,7 @@ snapshots:
     dependencies:
       dns-packet: 5.6.1
       thunky: 1.1.0
+    optional: true
 
   murmurhash-js@1.0.0: {}
 
@@ -40208,7 +40259,8 @@ snapshots:
 
   negotiator@0.6.3: {}
 
-  negotiator@0.6.4: {}
+  negotiator@0.6.4:
+    optional: true
 
   negotiator@1.0.0: {}
 
@@ -40500,7 +40552,8 @@ snapshots:
     dependencies:
       http-https: 1.0.0
 
-  obuf@1.1.2: {}
+  obuf@1.1.2:
+    optional: true
 
   ohash@2.0.12: {}
 
@@ -40510,7 +40563,8 @@ snapshots:
     dependencies:
       ee-first: 1.1.1
 
-  on-headers@1.1.0: {}
+  on-headers@1.1.0:
+    optional: true
 
   once@1.4.0:
     dependencies:
@@ -40542,6 +40596,7 @@ snapshots:
       define-lazy-prop: 3.0.0
       is-inside-container: 1.0.0
       wsl-utils: 0.1.0
+    optional: true
 
   open@11.0.0:
     dependencies:
@@ -40754,6 +40809,7 @@ snapshots:
       '@types/retry': 0.12.2
       is-network-error: 1.3.2
       retry: 0.13.1
+    optional: true
 
   p-retry@7.1.1:
     dependencies:
@@ -41073,6 +41129,7 @@ snapshots:
       pvtsutils: 1.3.6
       pvutils: 1.2.0
       tslib: 2.8.1
+    optional: true
 
   platform@1.3.6: {}
 
@@ -41563,8 +41620,10 @@ snapshots:
   pvtsutils@1.3.6:
     dependencies:
       tslib: 2.8.1
+    optional: true
 
-  pvutils@1.2.0: {}
+  pvutils@1.2.0:
+    optional: true
 
   qified@0.10.1:
     dependencies:
@@ -42821,7 +42880,8 @@ snapshots:
 
   seedrandom@3.0.5: {}
 
-  select-hose@2.0.0: {}
+  select-hose@2.0.0:
+    optional: true
 
   selenium-webdriver@4.48.0:
     dependencies:
@@ -42839,6 +42899,7 @@ snapshots:
     dependencies:
       '@peculiar/x509': 1.14.3
       pkijs: 3.4.0
+    optional: true
 
   semver@5.7.2: {}
 
@@ -42903,6 +42964,7 @@ snapshots:
       parseurl: 1.3.3
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   serve-static@1.16.3(supports-color@10.2.2):
     dependencies:
@@ -43009,7 +43071,8 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  shell-quote@1.11.0: {}
+  shell-quote@1.11.0:
+    optional: true
 
   shelljs@0.10.0:
     dependencies:
@@ -43127,6 +43190,7 @@ snapshots:
       faye-websocket: 0.11.4
       uuid: 8.3.2
       websocket-driver: 0.7.5
+    optional: true
 
   socks-proxy-agent@10.1.0(supports-color@10.2.2):
     dependencies:
@@ -43243,6 +43307,7 @@ snapshots:
       wbuf: 1.7.3
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   spdy@4.0.2(supports-color@10.2.2):
     dependencies:
@@ -43253,6 +43318,7 @@ snapshots:
       spdy-transport: 3.0.0(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   spec-change@1.11.21(supports-color@10.2.2):
     dependencies:
@@ -43330,7 +43396,8 @@ snapshots:
     dependencies:
       isnumber: 1.0.0
 
-  statuses@1.5.0: {}
+  statuses@1.5.0:
+    optional: true
 
   statuses@2.0.2: {}
 
@@ -43887,6 +43954,7 @@ snapshots:
   thingies@2.6.1(tslib@2.8.1):
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   third-party-web@0.29.2: {}
 
@@ -43916,7 +43984,8 @@ snapshots:
 
   through@2.3.8: {}
 
-  thunky@1.1.0: {}
+  thunky@1.1.0:
+    optional: true
 
   timers-browserify@2.0.12:
     dependencies:
@@ -44148,6 +44217,7 @@ snapshots:
   tsyringe@4.10.0:
     dependencies:
       tslib: 1.14.1
+    optional: true
 
   tty-browserify@0.0.1: {}
 
@@ -44991,6 +45061,7 @@ snapshots:
   wbuf@1.7.3:
     dependencies:
       minimalistic-assert: 1.0.1
+    optional: true
 
   wcwidth@1.0.1:
     dependencies:
@@ -45070,6 +45141,7 @@ snapshots:
       schema-utils: 4.3.3
     optionalDependencies:
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
+    optional: true
 
   webpack-dev-server@5.2.6(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)(webpack-cli@5.1.4)(webpack@5.96.1):
     dependencies:
@@ -45109,6 +45181,7 @@ snapshots:
       - debug
       - supports-color
       - utf-8-validate
+    optional: true
 
   webpack-hot-middleware@2.26.1:
     dependencies:
@@ -45169,8 +45242,10 @@ snapshots:
       http-parser-js: 0.5.10
       safe-buffer: 5.2.1
       websocket-extensions: 0.1.4
+    optional: true
 
-  websocket-extensions@0.1.4: {}
+  websocket-extensions@0.1.4:
+    optional: true
 
   wellknown@0.5.0:
     dependencies:
@@ -45348,6 +45423,7 @@ snapshots:
   wsl-utils@0.1.0:
     dependencies:
       is-wsl: 3.1.1
+    optional: true
 
   wsl-utils@0.3.1:
     dependencies:
