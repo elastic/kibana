@@ -197,6 +197,9 @@ const typedOverlays: Record<string, z.ZodType> = {
 const SSL_DESCRIPTION =
   "The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used.";
 
+const CREATE_ID_DESCRIPTION =
+  'A custom ID for the new monitor. Generated if omitted or empty. If a monitor with this ID already exists, the request fails with a `409 Conflict` error and the existing monitor is left unchanged. Only used by this endpoint; it is ignored by the bulk create endpoint, which always generates IDs.';
+
 const FIELD_DESCRIPTIONS: Record<string, string> = {
   [ConfigKey.NAME]: 'The monitor name.',
   [ConfigKey.ENABLED]: 'Specify whether the monitor is enabled. Defaults to `true`.',
@@ -225,6 +228,8 @@ To list available private locations, run the \`elastic-synthetics locations\` co
   [ConfigKey.TAGS]: 'An array of tags.',
   [ConfigKey.LABELS]:
     'Key-value pairs of labels to associate with the monitor. Labels can be used for filtering and grouping monitors.',
+  [ConfigKey.MAX_ATTEMPTS]:
+    'The maximum number of attempts for the monitor, including the initial run. Defaults to `2`. An explicit `retest_on_failure` value takes precedence: `true` uses the default of `2` and `false` uses `1`. When `retest_on_failure` is not set, `max_attempts` is used as provided.',
   [ConfigKey.TIMEOUT]: `The monitor timeout in seconds. The monitor fails if it doesn't complete within this time. Defaults to \`16\`.
 
 For browser monitors, the minimum timeout is 30 seconds. Browser monitor timeouts only apply on private locations; on public locations the timeout has no effect and the response includes a warning.`,
@@ -299,6 +304,9 @@ const bodyForType = (type: MonitorTypeEnum) => {
     .strictObject({
       type: z.literal(type).describe('The monitor type.'),
       ...shape,
+      // `id` is also a default field, which the edit schema accepts untyped so fetched monitors round-trip.
+      // On create it is the caller-supplied monitor ID; the monitor form sends an empty one by default.
+      id: z.string().max(MAX_ROUTE_ID_LENGTH).optional().describe(CREATE_ID_DESCRIPTION),
     })
     .meta({ id: MONITOR_OAS_IDS[type] });
 };

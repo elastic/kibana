@@ -534,4 +534,34 @@ describe('AddNewMonitorsPublicAPI', () => {
       expect(result).toBe('Monitor name must be unique, "test-monitor" already exists.');
     });
   });
+
+  describe('validateUniqueMonitorId', () => {
+    it('returns an error message if a monitor with the id already exists', async () => {
+      const get = jest.fn().mockResolvedValue({ id: 'custom-id' });
+      const api = new AddEditMonitorAPI({ monitorConfigRepository: { get } } as any);
+
+      const result = await api.validateUniqueMonitorId('custom-id');
+
+      expect(get).toHaveBeenCalledWith('custom-id');
+      expect(result).toBe('Monitor with id "custom-id" already exists.');
+    });
+
+    it('returns nothing if no monitor has the id', async () => {
+      const get = jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'custom-id')
+        );
+      const api = new AddEditMonitorAPI({ monitorConfigRepository: { get } } as any);
+
+      expect(await api.validateUniqueMonitorId('custom-id')).toBeUndefined();
+    });
+
+    it('rethrows unexpected lookup errors instead of treating the id as free', async () => {
+      const get = jest.fn().mockRejectedValue(new Error('boom'));
+      const api = new AddEditMonitorAPI({ monitorConfigRepository: { get } } as any);
+
+      await expect(api.validateUniqueMonitorId('custom-id')).rejects.toThrow('boom');
+    });
+  });
 });
