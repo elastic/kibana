@@ -25,7 +25,7 @@ export function copyAllowlistedFields(
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
       } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
-        const subValues = eventValue.filter((v) => typeof v === 'object');
+        const subValues = eventValue.filter((v) => typeof v === 'object' && v !== null);
         return {
           ...newEvent,
           [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
