@@ -27,6 +27,8 @@ import type {
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
 const Sec = 1000;
+/** A `start()` slower than this is doing work that belongs in `initialize()`. */
+const SLOW_START_WARNING_MS = 1 * Sec;
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
@@ -196,6 +198,7 @@ export class PluginsSystem<T extends PluginType> {
       }, {} as Record<PluginName, unknown>);
 
       let contract: unknown;
+      const startedAt = performance.now();
       const contractOrPromise = plugin.start(
         createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
         pluginDepContracts
@@ -221,13 +224,55 @@ export class PluginsSystem<T extends PluginType> {
       } else {
         contract = contractOrPromise;
       }
+      const startDurationMs = performance.now() - startedAt;
+      if (startDurationMs > SLOW_START_WARNING_MS) {
+        this.log.warn(
+          `Start lifecycle of "${pluginName}" plugin took ${Math.round(
+            startDurationMs
+          )}ms, which exceeds 1s. Move initialization work (index setup, data loading, Elasticsearch calls) into the plugin's initialize() hook so start() returns immediately.`
+        );
+      }
 
       contracts.set(pluginName, contract);
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
 
+    // Only once every plugin has started and runtime contracts are resolved, so an `initialize()`
+    // that awaits `core.plugins.onStart()` cannot deadlock the start loop.
+    await this.initializePlugins();
+
     return contracts;
+  }
+
+  /**
+   * Awaits the `initialize()` of every started plugin that defines one, one at a time in start
+   * order. A thrown error or a timeout fails boot, like an asynchronous `start()` does.
+   */
+  private async initializePlugins() {
+    const initializers = this.satupPlugins.flatMap((pluginName) => {
+      const initialize = this.plugins.get(pluginName)!.getInitialize();
+      return initialize ? [{ pluginName, initialize }] : [];
+    });
+    if (initializers.length === 0) {
+      return;
+    }
+
+    this.log.info(
+      `Initializing [${initializers.length}] plugins: [${initializers.map(
+        ({ pluginName }) => pluginName
+      )}]`
+    );
+
+    for (const { pluginName, initialize } of initializers) {
+      this.log.debug(`Initializing plugin "${pluginName}"...`);
+      const { timedout } = await withTimeout({ promise: initialize(), timeoutMs: 10 * Sec });
+      if (timedout) {
+        throw new Error(
+          `Initialize lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+        );
+      }
+    }
   }
 
   public async stopPlugins() {

@@ -184,6 +184,23 @@ export class PluginWrapper<
   }
 
   /**
+   * Returns the plugin's optional `initialize` function, bound to the arguments its `start`
+   * received, or `undefined` when the plugin does not define one.
+   */
+  public getInitialize(): (() => Promise<void>) | undefined {
+    const { instance } = this;
+    if (!instance || this.isPrebootPluginInstance(instance) || !instance.initialize) {
+      return undefined;
+    }
+
+    const initialize = instance.initialize.bind(instance);
+    return async () => {
+      const [startContext, plugins] = await this.startDependencies;
+      await initialize(startContext, plugins);
+    };
+  }
+
+  /**
    * Calls optional `stop` function exposed by the plugin initializer.
    */
   public async stop() {

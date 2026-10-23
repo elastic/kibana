@@ -434,6 +434,63 @@ test('`start` calls plugin.start with context and dependencies', async () => {
   expect(mockPluginInstance.start).toHaveBeenCalledWith(context, deps);
 });
 
+describe('`getInitialize`', () => {
+  const createPlugin = (manifestProps: Partial<PluginManifest> = {}) => {
+    const manifest = createPluginManifest(manifestProps);
+    const opaqueId = Symbol();
+    return new PluginWrapper({
+      path: 'plugin-with-initializer-path',
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo,
+        nodeInfo,
+      }),
+    });
+  };
+
+  test('returns `undefined` when the plugin does not define `initialize`', async () => {
+    const plugin = createPlugin();
+    mockPluginInitializer.mockResolvedValue({ setup: jest.fn(), start: jest.fn() });
+
+    await plugin.init();
+
+    expect(plugin.getInitialize()).toBeUndefined();
+  });
+
+  test('returns `undefined` for a preboot plugin', async () => {
+    const plugin = createPlugin({ type: PluginType.preboot });
+    mockPluginInitializer.mockResolvedValue({ setup: jest.fn(), initialize: jest.fn() });
+
+    await plugin.init();
+
+    expect(plugin.getInitialize()).toBeUndefined();
+  });
+
+  test('calls plugin.initialize with the context and dependencies `start` received', async () => {
+    const plugin = createPlugin();
+    const context = { any: 'thing' } as any;
+    const deps = { otherDep: 'value' };
+    const mockPluginInstance = {
+      setup: jest.fn(),
+      start: jest.fn(),
+      initialize: jest.fn().mockResolvedValue(undefined),
+    };
+    mockPluginInitializer.mockResolvedValue(mockPluginInstance);
+
+    await plugin.init();
+    await plugin.setup({} as any, {} as any);
+    await plugin.start(context, deps);
+    await plugin.getInitialize()!();
+
+    expect(mockPluginInstance.initialize).toHaveBeenCalledTimes(1);
+    expect(mockPluginInstance.initialize).toHaveBeenCalledWith(context, deps);
+  });
+});
+
 test("`start` resolves `startDependencies` Promise after plugin's start", async () => {
   expect.assertions(2);
 
