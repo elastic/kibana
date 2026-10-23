@@ -63,15 +63,20 @@ const groupByField = (extras: readonly ExtraField[]): Map<string, ExtraField[]> 
     new Map<string, ExtraField[]>()
   );
 
-/** Up to a few distinct values per field, with 1-based line numbers. */
-const toExamples = (extras: readonly ExtraField[]): FieldExample[] =>
-  extras
-    .filter(
-      ({ value }, index) =>
-        extras.findIndex((other) => normalizeValue(other.value) === normalizeValue(value)) === index
-    )
+/**
+ * Up to a few examples per field, with 1-based line numbers: each distinct value once, then more
+ * lines whose value repeats, so a value set on every line isn't judged from one line alone.
+ */
+const toExamples = (extras: readonly ExtraField[]): FieldExample[] => {
+  const isFirstOfValue = ({ value }: ExtraField, index: number) =>
+    extras.findIndex((other) => normalizeValue(other.value) === normalizeValue(value)) === index;
+  return [
+    ...extras.filter(isFirstOfValue),
+    ...extras.filter((extra, index) => !isFirstOfValue(extra, index)),
+  ]
     .slice(0, MAX_EXAMPLES_PER_FIELD)
     .map(({ line, value }) => ({ line: line + 1, value }));
+};
 
 /**
  * How Elastic integrations use fields whose verdicts judges disagree on, from the integration

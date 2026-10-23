@@ -39,7 +39,7 @@ const params: ExtraFieldJudgeParams = {
 };
 
 const createJudge = (verdicts: Record<string, 'PASS' | 'FAIL'>) => {
-  const evaluate = jest.fn(async () => ({
+  const evaluate = jest.fn(async (_example: Parameters<Evaluator['evaluate']>[0]) => ({
     metadata: {
       criteria: Object.entries(verdicts).map(([id, result]) => ({ id, result })),
     },
@@ -71,6 +71,21 @@ describe('createExtraFieldJudge', () => {
     expect(correct).toEqual(
       new Set([extraFieldKey(0, 'user.name'), extraFieldKey(1, 'user.name')])
     );
+  });
+
+  it('shows the judge every line of a value that repeats, not just the first', async () => {
+    const { judge, evaluate } = createJudge({ 'user.name': 'PASS', 'event.provider': 'PASS' });
+
+    await judge(params);
+
+    const [[{ input, output }]] = evaluate.mock.calls;
+    expect(output).toMatchObject({
+      'event.provider': [
+        { line: 1, value: 'UI' },
+        { line: 2, value: 'UI' },
+      ],
+    });
+    expect(input).toMatchObject({ lines: { 1: 'line one', 2: 'line two' } });
   });
 
   it('adds integration guidance to the criteria for fields judges disagree on', async () => {
