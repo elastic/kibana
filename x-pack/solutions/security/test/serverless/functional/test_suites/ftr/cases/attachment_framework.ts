@@ -6,6 +6,7 @@
  */
 
 import { expect } from 'expect';
+import { v4 as uuidv4 } from 'uuid';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ADD_TO_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
@@ -18,17 +19,32 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const svlCases = getService('svlCases');
-  const find = getService('find');
   const retry = getService('retry');
   const header = getPageObject('header');
   const toasts = getService('toasts');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const listingTable = getService('listingTable');
+  const browser = getService('browser');
 
   describe('Cases persistable attachments', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/176874
-    describe.skip('lens visualization', () => {
+    describe('lens visualization', () => {
+      const dashboardName = `Security cases dashboard ${uuidv4()}`;
+      let dashboardId: string | undefined;
+
       before(async () => {
         await svlCommonPage.loginAsAdmin();
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
+        );
+        // `createAndAddLensFromDashboard` configures logstash fields (bytes / @timestamp / ip)
+        // on the default data view, which the managed Case Analytics data view can otherwise take.
+        await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*' });
+
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
 
@@ -41,10 +57,31 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await lens.createAndAddLensFromDashboard({});
         await dashboard.waitForRenderComplete();
+        await dashboard.saveDashboard(dashboardName, {
+          saveAsNew: true,
+          waitDialogIsClosed: true,
+          exitFromEditMode: false,
+        });
+
+        await retry.waitFor('saved dashboard id in the url', async () => {
+          const { pathname } = new URL(await browser.getCurrentUrl());
+          const id = pathname.split('/dashboards/')[1]?.split('/')[0];
+          dashboardId = id && id !== 'create' ? id : undefined;
+          return dashboardId !== undefined;
+        });
       });
 
       after(async () => {
         await svlCases.api.deleteAllCaseItems();
+
+        if (dashboardId) {
+          await kibanaServer.savedObjects.delete({ type: 'dashboard', id: dashboardId });
+        }
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
+        );
+        await kibanaServer.uiSettings.unset('defaultIndex');
       });
 
       it('adds lens visualization to a new case', async () => {
@@ -75,7 +112,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.missingOrFail('caseOwnerSelector');
         await testSubjects.click('create-case-submit');
 
-        await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
+        await cases.common.expectToasterToContain(`Case ${caseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
@@ -84,8 +121,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('confirmModalConfirmButton');
         }
 
-        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-        expect(await title.getVisibleText()).toEqual(caseTitle);
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(caseTitle);
 
         await retry.waitFor('wait for the visualization to exist', async () => {
           return testSubjects.exists('comment-lens-lens');
@@ -102,11 +139,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.click('LandingImageCards-accordionButton');
-
-        if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
-          await testSubjects.click('edit-unsaved-New-Dashboard');
-        }
+        await listingTable.searchForItemWithName(dashboardName, { escape: false });
+        await listingTable.clickItemLink('dashboard', dashboardName);
+        await dashboard.waitForRenderComplete();
 
         await dashboardPanelActions.clickPanelAction(ADD_TO_CASE_DATA_TEST_SUBJ);
 
@@ -115,7 +150,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 
-        await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
+        await cases.common.expectToasterToContain(`Case ${theCaseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
@@ -124,8 +159,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('confirmModalConfirmButton');
         }
 
-        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-        expect(await title.getVisibleText()).toEqual(theCaseTitle);
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(theCaseTitle);
 
         await testSubjects.existOrFail('comment-lens-lens');
       });
