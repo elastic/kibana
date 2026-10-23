@@ -18,7 +18,6 @@ export const deploymentAgnosticServices = {
   esArchiver: apiIntegrationServices.esArchiver,
   esSupertest: apiIntegrationServices.esSupertest,
   indexPatterns: apiIntegrationServices.indexPatterns,
-  ingestPipelines: apiIntegrationServices.ingestPipelines,
   kibanaServer: apiIntegrationServices.kibanaServer,
   randomness: apiIntegrationServices.randomness,
   retry: apiIntegrationServices.retry,
