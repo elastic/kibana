@@ -257,5 +257,23 @@ describe('createSnoozeAction', () => {
         { series_id: 's1', snoozed_until: '2026-05-01T00:00:00Z' },
       ]);
     });
+
+    it('scopes the condition fields to the rule types of the selected source rows', async () => {
+      const getRuleTypeIds = jest.fn().mockReturnValue(['observability.rules.custom_threshold']);
+      const deps = makeDeps({ ...conditionalSource, getRuleTypeIds });
+      const open = mockModal({ snoozedUntil: null });
+
+      const sourceEpisode = makeSourceEpisode();
+      await createSnoozeAction(deps, makeExtension()).execute({
+        episodes: [sourceEpisode, makeEpisode({ 'episode.id': 'e2' })],
+      });
+
+      // Native rows have no source context to read a rule type from.
+      expect(getRuleTypeIds).toHaveBeenCalledWith([sourceEpisode]);
+      expect(open).toHaveBeenCalledWith(
+        deps,
+        expect.objectContaining({ ruleTypeIds: ['observability.rules.custom_threshold'] })
+      );
+    });
   });
 });

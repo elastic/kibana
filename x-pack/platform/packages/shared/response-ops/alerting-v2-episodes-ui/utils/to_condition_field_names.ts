@@ -19,6 +19,9 @@ export const toConditionFieldNames = (fields: readonly EpisodeSearchField[]): st
 
   for (const field of fields) {
     if (!field?.name || NON_SCALAR_FIELD_TYPES.has(field.type)) continue;
+    // Leaves of a nested object resolve to `null` when snapshotted by dot path
+    // (see #275054), so they can't back a `field_change` condition either.
+    if (field.subType?.nested) continue;
     names.add(field.name);
   }
 

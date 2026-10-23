@@ -96,8 +96,8 @@ export const queryKeys = {
     [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId, queryV2Source] as const,
   tagSuggestionsAll: () => [...queryKeys.all, 'tag-suggestions'] as const,
   tagSuggestions: (spaceId: string) => [...queryKeys.tagSuggestionsAll(), spaceId] as const,
-  conditionFieldNames: (sourceId: string) =>
-    [...queryKeys.all, 'condition-field-names', sourceId] as const,
+  conditionFieldNames: (sourceId: string, ruleTypeIds: string[]) =>
+    [...queryKeys.all, 'condition-field-names', sourceId, [...ruleTypeIds].sort()] as const,
   assigneeSuggestions: (searchTerm: string) =>
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
