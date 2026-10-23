@@ -16,7 +16,7 @@ and applies ECS structured-logging conventions to this plugin's failure modes.
 
 **Audience assumption — operator first, developer second.** `info` / `warn` /
 `error` lines are for someone paged at 3am running a Serverless project who
-needs to act. `debug` / `trace` lines are for a developer reproducing a bug.
+needs to act. `debug` lines are for a developer reproducing a bug.
 This split shapes every rule below.
 
 ## Rules
@@ -28,26 +28,29 @@ Every log line in this plugin:
 1. Goes through `LoggerService` (inject `LoggerServiceToken`). Never inject the
    raw `@kbn/logging` `Logger`, except to hand it to a dependency whose API
    requires one.
-2. Is emitted from a subsystem logger (`forSubsystem(...)`) bound once in the
-   constructor, never from the root.
+2. Is emitted from a subsystem logger (`forSubsystem(...)`) bound once where
+   the component is constructed, never from the root.
 3. Has a short, sentence-case message that names a _class_ of event and
    contains no interpolated values.
 4. Puts every variable value in `labels` (IDs only) or `error`, never in the
    message.
 5. If `warn` or `error`, carries a `code` from `ALERTING_LOG_CODES`.
 6. Logs nothing from the [deny list](#deny-list--never-log-at-any-level).
-7. Is asserted in a unit test on `code` and `labels`, not on message text.
+7. Is asserted in a unit test on `code` and `labels`.
 
 ### 1. Log levels
 
-| Level   | Use when                                                                                                                      | Examples in this plugin                                                                                                                |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `fatal` | The plugin process cannot continue. Extremely rare.                                                                           | A required saved object type failed to register.                                                                                       |
-| `error` | An operation the operator cares about failed and was not recovered. **The operator must act.**                                | A pipeline step threw; a background task could not be scheduled at boot; a bulk write into an alerting datastream was rejected.        |
-| `warn`  | An operation degraded but continued: recovered, retried, skipped, or gracefully degraded. The operator watches for a pattern. | Workflow not found on dispatch; an enrichment lookup failed and the page returned with `null` names; a KQL matcher failed to evaluate. |
-| `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | Alerting v2 disabled via advanced setting at boot; a saved object model-version migration completed.                                   |
-| `debug` | Anything a developer or on-call needs to trace one rule or one dispatch tick. Opt-in per logger name.                         | Step start / finish; state transitions; dispatch decisions; query timings.                                                             |
-| `trace` | Firehose: full pipeline state dumps, request / response bodies. Deep-debug only.                                              | Serialized rule state at each step boundary.                                                                                           |
+`LoggerService` exposes four levels. `fatal` and `trace` are deliberately not
+on the contract: nothing in this plugin stops the Kibana process, and
+firehose-level detail belongs in a lazy `debug` message that is free when the
+level is off.
+
+| Level   | Use when                                                                                                                      | Examples in this plugin                                                                                                                                                                                                     |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `error` | An operation the operator cares about failed and was not recovered. **The operator must act.**                                | A pipeline step threw (`RULE_EXECUTION_STEP_FAILED`); a saved object type failed to register (`SAVED_OBJECTS_TYPE_REGISTRATION_FAILED`); a background task could not be scheduled at boot (`TASKS_SCHEDULE_FAILED`).        |
+| `warn`  | An operation degraded but continued: recovered, retried, skipped, or gracefully degraded. The operator watches for a pattern. | Workflow not found on dispatch (`DISPATCH_WORKFLOW_NOT_FOUND`); a name lookup failed and the page returned with `null` names (`EXECUTION_HISTORY_RULE_LOOKUP_FAILED`); a KQL matcher failed (`POLICY_MATCHER_KQL_INVALID`). |
+| `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | The dispatcher found no persisted watermark and is starting from the overlap window (once, on cold start).                                                                                                                  |
+| `debug` | Anything a developer or on-call needs to trace one rule or one dispatch tick. Opt-in per logger name.                         | Step start / finish; episode transitions; dispatch decisions; a route returning a client error.                                                                                                                             |
 
 Rules:
 
@@ -83,15 +86,15 @@ Rules:
   ES DSL, no alert document payloads, no implementation details (class names,
   file paths, internal step names). Logs are read by customers, Elastic
   employees, and contributors.
-- **At `debug` / `trace`:** still no secrets. User KQL is permitted only when
-  necessary to reproduce a bug.
+- **At `debug`:** still no secrets. User KQL is permitted only when necessary
+  to reproduce a bug.
 
 Lazy vs eager messages:
 
-- Use `() => string` for `debug` / `trace` in hot paths (per-alert loops, per
-  step yields, per-row batches). It costs nothing when the level is disabled.
+- Use `() => string` for `debug` in hot paths (per-alert loops, per-step
+  yields, per-row batches). It costs nothing when the level is disabled.
 - Use a plain `string` for `info` / `warn` / `error` and for low-frequency
-  `debug`.
+  `debug`. A lazy message is still correct there; it just buys nothing.
 
 Before / after:
 
@@ -128,9 +131,10 @@ on, so it must identify a bounded slice of behaviour, not a file.
 - One child logger per subsystem, `plugins.alertingVTwo.<subsystem>`.
   Subsystem names are camelCase and come from the closed
   `AlertingSubsystemName` union in [`types.ts`](./types.ts).
-- Bind the subsystem logger **once**, in the constructor:
-  `this.logger = root.forSubsystem('dispatcher')`. Do not call `forSubsystem`
-  per log line, and do not log from the root service.
+- Bind the subsystem logger **once**, where the component is constructed: in
+  its constructor (`this.logger = root.forSubsystem('dispatcher')`) or in the
+  `setup/bind_*.ts` function that builds it. Do not call `forSubsystem` per
+  log line, and do not log from the root service.
 - Never repeat the subsystem name in message text.
 
 | Subsystem            | Covers                                                                     | Bound in                                                                         |
@@ -148,9 +152,13 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `savedObjects`       | Saved object type registration and model-version migrations.               | `setup/bind_on_setup.ts`                                                         |
 | `agentBuilder`       | Agent Builder tools, skills and attachments.                               | `setup/bind_agent_builder.ts`                                                    |
 | `events`             | Internal domain event bus, publishers and subscribers.                     | `lib/events/`                                                                    |
+| `telemetry`          | Event-based telemetry (EBT) reporting.                                     | `lib/services/ebt_service/ebt_service.ts`                                        |
 
 The tree is split along **failure-domain** boundaries, not directory
-boundaries. ~14 loggers an operator can remember, not 100+ file names.
+boundaries: 14 loggers an operator can remember, not 100+ file names. The
+`director` runs inside the executor pipeline but gets its own logger because it
+is reasoned about independently; the `events` bus is one logger even though
+publishers and subscribers live in several directories.
 
 Discover cheat sheet:
 
@@ -220,18 +228,21 @@ Every `warn` and `error` carries a `code` from `ALERTING_LOG_CODES` in
 looking at a spike filters `labels.code: "..."` and sees the count over the last
 hour instead of grepping messages.
 
-Naming:
+Naming (the JSDoc above `ALERTING_LOG_CODES` is the source of truth):
 
 - `<DOMAIN>_<WHAT_HAPPENED>`, SCREAMING_SNAKE_CASE.
-- The domain prefix matches the subsystem: `ROUTES_`, `RULE_` / `RULE_EXECUTION_`,
-  `DIRECTOR_`, `DISPATCH_` / `DISPATCHER_`, `POLICY_` / `ACTION_POLICY_`,
-  `EXECUTION_HISTORY_`, `RESOURCES_`, `SAVED_OBJECTS_`, `TASKS_`,
-  `AGENT_BUILDER_`, `EVENTS_`, `STORAGE_`, `QUERY_`, `MAINTENANCE_WINDOW_`,
-  `RULE_TEMPLATE_`.
-- The suffix encodes the mode. Warns: `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
-  `_NOT_FOUND`, `_LOOKUP_FAILED`, `_DEGRADED`, `_TRUNCATED`, `_INVALID`
-  (degraded but continued). Errors: `_FAILED`, `_UNAVAILABLE`, `_INVALID`,
-  `_UNRECOVERABLE` (could not complete).
+- The domain prefix matches the subsystem that owns the failure, so an operator
+  can filter a whole area with a prefix: `ROUTES_`, `RULE_` / `RULE_EXECUTION_`
+  / `RULE_TEMPLATE_`, `DIRECTOR_`, `DISPATCH_` / `DISPATCHER_`, `POLICY_` /
+  `ACTION_POLICY_`, `EXECUTION_HISTORY_`, `EVENTS_`, `STORAGE_`, `QUERY_`,
+  `RESOURCES_`, `MAINTENANCE_WINDOW_`, `SAVED_OBJECTS_`, `AGENT_BUILDER_`,
+  `TASKS_`, `TELEMETRY_`. Add the prefix to that JSDoc when you add a domain.
+- The suffix encodes the outcome. Warns (degraded but continued): `_FAILED`,
+  `_SKIPPED`, `_TIMED_OUT`, `_NOT_FOUND`, `_LOOKUP_FAILED`, `_DEGRADED`,
+  `_INVALID`, `_UNMAPPED`. Errors (could not complete): `_FAILED`,
+  `_UNAVAILABLE`, `_INVALID`, `_UNRECOVERABLE`. A few codes that predate the
+  standard use other suffixes; they keep their names because renaming is
+  breaking, but new codes pick from this list.
 
 Rules:
 
@@ -274,7 +285,7 @@ is not.
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Credentials                     | API keys, bearer tokens, cookies, session IDs, any `authorization` value                                                        |
 | User-supplied query bodies      | Rule matcher KQL, ES DSL, ES\|QL, Agent Builder tool inputs                                                                     |
-| Alert / event / document bodies | `.alerts-*`, `.rule-events-*`, `.alert-actions-*`, incoming ES documents                                                        |
+| Alert / event / document bodies | `.rule-events` rows, `.alert-actions` rows, alert episode rows, query results, incoming ES documents                            |
 | Rule / policy names and text    | `rule.name`, `rule.description`, `actionPolicy.name`, `actionPolicy.description`, `tags` — user-authored free text              |
 | User identity                   | `user.username`, `user.email`, `user.full_name`, `user.roles` beyond what core emits at request scope. Use the audit logger.    |
 | URLs from user input            | Webhook and connector URLs — they often carry tokens                                                                            |
@@ -482,7 +493,8 @@ Adding a code, a label, or a subsystem is a deliberate one-line type change:
 
 - **Code** — add an entry to `ALERTING_LOG_CODES` (`../../errors/error_codes.ts`)
   under the matching domain banner, with a JSDoc describing when it fires and
-  what degraded. Renaming or removing one is a breaking change for log-based
+  what degraded. A new domain prefix also goes into the catalog's header
+  JSDoc. Renaming or removing a code is a breaking change for log-based
   monitoring.
 - **Label** — add a key to `AlertingLabels` (`types.ts`) and to the list in
   [labels](#4-labels). Keys are snake_case; values must be low-cardinality
