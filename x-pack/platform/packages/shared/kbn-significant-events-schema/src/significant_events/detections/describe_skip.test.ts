@@ -5,11 +5,36 @@
  * 2.0.
  */
 
-import { describeSkip } from '.';
+import { SKIP_REASONS, describeSkip, skipMarkerSchema } from '.';
 
 const formatTime = (isoTime: string) => `at ${isoTime}`;
 
 describe('describeSkip', () => {
+  it('says when the agent reviewed the rule for an already_reviewed skip, not what an event records', () => {
+    expect(
+      describeSkip(
+        {
+          reason: 'already_reviewed',
+          reviewed_at: '2026-10-23T03:37:00.000Z',
+          absorbed_reason: 'series_too_old',
+          event_title: 'Checkout — request failures',
+          stored_verdict: 'confirms',
+          checked_at: '2026-10-23T05:00:00.000Z',
+        },
+        formatTime
+      )
+    ).toEqual([
+      'The agent reviewed this rule at 2026-10-23T03:37:00.000Z; its match count has not changed since.',
+      'Checked at 2026-10-23T05:00:00.000Z',
+    ]);
+  });
+
+  it('still explains an already_reviewed skip that has no review time', () => {
+    expect(describeSkip({ reason: 'already_reviewed' }, formatTime)).toEqual([
+      'The agent reviewed this rule recently; its match count has not changed since.',
+    ]);
+  });
+
   it('says what the query returned and what the event already records', () => {
     expect(
       describeSkip(
@@ -62,5 +87,28 @@ describe('describeSkip', () => {
         formatTime
       )
     ).toEqual(['some_new_reason', 'Checked at 2026-10-19T10:00:00.000Z']);
+  });
+});
+
+describe('skipMarkerSchema', () => {
+  // The discovery workflow tells a classifier skip from an agent review by `skip.event_id`.
+  it.each(SKIP_REASONS)('requires the live event id for a %s marker', (reason) => {
+    expect(skipMarkerSchema.safeParse({ reason }).success).toBe(false);
+    expect(skipMarkerSchema.safeParse({ reason, event_id: 'event-1' }).success).toBe(true);
+  });
+
+  it('accepts what an already_reviewed skip absorbed, and only a known reason', () => {
+    const marker = {
+      reason: 'already_reviewed',
+      event_id: 'event-1',
+      reviewed_at: '2026-10-23T03:37:00.000Z',
+    };
+
+    expect(skipMarkerSchema.safeParse({ ...marker, absorbed_reason: 'above_normal' }).success).toBe(
+      true
+    );
+    expect(skipMarkerSchema.safeParse({ ...marker, absorbed_reason: 'made_up' }).success).toBe(
+      false
+    );
   });
 });

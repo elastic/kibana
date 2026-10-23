@@ -38,8 +38,11 @@ export type ProbeStatus = (typeof PROBE_STATUSES)[number];
 const BASELINE_DECISIONS = ['above_normal', 'background', 'warming_up'] as const;
 export type BaselineDecision = (typeof BASELINE_DECISIONS)[number];
 
-/** Why a detection is skipped: nothing changed since the stored verdict. */
-export const SKIP_REASONS = ['still_breaching', 'still_healthy'] as const;
+/**
+ * Why a detection is skipped: nothing changed since the stored verdict, or since the agent's last
+ * review of the rule (`already_reviewed`).
+ */
+export const SKIP_REASONS = ['still_breaching', 'still_healthy', 'already_reviewed'] as const;
 
 /**
  * Why a detection reaches the agent. `state_changed`: the probe contradicts a stored verdict.
@@ -53,6 +56,7 @@ export const NEEDS_AGENT_REASONS = [
   'member_joining',
   'series_too_old',
   'above_normal',
+  'below_judged',
   'flaky_probe',
   'over_cap',
 ] as const;
@@ -91,17 +95,25 @@ export const detectionSkipSchema = lazySchema(() =>
     event_id: z.string().max(MAX_ID_LENGTH).optional(),
     event_title: z.string().max(MAX_TITLE_LENGTH).optional(),
     stored_verdict: z.string().max(32).optional(),
+    /** For `already_reviewed`: when the agent last reviewed the rule, and what the review absorbed. */
+    reviewed_at: isoDateTime({ offset: true }).optional(),
+    absorbed_reason: z.string().max(64).optional(),
     checked_at: isoDateTime({ offset: true }).optional(),
   })
 );
 
 export type DetectionSkip = z.infer<typeof detectionSkipSchema>;
 
-/** A skip as it is written to a processed marker: a known reason, and the event it rests on. */
+/**
+ * A skip as it is written to a processed marker: a known reason, and the event it rests on. Every
+ * skip marker must carry `event_id`: the discovery workflow tells a classifier skip from an agent
+ * review by it (`COUNT(skip.event_id)`), so a skip without it would count as a review.
+ */
 export const skipMarkerSchema = lazySchema(() =>
   detectionSkipSchema.omit({ checked_at: true }).extend({
     reason: z.enum(SKIP_REASONS),
     event_id: z.string().min(1).max(MAX_ID_LENGTH),
+    absorbed_reason: z.enum(NEEDS_AGENT_REASONS).optional(),
   })
 );
 
@@ -219,7 +231,20 @@ export const describeSkip = (
     (skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ??
     REASON_STATES[skip.reason];
   const lines: string[] = [];
-  if (state === undefined) {
+  if (skip.reason === 'already_reviewed') {
+    lines.push(
+      skip.reviewed_at
+        ? i18n.translate('xpack.significantEvents.detectionSkip.alreadyReviewedAt', {
+            defaultMessage:
+              'The agent reviewed this rule {time}; its match count has not changed since.',
+            values: { time: formatTime(skip.reviewed_at) },
+          })
+        : i18n.translate('xpack.significantEvents.detectionSkip.alreadyReviewed', {
+            defaultMessage:
+              'The agent reviewed this rule recently; its match count has not changed since.',
+          })
+    );
+  } else if (state === undefined) {
     lines.push(skip.reason);
   } else {
     if (skip.probe_has_rows !== undefined) {
