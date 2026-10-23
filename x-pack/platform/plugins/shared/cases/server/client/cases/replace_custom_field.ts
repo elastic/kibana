@@ -166,7 +166,9 @@ export const replaceCustomField = async (
     // Definition-aware validation of the FINAL map, matching create.ts/bulk_create.ts/bulk_update.ts:
     // the pairing-derived extended_fields entry must also be a valid key with a valid value
     // against the linked definition. `partial: true` — pairing never makes an absent field
-    // "required-missing".
+    // "required-missing". Only the keys this request wrote are validated (the full map is still
+    // passed so `show_when` / `required_when` see stored values): untouched fields were validated
+    // when written, and a stored value that is now invalid must not block an unrelated edit.
     if (extendedFieldsChanged && paired.extendedFields != null) {
       const globalFields = await resolveGlobalFields(
         caseToUpdate.attributes.owner,
@@ -174,6 +176,7 @@ export const replaceCustomField = async (
       );
       await validateCaseExtendedFields({
         extendedFields: paired.extendedFields as Record<string, string>,
+        touchedKeys: new Set(Object.values(paired.pairedKeyToStorageKey)),
         templateId: caseToUpdate.attributes.template?.id,
         globalFields,
         templatesService,
