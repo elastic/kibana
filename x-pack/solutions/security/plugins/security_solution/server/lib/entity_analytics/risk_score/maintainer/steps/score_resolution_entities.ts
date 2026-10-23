@@ -54,6 +54,8 @@ interface ScoreResolutionEntitiesParams {
    * index. Full runs only; it relies on the page's member filter to leave out entities in no group.
    */
   joinEntityStore?: boolean;
+  /** Reduce alerts to one row per entity before joining them to their resolution targets. */
+  preAggregateByEntity?: boolean;
 }
 
 interface ResolutionPageResult {
@@ -146,6 +148,7 @@ export const scoreResolutionPage = async (
     watchlistConfigs,
     alertFilters,
     joinEntityStore = false,
+    preAggregateByEntity = false,
   }: ScoreResolutionEntitiesParams,
   { pageNumber, resolutionTargetIds, bounds, timer }: ResolutionPageTask
 ): Promise<EntityRiskScoreRecord[]> => {
@@ -167,8 +170,9 @@ export const scoreResolutionPage = async (
     );
   }
 
-  // The store join needs the member filter to leave out entities in no group, so a page too big for
-  // one keeps the lookup join.
+  // Both need the member filter: the store join to leave out entities in no group, and the
+  // per-entity aggregation to stay within the page's members' alerts. A page too big for one keeps
+  // the lookup join and aggregates by target directly.
   const entityStoreIndex =
     joinEntityStore && memberFilter ? await crudClient.latestIndexName() : undefined;
   const { parsedScores, esqlRows, profileSummary } = await runResolutionScoringQuery({
@@ -177,6 +181,7 @@ export const scoreResolutionPage = async (
     resolutionTargetIds,
     bounds,
     entityStoreIndex,
+    preAggregate: preAggregateByEntity && memberFilter !== undefined,
     // A full run shares its ID with the lookup rows Phase 0 wrote for it.
     calculationRunId,
     sampleSize,
@@ -459,6 +464,7 @@ const runResolutionScoringQuery = async ({
   resolutionTargetIds,
   bounds,
   entityStoreIndex,
+  preAggregate,
   calculationRunId,
   sampleSize,
   pageSize,
@@ -473,6 +479,7 @@ const runResolutionScoringQuery = async ({
   resolutionTargetIds: string[];
   bounds: { lower?: string; upper: string } | undefined;
   entityStoreIndex: string | undefined;
+  preAggregate: boolean;
   calculationRunId: string;
   sampleSize: number;
   pageSize: number;
@@ -495,7 +502,7 @@ const runResolutionScoringQuery = async ({
         pageSize,
         alertsIndex,
         lookupIndex,
-        { entityStoreIndex }
+        { entityStoreIndex, preAggregate }
       )
     : getResolutionScoreESQLByIds(
         entityType,

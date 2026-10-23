@@ -61,7 +61,9 @@ export const parseEsqlBaseScoreRow =
           return null;
         }
         const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
+        // `sort_key` orders inputs by score inside the pre-aggregated resolution query.
         const otherFields = omit(parsedRiskInputData, [
+          'sort_key',
           'risk_score',
           'rule_name',
           'rule_name_b64',

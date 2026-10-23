@@ -201,6 +201,31 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).not.toContain('resolution_target_id IS NOT NULL');
     });
 
+    it('reduces alerts to one row per entity before joining them to their targets', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { upper: 'user:target-m' },
+        'run-1',
+        500,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default',
+        { entityStoreIndex: '.entities.v2.latest.default-00001', preAggregate: true }
+      );
+
+      const perEntity = query.indexOf('BY entity_id');
+      const join = query.indexOf('| LOOKUP JOIN');
+      const perTarget = query.indexOf('BY resolution_target_id');
+      expect(perEntity).toBeGreaterThan(-1);
+      expect(perEntity).toBeLessThan(join);
+      expect(join).toBeLessThan(perTarget);
+      expect(query).toContain('member_scores = TOP(risk_score, 500, "desc")');
+      expect(query).toContain('alert_count = SUM(member_alert_count)');
+      expect(query).toContain('TOP(member_scores, 500, "desc")');
+      // Inputs start with a zero-padded score, so ordering them as strings orders them by score.
+      expect(query).toContain('{"sort_key": """", REPEAT("0", 10 - LENGTH(score_key)), score_key');
+    });
+
     it("finds each alert's target in the entity store when given its index", () => {
       const query = getResolutionScoreESQLByRange(
         EntityType.user,

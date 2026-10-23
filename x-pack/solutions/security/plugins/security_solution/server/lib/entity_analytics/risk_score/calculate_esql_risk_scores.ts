@@ -767,6 +767,11 @@ export const getResolutionScoreESQLByIds = (
  * With `entityStoreIndex`, each alert's target comes from its entity's store document instead
  * (`resolved_to`, or the entity itself). Nothing then tells a target from an entity in no group,
  * so the caller must limit the alerts to the page's group members.
+ *
+ * With `preAggregate`, alerts are first reduced to one row per entity, holding the entity's top
+ * scores and inputs, and only those rows are joined and grouped by target. The group's top N is
+ * the top N of its members' top N, so scores and alert counts don't change; which of several
+ * equally scored alerts are kept as inputs may.
  */
 export const getResolutionScoreESQLByRange = (
   entityType: EntityType,
@@ -776,7 +781,10 @@ export const getResolutionScoreESQLByRange = (
   pageSize: number,
   alertsIndex: string,
   lookupIndex: string,
-  { entityStoreIndex }: { entityStoreIndex?: string } = {}
+  {
+    entityStoreIndex,
+    preAggregate = false,
+  }: { entityStoreIndex?: string; preAggregate?: boolean } = {}
 ): string => {
   assertEsqlInterpolatableIds(
     [bounds.lower, bounds.upper, calculationRunId].filter(
@@ -804,6 +812,7 @@ export const getResolutionScoreESQLByRange = (
     alertsIndex,
     lookupIndex,
     entityStoreIndex,
+    preAggregate,
   });
 };
 
@@ -815,6 +824,7 @@ const buildResolutionScoreESQL = ({
   alertsIndex,
   lookupIndex,
   entityStoreIndex,
+  preAggregate = false,
 }: {
   entityType: EntityType;
   /** Filters joined alert rows down to the page's resolution groups. */
@@ -825,6 +835,8 @@ const buildResolutionScoreESQL = ({
   lookupIndex: string;
   /** Joins the entity store instead of the lookup index to find each alert's resolution target. */
   entityStoreIndex?: string;
+  /** Reduces alerts to one row per entity before the join; see `getResolutionScoreESQLByRange`. */
+  preAggregate?: boolean;
 }): string => {
   const definition = getBuiltInEntityDefinition(entityType);
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
@@ -871,6 +883,7 @@ const buildResolutionScoreESQL = ({
     ${membershipClause}
     ${alertFieldsRename}`;
 
+  const sample = sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE;
   const alertsSource = `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
@@ -879,6 +892,44 @@ const buildResolutionScoreESQL = ({
     ${euidEvalClause}
     ${storedEuidCoalesceClause}
     | RENAME @timestamp as time`;
+
+  if (preAggregate) {
+    // Each input starts with its score, zero padded, so sorting inputs as strings sorts them by
+    // score at both levels. The parser drops `sort_key`.
+    const targetJoin = entityStoreIndex
+      ? `| LOOKUP JOIN ${entityStoreIndex} ON entity_id == entity.id
+    | EVAL resolution_target_id = COALESCE(entity.relationships.resolution.resolved_to, entity_id),
+           relationship_type = CASE(
+             entity.relationships.resolution.resolved_to IS NULL,
+             "${SELF_RELATIONSHIP_TYPE}",
+             "${RESOLUTION_RELATIONSHIP_TYPE}"
+           )`
+      : `| LOOKUP JOIN ${lookupIndex} ON entity_id`;
+
+    return /* esql */ `${alertsSource}
+    ${alertFieldsRename}
+    | EVAL rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category),
+           score_key = TO_STRING(TO_LONG(ROUND(risk_score * 1000)))
+    | EVAL input = CONCAT(""" {"sort_key": """", REPEAT("0", 10 - LENGTH(score_key)), score_key, """", "risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | STATS
+        member_alert_count = COUNT(risk_score),
+        member_scores = TOP(risk_score, ${sample}, "desc"),
+        member_inputs = TOP(input, ${MAX_INPUTS_COUNT}, "desc")
+        BY entity_id
+    ${targetJoin}
+    ${membershipClause}
+    | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
+    | STATS
+        alert_count = SUM(member_alert_count),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(member_scores, ${sample}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = TOP(member_inputs, ${MAX_INPUTS_COUNT}, "desc"),
+        contributing_entities_raw = VALUES(entity_with_rel)
+        BY resolution_target_id
+    | SORT scores DESC
+    | LIMIT ${pageSize}
+  `;
+  }
 
   const query = /* esql */ `${alertsSource}
     ${membershipJoin}

@@ -50,6 +50,8 @@ interface RunResolutionScoringParams {
   pagesInFlight?: number;
   /** Find each alert's resolution target by joining the entity store rather than the lookup index. */
   joinEntityStore?: boolean;
+  /** Reduce alerts to one row per entity before joining them to their resolution targets. */
+  preAggregateByEntity?: boolean;
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
   /** Collects each page's step times; pass one in to read them after the stage. */
@@ -78,6 +80,7 @@ export const runResolutionScoringStep = async ({
   entityStoreWriteChunks,
   pagesInFlight = 1,
   joinEntityStore,
+  preAggregateByEntity,
   collectScores,
   pageTimings = createPageStepTimings(),
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
@@ -145,6 +148,7 @@ export const runResolutionScoringStep = async ({
     alertFilters,
     pageTimings,
     joinEntityStore,
+    preAggregateByEntity,
   };
 
   await forEachConcurrently(discoverResolutionPages(scoringParams), pagesInFlight, async (task) => {

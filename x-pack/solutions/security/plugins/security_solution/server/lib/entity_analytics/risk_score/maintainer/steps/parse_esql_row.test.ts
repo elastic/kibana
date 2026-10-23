@@ -33,6 +33,24 @@ describe('parseEsqlResolutionScoreRow', () => {
       },
     ]);
   });
+
+  it('leaves the sort key of a pre-aggregated input out of the risk input', () => {
+    const parseRow = parseEsqlResolutionScoreRow('.alerts-security.alerts-default', 500);
+    const row = [
+      1,
+      60,
+      '{ "sort_key": "0000060000", "risk_score": "60", "time": "2026-01-01T00:00:00.000Z", "index": ".alerts-security.alerts-default", "rule_name_b64": "VGVzdCBSdWxl", "category_b64": "c2lnbmFs", "id": "alert-1" }',
+      'user:target-1|self',
+      'user:target-1',
+    ];
+
+    const [input] = parseRow(row).risk_inputs;
+
+    expect(input).not.toHaveProperty('sort_key');
+    expect(input).toEqual(
+      expect.objectContaining({ id: 'alert-1', score: 60, rule_name: 'Test Rule' })
+    );
+  });
 });
 
 describe('normalization by sample size', () => {
