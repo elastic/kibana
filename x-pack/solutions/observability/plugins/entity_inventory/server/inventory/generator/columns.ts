@@ -8,7 +8,8 @@
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { getDynamicBlock } from './dynamic';
 import { InventoryDefinitionError } from './errors';
-import { ENTITY_ID_COLUMN, resolveIdentityPlan } from './identity';
+import type { IdentityPlan } from './identity';
+import { ENTITY_ID_COLUMN } from './identity';
 import type { QueryPlan } from './types';
 
 /** The column holding the newest `@timestamp` of an entity. */
@@ -28,15 +29,15 @@ export interface OutputColumn {
 const RESERVED_COLUMNS: ReadonlySet<string> = new Set([ENTITY_ID_COLUMN, LAST_SEEN_COLUMN]);
 
 /**
- * Builds the ordered output columns: `entity.id`, the identity fields other than `entity.id`, the
- * attributes in plan order (one column per name), then `last_seen`.
+ * Builds the ordered output columns from the resolved identity: `entity.id`, the identity fields
+ * other than `entity.id`, the attributes in plan order (one column per name), then `last_seen`.
  */
 export const buildColumns = (
   definition: EntityDefinitionWithoutId,
-  plans: QueryPlan[]
+  plans: QueryPlan[],
+  { groupingFields, helperColumns }: IdentityPlan
 ): OutputColumn[] => {
   getDynamicBlock(definition);
-  const { groupingFields, helperColumns } = resolveIdentityPlan(definition);
   const identityFields = new Set(groupingFields);
   const helperColumnNames = new Set(helperColumns);
   const attributeColumns = new Map<string, Record<number, string>>();

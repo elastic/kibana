@@ -47,7 +47,7 @@ describe('buildListQuery', () => {
   describe.each(cases)('%s under %s', (_type, engine, definition) => {
     const plans = plansOf(definition, engine);
     const identity = resolveIdentityPlan(definition);
-    const columns = buildColumns(definition, plans);
+    const columns = buildColumns(definition, plans, identity);
 
     it.each(plans.map((plan) => [plan.index, plan] as const))(
       'builds the list query of plan %i',
@@ -101,10 +101,11 @@ describe('buildListQuery', () => {
 
   it('drops the store helper columns from KEEP', () => {
     const plans = plansOf(k8sDeploymentFixture, 'FROM');
+    const identity = resolveIdentityPlan(k8sDeploymentFixture);
     const { esql } = buildListQuery({
       plan: plans[0],
-      identity: resolveIdentityPlan(k8sDeploymentFixture),
-      columns: buildColumns(k8sDeploymentFixture, plans),
+      identity,
+      columns: buildColumns(k8sDeploymentFixture, plans, identity),
       window,
       limit: LIMIT,
     });
@@ -176,12 +177,13 @@ describe('buildListQuery', () => {
 
   it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])('rejects a limit of %p', (limit) => {
     const plans = plansOf(k8sDeploymentFixture, 'FROM');
+    const identity = resolveIdentityPlan(k8sDeploymentFixture);
 
     expect(() =>
       buildListQuery({
         plan: plans[0],
-        identity: resolveIdentityPlan(k8sDeploymentFixture),
-        columns: buildColumns(k8sDeploymentFixture, plans),
+        identity,
+        columns: buildColumns(k8sDeploymentFixture, plans, identity),
         window,
         limit,
       })

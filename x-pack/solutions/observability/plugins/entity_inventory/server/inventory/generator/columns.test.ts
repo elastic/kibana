@@ -9,6 +9,7 @@ import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { hostLikeFixture, k8sDeploymentFixture, k8sNodeFixture } from '../__fixtures__/definitions';
 import { buildColumns, planColumnNames } from './columns';
 import { InventoryDefinitionError } from './errors';
+import { resolveIdentityPlan } from './identity';
 import { planSources } from './source_plans';
 import type { QueryEngine } from './types';
 
@@ -19,7 +20,7 @@ const plansOf = (definition: EntityDefinitionWithoutId) =>
   );
 
 const columnsOf = (definition: EntityDefinitionWithoutId) =>
-  buildColumns(definition, plansOf(definition));
+  buildColumns(definition, plansOf(definition), resolveIdentityPlan(definition));
 
 describe('buildColumns', () => {
   it.each([
@@ -173,7 +174,11 @@ describe('buildColumns', () => {
 describe('planColumnNames', () => {
   it('lists the columns each plan of k8s.deployment produces', () => {
     const plans = plansOf(k8sDeploymentFixture);
-    const columns = buildColumns(k8sDeploymentFixture, plans);
+    const columns = buildColumns(
+      k8sDeploymentFixture,
+      plans,
+      resolveIdentityPlan(k8sDeploymentFixture)
+    );
     expect(plans.map((plan) => planColumnNames(columns, plan))).toEqual([
       ['entity.id', 'kubernetes.namespace', 'kubernetes.deployment.name', 'cluster', 'last_seen'],
       [

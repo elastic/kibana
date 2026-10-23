@@ -96,6 +96,6 @@ export const generateListQueries = (
 ): GeneratedQuery[] => {
   assertValidLimit(limit);
   const identity = resolveIdentityPlan(definition);
-  const columns = buildColumns(definition, plans);
+  const columns = buildColumns(definition, plans, identity);
   return plans.map((plan) => buildListQuery({ plan, identity, columns, window, limit }));
 };
