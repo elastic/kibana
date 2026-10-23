@@ -322,6 +322,50 @@ describe('runRelatedUserAliasResolution', () => {
     expect(result.lastRun).toMatchObject({ skippedAmbiguous: 1, linksCreated: 1 });
   });
 
+  it('reports a run summary scoped to the rule', async () => {
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createSourceDoc(['T03KX1Z'])]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createCandidate('user:ad')]) as never);
+    const telemetry = { report: jest.fn() };
+
+    await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient, telemetry }));
+
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scope: { kind: 'rule', value: 'related_user_alias_resolution' },
+        funnel: { scanned: 1, qualified: 1, applied: 1, skipped: 0, failed: 0 },
+        breakdown: expect.arrayContaining([
+          { name: 'links_created', count: 1 },
+          { name: 'truncated_candidate_values', count: 0 },
+        ]),
+      })
+    );
+  });
+
+  it('counts a value whose candidate search hits the size cap', async () => {
+    const candidates = Array.from({ length: 100 }, (_, index) =>
+      createCandidate(`user:ad-${index}`)
+    );
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createSourceDoc(['T03KX1Z'])]) as never)
+      .mockResolvedValueOnce(createSearchResponse(candidates) as never);
+    const telemetry = { report: jest.fn() };
+
+    const result = await runRelatedUserAliasResolution(
+      createDeps({ esClient, resolutionClient, telemetry })
+    );
+
+    expect(cascadeLinkEntities).not.toHaveBeenCalled();
+    expect(result.lastRun).toMatchObject({ skippedAmbiguous: 1, truncatedValues: 1 });
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        breakdown: expect.arrayContaining([{ name: 'truncated_candidate_values', count: 1 }]),
+      })
+    );
+  });
+
   it('dedupes a candidate matched by multiple values before cascading', async () => {
     esClient.search
       .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
