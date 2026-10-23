@@ -1570,12 +1570,23 @@ describe('Endpoint analysis run', () => {
         ...(alertIds === undefined ? {} : { 'kibana.alert.attack_discovery.alert_ids': alertIds }),
       },
     });
-    const when = (overrides: { analyzed?: boolean; status?: string; alertIds?: string[] }) => ({
+    const when = (overrides: {
+      analyzed?: boolean;
+      status?: string;
+      currentStatus?: string;
+      alertIds?: string[];
+    }) => ({
       steps: {
         forensic_analysis:
           overrides.analyzed === false ? {} : { output: { structured_output: {} } },
         fetch_attack_discovery_alert: {
           output: { hits: { hits: [attackHit(overrides.status ?? 'open', overrides.alertIds)] } },
+        },
+        // Read after the analysis, so it wins over the fetch before the agent ran.
+        reread_attack_status: {
+          output: {
+            hits: { hits: [attackHit(overrides.currentStatus ?? overrides.status ?? 'open')] },
+          },
         },
       },
     });
@@ -1592,6 +1603,29 @@ describe('Endpoint analysis run', () => {
       for (const step of [attackStep, tagStep, ackStep, verifyStep, note]) {
         expect(String(step?.if)).toContain('steps.resolve_attack_alerts.output.analyzed == true');
       }
+    });
+
+    // An analyst can close the attack while the agent runs; the fetch before it is stale.
+    it('decides on the status read after the analysis, not the one fetched before it', () => {
+      const reread = stepByName('reread_attack_status');
+      expect(reread?.type).toBe('elasticsearch.search');
+      expect(String(reread?.if)).toContain('steps.forensic_analysis.output != null');
+      expect(reread?.['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '5s' },
+        continue: true,
+      });
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('reread_attack_status')).toBeGreaterThan(
+        names.indexOf('forensic_analysis')
+      );
+      expect(names.indexOf('reread_attack_status')).toBeLessThan(
+        names.indexOf('resolve_attack_alerts')
+      );
+
+      expect(evaluate(resolve.attack_status, when({ status: 'open', currentStatus: 'closed' }))).toBe(
+        'closed'
+      );
+      expect(evaluate(resolve.attack_status, when({ status: 'open' }))).toBe('open');
     });
 
     // Acknowledging a closed attack would reopen it and drop its reason.

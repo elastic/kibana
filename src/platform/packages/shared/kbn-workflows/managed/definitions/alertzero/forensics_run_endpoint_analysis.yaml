@@ -951,12 +951,38 @@ steps:
 
           # The attack and its detection alerts are acknowledged once the analysis
           # has run. Only `open` attacks and `open` alerts are acknowledged.
+          #
+          # The status is read again here, not taken from the fetch before the agent
+          # ran: an analyst may close the attack during the analysis, and the status
+          # route would then reopen it and drop the closing reason. The attack route
+          # has no by-query form like the alerts one, so this narrows the window
+          # without closing it. A failed read leaves the status blank, which skips
+          # the acknowledgement.
+          - name: reread_attack_status
+            type: elasticsearch.search
+            if: "${{ steps.forensic_analysis.output != null }}"
+            with:
+              index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+              ignore_unavailable: true
+              size: 1
+              _source:
+                - kibana.alert.workflow_status
+              query:
+                ids:
+                  values:
+                    - "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+
           - name: resolve_attack_alerts
             type: data.set
             with:
               analyzed: "${{ steps.forensic_analysis.output != null }}"
               attack_id: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}"
-              attack_status: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.workflow_status'] }}"
+              attack_status: "{{ steps.reread_attack_status.output.hits.hits[0]._source['kibana.alert.workflow_status'] }}"
               has_alerts: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
               alert_ids: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
 
