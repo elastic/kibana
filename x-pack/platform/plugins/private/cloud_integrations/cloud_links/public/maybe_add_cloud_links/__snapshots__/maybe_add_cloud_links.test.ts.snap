@@ -14,7 +14,7 @@ Array [
   Object {
     "dataTestSubj": "userMenuLink__billing",
     "href": "billing-url",
-    "iconType": "chartGauge",
+    "iconType": "money",
     "isExternal": true,
     "label": "Billing and subscription",
     "order": 200,
@@ -53,7 +53,7 @@ Array [
   Object {
     "dataTestSubj": "userMenuLink__billing",
     "href": "billing-url",
-    "iconType": "chartGauge",
+    "iconType": "money",
     "isExternal": true,
     "label": "Billing and subscription",
     "order": 200,

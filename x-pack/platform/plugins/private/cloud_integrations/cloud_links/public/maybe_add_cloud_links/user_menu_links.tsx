@@ -49,7 +49,7 @@ export const createUserMenuLinks = async ({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.billingLinkText', {
         defaultMessage: 'Billing and subscription',
       }),
-      iconType: 'chartGauge',
+      iconType: 'money',
       href: billingUrl,
       isExternal: true,
       dataTestSubj: 'userMenuLink__billing',

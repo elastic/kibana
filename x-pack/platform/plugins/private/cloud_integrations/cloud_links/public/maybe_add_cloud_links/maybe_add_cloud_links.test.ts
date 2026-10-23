@@ -73,7 +73,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'chartGauge',
+        iconType: 'money',
         label: 'Billing and subscription',
         order: 200,
         isExternal: true,
@@ -166,7 +166,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'chartGauge',
+        iconType: 'money',
         label: 'Billing and subscription',
         order: 200,
         isExternal: true,
