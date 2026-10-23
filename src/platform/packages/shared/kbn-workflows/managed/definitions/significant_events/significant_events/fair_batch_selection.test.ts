@@ -182,13 +182,13 @@ describe('significant events fair batch selection', () => {
 
     it('counts skip markers apart from processed markers, per detection', () => {
       expect(query()).toContain(
-        '| INLINE STATS processed_count = COUNT(processed_by), skipped_count = COUNT(skip.event_id) BY detection_id'
+        '| INLINE STATS processed_count = COUNT(processed_by), skipped_count = COUNT(skip.event_id), processed_at = MAX(@timestamp) WHERE processed_by IS NOT NULL BY detection_id'
       );
     });
 
-    it('is the latest detection of the rule the agent processed without a skip', () => {
+    it('is when the agent last processed a detection of the rule without a skip, not the detection time', () => {
       expect(query()).toContain(
-        'last_reviewed_at = MAX(@timestamp) WHERE processed_count > 0 AND skipped_count == 0 BY rule_uuid'
+        'last_reviewed_at = MAX(processed_at) WHERE processed_count > 0 AND skipped_count == 0 BY rule_uuid'
       );
       expect(query()).toContain(
         'KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe, held_back, last_reviewed_at'

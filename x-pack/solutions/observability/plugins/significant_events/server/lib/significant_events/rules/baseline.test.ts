@@ -12,6 +12,7 @@ import {
   countsAfter,
   hasRowsAt,
   observationAt,
+  seenAt,
   observeMatchSeries,
   shiftFrom,
   type MatchSeries,
@@ -163,6 +164,14 @@ describe('reading a match series at a point in time', () => {
     });
     expect(observationAt(quietThenSpike, at('07:45'))).toBeUndefined();
     expect(observationAt(quietThenSpike, at('07:50'))).toMatchObject({ samples: 10 });
+  });
+
+  it('reads what something at a time could have seen: the bucket before the one that holds it', () => {
+    const seen = seenAt(quietThenSpike, at('12:00'));
+
+    expect(countAt(quietThenSpike, seen)).toBe(0);
+    expect(observationAt(quietThenSpike, seen)).toMatchObject({ decision: 'background', value: 0 });
+    expect(observationAt(quietThenSpike, at('12:00'))).toMatchObject({ value: 40 });
   });
 });
 

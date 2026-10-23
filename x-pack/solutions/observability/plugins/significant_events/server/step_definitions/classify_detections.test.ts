@@ -335,6 +335,13 @@ describe('classifyBatch', () => {
         { decision: 'needs_agent', reason: 'above_normal' },
       ],
       [
+        // The spike began inside the verdict's own bucket, after the verdict: it was never judged.
+        "a spike that began inside the verdict's own bucket, which the verdict never saw",
+        [...repeat(55, 5), ...repeat(6, 200)],
+        isoOfBucket(61, 55),
+        { decision: 'needs_agent', reason: 'above_normal' },
+      ],
+      [
         'a verdict older than the series, so any rise above normal escalates',
         plateau(210),
         hoursAgo(6),
@@ -456,6 +463,16 @@ describe('classifyBatch', () => {
       ['a probe that failed', jest.fn(async () => probeResult('timeout', false)), FLAT],
     ])('does not stand in for an unjudged verdict with %s', async (_name, probe, counts) => {
       const { decision } = await review({ memberships: unjudged(hoursAgo(2)), probe, counts });
+
+      expect(decision).toMatchObject({ decision: 'needs_agent', reason: 'unjudged_member' });
+    });
+
+    it("does not stand in for a verdict when the matches began inside the review's own bucket", async () => {
+      const { decision } = await review({
+        memberships: unjudged(hoursAgo(2)),
+        reviewedAt: isoOfBucket(61, 55),
+        counts: [...repeat(55, 5), ...repeat(6, 200)],
+      });
 
       expect(decision).toMatchObject({ decision: 'needs_agent', reason: 'unjudged_member' });
     });

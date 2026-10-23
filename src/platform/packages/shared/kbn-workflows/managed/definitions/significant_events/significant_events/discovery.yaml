@@ -164,9 +164,10 @@ steps:
       spaceId: '{{ workflow.spaceId }}'
 
   # Unbounded processed-marker semijoin by detection_id, then reduce to the latest
-  # unprocessed detection per rule (_id tie-break). `last_reviewed_at` is the latest detection of the
-  # rule the agent was given and processed (a marker without `skip`; every skip marker carries
-  # `skip.event_id`). Score by severity + age. The flaky-rule gate
+  # unprocessed detection per rule (_id tie-break). `last_reviewed_at` is when the agent last processed
+  # a detection of the rule it was given: the newest processed marker (a marker without `skip`;
+  # every skip marker carries `skip.event_id`), not the detection's own time, since the agent reads
+  # the data when it reviews. Score by severity + age. The flaky-rule gate
   # flags a rule `held_back` instead of dropping it, and held rows sort last, so noisy rules never
   # take batch slots from quiet ones. The classifier reads the flag by name: it may skip a held row
   # and never hands it to the agent.
@@ -175,9 +176,9 @@ steps:
     with:
       query: |-
         FROM .significant_events-detections METADATA _id, _source
-        | INLINE STATS processed_count = COUNT(processed_by), skipped_count = COUNT(skip.event_id) BY detection_id
+        | INLINE STATS processed_count = COUNT(processed_by), skipped_count = COUNT(skip.event_id), processed_at = MAX(@timestamp) WHERE processed_by IS NOT NULL BY detection_id
         | WHERE change_point_type IS NOT NULL
-        | INLINE STATS recent_detection_count = COUNT(*), last_reviewed_at = MAX(@timestamp) WHERE processed_count > 0 AND skipped_count == 0 BY rule_uuid
+        | INLINE STATS recent_detection_count = COUNT(*), last_reviewed_at = MAX(processed_at) WHERE processed_count > 0 AND skipped_count == 0 BY rule_uuid
         | WHERE processed_count == 0
         | INLINE STATS oldest_unprocessed = MIN(@timestamp), latest_timestamp = MAX(@timestamp) BY rule_uuid
         | WHERE @timestamp == latest_timestamp

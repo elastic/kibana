@@ -31,6 +31,7 @@ import {
   hasRowsAt,
   observationAt,
   observeMatchSeries,
+  seenAt,
   shiftFrom,
   type MatchSeries,
 } from '../lib/significant_events/rules/baseline';
@@ -208,22 +209,39 @@ const freshReviewTime = ({
   reviewFreshMs: number;
   probeSpanBuckets: number;
 }): number | undefined => {
-  if (reviewedAt === undefined || observed === undefined) return undefined;
+  if (reviewedAt === undefined || observed === undefined) {
+    return undefined;
+  }
   const verdictTime = newestVerdictTime(memberships, now);
-  if (verdictTime === undefined || reviewedAt <= verdictTime) return undefined;
-  if (!isWithinReviewWindow({ reviewedAt, now, reviewFreshMs })) return undefined;
+  if (verdictTime === undefined || reviewedAt <= verdictTime) {
+    return undefined;
+  }
+  if (!isWithinReviewWindow({ reviewedAt, now, reviewFreshMs })) {
+    return undefined;
+  }
 
   const { series } = observed;
   const latestStart = series.firstStart + (series.counts.length - 1) * series.bucketMs;
   // The latest bucket is only complete once it has ended, so a review inside it cannot be compared.
-  if (reviewedAt >= latestStart) return undefined;
-  const rowsThen = hasRowsAt({ series, time: reviewedAt, spanBuckets: probeSpanBuckets });
+  if (reviewedAt >= latestStart) {
+    return undefined;
+  }
+  // What the review could have seen is the last complete bucket before its own: the bucket that
+  // holds it is later activity.
+  const seen = seenAt(series, reviewedAt);
+  const rowsThen = hasRowsAt({ series, time: seen, spanBuckets: probeSpanBuckets });
   const rowsNow = hasRowsAt({ series, time: latestStart, spanBuckets: probeSpanBuckets });
-  const countThen = countAt(series, reviewedAt);
-  if (rowsThen === undefined || countThen === undefined || rowsThen !== rowsNow) return undefined;
+  const countThen = countAt(series, seen);
+  if (rowsThen === undefined || countThen === undefined || rowsThen !== rowsNow) {
+    return undefined;
+  }
+
   const isProbeAgreeing = probed?.status === 'ok' && probed.hasRows === rowsThen;
-  if (!needsProbe(memberships) && !isProbeAgreeing) return undefined;
-  const hasShiftedUp = countsAfter(series, reviewedAt).some(
+  if (!needsProbe(memberships) && !isProbeAgreeing) {
+    return undefined;
+  }
+
+  const hasShiftedUp = countsAfter(series, seen).some(
     (count) => shiftFrom({ value: count, from: countThen }) === 'up'
   );
   const hasShiftedSince = shiftFrom({ value: observed.observation.value, from: countThen });
@@ -517,7 +535,9 @@ const decideRow = ({
     probeSpanBuckets,
   });
   const levelAt = (time: number | undefined) =>
-    observed && time !== undefined ? observationAt(observed.series, time) : undefined;
+    observed && time !== undefined
+      ? observationAt(observed.series, seenAt(observed.series, time))
+      : undefined;
   return reconcileSkip({
     classification: classifyDetection({ memberships, probe: probed ?? NOT_PROBED }),
     memberships,

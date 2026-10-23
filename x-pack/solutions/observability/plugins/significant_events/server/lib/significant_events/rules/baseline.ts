@@ -146,6 +146,13 @@ export const observationAt = (
 };
 
 /**
+ * A time in the last complete bucket before the one that holds `time`: the level something at
+ * `time` could have seen. The bucket that holds `time` is later activity, since it can include
+ * matches that came after, so a verdict or a review is read against the bucket before it.
+ */
+export const seenAt = (series: MatchSeries, time: number): number => time - series.bucketMs;
+
+/**
  * Observes a filter-only match query: its count per bucket over the window of complete buckets, the
  * latest complete one against the rest. Anything else (aggregating queries, missing query, a failed
  * run) yields no observation.
