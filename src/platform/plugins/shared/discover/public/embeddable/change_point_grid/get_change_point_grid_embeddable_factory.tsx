@@ -10,6 +10,7 @@
 import { EuiLoadingChart } from '@elastic/eui';
 import type { ChangePointCardModel } from '@kbn/change-point-chart-viewer';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +24,7 @@ import {
   type HasTypeDisplayName,
   type PublishesBlockingError,
   type PublishesDataLoading,
+  type PublishesDataViews,
   type PublishesEsql,
   type PublishesWritableTimeRange,
   type PublishingSubject,
@@ -35,6 +37,7 @@ import type { UnifiedHistogramFetch$Arguments } from '@kbn/unified-histogram/typ
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, merge, ReplaySubject } from 'rxjs';
 import { CHANGE_POINT_GRID_EMBEDDABLE_TYPE } from '../../../common';
+import { ACTION_EXPLORE_DATA } from '../constants';
 import type { DiscoverServices } from '../../build_services';
 import type { ChangePointGridEmbeddableState } from '../../../server/embeddable/change_point_grid_schema';
 import { ChangePointGridRenderer } from './change_point_grid_renderer';
@@ -62,6 +65,7 @@ type ChangePointGridApi = DefaultEmbeddableApi<ChangePointGridEmbeddableState> &
   HasTypeDisplayName &
   PublishesDataLoading &
   PublishesBlockingError &
+  PublishesDataViews &
   PublishesEsql &
   PublishesWritableTimeRange & {
     searchContext$: PublishingSubject<ChangePointGridSearchRequest | undefined>;
@@ -86,6 +90,8 @@ export const getChangePointGridEmbeddableFactory = ({
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const applyDashboardContext = initialState.apply_dashboard_context !== false;
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const disabledActionIds$ = new BehaviorSubject<string[] | undefined>([ACTION_EXPLORE_DATA]);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
     const refresh$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1);
 
@@ -119,6 +125,8 @@ export const getChangePointGridEmbeddableFactory = ({
       ...timeRangeManager.api,
       defaultTitle$,
       dataLoading$,
+      dataViews$,
+      disabledActionIds$,
       blockingError$,
       esql$,
       approximationApplied$,
@@ -136,6 +144,7 @@ export const getChangePointGridEmbeddableFactory = ({
       // The chart hook only uses this emission as a rebuild trigger and ignores the payload.
       onCardsUpdated: () => refresh$.next(undefined as unknown as UnifiedHistogramFetch$Arguments),
       setDataLoading: (loading) => dataLoading$.next(loading),
+      setDataViews: (dataViews) => dataViews$.next(dataViews),
       setSearchError: (error) => blockingError$.next(error),
       setApproximationApplied: (applied) => approximationApplied$.next(applied),
     });

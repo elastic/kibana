@@ -61,6 +61,7 @@ describe('initializeChangePointGridFetch', () => {
     jest.mocked(fetch$).mockReturnValue(fetchContext$ as never);
     jest.mocked(resolveEsqlSource).mockResolvedValue({
       esqlSource: { id: 'source-1', kind: 'esql' },
+      dataView: { id: 'logs-*' },
     } as never);
     jest
       .mocked(buildChangePointCards)
@@ -76,6 +77,7 @@ describe('initializeChangePointGridFetch', () => {
 
   const start = (panelState: ChangePointGridEmbeddableState = state) => {
     const setDataLoading = jest.fn();
+    const setDataViews = jest.fn();
     const setSearchError = jest.fn();
     const setApproximationApplied = jest.fn();
     const onCardsUpdated = jest.fn();
@@ -97,6 +99,7 @@ describe('initializeChangePointGridFetch', () => {
       searchContext$,
       onCardsUpdated,
       setDataLoading,
+      setDataViews,
       setSearchError,
       setApproximationApplied,
     });
@@ -105,6 +108,7 @@ describe('initializeChangePointGridFetch', () => {
     return {
       cleanup,
       setDataLoading,
+      setDataViews,
       setSearchError,
       setApproximationApplied,
       onCardsUpdated,
@@ -118,7 +122,7 @@ describe('initializeChangePointGridFetch', () => {
   });
 
   it('searches with the dashboard context and publishes the latest cards', async () => {
-    const { setDataLoading, setApproximationApplied, onCardsUpdated } = start();
+    const { setDataLoading, setDataViews, setApproximationApplied, onCardsUpdated } = start();
     fetchContext$.next(dashboardContext);
     await Promise.resolve();
 
@@ -131,6 +135,7 @@ describe('initializeChangePointGridFetch', () => {
       })
     );
     expect(jest.mocked(fetchEsql)).toHaveBeenCalled();
+    expect(setDataViews).toHaveBeenCalledWith([{ id: 'logs-*' }]);
 
     resolveSearch({
       records: [],
@@ -224,12 +229,15 @@ describe('initializeChangePointGridFetch', () => {
       dataSource: { kind: 'esql', id: 'source-new', resultColumns: [] },
     } as never);
 
-    const { discoverServices } = start();
+    const { discoverServices, setDataViews } = start();
     fetchContext$.next(dashboardContext);
     fetchContext$.next({ ...dashboardContext, isReload: true });
 
     expect(resolveSources).toHaveLength(2);
-    resolveSources[1]({ esqlSource: { id: 'source-new', kind: 'esql' } });
+    resolveSources[1]({
+      esqlSource: { id: 'source-new', kind: 'esql' },
+      dataView: { id: 'logs-*' },
+    });
     await Promise.resolve();
 
     expect(jest.mocked(fetchEsql)).toHaveBeenCalledTimes(1);
@@ -237,9 +245,16 @@ describe('initializeChangePointGridFetch', () => {
       expect.objectContaining({ id: 'source-new' })
     );
 
-    resolveSources[0]({ esqlSource: { id: 'source-old', kind: 'esql' } });
+    expect(setDataViews).toHaveBeenCalledTimes(1);
+    expect(setDataViews).toHaveBeenCalledWith([{ id: 'logs-*' }]);
+
+    resolveSources[0]({
+      esqlSource: { id: 'source-old', kind: 'esql' },
+      dataView: { id: 'old-logs' },
+    });
     await Promise.resolve();
 
+    expect(setDataViews).toHaveBeenCalledTimes(1);
     expect(jest.mocked(fetchEsql)).toHaveBeenCalledTimes(1);
     expect(discoverServices.dataSourceService.unregisterEsqlSource).toHaveBeenCalledWith(
       'source-old'

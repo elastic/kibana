@@ -12,6 +12,7 @@ import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/m
 import type { PhaseEvent, PresentationContainer } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { ACTION_EXPLORE_DATA } from '../constants';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { ChangePointGridRenderer } from './change_point_grid_renderer';
 import { getChangePointGridEmbeddableFactory } from './get_change_point_grid_embeddable_factory';
@@ -60,6 +61,12 @@ describe('getChangePointGridEmbeddableFactory', () => {
       apply_dashboard_context: true,
       time_range: undefined,
     });
+    expect(api.disabledActionIds$?.getValue()).toEqual([ACTION_EXPLORE_DATA]);
+
+    const [{ setDataViews }] = jest.mocked(initializeChangePointGridFetch).mock.calls[0];
+    const dataView = { id: 'logs-*' };
+    setDataViews([dataView as never]);
+    expect(api.dataViews$.getValue()).toEqual([dataView]);
 
     render(<Component />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();

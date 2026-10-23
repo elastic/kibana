@@ -8,6 +8,7 @@
  */
 
 import { buildChangePointCards, type ChangePointCardModel } from '@kbn/change-point-chart-viewer';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { unregisterFromDataViewsCache } from '@kbn/data-source';
 import { fetch$ } from '@kbn/presentation-publishing';
@@ -31,6 +32,7 @@ export const initializeChangePointGridFetch = ({
   searchContext$,
   onCardsUpdated,
   setDataLoading,
+  setDataViews,
   setSearchError,
   setApproximationApplied,
 }: {
@@ -41,6 +43,7 @@ export const initializeChangePointGridFetch = ({
   searchContext$: BehaviorSubject<ChangePointGridSearchRequest | undefined>;
   onCardsUpdated: () => void;
   setDataLoading: (loading: boolean) => void;
+  setDataViews: (dataViews: DataView[] | undefined) => void;
   setSearchError: (error: Error | undefined) => void;
   setApproximationApplied: (applied: boolean | undefined) => void;
 }) => {
@@ -74,7 +77,7 @@ export const initializeChangePointGridFetch = ({
     setApproximationApplied(undefined);
 
     const run = async () => {
-      const { esqlSource } = await resolveEsqlSource({
+      const { esqlSource, dataView } = await resolveEsqlSource({
         esql: state.esql,
         services: discoverServices,
         esqlVariables: searchRequest.esqlVariables,
@@ -92,6 +95,7 @@ export const initializeChangePointGridFetch = ({
         return;
       }
       esqlSourceId = esqlSource.id;
+      setDataViews([dataView]);
       const result = await fetchEsql({
         query: { esql: state.esql },
         inputQuery: searchRequest.inputQuery,
