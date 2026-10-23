@@ -14,7 +14,7 @@ import { mapsVisTypeAlias } from '../maps_vis_type_alias';
 export function getAddMapPanelAction(deps: MapsPluginStartDependencies) {
   return {
     id: 'addMapPanelAction',
-    getIconType: () => 'map',
+    getIconType: () => mapsVisTypeAlias.icon,
     order: mapsVisTypeAlias.order,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {
