@@ -231,6 +231,12 @@ describe('esqlExecutor', () => {
 
       expect(result.state).toHaveProperty('lastQuery', params.query);
     });
+
+    it('should not store lastQuery in returned state when query has no mv_expand', async () => {
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(result.state.lastQuery).toBeUndefined();
+    });
   });
 
   describe('shard failures', () => {
@@ -299,22 +305,23 @@ describe('esqlExecutor', () => {
       expect(result.createdSignalsCount).toBe(1);
     });
 
-    it('should not allow partial results for an aggregating query', async () => {
+    it('should disallow partial results and fail the run for an aggregating query when ES rejects it', async () => {
       mockedArguments.sharedParams = getSharedParamsMock({
         ruleParams: getEsqlRuleParams({ query: 'from auditbeat* | stats count() by host.name' }),
       });
       const asyncQueryMock = ruleServices.scopedClusterClient.asCurrentUser.esql
         .asyncQuery as unknown as jest.Mock;
-      asyncQueryMock.mockResolvedValue({
-        id: 'QUERY-ID',
-        is_running: false,
-        columns: [],
-        values: [],
-      });
+      asyncQueryMock.mockRejectedValue(
+        new Error('Error while performing ES|QL search: script_exception')
+      );
 
-      await esqlExecutor(mockedArguments);
+      const result = await esqlExecutor(mockedArguments);
 
       expect(asyncQueryMock.mock.calls[0][0]).toHaveProperty('allow_partial_results', false);
+      expect(result.success).toBe(false);
+      expect(result.errors).toEqual([expect.stringContaining('script_exception')]);
+      expect(result.warningMessages).toEqual([]);
+      expect(ruleServices.alertWithPersistence).not.toHaveBeenCalled();
     });
   });
 
