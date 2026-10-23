@@ -5,9 +5,60 @@
  * 2.0.
  */
 
-import type { InferenceFeatureConfig } from '../types';
+import { chatCompletionReasoningEfforts } from '@kbn/inference-common';
+import type {
+  InferenceFeatureConfig,
+  RecommendedEndpoint,
+  RecommendedEndpointInput,
+} from '../types';
 
 export const FEATURE_ID_PATTERN = /^[a-z][a-z0-9_]*$/;
+
+const MAX_TEMPERATURE = 2;
+
+const validateModelParameters = ({
+  reasoning,
+  temperature,
+}: NonNullable<RecommendedEndpoint['parameters']>): void => {
+  if (
+    reasoning?.effort !== undefined &&
+    !chatCompletionReasoningEfforts.includes(reasoning.effort)
+  ) {
+    throw new Error(
+      `parameters.reasoning.effort must be one of: ${chatCompletionReasoningEfforts.join(', ')}.`
+    );
+  }
+
+  if (
+    temperature !== undefined &&
+    (!Number.isFinite(temperature) || temperature < 0 || temperature > MAX_TEMPERATURE)
+  ) {
+    throw new Error(`parameters.temperature must be a number between 0 and ${MAX_TEMPERATURE}.`);
+  }
+};
+
+/**
+ * Validates recommended endpoint entries, which can be endpoint ids or `{ id, parameters }` objects.
+ *
+ * @throws If an entry has an empty or whitespace-only id.
+ * @throws If an entry declares invalid model parameters.
+ */
+export const validateRecommendedEndpoints = (endpoints: RecommendedEndpointInput[]): void => {
+  for (const endpoint of endpoints) {
+    if (typeof endpoint === 'string') {
+      if (!endpoint.trim()) {
+        throw new Error('recommendedEndpoints must not contain empty strings.');
+      }
+    } else {
+      if (!endpoint.id.trim()) {
+        throw new Error('recommendedEndpoints must not contain entries with an empty id.');
+      }
+      if (endpoint.parameters) {
+        validateModelParameters(endpoint.parameters);
+      }
+    }
+  }
+};
 
 /**
  * Validates an {@link InferenceFeatureConfig} before registration.
@@ -19,7 +70,7 @@ export const FEATURE_ID_PATTERN = /^[a-z][a-z0-9_]*$/;
  * @throws If `featureDescription` is empty.
  * @throws If `taskType` is empty.
  * @throws If `maxNumberOfEndpoints` is specified and less than 1.
- * @throws If `recommendedEndpoints` contains any empty or whitespace-only string.
+ * @throws If `recommendedEndpoints` contains an empty id or invalid model parameters.
  */
 export const validateFeature = (feature: InferenceFeatureConfig): void => {
   if (!feature.featureId || !FEATURE_ID_PATTERN.test(feature.featureId)) {
@@ -50,7 +101,5 @@ export const validateFeature = (feature: InferenceFeatureConfig): void => {
     throw new Error('maxNumberOfEndpoints must be >= 1 when specified.');
   }
 
-  if (feature.recommendedEndpoints.some((ep) => !ep.trim())) {
-    throw new Error('recommendedEndpoints must not contain empty strings.');
-  }
+  validateRecommendedEndpoints(feature.recommendedEndpoints);
 };

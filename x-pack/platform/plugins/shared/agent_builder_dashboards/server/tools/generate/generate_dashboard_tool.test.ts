@@ -13,20 +13,24 @@ import {
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
-  executeDashboardOperations,
-  hasValidCreateMetadataOperations,
+  executeDashboardUpsert,
+  hasValidNewDashboardMetadata,
+  type LayoutArrangement,
+  type LayoutRequest,
 } from '@kbn/dashboard-agent-authoring';
 import { generateDashboardTool } from './generate_dashboard_tool';
+import { createLayoutArranger } from './layout_arranger';
 
 jest.mock('./attachment_state', () => ({ retrieveLatestVersion: jest.fn() }));
 jest.mock('@kbn/dashboard-agent-authoring', () => ({
   ...jest.requireActual('@kbn/dashboard-agent-authoring'),
-  executeDashboardOperations: jest.fn(),
-  hasValidCreateMetadataOperations: jest.fn(),
+  executeDashboardUpsert: jest.fn(),
+  hasValidNewDashboardMetadata: jest.fn(),
 }));
 jest.mock('./resolvers/control_field_capabilities_resolver', () => ({
   createControlFieldCapabilitiesResolver: jest.fn(),
 }));
+jest.mock('./layout_arranger', () => ({ createLayoutArranger: jest.fn() }));
 jest.mock('./resolvers/panel_resolver', () => ({ createPanelResolver: jest.fn() }));
 jest.mock('./resolvers/attachment_panel_resolver', () => ({
   createAttachmentPanelResolver: jest.fn(),
@@ -46,21 +50,49 @@ jest.mock('@kbn/custom-content-server', () => ({
 const mockRetrieveLatestVersion = retrieveLatestVersion as jest.MockedFunction<
   typeof retrieveLatestVersion
 >;
-const mockExecuteDashboardOperations = executeDashboardOperations as jest.MockedFunction<
-  typeof executeDashboardOperations
+const mockExecuteDashboardUpsert = executeDashboardUpsert as jest.MockedFunction<
+  typeof executeDashboardUpsert
 >;
-const mockHasValidCreateMetadataOperations =
-  hasValidCreateMetadataOperations as jest.MockedFunction<typeof hasValidCreateMetadataOperations>;
+const mockHasValidNewDashboardMetadata = hasValidNewDashboardMetadata as jest.MockedFunction<
+  typeof hasValidNewDashboardMetadata
+>;
+
+const mockArrangeLayout = jest.fn<Promise<LayoutArrangement>, [LayoutRequest]>();
+(createLayoutArranger as jest.MockedFunction<typeof createLayoutArranger>).mockReturnValue(
+  mockArrangeLayout
+);
+
+/** An arrangement that keeps every panel and section where the request places it. */
+const keepRequestedLayout = async ({
+  panels,
+  sections,
+}: LayoutRequest): Promise<LayoutArrangement> => {
+  const toArrangedPanels = (layoutPanels: LayoutRequest['panels']) =>
+    layoutPanels.map(({ id, grid }) => ({ id, ...(grid ?? { x: 0, y: 0, w: 24, h: 10 }) }));
+  return {
+    plan: '',
+    panels: toArrangedPanels(panels),
+    sections: sections.map(({ id, y, panels: sectionPanels }) => ({
+      id,
+      y: y ?? 0,
+      panels: toArrangedPanels(sectionPanels ?? []),
+    })),
+  };
+};
 
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
-const callHandler = async (dashboardAttachmentId?: string) => {
+const callHandler = async (
+  dashboardAttachmentId?: string,
+  layout?: string,
+  upsert: Record<string, unknown> = {}
+) => {
   const tool = generateDashboardTool({
     getDashboardValidator: jest.fn(),
   });
   const sendUiEvent = jest.fn();
   const ctx = {
-    logger: { info: jest.fn(), error: jest.fn() },
+    logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
     attachments: {
       add: jest.fn(async ({ id }: { id: string }) => ({ id, current_version: 1 })),
       update: jest.fn(async (id: string) => ({ id, current_version: 2, origin: 'saved-id' })),
@@ -69,7 +101,7 @@ const callHandler = async (dashboardAttachmentId?: string) => {
     esClient: { asCurrentUser: {} },
   };
   const ret = await tool.handler(
-    { dashboardAttachmentId, operations: [] } as unknown as Parameters<typeof tool.handler>[0],
+    { dashboardAttachmentId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
     ctx as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
@@ -79,9 +111,13 @@ const callHandler = async (dashboardAttachmentId?: string) => {
 describe('generateDashboardTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockHasValidCreateMetadataOperations.mockReturnValue(true);
-    mockExecuteDashboardOperations.mockResolvedValue({
+    mockArrangeLayout.mockImplementation(keepRequestedLayout);
+    mockHasValidNewDashboardMetadata.mockReturnValue(true);
+    mockExecuteDashboardUpsert.mockResolvedValue({
       dashboardData: generatedDashboard,
+      created: [],
+      updated: [],
+      removed: [],
       failures: [],
       panelAuthoringNotes: [],
     });
@@ -114,11 +150,11 @@ describe('generateDashboardTool handler', () => {
   it.each([
     [
       'a new dashboard is missing its metadata',
-      () => mockHasValidCreateMetadataOperations.mockReturnValue(false),
+      () => mockHasValidNewDashboardMetadata.mockReturnValue(false),
     ],
     [
       'generating the dashboard fails',
-      () => mockExecuteDashboardOperations.mockRejectedValue(new Error('boom')),
+      () => mockExecuteDashboardUpsert.mockRejectedValue(new Error('boom')),
     ],
   ])('does not send a UI event when %s', async (_, arrange) => {
     mockRetrieveLatestVersion.mockReturnValue(undefined);
@@ -140,22 +176,70 @@ describe('generateDashboardTool handler', () => {
     };
 
     const mockGeneratedDashboard = (dashboardData: DashboardAttachmentData) =>
-      mockExecuteDashboardOperations.mockResolvedValue({
+      mockExecuteDashboardUpsert.mockResolvedValue({
         dashboardData,
+        created: [],
+        updated: [],
+        removed: [],
         failures,
         panelAuthoringNotes: [],
-      } as unknown as Awaited<ReturnType<typeof executeDashboardOperations>>);
+      } as unknown as Awaited<ReturnType<typeof executeDashboardUpsert>>);
 
-    it('does not create a new dashboard without panels or controls', async () => {
+    it('does not create a new dashboard when every requested panel failed', async () => {
       mockRetrieveLatestVersion.mockReturnValue(undefined);
       mockGeneratedDashboard(generatedDashboard);
 
-      const { results, sendUiEvent, attachments } = await callHandler();
+      const { results, sendUiEvent, attachments } = await callHandler(undefined, undefined, {
+        panels: [{ id: 'panel' }],
+      });
 
       expect(results).toEqual([
         {
           type: ToolResultType.error,
-          data: { message: expect.any(String), metadata: { failures } },
+          data: {
+            message: expect.stringContaining('see metadata.failures'),
+            metadata: { failures },
+          },
+        },
+      ]);
+      expect(attachments.add).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not create a new dashboard whose requested panels left only empty sections', async () => {
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+      mockGeneratedDashboard({
+        ...generatedDashboard,
+        panels: [{ id: 'section', title: 'Section', collapsed: false, grid: { y: 0 }, panels: [] }],
+      });
+
+      const { results, sendUiEvent, attachments } = await callHandler(undefined, undefined, {
+        sections: [{ id: 'section', title: 'Section' }],
+        panels: [{ id: 'panel', section: 'section' }],
+      });
+
+      expect(results[0]).toEqual({
+        type: ToolResultType.error,
+        data: { message: expect.any(String), metadata: { failures } },
+      });
+      expect(attachments.add).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not create a new dashboard when every requested control was left out without a failure', async () => {
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+
+      const { results, sendUiEvent, attachments } = await callHandler(undefined, undefined, {
+        controls: [{ id: 'control' }],
+      });
+
+      expect(results).toEqual([
+        {
+          type: ToolResultType.error,
+          data: {
+            message: expect.stringContaining('controls you add on your own are left out'),
+            metadata: { failures: [] },
+          },
         },
       ]);
       expect(attachments.add).not.toHaveBeenCalled();
@@ -202,6 +286,108 @@ describe('generateDashboardTool handler', () => {
 
       expect(results[0]).toMatchObject({ data: { version: 2, failures } });
       expect(attachments.update).toHaveBeenCalled();
+    });
+  });
+
+  describe('layout', () => {
+    const panel = {
+      id: 'panel',
+      type: 'markdown',
+      config: { content: '# Title' },
+      grid: { x: 0, y: 0, w: 24, h: 15 },
+    };
+    const latestData: DashboardAttachmentData = { ...generatedDashboard, panels: [panel] };
+    const fullWidthGrid = { x: 0, y: 0, w: 48, h: 15 };
+
+    const mockExistingDashboard = () => {
+      mockRetrieveLatestVersion.mockReturnValue({
+        version: 3,
+        data: latestData,
+      } as ReturnType<typeof retrieveLatestVersion>);
+      mockExecuteDashboardUpsert.mockResolvedValue({
+        dashboardData: structuredClone(latestData),
+        created: [],
+        updated: [],
+        removed: [],
+        failures: [],
+        panelAuthoringNotes: [],
+      });
+    };
+
+    it('persists and sends the arranged layout of a new dashboard', async () => {
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+      mockExecuteDashboardUpsert.mockResolvedValue({
+        dashboardData: { ...generatedDashboard, panels: [panel] },
+        created: [],
+        updated: [],
+        removed: [],
+        failures: [],
+        panelAuthoringNotes: [],
+      });
+      mockArrangeLayout.mockResolvedValue({
+        plan: '',
+        panels: [{ id: 'p1', ...fullWidthGrid }],
+        sections: [],
+      });
+
+      const { sendUiEvent, attachments } = await callHandler();
+
+      const arrangedPanels = [{ ...panel, grid: fullWidthGrid }];
+      expect(attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ panels: arrangedPanels }) })
+      );
+      expect(sendUiEvent).toHaveBeenCalledWith(DASHBOARD_UPDATED_UI_EVENT, {
+        attachment: expect.objectContaining({
+          data: expect.objectContaining({ panels: arrangedPanels }),
+        }),
+      });
+    });
+
+    it('writes a version when a layout request changes the grid', async () => {
+      mockExistingDashboard();
+      mockArrangeLayout.mockResolvedValue({
+        plan: '',
+        panels: [{ id: 'p1', ...fullWidthGrid }],
+        sections: [],
+      });
+
+      const { results, attachments } = await callHandler(
+        'dashboard-attachment-id',
+        'make the panel full width'
+      );
+
+      expect(mockArrangeLayout).toHaveBeenCalledWith(
+        expect.objectContaining({ instructions: 'make the panel full width' })
+      );
+      expect(attachments.update).toHaveBeenCalledWith('dashboard-attachment-id', {
+        data: expect.objectContaining({ panels: [{ ...panel, grid: fullWidthGrid }] }),
+        description: expect.any(String),
+      });
+      expect(results[0]).toMatchObject({ data: { version: 2 } });
+    });
+
+    it('returns a failure when a layout request is not applied', async () => {
+      mockExistingDashboard();
+      mockArrangeLayout.mockRejectedValue(new Error('Model unavailable'));
+
+      const { results, attachments } = await callHandler(
+        'dashboard-attachment-id',
+        'make the panel full width'
+      );
+
+      expect(attachments.update).not.toHaveBeenCalled();
+      expect(results[0]).toMatchObject({
+        type: ToolResultType.dashboard,
+        data: {
+          version: 3,
+          failures: [
+            expect.objectContaining({
+              identifier: 'layout',
+              error: expect.stringContaining('Model unavailable'),
+            }),
+          ],
+        },
+      });
     });
   });
 });

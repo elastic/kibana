@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-export { dashboardOperationSchema, executeDashboardOperations } from './src/operations';
+export {
+  executeDashboardUpsert,
+  hasValidNewDashboardMetadata,
+  upsertDashboardSchema,
+} from './src/upsert';
+export type { DashboardUpsert, DashboardUpsertResult } from './src/upsert';
 
-export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';
+export { arrangeDashboardLayout, buildLayoutPrompt, parseLayoutAnswer } from './src/layout';
+export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';
 
-export { createPanelFailureResult } from './src/resolve_panel';
-export type {
-  InlinePanelOperationType,
-  PanelContent,
-  PanelContentAttempt,
-} from './src/resolve_panel';
+export { getErrorMessage } from './src/utils';
+export type { DashboardFailure } from './src/utils';
+
+export type { PanelContent, PanelContentAttempt } from './src/resolve_panel';
 
 export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
 
-export { getRendererEmbeddableType } from './src/operations/panels';
+export { getRendererEmbeddableType } from './src/panels';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
   CustomContentPanelResolutionRequest,
   ResolvePanelContent,
   VisPanelResolutionRequest,
-} from './src/operations/panels';
+} from './src/panels';
 
 export type {
   ControlFieldCapability,
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
-} from './src/operations/types';
+} from './src/types';

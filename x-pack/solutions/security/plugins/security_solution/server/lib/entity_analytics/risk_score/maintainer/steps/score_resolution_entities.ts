@@ -14,12 +14,14 @@ import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_
 import {
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
+  getResolutionScoreESQLByRange,
 } from '../../calculate_esql_risk_scores';
 import { MAX_RESOLUTION_TARGETS_PER_PAGE, RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import { RESOLUTION_RELATIONSHIP_TYPE } from '../lookup/lookup_types';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
+import { getResolutionPageMemberFilter } from './resolution_member_filter';
 import { parseEsqlResolutionScoreRow } from './parse_esql_row';
 import type { ParsedResolutionScore } from './parse_esql_row';
 import type { ScopedLogger } from '../utils/with_log_context';
@@ -68,6 +70,7 @@ export const calculateResolutionEntityScores = async function* ({
   alertFilters,
 }: ScoreResolutionEntitiesParams): AsyncGenerator<EntityRiskScoreRecord[], number> {
   let afterKey: Record<string, string> | undefined;
+  let previousPageUpperBound: string | undefined;
   let pagesProcessed = 0;
 
   do {
@@ -95,16 +98,43 @@ export const calculateResolutionEntityScores = async function* ({
       `[resolution][page:${pagesProcessed}] lookup buckets=${pageResult.bucketCount}, targets=${pageResult.resolutionTargetIds.length}`
     );
 
+    // Fetched before scoring so the query can skip alerts outside the page's groups, and reused
+    // for the group modifiers below.
+    const lookupMemberIds = await fetchResolutionGroupMemberIds({
+      esClient,
+      logger,
+      lookupIndex,
+      resolutionTargetIds: pageResult.resolutionTargetIds,
+    });
+    const pageMemberIds = [...new Set([...pageResult.resolutionTargetIds, ...lookupMemberIds])];
+    const memberFilter = getResolutionPageMemberFilter(entityType, pageMemberIds);
+    if (!memberFilter) {
+      logger.debug(
+        `[resolution][page:${pagesProcessed}] members=${pageMemberIds.length} exceed a terms query, reading every alert`
+      );
+    }
+
+    const pageUpperBound =
+      pageResult.resolutionTargetIds[pageResult.resolutionTargetIds.length - 1];
     const { parsedScores, esqlRows } = await scoreResolutionPage({
       esClient,
       entityType,
       resolutionTargetIds: pageResult.resolutionTargetIds,
+      // Full runs page through every target in sort order, so each page is exactly the
+      // targets in (previous upper bound, this upper bound]. Explicit target lists from
+      // single-entity recalculation can be sparse and keep the ID list.
+      bounds: targetEntityIds
+        ? undefined
+        : { lower: previousPageUpperBound, upper: pageUpperBound },
+      // A full run shares its ID with the lookup rows Phase 0 wrote for it.
+      calculationRunId,
       sampleSize,
       pageSize,
       alertsIndex,
       lookupIndex,
-      alertFilters,
+      alertFilters: memberFilter ? [...alertFilters, memberFilter] : alertFilters,
     });
+    previousPageUpperBound = pageUpperBound;
     logger.debug(
       `[resolution][page:${pagesProcessed}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
     );
@@ -112,12 +142,6 @@ export const calculateResolutionEntityScores = async function* ({
     let modifiedScores: EntityRiskScoreRecord[] = [];
     if (parsedScores.length > 0) {
       const allMemberIds = collectMemberEntityIds(parsedScores);
-      const lookupMemberIds = await fetchResolutionGroupMemberIds({
-        esClient,
-        logger,
-        lookupIndex,
-        resolutionTargetIds: pageResult.resolutionTargetIds,
-      });
       for (const memberId of lookupMemberIds) {
         allMemberIds.add(memberId);
       }
@@ -147,6 +171,96 @@ export const calculateResolutionEntityScores = async function* ({
   } while (afterKey !== undefined);
 
   return pagesProcessed;
+};
+
+/**
+ * Builds a zero resolution score for each of the given targets that still carries a resolution
+ * score from an earlier run.
+ *
+ * A group with no alert left to score produces no row in the scoring query, so its target keeps
+ * the last resolution score. A full engine run clears that up in `resetToZero`; this lets a
+ * targeted run do the same right away. The zero goes through the same group modifiers as a normal
+ * score, so criticality and watchlists that sit on an alias still apply.
+ */
+export const buildZeroResolutionScores = async ({
+  esClient,
+  crudClient,
+  logger,
+  entityType,
+  lookupIndex,
+  now,
+  calculationRunId,
+  watchlistConfigs,
+  resolutionTargetIds,
+}: {
+  esClient: ElasticsearchClient;
+  crudClient: EntityUpdateClient;
+  logger: ScopedLogger;
+  entityType: EntityType;
+  lookupIndex: string;
+  now: string;
+  calculationRunId: string;
+  watchlistConfigs: Map<string, WatchlistObject>;
+  resolutionTargetIds: string[];
+}): Promise<EntityRiskScoreRecord[]> => {
+  const { entities: targets } = await crudClient.listEntities({
+    filter: { terms: { 'entity.id': resolutionTargetIds } },
+    size: resolutionTargetIds.length,
+    source: ['entity.id', 'entity.relationships.resolution.risk.calculated_score_norm'],
+  });
+  // A target that was never scored gets no zero, which would put a 0 on screen where there was
+  // nothing before.
+  const previouslyScoredIds = targets.flatMap(({ entity }) =>
+    entity?.id && typeof entity.relationships?.resolution?.risk?.calculated_score_norm === 'number'
+      ? [entity.id]
+      : []
+  );
+  if (previouslyScoredIds.length === 0) {
+    return [];
+  }
+
+  const lookupMemberIds = await fetchResolutionGroupMemberIds({
+    esClient,
+    logger,
+    lookupIndex,
+    resolutionTargetIds: previouslyScoredIds,
+  });
+  const memberEntities = await fetchEntitiesByIds({
+    crudClient,
+    entityIds: [...previouslyScoredIds, ...lookupMemberIds],
+    logger,
+    errorContext:
+      'Error fetching entities for zero resolution scores. Skipping the zero score write',
+  });
+
+  // Without the target in hand we would write a score carrying none of the group's modifiers,
+  // which is worse than leaving the previous score alone. The aliases need no entry of their own:
+  // `applyResolutionModifiers` folds them in through their `resolved_to`.
+  const parsedScores: ParsedResolutionScore[] = previouslyScoredIds
+    .filter((targetId) => memberEntities.has(targetId))
+    .map((targetId) => ({
+      resolution_target_id: targetId,
+      alert_count: 0,
+      score: 0,
+      normalized_score: 0,
+      risk_inputs: [],
+      related_entities: [],
+    }));
+  logger.debug(
+    `[resolution] zero scores: previously_scored=${previouslyScoredIds.length}, built=${parsedScores.length}`
+  );
+  if (parsedScores.length === 0) {
+    return [];
+  }
+
+  return applyResolutionModifiers({
+    parsedScores,
+    memberEntities,
+    now,
+    entityType,
+    calculationRunId,
+    watchlistConfigs,
+  });
 };
 
 const fetchNextResolutionPage = async ({
@@ -267,6 +381,8 @@ const scoreResolutionPage = async ({
   esClient,
   entityType,
   resolutionTargetIds,
+  bounds,
+  calculationRunId,
   sampleSize,
   pageSize,
   alertsIndex,
@@ -276,26 +392,40 @@ const scoreResolutionPage = async ({
   esClient: ElasticsearchClient;
   entityType: EntityType;
   resolutionTargetIds: string[];
+  bounds: { lower?: string; upper: string } | undefined;
+  calculationRunId: string;
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
   lookupIndex: string;
   alertFilters: QueryDslQueryContainer[];
 }): Promise<{ parsedScores: ParsedResolutionScore[]; esqlRows: number }> => {
-  const query = getResolutionScoreESQLByIds(
-    entityType,
-    resolutionTargetIds,
-    sampleSize,
-    pageSize,
-    alertsIndex,
-    lookupIndex
-  );
+  const query = bounds
+    ? getResolutionScoreESQLByRange(
+        entityType,
+        bounds,
+        calculationRunId,
+        sampleSize,
+        pageSize,
+        alertsIndex,
+        lookupIndex
+      )
+    : getResolutionScoreESQLByIds(
+        entityType,
+        resolutionTargetIds,
+        sampleSize,
+        pageSize,
+        alertsIndex,
+        lookupIndex
+      );
   const esqlResponse = await esClient.esql.query(
     { query, filter: { bool: { filter: alertFilters } } },
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
   return {
-    parsedScores: (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex)),
+    parsedScores: (esqlResponse.values ?? []).map(
+      parseEsqlResolutionScoreRow(alertsIndex, sampleSize)
+    ),
     esqlRows: esqlResponse.values?.length ?? 0,
   };
 };

@@ -7,12 +7,13 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { createTestEsCluster } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { TimeRange } from '../../../entities_grid/common';
 import { getRiskScoreIndex } from '../../../entities_grid/queries/esql';
-import { buildRiskLevelHistoryBranch, buildRiskScoreHistoryBranch } from '../risk_history';
+import {
+  RISK_MOVER_MIN_SCORE_CHANGE,
+  buildRiskLevelHistoryBranch,
+  buildRiskScoreHistoryBranch,
+} from '../risk_history';
 import { buildJoinTail } from '../risk_previous_period';
 import {
   buildRiskTilesSeriesQuery,
@@ -23,6 +24,7 @@ import { buildNewlyHighCriticalCountQuery } from '../tile_newly_high_critical_qu
 import { buildRiskMoversCountQuery } from '../tile_risk_movers_query';
 import { TIME_RANGE_DAYS } from '../tile_period';
 import { getSeriesWindow, readSeriesDots } from '../tile_series_window';
+import { describeSeriesFollowsCount, readCounts, RANGES } from './series_follow_count_suite';
 
 /*
  * The risk tile sparkline dots must follow the tile counts. Dot k is the tile as it stood k steps
@@ -44,12 +46,14 @@ import { getSeriesWindow, readSeriesDots } from '../tile_series_window';
  * | host:r6   | 1500         | 10 Low, at 5: 80 High; no entity doc, so dropped                    |
  * | user:r7   | 1500         | 75 High, at 600: 40 Low, at 90: 78 High                             |
  * | host:r8   | 1500         | 20 Low, at 1300: 55 Moderate, at 40: 95 Critical                    |
+ * | host:g1   | 1500         | own 30 Low throughout; group 40 Low, at 100: 70 High (the group counts) |
+ * | host:g1a  | 1500         | alias of host:g1: own 20 Low, at 140: 80 Critical (must not count, even where the group does not rise) |
+ * | host:g4   | 1500         | like host:g1, but each group doc is older than the own doc of its hour (the group still counts) |
  */
 
 const NAMESPACE = 'default';
 const ENTITY_INDEX = 'entities-latest-risk-series-test';
 const HOUR_MS = 60 * 60 * 1000;
-const RANGES: readonly TimeRange[] = ['24h', '7d', '30d'];
 const HISTORY_HOURS = 1500;
 
 const KEYWORD: MappingProperty = { type: 'keyword' };
@@ -68,6 +72,8 @@ interface EntitySeed {
   changes: Change[];
   resolvedTo?: string;
   noEntityDoc?: boolean;
+  /** The group's own (resolution) value, on a main entity: its history, hour by hour. */
+  group?: { initial: Value; changes: Change[]; hoursOlder?: number };
 }
 
 const R1_CHANGES: Change[] = [
@@ -122,6 +128,27 @@ const ENTITIES: readonly EntitySeed[] = [
       [40, [95, 'Critical']],
     ],
   },
+  {
+    id: 'host:g1',
+    from: HISTORY_HOURS,
+    initial: [30, 'Low'],
+    changes: [],
+    group: { initial: [40, 'Low'], changes: [[100, [70, 'High']]] },
+  },
+  {
+    id: 'host:g1a',
+    from: HISTORY_HOURS,
+    initial: [20, 'Low'],
+    changes: [[140, [80, 'Critical']]],
+    resolvedTo: 'host:g1',
+  },
+  {
+    id: 'host:g4',
+    from: HISTORY_HOURS,
+    initial: [30, 'Low'],
+    changes: [],
+    group: { initial: [40, 'Low'], changes: [[100, [70, 'High']]], hoursOlder: 0.3 },
+  },
 ];
 
 const valueAt = ({ initial, changes }: EntitySeed, hoursAgo: number): Value =>
@@ -129,188 +156,177 @@ const valueAt = ({ initial, changes }: EntitySeed, hoursAgo: number): Value =>
 
 const typeOf = (id: string) => id.split(':')[0];
 
-describe('risk tile series on Elasticsearch', () => {
-  let esServer: ReturnType<typeof createTestEsCluster>;
-  let client: Client;
-
-  beforeAll(async () => {
-    esServer = createTestEsCluster({
-      log: new ToolingLog({ writeTo: process.stdout, level: 'info' }),
-    });
-    await esServer.start();
-    client = esServer.getClient();
-    await client.indices.create({
-      index: ENTITY_INDEX,
-      settings: { index: { mode: 'lookup' } },
-      mappings: {
-        properties: {
-          'entity.id': KEYWORD,
-          'entity.name': KEYWORD,
-          'entity.risk.calculated_score_norm': FLOAT,
-          'entity.risk.calculated_level': KEYWORD,
-          'entity.relationships.resolution.resolved_to': KEYWORD,
-        },
+const loadFixture = async (client: Client) => {
+  await client.indices.create({
+    index: ENTITY_INDEX,
+    settings: { index: { mode: 'lookup' } },
+    mappings: {
+      properties: {
+        'entity.id': KEYWORD,
+        'entity.name': KEYWORD,
+        'entity.risk.calculated_score_norm': FLOAT,
+        'entity.risk.calculated_level': KEYWORD,
+        'entity.relationships.resolution.resolved_to': KEYWORD,
+        'entity.relationships.resolution.risk.calculated_score_norm': FLOAT,
+        'entity.relationships.resolution.risk.calculated_level': KEYWORD,
       },
-    });
-    await client.indices.create({
-      index: getRiskScoreIndex(NAMESPACE),
-      mappings: {
-        properties: {
-          '@timestamp': DATE,
-          'host.risk.id_value': KEYWORD,
-          'host.risk.calculated_score_norm': FLOAT,
-          'host.risk.calculated_level': KEYWORD,
-          'user.risk.id_value': KEYWORD,
-          'user.risk.calculated_score_norm': FLOAT,
-          'user.risk.calculated_level': KEYWORD,
-        },
+    },
+  });
+  await client.indices.create({
+    index: getRiskScoreIndex(NAMESPACE),
+    mappings: {
+      properties: {
+        '@timestamp': DATE,
+        'host.risk.id_value': KEYWORD,
+        'host.risk.calculated_score_norm': FLOAT,
+        'host.risk.calculated_level': KEYWORD,
+        'host.risk.score_type': KEYWORD,
+        'user.risk.id_value': KEYWORD,
+        'user.risk.calculated_score_norm': FLOAT,
+        'user.risk.calculated_level': KEYWORD,
+        'user.risk.score_type': KEYWORD,
       },
-    });
-    const now = Date.now();
-    const operations = ENTITIES.flatMap((seed) => {
-      const type = typeOf(seed.id);
-      const [score, level] = valueAt(seed, 0);
-      const entityDoc = seed.noEntityDoc
-        ? []
-        : [
-            { index: { _index: ENTITY_INDEX } },
-            {
-              'entity.id': seed.id,
-              'entity.name': seed.id.split(':')[1],
-              'entity.risk.calculated_score_norm': score,
-              'entity.risk.calculated_level': level,
-              ...(seed.resolvedTo
-                ? { 'entity.relationships.resolution.resolved_to': seed.resolvedTo }
-                : {}),
-            },
-          ];
-      const history = Array.from({ length: seed.from + 1 }, (_, h) => {
-        const [docScore, docLevel] = valueAt(seed, h);
-        return [
-          { index: { _index: getRiskScoreIndex(NAMESPACE) } },
+    },
+  });
+  const now = Date.now();
+  const operations = ENTITIES.flatMap((seed) => {
+    const type = typeOf(seed.id);
+    const [score, level] = valueAt(seed, 0);
+    const entityDoc = seed.noEntityDoc
+      ? []
+      : [
+          { index: { _index: ENTITY_INDEX } },
           {
-            '@timestamp': new Date(now - (h + 0.5) * HOUR_MS).toISOString(),
-            [`${type}.risk.id_value`]: seed.id,
-            [`${type}.risk.calculated_score_norm`]: docScore,
-            [`${type}.risk.calculated_level`]: docLevel,
+            'entity.id': seed.id,
+            'entity.name': seed.id.split(':')[1],
+            'entity.risk.calculated_score_norm': score,
+            'entity.risk.calculated_level': level,
+            ...(seed.group
+              ? {
+                  'entity.relationships.resolution.risk.calculated_score_norm': valueAt(
+                    { ...seed, ...seed.group },
+                    0
+                  )[0],
+                  'entity.relationships.resolution.risk.calculated_level': valueAt(
+                    { ...seed, ...seed.group },
+                    0
+                  )[1],
+                }
+              : {}),
+            ...(seed.resolvedTo
+              ? { 'entity.relationships.resolution.resolved_to': seed.resolvedTo }
+              : {}),
           },
         ];
-      }).flat();
-      return [...entityDoc, ...history];
-    });
-    const response = await client.bulk({ operations, refresh: 'wait_for' });
-    if (response.errors) throw new Error('Bulk indexing of the risk series fixture failed');
-  }, 600_000);
-
-  afterAll(async () => {
-    await esServer?.stop();
+    const history = Array.from({ length: seed.from + 1 }, (_, h) => {
+      const [docScore, docLevel] = valueAt(seed, h);
+      const doc = (value: Value, scoreType?: 'base' | 'resolution', hoursOlder = 0) => [
+        { index: { _index: getRiskScoreIndex(NAMESPACE) } },
+        {
+          '@timestamp': new Date(now - (h + 0.5 + hoursOlder) * HOUR_MS).toISOString(),
+          [`${type}.risk.id_value`]: seed.id,
+          [`${type}.risk.calculated_score_norm`]: value[0],
+          [`${type}.risk.calculated_level`]: value[1],
+          ...(scoreType ? { [`${type}.risk.score_type`]: scoreType } : {}),
+        },
+      ];
+      // A main entity has its own (base) docs and its group's (resolution) docs, under one id.
+      return seed.group
+        ? [
+            ...doc([docScore, docLevel], 'base'),
+            ...doc(valueAt({ ...seed, ...seed.group }, h), 'resolution', seed.group.hoursOlder),
+          ]
+        : doc([docScore, docLevel]);
+    }).flat();
+    return [...entityDoc, ...history];
   });
+  const response = await client.bulk({ operations, refresh: 'wait_for' });
+  if (response.errors) throw new Error('Bulk indexing of the risk series fixture failed');
+};
 
-  const query = async (esql: string) =>
-    (await client.esql.query({ query: esql })) as unknown as ESQLSearchResponse;
+const hoursBack = (hours: number) => (hours === 0 ? 'NOW()' : `NOW() - ${hours} hours`);
 
-  const countValue = async (esql: string) => {
-    const { columns, values } = await query(esql);
-    return Number(values[0]?.[columns.findIndex((c) => c.name === 'value')] ?? 0);
-  };
+/** The risk tile as it stood `back` hours ago, from the two history branches the tiles use. */
+const oracleMovers = (range: TimeRange, back: number) => {
+  const index = getRiskScoreIndex(NAMESPACE);
+  const rangeHours = TIME_RANGE_DAYS[range] * 24;
+  return [
+    `SET unmapped_fields="nullify";`,
+    'FROM (',
+    ...buildRiskScoreHistoryBranch(index, hoursBack(back + rangeHours), 'boundary_score'),
+    '), (',
+    ...buildRiskScoreHistoryBranch(index, hoursBack(back), 'current_score'),
+    ')',
+    `| STATS boundary_score = MAX(boundary_score), current_score = MAX(current_score) BY \`entity.id\``,
+    `| WHERE current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`,
+    ...buildJoinTail(ENTITY_INDEX, []),
+  ].join('\n');
+};
 
-  const hoursBack = (hours: number) => (hours === 0 ? 'NOW()' : `NOW() - ${hours} hours`);
+const oracleNewlyHighCritical = (range: TimeRange, back: number) => {
+  const index = getRiskScoreIndex(NAMESPACE);
+  const rangeHours = TIME_RANGE_DAYS[range] * 24;
+  return [
+    `SET unmapped_fields="nullify";`,
+    'FROM (',
+    ...buildRiskLevelHistoryBranch(index, hoursBack(back + rangeHours), 'boundary_level_num'),
+    '), (',
+    ...buildRiskLevelHistoryBranch(index, hoursBack(back), 'current_level_num'),
+    '  | WHERE current_level_num >= 3',
+    ')',
+    `| STATS boundary_level_num = MAX(boundary_level_num), current_level_num = MAX(current_level_num) BY \`entity.id\``,
+    `| WHERE current_level_num >= 3 AND (boundary_level_num IS NULL OR current_level_num > boundary_level_num)`,
+    ...buildJoinTail(ENTITY_INDEX, []),
+  ].join('\n');
+};
 
-  /** The risk tile as it stood `back` hours ago, from the two history branches the tiles use. */
-  const oracleMovers = (range: TimeRange, back: number) => {
-    const index = getRiskScoreIndex(NAMESPACE);
-    const rangeHours = TIME_RANGE_DAYS[range] * 24;
-    return [
-      `SET unmapped_fields="nullify";`,
-      'FROM (',
-      ...buildRiskScoreHistoryBranch(index, hoursBack(back + rangeHours), 'boundary_score'),
-      '), (',
-      ...buildRiskScoreHistoryBranch(index, hoursBack(back), 'current_score'),
-      ')',
-      `| STATS boundary_score = MAX(boundary_score), current_score = MAX(current_score) BY \`entity.id\``,
-      `| WHERE current_score - boundary_score >= 10`,
-      ...buildJoinTail(ENTITY_INDEX, []),
-    ].join('\n');
-  };
+const COLUMNS = ['value'];
 
-  const oracleNewlyHighCritical = (range: TimeRange, back: number) => {
-    const index = getRiskScoreIndex(NAMESPACE);
-    const rangeHours = TIME_RANGE_DAYS[range] * 24;
-    return [
-      `SET unmapped_fields="nullify";`,
-      'FROM (',
-      ...buildRiskLevelHistoryBranch(index, hoursBack(back + rangeHours), 'boundary_level_num'),
-      '), (',
-      ...buildRiskLevelHistoryBranch(index, hoursBack(back), 'current_level_num'),
-      '  | WHERE current_level_num >= 3',
-      ')',
-      `| STATS boundary_level_num = MAX(boundary_level_num), current_level_num = MAX(current_level_num) BY \`entity.id\``,
-      `| WHERE current_level_num >= 3 AND (boundary_level_num IS NULL OR current_level_num > boundary_level_num)`,
-      ...buildJoinTail(ENTITY_INDEX, []),
-    ].join('\n');
-  };
-
-  const tiles = [
+describeSeriesFollowsCount({
+  name: 'risk tile series',
+  loadFixture,
+  setupTimeoutMs: 600_000,
+  tiles: [
     {
       name: 'Risk movers',
       column: riskMoversSeriesColumn,
-      oracle: oracleMovers,
-      count: (range: TimeRange) => buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, range),
-      byHand: { '24h': 2, '30d': 3 },
+      byHand: { '24h': 2, '30d': 5 },
     },
     {
       name: 'Newly high/critical',
       column: newlyHighCriticalSeriesColumn,
-      oracle: oracleNewlyHighCritical,
-      count: (range: TimeRange) => buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, range),
-      byHand: { '24h': 2, '30d': 4 },
+      byHand: { '24h': 2, '30d': 6 },
     },
-  ];
-
-  /** The one query for both tiles: each test reads its own tile's columns from the same result. */
-  const series = (range: TimeRange) => buildRiskTilesSeriesQuery(NAMESPACE, ENTITY_INDEX, range);
-
-  it.each(RANGES)('one %s query returns the dots of both tiles', async (range) => {
-    const result = await query(series(range));
-    const { dots } = getSeriesWindow(range);
-    const names = result.columns.map((c) => c.name);
-    for (let k = 0; k < dots; k++) {
-      expect(names).toContain(riskMoversSeriesColumn(k));
-      expect(names).toContain(newlyHighCriticalSeriesColumn(k));
-    }
-    // The tiles differ in this fixture, so one is not a copy of the other.
-    expect(readSeriesDots(result, range, riskMoversSeriesColumn)).not.toEqual(
-      readSeriesDots(result, range, newlyHighCriticalSeriesColumn)
-    );
-  });
-
-  describe.each(tiles)('$name', ({ column, oracle, count, byHand }) => {
-    const dotsOf = async (range: TimeRange) =>
-      readSeriesDots(await query(series(range)), range, column);
-
-    it.each(RANGES)(
-      'every %s dot equals the tile one step earlier, step by step',
-      async (range) => {
-        const { dots, stepHours } = getSeriesWindow(range);
-        const got = await dotsOf(range);
-        const expected: number[] = [];
-        for (let k = dots - 1; k >= 0; k--) {
-          expected.push(await countValue(oracle(range, k * stepHours)));
-        }
-        expect(got).toEqual(expected);
-        // The fixture must make the check meaningful: the dots are not all the same.
-        expect(new Set(expected).size).toBeGreaterThan(1);
+  ],
+  // The one query for both tiles.
+  seriesQuery: (range) => buildRiskTilesSeriesQuery(NAMESPACE, ENTITY_INDEX, range),
+  countNow: async (range, run) => [
+    ...readCounts(await run(buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, range)), COLUMNS),
+    ...readCounts(
+      await run(buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, range)),
+      COLUMNS
+    ),
+  ],
+  countStepsAgo: async (range, k, run) => {
+    const { stepHours } = getSeriesWindow(range);
+    return [
+      ...readCounts(await run(oracleMovers(range, k * stepHours)), COLUMNS),
+      ...readCounts(await run(oracleNewlyHighCritical(range, k * stepHours)), COLUMNS),
+    ];
+  },
+  extraTests: (run) => {
+    it.each(RANGES)('one %s query returns the dots of both tiles', async (range) => {
+      const result = await run(buildRiskTilesSeriesQuery(NAMESPACE, ENTITY_INDEX, range));
+      const { dots } = getSeriesWindow(range);
+      const names = result.columns.map((c) => c.name);
+      for (let k = 0; k < dots; k++) {
+        expect(names).toContain(riskMoversSeriesColumn(k));
+        expect(names).toContain(newlyHighCriticalSeriesColumn(k));
       }
-    );
-
-    it.each(RANGES)('the newest %s dot is the tile count', async (range) => {
-      const got = await dotsOf(range);
-      expect(got[got.length - 1]).toBe(await countValue(count(range)));
+      // The tiles differ in this fixture, so one is not a copy of the other.
+      expect(readSeriesDots(result, range, riskMoversSeriesColumn)).not.toEqual(
+        readSeriesDots(result, range, newlyHighCriticalSeriesColumn)
+      );
     });
-
-    it('counts by hand: aliases collapsed, a missing earlier value handled as the tile does', async () => {
-      expect((await dotsOf('24h')).slice(-1)).toEqual([byHand['24h']]);
-      expect((await dotsOf('30d')).slice(-1)).toEqual([byHand['30d']]);
-    });
-  });
+  },
 });
