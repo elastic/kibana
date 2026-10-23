@@ -25,20 +25,18 @@ export class GenAiSettingsPage {
    * Navigate to the GenAI Settings page in Stack Management
    */
   async navigateTo() {
-    await expect(async () => {
-      await this.page.gotoApp('management/ai/genAiSettings');
-      await this.page.testSubj.waitForSelector('genAiSettingsPage', {
-        state: 'visible',
-        timeout: 10_000,
-      });
-    }).toPass({ timeout: 70_000, intervals: [500, 1_000, 2_000] });
+    // A cold Kibana bootstrap on Cloud outruns the `load` event gate, so wait on the page's own signal instead.
+    await this.page.gotoApp('management/ai/genAiSettings', undefined, {
+      waitUntil: 'domcontentloaded',
+    });
+    await this.waitForPageToLoad(35_000);
   }
 
   /**
    * Wait for the page to finish loading
    */
-  async waitForPageToLoad() {
-    await this.page.testSubj.waitForSelector('genAiSettingsPage', { state: 'visible' });
+  async waitForPageToLoad(timeout?: number) {
+    await this.page.testSubj.waitForSelector('genAiSettingsPage', { state: 'visible', timeout });
   }
 
   /**
