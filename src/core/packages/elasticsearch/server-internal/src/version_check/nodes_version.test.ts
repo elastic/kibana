@@ -22,7 +22,6 @@ import {
 } from './nodes_version';
 import {
   compatibilityFromNodesInfo,
-  compatibilityFromRequestError,
   type NodesInfo,
   type NodesVersionCompatibility,
 } from './nodes_version_compatibility';
@@ -50,13 +49,13 @@ const results = {
 } satisfies Record<string, NodesVersionResult>;
 type Response = keyof typeof results;
 
-const compatibilityOf = (nodes: NodesInfo) =>
-  compatibilityFromNodesInfo(nodes, config.kibanaVersion, config.ignoreVersionMismatch);
+const compatibilityOf = (response: Response) =>
+  compatibilityFromNodesInfo(results[response], config.kibanaVersion, config.ignoreVersionMismatch);
 
 const settledCompatibility = {
-  compatible: compatibilityOf(compatible),
-  incompatible: compatibilityOf(incompatible),
-  error: compatibilityFromRequestError(requestError, config.kibanaVersion),
+  compatible: compatibilityOf('compatible'),
+  incompatible: compatibilityOf('incompatible'),
+  error: compatibilityOf('error'),
 } satisfies Record<Response, NodesVersionCompatibility>;
 
 const interval = {

@@ -63,7 +63,7 @@ export const realClock: Clock = {
 };
 
 /** Performs the action and stamps its completion; a failure becomes a result too. */
-const attempt = async <R>(
+export const attempt = async <R>(
   perform: Action<R>,
   now: Clock['now'],
   signal?: AbortSignal
