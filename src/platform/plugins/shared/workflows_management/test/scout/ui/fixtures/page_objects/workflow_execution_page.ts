@@ -241,10 +241,9 @@ export class WorkflowExecutionPage {
           found = true;
           if (i === nodes.length - 1) {
             await this.dismissToasts();
-            const treeItem = listItem.locator(
-              '> [data-test-subj="step-execution-tree-item-label"] [role="treeitem"]'
-            );
-            return (await treeItem.count()) > 0 ? treeItem : nameLocator;
+            // The row is the full width of the run. Its center sits under the step
+            // overlay, so a click there never reaches the tree. The name is on the left.
+            return nameLocator;
           }
 
           parentLocator = listItem.locator('> [data-test-subj="workflowStepTreeIndentGuide"]');
