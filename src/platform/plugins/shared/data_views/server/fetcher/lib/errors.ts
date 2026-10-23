@@ -46,6 +46,17 @@ export function isNoMatchingIndicesError(err: unknown) {
   return get(err, ['output', 'payload', 'code']) === ERR_NO_MATCHING_INDICES;
 }
 
+interface EsErrorCause {
+  type?: string;
+  reason?: string;
+  root_cause?: Array<{ reason?: string }>;
+}
+
+const getEsErrorMessage = (esError?: string | EsErrorCause): string | undefined => {
+  if (typeof esError !== 'object' || esError === null) return esError;
+  return esError.reason ?? esError.root_cause?.[0]?.reason ?? esError.type;
+};
+
 /**
  *  Wrap "index_not_found_exception" errors in custom Boom errors
  *  automatically
@@ -62,10 +73,10 @@ export function convertEsError(indices: string[] | string, error: unknown) {
     return error;
   }
 
-  const custom = error as CustomHttpResponseOptions<{ error: string; message: string }>;
+  const custom = error as CustomHttpResponseOptions<{ error?: string | EsErrorCause }>;
   const options = {
     statusCode: custom.statusCode,
-    message: custom.body?.error ?? undefined,
+    message: getEsErrorMessage(custom.body?.error),
   };
 
   return Boom.boomify(error as Error, options);
