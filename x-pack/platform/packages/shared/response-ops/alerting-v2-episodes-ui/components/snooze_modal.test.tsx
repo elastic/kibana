@@ -234,8 +234,20 @@ describe('openSnoozeModal', () => {
 
   it("loads the field_change options from the data source's searchable fields", async () => {
     const fetchSearchFields = jest.fn().mockResolvedValue([
-      { name: 'host.name', type: 'string', esTypes: ['keyword'], searchable: true, aggregatable: true },
-      { name: 'kibana.alert.grouping', type: 'object', esTypes: ['object'], searchable: false, aggregatable: false },
+      {
+        name: 'host.name',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+      },
+      {
+        name: 'kibana.alert.grouping',
+        type: 'object',
+        esTypes: ['object'],
+        searchable: false,
+        aggregatable: false,
+      },
     ]);
 
     openSnoozeModal(makeDeps(), { dataSource: { id: 'classic-alerts', fetchSearchFields } });
@@ -243,9 +255,7 @@ describe('openSnoozeModal', () => {
     await waitFor(() => {
       expect(screen.getByTestId('snoozeFieldOptions')).toHaveTextContent('host.name');
     });
-    expect(screen.getByTestId('snoozeFieldOptions')).not.toHaveTextContent(
-      'kibana.alert.grouping'
-    );
+    expect(screen.getByTestId('snoozeFieldOptions')).not.toHaveTextContent('kibana.alert.grouping');
   });
 
   it('skips the field lookup when conditions are unavailable', async () => {

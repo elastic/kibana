@@ -83,9 +83,7 @@ const toSnoozePayload = ({
   snoozedUntil: expiresAt ?? null,
   // The panel's condition type is open ended so consumers can register their own
   // descriptors; only the built-in ones are wired here, and they match the API shape.
-  ...(conditions?.length
-    ? { conditions: conditions as SnoozeCondition[], conditionOperator }
-    : {}),
+  ...(conditions?.length ? { conditions: conditions as SnoozeCondition[], conditionOperator } : {}),
 });
 
 const SnoozeModal = ({
