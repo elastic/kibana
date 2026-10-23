@@ -15,6 +15,7 @@ import { componentsPack } from '@kbn/isomer-components';
 import {
   defineChartsPack,
   prepareCharts,
+  type ChartEngine,
   type PrepareChartsOptions,
 } from '@kbn/isomer-primitives-charts';
 import { DASHBOARD_FRAME, dashboardFrame, dashboardPack } from '@kbn/isomer-primitives-dashboard';
@@ -106,18 +107,32 @@ export const createChartsDrawing = async ({
   hints,
   geometry,
   packs = [],
+  inline = false,
+  pdf = true,
 }: {
   hints?: ChartHints;
   /** Boundary files for the maps pack, which ships none. */
   geometry?: MapGeometry;
   /** Packs drawn beside the plugin's own, e.g. a dashboard grid. */
   packs?: Packs;
+  /**
+   * Draws charts in this thread instead of a worker. It installs jsdom's globals here and blocks while drawing,
+   * so only a process that does nothing else should set it (see `render_host`).
+   */
+  inline?: boolean;
+  /** Whether `drawPdf` may write; off, it rejects and the PDF thread never starts. */
+  pdf?: boolean;
 } = {}): Promise<ChartsDrawing> => {
-  const { defineElasticChartsNodeEngine } = await import('@kbn/isomer-charts-elastic-node');
-  const engine = await defineElasticChartsNodeEngine({
+  const { defineElasticChartsInlineEngine, defineElasticChartsNodeEngine } = await import(
+    '@kbn/isomer-charts-elastic-node'
+  );
+  const engineOptions = {
     ...(hints ? { hints } : {}),
     fonts: FACES.map(([family, file]) => ({ family, path: join(FONTS, file) })),
-  });
+  };
+  const engine: ChartEngine & { close?: () => Promise<void> } = inline
+    ? await defineElasticChartsInlineEngine(engineOptions)
+    : await defineElasticChartsNodeEngine(engineOptions);
   // The snapshot surface draws in the runtime's default card frame; charts size themselves for it at DEFAULT_CHART_SIZE.
   const runtime = createKibanaIsomerRuntime({
     // The card for a composition; a dashboard's page for a dashboard.
@@ -175,14 +190,16 @@ export const createChartsDrawing = async ({
         takumi.png(snapshot(composition, options), scale ? { scale } : {})
       ),
     drawPdf: (composition, { metadata, ...options } = {}) =>
-      withCharts(composition, options, () => {
-        // The PDF writer drops content under a mask (request 15).
-        const { html, css, width, height } = withoutMasks(snapshot(composition, options));
-        return pdfWriter.write(
-          { pages: [{ html }], css, width, height },
-          { uncoveredText: 'placeholder', ...(metadata ? { metadata } : {}) }
-        );
-      }),
+      pdf
+        ? withCharts(composition, options, () => {
+            // The PDF writer drops content under a mask (request 15).
+            const { html, css, width, height } = withoutMasks(snapshot(composition, options));
+            return pdfWriter.write(
+              { pages: [{ html }], css, width, height },
+              { uncoveredText: 'placeholder', ...(metadata ? { metadata } : {}) }
+            );
+          })
+        : Promise.reject(new Error('PDF drawing is off for this drawing')),
     renderNode: async (node, { width, height }) => {
       const composition = { type: 'view', body: [node] } as Composition;
       const { release } = await prepareCharts(engine, composition, {
@@ -207,7 +224,7 @@ export const createChartsDrawing = async ({
     },
     rasterize: (page, scale) => takumi.png(page, { scale }),
     close: async () => {
-      await Promise.all([engine.close(), pdfWriter.close()]);
+      await Promise.all([engine.close?.(), pdfWriter.close()]);
     },
     render: async (composition, surface, { width, height } = DEFAULT_CHART_SIZE) => {
       const started = performance.now();
