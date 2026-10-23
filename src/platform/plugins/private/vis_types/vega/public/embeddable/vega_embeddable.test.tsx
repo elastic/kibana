@@ -846,7 +846,7 @@ describe('vegaEmbeddableFactory', () => {
           filters: [
             libraryFilter,
             panelFilter,
-            { type: 'dsl', dsl: { query_string: { query: 'response:404' } } },
+            { type: 'dsl', dsl: { query: { query_string: { query: 'response:404' } } } },
           ],
         })
       );

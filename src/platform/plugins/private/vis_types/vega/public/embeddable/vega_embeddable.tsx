@@ -12,6 +12,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
@@ -248,7 +249,11 @@ export const vegaEmbeddableFactory = (
       if (!libraryItem) {
         return { ...serializePanelOwnedState(), ...panelSearch, spec: spec$.getValue() };
       }
-      const { query, filters: queryFilters } = mergeQueries(libraryItem.query, panelSearch.query);
+      const { query, filters: queryFilters } = mergeQueries(
+        libraryItem.query,
+        panelSearch.query,
+        getEsQueryConfig(core.uiSettings)
+      );
       const filters = [
         ...(libraryItem.filters ?? []),
         ...(panelSearch.filters ?? []),
