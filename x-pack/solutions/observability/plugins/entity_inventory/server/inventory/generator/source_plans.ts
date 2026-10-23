@@ -9,7 +9,7 @@ import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { getDynamicBlock } from './dynamic';
 import { InventoryDefinitionError } from './errors';
 import { assertSafeIndexPattern } from './esql_syntax';
-import { assertEsqlFilter } from './filters';
+import { canonicalizeEsqlFilter } from './filters';
 import type { QueryEngine, QueryPlan } from './types';
 import { MAX_QUERY_PLANS } from './types';
 
@@ -29,29 +29,27 @@ export const planSources = (
     );
   }
 
-  const plans = sources.map(
-    ({ indexPattern, filter, attributes = [] }, sourceIndex): QueryPlan => ({
-      index: sourceIndex,
-      sourceIndex,
-      indexPattern,
-      ...(filter !== undefined ? { filter } : {}),
-      attributes,
-      engine: engines[sourceIndex],
-    })
-  );
-
-  if (plans.length > MAX_QUERY_PLANS) {
+  if (sources.length > MAX_QUERY_PLANS) {
     throw new InventoryDefinitionError(
-      `definition "${type}" expands to ${plans.length} query plans; at most ${MAX_QUERY_PLANS} are allowed`
+      `definition "${type}" expands to ${sources.length} query plans; at most ${MAX_QUERY_PLANS} are allowed`
     );
   }
 
-  plans.forEach(({ indexPattern, filter }) => {
+  // A plan carries the canonical form of its source's filter: parsed, checked and re-printed from
+  // the syntax tree, so only that text ever reaches a query.
+  return sources.map(({ indexPattern, filter, attributes = [] }, sourceIndex): QueryPlan => {
     assertSafeIndexPattern(indexPattern);
-    if (filter !== undefined) {
-      assertEsqlFilter(filter, `source ${indexPattern} filter`);
-    }
+    const canonical =
+      filter !== undefined
+        ? canonicalizeEsqlFilter(filter, `source ${indexPattern} filter`)
+        : undefined;
+    return {
+      index: sourceIndex,
+      sourceIndex,
+      indexPattern,
+      ...(canonical !== undefined ? { filter: canonical } : {}),
+      attributes,
+      engine: engines[sourceIndex],
+    };
   });
-
-  return plans;
 };

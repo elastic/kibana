@@ -18,7 +18,7 @@ At start it logs the names of the entity definitions registered in the entity st
 | --- | --- |
 | `dynamic.ts` | Returns the `dynamic` block or throws `InventoryDefinitionError`. |
 | `esql_syntax.ts` | Backticks identifiers; checks an index pattern's character set and that it parses after `FROM`. |
-| `filters.ts` | Validates an author's filter as one boolean expression: no pipe, semicolon, comment or parameter, parses as `FROM x \| WHERE <filter>`. |
+| `filters.ts` | Canonicalises an author's filter: parses it as one boolean expression without parameters and re-prints it from its syntax tree, checking the re-print parses back to itself. |
 | `parse_guard.ts` | Parses generated text before it is returned; a failure is a generator bug. |
 | `identity.ts` | The `BY` keys, the identity-presence predicate and the `entity.id` evaluation. The last two come from the entity store's id compiler verbatim. |
 | `source_plans.ts` | One query plan per source, validated once. A later phase splits a source into several plans by metric filter. |
@@ -61,6 +61,6 @@ FROM <patterns> METADATA _index
 
 A single plan has no `METADATA _index` and no per-plan clause. An identity with more than one field is counted by distinct id, exactly, because a ranked fallback or a composed id can give two raw groups the same id.
 
-**Safety.** The window travels as the named parameters `?from` and `?to`. Every reference the generator writes is backticked. An index pattern may contain only letters, digits, `_`, `.`, `-`, `*`, `?` and `:`, may not start with `-`, and must parse. An author's filter must be a single boolean expression with no pipe, semicolon, comment or parameter. Every generated query is parsed before it leaves the generator. Anything a definition gets wrong throws `InventoryDefinitionError`; anything the generator gets wrong throws a plain `Error`.
+**Safety.** The window travels as the named parameters `?from` and `?to`. Every reference the generator writes is backticked. An index pattern may contain only letters, digits, `_`, `.`, `-`, `*`, `?` and `:`, may not start with `-`, and must parse. An author's filter is parsed as a single boolean expression without query parameters and re-printed from its syntax tree; only that canonical text reaches a query, so comments are dropped and string literals may contain anything. Every generated query is parsed before it leaves the generator. Anything a definition gets wrong throws `InventoryDefinitionError`; anything the generator gets wrong throws a plain `Error`.
 
 **Fixtures.** `server/inventory/__fixtures__/definitions.ts` holds test-only definitions (`k8s.deployment`, `k8s.node`, a host-like ranked identity) in the store's `dynamic` shape. Nothing registers them.

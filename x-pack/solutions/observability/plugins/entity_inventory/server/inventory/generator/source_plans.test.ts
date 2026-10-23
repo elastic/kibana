@@ -9,7 +9,6 @@ import type { DynamicSource, EntityDefinitionWithoutId } from '@kbn/entity-store
 import { k8sDeploymentFixture, k8sNodeFixture } from '../__fixtures__/definitions';
 import { InventoryDefinitionError } from './errors';
 import { assertSafeIndexPattern } from './esql_syntax';
-import { validateEsqlFilter } from './filters';
 import { planSources } from './source_plans';
 import type { QueryEngine } from './types';
 import { MAX_QUERY_PLANS } from './types';
@@ -98,11 +97,19 @@ describe('planSources', () => {
   it('throws on a bad filter with the filter rule message, labelled by the source', () => {
     const indexPattern = 'metrics-*';
     const filter = 'true | LIMIT 1';
-    const expected = 'source metrics-* filter must not contain a pipe: true | LIMIT 1';
-    expect(validateEsqlFilter(filter, `source ${indexPattern} filter`)).toBe(expected);
     expect(() => planSources(withSources([{ indexPattern, filter }]), ['FROM'])).toThrow(
       InventoryDefinitionError
     );
-    expect(() => planSources(withSources([{ indexPattern, filter }]), ['FROM'])).toThrow(expected);
+    expect(() => planSources(withSources([{ indexPattern, filter }]), ['FROM'])).toThrow(
+      'source metrics-* filter must be a single ES|QL expression: '
+    );
+  });
+
+  it('stores the canonical form of a source filter on its plan', () => {
+    const [plan] = planSources(
+      withSources([{ indexPattern: 'metrics-*', filter: '(state=="idle"  OR  a>1) // note' }]),
+      ['FROM']
+    );
+    expect(plan.filter).toBe('(state == "idle" OR a > 1)');
   });
 });
