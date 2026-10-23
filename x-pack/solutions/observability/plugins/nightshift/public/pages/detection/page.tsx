@@ -140,11 +140,8 @@ export const DetectionPage = ({
     <div
       css={css`
         display: flex;
-        flex: 1 1 auto;
         flex-direction: column;
-        height: 100%;
         min-height: 0;
-        overflow: hidden;
       `}
       data-test-subj="nightshiftDetectionPage"
     >
@@ -172,7 +169,6 @@ export const DetectionPage = ({
             flex: 1 1 auto;
             flex-direction: column;
             min-height: 0;
-            overflow: hidden;
           `,
         }}
       >

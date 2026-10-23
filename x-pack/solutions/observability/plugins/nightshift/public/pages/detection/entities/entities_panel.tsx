@@ -244,7 +244,6 @@ export const EntitiesPanel = ({
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
-        overflow: 'hidden',
       }}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
