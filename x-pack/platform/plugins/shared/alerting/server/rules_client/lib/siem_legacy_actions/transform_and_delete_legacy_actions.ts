@@ -62,21 +62,27 @@ const ruleHasAllSidecarActions = (
     return false;
   }
   const unmatchedRuleActions = [...rule.attributes.actions];
-  return sidecarActions.every((sidecarAction) => {
+
+  const ruleContainsSidecarAction = (sidecarAction: (typeof sidecarActions)[number]): boolean => {
     const connectorId = getConnectorId(sidecar.references, sidecarAction.actionRef);
-    const index = unmatchedRuleActions.findIndex(
+    if (connectorId === undefined) {
+      return false;
+    }
+    const matchIndex = unmatchedRuleActions.findIndex(
       (ruleAction) =>
-        connectorId !== undefined &&
         ruleAction.group === sidecarAction.group &&
         isEqual(ruleAction.params, sidecarAction.params) &&
         getConnectorId(rule.references, ruleAction.actionRef) === connectorId
     );
-    if (index === -1) {
+    if (matchIndex === -1) {
       return false;
     }
-    unmatchedRuleActions.splice(index, 1);
+    // A rule action can match only one sidecar action, so a match is removed from the pool of unmatched rule actions.
+    unmatchedRuleActions.splice(matchIndex, 1);
     return true;
-  });
+  };
+
+  return sidecarActions.every(ruleContainsSidecarAction);
 };
 
 type LegacySidecar = SavedObject<LegacyIRuleActionsAttributes>;
