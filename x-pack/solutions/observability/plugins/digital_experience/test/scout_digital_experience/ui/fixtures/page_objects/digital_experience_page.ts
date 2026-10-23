@@ -25,7 +25,7 @@ export class DigitalExperiencePage {
   public readonly sourceList: EuiSelectableObject;
   public readonly search: Locator;
   public readonly summary: Locator;
-  public readonly pageLoadsChartRendered: Locator;
+  public readonly pageLoadsChart: Locator;
   public readonly otelOverviewPlaceholder: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
@@ -49,10 +49,7 @@ export class DigitalExperiencePage {
     this.sourceList = page.components.selectable('digitalExperienceSourceFilterList');
     this.search = page.getByTestId('digitalExperienceApplicationsSearch');
     this.summary = page.getByTestId('digitalExperienceApplicationsSummary');
-    // Elastic Charts flags its (empty, so never visible) status element once the chart has drawn.
-    this.pageLoadsChartRendered = page
-      .getByTestId('digitalExperiencePageLoadsChart')
-      .locator('.echChartStatus[data-ech-render-complete="true"]');
+    this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
     this.otelOverviewPlaceholder = page.getByTestId('digitalExperienceOtelOverviewPlaceholder');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');

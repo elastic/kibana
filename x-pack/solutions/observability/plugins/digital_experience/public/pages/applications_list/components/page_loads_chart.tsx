@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import type { BrushEndListener } from '@elastic/charts';
@@ -53,6 +53,7 @@ export function PageLoadsChart({
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
   const hasPageLoads = points.some(({ count }) => count > 0);
+  const [renderedPoints, setRenderedPoints] = useState<TimeSeriesPoint[]>();
 
   const onBrushEnd: BrushEndListener = (brushArea) => {
     const [start, end] = ('x' in brushArea && brushArea.x) || [];
@@ -83,6 +84,7 @@ export function PageLoadsChart({
           showLegend={false}
           locale={i18n.getLocale()}
           onBrushEnd={onBrushEnd}
+          onRenderChange={(isRendered) => setRenderedPoints(isRendered ? points : undefined)}
         />
         <Tooltip headerFormatter={({ value }) => formatDate(value)} />
         <Axis id="time" position={Position.Bottom} />
@@ -103,7 +105,11 @@ export function PageLoadsChart({
   };
 
   return (
-    <EuiPanel hasBorder data-test-subj="digitalExperiencePageLoadsChart">
+    <EuiPanel
+      hasBorder
+      data-test-subj="digitalExperiencePageLoadsChart"
+      data-render-complete={!isLoading && hasPageLoads && renderedPoints === points}
+    >
       <EuiTitle size="xs">
         <h2>{TITLE}</h2>
       </EuiTitle>

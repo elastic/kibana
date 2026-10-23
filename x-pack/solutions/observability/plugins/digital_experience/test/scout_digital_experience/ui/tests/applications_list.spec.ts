@@ -27,7 +27,10 @@ test.describe(
     }) => {
       await test.step('shows the summary and the page loads over time', async () => {
         await expect(digitalExperience.summary).toBeVisible();
-        await expect(digitalExperience.pageLoadsChartRendered).toBeAttached();
+        await expect(digitalExperience.pageLoadsChart).toHaveAttribute(
+          'data-render-complete',
+          'true'
+        );
       });
 
       await test.step('shows one EDOT Browser row with a hint for a name with both sources', async () => {
