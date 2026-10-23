@@ -39,6 +39,7 @@ import {
   REMOVE_ENTITY_BUTTON,
   TARGET_ENTITY_TOOLTIP,
   CANNOT_REMOVE_TARGET_TOOLTIP,
+  INSUFFICIENT_PRIVILEGES_TOOLTIP,
   RESOLUTION_EMPTY_STATE,
   RESOLUTION_FETCH_ERROR,
   RESOLUTION_GROUP_TABLE_CAPTION,
@@ -56,6 +57,7 @@ export interface ResolutionGroupTableProps {
   isLoading: boolean;
   isError?: boolean;
   showActions?: boolean;
+  canModify?: boolean;
   onRemoveEntity?: (entityId: string) => void;
   targetEntityId?: string;
   removingEntityId?: string;
@@ -68,6 +70,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   isLoading,
   isError = false,
   showActions = false,
+  canModify = true,
   onRemoveEntity,
   targetEntityId,
   removingEntityId,
@@ -107,28 +110,23 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
             </EuiToolTip>
           );
 
-          const removeButton = (
-            <EuiToolTip content={REMOVE_ENTITY_BUTTON} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                color="primary"
-                aria-label={REMOVE_ENTITY_BUTTON}
-                disabled={isTarget || !!removingEntityId}
-                onClick={() => onRemoveEntity?.(entityId)}
-                isLoading={isThisEntityRemoving}
-              />
-            </EuiToolTip>
-          );
-
           return (
             <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>{expandButton}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {isTarget ? (
-                  <EuiToolTip content={CANNOT_REMOVE_TARGET_TOOLTIP}>{removeButton}</EuiToolTip>
-                ) : (
-                  removeButton
-                )}
+                <EuiToolTip
+                  content={getRemoveButtonTooltip(canModify, isTarget)}
+                  disableScreenReaderOutput={canModify && !isTarget}
+                >
+                  <EuiButtonIcon
+                    iconType="cross"
+                    color="primary"
+                    aria-label={REMOVE_ENTITY_BUTTON}
+                    disabled={!canModify || isTarget || !!removingEntityId}
+                    onClick={() => onRemoveEntity?.(entityId)}
+                    isLoading={isThisEntityRemoving}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -219,6 +217,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
     return cols;
   }, [
     showActions,
+    canModify,
     targetEntityId,
     onRemoveEntity,
     removingEntityId,
@@ -267,4 +266,15 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
       compressed
     />
   );
+};
+
+const getRemoveButtonTooltip = (canModify: boolean, isTarget: boolean) => {
+  if (!canModify) {
+    return INSUFFICIENT_PRIVILEGES_TOOLTIP;
+  }
+  if (isTarget) {
+    return CANNOT_REMOVE_TARGET_TOOLTIP;
+  }
+
+  return REMOVE_ENTITY_BUTTON;
 };

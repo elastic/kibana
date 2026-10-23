@@ -14,6 +14,7 @@ import { useResolutionGroup } from './hooks/use_resolution_group';
 import { useLinkEntities } from './hooks/use_link_entities';
 import { useUnlinkEntities } from './hooks/use_unlink_entities';
 import { useSearchEntities } from './hooks/use_search_entities';
+import { useCanModifyResolution } from './hooks/use_can_modify_resolution';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
@@ -21,6 +22,7 @@ jest.mock('./hooks/use_resolution_group');
 jest.mock('./hooks/use_link_entities');
 jest.mock('./hooks/use_unlink_entities');
 jest.mock('./hooks/use_search_entities');
+jest.mock('./hooks/use_can_modify_resolution');
 jest.mock('../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
@@ -41,6 +43,7 @@ const mockUseResolutionGroup = useResolutionGroup as jest.Mock;
 const mockUseLinkEntities = useLinkEntities as jest.Mock;
 const mockUseUnlinkEntities = useUnlinkEntities as jest.Mock;
 const mockUseSearchEntities = useSearchEntities as jest.Mock;
+const mockUseCanModifyResolution = useCanModifyResolution as jest.Mock;
 
 const mockFetch = jest.fn();
 const mockAddError = jest.fn();
@@ -60,6 +63,7 @@ const searchResults = [
 describe('ResolutionGroupTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCanModifyResolution.mockReturnValue(true);
     (useKibana as jest.Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
     (useAppToasts as jest.Mock).mockReturnValue({ addError: mockAddError });
     mockUseLinkEntities.mockReturnValue({ mutate: mockLinkMutate, isLoading: false });
@@ -219,6 +223,42 @@ describe('ResolutionGroupTab', () => {
       { entity_ids: ['alice-azure-id'] },
       expect.objectContaining({ onSettled: expect.any(Function) })
     );
+  });
+
+  describe('when the user cannot modify resolution groups', () => {
+    beforeEach(() => {
+      mockUseCanModifyResolution.mockReturnValue(false);
+      mockUseResolutionGroup.mockReturnValue({ data: existingGroup, isLoading: false });
+    });
+
+    it('disables the add and remove actions', () => {
+      const { getAllByLabelText } = render(
+        <TestProviders>
+          <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
+        </TestProviders>
+      );
+
+      getAllByLabelText(/add to resolution group/i).forEach((button) => {
+        expect(button).toBeDisabled();
+      });
+      getAllByLabelText(/remove from resolution group/i).forEach((button) => {
+        expect(button).toBeDisabled();
+      });
+    });
+
+    it('does not link or unlink when the disabled actions are clicked', () => {
+      const { getAllByLabelText } = render(
+        <TestProviders>
+          <ResolutionGroupTab entityId="alice-id" entityType="user" scopeId="test-scope" />
+        </TestProviders>
+      );
+
+      fireEvent.click(getAllByLabelText(/add to resolution group/i)[0]);
+      fireEvent.click(getAllByLabelText(/remove from resolution group/i)[0]);
+
+      expect(mockLinkMutate).not.toHaveBeenCalled();
+      expect(mockUnlinkMutate).not.toHaveBeenCalled();
+    });
   });
 
   it('confirm modal submit calls link mutation', async () => {
