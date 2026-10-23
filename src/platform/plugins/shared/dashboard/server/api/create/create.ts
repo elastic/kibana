@@ -68,6 +68,7 @@ export async function create(
     }
   );
   const snapshot = getHistorySnapshot({
+    dashboardId: savedObject.id,
     attributes: soAttributes,
     references: soReferences,
     strictValidationSchema,

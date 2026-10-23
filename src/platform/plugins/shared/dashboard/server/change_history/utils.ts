@@ -27,7 +27,7 @@ import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import { transformDashboardOut } from '../api/transforms';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { securityService, spacesService } from '../kibana_services';
+import { logger, securityService, spacesService } from '../kibana_services';
 import { getChangeHistoryClient } from './change_history_service';
 
 export const INITIAL_HISTORY_SEQUENCE = 1;
@@ -48,10 +48,12 @@ export const hasContentChanged = (
  * panel format. Returns undefined if the snapshot cannot be built, since history is best-effort.
  */
 export const getHistorySnapshot = ({
+  dashboardId,
   attributes,
   references,
   strictValidationSchema,
 }: {
+  dashboardId: string;
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>;
@@ -64,7 +66,10 @@ export const getHistorySnapshot = ({
       strictValidationSchema
     );
     return dashboardState;
-  } catch {
+  } catch (e) {
+    logger.warn(
+      `Unable to build change history snapshot for dashboard ${dashboardId}: ${e.message}`
+    );
     return undefined;
   }
 };
@@ -90,7 +95,10 @@ export const getHistorySequences = async ({
     ).getHistory(spaceId, 'dashboard', dashboardId, { size: 1 });
     const latestSequence = latestItem?.object.sequence;
     latest = typeof latestSequence === 'number' ? latestSequence : undefined;
-  } catch {
+  } catch (e) {
+    logger.warn(
+      `Unable to read change history sequence for dashboard ${dashboardId}: ${e.message}`
+    );
     latest = undefined;
   }
   return { latest, next: latest === undefined ? INITIAL_HISTORY_SEQUENCE : latest + 1 };

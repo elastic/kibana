@@ -23,6 +23,8 @@ const listResponseSchema = z.object({
       timestamp: z.string(),
       actor: z.object({ name: z.string(), id: z.string().optional() }),
       action: z.string(),
+      isCurrent: z.boolean(),
+      comment: z.string().optional(),
       changes: z.object({ count: z.number(), summary: z.any().optional() }).optional(),
       metadata: z.record(z.string(), z.any()).optional(),
     })
@@ -107,7 +109,7 @@ export const registerHistoryListRoute = (
               metadata: {
                 version: item.object.sequence,
               },
-            };
+            } satisfies HistoryListResponse['items'][number];
           }),
         },
       });

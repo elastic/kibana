@@ -26,7 +26,9 @@ import {
 
 jest.mock('./change_history_service');
 const mockUseRbacForRequest = jest.fn();
+const mockWarn = jest.fn();
 jest.mock('../kibana_services', () => ({
+  logger: { warn: (...args: unknown[]) => mockWarn(...args) },
   securityService: {
     authz: { mode: { useRbacForRequest: (...args: unknown[]) => mockUseRbacForRequest(...args) } },
   },
@@ -65,6 +67,7 @@ describe('getHistorySequences', () => {
   it('starts at the initial sequence when the client is unavailable', async () => {
     mockedGetClient.mockRejectedValue(new Error('not ready'));
     expect((await getHistorySequences({ spaceId: 'default', dashboardId: 'dash-1' })).next).toBe(1);
+    expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('dash-1'));
   });
 });
 
@@ -219,6 +222,7 @@ describe('addToHistory', () => {
 
 describe('getHistorySnapshot', () => {
   const args = {
+    dashboardId: 'dash-1',
     attributes: {} as never,
     references: [],
     strictValidationSchema: {} as never,
@@ -245,6 +249,7 @@ describe('getHistorySnapshot', () => {
       throw new Error('bad panel');
     });
     expect(getHistorySnapshot(args)).toBeUndefined();
+    expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('dash-1'));
   });
 });
 

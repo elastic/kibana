@@ -21,6 +21,26 @@ import type { DashboardApi, DashboardInitializationState } from '..';
 import { DASHBOARD_APP_ID, DashboardRenderer } from '..';
 import { unifiedSearchService } from '../services/kibana_services';
 
+/** prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
+const PreviewRenderer = React.memo(
+  ({
+    initialState,
+    onApiAvailable,
+  }: {
+    initialState: DashboardInitializationState;
+    onApiAvailable: (api: DashboardApi) => void;
+  }) => (
+    <DashboardRenderer
+      getCreationOptions={() =>
+        Promise.resolve({
+          getInitialInput: () => ({ ...initialState, viewMode: 'non-interactive' }),
+        })
+      }
+      onApiAvailable={onApiAvailable}
+    />
+  )
+);
+
 export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange?: DashboardState['time_range'];
@@ -55,20 +75,6 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
       isStale = true;
     };
   }, [change, dashboardApi, inheritedTimeRange, setPreviewTitle]);
-
-  const memoized = useMemo(() => {
-    /** prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
-    return (
-      <DashboardRenderer
-        getCreationOptions={() =>
-          Promise.resolve({
-            getInitialInput: () => ({ ...initialState.current, viewMode: 'non-interactive' }),
-          })
-        }
-        onApiAvailable={setDashboardApi}
-      />
-    );
-  }, []);
 
   const timeRange = (change.snapshot as DashboardState).time_range ?? inheritedTimeRange;
   const searchBarVisibilityProps = useMemo(() => {
@@ -120,7 +126,7 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
           {...searchBarVisibilityProps}
         />
       )}
-      {memoized}
+      <PreviewRenderer initialState={initialState.current} onApiAvailable={setDashboardApi} />
     </div>
   );
 };

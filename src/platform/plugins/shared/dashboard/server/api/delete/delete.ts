@@ -42,6 +42,7 @@ export async function deleteDashboard(
   const deletedAt = new Date().toISOString(); // SO client does not provide deletedAt timestamp, so this is the next-best thing
 
   const snapshot = getHistorySnapshot({
+    dashboardId: id,
     attributes: savedObject.attributes,
     references: savedObject.references,
     strictValidationSchema,

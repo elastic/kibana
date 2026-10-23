@@ -161,12 +161,14 @@ export async function update(
       }
     );
     const snapshot = getHistorySnapshot({
+      dashboardId: id,
       attributes: soAttributes,
       references: soReferences,
       strictValidationSchema,
     });
     if (snapshot && newSequence !== undefined) {
       const previousSnapshot = getHistorySnapshot({
+        dashboardId: id,
         attributes: existing.attributes,
         references: existing.references,
         strictValidationSchema,
