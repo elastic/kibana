@@ -71,7 +71,8 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
     return names;
   }, [selectedServiceIds, awsServicesMap, serviceSettings]);
 
-  const { statusByInstanceId, receivingCount, totalCount } = useServiceDataDetection();
+  const { statusByInstanceId, agentInfoByServiceId, receivingCount, totalCount } =
+    useServiceDataDetection();
 
   // Installed content — read from AWS package installation.
   const { data: awsPackageData } = useGetPackageInfoByKeyQuery('aws', undefined, { full: true });
@@ -128,6 +129,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
             awsServicesMap={awsServicesMap}
             serviceNames={serviceNames}
             statusByInstanceId={statusByInstanceId}
+            agentInfoByServiceId={agentInfoByServiceId}
             deploymentMethod={deploymentMethod}
             receivingCount={receivingCount}
             totalCount={totalCount}

@@ -26,14 +26,7 @@ import {
 import { OsRow } from './os_row';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
 
-export const LOCKED_CARD_ATTACK_SURFACE_REDUCTION = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.attack_surface_reduction',
-  {
-    defaultMessage: 'Attack Surface Reduction',
-  }
-);
-
-const CARD_TITLE = i18n.translate(
+export const ATTACK_SURFACE_REDUCTION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.attackSurfaceReduction.type',
   {
     defaultMessage: 'Attack surface reduction',
@@ -96,7 +89,7 @@ export const PerOsAttackSurfaceReductionCard = memo<PerOsAttackSurfaceReductionC
     if (!isPlatinumPlus) {
       return (
         <SettingLockedCard
-          title={LOCKED_CARD_ATTACK_SURFACE_REDUCTION}
+          title={ATTACK_SURFACE_REDUCTION_CARD_TITLE}
           data-test-subj={getTestId('locked')}
         />
       );
@@ -104,7 +97,7 @@ export const PerOsAttackSurfaceReductionCard = memo<PerOsAttackSurfaceReductionC
 
     return (
       <PerOsSettingCard
-        title={CARD_TITLE}
+        title={ATTACK_SURFACE_REDUCTION_CARD_TITLE}
         description={POLICY_SETTING_SECTION_DESCRIPTIONS.attackSurfaceReduction}
         dataTestSubj={getTestId()}
         mode={mode}

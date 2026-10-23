@@ -128,21 +128,12 @@ export function startTrackingDashboardLoadTelemetry(
 }
 
 /**
- * Returns an integer describing how dashboard results were accelerated:
- *   0 - no acceleration (standard query execution)
- *   1 - at least one panel used ES|QL approximation
- *   2 - at least one panel used cached data (not yet implemented)
+ * Returns whether any panel used ES|QL approximation.
  */
-function getAccelerationStrategy(children: unknown[]): number {
-  // TODO: return 2 before either check below if any panel uses cached data
-  if (
-    children.some(
-      (child) => apiPublishesEsql(child) && child.approximationApplied$.getValue() === true
-    )
-  ) {
-    return 1;
-  }
-  return 0;
+function getApproximationApplied(children: unknown[]): boolean {
+  return children.some(
+    (child) => apiPublishesEsql(child) && child.approximationApplied$.getValue() === true
+  );
 }
 
 function reportPerformanceMetrics({
@@ -182,12 +173,13 @@ function reportPerformanceMetrics({
     value2: panelCount,
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
-    key5: 'acceleration_strategy',
-    value5: getAccelerationStrategy(children),
     key8: 'mean_panel_prerender',
     value8: meanPanelPrerender,
     key9: 'mean_panel_rendering',
     value9: meanPanelRenderComplete,
+    meta: {
+      approximationApplied: getApproximationApplied(children),
+    },
   };
 
   reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);

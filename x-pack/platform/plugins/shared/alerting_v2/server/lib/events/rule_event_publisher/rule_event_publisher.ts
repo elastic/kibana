@@ -8,7 +8,6 @@
 import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { RuleEventOrigin } from '../../event_origin/origin_schemas';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -34,7 +33,6 @@ export interface EventRule {
   ruleId: string;
   spaceId: string;
   rule?: RuleResponse;
-  origin: RuleEventOrigin;
 }
 
 /**
@@ -101,11 +99,10 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
   }
 
   private toEventPayload(eventRule: EventRule, correlationId?: string): RuleEventPayload {
-    const { ruleId, spaceId, rule, origin } = eventRule;
+    const { ruleId, spaceId, rule } = eventRule;
     return {
       ruleId,
       spaceId,
-      origin,
       ...(correlationId ? { correlationId } : {}),
       ...(rule ? { rule } : {}),
     };
