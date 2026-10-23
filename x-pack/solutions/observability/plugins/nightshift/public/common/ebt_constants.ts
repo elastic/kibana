@@ -51,6 +51,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   TOGGLE_SLACK_CHANNELS: 'toggleSlackChannels',
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_AUTOMATION_RUNS: 'viewAutomationRuns',
+  VIEW_AUTOMATIONS: 'viewAutomations',
   VIEW_DETECTION: 'viewDetection',
   VIEW_DETECTION_TAB: 'viewDetectionTab',
   VIEW_ENTITY: 'viewEntity',
