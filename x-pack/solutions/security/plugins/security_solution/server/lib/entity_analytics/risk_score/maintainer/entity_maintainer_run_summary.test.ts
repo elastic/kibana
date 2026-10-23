@@ -30,6 +30,7 @@ const emptyMetrics = (overrides: Partial<RunMetrics> = {}): RunMetrics => ({
   entitiesCreated: 0,
   entitiesCreateSkipped: 0,
   entitiesCreateFailed: 0,
+  scoresUnchangedInStoreBase: 0,
   ...overrides,
 });
 
