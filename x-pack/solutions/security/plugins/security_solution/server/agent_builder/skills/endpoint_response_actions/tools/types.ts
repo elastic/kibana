@@ -11,6 +11,7 @@ import type { RunContext } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { HostInfo, ActionDetails } from '../../../../../common/endpoint/types';
@@ -148,6 +149,7 @@ export type ResponseActionErrorType =
   | 'invalid_argument'
   | 'license_tier_required'
   | 'license_unavailable'
+  | 'product_feature_disabled'
   | 'unknown_error';
 
 /**
@@ -233,6 +235,48 @@ export function licenseUnavailableResult(privilege: string, expired: boolean) {
       : `License limit: this deployment's Elastic license could not be read, so the '${privilege}' capability is disabled regardless of role. An administrator needs to restore license availability; a role grant will not help. Nothing was dispatched.`,
     { privilege, licenseState: expired ? 'expired' : 'unavailable' }
   );
+}
+
+/**
+ * Standard tool result returned when the deployment's product configuration —
+ * not the caller's role, not the license tier — is what withholds the
+ * privilege. On serverless, response-action privileges derive from the
+ * `endpointResponseActions` product feature, which only the Endpoint Complete
+ * tier includes; `calculateEndpointAuthz.hasAuth` returns false for every role
+ * (including superuser/admin) when the feature is off, while the serverless
+ * license is always Enterprise. Reporting that as
+ * `insufficient_privileges` or `license_tier_required` would both be wrong:
+ * no grant and no license change can enable it — only the deployment's
+ * product tier can.
+ */
+export function productFeatureDisabledResult(privilege: string) {
+  return responseActionErrorResult(
+    'product_feature_disabled',
+    `Not available on this deployment: response actions are part of the Endpoint Complete product tier, and this deployment's product configuration does not include them, so the '${privilege}' capability is disabled regardless of role or license. An administrator would need to upgrade this project to a product tier that includes response actions. Nothing was dispatched.`,
+    { privilege, productFeature: ProductFeatureSecurityKey.endpointResponseActions }
+  );
+}
+
+/**
+ * Whether the deployment's product configuration includes response actions
+ * (`isEnabled(endpointResponseActions)`). All response-action privileges
+ * derive from that feature on serverless, so when `authz[privilege]` is false
+ * and neither a role nor a license explains it, this is the remaining cause.
+ *
+ * `undefined` when the check cannot be answered (the product-features service
+ * has not been configured, e.g. some test contexts): callers treat that as
+ * "not the explanation" rather than guessing.
+ */
+export function responseActionsProductFeatureEnabled(productFeaturesService: {
+  isEnabled(key: string): boolean;
+}): boolean | undefined {
+  try {
+    return productFeaturesService.isEnabled(ProductFeatureSecurityKey.endpointResponseActions);
+  } catch {
+    // `isEnabled` throws before `setProductFeaturesConfigurator` has run;
+    // an unconfigured service says nothing about the feature.
+    return undefined;
+  }
 }
 
 /**

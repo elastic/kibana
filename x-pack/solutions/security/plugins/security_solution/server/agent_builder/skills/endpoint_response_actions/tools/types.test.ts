@@ -11,8 +11,10 @@ import {
   licenseLimitOf,
   licenseTierRequiredResult,
   licenseUnavailableResult,
+  productFeatureDisabledResult,
   resolveAgentTypeFromPackages,
   responseActionErrorResult,
+  responseActionsProductFeatureEnabled,
   summarizeActionHosts,
   summarizeActionOutputs,
   summarizeAgentState,
@@ -162,6 +164,38 @@ describe('response action error helpers', () => {
       })
     );
     expect((result.results[0].data as { message: string }).message).toContain('could not be read');
+  });
+
+  it('productFeatureDisabledResult names the product tier, not a grant or license, as the fix', () => {
+    const result = productFeatureDisabledResult('canIsolateHost');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'product_feature_disabled',
+        privilege: 'canIsolateHost',
+        productFeature: 'endpoint_response_actions',
+      })
+    );
+    // The point of the split: neither a role grant nor a license change can
+    // satisfy a product-configuration gate.
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).not.toContain('Ask an administrator to grant');
+    expect(message).not.toContain('upgrade the Elastic license');
+    expect(message).not.toContain('Security UI');
+  });
+
+  it('responseActionsProductFeatureEnabled reports the feature and tolerates an unconfigured service', () => {
+    expect(responseActionsProductFeatureEnabled({ isEnabled: () => true })).toBe(true);
+    expect(responseActionsProductFeatureEnabled({ isEnabled: () => false })).toBe(false);
+    // `isEnabled` throws before `setProductFeaturesConfigurator` has run; the
+    // helper must surface "unknown", not crash the gate it feeds.
+    const unconfigured = {
+      isEnabled: () => {
+        throw new Error('not configured');
+      },
+    };
+    expect(responseActionsProductFeatureEnabled(unconfigured)).toBeUndefined();
   });
 
   it('endpointNotFoundData reports a hostname miss without fabricating host state', () => {

@@ -123,6 +123,36 @@ describe('getResponseActionStatusTool', () => {
     expect(mockGetActionDetailsById).not.toHaveBeenCalled();
   });
 
+  it('reports product_feature_disabled when the deployment omits the response-actions feature (serverless Essentials)', async () => {
+    // On serverless Essentials every role fails the actions-log privilege (it
+    // derives from the `endpointResponseActions` product feature) while the
+    // license is always Enterprise — so neither a grant nor a license
+    // explains the refusal. The default license mock is Platinum+, so
+    // disabling only the feature isolates it as the cause.
+    service.getEndpointAuthz = jest.fn().mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canAccessEndpointActionsLogManagement: false,
+      })
+    );
+    service.getProductFeaturesService = jest.fn(
+      () =>
+        ({ isEnabled: () => false } as unknown as ReturnType<
+          EndpointAppContextService['getProductFeaturesService']
+        >)
+    ) as unknown as EndpointAppContextService['getProductFeaturesService'];
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('product_feature_disabled');
+    expect(denialData.privilege).toBe('canAccessEndpointActionsLogManagement');
+    expect(denialData.productFeature).toBe('endpoint_response_actions');
+    expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+  });
+
   it('returns insufficient_privileges for an actions-log-only caller without canReadSecuritySolution', async () => {
     // The details route requires the `securitySolution` feature privilege on
     // top of the actions-log check; the actions-log sub-feature does not grant it.

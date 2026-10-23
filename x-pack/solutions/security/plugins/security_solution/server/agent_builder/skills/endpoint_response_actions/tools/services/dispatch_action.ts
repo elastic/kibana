@@ -19,7 +19,9 @@ import {
   licenseLimitOf,
   licenseTierRequiredResult,
   licenseUnavailableResult,
+  productFeatureDisabledResult,
   responseActionErrorResult,
+  responseActionsProductFeatureEnabled,
   insufficientPrivilegesResult,
 } from '../types';
 import { createEndpointLookupService, type ResolvedEndpoint } from './endpoint_lookup';
@@ -225,17 +227,25 @@ const resolveTarget = async (request: DispatchRequest): Promise<ResolvedDispatch
   );
 
 /**
- * Distinguishes a missing role privilege from a license limit when
- * `authz[privilege]` is false, without re-deriving `calculateEndpointAuthz`'s
- * conjunctions here: the privilege flag already folds both in, so the license
- * service is only consulted when the flag is false to decide which of the
- * refusal shapes to return. `undefined` means the privilege has no license
- * conjunction, so the license is never the explanation.
+ * Distinguishes a missing role privilege from a license limit — and from a
+ * product-configuration refusal — when `authz[privilege]` is false, without
+ * re-deriving `calculateEndpointAuthz`'s conjunctions here: the privilege flag
+ * already folds all three in, so the license and product-features services are
+ * only consulted when the flag is false to decide which of the refusal shapes
+ * to return. `undefined` in `DISPATCH_PRIVILEGE_LICENSE_TIERS` means the
+ * privilege has no license conjunction, so the license is never the
+ * explanation.
  *
  * A license refusal itself has two causes (see `licenseLimitOf`): the active
  * license is honestly below the required tier, or the license has expired /
  * could not be read — in which case no tier comparison is meaningful and the
  * answer is renewal or restoration, not an upgrade.
+ *
+ * On serverless, all response-action privileges also derive from the
+ * `endpointResponseActions` product feature (only Endpoint Complete includes
+ * it), and the license is always Enterprise — so when the license raises no
+ * objection but the feature is disabled, the deployment's product tier is the
+ * honest explanation, not a role grant or a license upgrade.
  */
 const privilegeRefusal = (
   endpointAppContextService: EndpointAppContextService,
@@ -243,7 +253,8 @@ const privilegeRefusal = (
 ):
   | { kind: 'privilege'; privilege: string }
   | { kind: 'license'; privilege: DispatchPrivilege; tier: 'platinum' | 'enterprise' }
-  | { kind: 'license_state'; privilege: DispatchPrivilege; expired: boolean } => {
+  | { kind: 'license_state'; privilege: DispatchPrivilege; expired: boolean }
+  | { kind: 'product_feature'; privilege: DispatchPrivilege } => {
   if (privilege !== 'canReadSecuritySolution') {
     const requiredTier = DISPATCH_PRIVILEGE_LICENSE_TIERS[privilege];
     if (requiredTier) {
@@ -254,6 +265,13 @@ const privilegeRefusal = (
       if (limit?.kind === 'state') {
         return { kind: 'license_state', privilege, expired: limit.expired };
       }
+    }
+    if (
+      responseActionsProductFeatureEnabled(
+        endpointAppContextService.getProductFeaturesService()
+      ) === false
+    ) {
+      return { kind: 'product_feature', privilege };
     }
   }
 
@@ -444,6 +462,12 @@ export const describeDispatchTargetForConfirmation = async (
           }; while that is the case a role grant will not enable it here.`,
         };
       }
+      if (refusal.kind === 'product_feature') {
+        return {
+          kind: 'blocked',
+          message: `Response actions are not part of this deployment's product configuration, so '${requiredPrivilege}' is disabled regardless of role. Ask an administrator about the product tier of this project (on serverless, response actions require the Endpoint Complete tier); a role grant will not enable it here.`,
+        };
+      }
       return {
         kind: 'blocked',
         message: `You do not have the '${requiredPrivilege}' endpoint privilege, so this action will be refused. Ask an administrator to grant it, or perform the action from the Security UI.`,
@@ -510,6 +534,9 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
         kind: 'result',
         result: licenseUnavailableResult(refusal.privilege, refusal.expired),
       };
+    }
+    if (refusal.kind === 'product_feature') {
+      return { kind: 'result', result: productFeatureDisabledResult(refusal.privilege) };
     }
     return { kind: 'result', result: insufficientPrivilegesResult(refusal.privilege) };
   }

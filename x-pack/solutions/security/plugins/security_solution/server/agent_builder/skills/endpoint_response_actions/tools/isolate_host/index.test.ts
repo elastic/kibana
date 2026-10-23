@@ -228,6 +228,64 @@ describe('isolateHostTool', () => {
       );
     });
 
+    it('reports product_feature_disabled when the deployment omits the response-actions feature (serverless Essentials)', async () => {
+      // On serverless Essentials every role fails `hasAuth` (the action is not
+      // product-registered) while the license is always Enterprise — so
+      // neither a grant nor a license explains the refusal; the product
+      // configuration does. The default license mock is Enterprise, so
+      // disabling only the feature isolates it as the cause.
+      mockEndpointAppContextService.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
+      mockEndpointAppContextService.getProductFeaturesService = jest.fn(
+        () =>
+          ({ isEnabled: () => false } as unknown as ReturnType<
+            EndpointAppContextService['getProductFeaturesService']
+          >)
+      ) as unknown as EndpointAppContextService['getProductFeaturesService'];
+
+      const mockResponseActionsClient = { isolate: jest.fn() };
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.error).toBe('product_feature_disabled');
+      expect(data.privilege).toBe('canIsolateHost');
+      expect(data.productFeature).toBe('endpoint_response_actions');
+      expect((data.message as string).includes('product')).toBe(true);
+      expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
+    });
+
+    it('tells the confirmation card the product configuration blocks isolation', async () => {
+      mockEndpointAppContextService.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
+      mockEndpointAppContextService.getProductFeaturesService = jest.fn(
+        () =>
+          ({ isEnabled: () => false } as unknown as ReturnType<
+            EndpointAppContextService['getProductFeaturesService']
+          >)
+      ) as unknown as EndpointAppContextService['getProductFeaturesService'];
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'my-host' },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('This action will be refused');
+      expect(card?.message).toContain('product configuration');
+      expect(card?.message).not.toContain('Ask an administrator to grant');
+      // A refused card must record a refusal, never a confirmed target.
+      expect(toolCallState.value).toEqual(
+        expect.objectContaining({ kind: 'refused', action: 'isolate' })
+      );
+    });
+
     it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
