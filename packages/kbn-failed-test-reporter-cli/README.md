@@ -5,7 +5,9 @@ CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 ## `node scripts/report_failed_tests`
 
 Reads the JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per
-failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job.
+failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job. With
+`--consistent-failure-issues owner/name` it also files one `Failing … suite` issue per test file
+whose tests started failing every attempt build after build, by the Scout test events.
 
 Issues for FTR, Jest (unit and integration) and Scout tests link to the
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
@@ -20,36 +22,6 @@ the Slack message. If that issue is a flaky suite issue (see below), the failure
 as on a per-test issue: the count goes up, the issue is reopened if needed and a comment names the
 test and the build. The count is kept in the issue's `failed-test` metadata; the daily report's
 body and `flaky-test-suite` metadata are left alone.
-
-### Consistent failures
-
-A test that fails every attempt build after build is a break, not a flaky test. With
-`--consistent-failure-issues owner/name` (default `CONSISTENT_FAILURE_ISSUES_REPO`; unset,
-nothing is checked) the reporter looks the job's failures up in the Scout test events, over the
-last 4 days of the job's pipeline and branch, per config and target, and files one issue per
-test file that broke. `kibana-on-merge` sets `CONSISTENT_FAILURE_ISSUES_REPO: elastic/appex-qa-ai`,
-so for now these issues go to the sandbox while the per-test issues keep being filed in
-`elastic/kibana`. The check writes nothing when the per-test issues do not either
-(`--no-github-update`, or `REPORT_FAILED_TESTS_TO_GITHUB` unset), and an error in it is logged
-without failing the job's reporting.
-
-A test fails consistently when its latest builds, at least two, all failed on every attempt and
-the 20 builds before all passed; a new test with no history before counts too. A build counts
-only once a second attempt of the job reported the test; a build with a single failing report,
-the current one included until its retry runs, is left out. The check runs on every failing
-attempt and finds a break again on every build while it lasts; the issue filed the first time
-keeps it from filing another.
-
-The issue is titled `Failing <Framework> [UI|API] suite: <title>`, with the `describe` block the
-breaking tests share or the file name, and labelled like a flaky suite issue (`failed-test` plus
-the owning teams' labels, in `elastic/kibana` only). The body names the failing builds, the last
-passing build and the compare link between the two commits, the tests with their history links
-and the last failure's message, and ends with `flaky-test-suite` metadata (file, title,
-framework, test ids, branch, pipeline), so `/skip` and `report_flaky_test_issues` treat it as a
-suite issue. A file gets no new issue when an open `failed-test` issue of the target repository
-is already about the suite, or every breaking test has a per-test issue; other issues that
-mention the file are linked as possibly related. A job files at most 5 issues, most broken tests
-first: more than that looks like a systemic failure rather than a break.
 
 ## `node scripts/report_flaky_test_issues`
 
