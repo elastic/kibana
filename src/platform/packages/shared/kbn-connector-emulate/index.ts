@@ -23,7 +23,11 @@ export type {
   EmulatorControlHandler,
 } from './src/server/emulator_control';
 export { createEmulatorMcpHandler } from './src/server/emulator_mcp';
-export type { EmulatorMcpOptions, McpControlEmulator } from './src/server/emulator_mcp';
+export type {
+  EmulatorMcpOptions,
+  McpControlEmulator,
+  McpControlRequest,
+} from './src/server/emulator_mcp';
 export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
