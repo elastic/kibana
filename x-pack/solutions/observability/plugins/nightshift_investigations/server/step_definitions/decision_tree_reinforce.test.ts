@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/agent-builder-common';
+import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
-import { DECISION_TREE_LEARNING_TOOL_IDS } from '../tools/decision_tree';
+import {
+  DECISION_TREE_LEARNING_TOOL_IDS,
+  DECISION_TREE_SUBMIT_TOOL_ID,
+} from '../tools/decision_tree';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
 import { decisionTreeReinforceStepDefinition } from './decision_tree_reinforce';
 
@@ -62,7 +65,9 @@ describe('decisionTreeReinforceStepDefinition', () => {
       tool_results: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'toolu_1', results }],
     });
 
-    expect(output).toEqual({ output: { message: 'Persisted 1 tree' } });
+    expect(output).toEqual({
+      output: { message: 'Persisted 1 tree', submissions_json: '[]' },
+    });
     const [{ agentId, request, agentParams, interactive, defaultConnectorId }] =
       runAgent.mock.calls[0];
     expect(agentId).toBe(NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID);
@@ -79,6 +84,38 @@ describe('decisionTreeReinforceStepDefinition', () => {
         response: { message: 'Connection pool exhausted.' },
         steps: [expect.objectContaining({ tool_call_id: 'toolu_1', results })],
       }),
+    ]);
+  });
+
+  it('returns the submit tool arguments in call order', async () => {
+    const merged = { from: ['E3'], into: 'E2' };
+    runAgent.mockResolvedValue({
+      result: {
+        round: {
+          response: { message: 'Persisted 1 tree' },
+          steps: [
+            {
+              type: ConversationRoundStepType.reasoning,
+              reasoning: 'editing',
+            },
+            {
+              type: ConversationRoundStepType.toolCall,
+              tool_id: DECISION_TREE_SUBMIT_TOOL_ID,
+              tool_call_id: 'toolu_submit',
+              params: {
+                symptom_trees: [{ tree_id: 'symptom:eql-slo-burn-rate', merged_nodes: [merged] }],
+              },
+              results: [],
+            },
+          ],
+        },
+      },
+    });
+
+    const output = await run({});
+
+    expect(JSON.parse(output.output.submissions_json)).toEqual([
+      { symptom_trees: [{ tree_id: 'symptom:eql-slo-burn-rate', merged_nodes: [merged] }] },
     ]);
   });
 

@@ -21,6 +21,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: true,
         runConnectorProbes: false,
+        runReinforcement: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
@@ -32,6 +33,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: false,
         runConnectorProbes: false,
+        runReinforcement: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: true,
       });
@@ -55,6 +57,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: true,
       runConnectorProbes: false,
+      runReinforcement: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -66,6 +69,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: false,
       runConnectorProbes: false,
+      runReinforcement: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -79,6 +83,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: true,
       runConnectorProbes: false,
+      runReinforcement: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -92,6 +97,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: false,
       runConnectorProbes: true,
+      runReinforcement: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -113,7 +119,7 @@ describe('resolveEvalSelection', () => {
     'rejects %s without credentials, even when Scout would be reused',
     (value) => {
       expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: value })).toThrow(
-        `NIGHTSHIFT_DATASETS=${value} selects trace-only, which runs investigation evals, but SANDBOX_API_KEY is required`
+        `NIGHTSHIFT_DATASETS=${value} selects trace-only, which runs agent evals, but SANDBOX_API_KEY is required`
       );
     }
   );
@@ -122,10 +128,27 @@ describe('resolveEvalSelection', () => {
     'rejects an explicit %s without credentials instead of silently running only smoke',
     (value) => {
       expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: value })).toThrow(
-        `NIGHTSHIFT_DATASETS=${value.trim()} selects all, which runs investigation evals, but SANDBOX_API_KEY is required`
+        `NIGHTSHIFT_DATASETS=${value.trim()} selects all, which runs agent evals, but SANDBOX_API_KEY is required`
       );
     }
   );
+
+  it('runs only the reinforcement micro-eval and requires sandbox credentials', () => {
+    expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'reinforcement' })).toEqual(
+      {
+        runOrca: false,
+        runSmoke: false,
+        runInvestigations: false,
+        runConnectorProbes: false,
+        runReinforcement: true,
+        smokeDatasetsRequest: undefined,
+        fellBackToSmoke: false,
+      }
+    );
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'reinforcement' })).toThrow(
+      'NIGHTSHIFT_DATASETS=reinforcement selects reinforcement, which runs agent evals, but SANDBOX_API_KEY is required'
+    );
+  });
 
   it('rejects empty list items like selectDatasets does', () => {
     expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'synthetic-smoke,,' })).toThrow(

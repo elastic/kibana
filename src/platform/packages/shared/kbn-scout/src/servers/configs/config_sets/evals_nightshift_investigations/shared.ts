@@ -63,7 +63,11 @@ const createInvestigationConfig = (
         '--xpack.agenticInvestigations.enabled=true',
         '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
-        '--xpack.nightshift_investigations.cortex.enabled=false',
+        // Decision trees require Cortex. The reinforcement micro-eval turns that on; investigation
+        // runs leave it off unless this Scout process was started with NIGHTSHIFT_DATASETS=reinforcement.
+        `--xpack.nightshift_investigations.cortex.enabled=${
+          process.env.NIGHTSHIFT_DECISION_TREES === 'true'
+        }`,
         '--xpack.nightshift_investigations.memory.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),

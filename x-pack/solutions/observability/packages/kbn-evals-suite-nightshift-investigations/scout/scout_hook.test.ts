@@ -246,6 +246,21 @@ describe('nightshift-investigations scout hook', () => {
       rmSync(shimDir, { recursive: true, force: true });
     }
   });
+  it('exports NIGHTSHIFT_DECISION_TREES only when the reinforcement micro-eval is selected', () => {
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'reinforcement' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'trace-only, reinforcement' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'trace-only' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBeUndefined();
+  });
+
   it('keeps dataset selection out of the server fingerprint', () => {
     expect(runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASET_NAME: 'first' }).output).toEqual(
       runHook(

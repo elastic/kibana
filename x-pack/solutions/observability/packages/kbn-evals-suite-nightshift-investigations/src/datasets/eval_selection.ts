@@ -15,13 +15,25 @@ export const INVESTIGATION_DATASET_ID = 'trace-only';
  */
 export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
 
-const EVAL_IDS: readonly string[] = [INVESTIGATION_DATASET_ID, CONNECTOR_PROBE_DATASET_ID];
+const EVAL_IDS: readonly string[] = [
+  INVESTIGATION_DATASET_ID,
+  CONNECTOR_PROBE_DATASET_ID,
+  REINFORCEMENT_DATASET_ID,
+];
+
+/**
+ * `NIGHTSHIFT_DATASETS` id for the reinforcement micro-eval. Opt-in: it enables Cortex so decision
+ * trees run, which the default investigation server leaves off.
+ */
+export const REINFORCEMENT_DATASET_ID = 'reinforcement';
 
 export interface EvalSelection {
   runSmoke: boolean;
   runInvestigations: boolean;
   runOrca: boolean;
   runConnectorProbes: boolean;
+  /** True only when `NIGHTSHIFT_DATASETS` lists `reinforcement`. Not part of an unset or `all` run. */
+  runReinforcement: boolean;
   /** Smoke dataset ids for `selectDatasets`; `undefined` runs them all. Unused when `runSmoke` is false. */
   smokeDatasetsRequest: string | undefined;
   /** True when an unset selection fell back to smoke because no sandbox credentials were found. */
@@ -45,6 +57,7 @@ export const resolveEvalSelection = (
       runInvestigations: false,
       runOrca: true,
       runConnectorProbes: false,
+      runReinforcement: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     };
@@ -63,7 +76,7 @@ export const resolveEvalSelection = (
     // Playwright resolves this on every run; a reused Scout server never reloads its config.
     if (!hasSandbox) {
       throw new Error(
-        `NIGHTSHIFT_DATASETS=${requested} selects ${selected}, which runs investigation evals, but ` +
+        `NIGHTSHIFT_DATASETS=${requested} selects ${selected}, which runs agent evals, but ` +
           'SANDBOX_API_KEY is required; use --profile dev-vault, export SANDBOX_*, or select only smoke datasets.'
       );
     }
@@ -77,6 +90,7 @@ export const resolveEvalSelection = (
       runSmoke: true,
       runInvestigations: hasSandbox,
       runConnectorProbes: false,
+      runReinforcement: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: !hasSandbox,
     };
@@ -84,15 +98,18 @@ export const resolveEvalSelection = (
 
   const smokeIds = ids.filter((id) => !EVAL_IDS.includes(id));
   const runInvestigations = ids.includes(INVESTIGATION_DATASET_ID);
+  const runReinforcement = ids.includes(REINFORCEMENT_DATASET_ID);
   if (runInvestigations) requiresSandbox(INVESTIGATION_DATASET_ID);
   const runConnectorProbes = ids.includes(CONNECTOR_PROBE_DATASET_ID);
   if (runConnectorProbes) requiresSandbox(CONNECTOR_PROBE_DATASET_ID);
+  if (runReinforcement) requiresSandbox(REINFORCEMENT_DATASET_ID);
 
   return {
     runOrca: false,
     runSmoke: smokeIds.length > 0,
     runInvestigations,
     runConnectorProbes,
+    runReinforcement,
     smokeDatasetsRequest: smokeIds.length > 0 ? smokeIds.join(',') : undefined,
     fellBackToSmoke: false,
   };
