@@ -13,8 +13,8 @@ import type { ScoutServerConfig } from '../../../../../types';
 /**
  * Scout config for Threat Intel enrichment evals.
  *
- * Extends the tracing config and enables AlertZero (plus its required soft-off
- * deps) so `/internal/threat_intel/*` registers. `searchInferenceEndpoints`
+ * Extends the tracing config. AlertZero and its runtime deps are on by default
+ * in stateful, so `/internal/threat_intel/*` registers. `searchInferenceEndpoints`
  * stays on: Agent Builder requires it, AlertZero requires Agent Builder, and
  * the suite pins AlertZero Efficient/Frontier Model Settings to the model under
  * test instead of relying on the genAi default fallback.
@@ -22,15 +22,4 @@ import type { ScoutServerConfig } from '../../../../../types';
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_threat_intel
  */
-export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
-  kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
-    serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
-      '--xpack.alertzero.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
-    ],
-  },
-};
+export const servers: ScoutServerConfig = evalsTracingConfig;

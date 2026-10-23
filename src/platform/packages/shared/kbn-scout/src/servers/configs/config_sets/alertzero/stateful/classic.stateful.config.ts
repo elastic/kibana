@@ -13,10 +13,9 @@ import { defaultConfig } from '../../default/stateful/base.config';
 /**
  * Scout server config for tests that need `alertzero` and the plugins it depends on.
  *
- * `alertzero` gates threat-intel supply. `agenticInvestigations` and `proposals` are required
- * by alertzero and default off; without them Kibana cascade-disables alertzero and the TI
- * routes never register. The API tests of all three live under `test/scout_alertzero`
- * (security_solution, agentic_investigations, proposals).
+ * `alertzero` gates threat-intel supply. `alertzero`, `agenticInvestigations` and `proposals`
+ * are all on by default in stateful, so no plugin flags are needed here. The API tests of all
+ * three live under `test/scout_alertzero` (security_solution, agentic_investigations, proposals).
  *
  * Usage:
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alertzero
@@ -27,9 +26,6 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--xpack.alertzero.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
       // Already the traditional default; pinned so a local override cannot refuse the service
       // account the Hunt Watch specs create.
       '--xpack.security.serviceAccounts.enabled=true',
