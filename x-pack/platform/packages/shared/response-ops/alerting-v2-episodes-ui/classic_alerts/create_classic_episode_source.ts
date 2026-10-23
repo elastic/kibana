@@ -33,21 +33,18 @@ export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
     label: EPISODE_SEVERITY_WARNING_LABEL,
     color: 'warning',
     sortRank: 4,
-    filterDotColor: 'textWarning',
   },
   {
     value: 'minor',
     label: EPISODE_SEVERITY_MINOR_LABEL,
     color: 'neutral',
     sortRank: 2,
-    filterDotColor: 'textNeutral',
   },
   {
     value: 'major',
     label: EPISODE_SEVERITY_MAJOR_LABEL,
     color: 'risk',
     sortRank: 6,
-    filterDotColor: 'textRisk',
   },
 ];
 
