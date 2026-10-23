@@ -168,7 +168,7 @@ const prepareLegacyVisualization = async ({
   await expect
     .poll(() => discover.getHistogramLegendLabels())
     .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-  expect(await discover.getVisualizationTitle()).toBe('Line');
+  await expect.poll(() => discover.getVisualizationTitle()).toBe('Line');
   await discover.saveSearch(sessionName);
 
   const { saved_objects: sessions } = await kbnClient.savedObjects.find<DiscoverSessionAttributes>({
@@ -205,8 +205,7 @@ const prepareLegacyVisualization = async ({
   return { sourceSession, legacyVisContext };
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/295237
-spaceTest.describe.skip(
+spaceTest.describe(
   'Discover session API — visualization persistence',
   { tag: '@local-stateful-classic' },
   () => {
@@ -233,7 +232,10 @@ spaceTest.describe.skip(
         await spaceTest.step('save a customized chart and verify a normal reload', async () => {
           await discover.writeAndSubmitEsqlQuery(ESQL_QUERY);
           await discover.changeVisualizationShape('Line');
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          // Applying the flyout doesn't switch the chart right away: it stays a Bar until the chart
+          // finishes loading the query we just submitted. On a slow machine that takes a bit,
+          // so a single read can still see "Bar". Keep checking until it says "Line".
+          await expect.poll(() => discover.getVisualizationTitle()).toBe('Line');
 
           await discover.saveSearch(sessionName);
           await page.reload();
@@ -290,7 +292,7 @@ spaceTest.describe.skip(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect.poll(() => discover.getVisualizationTitle()).toBe('Line');
           await discover.saveSearch(sessionName);
         });
 
