@@ -104,10 +104,8 @@ describe('VisTypeVegaPlugin (server)', () => {
     const schema = serverDefinition.getSchema(mockGetDrilldownsSchema);
     const query = { language: 'kql', expression: 'bytes > 1000' };
 
-    expect(schema!.parse({ ref_id: 'library-item', query })).toEqual({
-      ref_id: 'library-item',
-      query,
-    });
+    // The library item owns the query and filters.
+    expect(schema!.parse({ ref_id: 'library-item', query })).toEqual({ ref_id: 'library-item' });
     expect(schema!.parse({ spec: { format: 'hjson', value: '{}' } })).toHaveProperty('spec');
     expect(() => schema!.parse({})).toThrow();
   });

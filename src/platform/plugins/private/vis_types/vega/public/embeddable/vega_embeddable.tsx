@@ -12,7 +12,6 @@ import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
@@ -76,7 +75,6 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { toPanelFilters } from '../lib/library_draft';
-import { mergeQueries } from '../lib/merge_queries';
 import {
   createVegaLibraryClient,
   hasVegaLibraryItemWithTitle,
@@ -138,6 +136,14 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
     }) => Promise<JSX.Element | undefined>;
   };
 
+// The library item owns the query and filters of a by-reference panel.
+const getPanelSearch = (
+  state: VegaEmbeddableState
+): { query?: Query | AggregateQuery; filters?: Filter[] } =>
+  'ref_id' in state
+    ? {}
+    : { query: toStoredQuery(state.query), filters: toPanelFilters(state.filters) };
+
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
@@ -185,10 +191,7 @@ export const vegaEmbeddableFactory = (
       query?: Query | AggregateQuery;
       filters?: Filter[];
     }>(
-      {
-        query: toStoredQuery(initialState.query),
-        filters: toPanelFilters(initialState.filters),
-      },
+      getPanelSearch(initialState),
       {
         query: undefined,
         filters: undefined,
@@ -244,30 +247,14 @@ export const vegaEmbeddableFactory = (
       };
     };
 
-    // Unlinking keeps what the library item and the panel each apply: the filters of both, and
-    // one query, plus a filter when their query languages differ.
+    // Unlinking copies the library item's spec, query, and filters into the panel.
     const serializeByValue = (): VegaByValueState => {
       const libraryItem = libraryItem$.getValue();
-      const panelSearch = serializePanelSearch();
       if (!libraryItem) {
-        return { ...serializePanelOwnedState(), ...panelSearch, spec: spec$.getValue() };
+        return { ...serializePanelOwnedState(), ...serializePanelSearch(), spec: spec$.getValue() };
       }
-      const { query, filters: queryFilters } = mergeQueries(
-        libraryItem.query,
-        panelSearch.query,
-        getEsQueryConfig(core.uiSettings)
-      );
-      const filters = [
-        ...(libraryItem.filters ?? []),
-        ...(panelSearch.filters ?? []),
-        ...queryFilters,
-      ];
-      return {
-        ...serializePanelOwnedState(),
-        query,
-        filters: filters.length ? filters : undefined,
-        spec: libraryItem.spec,
-      };
+      const { spec, query, filters } = libraryItem;
+      return { ...serializePanelOwnedState(), query, filters, spec };
     };
 
     // Linking moves the panel query and filters to the new library item.
@@ -281,7 +268,7 @@ export const vegaEmbeddableFactory = (
       parentApi,
       serializeState: () =>
         isByReference
-          ? { ...serializeByReference(libraryId), ...serializePanelSearch() }
+          ? serializeByReference(libraryId)
           : { ...serializePanelOwnedState(), ...serializePanelSearch(), spec: spec$.getValue() },
       anyStateChange$: merge(
         titleManager.anyStateChange$,
@@ -307,10 +294,7 @@ export const vegaEmbeddableFactory = (
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         drilldownsManager.reinitializeState(nextState);
-        panelSearchStateManager.reinitializeState({
-          query: toStoredQuery(nextState.query),
-          filters: toPanelFilters(nextState.filters),
-        });
+        panelSearchStateManager.reinitializeState(getPanelSearch(nextState));
         if ('spec' in nextState) spec$.next(nextState.spec);
       },
     });

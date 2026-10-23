@@ -280,7 +280,7 @@ describe('vegaEmbeddableFactory', () => {
     expect(api.filters$.getValue()).toEqual([
       expect.objectContaining({ $state: { store: FilterStateStore.APP_STATE } }),
     ]);
-    expect(api.serializeState().filters).toEqual([panelFilter]);
+    expect((api.serializeState() as VegaByValueState).filters).toEqual([panelFilter]);
   });
 
   it.each([
@@ -751,11 +751,8 @@ describe('vegaEmbeddableFactory', () => {
       });
     };
 
-    it('renders the library item with the dashboard, library and panel query and filters', async () => {
-      const { api } = await buildByReference({
-        query: { language: 'kql', expression: 'response : 404' },
-        filters: [panelFilter],
-      });
+    it('renders the library item with the dashboard and library query and filters', async () => {
+      const { api } = await buildByReference();
 
       expect(coreStart.http.get).toHaveBeenCalledWith('/api/vega/library-item', expect.any(Object));
       expect(api.defaultTitle$?.getValue()).toBe('Library title');
@@ -765,26 +762,19 @@ describe('vegaEmbeddableFactory', () => {
             query: [
               { language: 'kuery', query: '' },
               { language: 'kuery', query: 'bytes > 1000' },
-              { language: 'kuery', query: 'response : 404' },
             ],
-            filters: [
-              expect.objectContaining({ query: { match_phrase: { 'geo.dest': 'US' } } }),
-              expect.objectContaining({ query: { match_phrase: { extension: 'css' } } }),
-            ],
+            filters: [expect.objectContaining({ query: { match_phrase: { 'geo.dest': 'US' } } })],
             visParams: { spec: '{ mark: bar }' },
           })
         )
       );
-      // Only the panel's own query and filters are published, and the spec isn't serialized.
-      expect(api.query$.getValue()).toEqual({ language: 'kuery', query: 'response : 404' });
-      expect(api.serializeState()).toEqual(
-        expect.objectContaining({
-          ref_id: 'library-item',
-          query: { language: 'kql', expression: 'response : 404' },
-          filters: [panelFilter],
-        })
-      );
+      // The library item owns the spec, query and filters, so none are published or serialized.
+      expect(api.query$.getValue()).toBeUndefined();
+      expect(api.filters$.getValue()).toBeUndefined();
+      expect(api.serializeState()).toEqual(expect.objectContaining({ ref_id: 'library-item' }));
       expect(api.serializeState()).not.toHaveProperty('spec');
+      expect(api.serializeState()).not.toHaveProperty('query');
+      expect(api.serializeState()).not.toHaveProperty('filters');
     });
 
     it('fails to build when the library item is missing', async () => {
@@ -830,12 +820,8 @@ describe('vegaEmbeddableFactory', () => {
       expect(byReferenceState).not.toHaveProperty('filters');
     });
 
-    it('merges the library item and panel query and filters when unlinked', async () => {
-      const { api } = await buildByReference({
-        title: 'Panel',
-        query: { language: 'lucene', expression: 'response:404' },
-        filters: [panelFilter],
-      });
+    it('copies the library item spec, query and filters when unlinked', async () => {
+      const { api } = await buildByReference({ title: 'Panel' });
 
       expect(await api.canUnlinkFromLibrary?.()).toBe(true);
       expect(api.getSerializedStateByValue?.()).toEqual(
@@ -843,11 +829,7 @@ describe('vegaEmbeddableFactory', () => {
           title: 'Panel',
           spec: libraryItem.spec,
           query: libraryItem.query,
-          filters: [
-            libraryFilter,
-            panelFilter,
-            { type: 'dsl', dsl: { query: { query_string: { query: 'response:404' } } } },
-          ],
+          filters: [libraryFilter],
         })
       );
     });

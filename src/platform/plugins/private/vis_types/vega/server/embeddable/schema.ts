@@ -26,22 +26,25 @@ const getPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
     ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
-    query: vegaQuerySchema.meta({
-      description:
-        'Panel-level KQL or Lucene query. Applied together with the dashboard query, and the library item query for by-reference panels, to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
-    }),
-    filters: vegaFiltersSchema.meta({
-      description:
-        'Panel-level filters. Applied together with the dashboard filters, and the library item filters for by-reference panels, to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
-    }),
   });
 
 const getVegaByValueEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   getPanelSchema(getDrilldownsSchema)
-    .extend({ spec: vegaSpecSchema })
+    .extend({
+      query: vegaQuerySchema.meta({
+        description:
+          'Panel-level KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
+      }),
+      filters: vegaFiltersSchema.meta({
+        description:
+          'Panel-level filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
+      }),
+      spec: vegaSpecSchema,
+    })
     // Strip unknown keys for forward-compatible additive changes in this public contract.
     .strip();
 
+// The library item owns the query and filters, like the spec.
 const getVegaByReferenceEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   getPanelSchema(getDrilldownsSchema)
     .extend({
