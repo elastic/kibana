@@ -39,8 +39,7 @@ import type {
   AppHeaderShareAction,
 } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
@@ -67,6 +66,7 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
+import { useHeaderMode } from './use_header_mode';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
@@ -152,15 +152,10 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
-  const chromeStyle = useChromeStyle();
-  // Header rendering mode:
-  //  - `inline`: next chrome, standalone -> we render `AppHeader`.
-  //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
-  //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
-  const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = chromeStyle === 'project';
-  const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
+  const headerMode = useHeaderMode({
+    isEmbeddedViaUrl: Boolean(embedSettings?.isEmbeddedViaUrl),
+    isHostedByApp: Boolean(setCustomHeaderActionMenu),
+  });
 
   const { onAppLeave } = useDashboardMountContext();
 
@@ -509,6 +504,9 @@ export function InternalDashboardTopNav({
             experimentalDashboardAiAction={experimentalDashboardAiAction}
           />
         </DashboardFavoritesProvider>
+      )}
+      {headerMode === 'embedded' && visibilityProps.showTopNavMenu && (
+        <AppMenuComponent config={appMenuConfig} />
       )}
       {headerMode === 'legacy' && (
         <LegacyDashboardHeader
