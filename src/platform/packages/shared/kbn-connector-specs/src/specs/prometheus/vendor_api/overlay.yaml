@@ -1,0 +1,38 @@
+overlay: 1.0.0
+info:
+  title: Prometheus HTTP API corrections
+  version: 1.0.0
+actions:
+  - target: >-
+      $.paths['/series'].get.parameters[2]
+    description: &repeated >-
+      The spec sets explode false (comma-separated), but
+      https://prometheus.io/docs/prometheus/latest/querying/api/ documents these array parameters as
+      repeated keys, e.g. "match[]=<series_selector>: Repeated series selector argument" and
+      "rule_name[]=<string>: ... If the parameter is repeated, rules with any of the provided names
+      are returned", with the example
+      "curl -g 'http://localhost:9090/api/v1/series?' --data-urlencode 'match[]=up' --data-urlencode 'match[]=process_start_time_seconds{job=\"prometheus\"}'".
+    update:
+      explode: true
+  - target: $.paths['/label/{name}/values'].get.parameters[3]
+    description: *repeated
+    update:
+      explode: true
+  - target: $.paths['/rules'].get.parameters[1,2,3,4]
+    description: *repeated
+    update:
+      explode: true
+  - target: >-
+      $.paths['/query','/query_range'].get.parameters[*].schema.oneOf[?@.format == 'duration'].format
+    description: &duration >-
+      The spec gives durations JSON Schema's "duration" format (ISO 8601, e.g. PT15S), but
+      https://prometheus.io/docs/prometheus/latest/querying/api/ defines "<duration>" as "the subset
+      of Prometheus float literals using time units"
+      (https://prometheus.io/docs/prometheus/latest/querying/basics/#float-literals-and-time-durations),
+      e.g. step=15s in its query_range example.
+    remove: true
+  - target: >-
+      $.paths['/query','/query_range'].get.parameters[?@.name == 'step' || @.name == 'timeout' || @.name == 'lookback_delta'].schema.oneOf[0]
+    description: *duration
+    update:
+      pattern: ^([0-9]+(ms|[smhdwy]))+$

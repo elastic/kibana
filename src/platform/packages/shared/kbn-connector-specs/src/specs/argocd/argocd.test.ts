@@ -85,6 +85,7 @@ describe('ArgocdConnector', () => {
         method: 'GET',
         url: `${API_URL}/api/v1/applications`,
         params: { project: 'default' },
+        paramsSerializer: { indexes: null },
       });
       expect(result).toEqual({ items: [] });
     });
@@ -270,6 +271,19 @@ describe('ArgocdConnector', () => {
         })
       );
     });
+
+    it('sends the project in the request body', async () => {
+      mockRequest.mockResolvedValue(okResponse({}));
+
+      await ArgocdConnector.actions.syncApplication.handler(mockContext, {
+        name: 'demo',
+        project: 'default',
+      });
+
+      const [options] = mockRequest.mock.calls[0];
+      expect(options.data).toEqual(expect.objectContaining({ project: 'default' }));
+      expect(options).not.toHaveProperty('params');
+    });
   });
 
   describe('listClusters', () => {
@@ -296,6 +310,21 @@ describe('ArgocdConnector', () => {
 
       expect(result.items[0].config).toEqual({});
       expect(result.items[0].config).not.toHaveProperty('bearerToken');
+    });
+
+    it('filters by server URL', async () => {
+      mockRequest.mockResolvedValue(okResponse({ items: [] }));
+
+      await ArgocdConnector.actions.listClusters.handler(mockContext, {
+        id: 'https://kubernetes.default.svc',
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `${API_URL}/api/v1/clusters`,
+          params: { server: 'https://kubernetes.default.svc' },
+        })
+      );
     });
   });
 
