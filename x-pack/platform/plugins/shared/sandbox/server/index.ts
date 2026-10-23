@@ -32,6 +32,9 @@
  *
  * When `enabled` is `false` (the default), or when `api_key` is absent,
  * `SandboxPluginStart.getSession` throws a descriptive error for every call.
+ *
+ * For local development, `node scripts/mock_sandbox.js` (`@kbn/mock-sandbox`) runs a Docker-backed
+ * stand-in for sandbox-api and writes the matching settings to `config/kibana.mock_sandbox.yml`.
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';

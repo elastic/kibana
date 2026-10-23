@@ -3254,6 +3254,9 @@ importers:
       '@kbn/sandbox-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/sandbox
+      '@kbn/sandbox-proto':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-sandbox-proto
       '@kbn/saved-object-export-transforms-plugin':
         specifier: workspace:*
         version: link:src/platform/test/plugin_functional/plugins/saved_object_export_transforms
@@ -5724,6 +5727,9 @@ importers:
       '@kbn/mock-idp-utils':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-mock-idp-utils
+      '@kbn/mock-sandbox':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-mock-sandbox
       '@kbn/moon':
         specifier: workspace:*
         version: link:packages/kbn-moon
@@ -9136,6 +9142,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-mcp-client: {}
 
+  x-pack/platform/packages/shared/kbn-mock-sandbox: {}
+
   x-pack/platform/packages/shared/kbn-nightshift-ai: {}
 
   x-pack/platform/packages/shared/kbn-profiler-cli: {}
@@ -9145,6 +9153,8 @@ importers:
   x-pack/platform/packages/shared/kbn-proposals-ui: {}
 
   x-pack/platform/packages/shared/kbn-sample-parser: {}
+
+  x-pack/platform/packages/shared/kbn-sandbox-proto: {}
 
   x-pack/platform/packages/shared/kbn-search-index-documents: {}
 

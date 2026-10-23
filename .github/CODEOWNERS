@@ -1128,11 +1128,13 @@ x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
+x-pack/platform/packages/shared/kbn-mock-sandbox @elastic/nightshift
 x-pack/platform/packages/shared/kbn-nightshift-ai @elastic/nightshift
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-proposals-common @elastic/security-solution
 x-pack/platform/packages/shared/kbn-proposals-ui @elastic/security-solution
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
+x-pack/platform/packages/shared/kbn-sandbox-proto @elastic/nightshift
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/nightshift
