@@ -96,10 +96,10 @@ describe('useGetTimelinesByIds', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(mockPost).toHaveBeenCalledTimes(1);
 
-    await act(async () => {
-      await result.current.refetch();
+    act(() => {
+      result.current.refetch();
     });
 
-    expect(mockPost).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(2));
   });
 });
