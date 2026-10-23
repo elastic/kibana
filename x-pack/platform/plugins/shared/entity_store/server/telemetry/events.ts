@@ -123,6 +123,26 @@ export interface EntitySourceStateEventPayload {
 
 export type CollectionOutcomePayload = 'complete' | 'timed_out' | 'failed' | 'skipped';
 
+export interface LogCoverageEventPayload {
+  namespace: string;
+  outcome: 'complete' | 'partial' | 'timed_out' | 'failed' | 'skipped';
+  windowHours: number;
+  durationMs: number;
+  totalDocs?: number;
+  sampleRate?: number;
+  sampledDocs?: number;
+  sources?: Array<{
+    source: string;
+    sampledDocs: number;
+    withUserName: number;
+    withUserEmail: number;
+    withUserId: number;
+    withHostId: number;
+    withHostName: number;
+    matchesCreationRule: number;
+  }>;
+}
+
 export interface EntityMetadataEventPayload {
   namespace: string;
   entityType: string;
@@ -1170,6 +1190,56 @@ export const ENTITY_STORE_ENTITY_METADATA_EVENT = {
   },
 } as const satisfies EventTypeOpts<EntityMetadataEventPayload>;
 
+export const ENTITY_STORE_LOG_COVERAGE_EVENT = {
+  eventType: 'entity_store_log_coverage',
+  schema: {
+    namespace: keywordField('Kibana space the entity store belongs to (e.g. "default")'),
+    outcome: keywordField(
+      '"complete", "partial", "timed_out", "failed" or "skipped". Fields below are omitted when the probe did not get that far'
+    ),
+    windowHours: countField('Hours of logs the probe looked at'),
+    durationMs: countField('How long the probe took in milliseconds'),
+    totalDocs: {
+      type: 'long',
+      _meta: { optional: true, description: 'Log documents in the window, from an exact count' },
+    },
+    sampleRate: {
+      type: 'float',
+      _meta: {
+        optional: true,
+        description: 'Fraction of the window logs that was sampled (0 to 1)',
+      },
+    },
+    sampledDocs: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description: 'Sampled documents in the sources below (the top 30 sources only)',
+      },
+    },
+    sources: {
+      type: 'array',
+      items: {
+        properties: {
+          source: keywordField(
+            'Value of entity.source (event.module, event.dataset or data_stream.dataset), "unknown" when none is set'
+          ),
+          sampledDocs: countField('Sampled documents from this source'),
+          withUserName: countField('Sampled documents with a non-empty user.name'),
+          withUserEmail: countField('Sampled documents with a non-empty user.email'),
+          withUserId: countField('Sampled documents with a non-empty user.id'),
+          withHostId: countField('Sampled documents with a non-empty host.id'),
+          withHostName: countField('Sampled documents with a non-empty host.name'),
+          matchesCreationRule: countField(
+            'Sampled documents that could create a user entity: they pass the identity filter and are local-user or asset events'
+          ),
+        },
+      },
+      _meta: { optional: true, description: 'Top 30 sources by sampled documents' },
+    },
+  },
+} as const satisfies EventTypeOpts<LogCoverageEventPayload>;
+
 export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
   eventType: 'entity_store_health_report',
   schema: {
@@ -1255,6 +1325,7 @@ const events = [
   ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
   ENTITY_STORE_SOURCE_STATE_EVENT,
   ENTITY_STORE_ENTITY_METADATA_EVENT,
+  ENTITY_STORE_LOG_COVERAGE_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -1281,6 +1352,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT.eventType]: ResolutionRulesStateEvent;
   [ENTITY_STORE_SOURCE_STATE_EVENT.eventType]: EntitySourceStateEventPayload;
   [ENTITY_STORE_ENTITY_METADATA_EVENT.eventType]: EntityMetadataEventPayload;
+  [ENTITY_STORE_LOG_COVERAGE_EVENT.eventType]: LogCoverageEventPayload;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
