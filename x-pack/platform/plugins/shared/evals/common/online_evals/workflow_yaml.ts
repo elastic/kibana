@@ -26,7 +26,7 @@ const WORKFLOW_NAME_TEMPLATE = '{{ workflow.name }}';
 const EVALUATE_RESULTS_TEMPLATE = '${{ steps.evaluate.output.results }}';
 const EVALUATE_ERRORS_TEMPLATE = '${{ steps.evaluate.output.errors }}';
 const RETRY_CONDITION_TEMPLATE =
-  '${{ error.details.status != 400 and error.details.status != 403 }}';
+  '${{ error.details.status == blank or error.details.status == 404 or error.details.status == 429 or error.details.status >= 500 }}';
 
 // Keep module-level values plain literals, and don't import the step definitions for these
 // ids: either makes the bundler keep this module (and zod) in the plugin's page-load bundle
@@ -38,8 +38,9 @@ const PERSIST_ONLINE_SCORES_STEP_TYPE = 'ai.evals.persistOnlineScores';
 const buildStepOnFailure = () => ({
   retry: {
     'max-attempts': 3,
-    // 400 and 403 from the evals routes mean a misconfigured monitor (for example a deleted
-    // evaluator) or missing privileges; retrying every trace would only delay the run.
+    // Only transient failures: no HTTP status (network errors, or every evaluator failing),
+    // 404 (trace still being exported), 429 and 5xx. Other 4xx responses mean a misconfigured
+    // monitor or an invalid request, so retrying every trace would only delay the run.
     condition: RETRY_CONDITION_TEMPLATE,
     delay: '5s',
     strategy: 'exponential',
