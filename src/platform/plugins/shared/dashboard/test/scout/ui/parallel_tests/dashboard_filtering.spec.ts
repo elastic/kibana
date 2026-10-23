@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DebugState } from '@elastic/charts';
 import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 import { spaceTest, tags } from '@kbn/scout';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
@@ -17,46 +16,16 @@ import {
   DASHBOARD_FILTERING_BYTES_TITLE,
   DASHBOARD_FILTERING_NESTED_TITLE,
 } from '../constants';
+import {
+  getChartDebugState,
+  getPieSliceCount,
+  getSliceCountForAllPies,
+  filterOnPieSlice,
+  POLL_OPTIONS,
+} from '../../utils/chart_debug';
 import { findImportedSavedObjectId } from '../../utils/migration_smoke_helpers';
 
-const PIE_CHART = 'partitionVisChart';
 const ANIMAL_SOUNDS_PIE_TITLE = 'Rendering Test: animal sounds pie';
-const POLL_OPTIONS = { timeout: 30_000 };
-
-const getChartDebugState = async (page: ScoutPage, chartTestSubj: string, nth = 0) => {
-  const status = page.testSubj.locator(chartTestSubj).nth(nth).locator('.echChartStatus');
-  // The chart may be absent, still mounting or showing an empty state, so don't wait for it
-  if ((await status.count()) === 0) return undefined;
-  const debugState = await status.getAttribute('data-ech-debug-state');
-  return debugState ? (JSON.parse(debugState) as DebugState) : undefined;
-};
-
-const getPieSlices = (debugState?: DebugState) => debugState?.partition?.[0]?.partitions ?? [];
-
-const getPieSliceCount = async (page: ScoutPage) =>
-  getPieSlices(await getChartDebugState(page, PIE_CHART)).length;
-
-const getSliceCountForAllPies = async (page: ScoutPage) => {
-  const pieCount = await page.testSubj.locator(PIE_CHART).count();
-  let total = 0;
-  for (let i = 0; i < pieCount; i++) {
-    total += getPieSlices(await getChartDebugState(page, PIE_CHART, i)).length;
-  }
-  return total;
-};
-
-const filterOnPieSlice = async (page: ScoutPage, name: string) => {
-  const pie = page.testSubj.locator(PIE_CHART);
-  const slice = getPieSlices(await getChartDebugState(page, PIE_CHART)).find(
-    ({ name: sliceName }) => String(sliceName) === name
-  );
-  expect(slice, `pie slice "${name}" should exist`).toBeDefined();
-  await pie.click({ position: { x: slice!.coords[0], y: slice!.coords[1] } });
-  const actionsMenu = page.testSubj.locator('multipleActionsContextMenu');
-  if (await actionsMenu.isVisible()) {
-    await actionsMenu.getByText('Apply filter to current view').click();
-  }
-};
 
 const getTableRowCount = async (page: ScoutPage) => {
   const table = page.testSubj.locator('tbvChart').first();

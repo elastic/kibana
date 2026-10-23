@@ -95,3 +95,9 @@ export const DASHBOARD_FILTERING_ARCHIVE =
   'src/platform/plugins/shared/dashboard/test/scout/ui/fixtures/dashboard_filtering.json';
 export const DASHBOARD_FILTERING_BYTES_TITLE = 'Dashboard filtering: bytes';
 export const DASHBOARD_FILTERING_NESTED_TITLE = 'Dashboard filtering: nested';
+
+export const DASHBOARD_FILTER_BAR_ARCHIVE =
+  'src/platform/plugins/shared/dashboard/test/scout/ui/fixtures/dashboard_filter_bar.json';
+export const DASHBOARD_FILTER_BAR_EMPTY_TITLE = 'Filter bar: empty';
+export const DASHBOARD_FILTER_BAR_PIE_TITLE = 'Filter bar: pie';
+export const DASHBOARD_BAD_FILTERS_TITLE = 'dashboard with bad filters';

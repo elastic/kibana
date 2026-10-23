@@ -45,10 +45,7 @@ spaceTest.describe('Dashboard full screen mode', { tag: tags.deploymentAgnostic 
     });
 
     await spaceTest.step('option is available in view mode', async () => {
-      // The loaded dashboard reports unsaved changes in edit mode, so exiting without saving
-      // opens a "Reset dashboard?" confirm modal
-      await dashboard.saveChangesToExistingDashboard();
-      await dashboard.clickCancelOutOfEditMode();
+      await dashboard.clickCancelOutOfEditMode({ discardChanges: true });
       expect(await dashboard.hasFullscreenMenuItem()).toBe(true);
     });
 
