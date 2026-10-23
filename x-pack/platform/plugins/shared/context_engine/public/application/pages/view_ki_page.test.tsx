@@ -6,15 +6,17 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
+import { uiPrivileges } from '../../../common/features';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { getAiIndexKnowledgeIndicatorsPath, getViewKiPath, CONTEXT_ENGINE_PATHS } from '../paths';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
@@ -23,6 +25,9 @@ import { ViewKiPage } from './view_ki_page';
 const mockUseKi = jest.fn();
 const mockNavigateToContextEngine = jest.fn();
 const mockCreateContextEngineUrl = jest.fn((path: string) => path);
+const mockUpdateMutate = jest.fn();
+const mockDeleteMutateAsync = jest.fn();
+const mockRestoreMutateAsync = jest.fn();
 
 jest.mock('../hooks/use_ki', () => ({
   useKi: (args: { aiIndexId: string; kiId: string; index: string; enabled?: boolean }) =>
@@ -36,6 +41,21 @@ jest.mock('../hooks/use_navigation', () => ({
   }),
 }));
 
+jest.mock('../hooks/use_ki_mutations', () => ({
+  useUpdateKi: () => ({
+    mutate: mockUpdateMutate,
+    isLoading: false,
+  }),
+  useDeleteKi: () => ({
+    mutateAsync: mockDeleteMutateAsync,
+    isLoading: false,
+  }),
+  useRestoreKi: () => ({
+    mutateAsync: mockRestoreMutateAsync,
+    isLoading: false,
+  }),
+}));
+
 const defaultKi: GetKiResponse = {
   id: 'ki-1',
   document: {
@@ -45,11 +65,21 @@ const defaultKi: GetKiResponse = {
   },
 };
 
-const renderViewKiPage = (initialEntry: string) => {
+const renderViewKiPage = (
+  initialEntry: string,
+  { canWrite = false }: { canWrite?: boolean } = {}
+) => {
   const services = coreMock.createStart();
   services.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    contextEngine: {
+      show: true,
+      [uiPrivileges.write]: canWrite,
+    },
+  };
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   return render(
@@ -74,6 +104,10 @@ const renderViewKiPage = (initialEntry: string) => {
   );
 };
 
+const openHeaderOverflowMenu = async () => {
+  fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+};
+
 describe('ViewKiPage', () => {
   beforeEach(() => {
     mockUseKi.mockReturnValue({
@@ -81,6 +115,8 @@ describe('ViewKiPage', () => {
       isLoading: false,
       error: undefined,
     });
+    mockDeleteMutateAsync.mockResolvedValue(undefined);
+    mockRestoreMutateAsync.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -268,5 +304,72 @@ describe('ViewKiPage', () => {
     renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.queryByTestId('contextViewKiStatusBadge')).not.toBeInTheDocument();
+  });
+
+  it('does not show delete or edit actions without write privilege', () => {
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+
+    expect(screen.queryByTestId('contextViewKiDeleteButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextViewKiEditButton')).not.toBeInTheDocument();
+  });
+
+  it('shows delete primary action and edit overflow when user can write', async () => {
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
+      canWrite: true,
+    });
+
+    expect(await screen.findByTestId('contextViewKiDeleteButton')).toBeInTheDocument();
+
+    await openHeaderOverflowMenu();
+    expect(screen.getByTestId('contextViewKiEditButton')).toBeInTheDocument();
+  });
+
+  it('opens delete confirm modal and calls delete mutation on confirm', async () => {
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
+      canWrite: true,
+    });
+
+    fireEvent.click(await screen.findByTestId('contextViewKiDeleteButton'));
+    expect(screen.getByTestId('contextViewKiDeleteConfirmModal')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(mockDeleteMutateAsync).toHaveBeenCalled();
+    });
+    expect(mockNavigateToContextEngine).not.toHaveBeenCalled();
+  });
+
+  it('shows restore primary action when KI is deleted and user can write', async () => {
+    mockUseKi.mockReturnValue({
+      ki: {
+        ...defaultKi,
+        document: {
+          ...defaultKi.document,
+          governance: { lifecycle: { status: 'deleted' } },
+        },
+      },
+      isLoading: false,
+      error: undefined,
+    });
+
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
+      canWrite: true,
+    });
+
+    expect(await screen.findByTestId('contextViewKiRestoreButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextViewKiDeleteButton')).not.toBeInTheDocument();
+  });
+
+  it('enters content edit mode from the header overflow menu', async () => {
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
+      canWrite: true,
+    });
+
+    await openHeaderOverflowMenu();
+    fireEvent.click(screen.getByTestId('contextViewKiEditButton'));
+
+    expect(screen.getByTestId('contextViewKiContentEditing')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextViewKiDeleteButton')).toBeInTheDocument();
   });
 });
