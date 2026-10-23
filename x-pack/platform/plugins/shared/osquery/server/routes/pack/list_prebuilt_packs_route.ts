@@ -9,26 +9,20 @@ import type { IRouter } from '@kbn/core/server';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { API_VERSIONS } from '../../../common/constants';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
-import { PLUGIN_ID } from '../../../common';
+import {
+  PLUGIN_ID,
+  PREBUILT_PACK_UNAVAILABLE_REASON,
+  type PrebuiltPackListItem,
+  type PrebuiltPackUnavailableReason,
+} from '../../../common';
 import type { PackSavedObject } from '../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-
-/**
- * Prebuilt pack assets come from the osquery_manager package (a few dozen), and a space holds
- * about one copy of each, so both reads are bounded without paging. Custom packs are never read.
- */
-const MAX_ASSETS = 1000;
-const MAX_PACKS = 1000;
-
-export interface PrebuiltPackListItem {
-  asset_id: string;
-  /** Package-defined name, the stable handle the `osquery.runPack` step stores. */
-  asset_name: string;
-  pack_id: string;
-  name: string;
-  description?: string;
-  query_count: number;
-}
+import {
+  assertSavedObjectPageComplete,
+  loadPrebuiltPackAssets,
+  PREBUILT_PACK_LOOKUP_PAGE_SIZE,
+  PrebuiltPackLookupLimitError,
+} from './find_prebuilt_pack_asset';
 
 /**
  * Fields this route reads. `name` is optional because `packSchemaV1` allows a missing name,
@@ -40,13 +34,28 @@ interface ListedPrebuiltPack {
   queries?: PackSavedObject['queries'];
 }
 
+interface DraftPackRow {
+  asset_id: string;
+  asset_name: string;
+  pack_id: string;
+  name: string;
+  description?: string;
+  query_count: number;
+}
+
 /**
  * Lists the prebuilt packs loaded in the current space with their `osquery-pack-asset` id and
  * package name; the name is the stable, readable identifier the `osquery.runPack` step stores.
  * The assets status route needs `writePacks`, and the public find route does not expose asset
  * references. Reads the assets first, then only the packs that reference one of them.
- * An asset with more than one space copy is omitted: resolve returns 409 for it, and the step
- * stores the package name, so neither copy is a safe picker choice.
+ *
+ * Assets are read with the internal saved-objects client on purpose. `packs_read` does not grant
+ * read on `osquery-pack-asset` (`register_features.ts`), so a user with only that privilege could
+ * not read asset ids and names through saved objects. The response is limited to those ids and
+ * names, which are public package metadata.
+ *
+ * A row with `unavailable_reason` is not a safe picker choice: resolve returns 409, and loading
+ * prebuilt packs again does not remove the extra copy.
  */
 export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -67,17 +76,26 @@ export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryA
           request
         );
 
-        const assets = await spaceScopedClient.find<{ name?: string }>({
-          type: packAssetSavedObjectType,
-          perPage: MAX_ASSETS,
-          fields: ['name'],
-        });
+        let assets;
+        try {
+          assets = await loadPrebuiltPackAssets(spaceScopedClient);
+        } catch (error) {
+          if (error instanceof PrebuiltPackLookupLimitError) {
+            return response.customError({ statusCode: 500, body: { message: error.message } });
+          }
+
+          throw error;
+        }
+
         const assetNameById = new Map(
-          assets.saved_objects.flatMap((asset) =>
-            asset.attributes?.name ? [[asset.id, asset.attributes.name] as const] : []
-          )
+          assets.flatMap((asset) => (asset.name ? [[asset.id, asset.name] as const] : []))
         );
         if (assetNameById.size === 0) return response.ok({ body: { data: [] } });
+
+        const nameCounts = new Map<string, number>();
+        for (const assetName of assetNameById.values()) {
+          nameCounts.set(assetName, (nameCounts.get(assetName) ?? 0) + 1);
+        }
 
         const found = await spaceScopedClient.find<ListedPrebuiltPack>({
           type: packSavedObjectType,
@@ -86,41 +104,68 @@ export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryA
             id,
           })),
           hasReferenceOperator: 'OR',
-          perPage: MAX_PACKS,
+          perPage: PREBUILT_PACK_LOOKUP_PAGE_SIZE,
           // `name` is mapped as `text`, so it cannot be a sort field: sort the small list here.
           fields: ['name', 'description', 'queries'],
         });
 
-        const rows: PrebuiltPackListItem[] = found.saved_objects.flatMap((pack) => {
+        try {
+          assertSavedObjectPageComplete(
+            packSavedObjectType,
+            found.saved_objects.length,
+            found.total
+          );
+        } catch (error) {
+          if (error instanceof PrebuiltPackLookupLimitError) {
+            return response.customError({ statusCode: 500, body: { message: error.message } });
+          }
+
+          throw error;
+        }
+
+        const draftsByAssetId = new Map<string, DraftPackRow[]>();
+        for (const pack of found.saved_objects) {
           const assetId = pack.references.find(
             ({ type, id }) => type === packAssetSavedObjectType && assetNameById.has(id)
           )?.id;
           const assetName = assetId && assetNameById.get(assetId);
-          if (!assetId || !assetName) return [];
+          if (!assetId || !assetName) continue;
 
-          return [
-            {
-              asset_id: assetId,
-              asset_name: assetName,
-              pack_id: pack.id,
-              // A missing pack name must not reach `localeCompare` or the picker label.
-              name: pack.attributes.name ?? assetName,
-              ...(pack.attributes.description ? { description: pack.attributes.description } : {}),
-              query_count: Array.isArray(pack.attributes.queries)
-                ? pack.attributes.queries.length
-                : Object.keys(pack.attributes.queries ?? {}).length,
-            },
-          ];
-        });
-
-        const copiesByAssetId = new Map<string, number>();
-        for (const row of rows) {
-          copiesByAssetId.set(row.asset_id, (copiesByAssetId.get(row.asset_id) ?? 0) + 1);
+          const draft: DraftPackRow = {
+            asset_id: assetId,
+            asset_name: assetName,
+            pack_id: pack.id,
+            // A missing pack name must not reach `localeCompare` or the picker label.
+            name: pack.attributes.name ?? assetName,
+            ...(pack.attributes.description ? { description: pack.attributes.description } : {}),
+            query_count: Array.isArray(pack.attributes.queries)
+              ? pack.attributes.queries.length
+              : Object.keys(pack.attributes.queries ?? {}).length,
+          };
+          const group = draftsByAssetId.get(assetId) ?? [];
+          group.push(draft);
+          draftsByAssetId.set(assetId, group);
         }
 
-        const data = rows.filter((row) => copiesByAssetId.get(row.asset_id) === 1);
+        const data: PrebuiltPackListItem[] = [...draftsByAssetId.values()].map((group) => {
+          const [representative] = [...group].sort((a, b) => a.pack_id.localeCompare(b.pack_id));
+          const copies = group.length;
+          const nameIsShared = (nameCounts.get(representative.asset_name) ?? 0) > 1;
+          let unavailableReason: PrebuiltPackUnavailableReason | undefined;
+          if (nameIsShared) {
+            unavailableReason = PREBUILT_PACK_UNAVAILABLE_REASON.duplicateAssetName;
+          } else if (copies > 1) {
+            unavailableReason = PREBUILT_PACK_UNAVAILABLE_REASON.duplicateCopies;
+          }
 
-        data.sort((a, b) => a.name.localeCompare(b.name));
+          return {
+            ...representative,
+            copies,
+            ...(unavailableReason ? { unavailable_reason: unavailableReason } : {}),
+          };
+        });
+
+        data.sort((a, b) => a.name.localeCompare(b.name) || a.asset_id.localeCompare(b.asset_id));
 
         return response.ok({ body: { data } });
       }

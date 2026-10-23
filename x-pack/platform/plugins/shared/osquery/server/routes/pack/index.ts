@@ -27,7 +27,7 @@ export const initPackRoutes = (router: IRouter, context: OsqueryAppContext) => {
   readPackRoute(router, context);
   updatePackRoute(router, context);
 
-  // Only the `osquery.runPack` workflow step calls these.
+  // The `osquery.runPack` workflow step and its editor picker call these.
   if (context.experimentalFeatures.workflowsExtensionsEnabled) {
     resolvePrebuiltPackRoute(router, context);
     listPrebuiltPacksRoute(router, context);

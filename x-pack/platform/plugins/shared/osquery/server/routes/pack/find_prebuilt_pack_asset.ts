@@ -6,48 +6,82 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { escapeQuotes } from '@kbn/es-query';
 import { packAssetSavedObjectType } from '../../../common/types';
 
-const PER_PAGE = 100;
+/**
+ * Package assets are a few dozen. One page is the whole set; a larger `total` means the
+ * page was truncated and a name match against it could resolve the wrong asset.
+ */
+export const PREBUILT_PACK_LOOKUP_PAGE_SIZE = 1000;
+
+export class PrebuiltPackLookupLimitError extends Error {
+  constructor(savedObjectType: string, returned: number, total: number) {
+    super(
+      `Prebuilt pack lookup stopped because ${savedObjectType} results were truncated (returned ${returned} of ${total})`
+    );
+    this.name = 'PrebuiltPackLookupLimitError';
+  }
+}
+
+export interface PrebuiltPackAsset {
+  id: string;
+  name?: string;
+}
+
+/** Throws when a saved-object `find` page is shorter than `total`, so callers do not treat a truncated page as the full set. */
+export const assertSavedObjectPageComplete = (
+  savedObjectType: string,
+  returned: number,
+  total: number | undefined
+): void => {
+  if (typeof total === 'number' && total > returned) {
+    throw new PrebuiltPackLookupLimitError(savedObjectType, returned, total);
+  }
+};
+
+/**
+ * Loads every `osquery-pack-asset`. Callers match an id or package name in memory.
+ * `name` is mapped as `text` with no keyword subfield, so a phrase filter also hits
+ * longer names that contain the phrase.
+ *
+ * Pass the internal saved-objects client. `packs_read` does not grant read on
+ * `osquery-pack-asset` (`register_features.ts`). The list route returns only ids and
+ * package names, which are public package metadata.
+ */
+export const loadPrebuiltPackAssets = async (
+  soClient: Pick<SavedObjectsClientContract, 'find'>
+): Promise<PrebuiltPackAsset[]> => {
+  const found = await soClient.find<{ name?: string }>({
+    type: packAssetSavedObjectType,
+    perPage: PREBUILT_PACK_LOOKUP_PAGE_SIZE,
+    fields: ['name'],
+  });
+
+  assertSavedObjectPageComplete(packAssetSavedObjectType, found.saved_objects.length, found.total);
+
+  return found.saved_objects.map((asset) => ({
+    id: asset.id,
+    ...(asset.attributes?.name ? { name: asset.attributes.name } : {}),
+  }));
+};
 
 /**
  * Finds a prebuilt pack asset by its saved-object id (`osquery_manager-<uuid>`) or by its
  * package-defined name (for example `forensic-persistence`). Assets are space-agnostic and the
- * name is the readable, stable handle workflow YAML uses. Returns the asset id, `undefined` when
- * nothing matches exactly, or `'ambiguous'` when more than one asset has the name.
+ * name is the readable, stable handle workflow YAML uses. An id match wins when another asset
+ * uses that string as its name. Returns the asset id, `undefined` when nothing matches exactly,
+ * or `'ambiguous'` when more than one asset has the name.
  */
 export const findPrebuiltPackAssetId = async (
-  soClient: Pick<SavedObjectsClientContract, 'get' | 'find'>,
+  soClient: Pick<SavedObjectsClientContract, 'find'>,
   idOrName: string
 ): Promise<string | undefined | 'ambiguous'> => {
-  try {
-    const asset = await soClient.get(packAssetSavedObjectType, idOrName);
+  const assets = await loadPrebuiltPackAssets(soClient);
+  const byId = assets.find((asset) => asset.id === idOrName);
+  if (byId) return byId.id;
 
-    return asset.id;
-  } catch (error) {
-    if (!SavedObjectsErrorHelpers.isNotFoundError(error)) throw error;
-  }
+  const byName = assets.filter((asset) => asset.name === idOrName);
+  if (byName.length > 1) return 'ambiguous';
 
-  // `name` is mapped as `text` (no keyword subfield): the filter is a phrase match that also hits
-  // longer names containing the phrase, so read every match and keep only exact names.
-  const exact: string[] = [];
-  for (let page = 1; ; page++) {
-    const found = await soClient.find<{ name?: string }>({
-      type: packAssetSavedObjectType,
-      filter: `${packAssetSavedObjectType}.attributes.name: "${escapeQuotes(idOrName)}"`,
-      fields: ['name'],
-      perPage: PER_PAGE,
-      page,
-    });
-    found.saved_objects.forEach((asset) => {
-      if (asset.attributes.name === idOrName) exact.push(asset.id);
-    });
-
-    if (exact.length > 1) return 'ambiguous';
-    if (found.saved_objects.length < PER_PAGE || page * PER_PAGE >= found.total) break;
-  }
-
-  return exact[0];
+  return byName[0]?.id;
 };
