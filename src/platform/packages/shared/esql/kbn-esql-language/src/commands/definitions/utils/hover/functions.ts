@@ -35,7 +35,7 @@ function formatTypesList(types: Set<string>, maxTypesToShow?: number): string {
 
     const displayedTypes = sortedTypes.slice(0, maxTypesToShow);
     return `${displayedTypes.join(typeSeparator)}${i18n.translate(
-      'kbn-esql-language.esql.hover.functions.moreTypes',
+      'esqlLanguage.esql.hover.functions.moreTypes',
       {
         defaultMessage: `{typeSeparator}…+{remainingCount} more`,
         values: { remainingCount, typeSeparator },

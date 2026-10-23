@@ -141,6 +141,7 @@ export class DetectionClient {
       idField: FIELD_DETECTION_ID,
       idValues: detectionIds,
       where: detectionFilter(),
+      limit: detectionIds.length,
     });
     return { hits: await this.withDerivedProcessed(hits) };
   }
