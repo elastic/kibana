@@ -32,7 +32,7 @@ const row = (overrides: Record<string, unknown>) => ({
   failed: 0,
   recovered: 0,
   skipped: 0,
-  retries: null,
+  attempts: null,
   last_at: '2026-10-16T10:00:00.000Z',
   build_url: 'https://buildkite.com/elastic/kibana-on-merge/builds/1',
   commit: 'abc',
@@ -80,21 +80,22 @@ describe('buildRecentRunsQuery', () => {
     );
   });
 
-  it('records whether a retried job reported the test, and what the test and config are', () => {
+  it('records how many job attempts reported the test, and what the test and config are', () => {
     const query = buildRecentRunsQuery(scope, ['ftr'], ['test-1']);
 
-    expect(query).toContain('retries = MAX(TO_INTEGER(buildkite.retry_count))');
+    expect(query).toContain('attempts = COUNT_DISTINCT(TO_INTEGER(buildkite.retry_count))');
     expect(query).toContain('suite_title = MAX(suite.title.keyword)');
     expect(query).toContain('config_category = MAX(test_run.config.category)');
   });
 });
 
 describe('fetchRecentRuns', () => {
-  it('returns each test and setup with its runs per build, oldest first, settled by a retry', async () => {
+  it('returns each test and setup with its runs per build, oldest first, settled by a second attempt', async () => {
     const { client } = mockEs([
-      row({ build: 3, passed: 0, failed: 2, retries: 1, commit: 'ccc' }),
+      row({ build: 3, passed: 0, failed: 2, attempts: 2, commit: 'ccc' }),
       row({ build: 1 }),
-      row({ build: 2, passed: 0, failed: 1, retries: 0 }),
+      row({ build: 2, passed: 0, failed: 1, attempts: 1 }),
+      row({ build: 4, passed: 0, failed: 1, attempts: 1 }),
       row({
         build: 1,
         target_mode: 'serverless-search',
@@ -122,6 +123,8 @@ describe('fetchRecentRuns', () => {
           expect.objectContaining({ build: 1, passed: 1, settled: false, commit: 'abc' }),
           expect.objectContaining({ build: 2, failed: 1, settled: false }),
           expect.objectContaining({ build: 3, failed: 2, settled: true, commit: 'ccc' }),
+          // one report from a retried job, after a lost agent: another attempt may follow
+          expect.objectContaining({ build: 4, failed: 1, settled: false }),
         ],
       },
       {

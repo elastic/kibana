@@ -47,7 +47,14 @@ export interface TestSetupRuns {
 const TESTS_PER_QUERY = 5;
 
 /**
- * Per build, test and setup, how the test's runs went and whether a retried job reported it,
+ * Test jobs retry once on a test failure, on top of the retries for a lost agent, so the second
+ * attempt that reports a test is the last one that can. A single report, even from a retried
+ * job, may still be followed by another attempt.
+ */
+const ATTEMPTS_TO_SETTLE = 2;
+
+/**
+ * Per build, test and setup, how the test's runs went and how many job attempts reported it,
  * for the given tests of one execution model, with the suite title and config category the
  * events record for them.
  */
@@ -77,7 +84,7 @@ export const buildRecentRunsQuery = (
       ' failed = SUM(failed),' +
       ' recovered = SUM(recovered),' +
       ' skipped = SUM(skipped),' +
-      ' retries = MAX(TO_INTEGER(buildkite.retry_count)),' +
+      ' attempts = COUNT_DISTINCT(TO_INTEGER(buildkite.retry_count)),' +
       ' last_at = MAX(@timestamp),' +
       ' build_url = MAX(buildkite.build.url),' +
       ' commit = MAX(buildkite.commit),' +
@@ -104,7 +111,7 @@ interface RecentRunRow extends Record<string, unknown> {
   failed: number;
   recovered: number;
   skipped: number;
-  retries: number | null;
+  attempts: number | null;
   last_at: string;
   build_url: string | null;
   commit: string | null;
@@ -124,9 +131,9 @@ const chunk = <T>(values: readonly T[], size: number): T[][] =>
  * recovered on a retry, oldest build first.
  *
  * Tests are queried in batches, per execution model, since Playwright and the other frameworks
- * record outcomes differently. A build is marked settled only when a retried job reported the
- * test; the caller settles the rest. Throws when a query hits the row limit, as a cut-off history
- * would pass for a shorter one.
+ * record outcomes differently. A build is marked settled only when a second job attempt reported
+ * the test; the caller settles the rest. Throws when a query hits the row limit, as a cut-off
+ * history would pass for a shorter one.
  */
 export const fetchRecentRuns = async (
   es: ESClient,
@@ -170,7 +177,7 @@ export const fetchRecentRuns = async (
       failed: row.failed,
       recovered: row.recovered,
       skipped: row.skipped,
-      settled: (row.retries ?? 0) > 0,
+      settled: (row.attempts ?? 0) >= ATTEMPTS_TO_SETTLE,
     });
     bySetup.set(key, entry);
   }

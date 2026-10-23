@@ -21,8 +21,8 @@ export interface BuildRun {
   recovered: number;
   skipped: number;
   /**
-   * Whether no further attempt can report the test: a retried job already did, the build has
-   * finished, or the job does not retry on failure.
+   * Whether no further attempt can report the test: the job's last allowed attempt already did,
+   * the build has finished, or the job does not retry on failure.
    */
   settled: boolean;
 }
@@ -30,8 +30,9 @@ export interface BuildRun {
 export type BuildVerdict = 'passed' | 'recovered' | 'failed' | 'pending' | 'skipped';
 
 /**
- * What one build says about the test. A build whose only attempt failed is pending until it
- * settles: a retry may still decide whether the test failed every attempt or recovered.
+ * What one build says about the test. A build in which the test has only failed so far is
+ * pending until it settles: a retry may still decide whether it failed every attempt or
+ * recovered.
  */
 export const verdictOf = (run: BuildRun): BuildVerdict => {
   if (run.passed > 0) {
