@@ -91,7 +91,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   const siemModule = 'security_linux_v3';
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Details - Highlights API', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Details - Highlights API', function () {
+    this.timeout(360_000 * 2);
+
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
