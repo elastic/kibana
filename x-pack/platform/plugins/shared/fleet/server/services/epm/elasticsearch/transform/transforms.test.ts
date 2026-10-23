@@ -1636,7 +1636,7 @@ _meta:
     (esClient.transform.putTransform.mock.calls[0] as unknown as any[])[1];
 
   const putTransformPayload = () =>
-    (esClient.transform.putTransform.mock.calls[0] as unknown as any[])[0];
+    (esClient.transform.putTransform.mock.calls[0] as unknown as any[])[0].body;
 
   beforeEach(() => {
     appContextMock = createAppContextStartContractMock();

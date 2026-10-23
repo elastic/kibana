@@ -21,10 +21,11 @@ export default function (providerContext: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
 
-  // The remediation is about a Space-scoped, non-superuser package manager, so uploads run as a
-  // user holding only Fleet/Integrations privileges in the default Space and no Elasticsearch
-  // index privileges at all. That is what makes the privileges check below meaningful.
-  const uploader = testUsers.fleet_all_int_all_default_space_only;
+  // The remediation is about a non-superuser package manager, so uploads run as a user holding
+  // only Fleet/Integrations privileges and no Elasticsearch index privileges at all. That is what
+  // makes the privileges check below meaningful. On 8.19 without space awareness, Fleet
+  // privileges must be granted in all Spaces, so the default-Space-only user cannot be created.
+  const uploader = testUsers.fleet_all_int_all;
 
   const pkgName = 'transform_identity_test';
   const pkgVersion = '1.0.0';
@@ -128,10 +129,7 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
-      // The second argument is required: setupTestUsers skips
-      // fleet_all_int_all_default_space_only unless space awareness is requested, and without it
-      // the uploader below does not exist and every upload 401s.
-      await setupTestUsers(security, true);
+      await setupTestUsers(security);
     });
 
     // Wait until the process-wide upload rate-limit (10 s) has expired. The probe uses a
