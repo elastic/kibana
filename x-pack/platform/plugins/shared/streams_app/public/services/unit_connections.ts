@@ -29,6 +29,7 @@ import {
   readEntryIds,
   readRoutes,
   replaceUnit,
+  unionSignals,
   usedComponentIds,
   type PipelineConfig,
   type RouteRule,
@@ -181,7 +182,12 @@ const replacePipelineConfig = (unit: Unit, pipelineIndex: number, config: Pipeli
     )
   );
 
-const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit => {
+const writePipeline = (
+  unit: Unit,
+  pipelineIndex: number,
+  config: PipelineConfig,
+  supportedTelemetry?: UnitPipeline['supported_telemetry']
+): Unit => {
   const pipelines = unit.unit.pipelines.flatMap((pipeline, index) => {
     if (index !== pipelineIndex) {
       return [pipeline];
@@ -189,7 +195,13 @@ const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig
     if (!pipelineForwards(config)) {
       return [];
     }
-    return [{ ...pipeline, config }];
+    return [
+      {
+        ...pipeline,
+        config,
+        ...(supportedTelemetry ? { supported_telemetry: [...supportedTelemetry] } : {}),
+      },
+    ];
   });
   return replacePipelines(unit, pipelines);
 };
@@ -377,9 +389,6 @@ export const canConnectSourceToDestination = (
     return true;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  if (fit !== TELEMETRY_FIT.unknown && !sharesSignal(fit, pipeline.supported_telemetry)) {
-    return false;
-  }
   return !pipelineUsesRoutes(pipeline) || !catchAllBlocksDestination(readRoutes(pipeline.config));
 };
 
@@ -400,15 +409,20 @@ export const connectSourceToDestination = (
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
   const sources = readEntryIds(pipeline.config, PIPELINE_ENTRY.sources);
+  // The pipeline has no processors, so widening its signals for the new line is safe.
+  const nextTelemetry = unionSignals(
+    pipeline.supported_telemetry,
+    pipelineTelemetry(unit, sourceId, destinationId)
+  );
   if (pipelineUsesRoutes(pipeline)) {
     const routes = addDestinationToRoutes(readRoutes(pipeline.config), destinationId);
     if (sources.length === 1) {
-      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes));
+      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes), nextTelemetry);
     }
     return appendSourcePipeline(
       detachSource(unit, pipelineIndex, sourceId),
       sourceId,
-      pipeline.supported_telemetry,
+      nextTelemetry,
       [{ name: PIPELINE_ENTRY.routes, value: routes }]
     );
   }
@@ -420,13 +434,14 @@ export const connectSourceToDestination = (
       withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, [
         ...destinations,
         destinationId,
-      ])
+      ]),
+      nextTelemetry
     );
   }
   return appendSourcePipeline(
     detachSource(unit, pipelineIndex, sourceId),
     sourceId,
-    pipeline.supported_telemetry,
+    nextTelemetry,
     [{ name: PIPELINE_ENTRY.destinations, value: [...destinations, destinationId] }]
   );
 };

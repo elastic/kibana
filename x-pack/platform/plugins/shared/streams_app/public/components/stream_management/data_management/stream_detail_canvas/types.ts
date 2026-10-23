@@ -12,6 +12,7 @@ import type {
   UnitEdgeForwarding,
   UnitEdgeProcessingTarget,
 } from '../../../../services/unit_graph';
+import type { DestinationSignal } from '../../../streams_layout/destinations/types';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
@@ -20,22 +21,20 @@ export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
   sourceId?: string;
-  unconfiguredNodeId?: string;
-  configurationLabel?: string;
   title: string;
   subtitle: string;
   iconType?: IconType;
+  signals?: DestinationSignal[];
 }
 
 export interface DestinationNodeData extends Record<string, unknown> {
   title: string;
   subtitle?: string;
   streamName?: string;
-  hasProcessing?: boolean;
-  onProcessingClick?: (streamName: string) => void;
   destinationId?: string;
-  unconfiguredNodeId?: string;
-  configurationLabel?: string;
+  signals?: DestinationSignal[];
+  indexCount?: number;
+  targetedIndexNames?: string[];
 }
 
 export interface ProcessingNodeData extends Record<string, unknown> {

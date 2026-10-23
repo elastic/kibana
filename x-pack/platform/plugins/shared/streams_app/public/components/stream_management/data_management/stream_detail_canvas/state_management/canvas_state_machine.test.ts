@@ -52,6 +52,8 @@ const startCanvas = (
   unit: Unit = loadedUnit()
 ) => {
   const core = coreMock.createStart();
+  // The destinations machine resolves each destination's indices when it loads.
+  core.http.fetch.mockResolvedValue({ destinations: {} });
   const machine = canvasStateMachine.provide(
     createCanvasMachineImplementations({
       core,
@@ -62,7 +64,7 @@ const startCanvas = (
       apiKeyGenerationDeps: { streamsRepositoryClient: createStreamsRepositoryClient(core) },
       loadUnitDefinition: async () => unit,
       persistUnitDefinition,
-      createHistoryRef: { current: { hold: () => {}, commit: () => {}, discard: () => {} } },
+      createHistoryRef: { current: { hold: () => {}, reset: () => {}, discard: () => {} } },
     })
   );
   const canvas = createActor(machine, { input: defaultCanvasUrlState }).start();

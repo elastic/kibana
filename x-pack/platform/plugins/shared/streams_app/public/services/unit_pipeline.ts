@@ -48,6 +48,12 @@ export const readRoutes = (config: PipelineConfig): RouteRule[] =>
 export const pipelineForwards = (config: PipelineConfig): boolean =>
   config.some(({ name }) => name === PIPELINE_ENTRY.destinations || name === PIPELINE_ENTRY.routes);
 
+/** `current` followed by the signals of `added` it does not have yet. */
+export const unionSignals = (
+  current: readonly UnitSignal[],
+  added: readonly UnitSignal[]
+): UnitSignal[] => [...current, ...added.filter((signal) => !current.includes(signal))];
+
 /** Signals in both lists; an unset `subset` selects every signal. */
 export const intersectSignals = (
   signals: readonly UnitSignal[],

@@ -7,9 +7,9 @@
 
 import type { EdgeTypes, NodeTypes } from '@xyflow/react';
 import { AnimatedEdge } from './edges/animated_edge';
-import { SourceNode } from './nodes/source_node';
 import { DestinationNode } from './nodes/destination_node';
 import { ProcessingNode } from './nodes/processing_node';
+import { SourceNode } from './nodes/source_node';
 import {
   ANIMATED_EDGE_TYPE,
   DESTINATION_NODE_TYPE,

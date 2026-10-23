@@ -12,6 +12,7 @@
     "@kbn/i18n",
     "@kbn/slo-schema",
     { "path": "../../../../typings/deps/@types/lodash" },
-    { "path": "../../../../typings/deps/@types/io-ts" }
+    { "path": "../../../../typings/deps/@types/io-ts" },
+    "@kbn/slo-constants"
   ]
 }

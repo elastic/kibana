@@ -68,7 +68,7 @@ export const Grafana: ConnectorSpec = {
   metadata: {
     id: '.grafana',
     displayName: 'Grafana',
-    description: i18n.translate('core.kibanaConnectorSpecs.grafana.metadata.description', {
+    description: i18n.translate('connectorSpecs.grafana.metadata.description', {
       defaultMessage:
         'Read Grafana-managed alerts and rules, manage silences, post dashboard annotations, and search dashboards and notification configuration.',
     }),
@@ -86,16 +86,13 @@ export const Grafana: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.grafana.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.grafana.auth.bearer.token.label', {
                 defaultMessage: 'Service Account Token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.grafana.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Grafana service account token (Administration > Users and access > Service accounts). Grafana Cloud tokens are typically prefixed glsa_.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.grafana.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Grafana service account token (Administration > Users and access > Service accounts). Grafana Cloud tokens are typically prefixed glsa_.',
+              }),
             },
           },
         },
@@ -108,10 +105,10 @@ export const Grafana: ConnectorSpec = {
       baseUrl: UISchemas.url('https://your-stack.grafana.net')
         .describe('Grafana instance URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.grafana.config.baseUrl.label', {
+          label: i18n.translate('connectorSpecs.grafana.config.baseUrl.label', {
             defaultMessage: 'Grafana instance URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.grafana.config.baseUrl.helpText', {
+          helpText: i18n.translate('connectorSpecs.grafana.config.baseUrl.helpText', {
             defaultMessage:
               'The base URL of your Grafana instance, e.g. https://your-stack.grafana.net (Grafana Cloud) or https://grafana.example.com (self-hosted).',
           }),
@@ -123,10 +120,10 @@ export const Grafana: ConnectorSpec = {
         .describe('Organization ID to scope requests to, for multi-org Grafana instances')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.grafana.config.orgId.label', {
+          label: i18n.translate('connectorSpecs.grafana.config.orgId.label', {
             defaultMessage: 'Organization ID',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.grafana.config.orgId.helpText', {
+          helpText: i18n.translate('connectorSpecs.grafana.config.orgId.helpText', {
             defaultMessage:
               "Optional. Sent as the X-Grafana-Org-Id header on every request. Leave empty to use the token's default organization.",
           }),
@@ -488,7 +485,7 @@ export const Grafana: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.grafana.test.description', {
+    description: i18n.translate('connectorSpecs.grafana.test.description', {
       defaultMessage: 'Verifies the Grafana connection by listing configured alert rules',
     }),
     handler: async (ctx) => {

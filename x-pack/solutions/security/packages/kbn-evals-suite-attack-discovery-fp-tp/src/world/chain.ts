@@ -269,8 +269,9 @@ const buildAttack = (
 
 /**
  * Renders a chain into the documents one run seeds. The attack is stamped at
- * `FP_TP_BASE_TIME` and the chain starts an hour earlier, so every event falls
- * inside the analysis's ±2h raw-event window.
+ * `FP_TP_BASE_TIME` and the chain starts an hour earlier. Each alert's
+ * `kibana.alert.original_time` is its latest cited event plus a short delay,
+ * and that field is the anchor the analysis searches ±2h around.
  */
 export const buildChainWorld = (
   definition: FpTpChainDefinition,
