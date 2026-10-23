@@ -88,7 +88,11 @@ import {
   getAllowedSearchAiLakeInstallPackagesIfEnabled,
   getFilteredInstallPackages,
 } from '../filtered_packages';
-import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
+import {
+  isAgentlessEnabled,
+  isAgentlessSimulated,
+  isOnlyAgentlessIntegration,
+} from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
@@ -594,7 +598,8 @@ async function installPackageFromRegistry({
     }
 
     // only allow install of agentless packages if agentless is enabled, or if using force flag
-    const agentlessEnabled = isAgentlessEnabled();
+    // PROTOTYPE: agentless isn't gated (isAgentlessSimulated)
+    const agentlessEnabled = isAgentlessEnabled() || isAgentlessSimulated();
     const agentlessOnlyIntegration = isOnlyAgentlessIntegration(packageInfo);
     if (!agentlessEnabled && agentlessOnlyIntegration) {
       if (!force) {

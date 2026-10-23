@@ -174,7 +174,7 @@ import {
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
-import { isAgentlessEnabled } from './utils/agentless';
+import { isAgentlessEnabled, isAgentlessSimulated } from './utils/agentless';
 import { isSentinelPolicyVersionEnabled } from './utils/sentinel_policy_version';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
@@ -2826,7 +2826,8 @@ class AgentPolicyService {
     }
   }
   private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
-    if (!isAgentlessEnabled() && agentPolicy?.supports_agentless) {
+    // PROTOTYPE: agentless isn't gated (isAgentlessSimulated)
+    if (!isAgentlessEnabled() && agentPolicy?.supports_agentless && !isAgentlessSimulated()) {
       throw new AgentPolicyInvalidError(
         'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
       );

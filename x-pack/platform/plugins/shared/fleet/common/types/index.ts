@@ -134,6 +134,8 @@ export interface FleetConfigType {
     taskInterval?: string;
   };
   integrationsHomeOverride?: string;
+  /** PROTOTYPE: agentless not gated by the deployment, see server/config.ts */
+  prototypeAgentlessEverywhere?: boolean;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
   integrationRollbackTTL?: string;

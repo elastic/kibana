@@ -65,6 +65,7 @@ export const config: PluginConfigDescriptor = {
       privateElasticsearchHost: true,
     },
     integrationsHomeOverride: true,
+    prototypeAgentlessEverywhere: true,
     prereleaseEnabledByDefault: true,
     hideDashboards: true,
     isAirGapped: true,
@@ -508,6 +509,10 @@ export const config: PluginConfigDescriptor = {
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),
+      // PROTOTYPE: agentless isn't gated by the deployment. Where agentless isn't really available
+      // (local, self-managed), agentless policies are created but nothing is deployed. On by default
+      // in the prototype; config mocks in tests leave it unset, so stock behavior is tested.
+      prototypeAgentlessEverywhere: schema.boolean({ defaultValue: true }),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),
       installIntegrationsKnowledge: schema.maybe(schema.boolean()),

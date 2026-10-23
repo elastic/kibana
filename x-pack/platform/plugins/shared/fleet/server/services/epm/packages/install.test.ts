@@ -144,6 +144,7 @@ jest.mock('../../utils/agentless', () => {
   return {
     isAgentlessEnabled: jest.fn(),
     isOnlyAgentlessIntegration: jest.fn(),
+    isAgentlessSimulated: jest.fn().mockReturnValue(false),
   };
 });
 

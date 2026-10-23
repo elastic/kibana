@@ -414,49 +414,6 @@ const METHOD_INFO: Record<SetupTechnology, { title: string; description: string 
   },
 };
 
-/**
- * PROTOTYPE: "Where to run" on review when the package supports agentless but this deployment
- * doesn't (local stack, self-managed): the managed option shows, disabled, so the choice is
- * visible. With both available, the "how" step handles it.
- */
-export const WhereToRunSection: React.FC<{ title: string }> = ({ title }) => (
-  <div data-test-subj="groupWizardWhereToRun">
-    <SectionHeading title="Where to run" description={`How ${title} data gets collected.`} />
-    <EuiSpacer size="s" />
-    <EuiFlexGroup gutterSize="s" responsive={false}>
-      <EuiFlexItem>
-        <ChoiceCard
-          control="radio"
-          name="groupWizardWhereToRun"
-          title={METHOD_INFO[SetupTechnology.AGENT_BASED].title}
-          description={METHOD_INFO[SetupTechnology.AGENT_BASED].description}
-          checked
-          onChange={() => {}}
-          data-test-subj="groupWizardWhereToRun-agent"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ChoiceCard
-          control="radio"
-          name="groupWizardWhereToRun"
-          title={METHOD_INFO[SetupTechnology.AGENTLESS].title}
-          description={
-            <>
-              {METHOD_INFO[SetupTechnology.AGENTLESS].description}
-              <br />
-              Available on Elastic Cloud and Serverless
-            </>
-          }
-          checked={false}
-          disabled
-          onChange={() => {}}
-          data-test-subj="groupWizardWhereToRun-agentless"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </div>
-);
-
 export const HowStep: React.FC<{
   methods: SetupTechnology[];
   method: SetupTechnology;
@@ -691,8 +648,6 @@ export const ReviewStep: React.FC<{
   showMethod: boolean;
   /** Agent policy choice, when the "how" step is hidden. */
   agentPolicySection?: React.ReactNode;
-  /** PROTOTYPE: package supports agentless, this deployment doesn't - show it disabled. */
-  showManagedUnavailable?: boolean;
   agentPolicyLabel?: string;
   integrationSettings: React.ReactNode;
   onEdit: (step: string) => void;
@@ -828,7 +783,7 @@ export const ReviewStep: React.FC<{
         {props.showMethod &&
           row(
             'Deployment',
-            props.method === SetupTechnology.AGENTLESS ? 'Agentless' : 'Elastic Agent',
+            props.method === SetupTechnology.AGENTLESS ? 'Managed by Elastic' : 'Elastic Agent',
             'how'
           )}
         {props.agentPolicyLabel && row('Agent policy', props.agentPolicyLabel, 'how')}
@@ -917,7 +872,6 @@ export const ReviewStep: React.FC<{
         </div>
       )}
 
-      {props.showManagedUnavailable && <WhereToRunSection title={title} />}
       {props.agentPolicySection}
       {props.integrationSettings}
     </div>

@@ -302,7 +302,9 @@ export const DetectStep: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{isAgentless ? 'Agentless' : 'Elastic Agent'}</EuiBadge>
+                <EuiBadge color="hollow">
+                  {isAgentless ? 'Managed by Elastic' : 'Elastic Agent'}
+                </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow">{getSchemaInfo(schema, schemaLabels).title}</EuiBadge>

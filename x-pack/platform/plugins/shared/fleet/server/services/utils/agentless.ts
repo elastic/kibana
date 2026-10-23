@@ -16,6 +16,14 @@ export const isAgentlessEnabled = () => {
 };
 
 /**
+ * PROTOTYPE: agentless isn't gated by the deployment. Where agentless isn't really available
+ * (local, self-managed), agentless policies are created as usual but no agentless agent is
+ * deployed, so they wait for an agent that never comes.
+ */
+export const isAgentlessSimulated = () =>
+  !isAgentlessEnabled() && appContextService.getConfig()?.prototypeAgentlessEverywhere === true;
+
+/**
  * Stable, greppable marker prefixing every legacy agentless write deprecation log
  * line, so they can be aggregated regardless of the surrounding message text.
  */

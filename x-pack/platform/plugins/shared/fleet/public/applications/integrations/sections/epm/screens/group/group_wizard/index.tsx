@@ -481,7 +481,6 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
       }
       methods={methods}
       method={method}
-      supportsAgentless={deployment.supportsAgentless}
       excludedByMethod={excludedByMethod.map((s) => s.title)}
       onMethodChange={setPickedMethod}
       showHow={showHow}
@@ -549,8 +548,6 @@ interface BodyProps {
   onSkippedAssetsChange: (packageName: string, skippedKeys: string[]) => void;
   methods: SetupTechnology[];
   method: SetupTechnology;
-  /** The selection's policy template supports agentless (whether or not the deployment does). */
-  supportsAgentless: boolean;
   /** Selected streams the chosen method can't collect. */
   excludedByMethod: string[];
   onMethodChange: (method: SetupTechnology) => void;
@@ -961,11 +958,6 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
           method={props.method}
           showMethod={props.showHow}
           agentPolicySection={!props.showHow ? agentPolicySection : undefined}
-          showManagedUnavailable={
-            !props.showHow &&
-            props.supportsAgentless &&
-            !props.methods.includes(SetupTechnology.AGENTLESS)
-          }
           agentPolicyLabel={
             props.showHow && !isAgentless
               ? props.policyMode === 'new'

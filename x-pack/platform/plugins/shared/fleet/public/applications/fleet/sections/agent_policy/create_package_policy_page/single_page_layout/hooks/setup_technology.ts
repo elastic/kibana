@@ -30,7 +30,11 @@ export const useAgentless = () => {
   const isServerless = !!cloud?.isServerlessEnabled;
   const isCloud = !!cloud?.isCloudEnabled;
 
-  const isAgentlessEnabled = (isCloud || isServerless) && config.agentless?.enabled === true;
+  // PROTOTYPE: agentless isn't gated by the deployment (`prototypeAgentlessEverywhere`, on by
+  // default). Off a hosted deployment the server creates agentless policies but deploys nothing.
+  const isAgentlessEnabled =
+    config.prototypeAgentlessEverywhere === true ||
+    ((isCloud || isServerless) && config.agentless?.enabled === true);
   const isAgentlessDefault = isAgentlessEnabled && config.agentless?.isDefault === true;
   const isAgentlessCustomIntegrationsEnabled =
     isAgentlessEnabled && config.agentless?.customIntegrations?.enabled === true;

@@ -76,35 +76,6 @@ jest.mock('../../../../../../../hooks', () => ({
   ),
 }));
 
-// PROTOTYPE: agentless on/off per test (stock hook, used by the wizard and useOnSubmit)
-const mockAgentless = { enabled: false };
-jest.mock(
-  '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
-  () => {
-    const actual = jest.requireActual(
-      '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology'
-    );
-    return {
-      ...actual,
-      useAgentless: () => {
-        const real = actual.useAgentless();
-        return mockAgentless.enabled
-          ? {
-              ...real,
-              isAgentlessEnabled: true,
-              getAgentlessStatusForPackage: (pkg: any, template?: string) => ({
-                isAgentless: jest
-                  .requireActual('../../../../../../../../common/services/agentless_policy_helper')
-                  .isAgentlessIntegration(pkg, template),
-                isDefaultDeploymentMode: false,
-              }),
-            }
-          : real;
-      },
-    };
-  }
-);
-
 jest.mock('../../../../../../fleet/services/ensure_kibana_assets_installed', () => ({
   ensurePackageKibanaAssetsInstalled: jest.fn().mockResolvedValue(undefined),
 }));
@@ -134,6 +105,8 @@ const option = (schema: string, info: PackageInfo): GroupMemberOption => ({
   isInstalled: false,
 });
 
+let prototypeAgentless = false;
+
 describe('GroupOnboardingWizard', () => {
   beforeAll(() => {
     jest.spyOn(console, 'debug').mockImplementation(() => {});
@@ -157,6 +130,8 @@ describe('GroupOnboardingWizard', () => {
     host: Partial<React.ComponentProps<typeof GroupOnboardingWizard>> = {}
   ) => {
     renderer = createIntegrationsTestRendererMock();
+    // PROTOTYPE: agentless not gated by the deployment (on by default in the prototype config)
+    renderer.config.prototypeAgentlessEverywhere = prototypeAgentless;
     renderer.startServices.data.search.search = jest.fn().mockReturnValue(of({})) as any;
     if (projectType) {
       renderer.startServices.cloud = {
@@ -365,9 +340,6 @@ describe('GroupOnboardingWizard', () => {
   });
 
   describe('deployment (agentless per policy template, stock rules)', () => {
-    afterEach(() => {
-      mockAgentless.enabled = false;
-    });
     // Nginx ECS with a template that also supports agentless; only nginx/metrics may run agentless
     const agentlessNginx = (() => {
       const info = JSON.parse(JSON.stringify(nginxPackageInfo));
@@ -387,8 +359,14 @@ describe('GroupOnboardingWizard', () => {
       members: [{ package: 'nginx', version: '3.2.2', title: 'Nginx', schema: 'ecs' }],
     };
 
-    it('deployment supports agentless: "how" step, Elastic Agent default, agentless drops disallowed inputs', async () => {
-      mockAgentless.enabled = true;
+    // PROTOTYPE: agentless isn't gated by the deployment, so the "how" step shows whenever the
+    // template supports it
+    afterEach(() => {
+      prototypeAgentless = false;
+    });
+
+    it('template supports agentless: "how" step, Elastic Agent default, agentless drops disallowed inputs', async () => {
+      prototypeAgentless = true;
       (sendGetPackageInfoByKeyForRq as jest.Mock).mockImplementation(() =>
         Promise.resolve({ item: agentlessNginx })
       );
@@ -412,22 +390,6 @@ describe('GroupOnboardingWizard', () => {
       expect(result.getByTestId('groupWizardRail-metrics')).toBeInTheDocument();
     });
 
-    it('deployment without agentless: no "how" step, managed shown disabled on review', async () => {
-      (sendGetPackageInfoByKeyForRq as jest.Mock).mockImplementation(() =>
-        Promise.resolve({ item: agentlessNginx })
-      );
-      const result = renderWizard(group, [option('ecs', agentlessNginx)]);
-      await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
-      expect(result.queryByTestId('groupWizardRail-how')).not.toBeInTheDocument();
-      click(result.getByTestId('groupWizardSignal-logs').querySelector('input')!);
-      click(result.getByTestId('groupWizardSignal-metrics').querySelector('input')!);
-      click(result.getByTestId('groupWizardNext'));
-      await waitFor(() => expect(result.getByTestId('groupWizardReview')).toBeInTheDocument());
-      expect(
-        within(result.getByTestId('groupWizardWhereToRun-agentless')).getByRole('radio')
-      ).toBeDisabled();
-    });
-
     it('template without agentless: no managed option anywhere', async () => {
       const result = renderWizard(group, [option('ecs', nginxPackageInfo)]);
       await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
@@ -435,7 +397,7 @@ describe('GroupOnboardingWizard', () => {
       click(result.getByTestId('groupWizardSignal-metrics').querySelector('input')!);
       click(result.getByTestId('groupWizardNext'));
       await waitFor(() => expect(result.getByTestId('groupWizardReview')).toBeInTheDocument());
-      expect(result.queryByTestId('groupWizardWhereToRun')).not.toBeInTheDocument();
+      expect(result.queryByTestId('groupWizardRail-how')).not.toBeInTheDocument();
     });
   });
 

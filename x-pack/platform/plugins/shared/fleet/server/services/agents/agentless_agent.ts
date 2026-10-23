@@ -63,6 +63,7 @@ import type { AgentlessConfig } from '../utils/agentless';
 import {
   prependAgentlessApiBasePathToEndpoint,
   isAgentlessEnabled,
+  isAgentlessSimulated,
   isManagedBulkEnabled,
 } from '../utils/agentless';
 import {
@@ -149,6 +150,14 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
 
     const logger = appContextService.getLogger();
     logger.debug(`[Agentless API] Creating agentless agent ${agentlessAgentPolicy.id}`);
+
+    // PROTOTYPE: agentless isn't gated. Off a hosted deployment nothing is deployed.
+    if (isAgentlessSimulated()) {
+      logger.info(
+        `[Agentless API] PROTOTYPE: agentless not available on this deployment, no agentless agent deployed for ${agentlessAgentPolicy.id}`
+      );
+      return;
+    }
 
     const agentlessConfig = appContextService.getConfig()?.agentless;
     if (!agentlessConfig) {
