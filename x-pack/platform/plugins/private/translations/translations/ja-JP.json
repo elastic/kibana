@@ -50027,8 +50027,6 @@
     "xpack.significantEventsApp.detectionsTab.fetchError": "検出の読み込みに失敗しました",
     "xpack.significantEventsApp.detectionsTab.minimizeDetailsAriaLabel": "詳細を折りたたむ",
     "xpack.significantEventsApp.detectionsTab.ruleColumn": "ルール",
-    "xpack.significantEventsApp.detectionsTab.statusPending": "保留中",
-    "xpack.significantEventsApp.detectionsTab.statusProcessed": "処理済み",
     "xpack.significantEventsApp.detectionsTab.tableCaption": "検出",
     "xpack.significantEventsApp.detectionsTab.timestampColumn": "タイムスタンプ",
     "xpack.significantEventsApp.detectionsTab.viewDetailsAriaLabel": "詳細を表示",
