@@ -13,6 +13,7 @@ export const ELASTIC_AGENT_COMPLETE_IMAGE =
   'docker.elastic.co/elastic-agent/elastic-agent-complete';
 
 const ARTIFACTS_VERSIONS_URL = 'https://artifacts-api.elastic.co/v1/versions';
+const ARTIFACTS_FETCH_TIMEOUT_MS = 10 * 1000;
 
 export type AgentImageKind = 'complete' | 'agent';
 
@@ -27,7 +28,9 @@ const toSnapshotTag = (version: string): string =>
 const toReleaseVersion = (version: string): string => version.replace(/-SNAPSHOT$/, '');
 
 const fetchPublishedSnapshotVersions = async (): Promise<string[]> => {
-  const response = await fetch(ARTIFACTS_VERSIONS_URL);
+  const response = await fetch(ARTIFACTS_VERSIONS_URL, {
+    signal: AbortSignal.timeout(ARTIFACTS_FETCH_TIMEOUT_MS),
+  });
   if (!response.ok) {
     throw new Error(`HTTP ${response.status} ${response.statusText}`);
   }
@@ -38,7 +41,8 @@ const fetchPublishedSnapshotVersions = async (): Promise<string[]> => {
 /**
  * Resolves the Elastic Agent snapshot tag for the Kibana under test. Right after a minor
  * bump `elastic-agent:<version>-SNAPSHOT` may not be published yet, so this falls back to
- * the latest published snapshot `<=` Kibana's version.
+ * the latest published snapshot of the same major, at most one minor behind Kibana. Anything
+ * older would let the suite pass against an agent that is not the one under test.
  */
 export const resolveAgentSnapshotTag = async (
   kibanaVersion: string,
@@ -63,11 +67,21 @@ export const resolveAgentSnapshotTag = async (
       `${ELASTIC_AGENT_IMAGE}:${preferredTag} not published yet; falling back to ${fallbackTag}`
     );
   const targetRelease = toReleaseVersion(kibanaVersion);
+  const target = semver.parse(targetRelease);
+  if (!target) {
+    return preferredTag;
+  }
+
+  const isWithinFallbackRange = (version: string): boolean =>
+    semver.valid(version) !== null &&
+    semver.lte(version, targetRelease) &&
+    semver.major(version) === target.major &&
+    semver.minor(version) >= target.minor - 1;
 
   try {
     const candidates = (await fetchSnapshotVersions())
       .map(toReleaseVersion)
-      .filter((version) => semver.valid(version) !== null && semver.lte(version, targetRelease))
+      .filter(isWithinFallbackRange)
       .sort(semver.rcompare);
 
     for (const candidate of candidates) {
@@ -85,9 +99,8 @@ export const resolveAgentSnapshotTag = async (
     );
   }
 
-  const parsed = semver.parse(targetRelease);
-  if (parsed && parsed.minor > 0 && parsed.patch === 0) {
-    const previousMinorTag = `${parsed.major}.${parsed.minor - 1}.0-SNAPSHOT`;
+  if (target.minor > 0 && target.patch === 0) {
+    const previousMinorTag = `${target.major}.${target.minor - 1}.0-SNAPSHOT`;
     if (hasRequiredImages(previousMinorTag)) {
       warnFallback(previousMinorTag);
       return previousMinorTag;
