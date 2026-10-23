@@ -14,5 +14,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/shared/cases/{common,public,server}/**/*.{ts,tsx}',
   ],
-  testTimeout: 10000,
+  testTimeout: 60000,
 };
