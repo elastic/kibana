@@ -6,10 +6,12 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { EpisodeActionState } from '../types/action';
 import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
+import type { AlertEpisodeAction } from '../queries/episode_actions_query';
 import { QUERY_STALE_TIME } from '../constants';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -18,6 +20,24 @@ export interface UseFetchEpisodeActionsOptions {
   episodeIds: string[];
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
 }
+
+const toEpisodeActionsMap = (rows: AlertEpisodeAction[]) => {
+  const map = new Map<string, EpisodeActionState>();
+  for (const row of rows) {
+    map.set(row.alert_id, {
+      episodeId: row.alert_id,
+      ruleId: row.rule_id ?? null,
+      groupHash: row.group_hash ?? null,
+      lastAckAction: row.last_ack_action ?? null,
+      lastAssigneeUid: row.last_assignee_uid ?? null,
+      lastAckActor: row.last_ack_actor ?? null,
+      lastDeactivateAction: row.last_deactivate_action ?? null,
+      lastDeactivateActor: row.last_deactivate_actor ?? null,
+      tags: normalizeTags(row.last_tags),
+    });
+  }
+  return map;
+};
 
 export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) => {
   const { expressions } = services;
@@ -29,21 +49,6 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
     enabled: episodeIds.length > 0,
     keepPreviousData: true,
     staleTime: QUERY_STALE_TIME,
-    select: (rows) => {
-      const map = new Map<string, EpisodeActionState>();
-      for (const row of rows) {
-        map.set(row.alert_id, {
-          episodeId: row.alert_id,
-          ruleId: row.rule_id ?? null,
-          groupHash: row.group_hash ?? null,
-          lastAckAction: row.last_ack_action ?? null,
-          lastAssigneeUid: row.last_assignee_uid ?? null,
-          lastAckActor: row.last_ack_actor ?? null,
-          lastDeactivateAction: row.last_deactivate_action ?? null,
-          lastDeactivateActor: row.last_deactivate_actor ?? null,
-        });
-      }
-      return map;
-    },
+    select: toEpisodeActionsMap,
   });
 };

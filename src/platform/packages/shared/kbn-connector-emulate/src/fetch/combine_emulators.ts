@@ -13,7 +13,7 @@ import type { ContractCall, Emulator } from './create_emulator_fetch';
 export interface CombinedEmulator extends Emulator {
   /** The connectors, in the order requests that match several of them are routed. */
   readonly connectors: readonly string[];
-  /** Empties the calls of one connector, or all calls when none is given. */
+  /** Empties the calls and responder state of one connector, or of all when none is given. */
   readonly reset: (connector?: string) => void;
 }
 

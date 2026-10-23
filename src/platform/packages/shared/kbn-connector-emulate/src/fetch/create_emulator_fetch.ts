@@ -13,6 +13,7 @@ import type {
   ContractResponse,
   NamedOperationRef,
   Responder,
+  ResponderContext,
   Violation,
 } from '../contract/types';
 import type {
@@ -26,7 +27,7 @@ import { collectNamedResponses, rejectUnknownNamedResponses } from '../engine/na
 import { createResponseEngine } from '../engine/response_engine';
 import type { PaginationOptions } from '../engine/paginate';
 import { withPagination } from '../engine/paginate';
-import { sampleResponse } from '../engine/sample_response';
+import { sampleBoundaryResponse, sampleResponse } from '../engine/sample_response';
 import type { GraphQLSpec } from '../graphql/graphql_protocol';
 import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
 import type { McpSpec } from '../mcp/mcp_protocol';
@@ -60,9 +61,10 @@ export interface ContractCall {
   readonly token?: true;
   /**
    * Set for answered OpenAPI operations: whether the response came from a fixture, a recording,
-   * or the `respond` fallback (the spec's examples and samples by default).
+   * the spec's examples and samples (`generated`), or a `respond` that answered without
+   * deferring to the default chain (`responder`).
    */
-  readonly responseSource?: 'fixture' | 'recording' | 'generated';
+  readonly responseSource?: 'fixture' | 'recording' | 'generated' | 'responder';
   /** Set by `combineEmulators`: the connector whose emulator answered the request. */
   readonly connector?: string;
   readonly status: number;
@@ -87,12 +89,19 @@ export interface EmulatorOptions extends PaginationOptions {
   /** Responses captured from the vendor, served when they still conform to the spec. */
   readonly recordings?: readonly Recording[];
   /**
-   * Answers operations without a fixture or recording; defaults to the spec's examples,
-   * then deterministic samples of its schemas.
+   * Answers OpenAPI operations in front of the default chain: fixtures, recordings, then
+   * examples or samples. `context.next()` gives the default chain's answer, and `context.state`
+   * keeps what the responder needs across requests, e.g. to read back what it created. Answers
+   * may be promises, and are validated like any other.
    */
   readonly respond?: Responder;
   /** Called with each call as it is recorded, e.g. to log requests as they arrive. */
   readonly onCall?: (call: ContractCall) => void;
+  /**
+   * How the default chain samples responses the spec has no example for: `typical` values, or
+   * values at the schema's upper bounds (`boundary`), which also skips examples.
+   */
+  readonly sampling?: 'typical' | 'boundary';
 }
 
 export interface Emulator {
@@ -107,7 +116,7 @@ export interface Emulator {
   readonly operations: readonly EmulatorOperation[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
-  /** Empties `calls`, e.g. between tests; the array keeps its identity. */
+  /** Empties `calls` and the responder state, e.g. between tests; `calls` keeps its identity. */
   readonly reset: () => void;
 }
 
@@ -225,7 +234,8 @@ export const createEmulatorFetch = ({
   recordings,
   pagination,
   collectionSize,
-  respond = sampleResponse,
+  respond,
+  sampling = 'typical',
   onCall,
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
@@ -233,15 +243,31 @@ export const createEmulatorFetch = ({
   const loadedProtocols = loadProtocols(specs, namedResponses);
   const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
-  const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
-  const contract = createOpenApiAdapter(
+  const engine = createResponseEngine(operations, {
+    fixtures,
+    recordings,
+    fallback: sampling === 'boundary' ? sampleBoundaryResponse : sampleResponse,
+  });
+  // Paging applies to the default chain, so a responder that defers to `next()` pages too.
+  const defaultChain = withPagination(
     operations,
-    withPagination(
-      operations,
-      { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
-      engine.respond
-    )
+    { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
+    engine.respond
   );
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain);
+  const state = new Map<unknown, unknown>();
+  // The contexts whose responder deferred to the default chain, for `responseSource`.
+  const deferred = new WeakSet<ResponderContext>();
+  const contextFor = (operation: ContractOperation, request: ContractRequest) => {
+    const context: ResponderContext = {
+      state,
+      next: async () => {
+        deferred.add(context);
+        return defaultChain(operation, request, context);
+      },
+    };
+    return context;
+  };
   const calls: ContractCall[] = [];
   const record = (call: ContractCall) => {
     calls.push(call);
@@ -327,13 +353,17 @@ export const createEmulatorFetch = ({
       };
     }
 
-    const response = contract.respond(operation, request);
+    const context = contextFor(operation, request);
+    const response = await contract.respond(operation, request, context);
     const responseViolations = contract.validateResponse(operation, response);
     record({
       request: description,
       operation: name,
       matched,
-      responseSource: engine.servedFrom(operation) ?? 'generated',
+      responseSource:
+        respond && !deferred.has(context)
+          ? 'responder'
+          : engine.servedFrom(operation) ?? 'generated',
       status: response.statusCode,
       requestViolations,
       responseViolations,
@@ -367,6 +397,7 @@ export const createEmulatorFetch = ({
     rejectedResponses,
     reset: () => {
       calls.length = 0;
+      state.clear();
     },
   };
 };
