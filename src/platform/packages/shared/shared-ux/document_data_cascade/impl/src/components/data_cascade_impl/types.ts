@@ -86,6 +86,12 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
   onCascadeLeafNodeCollapsed?: (args: OnCascadeLeafNodeCollapsedArgs<G>) => void;
   getVirtualizer: () => CascadeRootVirtualizerReturnValue;
   /**
+   * Index of the cell's row in the cascade's root virtualizer (its position in the flattened, expanded
+   * row model), which the child virtualizer controller keys its per-row state by. It differs from the
+   * within-parent `row.index` for nested rows.
+   */
+  virtualRowIndex: number;
+  /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
   children: (args: CascadeRowCellRendererProps<G, L>) => React.ReactNode;

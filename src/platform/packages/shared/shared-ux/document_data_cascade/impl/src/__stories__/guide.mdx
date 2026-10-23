@@ -87,15 +87,17 @@ const { virtualizer, handle, isActive, isDetached } = useConnectedChildVirtualiz
   alternate view. The row stays activated while any connection remains. Changing `cellId` reconnects and restarts scroll
   restoration from the new connection's persisted anchor, while changing `rowIndex` (the cell moved to another row) reconnects
   and keeps the scroll position. Anchors of connections that are currently swapped out are
-  kept in the cascade's restorable state, so they survive a remount of the cascade. A view
-  whose items do not share an index space with the cell's primary view should pass `persistScrollAnchor: false`, so that its
-  scroll anchor is neither persisted nor restored.
+  kept in the cascade's restorable state, so they survive a remount of the cascade.
 - Once a connection has reported its state to the controller, its child virtualizer owns scroll compensation for the row: the
   cascade's root virtualizer no longer adjusts the scroll position when that row changes size, since the child compensates for its
   own content. A connection that replaces an owning one inherits the ownership until it reports (or disconnects) itself, which
   keeps a child's scroll restoration intact when the cell content is swapped and avoids compensating the same change twice.
+- A row whose connection was just made or reattached stays rendered until the root virtualizer has measured its new size,
+  so that a scroll position restored deep inside the child's content does not virtualize the row away based on its
+  previous size.
 
-See the "Cascade with nested virtualization" story for a complete example.
+See the "Cascade with nested virtualization" story for a complete example, and the "Cascade with nested virtualization and
+alternate cell views" story for a cell that swaps between two connected views.
 
 ## Component Props
 

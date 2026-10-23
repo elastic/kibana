@@ -1665,6 +1665,25 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
+      'should decorate the comparison toolbar when provided',
+      async () => {
+        await renderDataTable({
+          enableComparisonMode: true,
+          renderCustomComparisonToolbar: ({ toolbar }) => (
+            <div data-test-subj="test-decorated-comparison-toolbar">{toolbar}</div>
+          ),
+        });
+
+        await goToComparisonMode();
+
+        expect(screen.getByTestId('test-decorated-comparison-toolbar')).toContainElement(
+          screen.getByTestId('unifiedDataTableComparisonDisplay')
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
       'should exit full screen when entering comparison mode',
       async () => {
         const onFullScreenChange = jest.fn();

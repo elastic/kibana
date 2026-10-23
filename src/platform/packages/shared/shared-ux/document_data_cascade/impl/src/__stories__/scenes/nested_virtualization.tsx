@@ -49,10 +49,7 @@ import type { MockGroupData } from '../../__fixtures__/types';
 interface CustomCascadeGridBodyProps
   extends EuiDataGridCustomBodyProps,
     Pick<CascadeLeafCellContentProps, 'virtualizerController' | 'cellId' | 'rowIndex'>,
-    Pick<
-      Parameters<typeof useConnectedChildVirtualizer>[0],
-      'estimatedRowHeight' | 'persistScrollAnchor'
-    > {
+    Pick<Parameters<typeof useConnectedChildVirtualizer>[0], 'estimatedRowHeight'> {
   data: LeafNode[];
   isFullScreenMode?: boolean;
 }
@@ -70,6 +67,11 @@ interface CascadeLeafCellContentProps {
   rowIndex: number;
   virtualizerController: ChildVirtualizerController;
   columns: EuiDataGridColumn[];
+  /**
+   * Whether the cell can be switched to a summary view, an alternate view of its content that is
+   * connected to the cascade under its own connection id.
+   */
+  alternateViews?: boolean;
 }
 
 /**
@@ -84,7 +86,6 @@ const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody(
   rowIndex,
   isFullScreenMode,
   estimatedRowHeight = 34,
-  persistScrollAnchor,
   Cell,
   visibleColumns,
   visibleRowData,
@@ -107,7 +108,6 @@ const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody(
     estimatedRowHeight,
     overscan: 10,
     privateScrollElement: customGridBodyScrollContainerRef,
-    persistScrollAnchor,
   });
 
   useLayoutEffect(() => {
@@ -196,6 +196,7 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
   rowIndex,
   virtualizerController,
   columns,
+  alternateViews = false,
 }: CascadeLeafCellContentProps) {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<CellView>('grid');
@@ -230,9 +231,9 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
     [data, virtualizerController, cellId, rowIndex]
   );
 
-  // The summary grid is an alternate view of the same cell: it connects to the cascade with its own
-  // connection id, and since its rows do not share the primary view's heights it does not persist a
-  // scroll anchor. The row stays activated while the two views are swapped.
+  // The summary grid is an alternate view of the same cell: it connects to the cascade under its own
+  // connection id, so each view keeps and restores its own scroll position. The row stays activated
+  // while the two views are swapped.
   const renderSummaryGridBody = useCallback<
     NonNullable<ComponentProps<typeof EuiDataGrid>['renderCustomGridBody']>
   >(
@@ -244,7 +245,6 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
         cellId={`${cellId}/summary`}
         rowIndex={rowIndex}
         estimatedRowHeight={28}
-        persistScrollAnchor={false}
       />
     ),
     [data, virtualizerController, cellId, rowIndex]
@@ -252,15 +252,17 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
 
   return (
     <EuiPanel paddingSize="none">
-      <EuiButtonGroup
-        legend="Cell view"
-        options={CELL_VIEW_OPTIONS}
-        idSelected={view}
-        onChange={(id) => setView(id as CellView)}
-        buttonSize="compressed"
-        css={css({ padding: euiTheme.size.s })}
-      />
-      {view === 'grid' ? (
+      {alternateViews && (
+        <EuiButtonGroup
+          legend="Cell view"
+          options={CELL_VIEW_OPTIONS}
+          idSelected={view}
+          onChange={(id) => setView(id as CellView)}
+          buttonSize="compressed"
+          css={css({ padding: euiTheme.size.s })}
+        />
+      )}
+      {!alternateViews || view === 'grid' ? (
         <EuiDataGrid
           aria-label="Nested virtualized data grid"
           columns={columns}
@@ -292,7 +294,7 @@ const CascadeLeafCellContent = React.memo(function CascadeLeafCellContent({
  * a child virtualizer connected to the parent cascade's shared scroll context.
  */
 export const CascadeWithNestedVirtualization: StoryObj<
-  { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
+  { query: string; alternateViews?: boolean } & Pick<ComponentProps<typeof DataCascade>, 'size'>
 > = {
   render: function DataCascadeWrapper(args, context) {
     const groupByFields = useMemo(
@@ -456,10 +458,11 @@ export const CascadeWithNestedVirtualization: StoryObj<
             rowIndex={rowIndex}
             virtualizerController={virtualizerController}
             columns={columns}
+            alternateViews={args.alternateViews}
           />
         );
       },
-      [groupByFields]
+      [groupByFields, args.alternateViews]
     );
 
     const rowHeaderActions = useCallback<
@@ -544,6 +547,14 @@ export const CascadeWithNestedVirtualization: StoryObj<
                 &nbsp; hook, which is a hook that returns a child virtualizer that gets connected to
                 a parent virtualizer&nbsp; leveraging the virtualizer controller provided by render
                 prop for the cascade leaf cell.
+                {args.alternateViews && (
+                  <>
+                    {' '}
+                    Each expanded cell can also be switched to a summary view: an alternate view of
+                    the same content that connects to the cascade under its own connection id, so
+                    that the row stays in place while the views are swapped.
+                  </>
+                )}
               </p>
             </div>
           </EuiText>
@@ -589,3 +600,14 @@ export const CascadeWithNestedVirtualization: StoryObj<
 };
 
 CascadeWithNestedVirtualization.parameters = { docs: { disable: true } };
+
+/**
+ * Story for a leaf cell that swaps between two views of its content. Each view connects to the
+ * cascade under its own connection id, so each restores its own scroll position when shown again.
+ */
+export const CascadeWithNestedVirtualizationViews: typeof CascadeWithNestedVirtualization = {
+  ...CascadeWithNestedVirtualization,
+  args: { ...CascadeWithNestedVirtualization.args, alternateViews: true },
+};
+
+CascadeWithNestedVirtualizationViews.parameters = { docs: { disable: true } };

@@ -23,7 +23,11 @@ import type {
   ChildVirtualizerController,
   ConnectedChildState,
 } from './child_virtualizer_controller';
-import { useCascadeVirtualizer, type CascadeVirtualizerReturnValue } from '.';
+import {
+  useCascadeVirtualizer,
+  type CascadeVirtualizerReturnValue,
+  type UseVirtualizerReturnType,
+} from '.';
 
 export interface UseConnectedChildVirtualizerOptions<G extends GroupNode = GroupNode> {
   controller: ChildVirtualizerController;
@@ -49,13 +53,6 @@ export interface UseConnectedChildVirtualizerOptions<G extends GroupNode = Group
    * If not provided, the child cannot detach.
    */
   privateScrollElement?: React.RefObject<Element | null>;
-  /**
-   * Whether the connection persists its scroll anchor in the controller (default `true`),
-   * so that it is restored when the same id reconnects or when the cascade is restored
-   * from a persisted state. Set to `false` for connections whose items do not share an
-   * index space with the cell's other connections, e.g. an alternate view of the cell content.
-   */
-  persistScrollAnchor?: boolean;
 }
 
 export interface UseConnectedChildVirtualizerResult {
@@ -66,6 +63,27 @@ export interface UseConnectedChildVirtualizerResult {
 }
 
 const EMPTY_ROWS: ReadonlyArray<Pick<Row<GroupNode>, 'id'>> = [];
+
+/**
+ * The item at the top of the viewport and the offset of the viewport's top within it, or `null`
+ * when none of the items intersect the viewport: such a connection has no position of its own to
+ * restore, it is the cascade's position that places it. The offset is negative for a viewport that
+ * starts above the first item (e.g. at the row header above the items), so that the restored
+ * position keeps the same distance to it.
+ */
+const getScrollAnchor = (instance: UseVirtualizerReturnType) => {
+  const { measurementsCache } = instance;
+  const firstItem = measurementsCache[0];
+  const lastItem = measurementsCache[measurementsCache.length - 1];
+  if (!firstItem || !lastItem) return null;
+
+  const scrollOffset = instance.scrollOffset ?? 0;
+  const viewportEnd = scrollOffset + (instance.scrollRect?.height ?? 0);
+  if (scrollOffset >= lastItem.end || viewportEnd <= firstItem.start) return null;
+
+  const anchorItem = instance.getVirtualItemForOffset(scrollOffset);
+  return anchorItem ? { index: anchorItem.index, offset: scrollOffset - anchorItem.start } : null;
+};
 const getActivation = (controller: ChildVirtualizerController, rowIndex: number) =>
   controller.shouldActivate(rowIndex);
 
@@ -77,7 +95,6 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
   estimatedRowHeight,
   overscan,
   privateScrollElement,
-  persistScrollAnchor = true,
 }: UseConnectedChildVirtualizerOptions<G>): UseConnectedChildVirtualizerResult => {
   const isActive = useSyncExternalStore(
     controller.subscribe,
@@ -91,9 +108,12 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
 
   const childConfig = useMemo(() => controller.getChildConfig(rowIndex), [controller, rowIndex]);
 
-  const persistedAnchor = useMemo(
-    () => (persistScrollAnchor ? controller.getPersistedAnchor(cellId) : null),
-    [controller, cellId, persistScrollAnchor]
+  const { persistedAnchor, persistedAnchorOffset } = useMemo(
+    () => ({
+      persistedAnchor: controller.getPersistedAnchor(cellId),
+      persistedAnchorOffset: controller.getPersistedAnchorOffset(cellId),
+    }),
+    [controller, cellId]
   );
 
   const handleRef = useRef<ChildConnectionHandle | null>(null);
@@ -104,12 +124,12 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
   // effects of the same commit: a connection that replaces this one for the same row is thereby
   // registered before this one goes away, which keeps the row activated across the swap.
   useLayoutEffect(() => {
-    const handle = controller.connect(cellId, rowIndex, { persistScrollAnchor });
+    const handle = controller.connect(cellId, rowIndex);
     if (isDetachedRef.current) {
       handle.detachScrollElement();
     }
     handleRef.current = handle;
-  }, [controller, cellId, rowIndex, persistScrollAnchor]);
+  }, [controller, cellId, rowIndex]);
 
   useEffect(() => {
     const handle = handleRef.current;
@@ -119,7 +139,7 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
         handleRef.current = null;
       }
     };
-  }, [controller, cellId, rowIndex, persistScrollAnchor]);
+  }, [controller, cellId, rowIndex]);
 
   const wrappedHandle = useMemo<ChildConnectionHandle>(
     () => ({
@@ -155,16 +175,15 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
       // Before stabilization the offset is intermediate and would cause the
       // persisted anchor to capture a wrong position on disconnect/detach.
       if (didStabilize) {
-        if (persistScrollAnchor) {
-          patch.scrollAnchorItemIndex =
-            instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null;
-        }
+        const anchor = getScrollAnchor(instance);
+        patch.scrollAnchorItemIndex = anchor?.index ?? null;
+        patch.scrollAnchorItemOffset = anchor?.offset ?? null;
         patch.hasStabilized = true;
       }
 
       handleRef.current?.reportState(patch);
     },
-    [isActive, persistScrollAnchor]
+    [isActive]
   );
 
   const getScrollElement = useCallback(() => {
@@ -175,7 +194,7 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
   }, [isDetached, privateScrollElement, childConfig]);
 
   // child virtualizers only read `rows.length` and `rows[index].id`, see `useCascadeVirtualizer`
-  const effectiveRows = (isActive ? rows : EMPTY_ROWS) as unknown as Row<G>[];
+  const effectiveRows = (isActive ? rows : EMPTY_ROWS) as Row<G>[];
 
   const scrollMargin = isDetached ? 0 : controller.getScrollMarginForRow(rowIndex);
 
@@ -193,6 +212,7 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
     scrollMargin,
     initialOffset: isDetached ? 0 : childConfig.initialOffset,
     initialAnchorItemIndex,
+    initialAnchorItemOffset: persistedAnchorOffset,
     // a new connection id restores from its own persisted anchor, whereas a cell that merely moved to
     // another row keeps its position
     scrollRestorationKey: cellId,
