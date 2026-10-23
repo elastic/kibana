@@ -34,6 +34,8 @@ import * as epmPackagesInstall from './packages/install';
 import * as epmRegistry from './registry';
 import * as epmTransformsInstall from './elasticsearch/transform/install';
 import * as epmArchiveParse from './archive/parse';
+import * as epmBundledPackages from './packages/bundled_packages';
+import * as epmArchive from './archive';
 import { getEsPackage } from './archive/storage';
 
 jest.mock('./archive/storage');
@@ -329,6 +331,127 @@ describe('PackageService', () => {
 
       await expect(method(...args)).resolves.toEqual(expectedReturnValue);
       expect(spy).toHaveBeenCalledWith(...spyArgs);
+    });
+  });
+
+  describe('reinstallEsAssets - transform install source', () => {
+    const packageInfo: InstallablePackage = {
+      format_version: '1.0.0',
+      name: 'my_package',
+      title: 'My Package',
+      description: 'description',
+      version: '1.0.0',
+      release: 'ga',
+      owner: { github: 'elastic' },
+    };
+    const paths = ['my_package-1.0.0/elasticsearch/transform/probe/transform.yml'];
+
+    const mockInstallation = (installSource: string) => {
+      jest
+        .mocked(epmPackagesGet.getInstallation)
+        .mockResolvedValue({ name: packageInfo.name, install_source: installSource } as any);
+      jest.mocked(getEsPackage).mockResolvedValue({ assetsMap: new Map() } as any);
+      jest
+        .spyOn(epmBundledPackages, 'getBundledPackageForInstallation')
+        .mockResolvedValue(undefined);
+    };
+
+    // A reinstall replays the archive stored at install time, so the source recorded on the
+    // installation — not the reinstall call site — decides whether transforms may run as
+    // kibana_system.
+    it.each(['registry', 'upload'])(
+      'forwards install_source %p from the installation',
+      async (installSource) => {
+        mockInstallation(installSource);
+        const spy = jest
+          .spyOn(epmTransformsInstall, 'installTransforms')
+          .mockResolvedValue({ installedTransforms: [] } as any);
+
+        await mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths);
+
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ installSource }));
+      }
+    );
+
+    // The documented new failure mode: an uploaded package reinstalled without a user request
+    // has no credentials to grant a secondary authorization API key from, so installTransforms
+    // refuses rather than falling back to kibana_system.
+    it('surfaces the unauthorized error when an uploaded package is reinstalled without a request', async () => {
+      mockInstallation('upload');
+      jest
+        .spyOn(epmTransformsInstall, 'installTransforms')
+        .mockRejectedValue(new FleetUnauthorizedError('no secondary authorization'));
+
+      await expect(
+        mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths)
+      ).rejects.toThrow(FleetUnauthorizedError);
+    });
+
+    describe('upload installation of a bundled package', () => {
+      const bundledBuffer = Buffer.from('bundled-zip');
+
+      it('reinstalls from the bundled archive as bundled when a matching bundled package exists', async () => {
+        mockInstallation('upload');
+        const bundledIterator = { name: 'bundled-iterator' } as any;
+        const bundledAssetsMap = new Map();
+        jest.spyOn(epmBundledPackages, 'getBundledPackageForInstallation').mockResolvedValue({
+          name: packageInfo.name,
+          version: packageInfo.version,
+          getBuffer: async () => bundledBuffer,
+        });
+        const unpackSpy = jest.spyOn(epmArchive, 'unpackBufferToAssetsMap').mockResolvedValue({
+          paths,
+          assetsMap: bundledAssetsMap,
+          archiveIterator: bundledIterator,
+        });
+        const spy = jest
+          .spyOn(epmTransformsInstall, 'installTransforms')
+          .mockResolvedValue({ installedTransforms: [] } as any);
+
+        await mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths);
+
+        expect(unpackSpy).toHaveBeenCalledWith({
+          contentType: 'application/zip',
+          archiveBuffer: bundledBuffer,
+          useStreaming: false,
+        });
+        expect(getEsPackage).not.toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            installSource: 'bundled',
+            packageInstallContext: expect.objectContaining({
+              assetsMap: bundledAssetsMap,
+              archiveIterator: bundledIterator,
+            }),
+          })
+        );
+      });
+
+      it('keeps the upload source and stored archive when no matching bundled package exists', async () => {
+        mockInstallation('upload');
+        jest
+          .spyOn(epmBundledPackages, 'getBundledPackageForInstallation')
+          .mockResolvedValue(undefined);
+        const spy = jest
+          .spyOn(epmTransformsInstall, 'installTransforms')
+          .mockResolvedValue({ installedTransforms: [] } as any);
+
+        await mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths);
+
+        expect(getEsPackage).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ installSource: 'upload' }));
+      });
+    });
+
+    it('passes no authorization header when not scoped to a request', async () => {
+      mockInstallation('upload');
+      const spy = jest
+        .spyOn(epmTransformsInstall, 'installTransforms')
+        .mockResolvedValue({ installedTransforms: [] } as any);
+
+      await mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths);
+
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ authorizationHeader: undefined }));
     });
   });
 });
