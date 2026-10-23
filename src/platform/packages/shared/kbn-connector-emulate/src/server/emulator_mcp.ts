@@ -12,6 +12,7 @@ import type { CallToolResult, JSONRPCMessage, Tool } from '@modelcontextprotocol
 import {
   CallToolRequestSchema,
   ErrorCode,
+  isJSONRPCRequest,
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
@@ -23,12 +24,30 @@ import { isRecord } from '../openapi/schema_walk';
 import { checkFixtures } from './check_fixtures';
 import type { ControlledEmulator } from './controlled_emulator';
 
+/** A request the MCP control server received, e.g. to log it. */
+export type McpControlRequest =
+  | {
+      readonly method: 'tools/call';
+      readonly tool: string;
+      readonly arguments: Readonly<Record<string, unknown>>;
+      readonly isError: boolean;
+      /** What the tool did, in a few words, or the first line of its error. */
+      readonly summary: string;
+    }
+  | {
+      readonly method: string;
+      /** For `initialize`, the client's name and version. */
+      readonly client?: string;
+    };
+
 export interface EmulatorMcpOptions {
   /**
    * Writes the runtime fixtures somewhere lasting, such as a connector's committed fixtures, and
    * says where. Without it, the `export_fixtures` tool isn't offered.
    */
   readonly exportFixtures?: (fixtures: readonly ResponseFixture[]) => Promise<string>;
+  /** Called with each request: tool calls once answered, other requests as they arrive. */
+  readonly onRequest?: (request: McpControlRequest) => void;
 }
 
 const INSTRUCTIONS = `Controls a running connector emulator, which answers a connector's vendor API
@@ -179,6 +198,32 @@ const failed = (message: string, details?: unknown): CallToolResult => ({
   isError: true,
 });
 
+const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`;
+
+// What a tool's result says, in a few words, for `onRequest`.
+const summarize = (tool: string, { content, isError }: CallToolResult): string => {
+  const [first] = content;
+  const output = first?.type === 'text' ? first.text : '';
+  if (isError) {
+    return output.split('\n')[0];
+  }
+  const value = JSON.parse(output);
+  switch (tool) {
+    case 'list_operations':
+      return plural(value.length, 'operation');
+    case 'describe_operation':
+      return `${value.method} ${value.path}${value.connector ? ` of ${value.connector}` : ''}`;
+    case 'list_calls':
+      return `${plural(value.calls.length, 'call')} of ${value.total}`;
+    case 'export_fixtures':
+      return `exported to ${value.exportedTo}`;
+    case 'reset':
+      return 'reset';
+    default:
+      return `${plural(value.fixtures?.length ?? 0, 'fixture')} in effect`;
+  }
+};
+
 const text = (value: unknown): string | undefined =>
   typeof value === 'string' ? value : undefined;
 
@@ -205,7 +250,7 @@ const parseBody = (body: string): unknown => {
  */
 export const createEmulatorMcpHandler = (
   emulator: ControlledEmulator,
-  { exportFixtures }: EmulatorMcpOptions = {}
+  { exportFixtures, onRequest }: EmulatorMcpOptions = {}
 ): ((request: Request) => Promise<Response>) => {
   const { connectors } = emulator;
   // Combined emulators take the connector each tool is about.
@@ -307,9 +352,18 @@ export const createEmulatorMcpHandler = (
       }
     );
     server.setRequestHandler(ListToolsRequestSchema, () => ({ tools }));
-    server.setRequestHandler(CallToolRequestSchema, ({ params }) =>
-      call(params.name, isRecord(params.arguments) ? params.arguments : {})
-    );
+    server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
+      const args = isRecord(params.arguments) ? params.arguments : {};
+      const result = await call(params.name, args);
+      onRequest?.({
+        method: 'tools/call',
+        tool: params.name,
+        arguments: args,
+        isError: result.isError === true,
+        summary: summarize(params.name, result),
+      });
+      return result;
+    });
     const transport = createExchangeTransport();
     await server.connect(transport);
     try {
@@ -334,6 +388,19 @@ export const createEmulatorMcpHandler = (
     if ('statusCode' in read) {
       const { statusCode, headers, body } = transportErrorResponse(read);
       return Response.json(body, { status: statusCode, headers });
+    }
+    for (const message of read.messages) {
+      if (isJSONRPCRequest(message) && message.method !== 'tools/call') {
+        const { clientInfo } = (message.params ?? {}) as {
+          clientInfo?: { name?: string; version?: string };
+        };
+        onRequest?.({
+          method: message.method,
+          ...(message.method === 'initialize' && clientInfo
+            ? { client: `${clientInfo.name} ${clientInfo.version}` }
+            : {}),
+        });
+      }
     }
     const replies = await answer(read.messages);
     if (replies.length === 0) {
