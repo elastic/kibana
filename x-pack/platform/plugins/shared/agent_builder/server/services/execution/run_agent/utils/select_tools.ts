@@ -60,25 +60,35 @@ export const selectTools = async ({
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
+  // Agents that opt out of the internal tools get only the tools they select explicitly, which
+  // leaves out the attachment tools too.
+  const includeAttachmentTools = !agentConfiguration.disable_internal_tools;
+
   // create tool selection for attachments types
   const attachmentTypes = conversation.attachmentTypes.map((type) => type.type);
-  const attachmentToolIds = getToolsForAttachmentTypes(attachmentTypes, attachmentsService);
+  const attachmentToolIds = includeAttachmentTools
+    ? getToolsForAttachmentTypes(attachmentTypes, attachmentsService)
+    : [];
   const attachmentToolSelection: ToolSelection = {
     tool_ids: attachmentToolIds,
   };
 
-  const versionedAttachmentBoundTools = await getVersionedAttachmentBoundTools({
-    attachmentStateManager: conversation.attachmentStateManager,
-    attachmentsService,
-    formatContext,
-  });
+  const versionedAttachmentBoundTools = includeAttachmentTools
+    ? await getVersionedAttachmentBoundTools({
+        attachmentStateManager: conversation.attachmentStateManager,
+        attachmentsService,
+        formatContext,
+      })
+    : [];
 
-  const versionedAttachmentTools = createVersionedAttachmentTools({
-    attachmentStateManager: conversation.attachmentStateManager,
-    attachmentsService,
-    formatContext,
-    runner,
-  });
+  const versionedAttachmentTools = includeAttachmentTools
+    ? createVersionedAttachmentTools({
+        attachmentStateManager: conversation.attachmentStateManager,
+        attachmentsService,
+        formatContext,
+        runner,
+      })
+    : [];
 
   // The read tools come from the `ki-retrieval` skill, which carries the guidance for using them.
   // Memory tools have no skill of their own, so they stay static.

@@ -170,6 +170,47 @@ describe('selectTools', () => {
     );
   });
 
+  it('leaves out the attachment tools when internal tools are disabled', async () => {
+    const attachmentsService = {
+      getTypeDefinition: jest.fn(),
+      convertAttachmentTool: jest.fn(),
+    } as any;
+    const registryTool = createExecutableTool('registry.static');
+
+    const result = await selectTools({
+      conversation: {
+        attachmentTypes: [],
+        attachmentStateManager: {
+          getActive: jest.fn().mockReturnValue([
+            {
+              id: 'a-1',
+              type: 'text',
+              active: true,
+              current_version: 1,
+              versions: [{ version: 1, data: 'hello', created_at: 'now', content_hash: 'h' }],
+            },
+          ]),
+        },
+      } as any,
+      previousDynamicToolIds: [],
+      filteredSkills: [],
+      skills: { convertSkillTool: jest.fn() } as any,
+      request: {} as any,
+      toolProvider: { list: jest.fn().mockResolvedValue([registryTool]) } as any,
+      agentConfiguration: {
+        tools: [{ tool_ids: ['registry.static'] }],
+        enable_elastic_capabilities: false,
+        disable_internal_tools: true,
+      } as any,
+      aiIndicesEnabled: false,
+      attachmentsService,
+      spaceId: 'default',
+      runner: { runInternalTool: jest.fn() } as any,
+    });
+
+    expect(result.staticTools.map((tool) => tool.id)).toEqual(['registry.static']);
+  });
+
   describe('AI-index tools', () => {
     const memoryToolIds = Object.values(contextEngineMemoryTools);
     const aiIndexToolIds = [...Object.values(contextEngineAiIndexTools), ...memoryToolIds];

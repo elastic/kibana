@@ -184,11 +184,6 @@ export const buildRecorderMessages = ({
  * as the agent used new tools would throw the cached conversation away each time.
  */
 const KNOWN_AGENT_TOOLS = [
-  'attachments_add',
-  'attachments_diff',
-  'attachments_list',
-  'attachments_read',
-  'attachments_update',
   REPLY_USER_TOOL_ID,
   SANDBOX_BASH_TOOL_ID,
   SANDBOX_STR_REPLACE_TOOL_ID,

@@ -25,7 +25,9 @@ export const createReplyUserTool = (): BuiltinToolDefinition<typeof replyUserSch
   type: ToolType.builtin,
   description: `Send the final investigation answer to the user.
 
-Follow the system prompt's RESPONSE STYLE rules.
+Follow the system prompt's RESPONSE STYLE and INVESTIGATION ANSWER FORMAT rules: the answer must
+carry the root cause, severity, impact, hypotheses with their status and confidence, key evidence
+and next steps in plain markdown, because it is the only record of the investigation.
 Do not use emojis in responses.
 
 **GOOD:** "Root cause: the deploy at 01:00 UTC introduced a config
