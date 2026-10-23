@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AwsServiceMatrixEntry,
-  DeploymentMethod,
-  SignalType,
-  ServiceCategory,
-} from './aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod, SignalType } from './aws_service_matrix';
 import {
   AWS_SERVICES_STATIC,
   applyDeploymentMethodView,
@@ -20,19 +15,6 @@ import {
 
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
 const VALID_DEPLOYMENT_METHODS: DeploymentMethod[] = ['managed_integration', 'ecf', 'agent_based'];
-const VALID_CATEGORIES: ServiceCategory[] = [
-  'analytics',
-  'application_integration',
-  'cloud_financial_management',
-  'compute',
-  'containers',
-  'databases',
-  'machine_learning',
-  'management_governance',
-  'networking_content_delivery',
-  'security_identity_compliance',
-  'storage',
-];
 
 // Build a mock packages record.
 // For the aws package: provide data streams for all aws entries so that signalType and
@@ -100,10 +82,6 @@ describe('AWS service matrix', () => {
 
       it('has a non-empty name', () => {
         expect(entry.name).toBeTruthy();
-      });
-
-      it('has a valid category', () => {
-        expect(VALID_CATEGORIES).toContain(entry.category);
       });
 
       it('has a valid signalTypes array', () => {
@@ -411,7 +389,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
         },
       ]);
@@ -427,7 +404,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({} as any, [
         {
           id: 'aws_securityhub',
-          category: 'security_identity_compliance',
           packageName: 'aws_securityhub',
         },
       ]);
@@ -439,7 +415,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({} as any, [
         {
           id: 'vpcflow_otel',
-          category: 'networking_content_delivery',
           packageName: 'aws',
           ecfOnly: true,
           deploymentMethods: [{ method: 'ecf', preferred: true }],
@@ -468,7 +443,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ awsfargate: pkg as any }, [
         {
           id: 'awsfargate',
-          category: 'containers',
           packageName: 'awsfargate',
           policyTemplate: 'fargate',
         },
@@ -500,7 +474,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ aws_securityhub: pkg as any }, [
         {
           id: 'aws_securityhub',
-          category: 'security_identity_compliance',
           packageName: 'aws_securityhub',
         },
       ]);
@@ -530,7 +503,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws_bedrock: pkg as any }, [
-        { id: 'aws_bedrock', category: 'machine_learning', packageName: 'aws_bedrock' },
+        { id: 'aws_bedrock', packageName: 'aws_bedrock' },
       ]);
       expect(result.dataStreams).toEqual(['model_invocation']);
       expect(result.signalTypes).toContain('logs');
@@ -552,7 +525,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
-        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+        { id: 'elb', packageName: 'aws' },
       ]);
       expect(result.dataStreams).toEqual(['elb_logs']);
       expect(result.dataStreams).not.toContain('other_logs');
@@ -577,7 +550,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
           deploymentMethods: [{ method: 'agent_based', preferred: true }],
         },
@@ -608,7 +580,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
           deploymentMethods: [{ method: 'agent_based', preferred: true }],
         },
@@ -649,7 +620,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
           deploymentMethods: [{ method: 'agent_based', preferred: true }],
         },
@@ -678,7 +648,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
         {
           id: 'amazon_security_lake',
-          category: 'security_identity_compliance',
           packageName: 'amazon_security_lake',
         },
       ]);
@@ -701,7 +670,6 @@ describe('AWS service matrix', () => {
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
         {
           id: 'elb',
-          category: 'networking_content_delivery',
           packageName: 'aws',
           policyTemplate: 'elb',
         },
@@ -728,7 +696,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
-        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+        { id: 'elb', packageName: 'aws' },
       ]);
       expect(result.inputs).toEqual(['aws-s3', 'aws-cloudwatch']);
       expect(result.defaultEnabledInputs).toEqual(['aws-s3']);
@@ -746,7 +714,7 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
-        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+        { id: 'elb', packageName: 'aws' },
       ]);
       expect(result.defaultEnabledInputs).toEqual(['aws-s3', 'aws-cloudwatch']);
     });
