@@ -175,6 +175,7 @@ describe('DiscoverMainRoute', () => {
     mockRootProfileState = defaultRootProfileState;
     jest
       .mocked(DiscoverMainApp)
+      .mockClear()
       .mockImplementation(() => <div data-test-subj="discover-main-app" />);
   });
 
