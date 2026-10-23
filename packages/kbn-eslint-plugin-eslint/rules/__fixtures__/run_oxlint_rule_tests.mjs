@@ -53,6 +53,7 @@ const parityTests = {
   module_migration: () => require('../module_migration.test.js'),
   no_async_foreach: () => require('../no_async_foreach.test.js'),
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
+  no_uncleared_race_timeout: () => require('../no_uncleared_race_timeout.test.js'),
   no_conditional_saved_object_type_registration: () =>
     require('../no_conditional_saved_object_type_registration.test.js'),
   no_constructor_args_in_property_initializers: () =>

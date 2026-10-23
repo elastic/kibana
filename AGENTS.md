@@ -77,6 +77,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Prefer early returns and positive conditions.
 - Handle errors explicitly; return typed errors from APIs when possible.
 - Keep async logic linear; avoid nested `try` blocks when possible.
+- Clear a `Promise.race` deadline when the race settles. Prefer `withTimeout` from `@kbn/std`, which clears its `setTimeout` in a `finally`. Abort or shutdown arms can stay. `@kbn/eslint/no_uncleared_race_timeout` flags the direct case: a `new Promise` in the race whose executor calls `setTimeout` and never passes that timer to `clearTimeout`.
 
 ### UI Component Selection and Styling
 - Reuse existing components from the target module and shared packages it can depend on. Prefer `@kbn/ui-*` packages under `src/platform/kbn-ui` over equivalent `@elastic/eui` components — they encode Kibana-specific behavior and conventions.
