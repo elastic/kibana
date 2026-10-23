@@ -20,27 +20,27 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 const catchAllBadgeLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.catchAllBadge',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.reason.catchAllBadge',
   { defaultMessage: 'Catch-all' }
 );
 
 const catchAllTooltip = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.catchAllTooltip',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.reason.catchAllTooltip',
   { defaultMessage: 'Applies to every rule.' }
 );
 
 const expressionBadgeLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.expressionBadge',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.reason.expressionBadge',
   { defaultMessage: 'Expression' }
 );
 
 const expressionTooltipTitle = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.expressionTitle',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.reason.expressionTitle',
   { defaultMessage: 'Has query condition' }
 );
 
 const expressionTooltipBody = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.expressionBody',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.reason.expressionBody',
   {
     defaultMessage:
       'This policy has an additional KQL query. It is evaluated against alert data at dispatch time and is not previewed here.',
@@ -90,7 +90,7 @@ export const MatchedPolicyReason = ({ category, matcher, routingTags }: Props) =
   const matchedTags = matcherTags ? getMatchedTags(matcherTags, routingTags) : null;
   const tagsTooltipContent = matchedTags
     ? i18n.translate(
-        'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.routingTagsTooltip',
+        'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.reason.routingTagsTooltip',
         {
           defaultMessage: 'Matching routing tags: {tags}',
           values: { tags: matchedTags.join(', ') },

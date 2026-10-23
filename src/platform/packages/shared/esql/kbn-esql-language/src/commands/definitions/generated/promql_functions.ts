@@ -22,7 +22,7 @@ import { PromQLFunctionDefinitionTypes, type PromQLFunctionDefinition } from '..
 const absDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'abs',
-  description: i18n.translate('kbn-esql-language.promql.definitions.abs', {
+  description: i18n.translate('esqlLanguage.promql.definitions.abs', {
     defaultMessage:
       'Returns the input vector with all sample values converted to their absolute value.',
   }),
@@ -48,7 +48,7 @@ const absDefinition: PromQLFunctionDefinition = {
 const absentOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'absent_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.absent_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.absent_over_time', {
     defaultMessage: 'Returns `1` if the range vector has no elements, and `0` otherwise.',
   }),
   preview: false,
@@ -73,7 +73,7 @@ const absentOverTimeDefinition: PromQLFunctionDefinition = {
 const acosDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'acos',
-  description: i18n.translate('kbn-esql-language.promql.definitions.acos', {
+  description: i18n.translate('esqlLanguage.promql.definitions.acos', {
     defaultMessage: 'Calculates the arccosine of all elements in the input vector.',
   }),
   preview: false,
@@ -98,7 +98,7 @@ const acosDefinition: PromQLFunctionDefinition = {
 const acoshDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'acosh',
-  description: i18n.translate('kbn-esql-language.promql.definitions.acosh', {
+  description: i18n.translate('esqlLanguage.promql.definitions.acosh', {
     defaultMessage: 'Calculates the inverse hyperbolic cosine of all elements in the input vector.',
   }),
   preview: false,
@@ -123,7 +123,7 @@ const acoshDefinition: PromQLFunctionDefinition = {
 const asinDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'asin',
-  description: i18n.translate('kbn-esql-language.promql.definitions.asin', {
+  description: i18n.translate('esqlLanguage.promql.definitions.asin', {
     defaultMessage: 'Calculates the arcsine of all elements in the input vector.',
   }),
   preview: false,
@@ -148,7 +148,7 @@ const asinDefinition: PromQLFunctionDefinition = {
 const asinhDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'asinh',
-  description: i18n.translate('kbn-esql-language.promql.definitions.asinh', {
+  description: i18n.translate('esqlLanguage.promql.definitions.asinh', {
     defaultMessage: 'Calculates the inverse hyperbolic sine of all elements in the input vector.',
   }),
   preview: false,
@@ -173,7 +173,7 @@ const asinhDefinition: PromQLFunctionDefinition = {
 const atanDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'atan',
-  description: i18n.translate('kbn-esql-language.promql.definitions.atan', {
+  description: i18n.translate('esqlLanguage.promql.definitions.atan', {
     defaultMessage: 'Calculates the arctangent of all elements in the input vector.',
   }),
   preview: false,
@@ -198,7 +198,7 @@ const atanDefinition: PromQLFunctionDefinition = {
 const atanhDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'atanh',
-  description: i18n.translate('kbn-esql-language.promql.definitions.atanh', {
+  description: i18n.translate('esqlLanguage.promql.definitions.atanh', {
     defaultMessage:
       'Calculates the inverse hyperbolic tangent of all elements in the input vector.',
   }),
@@ -224,7 +224,7 @@ const atanhDefinition: PromQLFunctionDefinition = {
 const avgDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES,
   name: 'avg',
-  description: i18n.translate('kbn-esql-language.promql.definitions.avg', {
+  description: i18n.translate('esqlLanguage.promql.definitions.avg', {
     defaultMessage: 'Calculates the average of the values across the input vector.',
   }),
   preview: false,
@@ -249,7 +249,7 @@ const avgDefinition: PromQLFunctionDefinition = {
 const avgOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'avg_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.avg_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.avg_over_time', {
     defaultMessage: 'Returns the average value of all points in the specified time range.',
   }),
   preview: false,
@@ -274,7 +274,7 @@ const avgOverTimeDefinition: PromQLFunctionDefinition = {
 const bottomkDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES_REDUCTION,
   name: 'bottomk',
-  description: i18n.translate('kbn-esql-language.promql.definitions.bottomk', {
+  description: i18n.translate('esqlLanguage.promql.definitions.bottomk', {
     defaultMessage:
       'Returns `k` time series with the lowest values, keeping their full label set. When used with `by`, `bottomk` ranks independently within each group.',
   }),
@@ -306,7 +306,7 @@ const bottomkDefinition: PromQLFunctionDefinition = {
 const ceilDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'ceil',
-  description: i18n.translate('kbn-esql-language.promql.definitions.ceil', {
+  description: i18n.translate('esqlLanguage.promql.definitions.ceil', {
     defaultMessage: 'Rounds the sample values of all elements up to the nearest integer.',
   }),
   preview: false,
@@ -328,10 +328,36 @@ const ceilDefinition: PromQLFunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const changesDefinition: PromQLFunctionDefinition = {
+  type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
+  name: 'changes',
+  description: i18n.translate('esqlLanguage.promql.definitions.changes', {
+    defaultMessage:
+      'Returns the number of times the value changed in each time series in a range vector.',
+  }),
+  preview: false,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'v',
+          type: 'range_vector',
+          optional: false,
+          description: 'Range vector input.',
+        },
+      ],
+      returnType: 'instant_vector',
+    },
+  ],
+  locationsAvailable: [Location.PROMQL],
+  examples: ['changes(process_start_time_seconds[1h])'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const clampDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'clamp',
-  description: i18n.translate('kbn-esql-language.promql.definitions.clamp', {
+  description: i18n.translate('esqlLanguage.promql.definitions.clamp', {
     defaultMessage: 'Clamps the sample values of all elements to be within [min, max].',
   }),
   preview: false,
@@ -368,7 +394,7 @@ const clampDefinition: PromQLFunctionDefinition = {
 const clampMaxDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'clamp_max',
-  description: i18n.translate('kbn-esql-language.promql.definitions.clamp_max', {
+  description: i18n.translate('esqlLanguage.promql.definitions.clamp_max', {
     defaultMessage: 'Clamps the sample values of all elements to have an upper limit of max.',
   }),
   preview: false,
@@ -399,7 +425,7 @@ const clampMaxDefinition: PromQLFunctionDefinition = {
 const clampMinDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'clamp_min',
-  description: i18n.translate('kbn-esql-language.promql.definitions.clamp_min', {
+  description: i18n.translate('esqlLanguage.promql.definitions.clamp_min', {
     defaultMessage: 'Clamps the sample values of all elements to have a lower limit of min.',
   }),
   preview: false,
@@ -430,7 +456,7 @@ const clampMinDefinition: PromQLFunctionDefinition = {
 const cosDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'cos',
-  description: i18n.translate('kbn-esql-language.promql.definitions.cos', {
+  description: i18n.translate('esqlLanguage.promql.definitions.cos', {
     defaultMessage: 'Calculates the cosine of all elements in the input vector.',
   }),
   preview: false,
@@ -455,7 +481,7 @@ const cosDefinition: PromQLFunctionDefinition = {
 const coshDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'cosh',
-  description: i18n.translate('kbn-esql-language.promql.definitions.cosh', {
+  description: i18n.translate('esqlLanguage.promql.definitions.cosh', {
     defaultMessage: 'Calculates the hyperbolic cosine of all elements in the input vector.',
   }),
   preview: false,
@@ -480,7 +506,7 @@ const coshDefinition: PromQLFunctionDefinition = {
 const countDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES,
   name: 'count',
-  description: i18n.translate('kbn-esql-language.promql.definitions.count', {
+  description: i18n.translate('esqlLanguage.promql.definitions.count', {
     defaultMessage: 'Counts the number of elements in the input vector.',
   }),
   preview: false,
@@ -505,7 +531,7 @@ const countDefinition: PromQLFunctionDefinition = {
 const countOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'count_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.count_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.count_over_time', {
     defaultMessage: 'Returns the count of all values in the specified time range.',
   }),
   preview: false,
@@ -530,7 +556,7 @@ const countOverTimeDefinition: PromQLFunctionDefinition = {
 const dayOfMonthDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'day_of_month',
-  description: i18n.translate('kbn-esql-language.promql.definitions.day_of_month', {
+  description: i18n.translate('esqlLanguage.promql.definitions.day_of_month', {
     defaultMessage:
       'Returns the day of the month for each of the input timestamps (in UTC). Returned values are from 1 to 31.',
   }),
@@ -556,7 +582,7 @@ const dayOfMonthDefinition: PromQLFunctionDefinition = {
 const dayOfWeekDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'day_of_week',
-  description: i18n.translate('kbn-esql-language.promql.definitions.day_of_week', {
+  description: i18n.translate('esqlLanguage.promql.definitions.day_of_week', {
     defaultMessage:
       'Returns the day of the week for each of the input timestamps (in UTC). Returned values are from 0 to 6, where 0 means Sunday.',
   }),
@@ -582,7 +608,7 @@ const dayOfWeekDefinition: PromQLFunctionDefinition = {
 const dayOfYearDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'day_of_year',
-  description: i18n.translate('kbn-esql-language.promql.definitions.day_of_year', {
+  description: i18n.translate('esqlLanguage.promql.definitions.day_of_year', {
     defaultMessage:
       'Returns the day of the year for each of the input timestamps (in UTC). Returned values are from 1 to 366.',
   }),
@@ -608,7 +634,7 @@ const dayOfYearDefinition: PromQLFunctionDefinition = {
 const daysInMonthDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'days_in_month',
-  description: i18n.translate('kbn-esql-language.promql.definitions.days_in_month', {
+  description: i18n.translate('esqlLanguage.promql.definitions.days_in_month', {
     defaultMessage:
       'Returns the number of days in the month for each of the input timestamps (in UTC). Returned values are from 28 to 31.',
   }),
@@ -634,7 +660,7 @@ const daysInMonthDefinition: PromQLFunctionDefinition = {
 const degDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'deg',
-  description: i18n.translate('kbn-esql-language.promql.definitions.deg', {
+  description: i18n.translate('esqlLanguage.promql.definitions.deg', {
     defaultMessage:
       'Converts input values from radians to degrees for all elements in the input vector.',
   }),
@@ -660,7 +686,7 @@ const degDefinition: PromQLFunctionDefinition = {
 const deltaDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'delta',
-  description: i18n.translate('kbn-esql-language.promql.definitions.delta', {
+  description: i18n.translate('esqlLanguage.promql.definitions.delta', {
     defaultMessage:
       'Calculates the difference between the first and last value of each time series in a range vector. Operates on gauges: counter inputs are automatically and transparently converted to a gauge with `to_gauge`. The result is always a `double`.',
   }),
@@ -686,7 +712,7 @@ const deltaDefinition: PromQLFunctionDefinition = {
 const derivDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'deriv',
-  description: i18n.translate('kbn-esql-language.promql.definitions.deriv', {
+  description: i18n.translate('esqlLanguage.promql.definitions.deriv', {
     defaultMessage:
       'Calculates the per-second derivative of the time series using simple linear regression. Operates on gauges: counter inputs are automatically and transparently converted to a gauge with `to_gauge`. The result is always a `double`.',
   }),
@@ -712,7 +738,7 @@ const derivDefinition: PromQLFunctionDefinition = {
 const expDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'exp',
-  description: i18n.translate('kbn-esql-language.promql.definitions.exp', {
+  description: i18n.translate('esqlLanguage.promql.definitions.exp', {
     defaultMessage: 'Calculates the exponential function for all elements in the input vector.',
   }),
   preview: false,
@@ -737,7 +763,7 @@ const expDefinition: PromQLFunctionDefinition = {
 const firstOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'first_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.first_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.first_over_time', {
     defaultMessage: 'Returns the first value of each time series in the specified time range.',
   }),
   preview: false,
@@ -762,7 +788,7 @@ const firstOverTimeDefinition: PromQLFunctionDefinition = {
 const floorDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'floor',
-  description: i18n.translate('kbn-esql-language.promql.definitions.floor', {
+  description: i18n.translate('esqlLanguage.promql.definitions.floor', {
     defaultMessage: 'Rounds the sample values of all elements down to the nearest integer.',
   }),
   preview: false,
@@ -787,7 +813,7 @@ const floorDefinition: PromQLFunctionDefinition = {
 const histogramAvgDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.HISTOGRAM,
   name: 'histogram_avg',
-  description: i18n.translate('kbn-esql-language.promql.definitions.histogram_avg', {
+  description: i18n.translate('esqlLanguage.promql.definitions.histogram_avg', {
     defaultMessage: 'Returns the arithmetic average of observations stored in a native histogram.',
   }),
   preview: false,
@@ -812,7 +838,7 @@ const histogramAvgDefinition: PromQLFunctionDefinition = {
 const histogramCountDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.HISTOGRAM,
   name: 'histogram_count',
-  description: i18n.translate('kbn-esql-language.promql.definitions.histogram_count', {
+  description: i18n.translate('esqlLanguage.promql.definitions.histogram_count', {
     defaultMessage: 'Returns the count of observations stored in a native histogram.',
   }),
   preview: false,
@@ -837,7 +863,7 @@ const histogramCountDefinition: PromQLFunctionDefinition = {
 const histogramFractionDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.HISTOGRAM,
   name: 'histogram_fraction',
-  description: i18n.translate('kbn-esql-language.promql.definitions.histogram_fraction', {
+  description: i18n.translate('esqlLanguage.promql.definitions.histogram_fraction', {
     defaultMessage:
       'Returns the estimated fraction of observations of a classic or native histogram that fall between the provided lower and upper values.',
   }),
@@ -875,7 +901,7 @@ const histogramFractionDefinition: PromQLFunctionDefinition = {
 const histogramQuantileDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.HISTOGRAM,
   name: 'histogram_quantile',
-  description: i18n.translate('kbn-esql-language.promql.definitions.histogram_quantile', {
+  description: i18n.translate('esqlLanguage.promql.definitions.histogram_quantile', {
     defaultMessage:
       'Returns the φ-quantile of a classic histogram represented by cumulative `le` buckets or a native (exponential) histogram.',
   }),
@@ -907,7 +933,7 @@ const histogramQuantileDefinition: PromQLFunctionDefinition = {
 const histogramSumDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.HISTOGRAM,
   name: 'histogram_sum',
-  description: i18n.translate('kbn-esql-language.promql.definitions.histogram_sum', {
+  description: i18n.translate('esqlLanguage.promql.definitions.histogram_sum', {
     defaultMessage: 'Returns the sum of observations stored in a native histogram.',
   }),
   preview: false,
@@ -932,7 +958,7 @@ const histogramSumDefinition: PromQLFunctionDefinition = {
 const hourDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'hour',
-  description: i18n.translate('kbn-esql-language.promql.definitions.hour', {
+  description: i18n.translate('esqlLanguage.promql.definitions.hour', {
     defaultMessage:
       'Returns the hour of the day for each of the input timestamps (in UTC). Returned values are from 0 to 23.',
   }),
@@ -958,7 +984,7 @@ const hourDefinition: PromQLFunctionDefinition = {
 const ideltaDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'idelta',
-  description: i18n.translate('kbn-esql-language.promql.definitions.idelta', {
+  description: i18n.translate('esqlLanguage.promql.definitions.idelta', {
     defaultMessage:
       'Calculates the difference between the last two samples of each time series in a range vector. Operates on gauges: counter inputs are automatically and transparently converted to a gauge with `to_gauge`. The result is always a `double`.',
   }),
@@ -984,7 +1010,7 @@ const ideltaDefinition: PromQLFunctionDefinition = {
 const increaseDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'increase',
-  description: i18n.translate('kbn-esql-language.promql.definitions.increase', {
+  description: i18n.translate('esqlLanguage.promql.definitions.increase', {
     defaultMessage:
       "Calculates the increase in the time series in the range vector, adjusting for counter resets. Requires a counter input; non-counter inputs are automatically coerced with `to_counter`. The metric's configured temporality (cumulative or delta) is honored. The result is always a `double`.",
   }),
@@ -1010,7 +1036,7 @@ const increaseDefinition: PromQLFunctionDefinition = {
 const irateDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'irate',
-  description: i18n.translate('kbn-esql-language.promql.definitions.irate', {
+  description: i18n.translate('esqlLanguage.promql.definitions.irate', {
     defaultMessage:
       "Calculates the per-second instant rate of increase based on the last two data points. Requires a counter input; non-counter inputs are automatically coerced with `to_counter`. The metric's configured temporality (cumulative or delta) is honored. The result is always a `double`.",
   }),
@@ -1036,7 +1062,7 @@ const irateDefinition: PromQLFunctionDefinition = {
 const labelJoinDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.METADATA,
   name: 'label_join',
-  description: i18n.translate('kbn-esql-language.promql.definitions.label_join', {
+  description: i18n.translate('esqlLanguage.promql.definitions.label_join', {
     defaultMessage:
       'Joins the values of the source labels `src_label_1` .. `src_label_N` using `separator` and stores the result in the label `dst_label`. A missing source label contributes an empty string.',
   }),
@@ -1083,9 +1109,9 @@ const labelJoinDefinition: PromQLFunctionDefinition = {
 const labelReplaceDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.METADATA,
   name: 'label_replace',
-  description: i18n.translate('kbn-esql-language.promql.definitions.label_replace', {
+  description: i18n.translate('esqlLanguage.promql.definitions.label_replace', {
     defaultMessage:
-      'Matches the regular expression `regex` against the value of the label `src_label`. On a match, sets the label `dst_label` to the expansion of `replacement`, substituting `$1`, `$name`, and `${name}` with the matched capture groups; on no match the input series is returned unchanged.',
+      "Matches the regular expression `regex` against the value of the label `src_label`. On a match, sets the label `dst_label` to the expansion of `replacement`, substituting `$1`, `$name`, and `$'{'name'}'` with the matched capture groups; on no match the input series is returned unchanged.",
   }),
   preview: false,
   signatures: [
@@ -1135,7 +1161,7 @@ const labelReplaceDefinition: PromQLFunctionDefinition = {
 const lastOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'last_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.last_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.last_over_time', {
     defaultMessage:
       'Returns the most recent value of each time series in the specified time range.',
   }),
@@ -1161,7 +1187,7 @@ const lastOverTimeDefinition: PromQLFunctionDefinition = {
 const limitRatioDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES_REDUCTION,
   name: 'limit_ratio',
-  description: i18n.translate('kbn-esql-language.promql.definitions.limit_ratio', {
+  description: i18n.translate('esqlLanguage.promql.definitions.limit_ratio', {
     defaultMessage:
       'Returns a ratio `r` of the series from the input vector, keeping their full label set.',
   }),
@@ -1194,7 +1220,7 @@ const limitRatioDefinition: PromQLFunctionDefinition = {
 const limitkDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES_REDUCTION,
   name: 'limitk',
-  description: i18n.translate('kbn-esql-language.promql.definitions.limitk', {
+  description: i18n.translate('esqlLanguage.promql.definitions.limitk', {
     defaultMessage:
       'Returns `k` arbitrary elements from the input vector, keeping their full label set. Unlike `topk` and `bottomk`, selection is not sort-based and histogram samples are included.',
   }),
@@ -1226,7 +1252,7 @@ const limitkDefinition: PromQLFunctionDefinition = {
 const lnDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'ln',
-  description: i18n.translate('kbn-esql-language.promql.definitions.ln', {
+  description: i18n.translate('esqlLanguage.promql.definitions.ln', {
     defaultMessage: 'Calculates the natural logarithm for all elements in the input vector.',
   }),
   preview: false,
@@ -1251,7 +1277,7 @@ const lnDefinition: PromQLFunctionDefinition = {
 const log10Definition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'log10',
-  description: i18n.translate('kbn-esql-language.promql.definitions.log10', {
+  description: i18n.translate('esqlLanguage.promql.definitions.log10', {
     defaultMessage: 'Calculates the decimal logarithm for all elements in the input vector.',
   }),
   preview: false,
@@ -1276,7 +1302,7 @@ const log10Definition: PromQLFunctionDefinition = {
 const log2Definition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'log2',
-  description: i18n.translate('kbn-esql-language.promql.definitions.log2', {
+  description: i18n.translate('esqlLanguage.promql.definitions.log2', {
     defaultMessage: 'Calculates the binary logarithm for all elements in the input vector.',
   }),
   preview: false,
@@ -1301,7 +1327,7 @@ const log2Definition: PromQLFunctionDefinition = {
 const maxDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES,
   name: 'max',
-  description: i18n.translate('kbn-esql-language.promql.definitions.max', {
+  description: i18n.translate('esqlLanguage.promql.definitions.max', {
     defaultMessage: 'Returns the maximum value across the input vector.',
   }),
   preview: false,
@@ -1326,7 +1352,7 @@ const maxDefinition: PromQLFunctionDefinition = {
 const maxOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'max_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.max_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.max_over_time', {
     defaultMessage: 'Returns the maximum value of all points in the specified time range.',
   }),
   preview: false,
@@ -1351,7 +1377,7 @@ const maxOverTimeDefinition: PromQLFunctionDefinition = {
 const minDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES,
   name: 'min',
-  description: i18n.translate('kbn-esql-language.promql.definitions.min', {
+  description: i18n.translate('esqlLanguage.promql.definitions.min', {
     defaultMessage: 'Returns the minimum value across the input vector.',
   }),
   preview: false,
@@ -1376,7 +1402,7 @@ const minDefinition: PromQLFunctionDefinition = {
 const minOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'min_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.min_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.min_over_time', {
     defaultMessage: 'Returns the minimum value of all points in the specified time range.',
   }),
   preview: false,
@@ -1401,7 +1427,7 @@ const minOverTimeDefinition: PromQLFunctionDefinition = {
 const minuteDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'minute',
-  description: i18n.translate('kbn-esql-language.promql.definitions.minute', {
+  description: i18n.translate('esqlLanguage.promql.definitions.minute', {
     defaultMessage:
       'Returns the minute of the hour for each of the input timestamps (in UTC). Returned values are from 0 to 59.',
   }),
@@ -1427,7 +1453,7 @@ const minuteDefinition: PromQLFunctionDefinition = {
 const monthDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'month',
-  description: i18n.translate('kbn-esql-language.promql.definitions.month', {
+  description: i18n.translate('esqlLanguage.promql.definitions.month', {
     defaultMessage:
       'Returns the month of the year for each of the input timestamps (in UTC). Returned values are from 1 to 12.',
   }),
@@ -1453,7 +1479,7 @@ const monthDefinition: PromQLFunctionDefinition = {
 const piDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.SCALAR,
   name: 'pi',
-  description: i18n.translate('kbn-esql-language.promql.definitions.pi', {
+  description: i18n.translate('esqlLanguage.promql.definitions.pi', {
     defaultMessage: 'Returns the value of pi.',
   }),
   preview: false,
@@ -1471,7 +1497,7 @@ const piDefinition: PromQLFunctionDefinition = {
 const presentOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'present_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.present_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.present_over_time', {
     defaultMessage: 'Returns `1` if the range vector has at least one element, and `0` otherwise.',
   }),
   preview: false,
@@ -1496,7 +1522,7 @@ const presentOverTimeDefinition: PromQLFunctionDefinition = {
 const quantileDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES,
   name: 'quantile',
-  description: i18n.translate('kbn-esql-language.promql.definitions.quantile', {
+  description: i18n.translate('esqlLanguage.promql.definitions.quantile', {
     defaultMessage: 'Returns the φ-quantile (0 ≤ φ ≤ 1) of the values across the input vector.',
   }),
   preview: false,
@@ -1527,7 +1553,7 @@ const quantileDefinition: PromQLFunctionDefinition = {
 const quantileOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'quantile_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.quantile_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.quantile_over_time', {
     defaultMessage: 'Returns the φ-quantile (0 ≤ φ ≤ 1) of the values in the specified time range.',
   }),
   preview: false,
@@ -1558,7 +1584,7 @@ const quantileOverTimeDefinition: PromQLFunctionDefinition = {
 const radDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'rad',
-  description: i18n.translate('kbn-esql-language.promql.definitions.rad', {
+  description: i18n.translate('esqlLanguage.promql.definitions.rad', {
     defaultMessage:
       'Converts input values from degrees to radians for all elements in the input vector.',
   }),
@@ -1584,7 +1610,7 @@ const radDefinition: PromQLFunctionDefinition = {
 const rateDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'rate',
-  description: i18n.translate('kbn-esql-language.promql.definitions.rate', {
+  description: i18n.translate('esqlLanguage.promql.definitions.rate', {
     defaultMessage:
       "Calculates the per-second average rate of increase of the time series in the range vector. Requires a counter input; non-counter inputs are automatically coerced with `to_counter`. The metric's configured temporality (cumulative or delta) is honored. The result is always a `double`.",
   }),
@@ -1610,7 +1636,7 @@ const rateDefinition: PromQLFunctionDefinition = {
 const roundDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'round',
-  description: i18n.translate('kbn-esql-language.promql.definitions.round', {
+  description: i18n.translate('esqlLanguage.promql.definitions.round', {
     defaultMessage:
       'Rounds the sample values to the nearest integer, or to the nearest multiple of the optional argument.',
   }),
@@ -1642,7 +1668,7 @@ const roundDefinition: PromQLFunctionDefinition = {
 const scalarDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.SCALAR_CONVERSION,
   name: 'scalar',
-  description: i18n.translate('kbn-esql-language.promql.definitions.scalar', {
+  description: i18n.translate('esqlLanguage.promql.definitions.scalar', {
     defaultMessage:
       'Returns the sample value of a single-element instant vector as a scalar. If the input vector does not have exactly one element, scalar returns NaN.',
   }),
@@ -1668,7 +1694,7 @@ const scalarDefinition: PromQLFunctionDefinition = {
 const sgnDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'sgn',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sgn', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sgn', {
     defaultMessage:
       'Returns the sign of the sample values: -1 for negative, 0 for zero, and 1 for positive values.',
   }),
@@ -1694,7 +1720,7 @@ const sgnDefinition: PromQLFunctionDefinition = {
 const sinDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'sin',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sin', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sin', {
     defaultMessage: 'Calculates the sine of all elements in the input vector.',
   }),
   preview: false,
@@ -1719,7 +1745,7 @@ const sinDefinition: PromQLFunctionDefinition = {
 const sinhDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'sinh',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sinh', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sinh', {
     defaultMessage: 'Calculates the hyperbolic sine of all elements in the input vector.',
   }),
   preview: false,
@@ -1741,10 +1767,62 @@ const sinhDefinition: PromQLFunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const sortDefinition: PromQLFunctionDefinition = {
+  type: PromQLFunctionDefinitionTypes.RESULT_ORDERING,
+  name: 'sort',
+  description: i18n.translate('esqlLanguage.promql.definitions.sort', {
+    defaultMessage:
+      'Sorts instant-vector series by sample value in ascending order. NaN values are sorted last. Ordering is observable only on instant queries. Range queries return the series in their input order, without applying the requested ordering.',
+  }),
+  preview: false,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'v',
+          type: 'instant_vector',
+          optional: false,
+          description: 'Instant vector input.',
+        },
+      ],
+      returnType: 'instant_vector',
+    },
+  ],
+  locationsAvailable: [Location.PROMQL],
+  examples: ['sort(http_requests_total)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const sortDescDefinition: PromQLFunctionDefinition = {
+  type: PromQLFunctionDefinitionTypes.RESULT_ORDERING,
+  name: 'sort_desc',
+  description: i18n.translate('esqlLanguage.promql.definitions.sort_desc', {
+    defaultMessage:
+      'Sorts instant-vector series by sample value in descending order. NaN values are sorted last. Ordering is observable only on instant queries. Range queries return the series in their input order, without applying the requested ordering.',
+  }),
+  preview: false,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'v',
+          type: 'instant_vector',
+          optional: false,
+          description: 'Instant vector input.',
+        },
+      ],
+      returnType: 'instant_vector',
+    },
+  ],
+  locationsAvailable: [Location.PROMQL],
+  examples: ['sort_desc(http_requests_total)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const sqrtDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'sqrt',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sqrt', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sqrt', {
     defaultMessage: 'Calculates the square root of all elements in the input vector.',
   }),
   preview: false,
@@ -1769,7 +1847,7 @@ const sqrtDefinition: PromQLFunctionDefinition = {
 const stddevDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES,
   name: 'stddev',
-  description: i18n.translate('kbn-esql-language.promql.definitions.stddev', {
+  description: i18n.translate('esqlLanguage.promql.definitions.stddev', {
     defaultMessage: 'Calculates the population standard deviation across the input vector.',
   }),
   preview: false,
@@ -1794,7 +1872,7 @@ const stddevDefinition: PromQLFunctionDefinition = {
 const stddevOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'stddev_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.stddev_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.stddev_over_time', {
     defaultMessage:
       'Returns the population standard deviation of the values in the specified time range.',
   }),
@@ -1820,7 +1898,7 @@ const stddevOverTimeDefinition: PromQLFunctionDefinition = {
 const stdvarDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES,
   name: 'stdvar',
-  description: i18n.translate('kbn-esql-language.promql.definitions.stdvar', {
+  description: i18n.translate('esqlLanguage.promql.definitions.stdvar', {
     defaultMessage: 'Calculates the population variance across the input vector.',
   }),
   preview: false,
@@ -1845,7 +1923,7 @@ const stdvarDefinition: PromQLFunctionDefinition = {
 const stdvarOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'stdvar_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.stdvar_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.stdvar_over_time', {
     defaultMessage: 'Returns the population variance of the values in the specified time range.',
   }),
   preview: false,
@@ -1870,7 +1948,7 @@ const stdvarOverTimeDefinition: PromQLFunctionDefinition = {
 const sumDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES,
   name: 'sum',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sum', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sum', {
     defaultMessage: 'Calculates the sum of the values across the input vector.',
   }),
   preview: false,
@@ -1895,7 +1973,7 @@ const sumDefinition: PromQLFunctionDefinition = {
 const sumOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'sum_over_time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sum_over_time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sum_over_time', {
     defaultMessage: 'Returns the sum of all values in the specified time range.',
   }),
   preview: false,
@@ -1920,7 +1998,7 @@ const sumOverTimeDefinition: PromQLFunctionDefinition = {
 const tanDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'tan',
-  description: i18n.translate('kbn-esql-language.promql.definitions.tan', {
+  description: i18n.translate('esqlLanguage.promql.definitions.tan', {
     defaultMessage: 'Calculates the tangent of all elements in the input vector.',
   }),
   preview: false,
@@ -1945,7 +2023,7 @@ const tanDefinition: PromQLFunctionDefinition = {
 const tanhDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VALUE_TRANSFORMATION,
   name: 'tanh',
-  description: i18n.translate('kbn-esql-language.promql.definitions.tanh', {
+  description: i18n.translate('esqlLanguage.promql.definitions.tanh', {
     defaultMessage: 'Calculates the hyperbolic tangent of all elements in the input vector.',
   }),
   preview: false,
@@ -1970,7 +2048,7 @@ const tanhDefinition: PromQLFunctionDefinition = {
 const timeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.SCALAR,
   name: 'time',
-  description: i18n.translate('kbn-esql-language.promql.definitions.time', {
+  description: i18n.translate('esqlLanguage.promql.definitions.time', {
     defaultMessage:
       'Returns the number of seconds since January 1, 1970 UTC. Note that this does not actually return the current time, but the time at which the expression is being evaluated.',
   }),
@@ -1989,7 +2067,7 @@ const timeDefinition: PromQLFunctionDefinition = {
 const timestampDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'timestamp',
-  description: i18n.translate('kbn-esql-language.promql.definitions.timestamp', {
+  description: i18n.translate('esqlLanguage.promql.definitions.timestamp', {
     defaultMessage:
       'Returns the timestamp of each sample of the given vector as the number of seconds since January 1, 1970 UTC. It acts on float and histogram samples in the same way.',
   }),
@@ -2015,7 +2093,7 @@ const timestampDefinition: PromQLFunctionDefinition = {
 const topkDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES_REDUCTION,
   name: 'topk',
-  description: i18n.translate('kbn-esql-language.promql.definitions.topk', {
+  description: i18n.translate('esqlLanguage.promql.definitions.topk', {
     defaultMessage:
       'Returns `k` time series with the highest values, keeping their full label set. When used with `by`, `topk` ranks independently within each group.',
   }),
@@ -2047,7 +2125,7 @@ const topkDefinition: PromQLFunctionDefinition = {
 const vectorDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.VECTOR_CONVERSION,
   name: 'vector',
-  description: i18n.translate('kbn-esql-language.promql.definitions.vector', {
+  description: i18n.translate('esqlLanguage.promql.definitions.vector', {
     defaultMessage: 'Returns the scalar as a vector with no labels.',
   }),
   preview: false,
@@ -2072,7 +2150,7 @@ const vectorDefinition: PromQLFunctionDefinition = {
 const yearDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.TIME,
   name: 'year',
-  description: i18n.translate('kbn-esql-language.promql.definitions.year', {
+  description: i18n.translate('esqlLanguage.promql.definitions.year', {
     defaultMessage: 'Returns the year for each of the input timestamps (in UTC).',
   }),
   preview: false,
@@ -2106,6 +2184,7 @@ export const promqlFunctionDefinitions: PromQLFunctionDefinition[] = [
   avgOverTimeDefinition,
   bottomkDefinition,
   ceilDefinition,
+  changesDefinition,
   clampDefinition,
   clampMaxDefinition,
   clampMinDefinition,
@@ -2157,6 +2236,8 @@ export const promqlFunctionDefinitions: PromQLFunctionDefinition[] = [
   sgnDefinition,
   sinDefinition,
   sinhDefinition,
+  sortDefinition,
+  sortDescDefinition,
   sqrtDefinition,
   stddevDefinition,
   stddevOverTimeDefinition,

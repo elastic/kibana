@@ -43,6 +43,7 @@ export function createRulesSavedObjectServiceMock(): RulesSavedObjectServiceMock
     getRuleIdsByQuery: jest.fn().mockResolvedValue([]),
     countByQuery: jest.fn().mockResolvedValue(0),
     findTags: jest.fn().mockResolvedValue([]),
+    countByTemplateIds: jest.fn().mockResolvedValue({}),
     getTotalScheduledPerMinute: jest.fn().mockResolvedValue(0),
   };
 }

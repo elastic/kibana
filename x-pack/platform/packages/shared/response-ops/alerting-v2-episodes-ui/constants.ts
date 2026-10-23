@@ -24,26 +24,28 @@ export const QUERY_STALE_TIME = 30_000;
 export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
   {
     id: 'episode.status',
-    name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByStatus', {
+    name: i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.breakdownByStatus', {
       defaultMessage: 'Status',
     }),
     meta: { type: 'string' },
   },
   {
     id: 'rule.id',
-    name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByRule', { defaultMessage: 'Rule' }),
+    name: i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.breakdownByRule', {
+      defaultMessage: 'Rule',
+    }),
     meta: { type: 'string' },
   },
   {
     id: 'last_ack_action',
-    name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByAcknowledged', {
+    name: i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.breakdownByAcknowledged', {
       defaultMessage: 'Acknowledged',
     }),
     meta: { type: 'string' },
   },
   {
     id: 'last_assignee_uid',
-    name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByAssignee', {
+    name: i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.breakdownByAssignee', {
       defaultMessage: 'Assignee',
     }),
     meta: { type: 'string' },

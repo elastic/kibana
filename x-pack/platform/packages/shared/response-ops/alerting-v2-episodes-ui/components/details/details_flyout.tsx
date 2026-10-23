@@ -179,6 +179,7 @@ export const AlertEpisodeDetailsFlyout = ({
     severity,
     episodeAction,
     groupAction,
+    isActionStateLoaded,
     isFlapping,
   } = useEpisodeDetailsHeaderData({ episodeId, groupHash, services });
   const { label: systemLabel, icon: systemIcon } = useEpisodeSource(sourceId);
@@ -192,9 +193,23 @@ export const AlertEpisodeDetailsFlyout = ({
   // Related episodes are matched by rule or external source. Until the episode loads the
   // section renders its own loading or error state, so the panel stays.
   const showRelated = !episode || Boolean(episode['rule.id']) || connectorSource !== undefined;
-  const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
+  // The actions depend on the action state, so they wait for it to load.
+  const episodes = useMemo(
+    () => (episode && isActionStateLoaded ? [episode] : []),
+    [episode, isActionStateLoaded]
+  );
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
+    [actions, episodes]
+  );
+  const menuActions = useMemo(
+    () =>
+      actions && episodes.length
+        ? actions.filter(
+            (action) =>
+              action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+          )
+        : [],
     [actions, episodes]
   );
 
@@ -242,7 +257,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
-  const tags = groupAction?.tags ?? [];
+  const tags = episodeAction?.tags ?? [];
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
   const ruleName = isRuleLoaded(ruleState) ? ruleState.rule.metadata.name : undefined;
@@ -259,7 +274,7 @@ export const AlertEpisodeDetailsFlyout = ({
 
   // Info block values
   const durationMs = episode?.duration;
-  const assigneeUid = episode?.last_assignee_uid ?? undefined;
+  const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const rawAlertUrl =
     typeof episodeData.alert_url === 'string' && episodeData.alert_url.length > 0
@@ -520,7 +535,8 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              groupHash={groupHash}
+              seriesId={episode ? episode.series_id ?? null : undefined}
+              groupHash={episode?.group_hash}
               services={services}
             />
           </FlyoutTemplate.Body.TabPanel>
@@ -599,7 +615,7 @@ export const AlertEpisodeDetailsFlyout = ({
           anchor={menuAnchorRef.current}
           isOpen={isMenuOpen}
           onClose={() => setIsMenuOpen(false)}
-          actions={compatibleActions}
+          actions={menuActions}
           episodes={episodes}
           viewDetailsHref={getEpisodeDetailsHref(episodeId)}
           onSuccess={invalidateEpisodeQueries}
