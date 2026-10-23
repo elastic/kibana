@@ -27,5 +27,9 @@
     "@kbn/std",
     "@kbn/logging-mocks",
     "@kbn/repo-info",
+    "@kbn/connector-emulate",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/tooling-log",
   ]
 }
