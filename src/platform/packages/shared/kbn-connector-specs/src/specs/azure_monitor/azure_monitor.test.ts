@@ -201,6 +201,19 @@ describe('AzureMonitor', () => {
         { params: { 'api-version': '2023-10-01', metricnames: 'Percentage CPU,Network In' } }
       );
     });
+
+    it.each([
+      '/subscriptions/',
+      '/subscriptions//providers/Microsoft.Compute/virtualMachines/vm1',
+      '/subscriptions/x',
+      '/subscriptions/x/resourceGroups/rg1',
+      '/subscriptions/x/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1/',
+    ])('rejects the malformed resource id %s', (resourceId) => {
+      expect(
+        AzureMonitor.actions.queryMetrics.input.safeParse({ resourceId, metricNames: ['cpu'] })
+          .success
+      ).toBe(false);
+    });
   });
 
   describe('runLogQuery action', () => {

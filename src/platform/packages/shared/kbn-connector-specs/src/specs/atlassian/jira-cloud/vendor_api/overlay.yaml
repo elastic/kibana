@@ -1,0 +1,25 @@
+overlay: 1.0.0
+info:
+  title: Jira Cloud platform REST API corrections
+  version: 1.0.0
+actions:
+  - target: $.servers[?@.url == 'https://your-domain.atlassian.net']
+    description: >-
+      The server URL is a placeholder for the customer's site, not a literal host:
+      https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#3-2-construct-the-request-url
+      says the API documentation's example URLs "use https://your-domain.atlassian.net/{api}".
+      The connector calls https://{subdomain}.atlassian.net with basic auth.
+    update:
+      url: https://{your-domain}.atlassian.net
+      variables:
+        your-domain:
+          default: your-domain
+  - target: $.servers
+    description: >-
+      OAuth 2.0 (3LO) requests go to https://api.atlassian.com/ex/jira/{cloudid}/{api}, per
+      https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#3-2-construct-the-request-url.
+    update:
+      - url: https://api.atlassian.com/ex/jira/{cloudid}
+        variables:
+          cloudid:
+            default: cloudid

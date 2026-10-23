@@ -1,0 +1,55 @@
+{
+  "operations": {
+    "countResults": [
+      {
+        "method": "get",
+        "path": "/shodan/host/count",
+        "source": "rest"
+      }
+    ],
+    "getHostInfo": [
+      {
+        "method": "get",
+        "path": "/shodan/host/{ip}",
+        "source": "rest"
+      }
+    ],
+    "getServices": [],
+    "searchHosts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page"
+          },
+          "response": {
+            "itemsPath": "matches",
+            "totalPath": "total"
+          },
+          "style": "page"
+        },
+        "path": "/shodan/host/search",
+        "source": "rest"
+      }
+    ]
+  },
+  "sources": {
+    "rest": {
+      "apiVersion": "1.0.0",
+      "fetchedAt": "2026-10-20T18:11:28.875Z",
+      "format": "openapi",
+      "url": "https://developer.shodan.io/api/openapi.json"
+    }
+  },
+  "unmatched": {
+    "getServices": [
+      {
+        "method": "get",
+        "path": "/shodan/services",
+        "reason": "Documented in Shodan's REST API reference (https://developer.shodan.io/api, \"List all services that Shodan crawls\") but missing from its OpenAPI document, which lists /shodan/ports and /shodan/protocols only"
+      }
+    ]
+  }
+}

@@ -1,0 +1,352 @@
+{
+  "operations": {
+    "authorizeGuestAccess": [
+      {
+        "method": "post",
+        "path": "/v1/sites/{siteId}/clients/{clientId}/actions",
+        "source": "network"
+      }
+    ],
+    "getCameraSnapshot": [
+      {
+        "method": "get",
+        "path": "/v1/cameras/{id}/snapshot",
+        "source": "protect"
+      }
+    ],
+    "getClient": [
+      {
+        "method": "get",
+        "path": "/v1/sites/{siteId}/clients/{clientId}",
+        "source": "network"
+      }
+    ],
+    "getDevice": [
+      {
+        "method": "get",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}",
+        "source": "network"
+      }
+    ],
+    "getDeviceStatistics": [
+      {
+        "method": "get",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}/statistics/latest",
+        "source": "network"
+      }
+    ],
+    "getNetworkInfo": [
+      {
+        "method": "get",
+        "path": "/v1/info",
+        "source": "network"
+      }
+    ],
+    "getNvr": [
+      {
+        "method": "get",
+        "path": "/v1/nvrs",
+        "source": "protect"
+      }
+    ],
+    "getProtectDevice": [
+      {
+        "method": "get",
+        "path": "/v1/alarm-hubs/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/bridges/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/cameras/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/chimes/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/fobs/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/lights/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/link-stations/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/relays/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/sensors/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/sirens/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/speakers/{id}",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "path": "/v1/viewers/{id}",
+        "source": "protect"
+      }
+    ],
+    "getProtectInfo": [
+      {
+        "method": "get",
+        "path": "/v1/meta/info",
+        "source": "protect"
+      }
+    ],
+    "listClients": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "totalCount"
+          },
+          "style": "offset"
+        },
+        "path": "/v1/sites/{siteId}/clients",
+        "source": "network"
+      }
+    ],
+    "listDevices": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "totalCount"
+          },
+          "style": "offset"
+        },
+        "path": "/v1/sites/{siteId}/devices",
+        "source": "network"
+      }
+    ],
+    "listFirewallPolicies": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "totalCount"
+          },
+          "style": "offset"
+        },
+        "path": "/v1/sites/{siteId}/firewall/policies",
+        "source": "network"
+      }
+    ],
+    "listNetworks": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "totalCount"
+          },
+          "style": "offset"
+        },
+        "path": "/v1/sites/{siteId}/networks",
+        "source": "network"
+      }
+    ],
+    "listProtectDevices": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/alarm-hubs",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/bridges",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/cameras",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/chimes",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/fobs",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/lights",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/link-stations",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/relays",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/sensors",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/sirens",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/speakers",
+        "source": "protect"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/viewers",
+        "source": "protect"
+      }
+    ],
+    "listSites": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "totalCount"
+          },
+          "style": "offset"
+        },
+        "path": "/v1/sites",
+        "source": "network"
+      }
+    ],
+    "listWans": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "totalCount"
+          },
+          "style": "offset"
+        },
+        "path": "/v1/sites/{siteId}/wans",
+        "source": "network"
+      }
+    ],
+    "movePtzCameraToPreset": [
+      {
+        "method": "post",
+        "path": "/v1/cameras/{id}/ptz/goto/{slot}",
+        "source": "protect"
+      }
+    ],
+    "powerCyclePort": [
+      {
+        "method": "post",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}/interfaces/ports/{portIdx}/actions",
+        "source": "network"
+      }
+    ],
+    "restartDevice": [
+      {
+        "method": "post",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}/actions",
+        "source": "network"
+      }
+    ],
+    "unauthorizeGuestAccess": [
+      {
+        "method": "post",
+        "path": "/v1/sites/{siteId}/clients/{clientId}/actions",
+        "source": "network"
+      }
+    ]
+  },
+  "sources": {
+    "network": {
+      "apiVersion": "10.4.57",
+      "fetchedAt": "2026-10-07T20:20:26.345Z",
+      "format": "openapi",
+      "url": "https://developer.ui.com/network/v10.4.57/openapi.json"
+    },
+    "protect": {
+      "apiVersion": "0.0.0",
+      "fetchedAt": "2026-10-07T20:20:26.347Z",
+      "format": "openapi",
+      "url": "https://developer.ui.com/protect/v7.1.87/openapi.json"
+    }
+  }
+}

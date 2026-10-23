@@ -1,0 +1,285 @@
+{
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventData": {
+        "properties": {
+          "authorization": {
+            "$ref": "#/components/schemas/SenderAuthorization",
+            "readOnly": true
+          },
+          "caller": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/LocalizableString",
+            "readOnly": true
+          },
+          "claims": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "correlationId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "eventDataId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "eventName": {
+            "$ref": "#/components/schemas/LocalizableString",
+            "readOnly": true
+          },
+          "eventTimestamp": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "httpRequest": {
+            "$ref": "#/components/schemas/HttpRequestInfo",
+            "readOnly": true
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "level": {
+            "enum": [
+              "Critical",
+              "Error",
+              "Warning",
+              "Informational",
+              "Verbose"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "operationId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "operationName": {
+            "$ref": "#/components/schemas/LocalizableString",
+            "readOnly": true
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "resourceGroupName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "resourceId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "resourceProviderName": {
+            "$ref": "#/components/schemas/LocalizableString",
+            "readOnly": true
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/LocalizableString",
+            "readOnly": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/LocalizableString",
+            "readOnly": true
+          },
+          "subStatus": {
+            "$ref": "#/components/schemas/LocalizableString",
+            "readOnly": true
+          },
+          "submissionTimestamp": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "subscriptionId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "tenantId": {
+            "readOnly": true,
+            "type": "string"
+          }
+        }
+      },
+      "EventDataCollection": {
+        "properties": {
+          "nextLink": {
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/EventData"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "HttpRequestInfo": {
+        "properties": {
+          "clientIpAddress": {
+            "type": "string"
+          },
+          "clientRequestId": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        }
+      },
+      "LocalizableString": {
+        "properties": {
+          "localizedValue": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "SenderAuthorization": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "MonitorManagementClient"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/eventtypes/management/values": {
+      "get": {
+        "operationId": "ActivityLogs_List",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$filter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$select",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDataCollection"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

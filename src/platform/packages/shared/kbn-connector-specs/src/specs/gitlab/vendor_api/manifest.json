@@ -1,0 +1,490 @@
+{
+  "operations": {
+    "acceptMergeRequest": [
+      {
+        "method": "put",
+        "path": "/api/v4/projects/{id}/merge_requests/{merge_request_iid}/merge",
+        "source": "v4"
+      }
+    ],
+    "addIssueNote": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/issues/{noteable_id}/notes",
+        "source": "v4"
+      }
+    ],
+    "addMergeRequestNote": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/merge_requests/{noteable_id}/notes",
+        "source": "v4"
+      }
+    ],
+    "approveMergeRequest": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/merge_requests/{merge_request_iid}/approve",
+        "source": "v4"
+      }
+    ],
+    "cancelPipeline": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/pipelines/{pipeline_id}/cancel",
+        "source": "v4"
+      }
+    ],
+    "createBranch": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/repository/branches",
+        "source": "v4"
+      }
+    ],
+    "createIssue": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/issues",
+        "source": "v4"
+      }
+    ],
+    "createMergeRequest": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/merge_requests",
+        "source": "v4"
+      }
+    ],
+    "createOrUpdateFile": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/repository/files/{file_path}",
+        "source": "v4"
+      },
+      {
+        "method": "put",
+        "path": "/api/v4/projects/{id}/repository/files/{file_path}",
+        "source": "v4"
+      }
+    ],
+    "deleteFile": [
+      {
+        "method": "delete",
+        "path": "/api/v4/projects/{id}/repository/files/{file_path}",
+        "source": "v4"
+      }
+    ],
+    "getCommit": [
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}/repository/commits/{sha}",
+        "source": "v4"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/repository/commits/{sha}/diff",
+        "source": "v4"
+      }
+    ],
+    "getCurrentUser": [
+      {
+        "method": "get",
+        "path": "/api/v4/user",
+        "source": "v4"
+      }
+    ],
+    "getFile": [
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}/repository/files/{file_path}",
+        "source": "v4"
+      }
+    ],
+    "getIssue": [
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}/issues/{issue_iid}",
+        "source": "v4"
+      }
+    ],
+    "getJobArtifact": [
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}/jobs/{job_id}/artifacts/{artifact_path}",
+        "source": "v4"
+      },
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}/jobs/{job_id}/trace",
+        "source": "v4"
+      }
+    ],
+    "getMergeRequest": [
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}/merge_requests/{merge_request_iid}",
+        "source": "v4"
+      },
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}/merge_requests/{merge_request_iid}/approvals",
+        "source": "v4"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/merge_requests/{merge_request_iid}/diffs",
+        "source": "v4"
+      }
+    ],
+    "getPipeline": [
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}/pipelines/{pipeline_id}",
+        "source": "v4"
+      }
+    ],
+    "getProject": [
+      {
+        "method": "get",
+        "path": "/api/v4/projects/{id}",
+        "source": "v4"
+      }
+    ],
+    "listBranches": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/repository/branches",
+        "source": "v4"
+      }
+    ],
+    "listCommits": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/repository/commits",
+        "source": "v4"
+      }
+    ],
+    "listDeployments": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/deployments",
+        "source": "v4"
+      }
+    ],
+    "listEnvironments": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/environments",
+        "source": "v4"
+      }
+    ],
+    "listGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/groups",
+        "source": "v4"
+      }
+    ],
+    "listIssues": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/issues",
+        "source": "v4"
+      }
+    ],
+    "listJobs": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/pipelines/{pipeline_id}/jobs",
+        "source": "v4"
+      }
+    ],
+    "listLabels": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/labels",
+        "source": "v4"
+      }
+    ],
+    "listMergeRequests": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/merge_requests",
+        "source": "v4"
+      }
+    ],
+    "listPipelineSchedules": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/pipeline_schedules",
+        "source": "v4"
+      }
+    ],
+    "listPipelines": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/pipelines",
+        "source": "v4"
+      }
+    ],
+    "listTags": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects/{id}/repository/tags",
+        "source": "v4"
+      }
+    ],
+    "requestMergeRequestReview": [
+      {
+        "method": "put",
+        "path": "/api/v4/projects/{id}/merge_requests/{merge_request_iid}",
+        "source": "v4"
+      }
+    ],
+    "retryPipeline": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/pipelines/{pipeline_id}/retry",
+        "source": "v4"
+      }
+    ],
+    "searchCode": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/search",
+        "source": "v4"
+      }
+    ],
+    "searchProjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/projects",
+        "source": "v4"
+      }
+    ],
+    "searchUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/api/v4/users",
+        "source": "v4"
+      }
+    ],
+    "triggerPipeline": [
+      {
+        "method": "post",
+        "path": "/api/v4/projects/{id}/pipeline",
+        "source": "v4"
+      }
+    ],
+    "updateIssue": [
+      {
+        "method": "put",
+        "path": "/api/v4/projects/{id}/issues/{issue_iid}",
+        "source": "v4"
+      }
+    ],
+    "updateMergeRequest": [
+      {
+        "method": "put",
+        "path": "/api/v4/projects/{id}/merge_requests/{merge_request_iid}",
+        "source": "v4"
+      }
+    ]
+  },
+  "sources": {
+    "v4": {
+      "apiVersion": "19.5",
+      "fetchedAt": "2026-10-07T20:20:38.328Z",
+      "format": "openapi",
+      "url": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/doc/api/openapi/openapi_v3.yaml"
+    }
+  }
+}

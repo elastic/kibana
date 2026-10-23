@@ -1,0 +1,138 @@
+{
+  "operations": {
+    "getDrive": [
+      {
+        "method": "get",
+        "path": "/me/drive",
+        "source": "v1"
+      }
+    ],
+    "getFileContent": [
+      {
+        "method": "get",
+        "path": "/drives/{drive-id}/items/{driveItem-id}/content",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "path": "/me/drive/items/{driveItem-id}/content",
+        "source": "v1"
+      }
+    ],
+    "getFileMetadata": [
+      {
+        "method": "get",
+        "path": "/drives/{drive-id}/items/{driveItem-id}",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "path": "/me/drive/items/{driveItem-id}",
+        "source": "v1"
+      }
+    ],
+    "getItemChildren": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/drive/items/{driveItem-id}/children",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/drive/root/children",
+        "source": "v1"
+      }
+    ],
+    "getMe": [
+      {
+        "method": "get",
+        "path": "/me",
+        "source": "v1"
+      }
+    ],
+    "listRecentFiles": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/drive/recent",
+        "source": "v1"
+      }
+    ],
+    "listSharedWithMe": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/drive/sharedWithMe",
+        "source": "v1"
+      }
+    ],
+    "search": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/drive/root/search(q='{q}')",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "v1.0",
+      "fetchedAt": "2026-10-07T20:21:15.263Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/master/openapi/v1.0/openapi.yaml"
+    }
+  }
+}

@@ -101,7 +101,9 @@ describe('Sentry', () => {
 
       const result = await Sentry.actions.getIssue.handler(mockContext, { issueId: '123' });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/');
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/'
+      );
       expect(result).toEqual(expect.objectContaining({ id: '123', title: 'TypeError' }));
     });
 
@@ -110,7 +112,9 @@ describe('Sentry', () => {
 
       await Sentry.actions.getIssue.handler(mockContext, { issueId: 'a/b#c' });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://sentry.io/api/0/issues/a%2Fb%23c/');
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/a%2Fb%23c/'
+      );
     });
   });
 
@@ -120,9 +124,12 @@ describe('Sentry', () => {
 
       await Sentry.actions.resolveIssue.handler(mockContext, { issueId: '123' });
 
-      expect(mockClient.put).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/', {
-        status: 'resolved',
-      });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/',
+        {
+          status: 'resolved',
+        }
+      );
     });
 
     it('should resolve in next release when requested', async () => {
@@ -133,9 +140,12 @@ describe('Sentry', () => {
         inNextRelease: true,
       });
 
-      expect(mockClient.put).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/', {
-        status: 'resolvedInNextRelease',
-      });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/',
+        {
+          status: 'resolvedInNextRelease',
+        }
+      );
     });
   });
 
@@ -145,9 +155,12 @@ describe('Sentry', () => {
 
       await Sentry.actions.ignoreIssue.handler(mockContext, { issueId: '123' });
 
-      expect(mockClient.put).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/', {
-        status: 'ignored',
-      });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/',
+        {
+          status: 'ignored',
+        }
+      );
     });
 
     it('should pass ignoreDuration when provided', async () => {
@@ -155,10 +168,13 @@ describe('Sentry', () => {
 
       await Sentry.actions.ignoreIssue.handler(mockContext, { issueId: '123', ignoreDuration: 60 });
 
-      expect(mockClient.put).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/', {
-        status: 'ignored',
-        statusDetails: { ignoreDuration: 60 },
-      });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/',
+        {
+          status: 'ignored',
+          statusDetails: { ignoreDuration: 60 },
+        }
+      );
     });
   });
 
@@ -168,9 +184,12 @@ describe('Sentry', () => {
 
       await Sentry.actions.unresolveIssue.handler(mockContext, { issueId: '123' });
 
-      expect(mockClient.put).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/', {
-        status: 'unresolved',
-      });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/',
+        {
+          status: 'unresolved',
+        }
+      );
     });
   });
 
@@ -183,9 +202,12 @@ describe('Sentry', () => {
         assignedTo: 'a@b.com',
       });
 
-      expect(mockClient.put).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/', {
-        assignedTo: 'a@b.com',
-      });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/',
+        {
+          assignedTo: 'a@b.com',
+        }
+      );
     });
 
     it('should assign to a team', async () => {
@@ -196,9 +218,12 @@ describe('Sentry', () => {
         assignedTo: 'team:backend-team',
       });
 
-      expect(mockClient.put).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/', {
-        assignedTo: 'team:backend-team',
-      });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/',
+        {
+          assignedTo: 'team:backend-team',
+        }
+      );
     });
   });
 
@@ -208,9 +233,12 @@ describe('Sentry', () => {
 
       const result = await Sentry.actions.listIssueEvents.handler(mockContext, { issueId: '123' });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/events/', {
-        params: {},
-      });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/events/',
+        {
+          params: {},
+        }
+      );
       expect(result).toEqual({ events: [{ id: 'e1' }, { id: 'e2' }] });
     });
 
@@ -223,9 +251,12 @@ describe('Sentry', () => {
         full: true,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/events/', {
-        params: { cursor: 'abc', full: true },
-      });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/events/',
+        {
+          params: { cursor: 'abc', full: true },
+        }
+      );
     });
   });
 
@@ -324,7 +355,9 @@ describe('Sentry', () => {
 
       const result = await Sentry.actions.deleteIssue.handler(mockContext, { issueId: '123' });
 
-      expect(mockClient.delete).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/');
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/organizations/my-org/issues/123/'
+      );
       expect(result).toEqual({ deleted: true, issueId: '123' });
     });
 

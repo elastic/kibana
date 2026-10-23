@@ -1,0 +1,56 @@
+{
+  "createAlerts": {
+    "input": {
+      "alerts": [
+        {
+          "labels": {
+            "alertname": "DiskSpaceLow",
+            "severity": "warning",
+            "instance": "db-1"
+          },
+          "annotations": {
+            "summary": "Disk usage above 90%"
+          },
+          "startsAt": "2026-06-01T10:00:00Z",
+          "endsAt": "2026-06-01T12:00:00Z",
+          "generatorURL": "https://prometheus.example.com/graph"
+        }
+      ]
+    }
+  },
+  "getPrometheusSeries": {
+    "config": {
+      "prometheusUrl": "https://prometheus.example.com"
+    }
+  },
+  "listPrometheusAlerts": {
+    "config": {
+      "prometheusUrl": "https://prometheus.example.com"
+    }
+  },
+  "listPrometheusLabelValues": {
+    "config": {
+      "prometheusUrl": "https://prometheus.example.com"
+    }
+  },
+  "listPrometheusRules": {
+    "config": {
+      "prometheusUrl": "https://prometheus.example.com"
+    }
+  },
+  "listPrometheusTargets": {
+    "config": {
+      "prometheusUrl": "https://prometheus.example.com"
+    }
+  },
+  "queryPrometheus": {
+    "config": {
+      "prometheusUrl": "https://prometheus.example.com"
+    }
+  },
+  "queryRangePrometheus": {
+    "config": {
+      "prometheusUrl": "https://prometheus.example.com"
+    }
+  }
+}

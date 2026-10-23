@@ -1,0 +1,11 @@
+{
+  "searchMessages": {
+    "queries": [
+      {
+        "source": "v1",
+        "method": "POST",
+        "path": "/search/query"
+      }
+    ]
+  }
+}

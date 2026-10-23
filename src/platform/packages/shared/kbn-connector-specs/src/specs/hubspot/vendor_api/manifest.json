@@ -1,0 +1,231 @@
+{
+  "operations": {
+    "getCrmObject": [
+      {
+        "method": "post",
+        "path": "/crm/v4/associations/{fromObjectType}/{toObjectType}/batch/read",
+        "source": "associations_v4"
+      },
+      {
+        "method": "get",
+        "path": "/crm/v3/objects/contacts/{contactId}",
+        "source": "contacts_v3"
+      },
+      {
+        "method": "post",
+        "path": "/crm/v3/objects/notes/batch/read",
+        "source": "notes_v3"
+      },
+      {
+        "method": "get",
+        "path": "/crm/v3/objects/notes/{noteId}",
+        "source": "notes_v3"
+      },
+      {
+        "method": "get",
+        "path": "/crm/v3/objects/{objectType}/{objectId}",
+        "source": "objects_v3"
+      }
+    ],
+    "listOwners": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "after",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "paging.next.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/crm/v3/owners",
+        "source": "owners_v3"
+      }
+    ],
+    "listPipelines": [
+      {
+        "method": "get",
+        "path": "/crm/v3/pipelines/{objectType}",
+        "source": "pipelines_v3"
+      }
+    ],
+    "searchBroad": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "after",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "paging.next.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/crm/v3/objects/contacts/search",
+        "source": "contacts_v3"
+      },
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "after",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "paging.next.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/crm/v3/objects/{objectType}/search",
+        "source": "objects_v3"
+      }
+    ],
+    "searchCrmObjects": [
+      {
+        "method": "post",
+        "path": "/crm/v3/associations/{fromObjectType}/{toObjectType}/batch/read",
+        "source": "associations_v3"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "cursorParam": "after",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "paging.next.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/crm/v3/objects/contacts",
+        "source": "contacts_v3"
+      },
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "after",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "paging.next.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/crm/v3/objects/contacts/search",
+        "source": "contacts_v3"
+      },
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "after",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "paging.next.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/crm/v3/objects/notes/search",
+        "source": "notes_v3"
+      },
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "after",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "paging.next.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/crm/v3/objects/{objectType}/search",
+        "source": "objects_v3"
+      }
+    ],
+    "searchDeals": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "after",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "paging.next.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/crm/v3/objects/{objectType}/search",
+        "source": "objects_v3"
+      }
+    ]
+  },
+  "sources": {
+    "associations_v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:48:50.030Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Associations/Rollouts/120891/v3/associations.json"
+    },
+    "associations_v4": {
+      "apiVersion": "v4",
+      "fetchedAt": "2026-10-07T20:20:46.517Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Associations/Rollouts/130902/v4/associations.json"
+    },
+    "contacts_v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:20:46.515Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Contacts/Rollouts/424/v3/contacts.json"
+    },
+    "notes_v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:20:46.516Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Notes/Rollouts/424/v3/notes.json"
+    },
+    "objects_v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:20:46.514Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Objects/Rollouts/424/v3/objects.json"
+    },
+    "owners_v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:20:46.516Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Crm%20Owners/Rollouts/146888/v3/crmOwners.json"
+    },
+    "pipelines_v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:20:46.517Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Pipelines/Rollouts/145896/v3/pipelines.json"
+    }
+  }
+}

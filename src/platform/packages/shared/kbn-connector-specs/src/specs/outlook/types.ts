@@ -18,6 +18,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const OUTLOOK_MAX_ID_LENGTH = 1024;
 const OUTLOOK_MAX_QUERY_LENGTH = 2000;
 const OUTLOOK_MAX_ORDERBY_LENGTH = 100;
+// searchRequest.from is an Int32 in the Graph spec.
+export const OUTLOOK_MAX_SEARCH_FROM = 2147483647;
 
 export const SearchMessagesInputSchema = lazySchema(() =>
   z.object({
@@ -29,7 +31,9 @@ export const SearchMessagesInputSchema = lazySchema(() =>
       ),
     from: z
       .number()
+      .int()
       .min(0)
+      .max(OUTLOOK_MAX_SEARCH_FROM)
       .default(0)
       .describe('Zero-based offset for pagination (default: 0). Use with size to page results.'),
     size: z

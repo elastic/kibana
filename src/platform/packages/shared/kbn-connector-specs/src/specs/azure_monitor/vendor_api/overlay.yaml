@@ -1,0 +1,31 @@
+overlay: 1.0.0
+info:
+  title: Azure Monitor API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/subscriptions/{subscriptionId}/providers/Microsoft.Insights/eventtypes/management/values'].get.parameters
+    description: >-
+      x-ms-pageable; the Activity Log nextLink repeats the request with a `$skipToken` query
+      parameter the spec doesn't declare, e.g.
+      `.../eventtypes/management/values?%24filter=...&api-version=2015-04-01&$skipToken=EU1:-1:FFFFFFFF;...`
+      in https://github.com/Azure/azure-sdk-for-go/issues/15108 and
+      https://github.com/Azure/azure-sdk-for-go/issues/22408.
+    update:
+      - in: query
+        name: $skipToken
+        required: false
+        schema:
+          type: string
+  - target: $.paths['/{scope}/providers/Microsoft.AlertsManagement/alerts'].get.parameters
+    description: >-
+      x-ms-pageable; the alerts nextLink repeats the request with a `ctoken` query parameter
+      the spec doesn't declare, e.g.
+      `.../providers/Microsoft.AlertsManagement/alerts?api-version=2018-05-05-preview&timeRange=1d&ctoken=%2bRID...`
+      in the spec's own example
+      https://github.com/Azure/azure-rest-api-specs/blob/main/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertsManagement/stable/2019-03-01/examples/Alerts_List.json.
+    update:
+      - in: query
+        name: ctoken
+        required: false
+        schema:
+          type: string

@@ -1,0 +1,20 @@
+overlay: 1.0.0
+info:
+  title: Notion API corrections
+  version: 1.0.0
+actions:
+  - target: $.components.parameters.notionVersion.schema
+    description: >-
+      The spec only lists the latest Notion-Version. https://developers.notion.com/reference/versioning
+      says older versions keep working ("We don't currently have any plans to stop supporting older API
+      versions"); the connector pins 2025-09-03, the version that introduced data sources.
+    update:
+      enum:
+        - '2025-09-03'
+
+  - target: $.paths['/v1/search'].post.requestBody.content['application/json'].schema.properties.start_cursor.format
+    description: >-
+      https://developers.notion.com/reference/versioning says pagination cursors are opaque and "may change
+      in length, format, or structure at any time", to be passed back verbatim as start_cursor; the spec
+      marks it a uuid.
+    remove: true

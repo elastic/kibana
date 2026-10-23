@@ -11,8 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 
-const MAX_TICKET_ID_LENGTH = 200;
+// Ticket IDs are int64 in the Zendesk OpenAPI spec (components.parameters.TicketId).
+const MAX_TICKET_ID_LENGTH = 19;
+const TICKET_ID_PATTERN = /^\d+$/;
 const MAX_INCLUDE_LENGTH = 200;
+// Search, tickets and comments all return "a maximum of 100" records per page.
+const MAX_PER_PAGE = 100;
 
 const buildBaseUrl = (ctx: ActionContext): string =>
   `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com/api/v2`;
@@ -106,9 +110,12 @@ export const ZendeskConnector: ConnectorSpec = {
             .enum(['asc', 'desc'])
             .optional()
             .describe('Sort direction. "desc" is the default when sortBy is provided.'),
-          page: z.number().optional().describe('Page number for pagination.'),
+          page: z.number().int().min(1).optional().describe('Page number for pagination.'),
           perPage: z
             .number()
+            .int()
+            .min(1)
+            .max(MAX_PER_PAGE)
             .optional()
             .describe(
               'Number of results per page (max 100). The Search API returns up to 1000 results total across all pages.'
@@ -144,10 +151,17 @@ export const ZendeskConnector: ConnectorSpec = {
         'List Zendesk tickets. Use when you need to browse or filter tickets by page. For keyword or criteria-based lookups, prefer the search action instead.',
       input: lazySchema(() =>
         z.object({
-          page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
+          page: z
+            .number()
+            .int()
+            .min(1)
+            .default(1)
+            .describe('Page number for pagination. Defaults to 1.'),
           perPage: z
             .number()
-            .max(100)
+            .int()
+            .min(1)
+            .max(MAX_PER_PAGE)
             .default(25)
             .describe('Number of tickets per page (max 100). Defaults to 25.'),
           include: z
@@ -165,7 +179,7 @@ export const ZendeskConnector: ConnectorSpec = {
         if (input.page !== undefined && input.page !== null) params.page = input.page;
         if (input.perPage !== undefined && input.perPage !== null) params.per_page = input.perPage;
         if (input.include) params.include = input.include;
-        const response = await ctx.client.get(`${baseUrl}/tickets.json`, { params });
+        const response = await ctx.client.get(`${baseUrl}/tickets`, { params });
         return response.data;
       },
     },
@@ -180,12 +194,13 @@ export const ZendeskConnector: ConnectorSpec = {
           ticketId: z
             .string()
             .max(MAX_TICKET_ID_LENGTH)
+            .regex(TICKET_ID_PATTERN)
             .describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
         })
       ),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.get(`${baseUrl}/tickets/${input.ticketId}.json`, {
+        const response = await ctx.client.get(`${baseUrl}/tickets/${input.ticketId}`, {
           params: { include: 'comment_count' },
         });
         return response.data;
@@ -202,11 +217,19 @@ export const ZendeskConnector: ConnectorSpec = {
           ticketId: z
             .string()
             .max(MAX_TICKET_ID_LENGTH)
+            .regex(TICKET_ID_PATTERN)
             .describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
-          page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
+          page: z
+            .number()
+            .int()
+            .min(1)
+            .default(1)
+            .describe('Page number for pagination. Defaults to 1.'),
           perPage: z
             .number()
-            .max(100)
+            .int()
+            .min(1)
+            .max(MAX_PER_PAGE)
             .default(25)
             .describe('Number of comments per page (max 100). Defaults to 25.'),
           include: z
@@ -232,10 +255,9 @@ export const ZendeskConnector: ConnectorSpec = {
         if (input.include) params.include = input.include;
         if (input.includeInlineImages !== undefined)
           params.include_inline_images = input.includeInlineImages;
-        const response = await ctx.client.get(
-          `${baseUrl}/tickets/${input.ticketId}/comments.json`,
-          { params }
-        );
+        const response = await ctx.client.get(`${baseUrl}/tickets/${input.ticketId}/comments`, {
+          params,
+        });
         return response.data;
       },
     },
@@ -248,7 +270,7 @@ export const ZendeskConnector: ConnectorSpec = {
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.get(`${baseUrl}/users/me.json`);
+        const response = await ctx.client.get(`${baseUrl}/users/me`);
         return response.data;
       },
     },
@@ -277,7 +299,7 @@ export const ZendeskConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       const baseUrl = buildBaseUrl(ctx);
-      await ctx.client.get(`${baseUrl}/users/me.json`);
+      await ctx.client.get(`${baseUrl}/users/me`);
       return {};
     },
     enabled: true,

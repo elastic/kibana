@@ -1,0 +1,252 @@
+{
+  "components": {
+    "schemas": {
+      "ActionGroup": {
+        "properties": {
+          "actionGroupId": {
+            "type": "string"
+          },
+          "webhookProperties": {
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "actionGroupId"
+        ]
+      },
+      "ActionList": {
+        "properties": {
+          "actionGroups": {
+            "items": {
+              "$ref": "#/components/schemas/ActionGroup"
+            },
+            "type": "array"
+          }
+        }
+      },
+      "ActivityLogAlertResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AzureResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/AlertRuleProperties"
+          }
+        }
+      },
+      "AlertRuleAllOfCondition": {
+        "properties": {
+          "allOf": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRuleAnyOfOrLeafCondition"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "allOf"
+        ],
+        "type": "object"
+      },
+      "AlertRuleAnyOfOrLeafCondition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AlertRuleLeafCondition"
+          }
+        ],
+        "properties": {
+          "anyOf": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRuleLeafCondition"
+            },
+            "title": "An Activity Log Alert rule 'anyOf' condition.",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleLeafCondition": {
+        "properties": {
+          "containsAny": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "equals": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertRuleList": {
+        "properties": {
+          "nextLink": {
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityLogAlertResource"
+            },
+            "type": "array"
+          }
+        }
+      },
+      "AlertRuleProperties": {
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/ActionList"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/AlertRuleAllOfCondition"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scopes",
+          "condition",
+          "actions"
+        ],
+        "type": "object"
+      },
+      "AzureResource": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "location": {
+            "default": "global",
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "message": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Azure Activity Log Alerts API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/activityLogAlerts": {
+      "get": {
+        "operationId": "ActivityLogAlerts_ListBySubscriptionId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleList"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

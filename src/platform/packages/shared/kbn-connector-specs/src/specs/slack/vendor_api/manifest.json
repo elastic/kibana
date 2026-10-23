@@ -1,0 +1,204 @@
+{
+  "operations": {
+    "createConversation": [
+      {
+        "method": "post",
+        "path": "/conversations.create",
+        "source": "web"
+      }
+    ],
+    "getConversationHistory": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "hasMorePath": "has_more",
+            "itemsPath": "messages",
+            "nextPath": "response_metadata.next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/conversations.history",
+        "source": "web"
+      }
+    ],
+    "getConversationInfo": [
+      {
+        "method": "get",
+        "path": "/conversations.info",
+        "source": "web"
+      }
+    ],
+    "getFileInfo": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "comments",
+            "nextPath": "response_metadata.next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/files.info",
+        "source": "web"
+      }
+    ],
+    "inviteToConversation": [
+      {
+        "method": "post",
+        "path": "/conversations.invite",
+        "source": "web"
+      }
+    ],
+    "listChannels": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "channels",
+            "nextPath": "response_metadata.next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/conversations.list",
+        "source": "web"
+      }
+    ],
+    "listFiles": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "count"
+          },
+          "response": {
+            "itemsPath": "files",
+            "totalPath": "paging.total"
+          },
+          "style": "page"
+        },
+        "path": "/files.list",
+        "source": "web"
+      }
+    ],
+    "listUserConversations": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "channels",
+            "nextPath": "response_metadata.next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/users.conversations",
+        "source": "web"
+      }
+    ],
+    "listUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "members",
+            "nextPath": "response_metadata.next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/users.list",
+        "source": "web"
+      }
+    ],
+    "lookupUserByEmail": [
+      {
+        "method": "get",
+        "path": "/users.lookupByEmail",
+        "source": "web"
+      }
+    ],
+    "resolveChannelId": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "channels",
+            "nextPath": "response_metadata.next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/conversations.list",
+        "source": "web"
+      }
+    ],
+    "searchMessages": [],
+    "sendMessage": [
+      {
+        "method": "post",
+        "path": "/chat.postMessage",
+        "source": "web"
+      }
+    ],
+    "updateMessage": [
+      {
+        "method": "post",
+        "path": "/chat.update",
+        "source": "web"
+      }
+    ],
+    "whoAmI": [
+      {
+        "method": "get",
+        "path": "/auth.test",
+        "source": "web"
+      }
+    ]
+  },
+  "sources": {
+    "web": {
+      "apiVersion": "1.7.0",
+      "fetchedAt": "2026-10-07T20:21:38.228Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/slackapi/slack-api-specs/master/web-api/slack_web_openapi_v2.json"
+    }
+  },
+  "unmatched": {
+    "searchMessages": [
+      {
+        "method": "post",
+        "path": "/api/assistant.search.context",
+        "reason": "Missing from Slack's published OpenAPI spec; documented at https://docs.slack.dev/reference/methods/assistant.search.context"
+      }
+    ]
+  }
+}

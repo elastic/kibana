@@ -55,7 +55,7 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets.json',
+        'https://test-company.zendesk.com/api/v2/tickets',
         expect.objectContaining({
           params: { page: 1, per_page: 25 },
         })
@@ -73,7 +73,7 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets/123.json',
+        'https://test-company.zendesk.com/api/v2/tickets/123',
         expect.objectContaining({
           params: { include: 'comment_count' },
         })
@@ -82,14 +82,14 @@ describe('ZendeskConnector', () => {
   });
 
   describe('whoAmI action', () => {
-    it('should call Zendesk users/me.json API', async () => {
+    it('should call Zendesk users/me API', async () => {
       const mockResponse = { data: { user: { id: 1, email: 'agent@test.com' } } };
       mockClient.get.mockResolvedValue(mockResponse);
 
       await ZendeskConnector.actions.whoAmI.handler(mockContext, {});
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/users/me.json'
+        'https://test-company.zendesk.com/api/v2/users/me'
       );
     });
   });
@@ -104,7 +104,7 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets/456/comments.json',
+        'https://test-company.zendesk.com/api/v2/tickets/456/comments',
         expect.objectContaining({
           params: {},
         })
@@ -124,7 +124,7 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets/789/comments.json',
+        'https://test-company.zendesk.com/api/v2/tickets/789/comments',
         expect.objectContaining({
           params: {
             page: 2,
@@ -144,13 +144,13 @@ describe('ZendeskConnector', () => {
   describe('test handler', () => {
     const testSpec = ZendeskConnector.test;
 
-    it('should call /users/me.json and return {}', async () => {
+    it('should call /users/me and return {}', async () => {
       mockClient.get.mockResolvedValue({ data: { user: { id: 1, name: 'Alice' } } });
 
       const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/users/me.json'
+        'https://test-company.zendesk.com/api/v2/users/me'
       );
       expect(result).toEqual({});
     });

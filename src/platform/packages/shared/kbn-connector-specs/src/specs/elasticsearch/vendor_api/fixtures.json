@@ -1,0 +1,45 @@
+{
+  "esql": {
+    "input": {
+      "query": "FROM logs-* | STATS count = COUNT(*) BY host.name | LIMIT 10",
+      "filter": {
+        "exists": {
+          "field": "host.name"
+        }
+      }
+    },
+    "queries": [
+      {
+        "source": "stack",
+        "method": "POST",
+        "path": "/_query"
+      }
+    ]
+  },
+  "request": {
+    "input": {
+      "path": "/"
+    }
+  },
+  "search": {
+    "input": {
+      "query": {
+        "match_all": {}
+      },
+      "sort": [
+        {
+          "@timestamp": {
+            "order": "desc"
+          }
+        }
+      ]
+    },
+    "queries": [
+      {
+        "source": "stack",
+        "method": "POST",
+        "path": "/{index}/_search"
+      }
+    ]
+  }
+}

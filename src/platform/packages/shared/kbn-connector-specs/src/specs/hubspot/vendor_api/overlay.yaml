@@ -1,0 +1,11 @@
+overlay: 1.0.0
+info:
+  title: HubSpot CRM API corrections
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.PublicObjectSearchRequest.required
+    description: >-
+      The spec marks after, filterGroups, limit, properties and sorts as required, but every field
+      of the search body is optional: https://developers.hubspot.com/docs/api-reference/search/guide#search-default-searchable-properties
+      sends `{"query": "x"}` alone, and other examples on that page send only filterGroups.
+    remove: true

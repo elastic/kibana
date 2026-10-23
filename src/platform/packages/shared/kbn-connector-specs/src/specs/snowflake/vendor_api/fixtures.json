@@ -1,0 +1,15 @@
+{
+  "cortexSearch": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{service_name}:query",
+        "source": "cortexSearch"
+      }
+    ]
+  },
+  "runQuery": {
+    "input": { "statement": "SELECT 1" },
+    "queries": [{ "method": "POST", "path": "/api/v2/statements", "source": "sqlapi" }]
+  }
+}

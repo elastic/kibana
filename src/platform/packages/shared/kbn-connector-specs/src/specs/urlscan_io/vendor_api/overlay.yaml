@@ -1,0 +1,15 @@
+overlay: 1.0.0
+info:
+  title: urlscan.io API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/screenshots/{scanId}.png'].get
+    description: >-
+      Screenshots still answer anonymous requests. https://urlscan.io/blog/2026/03/18/api-auth-required/
+      makes only GET /api/v1/result/{scanId}/, GET /dom/{scanId}/ and GET /responses/{fileHash}/
+      authentication-only, and https://urlscan.io/docs/api/ fetches screenshots without a key
+      (curl https://urlscan.io/screenshots/$uuid.png). The spec requires the API key on every operation.
+    update:
+      security:
+        - apikeyAuth: [read, write]
+        - {}

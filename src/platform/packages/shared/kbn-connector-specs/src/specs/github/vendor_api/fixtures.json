@@ -1,0 +1,154 @@
+{
+  "getCommit": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "getFileContents": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "getIssue": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "getIssueComments": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "getLatestRelease": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "getMe": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "listBranches": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "listCommits": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "listIssues": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "listPullRequests": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "listReleases": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "listTags": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "listTools": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "pullRequestRead": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "searchCode": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "searchIssues": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "searchPullRequests": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "searchRepositories": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  },
+  "searchUsers": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp/"
+      }
+    ]
+  }
+}

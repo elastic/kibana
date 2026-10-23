@@ -119,9 +119,9 @@ export const GetSilenceInputSchema = lazySchema(() =>
   z.object({
     silenceId: z
       .string()
-      .min(1)
       .max(MAX_ID_LENGTH)
-      .describe('The silence ID, returned by listSilences or createSilence.'),
+      .uuid()
+      .describe('The silence ID (a UUID), returned by listSilences or createSilence.'),
   })
 );
 export type GetSilenceInput = z.infer<typeof GetSilenceInputSchema>;
@@ -137,13 +137,13 @@ export const CreateSilenceInputSchema = lazySchema(() =>
       ),
     startsAt: z
       .string()
-      .min(1)
       .max(64)
+      .datetime({ offset: true })
       .describe('RFC3339 timestamp the silence starts at, e.g. "2026-01-01T00:00:00Z".'),
     endsAt: z
       .string()
-      .min(1)
       .max(64)
+      .datetime({ offset: true })
       .describe('RFC3339 timestamp the silence ends at, e.g. "2026-01-01T02:00:00Z".'),
     createdBy: z
       .string()
@@ -163,9 +163,9 @@ export const ExpireSilenceInputSchema = lazySchema(() =>
   z.object({
     silenceId: z
       .string()
-      .min(1)
       .max(MAX_ID_LENGTH)
-      .describe('The silence ID to expire, returned by createSilence or listSilences.'),
+      .uuid()
+      .describe('The silence ID (a UUID) to expire, returned by createSilence or listSilences.'),
   })
 );
 export type ExpireSilenceInput = z.infer<typeof ExpireSilenceInputSchema>;
@@ -230,11 +230,13 @@ export const CreateAlertsInputSchema = lazySchema(() =>
           startsAt: z
             .string()
             .max(64)
+            .datetime({ offset: true })
             .optional()
             .describe('RFC3339 timestamp the alert starts at. Defaults to now if omitted.'),
           endsAt: z
             .string()
             .max(64)
+            .datetime({ offset: true })
             .optional()
             .describe(
               'RFC3339 timestamp the alert resolves at. Omit for an alert that stays firing until explicitly resolved (send it again with an endsAt in the past to resolve it early).'
@@ -261,6 +263,15 @@ export type CreateAlertsInput = z.infer<typeof CreateAlertsInputSchema>;
 export const GetStatusInputSchema = lazySchema(() => z.object({}));
 export type GetStatusInput = z.infer<typeof GetStatusInputSchema>;
 
+const timestampField = () =>
+  z.union([
+    z.string().max(64).datetime({ offset: true }),
+    z
+      .string()
+      .max(32)
+      .regex(/^\d+(\.\d+)?$/),
+  ]);
+
 export const QueryPrometheusInputSchema = lazySchema(() =>
   z.object({
     query: z
@@ -270,9 +281,7 @@ export const QueryPrometheusInputSchema = lazySchema(() =>
       .describe(
         "A PromQL expression to evaluate, e.g. 'up{job=\"node\"}' or 'rate(http_requests_total[5m])'."
       ),
-    time: z
-      .string()
-      .max(64)
+    time: timestampField()
       .optional()
       .describe(
         'RFC3339 timestamp (or Unix epoch seconds) to evaluate the query at. Defaults to the current server time.'
@@ -307,13 +316,9 @@ export const ListPrometheusRulesInputSchema = lazySchema(() =>
 export type ListPrometheusRulesInput = z.infer<typeof ListPrometheusRulesInputSchema>;
 
 const rangeTimeField = (bound: 'start' | 'end') =>
-  z
-    .string()
-    .min(1)
-    .max(64)
-    .describe(
-      `RFC3339 timestamp (or Unix epoch seconds) for the ${bound} of the range, e.g. "2026-01-01T00:00:00Z".`
-    );
+  timestampField().describe(
+    `RFC3339 timestamp (or Unix epoch seconds) for the ${bound} of the range, e.g. "2026-01-01T00:00:00Z".`
+  );
 
 export const QueryRangePrometheusInputSchema = lazySchema(() =>
   z.object({
@@ -328,8 +333,8 @@ export const QueryRangePrometheusInputSchema = lazySchema(() =>
     end: rangeTimeField('end'),
     step: z
       .string()
-      .min(1)
       .max(32)
+      .regex(/^(\d+(\.\d+)?|(\d+(ms|[smhdwy]))+)$/)
       .describe(
         'Query resolution step width, e.g. "15s", "1m", "1h", or a plain number of seconds.'
       ),
@@ -359,9 +364,7 @@ const seriesMatchField = () =>
     );
 
 const optionalRangeTimeField = (bound: 'start' | 'end') =>
-  z
-    .string()
-    .max(64)
+  timestampField()
     .optional()
     .describe(
       `Optional RFC3339 timestamp (or Unix epoch seconds) for the ${bound} of the time range. If omitted, Prometheus uses its own default.`
