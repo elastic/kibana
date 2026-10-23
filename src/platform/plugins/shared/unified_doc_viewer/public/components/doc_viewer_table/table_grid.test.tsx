@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import type { TableGridProps } from './table_grid';
 import { TableGrid, GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid';
 import { FieldRow } from './field_row';
+import { getFieldValueCellActions } from './table_cell_actions';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { buildHitMock } from '../../__mocks__';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -30,7 +31,7 @@ jest.mock('../../plugin', () => ({
 
 jest.mock('./table_cell_actions', () => ({
   getFieldCellActions: () => [],
-  getFieldValueCellActions: () => [],
+  getFieldValueCellActions: jest.fn(() => []),
   getFilterExistsDisabledWarning: () => undefined,
   getFilterInOutPairDisabledWarning: () => undefined,
 }));
@@ -101,6 +102,28 @@ describe('TableGrid', () => {
     await userEvent.click(expandPopoverButton);
 
     expect(screen.getAllByText('CustomPopover').length).toBeGreaterThan(0);
+  });
+
+  it('closes the cell popover after finding similar values', async () => {
+    const onFindSimilarValues = jest.fn();
+    render(
+      <TableGrid
+        {...defaultProps}
+        onFindSimilarValues={onFindSimilarValues}
+        customRenderCellPopover={() => <span>CustomPopover</span>}
+      />
+    );
+    await userEvent.hover(screen.getByText('fieldA'));
+    await userEvent.click(screen.getByTestId('euiDataGridCellExpandButton'));
+    expect(screen.getAllByText('CustomPopover').length).toBeGreaterThan(0);
+
+    const { onFindSimilarValues: onFindSimilarValuesWithClose } = jest
+      .mocked(getFieldValueCellActions)
+      .mock.calls.slice(-1)[0][0];
+    act(() => onFindSimilarValuesWithClose?.('message', 'value'));
+
+    expect(onFindSimilarValues).toHaveBeenCalledWith('message', 'value');
+    expect(screen.queryByText('CustomPopover')).not.toBeInTheDocument();
   });
 
   it('applies custom gridStyle from props', () => {

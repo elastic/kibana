@@ -12,8 +12,46 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { REVERSE_CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { UnifiedDataTableContext } from '../table_context';
+import type { UnifiedDataTableOpenInNewTab, UnifiedDataTableQueryContext } from '../types';
 
 const ACTION_REVERSE_CATEGORIZE_FIELD = 'ACTION_REVERSE_CATEGORIZE_FIELD';
+
+/**
+ * Whether the "Find similar values" (reverse categorization) action is registered.
+ */
+export const isFindSimilarValuesActionRegistered = (uiActions?: UiActionsStart): boolean =>
+  uiActions?.hasAction(ACTION_REVERSE_CATEGORIZE_FIELD) === true;
+
+/**
+ * Runs the "Find similar values" (reverse categorization) analysis for a value of a text field.
+ */
+export const executeFindSimilarValues = ({
+  uiActions,
+  dataView,
+  field,
+  fieldValue,
+  queryContext,
+  onOpenInNewTab,
+}: {
+  uiActions: UiActionsStart;
+  dataView: DataView;
+  field: DataViewField;
+  fieldValue: string;
+  queryContext?: UnifiedDataTableQueryContext;
+  onOpenInNewTab?: UnifiedDataTableOpenInNewTab;
+}): void => {
+  uiActions.executeTriggerActions(REVERSE_CATEGORIZE_FIELD_TRIGGER, {
+    field,
+    dataView,
+    originatingApp: 'discover',
+    fieldValue,
+    openInNewTab: onOpenInNewTab,
+    query: queryContext?.query,
+    filters: queryContext?.filters,
+    filterQuery: queryContext?.filterQuery,
+    timeRange: queryContext?.timeRange,
+  });
+};
 
 /**
  * Runs the "Find similar values" (reverse categorization) analysis for a value of a text field,
@@ -33,7 +71,7 @@ export const useFindSimilarValues = ({
   const { queryContext, onOpenInNewTab } = useContext(UnifiedDataTableContext);
 
   const isAvailable =
-    uiActions?.hasAction(ACTION_REVERSE_CATEGORIZE_FIELD) === true &&
+    isFindSimilarValuesActionRegistered(uiActions) &&
     field?.esTypes?.includes('text') === true &&
     dataView.isTimeBased();
 
@@ -42,16 +80,13 @@ export const useFindSimilarValues = ({
       if (!uiActions || !field) {
         return;
       }
-      uiActions.executeTriggerActions(REVERSE_CATEGORIZE_FIELD_TRIGGER, {
-        field,
+      executeFindSimilarValues({
+        uiActions,
         dataView,
-        originatingApp: 'discover',
+        field,
         fieldValue,
-        openInNewTab: onOpenInNewTab,
-        query: queryContext?.query,
-        filters: queryContext?.filters,
-        filterQuery: queryContext?.filterQuery,
-        timeRange: queryContext?.timeRange,
+        queryContext,
+        onOpenInNewTab,
       });
     },
     [dataView, field, onOpenInNewTab, queryContext, uiActions]

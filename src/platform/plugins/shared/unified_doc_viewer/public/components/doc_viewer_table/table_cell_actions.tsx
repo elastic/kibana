@@ -11,11 +11,16 @@ import React from 'react';
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DocViewFilterFn, DocViewFindSimilarValuesFn } from '@kbn/unified-doc-viewer/types';
 import {
   shouldShowFieldFilterExistAction,
   shouldShowFieldFilterInOutActions,
 } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
+import {
+  getFindSimilarValuesValue,
+  shouldShowFieldFindSimilarValuesAction,
+} from '@kbn/unified-doc-viewer/utils/should_show_field_find_similar_values_action';
 import type { IToasts } from '@kbn/core/public';
 import type { FieldRow } from './field_row';
 
@@ -137,6 +142,47 @@ const Copy: React.FC<Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts }
       }}
     >
       {copyLabel}
+    </Component>
+  );
+};
+
+const FindSimilarValues: React.FC<
+  Pick<TableActionsProps, 'Component' | 'row'> & {
+    dataView: DataView | undefined;
+    onFindSimilarValues: DocViewFindSimilarValuesFn | undefined;
+  }
+> = ({ Component, row, dataView, onFindSimilarValues }) => {
+  if (!row) {
+    return null;
+  }
+
+  const { name, dataViewField, flattenedValue } = row;
+  const fieldValue = getFindSimilarValuesValue(flattenedValue);
+
+  if (
+    !onFindSimilarValues ||
+    fieldValue === undefined ||
+    !shouldShowFieldFindSimilarValuesAction({ dataView, dataViewField, onFindSimilarValues })
+  ) {
+    return null;
+  }
+
+  const findSimilarValuesLabel = i18n.translate(
+    'unifiedDocViewer.docViews.table.findSimilarValuesButtonTooltip',
+    {
+      defaultMessage: 'Find similar values',
+    }
+  );
+
+  return (
+    <Component
+      data-test-subj={`findSimilarValuesButton-${name}`}
+      iconType="search"
+      title={findSimilarValuesLabel}
+      flush="left"
+      onClick={() => onFindSimilarValues(name, fieldValue)}
+    >
+      {findSimilarValuesLabel}
     </Component>
   );
 };
@@ -393,12 +439,16 @@ export function getFieldValueCellActions({
   isEsqlMode,
   hideFilteringOnComputedColumns,
   onFilter,
+  dataView,
+  onFindSimilarValues,
   toasts,
 }: {
   rows: FieldRow[];
   isEsqlMode: boolean | undefined;
   hideFilteringOnComputedColumns?: boolean;
   onFilter?: DocViewFilterFn;
+  dataView?: DataView;
+  onFindSimilarValues?: DocViewFindSimilarValuesFn;
   toasts: IToasts;
 }) {
   const filterActions = onFilter
@@ -432,5 +482,16 @@ export function getFieldValueCellActions({
     return <Copy toasts={toasts} row={rows[rowIndex]} Component={Component} />;
   };
 
-  return [...filterActions, copyAction];
+  const findSimilarValuesAction = ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+    return (
+      <FindSimilarValues
+        row={rows[rowIndex]}
+        Component={Component}
+        dataView={dataView}
+        onFindSimilarValues={onFindSimilarValues}
+      />
+    );
+  };
+
+  return [...filterActions, copyAction, ...(onFindSimilarValues ? [findSimilarValuesAction] : [])];
 }
