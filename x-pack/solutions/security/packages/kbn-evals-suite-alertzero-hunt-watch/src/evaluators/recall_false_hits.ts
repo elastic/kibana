@@ -28,6 +28,24 @@ const notApplicable = (explanation: string) => ({
 });
 
 /**
+ * Tier 2 skip reasons that abort the run before any model-driven behaviour
+ * executed (connector/inference plumbing, report content unavailable, or
+ * input scoping). These are infrastructure failures, not recall failures:
+ * the cell scores null (INVALID) and drops out of the pooled mean.
+ * `tier2_failed` (ambiguous: connector 504 vs model refusal) and
+ * `no_tier2_targets` (the model resolved a dataset with no behavioural
+ * rows) stay scoreable — both are chargeable to the model as recall 0.
+ */
+const INFRA_T2_SKIP: ReadonlySet<string> = new Set([
+  'no_report_text',
+  'no_inference',
+  'no_connector',
+  'no_inference_plugin',
+  'scope_blocked',
+  'no_searchable_input',
+]);
+
+/**
  * M1 (Tier 1 + Tier 2 separately) and M2 (FalseHitRate) as CODE evaluators
  * over the run records. One example per (report, phase); the evaluator
  * returns null (INVALID cell) on a C1/C2/C3a control failure or a
@@ -94,6 +112,20 @@ export const createSeededHitRecallTier2Evaluator = (): Evaluator<HuntExample, Hu
       return notApplicable(
         `report class ${output.reportClass} carries no behavioural text; tier 2 not applicable`
       );
+    }
+    // An infra skip (connector/inference plumbing, no report text, scoped-out
+    // input) aborted the run before any behaviour executed: the model never
+    // got a chance to recall, so the cell is INVALID, not recall 0. Only
+    // applies when nothing executed — a partial run with executed behaviours
+    // scores on those behaviours whatever the skip flag says.
+    const t2Skip = output.run.tier2_skipped_reason;
+    const t2Executed = (output.run.behaviours ?? []).some((b) => b.executed);
+    if (t2Skip && INFRA_T2_SKIP.has(t2Skip) && !t2Executed) {
+      return {
+        score: null,
+        label: 'INVALID',
+        explanation: `tier 2 aborted before any behaviour executed (${t2Skip}); infrastructure failure, not a recall failure`,
+      };
     }
     // Only executed behaviours with hits count (design v3 §2: T2-reached).
     const behaviours = (output.run.behaviours ?? [])

@@ -159,6 +159,58 @@ describe('M1/M2 CODE evaluator wiring (spec-level mutation proof)', () => {
     expect(labels.plantedBehaviours.length).toBeGreaterThan(scorableInChain().length);
   });
 
+  it('M1-T2: an infra skip before any behaviour executed is INVALID, not recall 0', async () => {
+    // Connector/inference plumbing died (or the report text was missing)
+    // before the model ever ran: recall is undefined, not zero. Every reason
+    // in the infra set must null the cell; only genuinely model-chargeable
+    // skips may keep scoring.
+    for (const reason of [
+      'no_report_text',
+      'no_inference',
+      'no_connector',
+      'no_inference_plugin',
+      'scope_blocked',
+      'no_searchable_input',
+    ]) {
+      const rec = record({ behaviours: [], tier2_skipped_reason: reason });
+      rec.tier2HitIds = [];
+      const verdict = await eval_(createSeededHitRecallTier2Evaluator(), rec);
+      expect(verdict.score).toBeNull();
+    }
+    // The same flags with behaviours that DID execute still score on them:
+    // the guard only fires when nothing executed.
+    const partial = record({
+      behaviours: [],
+      tier2_skipped_reason: 'no_connector',
+    });
+    partial.run = {
+      ...partial.run,
+      behaviours: [
+        {
+          executed: true,
+          hit: true,
+          technique_id: 'T1003.001',
+          hits: [
+            { _id: '00140285#0#positive', _index: '.ds-logs-endpoint.events.process-default' },
+          ],
+        },
+      ],
+    };
+    partial.tier2HitIds = ['00140285#0#positive'];
+    const partialScore = await eval_(createSeededHitRecallTier2Evaluator(), partial);
+    expect(partialScore.score).not.toBeNull();
+
+    // Model-chargeable skips stay scoreable: tier2_failed (ambiguous
+    // connector-504 vs model refusal) and no_tier2_targets (the model
+    // resolved a dataset with no behavioural rows) are honest recall 0.
+    const failed = record({ behaviours: [], tier2_skipped_reason: 'tier2_failed' });
+    failed.tier2HitIds = [];
+    expect((await eval_(createSeededHitRecallTier2Evaluator(), failed)).score).toBe(0);
+    const noTargets = record({ behaviours: [], tier2_skipped_reason: 'no_tier2_targets' });
+    noTargets.tier2HitIds = [];
+    expect((await eval_(createSeededHitRecallTier2Evaluator(), noTargets)).score).toBe(0);
+  });
+
   it('M2: a Tier 1 IoC hit on a planted positive with no Tier 2 behaviours is true, not false', async () => {
     // Regression (Libra): the old code classified every hit against
     // behaviours[0].technique_id, so a lone Tier 1 hit got technique '' and

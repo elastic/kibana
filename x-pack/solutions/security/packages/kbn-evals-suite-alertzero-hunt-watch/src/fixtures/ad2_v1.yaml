@@ -1,18 +1,5 @@
 version: ad2-v1
 profile: clean
-project: b7583d2ee03e4de9983378f1c0a3a02c
-run_scope:
-  count_only_alerts_after: ${RUN_START}
-  exclude_alert_ids_file: manifests/baseline-pre-detonation.json
-  exclude_rule_ids:
-  - a198fbbd-9413-45ec-a269-47ae4ccf59ce
-baseline:
-  file: manifests/baseline-pre-detonation.json
-  total: 158
-  causes:
-    lab-build: 151
-    rule-preview-control-leak: 5
-    guided-onboarding: 2
 sinkhole_zones:
 - malicious-c2.example.com
 - payload-cdn.example.net

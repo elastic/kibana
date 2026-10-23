@@ -139,7 +139,7 @@ describe('R5-B1: SUT gaps on T2-optional classes', () => {
   it('R5-B1 T2-optional ignores SUT gaps (sinkhole-infra E0, tier2_failed): BASE=incomplete, MUTANT=clean', () => {
     const fxT2Fail = sut({
       tier1_status: 'no_environment_hits',
-      ...T2_FAILURES['tier2_failed'],
+      ...T2_FAILURES.tier2_failed,
     });
     const base = m3Verdict('R-ioc', fxT2Fail).verdict;
     const mutant = m3Verdict('R-ioc', fxT2Fail, { ignoreCompleteness: true }).verdict;
@@ -443,9 +443,9 @@ describe('NB-a: M2 classification totality + 5-key breakdown', () => {
   };
 
   it('f3475224 and f59668de are both wmi-lateral and both T1047-matched', () => {
-    expect(chainOf['f3475224']).toBe('wmi-lateral');
-    expect(chainOf['f59668de']).toBe('wmi-lateral');
-    expect(techOf['f3475224']).toContain('T1047');
+    expect(chainOf.f3475224).toBe('wmi-lateral');
+    expect(chainOf.f59668de).toBe('wmi-lateral');
+    expect(techOf.f3475224).toContain('T1047');
   });
 
   it('R3-B2 restrict true ids to other chains (same-chain matched id): BASE=total, MUTANT=INVALID', () => {
