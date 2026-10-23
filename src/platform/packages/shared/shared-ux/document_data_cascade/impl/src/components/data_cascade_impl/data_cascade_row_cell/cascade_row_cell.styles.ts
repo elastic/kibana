@@ -10,13 +10,17 @@
 import { css } from '@emotion/react';
 import { type EuiThemeShape } from '@elastic/eui';
 
-export const cascadeRowCellStyles = (euiTheme: EuiThemeShape) => ({
-  cellWrapper: css({ width: '100%' }),
-  cellInner: css({
-    border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-    borderRadius: euiTheme.border.radius.small,
-    '& > *': {
-      clipPath: `inset(0 round ${euiTheme.border.radius.small})`,
-    },
-  }),
-});
+export const cascadeRowCellStyles = (euiTheme: EuiThemeShape) => {
+  const borderRadius = `var(--kbn-data-cascade-cell-border-radius, ${euiTheme.border.radius.inline})`;
+
+  return {
+    cellWrapper: css({ width: '100%' }),
+    cellInner: css({
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+      borderRadius,
+      '& > *': {
+        clipPath: `inset(0 round ${borderRadius})`,
+      },
+    }),
+  };
+};

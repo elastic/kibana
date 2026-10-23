@@ -10,16 +10,10 @@
 import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
 
 export interface StickyHeaderExtensionPointContextValue {
-  /**
-   * The portal container element in the sticky header. The element is created once per row and is
-   * attached to the sticky header whenever it is displayed, so consumers can portal into it on the
-   * same render that `isActiveSticky` turns true.
-   */
+  /** Stable portal container attached to the row's inline header. */
   extensionPointElement: HTMLDivElement;
-  /**
-   * Whether the sticky header is currently displayed for this row.
-   */
-  isDisplayed: boolean;
+  /** Whether the header uses sticky positioning rather than remaining in normal flow. */
+  stickyEnabled: boolean;
 }
 
 const StickyHeaderExtensionPointContext =
@@ -32,15 +26,15 @@ const StickyHeaderExtensionPointContext =
  */
 export function StickyHeaderExtensionPointProvider({
   extensionPointElement,
-  isDisplayed,
+  stickyEnabled,
   children,
 }: PropsWithChildren<StickyHeaderExtensionPointContextValue>) {
   const value = useMemo<StickyHeaderExtensionPointContextValue>(
     () => ({
       extensionPointElement,
-      isDisplayed,
+      stickyEnabled,
     }),
-    [extensionPointElement, isDisplayed]
+    [extensionPointElement, stickyEnabled]
   );
 
   return (

@@ -19,7 +19,12 @@ import React, {
   useSyncExternalStore,
 } from 'react';
 import { type Row } from '@tanstack/react-table';
-import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
+import {
+  useVirtualizer,
+  defaultRangeExtractor,
+  measureElement,
+  type VirtualItem,
+} from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
 import {
   createChildVirtualizerController,
@@ -129,27 +134,18 @@ export function calculateActiveStickyIndex<G extends GroupNode>(
     return null;
   }
 
-  const rangeStartParentRows = rangeStartRow.getParentRows();
+  if (rangeStartRow.getIsExpanded()) {
+    return startIndex;
+  }
 
-  if (!rangeStartParentRows.length && !rangeStartRow.getIsExpanded()) {
+  const nearestParent = rangeStartRow.getParentRows().at(-1);
+  if (!nearestParent) {
     return null;
   }
 
-  if (!rangeStartParentRows.length && rangeStartRow.getIsExpanded()) {
-    return rangeStartRow.index;
-  }
-
-  const nearestExpandedParentIndex = rangeStartParentRows.reduce<number>((acc, row, idx) => {
-    return (acc += row.index + idx);
-  }, 0);
-
-  const isExpandedLeafRow = !rangeStartRow.subRows.length && rangeStartRow.getIsExpanded();
-
-  return isExpandedLeafRow
-    ? // we add 1 to the index to account for the fact that
-      // we get an zero based index for children in relation to the parent
-      nearestExpandedParentIndex + rangeStartRow.index + 1
-    : nearestExpandedParentIndex;
+  // Table row indices are local to siblings; the virtualizer indexes the flattened visible rows.
+  const parentIndex = rows.findIndex((row) => row.id === nearestParent.id);
+  return parentIndex >= 0 ? parentIndex : null;
 }
 
 export interface CascadeVirtualizerReturnValue
@@ -478,6 +474,22 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     () => ({
       count: rows.length,
       estimateSize: () => estimatedRowHeight,
+      measureElement: (element, entry, instance) => {
+        const index = instance.indexFromElement(element);
+
+        const hasDetachedChild =
+          childController &&
+          Array.from(childController.getConnectedChildren().values()).some(
+            (child) => child.rowIndex === index && child.isDetached
+          );
+
+        // A detached child is not in normal flow; retain its row's bounds so scrolling cannot unmount it.
+        if (hasDetachedChild) {
+          return instance.measurementsCache[index]?.size ?? estimatedRowHeight;
+        }
+
+        return measureElement(element, entry, instance);
+      },
       getItemKey,
       getScrollElement,
       overscan: initialOverscan,
@@ -512,6 +524,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       observeElementOffset,
       observeElementRect,
       estimatedRowHeight,
+      childController,
       onStateChange,
     ]
   );
