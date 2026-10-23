@@ -146,6 +146,8 @@ export interface QueryAiIndicesRequest {
   params?: Record<string, AiIndexQueryParamValue>;
   /** Defaults to `DEFAULT_AI_INDEX_QUERY_LIMIT`. Capped at `MAX_AI_INDEX_QUERY_LIMIT`. */
   limit?: number;
+  /** Replaces the caller's own scope in the memory scope filter, for callers that manage their own end users. */
+  scope_ids?: string[];
 }
 
 export interface QueryAiIndicesResponse {

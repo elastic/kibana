@@ -6,6 +6,7 @@
  */
 
 import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
+import { isMemoryAiIndexDest } from '@kbn/context-engine-plugin/common/memory';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import type { CoreStart } from '@kbn/core/server';
@@ -42,6 +43,11 @@ export const getWritableMemoryAiIndex = async ({
   if (isIndexPattern(aiIndex.dest.value)) {
     throw new Error(
       `AI index '${aiIndexId}' uses an index pattern and cannot accept memory writes.`
+    );
+  }
+  if (!isMemoryAiIndexDest(aiIndex.dest.value)) {
+    throw new Error(
+      `AI index '${aiIndexId}' is not a memory AI index and cannot accept memory writes.`
     );
   }
 

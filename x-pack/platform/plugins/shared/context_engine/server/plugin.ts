@@ -21,6 +21,12 @@ import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settin
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
+import {
+  MEMORY_AI_INDEX_DESCRIPTION,
+  MEMORY_AI_INDEX_DEST,
+  MEMORY_AI_INDEX_ID,
+  buildUserScopeIds,
+} from '../common/memory';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -52,6 +58,7 @@ import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService, registerContextEngineUsageCollector } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
 import { resolveSpaceId } from './utils/resolve_space_id';
+import { resolveUserProfileUid } from './utils/resolve_user_profile_uid';
 
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
@@ -96,6 +103,15 @@ export class ContextEnginePlugin
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
     this.setupWorkflowsManagement(coreSetup);
+
+    this.aiIndexRegistry.register(MEMORY_AI_INDEX_ID, {
+      description: MEMORY_AI_INDEX_DESCRIPTION,
+      memory_enabled: true,
+      dest: { type: 'index', value: MEMORY_AI_INDEX_DEST },
+      automations: [],
+      sources: [],
+      traces: [],
+    });
 
     this.workflowsManagement = setupDeps.workflowsManagement?.management;
 
@@ -396,6 +412,14 @@ export class ContextEnginePlugin
       new AiIndexDataReadService({
         esClient,
         spaceId: resolveSpaceId(startDeps.spaces, request),
+        getScopeIds: async () =>
+          buildUserScopeIds(
+            await resolveUserProfileUid({
+              request,
+              security: coreStart.security,
+              esClient: coreStart.elasticsearch.client.asScoped(request),
+            })
+          ),
         auditLogger: coreStart.security.audit.asScoped(request),
         aiIndexService,
         logger: this.logger,

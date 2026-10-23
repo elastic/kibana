@@ -20,7 +20,7 @@ describe('getWritableMemoryAiIndex', () => {
   const aiIndex = {
     id: 'support',
     memory_enabled: true,
-    dest: { type: 'index', value: 'ai-index-idx-support' },
+    dest: { type: 'index', value: '.ai-memory-elastic' },
   } as AiIndexHttpItem;
 
   const run = () =>
@@ -63,11 +63,22 @@ describe('getWritableMemoryAiIndex', () => {
   it('rejects index-pattern destinations', async () => {
     get.mockResolvedValue({
       ...aiIndex,
-      dest: { type: 'index', value: 'ai-index-idx-*' },
+      dest: { type: 'index', value: '.ai-memory-*' },
     });
 
     await expect(run()).rejects.toThrow(
       "AI index 'support' uses an index pattern and cannot accept memory writes."
+    );
+  });
+
+  it('rejects destinations outside the memory index prefix', async () => {
+    get.mockResolvedValue({
+      ...aiIndex,
+      dest: { type: 'index', value: 'ai-index-idx-support' },
+    });
+
+    await expect(run()).rejects.toThrow(
+      "AI index 'support' is not a memory AI index and cannot accept memory writes."
     );
   });
 });

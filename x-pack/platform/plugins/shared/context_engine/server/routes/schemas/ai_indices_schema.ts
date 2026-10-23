@@ -39,6 +39,7 @@ import {
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
+import { MAX_MEMORY_SCOPE_IDS, MAX_MEMORY_SCOPE_ID_LENGTH } from '../../../common/memory';
 import {
   KI_LIFECYCLE_STATUSES,
   MAX_KI_ID_LENGTH,
@@ -384,6 +385,15 @@ export const queryAiIndicesBodySchema = schema.object({
         meta: { description: 'Values for `?name` placeholders in the query.' },
       }
     )
+  ),
+  scope_ids: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_MEMORY_SCOPE_ID_LENGTH }), {
+      maxSize: MAX_MEMORY_SCOPE_IDS,
+      meta: {
+        description:
+          "Scope values to match in the memory scope filter in place of the caller's own user scope. Rows with no `scope_id` still match.",
+      },
+    })
   ),
   limit: schema.maybe(
     schema.number({

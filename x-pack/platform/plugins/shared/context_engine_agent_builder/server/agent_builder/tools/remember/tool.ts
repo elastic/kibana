@@ -12,7 +12,12 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { randomUUID } from 'crypto';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
-import { MEMORY_KI_TYPES } from '@kbn/context-engine-plugin/common/memory';
+import {
+  MAX_MEMORY_SCOPE_IDS,
+  MAX_MEMORY_SCOPE_ID_LENGTH,
+  MEMORY_KI_TYPES,
+  isUserScopeId,
+} from '@kbn/context-engine-plugin/common/memory';
 import {
   MAX_KI_CONTENT_LENGTH,
   MAX_KI_DESCRIPTION_LENGTH,
@@ -31,10 +36,13 @@ import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
 import {
   createConversationReferences,
+  createMemoryPermissions,
   createMemoryWriter,
+  isMemoryInScope,
   type StoredMemoryDocument,
   updateMemoryProvenance,
 } from '../memory_document';
+import { resolveMemoryUserScopeId } from '../memory_user_scope';
 
 const memoryTypeSchema = z.enum(MEMORY_KI_TYPES);
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
@@ -78,6 +86,13 @@ const rememberSchema = z.object({
     .describe(
       'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
     ),
+  scope_ids: z
+    .array(z.string().min(1).max(MAX_MEMORY_SCOPE_ID_LENGTH))
+    .max(MAX_MEMORY_SCOPE_IDS)
+    .optional()
+    .describe(
+      'For direct API callers that manage their own end users: extra scope values stored next to the caller scope, such as entity://<id>. Values may not start with user://. Omit in Agent Builder conversations.'
+    ),
   expires_at: isoDateTime({ offset: true })
     .nullable()
     .optional()
@@ -114,9 +129,10 @@ export const createRememberTool = ({
   },
   description: dedent`
     Write a memory to a memory-enabled Context Engine AI index.
-    Memory is shared with users and agents that can access this AI index. Only record findings
-    useful to others working in this context, such as discovered patterns, effective approaches,
-    or domain knowledge. Do not record personal details or individual user preferences.
+    Memory is private to the current user: the server scopes every memory to the user who
+    recorded it, and only that user can recall, revise, or forget it. Record findings useful to
+    this user in later sessions, such as discovered patterns, effective approaches, domain
+    knowledge, and their stated preferences.
     Use memory.session_fact for a granular fact discovered during a session.
     Use memory.session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
@@ -161,6 +177,11 @@ export const createRememberTool = ({
         getCoreStart,
       });
 
+      const userScopeId = await resolveMemoryUserScopeId({ request, esClient, getCoreStart });
+      if (params.scope_ids?.some(isUserScopeId)) {
+        throw new Error('scope_ids may not contain user:// values.');
+      }
+
       const currentUserClient = esClient.asCurrentUser;
       const currentDate = getCurrentDate();
       const now = currentDate.toISOString();
@@ -169,6 +190,7 @@ export const createRememberTool = ({
       ).toISOString();
       const logicalId = params.id ?? generateId();
       const writer = createMemoryWriter({
+        userScopeId,
         toolId: contextEngineMemoryTools.remember,
         runId: runContext.runId,
         agentId: agent?.agentId,
@@ -222,6 +244,9 @@ export const createRememberTool = ({
         if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
           throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
         }
+        if (!isMemoryInScope(existingHit._source, userScopeId)) {
+          throw new Error(`Memory '${params.id}' belongs to another user and cannot be revised.`);
+        }
 
         existingBackingIndex = existingHit._index;
         existingSeqNo = existingHit._seq_no;
@@ -261,6 +286,10 @@ export const createRememberTool = ({
           writer,
           existingDocument === undefined
         ),
+        scope_id: existingDocument?.scope_id?.length
+          ? existingDocument.scope_id
+          : [userScopeId, ...(params.scope_ids ?? [])],
+        permissions: existingDocument?.permissions ?? createMemoryPermissions(spaceId),
       };
 
       if (
@@ -271,7 +300,8 @@ export const createRememberTool = ({
         throw new Error(`Memory '${logicalId}' is missing concurrency metadata.`);
       }
 
-      await currentUserClient.index({
+      // Written as kibana_system: users hold a read-only DLS grant on memory indices.
+      await esClient.asInternalUser.index({
         index:
           aiIndex.dest.type === 'index' && existingBackingIndex
             ? existingBackingIndex

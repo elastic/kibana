@@ -38,6 +38,7 @@ import {
   AI_INDEX_PATH,
   AI_INDEX_QUERY_PATH,
 } from '../../common/constants';
+import { MAX_MEMORY_SCOPE_IDS } from '../../common/memory';
 import { aiIndicesIndexName } from '../ai_indices/storage';
 import { kiIdQuery } from '../ai_indices/ki_get';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
@@ -887,6 +888,17 @@ describe('ai indices routes', () => {
         expect(() =>
           validateBody({ query: 'FROM a', params: { s: 'x', n: 1, b: true }, limit: 5 })
         ).not.toThrow();
+      });
+
+      it('bounds scope_ids', () => {
+        expect(() => validateBody({ query: 'FROM a', scope_ids: ['entity://e_1'] })).not.toThrow();
+        expect(() => validateBody({ query: 'FROM a', scope_ids: [''] })).toThrow();
+        expect(() =>
+          validateBody({
+            query: 'FROM a',
+            scope_ids: Array(MAX_MEMORY_SCOPE_IDS + 1).fill('entity://e_1'),
+          })
+        ).toThrow();
       });
 
       it('requires a non-empty query', () => {
