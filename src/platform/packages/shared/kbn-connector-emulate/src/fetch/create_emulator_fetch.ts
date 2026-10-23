@@ -36,6 +36,7 @@ import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import { insufficientScopeChallenge } from '../openapi/validate_security';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -90,6 +91,11 @@ export interface EmulatorOptions extends PaginationOptions {
    * values at the schema's upper bounds (`boundary`), which also skips examples.
    */
   readonly sampling?: 'typical' | 'boundary';
+  /**
+   * Answer 403 `insufficient_scope` when a bearer token the mock issued lacks the scopes an
+   * operation's OAuth 2 requirements list. Off by default, as some specs declare scopes loosely.
+   */
+  readonly checkScopes?: boolean;
 }
 
 export interface Emulator {
@@ -235,6 +241,7 @@ export const createEmulatorFetch = ({
   collectionSize,
   respond,
   sampling = 'typical',
+  checkScopes = false,
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
   const namedResponses = collectNamedResponses(fixtures, recordings);
@@ -252,7 +259,7 @@ export const createEmulatorFetch = ({
     { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
     engine.respond
   );
-  const contract = createOpenApiAdapter(operations, respond ?? defaultChain);
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, { checkScopes });
   const state = new Map<unknown, unknown>();
   const contextFor = (operation: ContractOperation, request: ContractRequest) => {
     const context: ResponderContext = {
@@ -326,7 +333,11 @@ export const createEmulatorFetch = ({
     const requestViolations =
       authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
-      const statusCode = authViolations.length > 0 ? 401 : 422;
+      // A token without the scopes an operation needs is forbidden, not unauthenticated.
+      const challenge = authViolations.some(({ code }) => code === 'insufficient_scope')
+        ? insufficientScopeChallenge(operation, request)
+        : undefined;
+      const statusCode = challenge ? 403 : authViolations.length > 0 ? 401 : 422;
       calls.push({
         request: description,
         operation: name,
@@ -337,7 +348,7 @@ export const createEmulatorFetch = ({
       });
       return {
         statusCode,
-        headers: JSON_HEADERS,
+        headers: challenge ? { ...JSON_HEADERS, 'www-authenticate': challenge } : JSON_HEADERS,
         body: { operation: name, violations: requestViolations },
       };
     }

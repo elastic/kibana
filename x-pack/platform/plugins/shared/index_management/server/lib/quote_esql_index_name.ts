@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { SpecsClient } from './specs_client';
-export type { ISpecsClient, SpecsClientOpts, GetSpecParams } from './types';
+/** Wraps an index name in double quotes so it is parsed as a single ES|QL index source. */
+export const quoteEsqlIndexName = (indexName: string): string =>
+  `"${indexName.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
