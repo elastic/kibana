@@ -120,7 +120,10 @@ export const createDashboardSmlType = ({
       type: 'dashboard',
       fields: ['title'],
       perPage: size,
-      ...(term ? { search: `${term}*`, searchFields: ['title'] } : {}),
+      sort: [{ field: 'updated_at', order: 'desc' }],
+      ...(term
+        ? { search: `${term}*`, searchFields: ['title'], defaultSearchOperator: 'AND' as const }
+        : {}),
     });
     return dashboards.map(({ id, attributes }) => ({
       originId: id,
