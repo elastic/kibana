@@ -7,7 +7,7 @@
 
 import { kibanaRegistry } from '@elastic/schemas/kibana/tools/index.js';
 import { getKibanaConnectors } from '@kbn/workflows';
-import { getStepRisk, KIBANA_STEP_APIS } from './step_risk';
+import { getStepRisk, getWorkflowSteps, KIBANA_STEP_APIS } from './step_risk';
 
 const normalizePath = (path: string): string => path.replace(/\{[^}]+\}/g, '{}');
 
@@ -61,5 +61,25 @@ describe('getStepRisk', () => {
         expect(patterns.map(normalizePath)).toContain(normalizePath(definition.path));
       }
     );
+  });
+});
+
+describe('getWorkflowSteps', () => {
+  it('resolves YAML aliases in step names and types', () => {
+    const yaml = `name: alias
+triggers:
+  - type: manual
+steps:
+  - name: &delete_type elasticsearch.indices.delete
+    type: *delete_type
+    with:
+      index: test-x
+`;
+    expect(getWorkflowSteps(yaml)).toEqual([
+      expect.objectContaining({
+        stepId: 'elasticsearch.indices.delete',
+        stepType: 'elasticsearch.indices.delete',
+      }),
+    ]);
   });
 });

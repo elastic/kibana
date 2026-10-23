@@ -621,6 +621,31 @@ steps:
       });
     });
 
+    it('blocks an unsafe step whose type is a YAML alias', async () => {
+      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+
+      const yaml = `name: alias
+triggers:
+  - type: manual
+steps:
+  - name: &delete_type elasticsearch.indices.delete
+    type: *delete_type
+    with:
+      index: test-x
+`;
+      const context = createMockContext(yaml);
+      const result = await invokeHandler(
+        registeredTool,
+        { stepName: 'elasticsearch.indices.delete' },
+        context
+      );
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.blocked).toBe(true);
+      expect(data.stepType).toBe('elasticsearch.indices.delete');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
     it('blocks a nested unsafe step referenced directly', async () => {
       mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
 

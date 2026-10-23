@@ -27,7 +27,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows';
 import { hasLiveUser } from './utils/confirm_tool_call';
-import { findUnsafeSteps, type UnsafeStep } from './utils/step_risk';
+import { findUnsafeSteps, resolveYamlAliases, type UnsafeStep } from './utils/step_risk';
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
@@ -594,6 +594,7 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
           error: `Invalid workflow YAML: ${yamlParseError}`,
         });
       }
+      yaml = resolveYamlAliases(yaml);
 
       const lookup = buildLookup(yaml);
       const stepInfo = lookup.steps[stepName];

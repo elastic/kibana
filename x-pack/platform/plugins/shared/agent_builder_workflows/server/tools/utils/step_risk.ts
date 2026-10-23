@@ -10,7 +10,7 @@ import { kibanaManifest } from '@elastic/schemas/kibana/tools/manifest.js';
 import type { ApiTarget, AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import { isApiAutoApproved } from '@kbn/agent-builder-common';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import { LineCounter, parseDocument } from 'yaml';
+import { LineCounter, parseDocument, stringify, visit } from 'yaml';
 import { buildWorkflowLookup, type StepInfo } from '@kbn/workflows-yaml';
 
 export interface StepRisk {
@@ -145,10 +145,26 @@ export const findUnsafeSteps = (
       ({ risk }) => !risk.safe && !(risk.api && isApiAutoApproved({ interactivity, ...risk.api }))
     );
 
+/**
+ * Expands YAML aliases, so a step lookup sees the same step names and types the
+ * workflow runs with. The workflow parser resolves aliases; the lookup does not.
+ */
+export const resolveYamlAliases = (yaml: string): string => {
+  const doc = parseDocument(yaml);
+  let hasAlias = false;
+  visit(doc, {
+    Alias: () => {
+      hasAlias = true;
+      return visit.BREAK;
+    },
+  });
+  return hasAlias && doc.errors.length === 0 ? stringify(doc.toJS({ maxAliasCount: 100 })) : yaml;
+};
+
 /** Parses workflow YAML into its steps; returns an empty list when the YAML does not parse. */
 export const getWorkflowSteps = (yaml: string): StepInfo[] => {
   const lineCounter = new LineCounter();
-  const doc = parseDocument(yaml, { lineCounter });
+  const doc = parseDocument(resolveYamlAliases(yaml), { lineCounter });
   if (doc.errors.length > 0) {
     return [];
   }
