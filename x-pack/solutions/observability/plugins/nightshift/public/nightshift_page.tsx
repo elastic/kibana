@@ -268,7 +268,6 @@ export function NightshiftPage(): React.ReactElement | null {
         ...(isDetectionPage
           ? {
               css: css`
-                flex: 1 1 auto;
                 min-height: 0;
                 overflow: hidden;
               `,
@@ -279,7 +278,6 @@ export function NightshiftPage(): React.ReactElement | null {
                   flex-direction: column;
                   min-height: 0;
                   height: 100%;
-                  width: 100%;
                 `,
               },
             }
