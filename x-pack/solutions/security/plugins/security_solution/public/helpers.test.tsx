@@ -14,7 +14,7 @@ import {
   getField,
   getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
-  isManagementPath,
+  isEndpointManagementPath,
   isSubPluginAvailable,
   parseRoute,
 } from './helpers';
@@ -300,24 +300,23 @@ describe('isDashboardViewPath', () => {
   });
 });
 
-describe('isManagementPath', () => {
-  it('returns true for the administration landing path', () => {
-    expect(isManagementPath('/administration')).toEqual(true);
+describe('isEndpointManagementPath', () => {
+  it.each([
+    '/administration/endpoints',
+    '/administration/policy',
+    '/administration/policy/abc-123/settings',
+    '/administration/trusted_apps',
+    '/administration/custom_yara_signatures',
+    '/administration/response_actions_history',
+    '/administration/script_library',
+  ])('returns true for %s', (pathname) => {
+    expect(isEndpointManagementPath(pathname)).toEqual(true);
   });
 
-  it('returns true for the endpoints list path', () => {
-    expect(isManagementPath('/administration/endpoints')).toEqual(true);
-  });
-
-  it('returns true for nested administration sub-routes', () => {
-    expect(isManagementPath('/administration/policy/abc-123/settings')).toEqual(true);
-  });
-
-  it('returns false for the manage landing path', () => {
-    expect(isManagementPath('/manage')).toEqual(false);
-  });
-
-  it('returns false for unrelated paths', () => {
-    expect(isManagementPath('/alerts')).toEqual(false);
-  });
+  it.each(['/administration', '/administration/notes', '/manage', '/alerts'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isEndpointManagementPath(pathname)).toEqual(false);
+    }
+  );
 });

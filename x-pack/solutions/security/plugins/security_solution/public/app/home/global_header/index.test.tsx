@@ -197,9 +197,12 @@ describe('global header', () => {
     '/rules/add_rules',
     '/exceptions',
     '/get_started',
-    '/administration',
     '/administration/endpoints',
     '/administration/policy',
+    '/administration/policy/abc-123/settings',
+    '/administration/trusted_apps',
+    '/administration/response_actions_history',
+    '/administration/script_library',
   ])(
     'does not mount the header action menu on %s, where the page app header owns the actions',
     (pathname) => {
@@ -237,6 +240,28 @@ describe('global header', () => {
 
     expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
   });
+
+  // Not migrated to `AdministrationListPage`: Notes (whose error state has no header) and the
+  // `/administration` redirect keep the global header action menu.
+  it.each(['/administration', '/administration/notes'])(
+    'mounts the header action menu on %s',
+    (pathname) => {
+      (useLocation as jest.Mock).mockReturnValue({ pathname });
+      const setHeaderActionMenu = jest.fn();
+      (useKibana as jest.Mock).mockReturnValue({
+        ...mockUseKibana(),
+        services: { ...mockUseKibana().services, setHeaderActionMenu },
+      });
+
+      render(
+        <TestProviders store={store}>
+          <GlobalHeader />
+        </TestProviders>
+      );
+
+      expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
+    }
+  );
 
   it('mounts the header action menu on the rule details page', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123' });

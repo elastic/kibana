@@ -243,6 +243,34 @@ describe('Policy Details', () => {
       expect(backButton).toHaveAccessibleName('Back to Endpoints');
     });
 
+    it('should reset the back button to Policies when navigating to a route without backLink state', async () => {
+      act(() => {
+        history.push({
+          pathname: policyDetailsPathUrl,
+          state: {
+            backLink: {
+              navigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
+              label: 'Endpoints',
+              href: '/app/security/administration/endpoints',
+            },
+          },
+        });
+      });
+      renderResult = render();
+      await asyncActions;
+      expect(await renderResult.findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAccessibleName(
+        'Back to Endpoints'
+      );
+
+      act(() => {
+        history.push({ pathname: policyDetailsPathUrl });
+      });
+
+      const backButton = await renderResult.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      expect(backButton).toHaveAccessibleName('Back to Policies');
+      expect(backButton).toHaveAttribute('href', `/app/security${policyListPath}`);
+    });
+
     it('should display agent stats as three health metadata items, with no "Total agents" item', async () => {
       renderResult = render();
       await asyncActions;

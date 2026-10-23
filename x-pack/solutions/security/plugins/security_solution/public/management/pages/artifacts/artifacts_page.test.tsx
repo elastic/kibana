@@ -333,6 +333,10 @@ describe('ArtifactsPage', () => {
     expect(
       renderResult.queryByTestId('artifacts-stub-hostIsolationExceptions')
     ).not.toBeInTheDocument();
+    // The hidden tab can't be selected, so the first visible tab is
+    expect(
+      within(renderResult.getByRole('tablist')).getByRole('tab', { selected: true })
+    ).toHaveTextContent(ENDPOINT_EXCEPTIONS_TAB);
   });
 
   it('shows a loading indicator while host isolation exceptions access is resolving', async () => {

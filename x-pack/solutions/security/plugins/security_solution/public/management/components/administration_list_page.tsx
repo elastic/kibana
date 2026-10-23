@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiPageSection } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import type {
   AppHeaderBack,
   AppHeaderMenu,
@@ -64,22 +64,29 @@ export const AdministrationListPage = memo<
     isHeaderLoading = false,
     ...otherProps
   }) => {
+    const hasTabs = Boolean(tabs?.length);
+
     return (
       <div {...otherProps}>
-        {!hideHeader &&
-          (isHeaderLoading ? (
-            <AppHeaderLoading back={back} spacing="largeBleed" />
-          ) : (
-            <SecurityAppHeader
-              title={title}
-              back={back}
-              tabs={tabs}
-              menu={menu}
-              metadata={metadata}
-              docLink={docLink}
-              spacing="largeBleed"
-            />
-          ))}
+        {!hideHeader && (
+          <>
+            {isHeaderLoading ? (
+              <AppHeaderLoading back={back} spacing="largeBleed" />
+            ) : (
+              <SecurityAppHeader
+                title={title}
+                back={back}
+                tabs={tabs}
+                menu={menu}
+                metadata={metadata}
+                docLink={docLink}
+                spacing="largeBleed"
+              />
+            )}
+            {/* Pages with header tabs own the gap between the tabs and their content */}
+            {!hasTabs && <EuiSpacer size="m" />}
+          </>
+        )}
         <EuiPageSection paddingSize="none" color="transparent" restrictWidth={restrictWidth}>
           {children}
         </EuiPageSection>

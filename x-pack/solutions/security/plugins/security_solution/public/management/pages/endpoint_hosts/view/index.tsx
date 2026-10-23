@@ -455,15 +455,16 @@ export const EndpointList = () => {
     ...(routeState.backLink?.navigateTo ?? [APP_UI_ID])
   );
   const appHeaderBack: AppHeaderBack | undefined = useMemo(() => {
-    if (!routeState.backLink?.href) {
+    if (!routeState.backLink) {
       return undefined;
     }
+    const { href, label, navigateTo } = routeState.backLink;
     return {
-      href: routeState.backLink.href,
-      label: routeState.backLink.label,
+      href: href ?? getAppUrl({ appId: navigateTo[0], path: navigateTo[1]?.path }),
+      label,
       onClick: handleAppHeaderBackClick,
     };
-  }, [routeState.backLink, handleAppHeaderBackClick]);
+  }, [routeState.backLink, getAppUrl, handleAppHeaderBackClick]);
 
   const onRefresh = useCallback(() => {
     if (autoRefreshInterval <= 0) {

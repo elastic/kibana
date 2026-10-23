@@ -747,7 +747,10 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
             onConfirm={confirmUnsavedChangesModal}
           />
         )}
-        {currentSelectedTab.content}
+        {/* Header tabs can't reference a panel (`aria-controls`), so name the panel instead */}
+        <div role="tabpanel" aria-label={currentSelectedTab.name}>
+          {currentSelectedTab.content}
+        </div>
       </>
     ),
   };

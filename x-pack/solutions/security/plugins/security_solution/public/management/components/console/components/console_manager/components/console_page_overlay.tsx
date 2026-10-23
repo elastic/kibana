@@ -134,6 +134,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         isHidden={isHidden}
         data-test-subj="consolePageOverlay"
         onHide={onHide}
+        paddingSize="l"
         enableScrolling={false}
         zIndex={dynamicZIndex}
       >
@@ -158,15 +159,16 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
                 `useInlineAppHeader`/`chrome_api.tsx`). `AppHeaderView` never claims that slot, so
                 closing the console cannot affect the page underneath.
 
-                The header is rendered outside `PageLayout`'s padded panel (no `spacing` - it owns
-                its own standard inset) per the `@kbn/app-header` README's preferred layout; the
-                console's own content keeps its 24px inset via `PageLayout`'s panel below.
+                `largeBleed` matches `PageOverlay`'s 24px padding, so the header spans the full
+                overlay width while the console content keeps its previous inset (overlay padding
+                plus `PageLayout`'s panel padding).
               */}
               <AppHeaderView
                 title={pageTitle}
                 back={back}
                 menu={headerMenu}
                 docLink={services.docLinks.links.securitySolution.responseActions}
+                spacing="largeBleed"
               />
             </EuiFlexItem>
           )}

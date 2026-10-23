@@ -46,10 +46,13 @@ export const ResponseActionsHistoryAppMenu = memo<ResponseActionsHistoryAppMenuP
 
     const closeFlyout = useCallback(() => {
       setShowActionLogFlyout(false);
-      // Restore focus to the app menu control that opened the flyout, mirroring the previous
-      // manual `buttonRef`/`requestAnimationFrame` focus-restoration hack.
-      returnFocusRef.current?.();
+      // Restore focus to the app menu control that opened the flyout once it's enabled again (it
+      // is disabled while the flyout is open), so EUI's focus trap doesn't return focus to <body>.
+      const returnFocus = returnFocusRef.current;
       returnFocusRef.current = undefined;
+      if (returnFocus) {
+        window.requestAnimationFrame(returnFocus);
+      }
     }, []);
 
     const openFlyout = useCallback((params?: AppMenuRunActionParams) => {

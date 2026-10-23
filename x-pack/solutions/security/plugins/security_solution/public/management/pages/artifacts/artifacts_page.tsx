@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
 import { SecurityPageName } from '@kbn/deeplinks-security';
@@ -246,15 +246,20 @@ export const ArtifactsPage = memo(() => {
     [location.pathname, visibleTabs]
   );
 
+  // When the URL's artifact type isn't a visible tab, the first visible tab is shown as selected.
+  const selectedTabIndex = visibleTabs.findIndex((tab) => tab === activeTab);
+  const effectiveSelectedIndex =
+    visibleTabs.length > 0 && selectedTabIndex >= 0 ? selectedTabIndex : 0;
+
   const headerTabs: AppHeaderTab[] = useMemo(
     () =>
-      visibleTabs.map((tab) => ({
+      visibleTabs.map((tab, index) => ({
         id: tab,
         label: getTabLabel(tab),
-        isSelected: tab === activeTab,
+        isSelected: index === effectiveSelectedIndex,
         href: getAppUrl({ path: getPathForTab(tab, visibleTabs) }),
       })),
-    [visibleTabs, activeTab, getAppUrl]
+    [visibleTabs, effectiveSelectedIndex, getAppUrl]
   );
 
   const docLink = useMemo(
@@ -267,24 +272,23 @@ export const ArtifactsPage = memo(() => {
   // tab switches, which drop `location.state` (same-origin hrefs navigate like plain links).
   const memoizedRouteState = useMemoizedRouteState(location.state);
   const backNavigateTo = memoizedRouteState?.onBackButtonNavigateTo;
-  const backOnClick = useNavigateToAppEventHandler(backNavigateTo?.[0] ?? '', {
-    path: backNavigateTo?.[1]?.path,
-    state: backNavigateTo?.[1]?.state,
-  });
+  const backOnClick = useNavigateToAppEventHandler(backNavigateTo?.[0] ?? '', backNavigateTo?.[1]);
   const back: AppHeaderBack | undefined = useMemo(() => {
-    if (!memoizedRouteState?.onBackButtonNavigateTo || !memoizedRouteState.backButtonUrl) {
+    if (!backNavigateTo) {
       return undefined;
     }
     return {
-      href: memoizedRouteState.backButtonUrl,
+      href:
+        memoizedRouteState?.backButtonUrl ??
+        getAppUrl({ appId: backNavigateTo[0], path: backNavigateTo[1]?.path }),
       label:
-        memoizedRouteState.backButtonLabel ??
+        memoizedRouteState?.backButtonLabel ??
         i18n.translate('xpack.securitySolution.artifacts.backButtonDefaultLabel', {
           defaultMessage: 'policy',
         }),
       onClick: backOnClick,
     };
-  }, [memoizedRouteState, backOnClick]);
+  }, [backNavigateTo, memoizedRouteState, getAppUrl, backOnClick]);
 
   return (
     <AdministrationListPage
@@ -294,6 +298,7 @@ export const ArtifactsPage = memo(() => {
       back={back}
       docLink={docLink}
     >
+      <EuiSpacer size="l" />
       <TrackApplicationView viewId={TAB_PAGE_NAMES[activeTab] ?? SecurityPageName.artifacts}>
         {activeTab === AdministrationSubTab.endpointExceptions && <EndpointExceptions />}
         {activeTab === AdministrationSubTab.trustedApps && <TrustedAppsList />}

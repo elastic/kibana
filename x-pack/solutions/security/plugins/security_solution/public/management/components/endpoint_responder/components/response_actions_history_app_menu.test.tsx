@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMenuConfig } from '@kbn/app-menu';
@@ -25,38 +25,39 @@ const meta: EndpointResponderExtensionComponentProps['meta'] = {
   platform: 'linux',
 };
 
-/** Renders the component the way `ConsoleManager` does: owning the `AppMenuConfig` it reports and
- * invoking its `primaryActionItem.run()` the same way the real app menu would. */
+/** Renders the component the way `ConsoleManager` + the app menu do: owning the `AppMenuConfig` it
+ * reports, rendering its primary action as a trigger (disabled per `disableButton`) and invoking
+ * `primaryActionItem.run()` with a `returnFocus` that focuses that trigger. */
 const TestHarness = () => {
   const [menu, setMenu] = useState<AppMenuConfig>();
-
-  const handleRun = () => {
-    if (menu?.primaryActionItem?.run) {
-      menu.primaryActionItem.run({
-        triggerElement: document.body,
-        returnFocus: () => {
-          document.body.setAttribute('data-return-focus-called', 'true');
-        },
-      });
-    }
-  };
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const primaryAction = menu?.primaryActionItem;
+  const disableButton = primaryAction?.disableButton;
+  const isDisabled = typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
 
   return (
     <>
-      <button type="button" data-test-subj="runPrimaryAction" onClick={handleRun}>
+      <button
+        type="button"
+        data-test-subj="runPrimaryAction"
+        ref={triggerRef}
+        disabled={isDisabled}
+        onClick={(event) =>
+          primaryAction?.run?.({
+            triggerElement: event.currentTarget,
+            returnFocus: () => triggerRef.current?.focus(),
+          })
+        }
+      >
         {'run'}
       </button>
-      <div data-test-subj="menuState">{JSON.stringify(menu?.primaryActionItem ?? null)}</div>
+      <div data-test-subj="menuState">{JSON.stringify(primaryAction ?? null)}</div>
       <ResponseActionsHistoryAppMenu meta={meta} onMenuChange={setMenu} />
     </>
   );
 };
 
 describe('ResponseActionsHistoryAppMenu', () => {
-  beforeEach(() => {
-    document.body.removeAttribute('data-return-focus-called');
-  });
-
   it('reports a primary action item, but renders nothing itself, until the action runs', () => {
     render(<TestHarness />);
 
@@ -85,19 +86,20 @@ describe('ResponseActionsHistoryAppMenu', () => {
     });
   });
 
-  it('restores focus via `returnFocus` when the flyout closes', async () => {
+  it('returns focus to the (re-enabled) trigger when the flyout closes', async () => {
     const user = userEvent.setup();
     render(<TestHarness />);
 
     await user.click(screen.getByTestId('runPrimaryAction'));
     const flyout = await screen.findByTestId('responderActionLogFlyout');
+    expect(screen.getByTestId('runPrimaryAction')).toBeDisabled();
 
     await user.click(within(flyout).getByTestId('euiFlyoutCloseButton'));
 
     await waitFor(() => {
-      expect(screen.queryByTestId('responderActionLogFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('runPrimaryAction')).toHaveFocus();
     });
-    expect(document.body.getAttribute('data-return-focus-called')).toEqual('true');
+    expect(screen.queryByTestId('responderActionLogFlyout')).not.toBeInTheDocument();
   });
 
   it('clears the reported menu on unmount', () => {

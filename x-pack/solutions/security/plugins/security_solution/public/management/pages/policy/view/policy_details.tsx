@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
@@ -57,7 +57,7 @@ const PolicyDetailsLoaded = React.memo<{
         color: 'success',
         label: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.healthyMetadata',
-          { defaultMessage: 'Healthy: {count}', values: { count: online } }
+          { defaultMessage: 'Healthy: {count, number}', values: { count: online } }
         ),
         'data-test-subj': 'policyAgentsSummary-healthy',
       },
@@ -66,7 +66,7 @@ const PolicyDetailsLoaded = React.memo<{
         color: 'warning',
         label: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.unhealthyMetadata',
-          { defaultMessage: 'Unhealthy: {count}', values: { count: error } }
+          { defaultMessage: 'Unhealthy: {count, number}', values: { count: error } }
         ),
         'data-test-subj': 'policyAgentsSummary-unhealthy',
       },
@@ -75,7 +75,7 @@ const PolicyDetailsLoaded = React.memo<{
         color: 'subdued',
         label: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.offlineMetadata',
-          { defaultMessage: 'Offline: {count}', values: { count: offline } }
+          { defaultMessage: 'Offline: {count, number}', values: { count: offline } }
         ),
         'data-test-subj': 'policyAgentsSummary-offline',
       },
@@ -110,32 +110,22 @@ export const PolicyDetails = React.memo(() => {
   const policyItem = usePolicyDetailsSelector(policyDetails);
 
   // The IA parent (`Policies`) unless the route state carries an explicit satellite origin (e.g.
-  // opened from Fleet, via `FleetIntegrationArtifactsCard`'s `backLink`). Memoized so the
-  // explicit origin, once seen, survives in-page navigation (tab switches) even though that
-  // doesn't carry `location.state`.
-  const [memoizedBackLink, setMemoizedBackLink] = useState(routeState?.backLink);
-  useEffect(() => {
-    if (routeState?.backLink) {
-      setMemoizedBackLink(routeState.backLink);
-    }
-  }, [routeState?.backLink]);
-
+  // opened from the Endpoints list or from Fleet). Tab switches keep that state.
+  const backLink = routeState?.backLink;
   const policyListPath = useMemo(() => getPoliciesPath(), []);
-  const backAppId = memoizedBackLink?.navigateTo[0] ?? APP_UI_ID;
-  const backPath = memoizedBackLink?.navigateTo[1]?.path ?? policyListPath;
-  const backState = memoizedBackLink?.navigateTo[1]?.state;
-  const backOnClick = useNavigateToAppEventHandler(backAppId, {
-    path: backPath,
-    state: backState,
-  });
+  const policyListNavigateOptions = useMemo(() => ({ path: policyListPath }), [policyListPath]);
+  const backAppId = backLink?.navigateTo[0] ?? APP_UI_ID;
+  const backNavigateOptions = backLink ? backLink.navigateTo[1] : policyListNavigateOptions;
+  const backPath = backNavigateOptions?.path;
+  const backOnClick = useNavigateToAppEventHandler(backAppId, backNavigateOptions);
 
   const back: AppHeaderBack = useMemo(
     () => ({
-      href: memoizedBackLink?.href ?? getAppUrl({ path: policyListPath }),
-      label: memoizedBackLink?.label ?? POLICIES_LIST_LABEL,
+      href: backLink?.href ?? getAppUrl({ appId: backAppId, path: backPath }),
+      label: backLink?.label ?? POLICIES_LIST_LABEL,
       onClick: backOnClick,
     }),
-    [memoizedBackLink, getAppUrl, policyListPath, backOnClick]
+    [backLink, getAppUrl, backAppId, backPath, backOnClick]
   );
 
   if (policyApiError || !policyItem) {

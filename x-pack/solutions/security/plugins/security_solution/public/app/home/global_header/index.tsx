@@ -23,7 +23,7 @@ import {
   isCloudSecurityPosturePath,
   isDashboardViewPath,
   isDetectionsPath,
-  isManagementPath,
+  isEndpointManagementPath,
   isRuleChangesHistoryPath,
   isRulesAddPath,
   isRulesManagementPath,
@@ -76,7 +76,7 @@ export const GlobalHeader = React.memo(() => {
   const cloudSecurityPosturePath = isCloudSecurityPosturePath(pathname);
   // Endpoint management pages (Endpoints, Policies, Response actions history, Script library,
   // Artifacts, Policy details) own "Add integrations" in their own `SecurityAppHeader`.
-  const managementPath = isManagementPath(pathname);
+  const managementPath = isEndpointManagementPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 

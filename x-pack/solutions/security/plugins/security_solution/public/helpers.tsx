@@ -25,7 +25,6 @@ import {
   CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
-  MANAGEMENT_PATH,
   RULES_ADD_PATH,
   RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
@@ -41,6 +40,13 @@ import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SecurityPageName } from './app/types';
 import type { InspectResponse, StartedSubPlugins, StartServices } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
+import {
+  ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS,
+  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_POLICIES_PATH,
+  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
+  MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH,
+} from './management/common/constants';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
 import { AllRulesTabs } from './detection_engine/rule_management_ui/components/rules_table/constants';
@@ -238,13 +244,19 @@ export const isSharedExceptionListsPath = (pathname: string): boolean =>
   });
 
 /**
- * Matches any Endpoint management route (Endpoints, Policies, Response actions history, Script
- * library, Artifacts, Policy details, etc.), whose app headers (`AdministrationListPage` /
- * `ArtifactListPage`) own the page actions, including "Add integrations".
+ * Matches the Endpoint management routes whose page headers (`AdministrationListPage`) own the
+ * page actions, including "Add integrations": Endpoints, Policies (incl. policy details),
+ * Artifacts, Response actions history and Script library.
  */
-export const isManagementPath = (pathname: string): boolean =>
+export const isEndpointManagementPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
-    path: MANAGEMENT_PATH,
+    path: [
+      MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+      MANAGEMENT_ROUTING_POLICIES_PATH,
+      ...ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS,
+      MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
+      MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH,
+    ],
     strict: false,
   });
 
