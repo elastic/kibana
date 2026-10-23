@@ -8,30 +8,43 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { and, assign, not, sendTo, setup, stateIn } from 'xstate';
+import { and, assign, fromPromise, sendTo, setup, stateIn } from 'xstate';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
+import {
+  STREAMS_DEFAULT_UNIT_ID,
+  type ResolveUnitIndicesResponse,
+  type ResolvedDestinationIndex,
+} from '@kbn/streams-plugin/common';
 import { collectUnitComponentIds } from '@kbn/streams-schema';
 import { notifyUnitUpdated } from '../../notify_unit_updated';
 import { createDestinationId } from '../destination_helpers';
 import { canSubmitDestinationForm, getDestinationCreationFormErrors } from '../destination_form';
 import {
+  AUTO_INDEX_PATTERNS,
   createUnitDestination,
   getConfiguredDestinations,
+  getDestinationCreateSpecs,
   getUnitDestinations,
-  indexUsesTemplate,
-  parseIndexPatterns,
   toDestinationViewModel,
   withUnitDestinations,
 } from '../destination_models';
+import {
+  createDestinationApiKeyServices,
+  type DestinationApiKey,
+  type DestinationApiKeyGenerationDeps,
+  type DestinationApiKeyServices,
+} from '../destination_api_keys';
 import type {
   DestinationCreationFormData,
   DestinationCreationFormErrors,
+  DestinationSignal,
   DestinationStorageKind,
   DestinationViewModel,
 } from '../types';
 import { EMPTY_ELASTICSEARCH_DESTINATION_FORM } from '../types';
 import { removeComponentFromPipelines } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
+import { getFormattedError } from '../../../../util/errors';
 
 export type { DestinationCreationFormErrors };
 
@@ -44,27 +57,38 @@ export interface DestinationsParentEvent {
 
 export interface DestinationsStateInput {
   unitDefinition: Unit;
-  includeUnconfiguredNodeOnCreate: boolean;
   parentRef: AnyActorRef;
+}
+
+export interface PendingDestination {
+  id: string;
+  signals: DestinationSignal[];
+  index?: string;
+  /** Stored on the unit as `index_patterns` when auto and the user set write targets. */
+  unitPatterns?: string[];
+  /** API key write-role globs. */
+  patterns: string[];
 }
 
 export interface DestinationCreationContext {
   formData: DestinationCreationFormData;
   formErrors: DestinationCreationFormErrors;
-  includeUnconfiguredNode: boolean;
-  associatedUnconfiguredNodeId?: string;
-  createdDestination?: DestinationViewModel;
+  pendingDestinations?: PendingDestination[];
+  createdDestinations?: DestinationViewModel[];
 }
+
+export type ResolvedIndicesStatus = 'loading' | 'ready' | 'unavailable';
 
 export interface DestinationsStateContext {
   unitDefinition: Unit;
-  unconfiguredNodeIds: string[];
   creationContext?: DestinationCreationContext;
-  includeUnconfiguredNodeOnCreate: boolean;
   selectedDestinationId?: string;
   persistenceError?: string;
+  apiKeyError?: string;
   hasReceivedUnit: boolean;
   parentRef: AnyActorRef;
+  resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>;
+  resolvedIndicesError?: string;
 }
 
 export type DestinationsStateEvent =
@@ -82,16 +106,29 @@ export type DestinationsStateEvent =
   | { type: 'destination.create' }
   | { type: 'destination.delete'; destinationId: string }
   | { type: 'destination.deleteMany'; destinationIds: string[] }
-  | { type: 'unconfiguredNode.remove'; nodeId: string }
-  | { type: 'unconfiguredNodes.set'; nodeIds: string[] }
   | { type: 'destination.view'; destinationId: string }
   | { type: 'storageKind.select'; storageKind: DestinationStorageKind }
   | { type: 'destinationName.change'; destinationName: string }
-  | { type: 'elasticsearch.change'; index?: string; indexPatterns?: string }
+  | {
+      type: 'elasticsearch.change';
+      auto?: boolean;
+      logsIndex?: string;
+      metricsIndex?: string;
+      tracesIndex?: string;
+    }
   | { type: 'creationForm.blur' }
-  | { type: 'modal.openCreate'; associatedUnconfiguredNodeId?: string }
+  | { type: 'modal.openCreate' }
   | { type: 'modal.closeCreate' }
-  | { type: 'flyout.close' };
+  | { type: 'flyout.close' }
+  | { type: 'xstate.done.actor.generateApiKey'; output: DestinationApiKeyGrant[] }
+  | { type: 'xstate.error.actor.generateApiKey'; error: unknown }
+  | { type: 'resolvedIndices.reload' }
+  | { type: 'xstate.done.actor.loadResolvedIndices'; output: ResolveUnitIndicesResponse }
+  | { type: 'xstate.error.actor.loadResolvedIndices'; error: unknown };
+
+export interface DestinationApiKeyGrant extends DestinationApiKey {
+  destinationId: string;
+}
 
 const removeDestinationsFromContext = (
   context: Pick<DestinationsStateContext, 'unitDefinition' | 'selectedDestinationId'>,
@@ -122,8 +159,21 @@ const getCreationFormErrors = ({
   unitDefinition: Unit;
 }): DestinationCreationFormErrors => getDestinationCreationFormErrors({ formData, unitDefinition });
 
-const createUnconfiguredNodeId = (): string =>
-  `unconfigured-destination-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+/** Keep an empty name quiet until the name field has already shown a required error. */
+const withoutUnrevealedRequiredErrors = (
+  next: DestinationCreationFormErrors,
+  previous: DestinationCreationFormErrors
+): DestinationCreationFormErrors => ({
+  ...next,
+  destinationName:
+    next.destinationName === 'required' && previous.destinationName !== 'required'
+      ? undefined
+      : next.destinationName,
+  staticIndexes:
+    next.staticIndexes === 'required' && previous.staticIndexes !== 'required'
+      ? undefined
+      : next.staticIndexes,
+});
 
 export const destinationsStateMachine = setup({
   types: {
@@ -131,9 +181,34 @@ export const destinationsStateMachine = setup({
     context: {} as DestinationsStateContext,
     events: {} as DestinationsStateEvent,
   },
+  actors: {
+    generateApiKey: getPlaceholderFor(createGenerateApiKeyActor),
+    loadResolvedIndices: getPlaceholderFor(createLoadResolvedIndicesActor),
+  },
   actions: {
     notifyDestinationCreated: getPlaceholderFor(createNotifyDestinationCreatedAction),
     notifyDestinationDeleted: getPlaceholderFor(createNotifyDestinationDeletedAction),
+    revokePendingDestinationApiKey: getPlaceholderFor(createRevokePendingDestinationApiKeyAction),
+    notifyResolvedIndicesError: getPlaceholderFor(createNotifyResolvedIndicesErrorAction),
+    storeResolvedIndices: assign(({ event }) => {
+      if (event.type !== 'xstate.done.actor.loadResolvedIndices') {
+        return {};
+      }
+      return {
+        resolvedIndicesByDestination: Object.fromEntries(
+          Object.entries(event.output.destinations).map(([destinationId, { indices }]) => [
+            destinationId,
+            indices,
+          ])
+        ),
+        resolvedIndicesError: undefined,
+      };
+    }),
+    storeResolvedIndicesError: assign(({ event }) =>
+      event.type === 'xstate.error.actor.loadResolvedIndices'
+        ? { resolvedIndicesError: getFormattedError(event.error).message }
+        : {}
+    ),
     syncLoadedUnit: assign(({ context, event }) => {
       if (event.type !== 'unit.loaded' && event.type !== 'unit.persisted') {
         return {};
@@ -152,62 +227,34 @@ export const destinationsStateMachine = setup({
         creationContext: context.creationContext
           ? {
               ...context.creationContext,
-              formErrors: getCreationFormErrors({
-                formData: context.creationContext.formData,
-                unitDefinition: event.unitDefinition,
-              }),
+              formErrors: withoutUnrevealedRequiredErrors(
+                getCreationFormErrors({
+                  formData: context.creationContext.formData,
+                  unitDefinition: event.unitDefinition,
+                }),
+                context.creationContext.formErrors
+              ),
             }
           : undefined,
       };
     }),
-    startFreshCreate: assign(({ context, event }) => {
-      if (event.type !== 'modal.openCreate') {
-        return {};
-      }
-      const existingUnconfiguredNodeId =
-        event.associatedUnconfiguredNodeId &&
-        context.unconfiguredNodeIds.includes(event.associatedUnconfiguredNodeId)
-          ? event.associatedUnconfiguredNodeId
-          : undefined;
-      const associatedUnconfiguredNodeId =
-        existingUnconfiguredNodeId ??
-        (context.includeUnconfiguredNodeOnCreate ? createUnconfiguredNodeId() : undefined);
-      return {
-        creationContext: {
-          formData: {
-            storageKind: 'local_elasticsearch' as const,
-            destinationName: '',
-            elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
-          },
-          formErrors: {},
-          includeUnconfiguredNode: context.includeUnconfiguredNodeOnCreate,
-          associatedUnconfiguredNodeId,
+    startFreshCreate: assign(() => ({
+      creationContext: {
+        formData: {
+          storageKind: 'local_elasticsearch' as const,
+          destinationName: '',
+          elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
         },
-        unconfiguredNodeIds:
-          associatedUnconfiguredNodeId &&
-          !context.unconfiguredNodeIds.includes(associatedUnconfiguredNodeId)
-            ? [...context.unconfiguredNodeIds, associatedUnconfiguredNodeId]
-            : context.unconfiguredNodeIds,
-        persistenceError: undefined,
-      };
-    }),
+        formErrors: {},
+      },
+      persistenceError: undefined,
+      apiKeyError: undefined,
+    })),
     clearCreate: assign({
       creationContext: undefined,
       persistenceError: undefined,
+      apiKeyError: undefined,
     }),
-    removeUnconfiguredNode: assign(({ context, event }) => {
-      if (event.type !== 'unconfiguredNode.remove') {
-        return {};
-      }
-      return {
-        unconfiguredNodeIds: context.unconfiguredNodeIds.filter(
-          (nodeId) => nodeId !== event.nodeId
-        ),
-      };
-    }),
-    setUnconfiguredNodes: assign(({ context, event }) =>
-      event.type === 'unconfiguredNodes.set' ? { unconfiguredNodeIds: event.nodeIds } : {}
-    ),
     selectStorageKind: assign(({ context, event }) => {
       if (event.type !== 'storageKind.select' || !context.creationContext) {
         return {};
@@ -220,10 +267,13 @@ export const destinationsStateMachine = setup({
         creationContext: {
           ...context.creationContext,
           formData,
-          formErrors: getCreationFormErrors({
-            formData,
-            unitDefinition: context.unitDefinition,
-          }),
+          formErrors: withoutUnrevealedRequiredErrors(
+            getCreationFormErrors({
+              formData,
+              unitDefinition: context.unitDefinition,
+            }),
+            context.creationContext.formErrors
+          ),
         },
       };
     }),
@@ -265,81 +315,126 @@ export const destinationsStateMachine = setup({
       if (event.type !== 'elasticsearch.change' || !context.creationContext) {
         return {};
       }
+      const elasticsearch = {
+        ...context.creationContext.formData.elasticsearch,
+        ...(event.auto !== undefined ? { auto: event.auto } : {}),
+        ...(event.logsIndex !== undefined ? { logsIndex: event.logsIndex } : {}),
+        ...(event.metricsIndex !== undefined ? { metricsIndex: event.metricsIndex } : {}),
+        ...(event.tracesIndex !== undefined ? { tracesIndex: event.tracesIndex } : {}),
+      };
       const formData: DestinationCreationFormData = {
         ...context.creationContext.formData,
-        elasticsearch: {
-          ...context.creationContext.formData.elasticsearch,
-          ...(event.index !== undefined ? { index: event.index } : {}),
-          ...(event.indexPatterns !== undefined ? { indexPatterns: event.indexPatterns } : {}),
-        },
+        elasticsearch,
       };
       return {
         creationContext: {
           ...context.creationContext,
           formData,
-          formErrors: getCreationFormErrors({
-            formData,
-            unitDefinition: context.unitDefinition,
-          }),
+          formErrors: withoutUnrevealedRequiredErrors(
+            getCreationFormErrors({
+              formData,
+              unitDefinition: context.unitDefinition,
+            }),
+            context.creationContext.formErrors
+          ),
         },
+        apiKeyError: undefined,
       };
     }),
-    stageCreatedDestination: assign(({ context, event }) => {
-      if (event.type !== 'destination.create' || !context.creationContext) {
+    assignPendingDestination: assign(({ context }) => {
+      if (!context.creationContext) {
         return {};
       }
-      const { destinationName, elasticsearch, storageKind } = context.creationContext.formData;
-      if (storageKind !== 'local_elasticsearch') {
-        return {};
-      }
-      const name = destinationName.trim();
-      const index = elasticsearch.index.trim();
-      const id = createDestinationId({
-        name,
-        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
-      });
-      const unitDestination = createUnitDestination({
-        id,
-        name,
-        index,
-        indexPatterns: indexUsesTemplate(index)
-          ? parseIndexPatterns(elasticsearch.indexPatterns)
-          : [],
-      });
-      const destination = toDestinationViewModel(unitDestination);
-      if (!destination) {
-        return {};
+      const name = context.creationContext.formData.destinationName.trim();
+      const existingIds = [...collectUnitComponentIds(context.unitDefinition.unit)];
+      const pendingDestinations: PendingDestination[] = [];
+      for (const spec of getDestinationCreateSpecs(
+        context.creationContext.formData.elasticsearch
+      )) {
+        const idName = spec.index ? `${name}-${spec.signals[0]}` : name;
+        const id = createDestinationId({
+          name: idName,
+          existingIds: [...existingIds, ...pendingDestinations.map((pending) => pending.id)],
+        });
+        pendingDestinations.push({
+          id,
+          signals: spec.signals,
+          index: spec.index,
+          unitPatterns: spec.patterns,
+          patterns: spec.index ? [spec.index] : spec.patterns ?? [...AUTO_INDEX_PATTERNS],
+        });
       }
       return {
         creationContext: {
           ...context.creationContext,
-          createdDestination: destination,
+          pendingDestinations,
         },
-        unconfiguredNodeIds: context.creationContext.associatedUnconfiguredNodeId
-          ? context.unconfiguredNodeIds.filter(
-              (nodeId) => nodeId !== context.creationContext?.associatedUnconfiguredNodeId
-            )
-          : context.unconfiguredNodeIds,
-        unitDefinition: withUnitDestinations(context.unitDefinition, [
-          ...getUnitDestinations(context.unitDefinition).filter(
-            ({ id: destinationId }) => destinationId !== unitDestination.id
-          ),
-          unitDestination,
-        ]),
-        persistenceError: undefined,
+        apiKeyError: undefined,
       };
     }),
+    stageCreatedDestination: assign(({ context, event }) => {
+      if (event.type !== 'xstate.done.actor.generateApiKey' || !context.creationContext) {
+        return {};
+      }
+      const { destinationName, storageKind } = context.creationContext.formData;
+      const pendingDestinations = context.creationContext.pendingDestinations;
+      if (storageKind !== 'local_elasticsearch' || !pendingDestinations?.length) {
+        return {};
+      }
+      const name = destinationName.trim();
+      const encodedByDestinationId = new Map(
+        event.output.map((apiKey) => [apiKey.destinationId, apiKey.encoded])
+      );
+      const unitDestinations = pendingDestinations.map((pending) =>
+        createUnitDestination({
+          id: pending.id,
+          name,
+          signals: pending.signals,
+          index: pending.index,
+          patterns: pending.unitPatterns,
+          apiKey: encodedByDestinationId.get(pending.id),
+        })
+      );
+      const createdDestinations = unitDestinations.flatMap((unitDestination) => {
+        const destination = toDestinationViewModel(unitDestination);
+        return destination ? [destination] : [];
+      });
+      if (createdDestinations.length === 0) {
+        return {};
+      }
+      const createdIds = new Set(unitDestinations.map(({ id }) => id));
+      const unitDefinition = withUnitDestinations(context.unitDefinition, [
+        ...getUnitDestinations(context.unitDefinition).filter(
+          ({ id: destinationId }) => !createdIds.has(destinationId)
+        ),
+        ...unitDestinations,
+      ]);
+      return {
+        creationContext: {
+          ...context.creationContext,
+          createdDestinations,
+        },
+        unitDefinition,
+        persistenceError: undefined,
+        apiKeyError: undefined,
+      };
+    }),
+    storeApiKeyError: assign(({ event }) =>
+      event.type === 'xstate.error.actor.generateApiKey'
+        ? { apiKeyError: getFormattedError(event.error).message }
+        : {}
+    ),
     notifyParentCreate: sendTo(
       ({ context }) => context.parentRef,
       ({ context }): DestinationsParentEvent => {
-        const destinationId = context.creationContext?.createdDestination?.id;
-        if (!destinationId) {
-          throw new Error('Expected a created destination');
+        const destinationIds = context.creationContext?.createdDestinations?.map(({ id }) => id);
+        if (!destinationIds?.length) {
+          throw new Error('Expected created destinations');
         }
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
-          destinationIds: [destinationId],
+          destinationIds,
           intent: 'create',
         };
       }
@@ -393,24 +488,11 @@ export const destinationsStateMachine = setup({
       selectedDestinationId: undefined,
       persistenceError: undefined,
     }),
-    storePersistenceError: assign(({ context, event }) => {
-      if (event.type !== 'unit.persistenceFailed') {
-        return {};
-      }
-      const associatedUnconfiguredNodeId =
-        context.creationContext?.includeUnconfiguredNode === true
-          ? context.creationContext.associatedUnconfiguredNodeId
-          : undefined;
-      return {
-        unitDefinition: event.unitDefinition,
-        persistenceError: event.message,
-        unconfiguredNodeIds:
-          associatedUnconfiguredNodeId &&
-          !context.unconfiguredNodeIds.includes(associatedUnconfiguredNodeId)
-            ? [...context.unconfiguredNodeIds, associatedUnconfiguredNodeId]
-            : context.unconfiguredNodeIds,
-      };
-    }),
+    storePersistenceError: assign(({ event }) =>
+      event.type === 'unit.persistenceFailed'
+        ? { unitDefinition: event.unitDefinition, persistenceError: event.message }
+        : {}
+    ),
     restoreUnitAfterPersistenceFailure: assign(({ event }) =>
       event.type === 'unit.persistenceFailed'
         ? { unitDefinition: event.unitDefinition, persistenceError: event.message }
@@ -427,27 +509,18 @@ export const destinationsStateMachine = setup({
           })
       ),
     isCreatedDestination: ({ context, event }) => {
-      const createdDestinationId = context.creationContext?.createdDestination?.id;
+      const createdDestinationIds = context.creationContext?.createdDestinations?.map(
+        ({ id }) => id
+      );
       return (
         (event.type === 'unit.persisted' ||
           (event.type === 'unit.persistenceFailed' && event.intent === 'create')) &&
-        createdDestinationId !== undefined &&
-        event.destinationIds.includes(createdDestinationId)
+        Boolean(createdDestinationIds?.length) &&
+        Boolean(createdDestinationIds?.every((id) => event.destinationIds.includes(id)))
       );
     },
     hasDestinationsToDelete: ({ event }) =>
       event.type === 'destination.deleteMany' && event.destinationIds.length > 0,
-    removesOpenPlaceholder: ({ context, event }) =>
-      event.type === 'unconfiguredNode.remove' &&
-      event.nodeId === context.creationContext?.associatedUnconfiguredNodeId,
-    setDropsOpenPlaceholder: ({ context, event }) => {
-      const associatedNodeId = context.creationContext?.associatedUnconfiguredNodeId;
-      return (
-        event.type === 'unconfiguredNodes.set' &&
-        associatedNodeId !== undefined &&
-        !event.nodeIds.includes(associatedNodeId)
-      );
-    },
     loadedUnitRemovedViewedDestination: ({ context, event }) =>
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
@@ -465,10 +538,9 @@ export const destinationsStateMachine = setup({
   type: 'parallel',
   context: ({ input }) => ({
     unitDefinition: input.unitDefinition,
-    unconfiguredNodeIds: [],
-    includeUnconfiguredNodeOnCreate: input.includeUnconfiguredNodeOnCreate,
     hasReceivedUnit: false,
     parentRef: input.parentRef,
+    resolvedIndicesByDestination: {},
   }),
   on: {
     'unit.loaded': { actions: 'syncLoadedUnit' },
@@ -485,22 +557,6 @@ export const destinationsStateMachine = setup({
       guard: and(['unitSaveIsIdle', 'hasDestinationsToDelete']),
       actions: ['deleteDestinations', 'notifyParentDeleteMany'],
     },
-    'unconfiguredNode.remove': [
-      {
-        guard: and(['removesOpenPlaceholder', not(stateIn({ configuring: 'persisting' }))]),
-        target: '#configuringIdle',
-        actions: ['removeUnconfiguredNode', 'clearCreate'],
-      },
-      { actions: 'removeUnconfiguredNode' },
-    ],
-    'unconfiguredNodes.set': [
-      {
-        guard: and(['setDropsOpenPlaceholder', not(stateIn({ configuring: 'persisting' }))]),
-        target: '#configuringIdle',
-        actions: ['setUnconfiguredNodes', 'clearCreate'],
-      },
-      { actions: 'setUnconfiguredNodes' },
-    ],
   },
   states: {
     configuring: {
@@ -524,13 +580,39 @@ export const destinationsStateMachine = setup({
             'creationForm.blur': { actions: 'validateCreationForm' },
             'destination.create': [
               {
-                target: 'persisting',
+                target: 'mintingApiKey',
                 guard: and(['canCreateDestination', 'unitSaveIsIdle']),
-                actions: ['stageCreatedDestination', 'notifyParentCreate'],
+                actions: 'assignPendingDestination',
               },
               { actions: 'validateCreationForm' },
             ],
             'modal.closeCreate': { target: 'idle', actions: 'clearCreate' },
+          },
+        },
+        mintingApiKey: {
+          invoke: {
+            id: 'generateApiKey',
+            src: 'generateApiKey',
+            input: ({ context }) => {
+              const pendingDestinations = context.creationContext?.pendingDestinations;
+              if (!pendingDestinations?.length) {
+                throw new Error('Expected pending destinations');
+              }
+              return {
+                destinations: pendingDestinations.map((pending) => ({
+                  destinationId: pending.id,
+                  patterns: pending.patterns,
+                })),
+              };
+            },
+            onDone: {
+              target: 'persisting',
+              actions: ['stageCreatedDestination', 'notifyParentCreate'],
+            },
+            onError: {
+              target: 'supplyingConfiguration',
+              actions: 'storeApiKeyError',
+            },
           },
         },
         persisting: {
@@ -543,7 +625,7 @@ export const destinationsStateMachine = setup({
             'unit.persistenceFailed': {
               guard: 'isCreatedDestination',
               target: 'failed',
-              actions: 'storePersistenceError',
+              actions: ['revokePendingDestinationApiKey', 'storePersistenceError'],
             },
           },
         },
@@ -566,6 +648,35 @@ export const destinationsStateMachine = setup({
         saving: {
           on: {
             'unit.save.finished': { target: 'idle' },
+          },
+        },
+      },
+    },
+    resolvedIndices: {
+      initial: 'loading',
+      on: {
+        'resolvedIndices.reload': { target: '.loading' },
+        'unit.persisted': { target: '.loading' },
+      },
+      states: {
+        loading: {
+          invoke: {
+            id: 'loadResolvedIndices',
+            src: 'loadResolvedIndices',
+            onDone: {
+              target: 'ready',
+              actions: 'storeResolvedIndices',
+            },
+            onError: {
+              target: 'unavailable',
+              actions: ['storeResolvedIndicesError', 'notifyResolvedIndicesError'],
+            },
+          },
+        },
+        ready: {},
+        unavailable: {
+          on: {
+            'resolvedIndices.reload': { target: 'loading' },
           },
         },
       },
@@ -646,13 +757,126 @@ function createNotifyDestinationDeletedAction({ toasts }: { toasts: Toasts }) {
   };
 }
 
-export const createDestinationsMachineImplementations = ({
+const revokeDestinationApiKeys = async ({
+  services,
+  toasts,
+  destinationIds,
+}: {
+  services: DestinationApiKeyServices;
+  toasts: Toasts;
+  destinationIds: string[];
+}): Promise<void> => {
+  const results = await Promise.allSettled(
+    destinationIds.map((destinationId) => services.delete(destinationId))
+  );
+  const failedDestinationIds = destinationIds.filter(
+    (_destinationId, index) => results[index].status === 'rejected'
+  );
+  if (failedDestinationIds.length === 0) {
+    return;
+  }
+  toasts.addWarning({
+    title: i18n.translate('xpack.streams.destinations.apiKeyRevokeFailedTitle', {
+      defaultMessage: 'Could not revoke unused API keys',
+    }),
+    text: i18n.translate('xpack.streams.destinations.apiKeyRevokeFailedText', {
+      defaultMessage:
+        'API keys created for {destinationIds} are still active. Invalidate them from Stack Management > API keys.',
+      values: { destinationIds: failedDestinationIds.join(', ') },
+    }),
+  });
+};
+
+function createGenerateApiKeyActor({
+  services,
   toasts,
 }: {
+  services: DestinationApiKeyServices;
   toasts: Toasts;
-}): MachineImplementationsFrom<typeof destinationsStateMachine> => ({
-  actions: {
-    notifyDestinationCreated: createNotifyDestinationCreatedAction({ toasts }),
-    notifyDestinationDeleted: createNotifyDestinationDeletedAction({ toasts }),
-  },
-});
+}) {
+  return fromPromise(
+    async ({
+      input,
+    }: {
+      input: { destinations: Array<{ destinationId: string; patterns: string[] }> };
+    }): Promise<DestinationApiKeyGrant[]> => {
+      const grants: DestinationApiKeyGrant[] = [];
+      try {
+        for (const destination of input.destinations) {
+          const apiKey = await services.generate(destination.destinationId, destination.patterns);
+          grants.push({ ...apiKey, destinationId: destination.destinationId });
+        }
+        return grants;
+      } catch (error) {
+        await revokeDestinationApiKeys({
+          services,
+          toasts,
+          destinationIds: grants.map(({ destinationId }) => destinationId),
+        });
+        throw error;
+      }
+    }
+  );
+}
+
+function createRevokePendingDestinationApiKeyAction({
+  services,
+  toasts,
+}: {
+  services: DestinationApiKeyServices;
+  toasts: Toasts;
+}) {
+  return ({ context }: { context: DestinationsStateContext }) => {
+    const destinationIds = (context.creationContext?.pendingDestinations ?? []).map(({ id }) => id);
+    void revokeDestinationApiKeys({ services, toasts, destinationIds });
+  };
+}
+
+function createLoadResolvedIndicesActor({
+  streamsRepositoryClient,
+}: DestinationApiKeyGenerationDeps) {
+  return fromPromise(async (): Promise<ResolveUnitIndicesResponse> => {
+    return streamsRepositoryClient.fetch('GET /internal/streams/unit/{id}/_resolve_indices', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID } },
+      signal: null,
+    });
+  });
+}
+
+function createNotifyResolvedIndicesErrorAction({ toasts }: { toasts: Toasts }) {
+  return ({ event }: { event: DestinationsStateEvent }) => {
+    if (event.type !== 'xstate.error.actor.loadResolvedIndices') {
+      return;
+    }
+    toasts.addError(getFormattedError(event.error), {
+      title: i18n.translate('xpack.streams.destinations.resolvedIndicesLoadFailedTitle', {
+        defaultMessage: 'Could not load destination indices',
+      }),
+    });
+  };
+}
+
+export const createDestinationsMachineImplementations = ({
+  toasts,
+  apiKeyGenerationDeps,
+}: {
+  toasts: Toasts;
+  apiKeyGenerationDeps: DestinationApiKeyGenerationDeps;
+}): MachineImplementationsFrom<typeof destinationsStateMachine> => {
+  const services = createDestinationApiKeyServices(apiKeyGenerationDeps);
+  return {
+    actors: {
+      generateApiKey: createGenerateApiKeyActor({ services, toasts }),
+      loadResolvedIndices: createLoadResolvedIndicesActor(apiKeyGenerationDeps),
+    },
+    actions: {
+      notifyDestinationCreated: createNotifyDestinationCreatedAction({ toasts }),
+      notifyDestinationDeleted: createNotifyDestinationDeletedAction({ toasts }),
+      notifyResolvedIndicesError: createNotifyResolvedIndicesErrorAction({ toasts }),
+      revokePendingDestinationApiKey: createRevokePendingDestinationApiKeyAction({
+        services,
+        toasts,
+      }),
+    },
+  };
+};

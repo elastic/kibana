@@ -14,8 +14,15 @@ export interface InvestigationTimelineEvent {
   description: string;
 }
 
+/** The range the telemetry was searched over, as ISO-8601 strings. */
+export interface InvestigationTimelineWindow {
+  start: string;
+  end: string;
+}
+
 export interface InvestigationTimelineAttachmentData {
   events: InvestigationTimelineEvent[];
+  window?: InvestigationTimelineWindow;
   attachmentLabel?: string;
 }
 

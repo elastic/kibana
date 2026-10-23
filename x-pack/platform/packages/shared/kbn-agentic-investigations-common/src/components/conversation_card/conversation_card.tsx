@@ -17,6 +17,7 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import { type Investigation } from '../../types';
+import { toPlainSummary } from '../../utils/to_plain_summary';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
 import { ConversationMetaInfo } from './conversation_meta_info';
@@ -186,7 +187,7 @@ export const ConversationCard = memo<ConversationCardProps>(
           {investigation.summary ? (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                <EuiTextTruncate text={investigation.summary} />
+                <EuiTextTruncate text={toPlainSummary(investigation.summary)} />
               </EuiText>
             </EuiFlexItem>
           ) : null}
