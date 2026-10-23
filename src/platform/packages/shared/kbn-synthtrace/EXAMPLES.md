@@ -942,7 +942,7 @@ node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z -
 
 #### `digital_experience_mixed`
 
-Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics.
+Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
 
 **Usage:**
 
