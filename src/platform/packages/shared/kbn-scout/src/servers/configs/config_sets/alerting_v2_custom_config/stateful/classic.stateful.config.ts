@@ -29,7 +29,7 @@ const DISPATCHER_CLEANUP_ENABLED =
 
 // Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so
 // API tests can assert on the plugin's EBT events (for example `alerting_v2_workflow_dispatched`).
-// Loaded as a server arg, so those assertions are local-only: Cloud attaches to an 
+// Loaded as a server arg, so those assertions are local-only: Cloud attaches to an
 // existing deployment.
 const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
