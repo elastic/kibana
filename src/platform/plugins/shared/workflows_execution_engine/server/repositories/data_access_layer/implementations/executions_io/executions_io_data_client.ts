@@ -82,7 +82,8 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
 
   /**
    * Creates an IO document on the data stream.
-   * An id is written once; a version conflict throws.
+   * An id is written once. Conflicts, including ids in older backing indexes, are reported
+   * per item with `errors: true`; the other documents are still written.
    */
   public async bulkCreate(request: ExecutionsIoBulkCreateRequest): Promise<BulkResponse> {
     if (request.documents.length === 0) {
@@ -95,31 +96,53 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       id: executionIoId(document.type, document.executionId),
       '@timestamp': document['@timestamp'] || timestamp,
     }));
-    const response = await this.deps.esClient.bulk<EsExecutionIo>({
-      refresh: request.refresh,
-      operations: documents.flatMap((document) => [
-        {
-          create: {
-            _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
-            _id: document.id,
-          },
-        },
-        document,
-      ]),
-    });
+    // A data stream only enforces `_id` uniqueness in the write index, so ids that already
+    // exist in older backing indexes are detected here and reported as conflicts.
+    const existingIds = await this.findExistingIds(documents.map(({ id }) => id));
+    const writable = documents.filter(({ id }) => !existingIds.has(id));
 
-    const items = documents.map((document, index) =>
-      toBulkItemResponse(document.id, response.items[index])
-    );
-    const conflict = items.find((item) => item.error?.type === 'version_conflict_engine_exception');
-    if (conflict) {
-      throw new Error(
-        `Failed to create execution IO ${conflict.id}: ${
-          conflict.error?.reason ?? 'document already exists'
-        }`
-      );
+    const writtenById = new Map<string, BulkItemResponse>();
+    if (writable.length > 0) {
+      const response = await this.deps.esClient.bulk<EsExecutionIo>({
+        refresh: request.refresh,
+        operations: writable.flatMap((document) => [
+          {
+            create: {
+              _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+              _id: document.id,
+            },
+          },
+          document,
+        ]),
+      });
+      writable.forEach((document, index) => {
+        writtenById.set(document.id, toBulkItemResponse(document.id, response.items[index]));
+      });
     }
+
+    const items = documents.map(
+      (document): BulkItemResponse =>
+        writtenById.get(document.id) ?? {
+          id: document.id,
+          index: '',
+          error: {
+            type: 'version_conflict_engine_exception',
+            reason: 'document already exists',
+          },
+        }
+    );
     return { items, errors: items.some((item) => item.error !== undefined) };
+  }
+
+  private async findExistingIds(ids: string[]): Promise<Set<string>> {
+    const response = await this.deps.esClient.search({
+      index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+      ignore_unavailable: true,
+      size: ids.length,
+      _source: false,
+      query: { ids: { values: ids } },
+    });
+    return new Set(response.hits.hits.flatMap((hit) => (hit._id ? [hit._id] : [])));
   }
 
   /** mget the two newest IO backing indexes, then search the data stream for the rest. */
