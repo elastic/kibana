@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ElasticsearchFeature, KibanaFeature } from '@kbn/features-plugin/server';
 import { Actions } from '@kbn/security-authorization-core';
@@ -20,6 +21,7 @@ type MockAuthzOptions =
       resolveCheckPrivileges: {
         privileges: CheckPrivilegesResponse['privileges'];
       };
+      expectedIndexPrivileges?: Record<string, string[]>;
     };
 
 const actions = new Actions();
@@ -47,7 +49,7 @@ const createMockAuthz = (options: MockAuthzOptions) => {
 
       expect(checkActions).toEqual({
         kibana: expectedKibana,
-        elasticsearch: { cluster: expectedCluster, index: {} },
+        elasticsearch: { cluster: expectedCluster, index: options.expectedIndexPrivileges ?? {} },
       });
       return options.resolveCheckPrivileges;
     });
@@ -58,6 +60,8 @@ const createMockAuthz = (options: MockAuthzOptions) => {
   });
   return mock;
 };
+
+const getNoUserIndexNames = () => Promise.resolve([]);
 
 const createMockUser = (user: Partial<AuthenticatedUser> = {}) =>
   ({
@@ -240,7 +244,8 @@ describe('usingPrivileges', () => {
         [esManagementFeature],
         mockLoggers.get(),
         mockAuthz,
-        createMockUser()
+        createMockUser(),
+        getNoUserIndexNames
       );
 
       const result = await usingPrivileges(inputCapabilities);
@@ -268,7 +273,8 @@ describe('usingPrivileges', () => {
         [esManagementFeature],
         mockLoggers.get(),
         mockAuthz,
-        createMockUser()
+        createMockUser(),
+        getNoUserIndexNames
       );
 
       const result = await usingPrivileges(inputCapabilities);
@@ -296,7 +302,8 @@ describe('usingPrivileges', () => {
         [],
         mockLoggers.get(),
         mockAuthz,
-        createMockUser()
+        createMockUser(),
+        getNoUserIndexNames
       );
 
       await expect(
@@ -408,7 +415,8 @@ describe('usingPrivileges', () => {
       esFeatures,
       loggingSystemMock.create().get(),
       mockAuthz,
-      createMockUser()
+      createMockUser(),
+      getNoUserIndexNames
     );
 
     const result = await usingPrivileges(
@@ -543,7 +551,8 @@ describe('usingPrivileges', () => {
       esFeatures,
       loggingSystemMock.create().get(),
       mockAuthz,
-      createMockUser()
+      createMockUser(),
+      getNoUserIndexNames
     );
 
     const allFalseCapabilities = Object.freeze({
@@ -588,6 +597,168 @@ describe('usingPrivileges', () => {
 
     expect(result).toEqual(allFalseCapabilities);
   });
+
+  describe('WHEN an Elasticsearch feature defines requiredAnyIndexPrivileges', () => {
+    const esAnyIndexFeature = new ElasticsearchFeature({
+      id: 'esAnyIndexFeature',
+      privileges: [
+        {
+          requiredClusterPrivileges: [],
+          requiredAnyIndexPrivileges: ['read', 'view_index_metadata'],
+          ui: ['show'],
+        },
+      ],
+    });
+    const esIndexFeature = new ElasticsearchFeature({
+      id: 'esIndexFeature',
+      privileges: [
+        {
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: { 'logs-*': ['manage'] },
+          ui: ['show'],
+        },
+      ],
+    });
+
+    const inputCapabilities = Object.freeze({
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      esAnyIndexFeature: { show: true },
+      esIndexFeature: { show: true },
+    });
+
+    const getCapabilities = async ({
+      userIndexNames,
+      index,
+      expectedIndexPrivileges,
+      logger = loggingSystemMock.create().get(),
+    }: {
+      userIndexNames: () => Promise<string[]>;
+      index: CheckPrivilegesResponse['privileges']['elasticsearch']['index'];
+      expectedIndexPrivileges: Record<string, string[]>;
+      logger?: Logger;
+    }) => {
+      const mockAuthz = createMockAuthz({
+        resolveCheckPrivileges: {
+          privileges: { kibana: [], elasticsearch: { cluster: [], index } },
+        },
+        expectedIndexPrivileges,
+      });
+
+      const { usingPrivileges } = disableUICapabilitiesFactory(
+        mockRequest,
+        [],
+        [esAnyIndexFeature, esIndexFeature],
+        logger,
+        mockAuthz,
+        createMockUser(),
+        userIndexNames
+      );
+
+      return usingPrivileges(inputCapabilities);
+    };
+
+    it('SHOULD check the required privileges against every index granted to the user', async () => {
+      await getCapabilities({
+        userIndexNames: () => Promise.resolve(['logs-*', 'metrics-*']),
+        index: {
+          'logs-*': [
+            { privilege: 'manage', authorized: false },
+            { privilege: 'read', authorized: false },
+            { privilege: 'view_index_metadata', authorized: false },
+          ],
+          'metrics-*': [
+            { privilege: 'read', authorized: false },
+            { privilege: 'view_index_metadata', authorized: false },
+          ],
+        },
+        expectedIndexPrivileges: {
+          'logs-*': ['manage', 'read', 'view_index_metadata'],
+          'metrics-*': ['read', 'view_index_metadata'],
+        },
+      });
+    });
+
+    it('SHOULD enable the capability WHEN all privileges are granted on at least one index', async () => {
+      const result = await getCapabilities({
+        userIndexNames: () => Promise.resolve(['logs-*', 'metrics-*']),
+        index: {
+          'logs-*': [
+            { privilege: 'manage', authorized: false },
+            { privilege: 'read', authorized: false },
+            { privilege: 'view_index_metadata', authorized: false },
+          ],
+          'metrics-*': [
+            { privilege: 'read', authorized: true },
+            { privilege: 'view_index_metadata', authorized: true },
+          ],
+        },
+        expectedIndexPrivileges: {
+          'logs-*': ['manage', 'read', 'view_index_metadata'],
+          'metrics-*': ['read', 'view_index_metadata'],
+        },
+      });
+
+      expect(result.esAnyIndexFeature).toEqual({ show: true });
+      expect(result.esIndexFeature).toEqual({ show: false });
+    });
+
+    it('SHOULD disable the capability WHEN the privileges are only granted across different indices', async () => {
+      const result = await getCapabilities({
+        userIndexNames: () => Promise.resolve(['logs-*', 'metrics-*']),
+        index: {
+          'logs-*': [
+            { privilege: 'manage', authorized: true },
+            { privilege: 'read', authorized: true },
+            { privilege: 'view_index_metadata', authorized: false },
+          ],
+          'metrics-*': [
+            { privilege: 'read', authorized: false },
+            { privilege: 'view_index_metadata', authorized: true },
+          ],
+        },
+        expectedIndexPrivileges: {
+          'logs-*': ['manage', 'read', 'view_index_metadata'],
+          'metrics-*': ['read', 'view_index_metadata'],
+        },
+      });
+
+      expect(result.esAnyIndexFeature).toEqual({ show: false });
+      expect(result.esIndexFeature).toEqual({ show: true });
+    });
+
+    it('SHOULD disable the capability WHEN the user has no index privileges', async () => {
+      const result = await getCapabilities({
+        userIndexNames: getNoUserIndexNames,
+        index: {
+          'logs-*': [{ privilege: 'manage', authorized: false }],
+        },
+        expectedIndexPrivileges: { 'logs-*': ['manage'] },
+      });
+
+      expect(result.esAnyIndexFeature).toEqual({ show: false });
+    });
+
+    it('SHOULD disable the capability WHEN the user index privileges cannot be retrieved', async () => {
+      const mockLoggers = loggingSystemMock.create();
+
+      const result = await getCapabilities({
+        userIndexNames: () => Promise.reject(new Error('cannot retrieve privileges')),
+        index: {
+          'logs-*': [{ privilege: 'manage', authorized: true }],
+        },
+        expectedIndexPrivileges: { 'logs-*': ['manage'] },
+        logger: mockLoggers.get(),
+      });
+
+      expect(result.esAnyIndexFeature).toEqual({ show: false });
+      expect(result.esIndexFeature).toEqual({ show: true });
+      expect(loggingSystemMock.collect(mockLoggers).debug).toEqual([
+        ['Unable to retrieve index privileges for the current user: cannot retrieve privileges'],
+      ]);
+    });
+  });
 });
 
 describe('all', () => {
@@ -610,7 +781,8 @@ describe('all', () => {
       ],
       loggingSystemMock.create().get(),
       mockAuthz,
-      createMockUser()
+      createMockUser(),
+      getNoUserIndexNames
     );
 
     const result = all(

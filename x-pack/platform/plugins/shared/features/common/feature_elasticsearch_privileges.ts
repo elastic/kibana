@@ -40,6 +40,25 @@ export interface FeatureElasticsearchPrivileges {
   };
 
   /**
+   * A set of Elasticsearch index privileges which the user must hold on at least one index for this feature to be enabled.
+   * All listed privileges must be granted on the same index (or index pattern) that the user has access to.
+   * See https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-indices
+   *
+   * @example
+   *
+   * Requiring `read` and `view_index_metadata` access to any index
+   * ```ts
+   * feature.registerElasticsearchPrivilege({
+   *   privileges: [{
+   *     requiredAnyIndexPrivileges: ['read', 'view_index_metadata']
+   *   }]
+   * })
+   * ```
+   *
+   */
+  requiredAnyIndexPrivileges?: string[];
+
+  /**
    * A set of Elasticsearch roles which are required for this feature to be enabled.
    *
    * @deprecated do not rely on hard-coded role names.
