@@ -15,28 +15,28 @@ describe('AlertEpisodeStatusBadge', () => {
     render(<AlertEpisodeStatusBadge status={ALERT_EPISODE_STATUS.INACTIVE} />);
     const badge = screen.getByText('Inactive');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
+    expect(badge.closest('.euiBadge')).toBeInTheDocument();
   });
 
   it('renders a pending badge', () => {
     render(<AlertEpisodeStatusBadge status={ALERT_EPISODE_STATUS.PENDING} />);
     const badge = screen.getByText('Pending');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
+    expect(badge.closest('.euiBadge')).toBeInTheDocument();
   });
 
   it('renders an active badge', () => {
     render(<AlertEpisodeStatusBadge status={ALERT_EPISODE_STATUS.ACTIVE} />);
     const badge = screen.getByText('Active');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
+    expect(badge.closest('.euiBadge')).toBeInTheDocument();
   });
 
   it('renders a recovering badge', () => {
     render(<AlertEpisodeStatusBadge status={ALERT_EPISODE_STATUS.RECOVERING} />);
     const badge = screen.getByText('Recovering');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
+    expect(badge.closest('.euiBadge')).toBeInTheDocument();
   });
 
   it('renders an unknown badge for unrecognized status', () => {
@@ -44,6 +44,6 @@ describe('AlertEpisodeStatusBadge', () => {
     render(<AlertEpisodeStatusBadge status="unknown-status" />);
     const badge = screen.getByText('Unknown');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
+    expect(badge.closest('.euiBadge')).toBeInTheDocument();
   });
 });

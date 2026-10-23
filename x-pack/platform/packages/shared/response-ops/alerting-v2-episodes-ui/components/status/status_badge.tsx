@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge, EuiHealth, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { alertTimelineStatusColor } from '../../alert_timeline/alert_timeline_status_palette';
 
 export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
 }
-
-/** Colors shared between the status badge and the status filter's dot indicator. */
-export const EPISODE_STATUS_BADGE_COLORS: Record<
-  AlertEpisodeStatus,
-  NonNullable<EuiBadgeProps['color']>
-> = {
-  [ALERT_EPISODE_STATUS.ACTIVE]: 'danger',
-  [ALERT_EPISODE_STATUS.RECOVERING]: 'primary',
-  [ALERT_EPISODE_STATUS.PENDING]: 'warning',
-  [ALERT_EPISODE_STATUS.INACTIVE]: 'success',
-};
 
 const STATUS_LABELS: Record<AlertEpisodeStatus, string> = {
   [ALERT_EPISODE_STATUS.ACTIVE]: i18n.translate(
@@ -61,9 +50,17 @@ export const getEpisodeStatusBadgeLabel = (status: AlertEpisodeStatus): string =
   });
 
 /**
- * Renders a badge indicating the status of an alerting episode.
+ * Renders a hollow badge with a Lifecycle-colored health dot for an alerting episode status.
  */
 export function AlertEpisodeStatusBadge({ status }: AlertEpisodeStatusBadgeProps) {
-  const color = EPISODE_STATUS_BADGE_COLORS[status] ?? 'hollow';
-  return <EuiBadge color={color}>{getEpisodeStatusBadgeLabel(status)}</EuiBadge>;
+  const { euiTheme } = useEuiTheme();
+  const color = alertTimelineStatusColor(euiTheme, status);
+
+  return (
+    <EuiBadge color="hollow">
+      <EuiHealth color={color} textSize="inherit">
+        {getEpisodeStatusBadgeLabel(status)}
+      </EuiHealth>
+    </EuiBadge>
+  );
 }
