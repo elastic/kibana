@@ -292,6 +292,32 @@ describe('createEmulatorProxy', () => {
       expect(await control.calls()).toEqual({ calls: [], total: 0 });
     });
 
+    it('sets, lists and clears runtime fixtures, and describes operations, for a client', async () => {
+      const control = createEmulatorControl(proxyUrl);
+      const url = 'https://api.vendor.example/v1/items/42';
+      const getItem = { method: 'GET', path: '/items/{id}' };
+
+      expect((await control.describeOperation('getItem')).responses[0].contents[0].sample).toEqual({
+        id: 0,
+      });
+      expect(
+        await control.setFixtures([{ operation: getItem, response: { status: 200, body: {} } }])
+      ).toEqual([expect.objectContaining({ operation: 'GET /items/{id}' })]);
+      expect(
+        await control.setFixtures([
+          { operation: getItem, response: { status: 200, body: { id: 42 } } },
+        ])
+      ).toEqual([]);
+      expect(await control.getFixtures()).toHaveLength(1);
+
+      const response = await send(url, { agent: trustingCa(url).httpsAgent });
+      expect(JSON.parse(response.body)).toEqual({ id: 42 });
+      expect((await control.calls()).calls[0].responseSource).toBe('runtime-fixture');
+
+      await control.clearFixtures('getItem');
+      expect(await control.getFixtures()).toEqual([]);
+    });
+
     it('keeps answering 400 to other requests sent to the proxy itself', async () => {
       const response = await send(new URL('/items/7', proxyUrl).href, { agent: undefined });
 
