@@ -102,7 +102,6 @@ export function getWorkflowsConnectorTypeArgs(
 
       const workflowToRun: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel(workflow);
 
-      // Top-level run on behalf of the caller: refuse delegated-identity-only workflows.
       workflowsManagementApi.assertRunnableStandalone(workflowToRun);
 
       // Run the workflow, @tb: maybe switch to scheduler?

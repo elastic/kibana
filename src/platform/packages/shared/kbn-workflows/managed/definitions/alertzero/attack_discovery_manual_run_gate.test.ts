@@ -31,10 +31,8 @@ import { requiresDelegatedIdentity } from '../../../definition/requires_delegate
 
 describe('Attack Discovery manual-run gate', () => {
   it('flags the managed runner: its generation step inherits a parent service account', () => {
-    // Regression (elastic/kibana#297266): the managed runner is exposed as a
-    // manual-trigger workflow, but a top-level run can never supply the parent
-    // service account its run-as-mode: inherit step requires — and starting it
-    // by hand cancels the space's in-flight scheduled run via cancel-in-progress.
+    // Regression (elastic/kibana#297266): a manual run of the runner can never supply the
+    // parent service account its inherit step requires, and cancels the scheduled run.
     const definition = parse(ATTACK_DISCOVERY_RUNNER_YAML);
     expect(requiresDelegatedIdentity({ definition })).toBe(true);
   });

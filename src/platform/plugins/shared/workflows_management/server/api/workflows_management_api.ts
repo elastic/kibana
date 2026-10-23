@@ -260,15 +260,11 @@ export interface RunWorkflowWithAlertPreprocessingParams {
    */
   eventOverrides?: Record<string, unknown>;
   /**
-  /**
    * Which compact selections in `event` the server may expand. Defaults to every kind it
    * supports; a caller that validates selections itself should list only the kinds it checked.
    */
   expandSelections?: readonly TriggerSelectionKind[];
-  /**
-   * Set by manual-run entry points (the Run route) to refuse workflows that can only run
-   * as the delegated identity of a parent run. Server-side callers leave it unset.
-   */
+  /** Set by manual-run entry points to refuse delegated-identity-only workflows. */
   rejectDelegatedIdentity?: boolean;
 }
 

@@ -22,11 +22,8 @@ type MaybeDelegatedIdentityCapableWorkflow = DelegatedIdentityCapableWorkflow | 
 /**
  * A workflow that dispatches children with `run-as-mode: inherit` and carries no
  * `settings.run_as` of its own can only execute as the delegated service account of a
- * parent run. A top-level run of such a workflow always fails at the first inherited step
- * ("Service account inheritance requires a parent executing as a service account"), and —
- * because workflow-level `settings.concurrency` keys the space with cancel-in-progress —
- * starting it by hand can cancel the space's in-flight scheduled run. Standalone runs
- * must be rejected up front instead.
+ * parent run, so a standalone run is doomed — and starting one by hand can cancel the
+ * space's in-flight scheduled run via cancel-in-progress. Reject such runs up front.
  */
 export const requiresDelegatedIdentity = (
   workflow: MaybeDelegatedIdentityCapableWorkflow

@@ -1447,12 +1447,8 @@ steps:
     });
 
     it('refuses to run a workflow whose steps inherit a parent service account', async () => {
-      // Regression: the managed Attack Discovery runner is exposed as a manual-trigger
-      // workflow, but its first step delegates identity with run-as-mode: inherit and the
-      // workflow has no run_as. A standalone run always failed with 'Service account
-      // inheritance requires a parent executing as a service account' — and, worse, the
-      // created run cancelled the space's in-flight scheduled run via cancel-in-progress.
-      // It must now be refused before any execution is created.
+      // Regression (elastic/kibana#297266): the managed Attack Discovery runner. It must be
+      // refused before any execution is created — a doomed run cancels the scheduled one.
       const workflow = {
         id: 'system-security-attack-discovery-worker',
         name: 'Attack Discovery Runner',
@@ -1626,9 +1622,8 @@ steps:
 
     it('executes a workflow with a nested run-as-mode inherit step and no run_as (server-side caller is not gated)', async () => {
       // Regression: shape of the proposals `system-create-proposal` workflow — an `inherit`
-      // workflow.execute step nested in if/else inside a while loop, no settings.run_as.
-      // `executeWorkflow` is the server-side entry (agent tools), so it must not be refused
-      // the way a manual Run of the same definition is.
+      // step nested in if/else inside a while loop. `executeWorkflow` is the server-side
+      // entry (agent tools), so it must not be refused the way a manual Run of it is.
       const definition = {
         version: '1' as const,
         name: 'Create proposal shape',
