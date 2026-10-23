@@ -1,0 +1,163 @@
+{
+  "operations": {
+    "assignIssue": [
+      {
+        "method": "put",
+        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "source": "v0"
+      }
+    ],
+    "bulkUpdateIssues": [
+      {
+        "method": "put",
+        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/",
+        "source": "v0"
+      }
+    ],
+    "createIssueAlertRule": [],
+    "deleteIssue": [
+      {
+        "method": "delete",
+        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "source": "v0"
+      }
+    ],
+    "getEvent": [
+      {
+        "method": "get",
+        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/",
+        "source": "v0"
+      }
+    ],
+    "getIssue": [
+      {
+        "method": "get",
+        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "source": "v0"
+      }
+    ],
+    "ignoreIssue": [
+      {
+        "method": "put",
+        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "source": "v0"
+      }
+    ],
+    "listIssueAlertRules": [],
+    "listIssueEvents": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/events/",
+        "source": "v0"
+      }
+    ],
+    "listIssues": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/api/0/organizations/{organization_id_or_slug}/issues/",
+        "source": "v0"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/",
+        "source": "v0"
+      }
+    ],
+    "listProjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/api/0/organizations/{organization_id_or_slug}/projects/",
+        "source": "v0"
+      }
+    ],
+    "resolveIssue": [
+      {
+        "method": "put",
+        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "source": "v0"
+      }
+    ],
+    "unresolveIssue": [
+      {
+        "method": "put",
+        "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+        "source": "v0"
+      }
+    ],
+    "updateIssueAlertRule": []
+  },
+  "sources": {
+    "v0": {
+      "apiVersion": "v0",
+      "fetchedAt": "2026-10-07T20:49:13.625Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/getsentry/sentry-api-schema/main/openapi-derefed.json"
+    }
+  },
+  "unmatched": {
+    "createIssueAlertRule": [
+      {
+        "method": "post",
+        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/rules/",
+        "reason": "Legacy issue alert rule endpoint, absent from the spec: Sentry deprecated it for the workflows API and removed it from sentry.io after 2026-08-17 (https://www.sentry.help/en/articles/15015315-migrating-to-new-detectors-and-alerts-apis, https://github.com/getsentry/sentry/pull/121879); older self-hosted Sentry still serves it. Porting to the workflows API: https://github.com/elastic/kibana/issues/296284"
+      }
+    ],
+    "listIssueAlertRules": [
+      {
+        "method": "get",
+        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/rules/",
+        "reason": "Legacy issue alert rule endpoint, absent from the spec: Sentry deprecated it for the workflows API and removed it from sentry.io after 2026-08-17 (https://www.sentry.help/en/articles/15015315-migrating-to-new-detectors-and-alerts-apis, https://github.com/getsentry/sentry/pull/121879); older self-hosted Sentry still serves it. Porting to the workflows API: https://github.com/elastic/kibana/issues/296284"
+      }
+    ],
+    "updateIssueAlertRule": [
+      {
+        "method": "get",
+        "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/rules/{rule_id}/",
+        "reason": "Legacy issue alert rule endpoint, absent from the spec: Sentry deprecated it for the workflows API and removed it from sentry.io after 2026-08-17 (https://www.sentry.help/en/articles/15015315-migrating-to-new-detectors-and-alerts-apis, https://github.com/getsentry/sentry/pull/121879); older self-hosted Sentry still serves it. Porting to the workflows API: https://github.com/elastic/kibana/issues/296284"
+      }
+    ]
+  }
+}

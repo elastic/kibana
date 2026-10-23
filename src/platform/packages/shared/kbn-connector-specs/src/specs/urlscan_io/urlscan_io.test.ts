@@ -1136,6 +1136,20 @@ describe('URLScan.io connector', () => {
     });
   });
 
+  describe('actions that need an API key', () => {
+    it.each([
+      ['getResult', { uuid: UUID }],
+      ['getDom', { uuid: UUID }],
+      ['scanUrl', { url: 'https://example.com' }],
+      ['scanUrlAndWait', { url: 'https://example.com' }],
+    ])('%s fails without sending a request when the connector has no key', async (name, input) => {
+      const { ctx, client } = createContext({ authType: 'none' });
+      await expect(action(name).handler(ctx, input)).rejects.toThrow(/requires an API key/);
+      expect(client.get).not.toHaveBeenCalled();
+      expect(client.post).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getQuota', () => {
     it('GETs the quota endpoint outside /api/v1 and flattens the per-action windows', async () => {
       const { ctx, client } = createContext();

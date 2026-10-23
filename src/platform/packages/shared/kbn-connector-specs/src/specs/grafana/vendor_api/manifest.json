@@ -1,0 +1,148 @@
+{
+  "operations": {
+    "createAnnotation": [
+      {
+        "method": "post",
+        "path": "/annotations",
+        "source": "http"
+      }
+    ],
+    "createSilence": [
+      {
+        "method": "post",
+        "path": "/alertmanager/grafana/api/v2/silences",
+        "source": "alerting"
+      }
+    ],
+    "deleteAnnotation": [
+      {
+        "method": "delete",
+        "path": "/annotations/{annotation_id}",
+        "source": "http"
+      }
+    ],
+    "deleteSilence": [
+      {
+        "method": "delete",
+        "path": "/alertmanager/grafana/api/v2/silence/{SilenceId}",
+        "source": "alerting"
+      }
+    ],
+    "getAlertRule": [
+      {
+        "method": "get",
+        "path": "/v1/provisioning/alert-rules/{UID}",
+        "source": "http"
+      }
+    ],
+    "getAlerts": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/alertmanager/grafana/api/v2/alerts",
+        "source": "alerting"
+      }
+    ],
+    "getDashboard": [
+      {
+        "method": "get",
+        "path": "/dashboards/uid/{uid}",
+        "source": "http"
+      }
+    ],
+    "getNotificationPolicyTree": [
+      {
+        "method": "get",
+        "path": "/v1/provisioning/policies",
+        "source": "http"
+      }
+    ],
+    "getSilence": [
+      {
+        "method": "get",
+        "path": "/alertmanager/grafana/api/v2/silence/{SilenceId}",
+        "source": "alerting"
+      }
+    ],
+    "listAnnotations": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/annotations",
+        "source": "http"
+      }
+    ],
+    "listContactPoints": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/provisioning/contact-points",
+        "source": "http"
+      }
+    ],
+    "listMuteTimings": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/provisioning/mute-timings",
+        "source": "http"
+      }
+    ],
+    "listRules": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/v1/provisioning/alert-rules",
+        "source": "http"
+      }
+    ],
+    "listSilences": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/alertmanager/grafana/api/v2/silences",
+        "source": "alerting"
+      }
+    ],
+    "searchDashboards": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 1000,
+          "request": {
+            "firstPage": 1,
+            "pageParam": "page",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
+        "path": "/search",
+        "source": "http"
+      }
+    ],
+    "updateAnnotation": [
+      {
+        "method": "patch",
+        "path": "/annotations/{annotation_id}",
+        "source": "http"
+      }
+    ]
+  },
+  "sources": {
+    "alerting": {
+      "apiVersion": "1.1.0",
+      "fetchedAt": "2026-10-07T20:19:45.509Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/grafana/grafana/main/pkg/services/ngalert/api/tooling/post.json"
+    },
+    "http": {
+      "apiVersion": "0.0.1",
+      "fetchedAt": "2026-10-07T20:19:45.508Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/grafana/grafana/main/public/openapi3.json"
+    }
+  }
+}

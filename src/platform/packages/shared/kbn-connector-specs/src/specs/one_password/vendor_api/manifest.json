@@ -1,0 +1,56 @@
+{
+  "operations": {
+    "getUser": [
+      {
+        "method": "get",
+        "path": "/v1beta1/accounts/{account}/users/{user}",
+        "source": "usersV1beta1"
+      }
+    ],
+    "listUsers": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "page_token"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/v1beta1/accounts/{account}/users",
+        "source": "usersV1beta1"
+      }
+    ],
+    "reactivateUser": [
+      {
+        "method": "post",
+        "path": "/v1beta1/accounts/{account}/users/{user}:reactivate",
+        "source": "usersV1beta1"
+      }
+    ],
+    "suspendUser": [
+      {
+        "method": "post",
+        "path": "/v1beta1/accounts/{account}/users/{user}:suspend",
+        "source": "usersV1beta1"
+      }
+    ]
+  },
+  "sources": {
+    "oauthV1": {
+      "apiVersion": "v1",
+      "fetchedAt": "2026-10-07T20:20:07.154Z",
+      "format": "openapi",
+      "url": "https://i.1password.com/media/1password-users-api/1password-oauth-api_v1.yaml"
+    },
+    "usersV1beta1": {
+      "apiVersion": "v1beta1",
+      "fetchedAt": "2026-10-07T20:49:16.486Z",
+      "format": "openapi",
+      "url": "https://i.1password.com/media/1password-users-api/1password-users-api_v1beta1.yaml"
+    }
+  }
+}

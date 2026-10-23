@@ -1,0 +1,11 @@
+{
+  "getClusterCredentials": {
+    "queries": [
+      {
+        "source": "aks",
+        "method": "POST",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/listClusterUserCredential"
+      }
+    ]
+  }
+}
