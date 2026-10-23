@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import {
+  EuiBadge,
   EuiButton,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -76,7 +77,13 @@ const IndicesSettings = ({ profile }: { profile: IndicesBoostProfile }) => {
         ...INDEX_OPTIONS.map(({ key, title, description }) => ({
           title,
           tip: description,
-          description: optionValues[key] ? ON_LABEL : OFF_LABEL,
+          // On stands out in the success color; off is a usual choice, such as to save cost,
+          // so it's neutral rather than a warning.
+          description: optionValues[key] ? (
+            <EuiBadge color="success">{ON_LABEL}</EuiBadge>
+          ) : (
+            <EuiBadge color="default">{OFF_LABEL}</EuiBadge>
+          ),
         })),
       ]}
     />
