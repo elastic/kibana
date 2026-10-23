@@ -190,15 +190,26 @@ describe('dynamicSourceSchema', () => {
 
 describe('dynamicAttributeSchema', () => {
   describe('name', () => {
-    it.each(['os', 'os_name', 'a1'])('accepts %s', (name) => {
+    it.each([
+      'os',
+      'os_name',
+      'a1',
+      'host.arch',
+      'os.type',
+      'k8s.pod.phase',
+      'Host.Arch',
+      'label-with-dash',
+    ])('accepts %s', (name) => {
       expect(dynamicAttributeSchema.safeParse(attribute({ name })).success).toBe(true);
     });
 
     it.each([
-      ['uppercase', 'OsName'],
-      ['a leading digit', '1os'],
-      ['a leading underscore', '_os'],
-      ['a dot', 'os.name'],
+      ['a leading dot', '.os'],
+      ['a trailing dot', 'os.'],
+      ['consecutive dots', 'os..type'],
+      ['whitespace', 'os type'],
+      ['a backtick', 'os`type'],
+      ['a slash', 'os/type'],
       ['empty', ''],
     ])('rejects %s', (_, name) => {
       expect(dynamicAttributeSchema.safeParse(attribute({ name })).success).toBe(false);
