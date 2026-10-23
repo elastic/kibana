@@ -817,7 +817,7 @@ describe('AwsIdentityFederationSetup', () => {
       expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeEnabled();
     });
 
-    it('shows the success toast, selects the identity the stack created and hands it to IacKeyCheck', async () => {
+    it('stays on the New Identity tab with the identity the stack created selected and ready', async () => {
       const clearIacConfirm = jest.fn();
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, {
@@ -840,15 +840,20 @@ describe('AwsIdentityFederationSetup', () => {
       expect(
         screen.queryByTestId('awsIdentityFederationSetup-callbackPending')
       ).not.toBeInTheDocument();
-      // Lands on the Existing tab with the new identity selected and under check; the template
-      // details of the launch belong to that identity now.
-      await waitFor(() => {
-        expect(lastIacKeyCheckProps()?.cloudConnectorId).toBe('cc-1');
-      });
+      // The screen does not change: the New tab stays selected and the stack just deployed the
+      // current template, so the identity is ready without a check. The template details of the
+      // launch belong to that identity now, and a second Launch would only make a duplicate.
+      expect(screen.getByRole('tab', { name: 'New Identity' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+      expect(lastReadyValue(onReadyChange)).toBe(true);
+      expect(lastIacKeyCheckProps()).toBeUndefined();
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
       expect(clearIacConfirm).toHaveBeenCalledTimes(1);
     });
 
-    it('clears the name once the stack created the identity', async () => {
+    it('keeps the name of the identity the stack created on screen', async () => {
       const user = userEvent.setup();
       const { rerender } = renderSetup({ cloud, integrations });
       await typeIdentityName(user);
@@ -858,8 +863,9 @@ describe('AwsIdentityFederationSetup', () => {
       );
       rerender(setupElement({ cloud, integrations }));
 
-      await user.click(screen.getByRole('tab', { name: 'New Identity' }));
-      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toHaveValue('');
+      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toHaveValue(
+        'my-identity'
+      );
     });
 
     it('keeps the ARN fields and Create unlocked before Launch', () => {
@@ -1005,8 +1011,7 @@ describe('AwsIdentityFederationSetup', () => {
         expect(input).not.toHaveProperty('onboardingDeploymentId');
       });
 
-      it('says it is deploying integrations, with no manual link and Create disabled, while the server deploys', async () => {
-        const user = userEvent.setup();
+      it('says it is deploying integrations on the same screen, with Create disabled, while the server deploys', () => {
         mockUseProvisioningCallback.mockReturnValue(
           callbackState({
             status: 'deploying',
@@ -1020,8 +1025,11 @@ describe('AwsIdentityFederationSetup', () => {
         );
         renderSetup({ cloud, integrations });
 
-        // The identity is selected on the Existing tab; the New tab shows the stage.
-        await user.click(screen.getByRole('tab', { name: 'New Identity' }));
+        // The identity exists already, but the user stays where the stages are shown.
+        expect(screen.getByRole('tab', { name: 'New Identity' })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
         expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
           'Deploying integrations'
         );

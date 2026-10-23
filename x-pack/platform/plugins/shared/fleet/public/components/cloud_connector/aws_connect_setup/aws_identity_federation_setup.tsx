@@ -333,15 +333,19 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
         defaultMessage: 'Federated identity created successfully',
       }),
     });
-    // The fields show what the stack reported; the identity itself is already created.
+    // The fields show what the stack reported; the identity itself is already created. The
+    // screen stays as it is: the New tab keeps showing the stages that follow (deploying), so
+    // the user is not moved away from the progress they are watching.
     setRoleArn(callbackCreated.role_arn ?? '');
     setStackArn(callbackCreated.stack_arn ?? '');
     setSelected({ id: callbackCreated.id, name: callbackCreated.name });
-    setSelectedTabId(TABS.EXISTING_CONNECTION);
-    setConnectorName('');
+    // The stack deployed the template rendered for this integration set, so the identity is
+    // current by construction; IacKeyCheck only mounts on the Existing tab and would otherwise
+    // never lift the pessimistic initial verdict.
+    setCheckVerdict({ key: `${callbackCreated.id}|${integrationsKey}`, isValid: true });
     // The template details belong to the identity the stack just created.
     clearIacConfirm();
-  }, [callbackCreated, queryClient, notifications, clearIacConfirm]);
+  }, [callbackCreated, integrationsKey, queryClient, notifications, clearIacConfirm]);
 
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
@@ -478,10 +482,15 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             isLoading={isGeneratingTemplate}
             // With the provisioner on the hook never disables the button, but a live render still
             // needs the console URL that only `cloud` provides, so keep the old guard.
-            // One launch at a time: while the form waits on a record, the manual-entry link is
-            // the way to stop waiting and launch again.
+            // One launch at a time, and none once this launch's stack has made the identity: a
+            // second stack would only create a duplicate.
             isDisabled={
-              isLaunchDisabled || !cloud || isCallbackChecking || isLaunchMissingName || isWaiting
+              isLaunchDisabled ||
+              !cloud ||
+              isCallbackChecking ||
+              isLaunchMissingName ||
+              isWaiting ||
+              callbackStatus === 'received'
             }
             templateGenerationError={templateGenerationError}
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
