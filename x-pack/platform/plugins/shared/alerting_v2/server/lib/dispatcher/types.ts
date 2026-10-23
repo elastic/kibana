@@ -146,7 +146,10 @@ export interface ActionGroup {
 
 export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
-export type ActionPolicyWorkflowPayloadAlert = Alert;
+export type ActionPolicyWorkflowPayloadAlert = Alert & {
+  /** Absolute, space-aware URL of the alert details page. */
+  alert_url: string;
+};
 
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;

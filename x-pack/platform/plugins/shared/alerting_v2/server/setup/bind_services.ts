@@ -16,6 +16,7 @@ import {
 } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
+import { ALERTING_V2_EPISODES_LOCATOR } from '@kbn/alerting-v2-constants';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { EpisodesClient } from '../lib/episodes_client';
@@ -24,6 +25,9 @@ import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strate
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
+import type { AlertingV2EpisodesLocatorParams } from '../../common/locators';
+import { getKibanaBaseUrl } from '../lib/locators/kibana_base_url';
+import { AlertingV2LocatorsToken, KibanaBaseUrlToken } from '../lib/locators/tokens';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
@@ -382,6 +386,29 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
       );
       return wfm.management;
+    })
+    .inSingletonScope();
+
+  bind(AlertingV2LocatorsToken)
+    .toDynamicValue(({ get }) => {
+      const share = get(PluginSetup<AlertingServerSetupDependencies['share']>('share'));
+      const episodesLocators = share.url.locators.get<AlertingV2EpisodesLocatorParams>(
+        ALERTING_V2_EPISODES_LOCATOR
+      );
+      if (!episodesLocators) {
+        throw new Error(`Locator ${ALERTING_V2_EPISODES_LOCATOR} is not registered`);
+      }
+      return { episodesLocators };
+    })
+    .inSingletonScope();
+
+  bind(KibanaBaseUrlToken)
+    .toDynamicValue(({ get }) => {
+      const http = get(CoreStart('http'));
+      const cloud = get(PluginSetup<AlertingServerSetupDependencies['cloud']>('cloud'), {
+        optional: true,
+      });
+      return getKibanaBaseUrl(http, cloud);
     })
     .inSingletonScope();
 

@@ -102,6 +102,7 @@ Catalog of fields the dispatcher passes as \`inputs.payload\`. In Liquid:
 | \`space_id\` | string | required | Identifier of the space the alert belongs to |
 | \`group_hash\` | string | required | Hash identifying the alert series/group this alert belongs to |
 | \`alert_id\` | string | required | Unique identifier of the alert |
+| \`alert_url\` | string | required | Absolute URL of the alert details page in Kibana, in the alert space |
 | \`alert_status\` | \\"inactive\\" \\\\| \\"pending\\" \\\\| \\"active\\" \\\\| \\"recovering\\" | required | Current lifecycle status of the alert (enum: inactive \\\\| pending \\\\| active \\\\| recovering) |
 | \`severity\` | \\"info\\" \\\\| \\"low\\" \\\\| \\"medium\\" \\\\| \\"high\\" \\\\| \\"critical\\" | optional | Severity of the alert (enum: info \\\\| low \\\\| medium \\\\| high \\\\| critical) |
 | \`data\` | object | optional | Data of the alert |
@@ -175,6 +176,11 @@ the dispatch payload schema. Without it, invalid field paths are only caught at 
             \\"type\\": \\"string\\",
             \\"description\\": \\"Unique identifier of the alert\\"
           },
+          \\"alert_url\\": {
+            \\"type\\": \\"string\\",
+            \\"format\\": \\"uri\\",
+            \\"description\\": \\"Absolute URL of the alert details page in Kibana, in the alert space\\"
+          },
           \\"alert_status\\": {
             \\"type\\": \\"string\\",
             \\"description\\": \\"Current lifecycle status of the alert\\",
@@ -209,6 +215,7 @@ the dispatch payload schema. Without it, invalid field paths are only caught at 
           \\"space_id\\",
           \\"group_hash\\",
           \\"alert_id\\",
+          \\"alert_url\\",
           \\"alert_status\\"
         ],
         \\"additionalProperties\\": false
@@ -248,6 +255,7 @@ the dispatch payload schema. Without it, invalid field paths are only caught at 
 - Top-level fields: \`{{ inputs.payload.<field> }}\`
 - Alert iteration: \`{% for alert in inputs.payload.alerts %}{{ alert.<field> }}{% endfor %}\`
 - Rule metadata: \`{{ inputs.payload.rules[alert.rule_id].name }}\`
+- Alert details link: \`{{ alert.alert_url }}\` (absolute URL; include it in every notification)
 
 ### \`data\` (dynamic query columns)
 
@@ -286,9 +294,8 @@ steps:
           Host: {{ alert.data.host.name | default: \\"unknown\\" }}
           Errors: {{ alert.data.error_count | default: \\"n/a\\" }}
           Status: {{ alert.alert_status }}
+          View alert: {{ alert.alert_url }}
         {% endfor %}
-
-        View execution: {{ execution.url }}
 \`\`\`"
 `;
 

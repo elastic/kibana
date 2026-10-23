@@ -30,6 +30,12 @@ import type {
 } from '../../services/license_service/license_service';
 import { LicenseServiceToken } from '../../services/license_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import {
+  AlertingV2LocatorsToken,
+  KibanaBaseUrlToken,
+  type AlertingV2ServerLocators,
+} from '../../locators/tokens';
+import { buildAlertDetailsUrl } from '../alert_details_url';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
   ActionGroup,
@@ -90,7 +96,9 @@ export class DispatchStep implements DispatcherStep {
   constructor(
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
-    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
+    @inject(AlertingV2LocatorsToken) private readonly locators: AlertingV2ServerLocators,
+    @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string
   ) {}
 
   public async execute(
@@ -352,7 +360,15 @@ export class DispatchStep implements DispatcherStep {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
-      alerts: group.alerts,
+      alerts: group.alerts.map((alert) => ({
+        ...alert,
+        alert_url: buildAlertDetailsUrl({
+          episodesLocator: this.locators.episodesLocators,
+          baseUrl: this.kibanaBaseUrl,
+          spaceId: alert.space_id,
+          alertId: alert.alert_id,
+        }),
+      })),
       rules: group.rules,
     };
     const inputs: Record<string, unknown> = { payload };

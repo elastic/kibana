@@ -1185,6 +1185,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '- Top-level fields: `{{ inputs.payload.<field> }}`',
     '- Alert iteration: `{% for alert in inputs.payload.alerts %}{{ alert.<field> }}{% endfor %}`',
     '- Rule metadata: `{{ inputs.payload.rules[alert.rule_id].name }}`',
+    '- Alert details link: `{{ alert.alert_url }}` (absolute URL; include it in every notification)',
     '',
     '### `data` (dynamic query columns)',
     '',
@@ -1223,9 +1224,8 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '          Host: {{ alert.data.host.name | default: "unknown" }}',
     '          Errors: {{ alert.data.error_count | default: "n/a" }}',
     '          Status: {{ alert.alert_status }}',
+    '          View alert: {{ alert.alert_url }}',
     '        {% endfor %}',
-    '',
-    '        View execution: {{ execution.url }}',
     '```'
   );
 

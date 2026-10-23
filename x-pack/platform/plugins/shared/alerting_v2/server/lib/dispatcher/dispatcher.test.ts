@@ -32,6 +32,7 @@ import { createRulesSavedObjectService } from '../services/rules_saved_object_se
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
+import { createAlertingV2LocatorsMock, MOCK_KIBANA_BASE_URL } from '../locators/tokens.mock';
 import {
   MAX_WINDOW_MINUTES,
   OVERLAP_WINDOW_MINUTES,
@@ -152,7 +153,12 @@ function buildDispatcherService(deps: {
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService),
-    new DispatchStep(deps.workflowsManagement, deps.licenseService ?? createMockLicenseService()),
+    new DispatchStep(
+      deps.workflowsManagement,
+      deps.licenseService ?? createMockLicenseService(),
+      createAlertingV2LocatorsMock(),
+      MOCK_KIBANA_BASE_URL
+    ),
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);

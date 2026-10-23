@@ -13,12 +13,18 @@ import { SlackChannelSelectorWrapper } from '../components/slack_channel_selecto
 const EMAIL_PARAMS_TEMPLATE = `to: 
   - ""
 subject: ""
-message: ""
+message: |
+  {% for alert in inputs.payload.alerts %}
+  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): {{ alert.alert_url }}
+  {% endfor %}
 `;
 
 // ToDo: add a channel selector to the Slack (v2) step form
 const SLACK2_PARAMS_TEMPLATE = `channel: ""
-text: ""
+text: |
+  {% for alert in inputs.payload.alerts %}
+  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): <{{ alert.alert_url }}|View alert>
+  {% endfor %}
 `;
 
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [

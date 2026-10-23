@@ -31,6 +31,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
@@ -107,6 +108,7 @@ export interface AlertingServerSetupDependencies {
   workflowsManagement: WorkflowsServerPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   eventLog: IEventLogService;
+  share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
