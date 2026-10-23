@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   PROPOSALS_UI_CAPABILITY_SHOW,
@@ -47,7 +47,6 @@ import {
 } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { CoreStart } from '@kbn/core/public';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
@@ -549,14 +548,15 @@ const ConversationsPageContent: React.FC = () => {
         </EuiFlexItem>
         {!canAccessAgentBuilder && (
           <EuiFlexItem grow={false}>
-            <KbnWarningCallout
+            <EuiCallOut
               announceOnMount
               size="s"
+              color="warning"
               iconType="lock"
               data-test-subj="alertZeroAgentBuilderPrivilegeCallout"
             >
               {AGENT_BUILDER_PRIVILEGE_REQUIRED.callout}
-            </KbnWarningCallout>
+            </EuiCallOut>
           </EuiFlexItem>
         )}
         <ScanFailureCallout surface="queue" wrapper={wrapScanFailureCallout} />
