@@ -20,7 +20,7 @@ import {
  */
 
 // Intro text for documentation
-export const mathExpressionLanguageIntro = i18n.translate('xpack.streams.math.docsIntro', {
+export const mathExpressionLanguageIntro = i18n.translate('xpack.streamlang.math.docsIntro', {
   defaultMessage: `## Math Expressions
 
 Arithmetic and logical expressions that compute values from document fields.
@@ -76,13 +76,13 @@ export interface MathLanguageDocumentationSections {
 
 // Section labels
 const sectionLabels = {
-  functions: i18n.translate('xpack.streams.math.docs.sectionFunctions', {
+  functions: i18n.translate('xpack.streamlang.math.docs.sectionFunctions', {
     defaultMessage: 'Functions',
   }),
-  comparison: i18n.translate('xpack.streams.math.docs.sectionComparison', {
+  comparison: i18n.translate('xpack.streamlang.math.docs.sectionComparison', {
     defaultMessage: 'Comparison',
   }),
-  howItWorks: i18n.translate('xpack.streams.math.docs.sectionHowItWorks', {
+  howItWorks: i18n.translate('xpack.streamlang.math.docs.sectionHowItWorks', {
     defaultMessage: 'How it works',
   }),
 };

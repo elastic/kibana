@@ -20,6 +20,7 @@ import {
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
@@ -72,11 +73,15 @@ const fillContextInstructions = ({
       includeDecisionTrees ? `${decisionTreesSection.trimEnd()}\n` : ''
     );
 
-interface InvestigationAgentTypeOptions {
+export interface InvestigationAgentTypeOptions {
   sandboxEnabled: boolean;
   cortexEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
+  /** The agentic investigations plugin is enabled, so its tools are registered. */
+  investigationToolsEnabled: boolean;
+  /** The proposals plugin is enabled, so `proposals.create` is registered. */
+  proposalsEnabled: boolean;
   telemetryConnectorId?: string;
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
@@ -104,40 +109,60 @@ const appendCustomContext = async ({
   }
 };
 
+/** Options of the Nightshift agent types that share the investigator's tools and hooks. */
+export type NightshiftAgentTypeOptions = Omit<
+  InvestigationAgentTypeOptions,
+  'decisionTreesEnabled'
+>;
+
 /**
- * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt, the sandbox tools, `time_converter_tool` and `reply_user`. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
+ * Memory hooks and the space's custom context. Only the instructions differ between types.
+ * With `standalone`, the agent gets only the tools it lists and the instructions as its whole system
+ * prompt: no Agent Builder internal tools, attachment tools or generic prompt.
  */
-export const getInvestigationAgentType = ({
+export const buildNightshiftAgentConfiguration = ({
+  instructions: agentInstructions,
   sandboxEnabled,
   cortexEnabled,
   memoryEnabled = false,
-  decisionTreesEnabled = false,
+  investigationToolsEnabled,
+  proposalsEnabled,
+  standalone = false,
   telemetryConnectorId,
   getCustomContextInstructions,
   logger,
-}: InvestigationAgentTypeOptions): AgentTypeDefinition => {
+}: NightshiftAgentTypeOptions & {
+  instructions: string;
+  standalone?: boolean;
+}): AgentTypeDefinition['baseConfiguration'] => {
   const baseConfiguration = {
-    instructions: fillContextInstructions({
-      includeDecisionTrees: sandboxEnabled && decisionTreesEnabled,
-      includeMemory: sandboxEnabled && memoryEnabled,
-    }),
+    instructions: agentInstructions,
     skill_ids: [],
     tools: [
       {
-        tool_ids: [
-          ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
-          TIME_CONVERTER_TOOL_ID,
-          REPLY_USER_TOOL_ID,
-        ],
+        tool_ids: standalone
+          ? [
+              ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+              TIME_CONVERTER_TOOL_ID,
+              REPLY_USER_TOOL_ID,
+            ]
+          : [
+              ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
+              ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
+              ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+            ],
       },
     ],
     enable_elastic_capabilities: false,
-    // Only the tools listed above: none of Agent Builder's internal file, API, todo or metadata tools.
-    disable_internal_tools: true,
-    // The investigator's own prompt, without Agent Builder's generic system prompt around it.
-    raw_system_prompt: true,
+    ...(standalone
+      ? {
+          // Only the tools listed above: none of Agent Builder's internal file, API, todo,
+          // attachment or metadata tools, and the agent's own prompt without Agent Builder's.
+          disable_internal_tools: true,
+          raw_system_prompt: true,
+        }
+      : {}),
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
@@ -159,24 +184,41 @@ export const getInvestigationAgentType = ({
       : {}),
   } satisfies AgentBaseConfiguration;
 
-  return {
-    id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
-    name: INVESTIGATION_AGENT_NAME,
-    description: INVESTIGATION_AGENT_DESCRIPTION,
-    avatar_icon: 'logoElastic',
-    baseConfiguration: getCustomContextInstructions
-      ? async (ctx) => ({
-          ...baseConfiguration,
-          instructions: await appendCustomContext({
-            instructions: baseConfiguration.instructions,
-            ctx,
-            getCustomContextInstructions,
-            logger,
-          }),
-        })
-      : baseConfiguration,
-  };
+  return getCustomContextInstructions
+    ? async (ctx) => ({
+        ...baseConfiguration,
+        instructions: await appendCustomContext({
+          instructions: baseConfiguration.instructions,
+          ctx,
+          getCustomContextInstructions,
+          logger,
+        }),
+      })
+    : baseConfiguration;
 };
+
+/**
+ * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
+ * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
+ * described in `/workspace/elastic.md`.
+ */
+export const getInvestigationAgentType = ({
+  decisionTreesEnabled = false,
+  ...options
+}: InvestigationAgentTypeOptions): AgentTypeDefinition => ({
+  id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+  name: INVESTIGATION_AGENT_NAME,
+  description: INVESTIGATION_AGENT_DESCRIPTION,
+  avatar_icon: 'logoElastic',
+  baseConfiguration: buildNightshiftAgentConfiguration({
+    ...options,
+    standalone: true,
+    instructions: fillContextInstructions({
+      includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
+      includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),
+    }),
+  }),
+});
 
 export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -185,6 +227,8 @@ export const registerInvestigationAgentType = (
     cortexEnabled,
     memoryEnabled = false,
     decisionTreesEnabled = false,
+    investigationToolsEnabled,
+    proposalsEnabled,
     telemetryConnectorId,
     getCustomContextInstructions,
     logger,
@@ -196,6 +240,8 @@ export const registerInvestigationAgentType = (
       cortexEnabled,
       memoryEnabled,
       decisionTreesEnabled,
+      investigationToolsEnabled,
+      proposalsEnabled,
       telemetryConnectorId,
       getCustomContextInstructions,
       logger,

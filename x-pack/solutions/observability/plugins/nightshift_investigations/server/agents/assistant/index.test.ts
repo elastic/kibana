@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type {
+  AgentBaseConfiguration,
+  AgentConfigContext,
+  AgentTypeDefinition,
+} from '@kbn/agent-builder-server/agents';
+import {
+  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import type { NightshiftAgentTypeOptions } from '../investigation';
+import { getInvestigationAgentType } from '../investigation';
+import {
+  ASSISTANT_AGENT_NAME,
+  ASSISTANT_INSTRUCTIONS,
+  NIGHTSHIFT_ASSISTANT_AGENT_TYPE_ID,
+  getAssistantAgentType,
+  registerAssistantAgentType,
+} from '.';
+
+const options: NightshiftAgentTypeOptions = {
+  sandboxEnabled: true,
+  cortexEnabled: true,
+  memoryEnabled: true,
+  investigationToolsEnabled: true,
+  proposalsEnabled: true,
+  telemetryConnectorId: 'telemetry',
+};
+
+const staticConfiguration = (definition: AgentTypeDefinition): AgentBaseConfiguration => {
+  const { baseConfiguration } = definition;
+  if (typeof baseConfiguration === 'function') throw new Error('Expected a static configuration');
+  return baseConfiguration;
+};
+
+describe('Nightshift assistant agent type', () => {
+  it('registers the assistant type', () => {
+    const registerType = jest.fn();
+    registerAssistantAgentType(
+      { agents: { registerType } } as unknown as AgentBuilderPluginSetup,
+      options
+    );
+
+    expect(registerType).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: NIGHTSHIFT_ASSISTANT_AGENT_TYPE_ID,
+        name: ASSISTANT_AGENT_NAME,
+      })
+    );
+  });
+
+  it('shares the investigator hooks and connectors, but keeps Agent Builder tools and prompt', () => {
+    const { instructions, ...assistant } = staticConfiguration(getAssistantAgentType(options));
+    const { instructions: investigatorInstructions, ...investigator } = staticConfiguration(
+      getInvestigationAgentType({ ...options, decisionTreesEnabled: true })
+    );
+
+    expect(instructions).toBe(ASSISTANT_INSTRUCTIONS);
+    expect(instructions).not.toBe(investigatorInstructions);
+    expect(assistant).toMatchObject({
+      connector_ids: ['telemetry'],
+      workflow_ids: [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID],
+      post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID],
+    });
+    expect(assistant.connector_ids).toEqual(investigator.connector_ids);
+    expect(assistant.workflow_ids).toEqual(investigator.workflow_ids);
+    expect(assistant.post_execution_workflow_ids).toEqual(investigator.post_execution_workflow_ids);
+    // Only the investigator is stripped down to its own tools and prompt.
+    expect(investigator).toMatchObject({ disable_internal_tools: true, raw_system_prompt: true });
+    expect(assistant).not.toHaveProperty('disable_internal_tools');
+    expect(assistant).not.toHaveProperty('raw_system_prompt');
+    expect(assistant.tools?.[0]?.tool_ids).toContain('proposals.create');
+    expect(investigator.tools?.[0]?.tool_ids).not.toContain('proposals.create');
+  });
+
+  it('points to the workspace files instead of embedding their guidance', () => {
+    for (const path of [
+      '/workspace/connectors.md',
+      '/workspace/elastic.md',
+      '/workspace/cortex/INDEX.md',
+      '/workspace/memories/.index.json',
+    ]) {
+      expect(ASSISTANT_INSTRUCTIONS).toContain(path);
+    }
+    expect(ASSISTANT_INSTRUCTIONS).not.toContain('decision-trees');
+  });
+
+  it('appends the space custom context like the investigator', async () => {
+    const { baseConfiguration } = getAssistantAgentType({
+      ...options,
+      getCustomContextInstructions: async () => 'Team context.',
+    });
+    if (typeof baseConfiguration !== 'function') throw new Error('Expected a resolver');
+
+    const { instructions } = await baseConfiguration({ spaceId: 'default' } as AgentConfigContext);
+
+    expect(instructions).toBe(`${ASSISTANT_INSTRUCTIONS.trimEnd()}\n\nTeam context.\n`);
+  });
+});

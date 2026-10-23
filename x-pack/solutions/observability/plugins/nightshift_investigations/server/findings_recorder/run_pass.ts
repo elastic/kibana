@@ -9,6 +9,7 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
 import type { Hypothesis } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { createOptimizeModel } from '../lib/create_optimize_model';
@@ -74,6 +75,24 @@ export const limitToOneConfirmed = (hypotheses: FindingsOutput['hypotheses']): H
  * throws for a model or write failure; it logs and returns false, because the investigation must
  * not depend on it.
  */
+const hasUserChosenSeverity = async (
+  conversations: {
+    get?: (conversationId: string) => Promise<{ events?: Array<{ type: string }> }>;
+  },
+  conversationId: string
+): Promise<boolean> => {
+  try {
+    const conversation = await conversations.get?.(conversationId);
+    return (
+      conversation?.events?.some(
+        ({ type }) => type === INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE
+      ) ?? false
+    );
+  } catch {
+    return false;
+  }
+};
+
 export const runFindingsPass = async (
   deps: FindingsPassDeps,
   { request, conversationId, steps, guard, memory, question, answer }: FindingsPassParams
@@ -171,6 +190,8 @@ export const runFindingsPass = async (
 
   const writer = agenticInvestigations.getFindingsWriter(request);
   const conversations = await agentBuilder.conversations.getScopedClient({ request });
+  // A severity a user chose is theirs: the recorder's own rating never replaces it.
+  const severityChosenByUser = await hasUserChosenSeverity(conversations, conversationId);
   const verdict = final ? output?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH) : undefined;
 
   const writes: Array<[string, () => Promise<unknown>]> = [
@@ -184,7 +205,7 @@ export const runFindingsPass = async (
             final && answer
             ? { summary: answer.slice(0, FALLBACK_SUMMARY_CHARS) }
             : {}),
-          ...(output?.severity ? { severity: output.severity } : {}),
+          ...(output?.severity && !severityChosenByUser ? { severity: output.severity } : {}),
           ...(verdict ? { verdict } : {}),
         }),
     ],

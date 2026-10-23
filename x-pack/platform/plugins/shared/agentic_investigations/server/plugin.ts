@@ -37,11 +37,13 @@ import {
 } from './subjects/services/subject_claims_service';
 import { createSubjectsClient } from './subjects/services/subjects_client';
 import { createFindingsWriter } from './findings/findings_writer';
+import { createThreadConversationResolver } from './subjects/services/thread_conversation_resolver';
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationConversationEvents } from './escalations/conversation_events';
+import { registerInvestigationConversationEvents } from './investigations/conversation_events';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
@@ -103,6 +105,7 @@ export class AgenticInvestigationsPlugin
     this.workflowsManagement = workflowsManagement?.management;
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
+    registerInvestigationConversationEvents(agentBuilder);
     if (this.escalationsEnabled) {
       registerEscalationConversationEvents(agentBuilder);
     }
@@ -137,6 +140,12 @@ export class AgenticInvestigationsPlugin
       assertCanReadConversation,
       logger: this.logger,
     });
+
+    agentBuilder.callbacks.registerConversationResolver(
+      createThreadConversationResolver({
+        getSubjectsService: () => this.requireSubjectsService(),
+      })
+    );
 
     agentBuilder.tools.register(
       createSetImpactTool({
@@ -302,7 +311,10 @@ export class AgenticInvestigationsPlugin
     }
 
     this.impactPillsService = new ImpactPillsService({
-      getImpactClient,
+      esClient,
+      logger: this.logger,
+      getImpactService: () => this.requireImpactService(),
+      privileges: startPrivileges,
       getSpaceId: (request) => this.getSpaceId(request),
       getProposals: () => plugins.proposals,
       getEscalationsService: () => this.escalationsService,

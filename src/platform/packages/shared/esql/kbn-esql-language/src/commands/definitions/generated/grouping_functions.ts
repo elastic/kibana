@@ -35,7 +35,7 @@ import { EsqlFunctionNames } from './function_names';
 const bucketDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.BUCKET,
-  description: i18n.translate('kbn-esql-language.esql.definitions.bucket', {
+  description: i18n.translate('esqlLanguage.esql.definitions.bucket', {
     defaultMessage:
       'Creates groups of values - buckets - out of a datetime or numeric input.\nThe size of the buckets can either be provided directly, or chosen based on a recommended count and values range.',
   }),
@@ -3702,7 +3702,7 @@ const bucketDefinition: FunctionDefinition = {
 const categorizeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.CATEGORIZE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.categorize', {
+  description: i18n.translate('esqlLanguage.esql.definitions.categorize', {
     defaultMessage: 'Groups text messages into categories of similarly formatted text values.',
   }),
   preview: false,
@@ -3747,7 +3747,7 @@ const categorizeDefinition: FunctionDefinition = {
 const tbucketDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.TBUCKET,
-  description: i18n.translate('kbn-esql-language.esql.definitions.tbucket', {
+  description: i18n.translate('esqlLanguage.esql.definitions.tbucket', {
     defaultMessage:
       'Creates groups of values - buckets - out of a `@timestamp` attribute.\nThe size of the buckets can be provided directly as a duration or period.\nAlternatively, the bucket size can be chosen based on a recommended count\nand a range.\n\nWhen using ES|QL in Kibana, the range can be derived automatically from the\n`@timestamp` filter\nthat Kibana adds to the query.',
   }),
@@ -4458,7 +4458,7 @@ const tbucketDefinition: FunctionDefinition = {
 const tstepDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.TSTEP,
-  description: i18n.translate('kbn-esql-language.esql.definitions.tstep', {
+  description: i18n.translate('esqlLanguage.esql.definitions.tstep', {
     defaultMessage:
       'Creates groups of values - buckets - out of a `@timestamp` attribute using either a fixed step width\nor a target bucket count.\nUnlike `TBUCKET`,\nwhich aligns buckets to calendar boundaries, TSTEP uses a fixed-width UTC grid anchored at the start\nof the query range. Each bucket is labeled by its right boundary.\nWhen a target bucket count is provided, TSTEP derives a fixed step width from the query range.\nThe derived step is rounded up so that the result uses no more than the target number of buckets.\n\nWhen using ES|QL in Kibana, the range can be derived automatically from the\n`@timestamp` filter\nthat Kibana adds to the query.',
   }),
@@ -6345,7 +6345,7 @@ const tstepDefinition: FunctionDefinition = {
 const withoutDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.WITHOUT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.without', {
+  description: i18n.translate('esqlLanguage.esql.definitions.without', {
     defaultMessage:
       'Groups by all time-series dimensions except the specified ones. When called with no arguments, groups by all dimensions.',
   }),

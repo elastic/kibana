@@ -54,7 +54,11 @@ describe('runFindingsPass', () => {
   const guard = { signal: new AbortController().signal, claimWrite: jest.fn(() => true) };
   const steps = [] as never[];
 
-  const setup = ({ answers = [answerWith(output)] as unknown[], earlier = [] as never[] } = {}) => {
+  const setup = ({
+    answers = [answerWith(output)] as unknown[],
+    earlier = [] as never[],
+    events = [] as Array<{ type: string }>,
+  } = {}) => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
@@ -69,7 +73,11 @@ describe('runFindingsPass', () => {
     const memory: RecorderMemory = { turns: jest.fn(() => earlier), remember: jest.fn() };
     const deps: FindingsPassDeps = {
       getAgentBuilder: () =>
-        ({ conversations: { getScopedClient: async () => ({ patchMetadata }) } } as never),
+        ({
+          conversations: {
+            getScopedClient: async () => ({ patchMetadata, get: async () => ({ events }) }),
+          },
+        } as never),
       getInference: () => ({} as never),
       getSavedObjects: () => ({} as never),
       getUiSettings: () => ({} as never),
@@ -111,6 +119,16 @@ describe('runFindingsPass', () => {
     expect(call.cacheControl).toEqual({ type: 'ephemeral', ttl: '5m' });
     expect(call.sessionId).toBe('c1');
     expect(Object.keys(call.tools)).toContain('structuredOutput');
+  });
+
+  it('leaves the severity alone when a user changed it', async () => {
+    const { deps, patchMetadata, memory } = setup({
+      events: [{ type: 'investigation_severity_changed' }],
+    });
+
+    await expect(run(deps, memory)).resolves.toBe(true);
+
+    expect(patchMetadata).toHaveBeenCalledWith('c1', { summary: output.summary });
   });
 
   it('writes summary, severity, hypotheses and impact from a live pass, without a verdict', async () => {
