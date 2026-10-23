@@ -8,7 +8,7 @@
 import {
   findSLOTemplatesParamsSchema,
   getSLOTemplateParamsSchema,
-  sloTemplateSchema,
+  sloTemplateSchemaZod,
   type FindSLOTemplatesResponse,
   type FindSLOTemplateTagsResponse,
   type GetSLOTemplateResponse,
@@ -37,7 +37,7 @@ export const getSLOTemplateRoute = createSloServerRoute({
     const { templateRepository } = await getScopedClients({ request, logger });
 
     const template = await templateRepository.findById(params.path.templateId);
-    return sloTemplateSchema.encode(template);
+    return sloTemplateSchemaZod.encode(template);
   },
 });
 
@@ -59,7 +59,7 @@ export const findSLOTemplatesRoute = createSloServerRoute({
   }): Promise<FindSLOTemplatesResponse> => {
     await assertPlatinumLicense(plugins);
     const { templateRepository } = await getScopedClients({ request, logger });
-    const { page = 1, perPage = 20, search, tags } = params.query ?? {};
+    const { page = 1, perPage = 20, search, tags } = params?.query ?? {};
     if (page <= 0) {
       throw new IllegalArgumentError('page must be a positive integer');
     }
@@ -78,7 +78,7 @@ export const findSLOTemplatesRoute = createSloServerRoute({
 
     return {
       ...templatesPaginated,
-      results: templatesPaginated.results.map((template) => sloTemplateSchema.encode(template)),
+      results: templatesPaginated.results.map((template) => sloTemplateSchemaZod.encode(template)),
     };
   },
 });

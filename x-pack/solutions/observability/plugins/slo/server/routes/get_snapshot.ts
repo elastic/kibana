@@ -29,6 +29,6 @@ export const getSnapshotRoute = createSloServerRoute({
     ]);
 
     const service = new SnapshotService(scopedClusterClient.asCurrentUser, repository, spaceId);
-    return service.compute(at, id, instanceId);
+    return service.compute(new Date(at), id, instanceId);
   },
 });
