@@ -100,10 +100,9 @@ describe('buildRuleChangedEventData', () => {
   });
 
   it('includes updated_fields when paths are passed', () => {
-    const data = buildRuleChangedEventData(createRuleResponse(), apiUserOrigin, 'rule-1', [
-      'metadata.name',
-      'schedule',
-    ]);
+    const data = buildRuleChangedEventData(createRuleResponse(), apiUserOrigin, 'rule-1', {
+      updatedFields: ['metadata.name', 'schedule'],
+    });
 
     expect(data.updated_fields).toEqual(['metadata.name', 'schedule']);
   });
@@ -113,15 +112,19 @@ describe('buildRuleChangedEventData', () => {
       buildRuleChangedEventData(createRuleResponse(), apiUserOrigin, 'rule-1')
     ).not.toHaveProperty('updated_fields');
     expect(
-      buildRuleChangedEventData(createRuleResponse(), apiUserOrigin, 'rule-1', [])
+      buildRuleChangedEventData(createRuleResponse(), apiUserOrigin, 'rule-1', {
+        updatedFields: [],
+      })
     ).not.toHaveProperty('updated_fields');
   });
 
   it('includes template_id and builder_type when present', () => {
     const rule = createRuleResponse({
-      metadata: { template: { id: 'template-1' }, builder: { type: 'threshold' } },
+      metadata: { builder: { type: 'threshold' } },
     });
-    const data = buildRuleChangedEventData(rule, apiUserOrigin, rule.id);
+    const data = buildRuleChangedEventData(rule, apiUserOrigin, rule.id, {
+      templateId: 'template-1',
+    });
 
     expect(data).toEqual(
       expect.objectContaining({ template_id: 'template-1', builder_type: 'threshold' })

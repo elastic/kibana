@@ -151,12 +151,21 @@ const updatedFieldsPayload = (
 ): Pick<RuleChangedEbtData, 'updated_fields'> =>
   updatedFields && updatedFields.length > 0 ? { updated_fields: [...updatedFields] } : {};
 
-/** Projects a rule-change telemetry payload. Rule fields are omitted when `rule` is absent. */
+interface RuleChangedEventOptions {
+  templateId?: string;
+  updatedFields?: readonly string[];
+}
+
+/**
+ * Projects a rule-change telemetry payload. Rule fields are omitted when `rule`
+ * is absent. `templateId` is passed separately because the public response no
+ * longer carries `metadata.template`; the lifecycle event supplies it.
+ */
 export const buildRuleChangedEventData = (
   rule: RuleResponse | undefined,
   origin: EventOrigin,
   ruleId: string,
-  updatedFields?: readonly string[]
+  { templateId, updatedFields }: RuleChangedEventOptions = {}
 ): RuleChangedEbtData => {
   const fields = updatedFieldsPayload(updatedFields);
 
@@ -165,7 +174,6 @@ export const buildRuleChangedEventData = (
   }
 
   const { kind, enabled, created_at: createdAt, metadata } = rule;
-  const templateId = metadata.template?.id;
   const builderType = metadata.builder?.type;
 
   return {

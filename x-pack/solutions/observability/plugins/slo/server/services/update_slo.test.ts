@@ -40,6 +40,8 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 import { UpdateSLO } from './update_slo';
 
+const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
+
 describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
@@ -460,6 +462,63 @@ describe('UpdateSLO', () => {
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
+    });
+
+    it('waits for in-flight install operations to settle before rolling back', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      const pendingSummaryInstall = Promise.withResolvers<string>();
+      mockSummaryTransformManager.install.mockReturnValueOnce(pendingSummaryInstall.promise);
+      mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+
+      const assertion = expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrow('Transform install error');
+      await flushPromises();
+
+      expect(mockRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+
+      pendingSummaryInstall.resolve(
+        getSLOSummaryTransformId(originalSlo.id, originalSlo.revision + 1)
+      );
+      await assertion;
+
+      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for in-flight start operations to settle before rolling back', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      mockTransformManager.start.mockRejectedValueOnce(new Error('rollup transform start error'));
+      const pendingSummaryStart = Promise.withResolvers<void>();
+      mockSummaryTransformManager.start.mockReturnValueOnce(pendingSummaryStart.promise);
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+
+      const assertion = expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrow('rollup transform start error');
+      await flushPromises();
+
+      expect(mockSummaryTransformManager.start).toHaveBeenCalledTimes(1);
+      expect(mockRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+
+      pendingSummaryStart.resolve();
+      await assertion;
+
+      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
     });
   });
 
