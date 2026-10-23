@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import { InferenceTaskErrorCode } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -29,6 +30,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
   let plugin: SearchInferenceEndpointsPlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let features: ReturnType<typeof featuresPluginMock.createSetup>;
+  let inferenceSetup: ReturnType<typeof inferenceMock.createSetupContract>;
 
   beforeEach(() => {
     const context = coreMock.createPluginInitializerContext<SearchInferenceEndpointsConfig>({
@@ -38,17 +40,18 @@ describe('SearchInferenceEndpointsPlugin', () => {
     plugin = new SearchInferenceEndpointsPlugin(context);
     coreSetup = coreMock.createSetup();
     features = featuresPluginMock.createSetup();
+    inferenceSetup = inferenceMock.createSetupContract();
   });
 
   describe('setup()', () => {
     it('registers routes', () => {
-      plugin.setup(coreSetup, { features });
+      plugin.setup(coreSetup, { features, inference: inferenceSetup });
 
       expect(coreSetup.http.createRouter).toHaveBeenCalledTimes(1);
     });
 
     it('registers the kibana feature with correct properties', () => {
-      plugin.setup(coreSetup, { features });
+      plugin.setup(coreSetup, { features, inference: inferenceSetup });
 
       expect(features.registerKibanaFeature).toHaveBeenCalledTimes(1);
 
@@ -70,7 +73,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
     });
 
     it('registers feature with all privilege granting management access', () => {
-      plugin.setup(coreSetup, { features });
+      plugin.setup(coreSetup, { features, inference: inferenceSetup });
 
       const feature = features.registerKibanaFeature.mock.calls[0][0];
 
@@ -86,7 +89,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
     });
 
     it('registers feature with read privilege enabled', () => {
-      plugin.setup(coreSetup, { features });
+      plugin.setup(coreSetup, { features, inference: inferenceSetup });
 
       const feature = features.registerKibanaFeature.mock.calls[0][0];
 
@@ -96,6 +99,85 @@ describe('SearchInferenceEndpointsPlugin', () => {
       });
       expect(feature.privileges?.read).not.toHaveProperty('disabled');
     });
+
+    describe('feature endpoint resolver', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const getFeature = jest.fn();
+      const getForFeature = jest.fn();
+
+      const setupAndGetResolver = () => {
+        const setupWithStart = coreMock.createSetup({
+          pluginStartContract: {
+            features: { get: getFeature },
+            endpoints: { getForFeature },
+          },
+        });
+        plugin.setup(setupWithStart, { features, inference: inferenceSetup });
+        return inferenceSetup.registerFeatureEndpointResolver.mock.calls[0][0];
+      };
+
+      beforeEach(() => {
+        getFeature.mockReset();
+        getForFeature.mockReset();
+      });
+
+      it('registers a resolver with the inference plugin', () => {
+        setupAndGetResolver();
+
+        expect(inferenceSetup.registerFeatureEndpointResolver).toHaveBeenCalledTimes(1);
+      });
+
+      it('returns the call options of the top endpoint', async () => {
+        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
+        getForFeature.mockResolvedValue({
+          endpoints: [
+            { connectorId: 'top', parameters: { temperature: 0.2, reasoning: { effort: 'low' } } },
+            { connectorId: 'second', parameters: { temperature: 0.7 } },
+          ],
+        });
+        const resolver = setupAndGetResolver();
+
+        await expect(resolver('my_feature', request)).resolves.toEqual({
+          connectorId: 'top',
+          temperature: 0.2,
+          reasoning: { effort: 'low' },
+        });
+        expect(getForFeature).toHaveBeenCalledWith('my_feature', request);
+      });
+
+      it('returns undefined when the feature has no endpoints', async () => {
+        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
+        getForFeature.mockResolvedValue({ endpoints: [] });
+        const resolver = setupAndGetResolver();
+
+        await expect(resolver('my_feature', request)).resolves.toBeUndefined();
+      });
+
+      it('throws when the feature is not registered', async () => {
+        getFeature.mockReturnValue(undefined);
+        const resolver = setupAndGetResolver();
+
+        await expect(resolver('unknown', request)).rejects.toMatchObject({
+          code: InferenceTaskErrorCode.requestError,
+          message: 'Feature "unknown" is not registered',
+          meta: { status: 400 },
+        });
+        expect(getForFeature).not.toHaveBeenCalled();
+      });
+
+      it('throws when the feature is not a chat completion feature', async () => {
+        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'text_embedding' });
+        const resolver = setupAndGetResolver();
+
+        await expect(resolver('my_feature', request)).rejects.toMatchObject({
+          code: InferenceTaskErrorCode.requestError,
+          message:
+            'Feature "my_feature" is not a chat completion feature (task type "text_embedding")',
+          meta: { status: 400 },
+        });
+        expect(getForFeature).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('start()', () => {
@@ -104,7 +186,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
     beforeEach(() => {
       coreStart = coreMock.createStart();
-      plugin.setup(coreSetup, { features });
+      plugin.setup(coreSetup, { features, inference: inferenceSetup });
 
       const inference = inferenceMock.createStartContract();
       inference.getConnectorList.mockResolvedValue([]);
