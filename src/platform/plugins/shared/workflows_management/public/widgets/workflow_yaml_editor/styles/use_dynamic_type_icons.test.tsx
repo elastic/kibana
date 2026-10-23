@@ -122,7 +122,7 @@ describe('useDynamicTypeIcons', () => {
     unmount();
   });
 
-  it('starts every icon lookup without waiting for earlier ones to resolve', async () => {
+  it('starts every icon lookup without waiting for earlier ones to resolve', () => {
     jest.mocked(getIconBase64).mockReturnValue(new Promise(() => {}));
     const services = createStartServicesMock();
     const connectorsData: ConnectorsResponse = {
@@ -137,14 +137,14 @@ describe('useDynamicTypeIcons', () => {
       wrapper: getTestProvider({ services }),
     });
 
-    await waitFor(() => {
-      expect(getIconBase64).toHaveBeenCalledWith(
-        expect.objectContaining({ actionTypeId: '.jira', kind: 'step' })
-      );
-      expect(getIconBase64).toHaveBeenCalledWith(
-        expect.objectContaining({ actionTypeId: '.teams', kind: 'step' })
-      );
-    });
+    // Asserted synchronously on purpose: both lookups start in the effect's first tick, so any
+    // waiting here would weaken the claim and only ever burn the test's budget on failure.
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.jira', kind: 'step' })
+    );
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.teams', kind: 'step' })
+    );
 
     unmount();
   });
