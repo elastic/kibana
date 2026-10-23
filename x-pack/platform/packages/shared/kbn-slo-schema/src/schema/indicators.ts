@@ -339,7 +339,7 @@ const indicatorTypesSchema = z
  * Codec between a comma separated list of indicator types
  * (e.g. `sli.kql.custom,sli.apm.transactionDuration`) and an array of indicator types.
  * `ArrayFromString` from @kbn/zod-helpers is decode-only (`z.preprocess`) and cannot
- * express the encode direction required for io-ts parity, hence the hand-rolled codec.
+ * express the encode direction, hence the hand-rolled codec.
  */
 const indicatorTypesArraySchema = z.codec(
   z
