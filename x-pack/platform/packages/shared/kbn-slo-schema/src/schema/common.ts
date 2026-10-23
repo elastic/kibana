@@ -17,9 +17,8 @@ const allOrAnyStringOrArray = z.union([allOrAnyString, z.array(allOrAnyString)])
 /**
  * Codec between a wire-form date string and a `Date` instance.
  *
- * Decoding reproduces the io-ts `dateType` semantics: any string `new Date()`
- * can parse is accepted, not only strict ISO 8601. Encoding always produces
- * the ISO string form.
+ * Decoding accepts any string `new Date()` can parse, not only strict
+ * ISO 8601. Encoding always produces the ISO string form.
  */
 const dateType = z.codec(
   z
