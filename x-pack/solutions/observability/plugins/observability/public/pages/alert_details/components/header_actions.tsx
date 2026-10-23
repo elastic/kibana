@@ -53,6 +53,7 @@ import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
 import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
+  addToChatButton?: React.ReactNode;
   alert: TopAlert | null;
   alertIndex?: string;
   alertStatus?: AlertStatus;
@@ -88,6 +89,7 @@ function AlertSnoozeForm({
 }
 
 export function HeaderActions({
+  addToChatButton,
   alert,
   alertIndex,
   alertStatus,
@@ -233,6 +235,7 @@ export function HeaderActions({
             </AiButton>
           </EuiFlexItem>
         )}
+        {addToChatButton && <EuiFlexItem grow={false}>{addToChatButton}</EuiFlexItem>}
         <EuiFlexItem grow={false}>
           <EuiPopover
             panelPaddingSize="none"
