@@ -307,6 +307,44 @@ export { useGetEnrollmentAPIKeysQuery } from './hooks/use_request/enrollment_api
 // /internal/ URL path. Do NOT change to internal.v1 ('1') — it returns 400 Unsupported version.
 // See: fleet/server/routes/agent_policy/index.ts ~line 308.
 export { sendCreateAgentPolicyWithPackagePolicies } from './hooks/use_request/agent_policy';
+export { sendGetPackagePolicies } from './hooks/use_request/package_policy';
 
 // Package policy creation — used by the existing-agent-policy path in ingest_hub
 export { sendCreatePackagePolicyForRq as sendCreatePackagePolicy } from './hooks/use_request/package_policy';
+
+// Agents of a set of agent policies and the incoming-data check — used by step 4 to resolve the
+// deployed agents and detect data per agent (immune to a customised data_stream.dataset).
+export { useAgentsForPolicyIds } from './hooks/use_agents_for_policy_ids';
+export { sendGetAgentIncomingData } from './hooks/use_request/agents';
+
+// Agent status badge — the same badge the Managed integrations table renders: the agent's health,
+// or Pending while there is no agent yet.
+export const LazyAgentStatusBadge = lazy(() =>
+  import('./components/agent_status_badge').then((m) => ({ default: m.AgentStatusBadge }))
+);
+export type { AgentStatusBadgeProps } from './components/agent_status_badge';
+
+// Agentless flyouts — step 4 opens these from a service status chip.
+export const LazyAgentlessStatusDetailsFlyout = lazy(() =>
+  import('./components/agentless_status_details_flyout').then((m) => ({
+    default: m.AgentlessStatusDetailsFlyout,
+  }))
+);
+export type { AgentlessStatusDetailsFlyoutProps } from './components/agentless_status_details_flyout';
+export const LazyAgentlessEnrollmentFlyout = lazy(() =>
+  import('./components/agentless_enrollment_flyout').then((m) => ({
+    default: m.AgentlessEnrollmentFlyout,
+  }))
+);
+export type { AgentlessEnrollmentFlyoutProps } from './components/agentless_enrollment_flyout';
+
+// Worst unit status of a package policy on an agent — lets step 4 judge an agent by the
+// integration it deployed rather than by unrelated integrations on the same agent.
+export {
+  getComponentAlertLevel,
+  getPackagePolicyUnitSummary,
+} from './components/agentless_status_details_flyout/component_alert_level';
+export type {
+  ComponentAlertLevel,
+  PackagePolicyUnitSummary,
+} from './components/agentless_status_details_flyout/component_alert_level';

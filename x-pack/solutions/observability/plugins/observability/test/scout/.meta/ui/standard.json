@@ -1,5 +1,5 @@
 {
-  "sha1": "a725b2595614f6e76c3c45a3d4d603e89d382961",
+  "sha1": "ba48766d9c4dab1f9223ac236aa2334bc8dee63e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -852,8 +852,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 141,
-        "column": 7
+        "line": 150,
+        "column": 38
       }
     },
     {
@@ -866,8 +866,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 155,
-        "column": 20
+        "line": 164,
+        "column": 9
       }
     },
     {
@@ -880,8 +880,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 168,
-        "column": 98
+        "line": 180,
+        "column": 11
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-94218abe6bf1539",
+      "title": "Classic Observability nav — Alerting section opens Rule Library under /app/observability/alerting and keeps the sub-nav",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 180,
+        "column": 11
       }
     },
     {
@@ -894,8 +908,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 168,
-        "column": 98
+        "line": 180,
+        "column": 11
       }
     },
     {
@@ -908,8 +922,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 168,
-        "column": 98
+        "line": 180,
+        "column": 11
       }
     },
     {
@@ -922,8 +936,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 183,
-        "column": 9
+        "line": 192,
+        "column": 27
       }
     },
     {
@@ -936,8 +950,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 196,
-        "column": 18
+        "line": 205,
+        "column": 16
       }
     },
     {
@@ -950,8 +964,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 206,
-        "column": 32
+        "line": 216,
+        "column": 18
       }
     },
     {
@@ -964,8 +978,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 217,
-        "column": 18
+        "line": 226,
+        "column": 16
       }
     },
     {
@@ -978,8 +992,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 233,
-        "column": 10
+        "line": 242,
+        "column": 11
       }
     },
     {
@@ -992,8 +1006,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 247,
-        "column": 18
+        "line": 256,
+        "column": 16
       }
     },
     {
@@ -1006,8 +1020,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 262,
-        "column": 16
+        "line": 271,
+        "column": 11
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-5b3d668f0ce2606",
+      "title": "Classic Observability nav — Alerting section shows only Rule Library when the user has only v2 rules read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 285,
+        "column": 13
       }
     },
     {
@@ -1020,8 +1048,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 276,
-        "column": 7
+        "line": 296,
+        "column": 16
       }
     },
     {
@@ -1034,8 +1062,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 287,
-        "column": 18
+        "line": 307,
+        "column": 10
       }
     },
     {
@@ -1048,8 +1076,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 297,
-        "column": 8
+        "line": 318,
+        "column": 7
       }
     },
     {
@@ -1160,8 +1188,8 @@
       }
     },
     {
-      "id": "33b867a7e4eb3bf-2eb762d6ab2df1a",
-      "title": "Observability Alerts nav — alerting v2 clicking Action Policies loads Action Policies when alerting v2 is enabled",
+      "id": "33b867a7e4eb3bf-389adbdbb9a07b5",
+      "title": "Observability Alerts nav — alerting v2 clicking Rule Library loads Rule library when alerting v2 is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1175,6 +1203,21 @@
       }
     },
     {
+      "id": "33b867a7e4eb3bf-2eb762d6ab2df1a",
+      "title": "Observability Alerts nav — alerting v2 clicking Action Policies loads Action Policies when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 294,
+        "column": 7
+      }
+    },
+    {
       "id": "33b867a7e4eb3bf-3373d4814aed62f",
       "title": "Observability Alerts nav — alerting v2 clicking Maintenance Windows loads Maintenance Windows when alerting v2 is enabled",
       "expectedStatus": "passed",
@@ -1185,7 +1228,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 294,
+        "line": 303,
         "column": 7
       }
     },
@@ -1200,8 +1243,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 303,
-        "column": 7
+        "line": 311,
+        "column": 69
       }
     },
     {
@@ -1215,8 +1258,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 311,
-        "column": 69
+        "line": 324,
+        "column": 7
       }
     },
     {
@@ -1230,8 +1273,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 335,
-        "column": 10
+        "line": 341,
+        "column": 71
       }
     },
     {
@@ -1245,8 +1288,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 347,
-        "column": 29
+        "line": 356,
+        "column": 58
       }
     },
     {
@@ -1260,8 +1303,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 356,
-        "column": 32
+        "line": 366,
+        "column": 18
       }
     },
     {
@@ -1275,8 +1318,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 370,
-        "column": 7
+        "line": 380,
+        "column": 10
       }
     },
     {
@@ -1290,8 +1333,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 389,
-        "column": 23
+        "line": 397,
+        "column": 31
       }
     },
     {
@@ -1305,8 +1348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 407,
-        "column": 13
+        "line": 419,
+        "column": 16
       }
     },
     {
@@ -1320,8 +1363,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 424,
-        "column": 18
+        "line": 435,
+        "column": 7
       }
     },
     {
@@ -1335,8 +1378,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 438,
-        "column": 16
+        "line": 450,
+        "column": 10
       }
     },
     {
@@ -1350,8 +1393,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 450,
-        "column": 18
+        "line": 461,
+        "column": 7
       }
     },
     {
@@ -1365,8 +1408,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 463,
-        "column": 18
+        "line": 474,
+        "column": 7
       }
     },
     {
@@ -1380,8 +1423,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 476,
-        "column": 18
+        "line": 487,
+        "column": 7
       }
     },
     {

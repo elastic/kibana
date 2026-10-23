@@ -60,7 +60,7 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
 
     return (
       <nav
-        aria-label={i18n.translate('workflows.library.categoryFacets.ariaLabel', {
+        aria-label={i18n.translate('workflowsUi.library.categoryFacets.ariaLabel', {
           defaultMessage: 'Filter templates by category',
         })}
       >
@@ -72,7 +72,7 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
             css={facetWeightCss(selectedCategories.length === 0)}
             data-test-subj="workflowLibraryCategoryFacet-all"
           >
-            {i18n.translate('workflows.library.categoryFacets.allCategories', {
+            {i18n.translate('workflowsUi.library.categoryFacets.allCategories', {
               defaultMessage: 'All categories',
             })}
           </EuiFacetButton>

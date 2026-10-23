@@ -97,7 +97,6 @@
     "@kbn/core-application-browser",
     "@kbn/dashboard-plugin",
     "@kbn/search-types",
-    "@kbn/slo-schema",
     "@kbn/alerting-types",
     "@kbn/swc-register",
     "@kbn/slo-plugin",
@@ -141,6 +140,8 @@
     "@kbn/ui-callout",
     "@kbn/app-header",
     "@kbn/app-menu",
+    "@kbn/config",
+    "@kbn/slo-constants",
   ],
   "exclude": ["target/**/*"]
 }

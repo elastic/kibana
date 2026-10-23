@@ -6,7 +6,12 @@
  */
 
 import { getDestinationNameValidationError } from './destination_helpers';
-import { indexUsesTemplate, parseIndexPatterns } from './destination_models';
+import {
+  getFormDestinationSignals,
+  SIGNAL_INDEX_FIELDS,
+  validateAutoWritePattern,
+  validateStaticSignalIndex,
+} from './destination_models';
 import { getDestinationTypeDefinition } from './destination_type_registry';
 import type {
   DestinationCreationFormData,
@@ -17,18 +22,35 @@ import type { Unit } from '../../../services/unit_repository';
 
 const getLocalElasticsearchErrors = (
   elasticsearch: ElasticsearchDestinationFormData
-): Pick<DestinationCreationFormErrors, 'index' | 'indexPatterns'> => {
-  const errors: Pick<DestinationCreationFormErrors, 'index' | 'indexPatterns'> = {};
-  const index = elasticsearch.index.trim();
-  if (!index) {
-    errors.index = 'required';
+): Pick<
+  DestinationCreationFormErrors,
+  'staticIndexes' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+> => {
+  const errors: Pick<
+    DestinationCreationFormErrors,
+    'staticIndexes' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+  > = {};
+  if (elasticsearch.auto) {
+    for (const signal of ['logs', 'metrics', 'traces'] as const) {
+      const field = SIGNAL_INDEX_FIELDS[signal];
+      const error = validateAutoWritePattern(signal, elasticsearch[field]);
+      if (error) {
+        errors[field] = error;
+      }
+    }
+    return errors;
   }
-  if (index && indexUsesTemplate(index)) {
-    const patterns = parseIndexPatterns(elasticsearch.indexPatterns);
-    if (patterns.length === 0) {
-      errors.indexPatterns = 'required';
-    } else if (new Set(patterns).size !== patterns.length) {
-      errors.indexPatterns = 'invalid';
+  const hasIndex = Object.values(SIGNAL_INDEX_FIELDS).some(
+    (field) => elasticsearch[field].trim().length > 0
+  );
+  if (!hasIndex) {
+    errors.staticIndexes = 'required';
+  }
+  for (const signal of ['logs', 'metrics', 'traces'] as const) {
+    const field = SIGNAL_INDEX_FIELDS[signal];
+    const error = validateStaticSignalIndex(signal, elasticsearch[field]);
+    if (error) {
+      errors[field] = error;
     }
   }
   return errors;
@@ -45,6 +67,7 @@ export const getDestinationCreationFormErrors = ({
     destinationName: getDestinationNameValidationError({
       destinationName: formData.destinationName,
       unitDefinition,
+      signals: getFormDestinationSignals(formData.elasticsearch),
     }),
   };
   if (formData.storageKind !== 'local_elasticsearch') {
@@ -67,5 +90,11 @@ export const canSubmitDestinationForm = ({
     return false;
   }
   const errors = getDestinationCreationFormErrors({ formData, unitDefinition });
-  return !errors.destinationName && !errors.index && !errors.indexPatterns;
+  return (
+    !errors.destinationName &&
+    !errors.staticIndexes &&
+    !errors.logsIndex &&
+    !errors.metricsIndex &&
+    !errors.tracesIndex
+  );
 };
