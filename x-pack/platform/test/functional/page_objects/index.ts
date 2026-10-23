@@ -30,9 +30,6 @@ import { StatusPageObject } from './status_page';
 import { GeoFileUploadPageObject } from './geo_file_upload';
 import { LogstashPageObject } from './logstash_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
-import { RollupPageObject } from './rollup_page';
-import { RemoteClustersPageProvider } from './remote_clusters_page';
-import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -62,7 +59,4 @@ export const pageObjects = {
   geoFileUpload: GeoFileUploadPageObject,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   logstash: LogstashPageObject,
-  rollup: RollupPageObject,
-  remoteClusters: RemoteClustersPageProvider,
-  crossClusterReplication: CrossClusterReplicationPageProvider,
 };
