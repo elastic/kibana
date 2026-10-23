@@ -35,6 +35,7 @@ import {
   applyLifetimeOverlap,
   applyTimeRange,
   esqlToObjects,
+  escapeEsqlLikePattern,
   executeCountQuery,
   executeEsqlQuery,
   isIndexNotFoundError,
@@ -158,8 +159,7 @@ const withDataJsonProjection = (query: ComposerQuery): ComposerQuery =>
 const buildFreeTextWhere = (search: string | undefined): ESQLAstExpression | undefined => {
   if (!search) return undefined;
 
-  const escaped = search.toLowerCase().replace(/\\/g, '\\\\').replace(/[*?]/g, '\\$&');
-  const pattern = esql.str(`*${escaped}*`);
+  const pattern = esql.str(`*${escapeEsqlLikePattern(search)}*`);
   const dataCol = esql.col('data');
 
   return esql.exp`(TO_LOWER(FIELD_EXTRACT(${dataCol}, ${esql.str(
