@@ -23,9 +23,13 @@ import {
   buildSlack2SendMessageInput,
   buildTeamsSendChannelMessageInput,
   escapeServiceNowCommentText,
+  escapeSlackMrkdwnLabel,
+  escapeSlackMrkdwnText,
+  escapeSlackMrkdwnUrl,
   escapeTeamsHtml,
   executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
+  fitSlackMrkdwnSectionText,
   renderServiceNowField,
   renderTeamsField,
   SERVICENOW_COMMENT_MAX_LENGTH,
@@ -62,10 +66,6 @@ export function buildWaitForApprovalResumeLinks({
     approveUrl: buildExternalResumeUrl({ ...baseParams, approved: true }),
     rejectUrl: buildExternalResumeUrl({ ...baseParams, approved: false }),
   };
-}
-
-function escapeSlackMrkdwnUrl(url: string): string {
-  return url.replace(/&/g, '&amp;');
 }
 
 function buildServiceNowApprovalComment({
@@ -124,10 +124,10 @@ function buildSlackMessage({
   approveUrl: string;
   rejectUrl: string;
 }): string {
-  const prompt = message.length > 0 ? `${message}\n\n` : '';
-  return `${prompt}<${escapeSlackMrkdwnUrl(approveUrl)}|${approveLabel}>  <${escapeSlackMrkdwnUrl(
-    rejectUrl
-  )}|${rejectLabel}>`;
+  const prompt = message.length > 0 ? `${escapeSlackMrkdwnText(message)}\n\n` : '';
+  return `${prompt}<${escapeSlackMrkdwnUrl(approveUrl)}|${escapeSlackMrkdwnLabel(
+    approveLabel
+  )}>  <${escapeSlackMrkdwnUrl(rejectUrl)}|${escapeSlackMrkdwnLabel(rejectLabel)}>`;
 }
 
 function buildSlackApiBlocks({
@@ -145,10 +145,11 @@ function buildSlackApiBlocks({
 }) {
   const blocks: Array<Record<string, unknown>> = [];
 
-  if (message.length > 0) {
+  const sectionText = fitSlackMrkdwnSectionText(escapeSlackMrkdwnText(message));
+  if (sectionText.length > 0) {
     blocks.push({
       type: 'section',
-      text: { type: 'mrkdwn', text: message },
+      text: { type: 'mrkdwn', text: sectionText },
     });
   }
 
