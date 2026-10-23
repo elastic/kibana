@@ -22,6 +22,7 @@ import type {
   InstallPackageResponse,
   GetCategoriesResponse,
   GetIntegrationGroupsResponse,
+  GetKibanaAssetListResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
   BulkInstallPackageInfo,
@@ -42,6 +43,7 @@ import type {
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
+  GetKibanaAssetListRequestSchema,
   MoveToReplacementRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
@@ -139,6 +141,8 @@ import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
 import { getPackageKnowledgeBase } from '../../services/epm/packages';
 import { moveReplacedPackagePolicies } from '../../services/epm/packages/move_replaced_package';
+import * as Registry from '../../services/epm/registry';
+import { listPackageKibanaAssets } from '../../services/epm/kibana/assets/install';
 
 import { getPackagePolicyIdsForCurrentUser } from './bulk_handler';
 
@@ -167,6 +171,18 @@ export const getIntegrationGroupsHandler: FleetRequestHandler = async (
 ) => {
   const body: GetIntegrationGroupsResponse = { items: await getIntegrationGroups() };
   return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
+};
+
+// PROTOTYPE: Kibana assets a package installs (wizard asset checklist)
+export const getKibanaAssetListHandler: FleetRequestHandler<
+  TypeOf<typeof GetKibanaAssetListRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName, pkgVersion } = request.params;
+  const { packageInfo, paths, archiveIterator } = await Registry.getPackage(pkgName, pkgVersion);
+  const body: GetKibanaAssetListResponse = {
+    items: await listPackageKibanaAssets({ packageInfo, paths, archiveIterator }),
+  };
+  return response.ok({ body });
 };
 
 // PROTOTYPE: move a replaced package's integration policies to its replacement (also runs on upgrade)
@@ -945,6 +961,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
       namespace_customization_settings: attributes.namespace_customization_settings,
       skip_kibana_assets: attributes.skip_kibana_assets,
+      skipped_kibana_assets: attributes.skipped_kibana_assets,
       moved_from: attributes.moved_from,
       moved_to: attributes.moved_to,
     };

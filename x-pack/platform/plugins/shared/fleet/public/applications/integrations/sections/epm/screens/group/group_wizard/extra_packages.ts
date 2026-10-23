@@ -14,6 +14,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '../../../../../../../types';
+import type { SkipKibanaAssets } from '../../../../../../../../common/types';
 import {
   sendCreatePackagePolicyForRq,
   sendGetPackagePolicies,
@@ -96,13 +97,14 @@ export const useExtraPackagePolicies = (
 
 /**
  * Saves the extra packages' package policies on the agent policies of the first package's saved
- * policy. Installs each package first (content per the wizard's "Install content", unless it's
+ * policy. Installs each package first (content per the wizard's asset checklist, unless it's
  * already installed).
  */
 export const saveExtraPackagePolicies = async (
   extras: ExtraPackagePolicy[],
   policyIds: string[],
-  installContent: boolean
+  /** undefined = all content (stock), true = none, a list = all but those. */
+  getSkipKibanaAssets: (packageName: string) => SkipKibanaAssets | undefined
 ): Promise<{ saved: PackagePolicy[]; errors: Array<{ packageName: string; message: string }> }> => {
   const saved: PackagePolicy[] = [];
   const errors: Array<{ packageName: string; message: string }> = [];
@@ -116,7 +118,7 @@ export const saveExtraPackagePolicies = async (
           extra.packageInfo.name,
           extra.packageInfo.version,
           false,
-          { skipKibanaAssets: !installContent }
+          { skipKibanaAssets: getSkipKibanaAssets(extra.packageName) }
         );
         if (res.error) throw new Error(res.error.message);
       }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SkipKibanaAssets } from '../../../../common/types';
 import fs from 'fs/promises';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -570,12 +571,18 @@ describe('install', () => {
     describe('skipKibanaAssets', () => {
       const installWith = async (
         saved: boolean | undefined,
-        requested: boolean | undefined
-      ): Promise<boolean | undefined> => {
+        requested: SkipKibanaAssets | undefined,
+        savedList?: Array<{ type: string; id: string }>
+      ): Promise<SkipKibanaAssets | undefined> => {
         jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
         jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
         jest.mocked(getInstallationObject).mockResolvedValueOnce({
-          attributes: { version: '1.2.0', installed_kibana: [], skip_kibana_assets: saved },
+          attributes: {
+            version: '1.2.0',
+            installed_kibana: [],
+            skip_kibana_assets: saved,
+            skipped_kibana_assets: savedList,
+          },
         } as any);
         await installPackage({
           spaceId: DEFAULT_SPACE_ID,
@@ -592,6 +599,14 @@ describe('install', () => {
       it('keeps the saved choice on upgrade when none is requested', async () => {
         expect(await installWith(true, undefined)).toBe(true);
         expect(await installWith(undefined, undefined)).toBe(false);
+      });
+
+      it('PROTOTYPE: keeps a saved granular selection, a request replaces it', async () => {
+        const list = [{ type: 'dashboard', id: 'apache-overview' }];
+        expect(await installWith(undefined, undefined, list)).toEqual(list);
+        expect(await installWith(undefined, false, list)).toBe(false);
+        const other = [{ type: 'search', id: 'apache-errors' }];
+        expect(await installWith(undefined, other, list)).toEqual(other);
       });
 
       it('uses the requested choice over the saved one', async () => {

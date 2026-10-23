@@ -914,12 +914,32 @@ export interface Installation {
    */
   skip_kibana_assets?: boolean;
   /**
+   * PROTOTYPE: granular "assets to install". Kibana assets left out of the install, by saved
+   * object type + id. Kept across upgrades and reinstalls like `skip_kibana_assets`.
+   */
+  skipped_kibana_assets?: KibanaAssetSelector[];
+  /**
    * PROTOTYPE: packages that were replaced by this one (`deprecated.replaced_by.package`) and whose
    * integration policies Fleet moved here. Shown on this package's page and the installed list.
    */
   moved_from?: ReplacedPackageMove[];
   /** PROTOTYPE: set on a replaced package once its integration policies were moved. */
   moved_to?: { package: string; version: string; moved_at: string };
+}
+
+/** PROTOTYPE: a Kibana asset by saved object type + id (granular asset selection). */
+export interface KibanaAssetSelector {
+  type: string;
+  id: string;
+}
+
+/** PROTOTYPE: install option. `true` = no Kibana assets, a list = all but these. */
+export type SkipKibanaAssets = boolean | KibanaAssetSelector[];
+
+/** PROTOTYPE: a Kibana asset a package would install, for the wizard's asset checklist. */
+export interface PackageKibanaAssetListItem extends KibanaAssetSelector {
+  title: string;
+  description?: string;
 }
 
 /** PROTOTYPE: one move of a replaced package's integration policies to its replacement. */

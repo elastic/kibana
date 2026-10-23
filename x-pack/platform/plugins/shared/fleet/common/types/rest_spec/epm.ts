@@ -12,6 +12,7 @@ import type {
   AssetReference,
   CategorySummaryList,
   IntegrationGroup,
+  PackageKibanaAssetListItem,
   PackageList,
   PackageInfo,
   PackageUsageStats,
@@ -34,6 +35,11 @@ export interface GetCategoriesRequest {
 
 export interface GetCategoriesResponse {
   items: CategorySummaryList;
+}
+
+// PROTOTYPE: wizard asset checklist
+export interface GetKibanaAssetListResponse {
+  items: PackageKibanaAssetListItem[];
 }
 
 // PROTOTYPE: integration groups

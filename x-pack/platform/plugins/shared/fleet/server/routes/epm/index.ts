@@ -28,6 +28,7 @@ import type { FleetAuthzRouteConfig } from '../../services/security/types';
 import { EPM_API_ROUTES } from '../../constants';
 import {
   GetCategoriesRequestSchema,
+  GetKibanaAssetListRequestSchema,
   MoveToReplacementRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
@@ -98,6 +99,7 @@ import { genericErrorResponse } from '../schema/errors';
 import {
   getCategoriesHandler,
   getIntegrationGroupsHandler,
+  getKibanaAssetListHandler,
   moveToReplacementHandler,
   getListHandler,
   getInstalledListHandler,
@@ -226,6 +228,22 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         validate: { request: MoveToReplacementRequestSchema },
       },
       moveToReplacementHandler
+    );
+
+  // PROTOTYPE: Kibana assets a package installs (wizard asset checklist)
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.KIBANA_ASSET_LIST_PATTERN,
+      security: READ_PACKAGE_INFO_SECURITY,
+      access: 'internal',
+      summary: `Get the Kibana assets a package installs`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: { request: GetKibanaAssetListRequestSchema },
+      },
+      getKibanaAssetListHandler
     );
 
   // PROTOTYPE: integration groups, built from member packages that bundle a group.yml

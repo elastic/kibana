@@ -31,6 +31,7 @@ import type {
   GetInputsTemplatesResponse,
 } from '../../types';
 import type { NamespaceConflictWarning } from '../../../common/types/rest_spec/epm';
+import type { GetKibanaAssetListResponse, SkipKibanaAssets } from '../../../common/types';
 import type {
   BulkUpgradePackagesRequest,
   BulkOperationPackagesResponse,
@@ -87,6 +88,14 @@ export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {})
     }
   );
 }
+
+/** PROTOTYPE: Kibana assets a package installs, for the wizard's asset checklist. */
+export const sendGetKibanaAssetListForRq = (pkgName: string, pkgVersion: string) =>
+  sendRequestForRq<GetKibanaAssetListResponse>({
+    path: epmRouteService.getKibanaAssetListPath(pkgName, pkgVersion),
+    method: 'get',
+    version: API_VERSIONS.internal.v1,
+  });
 
 /** PROTOTYPE: integration groups from the package registry. Errors -> no groups (stock tiles). */
 export function useGetIntegrationGroupsQuery(options?: { enabled?: boolean }) {
@@ -365,8 +374,9 @@ export const sendInstallPackage = (
   pkgName: string,
   pkgVersion: string,
   force: boolean = false,
-  // PROTOTYPE: "Install content" checkbox. Omitted keeps the installation's saved choice.
-  options: { skipKibanaAssets?: boolean } = {}
+  // PROTOTYPE: "Install content": true = none, a list = all but those. Omitted keeps the
+  // installation's saved choice.
+  options: { skipKibanaAssets?: SkipKibanaAssets } = {}
 ) => {
   const body =
     force || options.skipKibanaAssets !== undefined

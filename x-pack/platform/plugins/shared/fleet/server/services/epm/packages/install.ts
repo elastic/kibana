@@ -26,6 +26,7 @@ import { addSpanLabels } from '@kbn/apm-utils';
 
 import type {
   KibanaAssetReference,
+  SkipKibanaAssets,
   PackageDataStreamTypes,
   PackageDependencies,
   PackageInstallContext,
@@ -426,7 +427,7 @@ interface InstallRegistryPackageParams {
   installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
   /** PROTOTYPE: "Install content" off. Undefined keeps the installation's saved choice. */
-  skipKibanaAssets?: boolean;
+  skipKibanaAssets?: SkipKibanaAssets;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -715,7 +716,7 @@ export async function installPackageWithStateMachine(options: {
   skipDependencyCheck?: boolean;
   authorizedSpaces?: string[];
   /** PROTOTYPE: "Install content" off. Undefined keeps the installation's saved choice. */
-  skipKibanaAssets?: boolean;
+  skipKibanaAssets?: SkipKibanaAssets;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -743,8 +744,13 @@ export async function installPackageWithStateMachine(options: {
     authorizedSpaces,
   } = options;
   // PROTOTYPE: an explicit choice wins, else the one saved on the installation (upgrade, reinstall).
-  const skipKibanaAssets =
-    options.skipKibanaAssets ?? installedPkg?.attributes.skip_kibana_assets ?? false;
+  const skipKibanaAssets: SkipKibanaAssets =
+    options.skipKibanaAssets ??
+    (installedPkg?.attributes.skip_kibana_assets
+      ? true
+      : installedPkg?.attributes.skipped_kibana_assets?.length
+      ? installedPkg.attributes.skipped_kibana_assets
+      : false);
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
   logger.info(
@@ -1355,7 +1361,7 @@ export async function restartInstallation(options: {
   installedAsDependencyOf?: { name: string; version: string };
   existingIsDependencyOf?: { name: string; version: string }[];
   dependencies?: PackageDependencies | null;
-  skipKibanaAssets?: boolean;
+  skipKibanaAssets?: SkipKibanaAssets;
 }) {
   const {
     savedObjectsClient,
@@ -1376,7 +1382,8 @@ export async function restartInstallation(options: {
     previous_version: previousVersion,
     ...(dependencies ? { dependencies } : {}),
     // PROTOTYPE: "Install content" choice
-    skip_kibana_assets: !!skipKibanaAssets,
+    skip_kibana_assets: skipKibanaAssets === true,
+    skipped_kibana_assets: Array.isArray(skipKibanaAssets) ? skipKibanaAssets : [],
   };
 
   if (options.installedAsDependencyOf) {
@@ -1418,7 +1425,7 @@ export async function createInstallation(options: {
   verificationResult?: PackageVerificationResult;
   installedAsDependencyOf?: { name: string; version: string };
   dependencies?: PackageDependencies | null;
-  skipKibanaAssets?: boolean;
+  skipKibanaAssets?: SkipKibanaAssets;
 }) {
   const {
     savedObjectsClient,
@@ -1465,7 +1472,10 @@ export async function createInstallation(options: {
       ? { is_dependency_of: [installedAsDependencyOf], installed_as_dependency: true }
       : {}),
     // PROTOTYPE: "Install content" choice
-    ...(skipKibanaAssets ? { skip_kibana_assets: true } : {}),
+    ...(skipKibanaAssets === true ? { skip_kibana_assets: true } : {}),
+    ...(Array.isArray(skipKibanaAssets) && skipKibanaAssets.length
+      ? { skipped_kibana_assets: skipKibanaAssets }
+      : {}),
   };
 
   if (verificationResult) {

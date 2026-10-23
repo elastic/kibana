@@ -174,3 +174,12 @@ export const EpmPackagesSchemaV14 = EpmPackagesSchemaV13.extends({
     schema.object({ package: schema.string(), version: schema.string(), moved_at: schema.string() })
   ),
 });
+
+// PROTOTYPE: granular asset selection, see Installation.skipped_kibana_assets
+export const EpmPackagesSchemaV15 = EpmPackagesSchemaV14.extends({
+  skipped_kibana_assets: schema.maybe(
+    schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() }), {
+      maxSize: 10000,
+    })
+  ),
+});

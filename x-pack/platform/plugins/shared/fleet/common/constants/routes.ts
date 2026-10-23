@@ -55,6 +55,8 @@ export const EPM_API_ROUTES = {
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   // PROTOTYPE: integration groups from the package registry
   GROUPS_PATTERN: `${INTERNAL_ROOT}/epm/groups`,
+  // PROTOTYPE: Kibana assets a package installs, for the wizard's asset checklist
+  KIBANA_ASSET_LIST_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/{pkgVersion}/kibana_asset_list`,
   // PROTOTYPE: move a replaced package's integration policies to its replacement
   MOVE_TO_REPLACEMENT_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/_move_to_replacement`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,

@@ -26,7 +26,17 @@ import { partition, chunk, once, uniqBy } from 'lodash';
 import { getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetReference, Installation, PackageSpecTags } from '../../../../types';
-import type { KibanaAssetReference, PackageInstallContext } from '../../../../../common/types';
+import type {
+  KibanaAssetReference,
+  KibanaAssetSelector,
+  PackageInstallContext,
+  PackageKibanaAssetListItem,
+  SkipKibanaAssets,
+} from '../../../../../common/types';
+import {
+  INACTIVITY_MONITORING_ASSET,
+  isKibanaAssetSkipped,
+} from '../../../../../common/services/kibana_asset_selection';
 import {
   indexPatternTypes,
   getIndexPatternSavedObjects,
@@ -256,7 +266,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
   assetTags?: PackageSpecTags[];
-  skipKibanaAssets?: boolean;
+  skipKibanaAssets?: SkipKibanaAssets;
 }) {
   // Derive whether this is an additional-space install from the package's sticky primary space.
   // Any request from a space other than installed_kibana_space_id is an additional-space install.
@@ -454,13 +464,19 @@ export async function installKibanaAssetsAndReferences({
   spaceId: string;
   assetTags?: PackageSpecTags[];
   installAsAdditionalSpace?: boolean;
-  /** PROTOTYPE: "Install content" off. Removes previously installed assets, installs none. */
-  skipKibanaAssets?: boolean;
+  /**
+   * PROTOTYPE: "Install content". `true` removes previously installed assets and installs none; a
+   * list installs everything but those assets.
+   */
+  skipKibanaAssets?: SkipKibanaAssets;
 }) {
   const { savedObjectsImporter, savedObjectTagAssignmentService, savedObjectTagClient } =
     getSpaceAwareSaveobjectsClients(spaceId);
   // This is where the memory consumption is rising up in the first place
-  const kibanaAssetsArchiveIterator = getKibanaAssetsArchiveIterator(packageInstallContext);
+  const kibanaAssetsArchiveIterator = getKibanaAssetsArchiveIterator(
+    packageInstallContext,
+    Array.isArray(skipKibanaAssets) ? skipKibanaAssets : undefined
+  );
 
   if (installedPkg) {
     await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
@@ -471,7 +487,7 @@ export async function installKibanaAssetsAndReferences({
       : installAsAdditionalSpace;
 
   // PROTOTYPE: "Install content" off. Previous assets are gone (above), none are imported.
-  if (skipKibanaAssets) {
+  if (skipKibanaAssets === true) {
     return saveKibanaAssetsRefs(savedObjectsClient, pkgName, [], spaceId, saveAsAdditionalSpace);
   }
   await deleteOrphanedMultipleIsolatedAssets({
@@ -563,7 +579,45 @@ export const isKibanaAssetType = (path: string) => {
   return parts.service === 'kibana' && (kibanaAssetTypes as string[]).includes(parts.type);
 };
 
-function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallContext) {
+/**
+ * PROTOTYPE: Kibana assets a package installs (same filters as the install), with titles, for the
+ * wizard's asset checklist. Includes the inactivity monitoring template Fleet creates.
+ */
+export async function listPackageKibanaAssets(
+  packageInstallContext: PackageInstallContext
+): Promise<PackageKibanaAssetListItem[]> {
+  const items: PackageKibanaAssetListItem[] = [];
+  await getKibanaAssetsArchiveIterator(packageInstallContext)(async ({ asset }) => {
+    const attributes = (asset.attributes ?? {}) as Record<string, unknown>;
+    const title = [attributes.title, attributes.name, asset.id].find(
+      (v): v is string => typeof v === 'string' && v.length > 0
+    )!;
+    const description =
+      typeof attributes.description === 'string' && attributes.description
+        ? attributes.description
+        : undefined;
+    items.push({ type: asset.type, id: asset.id, title, description });
+  });
+  const { packageInfo } = packageInstallContext;
+  if (
+    appContextService.getExperimentalFeatures().enableIntegrationInactivityAlerting &&
+    packageInfo.type === 'integration' &&
+    (packageInfo.data_streams ?? []).length > 0
+  ) {
+    items.push({
+      ...INACTIVITY_MONITORING_ASSET,
+      title: `${packageInfo.title} inactivity monitoring`,
+      description: 'Alert template: no data received from this integration for a while.',
+    });
+  }
+  return items;
+}
+
+function getKibanaAssetsArchiveIterator(
+  packageInstallContext: PackageInstallContext,
+  // PROTOTYPE: granular asset selection - assets left out of the install
+  skipped?: KibanaAssetSelector[]
+) {
   return (
     onEntry: (entry: {
       path: string;
@@ -598,7 +652,7 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
         return;
       }
 
-      if (asset.type === soType) {
+      if (asset.type === soType && !isKibanaAssetSkipped(skipped, asset)) {
         await onEntry({ path: entry.path, assetType, asset });
       }
     }, isKibanaAssetType);

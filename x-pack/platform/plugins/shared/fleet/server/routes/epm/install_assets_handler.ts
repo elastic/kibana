@@ -109,6 +109,8 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,
       packageInstallContext,
+      // PROTOTYPE: granular asset selection made at install
+      skipKibanaAssets: installation.attributes.skipped_kibana_assets,
     });
 
     await stepCreateAlertingAssets({
@@ -118,6 +120,7 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       spaceId: spaceToInstallId,
       request,
       installAsAdditionalSpace,
+      skipKibanaAssets: installation.attributes.skipped_kibana_assets,
     });
   }
 

@@ -56,6 +56,14 @@ export const epmRouteService = {
     return EPM_API_ROUTES.GROUPS_PATTERN;
   },
 
+  // PROTOTYPE
+  getKibanaAssetListPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.KIBANA_ASSET_LIST_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
+
   getListPath: () => {
     return EPM_API_ROUTES.LIST_PATTERN;
   },

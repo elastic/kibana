@@ -183,6 +183,11 @@ export const InstallationInfoSchema = schema.object(
     rolled_back: schema.maybe(schema.boolean()),
     is_rollback_ttl_expired: schema.maybe(schema.boolean()),
     skip_kibana_assets: schema.maybe(schema.boolean()),
+    skipped_kibana_assets: schema.maybe(
+      schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() }), {
+        maxSize: 10000,
+      })
+    ),
     moved_from: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 100 })),
     moved_to: schema.maybe(schema.any()),
   },
@@ -1062,12 +1067,21 @@ export const InstallPackageFromRegistryRequestSchema = {
         }),
         // PROTOTYPE: "Install content" checkbox
         skip_kibana_assets: schema.maybe(
-          schema.boolean({
-            meta: {
-              description:
-                'When true, install without Kibana assets (dashboards, ML jobs, alert and SLO templates, saved searches); Elasticsearch assets are always installed. Saved on the installation and kept on upgrade and reinstall. When omitted, the saved choice is kept (default false).',
-            },
-          })
+          schema.oneOf(
+            [
+              schema.boolean(),
+              // PROTOTYPE: granular asset selection - leave these assets out
+              schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() }), {
+                maxSize: 10000,
+              }),
+            ],
+            {
+              meta: {
+                description:
+                  'true: install without Kibana assets (dashboards, ML jobs, alert and SLO templates, saved searches). A list of {type, id}: install all Kibana assets except those. Elasticsearch assets are always installed. Saved on the installation and kept on upgrade and reinstall. When omitted, the saved choice is kept (default false).',
+              },
+            }
+          )
         ),
       },
       { meta: { id: 'install_package_from_registry_request' } }
@@ -1076,6 +1090,11 @@ export const InstallPackageFromRegistryRequestSchema = {
 };
 
 // PROTOTYPE: move a replaced package's integration policies to its replacement
+// PROTOTYPE: wizard asset checklist
+export const GetKibanaAssetListRequestSchema = {
+  params: schema.object({ pkgName: schema.string(), pkgVersion: schema.string() }),
+};
+
 export const MoveToReplacementRequestSchema = {
   params: schema.object({ pkgName: schema.string() }),
 };

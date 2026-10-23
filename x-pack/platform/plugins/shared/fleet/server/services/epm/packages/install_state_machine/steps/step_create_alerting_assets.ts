@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  INACTIVITY_MONITORING_ASSET,
+  isKibanaAssetSkipped,
+} from '../../../../../../common/services/kibana_asset_selection';
 import { ruleLastRunOutcomeValues } from '@kbn/alerting-plugin/common/routes/rule/common';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { DEFAULT_SPACE_ID, brandSpaceId } from '@kbn/core-spaces-common';
@@ -327,9 +331,14 @@ export async function stepCreateAlertingAssets(
   > & { installAsAdditionalSpace?: boolean }
 ) {
   // PROTOTYPE: "Install content" off - no alerting templates or rules either.
-  if (context.skipKibanaAssets) {
+  if (context.skipKibanaAssets === true) {
     return;
   }
+  // PROTOTYPE: granular selection - the inactivity monitoring template can be left out.
+  const skipInactivityTemplate = isKibanaAssetSkipped(
+    context.skipKibanaAssets,
+    INACTIVITY_MONITORING_ASSET
+  );
   const {
     logger,
     savedObjectsClient,
@@ -351,10 +360,12 @@ export async function stepCreateAlertingAssets(
   const { name: pkgName } = packageInfo;
 
   // Create or re-create inactivity monitoring template for integration packages
-  await createInactivityMonitoringTemplate(
-    { logger, savedObjectsClient },
-    { packageInfo, spaceId, installAsAdditionalSpace }
-  );
+  if (!skipInactivityTemplate) {
+    await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo, spaceId, installAsAdditionalSpace }
+    );
+  }
 
   // When running from the primary space during a full reinstall, also recreate the inactivity
   // monitoring template for every registered secondary space. The archive-asset reinstall step
@@ -362,7 +373,7 @@ export async function stepCreateAlertingAssets(
   // it because it lives outside the package archive. stepCreateAlertingAssets is only invoked
   // once per install (for the primary space), so without this loop secondary spaces would be
   // left without their inactivity template after any primary-space reinstall.
-  if (!installAsAdditionalSpace && installedPkg) {
+  if (!installAsAdditionalSpace && installedPkg && !skipInactivityTemplate) {
     const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
     for (const additionalSpaceId of Object.keys(
       installedPkg.attributes.additional_spaces_installed_kibana ?? {}

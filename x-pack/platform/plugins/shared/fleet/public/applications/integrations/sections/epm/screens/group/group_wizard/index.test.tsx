@@ -56,6 +56,24 @@ jest.mock('../../../../../../../hooks', () => ({
   }),
   sendCreatePackagePolicyForRq: jest.fn(),
   sendInstallPackage: jest.fn().mockResolvedValue({ data: { items: [] } }),
+  // PROTOTYPE: asset checklist; nginx_otel has content, everything else none
+  sendGetKibanaAssetListForRq: jest.fn((name: string) =>
+    Promise.resolve({
+      items:
+        name === 'nginx_otel'
+          ? [
+              { type: 'dashboard', id: 'nginx_otel-overview', title: '[Nginx OTel] Overview' },
+              { type: 'dashboard', id: 'nginx_otel-traffic', title: '[Nginx OTel] Traffic' },
+              { type: 'slo_template', id: 'nginx_otel-availability', title: 'Availability' },
+              {
+                type: 'alerting_rule_template',
+                id: 'fleet-inactivity-monitoring',
+                title: 'Nginx inactivity monitoring',
+              },
+            ]
+          : [],
+    })
+  ),
 }));
 
 jest.mock('../../../../../../fleet/services/ensure_kibana_assets_installed', () => ({
@@ -309,8 +327,9 @@ describe('GroupOnboardingWizard', () => {
     expect(second.package.name).toBe('apache');
     expect(second.policy_ids).toEqual(first.policy_ids);
     expect(second.policy_ids.length).toBe(1);
+    // All content selected: stock install (no skip option)
     expect(sendInstallPackage).toHaveBeenCalledWith('apache', '3.0.2', false, {
-      skipKibanaAssets: false,
+      skipKibanaAssets: undefined,
     });
     (sendCreatePackagePolicyForRq as jest.Mock).mockClear();
     (sendInstallPackage as jest.Mock).mockClear();
@@ -349,7 +368,7 @@ describe('GroupOnboardingWizard', () => {
     expect(result.getByTestId('groupWizardInstalls')).toHaveTextContent(
       'No content in this package.'
     );
-    expect(result.queryByTestId('groupWizardInstallContent')).not.toBeInTheDocument();
+    expect(result.queryByTestId('groupWizardContent')).not.toBeInTheDocument();
     expect(result.getByTestId('groupWizardSave')).toHaveTextContent('Add Apache HTTP Server');
   });
 
@@ -461,8 +480,8 @@ describe('GroupOnboardingWizard', () => {
     );
   });
 
-  // PROTOTYPE: "Install content" (package structure design), nginx_otel 1.0.0 with inline content
-  describe('Install content', () => {
+  // PROTOTYPE: granular "assets to install", nginx_otel 1.0.0 with inline content
+  describe('Content to install', () => {
     beforeEach(() => {
       (sendCreatePackagePolicyForRq as jest.Mock).mockClear();
       (sendInstallPackage as jest.Mock).mockClear();
@@ -481,11 +500,16 @@ describe('GroupOnboardingWizard', () => {
       return result;
     };
 
-    it('on by default: stock save, content listed', async () => {
+    it('everything selected by default: stock save, assets listed by type', async () => {
       const result = await toReview();
-      expect(result.getByTestId('groupWizardInstallContent')).toBeChecked();
+      await waitFor(() =>
+        expect(result.getByTestId('groupWizardAssets-nginx_otel')).toHaveTextContent(
+          '4 of 4 selected'
+        )
+      );
+      expect(result.getByTestId('groupWizardAssetType-nginx_otel-dashboard')).toBeChecked();
       expect(result.getByTestId('groupWizardInstalls')).toHaveTextContent(
-        'plus content: 3 dashboards and 8 other Kibana assets'
+        'plus 4 of 4 content assets (2 dashboards, 1 alert templates, 1 slo templates)'
       );
       await waitFor(() => expect(result.getByTestId('groupWizardSave')).not.toBeDisabled());
       click(result.getByTestId('groupWizardSave'));
@@ -493,11 +517,38 @@ describe('GroupOnboardingWizard', () => {
       expect(sendInstallPackage).not.toHaveBeenCalled();
     });
 
-    it('off: installs the package without Kibana assets before saving the policy', async () => {
+    it('unchecked assets are left out of the install, by type + id', async () => {
       const result = await toReview();
-      click(result.getByTestId('groupWizardInstallContent'));
+      await waitFor(() =>
+        expect(result.getByTestId('groupWizardAsset-dashboard-nginx_otel-traffic')).toBeChecked()
+      );
+      click(result.getByTestId('groupWizardAsset-dashboard-nginx_otel-traffic'));
+      click(result.getByTestId('groupWizardAssetType-nginx_otel-alerting_rule_template'));
+      // Type checkbox goes indeterminate when only some of its assets are selected
+      expect(
+        (result.getByTestId('groupWizardAssetType-nginx_otel-dashboard') as HTMLInputElement)
+          .indeterminate
+      ).toBe(true);
       expect(result.getByTestId('groupWizardInstalls')).toHaveTextContent(
-        'Not installed: 3 dashboards and 8 other Kibana assets'
+        'plus 2 of 4 content assets'
+      );
+      await waitFor(() => expect(result.getByTestId('groupWizardSave')).not.toBeDisabled());
+      click(result.getByTestId('groupWizardSave'));
+      await waitFor(() => expect(sendCreatePackagePolicyForRq).toHaveBeenCalled());
+      expect(sendInstallPackage).toHaveBeenCalledWith('nginx_otel', '1.0.0', false, {
+        skipKibanaAssets: [
+          { type: 'dashboard', id: 'nginx_otel-traffic' },
+          { type: 'alerting_rule_template', id: 'fleet-inactivity-monitoring' },
+        ],
+      });
+    });
+
+    it('nothing selected: installs without Kibana assets', async () => {
+      const result = await toReview();
+      await waitFor(() => expect(result.getByText('Select none')).toBeInTheDocument());
+      click(result.getByText('Select none'));
+      expect(result.getByTestId('groupWizardInstalls')).toHaveTextContent(
+        'Elasticsearch assets (index templates, ingest pipelines) only.'
       );
       await waitFor(() => expect(result.getByTestId('groupWizardSave')).not.toBeDisabled());
       click(result.getByTestId('groupWizardSave'));
@@ -507,20 +558,30 @@ describe('GroupOnboardingWizard', () => {
       });
     });
 
-    it('already installed: shows the saved choice read-only', async () => {
+    it('already installed: shows the saved selection read-only', async () => {
       (sendGetPackageInfoByKeyForRq as jest.Mock).mockImplementation((name: string) =>
         Promise.resolve({
           item: {
             ...PACKAGES[name],
-            installationInfo: { install_status: 'installed', skip_kibana_assets: true },
+            installationInfo: {
+              install_status: 'installed',
+              skipped_kibana_assets: [{ type: 'slo_template', id: 'nginx_otel-availability' }],
+            },
           },
         })
       );
       const result = await toReview();
-      expect(result.getByTestId('groupWizardInstallContent')).not.toBeChecked();
-      expect(result.getByTestId('groupWizardInstallContent')).toBeDisabled();
+      await waitFor(() =>
+        expect(result.getByTestId('groupWizardAssets-nginx_otel')).toHaveTextContent(
+          '3 of 4 selected'
+        )
+      );
+      expect(
+        result.getByTestId('groupWizardAsset-slo_template-nginx_otel-availability')
+      ).not.toBeChecked();
+      expect(result.getByTestId('groupWizardAsset-dashboard-nginx_otel-traffic')).toBeDisabled();
       expect(result.getByTestId('groupWizardReview')).toHaveTextContent(
-        'Nginx OpenTelemetry is already installed without content.'
+        'is already installed with this selection'
       );
     });
   });

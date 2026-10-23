@@ -15,7 +15,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
 import { INSTALL_STATES } from '../../../../../common/types';
-import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
+import type {
+  PackageInstallContext,
+  SkipKibanaAssets,
+  StateNames,
+  StateContext,
+} from '../../../../../common/types';
 import type { PackageAssetReference } from '../../../../types';
 
 import type {
@@ -90,7 +95,7 @@ export interface InstallContext extends StateContext<StateNames> {
   kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
   skipDependencyCheck?: boolean;
   // PROTOTYPE: "Install content" off - skip Kibana assets (resolved, never undefined here)
-  skipKibanaAssets?: boolean;
+  skipKibanaAssets?: SkipKibanaAssets;
   // When set (upload path only), caps multispace propagation to the Spaces authorized
   // by preflight, preventing gated assets from reaching Spaces added after preflight ran.
   authorizedSpaces?: string[];

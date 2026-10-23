@@ -55,7 +55,8 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
 
   // PROTOTYPE: "Install content" off. No refs, so cleanUpUnusedKibanaAssetsStep removes any
   // previously installed ones.
-  if (context.skipKibanaAssets) {
+  // PROTOTYPE: a granular selection (list) isn't applied to streaming installs.
+  if (context.skipKibanaAssets === true) {
     return { installedKibanaAssetsRefs: [] };
   }
 

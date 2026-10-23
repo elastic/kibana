@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 
 import type { AgentPolicy, NewPackagePolicy } from '../../../../../../../types';
+import type { PackageKibanaAssetListItem } from '../../../../../../../../common/types';
 import type { PackagePolicyValidationResults } from '../../../../../../../../common/services';
 import { SetupTechnology } from '../../../../../../../../common/types';
 
@@ -67,6 +68,7 @@ import {
   toStreamVar,
 } from './model';
 import { ChoiceCard, SectionHeading, SharedSettingsCard, StreamCard } from './primitives';
+import { AssetChecklist, getAssetInstallText } from './assets';
 import type { VarFieldContext } from './var_fields';
 import { VarFieldGrid, VarGroupSelectors, countVarErrors, splitVars } from './var_fields';
 
@@ -621,6 +623,17 @@ export const IntegrationSettingsSection: React.FC<{
 
 /* ---------- Review ---------- */
 
+/** PROTOTYPE: one package's asset checklist on review. */
+export interface AssetSection {
+  packageName: string;
+  title: string;
+  items?: PackageKibanaAssetListItem[];
+  isLoading: boolean;
+  skippedKeys: string[];
+  /** Installed package: its saved choice, read-only. */
+  lockedReason?: string;
+}
+
 /** PROTOTYPE: another selected package of a pick-any schema, saved as its own package policy. */
 export interface ReviewExtraPackage {
   packageName: string;
@@ -647,11 +660,12 @@ export const ReviewStep: React.FC<{
   agentPolicyLabel?: string;
   integrationSettings: React.ReactNode;
   onEdit: (step: string) => void;
-  /** PROTOTYPE: "Install content" checkbox (all of the package's Kibana assets, or none). */
-  installContent: boolean;
-  onInstallContentChange: (installContent: boolean) => void;
-  /** Set when the package is already installed: the choice was made then, shown read-only. */
-  installContentLockedReason?: string;
+  /**
+   * PROTOTYPE: granular "assets to install", one checklist per package (the first selected
+   * package, then extras). Replaces the all-or-nothing "Install content" checkbox.
+   */
+  assetSections: AssetSection[];
+  onSkippedAssetsChange: (packageName: string, skippedKeys: string[]) => void;
   /** PROTOTYPE: pick-any schemas - the other selected packages. */
   extraPackages?: ReviewExtraPackage[];
 }> = (props) => {
@@ -661,19 +675,29 @@ export const ReviewStep: React.FC<{
   const streams = getEnabledStreams(model, state);
   const signals = getEnabledSignals(model, state);
   const summary = props.installSummary;
-  const contentText = summary && getContentInstallText(summary, props.installContent);
+  const sectionFor = (packageName: string) =>
+    props.assetSections.find((s) => s.packageName === packageName);
+  // Asset list loaded and non-empty: "N of M content assets". Else the package-info text
+  // (no content, or content from a content package dependency).
+  const installsText = (pkgLabel: string, pkgSummary?: InstallSummary, packageName?: string) => {
+    const section = packageName ? sectionFor(packageName) : undefined;
+    if (section?.items?.length) {
+      return getAssetInstallText(pkgLabel, section.items, section.skippedKeys);
+    }
+    return pkgSummary ? getContentInstallText(pkgSummary, true).installed : undefined;
+  };
+  const contentText = installsText(
+    `${model.packageTitle} ${model.packageVersion}`,
+    summary,
+    model.packageName
+  );
   const extras = props.extraPackages ?? [];
   const isMulti = extras.length > 0;
   const allStreamCount =
     streams.length +
     pushSources.length +
     extras.reduce((n, e) => n + getEnabledStreams(e.model, e.state).length, 0);
-  const hasAnyContent =
-    !!contentText?.hasContent ||
-    extras.some(
-      (e) =>
-        e.installSummary && getContentInstallText(e.installSummary, props.installContent).hasContent
-    );
+  const hasAnyContent = props.assetSections.some((s) => s.isLoading || !!s.items?.length);
 
   const row = (label: string, value: React.ReactNode, editStep?: string) => (
     <div
@@ -773,23 +797,16 @@ export const ReviewStep: React.FC<{
           )}
         {props.agentPolicyLabel && row('Agent policy', props.agentPolicyLabel, 'how')}
         {contentText &&
-          row(
-            'Installs',
-            <div data-test-subj="groupWizardInstalls">
-              {contentText.installed}
-              {contentText.skipped && (
-                <EuiText size="xs" color="subdued">
-                  {contentText.skipped}
-                </EuiText>
-              )}
-            </div>
-          )}
+          row('Installs', <div data-test-subj="groupWizardInstalls">{contentText}</div>)}
       </EuiPanel>
 
       {extras.map((extra) => {
         const extraStreams = getEnabledStreams(extra.model, extra.state);
-        const extraContent =
-          extra.installSummary && getContentInstallText(extra.installSummary, props.installContent);
+        const extraContent = installsText(
+          `${extra.model.packageTitle} ${extra.model.packageVersion}`,
+          extra.installSummary,
+          extra.packageName
+        );
         return (
           <EuiPanel
             key={extra.packageName}
@@ -832,27 +849,36 @@ export const ReviewStep: React.FC<{
                   )
                   .join(', ')
               )}
-            {extraContent && row('Installs', extraContent.installed)}
+            {extraContent && row('Installs', extraContent)}
           </EuiPanel>
         );
       })}
 
       {hasAnyContent && (
-        <EuiFormRow
-          helpText={
-            props.installContentLockedReason ??
-            'Dashboards, alert and SLO templates, ML jobs and saved searches. Index templates and ingest pipelines are always installed.'
-          }
-        >
-          <EuiCheckbox
-            id="groupWizardInstallContent"
-            label="Install content"
-            checked={props.installContent}
-            disabled={!!props.installContentLockedReason}
-            onChange={(e) => props.onInstallContentChange(e.target.checked)}
-            data-test-subj="groupWizardInstallContent"
+        <div data-test-subj="groupWizardContent">
+          <SectionHeading
+            title="Content to install"
+            description="Pick the dashboards, saved searches, alert and SLO templates and other content to install. Index templates and ingest pipelines always install."
           />
-        </EuiFormRow>
+          <EuiSpacer size="s" />
+          {props.assetSections.map((section) => (
+            <div key={section.packageName} css={css({ marginBottom: euiTheme.size.m })}>
+              {props.assetSections.length > 1 && (
+                <EuiTitle size="xxs">
+                  <h3>{section.title}</h3>
+                </EuiTitle>
+              )}
+              <AssetChecklist
+                packageName={section.packageName}
+                items={section.items}
+                isLoading={section.isLoading}
+                skippedKeys={section.skippedKeys}
+                lockedReason={section.lockedReason}
+                onChange={(keys) => props.onSkippedAssetsChange(section.packageName, keys)}
+              />
+            </div>
+          ))}
+        </div>
       )}
 
       {props.showManagedUnavailable && <WhereToRunSection title={title} />}

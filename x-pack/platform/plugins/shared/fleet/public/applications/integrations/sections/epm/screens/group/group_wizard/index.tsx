@@ -113,6 +113,8 @@ import { DetectStep } from './detect_step';
 import type { VarFieldContext } from './var_fields';
 import { countVarErrors } from './var_fields';
 import type { ExtraPackageInput } from './extra_packages';
+import type { AssetSection } from './steps';
+import { getInstalledSkippedKeys, getSkipKibanaAssets, useKibanaAssetLists } from './assets';
 import { saveExtraPackagePolicies, useExtraPackagePolicies } from './extra_packages';
 
 /** What the wizard hands back to its host when the user leaves. */
@@ -282,8 +284,8 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
   }>();
   const [visited, setVisited] = useState<WizardStep[]>([COLLECT_STEP]);
   const [saved, setSaved] = useState<SavedPolicyResult>();
-  // PROTOTYPE: "Install content" (review step), on by default, kept across schema switches.
-  const [installContent, setInstallContent] = useState(true);
+  // PROTOTYPE: granular "assets to install" (review step): package name -> asset keys left out.
+  const [skippedAssets, setSkippedAssets] = useState<Record<string, string[]>>({});
 
   const [policyMode, setPolicyMode] = useState<AgentPolicyMode>('new');
   const [existingPolicyId, setExistingPolicyId] = useState<string>();
@@ -452,8 +454,10 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
       }
       policyOverrides={policyOverrides}
       onPolicyFieldChange={(field, value) => setPolicyOverrides((p) => ({ ...p, [field]: value }))}
-      installContent={installContent}
-      onInstallContentChange={setInstallContent}
+      skippedAssets={skippedAssets}
+      onSkippedAssetsChange={(packageName, keys) =>
+        setSkippedAssets((prev) => ({ ...prev, [packageName]: keys }))
+      }
       methods={methods}
       method={method}
       onMethodChange={setPickedMethod}
@@ -518,8 +522,8 @@ interface BodyProps {
   ) => void;
   policyOverrides: PolicyOverrides;
   onPolicyFieldChange: (field: 'name' | 'namespace', value: string) => void;
-  installContent: boolean;
-  onInstallContentChange: (installContent: boolean) => void;
+  skippedAssets: Record<string, string[]>;
+  onSkippedAssetsChange: (packageName: string, skippedKeys: string[]) => void;
   methods: SetupTechnology[];
   method: SetupTechnology;
   onMethodChange: (method: SetupTechnology) => void;
@@ -614,6 +618,40 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   // after the first one on the same agent policy.
   const extraInputs: ExtraPackageInput[] = props.units.slice(1);
   const extras = useExtraPackagePolicies(extraInputs, packagePolicy.namespace);
+
+  // PROTOTYPE: granular "assets to install". One checklist per package; an installed package
+  // shows the choice it was installed with, read-only.
+  const assetPackages = [packageInfo, ...extras.map((e) => e.packageInfo)];
+  const assetLists = useKibanaAssetLists(
+    assetPackages.map((info) => (info ? { name: info.name, version: info.version } : undefined))
+  );
+  const assetSections: AssetSection[] = assetPackages.flatMap((info, i) => {
+    if (!info) return [];
+    const installation = 'installationInfo' in info ? info.installationInfo : undefined;
+    const installed = installation?.install_status === 'installed';
+    const { items, isLoading } = assetLists[i];
+    const skippedKeys = installed
+      ? getInstalledSkippedKeys(info, items)
+      : props.skippedAssets[info.name] ?? [];
+    return [
+      {
+        packageName: info.name,
+        title: `${info.title} ${info.version}`,
+        items,
+        isLoading,
+        skippedKeys,
+        lockedReason: installed
+          ? `${info.title} is already installed with this selection. Reinstall it to change it.`
+          : undefined,
+      },
+    ];
+  });
+  const getSkipFor = (packageName: string) => {
+    const section = assetSections.find((s) => s.packageName === packageName);
+    return section && !section.lockedReason
+      ? getSkipKibanaAssets(section.items, section.skippedKeys)
+      : undefined;
+  };
   const [isSavingExtras, setIsSavingExtras] = useState(false);
   const savingExtras = useRef(false);
 
@@ -625,19 +663,17 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     }
     savingExtras.current = true;
     setIsSavingExtras(true);
-    saveExtraPackagePolicies(
-      extras,
-      savedPackagePolicy.policy.policy_ids ?? [],
-      installContent
-    ).then(({ errors }) => {
-      setIsSavingExtras(false);
-      errors.forEach((e) =>
-        notifications.toasts.addError(new Error(e.message), {
-          title: `Couldn't add ${e.packageName}`,
-        })
-      );
-      props.onSaved(savedPackagePolicy);
-    });
+    saveExtraPackagePolicies(extras, savedPackagePolicy.policy.policy_ids ?? [], getSkipFor).then(
+      ({ errors }) => {
+        setIsSavingExtras(false);
+        errors.forEach((e) =>
+          notifications.toasts.addError(new Error(e.message), {
+            title: `Couldn't add ${e.packageName}`,
+          })
+        );
+        props.onSaved(savedPackagePolicy);
+      }
+    );
   }, [savedPackagePolicy, saved]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ctx: VarFieldContext | undefined = model && {
@@ -663,18 +699,11 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
       : undefined
   );
 
-  // PROTOTYPE: "Install content". An installed package keeps the choice it was installed with
-  // (shown read-only). Otherwise, with content off, install the package without Kibana assets
-  // before the stock submit, which then finds it installed. Content on = stock flow, unchanged.
+  // PROTOTYPE: with assets left out, install the package with that selection before the stock
+  // submit, which then finds it installed. Everything selected = stock flow, unchanged.
   const installation =
     packageInfo && 'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
   const isInstalled = installation?.install_status === 'installed';
-  const installContent = isInstalled ? !installation?.skip_kibana_assets : props.installContent;
-  const installContentLockedReason = isInstalled
-    ? `${packageInfo?.title} is already installed ${
-        installContent ? 'with' : 'without'
-      } content. Reinstall it to change this.`
-    : undefined;
   const [isInstallingPackage, setIsInstallingPackage] = useState(false);
 
   const index = steps.indexOf(step);
@@ -731,10 +760,11 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
       if (firstWithErrors && firstWithErrors !== step) props.goTo(firstWithErrors);
       return;
     }
-    if (packageInfo && !isInstalled && !installContent) {
+    const skipKibanaAssets = packageInfo ? getSkipFor(packageInfo.name) : undefined;
+    if (packageInfo && !isInstalled && skipKibanaAssets !== undefined) {
       setIsInstallingPackage(true);
       const res = await sendInstallPackage(packageInfo.name, packageInfo.version, false, {
-        skipKibanaAssets: true,
+        skipKibanaAssets,
       });
       setIsInstallingPackage(false);
       if (res.error) {
@@ -897,9 +927,8 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
           state={state}
           packagePolicy={packagePolicy}
           installSummary={packageInfo ? getInstallSummary(packageInfo) : undefined}
-          installContent={installContent}
-          onInstallContentChange={props.onInstallContentChange}
-          installContentLockedReason={installContentLockedReason}
+          assetSections={assetSections}
+          onSkippedAssetsChange={props.onSkippedAssetsChange}
           method={props.method}
           showMethod={props.showHow}
           agentPolicySection={!props.showHow ? agentPolicySection : undefined}

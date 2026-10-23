@@ -51,6 +51,7 @@ import {
   EpmPackagesSchemaV12,
   EpmPackagesSchemaV13,
   EpmPackagesSchemaV14,
+  EpmPackagesSchemaV15,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1641,6 +1642,7 @@ export const getSavedObjectTypes = (
           skip_kibana_assets: { type: 'boolean' },
           moved_from: { type: 'object', enabled: false },
           moved_to: { type: 'object', enabled: false },
+          skipped_kibana_assets: { type: 'object', enabled: false },
         },
       },
       modelVersions: {
@@ -1831,6 +1833,21 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV14.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV14,
+          },
+        },
+        // PROTOTYPE: granular asset selection
+        '15': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                skipped_kibana_assets: { type: 'object', enabled: false },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV15.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV15,
           },
         },
       },
