@@ -41,27 +41,31 @@ const PreviewRenderer = React.memo(
   )
 );
 
+/** `setState` leaves the previous time range in place when the snapshot has none, so fall back to the inherited one */
+const withInheritedTimeRange = (
+  snapshot: DashboardState,
+  inheritedTimeRange: DashboardState['time_range']
+): DashboardState =>
+  snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange };
+
 export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange?: DashboardState['time_range'];
 }> = ({ change, setPreviewTitle, inheritedTimeRange }) => {
   const initialState = useRef<DashboardInitializationState>({
-    time_range: inheritedTimeRange,
-    ...change,
+    ...withInheritedTimeRange(change.snapshot as DashboardState, inheritedTimeRange),
     viewMode: 'view' as const,
   });
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
 
   const applyQueue = useRef<Promise<void>>(Promise.resolve());
   /** the selection whose snapshot could not be applied; the preview would not match this version */
-  const [failedChange, setFailedChange] = useState<typeof change | undefined>();
+  const [failedChange, setFailedChange] 02= useState<typeof change | undefined>();
 
   useEffect(() => {
     if (!dashboardApi) return;
     setPreviewTitle((change.snapshot as DashboardState).title);
-    const snapshot = change.snapshot as DashboardState;
-    /** `setState` leaves the previous time range in place when the snapshot has none, so re-apply the inherited one */
-    const state = snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange };
+    const state = withInheritedTimeRange(change.snapshot as DashboardState, inheritedTimeRange);
     /** `setState` awaits async child state application, so wait for the previous call to avoid overlapping; skip snapshots that were superseded while queued */
     let isStale = false;
     setFailedChange(undefined);

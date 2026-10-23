@@ -15,6 +15,8 @@ import type { DashboardPluginStart } from '../types';
 import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 
 const MAX_PER_PAGE = 100;
+// Elasticsearch's default `index.max_result_window`: `from + size` may not exceed it
+const MAX_RESULT_WINDOW = 10000;
 
 const listResponseSchema = z.object({
   items: z.array(
@@ -49,10 +51,17 @@ export const registerHistoryListRoute = (
             .strict(),
           query: z
             .object({
-              page: z.coerce.number().optional(),
+              page: z.coerce.number().int().min(1).optional(),
               per_page: z.coerce.number().int().min(1).max(MAX_PER_PAGE).optional(),
             })
-            .strict(),
+            .strict()
+            .refine(
+              ({ page = 1, per_page: perPage }) => !perPage || page * perPage <= MAX_RESULT_WINDOW,
+              {
+                message: `page * per_page must not exceed ${MAX_RESULT_WINDOW}`,
+                path: ['page'],
+              }
+            ),
         },
         response: {
           200: {

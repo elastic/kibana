@@ -11,7 +11,8 @@ Every history event stores its version as `object.sequence`. The UI shows it as 
 - **Delete**: recorded as a `dashboard_delete` event with the next sequence, like any other version, so a dashboard recreated with the same ID continues after it. The event waits for the index refresh so that a recreate reads it. Saved object deletes take no version check, so an update racing a delete can still share a sequence.
 - **Restore**: is a regular update with the restored snapshot, so it creates a _new_ version rather than rewinding. The event stores `metadata.restoredFrom` (the restored version).
 - **Concurrency**: updates send the saved object `version` (optimistic concurrency control). A concurrent writer therefore gets a 409 before it can write a version, and because `historySequence` is stored in the same write, two saves can never share a sequence, regardless of when the history index refreshes.
-- **Best effort**: the history write happens after the saved object write. A failed history write is swallowed and does not fail the save, so that change has no version, and the next change reuses its number. If history cannot be read, the sequence restarts at `INITIAL_HISTORY_SEQUENCE`.
+- **Best effort**: the history write happens after the saved object write. A failed history write is swallowed and does not fail the save. Because `historySequence` is stored in the same write, that change has no version and the next save continues from the stored sequence, leaving a gap. No version is marked current until a later write succeeds.
+- **Unreadable history**: only dashboards with no stored `historySequence` (new, or saved before it existed) read history to find their next sequence. If that read fails, the sequence falls back to `INITIAL_HISTORY_SEQUENCE`, which can collide with existing versions. Dashboards with a stored sequence are unaffected.
 
 ## Event metadata
 
