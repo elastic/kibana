@@ -13,6 +13,7 @@ import type {
   ContractResponse,
   NamedOperationRef,
   Responder,
+  ResponderContext,
   Violation,
 } from '../contract/types';
 import type {
@@ -26,15 +27,20 @@ import { collectNamedResponses, rejectUnknownNamedResponses } from '../engine/na
 import { createResponseEngine } from '../engine/response_engine';
 import type { PaginationOptions } from '../engine/paginate';
 import { withPagination } from '../engine/paginate';
-import { sampleResponse } from '../engine/sample_response';
+import { sampleBoundaryResponse, sampleResponse } from '../engine/sample_response';
 import type { GraphQLSpec } from '../graphql/graphql_protocol';
 import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
 import type { McpSpec } from '../mcp/mcp_protocol';
 import { createMcpProtocol, isMcpSpec } from '../mcp/mcp_protocol';
 import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
+import type { OperationMatch } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import type { SmithyModel } from '../smithy';
+import { convertSmithy, isSmithyModel } from '../smithy';
+import type { AwsJsonRejection, AwsJsonService } from '../smithy/aws_json';
+import { createAwsJsonService, isAwsJsonModel } from '../smithy/aws_json';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -61,8 +67,11 @@ export interface ContractCall {
   readonly responseViolations: readonly Violation[];
 }
 
-/** An OpenAPI document, or a spec of a protocol with its own endpoints: GraphQL or MCP. */
-export type EmulatorSpec = OpenApiDocument | GraphQLSpec | McpSpec;
+/**
+ * An OpenAPI document; a spec of a protocol with its own endpoints, GraphQL or MCP; or a Smithy
+ * model of an AWS service that uses restJson1 (converted to OpenAPI), awsJson1_0 or awsJson1_1.
+ */
+export type EmulatorSpec = OpenApiDocument | GraphQLSpec | McpSpec | SmithyModel;
 
 export interface EmulatorOptions extends PaginationOptions {
   /**
@@ -78,10 +87,17 @@ export interface EmulatorOptions extends PaginationOptions {
   /** Responses captured from the vendor, served when they still conform to the spec. */
   readonly recordings?: readonly Recording[];
   /**
-   * Answers operations without a fixture or recording; defaults to the spec's examples,
-   * then deterministic samples of its schemas.
+   * Answers OpenAPI operations in front of the default chain: fixtures, recordings, then
+   * examples or samples. `context.next()` gives the default chain's answer, and `context.state`
+   * keeps what the responder needs across requests, e.g. to read back what it created. Answers
+   * may be promises, and are validated like any other.
    */
   readonly respond?: Responder;
+  /**
+   * How the default chain samples responses the spec has no example for: `typical` values, or
+   * values at the schema's upper bounds (`boundary`), which also skips examples.
+   */
+  readonly sampling?: 'typical' | 'boundary';
 }
 
 export interface Emulator {
@@ -89,6 +105,8 @@ export interface Emulator {
   readonly calls: ContractCall[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
+  /** Empties `calls` and the responder state, e.g. between tests. */
+  readonly reset: () => void;
 }
 
 const JSON_HEADERS = { 'content-type': 'application/json' };
@@ -148,10 +166,43 @@ const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation
   return operations;
 };
 
+// Converted once per model, so that mocks created from it share the loaded operations too.
+const smithyServices = new WeakMap<SmithyModel, OpenApiDocument | AwsJsonService>();
+
+const toSmithyService = (model: SmithyModel): OpenApiDocument | AwsJsonService => {
+  const service =
+    smithyServices.get(model) ??
+    (isAwsJsonModel(model) ? createAwsJsonService(model) : convertSmithy(model));
+  smithyServices.set(model, service);
+  return service;
+};
+
+const isAwsJsonService = (service: OpenApiDocument | AwsJsonService): service is AwsJsonService =>
+  typeof service.route === 'function';
+
+/** The OpenAPI document a spec is served from, if it isn't served by a protocol of its own. */
+const toDocument = (spec: EmulatorSpec): OpenApiDocument | undefined => {
+  if (isGraphQLSpec(spec) || isMcpSpec(spec)) {
+    return undefined;
+  }
+  if (!isSmithyModel(spec)) {
+    return spec;
+  }
+  const service = toSmithyService(spec);
+  return isAwsJsonService(service) ? service.document : service;
+};
+
 const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
-  toNamedSpecs(specs).flatMap(([source, spec]) =>
-    isGraphQLSpec(spec) || isMcpSpec(spec) ? [] : loadSpec(spec, source)
-  );
+  toNamedSpecs(specs).flatMap(([source, spec]) => {
+    const document = toDocument(spec);
+    return document ? loadSpec(document, source) : [];
+  });
+
+const loadAwsJsonServices = (specs: EmulatorOptions['specs']): AwsJsonService[] =>
+  toNamedSpecs(specs).flatMap(([, spec]) => {
+    const service = isSmithyModel(spec) ? toSmithyService(spec) : undefined;
+    return service && isAwsJsonService(service) ? [service] : [];
+  });
 
 interface LoadedProtocol {
   readonly source?: string;
@@ -202,8 +253,9 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
  * Creates a `fetch` that answers requests in-process from a vendor spec. Unmatched requests
  * get 404, requests without the credentials the operation requires get 401, and requests that
  * break the spec get 422 listing the violations; every request is recorded in `calls`. The
- * token URLs of the specs' OAuth 2 flows issue stub tokens, and GraphQL and MCP specs answer at
- * their endpoints. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
+ * token URLs of the specs' OAuth 2 flows issue stub tokens, GraphQL and MCP specs answer at
+ * their endpoints, and Smithy models of AWS JSON RPC services answer at their regional hosts.
+ * Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
  */
 export const createEmulatorFetch = ({
   specs,
@@ -211,28 +263,143 @@ export const createEmulatorFetch = ({
   recordings,
   pagination,
   collectionSize,
-  respond = sampleResponse,
+  respond,
+  sampling = 'typical',
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
   const namedResponses = collectNamedResponses(fixtures, recordings);
   const loadedProtocols = loadProtocols(specs, namedResponses);
   const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
-  const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
-  const contract = createOpenApiAdapter(
+  const engine = createResponseEngine(operations, {
+    fixtures,
+    recordings,
+    fallback: sampling === 'boundary' ? sampleBoundaryResponse : sampleResponse,
+  });
+  // Paging applies to the default chain, so a responder that defers to `next()` pages too.
+  const defaultChain = withPagination(
     operations,
-    withPagination(
-      operations,
-      { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
-      engine.respond
-    )
+    { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
+    engine.respond
   );
+  const awsJsonServices = loadAwsJsonServices(specs);
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain);
+  const state = new Map<unknown, unknown>();
+  const contextFor = (operation: ContractOperation, request: ContractRequest) => {
+    const context: ResponderContext = {
+      state,
+      next: async () => defaultChain(operation, request, context),
+    };
+    return context;
+  };
   const calls: ContractCall[] = [];
+
+  const rejectAsJson = (
+    rejection: AwsJsonRejection,
+    violations: readonly Violation[],
+    name: string
+  ): ContractResponse => ({
+    statusCode: rejection === 'unauthenticated' ? 401 : 422,
+    headers: JSON_HEADERS,
+    body: { operation: name, violations },
+  });
+
+  // Authenticates and validates a routed request, answers it and checks the answer, recording
+  // the call under the request's description.
+  const serveOperation = async (
+    routed: OperationMatch,
+    request: ContractRequest,
+    description: string,
+    reject: (
+      rejection: AwsJsonRejection,
+      violations: readonly Violation[],
+      name: string
+    ) => ContractResponse
+  ): Promise<ContractResponse> => {
+    const { operation } = routed;
+    const name = operation.id;
+    const matched = toOperationRef(operation);
+    const authViolations = contract.authenticate(routed, request);
+    const requestViolations =
+      authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
+    if (requestViolations.length > 0) {
+      const response = reject(
+        authViolations.length > 0 ? 'unauthenticated' : 'invalid',
+        requestViolations,
+        name
+      );
+      calls.push({
+        request: description,
+        operation: name,
+        matched,
+        status: response.statusCode,
+        requestViolations,
+        responseViolations: [],
+      });
+      return response;
+    }
+
+    const response = await contract.respond(operation, request, contextFor(operation, request));
+    const responseViolations = contract.validateResponse(operation, response);
+    calls.push({
+      request: description,
+      operation: name,
+      matched,
+      status: response.statusCode,
+      requestViolations,
+      responseViolations,
+    });
+    return response;
+  };
+
+  // AWS JSON RPC services answer every request to their hosts: `POST /` with the operation in
+  // `X-Amz-Target`, served as the operation at `POST /<Operation>` of the service's document.
+  const serveAwsJson = async (
+    service: AwsJsonService,
+    request: ContractRequest,
+    description: string
+  ): Promise<ContractResponse> => {
+    const target = service.route(request);
+    if ('response' in target) {
+      calls.push({
+        request: description,
+        status: target.response.statusCode,
+        requestViolations: target.violations,
+        responseViolations: [],
+      });
+      return target.response;
+    }
+    const routed = contract.route(target.request);
+    if (!('operation' in routed)) {
+      // Only when another spec's operations shadow the service's, which the specs should avoid.
+      calls.push({
+        request: description,
+        status: routed.status,
+        requestViolations: [],
+        responseViolations: [],
+      });
+      const detail = `${description}: ${target.operation}: ${routed.message}`;
+      return {
+        statusCode: routed.status,
+        headers: JSON_HEADERS,
+        body: { title: 'No matching operation', detail },
+      };
+    }
+    return service.toResponse(
+      await serveOperation(routed, target.request, description, (rejection, violations) =>
+        service.reject(rejection, violations)
+      )
+    );
+  };
 
   const handle = async (request: ContractRequest): Promise<ContractResponse> => {
     const description = `${request.method.toUpperCase()} ${request.url.origin}${
       request.url.pathname
     }`;
+    const awsJson = awsJsonServices.find((service) => service.matches(request.url));
+    if (awsJson) {
+      return serveAwsJson(awsJson, request, description);
+    }
     const protocol = protocols.get(toEndpoint(request.url));
     if (protocol) {
       const {
@@ -285,40 +452,7 @@ export const createEmulatorFetch = ({
       return { statusCode: routed.status, headers: JSON_HEADERS, body };
     }
 
-    const { operation } = routed;
-    const name = operation.id;
-    const matched = toOperationRef(operation);
-    const authViolations = contract.authenticate(routed, request);
-    const requestViolations =
-      authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
-    if (requestViolations.length > 0) {
-      const statusCode = authViolations.length > 0 ? 401 : 422;
-      calls.push({
-        request: description,
-        operation: name,
-        matched,
-        status: statusCode,
-        requestViolations,
-        responseViolations: [],
-      });
-      return {
-        statusCode,
-        headers: JSON_HEADERS,
-        body: { operation: name, violations: requestViolations },
-      };
-    }
-
-    const response = contract.respond(operation, request);
-    const responseViolations = contract.validateResponse(operation, response);
-    calls.push({
-      request: description,
-      operation: name,
-      matched,
-      status: response.statusCode,
-      requestViolations,
-      responseViolations,
-    });
-    return response;
+    return serveOperation(routed, request, description, rejectAsJson);
   };
 
   const mockFetch: typeof fetch = async (input, init) =>
@@ -332,5 +466,13 @@ export const createEmulatorFetch = ({
       loadedProtocols.map(({ source, protocol }) => ({ source, operations: protocol.operations }))
     ),
   ];
-  return { fetch: mockFetch, calls, rejectedResponses };
+  return {
+    fetch: mockFetch,
+    calls,
+    rejectedResponses,
+    reset: () => {
+      calls.length = 0;
+      state.clear();
+    },
+  };
 };

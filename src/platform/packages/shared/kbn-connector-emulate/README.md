@@ -131,11 +131,37 @@ const { fetch, rejectedResponses } = createEmulatorFetch({
 });
 ```
 
-Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`. Pass `respond: (operation, request) => response` to replace examples and samples.
+Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`.
 
 `sampleJsonSchema(schema, { optional, boundary })` samples a standalone JSON Schema the same way, with refs resolving against the schema itself (`#/$defs/...`), for example to generate inputs from a zod schema converted with `z.toJSONSchema`. `optional: 'required'` leaves out optional properties at every depth, so object and array examples and defaults, which may include them, are skipped; `boundary: true` samples at the upper bounds, ignoring examples and defaults.
 
-To test how a connector handles extreme responses, pass `respond: sampleBoundaryResponse`. It skips examples and samples bodies at the schema's upper bounds: strings at `maxLength` (1024 characters when unbounded), numbers at `maximum` or the largest value of their format (`int32`, `float`; `int64` and unbounded integers at `Number.MAX_SAFE_INTEGER`), arrays at `maxItems` (capped at 100; 3 items when unbounded, one for `uniqueItems`), and the last `enum` value. Fixtures and recordings are still preferred. Vendor `oneOf`s whose variants only differ in their examples can't be sampled without them, and are reported in the call's `responseViolations`; an overlay can correct them.
+To test how a connector handles extreme responses, pass `sampling: 'boundary'`. Fixtures and recordings still come first, but examples are skipped and bodies are sampled at the schema's upper bounds: strings at `maxLength` (1024 characters when unbounded), numbers at `maximum` or the largest value of their format (`int32`, `float`; `int64` and unbounded integers at `Number.MAX_SAFE_INTEGER`), arrays at `maxItems` (capped at 100; 3 items when unbounded, one for `uniqueItems`), and the last `enum` value. Fixtures and recordings are still preferred. Vendor `oneOf`s whose variants only differ in their examples can't be sampled without them, and are reported in the call's `responseViolations`; an overlay can correct them.
+
+### Responders
+
+Pass `respond` to answer OpenAPI operations in front of the default chain above, for example to keep state across requests (create something, then read it back), or to answer from another emulator. It gets the operation, the request and a context, and may return a promise:
+
+```ts
+const CREATED = Symbol('created items');
+
+const { fetch, reset } = createEmulatorFetch({
+  specs: [openApiDocument],
+  respond: async (operation, request, { state, next }) => {
+    const created = (state.get(CREATED) as unknown[] | undefined) ?? [];
+    if (operation.id === 'createItem') {
+      state.set(CREATED, [...created, request.body]);
+      return { statusCode: 201, headers: { 'content-type': 'application/json' }, body: request.body };
+    }
+    return operation.id === 'listItems'
+      ? { statusCode: 200, headers: { 'content-type': 'application/json' }, body: created }
+      : next();
+  },
+});
+```
+
+- `context.next()` answers with the default chain: fixtures, recordings, then examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there.
+- `context.state` is a `Map` kept for the emulator's run; `reset()` empties it, along with `calls`. Responders keep their entries under keys of their own, such as a symbol, so several can share it.
+- Answers are validated against the spec like any other, so a responder that drifts from the vendor's contract shows up in `calls`.
 
 ## Pagination
 
@@ -182,6 +208,24 @@ The mock then enforces the API's real contract, and recordings the vendor's spec
 ## Spec loading
 
 Google API Discovery documents convert to OpenAPI 3.0 with `convertDiscovery` (`isDiscoveryDocument` recognizes them). Each method becomes an operation at its `flatPath` under `rootUrl` + `servicePath`. Reserved expansions such as `v1/{+name}:access` can't match requests, because OpenAPI path parameters can't contain slashes, so `flatPath` is used instead. Each operation gets the API-wide parameters next to its own, its request and response schemas as JSON bodies, and its OAuth scopes as security requirements. Schemas become components, with draft 3 `required: true` property flags moved into `required` lists. Simple media uploads become operations of their own, served from `rootUrl`.
+
+AWS publishes its APIs as [Smithy](https://smithy.io) models ([`aws/api-models-aws`](https://github.com/aws/api-models-aws)), in the JSON AST that `isSmithyModel` recognizes. `convertSmithy(model)` converts an `aws.protocols#restJson1` service (such as EKS, Lambda and X-Ray) to OpenAPI 3.0; models with several services take `{ service }`.
+
+- Operations bound to the service or to its resources get their method and path from `@http`. Greedy labels such as `{Key+}` may span path segments, and URIs that fix query parameters (`/2018-10-31/layers?find=LayerVersion`) go under `x-ms-paths`.
+- Input members become path, query and header parameters by `@httpLabel`, `@httpQuery`, `@httpQueryParams` and `@httpHeader`; the `@httpPayload` member, or the remaining members as a JSON object (`<Operation>RequestContent`, with `@jsonName`), become the body. Output members become response headers and the body (`<Operation>ResponseContent`) at the `@http` status.
+- Modeled errors of the operation and the service become responses at their `@httpError` status (400 for client and 500 for server errors otherwise). Errors that share a status are an `anyOf`, as error bodies with only a `message` match several of them.
+- Shapes map to JSON Schema: structures, unions and enums as components, with `@required`, `@clientOptional`, `@length`, `@range`, `@pattern`, `@default`, `@sparse`, `@deprecated` and `@sensitive`. Timestamps follow `@timestampFormat` or the binding's default (epoch seconds in documents, `http-date` in headers, `date-time` in query strings and labels), blobs are base64 in documents and raw bytes as payloads, and event streams are `application/vnd.amazon.eventstream`.
+- Requests are served from `https://{endpointPrefix}.{region}.amazonaws.com` and, for SigV4 services, must carry an `Authorization` header (the signature isn't checked).
+
+`smithy_openapi_parity.test.ts` compares the conversion with [smithy-openapi](https://smithy.io/2.0/guides/model-translations/converting-to-openapi.html), AWS's own, for the operations the connectors call, and lists where the two differ on purpose.
+
+Smithy models can also be passed to `createEmulatorFetch` as specs: `restJson1` services are served from their conversion, and AWS's JSON RPC protocols, `awsJson1_0` and `awsJson1_1` (CloudWatch, CloudWatch Logs), are served as follows. Every operation is `POST /` with the operation named in `X-Amz-Target`, which OpenAPI can't express, so they aren't converted.
+
+- The service answers every request to its regional hosts (`https://{endpointPrefix}.{region}.amazonaws.com`, and subdomains of them for operations with an `@endpoint` host prefix). Requests must be `POST /` with `X-Amz-Target: <Service>.<Operation>` and `Content-Type: application/x-amz-json-1.0` (or `-1.1`); `application/json` is accepted too, as CloudWatch's connector sends it with `Content-Encoding: amz-1.0`, the legacy form of the protocol AWS still accepts.
+- Each operation is served as `POST /<Operation>` of an OpenAPI document built from the model, so the input is validated by member name (awsJson ignores `@jsonName`), null structure members count as absent, and doubles also take `"NaN"`, `"Infinity"` and `"-Infinity"`; responses come from fixtures, recordings or samples like any other operation. `calls` names the operation, and fixtures and recordings refer to it as `{ method: 'post', path: '/<Operation>' }`.
+- Errors are awsJson errors, `{ "__type": ..., "message": ... }`: 400 `UnknownOperationException` for targets that name no operation (404 for other paths), 400 `SerializationException` for other content types and bodies that aren't JSON, 403 `MissingAuthenticationTokenException` without SigV4's `Authorization` header, and 400 `ValidationException` for input that breaks the model. Modeled errors are responses at their `@httpError` status, or 400 for client and 500 for server errors.
+
+`aws_json_protocol_tests.test.ts` runs the awsJson1_0 and awsJson1_1 protocol compliance tests AWS publishes with Smithy that apply to servers. `restXml` (S3) isn't served yet.
 
 `loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document (converted to OpenAPI 3.0 first, with `convertSwagger2`, which is also exported) and returns its operations: method, path, servers, parameters (with `style` and `explode` defaults applied), request body and responses. Parameter, request body, response and header refs are resolved. Schemas are not dereferenced: each one stays in place in a copy of the document, together with its JSON pointer, so its refs keep resolving against the document. This keeps large specs such as Microsoft Graph fast to load. The schema dialect follows the OpenAPI version: OpenAPI 3.0 schemas for 3.0, JSON Schema 2020-12 for 3.1 and later.
 
