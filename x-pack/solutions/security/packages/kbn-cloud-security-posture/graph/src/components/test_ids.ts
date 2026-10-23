@@ -118,6 +118,14 @@ export const GRAPH_TAG_WRAPPER_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagWrapper` a
 export const GRAPH_TAG_COUNT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagCount` as const;
 export const GRAPH_TAG_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagText` as const;
 
+export const GRAPH_CALLOUT_NO_DATA_ID = `${GRAPH_INVESTIGATION_TEST_ID}CalloutNoData` as const;
+export const GRAPH_CALLOUT_NO_RELATIONSHIPS_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}CalloutNoRelationships` as const;
+export const GRAPH_CALLOUT_METADATA_UNAVAILABLE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}CalloutMetadataUnavailable` as const;
+export const GRAPH_CALLOUT_UNKNOWN_ENTITIES_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}CalloutUnknownEntities` as const;
+
 export const GRAPH_POPOVER_PREVIEW_PANEL =
   `${GRAPH_INVESTIGATION_TEST_ID}PopoverPreviewPanel` as const;
 

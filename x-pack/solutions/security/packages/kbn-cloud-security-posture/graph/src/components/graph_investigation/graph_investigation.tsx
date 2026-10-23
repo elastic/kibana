@@ -44,6 +44,7 @@ import {
 } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
+import { GraphCallouts } from './graph_callouts';
 import {
   CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
   CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
@@ -907,6 +908,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
             `}
           >
             {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
+            <GraphCallouts nodes={data?.nodes} isFetching={isFetching} />
             <Graph
               css={css`
                 height: 100%;

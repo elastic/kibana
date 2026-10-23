@@ -19,8 +19,18 @@ class ResizeObserver {
   }
 
   observe(target: Element) {
+    const contentRect = target.getBoundingClientRect();
+    const boxSize = [{ inlineSize: contentRect.width, blockSize: contentRect.height }];
     this.callback(
-      [{ target, contentRect: target.getBoundingClientRect() } as globalThis.ResizeObserverEntry],
+      [
+        {
+          target,
+          contentRect,
+          borderBoxSize: boxSize,
+          contentBoxSize: boxSize,
+          devicePixelContentBoxSize: boxSize,
+        } as globalThis.ResizeObserverEntry,
+      ],
       this
     );
   }
