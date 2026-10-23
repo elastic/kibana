@@ -41,7 +41,7 @@ const collect = (
     includeRawAttribution,
     scale,
     // Unseeded runs are random, which could make the minimums the tests rely on flaky
-    seed: 'collect',
+    seed: 'digital-experience-test',
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
@@ -221,20 +221,22 @@ describe('digital experience apps', () => {
 
       it('does not change the sessions themselves without session IDs', () => {
         const withoutSessionIds = generate('seed-a', { withSessionId: false });
+        // The distro version is the only resource attribute that tells the two apart
+        const asWithoutSessions = ({ attributes, resource, ...doc }: EdotBrowserDocument) => ({
+          ...doc,
+          resource: {
+            ...resource,
+            attributes: { ...resource?.attributes, 'telemetry.distro.version': '0.3.0' },
+          },
+          attributes: Object.fromEntries(
+            Object.entries(attributes ?? {}).filter(
+              ([key]) => !['session.id', 'session.previous_id', 'browser.tab.id'].includes(key)
+            )
+          ),
+        });
         // Without session IDs a session is a single visit. With them, some get more visits, an idle
         // tab and a session.start log, and all get session attributes.
-        const withSessionIds = new Set(
-          sorted(
-            generate('seed-a').map(({ attributes, ...doc }) => ({
-              ...doc,
-              attributes: Object.fromEntries(
-                Object.entries(attributes ?? {}).filter(
-                  ([key]) => !['session.id', 'session.previous_id', 'browser.tab.id'].includes(key)
-                )
-              ),
-            }))
-          )
-        );
+        const withSessionIds = new Set(sorted(generate('seed-a').map(asWithoutSessions)));
 
         expect(withoutSessionIds.length).toBeGreaterThan(0);
         sorted(withoutSessionIds).forEach((doc) => expect(withSessionIds.has(doc)).toBe(true));
@@ -415,6 +417,18 @@ describe('digital experience apps', () => {
           appsWithoutEnvironment.includes(String(resource?.attributes?.['service.name']))
         )
       ).toBe(true);
+    });
+
+    it('reports the version of the distro that writes sessions only when sessions are enabled', () => {
+      const distroVersions = (withSessionId: boolean) =>
+        new Set(
+          collect(withSessionId).map(
+            (doc) => doc.resource?.attributes?.['telemetry.distro.version']
+          )
+        );
+
+      expect(distroVersions(true)).toEqual(new Set(['0.4.0']));
+      expect(distroVersions(false)).toEqual(new Set(['0.3.0']));
     });
 
     it('only writes session.id when enabled', () => {

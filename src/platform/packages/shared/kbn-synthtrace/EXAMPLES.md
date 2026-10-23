@@ -912,7 +912,7 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 
 **Options (both scenarios):**
 
-- `withSessionId` (boolean, default `true`): writes `attributes.session.id`, with the tab ID and `session.start` that come with sessions. Set it to `false` to match EDOT Browser 0.3.0 and earlier, which don't emit them.
+- `withSessionId` (boolean, default `true`): writes `attributes.session.id`, with the tab ID and `session.start` that come with sessions. Set it to `false` to match EDOT Browser 0.3.0 and earlier, which don't emit them. The apps then report distro version `0.3.0`, and `0.4.0` otherwise.
 - `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
 - `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
 - `seed` (string or number, default random): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
@@ -942,7 +942,7 @@ node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z -
 
 #### `digital_experience_mixed`
 
-Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The classic app is named `storefront-web` like one of the OTel apps, so the apps list shows its "+ Classic RUM" hint. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics.
+Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics.
 
 **Usage:**
 

@@ -28,7 +28,8 @@ export class EdotBrowserApp {
     serviceVersion = '1.0.0',
     environment,
     sdkVersion = '2.10.0',
-    distroVersion = '0.3.0',
+    // 0.4.0 is the first release that writes session data and a session.start event
+    distroVersion = '0.4.0',
   }: EdotBrowserAppOptions) {
     this.resourceAttributes = {
       'service.name': serviceName,

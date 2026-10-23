@@ -28,7 +28,7 @@ export interface DigitalExperienceApp {
   serviceVersion: string;
   health: HealthProfileName;
   sessionsPerMinute: number;
-  /** Apps without a deployment environment show up as "Not defined" in the apps list. */
+  /** Omits `deployment.environment.name`, for lists that group apps by environment. */
   withoutEnvironment?: boolean;
   site: EdotBrowserSite;
   browserWeights?: Partial<Record<BrowserProfileId, number>>;
@@ -37,7 +37,8 @@ export interface DigitalExperienceApp {
 export interface DigitalExperienceScenarioOpts {
   /**
    * Write `attributes.session.id`, with the tab ID and `session.start` that come with sessions.
-   * Turn off to match EDOT Browser 0.3.0 and earlier.
+   * Turn off to match EDOT Browser 0.3.0 and earlier, which
+   * also sets the version of the distro to 0.3.0.
    */
   withSessionId: boolean;
   /** Write the web vital attribution as a JSON body, which EDOT Browser only does when opted in. */
@@ -481,6 +482,9 @@ const randomUuid = (random: () => number): string =>
 
 const getTimestamp = (event: EdotBrowserEvent) => Number(event.serialize()[0]['@timestamp']);
 
+// EDOT Browser 0.4.0 is the first release that writes session data, 0.3.0 the last one without
+const DISTRO_VERSION_WITH_SESSIONS = '0.4.0';
+const DISTRO_VERSION_WITHOUT_SESSIONS = '0.3.0';
 const MINUTE_MS = 60_000;
 // EDOT Browser ends a session after 30 minutes without user activity
 const SESSION_IDLE_TIMEOUT_MS = 30 * MINUTE_MS;
@@ -498,7 +502,7 @@ const IDLE_REQUEST_COUNT = 3;
  * window.
  *
  * Most sessions are a single visit in a new tab. Some are a second visit to a session that is
- * still running, in the same tab (a reload) or in another one. Others come back after the previous
+ * still running, in the same tab or in another one. Others come back after the previous
  * session expired: the tab stayed open sending background requests with no session ID, and the
  * user's return starts a new session that points to the expired one. The earlier visits of these
  * sessions precede the one that ends at the rate tick by up to an hour and a half, so in short runs
@@ -529,6 +533,9 @@ export const generateEdotBrowserSessions = (
         serviceName,
         serviceVersion,
         environment: withoutEnvironment ? undefined : environment,
+        distroVersion: withSessionId
+          ? DISTRO_VERSION_WITH_SESSIONS
+          : DISTRO_VERSION_WITHOUT_SESSIONS,
       });
       const healthProfile = edotBrowser.healthProfiles[health];
 

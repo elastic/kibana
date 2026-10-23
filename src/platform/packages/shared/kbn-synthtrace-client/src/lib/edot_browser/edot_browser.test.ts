@@ -896,8 +896,8 @@ describe('edotBrowser', () => {
 
     it('timestamps web vitals like the instrumentation', () => {
       for (let seed = 1; seed <= 30; seed++) {
-        // A long dwell, as timestamps are capped to the end of the page view, which a slow LCP
-        // would otherwise run past
+        // A long dwell, as timestamps are capped to the end of the page view. A slow LCP can run
+        // past a short one, as the page view only has to last until the load event ends.
         const docs = createSession({
           seed,
           pageViews: 1,
@@ -924,12 +924,13 @@ describe('edotBrowser', () => {
             Math.abs(Number(vital(name)?.['@timestamp']) - (TIMESTAMP + vitalValue(name)))
           ).toBeLessThan(1.1);
         });
-        // CLS at the largest shift, or when the page is hidden at the session end if nothing shifted
+        // CLS at the largest shift, or when the page is hidden at the session end if nothing shifted.
+        // The shift can fall on the same millisecond as the last event, e.g. the LCP.
         const sessionEnd = Math.max(...timestamps(docs));
         if (vitalValue('cls') < 0.0001) {
           expect(vital('cls')?.['@timestamp']).toBe(sessionEnd);
         } else {
-          expect(vital('cls')?.['@timestamp']).toBeLessThan(sessionEnd);
+          expect(vital('cls')?.['@timestamp']).toBeLessThanOrEqual(sessionEnd);
         }
         // INP at one of the clicks
         if (clickTimes.length) {
@@ -1001,6 +1002,7 @@ describe('edotBrowser', () => {
         createSession({
           seed,
           pageViews: 5,
+          // Mostly below the minimum dwell of 500ms, which most page views then last
           dwell: { median: 300, sigma: 0.5 },
           health: HEALTH_PROFILES.critical,
         })
@@ -1041,7 +1043,7 @@ describe('edotBrowser', () => {
       expect(starts).toHaveLength(1);
       expect(starts[0]).toMatchObject({
         '@timestamp': TIMESTAMP,
-        scope: { name: '@elastic/opentelemetry-browser', version: '0.3.0' },
+        scope: { name: '@elastic/opentelemetry-browser', version: '0.4.0' },
         attributes: { 'session.id': 'abc' },
       });
       expect(docs[0]).toBe(starts[0]);
