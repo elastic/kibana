@@ -33,17 +33,14 @@ export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransfo
   // defaults so Reset replaces the current values instead of keeping them. Tab initialization
   // applies URL state after this result, so a shared link can still override the default chart.
   fromSavedState: ({ gridSortField, gridSortDirection, histogramVisualization, ...settings }) => {
-    const storedVisualization = histogramVisualization as string | undefined;
-
     return [
       {
         ...settings,
         sortField: gridSortField ?? METRICS_GRID_SORT_DEFAULTS.sortField,
         sortDirection: gridSortDirection ?? METRICS_GRID_SORT_DEFAULTS.sortDirection,
-        histogramVisualization:
-          storedVisualization !== undefined && isHistogramVisualization(storedVisualization)
-            ? storedVisualization
-            : METRICS_GRID_SETTINGS_DEFAULTS.histogramVisualization,
+        histogramVisualization: isHistogramVisualization(histogramVisualization)
+          ? histogramVisualization
+          : METRICS_GRID_SETTINGS_DEFAULTS.histogramVisualization,
       },
     ];
   },

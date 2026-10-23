@@ -59,7 +59,8 @@ export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = ['lnsXY', 'lnsHeatmap'] as 
 
 export type HistogramVisualization = (typeof METRICS_GRID_HISTOGRAM_VISUALIZATIONS)[number];
 
-export const isHistogramVisualization = (value: string): value is HistogramVisualization =>
+export const isHistogramVisualization = (value: unknown): value is HistogramVisualization =>
+  typeof value === 'string' &&
   (METRICS_GRID_HISTOGRAM_VISUALIZATIONS as readonly string[]).includes(value);
 
 /** True when this visualization draws a heatmap instead of the percentile series. */
