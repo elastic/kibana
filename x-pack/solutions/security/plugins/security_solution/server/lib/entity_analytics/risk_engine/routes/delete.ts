@@ -14,6 +14,7 @@ import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity_analytics';
 import { deleteSavedObjects } from '../utils/saved_object_configuration';
+import { getIndexPatternLookup } from '../../risk_score/configurations';
 
 const isMissingResourceError = (error: unknown): boolean => {
   if (typeof error !== 'object' || error == null) {
@@ -54,7 +55,9 @@ export const riskEngineCleanupRoute = (
           const securitySolution = await context.securitySolution;
           const core = await context.core;
           const namespace = securitySolution.getSpaceId();
-          const esClient = core.elasticsearch.client.asInternalUser;
+          const currentUserEsClient = core.elasticsearch.client.asCurrentUser;
+          const internalEsClient = core.elasticsearch.client.asInternalUser;
+          const lookupIndex = getIndexPatternLookup(namespace);
           const errors: Error[] = [];
           const addError = (error: unknown) => {
             if (isMissingResourceError(error)) {
@@ -83,7 +86,7 @@ export const riskEngineCleanupRoute = (
             errors.push(...riskScoreErrors);
 
             const alias = `risk-score.risk-score-${namespace}`;
-            await esClient
+            await internalEsClient
               .delete(
                 {
                   index: '.kibana_task_manager',
@@ -93,8 +96,18 @@ export const riskEngineCleanupRoute = (
                 { ignore: [404] }
               )
               .catch(addError);
-            await esClient.indices.delete({ index: alias }, { ignore: [404] }).catch(addError);
-            await esClient.ingest
+            // The privilege check grants read/write, not delete_index. Delete the caller's
+            // risk-score index and lookup index as that user so a missing delete privilege fails closed.
+            await currentUserEsClient.indices
+              .delete({ index: alias }, { ignore: [404] })
+              .catch(addError);
+            await currentUserEsClient.indices
+              .delete({ index: lookupIndex.alias }, { ignore: [404] })
+              .catch(addError);
+            await currentUserEsClient.indices
+              .deleteIndexTemplate({ name: lookupIndex.template }, { ignore: [404] })
+              .catch(addError);
+            await internalEsClient.ingest
               .deletePipeline(
                 { id: `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}` },
                 { ignore: [404] }
