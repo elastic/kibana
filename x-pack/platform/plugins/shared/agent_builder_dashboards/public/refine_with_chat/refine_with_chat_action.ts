@@ -44,7 +44,7 @@ import {
 } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { getDashboardsSkillBadge } from '../../common';
-import type { IdGenerator } from '../attachment_types';
+import type { CanvasDashboard, CanvasDashboardRegistry, IdGenerator } from '../attachment_types';
 import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../telemetry';
 
 /**
@@ -64,23 +64,36 @@ export interface RefineWithChatActionDeps {
     'openChat' | 'addAttachment' | 'getAgentBuilderAccess' | 'events'
   >;
   dashboardAppApi$: DashboardStart['dashboardAppClientApi$'];
+  canvasDashboards: Pick<CanvasDashboardRegistry, 'get'>;
   analytics: AnalyticsServiceStart;
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
 }
 
+interface PanelDashboard {
+  dashboardApi: DashboardApi;
+  /** Set when the dashboard is rendered in the chat canvas. */
+  canvasDashboard?: CanvasDashboard;
+}
+
 /**
- * The panel must belong to the dashboard currently open in the dashboard app. Other dashboard
- * renderers (for example the preview inside the chat canvas) never get this action.
+ * The panel must belong to the dashboard open in the dashboard app or to a dashboard rendered in
+ * the chat canvas. Other dashboard renderers never get this action.
  */
-const getDashboardAppApi = (
+const getPanelDashboard = (
   embeddable: unknown,
-  dashboardAppApi$: RefineWithChatActionDeps['dashboardAppApi$']
-): DashboardApi | undefined => {
-  const dashboardApi = dashboardAppApi$.getValue();
-  return dashboardApi && apiHasParentApi(embeddable) && embeddable.parentApi === dashboardApi
-    ? dashboardApi
-    : undefined;
+  { dashboardAppApi$, canvasDashboards }: RefineWithChatActionDeps
+): PanelDashboard | undefined => {
+  if (!apiHasParentApi(embeddable)) {
+    return undefined;
+  }
+  const { parentApi } = embeddable;
+  const dashboardAppApi = dashboardAppApi$.getValue();
+  if (dashboardAppApi && parentApi === dashboardAppApi) {
+    return { dashboardApi: dashboardAppApi };
+  }
+  const canvasDashboard = canvasDashboards.get(parentApi);
+  return canvasDashboard ? { dashboardApi: parentApi as DashboardApi, canvasDashboard } : undefined;
 };
 
 const isRefinablePanel = (embeddable: unknown): embeddable is HasUniqueId =>
@@ -117,19 +130,14 @@ const findLinkedDashboardAttachmentId = (
     (attachment) => isDashboardAttachment(attachment) && attachment.origin === dashboardId
   )?.id;
 
-export const createRefineWithChatAction = ({
-  agentBuilder,
-  dashboardAppApi$,
-  analytics,
-  canWriteDashboards,
-  draftAttachmentId,
-}: RefineWithChatActionDeps): ActionDefinition<RefineWithChatActionContext> => {
+export const createRefineWithChatAction = (
+  deps: RefineWithChatActionDeps
+): ActionDefinition<RefineWithChatActionContext> => {
+  const { agentBuilder, analytics, canWriteDashboards, draftAttachmentId } = deps;
   const isCompatible = async (embeddable: unknown): Promise<boolean> => {
-    const dashboardApi = getDashboardAppApi(embeddable, dashboardAppApi$);
     if (
-      !dashboardApi ||
+      !getPanelDashboard(embeddable, deps) ||
       !canWriteDashboards ||
-      dashboardApi.viewMode$.getValue() !== 'edit' ||
       !isRefinablePanel(embeddable)
     ) {
       return false;
@@ -156,10 +164,11 @@ export const createRefineWithChatAction = ({
           )
         : undefined,
     execute: async ({ embeddable }) => {
-      const dashboardApi = getDashboardAppApi(embeddable, dashboardAppApi$);
-      if (!dashboardApi || !isRefinablePanel(embeddable) || !(await isCompatible(embeddable))) {
+      const panelDashboard = getPanelDashboard(embeddable, deps);
+      if (!panelDashboard || !isRefinablePanel(embeddable) || !(await isCompatible(embeddable))) {
         return;
       }
+      const { dashboardApi, canvasDashboard } = panelDashboard;
 
       const dashboardId = dashboardApi.savedObjectId$.getValue();
       const dashboardData = dashboardStateToAttachmentData(
@@ -192,6 +201,14 @@ export const createRefineWithChatAction = ({
           panel_type: panelType,
         },
       });
+
+      // The canvas renders a dashboard attachment of the open conversation: point at it directly.
+      if (canvasDashboard) {
+        reportClicked('canvas');
+        agentBuilder.addAttachment(buildPanelPointer(canvasDashboard.attachmentId));
+        canvasDashboard.closeCanvas?.();
+        return;
+      }
 
       const activeConversation = await firstValueFrom(agentBuilder.events.ui.activeConversation$);
 

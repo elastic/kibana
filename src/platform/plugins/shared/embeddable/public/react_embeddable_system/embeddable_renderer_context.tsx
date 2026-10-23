@@ -65,5 +65,6 @@ export const DEFAULT_QUICK_ACTIONS: QuickActions = {
     'togglePanel',
     'ACTION_FILTERS_NOTIFICATION',
     'ACTION_ESQL_NOTIFICATION',
+    'refinePanelWithChat',
   ],
 } as const;

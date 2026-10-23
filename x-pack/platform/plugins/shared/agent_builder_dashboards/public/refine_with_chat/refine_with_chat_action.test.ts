@@ -19,7 +19,7 @@ import {
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { REFINE_WITH_CHAT_ACTION_ID, type DashboardApi } from '@kbn/dashboard-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import type { IdGenerator } from '../attachment_types';
+import { createCanvasDashboardRegistry, type IdGenerator } from '../attachment_types';
 import { DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED } from '../telemetry/event_types';
 import {
   createRefineWithChatAction,
@@ -89,13 +89,19 @@ const expectedPointer = (dashboardAttachmentId: string, label = 'CPU usage') => 
   },
 });
 
+const CANVAS_ATTACHMENT_ID = 'canvas-attachment-id';
+
 const createAction = ({
   dashboardApi = createDashboardApi(),
+  canvasDashboardApi,
+  closeCanvas,
   active = null,
   canWriteDashboards = true,
   access = { hasRequiredLicense: true, hasLlmConnector: true },
 }: {
   dashboardApi?: DashboardApi;
+  canvasDashboardApi?: DashboardApi;
+  closeCanvas?: () => void;
   active?: ActiveConversation | null;
   canWriteDashboards?: boolean;
   access?: EmbeddableChatAccess;
@@ -112,9 +118,17 @@ const createAction = ({
       ui: { activeConversation$: new BehaviorSubject<ActiveConversation | null>(active) },
     },
   } as unknown as RefineWithChatActionDeps['agentBuilder'];
+  const canvasDashboards = createCanvasDashboardRegistry();
+  if (canvasDashboardApi) {
+    canvasDashboards.register(canvasDashboardApi, {
+      attachmentId: CANVAS_ATTACHMENT_ID,
+      closeCanvas,
+    });
+  }
   const action = createRefineWithChatAction({
     agentBuilder,
     dashboardAppApi$: new BehaviorSubject<DashboardApi | undefined>(dashboardApi),
+    canvasDashboards,
     analytics: { reportEvent } as unknown as AnalyticsServiceStart,
     canWriteDashboards,
     draftAttachmentId,
@@ -175,7 +189,7 @@ describe('createRefineWithChatAction', () => {
       ).resolves.toBe(false);
     });
 
-    it('rejects panels that do not belong to the dashboard open in the app', async () => {
+    it('rejects panels that do not belong to the dashboard open in the app or the canvas', async () => {
       const { action } = createAction();
 
       await expect(
@@ -183,14 +197,23 @@ describe('createRefineWithChatAction', () => {
       ).resolves.toBe(false);
     });
 
-    it('rejects panels in view mode', async () => {
+    it('accepts panels in view mode', async () => {
       const { action, dashboardApi } = createAction({
         dashboardApi: createDashboardApi({ viewMode: 'view' }),
       });
 
       await expect(
         isCompatible(action, createEmbeddable({ parentApi: dashboardApi }))
-      ).resolves.toBe(false);
+      ).resolves.toBe(true);
+    });
+
+    it('accepts panels of a dashboard rendered in the chat canvas', async () => {
+      const canvasDashboardApi = createDashboardApi({ viewMode: 'view' });
+      const { action } = createAction({ canvasDashboardApi });
+
+      await expect(
+        isCompatible(action, createEmbeddable({ parentApi: canvasDashboardApi }))
+      ).resolves.toBe(true);
     });
 
     it('rejects when the user cannot write dashboards', async () => {
@@ -291,6 +314,35 @@ describe('createRefineWithChatAction', () => {
       );
     });
 
+    it('points at the dashboard attachment a canvas panel belongs to', async () => {
+      const canvasDashboardApi = createDashboardApi({ viewMode: 'view' });
+      const { action, openChat, addAttachment, reportEvent } = createAction({
+        canvasDashboardApi,
+        active: activeConversation(),
+      });
+
+      await execute(action, createEmbeddable({ parentApi: canvasDashboardApi }));
+
+      expect(openChat).not.toHaveBeenCalled();
+      expect(addAttachment).toHaveBeenCalledTimes(1);
+      expect(addAttachment).toHaveBeenCalledWith(expectedPointer(CANVAS_ATTACHMENT_ID));
+      expect(reportEvent).toHaveBeenCalledWith(
+        DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
+        expect.objectContaining({ chat_state: 'canvas' })
+      );
+    });
+
+    it('closes a sidebar canvas after adding the pointer so the chat input shows it', async () => {
+      const canvasDashboardApi = createDashboardApi({ viewMode: 'view' });
+      const closeCanvas = jest.fn();
+      const { action, addAttachment } = createAction({ canvasDashboardApi, closeCanvas });
+
+      await execute(action, createEmbeddable({ parentApi: canvasDashboardApi }));
+
+      expect(addAttachment).toHaveBeenCalledWith(expectedPointer(CANVAS_ATTACHMENT_ID));
+      expect(closeCanvas).toHaveBeenCalledTimes(1);
+    });
+
     it('leaves the label empty for an untitled Lens panel', async () => {
       const { action, dashboardApi, openChat } = createAction();
 
@@ -368,7 +420,7 @@ describe('createRefineWithChatAction', () => {
 
     it('does nothing when the panel is not compatible', async () => {
       const { action, dashboardApi, openChat, addAttachment, reportEvent } = createAction({
-        dashboardApi: createDashboardApi({ viewMode: 'view' }),
+        canWriteDashboards: false,
       });
 
       await execute(action, createEmbeddable({ parentApi: dashboardApi }));

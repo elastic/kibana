@@ -11,7 +11,8 @@ export const DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED = 'dashboard_panel_refine_
 export type RefineWithChatChatState =
   | 'new_conversation'
   | 'linked_attachment'
-  | 'staged_attachment';
+  | 'staged_attachment'
+  | 'canvas';
 
 export interface RefineWithChatClickedEvent {
   panel_type: string;

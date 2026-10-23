@@ -29,7 +29,7 @@ export const registerAgentBuilderDashboardsAnalyticsEvents = once(
           type: 'keyword',
           _meta: {
             description:
-              'How the panel reached the chat. Possible values: new_conversation|linked_attachment|staged_attachment',
+              'How the panel reached the chat. Possible values: new_conversation|linked_attachment|staged_attachment|canvas',
           },
         },
         is_saved_dashboard: {

@@ -26,7 +26,8 @@ const isDashboardUpdatedUiEvent = (
 
 /**
  * Creates a subscription that applies LLM-driven dashboard attachment updates
- * to the dashboard currently open in the app, as soon as the tool that made them finishes.
+ * to the dashboard currently open in the app, as soon as the tool that made them finishes,
+ * switching a dashboard in view mode to edit mode so the changes can be saved.
  */
 export const createAgentLiveUpdatesSubscription = ({
   agentBuilder,
@@ -55,4 +56,9 @@ export const createAgentLiveUpdatesSubscription = ({
       }
 
       api.setState(attachmentDataToDashboardState(attachment.data), { changedBy: ['agent'] });
+
+      // Like panels added from other apps, agent edits are unsaved changes that only edit mode can save.
+      if (api.viewMode$.getValue() === 'view') {
+        api.setViewMode('edit');
+      }
     });

@@ -31,20 +31,30 @@ const buildToolUiEvent = (
   data: { tool_id: 'tool', tool_call_id: 'call', custom_event: customEvent, data: { attachment } },
 });
 
-const createHarness = (savedObjectId: string | undefined, isNewConversation = false) => {
+const createHarness = (
+  savedObjectId: string | undefined,
+  isNewConversation = false,
+  viewMode = 'edit'
+) => {
   const chatEvents$ = new Subject();
   const activeConversation$ = new BehaviorSubject<{ id?: string }>({
     id: isNewConversation ? undefined : 'conversation-1',
   });
   const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
   const setState = jest.fn();
+  const setViewMode = jest.fn();
   const upsertAttachment = jest.fn();
 
   const subscription = createAgentLiveUpdatesSubscription({
     agentBuilder: {
       events: { ui: { activeConversation$ }, getChatEvents$ },
     } as unknown as AgentBuilderPluginStart,
-    api: { savedObjectId$: { getValue: () => savedObjectId }, setState } as unknown as DashboardApi,
+    api: {
+      savedObjectId$: { getValue: () => savedObjectId },
+      viewMode$: new BehaviorSubject(viewMode),
+      setState,
+      setViewMode,
+    } as unknown as DashboardApi,
     upsertAttachment,
   });
 
@@ -53,12 +63,32 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     activeConversation$,
     getChatEvents$,
     setState,
+    setViewMode,
     upsertAttachment,
     subscription,
   };
 };
 
 describe('createAgentLiveUpdatesSubscription', () => {
+  it.each([
+    ['view', [['edit']]],
+    ['edit', []],
+  ])(
+    'handles the view mode of a dashboard in %s mode when it applies an update',
+    (viewMode, calls) => {
+      const { chatEvents$, setViewMode, subscription } = createHarness(
+        'dashboard-1',
+        false,
+        viewMode
+      );
+
+      chatEvents$.next(buildToolUiEvent(buildAttachment('dashboard-1')));
+
+      expect(setViewMode.mock.calls).toEqual(calls);
+      subscription.unsubscribe();
+    }
+  );
+
   it.each([
     ['the linked saved dashboard', 'dashboard-1', 'dashboard-1', 1],
     ['an unsaved dashboard', undefined, undefined, 1],
