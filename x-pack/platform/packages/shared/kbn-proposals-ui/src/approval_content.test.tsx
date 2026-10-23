@@ -509,6 +509,14 @@ describe('ApprovalContent', () => {
       jest.useRealTimers();
     });
 
+    it('does not say Expires soon once the deadline has passed but the gate has not settled', () => {
+      renderContent({
+        proposal: { ...baseProposal, status: 'pending', expiresAt: '2026-10-21T12:00:00.000Z' },
+      });
+
+      expect(screen.queryByTestId('approvalContent-expires')).not.toBeInTheDocument();
+    });
+
     it('does not claim it timed out when settled before its deadline', () => {
       renderContent({
         proposal: { ...baseProposal, status: 'expired', expiresAt: '2026-10-23T12:00:00.000Z' },

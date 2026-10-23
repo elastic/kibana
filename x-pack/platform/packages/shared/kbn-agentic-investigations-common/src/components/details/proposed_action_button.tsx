@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -171,12 +171,19 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const pendingCaption = getProposalCaption(proposal) && <ProposalCaption proposal={proposal} />;
 
     // Who and when: the saved decision when there is one, else the current user from when their
-    // click went out. A
-    // decision with no `actorName` is one nobody made (expired, chiefly) — the badge label alone
-    // ("Expired") already says what happened — and so is an expired proposal that has an actor.
+    // click went out. A decision with no `actorName` is one nobody made (expired, chiefly) — the
+    // badge label alone ("Expired") already says what happened — and so is an expired proposal
+    // that has an actor. Only a start seen after mount is timed: a row that mounts already
+    // submitting (a reopened flyout) does not know when it began, so shows no time.
     const [submittedAt, setSubmittedAt] = useState<string | undefined>();
+    const wasSubmitting = useRef(isSubmitting);
     useEffect(() => {
-      setSubmittedAt(isSubmitting ? new Date().toISOString() : undefined);
+      if (!isSubmitting) {
+        setSubmittedAt(undefined);
+      } else if (!wasSubmitting.current) {
+        setSubmittedAt(new Date().toISOString());
+      }
+      wasSubmitting.current = isSubmitting;
     }, [isSubmitting]);
     const actorName =
       decision?.status === 'expired'

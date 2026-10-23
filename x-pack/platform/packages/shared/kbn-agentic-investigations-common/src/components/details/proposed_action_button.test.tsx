@@ -207,7 +207,14 @@ describe('ProposedActionButton', () => {
     const hhmm = (iso: string) => moment(iso).format('HH:mm');
 
     it('shows when the approval started, not when the modal was opened', () => {
-      renderButton({ isSubmitting: 'applying', currentActorName: 'Kate Sosedova' });
+      const { rerender } = renderButton({ currentActorName: 'Kate Sosedova' });
+      rerender(
+        <ProposedActionButton
+          {...baseProps}
+          isSubmitting="applying"
+          currentActorName="Kate Sosedova"
+        />
+      );
       act(() => {
         jest.advanceTimersByTime(10 * 60 * 1000);
       });
@@ -217,6 +224,15 @@ describe('ProposedActionButton', () => {
       const banner = within(screen.getByRole('dialog')).getAllByText(/Kate Sosedova on/)[0];
       expect(banner).toHaveTextContent(hhmm('2026-10-22T12:00:00.000Z'));
       expect(banner).not.toHaveTextContent(hhmm('2026-10-22T12:10:00.000Z'));
+    });
+
+    it('shows no start time when the row mounts already submitting', () => {
+      renderButton({ isSubmitting: 'applying', currentActorName: 'Kate Sosedova' });
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      const banner = within(screen.getByRole('dialog')).getAllByText(/Kate Sosedova/)[0];
+      expect(banner).not.toHaveTextContent(' on ');
     });
   });
 

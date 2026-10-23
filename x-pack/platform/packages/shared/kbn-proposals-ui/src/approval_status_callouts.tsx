@@ -119,7 +119,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
           />
         )}
 
-        {upcomingExpiry && (
+        {upcomingExpiry && !hasDeadlinePassed({ expiresAt: upcomingExpiry }) && (
           <StatusCallout
             color="warning"
             title={APPROVAL_MODAL_TRANSLATIONS.expiresSoonCalloutTitle}
