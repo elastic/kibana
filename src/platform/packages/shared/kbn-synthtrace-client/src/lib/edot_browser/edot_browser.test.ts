@@ -410,6 +410,35 @@ describe('edotBrowser', () => {
       expect(doc.attributes).not.toHaveProperty('event.outcome');
     });
 
+    it('sets the instrumentation version on the scope of logs and spans', () => {
+      const [log] = client
+        .navigation({ url: 'https://shop.example.com/', sameDocument: false })
+        .serialize();
+      const [span] = client
+        .httpRequest({ method: 'GET', url: 'https://api.example.com/products', statusCode: 200 })
+        .serialize();
+
+      expect(log.scope).toEqual({
+        name: '@opentelemetry/browser-instrumentation/navigation',
+        version: '0.8.2',
+      });
+      expect(span.scope).toEqual({
+        name: '@opentelemetry/browser-instrumentation/fetch',
+        version: '0.8.2',
+      });
+    });
+
+    it('only writes the request body size when it is given', () => {
+      const url = 'https://api.example.com/cart';
+      const [withBody] = client
+        .httpRequest({ method: 'POST', url, statusCode: 201, requestBodySize: 512 })
+        .serialize();
+      const [withoutBody] = client.httpRequest({ method: 'GET', url, statusCode: 200 }).serialize();
+
+      expect(withBody.attributes['http.request.body.size']).toBe(512);
+      expect(withoutBody.attributes).not.toHaveProperty('http.request.body.size');
+    });
+
     it('marks failed XHR requests and network errors as errors', () => {
       const [failed] = client
         .httpRequest({
@@ -732,6 +761,38 @@ describe('edotBrowser', () => {
             )
         )
         .forEach((doc) => expect(doc).not.toHaveProperty('trace_id'));
+    });
+
+    it('reports the body size of fetch POST requests only', () => {
+      const origin = 'https://shop.example.com';
+      const site: EdotBrowserSite = {
+        origin,
+        pages: [
+          {
+            path: '/',
+            requests: [
+              { method: 'POST', url: '/api/sampled' },
+              { method: 'POST', url: '/api/fixed', bodySizeBytes: 777 },
+              { method: 'POST', url: '/api/xhr', instrumentation: 'xhr' },
+              { method: 'GET', url: '/api/get' },
+            ],
+          },
+        ],
+      };
+      const bodySizeByPath = Object.fromEntries(
+        createSession({ site, pageViews: 1 })
+          .filter(isSpan)
+          .map(({ attributes }) => [
+            String(attributes['url.full']).replace(origin, ''),
+            attributes['http.request.body.size'],
+          ])
+      );
+
+      expect(bodySizeByPath['/api/sampled']).toBeGreaterThanOrEqual(120);
+      expect(bodySizeByPath['/api/sampled']).toBeLessThanOrEqual(2_000);
+      expect(bodySizeByPath['/api/fixed']).toBe(777);
+      expect(bodySizeByPath['/api/xhr']).toBeUndefined();
+      expect(bodySizeByPath['/api/get']).toBeUndefined();
     });
 
     it('resolves request paths on the site origin', () => {

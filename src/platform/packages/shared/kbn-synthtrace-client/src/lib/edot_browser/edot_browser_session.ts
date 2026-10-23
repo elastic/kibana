@@ -42,6 +42,8 @@ export interface EdotBrowserRequest {
   failureStatusCodes?: readonly number[];
   /** Multiplies the health profile's HTTP latency. */
   latencyFactor?: number;
+  /** Size of the request body in bytes. Fetch only: XHR doesn't report it. Sampled for POSTs when unset. */
+  bodySizeBytes?: number;
 }
 
 export interface EdotBrowserClickTarget {
@@ -319,6 +321,7 @@ const sendRequest = (
     failureRate = health.httpFailureRate,
     failureStatusCodes = DEFAULT_FAILURE_STATUS_CODES,
     latencyFactor = 1,
+    bodySizeBytes,
   } = request;
   const url = toUrl(site, request.url);
   const duration = Math.min(
@@ -343,6 +346,11 @@ const sendRequest = (
         statusCode,
         // A failed fetch rejects with a TypeError, a failed XHR fires an `error` event
         errorType: isNetworkError ? (instrumentation === 'xhr' ? 'Error' : 'TypeError') : undefined,
+        // XHR doesn't report the size of the body it sends
+        requestBodySize:
+          instrumentation === 'fetch' && (bodySizeBytes !== undefined || method === 'POST')
+            ? bodySizeBytes ?? Math.round(between(random, 120, 2_000))
+            : undefined,
         instrumentation,
         ...traceContext,
       })

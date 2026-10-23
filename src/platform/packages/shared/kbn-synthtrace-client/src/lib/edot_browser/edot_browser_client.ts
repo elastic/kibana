@@ -16,6 +16,8 @@ import { getWebVitalRating, type WebVitalName } from './health_profiles';
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
 const SCOPE_PREFIX = '@opentelemetry/browser-instrumentation';
+// Version of the instrumentations, which EDOT Browser's `^0.8.0` range resolves to
+const SCOPE_VERSION = '0.8.2';
 
 const SEVERITY_INFO = 9;
 const SEVERITY_ERROR = 17;
@@ -123,7 +125,7 @@ export class EdotBrowserClient {
     return new EdotBrowserLog({ _index: LOGS_INDEX })
       .eventName(eventName)
       .severity(severityNumber)
-      .scope({ name: `${SCOPE_PREFIX}/${instrumentation}` })
+      .scope({ name: `${SCOPE_PREFIX}/${instrumentation}`, version: SCOPE_VERSION })
       .addResourceAttributes({ ...this.resourceAttributes })
       .addAttributes({ ...attributes, ...this.sessionAttributes });
   }
@@ -274,6 +276,7 @@ export class EdotBrowserClient {
     url,
     statusCode,
     errorType,
+    requestBodySize,
     instrumentation = 'fetch',
     traceId = generateLongId(),
     spanId = generateShortId(),
@@ -282,6 +285,8 @@ export class EdotBrowserClient {
     url: string;
     statusCode?: number;
     errorType?: string;
+    /** Size in bytes of a request body of known length, which fetch reports for e.g. JSON POSTs. */
+    requestBodySize?: number;
     instrumentation?: HttpInstrumentation;
     traceId?: string;
     spanId?: string;
@@ -299,13 +304,14 @@ export class EdotBrowserClient {
       name: method,
       kind: 'Client',
       status: { code: isError ? 'Error' : 'Unset' },
-      scope: { name: `${SCOPE_PREFIX}/${instrumentation}` },
+      scope: { name: `${SCOPE_PREFIX}/${instrumentation}`, version: SCOPE_VERSION },
       resource: { attributes: { ...this.resourceAttributes } },
       attributes: {
         'http.request.method': method,
         'url.full': url,
         'server.address': parsedUrl.hostname,
         ...(serverPort ? { 'server.port': serverPort } : {}),
+        ...(requestBodySize !== undefined ? { 'http.request.body.size': requestBodySize } : {}),
         ...(statusCode !== undefined ? { 'http.response.status_code': statusCode } : {}),
         ...(isError && resolvedErrorType ? { 'error.type': resolvedErrorType } : {}),
         ...this.sessionAttributes,
