@@ -21,21 +21,17 @@ const connector = (
 
 const setup = ({
   connectors = [] as ReturnType<typeof connector>[],
-  disabledIds = [] as string[],
   getAll = jest.fn().mockResolvedValue(connectors),
 }: {
   connectors?: ReturnType<typeof connector>[];
-  disabledIds?: string[];
   getAll?: jest.Mock;
 } = {}) => {
   const logger = loggerMock.create();
   const actions = {
     getActionsClientWithRequest: jest.fn().mockResolvedValue({ getAll }),
   };
-  const getDisabledConnectorIds = jest.fn().mockResolvedValue(disabledIds);
   const listSandboxConnectors = createListSandboxConnectors({
     getActions: () => actions as never,
-    getDisabledConnectorIds,
     logger,
   });
   return { listSandboxConnectors, getAll, logger, request: httpServerMock.createKibanaRequest() };
@@ -53,14 +49,12 @@ describe('createListSandboxConnectors', () => {
         name: 'Connector telemetry',
         connector_type_id: '.http',
         is_preconfigured: true,
-        enabled: true,
       },
       {
         id: 'github',
         name: 'Connector github',
         connector_type_id: '.http',
         is_preconfigured: true,
-        enabled: true,
       },
     ]);
     // The actions plugin decides sandbox capability; the lister only asks for capable ones.
@@ -78,23 +72,10 @@ describe('createListSandboxConnectors', () => {
     ]);
   });
 
-  it('marks the connectors an admin switched off', async () => {
-    const { listSandboxConnectors, request } = setup({
-      connectors: [connector('telemetry'), connector('github', { isPreconfigured: false })],
-      disabledIds: ['github', 'gone'],
-    });
-
-    await expect(listSandboxConnectors(request)).resolves.toEqual([
-      expect.objectContaining({ id: 'telemetry', enabled: true }),
-      expect.objectContaining({ id: 'github', enabled: false }),
-    ]);
-  });
-
   it('returns no connectors when the actions plugin is not available', async () => {
     const logger = loggerMock.create();
     const listSandboxConnectors = createListSandboxConnectors({
       getActions: () => undefined,
-      getDisabledConnectorIds: jest.fn().mockResolvedValue([]),
       logger,
     });
 

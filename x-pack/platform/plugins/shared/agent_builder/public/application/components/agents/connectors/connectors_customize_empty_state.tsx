@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiBetaBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiBetaBadge, EuiButtonEmpty } from '@elastic/eui';
 import { connectorsTechPreviewBadgeProps, labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useKibana } from '../../../hooks/use_kibana';
 import { CustomizeLandingEmptyState } from '../common/customize_landing_empty_state';
+import { AddConnectorMenu } from './add_connector_menu';
 import connectorsIllustration from '../overview/assets/handshake.svg';
 
 export interface ConnectorsCustomizeEmptyStateProps {
@@ -26,6 +20,7 @@ export interface ConnectorsCustomizeEmptyStateProps {
   hasAllPrivileges: boolean;
   onAddFromLibrary: () => void;
   onCreateNew: () => void;
+  layout?: 'page' | 'inline';
 }
 
 export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptyStateProps> = ({
@@ -33,67 +28,29 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
   hasAllPrivileges,
   onAddFromLibrary,
   onCreateNew,
+  layout,
 }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { createAgentBuilderUrl } = useNavigation();
-  const { docLinksService } = useAgentBuilderServices();
+  const { docLinks } = useKibana().services;
 
   return (
     <CustomizeLandingEmptyState
       dataTestSubj="agentConnectorsCustomizeEmptyState"
+      layout={layout}
       illustrationSrc={connectorsIllustration}
       title={labels.agentConnectors.emptyStateTitle}
       titleBadge={<EuiBetaBadge {...connectorsTechPreviewBadgeProps} />}
       description={labels.agentConnectors.emptyStateDescription}
-      learnMoreHref={docLinksService.agentBuilderConnectors}
+      learnMoreHref={docLinks.links.agentBuilder.agentBuilderConnectors}
       learnMoreSuffix={labels.agentConnectors.emptyStateLearnMoreSuffix}
       primaryAction={
         hasAllPrivileges && canEditAgent ? (
-          <EuiPopover
-            aria-label={labels.connectors.addConnectorPopoverLabel}
-            button={
-              <EuiButton
-                data-test-subj="agentConnectorsCustomizeEmptyStateAddButton"
-                fill
-                iconType="plusCircle"
-                iconSide="left"
-                onClick={() => setIsMenuOpen((prev) => !prev)}
-              >
-                {labels.agentConnectors.emptyStateAddButton}
-              </EuiButton>
-            }
-            isOpen={isMenuOpen}
-            closePopover={() => setIsMenuOpen(false)}
-            anchorPosition="downLeft"
-            panelPaddingSize="none"
-          >
-            <EuiContextMenuPanel
-              items={[
-                <EuiContextMenuItem
-                  key="from-library"
-                  icon="download"
-                  data-test-subj="agentConnectorsAddFromLibraryMenuItem"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    onAddFromLibrary();
-                  }}
-                >
-                  {labels.connectors.fromLibraryMenuItem}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key="create-new"
-                  icon="plusCircle"
-                  data-test-subj="agentConnectorsCreateNewMenuItem"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    onCreateNew();
-                  }}
-                >
-                  {labels.connectors.createNewMenuItem}
-                </EuiContextMenuItem>,
-              ]}
-            />
-          </EuiPopover>
+          <AddConnectorMenu
+            onAddFromLibrary={onAddFromLibrary}
+            onCreateNew={onCreateNew}
+            buttonLabel={labels.agentConnectors.emptyStateAddButton}
+            buttonTestSubj="agentConnectorsCustomizeEmptyStateAddButton"
+          />
         ) : undefined
       }
       secondaryAction={

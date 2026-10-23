@@ -7,7 +7,6 @@
 
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
@@ -191,127 +190,6 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).toContain('**Check before you finish.**');
     expect(instructions).not.toContain('blind_spots');
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
-  });
-
-  describe('sandbox connectors', () => {
-    const ctx = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-a' };
-
-    const resolveBase = async (
-      listSandboxConnectors: jest.Mock,
-      {
-        telemetryConnectorId,
-        logger,
-      }: { telemetryConnectorId?: string; logger?: jest.Mocked<Logger> } = {}
-    ): Promise<AgentBaseConfiguration> => {
-      const type = getInvestigationAgentType({
-        sandboxEnabled: true,
-        cortexEnabled: true,
-        ...ALL_PLUGINS,
-        telemetryConnectorId,
-        listSandboxConnectors,
-        logger,
-      });
-      if (typeof type.baseConfiguration !== 'function') {
-        throw new Error('expected a dynamic base configuration');
-      }
-      return type.baseConfiguration(ctx);
-    };
-
-    it('allow-lists the sandbox connectors on every resolve, telemetry first', async () => {
-      const listSandboxConnectors = jest.fn().mockResolvedValue([
-        { id: 'github', enabled: true },
-        { id: 'datadog', enabled: true },
-      ]);
-
-      const base = await resolveBase(listSandboxConnectors, {
-        telemetryConnectorId: 'elasticsearch-telemetry',
-      });
-
-      expect(listSandboxConnectors).toHaveBeenCalledWith(ctx.request);
-      expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github', 'datadog']);
-    });
-
-    it('lists the telemetry connector once when the lister returns it too', async () => {
-      const base = await resolveBase(
-        jest.fn().mockResolvedValue([
-          { id: 'elasticsearch-telemetry', enabled: true },
-          { id: 'github', enabled: true },
-        ]),
-        { telemetryConnectorId: 'elasticsearch-telemetry' }
-      );
-
-      expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
-    });
-
-    it('leaves out the connectors an admin switched off, the telemetry one included', async () => {
-      const base = await resolveBase(
-        jest.fn().mockResolvedValue([
-          { id: 'elasticsearch-telemetry', enabled: false },
-          { id: 'github', enabled: false },
-          { id: 'datadog', enabled: true },
-        ]),
-        { telemetryConnectorId: 'elasticsearch-telemetry' }
-      );
-
-      expect(base.connector_ids).toEqual(['datadog']);
-    });
-
-    it('keeps the rest of the base configuration untouched', async () => {
-      const base = await resolveBase(
-        jest.fn().mockResolvedValue([{ id: 'github', enabled: true }])
-      );
-
-      const staticConfiguration = staticBase(
-        getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
-      );
-      expect(base).toEqual({ ...staticConfiguration, connector_ids: ['github'] });
-    });
-
-    it('falls back to the telemetry connector and warns when listing fails', async () => {
-      const logger = loggerMock.create();
-
-      const base = await resolveBase(jest.fn().mockRejectedValue(new Error('boom')), {
-        telemetryConnectorId: 'elasticsearch-telemetry',
-        logger,
-      });
-
-      expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Failed to list sandbox connectors for space "space-a": boom'
-      );
-    });
-
-    it('ignores the connectors when the sandbox is not configured', () => {
-      const type = getInvestigationAgentType({
-        sandboxEnabled: false,
-        cortexEnabled: true,
-        ...ALL_PLUGINS,
-        telemetryConnectorId: 'elasticsearch-telemetry',
-        listSandboxConnectors: jest.fn().mockResolvedValue([{ id: 'github', enabled: true }]),
-      });
-
-      // Static: nothing to resolve per run, and the telemetry connector is the whole list.
-      expect(staticBase(type).connector_ids).toEqual(['elasticsearch-telemetry']);
-    });
-
-    it('resolves connectors and custom context together', async () => {
-      const type = getInvestigationAgentType({
-        sandboxEnabled: true,
-        cortexEnabled: true,
-        ...ALL_PLUGINS,
-        telemetryConnectorId: 'elasticsearch-telemetry',
-        listSandboxConnectors: jest.fn().mockResolvedValue([{ id: 'github', enabled: true }]),
-        getCustomContextInstructions: jest.fn().mockResolvedValue('**USER CONTEXT**'),
-      });
-      if (typeof type.baseConfiguration !== 'function') {
-        throw new Error('expected a dynamic base configuration');
-      }
-
-      const base = await type.baseConfiguration(ctx);
-
-      expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
-      expect(base.instructions).toMatch(/\*\*USER CONTEXT\*\*\n$/);
-    });
   });
 
   describe('custom context', () => {

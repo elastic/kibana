@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -17,8 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { ConnectorsCustomizeEmptyState } from '@kbn/agent-builder-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchSandboxConnectors } from './use_fetch_sandbox_connectors';
+import { useAgentConnectors } from './use_agent_connectors';
 import { useEditConnector } from './use_edit_connector';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 import { SourceCard } from './source_card';
@@ -32,33 +34,41 @@ const noPermissionTooltip = i18n.translate('xpack.nightshift.connectedConnectors
   defaultMessage: 'You need permission to edit connectors.',
 });
 
+/** The sandbox-capable connectors assigned to the investigation agent in Agent Builder */
 export function ConnectedConnectors({
   collapseSignal = 0,
 }: {
   collapseSignal?: number;
 }): React.ReactElement | null {
   const { data, error, isLoading, refetch } = useFetchSandboxConnectors();
-  const [isOpen, setIsOpen] = useState(false);
+  const agent = useAgentConnectors();
+  const [isOpen, setIsOpen] = useState<boolean | undefined>();
+  const defaultOpen = useRef<boolean | undefined>();
   useEffect(() => {
     if (collapseSignal > 0) setIsOpen(false);
   }, [collapseSignal]);
   const accordionId = useGeneratedHtmlId({ prefix: 'nightshiftConnectedConnectors' });
 
-  if (isLoading) return null;
-  if (error) {
+  if (isLoading || agent.isLoading) return null;
+  if (error || agent.error) {
     return (
       <SandboxConnectorsError
-        onRetry={() => refetch()}
+        onRetry={() => {
+          if (error) void refetch();
+          if (agent.error) agent.refetch();
+        }}
         data-test-subj="nightshiftConnectedConnectorsError"
       />
     );
   }
-  if (!data || data.connectors.length === 0) return null;
+  const connected = (data?.connectors ?? []).filter(({ id }) => agent.assignedIds.includes(id));
+  const isEmpty = connected.length === 0;
+  if (defaultOpen.current === undefined) defaultOpen.current = isEmpty;
 
   return (
     <EuiAccordion
       id={accordionId}
-      forceState={isOpen ? 'open' : 'closed'}
+      forceState={isOpen ?? defaultOpen.current ? 'open' : 'closed'}
       onToggle={setIsOpen}
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -72,18 +82,35 @@ export function ConnectedConnectors({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="success">{data.connectors.length}</EuiBadge>
+            <EuiBadge
+              color={isEmpty ? 'hollow' : 'success'}
+              data-test-subj="nightshiftConnectedConnectorsCount"
+            >
+              {connected.length}
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
       data-test-subj="nightshiftConnectedConnectors"
     >
       <EuiSpacer size="m" />
-      <div css={sourceGridStyles} role="list">
-        {data.connectors.map((connector) => (
-          <ConnectedConnectorCard key={connector.id} connector={connector} />
-        ))}
-      </div>
+      {isEmpty ? (
+        <ConnectorsCustomizeEmptyState
+          layout="inline"
+          canEditAgent={agent.canEditAgent}
+          hasAllPrivileges={agent.hasConnectorsAllPrivileges}
+          onAddFromLibrary={agent.openLibrary}
+          onCreateNew={agent.openCreate}
+        />
+      ) : (
+        <div css={sourceGridStyles} role="list">
+          {connected.map((connector) => (
+            <ConnectedConnectorCard key={connector.id} connector={connector} />
+          ))}
+        </div>
+      )}
+      {/* Outside the branches: the library stays open while the first connector arrives. */}
+      {agent.flyouts}
     </EuiAccordion>
   );
 }
@@ -107,15 +134,6 @@ function ConnectedConnectorCard({
         icon={model?.iconClass ?? 'plugs'}
         title={connector.name}
         description={model?.actionTypeTitle ?? connector.connector_type_id}
-        badge={
-          connector.enabled ? undefined : (
-            <EuiBadge color="hollow" data-test-subj={`nightshiftConnectorOff-${connector.id}`}>
-              {i18n.translate('xpack.nightshift.connectedConnectors.offBadge', {
-                defaultMessage: 'Off',
-              })}
-            </EuiBadge>
-          )
-        }
         data-test-subj={`nightshiftConnectedConnectorCard-${connector.id}`}
         action={{
           label: i18n.translate('xpack.nightshift.connectedConnectors.editButton', {

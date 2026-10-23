@@ -7,14 +7,20 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ConnectorItem } from '../../../../../common/http_api/tools';
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { appPaths } from '../../../utils/app_paths';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
 import { LibraryPanel } from '../common/library_panel';
 import type { LibraryPanelLabels } from '../common/library_panel';
 
-type ConnectorLibraryItem = ConnectorItem & { description: string };
+export interface ConnectorLibraryConnector {
+  id: string;
+  name: string;
+  actionTypeId: string;
+}
+
+type ConnectorLibraryItem<T extends ConnectorLibraryConnector> = T & { description: string };
 
 const libraryLabels: LibraryPanelLabels = {
   title: labels.agentConnectors.addConnectorFromLibraryTitle,
@@ -31,36 +37,39 @@ const libraryLabels: LibraryPanelLabels = {
   noItemsMessage: labels.agentConnectors.noAvailableConnectorsMessage,
 };
 
-const getConnectorName = (item: ConnectorLibraryItem): string => item.name;
+const getConnectorName = (item: ConnectorLibraryConnector): string => item.name;
 
-interface ConnectorLibraryPanelProps {
+export interface ConnectorLibraryPanelProps<T extends ConnectorLibraryConnector> {
   onClose: () => void;
-  allConnectors: readonly ConnectorItem[];
+  allConnectors: readonly T[];
   activeConnectorIdSet: Set<string>;
-  onToggle: (connector: ConnectorItem, isActive: boolean) => void;
+  onToggle: (connector: T, isActive: boolean) => void;
+  actionTypeRegistry?: ActionTypeRegistryContract;
 }
 
-export const ConnectorLibraryPanel: React.FC<ConnectorLibraryPanelProps> = ({
+export const ConnectorLibraryPanel = <T extends ConnectorLibraryConnector>({
   onClose,
   allConnectors,
   activeConnectorIdSet,
   onToggle,
-}) => {
-  const { actionTypeRegistry } = useKibana().services.plugins.triggersActionsUi;
+  actionTypeRegistry,
+}: ConnectorLibraryPanelProps<T>) => {
+  const { plugins } = useKibana().services;
+  const registry = actionTypeRegistry ?? plugins?.triggersActionsUi.actionTypeRegistry;
 
-  const items = useMemo<ConnectorLibraryItem[]>(
+  const items = useMemo<Array<ConnectorLibraryItem<T>>>(
     () =>
       allConnectors.map((c) => ({
         ...c,
-        description: actionTypeRegistry.has(c.actionTypeId)
-          ? actionTypeRegistry.get(c.actionTypeId).actionTypeTitle ?? c.actionTypeId
+        description: registry?.has(c.actionTypeId)
+          ? registry.get(c.actionTypeId).actionTypeTitle ?? c.actionTypeId
           : c.actionTypeId,
       })),
-    [allConnectors, actionTypeRegistry]
+    [allConnectors, registry]
   );
 
   return (
-    <LibraryPanel<ConnectorLibraryItem>
+    <LibraryPanel<ConnectorLibraryItem<T>>
       onClose={onClose}
       allItems={items}
       activeItemIdSet={activeConnectorIdSet}

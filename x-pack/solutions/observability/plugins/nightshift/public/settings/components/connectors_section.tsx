@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  CreateConnectorButton,
   ManageConnectorsLink,
   SandboxConnectorsTable,
 } from '../../sandbox_connectors/sandbox_connectors';
+import { InvestigationAgentAddConnectorMenu } from '../../sandbox_connectors/add_connector_menu';
 import { SettingsSection } from './settings_section';
 
-/** The connectors the investigation agent can use from its sandbox in this space. */
+/** The connectors assigned to the investigation agent, the same list Agent Builder manages. */
 export function ConnectorsSection(): React.ReactElement {
   return (
     <SettingsSection
@@ -29,7 +29,7 @@ export function ConnectorsSection(): React.ReactElement {
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
-          <CreateConnectorButton />
+          <InvestigationAgentAddConnectorMenu fill={false} size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SettingsSection>

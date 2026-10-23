@@ -33,6 +33,7 @@ import {
   type OnboardingStepId,
   type OnboardingStepState,
 } from './onboarding_steps';
+import { OnboardingEnableStep } from './enable_step';
 import { OnboardingConnectStep } from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
@@ -42,6 +43,9 @@ import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
 type StepOverride = 'connect' | 'investigate' | undefined;
 
 const HERO_TITLES: Record<OnboardingStepId, string> = {
+  enable: i18n.translate('xpack.nightshift.onboarding.heroTitleEnable', {
+    defaultMessage: 'Meet Elastic Nightshift',
+  }),
   connect: i18n.translate('xpack.nightshift.onboarding.heroTitle', {
     defaultMessage: 'Meet Elastic Nightshift',
   }),
@@ -81,7 +85,9 @@ export function NightshiftOnboarding({
   const [stepOverride, setStepOverride] = useState<StepOverride>();
 
   const execution = data?.execution;
-  // Step 1 is done once an exploration run exists.
+  // Step 1 is done once the investigation agent is installed in the space.
+  const isEnabled = data?.agent_installed === true;
+  // Step 2 is done once an exploration run exists.
   const isConnected = execution != null;
 
   // A new execution (setup changed, or a retry) ends any detour.
@@ -91,12 +97,13 @@ export function NightshiftOnboarding({
     setStepOverride(undefined);
   }
 
-  const step: OnboardingStepId =
-    !isConnected || stepOverride === 'connect'
-      ? 'connect'
-      : latestInvestigation && stepOverride !== 'investigate'
-      ? 'automate'
-      : 'investigate';
+  const step: OnboardingStepId = !isEnabled
+    ? 'enable'
+    : !isConnected || stepOverride === 'connect'
+    ? 'connect'
+    : latestInvestigation && stepOverride !== 'investigate'
+    ? 'automate'
+    : 'investigate';
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -157,9 +164,17 @@ export function NightshiftOnboarding({
   }, [agentBuilder, closeInvestigation, selectedInvestigationId, shareInvestigationAction]);
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
+    enable: {
+      status: isEnabled ? 'complete' : 'current',
+      hint: isEnabled
+        ? undefined
+        : i18n.translate('xpack.nightshift.onboarding.steps.enableHint', {
+            defaultMessage: 'One-time setup of this space',
+          }),
+    },
     connect: {
-      status: step === 'connect' ? 'current' : 'complete',
-      onClick: step !== 'connect' ? () => setStepOverride('connect') : undefined,
+      status: !isEnabled ? 'disabled' : step === 'connect' ? 'current' : 'complete',
+      onClick: isEnabled && step !== 'connect' ? () => setStepOverride('connect') : undefined,
       hint:
         step !== 'connect'
           ? undefined
@@ -253,7 +268,7 @@ export function NightshiftOnboarding({
     >
       <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline />
       <EuiSpacer size="l" />
-      {step === 'connect' && !isConnected && (
+      {(step === 'enable' || (step === 'connect' && !isConnected)) && (
         <>
           <OnboardingIntroBanner />
           <EuiSpacer size="xl" />
@@ -274,6 +289,8 @@ export function NightshiftOnboarding({
         >
           {isInitialLoading ? (
             <EuiLoadingSpinner size="l" />
+          ) : step === 'enable' ? (
+            <OnboardingEnableStep />
           ) : step === 'connect' || !execution ? (
             <OnboardingConnectStep />
           ) : step === 'investigate' || !latestInvestigation ? (

@@ -177,6 +177,7 @@ export {
   type OnboardingSuggestionsStatus,
   type OnboardingSuggestionsExecution,
   type GetOnboardingResponse,
+  type EnableOnboardingResponse,
   type StartOnboardingSuggestionsResponse,
 } from './onboarding';
 

@@ -9,6 +9,7 @@ import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
+  EnableOnboardingResponse,
   GetOnboardingResponse,
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
@@ -41,6 +42,26 @@ const getOnboardingRoute = createNightshiftInvestigationsServerRoute({
   },
 });
 
+const enableOnboardingRoute = createNightshiftInvestigationsServerRoute({
+  endpoint: 'POST /internal/nightshift/onboarding/enable',
+  options: {
+    access: 'internal',
+    summary: 'Enable Nightshift in the space',
+    description:
+      'The first onboarding step: installs the investigation agent in the current space, so it ' +
+      'can be configured in Agent Builder and run investigations there. Idempotent.',
+  },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
+  params: z.object({}),
+  handler: async ({ request, onboardingClient }): Promise<EnableOnboardingResponse> => {
+    try {
+      return await onboardingClient.enable(request);
+    } catch (error) {
+      return rethrowOnboardingError(error);
+    }
+  },
+});
+
 const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/onboarding/suggestions',
   options: {
@@ -62,5 +83,6 @@ const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRout
 
 export const onboardingRoutes = {
   ...getOnboardingRoute,
+  ...enableOnboardingRoute,
   ...startOnboardingSuggestionsRoute,
 };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { AgentsServiceStartContract } from './contract';
+export type { AgentsServiceStartContract, AgentWithPermissions } from './contract';

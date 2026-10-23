@@ -30,7 +30,7 @@ export function useEditConnector(): {
         setEditing(await fetchConnector(connector.id, { http }));
       } catch (err) {
         notifications.toasts.addError(err as Error, {
-          title: i18n.translate('xpack.nightshift.sandboxConnectors.loadError', {
+          title: i18n.translate('xpack.nightshift.sandboxConnectors.editLoadError', {
             defaultMessage: 'Could not load connector {name}',
             values: { name: connector.name },
           }),

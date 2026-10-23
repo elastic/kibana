@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -32,7 +32,6 @@ export function SourceCard({
   title,
   description,
   connected = false,
-  badge,
   action,
   'data-test-subj': dataTestSubj,
 }: {
@@ -40,7 +39,6 @@ export function SourceCard({
   title: string;
   description?: string;
   connected?: boolean;
-  badge?: ReactNode;
   action: SourceCardAction;
   'data-test-subj'?: string;
 }): React.ReactElement {
@@ -117,7 +115,6 @@ export function SourceCard({
           <EuiText size="s">
             <p css={titleStyles}>{title}</p>
           </EuiText>
-          {badge}
         </div>
         {description ? (
           <EuiText size="xs" color="subdued">
