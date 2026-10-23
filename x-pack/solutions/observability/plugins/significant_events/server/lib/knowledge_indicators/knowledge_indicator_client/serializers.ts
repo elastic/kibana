@@ -14,11 +14,12 @@ import type {
 import { deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { computeFeatureUuid, normalizeFeatureSlug } from '@kbn/significant-events-schema';
-import type {
-  StoredFeatureKnowledgeIndicator,
-  StoredKnowledgeIndicator,
-  StoredQueryKnowledgeIndicator,
-  StoredTombstone,
+import {
+  computeRevisionId,
+  type StoredFeatureKnowledgeIndicator,
+  type StoredKnowledgeIndicator,
+  type StoredQueryKnowledgeIndicator,
+  type StoredTombstone,
 } from '../data_stream';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 import { computeRuleId } from '../helpers/compute_rule_id';
@@ -68,9 +69,11 @@ export function toStoredFeature({
   const embedding = buildSearchEmbeddingFeature(feature, sourceId);
   const timestamp = new Date().toISOString();
   const slug = normalizeFeatureSlug(feature.id);
+  const id = computeFeatureUuid({ id: slug, source_id: sourceId });
   return {
     '@timestamp': timestamp,
-    id: computeFeatureUuid({ id: slug, source_id: sourceId }),
+    id,
+    revision_id: computeRevisionId({ sourceId, type: KI_TYPE_FEATURE, id, timestamp }),
     type: KI_TYPE_FEATURE,
     title: feature.title,
     description: feature.description,
@@ -120,6 +123,7 @@ export function toStoredQuery({
   return {
     '@timestamp': timestamp,
     id: query.id,
+    revision_id: computeRevisionId({ sourceId, type: KI_TYPE_QUERY, id: query.id, timestamp }),
     type: KI_TYPE_QUERY,
     title: query.title,
     description: query.description,
@@ -143,9 +147,11 @@ export function toTombstone(
   sourceId: string,
   identity: Pick<StoredKnowledgeIndicator, 'id' | 'type'>
 ): StoredTombstone {
+  const timestamp = new Date().toISOString();
   return {
-    '@timestamp': new Date().toISOString(),
+    '@timestamp': timestamp,
     id: identity.id,
+    revision_id: computeRevisionId({ sourceId, type: identity.type, id: identity.id, timestamp }),
     type: identity.type,
     'source.id': sourceId,
     deleted: true,

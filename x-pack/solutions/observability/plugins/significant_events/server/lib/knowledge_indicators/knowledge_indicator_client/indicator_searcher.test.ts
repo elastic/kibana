@@ -33,6 +33,7 @@ const emptyRankResponse = {
 const storedFeature = {
   '@timestamp': T1,
   id: 'u1',
+  revision_id: `src-a:feature:u1:${T1}`,
   type: 'feature',
   title: 'redis',
   description: 'desc',
@@ -41,23 +42,24 @@ const storedFeature = {
 };
 
 describe('IndicatorSearcher ranking function per embedding model', () => {
-  const fetchLatestRevisionEntries = jest.fn();
+  const fetchLatestRevisions = jest.fn();
   const resolveEmbeddingModel = jest.fn<Promise<SearchEmbeddingModel>, []>();
   const searcher = new IndicatorSearcher(
     elasticsearchServiceMock.createElasticsearchClient(),
     loggingSystemMock.createLogger(),
     { semantic_min_score: 0, rrf_rank_constant: 60 },
-    { fetchLatestRevisionEntries } as unknown as RevisionReader,
+    { fetchLatestRevisions } as unknown as RevisionReader,
     SPACE,
     resolveEmbeddingModel
   );
 
-  const rankQuery = () => (queryEsql as jest.Mock).mock.calls[0][0].query;
+  const rankCall = () => (queryEsql as jest.Mock).mock.calls[0][0];
+  const rankQuery = () => rankCall().query;
 
   beforeEach(() => {
     jest.clearAllMocks();
     resolveEmbeddingModel.mockResolvedValue({ kind: 'sparse' });
-    fetchLatestRevisionEntries.mockResolvedValue([{ esId: 'es-u1', doc: storedFeature }]);
+    fetchLatestRevisions.mockResolvedValue([storedFeature]);
     (queryEsql as jest.Mock).mockResolvedValue(emptyRankResponse);
   });
 
@@ -76,6 +78,17 @@ describe('IndicatorSearcher ranking function per embedding model', () => {
     expect(rankQuery().toRequest().params).toEqual(
       expect.arrayContaining([{ q: 'redis cache' }, { inference_id: '.jina-v5' }])
     );
+  });
+
+  it('prefilters on the latest revision ids in WHERE instead of a request filter', async () => {
+    resolveEmbeddingModel.mockResolvedValue({ kind: 'dense', inferenceId: '.jina-v5' });
+
+    await run();
+
+    const printed = rankQuery().print('basic');
+    expect(printed).toContain(`revision_id IN ("${storedFeature.revision_id}")`);
+    expect(printed.indexOf('revision_id IN')).toBeLessThan(printed.indexOf('FORK'));
+    expect(rankCall().filter).toBeUndefined();
   });
 
   it('ranks a sparse model with MATCH', async () => {

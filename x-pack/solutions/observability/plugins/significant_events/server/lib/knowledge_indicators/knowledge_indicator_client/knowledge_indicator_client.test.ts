@@ -13,7 +13,9 @@ import {
 } from './knowledge_indicator_client';
 import { computeFeatureUuid } from '@kbn/significant-events-schema';
 import {
+  computeRevisionId,
   type StoredFeatureKnowledgeIndicator,
+  type StoredKnowledgeIndicator,
   type StoredQueryKnowledgeIndicator,
   type StoredTombstone,
 } from '../data_stream';
@@ -59,7 +61,7 @@ function createFeatureDoc(
   overrides: Partial<StoredFeatureKnowledgeIndicator> & { slug?: string } = {}
 ): StoredFeatureKnowledgeIndicator {
   const { slug = 'feat-1', ...rest } = overrides;
-  return {
+  const doc = {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: featureUuid(slug),
     type: KI_TYPE_FEATURE,
@@ -75,7 +77,16 @@ function createFeatureDoc(
     },
     ...rest,
   };
+  return { revision_id: revisionIdOf(doc), ...doc };
 }
+
+const revisionIdOf = ({
+  'source.id': sourceId,
+  type,
+  id,
+  '@timestamp': timestamp,
+}: Pick<StoredKnowledgeIndicator, 'source.id' | 'type' | 'id' | '@timestamp'>): string =>
+  computeRevisionId({ sourceId, type, id, timestamp });
 
 function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   return createFeatureDoc({
@@ -783,10 +794,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
 
   const latestRevisionResponse = (
     docs: Array<StoredFeatureKnowledgeIndicator | StoredQueryKnowledgeIndicator>
-  ) => ({
-    hits: docs,
-    esIds: docs.map(({ id }, index) => `es-id-${id}-${index}`),
-  });
+  ) => ({ hits: docs, esIds: [] });
 
   const rankRequest = (
     rankEsql: jest.Mock,
@@ -798,6 +806,9 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     };
     return { ...composerQuery.toRequest(), filter };
   };
+
+  const revisionIdPredicate = (docs: StoredKnowledgeIndicator[]): string =>
+    `revision_id IN (${docs.map((doc) => `"${doc.revision_id}"`).join(', ')})`;
 
   it('uses only feature fields when type is [feature]', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
@@ -899,8 +910,9 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     );
     expect(request.query).toContain('SORT _score DESC | LIMIT 25');
     expect(request.params).toEqual([{ q: 'checkout service' }]);
-    expect(request.filter).toEqual({ ids: { values: [`es-id-${latest.id}-0`] } });
-    expect(request.query).not.toContain('id IN');
+    expect(request.query).toContain(revisionIdPredicate([latest]));
+    expect(request.filter).toBeUndefined();
+    expect(request.query).not.toMatch(/(?<!revision_)id IN/);
   });
 
   it('thresholds the normalized semantic branch before hybrid RRF fusion', async () => {
@@ -1052,9 +1064,8 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       const retryQuery = retryRequest.query;
       expect(retryQuery).toContain('WHERE _score >= 0 ');
       expect(retryQuery).not.toContain('0.15');
-      expect(retryRequest.filter).toEqual({
-        ids: { values: ['es-id-feat-semantic-0', 'es-id-feat-keyword-1'] },
-      });
+      expect(retryQuery).toContain(revisionIdPredicate([semanticOnly, keywordOnly]));
+      expect(retryRequest.filter).toBeUndefined();
       expect(hits.map((hit) => hit.type === 'feature' && hit.feature.uuid)).toEqual([
         'feat-semantic',
         'feat-keyword',
@@ -1116,7 +1127,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
 function createQueryDoc(
   overrides: Partial<StoredQueryKnowledgeIndicator> = {}
 ): StoredQueryKnowledgeIndicator {
-  return {
+  const doc = {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: 'query-1',
     type: KI_TYPE_QUERY,
@@ -1131,6 +1142,7 @@ function createQueryDoc(
     },
     ...overrides,
   };
+  return { revision_id: revisionIdOf(doc), ...doc };
 }
 
 describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {

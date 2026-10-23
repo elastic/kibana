@@ -28,18 +28,6 @@ describe('readSearchEmbeddingModel', () => {
     jest.clearAllMocks();
   });
 
-  it('reads a dense model shared by every backing index', async () => {
-    esClient.indices.getMapping.mockResolvedValue({
-      '.ds-ki-000001': indexWith(dense('.jina-v5')),
-      '.ds-ki-000002': indexWith(dense('.jina-v5')),
-    });
-
-    await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
-      kind: 'dense',
-      inferenceId: '.jina-v5',
-    });
-  });
-
   it('prefers search_inference_id', async () => {
     esClient.indices.getMapping.mockResolvedValue({
       '.ds-ki-000001': indexWith(dense('.jina-v5', { search_inference_id: 'jina-v5-query' })),
@@ -65,10 +53,11 @@ describe('readSearchEmbeddingModel', () => {
     });
   });
 
-  it('skips backing indices without model_settings', async () => {
+  it('reads the dense model agreed on by backing indices, skipping those without model_settings', async () => {
     esClient.indices.getMapping.mockResolvedValue({
       '.ds-ki-000001': indexWith({ type: 'semantic_text' }),
       '.ds-ki-000002': indexWith(dense('.jina-v5')),
+      '.ds-ki-000003': indexWith(dense('.jina-v5')),
     });
 
     await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({

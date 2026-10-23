@@ -38,6 +38,7 @@ import {
   QUERY_RULE_BACKED,
   QUERY_RULE_ID,
   QUERY_TYPE,
+  REVISION_ID,
   SEARCH_EMBEDDING,
   SOURCE_ID,
   TAGS,
@@ -269,42 +270,41 @@ export class IndicatorSearcher {
       ruleBackedFilter
     );
 
-    const latestRevisions = await this.revisionReader.fetchLatestRevisionEntries(
-      where,
-      postGroupingWhere
-    );
-    const docs = latestRevisions.map(({ doc }) => doc);
+    const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
     const docById = new Map(docs.map((d) => [`${d['source.id']}:${d.type}:${d.id}`, d]));
 
     if (docById.size === 0) {
       return { hits: [] };
     }
 
-    const latestRevisionIds = latestRevisions.map(({ esId }) => esId);
     const limit = options.limit ?? SEARCH_SIZE_LIMIT;
     // `buildRankQuery` issues its own FROM and bypasses `RevisionReader`, so the space
-    // filter has to be re-applied here.
+    // filter has to be re-applied here. The latest-revision restriction is a WHERE predicate, not
+    // a request `filter`: only WHERE conjuncts become `KNN` prefilters, and `_id` is not pushable.
     const phase2Where = andWhere(
-      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, options.types ?? [])),
+      combineWhere(
+        inPredicate(SOURCE_ID, sourceIds),
+        inPredicate(TYPE, options.types ?? []),
+        inPredicate(
+          REVISION_ID,
+          docs.map(({ revision_id: revisionId }) => revisionId)
+        )
+      ),
       inSpace(this.space)
     );
 
     const model: SearchEmbeddingModel =
       mode === 'keyword' ? { kind: 'unknown' } : await this.resolveEmbeddingModel();
-    const rankedRows = await this.rankWithTieFallback(
-      mode,
-      limit,
-      latestRevisionIds,
-      (semanticMinScore) =>
-        this.buildRankQuery(
-          mode,
-          phase2Where,
-          queryText,
-          options.types ?? [],
-          limit,
-          semanticMinScore,
-          model
-        )
+    const rankedRows = await this.rankWithTieFallback(mode, limit, (semanticMinScore) =>
+      this.buildRankQuery(
+        mode,
+        phase2Where,
+        queryText,
+        options.types ?? [],
+        limit,
+        semanticMinScore,
+        model
+      )
     );
 
     // Walk the ranked rows and surface each group once, in rank order. A row
@@ -353,16 +353,10 @@ export class IndicatorSearcher {
   private async rankWithTieFallback(
     mode: SearchMode,
     limit: number,
-    latestRevisionIds: string[],
     build: (semanticMinScore: number) => ComposerQuery
   ): Promise<RankedIndicatorRow[]> {
-    const filter = { ids: { values: latestRevisionIds } };
     const rankedRows = esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({
-        esClient: this.esClient,
-        query: build(this.config.semantic_min_score),
-        filter,
-      })
+      await queryEsql({ esClient: this.esClient, query: build(this.config.semantic_min_score) })
     );
     if (mode === 'keyword' || rankedRows.some((row) => row[RANK_LABEL_COLUMN] === SEMANTIC_LABEL)) {
       return rankedRows.slice(0, limit);
@@ -371,17 +365,15 @@ export class IndicatorSearcher {
       `KnowledgeIndicator ${mode} search: semantic branch contributed no rows above ${this.config.semantic_min_score}; retrying without the threshold`
     );
     const retriedRows = esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({ esClient: this.esClient, query: build(0), filter })
+      await queryEsql({ esClient: this.esClient, query: build(0) })
     );
     return retriedRows.slice(0, limit);
   }
 
   /**
-   * Dense `semantic_text` must rank with `KNN()`: ES|QL opens shard searches without a size
-   * (`DataNodeComputeHandler`), so `MATCH` on it becomes a knn with `k = DEFAULT_SIZE = 10` per
-   * shard whatever `LIMIT` says (`SemanticFieldMapper#semanticQuery` -> `KnnVectorQueryBuilder`),
-   * while `KNN()` takes `k` from `LIMIT` (`PushLimitToKnn`). Sparse has no such cap, and
-   * `TEXT_EMBEDDING` cannot target a sparse endpoint anyway.
+   * ES|QL shard searches carry no size, so `MATCH` on dense `semantic_text` compiles to a knn with
+   * `k = 10` per shard regardless of `LIMIT`; `KNN()` takes `k` from `LIMIT` (`PushLimitToKnn`).
+   * Sparse has no such cap, and `TEXT_EMBEDDING` cannot target a sparse endpoint.
    */
   private semanticCondition(queryText: string, model: SearchEmbeddingModel): SemanticCondition {
     const field = esql.col(SEARCH_EMBEDDING);

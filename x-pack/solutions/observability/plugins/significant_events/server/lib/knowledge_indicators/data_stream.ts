@@ -27,6 +27,7 @@ export const knowledgeIndicatorsMappings = {
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     id: mappings.keyword(),
+    revision_id: mappings.keyword(),
     type: mappings.keyword(),
     title: mappings.keyword(),
     description: mappings.text(),
@@ -76,8 +77,22 @@ export const knowledgeIndicatorsMappings = {
 interface StoredKiRevisionIdentity {
   '@timestamp': string;
   id: string;
+  revision_id: string;
   'source.id': string;
 }
+
+/** Per-revision key; stands in for `_id`, which ES|QL cannot push down as a filter. */
+export const computeRevisionId = ({
+  sourceId,
+  type,
+  id,
+  timestamp,
+}: {
+  sourceId: string;
+  type: KnowledgeIndicatorType;
+  id: string;
+  timestamp: string;
+}): string => `${sourceId}:${type}:${id}:${timestamp}`;
 
 export interface StoredFeature {
   type: string;
@@ -124,11 +139,8 @@ export interface StoredQueryKnowledgeIndicator extends StoredKiRevisionIdentity 
   query: StoredQuery;
 }
 
-export interface StoredTombstone {
-  '@timestamp': string;
-  id: string;
+export interface StoredTombstone extends StoredKiRevisionIdentity {
   type: KnowledgeIndicatorType;
-  'source.id': string;
   deleted: true;
 }
 
@@ -166,7 +178,7 @@ export const knowledgeIndicatorsDataStream: DataStreamDefinition<
   StoredKnowledgeIndicator & Record<string, unknown>
 > = {
   name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-  version: 4,
+  version: 5,
   hidden: true,
   template: {
     priority: 500,
