@@ -32,7 +32,7 @@ export type LogsBucket = EnvironmentAggregations & {
 /** One application in `spansSearch`. */
 export type SpansBucket = EnvironmentAggregations & {
   key: string;
-  doc_count: number;
+  requests: { doc_count: number };
   failed: { doc_count: number };
   lastSeen: { value: number | null };
 };

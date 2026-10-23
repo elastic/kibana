@@ -61,6 +61,16 @@ describe('getApplications', () => {
     ]);
   });
 
+  it('reports no unavailable source when every source loads', async () => {
+    const { unavailableSources } = await getApplications({
+      getOtelApplications: async () => result([app('shop', 'otel', 5)]),
+      getClassicApplications: async () => result([app('shop', 'classic', 20)]),
+      logger,
+    });
+
+    expect(unavailableSources).toEqual([]);
+  });
+
   it('merges the environments of every source, without duplicates, sorted', async () => {
     const { environments } = await getApplications({
       getOtelApplications: async () => result([], ['staging', 'production']),
@@ -125,6 +135,7 @@ describe('getApplications', () => {
 
     expect(response.applications).toEqual([app('shop', 'classic', 1)]);
     expect(response.environments).toEqual(['production']);
+    expect(response.unavailableSources).toEqual(['otel']);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security_exception'));
   });
 

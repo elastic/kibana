@@ -18,3 +18,4 @@ export const EVENT_WEB_VITAL = 'browser.web_vital';
 export const EVENT_EXCEPTION = 'exception';
 
 export const SPAN_KIND_CLIENT = 'Client';
+export const SPAN_STATUS_ERROR = 'Error';

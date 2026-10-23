@@ -15,6 +15,7 @@ import {
   RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  STATUS_CODE,
   TELEMETRY_SDK_LANGUAGE,
 } from '@kbn/apm-types';
 import type { CoreWebVital } from '../../../../common/core_web_vitals';
@@ -36,6 +37,7 @@ import {
   OTEL_LOGS_INDEX,
   OTEL_TRACES_INDEX,
   SPAN_KIND_CLIENT,
+  SPAN_STATUS_ERROR,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
 } from './field_names';
@@ -45,6 +47,11 @@ export interface SearchParams {
   end: number;
   /** Only this environment's data when set. */
   environment?: string;
+}
+
+export interface SpansSearchParams extends SearchParams {
+  /** The applications `logsSearch` found, so both searches cover the same ones. */
+  serviceNames: string[];
 }
 
 // `service.environment` aliases the deprecated `deployment.environment`; newer SDKs write the
@@ -74,6 +81,7 @@ const webVital = (vital: CoreWebVital) => ({
       filter: [
         ...termQuery(OTEL_EVENT_NAME, EVENT_WEB_VITAL),
         { term: { [WEB_VITAL_NAME]: { value: vital, case_insensitive: true } } },
+        { exists: { field: WEB_VITAL_VALUE } },
       ],
     },
   },
@@ -135,8 +143,16 @@ export const logsSearch = ({ start, end, environment }: SearchParams): estypes.S
   }),
 });
 
+// A request without a response (e.g. a network error) has no status code but an error span status.
+const requestWithoutResponse = termQuery(STATUS_CODE, SPAN_STATUS_ERROR);
+
 /** HTTP requests (client spans with a method) and the failed ones per application, from traces. */
-export const spansSearch = ({ start, end, environment }: SearchParams): estypes.SearchRequest => ({
+export const spansSearch = ({
+  start,
+  end,
+  environment,
+  serviceNames,
+}: SpansSearchParams): estypes.SearchRequest => ({
   index: OTEL_TRACES_INDEX,
   size: 0,
   track_total_hits: false,
@@ -152,12 +168,31 @@ export const spansSearch = ({ start, end, environment }: SearchParams): estypes.
   },
   aggs: applicationsByEnvironment(environment, {
     applications: {
-      terms: { field: SERVICE_NAME, size: MAX_APPLICATIONS_PER_SOURCE },
+      terms: { field: SERVICE_NAME, size: serviceNames.length, include: serviceNames },
       aggs: {
         ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
         lastSeen: LAST_SEEN_AGGREGATION,
-        // Failed: an HTTP error status (4xx or 5xx).
-        failed: { filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } } },
+        // Requests with a known outcome: a response status, or none because the request failed.
+        requests: {
+          filter: {
+            bool: {
+              should: [{ exists: { field: HTTP_RESPONSE_STATUS_CODE } }, ...requestWithoutResponse],
+              minimum_should_match: 1,
+            },
+          },
+        },
+        // Failed: an HTTP error status (4xx or 5xx), or no response.
+        failed: {
+          filter: {
+            bool: {
+              should: [
+                { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
+                ...requestWithoutResponse,
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
       },
     },
   }),

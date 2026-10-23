@@ -121,6 +121,14 @@ describe('GET /internal/digital_experience/applications', () => {
     expect(getApmIndices).not.toHaveBeenCalled();
   });
 
+  it('requires the Digital Experience and APM privileges, like the app', () => {
+    const { security } = applicationsRouteRepository[APPLICATIONS_ENDPOINT];
+
+    expect(security).toEqual({
+      authz: { requiredPrivileges: ['read_digital_experience', 'apm'] },
+    });
+  });
+
   it('validates that the range starts before it ends', () => {
     const { params } = applicationsRouteRepository[APPLICATIONS_ENDPOINT];
     const schema = params as unknown as {

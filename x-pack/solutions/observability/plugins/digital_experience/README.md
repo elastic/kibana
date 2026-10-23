@@ -20,16 +20,21 @@ entry; everyone else keeps the legacy entry. `/app/ux` stays reachable by URL.
 ### Applications (`/`)
 
 The monitored applications in the selected time range, served by
-`GET /internal/digital_experience/applications`.
+`GET /internal/digital_experience/applications`, which requires the Digital Experience and APM
+privileges like the app.
 
 - **Summary:** applications, page loads, JS errors per page load, failed HTTP requests and the
-  applications with a poor Core Web Vital, over every row that matches the filters.
+  applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
+  source; the search narrows only the table.
+- **Partial data:** when one source fails to load, a warning above the summary names it.
 - **Page loads chart:** page loads over time; drag over it to zoom into that range.
 - **Filters:** environment and source (kept in the URL), and a search on the name.
 - **Table:** per application, its source, page loads, JS errors per page load, LCP / INP / CLS / FCP /
   TTFB p75 colored by rating (with the good / needs improvement / poor shares in the tooltip), JS
-  errors, failed HTTP requests and when it was last seen. A column selector, kept in local storage,
-  hides FCP, TTFB and JS errors by default.
+  errors, failed HTTP requests and when it was last seen. Page loads, which the table is sorted by, is
+  always shown; a column selector, kept in local storage, hides FCP, TTFB and JS errors by default.
+- **Empty states:** with no applications at all, a link to the EDOT Browser docs; with none in the
+  selected environment, a button to show all environments.
 - With all sources, a name with data in both shows its EDOT Browser row with a "+ Classic RUM" hint
   that switches the list to the Classic RUM rows.
 

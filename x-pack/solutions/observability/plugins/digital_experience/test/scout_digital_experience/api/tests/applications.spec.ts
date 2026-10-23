@@ -17,6 +17,7 @@ const {
   APPLICATIONS_PATH,
   COMMON_HEADERS,
   DIGITAL_EXPERIENCE_ONLY_ROLE,
+  DIGITAL_EXPERIENCE_READ_ROLE,
   OTEL_APPS,
   SERVICE_NAME,
   STAGING_ENVIRONMENT,
@@ -35,7 +36,9 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
       });
 
       expect(response).toHaveStatusCode(200);
-      const { applications, environments } = response.body as ApplicationsResponse;
+      const { applications, environments, unavailableSources } =
+        response.body as ApplicationsResponse;
+      expect(unavailableSources).toStrictEqual([]);
       expect(environments).toStrictEqual(
         expect.arrayContaining(['production', STAGING_ENVIRONMENT])
       );
@@ -97,10 +100,22 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
     }
   );
 
+  apiTest('returns 403 without the APM privilege', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser(DIGITAL_EXPERIENCE_ONLY_ROLE);
+
+    const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(403);
+  });
+
   apiTest(
     'returns 403 without Elasticsearch details when no data can be read',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(DIGITAL_EXPERIENCE_ONLY_ROLE);
+      // The Kibana privileges of the app, without any index privilege.
+      const { cookieHeader } = await samlAuth.asInteractiveUser(DIGITAL_EXPERIENCE_READ_ROLE);
 
       const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },

@@ -11,7 +11,7 @@ import { withNotDefined } from '../../../lib/helpers/environment';
 import { toTimeSeries } from '../../../lib/helpers/time_series';
 import { SEARCH_SPAN_NAMES } from '../constants';
 import type { SourceApplications } from '../types';
-import type { SearchParams } from './search_requests';
+import type { SearchParams, SpansSearchParams } from './search_requests';
 import { logsSearch, spansSearch } from './search_requests';
 import type { LogsAggregations, SearchAggregations, SpansBucket } from './search_responses';
 import { environmentsOf, toApplication } from './to_application';
@@ -22,25 +22,40 @@ interface GetOtelApplicationsParams extends SearchParams {
   signal?: AbortSignal;
 }
 
+/** The HTTP requests of the given applications; none to search without applications. */
+const searchSpans = async (
+  esClient: ElasticsearchClient,
+  params: SpansSearchParams,
+  signal?: AbortSignal
+): Promise<SearchAggregations<SpansBucket> | undefined> => {
+  if (params.serviceNames.length === 0) {
+    return undefined;
+  }
+  const response = await esClient.search(spansSearch(params), { signal });
+  return response.aggregations as unknown as SearchAggregations<SpansBucket> | undefined;
+};
+
 const searchOtelApplications = async ({
   esClient,
   signal,
   ...searchParams
 }: GetOtelApplicationsParams): Promise<SourceApplications> => {
-  const [logsResponse, spansResponse] = await Promise.all([
-    esClient.search(logsSearch(searchParams), { signal }),
-    esClient.search(spansSearch(searchParams), { signal }),
-  ]);
+  // Not in parallel: each search caps its applications, so the spans search reads only the ones the
+  // logs search kept, or an application past the spans' cap would show no HTTP requests.
+  const logsResponse = await esClient.search(logsSearch(searchParams), { signal });
   const logs = logsResponse.aggregations as unknown as LogsAggregations | undefined;
-  const spans = spansResponse.aggregations as unknown as
-    | SearchAggregations<SpansBucket>
-    | undefined;
+  const logsBuckets = logs?.inEnvironment.applications.buckets ?? [];
 
-  // The logs define the applications; spans only add their HTTP requests.
+  const spans = await searchSpans(
+    esClient,
+    { ...searchParams, serviceNames: logsBuckets.map(({ key }) => key) },
+    signal
+  );
+
   const spansByService = new Map(
     (spans?.inEnvironment.applications.buckets ?? []).map((bucket) => [bucket.key, bucket])
   );
-  const applications = (logs?.inEnvironment.applications.buckets ?? []).map((bucket) =>
+  const applications = logsBuckets.map((bucket) =>
     toApplication(bucket, spansByService.get(bucket.key))
   );
 

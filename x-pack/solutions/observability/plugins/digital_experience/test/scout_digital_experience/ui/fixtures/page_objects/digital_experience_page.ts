@@ -84,7 +84,10 @@ export class DigitalExperiencePage {
   }
 
   applicationLink(serviceName: string): Locator {
-    return this.applicationsTable.rows.getByRole('link', { name: serviceName, exact: true });
+    // By text, not accessible name: a search highlight adds screen-reader markers to the name.
+    return this.applicationsTable.rows
+      .getByTestId('digitalExperienceApplicationLink')
+      .filter({ hasText: serviceName });
   }
 
   applicationRow(serviceName: string): Locator {

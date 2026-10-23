@@ -8,7 +8,7 @@
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ApplicationsResponse } from '../../../common/types/applications';
-import { DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
+import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { getApplications } from './get_applications';
 import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
@@ -25,7 +25,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
   endpoint: APPLICATIONS_ENDPOINT,
   options: { access: 'internal' },
   security: {
-    authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] },
+    authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read, APM_API_PRIVILEGE] },
   },
   params: lazySchema(() =>
     z.object({

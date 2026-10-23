@@ -110,5 +110,6 @@ export const getApplications = async ({
     applications: loaded.flatMap(({ applications }) => applications).sort(byPageLoadsThenName),
     environments: sortEnvironments(new Set(loaded.flatMap(({ environments }) => environments))),
     pageLoadsOverTime,
+    unavailableSources: failures.map(({ source }) => source),
   };
 };

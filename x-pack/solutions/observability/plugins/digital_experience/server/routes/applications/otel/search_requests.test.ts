@@ -18,6 +18,8 @@ const applicationsOf = (request: ReturnType<typeof logsSearch>) =>
 
 const PARAMS = { start: 10, end: 20 };
 
+const SPANS_PARAMS = { ...PARAMS, serviceNames: ['web', 'shop'] };
+
 describe('logsSearch', () => {
   it('reads only the events the metrics count', () => {
     expect(logsSearch(PARAMS).query?.bool?.filter).toContainEqual({
@@ -33,6 +35,16 @@ describe('logsSearch', () => {
     });
     expect(aggs.jsErrors).toEqual({
       filter: { bool: { filter: [{ term: { event_name: 'exception' } }] } },
+    });
+  });
+
+  it('counts only the web vital samples with a value', () => {
+    const { aggs } = applicationsOf(logsSearch(PARAMS)) as unknown as {
+      aggs: { lcp: { filter: { bool: { filter: unknown[] } } } };
+    };
+
+    expect(aggs.lcp.filter.bool.filter).toContainEqual({
+      exists: { field: 'browser.web_vital.value' },
     });
   });
 
@@ -69,22 +81,45 @@ describe('logsSearch', () => {
 
 describe('spansSearch', () => {
   it('reads only the HTTP requests the browser makes', () => {
-    const filter = spansSearch(PARAMS).query?.bool?.filter;
+    const filter = spansSearch(SPANS_PARAMS).query?.bool?.filter;
 
     expect(filter).toContainEqual({ term: { kind: 'Client' } });
     expect(filter).toContainEqual({ exists: { field: 'http.request.method' } });
   });
 
-  it('counts a request as failed from an HTTP status of 400', () => {
-    expect(applicationsOf(spansSearch(PARAMS)).aggs.failed).toEqual({
-      filter: { range: { 'http.response.status_code': { gte: 400 } } },
+  it('counts the requests with a response status or an error span status', () => {
+    expect(applicationsOf(spansSearch(SPANS_PARAMS)).aggs.requests).toEqual({
+      filter: {
+        bool: {
+          should: [
+            { exists: { field: 'http.response.status_code' } },
+            { term: { 'status.code': 'Error' } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
     });
   });
 
-  it('keeps every application, without ordering by page loads', () => {
-    expect(applicationsOf(spansSearch(PARAMS)).terms).toEqual({
+  it('counts a request as failed from an HTTP status of 400 or an error span status', () => {
+    expect(applicationsOf(spansSearch(SPANS_PARAMS)).aggs.failed).toEqual({
+      filter: {
+        bool: {
+          should: [
+            { range: { 'http.response.status_code': { gte: 400 } } },
+            { term: { 'status.code': 'Error' } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    });
+  });
+
+  it('reads only the applications the logs search found', () => {
+    expect(applicationsOf(spansSearch(SPANS_PARAMS)).terms).toEqual({
       field: 'service.name',
-      size: 1000,
+      size: 2,
+      include: ['web', 'shop'],
     });
   });
 });

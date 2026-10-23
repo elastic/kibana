@@ -37,7 +37,7 @@ export interface ScoreVital {
 export interface ApplicationSummary {
   serviceName: string;
   source: ApplicationSource;
-  /** Environments the application reported in the time range; empty when none is set. */
+  /** Environments the application reported in the time range, up to 10; empty when none is set. */
   environments: string[];
   pageLoads: { count: number };
   webVitals: {
@@ -65,10 +65,15 @@ export interface ApplicationSummary {
 
 export interface ApplicationsResponse {
   applications: ApplicationSummary[];
-  /** Every environment in the time range, whatever the `environment` filter, for the picker. */
+  /**
+   * The environments in the time range, whatever the `environment` filter, for the picker; up to
+   * 100 per source, the most used first.
+   */
   environments: string[];
   /** Page loads over the time range in the selected environment, per source. */
   pageLoadsOverTime: PageLoadsOverTime;
+  /** Sources that failed to load while others did, so their rows are missing; empty when none. */
+  unavailableSources: ApplicationSource[];
 }
 
 /** The documents in one bucket of a histogram over the time range. */

@@ -26,7 +26,7 @@ export const environmentsOf = (
 
 /** One application from its logs bucket and, when it made HTTP requests, its spans bucket. */
 export const toApplication = (logs: LogsBucket, spans?: SpansBucket): ApplicationSummary => {
-  const requests = spans?.doc_count ?? 0;
+  const requests = spans?.requests.doc_count ?? 0;
   const failedRequests = spans?.failed.doc_count ?? 0;
   return {
     serviceName: logs.key,
