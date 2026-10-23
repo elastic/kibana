@@ -9,15 +9,15 @@ import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v
 import { getEpisodeHeaderBadges } from './get_episode_header_badges';
 
 describe('getEpisodeHeaderBadges', () => {
-  it('maps each status to the expected badge color and label', () => {
+  it('maps each status to a hollow custom badge and label', () => {
     const statuses = [
-      { status: ALERT_EPISODE_STATUS.ACTIVE, color: 'danger', label: 'Active' },
-      { status: ALERT_EPISODE_STATUS.PENDING, color: 'warning', label: 'Pending' },
-      { status: ALERT_EPISODE_STATUS.RECOVERING, color: 'primary', label: 'Recovering' },
-      { status: ALERT_EPISODE_STATUS.INACTIVE, color: 'success', label: 'Inactive' },
+      { status: ALERT_EPISODE_STATUS.ACTIVE, label: 'Active' },
+      { status: ALERT_EPISODE_STATUS.PENDING, label: 'Pending' },
+      { status: ALERT_EPISODE_STATUS.RECOVERING, label: 'Recovering' },
+      { status: ALERT_EPISODE_STATUS.INACTIVE, label: 'Inactive' },
     ] as const;
 
-    for (const { status, color, label } of statuses) {
+    for (const { status, label } of statuses) {
       const badges = getEpisodeHeaderBadges({
         status,
         severity: undefined,
@@ -28,8 +28,9 @@ describe('getEpisodeHeaderBadges', () => {
       expect(badges).toEqual([
         expect.objectContaining({
           label,
-          color,
+          color: 'hollow',
           'data-test-subj': 'alertingV2EpisodeDetailsHeaderStatusBadge',
+          renderCustomBadge: expect.any(Function),
         }),
       ]);
     }
@@ -67,7 +68,8 @@ describe('getEpisodeHeaderBadges', () => {
 
     expect(badges[0]).toMatchObject({
       label: 'Inactive',
-      color: 'success',
+      color: 'hollow',
+      renderCustomBadge: expect.any(Function),
     });
   });
 

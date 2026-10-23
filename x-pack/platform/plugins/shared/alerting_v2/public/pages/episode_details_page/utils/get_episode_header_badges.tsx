@@ -24,6 +24,7 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from '@kbn/alerting-v2-episodes-ui/components/severity/severity_utils';
+import { AlertEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/status/status_badge';
 import { FlappingBadge } from '@kbn/alerting-v2-episodes-ui/components/flapping/flapping_badge';
 import { FLAPPING_BADGE_LABEL } from '@kbn/alerting-v2-episodes-ui/components/flapping/translations';
 import { isEpisodeSnoozed } from '@kbn/alerting-v2-episodes-ui/utils/is_episode_snoozed';
@@ -37,24 +38,12 @@ export interface EpisodeHeaderBadgesArgs {
   isFlapping?: boolean;
 }
 
-type AppHeaderBadgeColor = NonNullable<AppHeaderBadge['color']>;
-
-const STATUS_BADGE_COLORS: Record<AlertEpisodeStatus, AppHeaderBadgeColor> = {
-  [ALERT_EPISODE_STATUS.INACTIVE]: 'success',
-  [ALERT_EPISODE_STATUS.PENDING]: 'warning',
-  [ALERT_EPISODE_STATUS.ACTIVE]: 'danger',
-  [ALERT_EPISODE_STATUS.RECOVERING]: 'primary',
-};
-
 const STATUS_BADGE_LABELS: Record<AlertEpisodeStatus, string> = {
   [ALERT_EPISODE_STATUS.INACTIVE]: i18n.STATUS_BADGE_INACTIVE,
   [ALERT_EPISODE_STATUS.PENDING]: i18n.STATUS_BADGE_PENDING,
   [ALERT_EPISODE_STATUS.ACTIVE]: i18n.STATUS_BADGE_ACTIVE,
   [ALERT_EPISODE_STATUS.RECOVERING]: i18n.STATUS_BADGE_RECOVERING,
 };
-
-const getStatusBadgeColor = (status: AlertEpisodeStatus): AppHeaderBadgeColor =>
-  STATUS_BADGE_COLORS[status] ?? 'hollow';
 
 const getStatusBadgeLabel = (status: AlertEpisodeStatus): string =>
   STATUS_BADGE_LABELS[status] ?? i18n.STATUS_BADGE_UNKNOWN;
@@ -116,6 +105,9 @@ const renderSeverityBadge =
 
 const renderFlappingBadge = (_props: { badgeText: string }) => <FlappingBadge />;
 
+const renderStatusBadge = (status: AlertEpisodeStatus) => () =>
+  <AlertEpisodeStatusBadge status={status} />;
+
 // The app header caps badges at three, so status/severity/action badges
 // would otherwise be crowded out by a variable number of tag badges.
 export const getEpisodeHeaderBadges = ({
@@ -131,8 +123,9 @@ export const getEpisodeHeaderBadges = ({
   if (effectiveStatus) {
     badges.push({
       label: getStatusBadgeLabel(effectiveStatus),
-      color: getStatusBadgeColor(effectiveStatus),
+      color: 'hollow',
       'data-test-subj': 'alertingV2EpisodeDetailsHeaderStatusBadge',
+      renderCustomBadge: renderStatusBadge(effectiveStatus),
     });
   }
 
