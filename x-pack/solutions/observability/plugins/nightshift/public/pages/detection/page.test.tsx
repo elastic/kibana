@@ -124,6 +124,29 @@ describe('DetectionPage', () => {
     expect(screen.getByText('detections')).toBeInTheDocument();
   });
 
+  it('moves the detection status above the entities rail while the tab body scrolls', async () => {
+    renderPage();
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    const tabBody = screen.getByTestId('nightshiftDetectionTabBody');
+    const fullSlot = screen.getByTestId('nightshiftDetectionOverviewFullSlot');
+    const compactSlot = screen.getByTestId('nightshiftDetectionOverviewCompactSlot');
+
+    expect(fullSlot).not.toHaveAttribute('data-collapsed');
+    expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
+
+    Object.defineProperty(tabBody, 'scrollTop', { configurable: true, value: 9 });
+    fireEvent.scroll(tabBody);
+
+    expect(fullSlot).toHaveAttribute('data-collapsed', 'true');
+    expect(compactSlot).not.toHaveAttribute('data-collapsed');
+
+    Object.defineProperty(tabBody, 'scrollTop', { configurable: true, value: 0 });
+    fireEvent.scroll(tabBody);
+
+    expect(fullSlot).not.toHaveAttribute('data-collapsed');
+    expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
+  });
+
   it('shows the overview error instead of zero counts', async () => {
     mockUseDetectionOverview.mockReturnValue({
       data: undefined,

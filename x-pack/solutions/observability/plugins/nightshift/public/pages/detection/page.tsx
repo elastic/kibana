@@ -58,6 +58,9 @@ const SignalsTab = React.lazy(() =>
   import('./signals/signals_tab').then(({ SignalsTab: Tab }) => ({ default: Tab }))
 );
 
+const OVERVIEW_TRANSITION_MS = 240;
+const OVERVIEW_COMPACT_SCROLL_PX = 8;
+
 export type DetectionPageHeaderProps = Pick<
   NightshiftAppHeaderProps,
   | 'onSourcesClick'
@@ -87,6 +90,11 @@ export const DetectionPage = ({
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
   const selection = useEntitySelection();
+  const [isOverviewCompact, setIsOverviewCompact] = React.useState(false);
+  React.useEffect(() => setIsOverviewCompact(false), [tab]);
+  const handleTabBodyScroll = React.useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    setIsOverviewCompact(event.currentTarget.scrollTop > OVERVIEW_COMPACT_SCROLL_PX);
+  }, []);
   // Tab switches keep every filter, so returning to a tab restores it; only pages and flyouts reset.
   const tabParams = new URLSearchParams(location.search);
   [
@@ -98,6 +106,34 @@ export const DetectionPage = ({
   tabParams.set(RANGE_FROM_QUERY_PARAM, timeRange.from);
   tabParams.set(RANGE_TO_QUERY_PARAM, timeRange.to);
   const tabSearch = `?${tabParams.toString()}`;
+  const overviewProps = {
+    status: maintenanceStatus.data,
+    isStatusLoading: maintenanceStatus.isLoading,
+    isStatusError: maintenanceStatus.isError,
+    counts: overview.data,
+    isCountsLoading: overview.isLoading,
+    isCountsError: overview.isError,
+    onRetry: () => void overview.refetch(),
+  };
+  const overviewSlotStyles = (expanded: boolean, spaceAfter = false) => css`
+    display: grid;
+    grid-template-rows: ${expanded ? '1fr' : '0fr'};
+    opacity: ${expanded ? 1 : 0};
+    visibility: ${expanded ? 'visible' : 'hidden'};
+    margin-block-end: ${expanded && spaceAfter ? euiTheme.size.m : 0};
+    transition: grid-template-rows ${OVERVIEW_TRANSITION_MS}ms ease,
+      opacity ${OVERVIEW_TRANSITION_MS}ms ease, margin-block-end ${OVERVIEW_TRANSITION_MS}ms ease,
+      visibility 0s linear ${expanded ? '0s' : `${OVERVIEW_TRANSITION_MS}ms`};
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    > * {
+      min-height: 0;
+      overflow: hidden;
+    }
+  `;
 
   return (
     <div
@@ -142,16 +178,16 @@ export const DetectionPage = ({
           `,
         }}
       >
-        <DetectionOverview
-          status={maintenanceStatus.data}
-          isStatusLoading={maintenanceStatus.isLoading}
-          isStatusError={maintenanceStatus.isError}
-          counts={overview.data}
-          isCountsLoading={overview.isLoading}
-          isCountsError={overview.isError}
-          onRetry={() => void overview.refetch()}
-        />
-        <EuiSpacer size="m" />
+        <div
+          css={overviewSlotStyles(!isOverviewCompact)}
+          data-test-subj="nightshiftDetectionOverviewFullSlot"
+          data-collapsed={isOverviewCompact ? 'true' : undefined}
+        >
+          <div>
+            <DetectionOverview {...overviewProps} />
+            <EuiSpacer size="m" />
+          </div>
+        </div>
         <EuiFlexGroup
           gutterSize="l"
           alignItems="stretch"
@@ -163,10 +199,21 @@ export const DetectionPage = ({
           <EuiFlexItem
             grow={false}
             css={css`
+              display: flex;
+              flex-direction: column;
               width: ${euiTheme.base * 16}px;
               min-height: 0;
             `}
           >
+            <div
+              css={overviewSlotStyles(isOverviewCompact, true)}
+              data-test-subj="nightshiftDetectionOverviewCompactSlot"
+              data-collapsed={!isOverviewCompact ? 'true' : undefined}
+            >
+              <div>
+                <DetectionOverview {...overviewProps} compact />
+              </div>
+            </div>
             <EntitiesPanel
               timeRange={timeRange}
               selection={selection}
@@ -206,6 +253,8 @@ export const DetectionPage = ({
                 min-height: 0;
                 overflow: auto;
               `}
+              data-test-subj="nightshiftDetectionTabBody"
+              onScroll={handleTabBodyScroll}
             >
               <React.Suspense
                 fallback={
