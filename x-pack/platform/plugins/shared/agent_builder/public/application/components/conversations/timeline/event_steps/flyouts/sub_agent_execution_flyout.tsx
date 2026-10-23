@@ -20,6 +20,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
@@ -47,6 +48,21 @@ const executionIdLabel = i18n.translate(
   'xpack.agentBuilder.eventSteps.subAgentExecutionFlyout.executionIdLabel',
   { defaultMessage: 'Execution ID' }
 );
+
+const getStepStatus = ({
+  hasError,
+  isStopped,
+  isLoading,
+}: {
+  hasError: boolean;
+  isStopped: boolean;
+  isLoading: boolean;
+}): EuiStepStatus => {
+  if (hasError) return 'danger';
+  if (isStopped) return 'incomplete';
+  if (isLoading) return 'loading';
+  return 'complete';
+};
 
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
@@ -102,26 +118,18 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       : []),
     {
       title: executionLabel,
-      status: (hasError
-        ? 'danger'
-        : isRunStopped
-        ? 'incomplete'
-        : isRunning && !isCompleted
-        ? 'loading'
-        : 'complete') as 'danger' | 'incomplete' | 'loading' | 'complete',
+      status: getStepStatus({
+        hasError,
+        isStopped: isRunStopped,
+        isLoading: isRunning && !isCompleted,
+      }),
       children: <EventSteps steps={executionSteps} isAborted={isStopped} />,
     },
     ...(!isRunning || displayMessage
       ? [
           {
             title: resultLabel,
-            status: (hasError
-              ? 'danger'
-              : isRunStopped
-              ? 'incomplete'
-              : isRunning
-              ? 'loading'
-              : 'complete') as 'danger' | 'incomplete' | 'loading' | 'complete',
+            status: getStepStatus({ hasError, isStopped: isRunStopped, isLoading: isRunning }),
             children: (
               <>
                 {hasError ? (
