@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import {
-  is,
-  occurrencesBudgetingMethodSchemaZod,
-  timeslicesBudgetingMethodSchemaZod,
-} from '@kbn/slo-schema';
 import type { SLODefinition } from '../../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../../domain/services/get_delay_in_seconds_from_slo';
 
@@ -58,7 +53,7 @@ export function buildBurnRateAgg(
           '@timestamp': aggKeyToRangeMap[aggKey](slo),
         },
       },
-      ...(is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'occurrences' && {
         aggs: {
           goodEvents: {
             sum: {
@@ -72,7 +67,7 @@ export function buildBurnRateAgg(
           },
         },
       }),
-      ...(is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'timeslices' && {
         aggs: {
           goodEvents: {
             sum: {

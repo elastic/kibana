@@ -7,12 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ALL_VALUE,
-  is,
-  apmTransactionErrorRateIndicatorSchemaZod,
-  timeslicesBudgetingMethodSchemaZod,
-} from '@kbn/slo-schema';
+import { ALL_VALUE, is, apmTransactionErrorRateIndicatorSchemaZod } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -153,7 +148,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           match_all: {},
         },
       },
-      ...(is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'timeslices' && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {

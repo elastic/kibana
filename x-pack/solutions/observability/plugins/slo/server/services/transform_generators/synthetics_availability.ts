@@ -8,12 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
-import {
-  ALL_VALUE,
-  is,
-  syntheticsAvailabilityIndicatorSchemaZod,
-  timeslicesBudgetingMethodSchemaZod,
-} from '@kbn/slo-schema';
+import { ALL_VALUE, is, syntheticsAvailabilityIndicatorSchemaZod } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOPipelineId,
@@ -179,7 +174,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
           },
         },
       },
-      ...(is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'timeslices' && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {

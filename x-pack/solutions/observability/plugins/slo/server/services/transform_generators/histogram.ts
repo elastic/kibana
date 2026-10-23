@@ -7,11 +7,7 @@
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { HistogramIndicator } from '@kbn/slo-schema';
-import {
-  is,
-  histogramIndicatorSchemaZod,
-  timeslicesBudgetingMethodSchemaZod,
-} from '@kbn/slo-schema';
+import { is, histogramIndicatorSchemaZod } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -87,7 +83,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
         type: 'total',
         aggregationKey: 'slo.denominator',
       }),
-      ...(is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'timeslices' && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {
