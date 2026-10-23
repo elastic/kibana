@@ -1,6 +1,6 @@
 # Streams Development Guide
 
-This document explains how to develop the current ("new experience") of Streams — unit-scoped canvas, YAML unit model, and the Kibana unit APIs.
+This document explains how to develop the current ("new experience") of Streams — unit-scoped map, YAML unit model, and the Kibana unit APIs.
 
 Legacy wired / classic / query streams are documented in [`LEGACY_DEVELOPMENT.md`](./LEGACY_DEVELOPMENT.md).
 
@@ -13,7 +13,7 @@ Two layers of flags exist. **Kibana config** (`kibana.dev.yml`) is evaluated at 
 ### Kibana config (`kibana.dev.yml`)
 
 ```yaml
-# Registers the canvas saved object types. Required for unit GET/PUT.
+# Registers the Map saved object types. Required for unit GET/PUT.
 # Restart Kibana after changing it.
 xpack.streams.canvas.enabled: true
 
@@ -33,9 +33,9 @@ uiSettings.overrides:
 | Flag | What it actually gates |
 | --- | --- |
 | `xpack.streams.canvas.enabled` | Saved object **registration** for `streams-configuration` and `streams-ui-metadata` ([Scenario B WIP](https://www.elastic.co/docs/extend/kibana/key-concepts/saved-objects/validate#saved-objects-wip-types-scenario-b)). |
-| `observability:streamsEnableCanvas` | Unit HTTP APIs (`GET`/`PUT`/`POST …/_reset` on `/internal/streams/unit/{id}`) and the Canvas UI. |
+| `observability:streamsEnableCanvas` | Unit HTTP APIs (`GET`/`PUT`/`POST …/_reset` on `/internal/streams/unit/{id}`) and the Map UI. |
 
-You need both on for a working local canvas. If only the uiSetting is on, the APIs return 404-style "not enabled" or fail when writing because the types were never registered.
+You need both on for a working local Map. If only the uiSetting is on, the APIs return 404-style "not enabled" or fail when writing because the types were never registered.
 
 ### Advanced Settings (`uiSettings`)
 
@@ -43,15 +43,15 @@ Registered in `server/feature_flags.ts`. All `requiresPageReload: true`.
 
 | Setting | Default | UI-editable | Purpose |
 | --- | --- | --- | --- |
-| `observability:streamsEnableCanvas` | `false` | No (`readonlyMode: ui`) | New Streams Canvas + unit APIs |
+| `observability:streamsEnableCanvas` | `false` | No (`readonlyMode: ui`) | New Streams Map + unit APIs |
 
 Settings marked UI-readonly can only be turned on through `uiSettings.overrides` in `kibana.yml` / `kibana.dev.yml`.
 
 ## Access via URL
 
-With the feature flags enabled you can then access the "new experience" via `/app/streams/new-experience/`.
+With the feature flags enabled you can then access the "new experience" via `/app/streams/new-experience/map`.
 
-## Canvas saved objects (WIP)
+## Map saved objects (WIP)
 
 `streams-configuration` and `streams-ui-metadata` are work-in-progress types registered **conditionally** ([Scenario B](https://www.elastic.co/docs/extend/kibana/key-concepts/saved-objects/validate#saved-objects-wip-types-scenario-b)): only when `xpack.streams.canvas.enabled` is `true`. They are absent from Serverless / CI / production while the flag stays off, so model version 1 can still change.
 
@@ -127,7 +127,7 @@ The distributor's main branch ignores `credentials` on validate and cannot compi
 
 Kibana re-seals a unit's secrets only when the unit is saved. A unit that is not saved again after a key rotation keeps blobs under the previous kid, which the collector still accepts while that key stays in the Secret.
 
-### Reset canvas saved objects
+### Reset map saved objects
 
 These types are `hidden: true`, so they do not appear in Stack Management and Cloud Console cannot search `.kibana`. Reset through the unit API:
 
@@ -143,12 +143,12 @@ That deletes the configuration and UI metadata saved objects in the current spac
 
 | `Content-Type` | Body |
 | --- | --- |
-| `application/json` | `{ unit, ui_metadata, secrets? }` envelope (Canvas / Dev Tools). |
-| `application/yaml` (also `text/yaml`, `application/x-yaml`) | The authored unit document itself (`sources` / `destinations` / `pipelines`). Do **not** wrap it in `{ unit: … }` and do **not** jsonify it first. YAML cannot set `ui_metadata` or `secrets`; stored canvas layout and secrets are kept (stale node metadata is still pruned). |
+| `application/json` | `{ unit, ui_metadata, secrets? }` envelope (Map / Dev Tools). |
+| `application/yaml` (also `text/yaml`, `application/x-yaml`) | The authored unit document itself (`sources` / `destinations` / `pipelines`). Do **not** wrap it in `{ unit: … }` and do **not** jsonify it first. YAML cannot set `ui_metadata` or `secrets`; stored map layout and secrets are kept (stale node metadata is still pruned). |
 
-A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, validate is skipped and `compiled_config` is omitted.
+A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, validate is skipped and `compiled_config` is omitted. If the unit published but the canvas layout write failed, the response includes `ui_metadata_not_persisted: true`.
 
-### JSON envelope (Canvas)
+### JSON envelope (Map)
 
 ```
 PUT kbn:/internal/streams/unit/default
@@ -282,7 +282,8 @@ The full UI-engineer runbook (kind, two Tilts, serverless ES, Kibana, then one s
 
 ```sh
 ./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh status
-./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh
+./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh setup
+./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh seed
 ```
 
 Login is `elastic_serverless` / `changeme`.

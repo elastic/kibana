@@ -851,16 +851,6 @@
     }
   },
   {
-    "id": "security-detection-platform",
-    "name": "Security Detection Platform",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-platform"
-    }
-  },
-  {
     "id": "security-detection-rule-management",
     "name": "Security Detection Rule Management",
     "areas": [
