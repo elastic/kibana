@@ -215,9 +215,18 @@ describe('pollEsNodesClockSkew', () => {
 
   const respond = (timestamp: number) => async () => statsResponse(timestamp);
 
-  it('checks every ten minutes, logs skew once, reminds after an hour, and logs recovery once', async () => {
+  it('checks every ten minutes, logs skew once, stays quiet through failed checks, reminds after an hour, and logs recovery once', async () => {
+    const skewed = respond(kibanaTime - 61_000);
     const stoppedAt = await runRequests([
-      ...Array<() => Promise<unknown>>(7).fill(respond(kibanaTime - 61_000)),
+      skewed,
+      skewed,
+      async () => {
+        throw new Error('mock stats request error');
+      },
+      async () => ({ nodes: { 'node-0': {} } }),
+      skewed,
+      skewed,
+      skewed,
       respond(kibanaTime),
       respond(kibanaTime),
     ]);
