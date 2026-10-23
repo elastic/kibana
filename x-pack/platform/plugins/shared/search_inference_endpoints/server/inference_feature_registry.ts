@@ -6,14 +6,25 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceFeatureConfig, RegisterResult } from './types';
-import { validateFeature } from './utils/validate_feature';
+import type {
+  InferenceFeatureConfig,
+  RecommendedEndpoint,
+  RecommendedEndpointInput,
+  RegisteredInferenceFeature,
+  RegisterResult,
+} from './types';
+import { validateFeature, validateRecommendedEndpoints } from './utils/validate_feature';
+
+const normalizeRecommendedEndpoints = (
+  endpoints: RecommendedEndpointInput[]
+): RecommendedEndpoint[] =>
+  endpoints.map((endpoint) => (typeof endpoint === 'string' ? { id: endpoint } : endpoint));
 
 /**
  * Registry for inference features. Features can be registered and queried at any time.
  */
 export class InferenceFeatureRegistry {
-  private features: Map<string, InferenceFeatureConfig> = new Map();
+  private features: Map<string, RegisteredInferenceFeature> = new Map();
   private readonly logger: Logger;
 
   constructor(logger: Logger) {
@@ -49,16 +60,19 @@ export class InferenceFeatureRegistry {
       };
     }
 
-    this.features.set(feature.featureId, feature);
+    this.features.set(feature.featureId, {
+      ...feature,
+      recommendedEndpoints: normalizeRecommendedEndpoints(feature.recommendedEndpoints),
+    });
     return { ok: true };
   }
 
   /**
    * Returns all registered features.
    *
-   * @returns An array of all registered {@link InferenceFeatureConfig} entries.
+   * @returns An array of all {@link RegisteredInferenceFeature} entries.
    */
-  getAll(): InferenceFeatureConfig[] {
+  getAll(): RegisteredInferenceFeature[] {
     return [...this.features.values()];
   }
 
@@ -66,9 +80,9 @@ export class InferenceFeatureRegistry {
    * Returns a single feature by its ID, or `undefined` if not found.
    *
    * @param featureId - The ID of the feature to retrieve.
-   * @returns The matching {@link InferenceFeatureConfig}, or `undefined`.
+   * @returns The matching {@link RegisteredInferenceFeature}, or `undefined`.
    */
-  get(featureId: string): InferenceFeatureConfig | undefined {
+  get(featureId: string): RegisteredInferenceFeature | undefined {
     return this.features.get(featureId);
   }
 
@@ -76,10 +90,10 @@ export class InferenceFeatureRegistry {
    * Replaces the recommended endpoints for an already-registered feature.
    *
    * @param featureId - The ID of the feature to update.
-   * @param endpoints - Non-empty list of endpoint IDs to set as recommended.
+   * @param endpoints - Non-empty list of endpoint IDs or `{ id, parameters }` entries to set as recommended.
    * @throws if the feature is not found or the endpoint list is invalid.
    */
-  updateRecommendedEndpoints(featureId: string, endpoints: string[]): void {
+  updateRecommendedEndpoints(featureId: string, endpoints: RecommendedEndpointInput[]): void {
     const feature = this.features.get(featureId);
     if (!feature) {
       throw new Error(`feature "${featureId}" not found.`);
@@ -87,12 +101,13 @@ export class InferenceFeatureRegistry {
     if (endpoints.length === 0) {
       throw new Error('endpoints must not be empty.');
     }
-    if (endpoints.some((endpoint) => !endpoint.trim())) {
-      throw new Error('endpoints must not contain empty strings.');
-    }
-    this.features.set(featureId, { ...feature, recommendedEndpoints: endpoints });
+    validateRecommendedEndpoints(endpoints);
+    const recommendedEndpoints = normalizeRecommendedEndpoints(endpoints);
+    this.features.set(featureId, { ...feature, recommendedEndpoints });
     this.logger.debug(
-      `Updated recommended endpoints for "${featureId}": [${endpoints.join(', ')}]`
+      `Updated recommended endpoints for "${featureId}": [${recommendedEndpoints
+        .map(({ id }) => id)
+        .join(', ')}]`
     );
   }
 }

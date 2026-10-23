@@ -16,7 +16,7 @@ import {
   REMOTE_GROUP_ID,
 } from './grid_items_by_group';
 import type { OverviewStatusMetaData } from '../../types';
-import { WrappedHelper } from '../../../../../utils/testing';
+import { HookWrapper } from '../../../../../utils/testing/hook_helpers';
 import { selectOverviewGroupBy, selectServiceLocationsState } from '../../../../../state';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { useFilters } from '../../../common/monitor_filters/use_filters';
@@ -84,9 +84,9 @@ const setupSelectors = (groupField: string, allConfigs: OverviewStatusMetaData[]
 
 const renderGrid = () =>
   render(
-    <WrappedHelper>
+    <HookWrapper>
       <GridItemsByGroup setFlyoutConfigCallback={jest.fn()} view="cardView" />
-    </WrappedHelper>
+    </HookWrapper>
   );
 
 const idsIn = (groupId: string) => {

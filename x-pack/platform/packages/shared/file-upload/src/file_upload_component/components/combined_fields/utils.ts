@@ -162,7 +162,7 @@ export function createSemanticTextCombinedField(
 }
 
 export function getNameCollisionMsg(name: string) {
-  return i18n.translate('xpack.dataVisualizer.nameCollisionMsg', {
+  return i18n.translate('xpack.fileUpload.nameCollisionMsg', {
     defaultMessage: '"{name}" already exists, please provide a unique name',
     values: { name },
   });
