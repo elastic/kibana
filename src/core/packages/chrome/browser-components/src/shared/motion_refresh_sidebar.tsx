@@ -297,6 +297,17 @@ const spinnerTealUseLabel = i18n.translate(
   }
 );
 
+const shimmerTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshShimmerTitle', {
+  defaultMessage: 'Shimmer text loader',
+});
+
+const shimmerSwitchLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshShimmerToggleSwitch',
+  {
+    defaultMessage: 'Enable shimmer text loader',
+  }
+);
+
 const loginTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshLoginTitle', {
   defaultMessage: 'Log in screen',
 });
@@ -428,6 +439,7 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
     settings.callout &&
     settings.page &&
     settings.spinner &&
+    settings.shimmer &&
     settings.login;
 
   const tooltipRows: TokenRow[] = [
@@ -594,6 +606,15 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
             checked={settings.spinner}
             rows={spinnerRows}
             caption={spinnerTitle}
+          />
+          <MotionSection
+            id="shimmer"
+            title={shimmerTitle}
+            description=""
+            switchLabel={shimmerSwitchLabel}
+            checked={settings.shimmer}
+            rows={[]}
+            caption={shimmerTitle}
           />
           <MotionSection
             id="login"

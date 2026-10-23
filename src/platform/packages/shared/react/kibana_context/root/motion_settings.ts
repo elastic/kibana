@@ -25,6 +25,7 @@ export type MotionRefreshId =
   | 'callout'
   | 'page'
   | 'spinner'
+  | 'shimmer'
   | 'login';
 
 export interface MotionRefreshSettings {
@@ -34,6 +35,7 @@ export interface MotionRefreshSettings {
   callout: boolean;
   page: boolean;
   spinner: boolean;
+  shimmer: boolean;
   login: boolean;
 }
 
@@ -65,6 +67,7 @@ const DEFAULT_SETTINGS: MotionRefreshSettings = {
   callout: true,
   page: true,
   spinner: true,
+  shimmer: true,
   login: readLoginScreen(),
 };
 
@@ -103,6 +106,7 @@ export const setMotionRefreshEnabled = (enabled: boolean): void => {
     settings.callout === enabled &&
     settings.page === enabled &&
     settings.spinner === enabled &&
+    settings.shimmer === enabled &&
     settings.login === enabled
   ) {
     return;
@@ -114,6 +118,7 @@ export const setMotionRefreshEnabled = (enabled: boolean): void => {
     callout: enabled,
     page: enabled,
     spinner: enabled,
+    shimmer: enabled,
     login: enabled,
   };
   writeLoginScreen(enabled);
