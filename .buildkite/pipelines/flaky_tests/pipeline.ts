@@ -63,7 +63,7 @@ const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-st
 /**
  * Cypress group steps use `n2-4-virt` for `defend_workflows` suites. Command steps inherit the same
  * defaults unless `agentQueue` / `diskSizeGb` are set on the config entry. `diskSizeGb: undefined`
- * uses the agent image default; set a number to override it.
+ * uses `DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb`; set a number to override it.
  */
 function defaultCypressFlakyAgentOptions(pathHint: string): {
   agentQueue: string;
@@ -283,7 +283,8 @@ const pipeline = {
 steps.push({
   command: '.buildkite/scripts/steps/build_kibana.sh',
   label: 'Build Kibana Distribution',
-  agents: expandAgentQueue('c2-8'),
+  // Builds on the full image's disk without /dev/shm, so it needs more than the 72 GB default.
+  agents: expandAgentQueue('c2-8', 80),
   key: 'build',
   // Keep this step when KIBANA_BUILD_ID is set: FTR/Scout/Cypress jobs
   // depends_on: build, so skipping it skips those jobs. build_kibana.sh
