@@ -12,7 +12,6 @@ import { AlertsSection } from './alerts_section';
 import * as hasDataHook from '../../../../../hooks/use_has_data';
 import * as datePickerHook from '../../../../../hooks/use_date_picker_context';
 import * as kibanaHook from '../../../../../utils/kibana_react';
-import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import type { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
 
 jest.mock('./classic_alerts_section', () => ({
@@ -46,22 +45,12 @@ const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM
 const setup = ({
   universalEnabled,
   alertingVTwoAvailable = true,
-  canReadUniversalRules = true,
-  universalRuleCount = 1,
-  hasClassicRules = true,
+  hasAlertingRules = true,
 }: {
   universalEnabled: boolean;
   alertingVTwoAvailable?: boolean;
-  canReadUniversalRules?: boolean;
-  universalRuleCount?: number;
-  hasClassicRules?: boolean;
+  hasAlertingRules?: boolean;
 }) => {
-  jest.spyOn(fetcherHook, 'useFetcher').mockImplementation(((fn: () => unknown) => ({
-    data: fn() === undefined ? undefined : { total: universalRuleCount },
-    status: 'success',
-    refetch: () => {},
-  })) as unknown as typeof fetcherHook.useFetcher);
-
   jest.spyOn(datePickerHook, 'useDatePickerContext').mockReturnValue({
     relativeStart: 'now-15m',
     relativeEnd: 'now',
@@ -69,7 +58,7 @@ const setup = ({
   } as unknown as ReturnType<typeof datePickerHook.useDatePickerContext>);
 
   jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-    hasDataMap: { alert: { hasData: hasClassicRules, status: 'success' } },
+    hasDataMap: { alert: { hasData: hasAlertingRules, status: 'success' } },
   } as unknown as HasDataContextValue);
 
   jest.spyOn(kibanaHook, 'useKibana').mockReturnValue({
@@ -80,12 +69,6 @@ const setup = ({
           get: () => universalEnabled,
         },
         client: { get: () => false },
-      },
-      http: { get: jest.fn(() => Promise.resolve({ total: universalRuleCount })) },
-      application: {
-        capabilities: {
-          alerting_v2_rules: { read: canReadUniversalRules },
-        },
       },
       ...(alertingVTwoAvailable
         ? { alertingVTwo: { AlertsProvider: () => null, createAlertingV2HostApp: jest.fn() } }
@@ -136,29 +119,18 @@ describe('AlertsSection', () => {
     expect(href).toContain('now');
   });
 
-  it('stays visible in a space with only universal rules', async () => {
-    setup({ universalEnabled: true, hasClassicRules: false, universalRuleCount: 1 });
-    render(<AlertsSection bucketSize={bucketSize} />);
-
-    await waitFor(() =>
-      expect(screen.getByTestSubject('universalAlertsSection')).toBeInTheDocument()
-    );
-  });
-
-  it('renders nothing when neither classic nor universal rules exist', () => {
-    setup({ universalEnabled: true, hasClassicRules: false, universalRuleCount: 0 });
+  it('renders nothing when the space has no alerting rules', () => {
+    setup({ universalEnabled: true, hasAlertingRules: false });
     const { container } = render(<AlertsSection bucketSize={bucketSize} />);
 
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('stays visible on classic rules alone when the user cannot read universal rules', async () => {
-    setup({ universalEnabled: true, hasClassicRules: true, canReadUniversalRules: false });
-    render(<AlertsSection bucketSize={bucketSize} />);
+  it('renders nothing when the space has no alerting rules and universal alerting is off', () => {
+    setup({ universalEnabled: false, hasAlertingRules: false });
+    const { container } = render(<AlertsSection bucketSize={bucketSize} />);
 
-    await waitFor(() =>
-      expect(screen.getByTestSubject('universalAlertsSection')).toBeInTheDocument()
-    );
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('falls back to the classic section when the alertingVTwo plugin is unavailable', () => {

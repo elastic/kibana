@@ -10,17 +10,11 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  hasAlertingV2Capability,
-  shouldShowV1ObservabilityAlertsTable,
-} from '@kbn/alerting-v2-utils';
+import { shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
 import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_BASE_PATH,
 } from '@kbn/deeplinks-observability';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
-import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { useKibana } from '../../../../../utils/kibana_react';
@@ -49,20 +43,7 @@ export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {
   const alertingVTwo = services.alertingVTwo;
   const showUniversal = !showClassic && alertingVTwo != null;
 
-  const canReadUniversalRules =
-    !!services.settings && hasAlertingV2Capability(services as CoreStart, 'rules', 'read');
-  const hasClassicRules = !!hasDataMap.alert?.hasData;
-
-  const { data: universalRules } = useFetcher(() => {
-    if (!showUniversal || !canReadUniversalRules) {
-      return;
-    }
-    return services.http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-      query: { page: 1, per_page: 1 },
-    });
-  }, [showUniversal, canReadUniversalRules, services.http]);
-
-  const hasUniversalRules = (universalRules?.total ?? 0) > 0;
+  const hasAlertingRules = !!hasDataMap.alert?.hasData;
 
   const appLinkHref = useMemo(() => {
     if (!showUniversal) {
@@ -72,9 +53,7 @@ export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {
     return `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_ALERTS_PATH}?_a=${appState}`;
   }, [showUniversal, relativeStart, relativeEnd]);
 
-  const isVisible = showUniversal ? hasUniversalRules || hasClassicRules : hasClassicRules;
-
-  if (!isVisible) {
+  if (!hasAlertingRules) {
     return null;
   }
 
