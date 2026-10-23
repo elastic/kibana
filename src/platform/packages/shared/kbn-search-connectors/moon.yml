@@ -20,9 +20,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/core'
   - '@kbn/core-elasticsearch-server'
-  - '@kbn/config-schema'
-  - '@kbn/i18n-react'
-  - '@kbn/test-jest-helpers'
   - '@kbn/std'
   - '@kbn/doc-links'
 tags:

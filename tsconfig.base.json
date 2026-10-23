@@ -2349,6 +2349,8 @@
       "@kbn/search-code-examples/*": ["./x-pack/solutions/search/packages/kbn-search-code-examples/*"],
       "@kbn/search-connectors": ["./src/platform/packages/shared/kbn-search-connectors"],
       "@kbn/search-connectors/*": ["./src/platform/packages/shared/kbn-search-connectors/*"],
+      "@kbn/search-connectors-ui": ["./src/platform/packages/shared/kbn-search-connectors-ui"],
+      "@kbn/search-connectors-ui/*": ["./src/platform/packages/shared/kbn-search-connectors-ui/*"],
       "@kbn/search-errors": ["./src/platform/packages/shared/kbn-search-errors"],
       "@kbn/search-errors/*": ["./src/platform/packages/shared/kbn-search-errors/*"],
       "@kbn/search-examples-plugin": ["./examples/search_examples"],

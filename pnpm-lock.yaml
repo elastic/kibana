@@ -3335,6 +3335,9 @@ importers:
       '@kbn/search-connectors':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-search-connectors
+      '@kbn/search-connectors-ui':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-search-connectors-ui
       '@kbn/search-errors':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-search-errors
@@ -8279,6 +8282,8 @@ importers:
   src/platform/packages/shared/kbn-search-api-panels: {}
 
   src/platform/packages/shared/kbn-search-connectors: {}
+
+  src/platform/packages/shared/kbn-search-connectors-ui: {}
 
   src/platform/packages/shared/kbn-search-errors: {}
 

@@ -8,6 +8,7 @@
  */
 
 export type * from './connector_definition';
+export type * from './configuration';
 export * from './connectors';
 export type * from './connectors_api';
 export type * from './connector_stats';

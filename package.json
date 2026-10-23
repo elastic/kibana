@@ -1136,6 +1136,7 @@
     "@kbn/search-assistant": "workspace:*",
     "@kbn/search-code-examples": "workspace:*",
     "@kbn/search-connectors": "workspace:*",
+    "@kbn/search-connectors-ui": "workspace:*",
     "@kbn/search-errors": "workspace:*",
     "@kbn/search-examples-plugin": "workspace:*",
     "@kbn/search-getting-started": "workspace:*",

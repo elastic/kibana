@@ -903,6 +903,7 @@ packages:
   - 'src/platform/packages/shared/kbn-search-agent'
   - 'src/platform/packages/shared/kbn-search-api-panels'
   - 'src/platform/packages/shared/kbn-search-connectors'
+  - 'src/platform/packages/shared/kbn-search-connectors-ui'
   - 'src/platform/packages/shared/kbn-search-errors'
   - 'src/platform/packages/shared/kbn-search-response-warnings'
   - 'src/platform/packages/shared/kbn-search-types'
