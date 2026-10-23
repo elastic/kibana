@@ -122,7 +122,11 @@ describe('AlertZero action workflows', () => {
 
     it('addresses the rule by saved-object id, never by query', () => {
       const [trigger] = yaml.triggers ?? [];
-      expect(trigger?.inputs?.properties?.actionInput?.required).toEqual(['id']);
+      expect(trigger?.inputs?.properties?.actionInput?.required).toEqual([
+        'id',
+        'expected_revision',
+        'investigation_id',
+      ]);
 
       const enable = stepByName(yaml, 'enable_rule');
       expect(enable?.type).toBe('security.enableRule');
@@ -146,9 +150,6 @@ describe('AlertZero action workflows', () => {
       expect(names.indexOf('fail_rule_changed')).toBeLessThan(names.indexOf('enable_rule'));
     });
 
-    const runs = (name: string, context: Record<string, unknown>) => runsStep(yaml, name, context);
-    const trace = (context: Record<string, unknown>) => traceSteps(yaml, context);
-
     const disabled = { enabled: false, revision: 3, name: 'R', updated_by: 'elastic' };
     const enabled = { ...disabled, enabled: true, revision: 4 };
     const deleted = { error: { message: 'HTTP 404: Not Found' } };
@@ -164,26 +165,12 @@ describe('AlertZero action workflows', () => {
       ],
       ['a rule enabled by hand', { output: enabled }, 3, ['note_already_enabled']],
       ['a deleted rule', deleted, 3, ['fail_rule_deleted']],
-      [
-        'a proposal made before revisions were recorded',
-        { output: disabled },
-        undefined,
-        ['enable_rule'],
-      ],
     ])('handles %s', (_scenario, fetch, expected, steps) => {
       const context = {
         steps: { fetch_rule: fetch },
         inputs: { actionInput: { id: 'x', expected_revision: expected, investigation_id: 'c' } },
       };
-      expect(trace(context)).toEqual(steps);
-    });
-
-    it('skips the chat note when the proposal carries no investigation', () => {
-      const context = {
-        steps: { fetch_rule: { output: enabled } },
-        inputs: { actionInput: { id: 'x' } },
-      };
-      expect(runs('note_already_enabled', context)).toBe(false);
+      expect(traceSteps(yaml, context)).toEqual(steps);
     });
 
     it.each([
