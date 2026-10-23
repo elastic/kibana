@@ -39,6 +39,7 @@ import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../que
 
 import {
   IdleTaskWithExpiredRunAt,
+  WaitingTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
   getClaimSort,
@@ -329,9 +330,13 @@ async function searchAvailableTasks({
       EnabledTask,
       // a task type that's not excluded (may be removed or not)
       OneOfTaskTypes('task.taskType', claimPartitions.unlimitedTypes),
-      // Either a task with idle status and runAt <= now or
+      // Either a task with idle or waiting status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+      shouldBeOneOf(
+        IdleTaskWithExpiredRunAt,
+        WaitingTaskWithExpiredRunAt,
+        RunningOrClaimingTaskWithExpiredRetryAt
+      ),
       // must have a status that isn't 'unrecognized'
       RecognizedTask
     );
@@ -356,9 +361,13 @@ async function searchAvailableTasks({
       EnabledTask,
       // Specific task type
       OneOfTaskTypes('task.taskType', types.split(',')),
-      // Either a task with idle status and runAt <= now or
+      // Either a task with idle or waiting status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+      shouldBeOneOf(
+        IdleTaskWithExpiredRunAt,
+        WaitingTaskWithExpiredRunAt,
+        RunningOrClaimingTaskWithExpiredRetryAt
+      ),
       // must have a status that isn't 'unrecognized'
       RecognizedTask
     );

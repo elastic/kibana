@@ -10,6 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import {
   getTaskCostFromInstance,
   getDeleteTaskRunResult,
+  getYieldTaskRunResult,
   isFailedRunResult,
   taskDefinitionSchema,
   TaskCost,
@@ -44,6 +45,39 @@ describe('task', () => {
         state: {},
         shouldDeleteTask: true,
       });
+    });
+  });
+
+  describe('getYieldTaskRunResult()', () => {
+    it('yields immediately when delay is omitted', () => {
+      const before = Date.now();
+      const result = getYieldTaskRunResult({ state: { phase: 'resume' } });
+      const after = Date.now();
+
+      expect(result.shouldYieldTask).toBe(true);
+      expect(result.state).toEqual({ phase: 'resume' });
+      expect(result.params).toBeUndefined();
+      expect(result.runAt).toBeDefined();
+      expect(result.runAt?.getTime()).toBeGreaterThanOrEqual(before);
+      expect(result.runAt?.getTime()).toBeLessThanOrEqual(after);
+    });
+
+    it('sets runAt from the delay and includes params when provided', () => {
+      const before = Date.now();
+      const result = getYieldTaskRunResult({
+        state: { cursor: 2 },
+        params: { step: 'collect' },
+        delay: '5m',
+      });
+
+      expect(result.params).toEqual({ step: 'collect' });
+      expect(result.runAt).toBeDefined();
+      expect(result.runAt?.getTime()).toBeGreaterThanOrEqual(before + 5 * 60 * 1000);
+      expect(result.runAt?.getTime()).toBeLessThanOrEqual(Date.now() + 5 * 60 * 1000);
+    });
+
+    it('rejects a delay that is not an interval', () => {
+      expect(() => getYieldTaskRunResult({ delay: 'soon' })).toThrow(/Invalid yield delay/);
     });
   });
 

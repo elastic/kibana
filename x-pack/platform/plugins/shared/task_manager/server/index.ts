@@ -37,7 +37,9 @@ export {
   TaskCost,
   InstanceTaskCost,
   getTaskCostFromInstance,
+  getYieldTaskRunResult,
 } from './task';
+export type { YieldTaskRunResultOptions } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
