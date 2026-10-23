@@ -51,6 +51,10 @@ export function fromRangeOrHistogramLensApiToLensState(
   };
 }
 
+// The editor keeps an empty bound as `-Infinity` / `Infinity` and saved objects store it as `null`.
+const isBounded = (value: number | null | undefined): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
 export function fromRangeOrHistogramLensStateToAPI(
   column: RangeIndexPatternColumn
 ): LensApiRangeOperation | LensApiHistogramOperation {
@@ -58,13 +62,11 @@ export function fromRangeOrHistogramLensStateToAPI(
     return {
       operation: 'range',
       ...getLensAPIBucketSharedProps(column),
-      ranges: column.params.ranges
-        .filter(({ from, to }) => from != null || to != null)
-        .map(({ from, to, label }) => ({
-          ...(from != null ? { gt: from } : {}),
-          ...(to != null ? { lte: to } : {}),
-          ...(label != null ? { label } : {}),
-        })),
+      ranges: column.params.ranges.map(({ from, to, label }) => ({
+        ...(isBounded(from) ? { gt: from } : {}),
+        ...(isBounded(to) ? { lte: to } : {}),
+        ...(label != null ? { label } : {}),
+      })),
       ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
     };
   }

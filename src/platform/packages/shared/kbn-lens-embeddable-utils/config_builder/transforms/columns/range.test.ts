@@ -252,5 +252,70 @@ describe('Range Transforms', () => {
       const result = fromRangeOrHistogramLensStateToAPI(input);
       expect(result.label).toBe('Price Ranges');
     });
+
+    describe('unbounded ranges', () => {
+      type LensRange = RangeIndexPatternColumn['params']['ranges'][number];
+
+      const getRangeColumn = (ranges: LensRange[]): RangeIndexPatternColumn => ({
+        operationType: 'range',
+        dataType: 'string',
+        sourceField: 'price',
+        customLabel: false,
+        label: 'price',
+        isBucketed: true,
+        params: { type: 'range', maxBars: 'auto', ranges },
+      });
+
+      const getApiRanges = (ranges: LensRange[]) => {
+        const result = fromRangeOrHistogramLensStateToAPI(getRangeColumn(ranges));
+        return result.operation === 'range' ? result.ranges : undefined;
+      };
+
+      it.each<[string, LensRange, LensApiRangeOperation['ranges'][number]]>([
+        ['null on both sides', { from: null, to: null, label: '' }, { label: '' }],
+        [
+          'null on both sides with a label',
+          { from: null, to: null, label: 'All' },
+          { label: 'All' },
+        ],
+        ['infinite on both sides', { from: -Infinity, to: Infinity, label: '' }, { label: '' }],
+        ['infinite upper bound', { from: 1000, to: Infinity, label: '' }, { gt: 1000, label: '' }],
+        ['infinite lower bound', { from: -Infinity, to: 0, label: '' }, { lte: 0, label: '' }],
+        [
+          'null upper bound with a 0 lower bound',
+          { from: 0, to: null, label: '' },
+          { gt: 0, label: '' },
+        ],
+        ['0 on both sides', { from: 0, to: 0, label: '' }, { gt: 0, lte: 0, label: '' }],
+      ])('should keep a range with %s', (_, range, expected) => {
+        expect(getApiRanges([range])).toEqual([expected]);
+      });
+
+      it('should keep an unbounded range at its position in the list', () => {
+        expect(
+          getApiRanges([
+            { from: 0, to: 1000, label: '' },
+            { from: null, to: null, label: 'All' },
+            { from: 1000, to: Infinity, label: '' },
+          ])
+        ).toEqual([{ gt: 0, lte: 1000, label: '' }, { label: 'All' }, { gt: 1000, label: '' }]);
+      });
+
+      it('should read an empty API range back as unbounded on both sides', () => {
+        const state = fromRangeOrHistogramLensApiToLensState({
+          operation: 'range',
+          field: 'price',
+          ranges: [{}, { label: 'All' }],
+        });
+
+        expect(state.params.ranges).toEqual([
+          { from: null, to: null, label: '' },
+          { from: null, to: null, label: 'All' },
+        ]);
+        expect(fromRangeOrHistogramLensStateToAPI(state)).toMatchObject({
+          ranges: [{ label: '' }, { label: 'All' }],
+        });
+      });
+    });
   });
 });
