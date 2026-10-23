@@ -478,6 +478,38 @@ describe('edotBrowser', () => {
       expect(log.attributes?.['session.id']).toBe('session-1');
       expect(span.attributes['session.id']).toBe('session-1');
     });
+
+    it('stamps the tab id and previous session id like EDOT Browser', () => {
+      const app = edotBrowser.app({ serviceName: 'storefront-web', environment: 'production' });
+      const stamp = (options: Parameters<typeof app.client>[1]) => {
+        const tabClient = app.client(BROWSER_PROFILES.chromeMacos, options);
+        const [log] = tabClient
+          .exception({ type: 'Error', message: 'boom', stacktrace: '' })
+          .serialize();
+        const [span] = tabClient
+          .httpRequest({ method: 'GET', url: 'https://api.example.com/', statusCode: 200 })
+          .serialize();
+        return [log.attributes, span.attributes];
+      };
+
+      stamp({ sessionId: 's-2', previousSessionId: 's-1', tabId: 'tab-1' }).forEach((attributes) =>
+        expect(attributes).toMatchObject({
+          'session.id': 's-2',
+          'session.previous_id': 's-1',
+          'browser.tab.id': 'tab-1',
+        })
+      );
+      // The tab outlives an expired session
+      stamp({ tabId: 'tab-1' }).forEach((attributes) => {
+        expect(attributes).toMatchObject({ 'browser.tab.id': 'tab-1' });
+        expect(attributes).not.toHaveProperty('session.id');
+        expect(attributes).not.toHaveProperty('session.previous_id');
+      });
+      // A previous session ID only makes sense next to a session ID
+      stamp({ previousSessionId: 's-1' }).forEach((attributes) =>
+        expect(attributes).not.toHaveProperty('session.previous_id')
+      );
+    });
   });
 
   describe('planDocuments', () => {

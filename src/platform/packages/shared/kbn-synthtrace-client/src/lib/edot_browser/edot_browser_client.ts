@@ -27,6 +27,13 @@ const HTTP_PORT_FROM_PROTOCOL: Readonly<Record<string, number>> = { 'http:': 80,
 export interface EdotBrowserClientOptions {
   /** Written as `attributes.session.id` on every log and span when set. */
   sessionId?: string;
+  /** Written as `attributes.session.previous_id` when the session follows another one. Needs `sessionId`. */
+  previousSessionId?: string;
+  /**
+   * Written as `attributes.browser.tab.id` on every log and span, one per browser tab. It is written
+   * without `sessionId` too, like the telemetry of a tab whose session expired.
+   */
+  tabId?: string;
   /**
    * Writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, like the
    * experimental `includeRawAttribution` option of the web-vitals instrumentation. Off by default.
@@ -112,8 +119,12 @@ export class EdotBrowserClient {
   }
 
   private get sessionAttributes(): Record<string, string> {
-    const { sessionId } = this.options;
-    return sessionId ? { 'session.id': sessionId } : {};
+    const { sessionId, previousSessionId, tabId } = this.options;
+    return {
+      ...(sessionId ? { 'session.id': sessionId } : {}),
+      ...(sessionId && previousSessionId ? { 'session.previous_id': previousSessionId } : {}),
+      ...(tabId ? { 'browser.tab.id': tabId } : {}),
+    };
   }
 
   private log(
