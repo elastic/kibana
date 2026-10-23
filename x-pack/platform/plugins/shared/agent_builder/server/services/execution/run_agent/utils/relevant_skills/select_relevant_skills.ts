@@ -146,8 +146,8 @@ export const selectRelevantSkills = async ({
   timeoutMs = RELEVANT_SKILLS_TIMEOUT_MS,
 }: SelectRelevantSkillsParams): Promise<RelevantSkillSelection> => {
   // Wrap the whole body (including the short-circuits, which call getSkillAbsolutePath) so this never
-  // throws: the eagerly-created promise in run_chat_agent must always resolve to a selection, never
-  // reject. On any failure we fall back to no notification.
+  // throws: the cycle hook and the search tool always get a selection. On any failure we fall back
+  // to no notification.
   try {
     if (skills.length === 0) {
       return { skills: [] };

@@ -128,13 +128,42 @@ export const createShouldNotActivateSkillEvaluator = (skillName: string): Evalua
   },
 });
 
+/** The id the agent builder plugin registers its skill pre-selection cycle hook with. */
+const RELEVANT_SKILLS_HOOK_ID = 'relevant-skills';
+
+interface SurfacedSkill {
+  id?: string;
+  name?: string;
+  path?: string;
+}
+
+/**
+ * The skills the implicit pre-selection surfaced, or `undefined` when it produced no step. Today
+ * the selection is a cycle hook and lands as an `injected_context` step stamped with its hook id,
+ * with the skills in `data`; conversations recorded before that carry a `relevant_skills` step.
+ */
+const getImplicitPreSelection = (
+  steps: Array<Record<string, unknown>>
+): SurfacedSkill[] | undefined => {
+  for (const step of steps) {
+    if (step.type === 'injected_context' && step.hook_id === RELEVANT_SKILLS_HOOK_ID) {
+      const data = step.data as { skills?: SurfacedSkill[] } | undefined;
+      return data?.skills ?? [];
+    }
+    if (step.type === 'relevant_skills' && step.source === 'implicit') {
+      return (step.skills as SurfacedSkill[] | undefined) ?? [];
+    }
+  }
+  return undefined;
+};
+
 /**
  * Evaluates whether the implicit `<relevant_skills>` pre-selection surfaced the correct skill
  * before the agent acts.
  *
- * Checks the `relevant_skills` step with `source: 'implicit'` in the output steps (the fast-model
- * call that runs at the start of each round when the `relevantSkills` experiment flag is on).
- * Returns `score: null / label: 'SKIP'` when the step is absent — meaning the feature is
+ * Reads the pre-selection step from the output steps (see {@link getImplicitPreSelection}): the
+ * fast-model call that runs at the start of each round when the `relevantSkills` experiment flag
+ * is on. Returns `score: null / label: 'SKIP'` when the step is absent — meaning the feature is
  * disabled or the skill list was below the threshold that bypasses the model call.
  *
  * Ground truth keys (same as {@link skillSelectionEvaluator}):
@@ -158,21 +187,17 @@ export const preSelectionEvaluator: Evaluator = {
     }
 
     const steps = (output as { steps?: Array<Record<string, unknown>> })?.steps ?? [];
-    const preSelectStep = steps.find(
-      (s) => s.type === 'relevant_skills' && s.source === 'implicit'
-    );
+    const surfaced = getImplicitPreSelection(steps);
 
-    if (!preSelectStep) {
+    if (!surfaced) {
       return {
         score: null,
         label: 'SKIP',
         explanation:
-          'No implicit relevant_skills step — feature disabled, or skill list below threshold',
+          'No implicit pre-selection step — feature disabled, or skill list below threshold',
       };
     }
 
-    const surfaced =
-      (preSelectStep.skills as Array<{ id?: string; name?: string; path?: string }>) ?? [];
     const surfacedNames = surfaced.flatMap((s) =>
       [s.id, s.name, s.path].filter((v): v is string => typeof v === 'string')
     );
