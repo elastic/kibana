@@ -129,6 +129,9 @@ outputs:
   - name: proposal_decision
     type: string
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Attack Discovery worker"
   # What `resolve_analysis` falls back to when the analysis child produced no
   # payload. `failed` is an EXECUTION STATE, not a classification: the analysis
   # never returns it, and it is reachable here only by the child failing after its
@@ -310,6 +313,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           Review started for
@@ -408,6 +412,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           Attached the Attack Discovery. Attempted attachment of
@@ -467,6 +472,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           {% if steps.attach_impact.output.entities != blank %}Recorded impact:
@@ -495,6 +501,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: Starting FP/TP analysis.
     on-failure:
@@ -642,6 +649,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           Analysis finished:
@@ -733,6 +741,7 @@ steps:
                     workflow-id: system-alertzero-journal-note
                     run-as-mode: inherit
                     inputs:
+                      author_name: "{{ consts.author_name }}"
                       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                       message: >-
                         PARTIAL LIFECYCLE TRANSITION: the Investigation was closed as a
@@ -754,6 +763,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: >-
                   Closed the Investigation and the attack as a false positive.
@@ -767,6 +777,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: "Attack status written: closed (false_positive)."
             on-failure:
@@ -825,6 +836,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: >-
                   Analysis failed. The Investigation is left open.
@@ -1030,6 +1042,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           {%- assign retired = steps.resolve_alerts_retired.output -%}
@@ -1138,6 +1151,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: |-
           {% if steps.record_decision.output.approved == true %}Approved the forensics handoff.{% elsif steps.record_decision.output.declined == true %}Dismissed the forensics handoff as "{{ steps.read_proposal_decision.output.dismissReason | default: 'unspecified' }}". {{ steps.read_proposal_decision.output.rationale }}{% elsif steps.record_decision.output.expired == true %}The escalation proposal expired with no decision.{% endif %}
@@ -1227,6 +1241,7 @@ steps:
             workflow-id: system-alertzero-journal-note
             run-as-mode: inherit
             inputs:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
               message: >-
                 PARTIAL LIFECYCLE TRANSITION: the escalation was declined and the
@@ -1248,6 +1263,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: "Attack status written: closed."
     on-failure:

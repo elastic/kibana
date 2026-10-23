@@ -78,6 +78,11 @@ outputs:
         additionalProperties: true
     tier2_invoked:
       type: boolean
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Continuous Threat Hunt worker"
+
 steps:
   # Start + poll: POST returns `{ run_id, state: running, result_attachment_id }`
   # immediately; the pipeline updates that hidden attachment. Downstream reads
@@ -267,6 +272,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: |-
           {% assign coordinator = steps.read_hunt_result.output.data.result -%}
