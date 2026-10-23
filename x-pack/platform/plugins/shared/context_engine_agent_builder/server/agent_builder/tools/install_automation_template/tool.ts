@@ -412,6 +412,24 @@ export const createInstallAutomationTemplateTool = ({
         getWorkflowsManagement,
       });
 
+      if (result.valid === false) {
+        const details = result.validationErrors?.length
+          ? ` ${result.validationErrors.join('; ')}`
+          : '';
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  `Automation template was saved as workflow "${result.workflowId}" but its ` +
+                  `definition is invalid, so it cannot be enabled or run.${details}`,
+              },
+            },
+          ],
+        };
+      }
+
       return {
         results: [
           {

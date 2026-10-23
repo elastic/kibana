@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { installAutomationTemplateHandler } from './handler';
@@ -472,5 +473,46 @@ describe('install_automation_template handler arguments', () => {
       name: 'loyalty-index-metadata',
       sources: [{ index: 'loyalty-docs', categoryField: 'tier' }],
     });
+  });
+
+  it('reports an error with diagnostics when the installed workflow is invalid', async () => {
+    installHandlerMock.mockResolvedValueOnce({
+      aiIndexId: 'my-ai-index',
+      workflowId: 'wf-saved',
+      status: 'saved_and_attached',
+      replaced: false,
+      valid: false,
+      validationErrors: ['Unknown connector id'],
+    } as never);
+
+    const result = (await runTool({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sourceIndex: 'loyalty-docs',
+      categoryField: 'tier',
+    })) as { results: Array<{ type: string; data: { message?: string } }> };
+
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data.message).toContain('invalid');
+    expect(result.results[0].data.message).toContain('Unknown connector id');
+  });
+
+  it('reports success when the installed workflow is valid', async () => {
+    installHandlerMock.mockResolvedValueOnce({
+      aiIndexId: 'my-ai-index',
+      workflowId: 'wf-saved',
+      status: 'saved_and_attached',
+      replaced: false,
+    } as never);
+
+    const result = (await runTool({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sourceIndex: 'loyalty-docs',
+      categoryField: 'tier',
+    })) as { results: Array<{ type: string; data: { message?: string } }> };
+
+    expect(result.results[0].type).toBe(ToolResultType.other);
   });
 });

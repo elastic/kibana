@@ -255,6 +255,24 @@ export const createSaveAutomationTool = ({
         getWorkflowsManagement,
       });
 
+      if (result.valid === false) {
+        const details = result.validationErrors?.length
+          ? ` ${result.validationErrors.join('; ')}`
+          : '';
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  `Workflow "${result.workflowId}" was saved but its definition is invalid, so it ` +
+                  `cannot be enabled or run. Fix the definition and save again.${details}`,
+              },
+            },
+          ],
+        };
+      }
+
       return {
         results: [
           {

@@ -7,6 +7,8 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../../../common/agent_builder_attachments';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
@@ -18,7 +20,13 @@ jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
 }));
 
+jest.mock('./handler', () => ({
+  ...jest.requireActual('./handler'),
+  saveAutomationHandler: jest.fn(),
+}));
+
 const { hasWorkflowReadPrivilege } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { saveAutomationHandler } = jest.requireMock('./handler');
 
 describe('save_automation tool', () => {
   const getWorkflowMock = jest.fn();
@@ -97,6 +105,7 @@ describe('save_automation tool', () => {
   beforeEach(() => {
     getWorkflowMock.mockReset();
     hasWorkflowReadPrivilege.mockClear().mockResolvedValue(true);
+    saveAutomationHandler.mockReset();
   });
 
   it('uses the expected tool id', () => {
@@ -377,6 +386,58 @@ describe('save_automation tool', () => {
           aiIndexId: 'my-ai-index',
         })
       ).toEqual({ workflowYaml: 'name: x', aiIndexId: 'my-ai-index' });
+    });
+  });
+
+  describe('handler', () => {
+    const callHandler = (toolParams: Record<string, unknown> = { workflowYaml: 'name: x' }) => {
+      const tool = createTool();
+      const handlerContext = agentBuilderMocks.tools.createHandlerContext();
+      return tool.handler(toolParams, handlerContext);
+    };
+
+    it('reports an invalid saved workflow as a ToolResultType.error with its diagnostics', async () => {
+      saveAutomationHandler.mockResolvedValue({
+        aiIndexId: 'my-ai-index',
+        workflowId: 'workflow-1',
+        status: 'saved_and_attached',
+        valid: false,
+        validationErrors: ['Unknown connector id'],
+      });
+
+      const result = await callHandler();
+
+      if (!isToolHandlerStandardReturn(result)) {
+        throw new Error('Expected a standard tool result');
+      }
+      expect(result.results).toEqual([
+        {
+          type: ToolResultType.error,
+          data: {
+            message: expect.stringContaining('Unknown connector id'),
+          },
+        },
+      ]);
+      const message = (result.results[0].data as { message: string }).message;
+      expect(message).toContain('"workflow-1"');
+      expect(message).toContain('cannot be enabled or run');
+    });
+
+    it('reports a valid saved workflow as a ToolResultType.other with the save result', async () => {
+      const saveResult = {
+        aiIndexId: 'my-ai-index',
+        workflowId: 'workflow-1',
+        status: 'saved_and_attached' as const,
+        valid: true,
+      };
+      saveAutomationHandler.mockResolvedValue(saveResult);
+
+      const result = await callHandler();
+
+      if (!isToolHandlerStandardReturn(result)) {
+        throw new Error('Expected a standard tool result');
+      }
+      expect(result.results).toEqual([{ type: ToolResultType.other, data: saveResult }]);
     });
   });
 });
