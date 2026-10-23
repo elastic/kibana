@@ -73,6 +73,13 @@ export interface ListEntitiesParams {
   /** Cursor-mode sort; defaults to `@timestamp` desc. A `_shard_doc` tiebreaker is always appended. */
   sort?: SortCombinations[];
   fields?: (QueryDslFieldAndFormat | string)[];
+  /**
+   * Cursor mode: reads these fields from doc values instead of loading the documents. No
+   * `_source` or stored field (`_id` included) is read, so `entities` is empty and the values
+   * come back in `fields`, one entry per hit. The latest index stores documents with best
+   * compression, so on large pages this is many times cheaper than reading `_source`.
+   */
+  docValueFields?: string[];
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
   filterQuery?: string;
@@ -84,8 +91,10 @@ export interface ListEntitiesParams {
 
 export interface ListEntitiesResult {
   entities: Entity[];
-  fields?: Array<SearchHit['fields']>; // Only present if `fields` was specified in ListEntitiesParams
+  fields?: Array<SearchHit['fields']>; // Only present if `fields` or `docValueFields` was specified in ListEntitiesParams
   nextSearchAfter?: Array<string | number>;
+  /** Cursor mode: Elasticsearch's own time for the search, in milliseconds. */
+  took?: number;
   total?: number;
   page?: number;
   per_page?: number;
@@ -704,7 +713,8 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source, fields, sort } = p;
+    const { filter, size, searchAfter, source, fields, sort, docValueFields } = p;
+    const readDocValues = docValueFields !== undefined && docValueFields.length > 0;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -724,19 +734,23 @@ export class CRUDClient {
       sort: [...(sort ?? [{ '@timestamp': 'desc' }]), { _shard_doc: 'desc' }],
       search_after: searchAfter,
       ...(fields && fields.length > 0 ? { fields } : {}),
-      ...buildEntityListSourceFilter({
-        sourceIncludes: source,
-      }),
+      ...(readDocValues
+        ? { stored_fields: ['_none_'], docvalue_fields: docValueFields }
+        : buildEntityListSourceFilter({
+            sourceIncludes: source,
+          })),
     });
 
     const hits = resp.hits.hits;
-    const entities = hits.map((hit) => hit._source as Entity);
+    const entities = readDocValues ? [] : hits.map((hit) => hit._source as Entity);
     const lastHit = hits[hits.length - 1];
-    const entityFields = fields && fields.length > 0 ? hits.map((hit) => hit.fields) : undefined;
+    const entityFields =
+      (fields && fields.length > 0) || readDocValues ? hits.map((hit) => hit.fields) : undefined;
 
     return {
       entities,
       nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
+      took: resp.took,
       ...(entityFields ? { fields: entityFields } : {}),
     };
   }

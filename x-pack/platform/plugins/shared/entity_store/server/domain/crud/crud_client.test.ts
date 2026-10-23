@@ -101,6 +101,52 @@ describe('CRUDClient', () => {
         })
       );
     });
+
+    it('reads doc values without loading _source or stored fields when docValueFields is given', async () => {
+      await client.listEntities({
+        size: 10,
+        source: ['entity.id'],
+        docValueFields: ['entity.id', 'asset.criticality'],
+      });
+
+      const [request] = esClient.search.mock.calls[0];
+      expect(request).toEqual(
+        expect.objectContaining({
+          stored_fields: ['_none_'],
+          docvalue_fields: ['entity.id', 'asset.criticality'],
+        })
+      );
+      expect(request).not.toHaveProperty('_source');
+    });
+
+    it('returns doc values in fields, one entry per hit, and no entities', async () => {
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: [
+            { _index: 'entities', fields: { 'entity.id': ['host:a'] }, sort: ['host:a', 1] },
+            { _index: 'entities', fields: { 'entity.id': ['host:b'] }, sort: ['host:b', 2] },
+          ],
+        },
+      });
+
+      const result = await client.listEntities({ size: 10, docValueFields: ['entity.id'] });
+
+      expect(result.entities).toEqual([]);
+      expect(result.fields).toEqual([{ 'entity.id': ['host:a'] }, { 'entity.id': ['host:b'] }]);
+      expect(result.nextSearchAfter).toEqual(['host:b', 2]);
+      expect(result.took).toBe(1);
+    });
+
+    it('keeps reading _source when docValueFields is empty', async () => {
+      await client.listEntities({ size: 10, source: ['entity.id'], docValueFields: [] });
+
+      const [request] = esClient.search.mock.calls[0];
+      expect(request).toEqual(expect.objectContaining({ _source: ['entity.id'] }));
+      expect(request).not.toHaveProperty('stored_fields');
+    });
   });
 
   describe('latestIndexName', () => {
