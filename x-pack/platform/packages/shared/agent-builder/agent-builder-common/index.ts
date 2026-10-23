@@ -248,6 +248,7 @@ export {
   CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
+  USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH,
   CONVERSATION_METADATA_KEY_MAX_LENGTH,
   MODEL_CONTEXT_MAX_LENGTH,
   WORKFLOW_CONTEXT_MAX_NAMESPACES,
@@ -261,6 +262,7 @@ export {
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,
+  type ConversationRoundAuthorDecoration,
   type ConversationRoundOrigin,
   type ConversationWithoutRounds,
   type ConversationAttachmentSummary,
@@ -513,6 +515,9 @@ export {
   type ValidConversationEventType,
   assertValidConversationEventType,
   type ConversationAddEventInput,
+  type ChatCallbackEventResponse,
+  type ChatCallbackFailureResponse,
+  type ChatCallbackResponse,
 } from './chat';
 export {
   type PublicSkillDefinition,

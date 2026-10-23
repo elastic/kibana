@@ -40,12 +40,16 @@ const proposal = {
   createdAt: '2026-07-28T14:00:00.000Z',
 };
 
-const setup = ({ canDecide = true, isMissing = false } = {}) => {
+const setup = ({
+  canDecide = true,
+  isMissing = false,
+  data = proposal as Record<string, unknown>,
+} = {}) => {
   (useKibana as jest.Mock).mockReturnValue({
     services: { application: { capabilities: { proposals: { decideProposals: canDecide } } } },
   });
   (useProposal as jest.Mock).mockReturnValue({
-    data: isMissing ? undefined : proposal,
+    data: isMissing ? undefined : data,
     isLoading: false,
   });
   (useApproveProposal as jest.Mock).mockReturnValue({ mutateAsync: approve });
@@ -90,6 +94,17 @@ describe('ProposalDecision', () => {
     setup();
 
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')).toBeEnabled();
+  });
+
+  it("offers only I've applied for a to-do proposal", () => {
+    setup({ data: { ...proposal, category: 'todo' } });
+
+    expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toHaveTextContent(
+      "I've applied"
+    );
+    expect(
+      screen.queryByTestId('investigationHypothesisTreeProposal-p-1-dismiss')
+    ).not.toBeInTheDocument();
   });
 
   it('disables the decision without the decide capability', () => {

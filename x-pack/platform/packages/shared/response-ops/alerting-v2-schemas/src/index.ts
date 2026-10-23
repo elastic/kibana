@@ -15,6 +15,7 @@ export {
   entityIdSchema,
   ENTITY_ID_NOTE,
   groupHashSchema,
+  seriesIdSchema,
   tagsResponseSchema,
   tagsSchema,
 } from './common';

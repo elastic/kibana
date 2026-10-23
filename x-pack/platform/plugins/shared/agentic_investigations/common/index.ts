@@ -145,6 +145,7 @@ export {
   INVESTIGATION_BY_ID_URL,
   INVESTIGATION_CLOSE_PREVIEW_URL,
   INVESTIGATION_SEVERITIES,
+  INVESTIGATION_SEVERITY_URL,
   INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
@@ -197,6 +198,12 @@ export type {
   SetEscalationStatusResponse,
   EscalationClosePreviewResponse,
 } from './investigations/status';
+
+export type {
+  SetInvestigationSeverityRequest,
+  SetInvestigationSeverityResponse,
+  InvestigationSeverityChangedEventData,
+} from './investigations/severity_change';
 
 export {
   assignConversationRequestBodySchema,

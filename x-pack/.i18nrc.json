@@ -232,7 +232,9 @@
     "xpack.sampleDataIngest": "platform/plugins/shared/sample_data_ingest",
     "xpack.serverlessWorkplaceAI": "solutions/workplaceai/plugins/serverless_workplace_ai",
     "xpack.sloShared": "platform/plugins/shared/slo_shared",
-    "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app"
+    "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app",
+    "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"]
+
   },
   "exclude": [
     "examples",

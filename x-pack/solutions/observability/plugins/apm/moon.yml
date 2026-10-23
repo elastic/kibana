@@ -201,6 +201,4 @@ fileGroups:
     - server/**/*.json
     - test/scenarios/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

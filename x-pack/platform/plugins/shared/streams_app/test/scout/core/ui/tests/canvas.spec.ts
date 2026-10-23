@@ -263,12 +263,15 @@ test.describe(
       const attachmentsTab = flyout.getByTestId('streamsCanvasFlyoutTab-attachments');
 
       await attachmentsTab.click();
+      await expect(page).toHaveURL(/flyoutTab:attachments/);
+      const canvasUrl = page.url();
+
       await pageObjects.discover.goto({ queryMode: 'esql' });
 
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await expect(page).not.toHaveURL(/flyoutTab:attachments/);
 
-      await page.goBack();
+      await page.goto(canvasUrl);
 
       await expect(page).toHaveURL(/flyoutTab:attachments/);
       await expect(flyout).toBeVisible();

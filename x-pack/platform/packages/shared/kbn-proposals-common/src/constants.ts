@@ -30,6 +30,12 @@ export const PROPOSAL_CHARTS_SUMMARY_URL = `${PROPOSALS_INTERNAL_URL}/charts-sum
 export const PROPOSALS_CREATE_TOOL_ID = 'proposals.create' as const;
 
 /**
+ * Category of a proposal the analyst carries out themselves, and marks as applied once done. See
+ * `isTodoProposal`. A producer sets it explicitly, since nothing about the proposal implies it.
+ */
+export const PROPOSAL_CATEGORY_TODO = 'todo' as const;
+
+/**
  * Stand-in category for a proposal that carries no action and therefore has no
  * category of its own. Substituted on the read path rather than at write time:
  * the category vocabulary belongs to the solution that authored the action, so

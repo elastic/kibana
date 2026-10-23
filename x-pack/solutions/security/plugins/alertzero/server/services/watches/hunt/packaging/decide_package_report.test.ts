@@ -12,9 +12,9 @@ import {
   ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { buildProposalSubjectKey } from '../../../proposals/dedup';
 import {
   buildActionInput,
-  buildProposalSubjectKey,
   buildProposalSummaryBullets,
   canFillRespondAction,
   collectSubjects,
@@ -636,29 +636,6 @@ describe('decidePackageReport', () => {
     expect(byWorkflow.get(isolateHost.workflowId)).toBe('6f30494e-d19c-51d9-94b3-da6a6e4a17fd');
     // uuidv5(`agent-a|system-security-action-kill-process|entity:ent-4242`).
     expect(byWorkflow.get(killProcess.workflowId)).toBe('e7f4d23d-c0a4-57a8-804e-a1cbca13bc1c');
-  });
-
-  it('builds stable subject keys for the same host × action × process', () => {
-    const key = {
-      subjectId: 'e',
-      actionWorkflowId: 'a',
-      processKey: 'p',
-    };
-
-    expect(buildProposalSubjectKey(key)).toBe(buildProposalSubjectKey({ ...key }));
-  });
-
-  it('builds different subject keys for a different host, action or process', () => {
-    const key = { subjectId: 'e', actionWorkflowId: 'a', processKey: 'p' };
-    const keys = [
-      buildProposalSubjectKey(key),
-      buildProposalSubjectKey({ ...key, subjectId: 'e2' }),
-      buildProposalSubjectKey({ ...key, actionWorkflowId: 'a2' }),
-      buildProposalSubjectKey({ ...key, processKey: 'p2' }),
-      buildProposalSubjectKey({ subjectId: 'e', actionWorkflowId: 'a' }),
-    ];
-
-    expect(new Set(keys).size).toBe(keys.length);
   });
 
   describe('which Investigation raised a proposal', () => {

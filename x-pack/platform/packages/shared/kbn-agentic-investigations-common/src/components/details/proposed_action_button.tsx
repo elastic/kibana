@@ -20,6 +20,7 @@ import {
   type ApprovalActorTimeProps,
   getApprovalOutcomeBadge,
   getProposalCaption,
+  ProposalCaption,
   getProposalDecision,
   ProposedActionStatusBadge,
   type ApprovalPhase,
@@ -56,6 +57,8 @@ export interface ProposedActionButtonProps {
 const ACTOR_OUTCOME_BY_STATUS: Partial<Record<ApprovalPhase, ApprovalActorTimeProps['outcome']>> = {
   applied: 'approved',
   applying: 'approved',
+  // A to-do proposal, marked as applied by the human who carried it out.
+  marked_applied: 'applied',
   declined: 'declined',
   failed: 'executed',
 };
@@ -151,7 +154,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
 
-    const pendingCaption = getProposalCaption(proposal);
+    const pendingCaption = getProposalCaption(proposal) && <ProposalCaption proposal={proposal} />;
 
     // A decision with no `actorName` is a terminal state nobody actually decided (expired,
     // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds

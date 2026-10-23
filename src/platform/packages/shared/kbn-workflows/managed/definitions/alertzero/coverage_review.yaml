@@ -217,6 +217,30 @@ steps:
                 on-failure:
                   continue: true
 
+              - name: report_investigation_closed_declined
+                type: alertzero.reportWorkerOutcome
+                if: "${{ steps.close_investigation_declined.error == blank and steps.close_investigation_declined.output.changed_fields contains 'status' }}"
+                on-failure:
+                  continue: true
+                with:
+                  event: worker_investigation_closed
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  close_reason: other
+
+              # Telemetry: the review's outcome when the analyst declined it.
+              - name: report_review_completed_declined
+                type: alertzero.reportWorkerOutcome
+                on-failure:
+                  continue: true
+                with:
+                  event: rule_coverage_review_completed
+                  entry_gate: declined
+                  verdict: none
+                  proposal_kind: none
+                  decision: none
+                  ki_processed: "${{ steps.mark_declined.output.result != null }}"
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
               # workflow.output ends the run.
               - name: stop_declined
                 type: workflow.output
@@ -231,6 +255,19 @@ steps:
           # stays open, so the next sweep asks again.
           - match: expired
             steps:
+              # Telemetry: the review's outcome when nobody answered.
+              - name: report_review_completed_undecided
+                type: alertzero.reportWorkerOutcome
+                on-failure:
+                  continue: true
+                with:
+                  event: rule_coverage_review_completed
+                  entry_gate: undecided
+                  verdict: none
+                  proposal_kind: none
+                  decision: none
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
               - name: stop_expired
                 type: workflow.output
                 status: completed
@@ -788,6 +825,16 @@ steps:
             on-failure:
               continue: true
 
+          - name: report_investigation_closed_resolved
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_investigation_resolved.error == blank and steps.close_investigation_resolved.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              close_reason: "{{ steps.close_investigation_resolved.output.metadata.close_reason }}"
+
       - match: dismissed
         steps:
           - name: close_investigation_dismissed
@@ -800,6 +847,16 @@ steps:
                 verdict: "Analyst dismissed the coverage proposal."
             on-failure:
               continue: true
+
+          - name: report_investigation_closed_dismissed
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_investigation_dismissed.error == blank and steps.close_investigation_dismissed.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              close_reason: other
 
   # Step 10 of 10: mark the indicator processed. Except for a declined entry gate,
   # this is the only write to the indicator. It runs only after an applied decision.
@@ -833,6 +890,78 @@ steps:
       ki:
         attributes:
           status: processed
+
+  # Telemetry: the review's outcome. Free-text outputs are sent only as flags.
+  - name: report_review_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: rule_coverage_review_completed
+      entry_gate: |-
+        {%- if steps.propose_entry.output.decision == 'approved' -%}
+        approved
+        {%- else -%}
+        skipped
+        {%- endif -%}
+      verdict: |-
+        {%- assign verdict = steps.coverage_check.output.structured_output.verdict -%}
+        {%- if verdict == 'covered_enabled' or verdict == 'covered_disabled' or verdict == 'prebuilt_available' or verdict == 'no_coverage' -%}
+        {{ verdict }}
+        {%- else -%}
+        none
+        {%- endif -%}
+      proposal_kind: |-
+        {%- if steps.propose_enable.output.status != blank -%}
+        enable_rule
+        {%- elsif steps.propose_install.output.status != blank -%}
+        install_prebuilt_rule
+        {%- elsif steps.propose_confirm.output.status != blank -%}
+        confirm_coverage
+        {%- elsif steps.report_unresolved_rule.output.status != blank or steps.report_missing_version.output.status != blank or steps.report_unconfirmed_rule.output.status != blank or steps.report_unknown_verdict.output.status != blank -%}
+        manual_follow_up
+        {%- elsif steps.coverage_check.output.structured_output.verdict == 'no_coverage' and steps.run_rule_creation.error == null and steps.run_rule_creation.output.skip_reason == blank -%}
+        create_rule
+        {%- else -%}
+        none
+        {%- endif -%}
+      decision: |-
+        {%- if steps.record_decision.output.approved == true -%}
+        approved
+        {%- elsif steps.record_decision.output.dismissed == true -%}
+        dismissed
+        {%- elsif steps.propose_enable.output.status != blank or steps.propose_install.output.status != blank or steps.propose_confirm.output.status != blank or steps.report_unresolved_rule.output.status != blank or steps.report_missing_version.output.status != blank or steps.report_unconfirmed_rule.output.status != blank or steps.report_unknown_verdict.output.status != blank -%}
+        undecided
+        {%- elsif steps.coverage_check.output.structured_output.verdict == 'no_coverage' and steps.run_rule_creation.error == null and steps.run_rule_creation.output.skip_reason == blank -%}
+        undecided
+        {%- else -%}
+        none
+        {%- endif -%}
+      applied: "${{ steps.record_decision.output.applied == true and steps.refetch_rule.error == null and steps.refetch_rule.output.enabled == true }}"
+      approved_not_applied: "${{ steps.resolve_outcome.output.enable_approved_not_applied == true or steps.resolve_outcome.output.install_approved_not_applied == true }}"
+      rule_created: "${{ steps.run_rule_creation.output.created == true }}"
+      creation_skipped: "${{ steps.run_rule_creation.output.skip_reason != blank }}"
+      creation_failed: "${{ steps.run_rule_creation.error != null }}"
+      check_failed: "${{ steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' }}"
+      ki_processed: "${{ steps.mark_processed.output.result != null }}"
+      # The rule's own type, which the step maps to the event's vocabulary. A created rule is ES|QL.
+      rule_type: |-
+        {%- if steps.coverage_check.output.structured_output.verdict == 'no_coverage' and steps.run_rule_creation.error == null and steps.run_rule_creation.output.skip_reason == blank -%}
+        esql
+        {%- else -%}
+        {{ steps.refetch_rule.output.type | default: steps.resolve_rule.output.type }}
+        {%- endif -%}
+      rule_source: |-
+        {%- if steps.propose_install.output.status != blank -%}
+        prebuilt
+        {%- elsif steps.coverage_check.output.structured_output.verdict == 'no_coverage' and steps.run_rule_creation.error == null and steps.run_rule_creation.output.skip_reason == blank -%}
+        custom
+        {%- elsif steps.resolve_rule.output.rule_source.type == 'external' or steps.resolve_rule.output.immutable == true -%}
+        prebuilt
+        {%- elsif steps.resolve_rule.output.type != blank -%}
+        custom
+        {%- endif -%}
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
 
   - name: emit_result
     type: workflow.output

@@ -95,7 +95,12 @@ describe('ApplyMaintenanceWindowStep', () => {
     expect(result.data?.triage?.dispatchable).toHaveLength(0);
     expect(result.data?.triage?.suppressed).toHaveLength(1);
     expect(result.data?.triage?.suppressed[0]).toEqual(
-      expect.objectContaining({ rule_id: alert.rule_id, reason: 'maintenance_window:mw-1' })
+      expect.objectContaining({
+        rule_id: alert.rule_id,
+        reason: 'maintenance_window:mw-1',
+        action_subtype: 'maintenance_window',
+        maintenance_window_id: 'mw-1',
+      })
     );
   });
 
@@ -237,6 +242,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     const previouslySuppressed = {
       ...createAlert({ alert_id: 'previously-suppressed' }),
       reason: 'snooze',
+      action_subtype: 'snooze' as const,
     };
     const state = createDispatcherPipelineState({
       dispatchable: [alert],

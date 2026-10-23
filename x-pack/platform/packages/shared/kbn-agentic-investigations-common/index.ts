@@ -54,6 +54,7 @@ export {
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
+export { SeverityPicker, type SeverityPickerProps } from './src/components/details/severity_picker';
 export {
   SEVERITY_COLORS,
   SEVERITY_LABELS,
@@ -100,6 +101,8 @@ export {
   type AssigneesSlotRenderProps,
   type RenderStatus,
   type StatusSlotRenderProps,
+  type RenderSeverity,
+  type SeveritySlotRenderProps,
   type RenderLinkedInvestigations,
   type RenderSyncIndicator,
   type SyncIndicatorSlotRenderProps,

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
-import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import { SpecsClient } from '../../../../specs_client';
+import { getRegisteredSpec } from '../../../../specs_client/lib/get_registered_spec';
 import type { GetConnectorSpecParams } from './types';
 
 export async function getConnectorSpecAsJsonSchema({
@@ -15,50 +14,24 @@ export async function getConnectorSpecAsJsonSchema({
   id,
   configurationUtilities,
 }: GetConnectorSpecParams) {
-  try {
-    await context.authorization.ensureAuthorized({ operation: 'get' });
-  } catch (error) {
-    context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.GET,
-        error,
-      })
-    );
-    throw error;
-  }
+  const client = new SpecsClient({
+    actionTypeRegistry: context.actionTypeRegistry,
+    configurationUtilities,
+    authorization: context.authorization,
+    auditLogger: context.auditLogger,
+  });
+  const detail = await client.get({ id });
+  const { spec } = getRegisteredSpec(context.actionTypeRegistry, id);
 
-  const spec = context.actionTypeRegistry.getSpec(id);
-
-  if (!spec) {
-    throw Boom.notFound(`Spec for connector type "${id}" not found.`);
-  }
-
-  try {
-    const webhookSettings = configurationUtilities.getWebhookSettings();
-    const isPfxEnabled = webhookSettings.ssl.pfx.enabled;
-    const isEarsEnabled = configurationUtilities.isEarsEnabled();
-    const isEarsExperimentalEnabled = configurationUtilities.isEarsExperimentalEnabled();
-    const serialized = serializeConnectorSpec(spec, {
-      isPfxEnabled,
-      isEarsEnabled,
-      isEarsExperimentalEnabled,
-    });
-    return {
-      metadata: serialized.metadata,
-      schema: serialized.schema,
-      isTestable: Boolean(spec.test.enabled),
-      actions: Object.entries(spec.actions).map(([name, def]) => ({
-        name,
-        isTool: Boolean(def.isTool),
-        ...(def.description !== undefined ? { description: def.description } : {}),
-        ...(def.scope !== undefined ? { scope: def.scope } : {}),
-      })),
-    };
-  } catch (error) {
-    throw new Error(
-      `Failed to serialize connector spec: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
+  return {
+    metadata: spec.metadata,
+    schema: detail.formSchema,
+    isTestable: detail.isTestable,
+    actions: detail.actions.map(({ name, isTool, description, scope }) => ({
+      name,
+      isTool,
+      ...(description !== undefined ? { description } : {}),
+      ...(scope !== undefined ? { scope } : {}),
+    })),
+  };
 }

@@ -758,6 +758,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         ['rule', 'stroke', defaultColor],
         ['shape', 'stroke', defaultColor],
         ['symbol', 'fill', defaultColor],
+        ['text', 'fill', getVegaThemeColors(this.theme, 'text')],
         ['trail', 'fill', defaultColor],
       ] as const;
 

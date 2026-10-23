@@ -13,7 +13,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 7484
+  alertzero: 8277
   apm: 35746
   apmShared: 2226
   apmSourcesAccess: 1174
@@ -67,6 +67,7 @@ pageLoadAssetSize:
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
+  entityInventoryApp: 1216
   entityStore: 2508
   esql: 382
   esqlDataGrid: 215
@@ -127,7 +128,7 @@ pageLoadAssetSize:
   logsShared: 2042
   logstash: 11772
   maintenanceWindows: 4338
-  management: 10296
+  management: 11778
   maps: 1201
   mapsEms: 3256
   metricsDataAccess: 2418
@@ -146,7 +147,7 @@ pageLoadAssetSize:
   observabilityAIAssistant: 2236
   observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2280
-  observabilityAlerting: 3883
+  observabilityAlerting: 4632
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 8355

@@ -74,7 +74,7 @@ describe('StoreActionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      suppressed: [{ ...alert, reason: 'user acknowledged' }],
+      suppressed: [{ ...alert, reason: 'user acknowledged', action_subtype: 'ack' }],
       throttled: [],
       dispatch: [],
       rules: createRules('rule-1'),
@@ -95,10 +95,60 @@ describe('StoreActionsStep', () => {
           rule_id: 'rule-1',
           source: 'internal',
           reason: 'user acknowledged',
+          action_subtype: 'ack',
           space_id: 'default',
         },
       ],
     });
+  });
+
+  it('records the maintenance window id on a suppress doc', async () => {
+    const mockService = createMockStorageServiceContract();
+    const step = new StoreActionsStep(mockService);
+
+    const alert = createAlert({ rule_id: 'rule-1', group_hash: 'hash-1' });
+
+    const state = createDispatcherPipelineState({
+      suppressed: [
+        {
+          ...alert,
+          reason: 'maintenance_window:mw-1',
+          action_subtype: 'maintenance_window',
+          maintenance_window_id: 'mw-1',
+        },
+      ],
+      throttled: [],
+      dispatch: [],
+      rules: createRules('rule-1'),
+    });
+
+    await step.execute(state, logger);
+
+    expect(mockService.bulkIndexDocs.mock.calls[0][0].docs).toEqual([
+      expect.objectContaining({
+        action_type: 'suppress',
+        reason: 'maintenance_window:mw-1',
+        maintenance_window_id: 'mw-1',
+      }),
+    ]);
+  });
+
+  it('omits maintenance_window_id from a suppress doc that has none', async () => {
+    const mockService = createMockStorageServiceContract();
+    const step = new StoreActionsStep(mockService);
+
+    const state = createDispatcherPipelineState({
+      suppressed: [{ ...createAlert(), reason: 'user acknowledged', action_subtype: 'ack' }],
+      throttled: [],
+      dispatch: [],
+      rules: createRules('rule-1'),
+    });
+
+    await step.execute(state, logger);
+
+    expect(mockService.bulkIndexDocs.mock.calls[0][0].docs[0]).not.toHaveProperty(
+      'maintenance_window_id'
+    );
   });
 
   it('records throttled notification groups with throttle-specific reason', async () => {
@@ -139,6 +189,7 @@ describe('StoreActionsStep', () => {
           rule_id: 'rule-1',
           source: 'internal',
           reason: 'suppressed by throttled policy policy-1',
+          action_subtype: 'throttled',
           space_id: 'default',
         },
       ],
@@ -331,7 +382,9 @@ describe('StoreActionsStep', () => {
 
     const state = createDispatcherPipelineState({
       dispatchable: [dispatchAlert, throttledAlert, unmatchedAlert],
-      suppressed: [{ ...suppressedAlert, reason: 'manually suppressed' }],
+      suppressed: [
+        { ...suppressedAlert, reason: 'manually suppressed', action_subtype: 'unknown' },
+      ],
       throttled: [throttledGroup],
       dispatch: [dispatchGroup],
       policies: new Map([
@@ -360,6 +413,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-suppressed',
       source: 'internal',
       reason: 'manually suppressed',
+      action_subtype: 'unknown',
       space_id: 'default',
     });
 
@@ -371,6 +425,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-throttled',
       source: 'internal',
       reason: 'suppressed by throttled policy throttle-policy',
+      action_subtype: 'throttled',
       space_id: 'default',
     });
 
@@ -514,8 +569,8 @@ describe('StoreActionsStep', () => {
 
       const state = createDispatcherPipelineState({
         suppressed: [
-          { ...alert1, reason: 'suppressed' },
-          { ...alert2, reason: 'suppressed' },
+          { ...alert1, reason: 'suppressed', action_subtype: 'unknown' },
+          { ...alert2, reason: 'suppressed', action_subtype: 'unknown' },
         ],
       });
 
@@ -651,7 +706,9 @@ describe('StoreActionsStep', () => {
 
       const state = createDispatcherPipelineState({
         dispatchable: [dispatchedAlert, throttledAlert, unmatchedAlert],
-        suppressed: [{ ...createAlert({ alert_id: 'ep-sup' }), reason: 'acked' }],
+        suppressed: [
+          { ...createAlert({ alert_id: 'ep-sup' }), reason: 'acked', action_subtype: 'ack' },
+        ],
         throttled: [createActionGroup({ id: 'g-throttle', alerts: [throttledAlert] })],
         dispatch: [createActionGroup({ id: 'g-dispatch', alerts: [dispatchedAlert] })],
       });

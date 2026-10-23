@@ -174,6 +174,48 @@ describe('ProposalsService', () => {
   });
 
   describe('create', () => {
+    it('refuses a to-do that would run an action workflow', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      // "I've applied" would otherwise approve the gate and run the action again.
+      await expect(
+        service.create(
+          {
+            conversationId: 'conv-1',
+            comment: 'Tune the noisy rule',
+            actionWorkflowId: 'system-alertzero-action-create-rule',
+            actionInput: { name: 'Suspicious PowerShell' },
+            category: 'todo',
+            confidence: 'medium',
+            origin: 'nightshift',
+          },
+          { spaceId: SPACE_ID, request }
+        )
+      ).rejects.toThrow(ProposalInvalidActionInputError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('accepts a to-do without an action', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Revert the pool-size config change',
+          category: 'todo',
+          confidence: 'medium',
+          origin: 'nightshift',
+        },
+        { spaceId: SPACE_ID, request }
+      );
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ category: 'todo' }) })
+      );
+    });
+
     it("titles the attachment card with the proposal's own title over the action's name", async () => {
       const storage = createStorage();
       const { service, attachmentsClient } = createService(storage);
@@ -2230,6 +2272,30 @@ describe('ProposalsService', () => {
           { term: { origin: 'alertzero' } },
           { terms: { category: ['respond', 'investigate'] } },
         ])
+      );
+    });
+
+    it('filters by any of the given statuses', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { by_conversation: { buckets: [] } },
+      });
+      const { service } = createService(storage);
+
+      await service.countByConversation(
+        {
+          statuses: ['pending', 'executing'],
+          excludeSuperseded: true,
+          excludeExpired: false,
+        },
+        SPACE_ID,
+        10
+      );
+
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([{ terms: { status: ['pending', 'executing'] } }])
       );
     });
   });

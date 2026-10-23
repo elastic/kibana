@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isProposalSettling, isTerminal } from '@kbn/proposals-common';
 import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
@@ -58,23 +59,24 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
  * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
  * - `entityIds`        from the conversation's Impact document; omitted when none.
- * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
- *                      `'succeeded'`, …) are not investigation statuses, and mapping them
- *                      across would be inventing a meaning. The bucket carries the part
- *                      the queue actually needs: decided proposals land in `closed`.
+ * - `status`           deliberately `undefined`. A proposal status (`'pending'`, `'succeeded'`, …)
+ *                      is not an investigation status. The bucket gives the queue what it
+ *                      needs: a settled proposal goes to `closed`. An approved proposal that
+ *                      still runs stays in its category. `isProposalSettling` marks it.
  * - `severity`         lossy 4→3 collapse: `critical` → `'high'` so the danger icon fires.
  * - `proposalCreatedAt` / `proposalDecidedAt` the proposal's own timestamps. The decision time
  *                      dates the closed rows.
  * - `recordId`         repurposed as the proposal id; the page gates dismiss/assign modals
  *                      on `modalState.recordId`, so this must be non-null for the ⋮ menu
  *                      items to work.
- * - `pendingProposalCount` degenerate (1 for pending, 0 for decided); one card IS one proposal.
+ * - `pendingProposalCount` is 1 for a pending proposal and 0 for any other.
  * - `confidence`, `origin`, `dismissReason`, `rationale`, `executionError`,
  *   `workflowExecutionId`, `decidedBy`, `expiresAt` — no destination in Investigation.
  */
 export const proposalToInvestigation = (proposal: ProposalItem): Investigation => {
-  // Closed detection mirrors groupProposals() server-side: decidedAt wins over category.
-  const isClosed = Boolean(proposal.decidedAt);
+  // A proposal is closed when it settles, not when it is decided. An approved proposal stays in
+  // its category while its action runs. This matches the server, which lists by status.
+  const isClosed = isTerminal(proposal.status);
   const bucket: RecommendedAction = isClosed
     ? CLOSED_GROUP_KEY
     : CATEGORY_TO_BUCKET[proposal.category ?? ''] ?? FALLBACK_BUCKET;
@@ -93,7 +95,8 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // Proposals do not carry worker execution IDs.
     worker_execution_ids: [],
     // status is deliberately omitted — see the data-gap note above.
-    pendingProposalCount: proposal.decidedAt ? 0 : 1,
+    pendingProposalCount: proposal.status === 'pending' ? 1 : 0,
+    isProposalSettling: isProposalSettling(proposal),
     recommendedAction: bucket,
     // severity collapse: 4-level impact → 3-level severity string.
     // 'critical' maps to 'high' so helpers.tsx's === 'high' check still fires.

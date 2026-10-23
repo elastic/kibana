@@ -34,7 +34,7 @@
       "id": "ml",
       "name": "ML Agent Builder Skills",
       "slackChannel": "#agent-builder-alerts",
-      "configPath": "x-pack/platform/plugins/shared/ml/evals/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/private/ml/kbn-evals-suite-ml/playwright.config.ts",
       "serverConfigSet": "evals_agent_builder",
       "tags": [
         "platform",

@@ -45,9 +45,10 @@ import {
 } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
+import { COLLECTION_QUERYPARAM } from '../../../../../../services/collections';
 
 /** URL query-param key that holds the currently-open collection group id. */
-export const COLLECTION_QUERYPARAM = 'collection';
+export { COLLECTION_QUERYPARAM };
 
 export interface CollectionStateRef {
   groupId: string;

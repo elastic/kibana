@@ -608,6 +608,7 @@ describe('Endpoint analysis run', () => {
         'journal_proposals_queued',
         'journal_rationale',
         'journal_timeline',
+        'write_convergence_note',
       ]);
       expect(
         journalSteps.every(({ with: withInputs }) => withInputs?.['run-as-mode'] === 'inherit')
@@ -1252,17 +1253,18 @@ describe('Endpoint analysis run', () => {
     });
 
     // Every field here is read when the proposal is dispatched, so a field the workflow
-    // never passes on is one the model spends tokens filling for nothing.
+    // never passes on is one the model spends tokens filling for nothing. The field names
+    // are the ones `alertzero.resolveProposals` takes, so the list is handed over as is.
     it('asks only for the fields the proposal dispatch passes on', () => {
       expect(Object.keys(recommendation?.properties ?? {}).sort()).toEqual([
-        'actionId',
         'actionInput',
+        'actionWorkflowId',
         'comment',
         'confidence',
         'title',
       ]);
       expect(recommendation?.required).toEqual([
-        'actionId',
+        'actionWorkflowId',
         'actionInput',
         'title',
         'comment',
@@ -1276,7 +1278,7 @@ describe('Endpoint analysis run', () => {
       });
       // A blank id is schema-valid without this, and the proposal workflow treats a
       // blank actionWorkflowId as a no-action card an analyst can approve.
-      expect(recommendation?.properties?.actionId).toMatchObject({
+      expect(recommendation?.properties?.actionWorkflowId).toMatchObject({
         type: 'string',
         minLength: 1,
         maxLength: 256,
@@ -1402,6 +1404,12 @@ describe('Endpoint analysis run', () => {
     it('dispatches containment only after the findings are on the investigation', () => {
       const names = allSteps.map(({ name }) => name);
       expect(names.indexOf('resolve_run_outcome')).toBeLessThan(
+        names.indexOf('resolve_proposal_slots')
+      );
+      expect(names.indexOf('resolve_proposal_slots')).toBeLessThan(
+        names.indexOf('resolve_proposal_counts')
+      );
+      expect(names.indexOf('resolve_proposal_counts')).toBeLessThan(
         names.indexOf('journal_proposals_queued')
       );
       expect(names.indexOf('journal_proposals_queued')).toBeLessThan(
@@ -1410,13 +1418,17 @@ describe('Endpoint analysis run', () => {
       expect(names.indexOf('propose_actions')).toBeLessThan(names.indexOf('resolve_proposals'));
       expect(names.indexOf('resolve_proposals')).toBeLessThan(names.indexOf('mark_processed'));
 
-      const gate = String(stepByName('propose_actions')?.if);
+      // The slot resolution carries the gate; the dispatch keys off what it returned.
+      const gate = String(stepByName('resolve_proposal_slots')?.if);
       expect(gate).toContain('steps.resolve_run_outcome.output.attached == true');
       expect(gate).toContain('recommendedActions.size > 0');
       expect(gate).not.toContain('settled');
+      expect(stepByName('propose_actions')?.if).toBe(
+        '${{ steps.resolve_proposal_counts.output.new_count > 0 }}'
+      );
       // `| default: []` is not an array in this engine, so `foreach` hard-fails on it.
       expect(stepByName('propose_actions')?.foreach).toBe(
-        '${{ steps.forensic_analysis.output.structured_output.recommendedActions }}'
+        '${{ steps.resolve_proposal_slots.output.proposals }}'
       );
 
       const when = (attached: boolean, propose: boolean, recommended = 1) => ({
@@ -1481,51 +1493,17 @@ describe('Endpoint analysis run', () => {
       });
 
       // The barrier counts every proposal on the investigation, and this one already
-      // holds at least the approved handoff that requested the analysis. A barrier of
-      // just this run's actions would be met before the siblings finished queueing.
+      // holds at least the approved handoff that requested the analysis. The step
+      // computes that total: the ones already there plus the ones about to be created.
       it('baselines the creation barrier on the proposals already there', () => {
-        const count = stepByName('count_existing_proposals');
-        expect(count?.type).toBe('kibana.request');
-        expect(count?.with).toMatchObject({
-          method: 'GET',
-          path: '/s/{{ workflow.spaceId }}/internal/proposals',
-          headers: { 'elastic-api-version': '1' },
-          query: {
-            conversationId: '{{ steps.resolve_request.output.investigation_id }}',
-            size: 1,
-          },
-        });
-        expect(count?.['on-failure']).toEqual({ continue: true });
-        expect(count?.if).toBe(stepByName('propose_actions')?.if);
-
-        const names = allSteps.map(({ name }) => name);
-        expect(names.indexOf('count_existing_proposals')).toBeLessThan(
-          names.indexOf('resolve_expected_proposals')
-        );
-        expect(names.indexOf('resolve_expected_proposals')).toBeLessThan(
-          names.indexOf('propose_actions')
-        );
-
         expect(inputs.expectedProposalCount).toBe(
-          '${{ steps.resolve_expected_proposals.output.count }}'
+          '${{ steps.resolve_proposal_slots.output.expectedProposalCount }}'
         );
-        const expected = String(stepByName('resolve_expected_proposals')?.with?.count);
-        const when = (total: number | undefined, recommended: number) => ({
-          steps: {
-            count_existing_proposals: total === undefined ? { error: {} } : { output: { total } },
-            forensic_analysis: {
-              output: {
-                structured_output: {
-                  recommendedActions: Array.from({ length: recommended }, () => ({})),
-                },
-              },
-            },
-          },
-        });
-        expect(evaluate(expected, when(1, 2))).toBe(3);
-        expect(evaluate(expected, when(0, 2))).toBe(2);
-        // A failed count falls back to this run's own actions rather than blocking.
-        expect(evaluate(expected, when(undefined, 2))).toBe(2);
+      });
+
+      it('hands the gate the id the slot was resolved under', () => {
+        expect(inputs.proposalId).toBe('{{ foreach.item.proposalId }}');
+        expect(inputs.actionWorkflowId).toBe('{{ foreach.item.actionWorkflowId }}');
       });
 
       it('tells the analyst the investigation will close on the last decision', () => {
@@ -1534,6 +1512,147 @@ describe('Endpoint analysis run', () => {
             ?.inputs?.message
         );
         expect(message).toContain('closes once every proposal');
+      });
+    });
+
+    // A recommendation a live Proposal already holds, on this Investigation or another,
+    // must not become a second card. The step resolves each recommendation to a
+    // deterministic id and returns only the ones nothing holds yet; the rest are
+    // journaled as converged on the Proposal that does.
+    describe('resolves each recommendation against the Proposals already live', () => {
+      const slots = stepByName('resolve_proposal_slots');
+      const counts = stepByName('resolve_proposal_counts')?.with as Record<string, string>;
+
+      it('runs the shared dedup step over the agent list', () => {
+        expect(slots?.type).toBe('alertzero.resolveProposals');
+        expect(slots?.with).toEqual({
+          investigationConversationId: '{{ steps.resolve_request.output.investigation_id }}',
+          proposals: '${{ steps.forensic_analysis.output.structured_output.recommendedActions }}',
+        });
+        // A failed check must not fail the run after the agent; it is journaled and
+        // retires the indicator below instead.
+        expect(slots?.['on-failure']).toEqual({ continue: true });
+      });
+
+      it('derives every later gate from the step output, all off when it was skipped', () => {
+        const skipped = { steps: {} };
+        expect(evaluate(counts.new_count, skipped)).toBe(0);
+        expect(evaluate(counts.converged_count, skipped)).toBe(0);
+        expect(evaluate(counts.already_open_count, skipped)).toBe(0);
+        expect(evaluate(counts.check_failed, skipped)).toBe(false);
+
+        const resolved = {
+          steps: {
+            resolve_proposal_slots: {
+              output: {
+                proposals: [{}, {}],
+                converged: [{}],
+                alreadyOpenCount: 3,
+                mintSuppression: 'none',
+              },
+            },
+          },
+        };
+        expect(evaluate(counts.new_count, resolved)).toBe(2);
+        expect(evaluate(counts.converged_count, resolved)).toBe(1);
+        expect(evaluate(counts.already_open_count, resolved)).toBe(3);
+        expect(evaluate(counts.check_failed, resolved)).toBe(false);
+      });
+
+      // Two ways the check can fail: the step reported it could not count, or the step
+      // itself threw and `continue: true` recorded the error.
+      it('treats a suppressed mint or a thrown step as a failed check', () => {
+        expect(
+          evaluate(counts.check_failed, {
+            steps: {
+              resolve_proposal_slots: {
+                output: { proposals: [], converged: [], mintSuppression: 'check_failed' },
+              },
+            },
+          })
+        ).toBe(true);
+        expect(
+          evaluate(counts.check_failed, {
+            steps: { resolve_proposal_slots: { error: { message: 'boom' } } },
+          })
+        ).toBe(true);
+      });
+
+      it('writes one convergence note per recommendation another Proposal holds', () => {
+        const notes = stepByName('write_convergence_notes');
+        expect(notes?.type).toBe('parallel');
+        expect(notes?.mode).toBe('settled');
+        expect(notes?.if).toBe('${{ steps.resolve_proposal_counts.output.converged_count > 0 }}');
+        expect(notes?.foreach).toBe('${{ steps.resolve_proposal_slots.output.converged }}');
+        expect(stepByName('write_convergence_note')).toMatchObject({
+          type: 'workflow.execute',
+          with: {
+            'workflow-id': 'system-alertzero-journal-note',
+            'run-as-mode': 'inherit',
+            inputs: {
+              conversation_id: '{{ steps.resolve_request.output.investigation_id }}',
+              message: '{{ foreach.item.note }}',
+            },
+          },
+        });
+        const names = allSteps.map(({ name }) => name);
+        expect(names.indexOf('propose_actions')).toBeLessThan(
+          names.indexOf('write_convergence_notes')
+        );
+      });
+
+      it('reports the dedup totals in the queued note', () => {
+        const message = String(
+          (stepByName('journal_proposals_queued')?.with as { inputs?: { message?: string } })
+            ?.inputs?.message
+        );
+        const render = (
+          newCount: number,
+          convergedCount: number,
+          alreadyOpenCount: number,
+          level = 'manual'
+        ) =>
+          liquid.parseAndRenderSync(message, {
+            steps: {
+              resolve_host: { output: { host_name: 'web-01' } },
+              resolve_autonomy: { output: { level } },
+              resolve_proposal_counts: {
+                output: {
+                  new_count: newCount,
+                  converged_count: convergedCount,
+                  already_open_count: alreadyOpenCount,
+                },
+              },
+            },
+          });
+
+        expect(render(2, 0, 0)).toBe(
+          'Endpoint analysis of `web-01` is submitting 2 containment proposal(s) for analyst approval. The investigation closes once every proposal on it has been decided.'
+        );
+        expect(render(1, 0, 0, 'supervised')).toContain('for auto-approval.');
+        expect(render(1, 2, 1)).toBe(
+          'Endpoint analysis of `web-01` is submitting 1 containment proposal(s) for analyst approval. 2 already raised by another Investigation. 1 already open on this investigation. The investigation closes once every proposal on it has been decided.'
+        );
+        // Nothing new: the gate never runs, so nothing closes the investigation.
+        expect(render(0, 1, 0)).toBe(
+          'Endpoint analysis of `web-01` found containment worth proposing, but every proposal it would have raised already exists, so none was created. 1 already raised by another Investigation. The investigation stays open until an analyst closes it.'
+        );
+      });
+
+      it('surfaces the new and converged counts on the run output', () => {
+        const outputs = (
+          definition as unknown as {
+            outputs?: { properties?: Record<string, { type?: string }> };
+          }
+        ).outputs?.properties;
+        expect(outputs?.proposals_submitted).toMatchObject({ type: 'number' });
+        expect(outputs?.proposals_converged).toMatchObject({ type: 'number' });
+        expect(stepByName('emit_result')?.with).toMatchObject({
+          proposals_submitted:
+            '${{ steps.resolve_proposal_counts.output.new_count | default: 0 | minus: steps.resolve_proposal_dispatch.output.failed | at_least: 0 }}',
+          proposals_converged:
+            '${{ steps.resolve_proposal_counts.output.converged_count | default: 0 }}',
+        });
       });
     });
 
@@ -1581,6 +1700,37 @@ describe('Endpoint analysis run', () => {
           },
         })
       ).toBe(false);
+      // A failed dedup check created nothing either, and a retry would skip the agent.
+      expect(
+        evaluate(lost, {
+          steps: {
+            forensic_analysis: { output: { structured_output: { propose: true } } },
+            resolve_proposal_dispatch: { output: { failed: 0 } },
+            resolve_proposal_counts: { output: { check_failed: true } },
+          },
+        })
+      ).toBe(true);
+      const lostMessage = String(
+        (stepByName('journal_proposals_lost')?.with as { inputs?: { message?: string } })?.inputs
+          ?.message
+      );
+      expect(
+        liquid.parseAndRenderSync(lostMessage, {
+          steps: {
+            resolve_host: { output: { host_name: 'web-01' } },
+            resolve_proposal_counts: { output: { check_failed: true } },
+          },
+        })
+      ).toContain('could not check whether those proposals already exist');
+      expect(
+        liquid.parseAndRenderSync(lostMessage, {
+          steps: {
+            resolve_host: { output: { host_name: 'web-01' } },
+            resolve_proposal_counts: { output: { check_failed: false } },
+            resolve_proposal_dispatch: { output: { failed: 2 } },
+          },
+        })
+      ).toContain('2 containment proposal(s) did not');
 
       const processed = String(stepByName('mark_processed')?.if);
       const retired = String(stepByName('mark_proposals_failed')?.if);
@@ -1637,6 +1787,15 @@ describe('Endpoint analysis run', () => {
       expect(evaluate(queued, queuedWhen(true, 0, true))).toBe(false);
       expect(evaluate(queued, queuedWhen(false, 2, true))).toBe(false);
       expect(evaluate(queued, queuedWhen(true, 2, false))).toBe(false);
+      // A failed check is narrated by `journal_proposals_lost`, not as queued.
+      expect(
+        evaluate(queued, {
+          steps: {
+            ...queuedWhen(true, 2, true).steps,
+            resolve_proposal_counts: { output: { check_failed: true } },
+          },
+        })
+      ).toBe(false);
       expect(stepByName('journal_proposals_lost')?.if).toBe(
         stepByName('mark_proposals_failed')?.if
       );
