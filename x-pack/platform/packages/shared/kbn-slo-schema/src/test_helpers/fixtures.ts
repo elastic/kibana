@@ -7,7 +7,7 @@
 
 import type { z } from '@kbn/zod';
 import { Duration, DurationUnit } from '../models/duration';
-import type { sloDefinitionSchema } from '../schema/zod/slo';
+import type { sloDefinitionSchema } from '../schema/slo';
 import type { sloWithDataResponseSchemaZod } from '../rest_specs/slo';
 
 // Artifact-free base: assignable to both the definition schema (dashboards with

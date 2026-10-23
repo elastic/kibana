@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 
-import { ALL_VALUE, SLO_STATUS } from '../../constants';
+import { ALL_VALUE, SLO_STATUS } from '../constants';
 import { MAX_DATE_STRING_LENGTH } from './limits';
 
 const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string()]);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { allOrAnyString } from '../../schema/zod/common';
-import { sloIdSchema } from '../../schema/zod/slo';
+import { allOrAnyString } from '../../schema/common';
+import { sloIdSchema } from '../../schema/slo';
 import { sloWithDataResponseSchemaZod } from '../slo';
 
 const getSLOQuerySchema = z.object({

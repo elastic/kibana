@@ -7,7 +7,8 @@
 
 import { z } from '@kbn/zod';
 
-import { dateType, optionalSettingsSchema, settingsSchema } from './zod';
+import { dateType } from './common';
+import { optionalSettingsSchema, settingsSchema } from './slo';
 
 describe('Schema', () => {
   describe('DateType', () => {

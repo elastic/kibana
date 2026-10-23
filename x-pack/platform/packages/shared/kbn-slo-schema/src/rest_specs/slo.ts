@@ -13,7 +13,7 @@ import {
   remoteSchema as remoteSchemaZod,
   sloDefinitionSchema as sloDefinitionSchemaZod,
   summarySchema as summarySchemaZod,
-} from '../schema/zod';
+} from '../schema';
 import type { SLODefinitionResponse } from './routes/find_definition';
 
 const sloWithDataResponseSchemaZod = sloDefinitionSchemaZod.extend({

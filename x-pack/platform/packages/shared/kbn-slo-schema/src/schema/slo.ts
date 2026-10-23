@@ -19,7 +19,7 @@ import {
   PROJECT_ROUTINGS_TOO_LONG_MESSAGE,
   SLO_ID_INVALID_MESSAGE,
   SLO_ID_REGEX,
-} from '../validation_constants';
+} from './validation_constants';
 
 const occurrencesBudgetingMethodSchema = z.literal('occurrences');
 const timeslicesBudgetingMethodSchema = z.literal('timeslices');
