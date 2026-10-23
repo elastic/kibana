@@ -381,6 +381,18 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         request
       );
 
+      // The package policy above is created with `bumpRevision: false`, which skips the agent policy
+      // update that computes `has_agent_version_conditions` and the minimum agent version. Without it
+      // the agent policy would not get version specific policies until its first update. This only
+      // refreshes those fields: no revision bump, no deploy event.
+      await agentPolicyService.update(
+        this.soClient,
+        this.esClient,
+        agentPolicyId,
+        {},
+        { user, bumpRevision: false, skipValidation: true }
+      );
+
       this.logger.debug(`Deploy agentless policy ${agentPolicyId}`);
       await agentPolicyService.deployPolicy(this.soClient, agentPolicyId, undefined, {
         throwOnAgentlessError: true,

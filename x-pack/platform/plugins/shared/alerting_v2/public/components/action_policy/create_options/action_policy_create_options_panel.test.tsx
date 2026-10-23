@@ -142,43 +142,20 @@ describe('ActionPolicyCreateOptionsPanel', () => {
 });
 
 describe('getCreateActionPolicyWithAgentTooltipText', () => {
-  it('returns undefined when both prerequisites are met', () => {
+  it('returns undefined when the agent builder capability is present', () => {
     expect(
       getCreateActionPolicyWithAgentTooltipText({
         hasAgentBuilderCapability: true,
-        isExperimentalFeaturesEnabled: true,
       })
     ).toBeUndefined();
   });
 
-  it('names only the privilege when only the capability is missing', () => {
+  it('names the privilege when the capability is missing', () => {
     const tooltip = getCreateActionPolicyWithAgentTooltipText({
       hasAgentBuilderCapability: false,
-      isExperimentalFeaturesEnabled: true,
     });
 
     expect(tooltip).toContain('Agent Builder: Read');
     expect(tooltip).not.toContain('advanced setting');
-  });
-
-  it('names only the advanced setting when only the experimental feature is missing', () => {
-    const tooltip = getCreateActionPolicyWithAgentTooltipText({
-      hasAgentBuilderCapability: true,
-      isExperimentalFeaturesEnabled: false,
-    });
-
-    expect(tooltip).toContain('Elastic Agent Builder: Experimental Features');
-    expect(tooltip).toContain('advanced setting');
-    expect(tooltip).not.toContain('Agent Builder: Read');
-  });
-
-  it('names both prerequisites when neither is met', () => {
-    const tooltip = getCreateActionPolicyWithAgentTooltipText({
-      hasAgentBuilderCapability: false,
-      isExperimentalFeaturesEnabled: false,
-    });
-
-    expect(tooltip).toContain('Agent Builder: Read');
-    expect(tooltip).toContain('Elastic Agent Builder: Experimental Features');
   });
 });

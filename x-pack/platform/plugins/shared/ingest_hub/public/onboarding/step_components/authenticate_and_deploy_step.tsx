@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
@@ -30,6 +23,7 @@ import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/manag
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { getIncompleteInstances } from './service_settings_step/use_service_settings';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { toSOSettings, toSOSettingsUpdate } from './authenticate_and_deploy_step/so_settings';
 import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
@@ -46,6 +40,7 @@ import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from './service_settings_step/use_service_settings';
+import { StepFooter } from './step_footer';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -121,6 +116,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     }),
     [ecfOnlyServices]
   );
+
+  // Switching the method resets the agent policy name and options (see setDeploymentMethod), so
+  // when the user has entered some, the card asks before switching.
+  const switchResetsSettings =
+    !!agentBasedDeploymentFromFlow?.agentPolicyId ||
+    !!agentBasedDeploymentFromFlow?.agentPolicyName ||
+    agentBasedDeploymentFromFlow?.withSysMonitoring !== undefined;
 
   const handleDeploymentMethodChange = useCallback(
     (method: DeploymentMethod) => {
@@ -367,8 +369,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // hasAnyEcf=false so the section is hidden and Next is not gated on ECF completion.
   const {
     hasAnyEcf,
+    hasRemovedFamiliesWithArn,
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
+    currentServiceIdsByFamily,
+    advanceStaleSnapshots,
   } = useEcfDeployment({
     instances: isAgentBased ? [] : ecfInstances,
     serviceVars,
@@ -406,14 +411,24 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       .map((family) => {
         const version = ecfSectionProps.stackVersions[family];
         if (!version) return null;
+        const stackArn = ecfSectionProps.stackArns[family];
+        const serviceIds = currentServiceIdsByFamily[family];
         return {
           family,
           stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
           templateVersion: version,
+          ...(stackArn ? { stackArn } : {}),
+          serviceIds,
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
-  }, [ecfSectionProps.launchedFamilies, ecfSectionProps.stackVersions, ecfSectionProps.stackNames]);
+  }, [
+    ecfSectionProps.launchedFamilies,
+    ecfSectionProps.stackVersions,
+    ecfSectionProps.stackNames,
+    ecfSectionProps.stackArns,
+    currentServiceIdsByFamily,
+  ]);
 
   const ecfStacksUnchanged = useMemo(
     () =>
@@ -441,6 +456,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
         globalRegion,
+        ...toSOSettings(serviceSettings),
         dataFormat,
       }));
     if (deploymentId) {
@@ -452,6 +468,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // This write is load-bearing — failure leaves the SO advertising the wrong mechanism
       // and an orphaned connector reference, so we must confirm it before navigating.
       const writeSucceeded = await updateDeployment(deploymentId, {
+        ...toSOSettingsUpdate(serviceSettings),
         mechanisms: ['ecf'],
         connectorId: null,
         authMethod: null,
@@ -478,6 +495,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     } else {
       setIsSavingSO(false);
     }
+    advanceStaleSnapshots();
     onContinue();
     // persistDeploymentId after navigate: onContinue pushes a stale location snapshot, so
     // calling persistDeploymentId before it would replace step 3's URL. Calling it after
@@ -489,9 +507,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     detectAndReviewStep.onboardingDeploymentId,
     selectedServiceIds,
     serviceVars,
+    serviceSettings,
     awsServicesMap,
     globalRegion,
     dataFormat,
+    advanceStaleSnapshots,
     onContinue,
     createDeployment,
     updateDeployment,
@@ -501,6 +521,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
   const handleMixedEcfNext = useCallback(async () => {
+    advanceStaleSnapshots();
     onContinue();
     if (!ecfStacksUnchanged && detectAndReviewStep.onboardingDeploymentId) {
       await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
@@ -534,6 +555,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     deployGroups,
     failedInstances,
     selectedServiceIds,
+    advanceStaleSnapshots,
     removeDeployInstances,
     onContinue,
     updateDeployment,
@@ -666,6 +688,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         onChange={handleDeploymentMethodChange}
         availableMethods={isSelfManaged ? SELF_MANAGED_DEPLOYMENT_METHODS : undefined}
         unsupportedServices={unsupportedServices}
+        switchResetsSettings={switchResetsSettings}
         locked={isSelfManaged || ((allAgentBasedOnly || allEcfOnly) && !isMethodLocked)}
         disabled={isMethodLocked}
       />
@@ -893,38 +916,28 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         />
       )}
 
-      {hasAnyEcf && !isAgentBased && <EuiHorizontalRule margin="l" />}
+      {(hasAnyEcf || hasRemovedFamiliesWithArn) && !isAgentBased && (
+        <EuiHorizontalRule margin="l" />
+      )}
 
-      {hasAnyEcf && !isAgentBased && <EcfDeploymentSection {...ecfSectionProps} />}
+      {(hasAnyEcf || hasRemovedFamiliesWithArn) && !isAgentBased && (
+        <EcfDeploymentSection {...ecfSectionProps} />
+      )}
 
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.backButton"
-                defaultMessage="Back"
-              />
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleNext}
-            isDisabled={isNextDisabled}
-            isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
-            data-test-subj="authenticateAndDeployStep-nextButton"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
-              defaultMessage="Next"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <StepFooter onBack={onBack}>
+        <EuiButton
+          fill
+          onClick={handleNext}
+          isDisabled={isNextDisabled}
+          isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
+          data-test-subj="authenticateAndDeployStep-nextButton"
+        >
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
+            defaultMessage="Next"
+          />
+        </EuiButton>
+      </StepFooter>
     </div>
   );
 }

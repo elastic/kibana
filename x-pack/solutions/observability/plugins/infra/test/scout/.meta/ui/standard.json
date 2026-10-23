@@ -1,5 +1,5 @@
 {
-  "sha1": "5859da0700ea75022fb98587f976e492ce859d1c",
+  "sha1": "58c22b0864fa340b4f51604efd47e4728be9cbb8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 54,
-        "column": 57
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 58,
-        "column": 9
+        "line": 50,
+        "column": 78
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 72,
-        "column": 9
+        "line": 64,
+        "column": 25
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 104,
-        "column": 22
+        "line": 94,
+        "column": 11
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 121,
-        "column": 22
+        "line": 113,
+        "column": 25
       }
     },
     {
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 140,
-        "column": 20
+        "line": 129,
+        "column": 36
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 156,
-        "column": 15
+        "line": 147,
+        "column": 7
       }
     },
     {
@@ -176,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 171,
-        "column": 26
+        "line": 163,
+        "column": 13
       }
     },
     {
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 192,
-        "column": 24
+        "line": 184,
+        "column": 13
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 214,
-        "column": 36
+        "line": 205,
+        "column": 26
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
-        "line": 57,
-        "column": 23
+        "line": 48,
+        "column": 77
       }
     },
     {
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
-        "line": 64,
-        "column": 63
+        "line": 54,
+        "column": 26
       }
     },
     {
@@ -256,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
-        "line": 67,
-        "column": 11
+        "line": 58,
+        "column": 78
       }
     },
     {
@@ -272,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
-        "line": 73,
-        "column": 20
+        "line": 62,
+        "column": 22
       }
     },
     {
@@ -288,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
-        "line": 100,
-        "column": 20
+        "line": 89,
+        "column": 22
       }
     },
     {
@@ -309,22 +309,6 @@
       }
     },
     {
-      "id": "cae0fa4f91bcd16-9e427e0b61a751f",
-      "title": "Pod Metric Detail - schema selector flag off ignores a leftover OpenTelemetry URL",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv_flag_off.spec.ts",
-        "line": 29,
-        "column": 30
-      }
-    },
-    {
       "id": "bc1c963cd55d152-9ff361d381da54d",
       "title": "Pod Metric Detail - OpenTelemetry kubeletstats opens kubeletstats charts from an OpenTelemetry tile",
       "expectedStatus": "passed",
@@ -336,8 +320,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
-        "line": 49,
-        "column": 57
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "bc1c963cd55d152-0c1dfb8517d1f17",
+      "title": "Pod Metric Detail - OpenTelemetry kubeletstats shows the node metadata resolved from the OpenTelemetry host record",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
+        "line": 74,
+        "column": 13
       }
     },
     {
@@ -352,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
-        "line": 76,
-        "column": 13
+        "line": 95,
+        "column": 22
       }
     },
     {

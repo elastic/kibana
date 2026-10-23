@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
+import React, { useEffect, useRef } from 'react';
 import { FLYOUT_ORIGIN, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../../common/lib/telemetry';
-import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../../../flyout_v2/shared/hooks/use_open_flyout';
-import {
-  FlyoutSessionContextProvider,
-  useFlyoutSessionContext,
-} from '../../../flyout_v2/session_context';
+import { useFlyoutSessionContext } from '../../../flyout_v2/session_context';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { getOpenConversationFlyoutWidth } from '../grouped_attachments/conversation_flyout_width';
-import {
-  INVESTIGATION_TIMELINE_FLYOUT_TITLE,
-  InvestigationTimelineFlyout,
-} from './timeline_flyout';
-import type { InvestigationTimelineEvent } from './types';
+import { TIMELINE_TITLE } from '../grouped_attachments';
+import { ConversationFlyoutHost } from '../grouped_attachments/conversation_flyout_host';
+import { InvestigationTimelineFlyout } from './timeline_flyout';
+import type { InvestigationTimelineEvent, InvestigationTimelineWindow } from './types';
 
-const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] }) => {
+const OpenTimelineOnMount = ({
+  events,
+  window,
+}: {
+  events: InvestigationTimelineEvent[];
+  window?: InvestigationTimelineWindow;
+}) => {
   const openFlyout = useOpenFlyout();
   const { session, historyKey } = useFlyoutSessionContext();
   const defaultProperties = useDefaultDocumentFlyoutProperties();
@@ -35,82 +34,43 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
     }
     hasOpened.current = true;
     // A new push flyout on the conversation history, so Back
-    // returns to the conversation flyout. Size is that flyout's current width.
+    // returns to the conversation flyout.
     openFlyout(
-      <InvestigationTimelineFlyout events={events} />,
+      <InvestigationTimelineFlyout events={events} window={window} />,
       {
         ...defaultProperties,
         historyKey,
         session,
         type: 'push',
-        size: getOpenConversationFlyoutWidth() ?? 's',
-        maxWidth: false,
         resizable: true,
         paddingSize: 'l',
-        title: INVESTIGATION_TIMELINE_FLYOUT_TITLE,
+        title: TIMELINE_TITLE,
       },
       {
         surface: FLYOUT_SURFACE.FLYOUT,
         flyoutType: FLYOUT_TYPE.INVESTIGATION_TIMELINE,
         session,
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
-      },
-      undefined,
-      { persistWidth: false }
+      }
     );
-  }, [defaultProperties, events, historyKey, openFlyout, session]);
+  }, [defaultProperties, events, historyKey, openFlyout, session, window]);
 
   return null;
 };
 
 export interface InvestigationTimelineFlyoutOpenerProps {
   events: InvestigationTimelineEvent[];
+  window?: InvestigationTimelineWindow;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
-/**
- * The overview renders outside the Security app shell, so the opened flyout's dependencies are
- * re-established with `flyoutProviders`, the same way an alert row opens its flyout.
- */
+/** Opens the timeline flyout from the conversation overview. Timeline does not query, so it skips the data-view bootstrap. */
 export const InvestigationTimelineFlyoutOpener = ({
   events,
+  window,
   resolveSecurityCanvasContext,
-}: InvestigationTimelineFlyoutOpenerProps) => {
-  const [bundle, setBundle] = useState<SecurityCanvasEmbeddedBundle>();
-
-  useEffect(() => {
-    let isMounted = true;
-    resolveSecurityCanvasContext()
-      .then((resolved) => {
-        if (isMounted) {
-          setBundle(resolved);
-        }
-      })
-      .catch((error) => {
-        window.console.warn('Investigation timeline flyout could not start Security', error);
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, [resolveSecurityCanvasContext]);
-
-  if (!bundle) {
-    return null;
-  }
-
-  return flyoutProviders({
-    services: bundle.kibanaServices,
-    store: bundle.store,
-    children: (
-      <FlyoutSessionContextProvider
-        value={{
-          session: 'start',
-          historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-          type: 'push',
-        }}
-      >
-        <OpenTimelineOnMount events={events} />
-      </FlyoutSessionContextProvider>
-    ),
-  });
-};
+}: InvestigationTimelineFlyoutOpenerProps) => (
+  <ConversationFlyoutHost resolveSecurityCanvasContext={resolveSecurityCanvasContext}>
+    <OpenTimelineOnMount events={events} window={window} />
+  </ConversationFlyoutHost>
+);

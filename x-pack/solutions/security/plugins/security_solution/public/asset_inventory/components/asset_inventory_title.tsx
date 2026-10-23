@@ -8,7 +8,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { SecurityAppHeader } from '../../common/components/app_header';
-import { DOCS_URL } from '../constants';
 import { TECHNICAL_PREVIEW } from '../../common/translations';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.assetInventory.title', {
@@ -36,7 +35,6 @@ export const AssetInventoryTitle = () => (
     title={PAGE_TITLE}
     badges={BADGES}
     spacing="largeBleed"
-    docLink={DOCS_URL}
     // we still want to show the menu for the feedback and doc links when there are no other items in the menu (i.e. when integrations are not installed)
     menu={{ items: [] }}
   />

@@ -12,7 +12,12 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataSource } from '@kbn/data-source';
-import type { DocumentsDisplayMode, ValueToStringConverter } from './types';
+import type {
+  DocumentsDisplayMode,
+  UnifiedDataTableOpenInNewTab,
+  UnifiedDataTableQueryContext,
+  ValueToStringConverter,
+} from './types';
 import type { UseSelectedDocsState } from './hooks/use_selected_docs';
 
 export interface DataTableContext {
@@ -20,6 +25,8 @@ export interface DataTableContext {
   setExpanded?: (hit?: DataTableRecord) => void;
   getRowByIndex: (index: number) => DataTableRecord | undefined;
   onFilter?: DocViewFilterFn;
+  onOpenInNewTab?: UnifiedDataTableOpenInNewTab;
+  queryContext?: UnifiedDataTableQueryContext;
   hideFilteringOnComputedColumns?: boolean;
   dataView: DataView;
   selectedDocsState: UseSelectedDocsState;

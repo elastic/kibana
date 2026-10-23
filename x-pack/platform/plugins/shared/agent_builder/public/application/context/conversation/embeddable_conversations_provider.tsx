@@ -27,6 +27,7 @@ import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
 import { RedirectLoading } from '../../components/redirects/redirect_loading';
+import { refreshListsOnAgentChanges } from '../../utils/refresh_lists_on_agent_changes';
 
 /**
  * Pins restricted (non-`manageAgents`) users to their space's default agent.
@@ -97,6 +98,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       conversationStreamService.dispose();
     };
   }, [conversationStreamService]);
+  useEffect(() => {
+    const listRefresh = refreshListsOnAgentChanges({
+      eventsService: services.eventsService,
+      queryClient,
+    });
+    return () => listRefresh.unsubscribe();
+  }, [services.eventsService, queryClient]);
 
   const kibanaServices = useMemo(
     () => ({

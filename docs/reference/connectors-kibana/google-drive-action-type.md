@@ -19,9 +19,11 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [google-drive-connector-configuration]
 
-Google Drive connectors support **Bearer Token** (a static access token you supply) or **OAuth 2.0 authorization code**
-(Google signs the user in through {{kib}} and {{kib}} stores refreshable tokens). Choose the authentication type when you
-create or edit the connector.
+Google Drive connectors support the following authentication types. Select the authentication type when you create or
+edit the connector.
+
+Quick Connect OAuth 2.0 (recommended) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
+:   Elastic's managed OAuth flow for Google Drive. Grants read-only access (`drive.readonly` and `drive.metadata.readonly`). No app setup is required — select this option and authorize access through Elastic. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 Bearer Token
 :   A Google OAuth 2.0 access token with Google Drive API scopes. See **Get API credentials**.
@@ -69,7 +71,11 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [google-drive-api-credentials]
 
-### OAuth 2.0 authorization code (recommended for ongoing use)
+### Quick Connect OAuth 2.0
+
+No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Google Drive. Your Google Workspace administrator might need to approve the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+
+### OAuth 2.0 authorization code
 
 This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}. Configure a **Web application** OAuth
 client in Google Cloud (similar to common guides that use **Authorized JavaScript origins** and **Authorized redirect

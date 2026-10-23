@@ -129,12 +129,42 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
       errors: [
         {
           message: 'File must start with a license header',
+          line: 1,
+          column: 1,
+          endLine: 1,
+          endColumn: 19,
         },
       ],
 
       output: dedent`
         /* license */
 
+        console.log('foo')
+      `,
+    },
+
+    // missing license header in a file that starts with an empty line
+    {
+      code:
+        '\n' +
+        dedent`
+        console.log('foo')
+      `,
+
+      options: [{ license: '/* license */' }],
+      errors: [
+        {
+          message: 'File must start with a license header',
+          line: 1,
+          column: 1,
+          endLine: 1,
+          endColumn: 1,
+        },
+      ],
+
+      output:
+        '/* license */\n\n\n' +
+        dedent`
         console.log('foo')
       `,
     },

@@ -184,6 +184,7 @@ describe('Navigation Tree', () => {
 
   it('opens an Alerts panel pointing at observability alerting deep links when alerting v2 is enabled', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.settings.globalClient.isDeclared = () => true;
     core.application.capabilities = {
       ...core.application.capabilities,
       alerting_v2_alerts: { read: true },
@@ -227,6 +228,7 @@ describe('Navigation Tree', () => {
           title: 'Rule Management',
           children: expect.arrayContaining([
             expect.objectContaining({ link: 'observabilityAlerting:rules-v2' }),
+            expect.objectContaining({ link: 'observabilityAlerting:rule-library' }),
             expect.objectContaining({
               link: 'observabilityAlerting:rules-v1',
               sideNavStatus: 'hidden',
@@ -252,6 +254,7 @@ describe('Navigation Tree', () => {
 
   it('omits Alerting V2 Preview from Admin and Settings when alerting v2 is enabled', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.settings.globalClient.isDeclared = () => true;
 
     const adminSettingsNode = getAdminSettingsNode({ core });
 
@@ -282,6 +285,7 @@ describe('Navigation Tree', () => {
 
   it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.settings.globalClient.isDeclared = () => true;
 
     const adminSettingsNode = getAdminSettingsNode({ core });
     const alertsSection = adminSettingsNode.children?.find(

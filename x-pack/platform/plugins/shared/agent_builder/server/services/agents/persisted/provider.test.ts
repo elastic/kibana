@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId, chatAgentTypeId } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  chatAgentTypeId,
+  SYSTEM_USER_ID,
+} from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { createClient, type AgentClient } from './client';
-import { createPersistedProviderFn } from './provider';
+import { createPersistedProviderFn, toInternalDefinition } from './provider';
 
 jest.mock('./client');
 
@@ -25,6 +29,7 @@ const gatedAgent = {
   permissions: {
     update_agent: true,
     update_access_control: true,
+    update_approvals: true,
   },
 };
 
@@ -33,6 +38,96 @@ const availabilityContext = {
   spaceId: 'default',
   uiSettings: {} as never,
 };
+
+const makeDefinition = (
+  overrides: Partial<Parameters<typeof toInternalDefinition>[0]['definition']> = {}
+): Parameters<typeof toInternalDefinition>[0]['definition'] => ({
+  id: 'agent-id',
+  type: chatAgentTypeId,
+  name: 'Agent',
+  description: '',
+  configuration: { tools: [] },
+  access_control: undefined,
+  created_by: undefined,
+  permissions: { update_agent: true, update_access_control: true, update_approvals: false },
+  ...overrides,
+});
+
+const toInternal = (
+  overrides: Partial<Parameters<typeof toInternalDefinition>[0]['definition']> = {},
+  hiddenByAgentId: Map<string, boolean> = new Map()
+) =>
+  toInternalDefinition({
+    definition: makeDefinition(overrides),
+    availabilityByAgentId: new Map(),
+    hiddenByAgentId,
+    availabilityCache: { getOrCompute: jest.fn() } as never,
+  });
+
+describe('toInternalDefinition hidden derivation', () => {
+  it('chat agents created by system are NOT hidden', () => {
+    const agent = toInternal({
+      type: chatAgentTypeId,
+      created_by: { id: undefined, username: SYSTEM_USER_ID },
+    });
+    expect(agent.hidden).toBe(false);
+  });
+
+  it('non-chat agents created by system ARE hidden', () => {
+    const agent = toInternal({
+      type: 'platform.nightshift.investigation-type',
+      created_by: { id: undefined, username: SYSTEM_USER_ID },
+    });
+    expect(agent.hidden).toBe(true);
+  });
+
+  it('non-chat agents created by a real user are NOT hidden', () => {
+    const agent = toInternal({
+      type: 'platform.nightshift.investigation-type',
+      created_by: { id: 'user-123', username: 'alice' },
+    });
+    expect(agent.hidden).toBe(false);
+  });
+
+  it('chat agents created by a real user are NOT hidden', () => {
+    const agent = toInternal({
+      type: chatAgentTypeId,
+      created_by: { id: 'user-123', username: 'alice' },
+    });
+    expect(agent.hidden).toBe(false);
+  });
+
+  it('explicit hidden:true on the stored definition overrides the derivation', () => {
+    const agent = toInternal({
+      type: chatAgentTypeId,
+      created_by: { id: 'user-123', username: 'alice' },
+      hidden: true,
+    });
+    expect(agent.hidden).toBe(true);
+  });
+
+  it('an ensure-registered hidden:false makes a system-created non-chat agent visible', () => {
+    const agent = toInternal(
+      {
+        type: 'platform.nightshift.investigation-type',
+        created_by: { id: undefined, username: SYSTEM_USER_ID },
+      },
+      new Map([['agent-id', false]])
+    );
+    expect(agent.hidden).toBe(false);
+  });
+
+  it('an ensure-registered override for another agent id does not apply', () => {
+    const agent = toInternal(
+      {
+        type: 'platform.nightshift.investigation-type',
+        created_by: { id: undefined, username: SYSTEM_USER_ID },
+      },
+      new Map([['other-agent', false]])
+    );
+    expect(agent.hidden).toBe(true);
+  });
+});
 
 describe('persisted agent provider', () => {
   beforeEach(() => {
@@ -52,6 +147,7 @@ describe('persisted agent provider', () => {
       toolsService: {} as never,
       logger: {} as never,
       availabilityByAgentId: new Map(),
+      hiddenByAgentId: new Map(),
     });
     const provider = await providerFactory({ request: {} as never, space: 'default' });
 
@@ -74,6 +170,7 @@ describe('persisted agent provider', () => {
         toolsService: {} as never,
         logger: {} as never,
         availabilityByAgentId: new Map(),
+        hiddenByAgentId: new Map(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);
@@ -103,6 +200,7 @@ describe('persisted agent provider', () => {
         toolsService: {} as never,
         logger: {} as never,
         availabilityByAgentId,
+        hiddenByAgentId: new Map(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);
@@ -133,6 +231,7 @@ describe('persisted agent provider', () => {
         toolsService: {} as never,
         logger: {} as never,
         availabilityByAgentId,
+        hiddenByAgentId: new Map(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);

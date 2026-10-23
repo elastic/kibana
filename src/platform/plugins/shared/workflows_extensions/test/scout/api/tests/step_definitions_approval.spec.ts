@@ -50,7 +50,6 @@ apiTest.describe.skip(
       ...tags.serverless.search,
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
-      ...tags.serverless.workplaceai,
       ...tags.serverless.vectordb,
     ],
   },

@@ -13,7 +13,6 @@ import { useRuleSummary } from './rule_summary_context';
 
 export const RuleSummaryInvestigationSection: React.FC = () => {
   const rule = useRuleSummary();
-  const hasRunbook = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'runbook'));
 
   return (
     <FlyoutAccordion
@@ -21,7 +20,7 @@ export const RuleSummaryInvestigationSection: React.FC = () => {
         defaultMessage: 'Investigation',
       })}
       hasBorder={false}
-      initialIsOpen={hasRunbook}
+      initialIsOpen
       data-test-subj="ruleSummaryInvestigation"
     >
       <RuleSummaryRunbookCard rule={rule} />

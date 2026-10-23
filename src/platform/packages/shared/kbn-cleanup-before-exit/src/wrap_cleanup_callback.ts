@@ -9,6 +9,7 @@
 
 import { once } from 'lodash';
 import { diag } from '@opentelemetry/api';
+import { withTimeout } from '@kbn/std';
 import type { CleanupBeforeExitOptions, CleanupHandlerCallback } from './types';
 
 const DEFAULT_TIMEOUT = 5000;
@@ -19,29 +20,37 @@ export function wrapCleanupCallback(
   options: CleanupBeforeExitOptions
 ): () => Promise<void> {
   return once(() => {
-    return Promise.race([
-      Promise.resolve().then(() => cb()),
-      new Promise<void>((_, reject) => {
-        function rejectOnProcessExit() {
-          reject(new Error(`Process exited before cleanup could finish`));
-        }
+    const timeoutMs = options.timeout ?? DEFAULT_TIMEOUT;
+    const work = Promise.resolve().then(() => cb());
 
-        function rejectOnTimeout() {
-          reject(new Error(`Timeout of ${timeout}ms reached before cleanup could finish`));
-        }
+    let removeExitListener = () => {};
+    const raced = options.blockExit
+      ? work
+      : Promise.race([
+          work,
+          new Promise<never>((_, reject) => {
+            const rejectOnProcessExit = () => {
+              reject(new Error('Process exited before cleanup could finish'));
+            };
+            if (processExitSignal.aborted) {
+              rejectOnProcessExit();
+            } else {
+              processExitSignal.addEventListener('abort', rejectOnProcessExit);
+              removeExitListener = () =>
+                processExitSignal.removeEventListener('abort', rejectOnProcessExit);
+            }
+          }),
+        ]);
 
-        const timeout = options.timeout ?? DEFAULT_TIMEOUT;
-        if (!options.blockExit) {
-          if (processExitSignal.aborted) {
-            rejectOnProcessExit();
-          } else {
-            processExitSignal.addEventListener('abort', rejectOnProcessExit);
-          }
+    return withTimeout({ promise: raced, timeoutMs, unref: true })
+      .then((outcome) => {
+        if (outcome.timedout) {
+          diag.warn(`Timeout of ${timeoutMs}ms reached before cleanup could finish`);
         }
-        setTimeout(rejectOnTimeout, timeout).unref();
-      }),
-    ]).catch((error) => {
-      diag.warn(error);
-    });
+      })
+      .catch((error) => {
+        diag.warn(error);
+      })
+      .finally(removeExitListener);
   });
 }

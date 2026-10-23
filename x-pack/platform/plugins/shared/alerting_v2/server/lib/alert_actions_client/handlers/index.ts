@@ -15,7 +15,9 @@ import { ackHandler, unackHandler } from './ack';
 import { activateHandler } from './activate';
 import { assignHandler } from './assign';
 import { deactivateHandler } from './deactivate';
+import { snoozeHandler } from './snooze';
 import { tagHandler } from './tag';
+import { unsnoozeHandler } from './unsnooze';
 
 /**
  * Exhaustive map from `action_type` to its handler. The mapped type
@@ -25,16 +27,6 @@ import { tagHandler } from './tag';
  */
 export type ActionHandlersRegistry = {
   [T in AlertEpisodeActionType]: ActionHandler<Extract<CreateAlertActionBody, { action_type: T }>>;
-};
-
-/**
- * The audit-only handler: returns the orchestrator-built audit doc
- * verbatim, applies no preconditions. Only the series-scoped actions
- * (snooze/unsnooze) qualify — `snooze` carries an expiry, so repeating it
- * extends the silence rather than restating it.
- */
-const auditOnlyHandler: ActionHandler = {
-  prepare: ({ alertActionDoc }) => ({ alertActionDoc }),
 };
 
 /**
@@ -49,8 +41,8 @@ export const ACTION_HANDLERS: Readonly<ActionHandlersRegistry> = {
   [ALERT_EPISODE_ACTION_TYPE.UNACK]: unackHandler,
   [ALERT_EPISODE_ACTION_TYPE.ASSIGN]: assignHandler,
   [ALERT_EPISODE_ACTION_TYPE.TAG]: tagHandler,
-  [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: auditOnlyHandler,
-  [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: auditOnlyHandler,
+  [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: snoozeHandler,
+  [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: unsnoozeHandler,
   [ALERT_EPISODE_ACTION_TYPE.DEACTIVATE]: deactivateHandler,
   [ALERT_EPISODE_ACTION_TYPE.ACTIVATE]: activateHandler,
 };
@@ -61,6 +53,13 @@ export const ACTION_HANDLERS: Readonly<ActionHandlersRegistry> = {
  */
 export const requiresActionState = (actionType: AlertEpisodeActionType): boolean =>
   ACTION_HANDLERS[actionType].requiresActionState === true;
+
+/**
+ * Whether an action's handler reads the series' snooze, i.e. whether the
+ * orchestrator has to load that state before preparing it.
+ */
+export const requiresSeriesActionState = (actionType: AlertEpisodeActionType): boolean =>
+  ACTION_HANDLERS[actionType].requiresSeriesActionState === true;
 
 /**
  * Calls the handler that `handlers` registers for

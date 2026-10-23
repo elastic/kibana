@@ -38,6 +38,9 @@ import {
 } from '../../../../common/lib/api';
 
 const EVENTS_INDEX = 'test-events-index';
+// Stand-in for `.alerts-security.alerts-default` (no alert document is ever indexed here) so the
+// case status sync cannot race the alerting framework's bootstrap of that index.
+const ALERT_INDEX = '.alerts-test-cases-security-alerts';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -418,7 +421,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: {
             alertId: 'collection-legacy-alert-1',
-            index: '.alerts-security.alerts-default',
+            index: ALERT_INDEX,
             rule: { id: 'rule-collection-1', name: 'Rule collection 1' },
             type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
@@ -434,7 +437,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'collection-unified-alert-1',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-collection-2', name: 'Rule collection 2' },
               },
               owner: 'securitySolutionFixture',
@@ -513,7 +516,7 @@ export default ({ getService }: FtrProviderContext): void => {
             type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
             alertId: 'leftover-alert-1',
-            index: '.alerts-security.alerts-default',
+            index: ALERT_INDEX,
             rule: { id: 'rule-leftover-1', name: 'Rule leftover 1' },
           },
         });

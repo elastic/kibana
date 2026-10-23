@@ -8,19 +8,11 @@
 import { esManifest } from '@elastic/schemas/es/tools/manifest.js';
 import { kibanaManifest } from '@elastic/schemas/kibana/tools/manifest.js';
 import { compact, uniq } from 'lodash';
+import { allApisSelector, toApiNamespace, toNamespaceSelector } from './api_selectors';
+import type { ApiReference } from './api_selectors';
 import type { ApiTarget } from './targets';
 
-/**
- * An API operation, addressed by the backend it belongs to and its identifier.
- */
-export interface ApiReference {
-  target: ApiTarget;
-  api: string;
-}
-
-export const allApisSelector = '*';
-
-const namespaceSelectorSuffix = '.*';
+export type { ApiReference } from './api_selectors';
 
 /**
  * Every Elasticsearch operation the API tools can reach.
@@ -32,15 +24,10 @@ export const elasticsearchApiIds: readonly string[] = esManifest.map((entry) => 
  */
 export const kibanaApiIds: readonly string[] = kibanaManifest.map((entry) => entry.id);
 
-const toNamespace = (api: string): string | undefined => {
-  const separator = api.indexOf('.');
-  return separator === -1 ? undefined : api.slice(0, separator);
-};
-
 const toNamespaceSelectors = (apiIds: readonly string[]): string[] =>
-  uniq(compact(apiIds.map(toNamespace)))
+  uniq(compact(apiIds.map(toApiNamespace)))
     .sort()
-    .map((namespace) => `${namespace}${namespaceSelectorSuffix}`);
+    .map(toNamespaceSelector);
 
 const toSelectors = (apiIds: readonly string[]): readonly string[] => [
   allApisSelector,
@@ -82,32 +69,6 @@ const selectorSetsByTarget: Record<ApiTarget, ReadonlySet<string>> = {
  */
 export const isKnownApiSelector = ({ target, api }: ApiReference): boolean =>
   selectorSetsByTarget[target].has(api);
-
-/**
- * Whether a selector stands for a set of operations rather than naming one.
- *
- * @param selector - Granted value, as passed to a pre-approval.
- * @returns True for `*` and for a namespace wildcard such as `indices.*`.
- */
-export const isApiWildcardSelector = (selector: string): boolean =>
-  selector === allApisSelector || selector.endsWith(namespaceSelectorSuffix);
-
-/**
- * Whether a granted selector covers a specific operation.
- *
- * @param selector - Granted value: `*`, a namespace wildcard such as `indices.*`, or an exact identifier.
- * @param api - Exact operation identifier, as passed to `execute_api`.
- * @returns True when the selector covers that operation.
- */
-export const matchesApiSelector = (selector: string, api: string): boolean => {
-  if (selector === allApisSelector || selector === api) {
-    return true;
-  }
-  if (!selector.endsWith(namespaceSelectorSuffix)) {
-    return false;
-  }
-  return api.startsWith(selector.slice(0, -1));
-};
 
 /**
  * Filters a list of target/selector pairs down to the ones that name nothing grantable.

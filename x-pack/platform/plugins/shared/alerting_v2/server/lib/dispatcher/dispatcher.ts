@@ -176,19 +176,24 @@ export class DispatcherService implements DispatcherServiceContract {
       return eventWatermark;
     }
 
-    const code = eventWatermark
-      ? ALERTING_LOG_CODES.DISPATCHER_INVALID_WATERMARK
-      : ALERTING_LOG_CODES.DISPATCHER_COLD_START;
-    logger.warn({
-      code,
+    const seed = new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
+
+    if (eventWatermark) {
+      logger.warn({
+        code: ALERTING_LOG_CODES.DISPATCHER_INVALID_WATERMARK,
+        message: () =>
+          `eventWatermark is Invalid Date; falling back to cold start ` +
+          `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`,
+      });
+      return seed;
+    }
+
+    logger.info({
       message: () =>
-        eventWatermark
-          ? `eventWatermark is Invalid Date; falling back to cold start ` +
-            `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`
-          : `no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
-            `Rule events older than that will not be dispatched.`,
+        `no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
+        `Rule events older than that will not be dispatched.`,
     });
-    return new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
+    return seed;
   }
 
   /**

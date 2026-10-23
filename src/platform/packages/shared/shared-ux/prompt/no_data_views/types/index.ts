@@ -95,6 +95,8 @@ export interface NoDataViewsPromptComponentProps {
   onClickCreate?: () => void;
   /** If the cluster has data, this handler allows the user to try ES|QL */
   onTryESQL?: () => void;
+  /** Disables the try ES|QL button, e.g. while the `onTryESQL` handler's dependencies are still loading. */
+  isTryESQLDisabled?: boolean;
   /** Link to documentation on ES|QL. */
   esqlDocLink?: string;
 }
@@ -107,6 +109,8 @@ export interface NoDataViewsPromptProps {
   onDataViewCreated: (dataView: unknown) => void;
   /** If the cluster has data, this handler allows the user to try ES|QL */
   onTryESQL?: () => void;
+  /** Disables the try ES|QL button, e.g. while the `onTryESQL` handler's dependencies are still loading. */
+  isTryESQLDisabled?: boolean;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
   onESQLNavigationComplete?: () => void;
   /** Empty prompt color **/

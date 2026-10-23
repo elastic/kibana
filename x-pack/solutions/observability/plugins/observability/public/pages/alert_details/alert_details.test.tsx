@@ -484,6 +484,7 @@ describe('Alert details', () => {
           ...kibanaStartMockServices.settings,
           globalClient: {
             ...kibanaStartMockServices.settings.globalClient,
+            isDeclared: jest.fn().mockReturnValue(true),
             get: jest.fn().mockReturnValue(universalEnabled),
           },
           client: {

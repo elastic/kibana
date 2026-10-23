@@ -21,8 +21,10 @@ import {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { VisIconType } from '@kbn/chart-icons';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -110,12 +112,13 @@ export const iconCompat = getReversibleMappings<MetricIconName, string>([
   ['heart', 'heart'],
   ['map_marker', 'mapMarker'],
   ['pin', 'pin'],
+  ['popout', 'popout'],
   ['sort_down', 'sortDown'],
   ['sort_up', 'sortUp'],
   ['star_empty', 'starEmpty'],
   ['tag', 'tag'],
   ['temperature', 'temperature'],
-]);
+] satisfies Array<[MetricIconName, VisIconType]>);
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -595,7 +598,7 @@ function reverseBuildVisualizationState(
   );
 
   if (!dataSource || dataSource.type == null) {
-    throw new Error('Unsupported DataSource type');
+    throw new DatasourceUnsupportedError();
   }
 
   return {
@@ -877,6 +880,10 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   // For ES|QL metric charts with trendlines, create the trendline text-based layer.
   // buildDatasourceStates only creates the main layer; the trendline needs its own
   // layer with a BUCKET() time-bucketing query.
+  //
+  // If the query has no time field, skip the layer only — keep the visualization
+  // trendline accessors. Lens hydration rebuilds the layer after DataViews provide
+  // timeField. Clearing accessors here would drop the sparkline for good.
   const trendlineLayerId = (visualization as MetricVisualizationState).trendlineLayerId;
   const mainLayer = layers.textBased?.layers?.[DEFAULT_LAYER_ID];
   if (trendlineLayerId && isEsqlLayerWithIndex(mainLayer)) {

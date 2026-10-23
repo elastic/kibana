@@ -29,9 +29,9 @@ const TRIGGER_TYPE_ICONS: Record<string, IconType> = {
 
 /** Display labels for the bare trigger `type` values above, shown in the icon tooltip. */
 const TRIGGER_TYPE_LABELS: Record<string, string> = {
-  manual: i18n.translate('workflows.stepIcons.triggerType.manual', { defaultMessage: 'Manual' }),
-  alert: i18n.translate('workflows.stepIcons.triggerType.alert', { defaultMessage: 'Alert' }),
-  scheduled: i18n.translate('workflows.stepIcons.triggerType.scheduled', {
+  manual: i18n.translate('workflowsUi.stepIcons.triggerType.manual', { defaultMessage: 'Manual' }),
+  alert: i18n.translate('workflowsUi.stepIcons.triggerType.alert', { defaultMessage: 'Alert' }),
+  scheduled: i18n.translate('workflowsUi.stepIcons.triggerType.scheduled', {
     defaultMessage: 'Scheduled',
   }),
 };

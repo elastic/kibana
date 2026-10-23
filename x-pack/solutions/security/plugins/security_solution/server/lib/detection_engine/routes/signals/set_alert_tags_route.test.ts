@@ -40,15 +40,20 @@ describe('setAlertTagsRoute', () => {
         body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2'], ['test-id']),
       });
 
-      context.core.elasticsearch.client.asCurrentUser.bulk.mockResponse({
-        errors: false,
-        took: 0,
-        items: [{ update: { result: 'updated', status: 200, _index: 'test-index' } }],
-      });
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
+        getSuccessfulSignalUpdateResponse()
+      );
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
+      const auditLogger = context.securitySolution.getAuditLogger();
+      expect(auditLogger?.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'User is updating alert [id=test-id]',
+          event: expect.objectContaining({ action: 'alert_update' }),
+        })
+      );
     });
   });
 
@@ -76,6 +81,26 @@ describe('setAlertTagsRoute', () => {
         ],
         status_code: 400,
       });
+      expect(context.securitySolution.getAuditLogger()?.log).not.toHaveBeenCalled();
+    });
+
+    test('audits a 404 when the alert update target is unavailable', async () => {
+      context.securitySolution.getAppClient.mockReturnValue(undefined as never);
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2'], ['test-id']),
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(404);
+      expect(context.securitySolution.getAuditLogger()?.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
+          error: expect.objectContaining({ message: 'Alert update target unavailable' }),
+        })
+      );
     });
 
     test('returns 400 if no alert ids are provided', async () => {

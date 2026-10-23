@@ -193,7 +193,6 @@ export const XyLegendSettings = ({
           },
         });
       }}
-      showAutoLegendSizeOption={true}
     />
   );
 };

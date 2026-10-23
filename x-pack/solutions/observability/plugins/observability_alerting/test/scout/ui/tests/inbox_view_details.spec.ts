@@ -93,7 +93,7 @@ test.describe(
         await alerting.clickViewRuleDetails();
         await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE);
         await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_RULES_URL_RE);
-        await expect(page).toHaveURL(new RegExp(`/rules/v2/${ruleId}(/|$|\\?|#)`));
+        await expect(page).toHaveURL(new RegExp(`/rules/universal/${ruleId}(/|$|\\?|#)`));
         await expect(alerting.ruleDetailLayout).toBeVisible();
       });
     });
@@ -122,7 +122,7 @@ test.describe(
         await alerting.clickViewRuleDetails();
         await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE);
         await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_RULES_URL_RE);
-        await expect(page).toHaveURL(new RegExp(`/rules/v2/${ruleId}(/|$|\\?|#)`));
+        await expect(page).toHaveURL(new RegExp(`/rules/universal/${ruleId}(/|$|\\?|#)`));
         await expect(alerting.ruleDetailLayout).toBeVisible();
       });
     });

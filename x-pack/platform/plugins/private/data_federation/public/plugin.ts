@@ -28,6 +28,7 @@ export class DataFederationPlugin
   private readonly enableAzureDataSourceType: boolean;
 
   private readonly workloadIdentityIssuerUrl: string | undefined;
+  private readonly awsCloudFormationTemplateUrl: string;
 
   private registeredApp?: ManagementApp;
   private licenseSubscription?: Subscription;
@@ -39,16 +40,19 @@ export class DataFederationPlugin
       enableGoogleCloudStorageDataSourceType,
       enableAzureDataSourceType,
       workloadIdentityIssuerUrl,
+      awsCloudFormationTemplateUrl,
     } = initializerContext.config.get<{
       enabled: boolean;
       enableGoogleCloudStorageDataSourceType: boolean;
       enableAzureDataSourceType: boolean;
       workloadIdentityIssuerUrl?: string;
+      awsCloudFormationTemplateUrl: string;
     }>();
     this.enabled = enabled;
     this.enableGoogleCloudStorageDataSourceType = enableGoogleCloudStorageDataSourceType;
     this.enableAzureDataSourceType = enableAzureDataSourceType;
     this.workloadIdentityIssuerUrl = workloadIdentityIssuerUrl;
+    this.awsCloudFormationTemplateUrl = awsCloudFormationTemplateUrl;
   }
 
   public setup(core: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies): void {
@@ -63,11 +67,14 @@ export class DataFederationPlugin
 
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
     const enableAzureDataSourceType = this.enableAzureDataSourceType;
-    const cloudInfo = buildFederatedIdentityClusterInfo(cloud, this.workloadIdentityIssuerUrl);
+    const cloudInfo = buildFederatedIdentityClusterInfo(cloud, {
+      workloadIdentityIssuerUrl: this.workloadIdentityIssuerUrl,
+      awsCloudFormationTemplateUrl: this.awsCloudFormationTemplateUrl,
+    });
     this.registeredApp = management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      order: 2,
+      order: 1,
       visibleIn: ['globalSearch', 'projectSideNav'],
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');

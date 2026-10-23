@@ -1,0 +1,15 @@
+# SOURCE-COMMANDS
+
+A source command produces a table, typically with data from Elasticsearch. A query must start with a source command.
+
+## Syntax
+
+`<source-command>`
+
+Supported source commands:
+
+- `FROM`
+- `PROMQL` Applies to: Elastic Stack: Preview since 9.4 Applies to: Elastic Stack: Generally available since 9.5
+- `ROW`
+- `SHOW`
+- `TS` Applies to: Elastic Stack: Preview since 9.2 Applies to: Elastic Cloud Serverless: Preview

@@ -307,6 +307,37 @@ describe('DatastreamInitializer forceReset (integration)', () => {
     expect(await getDataStreamVersion()).toBe(currentDefinition.version);
     await expectCurrentMapping();
   });
+
+  describe('data retention', () => {
+    const getDataRetention = async () => {
+      const {
+        data_streams: [{ lifecycle }],
+      } = await esServer.getClient().indices.getDataLifecycle({ name: TEST_DATA_STREAM });
+      return lifecycle?.data_retention;
+    };
+
+    const withRetention = (dataRetention?: string): ResourceDefinition => ({
+      ...currentDefinition,
+      lifecycle: getAlertEventsResourceDefinition({ dataRetention }).lifecycle,
+    });
+
+    it('applies the retention on a fresh install', async () => {
+      await initialize(withRetention('90d'));
+
+      expect(await getDataRetention()).toBe('90d');
+    });
+
+    it('updates and removes the retention of an existing data stream without a version bump', async () => {
+      await initialize(withRetention('90d'));
+
+      await initialize(withRetention('45d'));
+      expect(await getDataRetention()).toBe('45d');
+
+      await initialize(withRetention());
+      expect(await getDataRetention()).toBeUndefined();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('DatastreamInitializer forceReset for .alert-actions (integration)', () => {

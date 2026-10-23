@@ -29,7 +29,7 @@ import { initSyntheticsServer } from './server';
 import { syntheticsFeature } from './feature';
 import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
 import type { UptimeConfig } from './config';
-import { SyntheticsService } from './synthetics_service/synthetics_service';
+import { ServiceManagedLocations } from './synthetics_service/service_managed_locations';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
@@ -52,7 +52,7 @@ export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
   private readonly logger: Logger;
   private server?: SyntheticsServerSetup;
-  private syntheticsService?: SyntheticsService;
+  private serviceManagedLocations?: ServiceManagedLocations;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private telemetry?: SyntheticsTelemetry;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
@@ -98,11 +98,14 @@ export class Plugin implements PluginType {
       isCpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
     } as SyntheticsServerSetup;
 
-    this.syntheticsService = new SyntheticsService(this.server);
+    this.serviceManagedLocations = new ServiceManagedLocations(this.server);
 
-    this.syntheticsService.setup(plugins.taskManager).catch(() => {});
+    this.serviceManagedLocations.setup(plugins.taskManager).catch(() => {});
 
-    this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
+    this.syntheticsMonitorClient = new SyntheticsMonitorClient(
+      this.serviceManagedLocations,
+      this.server
+    );
 
     registerSyntheticsEventTypes(core.analytics);
 
@@ -196,7 +199,7 @@ export class Plugin implements PluginType {
       });
     }
 
-    this.syntheticsService?.start(pluginsStart.taskManager);
+    this.serviceManagedLocations?.start(pluginsStart.taskManager);
 
     this.telemetry?.loadLicenseInfo(coreStart.elasticsearch.client.asInternalUser).catch(() => {});
   }

@@ -399,7 +399,7 @@ describe('Worker settings contract', () => {
     ).toThrow(/Unclassified/);
     expect(() =>
       normalizeSettingsSchema(z.object({ a: z.union([z.string(), z.number()]) }), 'x')
-    ).toThrow(/Unclassified anyOf at x\.a/);
+    ).toThrow(/Unclassified JSON Schema type at x\.a/);
   });
 
   it('rejects a schema default the declaration does not have', () => {

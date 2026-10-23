@@ -176,7 +176,9 @@ apiTest.describe('Delete UIAM service accounts', { tag: ['@local-serverless-sear
           pluginId: 'serviceAccountsTest',
           workloadType: 'job',
           workloadId,
-          displayName: workloadId,
+          displayName: `Test job ${workloadId}`,
+          typeName: 'Test job',
+          href: `/app/service_accounts_test/jobs/${workloadId}`,
         },
       ];
 

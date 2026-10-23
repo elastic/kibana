@@ -16,9 +16,7 @@ const createESQLQuery = (params: Parameters<typeof createESQLQueryWithSettings>[
   const query = createESQLQueryWithSettings(params);
   const expectedPrefix = `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND}\n`;
 
-  expect(query.startsWith(expectedPrefix)).toBe(true);
-
-  return query.slice(expectedPrefix.length);
+  return query.startsWith(expectedPrefix) ? query.slice(expectedPrefix.length) : query;
 };
 
 const mockMetric: ParsedMetricItem = {
@@ -64,14 +62,48 @@ const mockLegacyHistogramMetric: ParsedMetricItem = {
 };
 
 describe('createESQLQuery', () => {
-  it('should nullify unmapped fields in generated metric queries', () => {
+  it('omits NULLIFY when the chart does not name an extra column', () => {
     expect(createESQLQueryWithSettings({ metricItem: mockMetric })).toBe(
       `
-SET unmapped_fields = "NULLIFY";
 TS metrics-*
   | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
+  });
+
+  it('nullifies unmapped fields when a filter names a user column', () => {
+    expect(
+      createESQLQueryWithSettings({
+        metricItem: mockMetric,
+        whereStatements: ['host.name == "host-01"'],
+      })
+    ).toBe(
+      `
+SET unmapped_fields = "NULLIFY";
+TS metrics-*
+  | WHERE host.name == "host-01"
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
+`.trim()
+    );
+  });
+
+  it('nullifies unmapped fields when a breakdown dimension is selected', () => {
+    expect(
+      createESQLQueryWithSettings({
+        metricItem: mockMetric,
+        splitAccessors: ['host.name'],
+      }).startsWith(`${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND}\n`)
+    ).toBe(true);
+  });
+
+  it('omits NULLIFY when filters and breakdowns only name always-mapped fields', () => {
+    expect(
+      createESQLQueryWithSettings({
+        metricItem: mockMetric,
+        whereStatements: ['@timestamp IS NOT NULL', 'data_stream.namespace == "default"'],
+        splitAccessors: ['data_stream.type'],
+      }).startsWith(`${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND}\n`)
+    ).toBe(false);
   });
 
   it('should generate a basic AVG query for a metric field', () => {

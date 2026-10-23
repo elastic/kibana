@@ -32,7 +32,7 @@ import {
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { LegendSize } from '@kbn/chart-expressions-common';
+import type { LegendSize } from '@kbn/chart-expressions-common';
 import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import {
   LabelPositions,
@@ -99,7 +99,6 @@ const PieOptions = (props: PieOptionsProps) => {
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
   const legendSize = stateParams.legendSize;
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const getLegendDisplay = useCallback(
     (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),
@@ -245,7 +244,6 @@ const PieOptions = (props: PieOptionsProps) => {
                 stateParams.legendPosition === Position.Left ||
                 stateParams.legendPosition === Position.Right
               }
-              showAutoOption={hadAutoLegendSize}
             />
           </>
         )}

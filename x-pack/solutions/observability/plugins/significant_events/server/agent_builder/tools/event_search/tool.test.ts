@@ -10,6 +10,8 @@ import {
   createMockToolContext,
   createSignificantEventsServer,
   invokeHandler,
+  mockSourcesClient,
+  sourceWithSlug,
 } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -106,6 +108,7 @@ describe('event_search tool', () => {
       getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
+      sourcesClient: mockSourcesClient(['logs.checkout']),
     });
     const telemetry = createMockTelemetry();
 
@@ -120,21 +123,33 @@ describe('event_search tool', () => {
       tool as never,
       {
         query: '   ',
-        stream_names: ['logs.checkout'],
+        slugs: ['logs.checkout'],
         rule_uuids: ['rule-uuid-1'],
         status: 'active',
       },
       createMockToolContext()
     );
 
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('other');
+    if (!('results' in result) || result.results[0].type !== 'other') {
+      throw new Error('expected an other tool result');
     }
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        sources: [
+          {
+            id: 'logs.checkout',
+            slug: 'logs.checkout',
+            title: 'logs.checkout',
+            view_name: '$.nightshift.sources.default.logs.checkout',
+          },
+        ],
+      })
+    );
     expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith({
       success: true,
       result_count: 1,
       has_query: false,
-      has_stream_filter: true,
+      has_source_filter: true,
       status_filter: 'active',
       view: 'compact',
       page: 1,
@@ -149,10 +164,10 @@ describe('event_search tool', () => {
     );
   });
 
-  it('accepts cross-stream searches without stream_names', async () => {
+  it('accepts searches that omit slugs', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
-      events: [{ event_uuid: 'e2' }],
+      events: [{ event_uuid: 'e2', source_ids: ['source-uuid'] }],
       view: 'compact',
       page: 1,
       total: 1,
@@ -162,6 +177,12 @@ describe('event_search tool', () => {
       getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({
+          sources: [sourceWithSlug('nginx-errors', { id: 'source-uuid', title: 'Nginx errors' })],
+          total: 1,
+        }),
+      },
     });
 
     const tool = createSearchEventsTool({
@@ -177,9 +198,22 @@ describe('event_search tool', () => {
       createMockToolContext()
     );
 
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('other');
+    if (!('results' in result) || result.results[0].type !== 'other') {
+      throw new Error('expected an other tool result');
     }
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        sources: [
+          {
+            id: 'source-uuid',
+            slug: 'nginx-errors',
+            title: 'Nginx errors',
+            view_name: '$.nightshift.sources.default.nginx-errors',
+          },
+        ],
+        events: [expect.objectContaining({ source_ids: ['source-uuid'] })],
+      })
+    );
   });
 
   it('does not search without the Nightshift read privilege', async () => {

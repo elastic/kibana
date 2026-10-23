@@ -113,7 +113,10 @@ describe('RuleChangesHistorySubscriber', () => {
       async ({ eventType, action, ecsEventType }) => {
         subscriber.start();
 
-        await handlerFor(eventType)(eventOf(eventType), { request, origin: 'user' });
+        await handlerFor(eventType)(eventOf(eventType), {
+          request,
+          origin: { actor: 'user', channel: 'api' },
+        });
 
         expect(userProfile.getCurrent).toHaveBeenCalledWith({ request });
         expect(changeHistory.logRuleChanges).toHaveBeenCalledTimes(1);
@@ -134,7 +137,7 @@ describe('RuleChangesHistorySubscriber', () => {
 
       await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
@@ -151,7 +154,7 @@ describe('RuleChangesHistorySubscriber', () => {
           spaceId: 'my-space',
           correlationId: 'corr-1',
         }),
-        { request, origin: 'user' }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
 
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
@@ -162,7 +165,7 @@ describe('RuleChangesHistorySubscriber', () => {
 
       await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
@@ -177,7 +180,7 @@ describe('RuleChangesHistorySubscriber', () => {
       await expect(
         handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
           request,
-          origin: 'user',
+          origin: { actor: 'user', channel: 'api' },
         })
       ).resolves.toBeUndefined();
 

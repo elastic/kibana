@@ -57,8 +57,10 @@ jest.mock('../../hooks/use_significant_events_app_params', () => ({
 }));
 jest.mock('../../hooks/use_significant_events_app_router', () => ({
   useSignificantEventsAppRouter: () => ({
-    link: (path: string, params?: { path: { tab: string } }) =>
-      params ? `/${params.path.tab}` : path,
+    link: (path: string, params?: { path?: { tab: string }; query?: Record<string, string> }) =>
+      params?.path
+        ? `/${params.path.tab}`
+        : `${path}${params?.query ? `?${new URLSearchParams(params.query)}` : ''}`,
   }),
 }));
 jest.mock('../../hooks/use_significant_events_availability', () => ({
@@ -98,15 +100,8 @@ jest.mock('../../components/redirect_to', () => ({
     <div data-test-subj="redirect-to">{params?.path?.tab}</div>
   ),
 }));
-jest.mock('./components/knowledge_indicators_table', () => ({
-  KnowledgeIndicatorsTable: () => null,
-  KiGenerationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
 jest.mock('./components/queries_table/queries_table', () => ({
   QueriesTable: () => null,
-}));
-jest.mock('./components/streams_view/streams_view', () => ({
-  StreamsView: () => <div data-test-subj="streams-tab-content" />,
 }));
 jest.mock('./components/detections_tab', () => ({
   DetectionsTab: () => <div data-test-subj="detections-tab-content" />,
@@ -149,14 +144,14 @@ describe('SignificantEventsPage developer mode', () => {
   });
 
   it('hides the Detections tab when developer mode is off', () => {
-    setup({ tab: 'streams', isDeveloperMode: false });
+    setup({ tab: 'queries', isDeveloperMode: false });
 
-    expect(screen.getByTestId('app-header-tab-streams')).toBeInTheDocument();
+    expect(screen.getByTestId('app-header-tab-queries')).toBeInTheDocument();
     expect(screen.queryByTestId('app-header-tab-detections')).not.toBeInTheDocument();
   });
 
   it('shows the Detections tab with a code icon badge when developer mode is on', () => {
-    setup({ tab: 'streams', isDeveloperMode: true });
+    setup({ tab: 'queries', isDeveloperMode: true });
 
     const detectionsTab = screen.getByTestId('app-header-tab-detections');
     expect(detectionsTab).toBeInTheDocument();
@@ -166,7 +161,7 @@ describe('SignificantEventsPage developer mode', () => {
   it('redirects /detections away when developer mode is off', () => {
     setup({ tab: 'detections', isDeveloperMode: false });
 
-    expect(screen.getByTestId('redirect-to')).toHaveTextContent('streams');
+    expect(screen.getByTestId('redirect-to')).toHaveTextContent('queries');
     expect(screen.queryByTestId('detections-tab-content')).not.toBeInTheDocument();
   });
 });

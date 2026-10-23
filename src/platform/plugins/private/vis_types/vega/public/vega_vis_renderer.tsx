@@ -39,7 +39,7 @@ export const getVegaVisRenderer: (
 ) => ExpressionRenderDefinition<RenderValue> = (deps) => ({
   name: 'vega_vis',
   reuseDomNode: true,
-  render: async (domNode, { visData }, handlers) => {
+  render: async (domNode, { visData, inspectorAdapters }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -62,6 +62,7 @@ export const getVegaVisRenderer: (
           <LazyVegaVisComponent
             deps={deps}
             fireEvent={handlers.event}
+            inspectorAdapters={inspectorAdapters}
             renderComplete={renderComplete}
             // Adapts the Expressions render mode to Vega's own contract. Historically any mode
             // other than `view` — the Visualize editor's `edit` in practice — showed warnings.

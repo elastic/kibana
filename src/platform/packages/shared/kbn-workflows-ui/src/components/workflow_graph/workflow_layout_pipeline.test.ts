@@ -342,8 +342,8 @@ describe('workflow layout pipeline', () => {
     /**
      * An if whose `else` branch is much deeper (foreach with 2 inner steps)
      * than its `then` branch (1 step). Dagre places the deeper branch first
-     * (lower cross-axis / further left in TB). After enforceForkLaneOrder the
-     * `then` (true) branch must be left of `else` (false).
+     * (lower cross-axis / further left in TB). The layout keeps declaration order:
+     * the `then` (true) branch must be left of `else` (false).
      */
     const buildIfWithLongElse = () =>
       runLayout(
@@ -554,7 +554,7 @@ describe('workflow layout pipeline', () => {
 
 // ─── spec 02 regression — named fixtures ──────────────────────────────────────
 //
-// Before this fix, enforceForkLaneOrder permuted lane *starts*, which is only
+// Regression fixtures for a layout that once permuted lane *starts*, which is only
 // overlap-safe for equal-width lanes. The reported YAML combined a nested
 // fallback lane with an asymmetric if (foreach in then, single step in else),
 // triggering overlaps of 232 / 209 / 14 px. All four variants below now produce
@@ -683,8 +683,7 @@ describe('spec 02 regression — named fixtures', () => {
   });
 
   it('owner with fallback and a plain following step share the spine column', () => {
-    // Speculative anchoring (pass 3) translates the owner onto its spine
-    // successor's column. Owner and next-step should share the same x-centre.
+    // The owner sits on its spine successor's column: owner and next step share the same x-centre.
     const { result } = runLayout(
       minimal({
         steps: [
@@ -1000,14 +999,7 @@ describe('spec 02 regression — named fixtures', () => {
     }
   );
 
-  it('edge whose endpoints move by different deltas: reconcileEdgePoints clears it', () => {
-    // Build a fallback owner whose lane head moves a different amount than the
-    // owner itself after the post-dagre passes. The failure edge's waypoints
-    // should be cleared (points.length < 2), not translated.
-    //
-    // We can't easily control the exact movements, but we can assert that the
-    // pipeline produces a valid result (no throws, finite positions) even when
-    // waypoints are cleared — the smooth-step fallback renders correctly.
+  it('drops the layout engine waypoints, so edges are routed from the final handle positions', () => {
     const { result } = runLayout(
       minimal({
         steps: [
@@ -1026,12 +1018,8 @@ describe('spec 02 regression — named fixtures', () => {
       expect(isFinite(n.x)).toBe(true);
       expect(isFinite(n.y)).toBe(true);
     }
-    for (const e of result.edges) {
-      for (const p of e.points) {
-        expect(isFinite(p.x)).toBe(true);
-        expect(isFinite(p.y)).toBe(true);
-      }
-    }
+    expect(result.edges.length).toBeGreaterThan(0);
+    expect(result.edges.every((e) => e.points.length === 0)).toBe(true);
   });
 });
 
@@ -1043,25 +1031,17 @@ describe('spec 02 regression — named fixtures', () => {
  * the root graph. The lane must land in the +cross margin (to the right of its
  * owner in TB direction) so it is visually separate from the spine.
  *
- * Current defect: pass 1 (enforceForkLaneOrder) filters isFailure edges before
- * building the fork map, so it cannot see the fallback edge inside the group.
- * Pass 1b (enforceForkBranchCompoundOrder) only processes outer-graph lanes
- * (graphId === undefined) and skips group-hosted lanes entirely.
+ * A lane hosted by a container body is packed with the fork branches of that body, so
+ * it must sit beside its owner's branch and the next branch must start beyond it.
  *
- * As a result, after all post-dagre passes the fallback node ends up at the
- * wrong cross position.
- *
- * The assertion is PLACEMENT (lane is in the +cross margin), not overlap. Pass 3
- * already guarantees no overlap on raw dagLayout output, so an overlap assertion
- * would be green regardless.
+ * The assertion is PLACEMENT (lane is in the +cross margin), not overlap: the packer
+ * rules out overlap by construction, so an overlap assertion would be green regardless.
  */
 describe('Cycle C — group-hosted lane placement (foreach body on-failure)', () => {
   it('fallback step inside a foreach body is in the +cross margin of its owner (TB)', () => {
     // Topology: loop(foreach) → body: [ if-fork → { then: [good + on-failure/recover], else: [bad] } ]
-    // The lane (recover) is group-hosted (graphId = 'loop'). Pass 1b skips it.
-    // After pass 1 reorders the fork branches, pass 1b would normally shift recover
-    // to stay right of good's NEW position. Since pass 1b skips it, recover may
-    // end up left of bad (i.e., NOT in the +cross margin relative to good).
+    // The lane (recover) is group-hosted (graphId = 'loop'). It belongs to the branch
+    // of `good`, so it must end up right of good and left of bad (the next branch).
     const { result } = runLayout(
       minimal({
         steps: [
@@ -1095,16 +1075,498 @@ describe('Cycle C — group-hosted lane placement (foreach body on-failure)', ()
     const recover = findNode(result.nodes, 'recover');
     const bad = findNode(result.nodes, 'bad');
 
-    // In TB layout the cross axis is x. After pass 1b packs the fork branches
-    // as compound units (good+recover, then bad), the order must be:
+    // In TB layout the cross axis is x. The fork branches are packed as compound units
+    // (good+recover, then bad), so the order must be:
     //   good.x < recover.x < bad.x
     //
     // Specifically: bad must start at or beyond recover's right edge + nodeSep.
-    // Without pass 1b handling group-hosted lanes, dagLayout places recover at
-    // the right of ALL spine nodes in the band (including bad), so the order
-    // becomes good < bad < recover — bad is between good and recover.
     expect(bad.x).toBeGreaterThanOrEqual(
       recover.x + recover.width + WORKFLOW_NODE_SEP - 1 // -1: float tolerance
     );
+  });
+});
+
+/** The fallback reference workflow: nested on-failure fallbacks + if/else + foreach. */
+const referenceFallbackWorkflow = () =>
+  minimal({
+    steps: [
+      {
+        name: 'ai-agent-fails',
+        type: '.inference',
+        'on-failure': {
+          fallback: [
+            {
+              name: 'ai-agent-nested-fails',
+              type: '.inference',
+              'on-failure': { fallback: [{ name: 'console-step', type: 'http' }] },
+            },
+          ],
+        },
+      },
+      {
+        name: 'if-step',
+        type: 'if',
+        condition: 'true == true',
+        steps: [
+          {
+            name: 'then-ai-agent-fails',
+            type: '.inference',
+            'on-failure': {
+              fallback: [{ name: 'then-ai-agent-nested-fails', type: '.inference' }],
+            },
+          },
+          {
+            name: 'loop-step',
+            type: 'foreach',
+            foreach: 'items',
+            steps: [{ name: 'loop-inner', type: 'http' }],
+          },
+        ],
+        else: [
+          {
+            name: 'else-ai-agent-fails',
+            type: '.inference',
+            'on-failure': {
+              fallback: [{ name: 'else-ai-agent-nested-fails', type: '.inference' }],
+            },
+          },
+        ],
+      },
+      { name: 'final-step', type: 'http' },
+    ] as unknown as WorkflowYaml['steps'],
+  });
+
+describe('fork barycenter after lane reorder', () => {
+  const crossCentre = (n: ReturnType<typeof findNode>, direction: 'TB' | 'LR') =>
+    direction === 'TB' ? n.x + n.width / 2 : n.y + n.height / 2;
+
+  const expectGateCentredOnHeads = (
+    result: ReturnType<typeof computeWorkflowLayout>,
+    gateId: string,
+    headIds: string[],
+    direction: 'TB' | 'LR' = 'TB'
+  ) => {
+    const heads = headIds.map((id) => crossCentre(findNode(result.nodes, id), direction));
+    const mean = heads.reduce((a, b) => a + b, 0) / heads.length;
+    expect(Math.abs(crossCentre(findNode(result.nodes, gateId), direction) - mean)).toBeLessThan(
+      CENTER_TOLERANCE
+    );
+  };
+
+  const ifWithoutElse = (withSuccessor: boolean) =>
+    minimal({
+      steps: [
+        {
+          name: 'gate',
+          type: 'if',
+          condition: 'true',
+          steps: [{ name: 'then_step', type: 'http' }],
+        },
+        ...(withSuccessor ? [{ name: 'after', type: 'http' }] : []),
+      ] as unknown as WorkflowYaml['steps'],
+    });
+
+  it('trailing if without else: gate is centred over the then head and the else bypass', () => {
+    const { result, transformed } = runLayout(ifWithoutElse(false));
+    const [bypass] = transformed.bypassLaneNodes;
+    expectGateCentredOnHeads(result, 'gate', ['then-step', bypass.id]);
+    expect(findNode(result.nodes, 'then-step').x).toBeLessThan(findNode(result.nodes, bypass.id).x);
+  });
+
+  it('if without else followed by a step: gate centred and successor stays under the gate', () => {
+    const { result, transformed } = runLayout(ifWithoutElse(true));
+    const [bypass] = transformed.bypassLaneNodes;
+    expectGateCentredOnHeads(result, 'gate', ['then-step', bypass.id]);
+    expect(
+      Math.abs(centerX(findNode(result.nodes, 'after')) - centerX(findNode(result.nodes, 'gate')))
+    ).toBeLessThan(CENTER_TOLERANCE);
+  });
+
+  it('if with only else: then bypass is left of the else head and the gate is centred', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            else: [{ name: 'else_step', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const [bypass] = transformed.bypassLaneNodes;
+    expectGateCentredOnHeads(result, 'gate', [bypass.id, 'else-step']);
+    expect(findNode(result.nodes, bypass.id).x).toBeLessThan(findNode(result.nodes, 'else-step').x);
+  });
+
+  it('switch without default: gate is centred over the case head and the default bypass', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'router',
+            type: 'switch',
+            expression: 'x',
+            cases: [{ match: 'a', steps: [{ name: 'case_a', type: 'http' }] }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const [bypass] = transformed.bypassLaneNodes;
+    expectGateCentredOnHeads(result, 'router', ['case-a', bypass.id]);
+  });
+
+  it('LR: trailing if without else is centred on the cross (y) axis', () => {
+    const { result, transformed } = runLayout(ifWithoutElse(false), 'LR');
+    const [bypass] = transformed.bypassLaneNodes;
+    expectGateCentredOnHeads(result, 'gate', ['then-step', bypass.id], 'LR');
+  });
+
+  it('reference fallback workflow: no pairwise overlap and fallback lanes stay in the +cross margin', () => {
+    const { result, transformed } = runLayout(referenceFallbackWorkflow());
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    expect(findOverlappingPairs(result.nodes, groupIds)).toHaveLength(0);
+
+    const owner = findNode(result.nodes, 'ai-agent-fails');
+    const nested = findNode(result.nodes, 'ai-agent-nested-fails');
+    const deepest = findNode(result.nodes, 'console-step');
+    expect(nested.x).toBeGreaterThan(owner.x);
+    expect(deepest.x).toBeGreaterThan(nested.x);
+    // Spine stays on one column across the fallback owner, the if and the final step.
+    expect(Math.abs(centerX(owner) - centerX(findNode(result.nodes, 'final-step')))).toBeLessThan(
+      CENTER_TOLERANCE
+    );
+  });
+});
+
+// Shape of block-user-credentials-ransomware-over-smb: a narrow `then` leaf next to a
+// wide nested `else`, three levels deep, rejoining at the end.
+const nestedSteps = [
+  {
+    name: 'validate_user_sid',
+    type: 'if',
+    condition: 'true',
+    steps: [{ name: 'log_skip_empty_sid', type: 'http' }],
+    else: [
+      {
+        name: 'skip_system_account',
+        type: 'if',
+        condition: 'true',
+        steps: [{ name: 'log_skip_system', type: 'http' }],
+        else: [
+          { name: 'resolve_agent_id', type: 'http' },
+          {
+            name: 'when_agent_found',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              { name: 'check_history', type: 'http' },
+              {
+                name: 'already_blocked',
+                type: 'if',
+                condition: 'true',
+                steps: [{ name: 'log_already_blocked', type: 'http' }],
+                else: [
+                  { name: 'kill_sessions', type: 'http' },
+                  { name: 'log_kill_result', type: 'http' },
+                ],
+              },
+            ],
+            else: [{ name: 'log_no_agent', type: 'http' }],
+          },
+        ],
+      },
+    ],
+  },
+  { name: 'log_summary', type: 'http' },
+] as unknown as WorkflowYaml['steps'];
+
+describe('fork owners stay centred over real (non-bypass) lanes', () => {
+  // Shape of block-user-credentials-ransomware-over-smb: a narrow `then` leaf
+  // next to a wide nested `else`, three levels deep, rejoining at the end.
+  const nestedIfElse = () => minimal({ steps: nestedSteps });
+
+  it('every if gate is centred on the midpoint of its outermost lane heads', () => {
+    const { result, transformed } = runLayout(nestedIfElse());
+    const gates = [
+      'validate-user-sid',
+      'skip-system-account',
+      'when-agent-found',
+      'already-blocked',
+    ];
+    for (const gate of gates) {
+      const heads = transformed.edges
+        .filter((e) => e.source === gate && e.branchType)
+        .map((e) => centerX(findNode(result.nodes, e.target)));
+      const midpoint = (Math.min(...heads) + Math.max(...heads)) / 2;
+      expect(Math.abs(centerX(findNode(result.nodes, gate)) - midpoint)).toBeLessThan(
+        CENTER_TOLERANCE
+      );
+    }
+  });
+
+  it('the rejoin node stays on the fork owner column', () => {
+    const { result } = runLayout(nestedIfElse());
+    expect(
+      Math.abs(
+        centerX(findNode(result.nodes, 'log-summary')) -
+          centerX(findNode(result.nodes, 'validate-user-sid'))
+      )
+    ).toBeLessThan(CENTER_TOLERANCE);
+  });
+
+  it('the rejoin node stays on the fork owner column inside a container body', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          { name: 'loop', type: 'foreach', foreach: 'items', steps: nestedSteps },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(
+      Math.abs(
+        centerX(findNode(result.nodes, 'log-summary')) -
+          centerX(findNode(result.nodes, 'validate-user-sid'))
+      )
+    ).toBeLessThan(CENTER_TOLERANCE);
+  });
+
+  it('a container joining a fork stays on the owner column when its body is re-centred', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'leaf', type: 'http' }],
+            else: [
+              { name: 'wide_a', type: 'http' },
+              { name: 'wide_b', type: 'if', condition: 'true', steps: nestedSteps, else: [] },
+            ],
+          },
+          { name: 'loop', type: 'foreach', foreach: 'items', steps: nestedSteps },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(
+      Math.abs(centerX(findNode(result.nodes, 'loop')) - centerX(findNode(result.nodes, 'gate')))
+    ).toBeLessThan(CENTER_TOLERANCE);
+  });
+
+  it('no pairwise overlap', () => {
+    const { result, transformed } = runLayout(nestedIfElse());
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    expect(findOverlappingPairs(result.nodes, groupIds)).toHaveLength(0);
+  });
+
+  it('centres the gates of forks whose branches have fallback lanes (reference workflow)', () => {
+    const { result, transformed } = runLayout(referenceFallbackWorkflow());
+    const headsByGate = new Map<string, string[]>();
+    for (const e of transformed.edges.filter((edge) => edge.branchType && !edge.isFailure)) {
+      headsByGate.set(e.source, [...(headsByGate.get(e.source) ?? []), e.target]);
+    }
+    expect(headsByGate.size).toBeGreaterThan(0);
+    for (const [gate, heads] of headsByGate) {
+      const centres = heads.map((id) => centerX(findNode(result.nodes, id)));
+      const midpoint = (Math.min(...centres) + Math.max(...centres)) / 2;
+      expect(Math.abs(centerX(findNode(result.nodes, gate)) - midpoint)).toBeLessThan(
+        CENTER_TOLERANCE
+      );
+    }
+  });
+
+  it('3-lane switch with a default bypass: gate is centred on the outermost lane heads', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'router',
+            type: 'switch',
+            expression: 'x',
+            cases: [
+              { match: 'a', steps: [{ name: 'case_a', type: 'http' }] },
+              { match: 'b', steps: [{ name: 'case_b', type: 'http' }] },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const heads = transformed.edges
+      .filter((e) => e.source === 'router' && e.branchType)
+      .map((e) => centerX(findNode(result.nodes, e.target)));
+    expect(heads).toHaveLength(3);
+    const midpoint = (Math.min(...heads) + Math.max(...heads)) / 2;
+    expect(Math.abs(centerX(findNode(result.nodes, 'router')) - midpoint)).toBeLessThan(
+      CENTER_TOLERANCE
+    );
+  });
+});
+
+describe('fork lanes and owners inside nested forks and container bodies', () => {
+  // Shape of browser-extension-daily-reputation-check's remediation step: an outer
+  // fork whose branch holds a fork with a fallback lane (macOS) whose `else`
+  // holds another fork with fallback lanes (Windows).
+  const nestedForkLanes = (): WorkflowYaml =>
+    minimal({
+      steps: [
+        {
+          name: 'outer',
+          type: 'if',
+          condition: 'true',
+          steps: [
+            {
+              name: 'm',
+              type: 'if',
+              condition: 'true',
+              steps: [
+                {
+                  name: 'm_zip',
+                  type: 'http',
+                  'on-failure': { fallback: [{ name: 'm_fail', type: 'http' }] },
+                },
+                { name: 'm_wait', type: 'http' },
+              ],
+              else: [
+                {
+                  name: 'w',
+                  type: 'if',
+                  condition: 'true',
+                  steps: [
+                    {
+                      name: 'w_zip',
+                      type: 'http',
+                      'on-failure': { fallback: [{ name: 'w_fail', type: 'http' }] },
+                    },
+                    { name: 'w_wait', type: 'http' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+
+  it('a nested fork keeps its fallback lane next to its own branch, left of its sibling branch', () => {
+    const { result } = runLayout(nestedForkLanes());
+    const mFail = findNode(result.nodes, 'm-fail');
+    const mZip = findNode(result.nodes, 'm-zip');
+    expect(mFail.x).toBeGreaterThanOrEqual(mZip.x + mZip.width);
+    for (const id of ['w', 'w-zip', 'w-wait']) {
+      expect(findNode(result.nodes, id).x).toBeGreaterThanOrEqual(mFail.x + mFail.width);
+    }
+  });
+
+  it('a nested fork keeps its fallback lane on the +cross side of its own owner', () => {
+    const { result } = runLayout(nestedForkLanes());
+    for (const [owner, lane] of [
+      ['m-zip', 'm-fail'],
+      ['w-zip', 'w-fail'],
+    ]) {
+      expect(findNode(result.nodes, lane).x).toBeGreaterThan(findNode(result.nodes, owner).x);
+    }
+  });
+
+  it('no pairwise overlap with nested forks that own fallback lanes', () => {
+    const { result, transformed } = runLayout(nestedForkLanes());
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    expect(findOverlappingPairs(result.nodes, groupIds)).toHaveLength(0);
+  });
+
+  it('forks inside a container body are centred and stay inside the container box', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          { name: 'loop', type: 'foreach', foreach: 'items', steps: nestedSteps },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const [group] = transformed.foreachGroups;
+    const forks = new Map<string, string[]>();
+    for (const e of group.innerEdges) {
+      if (e.branchType) forks.set(e.source, [...(forks.get(e.source) ?? []), e.target]);
+    }
+    expect(forks.size).toBe(4);
+    for (const [gate, heads] of forks) {
+      const centres = heads.map((h) => centerX(findNode(result.nodes, h)));
+      const midpoint = (Math.min(...centres) + Math.max(...centres)) / 2;
+      expect(Math.abs(centerX(findNode(result.nodes, gate)) - midpoint)).toBeLessThan(
+        CENTER_TOLERANCE
+      );
+    }
+    const box = findNode(result.nodes, 'loop');
+    for (const n of group.innerNodes) {
+      const inner = findNode(result.nodes, n.id);
+      expect(inner.x).toBeGreaterThanOrEqual(box.x);
+      expect(inner.x + inner.width).toBeLessThanOrEqual(box.x + box.width);
+    }
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    expect(findOverlappingPairs(result.nodes, groupIds)).toHaveLength(0);
+  });
+});
+
+describe('container box fits its body (live Censys enrichment shape)', () => {
+  // A foreach whose body is far wider on one side of its spine than the other: a 5-case
+  // switch under an `if` without `else`, followed by a step, like the Censys workflows.
+  const censysLoop = () =>
+    minimal({
+      steps: [
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: 'items',
+          steps: [
+            { name: 'fetch', type: 'http' },
+            {
+              name: 'dispatch',
+              type: 'if',
+              condition: 'x',
+              steps: [
+                {
+                  name: 'route',
+                  type: 'switch',
+                  expression: 'v',
+                  cases: ['a', 'b', 'c', 'd', 'e'].map((match) => ({
+                    match,
+                    steps: [{ name: `write_${match}`, type: 'http' }],
+                  })),
+                },
+              ],
+            },
+            { name: 'note', type: 'http' },
+          ],
+        },
+        { name: 'after', type: 'http' },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+
+  it.each(['TB', 'LR'] as const)(
+    '%s: the box is the body extent plus the padding, with nothing left over on either side',
+    (direction) => {
+      const { result, transformed } = runLayout(censysLoop(), direction);
+      const [group] = transformed.foreachGroups;
+      const box = findNode(result.nodes, 'loop');
+      const body = [...group.innerNodes, ...group.bypassLaneNodes].map((n) =>
+        findNode(result.nodes, n.id)
+      );
+      const isTB = direction === 'TB';
+      const start = (n: typeof box) => (isTB ? n.x : n.y);
+      const end = (n: typeof box) => (isTB ? n.x + n.width : n.y + n.height);
+      const paddingStart = isTB ? WORKFLOW_COMPOUND_PADDING.left : WORKFLOW_COMPOUND_PADDING.top;
+      const paddingEnd = isTB ? WORKFLOW_COMPOUND_PADDING.right : WORKFLOW_COMPOUND_PADDING.bottom;
+
+      expect(
+        Math.abs(Math.min(...body.map(start)) - start(box) - paddingStart)
+      ).toBeLessThanOrEqual(1);
+      expect(Math.abs(end(box) - Math.max(...body.map(end)) - paddingEnd)).toBeLessThanOrEqual(1);
+    }
+  );
+
+  it('keeps the box centred on the spine of the steps around it', () => {
+    const { result } = runLayout(censysLoop());
+    const spine = centerX(findNode(result.nodes, 'after'));
+    expect(Math.abs(centerX(findNode(result.nodes, 'loop')) - spine)).toBeLessThanOrEqual(1);
   });
 });
