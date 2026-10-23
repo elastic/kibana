@@ -12,6 +12,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { isFiniteRunLimit, type RunLimitDraft } from './run_limit_draft';
@@ -27,7 +28,10 @@ export const RunQuotaExhaustionCallout = ({
   counts: Record<RunQuotaGroup, number>;
   groups: readonly RunQuotaGroup[];
 }) => {
-  const { application } = useKibana().services;
+  const { application, featureFlags, nightshiftInvestigations } = useKibana().services;
+  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
+  const canUseAutomations =
+    nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
   const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/automations' });
   const exhaustedGroups = enabled
     ? groups.filter((group) => isFiniteRunLimit(limits[group]) && counts[group] >= limits[group])
@@ -51,23 +55,30 @@ export const RunQuotaExhaustionCallout = ({
           defaultMessage:
             'New automation runs are skipped until the limit resets at midnight (UTC). Manual runs are not limited.',
         })}
-        actionProps={{
-          primary: {
-            children: i18n.translate('xpack.nightshift.settings.runLimits.openAutomationsButton', {
-              defaultMessage: 'Open automations',
-            }),
-            href: automationsHref,
-            onClick: (event: React.MouseEvent) => {
-              event.preventDefault();
-              application.navigateToUrl(automationsHref);
-            },
-            'data-test-subj': 'nightshiftRunLimitsOpenAutomations',
-            ...getEbtProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.VIEW_AUTOMATIONS,
-              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-            }),
-          },
-        }}
+        actionProps={
+          canUseAutomations
+            ? {
+                primary: {
+                  children: i18n.translate(
+                    'xpack.nightshift.settings.runLimits.openAutomationsButton',
+                    {
+                      defaultMessage: 'Open automations',
+                    }
+                  ),
+                  href: automationsHref,
+                  onClick: (event: React.MouseEvent) => {
+                    event.preventDefault();
+                    application.navigateToUrl(automationsHref);
+                  },
+                  'data-test-subj': 'nightshiftRunLimitsOpenAutomations',
+                  ...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.VIEW_AUTOMATIONS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  }),
+                },
+              }
+            : undefined
+        }
       />
       <EuiSpacer />
     </>
