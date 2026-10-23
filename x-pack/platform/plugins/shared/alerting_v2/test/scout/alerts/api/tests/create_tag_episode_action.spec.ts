@@ -69,45 +69,51 @@ apiTest.describe('Create tag episode action API', { tag: testData.API_ENGINE_TAG
     });
   });
 
-  apiTest(
-    'tag: an empty tags array clears the tags and returns 204',
-    async ({ apiClient, apiServices }) => {
-      // The tag schema doesn't enforce a minimum array length, so `tags: []`
-      // is how a client drops every tag from an alert.
-      const ruleId = 'tag-empty-rule';
-      const groupHash = 'tag-empty-group';
-      const episodeId = 'tag-empty-episode';
-      await apiServices.alertingV2.ruleEvents.seed([
-        buildAlertEvent({
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          alert: { id: episodeId, status: 'active' },
-        }),
-      ]);
-      const tagResponse = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
-        headers: writerHeaders,
-        body: { tags: ['production'] },
-      });
-      expect(tagResponse).toHaveStatusCode(204);
-
-      const response = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
-        headers: writerHeaders,
-        body: { tags: [] },
-      });
-      expect(response).toHaveStatusCode(204);
-      const actions = await apiServices.alertingV2.alertActionsEvents.find({
-        ruleId,
-        actionTypes: ['tag'],
-      });
-      expect(actions).toHaveLength(2);
-      expect(actions[1]).toMatchObject({
-        action_type: 'tag',
+  apiTest('tag: null clears the tags and returns 204', async ({ apiClient, apiServices }) => {
+    // `null` is the one clearing idiom on every alerting v2 body, so it is
+    // how a client drops every tag from an alert; `[]` is rejected below.
+    const ruleId = 'tag-empty-rule';
+    const groupHash = 'tag-empty-group';
+    const episodeId = 'tag-empty-episode';
+    await apiServices.alertingV2.ruleEvents.seed([
+      buildAlertEvent({
+        rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        alert_id: episodeId,
-        rule_id: ruleId,
-      });
-    }
-  );
+        alert: { id: episodeId, status: 'active' },
+      }),
+    ]);
+    const tagResponse = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
+      headers: writerHeaders,
+      body: { tags: ['production'] },
+    });
+    expect(tagResponse).toHaveStatusCode(204);
+
+    const response = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
+      headers: writerHeaders,
+      body: { tags: null },
+    });
+    expect(response).toHaveStatusCode(204);
+    const actions = await apiServices.alertingV2.alertActionsEvents.find({
+      ruleId,
+      actionTypes: ['tag'],
+    });
+    expect(actions).toHaveLength(2);
+    expect(actions[1]).toMatchObject({
+      action_type: 'tag',
+      group_hash: groupHash,
+      alert_id: episodeId,
+      rule_id: ruleId,
+    });
+  });
+
+  apiTest('tag: an empty tags array is rejected with 400', async ({ apiClient }) => {
+    const response = await apiClient.post(getTagEpisodeActionUrl('tag-empty-array-episode'), {
+      headers: writerHeaders,
+      body: { tags: [] },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ code: 'BAD_REQUEST' });
+  });
 
   apiTest(
     'tag: repeating the current set returns 409 regardless of order',
@@ -160,7 +166,7 @@ apiTest.describe('Create tag episode action API', { tag: testData.API_ENGINE_TAG
       }),
     ]);
 
-    for (const tags of [['production'], []]) {
+    for (const tags of [['production'], null]) {
       const setupResponse = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
         headers: writerHeaders,
         body: { tags },
