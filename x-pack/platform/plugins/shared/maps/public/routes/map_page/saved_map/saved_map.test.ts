@@ -126,9 +126,26 @@ describe('SavedMap.reset', () => {
     await savedMap.whenReady();
     expect(getLayerIds(savedMap)).toEqual(['base']);
 
-    savedMap.reset({
+    await savedMap.reset({
       attributes: { title: 'test map', layers: [baseLayer, extraLayer] },
     } as MapByValueState);
     expect(getLayerIds(savedMap)).toEqual(['base', 'extra']);
+  });
+
+  test('creates the ad hoc data views of the new by-value attributes before applying layers', async () => {
+    mockDataViewCreate.mockReset();
+    mockDataViewCreate.mockResolvedValue({});
+    const spec = { id: 'adhoc-2', title: 'metrics-*' };
+
+    const savedMap = new SavedMap({
+      mapEmbeddableState: { attributes: { title: 'test map' } } as MapByValueState,
+    });
+    await savedMap.whenReady();
+    expect(mockDataViewCreate).not.toHaveBeenCalled();
+
+    await savedMap.reset({
+      attributes: { title: 'test map', adHocDataViews: [spec] },
+    } as MapByValueState);
+    expect(mockDataViewCreate).toHaveBeenCalledWith(spec);
   });
 });
