@@ -109,7 +109,7 @@ describe('getRequestHandlerFactory', () => {
       expect((options as any).context.timingContext.startTime).toBeGreaterThan(0);
     });
 
-    it('sets timing context with kibanaRequest for scoped user', () => {
+    it('sets timing context with a measurement callback for scoped user', () => {
       const factory = getRequestHandlerFactory(true);
       const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
       const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
@@ -121,7 +121,7 @@ describe('getRequestHandlerFactory', () => {
       expect((options as any).context).toBeDefined();
       expect((options as any).context.timingContext).toBeDefined();
       expect((options as any).context.timingContext.startTime).toBeGreaterThan(0);
-      expect((options as any).context.timingContext.kibanaRequest).toBe(request);
+      expect((options as any).context.timingContext.measure).toEqual(expect.any(Function));
     });
 
     it('sets both timing and CPS contexts', () => {
