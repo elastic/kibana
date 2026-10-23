@@ -11,8 +11,10 @@ import { ApplicationPage } from './application_page';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useEnvironment } from '../../hooks/use_environment';
 
 jest.mock('../../hooks/use_kibana_services');
+jest.mock('../../hooks/use_environment');
 jest.mock('../../breadcrumbs/use_route_breadcrumb');
 jest.mock('../../hooks/use_time_range', () => ({
   ...jest.requireActual('../../hooks/use_time_range'),
@@ -24,6 +26,9 @@ const timeRange = { rangeFrom: 'now-7d', rangeTo: 'now' };
 const setTimeRange = jest.fn();
 
 beforeEach(() => {
+  jest
+    .mocked(useEnvironment)
+    .mockReturnValue({ environment: undefined, setEnvironment: jest.fn() });
   jest.mocked(useTimeRange).mockReturnValue({
     timeRange,
     isTimeRangeInUrl: true,
@@ -47,11 +52,29 @@ describe('ApplicationPage', () => {
     expect(useRouteBreadcrumb).toHaveBeenCalledWith([{ text: 'my-app' }, { text: 'Overview' }]);
     expect(ClassicRumDashboard.mock.calls[0][0]).toEqual({
       serviceName: 'my-app',
+      environment: undefined,
       timeRange,
       onTimeRangeChange: setTimeRange,
     });
     expect(getClassicRumDashboard).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('digitalExperienceTab-overview')).toBeInTheDocument();
+  });
+
+  it('opens the Classic RUM dashboard in the environment selected in the list', async () => {
+    jest
+      .mocked(useEnvironment)
+      .mockReturnValue({ environment: 'production', setEnvironment: jest.fn() });
+    const ClassicRumDashboard = jest.fn((_props: { environment?: string }) => (
+      <div data-test-subj="classicRumDashboard" />
+    ));
+    useKibanaServicesMock.mockReturnValue({
+      ux: { getClassicRumDashboard: jest.fn().mockResolvedValue(ClassicRumDashboard) },
+    } as unknown as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="classic" />);
+
+    await screen.findByTestId('classicRumDashboard');
+    expect(ClassicRumDashboard.mock.calls[0][0]).toMatchObject({ environment: 'production' });
   });
 
   it('shows the loading state while the Classic RUM dashboard loads', () => {

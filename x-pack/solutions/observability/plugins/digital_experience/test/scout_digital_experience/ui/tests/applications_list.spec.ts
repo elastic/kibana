@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
 
-const { SERVICE_NAME, OTEL_APPS, STAGING_ENVIRONMENT } = testData;
+const { SERVICE_NAME, OTEL_APPS, STAGING_ENVIRONMENT, TIME_RANGE } = testData;
 
 // The metrics of each application are asserted by the applications API specs.
 test.describe(
@@ -76,6 +76,13 @@ test.describe(
         await digitalExperience.selectEnvironment('All');
 
         await expect(page).not.toHaveURL(/environment=/);
+        await expect(digitalExperience.applicationLink(OTEL_APPS.shop)).toBeVisible();
+      });
+
+      await test.step('removes an invalid source from the URL and lists every source', async () => {
+        await digitalExperience.gotoApplications({ ...TIME_RANGE, sourceFilter: 'invalid' });
+
+        await expect(page).not.toHaveURL(/sourceFilter=/);
         await expect(digitalExperience.applicationLink(OTEL_APPS.shop)).toBeVisible();
       });
     });

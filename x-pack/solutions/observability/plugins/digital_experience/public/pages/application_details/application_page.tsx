@@ -13,6 +13,7 @@ import { APPLICATION_SOURCE } from '../../../common/application_source';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
 
 /** Tabs of the Application view, in display order. */
@@ -92,6 +93,7 @@ export function ApplicationPage({
 }) {
   const { ux } = useKibanaServices();
   const { timeRange, setTimeRange } = useTimeRange();
+  const { environment } = useEnvironment();
 
   const selectedTab: ApplicationTabId = 'overview';
 
@@ -113,6 +115,7 @@ export function ApplicationPage({
       return (
         <dashboard.Component
           serviceName={serviceName}
+          environment={environment}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
         />

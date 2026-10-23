@@ -66,8 +66,9 @@ export class DigitalExperiencePage {
     this.classicRumServiceSelect = page.getByTestId('uxServiceNameFilterSelect');
   }
 
-  async gotoApplications(timeRange = TIME_RANGE): Promise<void> {
-    await this.page.goto(this.kbnUrl.get(`${APP_PATH}?${new URLSearchParams(timeRange)}`));
+  /** Opens the list with the given URL query, by default only the time range. */
+  async gotoApplications(query: Record<string, string> = TIME_RANGE): Promise<void> {
+    await this.page.goto(this.kbnUrl.get(`${APP_PATH}?${new URLSearchParams(query)}`));
   }
 
   async gotoApplication(serviceName: string, timeRange = TIME_RANGE): Promise<void> {

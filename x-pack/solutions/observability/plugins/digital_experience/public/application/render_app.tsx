@@ -37,11 +37,13 @@ export const renderApp = ({
       <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
         <RouterProvider history={history} router={router}>
           <div className={APP_WRAPPER_CLASS} data-test-subj="digitalExperienceMainContainer">
-            <PageTemplate>
-              <RouteBreadcrumbsContextProvider>
+            {/* Outside the template's error boundary, so an invalid URL param reaches the router's
+            boundary, which removes it from the URL. */}
+            <RouteBreadcrumbsContextProvider>
+              <PageTemplate>
                 <RouteRenderer />
-              </RouteBreadcrumbsContextProvider>
-            </PageTemplate>
+              </PageTemplate>
+            </RouteBreadcrumbsContextProvider>
           </div>
         </RouterProvider>
       </KibanaContextProvider>
