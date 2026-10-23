@@ -142,7 +142,6 @@ export function DetectionFlyout({
         resizable
         aria-label={title}
         data-test-subj="nightshiftDetectionFlyout"
-        type="push"
         hasAnimation={false}
         closeButtonProps={{
           'data-test-subj': 'euiFlyoutCloseButton',

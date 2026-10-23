@@ -15,8 +15,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
@@ -34,9 +32,11 @@ import type {
 import { defineRoute as defineLogRateAnalysisFieldCandidatesRoute } from './routes/log_rate_analysis_field_candidates/define_route';
 import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
 import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
+import { defineRoute as defineTelemetryRoute } from './routes/telemetry/define_route';
 import { registerCaseAttachments } from './register_cases';
 import type { ConfigSchema } from './config_schema';
 import { setupCapabilities } from './lib/capabilities';
+import { AiopsUsage } from './lib/track_route_usage';
 import { transformIn as changePointTransformIn } from '../common/embeddables/change_point_chart/transform_in';
 import { transformOut as changePointTransformOut } from '../common/embeddables/change_point_chart/transform_out';
 import { transformIn as logRateTransformIn } from '../common/embeddables/log_rate_analysis/transform_in';
@@ -49,7 +49,6 @@ export class AiopsPlugin
 {
   private readonly logger: Logger;
   private licenseSubscription: Subscription | null = null;
-  private usageCounter?: UsageCounter;
   private aiopsEnabled: boolean = true;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -63,7 +62,7 @@ export class AiopsPlugin
   ) {
     setupCapabilities(core, this.aiopsEnabled);
 
-    this.usageCounter = plugins.usageCollection?.createUsageCounter(AIOPS_PLUGIN_ID);
+    const aiopsUsage = new AiopsUsage(plugins.usageCollection);
 
     // Subscribe to license changes and store the current license in `currentLicense`.
     // This way we can pass on license changes to the route factory having always
@@ -81,9 +80,10 @@ export class AiopsPlugin
 
     // Register server side APIs
     void core.getStartServices().then(([coreStart, depsStart]) => {
-      defineLogRateAnalysisFieldCandidatesRoute(router, aiopsLicense, coreStart, this.usageCounter);
-      defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
-      defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
+      defineLogRateAnalysisFieldCandidatesRoute(router, aiopsLicense, coreStart, aiopsUsage);
+      defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, aiopsUsage);
+      defineCategorizationFieldValidationRoute(router, aiopsLicense, aiopsUsage);
+      defineTelemetryRoute(router, aiopsUsage);
     });
 
     plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {

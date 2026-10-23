@@ -141,18 +141,21 @@ export class StreamsUnitService {
   }
 
   async getUnit(unitId: string): Promise<StreamsUnit.GetResponse> {
-    const configuration = await this.getConfigurationSavedObject(unitId);
-
-    if (!configuration) {
+    const unit = await this.readUnit(unitId);
+    if (!unit) {
       throw new StatusError(`Streams unit [${unitId}] not found.`, 404);
     }
+    return unit;
+  }
 
-    const uiMetadata = await this.getUiMetadataSavedObject(configuration.id);
-
-    return {
-      unit: configuration.attributes.unit,
-      ui_metadata: uiMetadata?.attributes.metadata ?? {},
-    };
+  /** Empty config when the unit has never been stored. Used by PUT, reset, and resolve-indices. */
+  async getUnitOrEmpty(unitId: string): Promise<StreamsUnit.GetResponse> {
+    return (
+      (await this.readUnit(unitId)) ?? {
+        unit: { sources: [], destinations: [], pipelines: [] },
+        ui_metadata: {},
+      }
+    );
   }
 
   async upsertUnit({
@@ -160,12 +163,15 @@ export class StreamsUnitService {
     unit,
     ui_metadata: uiMetadata,
     secrets,
+    onPublished,
   }: {
     unitId: string;
     unit: StreamsUnit.Configuration;
     ui_metadata?: StreamsUnit.UiMetadata;
     secrets?: StreamsUnit.Secrets;
-  }): Promise<UnitValidationResult> {
+    /** Runs once the unit is published, before the UI metadata write. */
+    onPublished?: () => Promise<void>;
+  }): Promise<UnitValidationResult & { ui_metadata_not_persisted?: true }> {
     if (!this.canEncrypt) {
       throw new StatusError(
         'Cannot store Streams unit credentials: encrypted saved objects are not configured.',
@@ -240,15 +246,24 @@ export class StreamsUnitService {
       throw error;
     }
 
+    await onPublished?.();
+
     const metadataToWrite =
       uiMetadata !== undefined
         ? uiMetadata
         : (await this.getUiMetadataSavedObject(unitId))?.attributes.metadata ?? {};
 
-    await this.writeUiMetadata({
-      configurationSavedObjectId: unitId,
-      metadata: pruneStaleNodeMetadata(metadataToWrite, unit),
-    });
+    try {
+      await this.writeUiMetadata({
+        configurationSavedObjectId: unitId,
+        metadata: pruneStaleNodeMetadata(metadataToWrite, unit),
+      });
+    } catch (error) {
+      // The unit is already stored and published. Fail the metadata write
+      // in-band so the PUT can still acknowledge the live configuration.
+      this.logger.error(`Failed to persist Streams unit UI metadata [${unitId}]: ${error}`);
+      return { ...validation, ui_metadata_not_persisted: true };
+    }
 
     return validation;
   }
@@ -296,6 +311,20 @@ export class StreamsUnitService {
       getStreamsUiMetadataSavedObjectId(configuration.id)
     );
     await this.deleteSavedObject(STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE, configuration.id);
+  }
+
+  private async readUnit(unitId: string): Promise<StreamsUnit.GetResponse | undefined> {
+    const configuration = await this.getConfigurationSavedObject(unitId);
+    if (!configuration) {
+      return undefined;
+    }
+
+    const uiMetadata = await this.getUiMetadataSavedObject(configuration.id);
+
+    return {
+      unit: configuration.attributes.unit,
+      ui_metadata: uiMetadata?.attributes.metadata ?? {},
+    };
   }
 
   private async getConfigurationSavedObject(

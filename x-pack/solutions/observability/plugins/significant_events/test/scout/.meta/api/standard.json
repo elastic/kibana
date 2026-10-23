@@ -1,5 +1,5 @@
 {
-  "sha1": "ccca875e73fd33627b326d91d64d9904463d22a4",
+  "sha1": "86754154536a3754a8b3e7ae95e7907bc677363a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,6 +21,22 @@
       }
     },
     {
+      "id": "abeb9fe1f06530f-f778a1cd0b257fb",
+      "title": "Significant Events actions for the built-in editor role creates and deletes a source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 122,
+        "column": 15
+      }
+    },
+    {
       "id": "abeb9fe1f06530f-e5b21509e0a097b",
       "title": "Significant Events actions for the built-in editor role closes a significant event",
       "expectedStatus": "passed",
@@ -32,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 65,
-        "column": 15
+        "line": 133,
+        "column": 48
       }
     },
     {
@@ -48,13 +64,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 76,
-        "column": 39
+        "line": 153,
+        "column": 17
       }
     },
     {
-      "id": "abeb9fe1f06530f-992b8eb4e3c27e9",
-      "title": "Significant Events actions for the built-in editor role creates and deletes a knowledge indicator",
+      "id": "abeb9fe1f06530f-85fba3d5be340fb",
+      "title": "Significant Events actions for the built-in editor role creates, lists and deletes a feature knowledge indicator",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -64,8 +80,40 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 111,
-        "column": 46
+        "line": 186,
+        "column": 14
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-a747d4d80daca13",
+      "title": "Significant Events actions for the built-in editor role creates and lists a rule-backed query knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 215,
+        "column": 22
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-19bf7a0b5d451ca",
+      "title": "Significant Events actions for the built-in editor role deletes a rule-backed query knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 258,
+        "column": 14
       }
     },
     {
@@ -80,8 +128,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 124,
-        "column": 25
+        "line": 275,
+        "column": 45
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-546bcf63fce417c",
+      "title": "Significant Events actions for the built-in admin role creates and deletes a source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 122,
+        "column": 15
       }
     },
     {
@@ -96,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 65,
-        "column": 15
+        "line": 133,
+        "column": 48
       }
     },
     {
@@ -112,13 +176,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 76,
-        "column": 39
+        "line": 153,
+        "column": 17
       }
     },
     {
-      "id": "abeb9fe1f06530f-b65e5f481717ebf",
-      "title": "Significant Events actions for the built-in admin role creates and deletes a knowledge indicator",
+      "id": "abeb9fe1f06530f-2937552c4aa087c",
+      "title": "Significant Events actions for the built-in admin role creates, lists and deletes a feature knowledge indicator",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -128,8 +192,40 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 111,
-        "column": 46
+        "line": 186,
+        "column": 14
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-cbd53c72c77f88a",
+      "title": "Significant Events actions for the built-in admin role creates and lists a rule-backed query knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 215,
+        "column": 22
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-0c5264d2cecc8d7",
+      "title": "Significant Events actions for the built-in admin role deletes a rule-backed query knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 258,
+        "column": 14
       }
     },
     {
@@ -144,8 +240,120 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 124,
-        "column": 25
+        "line": 275,
+        "column": 45
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-94b5a89dabfb851",
+      "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read creates and deletes a source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 122,
+        "column": 15
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-89a1137af54d8c6",
+      "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read closes a significant event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 133,
+        "column": 48
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-65bd981fe15f021",
+      "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read writes and reads detections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 153,
+        "column": 17
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-4d087cdce30399f",
+      "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read creates, lists and deletes a feature knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 186,
+        "column": 14
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-8cb8129847a85d2",
+      "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read creates and lists a rule-backed query knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 215,
+        "column": 22
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-e719570e0020e49",
+      "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read deletes a rule-backed query knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 258,
+        "column": 14
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-541251bd79baa69",
+      "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read creates a knowledge indicator from Agent Builder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 275,
+        "column": 45
       }
     },
     {

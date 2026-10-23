@@ -17,6 +17,7 @@ import {
   getTriagePlanSweepStepDefinition,
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
+import { getResolveProposalsStepDefinition } from './resolve_proposals';
 import {
   getSummarizeInvestigationStepDefinition,
   type SummarizeInvestigationStepDependencies,
@@ -62,6 +63,14 @@ export const registerStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(
+    getResolveProposalsStepDefinition({
+      getProposalsService: () => getHuntServices().getProposalsService(),
+      getProposalPrivileges: () => getHuntServices().getProposalPrivileges(),
+      getConversations,
+      logger,
+    })
+  );
+  workflowsExtensions.registerStepDefinition(
     getSummarizeInvestigationStepDefinition({
       getConversationClient: (request) => getConversations().getScopedClient({ request }),
       executeAgent: (params) => getExecution(params),
@@ -74,6 +83,7 @@ export const registerStepDefinitions = ({
 };
 
 export { getPackageReportStepDefinition } from './package_report';
+export { getResolveProposalsStepDefinition } from './resolve_proposals';
 
 export { OPT_IN_TIMEOUT_MS as REPORT_STEP_OPT_IN_TIMEOUT_MS } from './report_worker_outcome/report_worker_outcome_step';
 

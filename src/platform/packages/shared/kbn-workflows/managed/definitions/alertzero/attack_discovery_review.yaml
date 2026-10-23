@@ -1081,7 +1081,7 @@ steps:
     with:
       request:
         method: GET
-        path: "/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
+        path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
         headers:
           elastic-api-version: "1"
     on-failure:
