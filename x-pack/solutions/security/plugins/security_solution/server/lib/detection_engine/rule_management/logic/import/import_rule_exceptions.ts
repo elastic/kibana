@@ -11,6 +11,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
 
 /**
  * Util to call into exceptions list client import logic
@@ -31,30 +32,31 @@ export const importRuleExceptions = async ({
   exceptionsClient: ExceptionListClient | undefined;
   overwrite: boolean;
   maxExceptionsImportSize: number;
-}) => {
-  if (exceptionsClient == null) {
+}) =>
+  withSecuritySpan('importRuleExceptions', async () => {
+    if (exceptionsClient == null) {
+      return {
+        success: true,
+        errors: [],
+        successCount: 0,
+      };
+    }
+
+    const {
+      errors,
+      success,
+      // return only count of exception list items, without count exceptions list
+      // to be consistent with UI, and users shouldn't know about backend structure
+      success_count_exception_list_items: successCount,
+    } = await exceptionsClient.importExceptionListAndItemsAsArray({
+      exceptionsToImport: exceptions,
+      overwrite,
+      maxExceptionsImportSize,
+    });
+
     return {
-      success: true,
-      errors: [],
-      successCount: 0,
+      errors,
+      success,
+      successCount,
     };
-  }
-
-  const {
-    errors,
-    success,
-    // return only count of exception list items, without count exceptions list
-    // to be consistent with UI, and users shouldn't know about backend structure
-    success_count_exception_list_items: successCount,
-  } = await exceptionsClient.importExceptionListAndItemsAsArray({
-    exceptionsToImport: exceptions,
-    overwrite,
-    maxExceptionsImportSize,
   });
-
-  return {
-    errors,
-    success,
-    successCount,
-  };
-};
