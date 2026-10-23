@@ -68,6 +68,10 @@ dependsOn:
   - '@kbn/openapi-bundler'
   - '@kbn/repo-info'
   - '@kbn/zod'
+  - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
+  - '@kbn/crypto'
+  - '@kbn/test-es-server'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-saved-objects-api-server-internal'
   - '@kbn/core-http-server-utils'
@@ -108,6 +112,7 @@ fileGroups:
     - scripts/**/*.json
     - server/**/*
     - test/scout/**/*
+    - test/scout_osquery_workflows/**/*
     - common/schemas/*/*.json
     - '!target/**/*'
 tasks: {}

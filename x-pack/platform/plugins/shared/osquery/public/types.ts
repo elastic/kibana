@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
@@ -106,6 +107,7 @@ export interface StartPlugins {
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cases?: CasesPublicSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;
