@@ -251,7 +251,7 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
 
-      expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+      expect(screen.getByText("Let's turn on the Watches.")).toBeInTheDocument();
       expect(screen.getAllByRole('switch').length).toBeGreaterThan(0);
     });
   });
@@ -337,7 +337,7 @@ describe('OnboardingPage', () => {
 
   it('renders the title', () => {
     renderPage({ canWrite: true });
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches.")).toBeInTheDocument();
   });
 
   describe('with write capability', () => {

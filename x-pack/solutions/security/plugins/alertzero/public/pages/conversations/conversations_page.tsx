@@ -170,7 +170,7 @@ const ConversationsPageContent: React.FC = () => {
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
-  useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
+  useAlertZeroDocTitle();
   const { reportEvent } = useAlertZeroTelemetry();
 
   // The Impact entity filter is the queue's only filter today. Only setting it reports, never
