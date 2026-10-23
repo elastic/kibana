@@ -412,9 +412,6 @@ export const createInstallAutomationTemplateTool = ({
         getWorkflowsManagement,
       });
 
-      // A template whose rendered YAML fails validation is stored as invalid rather than rejected,
-      // so the install effectively failed: report it as an error with the diagnostics instead of
-      // claiming success for a workflow that cannot be enabled or run.
       if (result.valid === false) {
         const details = result.validationErrors?.length
           ? ` ${result.validationErrors.join('; ')}`

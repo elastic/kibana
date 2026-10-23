@@ -10,7 +10,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus, isTerminalStatus, type WorkflowDetailDto } from '@kbn/workflows';
-import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import {
+  hasWorkflowExecutePrivilege,
+  hasWorkflowReadPrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import { CREATE_KI_STEP_ID } from '@kbn/context-engine-plugin/common/step_types/create_ki';
 import {
   collectWorkflowValidationErrors,
@@ -112,8 +115,6 @@ export const runAutomationHandler = async ({
   const workflowsManagement = getWorkflowsManagement();
   const { workflowId, pilotSize } = params;
 
-  // Checked before the workflow is read: the preflight below surfaces validation diagnostics
-  // derived from the stored definition, which must never reach a caller who cannot execute it.
   const security = await getSecurityStart();
   const canExecute = await hasWorkflowExecutePrivilege({ security, request, spaceId });
   if (!canExecute) {
@@ -123,8 +124,6 @@ export const runAutomationHandler = async ({
     };
   }
 
-  // Read the saved workflow up front: an invalid definition cannot run on either path, and the
-  // pilot-input check below reads the parsed definition, which is null for an invalid workflow.
   const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
   if (!workflow) {
     return {
@@ -133,16 +132,17 @@ export const runAutomationHandler = async ({
     };
   }
 
-  // An invalid definition parses to `null`, so the pilot-input check would misreport it as missing
-  // the input. Diagnose the real cause — the invalid definition — and surface its diagnostics.
   if (!workflow.valid || !workflow.definition) {
-    const errors = await collectWorkflowValidationErrors({
-      yaml: workflow.yaml,
-      workflowsManagement,
-      spaceId,
-      request,
-      logger,
-    });
+    const canRead = await hasWorkflowReadPrivilege({ security, request, spaceId });
+    const errors = canRead
+      ? await collectWorkflowValidationErrors({
+          yaml: workflow.yaml,
+          workflowsManagement,
+          spaceId,
+          request,
+          logger,
+        })
+      : [];
     const details = errors.length > 0 ? ` ${errors.join('; ')}` : '';
     return {
       started: false,

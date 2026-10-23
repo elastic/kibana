@@ -56,7 +56,7 @@ export interface SaveAutomationResult {
   status: 'saved_and_attached' | 'attached' | 'already_attached';
   /**
    * Whether the saved definition passed schema validation. `false` means it was stored but cannot
-   * be enabled or run. Absent on the attach-only path, where no definition is persisted.
+   * be enabled or run.
    */
   valid?: boolean;
   /** Validation diagnostics explaining why the saved definition is invalid, when `valid` is false. */
@@ -481,11 +481,7 @@ const syncAttachmentsToSavedWorkflow = async ({
   }
 };
 
-/**
- * Error-severity validation diagnostics for a YAML definition, each as a human-readable message.
- * Empty when the definition validates or diagnostics could not be collected. Used to explain why a
- * saved or stored workflow is unusable; never throws so it can run on paths that must not fail.
- */
+/** Error-severity validation diagnostics for a YAML definition; never throws. */
 export const collectWorkflowValidationErrors = async ({
   yaml,
   workflowsManagement,
@@ -517,9 +513,7 @@ export const collectWorkflowValidationErrors = async ({
 interface PersistedWorkflow {
   workflowId: string;
   newlyCreated: boolean;
-  /** Whether the saved definition passed schema validation. `false` means it cannot be run. */
   valid: boolean;
-  /** Diagnostics explaining why the saved definition is invalid, when `valid` is false. */
   validationErrors: string[];
 }
 
@@ -560,8 +554,6 @@ const persistWorkflow = async ({
       );
     }
 
-    // The save stores invalid YAML as `valid: false` rather than throwing, so the caller is told
-    // nothing unless the update's own validity is read back and surfaced.
     const updated = await workflowsManagement.updateWorkflow(
       existingWorkflowId,
       { yaml },
@@ -579,8 +571,6 @@ const persistWorkflow = async ({
   await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
   const created = await workflowsManagement.createWorkflow({ yaml }, spaceId, request);
 
-  // `createWorkflow` reports `valid` but not the diagnostics, so collect them separately when the
-  // stored definition is invalid.
   const validationErrors = created.valid
     ? []
     : await collectWorkflowValidationErrors({
@@ -817,7 +807,6 @@ export const saveAutomationHandler = async ({
       aiIndexId,
       workflowId,
       status: isUpdate || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
-      // Only surfaced when the stored definition is invalid; a valid save stays a plain success.
       ...(valid === false && { valid: false }),
       ...(validationErrors.length > 0 && { validationErrors }),
     };

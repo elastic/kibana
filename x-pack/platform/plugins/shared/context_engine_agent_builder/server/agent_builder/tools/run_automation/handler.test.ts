@@ -11,6 +11,7 @@ import { runAutomationHandler } from './handler';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
+  hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
   executeWorkflow: jest.fn(),
 }));
@@ -19,8 +20,12 @@ jest.mock('../../assert_context_engine_write_access', () => ({
   assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const { hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege, executeWorkflow } =
-  jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const {
+  hasWorkflowExecutePrivilege,
+  hasWorkflowReadPrivilege,
+  hasWorkflowUpdatePrivilege,
+  executeWorkflow,
+} = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
 
 const { assertContextEngineWriteAccess } = jest.requireMock(
   '../../assert_context_engine_write_access'
@@ -37,7 +42,6 @@ describe('runAutomationHandler', () => {
   const getWorkflowExecutionMock = jest.fn();
   const validateWorkflowMock = jest.fn();
 
-  // A valid, enabled workflow with a parsed definition — what the validity guard expects to pass.
   const validWorkflow = (overrides: Record<string, unknown> = {}) => ({
     id: workflowId,
     enabled: true,
@@ -70,6 +74,7 @@ describe('runAutomationHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     hasWorkflowExecutePrivilege.mockResolvedValue(true);
+    hasWorkflowReadPrivilege.mockResolvedValue(true);
     hasWorkflowUpdatePrivilege.mockResolvedValue(true);
     assertContextEngineWriteAccess.mockResolvedValue(undefined);
     getWorkflowMock.mockResolvedValue(validWorkflow());
@@ -252,6 +257,24 @@ describe('runAutomationHandler', () => {
     expect(result.reason).toMatch(/invalid definition/);
     expect(result.reason).toContain('Unknown connector id');
     expect(result.reason).not.toContain('just a warning');
+  });
+
+  it('does not leak validation diagnostics to a caller who lacks read privilege', async () => {
+    hasWorkflowReadPrivilege.mockResolvedValue(false);
+    getWorkflowMock.mockResolvedValue(validWorkflow({ valid: false, definition: null }));
+    validateWorkflowMock.mockResolvedValue({
+      valid: false,
+      diagnostics: [
+        { severity: 'error', message: 'Unknown connector id', source: 'schema', ruleId: 'x' },
+      ],
+    });
+
+    const result = await runAutomationHandler(buildDeps());
+
+    expect(validateWorkflowMock).not.toHaveBeenCalled();
+    expect(result.started).toBe(false);
+    expect(result.reason).toMatch(/invalid definition/);
+    expect(result.reason).not.toContain('Unknown connector id');
   });
 
   it('still refuses an invalid workflow when diagnostics cannot be collected', async () => {

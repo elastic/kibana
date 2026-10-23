@@ -255,8 +255,6 @@ export const createSaveAutomationTool = ({
         getWorkflowsManagement,
       });
 
-      // The save stores an invalid definition rather than rejecting it, so an invalid result is a
-      // failed save from the caller's point of view: report it as an error with the diagnostics.
       if (result.valid === false) {
         const details = result.validationErrors?.length
           ? ` ${result.validationErrors.join('; ')}`
