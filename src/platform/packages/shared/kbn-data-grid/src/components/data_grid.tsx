@@ -54,6 +54,13 @@ const toInternalColumn = <TRow,>({
   isControl: true,
 });
 
+const getRowHeightMode = (lineCount: number | undefined): 'auto' | 'single' | 'lines' => {
+  if (lineCount === undefined) {
+    return 'auto';
+  }
+  return lineCount === 1 ? 'single' : 'lines';
+};
+
 /**
  * Generic, virtualized data grid. It knows nothing about the shape of the rows: columns describe how
  * to render a row. Memoize `columns`, a new array rebuilds the column model.
@@ -484,7 +491,7 @@ export const DataGrid = <TRow,>({
       data-row-hover={rowHover}
       data-header={header}
       data-footer={footer}
-      data-row-height={lineCount === undefined ? 'auto' : 'lines'}
+      data-row-height={getRowHeightMode(lineCount)}
       css={styles.scrollContainer}
       style={containerStyle}
     >

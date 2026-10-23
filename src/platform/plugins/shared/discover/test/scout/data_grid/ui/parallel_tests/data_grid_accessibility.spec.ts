@@ -24,7 +24,11 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
 const SORT_POPOVER_TEST_SUBJ = '[data-test-subj="dataGridColumnSortingPopover"]';
-const DISPLAY_POPOVER_TEST_SUBJ = '[data-test-subj="dataGridDisplaySelectorPopover"]';
+// The open panel of the display settings, which EuiDataGrid and `@kbn/data-grid` both render.
+const DISPLAY_POPOVER_SELECTOR = '.euiDataGrid__displayPopoverPanel[data-popover-open]';
+// Scanned instead of the panel, like the test subject of EuiDataGrid's popover, which is on its trigger:
+// the row height inputs of the panel have no label yet, in both grids.
+const DISPLAY_POPOVER_TRIGGER_SELECTOR = '[data-test-subj="dataGridDisplaySelectorButton"]';
 
 const COLUMN = 'extension';
 
@@ -83,9 +87,11 @@ spaceTest.describe('Discover data grid - accessibility', { tag: '@local-stateful
         await page.keyboard.press('Escape');
         await dataGrid.openGridDisplaySettings();
         // The helper gates on the trigger's `aria-expanded`, not on the panel.
-        await expect(page.locator(DISPLAY_POPOVER_TEST_SUBJ)).toBeVisible();
+        await expect(page.locator(DISPLAY_POPOVER_SELECTOR)).toBeVisible();
 
-        const { violations } = await page.checkA11y({ include: [DISPLAY_POPOVER_TEST_SUBJ] });
+        const { violations } = await page.checkA11y({
+          include: [DISPLAY_POPOVER_TRIGGER_SELECTOR],
+        });
         expect(violations).toStrictEqual([]);
       });
     }

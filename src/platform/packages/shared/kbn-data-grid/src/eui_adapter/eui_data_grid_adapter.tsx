@@ -346,7 +346,9 @@ const fullScreenStyles = ({ euiTheme }: ReturnType<typeof useEuiTheme>) =>
   });
 
 const rootStyles = css({ display: 'flex', flexDirection: 'column', blockSize: '100%' });
-const gridAreaStyles = css({ flex: '1 1 0', minBlockSize: 0 });
+// Fills the height it is given, like EuiDataGrid, and grows with the rows where it is given none (e.g.
+// in an accordion): a basis of 0 would leave no room for the rows to render in.
+const gridAreaStyles = css({ flex: '1 1 auto', minBlockSize: 0 });
 
 /**
  * Renders the props of an `EuiDataGrid` with the `DataGrid` and the toolbar of this package, so a

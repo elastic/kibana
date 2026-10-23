@@ -38,7 +38,7 @@ spaceTest.describe(
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
         await expect(page.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
-        await expect(page.testSubj.locator('dataGridHeader')).toBeVisible();
+        await expect(pageObjects.dataGrid.getColumnTitleLabels()).not.toHaveCount(0);
       }
     );
   }

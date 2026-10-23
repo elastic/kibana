@@ -16,14 +16,6 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
 import { testData } from '../fixtures';
 
-// Mirrors the FTR `dataGrid.getHeaderFields`: only the data-column titles live in
-// `.euiDataGridHeaderCell__content`, so this excludes control columns (select,
-// actions) and their screen-reader-only labels.
-const getColumnTitles = async (page: ScoutPage): Promise<string[]> => {
-  const titles = await page.locator('.euiDataGridHeaderCell__content').allInnerTexts();
-  return titles.map((title) => title.trim());
-};
-
 /**
  * Mirrors the FTR `isVisible` helper: returns whether the element identified by
  * `dataTestSubj` is the top-most element at its own center point. Full-screen
@@ -76,17 +68,20 @@ spaceTest.describe('Discover data grid', { tag: '@local-stateful-classic' }, () 
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('can add fields to the table', async ({ page }) => {
+  spaceTest('can add fields to the table', async ({ page, pageObjects }) => {
+    // Mirrors the FTR `dataGrid.getHeaderFields`: the titles of the data columns, without the
+    // control columns (select, actions) and their screen-reader-only labels.
+    const getColumnTitles = () => pageObjects.dataGrid.getColumnTitles();
     // The default view shows the `@timestamp` and `Summary` (`_source`) columns.
     // Adding a field replaces the `Summary` column, and removing all added fields
     // restores it.
-    await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', 'Summary']);
+    await expect.poll(() => getColumnTitles()).toStrictEqual(['@timestamp', 'Summary']);
 
     await toggleColumnFromSidebar(page, 'bytes');
-    await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', 'bytes']);
+    await expect.poll(() => getColumnTitles()).toStrictEqual(['@timestamp', 'bytes']);
 
     await toggleColumnFromSidebar(page, 'agent');
-    await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', 'bytes', 'agent']);
+    await expect.poll(() => getColumnTitles()).toStrictEqual(['@timestamp', 'bytes', 'agent']);
 
     const { violations } = await page.checkA11y({
       include: ['[data-test-subj="discoverDocTable"]'],
@@ -94,10 +89,10 @@ spaceTest.describe('Discover data grid', { tag: '@local-stateful-classic' }, () 
     expect(violations).toStrictEqual([]);
 
     await toggleColumnFromSidebar(page, 'bytes');
-    await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', 'agent']);
+    await expect.poll(() => getColumnTitles()).toStrictEqual(['@timestamp', 'agent']);
 
     await toggleColumnFromSidebar(page, 'agent');
-    await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', 'Summary']);
+    await expect.poll(() => getColumnTitles()).toStrictEqual(['@timestamp', 'Summary']);
   });
 
   spaceTest(

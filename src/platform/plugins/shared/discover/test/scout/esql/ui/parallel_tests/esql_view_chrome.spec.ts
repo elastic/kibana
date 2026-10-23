@@ -54,9 +54,9 @@ spaceTest.describe(
       // toggle is rendered as extra content inside the `select` control column, so
       // it has no column id of its own.
       await expect(
-        page.locator(
-          '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
-        )
+        pageObjects.dataGrid
+          .getRowByVisibleIndex(0)
+          .locator('[data-test-subj="docTableExpandToggleColumn"]')
       ).toBeVisible();
       // Alerts and Share stay available in ES|QL mode. Opening the overflow can only
       // add visibility, so this holds whether an item sits there or at the top level.

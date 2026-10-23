@@ -125,7 +125,7 @@ export const componentStyles = {
         backgroundColor: euiTheme.components.dataGridRowStripesBackgroundStriped,
       },
 
-      // Rows show a number of lines of text, or grow with their content.
+      // Rows show a number of lines of text, a single line, or grow with their content.
       [`&[data-row-height="lines"] .${DATA_GRID_CELL_CONTENT_CLASS}`]: {
         display: '-webkit-box',
         WebkitBoxOrient: 'vertical',
@@ -137,6 +137,13 @@ export const componentStyles = {
         lineHeight: 'var(--kbnDataGridLineHeight, inherit)',
         // Like EuiDataGrid: text wraps (and keeps its line breaks) instead of being cut off.
         whiteSpace: 'pre-wrap',
+      },
+      // Like EuiDataGrid, a row of a single line keeps its text on that line: line breaks collapse and
+      // what does not fit ends with an ellipsis.
+      [`&[data-row-height="single"] .${DATA_GRID_CELL_CONTENT_CLASS}`]: {
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
       },
 
       [`.${DATA_GRID_REVEAL_ON_ROW_HOVER_CLASS}`]: {

@@ -648,7 +648,7 @@ describe('EuiDataGridAdapter', () => {
 
     it('shows a single line per row without a default row height', () => {
       render(<EuiDataGridAdapter {...getProps()} />);
-      expect(screen.getByTestId('adapterGrid')).toHaveAttribute('data-row-height', 'lines');
+      expect(screen.getByTestId('adapterGrid')).toHaveAttribute('data-row-height', 'single');
       expect(
         screen.getByTestId('adapterGrid').style.getPropertyValue('--kbnDataGridRowLines')
       ).toBe('1');

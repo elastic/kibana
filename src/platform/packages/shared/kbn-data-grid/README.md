@@ -50,7 +50,7 @@ visible cells re-render when it changes.
 | `gridStyle` | `{ cellPadding, fontSize, border, stripes, rowHover, header, footer }`, like `EuiDataGrid`. Defaults to compact text, horizontal borders, stripes and a hover highlight. |
 | `renderFooterCell({ columnId, colIndex, isControl })` | Renders a footer row below the data, e.g. a summary of each column. It stays at the bottom while the rows scroll and can be reached with the arrow keys. Without it there is no footer. |
 | `onRenderComplete` | Called once the grid rendered its rows at their final width, and again when the rows or columns change, e.g. to tell a report or a screenshot that the content is ready. |
-| `rowHeight`, `lineHeight` | `'auto'`, or `{ lineCount }` lines of text per row, and the CSS line height of the text. |
+| `rowHeight`, `lineHeight` | `'auto'`, or `{ lineCount }` lines of text per row, and the CSS line height of the text. Like `EuiDataGrid`, a single line (`{ lineCount: 1 }`) does not wrap: line breaks collapse and the text ends with an ellipsis. |
 | `pinnedRowIds` | Rows kept in a sticky section below the header, in `rows` order. |
 | `estimatedRowHeight`, `overscan` | Sizing of the scrollbar before rows are measured, and rows rendered beyond the visible ones. |
 | `columnWidths`, `onColumnResize({ columnId, width })` | Column widths by id. When `columnWidths` is set the grid is controlled: a resize only sticks if you update it in `onColumnResize`, which is called when the drag ends, with `width: undefined` when a column is reset. Without it the grid keeps the widths itself. |

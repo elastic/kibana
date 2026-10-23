@@ -754,6 +754,20 @@ describe('DataGrid', () => {
     });
   });
 
+  it('keeps the text of a single-line row on one line, unlike rows of several lines', () => {
+    const { rerender } = render(<DataGrid {...defaultProps} rowHeight={{ lineCount: 1 }} />);
+    expect(screen.getByTestId('testGrid')).toHaveAttribute('data-row-height', 'single');
+    expect(getCell('valueA').querySelector('.kbnDataGrid__cellContent')).toHaveStyle({
+      whiteSpace: 'nowrap',
+    });
+
+    rerender(<DataGrid {...defaultProps} rowHeight={{ lineCount: 2 }} />);
+    expect(screen.getByTestId('testGrid')).toHaveAttribute('data-row-height', 'lines');
+    expect(getCell('valueA').querySelector('.kbnDataGrid__cellContent')).toHaveStyle({
+      whiteSpace: 'pre-wrap',
+    });
+  });
+
   describe('custom cell popover', () => {
     // Like a consumer would, changing the panel from an effect.
     const CustomPopover = ({

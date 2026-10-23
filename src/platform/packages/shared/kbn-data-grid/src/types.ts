@@ -236,7 +236,10 @@ export interface DataGridStyle {
   footer?: 'shade' | 'overline' | 'striped';
 }
 
-/** Rows grow to fit their content (`'auto'`), or show up to `lineCount` lines of text. */
+/**
+ * Rows grow to fit their content (`'auto'`), or show up to `lineCount` lines of text. A single line
+ * does not wrap, like in EuiDataGrid: line breaks collapse and the text ends with an ellipsis.
+ */
 export type DataGridRowHeight = 'auto' | { lineCount: number };
 
 export interface DataGridProps<TRow> {
