@@ -64,7 +64,6 @@ const getChartSnapshot = async (page: ScoutPage) => ({
   tsvbTopN: await getTexts(page.testSubj.locator('tsvbTopNValue')),
   tsvbMarkdown: await getTexts(page.testSubj.locator('tsvbMarkdown')),
   timelion: await page.testSubj.locator('flotLegendLabel').count(),
-  vega: await getTexts(page.locator('.vgaVis__view text')),
 });
 
 type ChartSnapshot = Awaited<ReturnType<typeof getChartSnapshot>>;
