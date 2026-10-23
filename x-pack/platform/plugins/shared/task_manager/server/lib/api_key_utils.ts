@@ -7,7 +7,7 @@
 
 import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import { isUiamCredential } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
 import type { TaskInstance, TaskUserScope } from '../task';
 import type { GrantApiKeysOpts } from '../api_key_strategy/api_key_strategy';
@@ -100,8 +100,17 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
   return user?.authentication_type === 'api_key';
 };
 
+/**
+ * Whether the request's `Authorization` header uses the `ApiKey` scheme (an Elasticsearch or UIAM
+ * API key). Fake requests have no authenticated user to ask, so the scheme is the only signal:
+ * a fake request can also carry a bearer token or basic credentials, which Elasticsearch can
+ * grant an API key from but not clone.
+ */
+export const hasApiKeyAuthorizationScheme = (request: KibanaRequest): boolean =>
+  HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'apikey';
+
 export const hasApiKey = (user: AuthenticatedUser | null, request: KibanaRequest) => {
-  return request.isFakeRequest || (user != null && isRequestApiKeyType(user));
+  return isRequestApiKeyType(user) || hasApiKeyAuthorizationScheme(request);
 };
 
 export const requestHasApiKey = (security: SecurityServiceStart, request: KibanaRequest) => {
@@ -129,15 +138,18 @@ export const getApiKeyFromRequest = (request: KibanaRequest): RequestApiKeyCrede
   return null;
 };
 
+/**
+ * A request's API key is cloned when the caller asks for it, or when the request is a fake one:
+ * the key on a fake request is typically owned by another task and invalidated with it, so it
+ * must not be reused as-is. A request without an API key is never cloned; it is granted from.
+ */
 export const shouldCloneApiKeyFromRequest = (
   security: SecurityServiceStart,
   request: KibanaRequest,
   options?: GrantApiKeysOpts,
   user: AuthenticatedUser | null = security.authc.getCurrentUser(request)
 ) => {
-  const requestCarriesApiKey = (user && isRequestApiKeyType(user)) || request.isFakeRequest;
-
-  return requestCarriesApiKey && (options?.cloneApiKey === true || request.isFakeRequest);
+  return hasApiKey(user, request) && (options?.cloneApiKey === true || request.isFakeRequest);
 };
 
 const grantApiKeysForTaskTypes = async ({
@@ -221,7 +233,8 @@ export const createApiKey = async (
     });
   }
 
-  // The user passed in their own API key, so reuse it directly (fake requests always clone above).
+  // The user passed in their own API key, so reuse it directly (a fake request carrying an API
+  // key always clones above).
   if (apiKeyCreatedByUser) {
     const apiKeyCreateResult = getApiKeyFromRequest(request);
 
@@ -249,8 +262,8 @@ export const createApiKey = async (
 
     return apiKeyByTaskIdMap;
   }
-  // If the user did not pass in their own API key, we need to create 1 key per task
-  // type (due to naming requirements).
+  // The request carries no API key (a session or basic credential, on a real or a fake request),
+  // so grant one key per task type (due to naming requirements) from that credential.
   return grantApiKeysForTaskTypes({
     taskInstances,
     user,
