@@ -162,14 +162,14 @@ async function _fetchFindLatestPackage(
         `Failed to fetch latest version of ${packageName} from registry: ${error.message}`
       );
 
-      if (throwOnError) {
-        throw error;
-      }
-
       // Fall back to the bundled version of the package if it exists
       if (bundledPackage) {
         logger.debug(`_fetchFindLatestPackage - Fall back on bundled package of ${packageName}`);
         return bundledPackage;
+      }
+
+      if (throwOnError) {
+        throw error;
       }
 
       // Otherwise, return null and allow callers to determine whether they'll consider this an error or not
@@ -206,6 +206,9 @@ export async function fetchFindLatestPackageOrUndefined(
     return latestPackage;
   } catch (error) {
     logger.warn(`Error fetching latest package for ${packageName}: ${error.message}`);
+    if (options?.throwOnError) {
+      throw error;
+    }
     return undefined;
   }
 }

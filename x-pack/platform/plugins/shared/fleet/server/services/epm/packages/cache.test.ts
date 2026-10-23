@@ -10,9 +10,11 @@ import Handlebars from '@kbn/handlebars';
 import {
   getPackageAssetsMapCache,
   getPackageInfoCache,
+  getPackageInfoCacheError,
   runWithCache,
   setPackageAssetsMapCache,
   setPackageInfoCache,
+  setPackageInfoCacheError,
   setHandlebarsCompiledTemplateCache,
   getHandlebarsCompiledTemplateCache,
 } from './cache';
@@ -32,6 +34,12 @@ describe('EPM CacheSession', () => {
       expect(cache).toBeUndefined();
     });
 
+    it('should not cache a failed package info lookup', () => {
+      const error = new Error('not found');
+      setPackageInfoCacheError(PKG_NAME, PKG_VERSION, error);
+      expect(getPackageInfoCacheError(PKG_NAME, PKG_VERSION)).toBeUndefined();
+    });
+
     it('should not cache assetsMap', () => {
       setPackageAssetsMapCache(PKG_NAME, PKG_VERSION, new Map());
       const cache = getPackageAssetsMapCache(PKG_NAME, PKG_VERSION);
@@ -47,6 +55,34 @@ describe('EPM CacheSession', () => {
   });
 
   describe('in of a cache session', () => {
+    it('should cache a failed package info lookup for the session only', async () => {
+      const error = new Error('not found');
+
+      await runWithCache(async () => {
+        setPackageInfoCacheError(PKG_NAME, PKG_VERSION, error);
+        expect(getPackageInfoCache(PKG_NAME, PKG_VERSION)).toBeUndefined();
+        expect(getPackageInfoCacheError(PKG_NAME, PKG_VERSION)).toBe(error);
+      });
+
+      expect(getPackageInfoCacheError(PKG_NAME, PKG_VERSION)).toBeUndefined();
+    });
+
+    it('should reuse the outer cache when runWithCache is nested', async () => {
+      await runWithCache(async () => {
+        setPackageInfoCache(PKG_NAME, PKG_VERSION, { name: 'outer' } as any);
+
+        await runWithCache(async () => {
+          expect(getPackageInfoCache(PKG_NAME, PKG_VERSION)).toEqual({ name: 'outer' });
+          setPackageInfoCache('other', PKG_VERSION, { name: 'inner' } as any);
+        });
+
+        expect(getPackageInfoCache('other', PKG_VERSION)).toEqual({ name: 'inner' });
+      });
+
+      expect(getPackageInfoCache(PKG_NAME, PKG_VERSION)).toBeUndefined();
+      expect(getPackageInfoCache('other', PKG_VERSION)).toBeUndefined();
+    });
+
     it('should cache package info', async () => {
       function setCache() {
         setPackageInfoCache(PKG_NAME, PKG_VERSION, {
