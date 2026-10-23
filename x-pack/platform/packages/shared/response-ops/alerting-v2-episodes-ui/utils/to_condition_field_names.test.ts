@@ -33,6 +33,18 @@ describe('toConditionFieldNames', () => {
     ).toEqual(['kibana.alert.status']);
   });
 
+  it('excludes leaves of a nested object', () => {
+    expect(
+      toConditionFieldNames([
+        {
+          ...field('kibana.alert.rule.threshold.value'),
+          subType: { nested: { path: 'threshold' } },
+        },
+        field('kibana.alert.status'),
+      ])
+    ).toEqual(['kibana.alert.status']);
+  });
+
   it('dedupes repeated names', () => {
     expect(toConditionFieldNames([field('host.name'), field('host.name')])).toEqual(['host.name']);
   });
