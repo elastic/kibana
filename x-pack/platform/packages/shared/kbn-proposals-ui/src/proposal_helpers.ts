@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { isTodoProposal, PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
 import type { ApprovalProposal, ApprovalDecision } from './types';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
@@ -61,7 +62,14 @@ export const getProposalCaptionParts = (
   const category = proposal.action?.category ?? proposal.category;
   const isReversible = proposal.action?.reversible;
   const parts: Array<ProposalCaptionPart | undefined> = [
-    category === undefined ? undefined : { text: toSentenceCase(category) },
+    category === undefined
+      ? undefined
+      : {
+          text:
+            category === PROPOSAL_CATEGORY_TODO
+              ? APPROVAL_MODAL_TRANSLATIONS.todoCategory
+              : toSentenceCase(category),
+        },
     isReversible === undefined
       ? undefined
       : isReversible
@@ -160,7 +168,8 @@ const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, '
     return 'applying';
   }
   if (proposal.status === 'no_action') {
-    return 'no_action';
+    // A to-do's approval is the analyst saying they carried it out, not consent to run nothing.
+    return isTodoProposal(proposal) ? 'marked_applied' : 'no_action';
   }
   return 'applied';
 };

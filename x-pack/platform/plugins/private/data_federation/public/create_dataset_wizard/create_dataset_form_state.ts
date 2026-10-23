@@ -130,6 +130,8 @@ export interface CreateDatasetFormValues {
     formatWasAutoDetected: boolean;
     additionalCommonSettingsIsOpen: boolean;
     additionalAdvancedSettingsIsOpen: boolean;
+    /** Data sources connected from within this wizard session. */
+    createdDataSourceNames: string[];
     /**
      * Passthrough-only dataset settings not managed by the wizard UI.
      * Used to preserve API-supported settings on edit, and included in request output.
