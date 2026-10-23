@@ -1,0 +1,275 @@
+{
+  "operations": {
+    "addIamPolicyBinding": [
+      {
+        "method": "post",
+        "path": "/v1/organizations/{organizationsId}:getIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/organizations/{organizationsId}:setIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{resource}:getIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{resource}:setIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v2/folders/{foldersId}:getIamPolicy",
+        "source": "cloudresourcemanagerV2"
+      },
+      {
+        "method": "post",
+        "path": "/v2/folders/{foldersId}:setIamPolicy",
+        "source": "cloudresourcemanagerV2"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:getIamPolicy",
+        "source": "iamV1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:setIamPolicy",
+        "source": "iamV1"
+      }
+    ],
+    "createServiceAccount": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts",
+        "source": "iamV1"
+      }
+    ],
+    "createServiceAccountKey": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}/keys",
+        "source": "iamV1"
+      }
+    ],
+    "deleteServiceAccount": [
+      {
+        "method": "delete",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}",
+        "source": "iamV1"
+      }
+    ],
+    "deleteServiceAccountKey": [
+      {
+        "method": "delete",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}/keys/{keysId}",
+        "source": "iamV1"
+      }
+    ],
+    "disableServiceAccount": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:disable",
+        "source": "iamV1"
+      }
+    ],
+    "disableServiceAccountKey": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}/keys/{keysId}:disable",
+        "source": "iamV1"
+      }
+    ],
+    "enableServiceAccount": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:enable",
+        "source": "iamV1"
+      }
+    ],
+    "enableServiceAccountKey": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}/keys/{keysId}:enable",
+        "source": "iamV1"
+      }
+    ],
+    "getIamPolicy": [
+      {
+        "method": "post",
+        "path": "/v1/organizations/{organizationsId}:getIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{resource}:getIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v2/folders/{foldersId}:getIamPolicy",
+        "source": "cloudresourcemanagerV2"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:getIamPolicy",
+        "source": "iamV1"
+      }
+    ],
+    "getRole": [
+      {
+        "method": "get",
+        "path": "/v1/roles/{rolesId}",
+        "source": "iamV1"
+      }
+    ],
+    "getServiceAccount": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}",
+        "source": "iamV1"
+      }
+    ],
+    "listServiceAccountKeys": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}/keys",
+        "source": "iamV1"
+      }
+    ],
+    "listServiceAccounts": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "accounts",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v1/projects/{projectsId}/serviceAccounts",
+        "source": "iamV1"
+      }
+    ],
+    "queryGrantableRoles": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "in": "body",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "roles",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v1/roles:queryGrantableRoles",
+        "source": "iamV1"
+      }
+    ],
+    "removeIamPolicyBinding": [
+      {
+        "method": "post",
+        "path": "/v1/organizations/{organizationsId}:getIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{resource}:getIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v2/folders/{foldersId}:getIamPolicy",
+        "source": "cloudresourcemanagerV2"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:getIamPolicy",
+        "source": "iamV1"
+      }
+    ],
+    "setIamPolicy": [
+      {
+        "method": "post",
+        "path": "/v1/organizations/{organizationsId}:setIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{resource}:setIamPolicy",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v2/folders/{foldersId}:setIamPolicy",
+        "source": "cloudresourcemanagerV2"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:setIamPolicy",
+        "source": "iamV1"
+      }
+    ],
+    "testIamPermissions": [
+      {
+        "method": "post",
+        "path": "/v1/organizations/{organizationsId}:testIamPermissions",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{resource}:testIamPermissions",
+        "source": "cloudresourcemanagerV1"
+      },
+      {
+        "method": "post",
+        "path": "/v2/folders/{foldersId}:testIamPermissions",
+        "source": "cloudresourcemanagerV2"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:testIamPermissions",
+        "source": "iamV1"
+      }
+    ],
+    "undeleteServiceAccount": [
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:undelete",
+        "source": "iamV1"
+      }
+    ]
+  },
+  "sources": {
+    "cloudresourcemanagerV1": {
+      "apiVersion": "v1",
+      "fetchedAt": "2026-10-07T20:20:15.436Z",
+      "format": "discovery",
+      "url": "https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v1"
+    },
+    "cloudresourcemanagerV2": {
+      "apiVersion": "v2",
+      "fetchedAt": "2026-10-07T20:20:15.436Z",
+      "format": "discovery",
+      "url": "https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v2"
+    },
+    "iamV1": {
+      "apiVersion": "v1",
+      "fetchedAt": "2026-10-07T20:20:15.435Z",
+      "format": "discovery",
+      "url": "https://iam.googleapis.com/$discovery/rest?version=v1"
+    }
+  }
+}

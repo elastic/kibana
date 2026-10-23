@@ -1,0 +1,16 @@
+{
+  "invoke": {
+    "responses": [
+      {
+        "source": "runV2",
+        "method": "GET",
+        "path": "/v2/projects/{projectsId}/locations/{locationsId}/services/{servicesId}",
+        "status": 200,
+        "body": {
+          "name": "projects/my-project/locations/us-central1/services/hello-world",
+          "uri": "https://hello-world-abc123xyz-uc.a.run.app"
+        }
+      }
+    ]
+  }
+}

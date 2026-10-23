@@ -68,6 +68,12 @@ const idSchema = (description: string) =>
     .regex(/^[A-Za-z0-9_-]+$/, 'IDs contain only letters, numbers, hyphens, and underscores')
     .describe(description);
 
+/** Message and task IDs, which the Sublime API types as UUIDs. */
+const uuidSchema = (description: string) => z.string().max(36).uuid().describe(description);
+
+const isoDateSchema = (description: string) =>
+  z.string().max(64).datetime({ offset: true }).optional().describe(description);
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -130,18 +136,12 @@ export const SearchMessageGroupsInputSchema = lazySchema(() =>
         .enum(FLAGGED_RULE_SEVERITIES)
         .optional()
         .describe('Only return message groups flagged by a rule of this severity'),
-      createdAtGte: z
-        .string()
-        .max(64)
-        .optional()
-        .describe(
-          `Inclusive start of the creation-time window; defaults to 30 days ago when omitted (the API requires a start time). ${ISO_DATE_DESCRIPTION}`
-        ),
-      createdAtLt: z
-        .string()
-        .max(64)
-        .optional()
-        .describe(`Exclusive end of the creation-time window. ${ISO_DATE_DESCRIPTION}`),
+      createdAtGte: isoDateSchema(
+        `Inclusive start of the creation-time window; defaults to 30 days ago when omitted (the API requires a start time). ${ISO_DATE_DESCRIPTION}`
+      ),
+      createdAtLt: isoDateSchema(
+        `Exclusive end of the creation-time window. ${ISO_DATE_DESCRIPTION}`
+      ),
       limit: z
         .number()
         .int()
@@ -178,7 +178,9 @@ export type GetMessageGroupInput = z.infer<typeof GetMessageGroupInputSchema>;
 
 export const GetMessageInputSchema = lazySchema(() =>
   z.object({
-    messageId: idSchema('ID of the message, as returned by searchMessageGroups or getMessageGroup'),
+    messageId: uuidSchema(
+      'ID of the message (a UUID), as returned by searchMessageGroups or getMessageGroup'
+    ),
   })
 );
 export type GetMessageInput = z.infer<typeof GetMessageInputSchema>;
@@ -238,8 +240,8 @@ export type MessageGroupActionInput = z.infer<typeof MessageGroupActionInputSche
 
 export const GetTaskInputSchema = lazySchema(() =>
   z.object({
-    taskId: idSchema(
-      'Task ID returned by quarantineMessageGroups, trashMessageGroups, or restoreMessageGroups'
+    taskId: uuidSchema(
+      'Task ID (a UUID) returned by quarantineMessageGroups, trashMessageGroups, or restoreMessageGroups'
     ),
   })
 );

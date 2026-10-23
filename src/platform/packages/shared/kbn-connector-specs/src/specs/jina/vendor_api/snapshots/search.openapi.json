@@ -1,0 +1,12 @@
+{
+  "info": {
+    "title": "Jina Reader API"
+  },
+  "openapi": "3.0.0",
+  "paths": {},
+  "servers": [
+    {
+      "url": "https://s.jina.ai/"
+    }
+  ]
+}

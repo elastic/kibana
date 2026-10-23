@@ -3,7 +3,7 @@ name: create-connector
 description: Creates a new connector spec for Kibana. Use when asked to create (or add) a new connector, integration, or data source.
 allowed-tools: WebFetch, WebSearch, Read, Grep, Glob, Write, Edit, Bash, Skill
 context: fork
-argument-hint: [3rd-party-service-name]
+argument-hint: [3rd-party-service-name] [actions to build]
 ---
 
 # Create a Connector
@@ -25,10 +25,45 @@ Check if $0 has an official hosted MCP server. If so, creating an MCP-native con
 
 Follow only the steps for the chosen path. Do not mix them.
 
+### Choose the actions
+
+Decide which vendor operations become actions before researching any one of them. If the invocation
+lists actions after the service name (`build-connector` passes the list the user confirmed), build those.
+Otherwise propose a set yourself. For a custom connector, list what the spec offers after scaffolding with
+`node scripts/connector_vendor_api --inspect --connector <id> --source v1=<url> --grep <area>`; for an
+MCP connector, the server's tools are the candidates (`listTools` and `callTool` reach the rest).
+
+Choose from the questions a user is likely to ask an agent about $0, not from the breadth of the API:
+
+- at least one discovery action (the current user, the projects, spaces or accounts it can see), so the
+  IDs other actions take can be found;
+- for every search or list, a way to open a result; for every write, a way to read the state back;
+- one action with a `type` enum where the vendor has the same operation for several entity types;
+- writes only where a use case needs them; destructive and admin operations left out, or `isTool: false`
+  with the reason;
+- no deprecated operations (the listing marks them).
+
+These are the "Tool Design" checks in `review-connector`, applied before the code exists. A given list
+is only extended where it fails them, and each addition is reported as such.
+
+Record the result in the PR description's `## Actions` section (see
+[reference/pr-validation-table.md](reference/pr-validation-table.md)), and start your report with it,
+so the user can change the set before the connector is tested.
+
 ### Research the vendor API before writing schemas or handlers
 
-For a custom (non-MCP) connector, do this before Step 2. For each action you plan to implement, find the
-vendor's real API docs and verify — don't assume: update semantics (partial vs. full-replace, including
+For a custom (non-MCP) connector, do this before Step 2. Start from the vendor's own machine-readable
+spec: find its URL, then list and describe the operations your actions will call with
+`node scripts/connector_vendor_api --inspect --connector <id> --source v1=<url> [--grep <text> | --operation '<METHOD> <path>']`,
+and write each action's method, parameter locations and zod bounds from that description. The first
+inspection adds the source to the connector's `vendor_api/manifest.json`; leave out `--source` after it. See "Start
+from the vendor's spec" in
+[reference/custom-connector-setup.md](reference/custom-connector-setup.md). The connector is recorded
+and checked against the same spec in Step 4, so code written from it avoids most of what recording
+would report.
+
+Then, for each action, find the vendor's real API docs and verify what the spec doesn't settle — don't
+assume: update semantics (partial vs. full-replace, including
 nested objects sent whole), the HTTP method and body shape of that exact route, how array query params
 are encoded, whether optional modifier params (`scope`, filters, flags) on `POST`/`PATCH` actions belong
 in the query string or the JSON body, the auth scope or cloud role (and the level it is granted at) each
@@ -212,19 +247,93 @@ them with unit tests up front — each one only if your connector has the thing 
 A connector with none of these (an MCP-only spec, or one whose actions are plain `GET` reads) owes none
 of them. Write the tests its own surface needs instead.
 
+### Record the vendor API contract
+
+Every connector has a `vendor_api/` folder next to its spec, or an entry in `vendor_api_exemptions.json`;
+the contract test fails otherwise. The folder records the vendor operations each action calls and a cut-down
+snapshot of the vendor's spec, so the connector is checked offline against it on every CI run. See
+"Vendor API artifacts" in the package README for the file formats.
+
+1. **Record.** The sources you inspected in Step 1 are already in `manifest.json`, so run:
+
+   ```bash
+   node scripts/connector_vendor_api --connector {connector_name}
+   ```
+
+   It records against the same documents you inspected, kept since then in `data/connector_vendor_api`.
+   A spec you didn't inspect is added with `--source name=url`, one per spec; YAML, JSON, Swagger 2.0
+   and Google Discovery documents all work.
+   The script runs every action against a mock built from the spec, under each auth type, with inputs
+   generated from its schema: without and with optional properties, at every upper bound, and with each
+   enum value. After changing the connector, rerun it without `--source` to record offline against the
+   committed snapshots.
+2. **Fix every problem it reports.** Fix the connector first; correct the spec only with evidence:
+   - *breaks the spec*: the action sent something the vendor rejects. A *String is too long* or
+     *exceeds maximum* error usually means the action's schema is looser than the vendor's; tighten the
+     `.max()` to the vendor's limit. Other errors are wrong field names, types or locations in the
+     handler.
+   - *matches no operation*: the path or method is wrong, or the spec lacks the endpoint. If the vendor's
+     docs document it, add an overlay action (below). If the endpoint is real but documented nowhere
+     machine-readable, list it in `unmatched` in `manifest.json`, with a `reason` that links the docs page
+     or a follow-up issue. Use `{name}` for the variable path segments.
+   - *has scope 'read' but sent …*: the action is `read` but sends a `POST`/`PUT`/`PATCH`/`DELETE`. If
+     the vendor documents that operation as a query (a search sent as `POST`), add it to the action's
+     `queries` in `fixtures.json`; otherwise the scope is wrong.
+   - *no generated input passes the action's schema*: give the action an `input` in `fixtures.json` with
+     the values its refinements need, such as an ID in the vendor's format.
+   - *threw before sending a request under every auth type*: the handler rejects every sampled config or
+     input; add the `input` it needs, or fix the handler.
+   - *looks like it returns a collection, but has no pagination*: declare `pagination` for that
+     operation in `manifest.json`, or `"none"` if it returns everything at once.
+3. **Review the warnings.** For each proposed `pagination` descriptor, check it against the vendor's docs:
+   the parameter that selects the page, the page size parameter, and where the items and the next cursor
+   sit in the response. Correct it in `manifest.json`; the script keeps what is declared. Handler errors
+   on sampled responses are usually harmless, but read them.
+4. **Correct the spec with an overlay, with evidence.** `vendor_api/overlay.yaml` is an
+   [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) applied whenever the spec is loaded.
+   Add an action for:
+   - a limit stated only in the docs prose ("max 100"), found during research: add `maxLength`,
+     `maximum` or `maxItems` to the parameter or property;
+   - a spec defect found while verifying against the real API: a missing parameter, a wrong type, an
+     undocumented request body.
+
+   Every action states its evidence in `description`: the docs URL and what it says, or what the real API
+   did. Without evidence, a reviewer can't tell a correction from a workaround that hides a connector bug.
+
+   ```yaml
+   overlay: 1.0.0
+   info: { title: Example API corrections, version: 1.0.0 }
+   actions:
+     - target: $.paths['/search'].get.parameters[?@.name == 'limit'].schema
+       description: 'https://docs.example.com/search#limit says "at most 100 results per page".'
+       update:
+         maximum: 100
+   ```
+5. **No usable spec?** Add the connector to `vendor_api_exemptions.json` with a reason that names what
+   is missing (no public spec, a database protocol rather than HTTP). New connectors can be exempted in
+   the PR that adds them, and reviewers check the reason. Connectors that already exist can't be added.
+6. **Run the contract test** and commit the whole `vendor_api/` folder:
+
+   ```bash
+   node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts
+   ```
+
 ### Self-review before handing off
 
 First run the deterministic checks, and fix every failure for your connector:
 
 ```bash
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
+node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts
 ```
 
 They check that the docs page exists at the URL derived from the connector id, that it states the
 availability `supportedFeatureIds` allows (and only that), that a page for a connector without workflow
 support does not describe workflow use, that the docs page avoids internal wording ("custom connector", "MCP-native",
 "connector spec"), that the navigation links resolve, that every tool action and input parameter has a
-description, and that every input string and array has a `.max()`. Do not re-check those by hand.
+description, and that every input string and array has a `.max()`. The vendor API contract test checks
+that the connector's `vendor_api/` artifacts are current and that no action sends a request the vendor's
+spec rejects. Do not re-check those by hand.
 
 Then, before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
 

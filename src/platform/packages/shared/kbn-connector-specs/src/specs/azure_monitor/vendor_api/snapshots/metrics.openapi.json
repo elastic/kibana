@@ -1,0 +1,391 @@
+{
+  "components": {
+    "schemas": {
+      "ErrorAdditionalInfo": {
+        "properties": {
+          "info": {
+            "readOnly": true,
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "additionalInfo": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorAdditionalInfo"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "code": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "message": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "target": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "title": "Error Response",
+        "type": "object"
+      },
+      "LocalizableString": {
+        "properties": {
+          "localizedValue": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "MetadataValue": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizableString"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Metric": {
+        "properties": {
+          "displayDescription": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizableString"
+          },
+          "timeseries": {
+            "items": {
+              "$ref": "#/components/schemas/TimeSeriesElement"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "unit",
+          "timeseries"
+        ],
+        "type": "object"
+      },
+      "MetricValue": {
+        "properties": {
+          "average": {
+            "format": "double",
+            "type": "number"
+          },
+          "count": {
+            "format": "double",
+            "type": "number"
+          },
+          "maximum": {
+            "format": "double",
+            "type": "number"
+          },
+          "minimum": {
+            "format": "double",
+            "type": "number"
+          },
+          "timeStamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "total": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "timeStamp"
+        ],
+        "type": "object"
+      },
+      "Response": {
+        "properties": {
+          "cost": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "number"
+          },
+          "interval": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "resourceregion": {
+            "type": "string"
+          },
+          "timespan": {
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/Metric"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "timespan",
+          "value"
+        ],
+        "type": "object"
+      },
+      "TimeSeriesElement": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/MetricValue"
+            },
+            "type": "array"
+          },
+          "metadatavalues": {
+            "items": {
+              "$ref": "#/components/schemas/MetadataValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Unit": {
+        "enum": [
+          "Count",
+          "Bytes",
+          "Seconds",
+          "CountPerSecond",
+          "BytesPerSecond",
+          "Percent",
+          "MilliSeconds",
+          "ByteSeconds",
+          "Unspecified",
+          "Cores",
+          "MilliCores",
+          "NanoCores",
+          "BitsPerSecond"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Azure Monitor Metrics Data API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/{resourceUri}/providers/Microsoft.Insights/metrics": {
+      "get": {
+        "operationId": "Metrics_List",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceUri",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-skip-url-encoding": true
+          },
+          {
+            "in": "query",
+            "name": "timespan",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricnames",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregation",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "top",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderby",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "resultType",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Data",
+                "Metadata"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "metricnamespace",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "AutoAdjustTimegrain",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ValidateDimensions",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rollupby",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

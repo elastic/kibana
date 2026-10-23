@@ -13,13 +13,234 @@ const MAX_SEARCH_LIMIT = 100;
 const DEFAULT_SEARCH_LIMIT = 10;
 const MAX_ID_LENGTH = 200;
 const MAX_IOC_VALUE_LENGTH = 2048;
-// MISP stores attribute values in TEXT columns and types in varchar(100); tags and categories in varchar(255).
+// MISP stores attribute values in TEXT columns and tags in varchar(255).
 const MAX_ATTRIBUTE_VALUE_LENGTH = 65_535;
-const MAX_TYPE_LENGTH = 100;
-const MAX_CATEGORY_LENGTH = 255;
 const MAX_TAG_LENGTH = 255;
 const MAX_INFO_LENGTH = 1024;
 const MAX_DATE_LENGTH = 64;
+const MAX_EVENT_ID_LENGTH = 36;
+// Event ids are numeric (at most 10 digits) or UUIDs, per the MISP OpenAPI spec's EventId and UUID schemas.
+const NUMERIC_EVENT_ID = /^\d{1,10}$/;
+const EVENT_ID_OR_UUID =
+  /^(\d{1,10}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+
+/** Attribute types and categories MISP accepts, from its OpenAPI spec (AttributeType, AttributeCategory). */
+export const MISP_ATTRIBUTE_TYPES = [
+  'md5',
+  'sha1',
+  'sha256',
+  'filename',
+  'pdb',
+  'filename|md5',
+  'filename|sha1',
+  'filename|sha256',
+  'ip-src',
+  'ip-dst',
+  'hostname',
+  'domain',
+  'domain|ip',
+  'email',
+  'email-src',
+  'eppn',
+  'email-dst',
+  'email-subject',
+  'email-attachment',
+  'email-body',
+  'float',
+  'git-commit-id',
+  'url',
+  'http-method',
+  'user-agent',
+  'ja3-fingerprint-md5',
+  'jarm-fingerprint',
+  'favicon-mmh3',
+  'hassh-md5',
+  'hasshserver-md5',
+  'regkey',
+  'regkey|value',
+  'AS',
+  'snort',
+  'suricata',
+  'bro',
+  'zeek',
+  'community-id',
+  'pattern-in-file',
+  'pattern-in-traffic',
+  'pattern-in-memory',
+  'pattern-filename',
+  'pgp-public-key',
+  'pgp-private-key',
+  'yara',
+  'stix2-pattern',
+  'sigma',
+  'gene',
+  'kusto-query',
+  'mime-type',
+  'identity-card-number',
+  'cookie',
+  'vulnerability',
+  'cpe',
+  'weakness',
+  'attachment',
+  'malware-sample',
+  'link',
+  'comment',
+  'text',
+  'hex',
+  'other',
+  'named pipe',
+  'mutex',
+  'process-state',
+  'target-user',
+  'target-email',
+  'target-machine',
+  'target-org',
+  'target-location',
+  'target-external',
+  'btc',
+  'dash',
+  'xmr',
+  'iban',
+  'bic',
+  'bank-account-nr',
+  'aba-rtn',
+  'bin',
+  'cc-number',
+  'prtn',
+  'phone-number',
+  'threat-actor',
+  'campaign-name',
+  'campaign-id',
+  'malware-type',
+  'uri',
+  'authentihash',
+  'vhash',
+  'ssdeep',
+  'imphash',
+  'telfhash',
+  'pehash',
+  'impfuzzy',
+  'sha224',
+  'sha384',
+  'sha512',
+  'sha512/224',
+  'sha512/256',
+  'sha3-224',
+  'sha3-256',
+  'sha3-384',
+  'sha3-512',
+  'tlsh',
+  'cdhash',
+  'filename|authentihash',
+  'filename|vhash',
+  'filename|ssdeep',
+  'filename|imphash',
+  'filename|impfuzzy',
+  'filename|pehash',
+  'filename|sha224',
+  'filename|sha384',
+  'filename|sha512',
+  'filename|sha512/224',
+  'filename|sha512/256',
+  'filename|sha3-224',
+  'filename|sha3-256',
+  'filename|sha3-384',
+  'filename|sha3-512',
+  'filename|tlsh',
+  'windows-scheduled-task',
+  'windows-service-name',
+  'windows-service-displayname',
+  'whois-registrant-email',
+  'whois-registrant-phone',
+  'whois-registrant-name',
+  'whois-registrant-org',
+  'whois-registrar',
+  'whois-creation-date',
+  'x509-fingerprint-sha1',
+  'x509-fingerprint-md5',
+  'x509-fingerprint-sha256',
+  'dns-soa-email',
+  'size-in-bytes',
+  'counter',
+  'datetime',
+  'port',
+  'ip-dst|port',
+  'ip-src|port',
+  'hostname|port',
+  'mac-address',
+  'mac-eui-64',
+  'email-dst-display-name',
+  'email-src-display-name',
+  'email-header',
+  'email-reply-to',
+  'email-x-mailer',
+  'email-mime-boundary',
+  'email-thread-index',
+  'email-message-id',
+  'github-username',
+  'github-repository',
+  'github-organisation',
+  'jabber-id',
+  'twitter-id',
+  'dkim',
+  'dkim-signature',
+  'first-name',
+  'middle-name',
+  'last-name',
+  'full-name',
+  'date-of-birth',
+  'place-of-birth',
+  'gender',
+  'passport-number',
+  'passport-country',
+  'passport-expiration',
+  'redress-number',
+  'nationality',
+  'visa-number',
+  'issue-date-of-the-visa',
+  'primary-residence',
+  'country-of-residence',
+  'special-service-request',
+  'frequent-flyer-number',
+  'travel-details',
+  'payment-details',
+  'place-port-of-original-embarkation',
+  'place-port-of-clearance',
+  'place-port-of-onward-foreign-destination',
+  'passenger-name-record-locator-number',
+  'mobile-application-id',
+  'chrome-extension-id',
+  'edge-extension-id',
+  'cortex',
+  'boolean',
+  'anonymised',
+] as const;
+
+export const MISP_ATTRIBUTE_CATEGORIES = [
+  'Internal reference',
+  'Targeting data',
+  'Antivirus detection',
+  'Payload delivery',
+  'Artifacts dropped',
+  'Payload installation',
+  'Persistence mechanism',
+  'Network activity',
+  'Payload type',
+  'Attribution',
+  'External analysis',
+  'Financial fraud',
+  'Support Tool',
+  'Social network',
+  'Person',
+  'Other',
+] as const;
+
+const eventIdSchema = (description: string) =>
+  z
+    .string()
+    .max(MAX_EVENT_ID_LENGTH)
+    .regex(EVENT_ID_OR_UUID, 'Use a numeric event id or an event UUID.')
+    .describe(description);
 
 export const SearchAttributesInputSchema = lazySchema(() =>
   z.object({
@@ -30,15 +251,11 @@ export const SearchAttributesInputSchema = lazySchema(() =>
       .optional()
       .describe('IOC value to search for.'),
     type: z
-      .string()
-      .min(1)
-      .max(MAX_TYPE_LENGTH)
+      .enum(MISP_ATTRIBUTE_TYPES)
       .optional()
       .describe('MISP attribute type filter (ip-dst, domain, md5, …).'),
     category: z
-      .string()
-      .min(1)
-      .max(MAX_CATEGORY_LENGTH)
+      .enum(MISP_ATTRIBUTE_CATEGORIES)
       .optional()
       .describe('MISP attribute category filter.'),
     tags: z
@@ -48,10 +265,10 @@ export const SearchAttributesInputSchema = lazySchema(() =>
       .describe('Tag names to filter on.'),
     eventId: z
       .string()
-      .min(1)
-      .max(MAX_ID_LENGTH)
+      .max(10)
+      .regex(NUMERIC_EVENT_ID, 'Use a numeric event id.')
       .optional()
-      .describe('Restrict results to a single event id or UUID.'),
+      .describe('Restrict results to a single event, by its numeric id.'),
     limit: z.coerce
       .number()
       .int()
@@ -115,9 +332,7 @@ export const CheckIndicatorInputSchema = lazySchema(() =>
   z.object({
     value: z.string().min(1).max(MAX_IOC_VALUE_LENGTH).describe('IOC value to look up.'),
     type: z
-      .string()
-      .min(1)
-      .max(MAX_TYPE_LENGTH)
+      .enum(MISP_ATTRIBUTE_TYPES)
       .optional()
       .describe('Optional MISP attribute type hint (ip-dst, domain, …).'),
   })
@@ -156,7 +371,7 @@ export type AddSightingInput = z.infer<typeof AddSightingInputSchema>;
 
 export const GetEventInputSchema = lazySchema(() =>
   z.object({
-    eventId: z.string().min(1).max(MAX_ID_LENGTH).describe('Event id or UUID.'),
+    eventId: eventIdSchema('Event id or UUID.'),
   })
 );
 export type GetEventInput = z.infer<typeof GetEventInputSchema>;
@@ -209,21 +424,11 @@ export type CreateEventInput = z.infer<typeof CreateEventInputSchema>;
 
 export const AddAttributeInputSchema = lazySchema(() =>
   z.object({
-    eventId: z
-      .string()
-      .min(1)
-      .max(MAX_ID_LENGTH)
-      .describe('Event id or UUID to attach the attribute to.'),
-    type: z
-      .string()
-      .min(1)
-      .max(MAX_TYPE_LENGTH)
-      .describe('MISP attribute type (ip-dst, domain, md5, …).'),
+    eventId: eventIdSchema('Event id or UUID to attach the attribute to.'),
+    type: z.enum(MISP_ATTRIBUTE_TYPES).describe('MISP attribute type (ip-dst, domain, md5, …).'),
     value: z.string().min(1).max(MAX_ATTRIBUTE_VALUE_LENGTH).describe('Attribute value.'),
     category: z
-      .string()
-      .min(1)
-      .max(MAX_CATEGORY_LENGTH)
+      .enum(MISP_ATTRIBUTE_CATEGORIES)
       .optional()
       .describe(
         'MISP attribute category (e.g. "Network activity", "Payload delivery"). Defaults to the category MISP associates with the attribute type.'
@@ -246,14 +451,14 @@ export type AddAttributeInput = z.infer<typeof AddAttributeInputSchema>;
 
 export const PublishEventInputSchema = lazySchema(() =>
   z.object({
-    eventId: z.string().min(1).max(MAX_ID_LENGTH).describe('Event id or UUID to publish.'),
+    eventId: eventIdSchema('Event id or UUID to publish.'),
   })
 );
 export type PublishEventInput = z.infer<typeof PublishEventInputSchema>;
 
 export const AddTagToEventInputSchema = lazySchema(() =>
   z.object({
-    eventId: z.string().min(1).max(MAX_ID_LENGTH).describe('Event id or UUID.'),
+    eventId: eventIdSchema('Event id or UUID.'),
     tag: z.string().min(1).max(MAX_TAG_LENGTH).describe('Tag name or id to apply.'),
   })
 );

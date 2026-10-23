@@ -1,0 +1,10 @@
+{
+  "runLogQuery": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/"
+      }
+    ]
+  }
+}
