@@ -92,6 +92,13 @@ Follow existing patterns in the target area first; below are common defaults.
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
 - Run `node scripts/i18n_check --fix` to check for and fix errors.
 
+## Documentation
+- This repo publishes two audiences from different folders. `docs/**` is public user documentation at elastic.co/docs: write for users, not maintainers. `dev_docs/**` and `docs-dev/**` are internal developer docs. Do not move content or tone between them.
+- Public docs for 9.x and serverless publish from `main` only. Do not create per-version copies of a page; mark version and deployment differences inline with `applies_to`. Read [cumulative docs](https://www.elastic.co/docs/contribute-docs/how-to/cumulative-docs) and the [`applies_to` quick reference](https://www.elastic.co/docs/contribute-docs/how-to/cumulative-docs/reference) before editing, and follow the [Elastic style guide](https://www.elastic.co/docs/contribute-docs/style-guide).
+- 8.x and earlier docs are AsciiDoc in their version branch (`8.19`, ...) and publish from there. A Markdown change on `main` never reaches 8.x, and 8.x AsciiDoc is not ported to `main`.
+- When opening or updating a PR with a `release_note:feature`, `release_note:enhancement`, `release_note:fix`, `release_note:breaking`, or `release_note:deprecation` label, use the `changelog-entry` skill (`.agents/skills/changelog-entry`) to write the PR title and the `## Release note` section of the PR body. Both are published as-is in the release notes after merge: the title becomes the release-note bullet (`Fix <symptom> in <feature>`, not a dev summary) and the section becomes its description. See [release notes](https://www.elastic.co/docs/extend/kibana/contributing/workflow/how-we-use-github#release-notes). Do not add `docs/changelog/*.yaml` to a PR, and do not edit `docs/changelog/**`, `docs/releases/**`, `docs/release-notes/**`, or `docs/CHANGELOG.asciidoc`; the docs team generates and owns them. Never edit `oas_docs/output/**`; CI regenerates it.
+- Public HTTP APIs (`access: 'public'`) are documented in route code: `summary`, `description`, `options.availability: { stability, since }`, and `meta.description` on every schema field. Tutorial: `docs/extend/tutorials/generating-oas-for-http-apis.md`. Standards: [API docs guidelines](https://www.elastic.co/docs/contribute-docs/api-docs/guidelines), [checklist](https://www.elastic.co/docs/contribute-docs/api-docs/checklist), [lifecycle and availability](https://www.elastic.co/docs/contribute-docs/api-docs/organize-annotate#specify-api-lifecycle-status). Review skill: `.agents/skills/api-docs-review`.
+
 ## CI
 - Use the `bk` CLI when interacting with Buildkite.
 
