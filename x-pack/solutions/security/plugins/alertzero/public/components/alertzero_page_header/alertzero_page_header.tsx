@@ -115,6 +115,12 @@ export interface AlertZeroPageHeaderProps {
   title?: string;
   /** Supporting line under the heading. */
   subtitle?: string;
+  /**
+   * Focus target for pages that swap their content in place (e.g. the onboarding
+   * steps): the heading is made programmatically focusable so a step change can
+   * move focus into the new step and have it announced.
+   */
+  headingRef?: React.Ref<HTMLHeadingElement>;
 }
 /**
  * Page header for AlertZero routes.
@@ -132,6 +138,7 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
   greeting,
   title: titleOverride,
   subtitle,
+  headingRef,
 }) => {
   const { euiTheme } = useEuiTheme();
   const timeZone = useKibanaTimeZone();
@@ -198,7 +205,7 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m" css={{ fontWeight: 500 }}>
-              <h1>
+              <h1 ref={headingRef} tabIndex={headingRef ? -1 : undefined}>
                 <span style={{ color: euiTheme.colors.mediumShade }}>
                   {greeting ?? getAlertZeroGreeting(timeZone)}
                 </span>{' '}

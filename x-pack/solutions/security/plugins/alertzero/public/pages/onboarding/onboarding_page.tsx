@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiCallOut, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -37,6 +37,20 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   } = useKibana<CoreStart>();
   const history = useHistory();
   const [step, setStep] = useState<'intro' | 'workers'>('intro');
+  const introHeadingRef = useRef<HTMLHeadingElement>(null);
+  const workersHeadingRef = useRef<HTMLHeadingElement>(null);
+  // The first render is the page's own mount: focus stays where the browser put
+  // it. Every later step change unmounts the control that activated it, so focus
+  // moves into the new step's heading — announced by screen readers, and the
+  // next Tab continues from inside the wizard instead of the document top.
+  const hasMounted = useRef(false);
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+    (step === 'intro' ? introHeadingRef : workersHeadingRef).current?.focus();
+  }, [step]);
 
   useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
 
@@ -64,6 +78,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
       <OnboardingIntro
         onContinue={() => setStep('workers')}
         continueDisabledReason={canWrite ? undefined : i18n.ONBOARDING_CONTINUE_REQUIRES_WRITE}
+        headingRef={introHeadingRef}
       />
     );
   }
@@ -89,7 +104,11 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           width: 100%;
         `}
       >
-        <AlertZeroPageHeader greeting={i18n.ONBOARDING_GREETING} title={i18n.ONBOARDING_TITLE} />
+        <AlertZeroPageHeader
+          greeting={i18n.ONBOARDING_GREETING}
+          title={i18n.ONBOARDING_TITLE}
+          headingRef={workersHeadingRef}
+        />
         <EuiSpacer size="l" />
         <EuiTitle size="xs">
           <h2>{i18n.ONBOARDING_WATCHES_HEADING}</h2>

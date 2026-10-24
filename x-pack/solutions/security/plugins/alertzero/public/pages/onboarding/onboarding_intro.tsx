@@ -20,9 +20,15 @@ import * as i18n from './translations';
 interface Props {
   onContinue: () => void;
   continueDisabledReason?: string;
+  /** Focus target for the step-change focus effect in `onboarding_page.tsx`. */
+  headingRef?: React.Ref<HTMLHeadingElement>;
 }
 
-export const OnboardingIntro: React.FC<Props> = ({ onContinue, continueDisabledReason }) => {
+export const OnboardingIntro: React.FC<Props> = ({
+  onContinue,
+  continueDisabledReason,
+  headingRef,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -49,6 +55,7 @@ export const OnboardingIntro: React.FC<Props> = ({ onContinue, continueDisabledR
         <AlertZeroPageHeader
           greeting={i18n.ONBOARDING_INTRO_GREETING}
           title={i18n.ONBOARDING_INTRO_HEADING}
+          headingRef={headingRef}
         />
 
         <EuiSpacer size="l" />
