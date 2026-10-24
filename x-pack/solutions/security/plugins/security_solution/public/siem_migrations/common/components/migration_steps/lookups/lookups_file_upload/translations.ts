@@ -16,3 +16,29 @@ export const SKIP_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.skipButtonAriaLabel',
   { defaultMessage: 'Skip this step and continue without uploading all the items' }
 );
+
+export const emptyLookupNameError = (fileName: string): string =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.emptyLookupNameErrorMessage',
+    {
+      defaultMessage: '"{fileName}" cannot be uploaded because its lookup name is empty.',
+      values: { fileName },
+    }
+  );
+
+export const lookupFileNameMismatchError = (fileName?: string): string => {
+  if (fileName == null) {
+    return i18n.translate(
+      'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.lookupFileNameMismatchErrorMessage',
+      { defaultMessage: 'The file name must match one of the lookup names in the list above.' }
+    );
+  }
+  return i18n.translate(
+    'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.lookupFileNameMismatchWithFileNameErrorMessage',
+    {
+      defaultMessage:
+        '{fileName}: The file name must match one of the lookup names in the list above.',
+      values: { fileName },
+    }
+  );
+};
