@@ -19,6 +19,11 @@ import type { CaseError, HTTPError } from '../../common/error';
 import { isCaseError, isHTTPError } from '../../common/error';
 import { getTypedApiErrorAttributes } from '../../common/api_errors';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../../common/utils/attachments';
 
 /**
  * Transforms an error into the correct format for a kibana response.
@@ -90,4 +95,20 @@ export const extractWarningValueFromWarningHeader = (warningHeader: string) => {
   const lastQuote = warningHeader.length - 1;
   const warningValue = warningHeader.substring(firstQuote + 1, lastQuote);
   return warningValue;
+};
+
+/**
+ * Returns the attachment type as sent by the caller. Legacy external reference and persistable
+ * state attachments include their subtype id, for example `persistableState:.lens`.
+ */
+export const getAttachmentRequestType = (attachment: AttachmentRequestV2): string => {
+  if (isCommentRequestTypeExternalReference(attachment)) {
+    return `${attachment.type}:${attachment.externalReferenceAttachmentTypeId}`;
+  }
+
+  if (isCommentRequestTypePersistableState(attachment)) {
+    return `${attachment.type}:${attachment.persistableStateAttachmentTypeId}`;
+  }
+
+  return attachment.type;
 };
