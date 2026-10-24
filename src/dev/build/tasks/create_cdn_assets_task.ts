@@ -119,6 +119,9 @@ export const CreateCdnAssets: Task = {
       resolve(assets, buildSha, 'ui', 'charts')
     );
 
+    // Source maps stay in the distributable.
+    await del('**/*.map', { cwd: assets });
+
     await compressTar({
       source: assets,
       destination: config.resolveFromTarget(`kibana-${buildVersion}-cdn-assets.tar.gz`),

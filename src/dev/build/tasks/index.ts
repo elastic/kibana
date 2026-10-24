@@ -10,6 +10,7 @@
 export * from './bin';
 export * from './build_bundles_task';
 export * from './build_packages_task';
+export * from './bundle_plugin_server';
 export * from './clean_tasks';
 export * from './copy_legacy_source_task';
 export * from './create_archives_sources_task';
@@ -21,6 +22,7 @@ export * from './download_cloud_dependencies';
 export * from './generate_packages_optimized_assets';
 export * from './install_dependencies_task';
 export * from './license_file_task';
+export * from './minify_packages_task';
 export * from './nodejs';
 export * from './notice_file_task';
 export * from './os_packages';

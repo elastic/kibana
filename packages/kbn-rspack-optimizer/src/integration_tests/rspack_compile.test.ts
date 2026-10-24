@@ -221,7 +221,7 @@ describe('rspack compile integration', () => {
       });
 
       expect(config.mode).toBe('production');
-      expect(config.devtool).toBe(false);
+      expect(config.devtool).toBe('hidden-nosources-source-map');
       expect(config.optimization!.minimize).toBe(true);
       expect(config.optimization!.minimizer).toBeDefined();
       expect(config.optimization!.minimizer!.length).toBeGreaterThan(0);

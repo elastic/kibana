@@ -14,7 +14,6 @@ import zlib from 'zlib';
 import { cpus } from 'os';
 import { promisify } from 'util';
 
-import { minify } from '@swc/core';
 import { transform as lightningTransform, browserslistToTargets } from 'lightningcss';
 import browserslist from 'browserslist';
 import { asyncForEachWithLimit } from '@kbn/std';
@@ -24,6 +23,7 @@ import del from 'del';
 
 import type { Task } from '../lib';
 import { write } from '../lib';
+import { minifyFile } from './minify_packages_task';
 
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
 
@@ -39,8 +39,9 @@ async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: 
   log.info('Creating optimized assets for', assetDir);
   log.indent(4);
   try {
-    log.debug('Remove Pre Minify Sourcemaps');
-    await del(['**/*.map'], { cwd: assetDir });
+    // Lightning CSS doesn't update CSS source maps, while JS ones are kept through minification.
+    log.debug('Remove CSS Sourcemaps');
+    await del(['**/*.css.map'], { cwd: assetDir });
 
     log.debug('Minify CSS with Lightning CSS');
     const cssFiles = await globby(['**/*.css'], { cwd: assetDir, absolute: true });
@@ -58,15 +59,9 @@ async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: 
 
     log.debug('Minify JS with SWC');
     const jsFiles = await globby(['**/*.js'], { cwd: assetDir, absolute: true });
-    await asyncForEachWithLimit(jsFiles, PARALLEL_CONCURRENCY, async (file) => {
-      const source = await Fsp.readFile(file, 'utf8');
-      const result = await minify(source, {
-        compress: { passes: 2 },
-        mangle: true,
-        sourceMap: false,
-      });
-      await Fsp.writeFile(file, result.code);
-    });
+    await asyncForEachWithLimit(jsFiles, PARALLEL_CONCURRENCY, (file) =>
+      minifyFile(file, { compress: { passes: 2 }, mangle: true })
+    );
 
     log.debug('Brotli compress');
     const compressFiles = await globby(['**/*.{js,css}'], { cwd: assetDir, absolute: true });
@@ -113,7 +108,7 @@ function categorizeAssets(assetDirs: string[]) {
   const assets = assetDirs.flatMap((assetDir) =>
     globbySync(['**/*'], {
       cwd: assetDir,
-      ignore: ['*-manifest.json', '*.gz', '*.br'],
+      ignore: ['*-manifest.json', '*.gz', '*.br', '*.map'],
       absolute: true,
     }).map((path): { path: string; category: Category } => ({
       path,

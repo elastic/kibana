@@ -43,6 +43,7 @@ fileGroups:
     - keystore/**/*
     - plugin/**/*
     - profiler/**/*
+    - resolve_stack_trace/**/*
     - serve/**/*
     - setup/**/*
     - verification_code/**/*

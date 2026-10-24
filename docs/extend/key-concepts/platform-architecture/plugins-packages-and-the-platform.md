@@ -78,6 +78,8 @@ as well as from the top level `index.ts` files that exist in the three "scope" f
 Any plugin that exports something from those files, or from the lifecycle methods, is exposing a public service. We sometimes call these "plugin services" or
 "shared services".
 
+{{kib}} distributables bundle each plugin's server code, so at runtime other plugins can only import from these files, and from `common` directories listed in `extraPublicDirs`. For example, importing `@kbn/alerting-plugin/server/types` fails. Use `import type` and `export type` for types from other files, so they aren't loaded at runtime.
+
 ## Lifecycle methods
 
 Core, and plugins, expose different features at different parts of their lifecycle. We describe the lifecycle of core services and plugins with specifically-named functions on the service definition.

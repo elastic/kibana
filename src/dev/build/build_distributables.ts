@@ -103,6 +103,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
     await globalRun(Tasks.DeletePackagesFromBuildRoot);
 
+    // Post-process the installed packages, after the notice tasks read `@notice` comments.
+    await globalRun(Tasks.BundlePluginServers);
+    await globalRun(Tasks.MinifyPackages);
+
     await globalRun(Tasks.UpdateLicenseFile);
     await globalRun(Tasks.RemovePackageJsonDeps);
     await globalRun(Tasks.CleanPackageManagerRelatedFiles);

@@ -290,7 +290,9 @@ export class Config {
   }
 
   getDistPluginsFromRepo() {
-    return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
+    return getPackages(this.repoRoot).filter(
+      (p): p is PluginPackage => !p.isDevOnly() && this.pluginFilter(p)
+    );
   }
 
   getPrivateSolutionPackagesFromRepo(project: KibanaSolution) {

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginPackage } from '@kbn/repo-packages';
 import { findUsedDependencies } from './find_used_dependencies';
 import { renderPnpmWorkspace } from './render_pnpm_workspace';
 import type { Task } from '../../lib';
@@ -17,7 +16,7 @@ export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
 
   async run(config, log, build) {
-    const plugins = config.getDistPluginsFromRepo() as PluginPackage[];
+    const plugins = config.getDistPluginsFromRepo();
     const distPackages = config.getDistPackagesFromRepo();
     const distPkgIds = new Set(distPackages.map((p) => p.id));
     const distPkgDirById = new Map(distPackages.map((p) => [p.id, p.normalizedRepoRelativeDir]));

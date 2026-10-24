@@ -10,7 +10,9 @@
 // ported from https://github.com/spalger/sha.js/blob/6557630d508873e262e94bff70c50bdd797c1df7/sha256.js
 // and https://github.com/spalger/sha.js/blob/6557630d508873e262e94bff70c50bdd797c1df7/hash.js
 
-/**
+/* @notice
+ * This product bundles code based on sha.js, which is available under a "MIT" license.
+ *
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
  * Version 2.2-beta Copyright Angel Marin, Paul Johnston 2000 - 2009.
