@@ -41,7 +41,7 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
   ) {}
 
   getIconType(): string | undefined {
-    return 'discoverApp';
+    return 'productDiscover';
   }
 
   getDisplayName(): string {
