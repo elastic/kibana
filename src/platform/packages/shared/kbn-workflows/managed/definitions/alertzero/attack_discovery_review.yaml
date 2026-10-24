@@ -105,6 +105,25 @@ triggers:
             Workflow execution id of the runner that launched this review, recorded
             on the Investigation below. It is the only link back to the parent the
             engine keeps. Empty on a standalone run.
+        related_investigation_id:
+          type: string
+          maxLength: 256
+          description: >-
+            Set when this attack shares a host and a user with a closed
+            false-positive Investigation but does not share its alerts. The review
+            still runs FP/TP on a new Investigation and journals the link. Empty
+            when there is nothing to link.
+        sibling_alert_ids:
+          type: array
+          maxItems: 1000
+          items:
+            type: string
+            maxLength: 256
+          description: >-
+            Detection alert ids from the same-run attacks attached to this
+            Investigation, excluding ids already in `alert_ids`. A true-positive or
+            inconclusive verdict tags and acknowledges them with `alert_ids`. Empty
+            when this attack has no siblings.
       # The attack's identity is required: without the persisted document id there
       # is nothing to attach by reference and nothing to close. Everything else
       # defaults from `consts` so the worker and this workflow can be upgraded
@@ -324,6 +343,24 @@ steps:
           Autonomy: {{ inputs.autonomy | default: consts.default_autonomy }}.
           Parent run: {{ inputs.parent_run_id }}.
           This execution: {{ execution.id }}.
+    on-failure:
+      continue: true
+
+  # A closed false positive stays the match only while the new attack shares its
+  # alerts. Host and user alone, after that close, start a new Investigation; this
+  # note is the link back so the two are not silent strangers.
+  - name: journal_related_investigation
+    type: workflow.execute
+    if: "${{ inputs.related_investigation_id != blank }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          This attack shares entities with closed false-positive Investigation
+          {{ inputs.related_investigation_id }} and does not share its alerts.
+          It is reviewed on its own.
     on-failure:
       continue: true
 
@@ -923,14 +960,16 @@ steps:
   # empty id list.
   #
   # Every alert is tagged, closed ones included: a tag changes no status, and it is
-  # what traces an alert to this Worker.
+  # what traces an alert to this Worker. `sibling_alert_ids` are the detection alerts
+  # on the same-run attacks attached to this Investigation; they leave the queue with
+  # this attack's alerts. An omitted list concatenates as nothing.
   - name: tag_correlated_alerts
     type: security.setAlertTags
     if: >-
       ${{ steps.resolve_escalation.output.escalate == true
         and inputs.alert_ids != blank }}
     with:
-      alert_ids: "${{ inputs.alert_ids }}"
+      alert_ids: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}"
       # Listed item by item because security.setAlertTags takes an array here and its
       # input schema is a union, so a whole-array template fails workflow validation.
       tags_to_add:
@@ -971,7 +1010,7 @@ steps:
         bool:
           filter:
             - ids:
-                values: "${{ inputs.alert_ids }}"
+                values: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}"
             - term:
                 kibana.alert.workflow_status: open
     on-failure:
@@ -992,7 +1031,7 @@ steps:
       track_total_hits: true
       query:
         ids:
-          values: "${{ inputs.alert_ids }}"
+          values: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}"
       aggregations:
         tagged:
           filter:
@@ -1024,7 +1063,7 @@ steps:
         and inputs.alert_ids != blank }}
     with:
       read: "${{ steps.verify_alerts_retired.output.hits != null }}"
-      requested: "${{ inputs.alert_ids | size }}"
+      requested: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids | size }}"
       tagged: "${{ steps.verify_alerts_retired.output.aggregations.tagged.doc_count | default: 0 }}"
       open: "${{ steps.verify_alerts_retired.output.aggregations.open.doc_count | default: 0 }}"
       acknowledged: "${{ steps.verify_alerts_retired.output.aggregations.acknowledged.doc_count | default: 0 }}"

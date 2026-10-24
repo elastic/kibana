@@ -57,6 +57,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
+import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
 import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
@@ -342,6 +343,8 @@ export class AlertZeroPlugin
     if (!this.config.enabled) {
       return this.alertZeroStartContract();
     }
+
+    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger);
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 

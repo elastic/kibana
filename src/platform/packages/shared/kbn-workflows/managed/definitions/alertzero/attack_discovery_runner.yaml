@@ -26,9 +26,9 @@ settings:
   #
   # Accepted cost: a run cancelled after generation persisted but before the fan-out
   # dispatched leaves those attacks with no AlertZero review. Duplicates are not part
-  # of the cost — the ad-hoc write path ids each attack by a hash of its alert ids,
-  # connector, owner and space, so an identical attack is dropped on write; only a
-  # regrouped alert set hashes differently and lands as a near-duplicate.
+  # of the cost — the ad-hoc write path drops an identical alert set, and
+  # `match_fingerprints` attaches a regrouped set to the Investigation that already
+  # describes that attack.
   #
   # Cancelling does not interrupt an in-flight generation request today: it runs to
   # completion and its result is discarded (elastic/kibana#290832 adds a cancellation
@@ -188,15 +188,38 @@ steps:
         steps.run_generation.output.batches_failed }} failed). Skipping the
         per-attack fan-out.
 
-  # One review execution per attack. Each `chunk: 100` batch stays under the
-  # parallel fan-out ceiling so a 101+ generation cannot throw. Branches still
+  # Same-run attacks are grouped here, before any fingerprint is written, so a split
+  # across generation batches does not depend on a document that was just indexed.
+  # Cross-run matches read unexpired fingerprints by host, user, and alert id.
+  # A match is attached instead of reviewed; a new canonical attack is written from
+  # inside the step (`op_type: create`) so a parallel run cannot save a second copy.
+  # An unexpected failure returns every attack as a review. A fingerprint index
+  # that was not read does the same and writes nothing: generation will not hand
+  # those discoveries to a later run. `continue` covers a failure that still
+  # comes back as an error, and the fallback below dispatches those.
+  - name: match_fingerprints
+    type: security.matchAttackFingerprints
+    on-failure:
+      continue: true
+    with:
+      attacks: "${{ steps.resolve_fanout.output.attacks }}"
+      parent_run_id: "{{ execution.id }}"
+
+  - name: resolve_dispatch
+    type: data.set
+    with:
+      review_batches: "${{ steps.match_fingerprints.output.reviews | default: consts.no_discoveries | chunk: 100 }}"
+      attach_batches: "${{ steps.match_fingerprints.output.attachments | default: consts.no_discoveries | chunk: 100 }}"
+
+  # One review execution per attack that still needs FP/TP. Each `chunk: 100` batch
+  # stays under the parallel fan-out ceiling so a 101+ generation cannot throw. Branches still
   # run at `concurrency.max` (2). The per-attack body cannot live in a parallel
   # branch: that body must be a straight-line sequence, so the verdict `switch`
   # sits in a child workflow. `current_batch` copies `foreach.item` so the inner
   # parallel's `foreach.item` is the attack, not the batch array.
   - name: run_review_batches
     type: foreach
-    foreach: "${{ steps.resolve_fanout.output.batches }}"
+    foreach: "${{ steps.resolve_dispatch.output.review_batches }}"
     steps:
       - name: current_batch
         type: data.set
@@ -246,30 +269,98 @@ steps:
               run-as-mode: inherit
               inputs:
                 # `${{ }}` preserves the value's type (arrays stay arrays); `{{ }}`
-                # stringifies.
+                # stringifies. `match_fingerprints` has already read the flat dotted
+                # keys off the persisted `_source`, so these are plain fields.
                 #
-                # Bracket access: these are persisted alert `_source` documents whose
-                # discovery fields are FLAT dotted keys, so `foreach.item.title`
-                # silently resolves to empty.
-                #
-                # `kibana.alert.uuid` IS the persisted document's `_id` — the bulk
-                # create indexes each candidate under it — so reading it off
-                # `_source` needs no second index read. It is what
-                # `security.setAttackStatus` and the by-reference
-                # `security.attack_discovery` attachment both key on.
-                #
-                # per attack and attach the discovery by reference.
-                attack_discovery_id: '{{ foreach.item["kibana.alert.uuid"] }}'
-                #
+                # `attack_discovery_id` is `kibana.alert.uuid`, the persisted
+                # document `_id`. `security.setAttackStatus` and the by-reference
+                # `security.attack_discovery` attachment both key on it.
+                attack_discovery_id: "{{ foreach.item.attack_discovery_id }}"
                 # Anonymized fields, not `*_with_replacements` — de-anonymizing
                 # reviews is a behaviour change owned by #19022 / #19211.
-                title: '{{ foreach.item["kibana.alert.attack_discovery.title"] }}'
+                title: "{{ foreach.item.title }}"
                 # DETECTION alert ids, not the Attack Discovery's own id.
-                alert_ids: '${{ foreach.item["kibana.alert.attack_discovery.alert_ids"] }}'
-                summary_markdown: '{{ foreach.item["kibana.alert.attack_discovery.summary_markdown"] }}'
+                alert_ids: "${{ foreach.item.alert_ids }}"
+                summary_markdown: "{{ foreach.item.summary_markdown }}"
+                # Set when this attack shares entities with a closed false-positive
+                # Investigation and does not share its alerts. Empty otherwise.
+                related_investigation_id: "{{ foreach.item.related_investigation_id }}"
+                # Detection alerts on the same-run attacks attached to this
+                # Investigation. The review tags them with its own when the verdict
+                # escalates.
+                sibling_alert_ids: "${{ foreach.item.sibling_alert_ids }}"
                 # `${{ }}` so the editor does not type-check the template source
                 # against the child's enum.
                 autonomy: "${{ inputs.autonomy }}"
+                parent_run_id: "{{ execution.id }}"
+
+  # Matching failed closed. Review every generated attack, which is what this run
+  # did before fingerprints existed. The persisted documents still use dotted keys;
+  # the matcher is what normally flattens them.
+  - name: run_unmatched_reviews
+    type: foreach
+    if: "${{ steps.match_fingerprints.error != blank }}"
+    foreach: "${{ steps.resolve_fanout.output.batches }}"
+    steps:
+      - name: unmatched_batch
+        type: data.set
+        with:
+          attacks: "${{ foreach.item }}"
+
+      - name: run_unmatched
+        type: parallel
+        foreach: "${{ steps.unmatched_batch.output.attacks }}"
+        mode: settled
+        concurrency:
+          max: 2
+        steps:
+          - name: run_unmatched_review
+            type: workflow.executeAsync
+            with:
+              workflow-id: system-security-attack-discovery-review
+              run-as-mode: inherit
+              inputs:
+                attack_discovery_id: "{{ foreach.item['kibana.alert.uuid'] }}"
+                title: "{{ foreach.item['kibana.alert.attack_discovery.title'] }}"
+                alert_ids: "${{ foreach.item['kibana.alert.attack_discovery.alert_ids'] | default: consts.no_discoveries }}"
+                summary_markdown: "{{ foreach.item['kibana.alert.attack_discovery.summary_markdown'] }}"
+                related_investigation_id: ""
+                sibling_alert_ids: "${{ consts.no_discoveries }}"
+                autonomy: "${{ inputs.autonomy }}"
+                parent_run_id: "{{ execution.id }}"
+
+  # Attacks that match a fingerprint, or a sibling in this run, skip FP/TP. The
+  # attach workflow waits for the review to create the Investigation and does not
+  # create it. Same chunking and dispatch bound as the reviews above.
+  - name: run_attach_batches
+    type: foreach
+    foreach: "${{ steps.resolve_dispatch.output.attach_batches }}"
+    steps:
+      - name: attach_current_batch
+        type: data.set
+        with:
+          attacks: "${{ foreach.item }}"
+
+      - name: run_attachments
+        type: parallel
+        foreach: "${{ steps.attach_current_batch.output.attacks }}"
+        mode: settled
+        concurrency:
+          max: 2
+        steps:
+          - name: run_attach
+            type: workflow.executeAsync
+            with:
+              workflow-id: system-security-attack-discovery-attach
+              run-as-mode: inherit
+              inputs:
+                attack_discovery_id: "{{ foreach.item.attack_discovery_id }}"
+                title: "{{ foreach.item.title }}"
+                alert_ids: "${{ foreach.item.alert_ids }}"
+                summary_markdown: "{{ foreach.item.summary_markdown }}"
+                investigation_id: "{{ foreach.item.investigation_id }}"
+                tag_correlated_alerts: "${{ foreach.item.tag_correlated_alerts }}"
+                journal_alerts_retired: "${{ foreach.item.journal_alerts_retired }}"
                 parent_run_id: "{{ execution.id }}"
 
   # Telemetry: Attack Discovery's own run event (alerts, batches, attacks), once every batch has
