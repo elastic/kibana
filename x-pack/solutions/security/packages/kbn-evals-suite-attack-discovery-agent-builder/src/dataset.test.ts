@@ -7,6 +7,12 @@
 
 import { goldenPathExamples } from './dataset';
 import { attackDiscoveryFixtureMarker } from './fixtures';
+import { createWorkflowEvidenceEvaluator } from './evaluators/workflow_evidence_evaluator';
+import { EMPTY_RETRIEVAL_EVIDENCE } from './types';
+import type {
+  AttackDiscoveryAgentBuilderExample,
+  AttackDiscoveryAgentBuilderTaskOutput,
+} from './types';
 
 /**
  * Regression test for the golden-path slice partitioning used by
@@ -80,5 +86,53 @@ describe('goldenPathExamples fixture partitioning', () => {
     // Every example in the dataset must belong to exactly one of the five
     // named slices above — none silently dropped, none double-counted.
     expect(seen.size).toBe(goldenPathExamples.length);
+  });
+});
+
+/**
+ * F23a (bk-01a14b73): the zero-alert negative control must not pin the passed
+ * count. `expectedPassedAlertCount: null` ASSERTS the run reports `null`
+ * (workflow_evidence_evaluator.ts), so the example scored 0 for the four
+ * families that correctly reported 0 alerts passed, while the two runs that
+ * reported `null` scored 1 — a null-only expectation punishing a correct 0.
+ * The example asks no passed-count question, so the key must be ABSENT.
+ */
+describe('missing-alert-retrieval passed-count contract', () => {
+  const [negativeControl] = goldenPathExamples.filter(
+    ({ metadata }) => metadata?.fixture === 'missing-alert-retrieval'
+  );
+
+  const workflowOutput = (
+    overrides: Partial<AttackDiscoveryAgentBuilderTaskOutput['workflow']>
+  ): AttackDiscoveryAgentBuilderTaskOutput => ({
+    messages: [],
+    steps: [],
+    errors: [],
+    workflow: {
+      stages: [],
+      retrievedAlertCount: null,
+      retrievedAlertCountSource: 'none',
+      passedAlertCount: null,
+      validatedDiscoveryCount: null,
+      retrievalEvidence: EMPTY_RETRIEVAL_EVIDENCE,
+      ...overrides,
+    },
+  });
+
+  it('leaves the passed count unscored instead of asserting a null report', () => {
+    expect(negativeControl.output).not.toHaveProperty('expectedPassedAlertCount');
+  });
+
+  it('scores a run that correctly reports 0 passed alerts as a pass', async () => {
+    const evaluator = createWorkflowEvidenceEvaluator();
+    const result = await evaluator.evaluate({
+      input: negativeControl.input as AttackDiscoveryAgentBuilderExample['input'],
+      output: workflowOutput({ passedAlertCount: 0 }),
+      expected: negativeControl.output as AttackDiscoveryAgentBuilderExample['output'],
+      metadata: negativeControl.metadata as AttackDiscoveryAgentBuilderExample['metadata'],
+    });
+
+    expect(result.metadata?.evidenceState).toBe('complete');
+    expect(result.score).toBe(1);
   });
 });
