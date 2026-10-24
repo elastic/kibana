@@ -99,6 +99,14 @@ describe('sampleSchema', () => {
     ).toEqual({ id: 0, archived_at: 'string' });
   });
 
+  it('adds entries to maps until they have minProperties', () => {
+    expect(
+      sample({ type: 'object', minProperties: 2, additionalProperties: { type: 'string' } })
+    ).toEqual({ key1: 'string', key2: 'string' });
+    expect(sample({ type: 'object', minProperties: 1 })).toEqual({ key1: 'value' });
+    expect(sample({ type: 'object', minProperties: 1, additionalProperties: false })).toEqual({});
+  });
+
   it('takes the first non-null variant and merges allOf parts', () => {
     expect(sample({ anyOf: [{ type: 'null' }, { type: 'integer' }] })).toBe(0);
     expect(
