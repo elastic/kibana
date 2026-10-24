@@ -131,10 +131,13 @@ ${ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT}
 
 ### 4. Risk score grounding
 
-Check \`riskScoreGrounding.status\` in the tool's \`other\` result:
-- **\`started\`** — scoring is current; say nothing.
-- **\`stopped\`** — caveat results using \`lastScoreTimeAgo\`; suggest re-enabling entity analytics.
-- **\`never_started\`** — say risk data is unavailable; suggest enabling entity analytics.
+Read \`riskScoreGrounding.status\` in the tool's \`other\` result and take exactly one of these branches:
+
+- **\`started\`** — the risk-score maintainer is running. **Say nothing about the risk data's currency or status: never write "the data is current", "up to date", "scores are up to date", "fresh", "live", or "reliable", and never add a "scoring is current" / "the risk engine is running, so …" sentence.** The payload reports only that the maintainer process is running — it does not establish that any score is current, and an empty result is not evidence that the environment is safe or clean.
+  This holds **even when the user's question asks whether the data is current** ("is that risk data current?", "is this up to date?"): answer the entity part of the question and stop — do not answer the freshness part with a currency claim, and do not explain that the status was \`started\` unless the user explicitly asks for the maintainer/engine status itself, in which case report the status verbatim (\`started\`) and never rephrase it as "the data is current and up to date".
+- **\`stopped\`** — scoring was turned off. Caveat the results with \`lastScoreTimeAgo\` (or "no scores have been computed yet" when it is absent) instead of concluding the environment is safe, and suggest re-enabling entity analytics.
+- **\`never_started\`** — scoring never ran. Say the risk data is unavailable rather than "no risk data found"; do not call the environment safe; suggest enabling entity analytics.
+- **Grounding missing** — do not guess a status; answer from the entity result as-is.
 
 ### 5. Recommend next steps
 - User entities → external activities and lateral movement.
@@ -280,6 +283,14 @@ User: Show me the Entity Analytics dashboard.
 2. \`attachments.add\` with \`type: 'security.entity_analytics_dashboard'\`, populated from tool output (see "Dashboard snapshot" above).
 3. Render the dashboard tag (from \`attachments.add\` \`id\`/\`current_version\`) AND the entities table tag (from \`search_entities\` \`renderTag\`) in the same turn.
 4. 2–4 prose sentences interpreting the snapshot.
+
+### Example 9: "Right now" list question that also asks about data freshness
+
+User: Are there any critical-risk hosts right now, and is that risk data current?
+
+1. \`security.search_entities\` with \`entityTypes: ['host']\` and \`riskLevels: ['Critical']\`. "Right now" is the user's framing, not a parameter — do not invent a time filter.
+2. Copy the \`renderTag\` verbatim from the tool's \`other\` result when hosts come back; when none do, state plainly that no critical-risk hosts were found.
+3. Read \`riskScoreGrounding.status\` and apply step 4 of the investigation pattern before writing the answer. With \`started\`, the answer ends after the list (or the empty statement) — do **not** write "the risk scoring engine is running, so the data is current and up to date", "scores are up to date", or any other scoring-is-current caveat, and do not upgrade an empty result into "your environment is clean / safe". With \`stopped\` or \`never_started\`, say the risk data is stale or unavailable (with \`lastScoreTimeAgo\` when present) and do not call the environment safe.
 
 ## Best Practices
 - Report risk scores using \`calculated_score_norm\` (0–100). Scores above 80 are risky.
