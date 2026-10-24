@@ -7,7 +7,7 @@
 
 import type { FpTpWorld } from '../../world';
 import { buildFpTpExampleWorld } from '..';
-import { FP_TP_RAW_EVENT_PAGE_SIZE } from '../../world';
+import { FP_TP_RAW_EVENT_BRANCH_SIZE } from '../../world';
 import { MIMICRAT_STAGE2_DOMAIN } from './chain';
 import { MIMICRAT_EXAMPLES } from './examples';
 
@@ -77,7 +77,10 @@ const observedChecks = (world: FpTpWorld): Record<string, string> => {
 /** The workflow's per-alert window: ±2h around the alert's original_time, on its host. */
 const WINDOW_MS = 2 * 3_600_000;
 
-const eventsInWindow = (world: FpTpWorld, alertIndex: number): Array<{ source: Record<string, unknown> }> => {
+const eventsInWindow = (
+  world: FpTpWorld,
+  alertIndex: number
+): Array<{ source: Record<string, unknown> }> => {
   const byTime = [...world.alerts].sort(
     (left, right) =>
       Date.parse(String(left.source['kibana.alert.original_time'])) -
@@ -131,7 +134,7 @@ describe('mimicrat-clickfix examples', () => {
     expect(world.events).toEqual(base.events);
   });
 
-  it('returns tp-multiday-span with cited-alert original_time spread over three days and every raw event retimed into its own stage\'s alert window', () => {
+  it("returns tp-multiday-span with cited-alert original_time spread over three days and every raw event retimed into its own stage's alert window", () => {
     const world = buildFpTpExampleWorld('mimicrat-clickfix.tp-multiday-span', 'run1');
     const originalTimes = world.alerts.map((alert) =>
       Date.parse(String(alert.source['kibana.alert.original_time']))
@@ -171,7 +174,7 @@ describe('mimicrat-clickfix examples', () => {
   // branch's own total is 62 > 10, so `branches_truncated` flips — corpus volume
   // inside a branch window dilutes that branch, exactly what the per-alert design
   // was supposed to survive, and the gold stays `inconclusive`.
-  it('returns fp-multiday-span-truncated whose only over-cap branch is the first stage\'s, from the benign fill inside its own window', () => {
+  it("returns fp-multiday-span-truncated whose only over-cap branch is the first stage's, from the benign fill inside its own window", () => {
     const world = buildFpTpExampleWorld('mimicrat-clickfix.fp-multiday-span-truncated', 'run1');
     const isBenign = ({ source }: { source: Record<string, unknown> }): boolean =>
       (source.process as { name?: string } | undefined)?.name === 'svchost.exe';
@@ -180,8 +183,11 @@ describe('mimicrat-clickfix examples', () => {
     expect(totals).toEqual([62, 1, 2, 2]);
     const firstWindow = eventsInWindow(world, 0);
     expect(firstWindow.filter(isBenign)).toHaveLength(60);
-    // The first stage's deciding events still lead its branch's oldest-first page.
-    const page = firstWindow.slice(0, FP_TP_RAW_EVENT_PAGE_SIZE);
+    // The truncation flag is what the gold rests on: the branch's own total
+    // exceeds its per-branch cap, while the first stage's deciding events are
+    // the oldest in the window and still lead the oldest-first branch page.
+    expect(totals[0]).toBeGreaterThan(FP_TP_RAW_EVENT_BRANCH_SIZE);
+    const page = firstWindow.slice(0, FP_TP_RAW_EVENT_BRANCH_SIZE);
     expect(page.filter((event) => !isBenign(event))).toHaveLength(2);
   });
 

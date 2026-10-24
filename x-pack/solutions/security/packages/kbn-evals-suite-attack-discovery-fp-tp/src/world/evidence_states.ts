@@ -64,8 +64,10 @@ export const withMissingCitedAlert = (world: FpTpWorld): FpTpWorld => ({
  * own events stay on the oldest-first page and only truncation is reported, which blocks
  * a `false_positive` verdict. With `before` they sit just before the earliest event, and
  * `count` exceeding the page means the fill occupies it entirely and evicts the world's
- * own events — the dilution a widened alert window causes. Throws when the world has no
- * process event to place them on.
+ * own events — the dilution a widened alert window causes. `afterFirstStage` is the
+ * per-alert-branch form: the fill is anchored just after the EARLIEST raw event rather
+ * than the whole world's last event (the anchor comment below spells out the caveat).
+ * Throws when the world has no process event to place them on.
  */
 export const withTruncatingBenignEvents = (
   world: FpTpWorld,
@@ -84,22 +86,20 @@ export const withTruncatingBenignEvents = (
   // `after` keeps the world's own events on the oldest-first page (only truncation is
   // reported); `before` packs the fill into the minutes before the earliest event, so
   // with a single shared window the fill occupies the whole page and evicts the
-  // world's own events. Under the per-alert branch design the fill lands inside the
-  // first cited alert's window only (its window reaches back to the chain's start),
-  // so that branch's page is all fill and flips `branches_truncated` — the
-  // per-branch form of the same dilution.
-  // `afterFirstStage` anchors the fill after the EARLIEST raw event (the first
-  // stage's own first event) instead of after the whole world: under
+  // world's own events. Under the per-alert branch design both arms anchor at the
+  // earliest raw event, so the fill lands inside the FIRST cited alert's window only
+  // (its window reaches back to the chain's start) and that branch's own total flips
+  // `branches_truncated` — the per-branch form of the same dilution.
+  // `afterFirstStage` differs from `before` only in direction: under
   // `withStageEventSpan` the stages are spread across days, so `after` would land
-  // the fill near the LAST stage and dilute the wrong branch. The fill then sits
-  // between the first stage's events and its alert — inside only that branch's
-  // ±2h window, exactly like `before` does for the single-hour chain.
-  const anchorMs =
-    placement === 'afterFirstStage'
-      ? earliestMs
-      : placement === 'before'
-      ? earliestMs
-      : latestMs;
+  // the fill near the LAST stage and dilute the wrong branch. `afterFirstStage`
+  // places the fill AFTER the earliest raw event — the first stage's own events
+  // stay on the page and are kept; the gold inconclusive rests on that branch's
+  // total exceeding its cap (62 > 10), not on evicting the stage's events. The
+  // anchor is the earliest RAW EVENT, not the first alert: the fill is inside the
+  // first alert's ±2h window only while the chain keeps its first-stage events
+  // within that window of their alert (the default chain does).
+  const anchorMs = placement === 'after' ? latestMs : earliestMs;
   const offsetMs = (position: number): number =>
     placement === 'before'
       ? -(count - position) * BENIGN_EVENT_SPACING_MS

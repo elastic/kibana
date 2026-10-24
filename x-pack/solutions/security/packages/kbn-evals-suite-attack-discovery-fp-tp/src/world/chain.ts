@@ -89,7 +89,8 @@ export interface FpTpChainIds {
 
 const CHAIN_START_OFFSET_MS = 60 * 60 * 1000;
 
-const ALERT_DELAY_MS = 5_000;
+/** Cited events sit this long before the alert that cites them; shared with the stage-span mutations. */
+export const ALERT_DELAY_MS = 5_000;
 
 const isoTimestamp = (value: Date): string => value.toISOString().replace(/\.\d{3}Z$/, '.000Z');
 

@@ -6,7 +6,7 @@
  */
 
 import type { Ad2IndexedRawEvent } from '@kbn/evals-suite-attack-discovery-agent-builder';
-import type { FpTpChainDestination, FpTpChainParentProcess } from './chain';
+import { ALERT_DELAY_MS, type FpTpChainDestination, type FpTpChainParentProcess } from './chain';
 import { asRecord, withFieldMessage } from './event_message';
 import type { FpTpWorld } from './types';
 
@@ -196,12 +196,16 @@ export const withStageSpan = (world: FpTpWorld, days: number): FpTpWorld => {
 /**
  * `withStageSpan`, but every raw event follows its stage. After the alerts are spread
  * across the span, each event is retimed to its citing stage's alert: an event cited by
- * exactly one stage moves to that alert's time minus the same alert-to-event delay, and an
- * event cited by several stages is placed just before the EARLIEST of them, so it is inside
- * every citing branch window (each window is ±2h). Events no alert cites keep their time —
- * they are bystanders, not branch evidence. Stage-relative offsets inside a stage collapse
- * to milliseconds so intra-stage order survives (alerts sort them; the search sorts
- * oldest-first and dedups).
+ * exactly one stage moves to that alert's time minus the same alert-to-event delay
+ * (`ALERT_DELAY_MS` in chain.ts), and an event cited by several stages is placed just
+ * before the EARLIEST citing alert. That puts it inside every citing branch window only
+ * while the citing alerts sit within `FP_TP_RAW_EVENT_WINDOW_MS` (±2h) of that earliest
+ * alert — the chain fixtures keep a stage's citing alerts inside one window, but this
+ * helper does not itself enforce that bound. Events no alert cites keep their time —
+ * they are bystanders, not branch evidence. Every event of a stage lands on the SAME
+ * timestamp (its alert's time minus the delay): the chain's intra-stage offsets
+ * collapse, so intra-stage order is NOT preserved — the per-alert search sorts
+ * oldest-first and dedups, which is all the branch reads need.
  *
  * Use on its own (it spreads the alerts itself) or after `withStageSpan`, which is
  * idempotent here: re-anchoring on the already-spread alert times moves nothing.
@@ -216,7 +220,6 @@ export const withStageEventSpan = (world: FpTpWorld, days: number): FpTpWorld =>
   if (alerts.length === 0) {
     return spread;
   }
-  const alertById = new Map(alerts.map((alert) => [alert.id, alert]));
   const alertTime = new Map(
     alerts.map((alert) => [
       alert.id,
@@ -227,22 +230,21 @@ export const withStageEventSpan = (world: FpTpWorld, days: number): FpTpWorld =>
   const citingAlert = new Map<string, string>();
   for (const alert of alerts) {
     const ancestors = alert.source['kibana.alert.ancestors'];
-    if (!Array.isArray(ancestors)) continue;
-    for (const ancestor of ancestors) {
-      const eventId = String((ancestor as Record<string, unknown>).id);
-      if (!citingAlert.has(eventId)) {
-        citingAlert.set(eventId, alert.id);
+    if (Array.isArray(ancestors)) {
+      for (const ancestor of ancestors) {
+        const eventId = String((ancestor as Record<string, unknown>).id);
+        if (!citingAlert.has(eventId)) {
+          citingAlert.set(eventId, alert.id);
+        }
       }
     }
   }
-  const ALERT_DELAY_MS = 5_000;
   const events = spread.events.map((event): Ad2IndexedRawEvent => {
-    const stageAlertId = citingAlert.get(event.id);
-    const anchor = stageAlertId === undefined ? undefined : alertById.get(stageAlertId);
-    if (anchor === undefined) {
+    const stageAlertMs = alertTime.get(citingAlert.get(event.id) ?? '');
+    if (stageAlertMs === undefined) {
       return event;
     }
-    const time = alertTime.get(stageAlertId)! - ALERT_DELAY_MS;
+    const time = stageAlertMs - ALERT_DELAY_MS;
     return {
       ...event,
       source: {

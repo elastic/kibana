@@ -15,10 +15,10 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
 import { buildFieldsZodValidator } from '../../../spec/lib/build_fields_zod_validator';
 import { normalizeFieldsToJsonSchema } from '../../../spec/lib/field_conversion';
 import { WorkflowSchema } from '../../../spec/schema';
-import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
 import type { WorkflowYaml } from '../../../spec/schema';
 
 /**
