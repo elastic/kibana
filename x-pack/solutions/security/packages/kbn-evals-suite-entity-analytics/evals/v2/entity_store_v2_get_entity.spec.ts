@@ -9,9 +9,11 @@ import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 import {
   bulkIndexEntities,
+  bulkIndexEntityHistorySnapshots,
   deleteEntityEngines,
   installEntityStoreV2AndWait,
 } from '../../src/setup_helpers';
+import { getMarchSnapshotTimestamps } from '../../src/snapshot_dates';
 
 /**
  * Entity Store V2 - get_entity tool routing evals.
@@ -28,8 +30,15 @@ import {
  * "entity not found" but the call itself must still be made. For grounded
  * criteria (verifying actual profile fields, risk inputs, etc.) seed the entity
  * store using the security-documents-generator populate script.
+ *
+ * The point-in-time example seeds its own dated history snapshot
+ * ({@link bulkIndexEntityHistorySnapshots}) instead: the populate script and
+ * `bulkIndexEntities` only ever write the *current* profile, so without a dated
+ * document that example's profile-retrieval branch is unreachable and only its
+ * "no snapshot data is available" branch can be satisfied.
  */
 const RISKY_USER_EUID = 'user:critical-alice';
+const SNAPSHOT_USER_EUID = 'user:jsmith123';
 
 evaluate.describe(
   'SIEM Entity Analytics V2 Skill - Get Entity',
@@ -40,8 +49,30 @@ evaluate.describe(
 
       await bulkIndexEntities({
         esClient,
-        entities: [{ euid: RISKY_USER_EUID, riskLevel: 'Critical', riskScoreNorm: 96 }],
+        entities: [
+          { euid: RISKY_USER_EUID, riskLevel: 'Critical', riskScoreNorm: 96 },
+          // The dated example below asks for this user's profile on a past calendar day, so the
+          // fixture owns both halves of that lookup: a resolvable entity, and a snapshot for the
+          // day the question names. Leaving either to another spec's seed would make the example
+          // depend on stack state this fixture does not control.
+          { euid: SNAPSHOT_USER_EUID },
+        ],
       });
+
+      for (const timestamp of getMarchSnapshotTimestamps()) {
+        await bulkIndexEntityHistorySnapshots({
+          esClient,
+          entities: [
+            {
+              euid: SNAPSHOT_USER_EUID,
+              riskLevel: 'Low',
+              riskScoreNorm: 21,
+              assetCriticality: 'low_impact',
+            },
+          ],
+          timestamp,
+        });
+      }
     });
 
     evaluate.afterAll(async ({ log, supertest }) => {

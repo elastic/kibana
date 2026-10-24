@@ -11,6 +11,7 @@ import { getEntitiesAlias, ENTITY_LATEST, ENTITY_STORE_ROUTES } from '@kbn/entit
 import type { AssetCriticalityLevel, EntityRiskLevels } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { ScoutLogger } from '@kbn/scout';
+import { getHistorySnapshotIndexName } from './history_snapshot_index';
 import { waitForCondition } from './wait_for_condition';
 
 const COMMON_HEADERS = {
@@ -71,6 +72,34 @@ interface SeedEntity {
   extraFields?: Record<string, unknown>;
 }
 
+/**
+ * Builds one entity document. The same shape is what the entity store writes to the latest
+ * alias and what a history snapshot holds; only the `@timestamp` differs.
+ */
+const buildEntityDocument = (
+  { euid, riskLevel, riskScoreNorm, assetCriticality, extraFields }: SeedEntity,
+  timestamp: string
+): Record<string, unknown> => {
+  const [type, displayName] = euid.split(':');
+
+  const hasRisk = riskLevel !== undefined || riskScoreNorm !== undefined;
+  return {
+    '@timestamp': timestamp,
+    entity: {
+      id: euid,
+      EngineMetadata: { Type: type },
+      ...(hasRisk && {
+        risk: {
+          ...(riskLevel !== undefined && { calculated_level: riskLevel }),
+          ...(riskScoreNorm !== undefined && { calculated_score_norm: riskScoreNorm }),
+        },
+      }),
+    },
+    [type]: { name: displayName, ...extraFields },
+    ...(assetCriticality !== undefined && { asset: { criticality: assetCriticality } }),
+  };
+};
+
 export async function bulkIndexEntities({
   esClient,
   entities,
@@ -85,30 +114,43 @@ export async function bulkIndexEntities({
   const latestAlias = getEntitiesAlias(ENTITY_LATEST, namespace);
   const now = new Date().toISOString();
 
-  const operations = entities.flatMap(
-    ({ euid, riskLevel, riskScoreNorm, assetCriticality, extraFields }) => {
-      const [type, displayName] = euid.split(':');
+  const operations = entities.flatMap((entity) => [
+    { index: { _index: latestAlias, _id: hashEuid(entity.euid) } },
+    buildEntityDocument(entity, now),
+  ]);
 
-      const hasRisk = riskLevel !== undefined || riskScoreNorm !== undefined;
-      const doc: Record<string, unknown> = {
-        '@timestamp': now,
-        entity: {
-          id: euid,
-          EngineMetadata: { Type: type },
-          ...(hasRisk && {
-            risk: {
-              ...(riskLevel !== undefined && { calculated_level: riskLevel }),
-              ...(riskScoreNorm !== undefined && { calculated_score_norm: riskScoreNorm }),
-            },
-          }),
-        },
-        [type]: { name: displayName, ...extraFields },
-        ...(assetCriticality !== undefined && { asset: { criticality: assetCriticality } }),
-      };
+  await esClient.bulk({ refresh: true, operations });
+}
 
-      return [{ index: { _index: latestAlias, _id: hashEuid(euid) } }, doc];
-    }
-  );
+/**
+ * Seeds a dated entity-store history snapshot for each entity — the "profile as it stood on
+ * that calendar day" that `security.get_entity` returns when it is called with a `date`
+ * (its date branch ranges over the history snapshot indices on `@timestamp`).
+ *
+ * `bulkIndexEntities` only writes the *current* profile (`@timestamp` = now), so a
+ * point-in-time example that names a past day has nothing to retrieve unless its fixture
+ * seeds a dated document. Without one the example can only ever be answered through its
+ * "no snapshot data is available" branch.
+ */
+export async function bulkIndexEntityHistorySnapshots({
+  esClient,
+  entities,
+  timestamp,
+  namespace = 'default',
+}: {
+  esClient: ElasticsearchClient;
+  entities: readonly SeedEntity[];
+  /** ISO 8601 instant the snapshot is dated. The date branch only looks at the calendar day. */
+  timestamp: string;
+  namespace?: string;
+}): Promise<void> {
+  if (entities.length === 0) return;
+
+  const index = getHistorySnapshotIndexName(namespace, new Date(timestamp));
+  const operations = entities.flatMap((entity) => [
+    { index: { _index: index, _id: hashEuid(entity.euid) } },
+    buildEntityDocument(entity, timestamp),
+  ]);
 
   await esClient.bulk({ refresh: true, operations });
 }
