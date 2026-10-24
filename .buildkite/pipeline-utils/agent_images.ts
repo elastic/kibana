@@ -23,8 +23,9 @@ export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-  // `undefined` uses the agent image default; set a number to override it.
-  diskSizeGb: undefined,
+  // Boot disk (GB). The image uses ~58 GB before a job starts and PR jobs peak at ~62 GB; a 72 GB
+  // disk formats to ~69 GB, leaving ~7 GB of headroom. Steps that need more set their own `diskSizeGb`.
+  diskSizeGb: 72,
 };
 
 const getFIPSImage = () => {
@@ -42,6 +43,8 @@ const getFIPSImage = () => {
   return {
     ...DEFAULT_AGENT_IMAGE_CONFIG,
     image,
+    // FIPS image disk usage has not been measured; keep the image default.
+    diskSizeGb: undefined,
   };
 };
 

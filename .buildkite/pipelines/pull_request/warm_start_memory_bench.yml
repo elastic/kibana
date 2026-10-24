@@ -7,6 +7,8 @@ steps:
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
       zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d
+      # Peaks at ~66 GB, above the 72 GB default's headroom.
+      diskSizeGb: 80
     timeout_in_minutes: 90
     env:
       WARM_START_MEMORY_COMMENT_ENABLED: 'true'

@@ -2416,6 +2416,7 @@ exports[`pull_request fragments pull_request/warm_start_memory_bench 1`] = `
   "steps": [
     {
       "agents": {
+        "diskSizeGb": 80,
         "diskType": "hyperdisk-balanced",
         "machineType": "c4d-standard-16",
         "zones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d",
