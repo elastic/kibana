@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
@@ -25,6 +26,8 @@ import {
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
+import { SLOOperationTimeout } from '../errors';
+import { REQUEST_DEADLINE_MS } from '../utils/with_deadline';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -442,7 +445,7 @@ describe('UpdateSLO', () => {
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
         expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
-        { ignore: [404] }
+        expect.objectContaining({ ignore: [404] })
       );
     });
 
@@ -524,6 +527,102 @@ describe('UpdateSLO', () => {
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
     });
+
+    it('passes the deadline signal to the pre-flight checks and the installation', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      const deadlineSignal = { signal: expect.objectContaining({ aborted: false }) };
+
+      await updateSLO.execute(originalSlo.id, {
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'production' }),
+      });
+
+      expect(mockSummaryTransformManager.getVersion).toHaveBeenCalledWith(
+        expect.any(String),
+        deadlineSignal
+      );
+      expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockTransformManager.install).toHaveBeenCalledWith(expect.any(Object), deadlineSignal);
+      expect(mockSummaryTransformManager.start).toHaveBeenCalledWith(
+        expect.any(String),
+        deadlineSignal
+      );
+    });
+
+    it('throws SLOOperationTimeout and restores the previous definition when the deadline is exceeded', async () => {
+      jest.useFakeTimers();
+      try {
+        const originalSlo = createSLO({
+          id: 'original-id',
+          indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+        });
+        mockRepository.findById.mockResolvedValueOnce(originalSlo);
+        mockSummaryTransformManager.install.mockImplementationOnce(
+          (_slo, { signal } = {}) =>
+            new Promise((_resolve, reject) => {
+              signal?.addEventListener('abort', () =>
+                reject(new errors.RequestAbortedError('Request aborted'))
+              );
+            })
+        );
+
+        const assertion = expect(
+          updateSLO.execute(originalSlo.id, {
+            indicator: createAPMTransactionErrorRateIndicator({ environment: 'production' }),
+          })
+        ).rejects.toBeInstanceOf(SLOOperationTimeout);
+        await jest.advanceTimersByTimeAsync(REQUEST_DEADLINE_MS);
+        await assertion;
+
+        expect(mockTransformManager.start).not.toHaveBeenCalled();
+        expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
+        expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
+        expect(mockRepository.update).toHaveBeenLastCalledWith(originalSlo);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('rolls back resources in parallel and restores the previous definition last', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
+      const pendingUninstall = Promise.withResolvers<void>();
+      mockSummaryTransformManager.uninstall.mockReturnValueOnce(pendingUninstall.promise);
+
+      const assertion = expect(
+        updateSLO.execute(originalSlo.id, {
+          indicator: createAPMTransactionErrorRateIndicator({ environment: 'production' }),
+        })
+      ).rejects.toThrow('Transform install error');
+      await flushPromises();
+
+      expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(2);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.update).toHaveBeenCalledTimes(1);
+
+      pendingUninstall.resolve();
+      await assertion;
+
+      expect(mockRepository.update).toHaveBeenCalledTimes(2);
+      expect(mockRepository.update).toHaveBeenLastCalledWith(originalSlo);
+    });
   });
 
   describe('Update also updates updatedBy field', () => {
@@ -567,8 +666,12 @@ describe('UpdateSLO', () => {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
     const summaryTransformId = getSLOSummaryTransformId(originalSlo.id, originalSlo.revision);
 
-    expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);
-    expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
+    expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId, {
+      signal: expect.any(AbortSignal),
+    });
+    expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId, {
+      signal: expect.any(AbortSignal),
+    });
 
     // rollup and summary pipelines
     expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalledTimes(
@@ -588,7 +691,8 @@ describe('UpdateSLO', () => {
             ],
           },
         },
-      })
+      }),
+      { signal: expect.any(AbortSignal) }
     );
     expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenNthCalledWith(
       2,
@@ -602,7 +706,8 @@ describe('UpdateSLO', () => {
             ],
           },
         },
-      })
+      }),
+      { signal: expect.any(AbortSignal) }
     );
   }
 });

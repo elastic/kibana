@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
@@ -32,6 +33,8 @@ import { ResetSLO } from './reset_slo';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 import type { SLODefinition } from '../domain/models';
+import { SLOOperationTimeout } from '../errors';
+import { REQUEST_DEADLINE_MS } from '../utils/with_deadline';
 
 const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
 
@@ -95,6 +98,49 @@ describe('ResetSLO', () => {
     });
   });
 
+  describe('deadline signal', () => {
+    beforeEach(() => {
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        application: {},
+        cluster: {},
+        has_all_requested: true,
+        index: {},
+        username: 'some-user',
+      });
+    });
+
+    it('passes the deadline signal to every Elasticsearch operation', async () => {
+      const slo = createSLO({ id: 'irrelevant', version: 1 });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockRepository.update.mockImplementation((v) => Promise.resolve(v));
+      const deadlineSignal = { signal: expect.objectContaining({ aborted: false }) };
+
+      await resetSLO.execute(slo.id);
+
+      expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockScopedClusterClient.asCurrentUser.index).toHaveBeenCalledWith(
+        expect.any(Object),
+        deadlineSignal
+      );
+      expect(mockTransformManager.install).toHaveBeenCalledWith(expect.any(Object), deadlineSignal);
+      expect(mockSummaryTransformManager.start).toHaveBeenCalledWith(
+        expect.any(String),
+        deadlineSignal
+      );
+    });
+  });
+
   describe('unhappy path', () => {
     beforeEach(() => {
       mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
@@ -135,7 +181,10 @@ describe('ResetSLO', () => {
       await jest.advanceTimersByTimeAsync(0);
 
       expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
-      expect(mockTransformManager.uninstall).not.toHaveBeenCalledWith(resetedRollupTransformId);
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalledWith(
+        resetedRollupTransformId,
+        expect.anything()
+      );
 
       pendingSummaryInstall.resolve(getSLOSummaryTransformId(slo.id, slo.revision + 1));
       await assertion;
@@ -143,9 +192,44 @@ describe('ResetSLO', () => {
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
         expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
-        { ignore: [404] }
+        expect.objectContaining({ ignore: [404] })
       );
-      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(resetedRollupTransformId);
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(resetedRollupTransformId, {
+        signal: expect.any(AbortSignal),
+      });
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('throws SLOOperationTimeout and rolls back when the deadline is exceeded', async () => {
+      const slo = createSLO({ id: 'irrelevant', version: 1 });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockTransformManager.install.mockImplementationOnce(
+        (_slo, { signal } = {}) =>
+          new Promise((_resolve, reject) => {
+            signal?.addEventListener('abort', () =>
+              reject(new errors.RequestAbortedError('Request aborted'))
+            );
+          })
+      );
+      const resetedRollupTransformId = getSLOTransformId(slo.id, slo.revision + 1);
+      const resetedSummaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision + 1);
+
+      const assertion = expect(resetSLO.execute(slo.id)).rejects.toBeInstanceOf(
+        SLOOperationTimeout
+      );
+      await jest.advanceTimersByTimeAsync(REQUEST_DEADLINE_MS);
+      await assertion;
+
+      expect(mockTransformManager.start).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(
+        resetedRollupTransformId,
+        expect.anything()
+      );
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(
+        resetedSummaryTransformId,
+        expect.anything()
+      );
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
   });
@@ -154,8 +238,12 @@ describe('ResetSLO', () => {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
     const summaryTransformId = getSLOSummaryTransformId(originalSlo.id, originalSlo.revision);
 
-    expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);
-    expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
+    expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId, {
+      signal: expect.any(AbortSignal),
+    });
+    expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId, {
+      signal: expect.any(AbortSignal),
+    });
 
     // rollup and summary pipelines using wildcard pipeline
     expect(
@@ -163,7 +251,7 @@ describe('ResetSLO', () => {
     ).toHaveBeenNthCalledWith(
       1,
       { id: getWildcardPipelineId(originalSlo.id, originalSlo.revision) },
-      { ignore: [404] }
+      { ignore: [404], signal: expect.any(AbortSignal) }
     );
 
     expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenCalledTimes(2);
@@ -179,7 +267,8 @@ describe('ResetSLO', () => {
             ],
           },
         },
-      })
+      }),
+      { signal: expect.any(AbortSignal) }
     );
     expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenNthCalledWith(
       2,
@@ -193,7 +282,8 @@ describe('ResetSLO', () => {
             ],
           },
         },
-      })
+      }),
+      { signal: expect.any(AbortSignal) }
     );
   }
 
