@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { evaluateKql } from '@kbn/eval-kql';
-import { isKqlSyntaxError } from './kql_utils';
+import { decodeKqlTemplateValues, evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
+import { isKqlSyntaxError, renderKqlCondition } from './kql_utils';
 import { dataFilterStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -17,7 +17,8 @@ export const dataFilterStepDefinition = createServerStepDefinition({
   handler: async (context) => {
     try {
       const items = context.config.items;
-      const { condition, limit } = context.input;
+      const { limit } = context.input;
+      const condition = renderKqlCondition(context.contextManager, context.rawInput.condition);
 
       if (!Array.isArray(items)) {
         context.logger.error(`Input items has invalid type: ${typeof items}`);
@@ -34,7 +35,7 @@ export const dataFilterStepDefinition = createServerStepDefinition({
       }
 
       context.logger.debug(
-        `Filtering ${items.length} item(s) with condition: ${condition}${
+        `Filtering ${items.length} item(s) with condition: ${decodeKqlTemplateValues(condition)}${
           limit ? ` (limit: ${limit})` : ''
         }`
       );
@@ -63,7 +64,7 @@ export const dataFilterStepDefinition = createServerStepDefinition({
           );
         } else {
           try {
-            const matches = evaluateKql(condition, { item, index });
+            const matches = evaluateKql(parseKqlTemplate(condition), { item, index });
 
             if (matches) {
               filteredItems.push(item);
