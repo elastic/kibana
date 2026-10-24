@@ -7,6 +7,7 @@
 
 import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import axios, { AxiosHeaders } from 'axios';
+import { Readable } from 'stream';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -318,6 +319,67 @@ describe('SubActionConnector', () => {
       expect(logger.debug).toHaveBeenLastCalledWith(
         'Request to external service failed. Connector Id: test-id. Connector type: .test. Method: get. URL: https://example.com'
       );
+    });
+
+    it('reads the body of a streaming error response', async () => {
+      // e.g. a GenAI `stream` sub-action that fails with a non-2xx response:
+      // axios rejects with the raw response stream in error.response.data
+      const error = createAxiosError();
+      error.config = {
+        ...error.config,
+        responseType: 'stream',
+      } as AxiosError['config'];
+      error.response = {
+        config: error.config,
+        status: 429,
+        data: Readable.from([JSON.stringify({ errorMessage: 'rate limited', errorCode: 429 })]),
+      } as AxiosResponse;
+      requestMock.mockImplementation(() => {
+        throw error;
+      });
+
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow('Message: rate limited. Code: 429');
+
+      expect(error.response?.data).toEqual({ errorMessage: 'rate limited', errorCode: 429 });
+    });
+
+    it('does not throw an unhandled error event when a streaming error response is truncated', async () => {
+      // https://github.com/elastic/kibana/issues/299804
+      const error = createAxiosError();
+      error.config = {
+        ...error.config,
+        responseType: 'stream',
+      } as AxiosError['config'];
+      error.response = {
+        config: error.config,
+        status: 403,
+        data: new Readable({
+          read() {
+            this.push('<html>');
+            this.destroy(new Error('aborted'));
+          },
+        }),
+      } as AxiosResponse;
+      requestMock.mockImplementation(() => {
+        throw error;
+      });
+
+      const unhandledErrors: Error[] = [];
+      const onUnhandled = (err: Error) => unhandledErrors.push(err);
+      process.on('uncaughtException', onUnhandled);
+      process.on('unhandledRejection', onUnhandled);
+
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow('Status code: 403');
+
+      // give a potential unhandled error a chance to surface, then assert none did
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      process.removeListener('uncaughtException', onUnhandled);
+      process.removeListener('unhandledRejection', onUnhandled);
+      expect(unhandledErrors).toEqual([]);
     });
 
     it('converts auth axios property to a basic auth header if provided', async () => {
