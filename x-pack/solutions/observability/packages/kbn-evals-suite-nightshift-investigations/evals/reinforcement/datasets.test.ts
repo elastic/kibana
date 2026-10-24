@@ -6,6 +6,7 @@
  */
 
 import { REINFORCEMENT_EXAMPLE_LIMIT, selectCustomer0Examples } from './datasets';
+import { reinforcementExamples } from './traces';
 
 describe('selectCustomer0Examples', () => {
   const examples = ['a', 'b', 'c', 'd', 'e', 'f'];
@@ -20,5 +21,16 @@ describe('selectCustomer0Examples', () => {
 
   it('falls back to the default count when the limit is not a number', () => {
     expect(selectCustomer0Examples(examples, Number.NaN)).toHaveLength(REINFORCEMENT_EXAMPLE_LIMIT);
+  });
+});
+
+describe('reinforcementExamples', () => {
+  it('gives the reinforcement agent one prior tree with two nodes for the same pod loss', () => {
+    const requiring = reinforcementExamples.filter((example) => example.metadata.require_merge);
+    expect(requiring).toHaveLength(1);
+    const markdown = requiring[0].input.prior_tree.markdown;
+    expect(markdown).toContain('E2[Pod restarted]');
+    expect(markdown).toContain('E3[Pod deleted]');
+    expect(requiring[0].input.response).toContain('same pod-loss event');
   });
 });

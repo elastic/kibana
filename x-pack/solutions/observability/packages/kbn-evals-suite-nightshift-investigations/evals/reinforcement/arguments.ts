@@ -97,19 +97,22 @@ const formatArguments = (submission: SubmitArguments): string =>
  * Structural check of the last submit call against the investigation response, the tree before
  * the run, and the tree after it. A score of 1 means the agent passed a traversal for this tree,
  * the visit path is non-empty, the causal path is present only when the response confirms a
- * cause, and any declared merges agree with the two trees. Whether those merges and paths are
- * the right ones for the investigation is the LLM judge's job.
+ * cause, and any declared merges agree with the two trees. A round marked `requireMerge` must
+ * declare one. Whether those merges and paths are the right ones for the investigation is the
+ * LLM judge's job.
  */
 export const gradeSubmissions = ({
   submissions,
   prior,
   submitted,
   response,
+  requireMerge = false,
 }: {
   submissions: SubmitArguments[];
   prior: DecisionTreeView | undefined;
   submitted: DecisionTreeView | undefined;
   response: string;
+  requireMerge?: boolean;
 }): { score: 0 | 1; explanation: string } => {
   if (submissions.length === 0) {
     return {
@@ -127,6 +130,9 @@ export const gradeSubmissions = ({
     problems.push(...traversalProblems(last, treeId, response));
     problems.push(...mergeProblems(last, prior, submitted));
     problems.push(...pathProblems(last, submitted));
+    if (requireMerge && !declaresMerge(last, treeId)) {
+      problems.push(`This round folds duplicate nodes in ${treeId}, but merged_nodes is empty.`);
+    }
   }
 
   const rendered = `Last ${SUBMIT_TOOL} arguments:\n${formatArguments(last)}`;
@@ -138,6 +144,14 @@ export const gradeSubmissions = ({
     explanation: `Submit arguments are consistent with the prior and submitted trees.\n\n${rendered}`,
   };
 };
+
+const declaresMerge = (submission: SubmitArguments, treeId: string): boolean =>
+  (submission.symptom_trees ?? []).some((tree) => {
+    if (tree.tree_id && tree.tree_id !== treeId) return false;
+    return (tree.merged_nodes ?? []).some(
+      (merge) => (merge.from ?? []).length > 0 && Boolean(merge.into)
+    );
+  });
 
 const traversalsForTree = (submission: SubmitArguments, treeId: string): TraversalSubmission[] =>
   (submission.traversals ?? []).filter(

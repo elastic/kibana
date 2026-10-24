@@ -19,14 +19,14 @@ const fileSchema = lazySchema(() =>
 
 /**
  * Full reinforcement rounds from `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE`.
- * The default run does not use this: it takes a few Customer-0 investigation examples instead.
+ * The default run uses the committed reduced rounds instead of this file.
  */
 export const loadReinforcementExamples = (
   examplesFile = process.env.NIGHTSHIFT_REINFORCEMENT_TRACES_FILE
 ): ReinforcementExample[] => {
   if (!examplesFile) {
     throw new Error(
-      'NIGHTSHIFT_REINFORCEMENT_TRACES_FILE is not set. The reinforcement micro-eval replays Customer-0 investigations unless this file is provided.'
+      'NIGHTSHIFT_REINFORCEMENT_TRACES_FILE is not set. The reinforcement micro-eval replays the committed Customer-0 rounds unless this file is provided.'
     );
   }
   const file = fileSchema.parse(JSON.parse(readFileSync(examplesFile, 'utf8')));
