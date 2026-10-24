@@ -15,6 +15,7 @@ import { createMemoryPageStore, epochSecondsToIso, type MemoryPageWrite } from '
 
 const SPACE_A = 'space-a';
 const SPACE_B = 'space-b';
+const SPACE_PROBE = 'space-mapping-probe';
 const NOW_SECONDS = 1_800_000_000;
 
 const createPage = (slug: string, overrides: Partial<MemoryPageWrite> = {}): MemoryPageWrite => ({
@@ -45,7 +46,9 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     });
     await esServer.start();
     esClient = esServer.getClient();
+  });
 
+  beforeEach(async () => {
     await esClient.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
   });
 
@@ -59,7 +62,7 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     const store = createMemoryPageStore({
       esClient,
       logger,
-      spaceId: SPACE_A,
+      spaceId: SPACE_PROBE,
       now: () => NOW_SECONDS,
     });
     await store.create(createPage('mapping-probe'));
@@ -85,9 +88,6 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     await expect(
       esClient.cluster.getComponentTemplate({ name: 'ai-index@custom' })
     ).rejects.toThrow();
-
-    // Start the lifecycle test from an empty, auto-created index.
-    await esClient.indices.delete({ index: MEMORY_INDEX });
   });
 
   it('exercises page lifecycle, isolation, and counter OCC on the semantic index', async () => {
