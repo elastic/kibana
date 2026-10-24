@@ -115,6 +115,19 @@ describe('Detection Rule Creation worker', () => {
       expect(create?.with?.rule).toBe('${{ inputs.actionInput }}');
     });
 
+    // The approval closes the gap only if the rule runs. `security.createRule`
+    // always creates disabled, so the action enables the rule it created and the
+    // proposal tells the analyst that is what approving does.
+    it('enables the created rule and says so in the proposal', () => {
+      const enable = action.steps.find((step) => step.name === 'enable_rule');
+      expect(enable?.type).toBe('security.enableRule');
+      expect(enable?.with?.ids).toEqual(['{{ steps.create_rule.output.id }}']);
+
+      const comment = String(inputsOf(stepByName('propose_creation')).comment);
+      expect(comment).toContain('creates and enables the rule');
+      expect(comment).not.toContain('disabled');
+    });
+
     // A draft is reviewable only with a query, a name, a description and an attachment.
     // The create action requires a name and a description, so proposing a draft without
     // them would ask the analyst to approve a rule that can never be created.
