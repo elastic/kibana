@@ -5544,6 +5544,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-fp-tp':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
+      '@kbn/evals-suite-az-escalation-grounding':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-az-escalation-grounding
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -9777,6 +9780,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-az-escalation-grounding: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
 
