@@ -15,27 +15,45 @@ import {
   SERVICE_NAME_FIELDS,
 } from '../../../../../../common/data_types/logs/constants';
 import { getServiceNameCell } from '../../../../../components/data_types/logs/service_name_cell';
+import {
+  createServiceSummaryDefinition,
+  getEntitySummaryCell,
+} from '../../../../../components/data_types/entity_summary';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
   (prev, { toolkit }) =>
-  (params) => ({
-    ...prev(params),
-    ...LOG_LEVEL_FIELDS.reduce(
-      (acc, field) => ({
-        ...acc,
-        [field]: getLogLevelBadgeCell(field),
-        [`${field}.keyword`]: getLogLevelBadgeCell(`${field}.keyword`),
-      }),
-      {}
-    ),
-    ...SERVICE_NAME_FIELDS.reduce(
-      (acc, field) => ({
-        ...acc,
-        [field]: getServiceNameCell(field, toolkit),
-        [`${field}.keyword`]: getServiceNameCell(`${field}.keyword`, toolkit),
-      }),
-      {}
-    ),
-    [SOURCE_COLUMN]: getSummaryColumn(params, toolkit),
-  });
+  (params) => {
+    // One service definition shared across every service-name field (and its `.keyword` variant),
+    // so the dedicated column shows the same popover as the summary-column chip. Falls back to the
+    // filter/copy badge when APM isn't available to provide the data.
+    const serviceDefinition = createServiceSummaryDefinition();
+    const createServiceCell = (field: string) =>
+      getEntitySummaryCell({
+        fieldName: field,
+        definition: serviceDefinition,
+        toolkit,
+        FallbackCell: getServiceNameCell(field, toolkit),
+      });
+
+    return {
+      ...prev(params),
+      ...LOG_LEVEL_FIELDS.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field]: getLogLevelBadgeCell(field),
+          [`${field}.keyword`]: getLogLevelBadgeCell(`${field}.keyword`),
+        }),
+        {}
+      ),
+      ...SERVICE_NAME_FIELDS.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field]: createServiceCell(field),
+          [`${field}.keyword`]: createServiceCell(`${field}.keyword`),
+        }),
+        {}
+      ),
+      [SOURCE_COLUMN]: getSummaryColumn(params, toolkit),
+    };
+  };

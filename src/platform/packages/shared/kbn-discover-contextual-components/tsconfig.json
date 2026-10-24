@@ -5,6 +5,7 @@
     "types": [
       "jest",
       "node",
+      "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
       "@testing-library/react"
     ]
@@ -34,5 +35,6 @@
     "@kbn/data-view-utils",
     "@kbn/react-kibana-context-theme",
     "@kbn/data-source",
+    "@kbn/apm-ui-shared",
   ]
 }

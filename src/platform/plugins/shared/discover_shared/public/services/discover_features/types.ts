@@ -304,13 +304,68 @@ export interface ObservabilityTracesFetchLatencyOverallSpanDistributionFeature {
   >;
 }
 
+export interface ObservabilityTracesServiceSummaryMetric {
+  /** Time-series points for the sparkline. `y` is `null` for gaps / no-data buckets. */
+  series: Array<{ x: number; y: number | null }>;
+  /** Pre-formatted current value — APM owns the units, e.g. `100 ms`, `112.9 tpm`, or `N/A`. */
+  valueLabel: string;
+}
+
+/** Absolute, ready-to-use hrefs for the service's destinations — built by the fulfilling plugin. */
+export interface ObservabilityTracesServiceSummaryLinks {
+  serviceOverview: string;
+  alerts: string;
+  slos: string;
+}
+
+export type ObservabilityTracesServiceSloStatus =
+  | 'violated'
+  | 'degrading'
+  | 'healthy'
+  | 'noData'
+  | 'noSLOs';
+
+export interface ObservabilityTracesServiceSummarySlo {
+  /** Worst status across the service's SLOs, worst-first (violated → degrading → noData → healthy). */
+  status: ObservabilityTracesServiceSloStatus;
+  /** Number of SLOs matching the worst status (e.g. how many are violated). */
+  count: number;
+  /** Total number of SLOs defined for the service. */
+  total: number;
+}
+
+export interface ObservabilityTracesServiceSummaryData {
+  latency: ObservabilityTracesServiceSummaryMetric;
+  throughput: ObservabilityTracesServiceSummaryMetric;
+  failedTransactionRate: ObservabilityTracesServiceSummaryMetric;
+  /** Number of active alerts for the service, when the current user can read alerts. */
+  activeAlertCount?: number;
+  /** SLO health for the service, when the current user can read SLOs. */
+  slo?: ObservabilityTracesServiceSummarySlo;
+  links: ObservabilityTracesServiceSummaryLinks;
+}
+
+export interface ObservabilityTracesFetchServiceSummaryFeature {
+  id: 'observability-traces-fetch-service-summary';
+  fetchServiceSummary: (
+    params: {
+      serviceName: string;
+      environment?: string;
+      start: string;
+      end: string;
+    },
+    signal: AbortSignal
+  ) => Promise<ObservabilityTracesServiceSummaryData>;
+}
+
 export type ObservabilityTracesFeature =
   | ObservabilityTracesSpanLinksFeature
   | ObservabilityTracesFetchErrorsFeature
   | ObservabilityTracesFetchRootSpanByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
-  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature;
+  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
+  | ObservabilityTracesFetchServiceSummaryFeature;
 
 /** ****************************************************************************************/
 
