@@ -48,6 +48,9 @@ if [[ -z "${EVAL_SCOUT_DOMAIN:-}" && "${EVAL_SCOUT_ARCH:-stateful}" == "$_suite_
   EVAL_SCOUT_DOMAIN="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutDomain // empty' 2>/dev/null || true)"
 fi
 unset _suite_scout_arch
+# Fall back to the suite's serverConfigSet (stack plugin flags) — unlike scoutArch/scoutDomain,
+# the on-demand pipeline doesn't forward it, and the default evals_tracing stack disables suite plugins.
+EVAL_SERVER_CONFIG_SET="${EVAL_SERVER_CONFIG_SET:-$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.serverConfigSet // empty' 2>/dev/null || true)}"
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
