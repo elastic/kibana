@@ -111,6 +111,7 @@ export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
   workflowExecutionId,
+  telemetryNotAfter,
   beforeCreate,
   telemetryTarget,
 }: {
@@ -121,11 +122,19 @@ export const getOrCreateInvestigationConversation = async ({
    * in progress between its creation and the run being recorded on it.
    */
   workflowExecutionId?: string;
+  /**
+   * Latest inclusive `@timestamp` this investigation's telemetry queries may return. Stored on
+   * the conversation and not shown to the agent. Patched onto a conversation that already exists.
+   */
+  telemetryNotAfter?: string;
   beforeCreate?: () => Promise<void>;
   telemetryTarget?: string;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
+    if (telemetryNotAfter) {
+      await conversations.patchMetadata(existing.id, { telemetry_not_after: telemetryNotAfter });
+    }
     return existing;
   }
 
@@ -142,6 +151,7 @@ export const getOrCreateInvestigationConversation = async ({
           severity: INITIAL_INVESTIGATION_SEVERITY,
           ...(workflowExecutionId ? { workflow_execution_ids: [workflowExecutionId] } : {}),
           ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
+          ...(telemetryNotAfter ? { telemetry_not_after: telemetryNotAfter } : {}),
         },
         accessControl: { access_mode: ConversationAccessControlMode.Public },
       });

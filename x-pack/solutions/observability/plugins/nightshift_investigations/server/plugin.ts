@@ -343,6 +343,18 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
+            readTelemetryNotAfter: async (request, conversationId) => {
+              const agentBuilderStart = this.agentBuilder;
+              if (!agentBuilderStart) return undefined;
+              const conversations = await agentBuilderStart.conversations.getScopedClient({
+                request,
+              });
+              const metadata = (await conversations.bulkGet([conversationId])).get(
+                conversationId
+              )?.metadata;
+              const value = metadata?.telemetry_not_after;
+              return typeof value === 'string' ? value : undefined;
+            },
             logger: sandboxLogger,
           })
         );

@@ -70,6 +70,7 @@ import {
   alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
+  isTelemetryNotAfter,
 } from '../../common';
 import {
   buildAlertRecoveredFollowUpMessage,
@@ -482,6 +483,7 @@ export class NightshiftInvestigationsClient {
       source_ids,
       connector_id,
       telemetry_target,
+      telemetry_not_after: telemetryNotAfterInput,
       context = {},
       notificationDestinations,
       slack_thread: slackThread,
@@ -568,6 +570,10 @@ export class NightshiftInvestigationsClient {
 
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
+    const telemetryNotAfter =
+      telemetryNotAfterInput && isTelemetryNotAfter(telemetryNotAfterInput)
+        ? telemetryNotAfterInput
+        : undefined;
 
     const inputs = {
       message: isFollowUp
@@ -596,6 +602,7 @@ export class NightshiftInvestigationsClient {
         trigger_type,
         ...(resolvedSubject.summary ? { summary: resolvedSubject.summary } : {}),
       },
+      ...(telemetryNotAfter ? { telemetry_not_after: telemetryNotAfter } : {}),
     };
 
     const executionId = await this.runInvestigationWorkflow(
@@ -611,6 +618,7 @@ export class NightshiftInvestigationsClient {
         investigationId,
         executionId,
         telemetryTarget,
+        telemetryNotAfter,
       });
     }
 
@@ -637,11 +645,13 @@ export class NightshiftInvestigationsClient {
     investigationId,
     executionId,
     telemetryTarget,
+    telemetryNotAfter,
   }: {
     conversations: ConversationPublicClient;
     investigationId: string;
     executionId: string;
     telemetryTarget?: string;
+    telemetryNotAfter?: string;
   }): Promise<void> {
     try {
       // Records the run in the creating write. If the run's `_ensure` step created the
@@ -651,6 +661,7 @@ export class NightshiftInvestigationsClient {
         id: investigationId,
         workflowExecutionId: executionId,
         telemetryTarget,
+        telemetryNotAfter,
       });
     } catch (error) {
       this.logger.warn(
@@ -906,11 +917,17 @@ export class NightshiftInvestigationsClient {
     const requestedTarget = telemetryTargetNameSchema.optional().parse(inputs?.telemetry_target);
     const telemetryTarget = requestedTarget ?? this.telemetryConfig?.default_telemetry_target;
     resolveTelemetryTarget(this.telemetryConfig, telemetryTarget);
+    const telemetryNotAfterInput = asString(inputs?.telemetry_not_after);
+    const telemetryNotAfter =
+      telemetryNotAfterInput && isTelemetryNotAfter(telemetryNotAfterInput)
+        ? telemetryNotAfterInput
+        : undefined;
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
       workflowExecutionId: executionId,
       telemetryTarget,
+      telemetryNotAfter,
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {

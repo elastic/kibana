@@ -13,7 +13,11 @@ import { NO_CONCLUSION_ERROR } from '../task';
 import {
   createAntiLeakageEvaluator,
   createGoalPassEvaluator,
+  createOrcaEvaluators,
   createTruthfulnessEvaluator,
+  ORCA_CONTROL_EVALUATOR,
+  ORCA_HALLUCINATION_EVALUATOR,
+  ORCA_RCA_ACCURACY_EVALUATOR,
 } from '.';
 import { normalizeGoalScore, normalizeTruthfulnessScore } from './scoring';
 
@@ -23,7 +27,7 @@ jest.mock('@kbn/inference-tracing', () => ({
     callback(),
 }));
 
-const judgeReturning = (args: Record<string, string | number | boolean>) => {
+const judgeReturning = (args: Record<string, string | number | boolean | string[]>) => {
   const prompt = jest.fn().mockResolvedValue({ toolCalls: [{ function: { arguments: args } }] });
   return {
     prompt,
@@ -127,5 +131,91 @@ describe('rca_anti_leakage', () => {
     });
     expect(prompt).not.toHaveBeenCalled();
     expect(result).toMatchObject({ score: null, label: 'n/a' });
+  });
+});
+
+describe('ORCA scores', () => {
+  const evaluator = (deps: ReturnType<typeof judgeReturning>['deps'], name: string) => {
+    const found = createOrcaEvaluators(deps).find((candidate) => candidate.name === name);
+    if (!found) throw new Error(`missing ${name}`);
+    return found;
+  };
+
+  it('scores accuracy 0 when the report names only one of several plausible flags', async () => {
+    const { deps, prompt } = judgeReturning({
+      named_flags: ['productCatalogFailure'],
+      named_causes: ['productCatalogFailure'],
+      reasoning: 'One flag.',
+    });
+    const result = await evaluator(deps, ORCA_RCA_ACCURACY_EVALUATOR).evaluate({
+      ...example,
+      metadata: {
+        case_id: 'checkout',
+        plausible_flags: ['productCatalogFailure', 'recommendationCacheFailure'],
+      },
+      output: output(),
+    });
+    expect(prompt).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ score: 0, label: 'fail' });
+  });
+
+  it('passes an empty control report without calling the judge', async () => {
+    const { deps, prompt } = judgeReturning({
+      incident_inside_quiet_window: true,
+      reasoning: 'Unused.',
+    });
+    const result = await evaluator(deps, ORCA_CONTROL_EVALUATOR).evaluate({
+      ...example,
+      metadata: { case_id: 'checkout', control: true, plausible_flags: [] },
+      output: output({ structured_report: undefined }),
+    });
+    expect(prompt).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('passes a control report that only has the default severity', async () => {
+    const { deps, prompt } = judgeReturning({
+      incident_inside_quiet_window: true,
+      reasoning: 'Unused.',
+    });
+    const result = await evaluator(deps, ORCA_CONTROL_EVALUATOR).evaluate({
+      ...example,
+      metadata: { case_id: 'checkout', control: true },
+      output: output({ structured_report: { severity: 'medium' } }),
+    });
+    expect(prompt).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('fails a control report that places an incident inside the quiet window', async () => {
+    const { deps } = judgeReturning({
+      incident_inside_quiet_window: true,
+      reasoning: 'The report puts the incident inside the window.',
+    });
+    const result = await evaluator(deps, ORCA_CONTROL_EVALUATOR).evaluate({
+      ...example,
+      metadata: {
+        case_id: 'checkout',
+        task_type: 'control',
+        plausible_flags: [],
+        quiet_window: { start: '2026-04-19T16:00:00.000Z', end: '2026-04-19T17:00:00.000Z' },
+      },
+      output: output(),
+    });
+    expect(result).toMatchObject({ score: 0, label: 'fail' });
+  });
+
+  it('scores a hallucination when a named cause is outside the plausible set', async () => {
+    const { deps } = judgeReturning({
+      named_flags: ['productCatalogFailure'],
+      named_causes: ['productCatalogFailure', 'paymentServiceMemoryLeak'],
+      reasoning: 'An extra cause.',
+    });
+    const result = await evaluator(deps, ORCA_HALLUCINATION_EVALUATOR).evaluate({
+      ...example,
+      metadata: { case_id: 'checkout', plausible_flags: ['productCatalogFailure'] },
+      output: output(),
+    });
+    expect(result).toMatchObject({ score: 1, label: 'hallucinated' });
   });
 });

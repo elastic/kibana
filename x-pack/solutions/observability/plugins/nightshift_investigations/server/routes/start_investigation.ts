@@ -11,6 +11,7 @@ import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schem
 import {
   freeFormContextSchema,
   investigationNotificationDestinationsSchema,
+  isTelemetryNotAfter,
   MAX_ALERTS_PER_INVESTIGATION,
 } from '../../common';
 import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
@@ -69,6 +70,11 @@ const startInvestigationBodySchema = z.union([
     title: titleSchema.optional(),
     context: freeFormContextSchema.optional(),
     message: z.string().min(1).max(MAX_TEXT_LENGTH),
+    telemetry_not_after: z
+      .string()
+      .max(40)
+      .refine(isTelemetryNotAfter, 'telemetry_not_after must be a UTC timestamp')
+      .optional(),
     ...startInvestigationModel,
     notificationDestinations: investigationNotificationDestinationsSchema.optional(),
   }),

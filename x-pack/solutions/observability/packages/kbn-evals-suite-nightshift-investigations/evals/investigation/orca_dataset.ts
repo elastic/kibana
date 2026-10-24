@@ -66,6 +66,13 @@ export const validateOrcaDataset = (
     getOrcaDatasetHash(examples) === release.sha256,
     'ORCA dataset content differs from the pinned release; publish and review a new dataset release'
   );
+  assert(
+    examples.every((example) => {
+      const currentTime = example.metadata.current_time;
+      return typeof currentTime === 'string' && !Number.isNaN(Date.parse(currentTime));
+    }),
+    'ORCA dataset examples must record a parseable metadata.current_time'
+  );
   return {
     name: dataset.name,
     description: dataset.description,
