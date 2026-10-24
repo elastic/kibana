@@ -52,6 +52,18 @@ export const MAX_TAG_FILTER_KEYWORDS = MAX_MEMORY_TAGS_PER_PAGE;
 
 export type MemoryRetrieveMatch = 'context' | 'content';
 
+/**
+ * How `retrieve` found its pages: `hybrid` is lexical plus semantic RRF on `description`,
+ * `bm25` is lexical only (content matching, or the fallback when the semantic retriever fails),
+ * `browse` is newest-first with no query.
+ */
+export type MemoryRetrieveMode = 'hybrid' | 'bm25' | 'browse';
+
+export interface MemoryRetrieveResult {
+  pages: MemoryPage[];
+  mode: MemoryRetrieveMode;
+}
+
 /** Elasticsearch's optimistic-concurrency pair, as the store hands it out. */
 export interface MemoryPageVersion {
   seqNo: number;
@@ -108,7 +120,7 @@ export interface MemoryPageStore {
     size?: number;
     /** Default matches stored `description`; duplicate-detection matches `content`. */
     match?: MemoryRetrieveMatch;
-  }) => Promise<MemoryPage[]>;
+  }) => Promise<MemoryRetrieveResult>;
   get: (id: string) => Promise<MemoryPage | undefined>;
   getMany: (ids: readonly string[]) => Promise<MemoryPage[]>;
   getVersioned: (id: string) => Promise<VersionedMemoryPage | undefined>;
@@ -550,7 +562,7 @@ export const createMemoryPageStore = ({
           `space=${spaceId} query=${JSON.stringify(previewText(trimmed))}`
       );
 
-      const searchWithQuery = async (queryText: string) => {
+      const searchWithQuery = async (queryText: string): Promise<MemoryRetrieveResult> => {
         if (match === 'content') {
           const response = await esClient.search<StoredMemoryPage>(
             {
@@ -576,7 +588,7 @@ export const createMemoryPageStore = ({
             },
             { signal }
           );
-          return hitsToPages(response.hits.hits);
+          return { pages: hitsToPages(response.hits.hits), mode: 'bm25' };
         }
 
         try {
@@ -602,10 +614,10 @@ export const createMemoryPageStore = ({
             },
             { signal }
           );
-          return hitsToPages(response.hits.hits);
+          return { pages: hitsToPages(response.hits.hits), mode: 'hybrid' };
         } catch (err) {
           if (isIndexNotFoundError(err)) {
-            return [];
+            return { pages: [], mode: 'hybrid' };
           }
           logger.warn(
             `Memory context hybrid retrieve failed, falling back to BM25: ${
@@ -626,12 +638,12 @@ export const createMemoryPageStore = ({
             },
             { signal }
           );
-          return hitsToPages(response.hits.hits);
+          return { pages: hitsToPages(response.hits.hits), mode: 'bm25' };
         }
       };
 
       try {
-        let pages: MemoryPage[];
+        let result: MemoryRetrieveResult;
         if (!isSearch || trimmed === undefined) {
           const response = await esClient.search<StoredMemoryPage>(
             {
@@ -647,18 +659,23 @@ export const createMemoryPageStore = ({
             },
             { signal }
           );
-          pages = hitsToPages(response.hits.hits);
+          result = { pages: hitsToPages(response.hits.hits), mode: 'browse' };
         } else {
-          pages = await searchWithQuery(trimmed);
+          result = await searchWithQuery(trimmed);
         }
         logger.debug(
-          `Memory retrieve done match=${match} hits=${pages.length}: ${formatPageRefs(pages)}`
+          `Memory retrieve done match=${match} mode=${result.mode} hits=${
+            result.pages.length
+          }: ${formatPageRefs(result.pages)}`
         );
-        return pages;
+        return result;
       } catch (err) {
         if (isIndexNotFoundError(err)) {
           logger.debug(`Memory retrieve index ${MEMORY_INDEX} missing — returning 0 hits`);
-          return [];
+          return {
+            pages: [],
+            mode: !isSearch ? 'browse' : match === 'content' ? 'bm25' : 'hybrid',
+          };
         }
         throw err;
       }
