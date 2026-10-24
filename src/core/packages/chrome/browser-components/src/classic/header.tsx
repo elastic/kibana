@@ -37,6 +37,7 @@ import {
 import { SearchButton } from '../shared/search_button';
 import { AiButtonSlot } from '../shared/ai_button_slot';
 import { HelpButton } from '../shared/help_button';
+import { MotionRefreshButton } from '../shared/motion_refresh_button';
 import { HeaderRightGroup } from '../shared/header_right_group';
 import { ClassicHeaderDarkColorMode } from '../shared/header_color_mode';
 
@@ -59,6 +60,7 @@ export const ClassicHeader = React.memo(() => {
       search={isSmall ? search : undefined}
       help={dark(<HelpButton />)}
       actions={<AiButtonSlot />}
+      motion={dark(<MotionRefreshButton />)}
       userMenu={userMenu}
     />
   );

@@ -2,11 +2,11 @@
 
 exports[`LoginPage disabled form states renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
 >
   <header
-    class="css-18p0ypx-padding"
+    class="css-mhvpcp-loginForm"
   >
     <div
       class="css-18h45yv-loginWelcomeStyle-contentHeaderStyles"
@@ -74,11 +74,11 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
 
 exports[`LoginPage disabled form states renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
 >
   <header
-    class="css-18p0ypx-padding"
+    class="css-mhvpcp-loginForm"
   >
     <div
       class="css-18h45yv-loginWelcomeStyle-contentHeaderStyles"
@@ -146,11 +146,11 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
 
 exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
 >
   <header
-    class="css-18p0ypx-padding"
+    class="css-mhvpcp-loginForm"
   >
     <div
       class="css-18h45yv-loginWelcomeStyle-contentHeaderStyles"
@@ -208,11 +208,11 @@ exports[`LoginPage disabled form states renders as expected when a connection to
 
 exports[`LoginPage disabled form states renders as expected when an unknown loginState layout is provided 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
 >
   <header
-    class="css-18p0ypx-padding"
+    class="css-mhvpcp-loginForm"
   >
     <div
       class="css-18h45yv-loginWelcomeStyle-contentHeaderStyles"
@@ -270,60 +270,30 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
 
 exports[`LoginPage disabled form states renders as expected when login is not enabled 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-ihogzj-fullScreenGraphicsFadeIn-loginForm"
   data-test-subj="loginForm"
 >
-  <header
-    class="css-18p0ypx-padding"
-  >
-    <div
-      class="css-c2wr7u-loginWelcomeStyle"
-    >
-      <span
-        class="loginWelcome__logo"
-      >
-        <span
-          aria-hidden="true"
-          data-euiicon-type="logoElastic"
-        />
-      </span>
-      <h1
-        class="euiTitle loginWelcome__title emotion-euiTitle-m"
-        data-test-subj="loginWelcomeTitle"
-      >
-        Welcome to Elastic
-      </h1>
-    </div>
-  </header>
   <div
-    class="css-c2wr7u-loginWelcomeStyle"
+    class="css-1npc3ex-loginForm"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiText emotion-euiText-s-euiTextColor-danger"
+        style="text-align: center;"
       >
-        <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
-        >
-          <div
-            class="euiText emotion-euiText-s-euiTextColor-danger"
-            style="text-align: center;"
-          >
-            <p>
-              Login is disabled.
-            </p>
-          </div>
-          <div
-            class="euiText emotion-euiText-s"
-            style="text-align: center;"
-          >
-            <p>
-              Contact your system administrator.
-            </p>
-          </div>
-        </div>
+        <p>
+          Login is disabled.
+        </p>
+      </div>
+      <div
+        class="euiText emotion-euiText-s"
+        style="text-align: center;"
+      >
+        <p>
+          Contact your system administrator.
+        </p>
       </div>
     </div>
   </div>
@@ -332,11 +302,11 @@ exports[`LoginPage disabled form states renders as expected when login is not en
 
 exports[`LoginPage disabled form states renders as expected when secure connection is required but not present 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
 >
   <header
-    class="css-18p0ypx-padding"
+    class="css-mhvpcp-loginForm"
   >
     <div
       class="css-18h45yv-loginWelcomeStyle-contentHeaderStyles"
@@ -394,11 +364,11 @@ exports[`LoginPage disabled form states renders as expected when secure connecti
 
 exports[`LoginPage disabled form states renders as expected when xpack is not available 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
 >
   <header
-    class="css-18p0ypx-padding"
+    class="css-mhvpcp-loginForm"
   >
     <div
       class="css-18h45yv-loginWelcomeStyle-contentHeaderStyles"
@@ -456,11 +426,11 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
 
 exports[`LoginPage disabled form states renders warning when cookies are disabled and document is not embedded inside iframe 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-yd0ea2-fullScreenGraphicsFadeIn"
   data-test-subj="loginForm"
 >
   <header
-    class="css-18p0ypx-padding"
+    class="css-mhvpcp-loginForm"
   >
     <div
       class="css-18h45yv-loginWelcomeStyle-contentHeaderStyles"
@@ -518,183 +488,181 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
 
 exports[`LoginPage enabled form state renders as expected 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-ihogzj-fullScreenGraphicsFadeIn-loginForm"
   data-test-subj="loginForm"
 >
-  <header
-    class="css-18p0ypx-padding"
-  >
-    <div
-      class="css-c2wr7u-loginWelcomeStyle"
-    >
-      <span
-        class="loginWelcome__logo"
-      >
-        <span
-          aria-hidden="true"
-          data-euiicon-type="logoElastic"
-        />
-      </span>
-      <h1
-        class="euiTitle loginWelcome__title emotion-euiTitle-m"
-        data-test-subj="loginWelcomeTitle"
-      >
-        Welcome to Elastic
-      </h1>
-    </div>
-  </header>
   <div
-    class="css-c2wr7u-loginWelcomeStyle"
+    class="css-1npc3ex-loginForm"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge emotion-euiPanel-grow-m-l-plain-hasShadow-loginPanelCss"
+      data-test-subj="loginForm"
     >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
+      <form>
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
-          data-test-subj="loginForm"
+          aria-hidden="true"
+          class="css-1lt7npn-loginMarkCss"
         >
-          <form>
+          <img
+            alt=""
+            class="css-9scbnr-loginGlyphCss"
+            height="36"
+            src="/ui/login_screen/elastic_glyph.svg"
+            width="36"
+          />
+          <img
+            alt=""
+            class="css-njnyz2-loginWordCss"
+            height="20"
+            src="/ui/login_screen/elastic_wordmark.svg"
+            width="64"
+          />
+        </div>
+        <div
+          class="css-tr2451-loginFieldsCss"
+        >
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
             <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
+              >
+                Username
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFormRow__labelWrapper"
-              >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Username
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
+                class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
               >
                 <div
-                  class="euiFormControlLayout emotion-euiFormControlLayout"
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
-                  >
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldText emotion-euiFieldText"
-                      data-test-subj="loginUsername"
-                      id="generated-id"
-                      name="username"
-                      type="text"
-                      value=""
-                    />
-                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldText emotion-euiFieldText-fullWidth"
+                    data-test-subj="loginUsername"
+                    id="generated-id"
+                    name="username"
+                    type="text"
+                    value=""
+                  />
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
             <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+              class="euiFormRow__labelWrapper"
             >
-              <div
-                class="euiFormRow__labelWrapper"
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
               >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Password
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
-              >
-                <div
-                  class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
-                >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
-                    style="--euiFormControlLeftIconsCount: 1;"
-                  >
-                    <div
-                      class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
-                    >
-                      <span
-                        class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiFormControlLayoutCustomIcon__icon"
-                          data-euiicon-type="lock"
-                        />
-                      </span>
-                    </div>
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldPassword emotion-euiFieldPassword-inGroup-withToggle"
-                      data-test-subj="loginPassword"
-                      id="generated-id"
-                      name="password"
-                      type="password"
-                      value=""
-                    />
-                  </div>
-                  <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
-                  >
-                    <span
-                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                      id="generated-id_euiToolTipAnchor"
-                    >
-                      <button
-                        aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                        type="button"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="eye"
-                        />
-                      </button>
-                    </span>
-                  </div>
-                </div>
-              </div>
+                Password
+              </label>
             </div>
             <div
-              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-            />
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-grow-1"
+                class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
               >
-                <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
-                  data-test-subj="loginSubmit"
-                  type="submit"
+                <div
+                  class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side"
                 >
                   <span
-                    class="emotion-euiButtonDisplayContent"
+                    aria-hidden="true"
+                    data-euiicon-type="lock"
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
+                  style="--euiFormControlLeftIconsCount: 1;"
+                >
+                  <div
+                    class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
                   >
-                    Log in
+                    <span
+                      class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="lock"
+                      />
+                    </span>
+                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldPassword emotion-euiFieldPassword-fullWidth-inGroup-withToggle"
+                    data-test-subj="loginPassword"
+                    id="generated-id"
+                    name="password"
+                    type="password"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id_euiToolTipAnchor"
+                  >
+                    <button
+                      aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="eye"
+                      />
+                    </button>
                   </span>
-                </button>
+                </div>
               </div>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-loginActionsCss"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+              data-test-subj="loginSubmit"
+              type="submit"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Log in
+              </span>
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -702,202 +670,200 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
 
 exports[`LoginPage enabled form state renders as expected when loginAssistanceMessage is set 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-ihogzj-fullScreenGraphicsFadeIn-loginForm"
   data-test-subj="loginForm"
 >
-  <header
-    class="css-18p0ypx-padding"
-  >
-    <div
-      class="css-c2wr7u-loginWelcomeStyle"
-    >
-      <span
-        class="loginWelcome__logo"
-      >
-        <span
-          aria-hidden="true"
-          data-euiicon-type="logoElastic"
-        />
-      </span>
-      <h1
-        class="euiTitle loginWelcome__title emotion-euiTitle-m"
-        data-test-subj="loginWelcomeTitle"
-      >
-        Welcome to Elastic
-      </h1>
-    </div>
-  </header>
   <div
-    class="css-c2wr7u-loginWelcomeStyle"
+    class="css-1npc3ex-loginForm"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="css-1jqf2m-assistanceCss"
+      data-test-subj="loginAssistanceMessage"
     >
+      <hr
+        class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
+      />
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiText emotion-euiText-xs"
       >
+        <p>
+          This is an 
+          <em>
+            important
+          </em>
+           message
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge emotion-euiPanel-grow-m-l-plain-hasShadow-loginPanelCss"
+      data-test-subj="loginForm"
+    >
+      <form>
         <div
-          class="css-1jqf2m-assistanceCss"
-          data-test-subj="loginAssistanceMessage"
+          aria-hidden="true"
+          class="css-1lt7npn-loginMarkCss"
         >
-          <hr
-            class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
+          <img
+            alt=""
+            class="css-9scbnr-loginGlyphCss"
+            height="36"
+            src="/ui/login_screen/elastic_glyph.svg"
+            width="36"
           />
+          <img
+            alt=""
+            class="css-njnyz2-loginWordCss"
+            height="20"
+            src="/ui/login_screen/elastic_wordmark.svg"
+            width="64"
+          />
+        </div>
+        <div
+          class="css-tr2451-loginFieldsCss"
+        >
           <div
-            class="euiText emotion-euiText-xs"
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
           >
-            <p>
-              This is an 
-              <em>
-                important
-              </em>
-               message
-            </p>
+            <div
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
+              >
+                Username
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
+              >
+                <div
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldText emotion-euiFieldText-fullWidth"
+                    data-test-subj="loginUsername"
+                    id="generated-id"
+                    name="username"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
+            <div
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
+              >
+                Password
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
+              >
+                <div
+                  class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side"
+                >
+                  <span
+                    aria-hidden="true"
+                    data-euiicon-type="lock"
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
+                  style="--euiFormControlLeftIconsCount: 1;"
+                >
+                  <div
+                    class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
+                  >
+                    <span
+                      class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="lock"
+                      />
+                    </span>
+                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldPassword emotion-euiFieldPassword-fullWidth-inGroup-withToggle"
+                    data-test-subj="loginPassword"
+                    id="generated-id"
+                    name="password"
+                    type="password"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id_euiToolTipAnchor"
+                  >
+                    <button
+                      aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="eye"
+                      />
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
-          data-test-subj="loginForm"
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-loginActionsCss"
         >
-          <form>
-            <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+              data-test-subj="loginSubmit"
+              type="submit"
             >
-              <div
-                class="euiFormRow__labelWrapper"
+              <span
+                class="emotion-euiButtonDisplayContent"
               >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Username
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
-              >
-                <div
-                  class="euiFormControlLayout emotion-euiFormControlLayout"
-                >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
-                  >
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldText emotion-euiFieldText"
-                      data-test-subj="loginUsername"
-                      id="generated-id"
-                      name="username"
-                      type="text"
-                      value=""
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
-            >
-              <div
-                class="euiFormRow__labelWrapper"
-              >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Password
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
-              >
-                <div
-                  class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
-                >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
-                    style="--euiFormControlLeftIconsCount: 1;"
-                  >
-                    <div
-                      class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
-                    >
-                      <span
-                        class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiFormControlLayoutCustomIcon__icon"
-                          data-euiicon-type="lock"
-                        />
-                      </span>
-                    </div>
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldPassword emotion-euiFieldPassword-inGroup-withToggle"
-                      data-test-subj="loginPassword"
-                      id="generated-id"
-                      name="password"
-                      type="password"
-                      value=""
-                    />
-                  </div>
-                  <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
-                  >
-                    <span
-                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                      id="generated-id_euiToolTipAnchor"
-                    >
-                      <button
-                        aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                        type="button"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="eye"
-                        />
-                      </button>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-            />
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
-            >
-              <div
-                class="euiFlexItem emotion-euiFlexItem-grow-1"
-              >
-                <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
-                  data-test-subj="loginSubmit"
-                  type="submit"
-                >
-                  <span
-                    class="emotion-euiButtonDisplayContent"
-                  >
-                    Log in
-                  </span>
-                </button>
-              </div>
-            </div>
-          </form>
+                Log in
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 </div>
@@ -905,197 +871,195 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
 
 exports[`LoginPage enabled form state renders as expected when loginHelp is set 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-ihogzj-fullScreenGraphicsFadeIn-loginForm"
   data-test-subj="loginForm"
 >
-  <header
-    class="css-18p0ypx-padding"
-  >
-    <div
-      class="css-c2wr7u-loginWelcomeStyle"
-    >
-      <span
-        class="loginWelcome__logo"
-      >
-        <span
-          aria-hidden="true"
-          data-euiicon-type="logoElastic"
-        />
-      </span>
-      <h1
-        class="euiTitle loginWelcome__title emotion-euiTitle-m"
-        data-test-subj="loginWelcomeTitle"
-      >
-        Welcome to Elastic
-      </h1>
-    </div>
-  </header>
   <div
-    class="css-c2wr7u-loginWelcomeStyle"
+    class="css-1npc3ex-loginForm"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge emotion-euiPanel-grow-m-l-plain-hasShadow-loginPanelCss"
+      data-test-subj="loginForm"
     >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
+      <form>
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
-          data-test-subj="loginForm"
+          aria-hidden="true"
+          class="css-1lt7npn-loginMarkCss"
         >
-          <form>
+          <img
+            alt=""
+            class="css-9scbnr-loginGlyphCss"
+            height="36"
+            src="/ui/login_screen/elastic_glyph.svg"
+            width="36"
+          />
+          <img
+            alt=""
+            class="css-njnyz2-loginWordCss"
+            height="20"
+            src="/ui/login_screen/elastic_wordmark.svg"
+            width="64"
+          />
+        </div>
+        <div
+          class="css-tr2451-loginFieldsCss"
+        >
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
             <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
+              >
+                Username
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFormRow__labelWrapper"
-              >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Username
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
+                class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
               >
                 <div
-                  class="euiFormControlLayout emotion-euiFormControlLayout"
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
-                  >
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldText emotion-euiFieldText"
-                      data-test-subj="loginUsername"
-                      id="generated-id"
-                      name="username"
-                      type="text"
-                      value=""
-                    />
-                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldText emotion-euiFieldText-fullWidth"
+                    data-test-subj="loginUsername"
+                    id="generated-id"
+                    name="username"
+                    type="text"
+                    value=""
+                  />
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
             <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+              class="euiFormRow__labelWrapper"
             >
-              <div
-                class="euiFormRow__labelWrapper"
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
               >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Password
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
-              >
-                <div
-                  class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
-                >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
-                    style="--euiFormControlLeftIconsCount: 1;"
-                  >
-                    <div
-                      class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
-                    >
-                      <span
-                        class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiFormControlLayoutCustomIcon__icon"
-                          data-euiicon-type="lock"
-                        />
-                      </span>
-                    </div>
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldPassword emotion-euiFieldPassword-inGroup-withToggle"
-                      data-test-subj="loginPassword"
-                      id="generated-id"
-                      name="password"
-                      type="password"
-                      value=""
-                    />
-                  </div>
-                  <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
-                  >
-                    <span
-                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                      id="generated-id_euiToolTipAnchor"
-                    >
-                      <button
-                        aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                        type="button"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="eye"
-                        />
-                      </button>
-                    </span>
-                  </div>
-                </div>
-              </div>
+                Password
+              </label>
             </div>
             <div
-              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-            />
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-grow-1"
+                class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
               >
-                <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
-                  data-test-subj="loginSubmit"
-                  type="submit"
+                <div
+                  class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side"
                 >
                   <span
-                    class="emotion-euiButtonDisplayContent"
+                    aria-hidden="true"
+                    data-euiicon-type="lock"
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
+                  style="--euiFormControlLeftIconsCount: 1;"
+                >
+                  <div
+                    class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
                   >
-                    Log in
+                    <span
+                      class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="lock"
+                      />
+                    </span>
+                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldPassword emotion-euiFieldPassword-fullWidth-inGroup-withToggle"
+                    data-test-subj="loginPassword"
+                    id="generated-id"
+                    name="password"
+                    type="password"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id_euiToolTipAnchor"
+                  >
+                    <button
+                      aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="eye"
+                      />
+                    </button>
                   </span>
-                </button>
+                </div>
               </div>
             </div>
-          </form>
+          </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiText eui-textCenter emotion-euiText-xs"
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-loginActionsCss"
         >
-          <button
-            class="euiLink emotion-euiLink-text"
-            data-test-subj="loginHelpLink"
-            type="button"
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
-            Need help?
-          </button>
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+              data-test-subj="loginSubmit"
+              type="submit"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Log in
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      </form>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+    />
+    <div
+      class="euiText eui-textCenter emotion-euiText-xs"
+    >
+      <button
+        class="euiLink emotion-euiLink-text"
+        data-test-subj="loginHelpLink"
+        type="button"
+      >
+        Need help?
+      </button>
     </div>
   </div>
 </div>
@@ -1103,183 +1067,181 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 
 exports[`LoginPage page renders as expected 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-ihogzj-fullScreenGraphicsFadeIn-loginForm"
   data-test-subj="loginForm"
 >
-  <header
-    class="css-18p0ypx-padding"
-  >
-    <div
-      class="css-c2wr7u-loginWelcomeStyle"
-    >
-      <span
-        class="loginWelcome__logo"
-      >
-        <span
-          aria-hidden="true"
-          data-euiicon-type="logoElastic"
-        />
-      </span>
-      <h1
-        class="euiTitle loginWelcome__title emotion-euiTitle-m"
-        data-test-subj="loginWelcomeTitle"
-      >
-        Welcome to Elastic
-      </h1>
-    </div>
-  </header>
   <div
-    class="css-c2wr7u-loginWelcomeStyle"
+    class="css-1npc3ex-loginForm"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge emotion-euiPanel-grow-m-l-plain-hasShadow-loginPanelCss"
+      data-test-subj="loginForm"
     >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
+      <form>
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
-          data-test-subj="loginForm"
+          aria-hidden="true"
+          class="css-1lt7npn-loginMarkCss"
         >
-          <form>
+          <img
+            alt=""
+            class="css-9scbnr-loginGlyphCss"
+            height="36"
+            src="/ui/login_screen/elastic_glyph.svg"
+            width="36"
+          />
+          <img
+            alt=""
+            class="css-njnyz2-loginWordCss"
+            height="20"
+            src="/ui/login_screen/elastic_wordmark.svg"
+            width="64"
+          />
+        </div>
+        <div
+          class="css-tr2451-loginFieldsCss"
+        >
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
             <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
+              >
+                Username
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFormRow__labelWrapper"
-              >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Username
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
+                class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
               >
                 <div
-                  class="euiFormControlLayout emotion-euiFormControlLayout"
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
-                  >
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldText emotion-euiFieldText"
-                      data-test-subj="loginUsername"
-                      id="generated-id"
-                      name="username"
-                      type="text"
-                      value=""
-                    />
-                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldText emotion-euiFieldText-fullWidth"
+                    data-test-subj="loginUsername"
+                    id="generated-id"
+                    name="username"
+                    type="text"
+                    value=""
+                  />
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
             <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+              class="euiFormRow__labelWrapper"
             >
-              <div
-                class="euiFormRow__labelWrapper"
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
               >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Password
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
-              >
-                <div
-                  class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
-                >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
-                    style="--euiFormControlLeftIconsCount: 1;"
-                  >
-                    <div
-                      class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
-                    >
-                      <span
-                        class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiFormControlLayoutCustomIcon__icon"
-                          data-euiicon-type="lock"
-                        />
-                      </span>
-                    </div>
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldPassword emotion-euiFieldPassword-inGroup-withToggle"
-                      data-test-subj="loginPassword"
-                      id="generated-id"
-                      name="password"
-                      type="password"
-                      value=""
-                    />
-                  </div>
-                  <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
-                  >
-                    <span
-                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                      id="generated-id_euiToolTipAnchor"
-                    >
-                      <button
-                        aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                        type="button"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="eye"
-                        />
-                      </button>
-                    </span>
-                  </div>
-                </div>
-              </div>
+                Password
+              </label>
             </div>
             <div
-              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-            />
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-grow-1"
+                class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
               >
-                <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
-                  data-test-subj="loginSubmit"
-                  type="submit"
+                <div
+                  class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side"
                 >
                   <span
-                    class="emotion-euiButtonDisplayContent"
+                    aria-hidden="true"
+                    data-euiicon-type="lock"
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
+                  style="--euiFormControlLeftIconsCount: 1;"
+                >
+                  <div
+                    class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
                   >
-                    Log in
+                    <span
+                      class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="lock"
+                      />
+                    </span>
+                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldPassword emotion-euiFieldPassword-fullWidth-inGroup-withToggle"
+                    data-test-subj="loginPassword"
+                    id="generated-id"
+                    name="password"
+                    type="password"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id_euiToolTipAnchor"
+                  >
+                    <button
+                      aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="eye"
+                      />
+                    </button>
                   </span>
-                </button>
+                </div>
               </div>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-loginActionsCss"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+              data-test-subj="loginSubmit"
+              type="submit"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Log in
+              </span>
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -1287,190 +1249,181 @@ exports[`LoginPage page renders as expected 1`] = `
 
 exports[`LoginPage page renders with custom branding 1`] = `
 <div
-  class="css-yd0ea2-fullScreenGraphicsFadeIn"
+  class="kbnLoginPage css-ihogzj-fullScreenGraphicsFadeIn-loginForm"
   data-test-subj="loginForm"
 >
-  <header
-    class="css-18p0ypx-padding"
+  <div
+    class="css-1npc3ex-loginForm"
   >
     <div
-      class="css-c2wr7u-loginWelcomeStyle"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge emotion-euiPanel-grow-m-l-plain-hasShadow-loginPanelCss"
+      data-test-subj="loginForm"
     >
-      <span
-        class="loginWelcome__logo"
-        style="padding: 0px;"
-      >
-        <figure
-          class="euiImageWrapper emotion-euiImageWrapper"
+      <form>
+        <div
+          aria-hidden="true"
+          class="css-1lt7npn-loginMarkCss"
         >
           <img
-            alt="logo"
-            class="euiImage emotion-euiImage-customSize"
-            src="logo"
-            style="max-width: 40px; max-height: 40px;"
+            alt=""
+            class="css-9scbnr-loginGlyphCss"
+            height="36"
+            src="/ui/login_screen/elastic_glyph.svg"
+            width="36"
           />
-        </figure>
-      </span>
-      <h1
-        class="euiTitle loginWelcome__title emotion-euiTitle-m"
-        data-test-subj="loginWelcomeTitle"
-      >
-        Welcome to Elastic
-      </h1>
-    </div>
-  </header>
-  <div
-    class="css-c2wr7u-loginWelcomeStyle"
-  >
-    <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-    >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
+          <img
+            alt=""
+            class="css-njnyz2-loginWordCss"
+            height="20"
+            src="/ui/login_screen/elastic_wordmark.svg"
+            width="64"
+          />
+        </div>
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
-          data-test-subj="loginForm"
+          class="css-tr2451-loginFieldsCss"
         >
-          <form>
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
             <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
+              >
+                Username
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFormRow__labelWrapper"
-              >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Username
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
+                class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
               >
                 <div
-                  class="euiFormControlLayout emotion-euiFormControlLayout"
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
                 >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
-                  >
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldText emotion-euiFieldText"
-                      data-test-subj="loginUsername"
-                      id="generated-id"
-                      name="username"
-                      type="text"
-                      value=""
-                    />
-                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldText emotion-euiFieldText-fullWidth"
+                    data-test-subj="loginUsername"
+                    id="generated-id"
+                    name="username"
+                    type="text"
+                    value=""
+                  />
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth-loginFieldRowCss"
+            id="generated-id-row"
+          >
             <div
-              class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
-              id="generated-id-row"
+              class="euiFormRow__labelWrapper"
             >
-              <div
-                class="euiFormRow__labelWrapper"
+              <label
+                aria-invalid="false"
+                class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+                for="generated-id"
+                id="generated-id-label"
               >
-                <label
-                  aria-invalid="false"
-                  class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-                  for="generated-id"
-                  id="generated-id-label"
-                >
-                  Password
-                </label>
-              </div>
-              <div
-                class="euiFormRow__fieldWrapper"
-              >
-                <div
-                  class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
-                >
-                  <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
-                    style="--euiFormControlLeftIconsCount: 1;"
-                  >
-                    <div
-                      class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
-                    >
-                      <span
-                        class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiFormControlLayoutCustomIcon__icon"
-                          data-euiicon-type="lock"
-                        />
-                      </span>
-                    </div>
-                    <input
-                      aria-required="true"
-                      autocomplete="off"
-                      class="euiFieldPassword emotion-euiFieldPassword-inGroup-withToggle"
-                      data-test-subj="loginPassword"
-                      id="generated-id"
-                      name="password"
-                      type="password"
-                      value=""
-                    />
-                  </div>
-                  <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
-                  >
-                    <span
-                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                      id="generated-id_euiToolTipAnchor"
-                    >
-                      <button
-                        aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                        type="button"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="eye"
-                        />
-                      </button>
-                    </span>
-                  </div>
-                </div>
-              </div>
+                Password
+              </label>
             </div>
             <div
-              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-            />
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              class="euiFormRow__fieldWrapper"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-grow-1"
+                class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-fullWidth-group"
               >
-                <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
-                  data-test-subj="loginSubmit"
-                  type="submit"
+                <div
+                  class="euiFormControlLayout__prepend emotion-euiFormControlLayout__side"
                 >
                   <span
-                    class="emotion-euiButtonDisplayContent"
+                    aria-hidden="true"
+                    data-euiicon-type="lock"
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
+                  style="--euiFormControlLeftIconsCount: 1;"
+                >
+                  <div
+                    class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
                   >
-                    Log in
+                    <span
+                      class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="lock"
+                      />
+                    </span>
+                  </div>
+                  <input
+                    aria-required="true"
+                    autocomplete="off"
+                    class="euiFieldPassword emotion-euiFieldPassword-fullWidth-inGroup-withToggle"
+                    data-test-subj="loginPassword"
+                    id="generated-id"
+                    name="password"
+                    type="password"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id_euiToolTipAnchor"
+                  >
+                    <button
+                      aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="eye"
+                      />
+                    </button>
                   </span>
-                </button>
+                </div>
               </div>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row-loginActionsCss"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+              data-test-subj="loginSubmit"
+              type="submit"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Log in
+              </span>
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>

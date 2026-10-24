@@ -35,6 +35,7 @@ export interface ChromeHeaderShellProps {
   search?: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
+  motion?: ReactNode;
   userMenu?: ReactNode;
 }
 
@@ -104,7 +105,17 @@ const useChromeHeaderStyles = () => {
 };
 
 export const ChromeHeaderShell = React.memo<ChromeHeaderShellProps>(
-  ({ logo, switcher, projectPicker, subscriptionBadge, search, help, actions, userMenu }) => {
+  ({
+    logo,
+    switcher,
+    projectPicker,
+    subscriptionBadge,
+    search,
+    help,
+    actions,
+    motion,
+    userMenu,
+  }) => {
     const sideNavWidth = useSideNavWidth();
     const styles = useChromeHeaderStyles();
     const logoWidth = sideNavWidth <= COLLAPSED_WIDTH ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -145,7 +156,13 @@ export const ChromeHeaderShell = React.memo<ChromeHeaderShellProps>(
           </>
         )}
         <div css={styles.spacer} />
-        <HeaderRightGroup search={search} help={help} actions={actions} userMenu={userMenu} />
+        <HeaderRightGroup
+          search={search}
+          help={help}
+          actions={actions}
+          motion={motion}
+          userMenu={userMenu}
+        />
       </header>
     );
   }

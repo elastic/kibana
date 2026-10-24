@@ -32,10 +32,12 @@ export const Styles: FC<Props> = ({ darkMode, themeName, stylesheetPaths }) => {
 interface SplashColors {
   pageBackground: string;
   welcomeText: string;
-  progress: string;
   progressBefore: string;
   errorTitleText: string;
   errorButtonText: string;
+  loginTrack: string;
+  loginIndicator: string;
+  loginLogoFilter: string;
 }
 
 const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashColors } => {
@@ -45,19 +47,23 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
         // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
         pageBackground: '#ECF1F9', // colors.body
         welcomeText: '#516381', // colors.subduedText
-        progress: '#E3E8F2', // shade20, a step darker than the page so the track stays visible
         progressBefore: '#0B64DD', // colors.primary
         errorTitleText: '#111C2C', // colors.textHeading
         errorButtonText: '#FFFFFF', // colors.textInverse
+        loginTrack: '#48EFCF',
+        loginIndicator: '#0B64DD',
+        loginLogoFilter: 'none',
       },
       dark: {
         // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
         pageBackground: '#07101F', // colors.body
         welcomeText: '#98A8C3',
-        progress: '#172336', // colors.lightestShade
         progressBefore: '#61A2FF',
         errorTitleText: '#E3E8F2', // colors.textHeading
         errorButtonText: '#07101F', // colors.textInverse
+        loginTrack: '#48EFCF',
+        loginIndicator: '#61A2FF',
+        loginLogoFilter: 'brightness(0) invert(1)',
       },
     };
   }
@@ -66,18 +72,22 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
     light: {
       pageBackground: '#F8FAFD',
       welcomeText: '#69707D',
-      progress: '#F5F7FA',
       progressBefore: '#006DE4',
       errorTitleText: '#1a1c21',
       errorButtonText: '#FFFFFF',
+      loginTrack: '#48EFCF',
+      loginIndicator: '#006DE4',
+      loginLogoFilter: 'none',
     },
     dark: {
       pageBackground: '#141519',
       welcomeText: '#98A2B3',
-      progress: '#25262E',
       progressBefore: '#1BA9F5',
       errorTitleText: '#DFE5EF',
       errorButtonText: '#FFFFFF',
+      loginTrack: '#48EFCF',
+      loginIndicator: '#1BA9F5',
+      loginLogoFilter: 'brightness(0) invert(1)',
     },
   };
 };
@@ -91,14 +101,6 @@ const splashRules = (colors: SplashColors) => `
             color: ${colors.welcomeText};
           }
 
-          .kbnProgress {
-            background-color: ${colors.progress};
-          }
-
-          .kbnProgress:before {
-            background-color: ${colors.progressBefore};
-          }
-
           .kbnBootstrapErrorTitle {
             color: ${colors.errorTitleText};
           }
@@ -110,6 +112,25 @@ const splashRules = (colors: SplashColors) => `
           .kbnBootstrapErrorButton {
             background-color: ${colors.progressBefore};
             color: ${colors.errorButtonText};
+          }
+
+          .kbnLoginBar {
+            background-color: ${colors.loginTrack};
+          }
+
+          .kbnLoginBar::before {
+            background-color: transparent;
+            background-image: linear-gradient(
+              90deg,
+              transparent,
+              ${colors.loginIndicator},
+              transparent
+            );
+          }
+
+          .kbnLoginSymbol,
+          .kbnLoginWord {
+            filter: ${colors.loginLogoFilter};
           }
 `;
 
