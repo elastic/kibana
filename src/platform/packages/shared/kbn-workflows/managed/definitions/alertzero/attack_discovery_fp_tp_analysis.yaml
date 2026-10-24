@@ -227,16 +227,6 @@ steps:
       query:
         ids:
           values: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
-      # Bounds for the raw-event window. `value_as_string` is absent when no cited
-      # alert has `kibana.alert.original_time`; `count_alerts` then uses the
-      # discovery timestamp, which is the previous window.
-      aggregations:
-        earliest_original_time:
-          min:
-            field: kibana.alert.original_time
-        latest_original_time:
-          max:
-            field: kibana.alert.original_time
 
   - name: count_alerts
     type: data.set
@@ -246,11 +236,6 @@ steps:
       host_ids: "${{ steps.load_alerts.output.hits.hits | map: '_source.host.id' | compact | uniq }}"
       host_names: "${{ steps.load_alerts.output.hits.hits | map: '_source.host.name' | compact | uniq }}"
       user_names: "${{ steps.load_alerts.output.hits.hits | map: '_source.user.name' | compact | uniq }}"
-      # ±2h is applied by the raw-event range as Elasticsearch date math. The
-      # discovery timestamp is only the fallback when the alerts have no
-      # `kibana.alert.original_time`.
-      events_from: "{%- assign earliest = steps.load_alerts.output.aggregations.earliest_original_time.value_as_string | default: steps.load_alerts.output.aggregations.earliest_original_time.value -%}{%- if earliest != blank -%}{{ earliest }}{%- else -%}{{ steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}{%- endif -%}"
-      events_to: "{%- assign latest = steps.load_alerts.output.aggregations.latest_original_time.value_as_string | default: steps.load_alerts.output.aggregations.latest_original_time.value -%}{%- if latest != blank -%}{{ latest }}{%- else -%}{{ steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}{%- endif -%}"
 
   - name: require_cited_alerts
     type: workflow.fail
@@ -289,103 +274,155 @@ steps:
             - terms:
                 user.name: "${{ steps.count_alerts.output.user_names }}"
 
-  # Optional. Raw endpoint events on the cited hosts, from 2 hours before the
-  # earliest cited alert's `kibana.alert.original_time` to 2 hours after the
-  # latest, one shared cap of 50. `host.id` is the host key. Alerts with no
-  # `host.id` (the list is empty) are matched on `host.name` instead, so a name
-  # is not added when an id exists and cannot pull in another host that happens
-  # to share it. A truncated page does not fail the run; `block_truncated_clear`
-  # stops it from clearing the attack.
-  - name: load_events_by_host_id
-    type: elasticsearch.search
-    if: "${{ (steps.count_alerts.output.host_ids | size) > 0 }}"
-    on-failure:
-      continue: true
-    with:
-      index: logs-endpoint.events.*
-      size: 50
-      # The template caps this string at 200k characters. Endpoint documents
-      # carry process and network trees the parent and destination checks do not use.
-      _source:
-        - '@timestamp'
-        - host.name
-        - host.id
-        - user.name
-        - process.name
-        - process.parent.name
-        - process.entity_id
-        - process.executable
-        - process.command_line
-        - source.ip
-        - destination.ip
-        - destination.domain
-        - event.action
-        - event.category
-        - agent.id
-        - dns.question.name
-        - network.direction
-      sort:
-        - "@timestamp": asc
-      query:
-        bool:
-          filter:
-            - terms:
-                host.id: "${{ steps.count_alerts.output.host_ids }}"
-            - range:
-                "@timestamp":
-                  gte: "{{ steps.count_alerts.output.events_from }}||-2h"
-                  lte: "{{ steps.count_alerts.output.events_to }}||+2h"
+  # Optional. Raw endpoint events, searched PER CITED ALERT so each window
+  # hugs its own alert instead of one shared span. A shared
+  # [min−2h, max+2h] window over a multi-day discovery returned a page of
+  # ordinary telemetry from the start of the span and evicted every
+  # alert-adjacent event (fp-tp suite, fp-multiday-span-truncated), because
+  # `size:50` with `@timestamp asc` fills with whatever came first, not with
+  # what is near the alerts. A per-host split would narrow the span but NOT
+  # fix that case when all cited alerts sit on one host; anchoring each
+  # branch on one alert's `kibana.alert.original_time` does.
+  #
+  # `parallel` dynamic fan-out, one branch per cited-alert hit. Each branch
+  # searches that alert's host (host.id, falling back to host.name when the
+  # alert has no host.id) within original_time ±2h, `size` per branch. The
+  # aggregate `results[]` is index-aligned and carries each branch's search
+  # output under `results[].output`, so downstream steps reassemble one hit
+  # list WITHOUT per-iteration output eviction (a `foreach` step keeps only
+  # the LAST iteration's output — verified in exit_foreach_node_impl.ts,
+  # which evicts every non-latest iteration output on loop exit).
+  #
+  # `mode: settled`: raw events are an optional source, and a failed branch
+  # (missing index/privilege) is recorded in `results[].status/error` and
+  # must not fail the analysis — it feeds `events_failed` below. The
+  # aggregate `status` becomes `failed` when any branch failed, which is
+  # what `events_failed` reads. Branch bodies CANNOT carry `on-failure`
+  # (rejected at build time: unsupported flow-control inside a parallel
+  # branch — parallel_step.md §Limitation), so `settled` mode provides the
+  # tolerance a failed search needs without failing the analysis.
+  #
+  # Fan-out ceiling: DEFAULT_PARALLEL_MAX_FAN_OUT is 100 and load_alerts has
+  # `size: 100`, so a discovery citing exactly 100 alerts is AT the ceiling
+  # (exceeding throws at init). If 100-alert discoveries are real, cap the
+  # foreach list (`| first: 50` on the `foreach` expression) or raise the
+  # ceiling first.
+  - name: load_events_per_alert
+    type: parallel
+    mode: settled
+    foreach: "${{ steps.load_alerts.output.hits.hits }}"
+    concurrency:
+      max: 5
+    steps:
+      - name: search_alert_window
+        type: elasticsearch.search
+        with:
+          index: logs-endpoint.events.*
+          # Per-branch budget. Worst case is 100 branches x 10 events =
+          # 1000 events rendered against the old single size:50 page. The
+          # template still caps the rendered string at 200k characters, and
+          # a branch overflowing its page sets `branches_truncated`, which
+          # blocks an FP clear, so overflow degrades to inconclusive rather
+          # than silently dropping evidence.
+          size: 10
+          _source:
+            - '@timestamp'
+            - host.name
+            - host.id
+            - user.name
+            - process.name
+            - process.parent.name
+            - process.entity_id
+            - process.executable
+            - process.command_line
+            - source.ip
+            - destination.ip
+            - destination.domain
+            - event.action
+            - event.category
+            - agent.id
+            - dns.question.name
+            - network.direction
+          sort:
+            - "@timestamp": asc
+          # Term (not terms) on the single alert's own host, so one branch
+          # cannot pull in another host's telemetry. Alerts with a host.id
+          # are keyed by id; the host.name arm renders its term value only
+          # when this alert has NO host.id (an empty-string term matches
+          # nothing), so an alert with a host.id never matches other hosts
+          # sharing its host.name.
+          # The alert's own original_time anchors the window; the discovery
+          # timestamp is the fallback when this alert has no original_time
+          # (fallback for alerts without an original_time).
+          query:
+            bool:
+              minimum_should_match: 1
+              should:
+                - bool:
+                    filter:
+                      - term:
+                          host.id: "{{ foreach.item._source.host.id }}"
+                      - range:
+                          "@timestamp":
+                            gte: "{{ foreach.item._source['kibana.alert.original_time'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}||-2h"
+                            lte: "{{ foreach.item._source['kibana.alert.original_time'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}||+2h"
+                - bool:
+                    filter:
+                      - term:
+                          host.name: "{% if foreach.item._source.host.id == blank %}{{ foreach.item._source.host.name }}{% endif %}"
+                      - range:
+                          "@timestamp":
+                            gte: "{{ foreach.item._source['kibana.alert.original_time'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}||-2h"
+                            lte: "{{ foreach.item._source['kibana.alert.original_time'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}||+2h"
 
-  - name: load_events_by_host_name
-    type: elasticsearch.search
-    if: "${{ (steps.count_alerts.output.host_ids | size) == 0 }}"
-    on-failure:
-      continue: true
-    with:
-      index: logs-endpoint.events.*
-      size: 50
-      _source:
-        - '@timestamp'
-        - host.name
-        - host.id
-        - user.name
-        - process.name
-        - process.parent.name
-        - process.entity_id
-        - process.executable
-        - process.command_line
-        - source.ip
-        - destination.ip
-        - destination.domain
-        - event.action
-        - event.category
-        - agent.id
-        - dns.question.name
-        - network.direction
-      sort:
-        - "@timestamp": asc
-      query:
-        bool:
-          filter:
-            - terms:
-                host.name: "${{ steps.count_alerts.output.host_names }}"
-            - range:
-                "@timestamp":
-                  gte: "{{ steps.count_alerts.output.events_from }}||-2h"
-                  lte: "{{ steps.count_alerts.output.events_to }}||+2h"
-
-  # One hit set for the rest of the workflow. Exactly one of the searches above
-  # runs. `default` takes the name search when the id search was skipped.
+  # One hit set for the rest of the workflow, flattened from the branch
+  # results and deduplicated by `_id` (overlapping per-alert windows return
+  # the same event many times). Dedup joins the ids into a comma-delimited
+  # list and matches `',' + id + ','`, so the check is delimiter-anchored:
+  # one `_id` can never substring-match another. The initial capture seeds
+  # the list with a lone comma so the first id matches too.
   - name: load_events
     type: data.set
     with:
-      hits: "${{ steps.load_events_by_host_id.output.hits | default: steps.load_events_by_host_name.output.hits }}"
+      hits: |-
+        {%- assign results = steps.load_events_per_alert.output.results | default: consts.no_rows -%}
+        {%- capture seen_ids -%},{%- endcapture -%}
+        {%- capture rows -%}{%- endcapture -%}
+        {%- for r in results -%}
+          {%- if r.status == 'completed' -%}
+            {%- for hit in r.output.hits.hits -%}
+              {%- assign id = hit._id -%}
+              {%- assign id_marker = ',' | append: id | append: ',' -%}
+              {%- unless seen_ids contains id_marker -%}
+                {%- capture seen_ids -%}{{ seen_ids }}{{ id }},{%- endcapture -%}
+                {%- capture rows -%}{{ rows }}{{ hit | json }},{%- endcapture -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if rows == blank -%}[]{%- else -%}[{{ rows | remove_last: ',' }}]{%- endif -%}
+      # hits is RENDERED as a JSON array string (Liquid cannot build an array
+      # across a loop in one expression), so every consumer must `json_parse`
+      # it. `branches_failed`/`branches_truncated` are the aggregate facts the
+      # downstream gates read; branches_truncated is the text "1" or "0" (loop
+      # output), so consumers compare against '1'.
+      branches_failed: "${{ steps.load_events_per_alert.output.failed }}"
+      branches_truncated: |-
+        {%- assign truncated = 0 -%}
+        {%- for r in steps.load_events_per_alert.output.results -%}
+          {%- if r.status == 'completed' and r.output.hits.total.value > 10 -%}
+            {%- assign truncated = 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {{ truncated }}
 
   - name: source_status
     type: data.set
     with:
       entities_failed: "${{ steps.load_entities.error != null }}"
-      events_failed: "${{ steps.load_events_by_host_id.error != null or steps.load_events_by_host_name.error != null }}"
+      # A failed per-alert branch (settled mode records, not raises) is a
+      # failed raw-event search.
+      events_failed: "${{ steps.load_events.output.branches_failed > 0 }}"
 
   - name: analyze
     type: ai.agent
@@ -416,7 +453,7 @@ steps:
         discovery: "{{ steps.load_attack_discovery.output.hits.hits[0] | json }}"
         cited_alerts: "{{ steps.load_alerts.output.hits.hits | json }}"
         entities: "{{ steps.load_entities.output.hits.hits | default: consts.no_rows | json }}"
-        events: "{{ steps.load_events.output.hits.hits | default: consts.no_rows | json }}"
+        events: "{{ steps.load_events.output.hits | default: consts.no_rows | json_parse | json }}"
         entities_failed: "${{ steps.source_status.output.entities_failed }}"
         events_failed: "${{ steps.source_status.output.events_failed }}"
       message: |
@@ -508,8 +545,8 @@ steps:
         Entity store, showing at most 50 of {{ steps.load_entities.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.entities_failed }}):
         {{ steps.load_entities.output.hits.hits | default: consts.no_rows | json }}
 
-        Raw events from 2 hours before the earliest cited alert to 2 hours after the latest, showing at most 50 of {{ steps.load_events.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.events_failed }}):
-        {{ steps.load_events.output.hits.hits | default: consts.no_rows | json }}
+        Raw events from a window around EACH cited alert (2 hours before to 2 hours after that alert's own time, on that alert's host), deduplicated, at most 10 per alert (query failed: {{ steps.source_status.output.events_failed }}):
+        {{ steps.load_events.output.hits | default: consts.no_rows | json_parse | json }}
       schema:
         type: object
         additionalProperties: false
@@ -653,12 +690,18 @@ steps:
   #
   # Parentheses are required. `and` binds tighter than `or`, so an ungrouped
   # condition also rewrites a truncated `true_positive`.
+  #
+  # Event truncation is per-branch: any completed per-alert branch whose
+  # own total exceeded its size cap means evidence was dropped. Per-alert
+  # windows are small and hugging their alert, so a truncated branch is a
+  # genuinely hot window rather than dilution noise — but the missing events
+  # could still be the ones that clear the attack, so it still blocks a clear.
   - name: block_truncated_clear
     type: data.set
     with:
-      downgraded: "${{ (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' }}"
-      verdict: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
-      summary_markdown: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}Evidence was truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
+      downgraded: "${{ (steps.load_events.output.branches_truncated == '1' or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' }}"
+      verdict: "{% if (steps.load_events.output.branches_truncated == '1' or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
+      summary_markdown: "{% if (steps.load_events.output.branches_truncated == '1' or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}Evidence was truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
 
   # A world claim may only cite an id from the hits. `capture` records a miss
   # without depending on `assign` inside `for`. No claims is not a miss: claims
@@ -672,7 +715,7 @@ steps:
     with:
       ungrounded: |
         {%- assign world = steps.analyze.output.structured_output.claims.world -%}
-        {%- assign event_ids = steps.load_events.output.hits.hits | default: consts.no_rows | map: '_id' -%}
+        {%- assign event_ids = steps.load_events.output.hits | default: consts.no_rows | json_parse | map: '_id' -%}
         {%- assign entity_ids = steps.load_entities.output.hits.hits | default: consts.no_rows | map: '_source.entity.id' -%}
         {%- capture misses -%}{%- for claim in world -%}{%- if claim.source == 'raw_event' -%}{%- unless event_ids contains claim.id -%}x{%- endunless -%}{%- elsif claim.source == 'entity_store' -%}{%- unless entity_ids contains claim.id -%}x{%- endunless -%}{%- else -%}x{%- endif -%}{%- endfor -%}{%- endcapture -%}
         {%- if misses != blank and steps.block_truncated_clear.output.verdict != 'inconclusive' -%}true{%- else -%}false{%- endif -%}
@@ -733,9 +776,10 @@ steps:
           cap: 50
           truncated: "${{ steps.load_entities.output.hits.total.value > 50 }}"
         events:
-          seen: "${{ steps.load_events.output.hits.hits | default: consts.no_rows | size }}"
-          cap: 50
-          truncated: "${{ steps.load_events.output.hits.total.value > 50 }}"
+          seen: "${{ steps.load_events.output.hits | default: consts.no_rows | json_parse | size }}"
+          cap: 10
+          # Per-alert branch truncation, not a single shared total.
+          truncated: "${{ steps.load_events.output.branches_truncated == '1' }}"
       payload:
         verdict: "${{ steps.block_ungrounded_claims.output.verdict }}"
         summary_markdown: "${{ steps.block_ungrounded_claims.output.summary_markdown }}"

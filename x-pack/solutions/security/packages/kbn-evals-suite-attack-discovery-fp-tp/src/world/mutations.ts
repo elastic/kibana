@@ -127,9 +127,10 @@ export const withNetworkDestination = (
   );
 
 /**
- * Removes `host.id` from every alert, leaving `host.name`. The workflow gates its two
- * raw-event searches on the cited alerts' host ids, so with none it must run the
- * name-matched search. Raw events keep their ids: only the alerts drive the gate.
+ * Removes `host.id` from every alert, leaving `host.name`. Each per-alert branch
+ * search keys on its alert's host id and falls back to the name, so with no ids
+ * every branch must match by name. Raw events keep their ids: only the alerts
+ * drive the key.
  */
 export const withoutAlertHostId = (world: FpTpWorld): FpTpWorld => ({
   ...world,
@@ -169,8 +170,17 @@ export const withStageSpan = (world: FpTpWorld, days: number): FpTpWorld => {
           .map((ancestor) => anchored.get(String((ancestor as Record<string, unknown>).id)))
           .filter((time): time is number => time !== undefined)
       : [];
-    const time = citedTimes.length > 0 ? Math.max(...citedTimes) : anchored.get(String(source['kibana.alert.uuid']));
-    return time === undefined ? source : { ...source, '@timestamp': new Date(time).toISOString(), 'kibana.alert.original_time': new Date(time).toISOString() };
+    const time =
+      citedTimes.length > 0
+        ? Math.max(...citedTimes)
+        : anchored.get(String(source['kibana.alert.uuid']));
+    return time === undefined
+      ? source
+      : {
+          ...source,
+          '@timestamp': new Date(time).toISOString(),
+          'kibana.alert.original_time': new Date(time).toISOString(),
+        };
   };
   return {
     ...world,

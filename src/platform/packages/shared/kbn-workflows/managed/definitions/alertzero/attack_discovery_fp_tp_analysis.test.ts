@@ -41,6 +41,10 @@ interface YamlStep {
   'plugin-id'?: string;
   'aggregate-by'?: string;
   timeout?: string;
+  mode?: string;
+  foreach?: string;
+  concurrency?: { max?: number };
+  steps?: YamlStep[];
 }
 
 interface YamlWorkflow {
@@ -101,6 +105,25 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     );
 
     expect(result.success ? null : result.error.issues).toBeNull();
+  });
+
+  // The nesting caveat in this file's header is why the raw tree is used for
+  // structural assertions: strict-parse children are typed `BaseStepSchema`.
+  // `parallel` itself must survive strict parsing as a step type in a managed
+  // definition, so a schema regression to "parallel only inside authored
+  // definitions" fails here rather than at managed-install time.
+  it('accepts a parallel fan-out step in the managed definition', () => {
+    const result = WorkflowSchema.safeParse(
+      parse(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.yaml)
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const parsed = result.data as { steps?: Array<{ name?: string; type?: string }> };
+      const fanOut = parsed.steps?.find((step) => step.name === 'load_events_per_alert');
+
+      expect(fanOut?.type).toBe('parallel');
+    }
   });
 
   // Launched by the review, never on a schedule of its own.
@@ -525,14 +548,15 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBeUndefined();
     });
 
-    it.each([
-      'load_attack_discovery',
-      'load_alerts',
-      'load_entities',
-      'load_events_by_host_id',
-      'load_events_by_host_name',
-    ] as const)('projects %s so the template payload stays inside the gateway cap', (name) => {
-      expect(stepIn(name)?.with?._source).toEqual(expect.any(Array));
+    it.each(['load_attack_discovery', 'load_alerts', 'load_entities'] as const)(
+      'projects %s so the template payload stays inside the gateway cap',
+      (name) => {
+        expect(stepIn(name)?.with?._source).toEqual(expect.any(Array));
+      }
+    );
+
+    it('projects the per-alert branch search so the template payload stays inside the gateway cap', () => {
+      expect(stepIn('load_events_per_alert')?.steps?.[0]?.with?._source).toEqual(expect.any(Array));
     });
 
     it('keeps the alert fields the workflow expressions read', () => {
@@ -544,12 +568,9 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
-    it.each(['load_entities', 'load_events_by_host_id', 'load_events_by_host_name'] as const)(
-      'continues when optional source %s fails',
-      (name) => {
-        expect(stepIn(name)?.['on-failure']?.continue).toBe(true);
-      }
-    );
+    it.each(['load_entities'] as const)('continues when optional source %s fails', (name) => {
+      expect(stepIn(name)?.['on-failure']?.continue).toBe(true);
+    });
 
     it('runs the agent on its own conversation', () => {
       expect(analyze?.['create-conversation']).toBe(true);
@@ -660,178 +681,246 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
   });
 
   describe('the raw-event window', () => {
-    const render = (field: 'events_from' | 'events_to', context: Record<string, unknown>): string =>
-      createWorkflowLiquidEngine().parseAndRenderSync(
-        String(stepIn('count_alerts')?.with?.[field]),
-        context
+    const fanOut = stepIn('load_events_per_alert');
+    // The branch body is nested, so it is not in the top-level `steps` lookup.
+    const branch = fanOut?.steps?.[0];
+
+    // `foreach` evicts every non-latest iteration's output on loop exit
+    // (`exit_foreach_node_impl.ts` → `evictStaleLoopOutputs`), so only the
+    // `parallel` dynamic fan-out can hand downstream steps one hit list per
+    // cited alert. This is the load-bearing engine choice of the design.
+    it('fans out with a parallel step over the cited-alert hits', () => {
+      expect(fanOut?.type).toBe('parallel');
+      expect(fanOut?.foreach).toBe('${{ steps.load_alerts.output.hits.hits }}');
+      expect(fanOut?.steps).toEqual([expect.objectContaining({ name: 'search_alert_window' })]);
+    });
+
+    // Raw events are an optional source, and a parallel branch body cannot
+    // carry `on-failure` (rejected at build time). `settled` records a failed
+    // branch in `results[].status` instead of failing the analysis.
+    it('settles failed branches instead of failing the analysis', () => {
+      expect(fanOut?.mode).toBe('settled');
+      expect(branch?.['on-failure']).toBeUndefined();
+    });
+
+    it('bounds the ES fan-out with a concurrency cap', () => {
+      expect(fanOut?.concurrency?.max).toBe(5);
+    });
+
+    it('searches one small branch window per cited alert', () => {
+      expect(branch?.type).toBe('elasticsearch.search');
+      expect(branch?.with?.size).toBe(10);
+      expect(branch?.with?.index).toBe('logs-endpoint.events.*');
+      expect(JSON.stringify(branch?.with?.sort)).toContain('asc');
+    });
+
+    // Both `should` arms must be keyed on `foreach.item` so one branch cannot
+    // pull in another host's telemetry, and each range is anchored on that
+    // alert's own original_time.
+    it('keys every branch arm on its own alert and host', () => {
+      const query = JSON.stringify(branch?.with?.query);
+
+      expect(query).toContain('minimum_should_match');
+      expect(query).toContain('"host.id":"{{ foreach.item._source.host.id }}"');
+      expect(query).toContain(
+        `{{ foreach.item._source['kibana.alert.original_time'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}||-2h`
       );
-
-    const alertsContext = (
-      earliest: string | undefined,
-      latest: string | undefined,
-      discoveryAt: string
-    ) => ({
-      steps: {
-        load_alerts: {
-          output: {
-            aggregations: {
-              earliest_original_time: { value_as_string: earliest },
-              latest_original_time: { value_as_string: latest },
-            },
-          },
-        },
-        load_attack_discovery: {
-          output: { hits: { hits: [{ _source: { '@timestamp': discoveryAt } }] } },
-        },
-      },
-    });
-
-    it('returns the earliest cited alert original time as the window start', () => {
-      expect(
-        render(
-          'events_from',
-          alertsContext(
-            '2026-10-14T03:22:00.000Z',
-            '2026-10-14T17:42:00.000Z',
-            '2026-10-14T21:00:02.000Z'
-          )
-        )
-      ).toBe('2026-10-14T03:22:00.000Z');
-    });
-
-    it('returns the latest cited alert original time as the window end', () => {
-      expect(
-        render(
-          'events_to',
-          alertsContext(
-            '2026-10-14T03:22:00.000Z',
-            '2026-10-14T17:42:00.000Z',
-            '2026-10-14T21:00:02.000Z'
-          )
-        )
-      ).toBe('2026-10-14T17:42:00.000Z');
-    });
-
-    it('returns the discovery timestamp when the alerts have no original time', () => {
-      expect(
-        render('events_from', alertsContext(undefined, undefined, '2026-10-14T21:00:02.000Z'))
-      ).toBe('2026-10-14T21:00:02.000Z');
-    });
-
-    it('searches host.id when the cited alerts have one', () => {
-      expect(stepIn('load_events_by_host_id')?.if).toBe(
-        '${{ (steps.count_alerts.output.host_ids | size) > 0 }}'
+      expect(query).toContain(
+        `{{ foreach.item._source['kibana.alert.original_time'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}||+2h`
       );
     });
 
-    it('searches host.name only when the cited alerts have no host.id', () => {
-      expect(stepIn('load_events_by_host_name')?.if).toBe(
-        '${{ (steps.count_alerts.output.host_ids | size) == 0 }}'
+    // Without the guard, an alert WITH a host.id also matches via its
+    // host.name arm, pulling in every other host sharing that name. The
+    // host.name term value renders only when the alert has no host.id, and
+    // an empty-string term matches nothing.
+    it('gates the host.name term on the alert having no host.id', () => {
+      const arm = JSON.stringify(branch?.with?.query);
+
+      expect(arm).toContain('{% if foreach.item._source.host.id == blank %}');
+      expect(arm).toContain(
+        '"host.name":"{% if foreach.item._source.host.id == blank %}{{ foreach.item._source.host.name }}{% endif %}"'
       );
     });
 
-    it('applies the alert window as date math on the host.id search', () => {
-      expect(JSON.stringify(stepIn('load_events_by_host_id')?.with?.query)).toContain(
-        '{{ steps.count_alerts.output.events_from }}||-2h'
-      );
+    it('renders the host.name term value only for an alert with no host.id', () => {
+      const term = (item: Record<string, unknown>): string =>
+        createWorkflowLiquidEngine().parseAndRenderSync(
+          '{% if foreach.item._source.host.id == blank %}{{ foreach.item._source.host.name }}{% endif %}',
+          { foreach: { item } }
+        );
+
+      expect(term({ _source: { host: { id: '', name: 'host-a' } } })).toBe('host-a');
+      expect(term({ _source: { host: { name: 'host-a' } } })).toBe('host-a');
+      expect(term({ _source: { host: { id: 'abc', name: 'host-a' } } })).toBe('');
     });
 
-    it('applies the alert window as date math on the host.name search', () => {
-      expect(JSON.stringify(stepIn('load_events_by_host_name')?.with?.query)).toContain(
-        '{{ steps.count_alerts.output.events_to }}||+2h'
-      );
-    });
-
-    it('tells the agent the window follows the cited alerts', () => {
+    it('tells the agent the window follows each cited alert', () => {
       expect(String(stepIn('analyze')?.with?.message)).toContain(
-        'Raw events from 2 hours before the earliest cited alert to 2 hours after the latest'
+        'Raw events from a window around EACH cited alert'
       );
     });
 
-    const hitsExpression = String(stepIn('load_events')?.with?.hits)
-      .replace(/^\$\{\{/, '')
-      .replace(/\}\}$/, '')
-      .trim();
+    // `load_events` reassembles the branch outputs. `hits` renders as a JSON
+    // array STRING (Liquid cannot build an array across a loop in one
+    // expression), so every consumer must `json_parse` it. The render below
+    // exercises the real loop: dedup by `_id`, skipping failed branches.
+    describe('the reassembled hit list', () => {
+      const branchResults = (...branches: Array<Record<string, unknown>>) =>
+        branches.map((b, index) => ({ index, key: {}, status: 'completed', output: b, ...b }));
 
-    it('returns the host.id hits when that search ran', () => {
-      expect(
-        createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
-          steps: {
-            load_events_by_host_id: { output: { hits: { total: { value: 3 }, hits: [] } } },
-            load_events_by_host_name: { output: { hits: { total: { value: 9 }, hits: [] } } },
-          },
-        })
-      ).toEqual({ total: { value: 3 }, hits: [] });
+      const renderHits = (results: Array<Record<string, unknown>>): string =>
+        createWorkflowLiquidEngine().parseAndRenderSync(String(stepIn('load_events')?.with?.hits), {
+          consts: analysis.consts,
+          steps: { load_events_per_alert: { output: { results } } },
+        });
+
+      it('flattens every completed branch, deduplicated by id', () => {
+        expect(
+          renderHits(
+            branchResults(
+              {
+                hits: {
+                  hits: [
+                    { _id: 'a', v: 1 },
+                    { _id: 'b', v: 2 },
+                  ],
+                },
+              },
+              {
+                hits: {
+                  hits: [
+                    { _id: 'b', v: 2 },
+                    { _id: 'c', v: 3 },
+                  ],
+                },
+              }
+            )
+          )
+        ).toBe('[{"_id":"a","v":1},{"_id":"b","v":2},{"_id":"c","v":3}]');
+      });
+
+      // The dedup marker is delimiter-anchored (`,<id>,`), so one id that is a
+      // prefix of another must NOT be treated as already seen.
+      it('keeps hits whose id is a prefix of another id', () => {
+        expect(
+          renderHits(
+            branchResults({
+              hits: {
+                hits: [
+                  { _id: 'a', v: 1 },
+                  { _id: 'ab', v: 2 },
+                ],
+              },
+            })
+          )
+        ).toBe('[{"_id":"a","v":1},{"_id":"ab","v":2}]');
+      });
+
+      it('is an empty array when no branch returned hits', () => {
+        expect(renderHits(branchResults({ hits: { hits: [] } }))).toBe('[]');
+      });
+
+      it('is an empty array when the fan-out produced no results', () => {
+        expect(renderHits([])).toBe('[]');
+      });
+
+      it('skips failed branches rather than failing the reassembly', () => {
+        expect(
+          renderHits([
+            { index: 0, key: {}, status: 'failed', error: { message: 'down' } },
+            {
+              index: 1,
+              key: {},
+              status: 'completed',
+              output: { hits: { hits: [{ _id: 'a' }] } },
+            },
+          ])
+        ).toBe('[{"_id":"a"}]');
+      });
+
+      it('parses as JSON, which is what every consumer relies on', () => {
+        expect(() =>
+          JSON.parse(renderHits(branchResults({ hits: { hits: [{ _id: 'a' }, { _id: 'b' }] } })))
+        ).not.toThrow();
+      });
     });
 
-    it('returns the host.name hits when the host.id search was skipped', () => {
-      expect(
-        createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
-          steps: {
-            load_events_by_host_name: { output: { hits: { total: { value: 2 }, hits: [] } } },
-          },
-        })
-      ).toEqual({ total: { value: 2 }, hits: [] });
+    // `branches_truncated` is rendered by a loop, so it is the text "1"/"0"
+    // and downstream gates compare against '1'. A branch whose own total
+    // exceeded its size cap is genuinely-dropped evidence.
+    describe('the per-branch truncation flag', () => {
+      const renderFlag = (
+        results: Array<{ status: string; output?: { hits: { total: { value: number } } } }>
+      ): string =>
+        createWorkflowLiquidEngine().parseAndRenderSync(
+          String(stepIn('load_events')?.with?.branches_truncated),
+          { steps: { load_events_per_alert: { output: { results } } } }
+        );
+
+      it('marks the fan-out truncated when any branch overflowed its own page', () => {
+        expect(
+          renderFlag([
+            { status: 'completed', output: { hits: { total: { value: 3 } } } },
+            { status: 'completed', output: { hits: { total: { value: 11 } } } },
+          ])
+        ).toBe('1');
+      });
+
+      it('stays clear when every branch page holds its window', () => {
+        expect(
+          renderFlag([{ status: 'completed', output: { hits: { total: { value: 10 } } } }])
+        ).toBe('0');
+      });
+
+      it('ignores failed branches, whose totals are unknown', () => {
+        expect(
+          renderFlag([
+            { status: 'failed' as const },
+            { status: 'completed', output: { hits: { total: { value: 2 } } } },
+          ])
+        ).toBe('0');
+      });
     });
 
-    // `events_failed` reads the two searches directly, not the combined
-    // `load_events` hit set: the search that ran decides, so a skipped search's
-    // absent `error` cannot masquerade as a failure (or hide one).
+    // `events_failed` reads the aggregate `failed` count of the fan-out: any
+    // failed branch (settled mode records rather than raises) is the old
+    // single-search failure.
     describe('the event-search failure flag', () => {
       const expression = String(stepIn('source_status')?.with?.events_failed)
         .replace(/^\$\{\{/, '')
         .replace(/\}\}$/, '')
         .trim();
 
-      const evaluate = (stepsContext: Record<string, unknown>): unknown =>
-        createWorkflowLiquidEngine().evalValueSync(expression, { steps: stepsContext });
+      const evaluate = (failedCount: number): unknown =>
+        createWorkflowLiquidEngine().evalValueSync(expression, {
+          steps: { load_events: { output: { branches_failed: failedCount } } },
+        });
 
-      it('reports the failure when the host.id search failed', () => {
-        expect(
-          evaluate({
-            load_events_by_host_id: { error: { message: 'failed' } },
-          })
-        ).toBe(true);
+      it('reports the failure when any branch failed', () => {
+        expect(evaluate(1)).toBe(true);
       });
 
-      it('reports the failure when the host.name search failed', () => {
-        expect(
-          evaluate({
-            load_events_by_host_name: { error: { message: 'failed' } },
-          })
-        ).toBe(true);
-      });
-
-      it('reports no failure when both searches are clean', () => {
-        expect(
-          evaluate({
-            load_events_by_host_id: { output: { hits: { total: { value: 0 }, hits: [] } } },
-            load_events_by_host_name: { output: { hits: { total: { value: 0 }, hits: [] } } },
-          })
-        ).toBe(false);
-      });
-
-      it('reports no failure when the host.id search is clean and the host.name search was skipped', () => {
-        expect(evaluate({ load_events_by_host_id: { output: {} } })).toBe(false);
-      });
-
-      it('reports no failure when the host.name search is clean and the host.id search was skipped', () => {
-        expect(evaluate({ load_events_by_host_name: { output: {} } })).toBe(false);
+      it('reports no failure when every branch is clean', () => {
+        expect(evaluate(0)).toBe(false);
       });
     });
   });
 
   describe('the truncation clear', () => {
+    // Events truncation is per-branch: `load_events.branches_truncated`
+    // is the loop-rendered text "1"/"0" for whether any per-alert branch
+    // overflowed its own page. Entities stay a shared page with a total.
     const contextFor = (
-      events: number | undefined,
+      eventsTruncated: boolean | undefined,
       entities: number | undefined,
       verdict: string,
       summary: string
     ) => ({
       steps: {
-        ...(events === undefined
+        ...(eventsTruncated === undefined
           ? {}
-          : { load_events: { output: { hits: { total: { value: events } } } } }),
+          : { load_events: { output: { branches_truncated: eventsTruncated ? '1' : '0' } } }),
         ...(entities === undefined
           ? {}
           : { load_entities: { output: { hits: { total: { value: entities } } } } }),
@@ -841,18 +930,18 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     const render = (
       field: string,
-      events: number | undefined,
+      eventsTruncated: boolean | undefined,
       entities: number | undefined,
       verdict: string,
       summary: string
     ): string =>
       createWorkflowLiquidEngine().parseAndRenderSync(
         String(stepIn('block_truncated_clear')?.with?.[field]),
-        contextFor(events, entities, verdict, summary)
+        contextFor(eventsTruncated, entities, verdict, summary)
       );
 
     const evaluate = (
-      events: number | undefined,
+      eventsTruncated: boolean | undefined,
       entities: number | undefined,
       verdict: string
     ): unknown => {
@@ -863,28 +952,28 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
       return createWorkflowLiquidEngine().evalValueSync(
         expression,
-        contextFor(events, entities, verdict, 'Cleared.')
+        contextFor(eventsTruncated, entities, verdict, 'Cleared.')
       );
     };
 
-    it('returns inconclusive when a truncated event page would clear the attack', () => {
-      expect(render('verdict', 51, 10, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    it('returns inconclusive when a truncated event branch would clear the attack', () => {
+      expect(render('verdict', true, 10, 'false_positive', 'Cleared.')).toBe('inconclusive');
     });
 
     it('returns inconclusive when a truncated entity page would clear the attack', () => {
-      expect(render('verdict', 10, 51, 'false_positive', 'Cleared.')).toBe('inconclusive');
+      expect(render('verdict', false, 51, 'false_positive', 'Cleared.')).toBe('inconclusive');
     });
 
     it('keeps false_positive when every matched event and entity is shown', () => {
-      expect(render('verdict', 50, 50, 'false_positive', 'Cleared.')).toBe('false_positive');
+      expect(render('verdict', false, 50, 'false_positive', 'Cleared.')).toBe('false_positive');
     });
 
-    it('keeps true_positive when the event page is truncated', () => {
-      expect(render('verdict', 51, 10, 'true_positive', 'Escalate.')).toBe('true_positive');
+    it('keeps true_positive when an event branch is truncated', () => {
+      expect(render('verdict', true, 10, 'true_positive', 'Escalate.')).toBe('true_positive');
     });
 
     it('keeps true_positive when the entity page is truncated', () => {
-      expect(render('verdict', 10, 51, 'true_positive', 'Escalate.')).toBe('true_positive');
+      expect(render('verdict', false, 51, 'true_positive', 'Escalate.')).toBe('true_positive');
     });
 
     it('keeps false_positive when the entity query failed', () => {
@@ -893,7 +982,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           String(stepIn('block_truncated_clear')?.with?.verdict),
           {
             steps: {
-              load_events: { output: { hits: { total: { value: 10 } } } },
+              load_events: { output: { branches_truncated: '0' } },
               load_entities: { error: { message: 'failed' } },
               analyze: {
                 output: {
@@ -907,21 +996,21 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     it('marks a truncated clear as downgraded', () => {
-      expect(evaluate(10, 51, 'false_positive')).toBe(true);
+      expect(evaluate(false, 51, 'false_positive')).toBe(true);
     });
 
     it('does not mark a complete clear as downgraded', () => {
-      expect(evaluate(50, 50, 'false_positive')).toBe(false);
+      expect(evaluate(false, 50, 'false_positive')).toBe(false);
     });
 
     it('replaces the summary when truncation blocks a clear', () => {
-      expect(render('summary_markdown', 51, 10, 'false_positive', 'Cleared.')).toBe(
+      expect(render('summary_markdown', true, 10, 'false_positive', 'Cleared.')).toBe(
         'Evidence was truncated, so this cannot be cleared as a false positive.'
       );
     });
 
     it('keeps the model summary when the clear stands', () => {
-      expect(render('summary_markdown', 50, 50, 'false_positive', 'Cleared.')).toBe('Cleared.');
+      expect(render('summary_markdown', false, 50, 'false_positive', 'Cleared.')).toBe('Cleared.');
     });
 
     it('runs after the payload guard and before emit', () => {
@@ -1015,7 +1104,9 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           },
         },
         load_events: {
-          output: { hits: { hits: eventIds.map((id) => ({ _id: id })) } },
+          // `hits` is a loop-rendered JSON array STRING (see load_events), so
+          // the grounding expression json_parses it before mapping ids.
+          output: { hits: JSON.stringify(eventIds.map((id) => ({ _id: id }))) },
         },
         load_entities: {
           output: {

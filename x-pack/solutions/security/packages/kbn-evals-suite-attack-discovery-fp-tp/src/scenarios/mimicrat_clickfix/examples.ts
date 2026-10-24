@@ -292,7 +292,12 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     expectedOutcome: 'inconclusive',
     provenance: 'authored',
     buildWorld: (runMarker) =>
-      withTruncatingBenignEvents(withStageSpan(fpWorld(runMarker), 3), runMarker, undefined, 'before'),
+      withTruncatingBenignEvents(
+        withStageSpan(fpWorld(runMarker), 3),
+        runMarker,
+        undefined,
+        'before'
+      ),
   },
   {
     id: 'mimicrat-clickfix.parent-spoof',

@@ -70,3 +70,12 @@ export const FP_TP_RAW_EVENT_WINDOW_MS = 2 * 60 * 60 * 1000;
  * `inconclusive`.
  */
 export const FP_TP_RAW_EVENT_PAGE_SIZE = 50;
+
+/**
+ * Raw events each per-alert branch of `load_events_per_alert` reads
+ * (`search_alert_window` `size`). A branch window with more hits than this is
+ * truncated and `block_truncated_clear` turns a `false_positive` into `inconclusive`.
+ * The `load_events` step's Liquid `branches_truncated` check hardcodes the same
+ * number; change both together.
+ */
+export const FP_TP_RAW_EVENT_BRANCH_SIZE = 10;
