@@ -335,4 +335,79 @@ describe('pciComplianceTool (consolidated)', () => {
       }
     });
   });
+
+  describe('report mode violating evidence', () => {
+    // 8.3.4's violation query projects the entity that made the requirement RED.
+    const bruteForceRows = {
+      columns: [
+        { name: 'user.name', type: 'keyword' },
+        { name: 'source.ip', type: 'keyword' },
+        { name: 'failed_attempts', type: 'long' },
+      ],
+      values: [['jdoe', '192.168.1.100', 12]],
+    };
+
+    const reportRequest = {
+      mode: 'report' as const,
+      requirements: ['8.3.4'],
+      indices: ['logs-*'],
+      timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
+      format: 'summary' as const,
+      includeRecommendations: true,
+      includeEvidence: true,
+    };
+
+    interface ReportRequirementRow {
+      id: string;
+      status: string;
+      topViolations: Array<Record<string, unknown>>;
+    }
+
+    const readRequirementRows = (result: ToolHandlerStandardReturn): ReportRequirementRow[] => {
+      const summary = result.results.find((r) => r.type === ToolResultType.other);
+      return (summary?.data as { requirements: ReportRequirementRow[] }).requirements;
+    };
+
+    it('attaches the violating rows to a RED requirement so the report can name the entity', async () => {
+      mockExecuteEsql.mockResolvedValue(bruteForceRows as never);
+
+      const result = (await tool.handler(
+        reportRequest,
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const rows = readRequirementRows(result);
+      expect(rows[0].status).toBe('RED');
+      expect(rows[0].topViolations).toEqual([
+        { 'user.name': 'jdoe', 'source.ip': '192.168.1.100', failed_attempts: 12 },
+      ]);
+
+      const violationEvidence = result.results
+        .filter((r) => r.type === ToolResultType.esqlResults)
+        .map((r) => r.data as { query: string; values: unknown[][]; time_range?: unknown })
+        .find((data) => data.query.includes('failed_attempts'));
+      expect(violationEvidence).toBeDefined();
+      expect(violationEvidence!.values).toEqual([['jdoe', '192.168.1.100', 12]]);
+      expect(violationEvidence!.time_range).toEqual({
+        from: '2024-01-01T00:00:00Z',
+        to: '2024-01-08T00:00:00Z',
+      });
+    });
+
+    it('omits violating evidence from the report when includeEvidence is false', async () => {
+      mockExecuteEsql.mockResolvedValue(bruteForceRows as never);
+
+      const result = (await tool.handler(
+        { ...reportRequest, includeEvidence: false },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(readRequirementRows(result)[0].topViolations).toEqual([]);
+      const violationEvidence = result.results
+        .filter((r) => r.type === ToolResultType.esqlResults)
+        .map((r) => r.data as { query: string })
+        .find((data) => data.query.includes('failed_attempts'));
+      expect(violationEvidence).toBeUndefined();
+    });
+  });
 });

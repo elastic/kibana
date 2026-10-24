@@ -31,6 +31,7 @@ import {
 } from './pci_compliance_schemas';
 import {
   type EvaluatedRequirement,
+  type RequirementFinding,
   evaluateRequirement,
   runWithConcurrency,
   PCI_REQUIREMENT_CONCURRENCY,
@@ -38,14 +39,25 @@ import {
 
 const REPORT_FORMATS = ['summary', 'detailed', 'executive'] as const;
 
+/**
+ * Report mode carries the same per-violation evidence `check` mode returns, bounded so a
+ * 12-requirement report stays a single usable tool result:
+ *  - `REPORT_EVIDENCE_ROW_LIMIT` caps the ES|QL rows emitted per violating finding.
+ *  - `REPORT_TOP_VIOLATIONS_LIMIT` caps the inline `topViolations` rows on a requirement row.
+ */
+const REPORT_EVIDENCE_ROW_LIMIT = 10;
+const REPORT_TOP_VIOLATIONS_LIMIT = 5;
+
 const pciComplianceSchema = z
   .object({
     mode: z
       .enum(['check', 'report'])
       .describe(
         '`check` runs violation + coverage + preflight for one or more requirements and returns findings with evidence. ' +
-          '`report` produces a roll-up scorecard (RED/AMBER/GREEN + confidence + score) across the requested set. ' +
-          'Use `check` when you need actionable findings; use `report` when you need a posture snapshot.'
+          '`report` produces a roll-up scorecard (RED/AMBER/GREEN + confidence + score) across the requested set, and for ' +
+          'each RED requirement the violating rows behind the verdict (`topViolations` plus the ES|QL evidence tables). ' +
+          'Use `check` when you need a deep per-requirement investigation; use `report` for a posture snapshot that still ' +
+          'names what made each requirement fail.'
       ),
     requirements: z
       .array(pciRequirementIdSchema)
@@ -73,7 +85,10 @@ const pciComplianceSchema = z
       .boolean()
       .optional()
       .default(true)
-      .describe('[check mode] Include tabular ES|QL evidence in findings. Ignored in report mode.'),
+      .describe(
+        '[check and report mode] Include the ES|QL evidence rows behind each finding. In both modes the rows for a ' +
+          'violating (RED) requirement are attached; other findings keep their roll-up detail.'
+      ),
     format: z
       .enum(REPORT_FORMATS)
       .optional()
@@ -145,8 +160,9 @@ export const pciComplianceTool = (
     description:
       'Run PCI DSS v4.0.1 compliance checks or reports. Mode "check" returns per-requirement ' +
       'findings with ES|QL evidence. Mode "report" returns a visual scorecard with confidence-weighted ' +
-      'scores across the requested requirements. All responses include a scopeClaim describing which ' +
-      'indices, time range, and requirement IDs were actually evaluated.',
+      'scores across the requested requirements, together with the violating evidence rows for every ' +
+      'RED requirement. All responses include a scopeClaim describing which indices, time range, and ' +
+      'requirement IDs were actually evaluated.',
     schema: pciComplianceSchema,
     availability: {
       cacheMode: 'space',
@@ -212,7 +228,7 @@ export const pciComplianceTool = (
           indexPattern,
           from,
           to,
-          includeEvidence: mode === 'check' ? includeEvidence : false,
+          includeEvidence,
           esClient: esClient.asCurrentUser,
         });
       });
@@ -260,6 +276,8 @@ export const pciComplianceTool = (
         indexPattern,
         format,
         includeRecommendations,
+        includeEvidence,
+        timeRange,
       });
     },
     tags: ['security', 'compliance', 'pci', 'audit'],
@@ -337,18 +355,49 @@ function buildCheckResponse({
   return { results };
 }
 
+/**
+ * Turn an ES|QL evidence table into records keyed by column name, so a report row can name the
+ * entity behind a violation (`user.name`, `source.ip`, `failed_attempts`) instead of forcing the
+ * caller to read the raw table.
+ */
+const toViolationRecords = (
+  evidence: NonNullable<RequirementFinding['evidence']>,
+  limit: number
+): Array<Record<string, unknown>> =>
+  evidence.values.slice(0, limit).map((values) =>
+    evidence.columns.reduce<Record<string, unknown>>((record, column, index) => {
+      record[column.name] = values[index] ?? null;
+      return record;
+    }, {})
+  );
+
+/** Inline violating-evidence rows for one requirement, bounded by REPORT_TOP_VIOLATIONS_LIMIT. */
+const collectTopViolations = (row: EvaluatedRequirement): Array<Record<string, unknown>> => {
+  const records: Array<Record<string, unknown>> = [];
+  for (const finding of row.findings) {
+    if (finding.status === 'RED' && finding.evidence) {
+      records.push(...toViolationRecords(finding.evidence, REPORT_TOP_VIOLATIONS_LIMIT));
+    }
+  }
+  return records;
+};
+
 function buildReportResponse({
   rows,
   scopeClaim,
   indexPattern,
   format,
   includeRecommendations,
+  includeEvidence,
+  timeRange,
 }: {
   rows: EvaluatedRequirement[];
   scopeClaim: ReturnType<typeof buildScopeClaim>;
   indexPattern: string;
   format: (typeof REPORT_FORMATS)[number];
   includeRecommendations: boolean;
+  includeEvidence: boolean;
+  timeRange?: { from: string; to: string };
 }) {
   const overallScore =
     rows.length === 0 ? 0 : Math.round(rows.reduce((sum, r) => sum + r.score, 0) / rows.length);
@@ -395,6 +444,29 @@ function buildReportResponse({
     },
   ];
 
+  // A report that only says "requirement 4.1 is RED" cannot be acted on. Emit the same
+  // violation tables check mode returns, so a report-mode answer can name the entity behind
+  // the verdict (user, source/destination, count) and not just restate the status.
+  if (includeEvidence) {
+    for (const row of rows) {
+      for (const finding of row.findings) {
+        if (finding.status === 'RED' && finding.evidence && finding.evidence.values.length > 0) {
+          const { from, to } = getTimeRangeForCheck(row.requirement, timeRange);
+          results.push({
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.esqlResults,
+            data: {
+              query: finding.evidence.query,
+              columns: finding.evidence.columns,
+              values: finding.evidence.values.slice(0, REPORT_EVIDENCE_ROW_LIMIT),
+              time_range: { from, to },
+            },
+          });
+        }
+      }
+    }
+  }
+
   const requirementRows = rows.map((row) => ({
     id: row.requirement,
     name: row.name,
@@ -404,6 +476,7 @@ function buildReportResponse({
     score: row.score,
     evidenceCount: row.evidenceCount,
     topFindings: row.findings.map((f) => f.detail),
+    topViolations: includeEvidence ? collectTopViolations(row) : [],
     recommendations: includeRecommendations ? row.recommendations : [],
   }));
 
@@ -419,14 +492,17 @@ function buildReportResponse({
       summary: `PCI DSS v4.0.1 posture is ${overallStatus} with score ${overallScore}/100. Requirements: ${greenCount} GREEN, ${amberCount} AMBER, ${redCount} RED, ${notAssessableCount} NOT ASSESSABLE.`,
       requirements:
         format === 'executive'
-          ? requirementRows.map(({ id, name, status, confidence, score, evidenceCount }) => ({
-              id,
-              name,
-              status,
-              confidence,
-              score,
-              evidenceCount,
-            }))
+          ? requirementRows.map(
+              ({ id, name, status, confidence, score, evidenceCount, topViolations }) => ({
+                id,
+                name,
+                status,
+                confidence,
+                score,
+                evidenceCount,
+                topViolations,
+              })
+            )
           : requirementRows,
       dataCoverage: {
         indexPattern,
