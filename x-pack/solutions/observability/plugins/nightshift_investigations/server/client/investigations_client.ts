@@ -40,7 +40,7 @@ import {
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
-import type { InvestigationQuotaCallback } from '../types';
+import type { AutomationBudget, InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
   AlertSnapshot,
@@ -411,18 +411,21 @@ export class NightshiftInvestigationsClient {
     };
   }
 
-  async start({
-    subject,
-    title,
-    trigger_type,
-    message,
-    timeout_seconds,
-    source_ids,
-    connector_id,
-    context = {},
-    notificationDestinations,
-    slack_thread: slackThread,
-  }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
+  async start(
+    {
+      subject,
+      title,
+      trigger_type,
+      message,
+      timeout_seconds,
+      source_ids,
+      connector_id,
+      context = {},
+      notificationDestinations,
+      slack_thread: slackThread,
+    }: StartInvestigationRequest,
+    { automationBudget }: { automationBudget?: AutomationBudget } = {}
+  ): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -485,7 +488,7 @@ export class NightshiftInvestigationsClient {
       newInvestigationId,
       // Only a start that opens a new investigation counts against the daily automatic quota:
       // a follow-up adds a round to an investigation that was already paid for.
-      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type),
+      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type, automationBudget),
     });
     const isFollowUp = investigationId !== newInvestigationId;
 
@@ -592,21 +595,34 @@ export class NightshiftInvestigationsClient {
     }
   }
 
-  /** Charges the daily automatic quota for a start that opens a new investigation. */
+  private async assertInvestigationQuota(consume: boolean): Promise<void> {
+    const { allowed } = await evaluateInvestigationQuota({
+      callback: this.investigationQuotaCallback,
+      logger: this.logger,
+      consume,
+    });
+    if (!allowed) {
+      throw new InvestigationQuotaDeniedError();
+    }
+  }
+
+  /**
+   * Checks the global quota, then the automation budget, and only charges either once both allow
+   * the start, so a denied start never uses up the other limit. The global limit wins when both
+   * are reached.
+   */
   private async assertQuotaForNewInvestigation(
-    triggerType: StartInvestigationRequest['trigger_type']
+    triggerType: StartInvestigationRequest['trigger_type'],
+    automationBudget?: AutomationBudget
   ): Promise<void> {
     switch (triggerType) {
       case 'manual':
         return;
       case 'automatic': {
-        const { allowed } = await evaluateInvestigationQuota({
-          callback: this.investigationQuotaCallback,
-          logger: this.logger,
-        });
-        if (!allowed) {
-          throw new InvestigationQuotaDeniedError();
-        }
+        await this.assertInvestigationQuota(false);
+        await automationBudget?.check();
+        await automationBudget?.consume();
+        await this.assertInvestigationQuota(true);
         return;
       }
       default:

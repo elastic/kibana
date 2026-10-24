@@ -35,6 +35,13 @@ export const readAutomationUsage = async (
     : 0;
 };
 
+export const hasAutomationBudget = async (
+  soClient: BudgetRepository,
+  automationId: string,
+  dailyLimit: number | undefined
+): Promise<boolean> =>
+  dailyLimit === undefined || (await readAutomationUsage(soClient, automationId)) < dailyLimit;
+
 /** Reserve one dispatch before starting an investigation, using optimistic concurrency across Kibana instances. */
 export const consumeAutomationBudget = async (
   soClient: BudgetRepository,

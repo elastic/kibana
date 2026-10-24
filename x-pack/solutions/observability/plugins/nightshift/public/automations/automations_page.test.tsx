@@ -22,6 +22,7 @@ import {
   useUpdateAutomation,
 } from './hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
+import { useRunQuotas } from '../settings/hooks/use_significant_events_run_quotas';
 import type { Automation } from './hooks/use_automations';
 
 jest.mock('./hooks/use_automations', () => ({
@@ -37,6 +38,9 @@ jest.mock('./hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../settings/hooks/use_significant_events_run_quotas', () => ({
+  useRunQuotas: jest.fn(),
+}));
 jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../settings/components/apps_section/use_relay_app_bindings'),
@@ -59,6 +63,7 @@ const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
+const mockUseRunQuotas = useRunQuotas as jest.Mock;
 
 describe('AutomationsPage', () => {
   beforeAll(() => {
@@ -68,13 +73,18 @@ describe('AutomationsPage', () => {
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { capabilities: { nightshift: { manage: true } }, navigateToUrl: jest.fn() },
+        application: {
+          capabilities: { nightshift: { manage: true } },
+          navigateToUrl: jest.fn(),
+          getUrlForApp: (app: string, { path }: { path: string }) => `/app/${app}${path}`,
+        },
         http: { basePath: { prepend: (path: string) => path } },
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
       },
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
+    mockUseRunQuotas.mockReturnValue({ data: undefined });
     mockUseAutomationRunsInRange.mockReturnValue({
       data: { runs: [], total: 0, usedToday: 0 },
       isInitialLoading: false,
@@ -406,6 +416,52 @@ describe('AutomationsPage', () => {
 
       expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
+    it('shows only the global callout when automations are also rate limited', () => {
+      mockUseRunQuotas.mockReturnValue({
+        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: 3 } },
+      });
+      renderPage();
+
+      expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
+      expect(screen.queryByTestId('automationsRateLimitBanner')).not.toBeInTheDocument();
+    });
+
+    it('shows the paused callout only when the global investigation limit is reached', () => {
+      const quotas = (used: number) => ({
+        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: used } },
+      });
+      mockUseRunQuotas.mockReturnValue(quotas(2));
+      const { unmount } = renderPage();
+      expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
+      unmount();
+
+      mockUseRunQuotas.mockReturnValue(quotas(3));
+      renderPage();
+      expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
+    });
+
+    it('links the paused callout to the investigation settings only when the user can manage limits', () => {
+      const quotas = (canManage: boolean) => ({
+        data: {
+          enabled: true,
+          limits: { investigation: 3 },
+          counts: { investigation: 3 },
+          canManage,
+        },
+      });
+      mockUseRunQuotas.mockReturnValue(quotas(false));
+      const { unmount } = renderPage();
+      expect(screen.queryByTestId('automationsGlobalLimitSettingsLink')).not.toBeInTheDocument();
+      unmount();
+
+      mockUseRunQuotas.mockReturnValue(quotas(true));
+      renderPage();
+      expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings/investigations'
+      );
     });
 
     it('filters by the configured triggers', async () => {
