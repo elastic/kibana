@@ -53,6 +53,7 @@ const Popover = React.memo<UtilityBarActionProps>(
         panelPaddingSize={popoverPanelPaddingSize}
         button={
           <LinkIcon
+            ariaLabel={ariaLabel}
             dataTestSubj={dataTestSubj}
             color={color}
             iconSide={iconSide}
@@ -86,6 +87,7 @@ export interface UtilityBarActionProps extends LinkIconProps {
 
 export const UtilityBarAction = React.memo<UtilityBarActionProps>(
   ({
+    ariaLabel,
     children,
     color,
     dataTestSubj,
@@ -121,6 +123,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       <BarAction data-test-subj={dataTestSubj}>
         {popoverContent ? (
           <Popover
+            ariaLabel={ariaLabel}
             dataTestSubj={`${dataTestSubj}-popover`}
             disabled={disabled}
             color={color}
@@ -136,6 +139,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
           </Popover>
         ) : (
           <LinkIcon
+            ariaLabel={ariaLabel}
             color={color}
             dataTestSubj={`${dataTestSubj}-linkIcon`}
             disabled={disabled}

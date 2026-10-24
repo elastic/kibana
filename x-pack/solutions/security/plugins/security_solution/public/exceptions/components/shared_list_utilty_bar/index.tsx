@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import type { Sort } from '@kbn/securitysolution-io-ts-list-types';
 import styled from '@emotion/styled';
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiIcon } from '@elastic/eui';
+import {
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiIcon,
+  EuiScreenReaderLive,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 
 import {
   UtilityBar,
@@ -35,6 +41,7 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
   sort,
   sortFields,
 }) => {
+  const [sortAnnouncement, setSortAnnouncement] = useState('');
   const selectedSortField = sortFields?.find((sortField) => sortField.field === sort?.field);
   return (
     <UtilityBar border>
@@ -61,37 +68,65 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
             {sort && (
               <UtilityBarAction
                 dataTestSubj="sortExceptions"
+                ariaLabel={
+                  selectedSortField
+                    ? i18n.getSortByAriaLabel(
+                        selectedSortField.label,
+                        getSortOrderLabel(sort.order)
+                      )
+                    : undefined
+                }
                 iconSide="right"
                 iconType={sort.order === 'asc' ? 'sortUp' : 'sortDown'}
                 popoverPanelPaddingSize={'s'}
+                onClick={() => setSortAnnouncement('')}
                 popoverContent={() => (
-                  <EuiContextMenuPanel
-                    items={sortFields?.map((item) => {
-                      const isSelectedSortItem = selectedSortField?.field === item.field;
-                      let nextSortOrder = item.defaultOrder;
-                      if (isSelectedSortItem) {
-                        nextSortOrder = sort.order === 'asc' ? 'desc' : 'asc';
-                      }
-                      return (
-                        <EuiContextMenuItem
-                          key={item.field}
-                          onClick={() =>
-                            setSort?.({
-                              field: item.field,
-                              order: nextSortOrder,
-                            })
-                          }
-                        >
-                          <SortMenuItem>
-                            {item.label}{' '}
-                            {selectedSortField?.field === item.field && (
-                              <SortIcon type={sort.order === 'asc' ? 'sortUp' : 'sortDown'} />
-                            )}
-                          </SortMenuItem>
-                        </EuiContextMenuItem>
-                      );
-                    })}
-                  />
+                  <>
+                    {/* Must live inside the aria-modal popover panel to be announced while it is open */}
+                    <EuiScreenReaderLive>{sortAnnouncement}</EuiScreenReaderLive>
+                    <EuiContextMenuPanel
+                      items={sortFields?.map((item) => {
+                        const isSelectedSortItem = selectedSortField?.field === item.field;
+                        let nextSortOrder = item.defaultOrder;
+                        if (isSelectedSortItem) {
+                          nextSortOrder = sort.order === 'asc' ? 'desc' : 'asc';
+                        }
+                        return (
+                          <EuiContextMenuItem
+                            key={item.field}
+                            onClick={() => {
+                              setSort?.({
+                                field: item.field,
+                                order: nextSortOrder,
+                              });
+                              setSortAnnouncement(
+                                i18n.getSortChangedAnnouncement(
+                                  item.label,
+                                  getSortOrderLabel(nextSortOrder)
+                                )
+                              );
+                            }}
+                          >
+                            <SortMenuItem>
+                              {item.label}{' '}
+                              {isSelectedSortItem && (
+                                <>
+                                  <EuiScreenReaderOnly>
+                                    <span>
+                                      {i18n.getSortMenuItemOrderLabel(
+                                        getSortOrderLabel(sort.order)
+                                      )}
+                                    </span>
+                                  </EuiScreenReaderOnly>
+                                  <SortIcon type={sort.order === 'asc' ? 'sortUp' : 'sortDown'} />
+                                </>
+                              )}
+                            </SortMenuItem>
+                          </EuiContextMenuItem>
+                        );
+                      })}
+                    />
+                  </>
                 )}
               >
                 <SortMenuItem>
@@ -106,6 +141,9 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
     </UtilityBar>
   );
 };
+
+const getSortOrderLabel = (order: string): string =>
+  order === 'asc' ? i18n.SORT_ORDER_ASCENDING : i18n.SORT_ORDER_DESCENDING;
 
 const SortMenuItem = styled('div')`
   display: flex;
