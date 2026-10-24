@@ -98,7 +98,21 @@ export const generateInsights = async ({
 
   let lastParseError: unknown;
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
-    const response = await inferenceClient.chatComplete({ messages });
+    let response;
+    try {
+      response = await inferenceClient.chatComplete({ messages });
+    } catch (error) {
+      // The request never produced a model response. That is not a parse
+      // failure, so it is not retried through the parse loop below; label it so
+      // the recorded task error names the layer that failed instead of a bare
+      // `fetch failed`.
+      throw new Error(
+        `Attack Discovery inference request failed on the wire: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        { cause: error }
+      );
+    }
 
     try {
       // In continuation mode the model returns only the missing suffix of
