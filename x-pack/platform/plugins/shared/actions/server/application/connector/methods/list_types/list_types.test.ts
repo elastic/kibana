@@ -30,6 +30,8 @@ import { getConnectorType } from '../../../../fixtures';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
+import { createSpec } from '../../../../specs_client/test_utils';
+import { z as z4 } from '@kbn/zod/v4';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
@@ -205,5 +207,117 @@ describe('listTypes()', () => {
         isTestable: false,
       },
     ]);
+  });
+
+  describe('spec-backed connector types', () => {
+    const spec = createSpec({
+      metadata: {
+        id: '.spec-stub',
+        displayName: 'Spec Stub',
+        description: 'Spec stub',
+        icon: 'logo',
+        docsUrl: 'https://example.test',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['workflows'],
+      },
+      auth: { types: ['api_key_header'] },
+      schema: null,
+      actions: {
+        listThings: {
+          isTool: true,
+          description: 'List things',
+          scope: 'read',
+          input: z4.object({}),
+          handler: async () => ({}),
+        },
+      },
+      test: { handler: async () => ({}), enabled: true },
+    });
+
+    it('adds spec fields to spec rows', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.spec-stub',
+          name: 'Spec Stub',
+          supportedFeatureIds: ['workflows'],
+          source: 'spec',
+          spec,
+        })
+      );
+
+      expect(await actionsClient.listTypes({ featureId: 'workflows' })).toEqual([
+        {
+          id: '.spec-stub',
+          name: 'Spec Stub',
+          minimumLicenseRequired: 'basic',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          supportedFeatureIds: ['workflows'],
+          isSystemActionType: false,
+          isDeprecated: false,
+          source: 'spec',
+          isTestable: false,
+          spec: {
+            icon: 'logo',
+            docsUrl: 'https://example.test',
+            authTypeIds: ['api_key_header'],
+            hasInboundEvents: false,
+            isInboundOnly: false,
+            isEarsExperimental: false,
+            actions: [
+              { name: 'listThings', description: 'List things', isTool: true, scope: 'read' },
+            ],
+          },
+        },
+      ]);
+    });
+
+    it('adds spec fields only to spec rows when stack and spec rows are listed together', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      actionTypeRegistry.register(getConnectorType({ id: '.server-log', name: 'Server log' }));
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.spec-stub',
+          name: 'Spec Stub',
+          source: 'spec',
+          spec,
+        })
+      );
+
+      const result = await actionsClient.listTypes({});
+      expect(result).toHaveLength(2);
+      expect(result[0]).not.toHaveProperty('spec');
+      expect(result[1]).toMatchObject({
+        id: '.spec-stub',
+        source: 'spec',
+        spec: { authTypeIds: ['api_key_header'], isEarsExperimental: false },
+      });
+    });
+
+    it('does not add spec fields when the spec row has no registered spec', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      actionTypeRegistry.register(
+        getConnectorType({ id: '.spec-missing', name: 'Spec missing', source: 'spec' })
+      );
+
+      const [result] = await actionsClient.listTypes({});
+      expect(result).toMatchObject({ id: '.spec-missing', source: 'spec' });
+      expect(result).not.toHaveProperty('spec');
+    });
+
+    it('does not add spec fields to stack rows', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      actionTypeRegistry.register(getConnectorType({ id: '.server-log', name: 'Server log' }));
+
+      const [result] = await actionsClient.listTypes({});
+      expect(result).toMatchObject({ id: '.server-log', source: 'stack' });
+      expect(result).not.toHaveProperty('spec');
+    });
   });
 });

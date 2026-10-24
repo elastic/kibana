@@ -96,6 +96,30 @@ export const connectorResponseSchema = getConnectorResponseSchema(true);
 /** Flag-on schema so TypeOf includes the optional field. */
 export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true);
 
+export const connectorSpecActionSummaryResponseSchema = schema.object(
+  {
+    name: schema.string({
+      meta: { description: 'The action key, e.g. "listIncidents".' },
+    }),
+    description: schema.maybe(
+      schema.string({
+        meta: { description: 'Human-readable description of what this action does.' },
+      })
+    ),
+    is_tool: schema.boolean({
+      meta: { description: 'Whether this action is exposed as an agent tool.' },
+    }),
+    scope: schema.maybe(
+      schema.oneOf([schema.literal('read'), schema.literal('write'), schema.literal('destroy')], {
+        meta: { description: 'Permission scope of this action (read, write, or destroy).' },
+      })
+    ),
+  },
+  {
+    meta: { description: 'Action listing without the input JSON Schema.' },
+  }
+);
+
 export const connectorTypeResponseSchema = schema.object(
   {
     id: schema.string({
@@ -188,6 +212,64 @@ export const connectorTypeResponseSchema = schema.object(
         description: 'Indicates whether the connector type supports testing.',
       },
     }),
+    icon: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Icon key or URL for the connector type. Only present when source is spec and the spec defines an icon.',
+        },
+      })
+    ),
+    docs_url: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Link to documentation for the connector type. Only present when source is spec and the spec defines a docs URL.',
+        },
+      })
+    ),
+    auth_type_ids: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        maxSize: 100,
+        meta: {
+          description:
+            'Authentication type identifiers the connector type supports. Only present when source is spec.',
+        },
+      })
+    ),
+    has_inbound_events: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the connector type can receive inbound events. Only present when source is spec.',
+        },
+      })
+    ),
+    is_inbound_only: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the connector type only receives inbound events. Only present when source is spec.',
+        },
+      })
+    ),
+    is_ears_experimental: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the connector type uses experimental EARS authentication. Only present when source is spec.',
+        },
+      })
+    ),
+    actions: schema.maybe(
+      schema.arrayOf(connectorSpecActionSummaryResponseSchema, {
+        maxSize: 500,
+        meta: {
+          description:
+            'The actions available on the connector type, without input schemas. Only present when source is spec.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_type_response' } }
 );
@@ -285,6 +367,13 @@ export const connectorAuthStatusResponseSchema = schema.recordOf(
   }
 );
 
+export const connectorSpecActionDetailResponseSchema =
+  connectorSpecActionSummaryResponseSchema.extends({
+    input_schema: schema.recordOf(schema.string(), schema.any(), {
+      meta: { description: 'JSON Schema of this action input.' },
+    }),
+  });
+
 export const getConnectorSpecResponseBodySchema = schema.object({
   metadata: schema.object(
     {
@@ -354,30 +443,23 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       description: 'When true, this connector type supports the reserved test sub-action.',
     },
   }),
-  actions: schema.arrayOf(
-    schema.object({
-      name: schema.string({
-        meta: { description: 'The action key, e.g. "listIncidents".' },
-      }),
-      description: schema.maybe(
-        schema.string({
-          meta: { description: 'Human-readable description of what this action does.' },
-        })
-      ),
-      is_tool: schema.boolean({
-        meta: { description: 'Whether this action is exposed as an agent tool.' },
-      }),
-      scope: schema.maybe(
-        schema.oneOf([schema.literal('read'), schema.literal('write'), schema.literal('destroy')], {
-          meta: { description: 'Permission scope of this action (read, write, or destroy).' },
-        })
-      ),
-    }),
-    {
-      maxSize: 500,
-      meta: {
-        description: 'The actions available on this connector type.',
-      },
-    }
-  ),
+  auth_type_ids: schema.arrayOf(schema.string(), {
+    maxSize: 100,
+    meta: { description: 'Authentication type identifiers this connector type supports.' },
+  }),
+  has_inbound_events: schema.boolean({
+    meta: { description: 'Whether this connector type can receive inbound events.' },
+  }),
+  is_inbound_only: schema.boolean({
+    meta: { description: 'Whether this connector type only receives inbound events.' },
+  }),
+  is_ears_experimental: schema.boolean({
+    meta: { description: 'Whether this connector type uses experimental EARS authentication.' },
+  }),
+  actions: schema.arrayOf(connectorSpecActionDetailResponseSchema, {
+    maxSize: 500,
+    meta: {
+      description: 'The actions available on this connector type, including input JSON Schemas.',
+    },
+  }),
 });

@@ -18,13 +18,11 @@ import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/co
 import type { ConnectorZodSchema } from '@kbn/connector-specs';
 import { getMeta, setMeta } from '@kbn/connector-specs';
 import { UseField, type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ConnectorMetadata } from '@kbn/connector-specs';
 import { ConnectorActionSelector } from '../components/connector_action_selector';
-import type {
-  ConnectorActionDef,
-  ConnectorSpecResponse,
-  ConnectorSpecWireResponse,
-} from '../apis/fetch_connector_spec';
-import { transformConnectorSpecResponse } from '../apis/fetch_connector_spec';
+import type { ConnectorActionDef, ConnectorSpecResponse } from '../apis/fetch_connector_spec';
+import { createSpecsClient } from '../apis/specs_client';
+import type { BrowserConnectorSpecDetail } from '../apis/specs_client';
 import type { ActionConnectorFieldsProps, ActionTypeModel } from '../types/action_types';
 
 export type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
@@ -45,6 +43,32 @@ export function shouldHideWorkflowsOnlyConnector(
 }
 
 /**
+ * Adapts a SpecsClient detail into the legacy ConnectorSpecResponse used by connector forms.
+ */
+export const toConnectorSpecResponse = (
+  detail: BrowserConnectorSpecDetail
+): ConnectorSpecResponse => ({
+  metadata: {
+    id: detail.id,
+    displayName: detail.displayName,
+    description: detail.description,
+    minimumLicense: detail.minimumLicense,
+    supportedFeatureIds: detail.supportedFeatureIds as ConnectorMetadata['supportedFeatureIds'],
+    ...(detail.icon !== undefined ? { icon: detail.icon } : {}),
+    ...(detail.docsUrl !== undefined ? { docsUrl: detail.docsUrl } : {}),
+    isTechnicalPreview: detail.isTechnicalPreview,
+  },
+  schema: detail.formSchema,
+  isTestable: detail.isTestable,
+  actions: detail.actions.map(({ name, description, isTool, scope }) => ({
+    name,
+    isTool,
+    ...(description !== undefined ? { description } : {}),
+    ...(scope !== undefined ? { scope } : {}),
+  })),
+});
+
+/**
  * Fetches a connector spec from the API.
  */
 export async function fetchConnectorSpec(
@@ -52,11 +76,8 @@ export async function fetchConnectorSpec(
   connectorTypeId: string,
   signal?: AbortSignal
 ): Promise<ConnectorSpecResponse> {
-  const wire = await http.get<ConnectorSpecWireResponse>(
-    `/internal/actions/connector_types/${encodeURIComponent(connectorTypeId)}/spec`,
-    { signal }
-  );
-  return transformConnectorSpecResponse(wire);
+  const detail = await createSpecsClient({ http }).get({ id: connectorTypeId, signal });
+  return toConnectorSpecResponse(detail);
 }
 
 /**

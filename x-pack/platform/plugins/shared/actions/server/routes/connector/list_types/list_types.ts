@@ -63,8 +63,10 @@ export const listTypesRoute = (
           featureId: query?.feature_id,
         });
 
-        const responseBody: GetAllConnectorTypesResponseV1 =
-          transformListTypesResponseV1(connectorTypes);
+        const responseBody: GetAllConnectorTypesResponseV1 = transformListTypesResponseV1(
+          connectorTypes,
+          { includeSpecFields: true }
+        );
 
         return res.ok({ body: responseBody });
       })

@@ -1,0 +1,16 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export {
+  transformConnectorSpecSummaryResponse,
+  transformConnectorSpecActionSummaryResponse,
+} from './transform_connector_spec_summary_response/latest';
+
+export {
+  transformConnectorSpecSummaryResponse as transformConnectorSpecSummaryResponseV1,
+  transformConnectorSpecActionSummaryResponse as transformConnectorSpecActionSummaryResponseV1,
+} from './transform_connector_spec_summary_response/v1';
