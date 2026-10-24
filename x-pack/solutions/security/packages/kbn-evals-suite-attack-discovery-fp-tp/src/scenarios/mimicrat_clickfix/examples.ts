@@ -7,11 +7,14 @@
 
 import {
   getChainIds,
+  withoutAlertHostId,
   withoutEntities,
   withoutEventCategory,
   withoutEventIds,
   withoutEvents,
   withProcessParent,
+  withStageEventSpan,
+  withTruncatingBenignEvents,
 } from '../../world';
 import type { FpTpExample } from '../types';
 import { MIMICRAT_CHAIN } from './chain';
@@ -242,6 +245,66 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
       networkDestination: 'supports',
     },
     buildWorld: (runMarker) => tpWorld(runMarker, 'mdm_management'),
+  },
+  {
+    id: 'mimicrat-clickfix.tp-host-name-only',
+    situation: 'U6',
+    evidenceState: 'complete',
+    expectedOutcome: 'true_positive',
+    provenance: 'replay',
+    variant: {
+      kind: 'perturbation',
+      of: TP_ID,
+      description: 'cited alerts carry host.name but no host.id',
+    },
+    checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
+    buildWorld: (runMarker) => withoutAlertHostId(tpWorld(runMarker)),
+  },
+  {
+    id: 'mimicrat-clickfix.tp-multiday-span',
+    situation: 'U6',
+    evidenceState: 'complete',
+    expectedOutcome: 'true_positive',
+    provenance: 'replay',
+    variant: {
+      kind: 'perturbation',
+      of: TP_ID,
+      description: "cited-alert original_time and each stage's events spread across three days",
+    },
+    checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
+    buildWorld: (runMarker) => withStageEventSpan(tpWorld(runMarker), 3),
+  },
+  // The dilution measurement the #299995 review asked for, under the per-alert
+  // window the follow-up adopted: the 3-day span widens the union of branch
+  // windows to three days while each branch reads at most 10, oldest first.
+  // More than a branch page of benign service starts sit inside the FIRST
+  // cited alert's window (the fill lands just after the chain's first-stage
+  // events, and only that first alert's window reaches back to them), so that
+  // branch's own total (62) exceeds its 10-event cap and `branches_truncated`
+  // flips, which blocks the clear — gold `inconclusive`, the same downgrade as
+  // `encoded-powershell.fp-events-truncated` (per-branch truncation rather
+  // than eviction off a single shared page). The first stage's own events are
+  // the oldest in that window, so they still lead the branch's oldest-first
+  // page and are KEPT; the gold rests on the truncation flag alone. The later
+  // stages' alerts carry their own windows, so the analysis can still see
+  // those events via their branches. With no such early-window volume every
+  // deciding event fits (`tp-multiday-span`): a multi-day span alone does not
+  // dilute; corpus volume inside a branch window does. No `checks`: the
+  // verdict rules do not model truncation or eviction, so the gold would not
+  // follow from them.
+  {
+    id: 'mimicrat-clickfix.fp-multiday-span-truncated',
+    situation: 'U1',
+    evidenceState: 'events_truncated',
+    expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    buildWorld: (runMarker) =>
+      withTruncatingBenignEvents(
+        withStageEventSpan(fpWorld(runMarker), 3),
+        runMarker,
+        undefined,
+        'afterFirstStage'
+      ),
   },
   {
     id: 'mimicrat-clickfix.parent-spoof',
