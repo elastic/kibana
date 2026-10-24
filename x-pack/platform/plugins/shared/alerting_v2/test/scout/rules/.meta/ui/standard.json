@@ -1,5 +1,5 @@
 {
-  "sha1": "99e49e6aecb8e36ba9a4f61ec2b948c549fa6ef4",
+  "sha1": "6c1a11c87cdf8e035b3e5f0e15fdd92c04bec956",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -176,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
-        "line": 128,
-        "column": 23
+        "line": 127,
+        "column": 19
       }
     },
     {
@@ -264,8 +264,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 138,
-        "column": 15
+        "line": 134,
+        "column": 10
       }
     },
     {
@@ -281,7 +281,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
         "line": 180,
-        "column": 11
+        "column": 7
       }
     },
     {
@@ -296,8 +296,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 202,
-        "column": 10
+        "line": 203,
+        "column": 15
       }
     },
     {
@@ -313,7 +313,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
         "line": 245,
-        "column": 52
+        "column": 23
       }
     },
     {
@@ -328,8 +328,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 287,
-        "column": 29
+        "line": 285,
+        "column": 74
       }
     },
     {
