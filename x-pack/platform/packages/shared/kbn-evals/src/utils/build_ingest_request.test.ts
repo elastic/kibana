@@ -8,7 +8,13 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { EvaluationCompleteEvent, DatasetRunResult } from '../types';
-import { buildIngestRequest } from './build_ingest_request';
+import { IngestScoresRequestBody } from '@kbn/evals-common';
+import {
+  buildIngestRequest,
+  clampToIngestLimit,
+  MAX_SCORE_EXPLANATION_LENGTH,
+  MAX_SCORE_LABEL_LENGTH,
+} from './build_ingest_request';
 
 const createLog = (): jest.Mocked<Pick<SomeDevLog, 'warning'>> => ({
   warning: jest.fn(),
@@ -418,5 +424,58 @@ describe('buildIngestRequest', () => {
 
     expect(requests).toEqual([]);
     expect(log.warning).toHaveBeenCalledWith('Skipped 2 score(s) due to missing model id');
+  });
+});
+
+describe('buildIngestRequest ingest schema limits', () => {
+  const buildFor = (result: EvaluationCompleteEvent['evaluationRun']['result']) =>
+    buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: null, commitSha: null },
+      source: {
+        kind: 'event',
+        event: createEvent({ evaluationRun: { ...createEvent().evaluationRun, result } }),
+      },
+    });
+
+  it('keeps a judge explanation longer than the ingest cap so the score still parses', () => {
+    // A rubric judge explanation of 5850 chars, the longest seen when re-judging unscored cells.
+    const explanation = `${'✅ PASS. '.repeat(650)}`;
+    expect(explanation.length).toBeGreaterThan(MAX_SCORE_EXPLANATION_LENGTH);
+
+    const [request] = buildFor({ score: 1, label: 'Y', explanation });
+
+    expect(() => IngestScoresRequestBody.parse(request)).not.toThrow();
+    const stored = request.scores[0].evaluator.explanation!;
+    expect(stored.length).toBe(MAX_SCORE_EXPLANATION_LENGTH);
+    expect(stored.startsWith(explanation.slice(0, 100))).toBe(true);
+    expect(stored.endsWith('[truncated]')).toBe(true);
+    expect(request.scores[0].evaluator.score).toBe(1);
+  });
+
+  it('clamps an over-long label the same way', () => {
+    const [request] = buildFor({ score: 0, label: 'x'.repeat(300), explanation: null });
+
+    expect(() => IngestScoresRequestBody.parse(request)).not.toThrow();
+    expect(request.scores[0].evaluator.label!.length).toBe(MAX_SCORE_LABEL_LENGTH);
+    expect(request.scores[0].evaluator.explanation).toBeNull();
+  });
+
+  it('leaves values within the cap untouched', () => {
+    const explanation = 'a'.repeat(MAX_SCORE_EXPLANATION_LENGTH);
+    const [request] = buildFor({ score: 1, label: 'Y', explanation });
+
+    expect(request.scores[0].evaluator.explanation).toBe(explanation);
+    expect(request.scores[0].evaluator.label).toBe('Y');
+  });
+
+  it('never splits a surrogate pair at the cut', () => {
+    const clamped = clampToIngestLimit(`${'a'.repeat(4082)}${'😀'.repeat(20)}`, 4096);
+
+    expect(clamped.length).toBeLessThanOrEqual(4096);
+    expect(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(clamped)).toBe(false);
   });
 });

@@ -19,6 +19,32 @@ import type { EvaluationCompleteEvent, DatasetRunResult, EvaluatorKind } from '.
 // converge this SDK path onto `buildScoreDocuments`.
 const MAX_INGEST_BATCH_SIZE = 1000;
 
+// Length caps on `IngestScoresRequestBody.scores[].evaluator` (ingest_scores_route.schema.yaml).
+// `ingestScores` parses the request client-side, so one over-long value rejects the whole request
+// and the score never lands. Judges routinely write explanations past 4096 characters.
+export const MAX_SCORE_EXPLANATION_LENGTH = 4096;
+export const MAX_SCORE_LABEL_LENGTH = 256;
+const TRUNCATION_SUFFIX = '… [truncated]';
+
+/**
+ * Clamps a string to the ingest schema's `max(n)`. Zod counts UTF-16 code units, the same as
+ * `String.prototype.length`, so slicing by `length` keeps the result within the cap.
+ */
+export const clampToIngestLimit = (value: string, maxLength: number): string => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  let head = value.slice(0, maxLength - TRUNCATION_SUFFIX.length);
+  // Do not leave a lone high surrogate at the cut.
+  if (/[\uD800-\uDBFF]$/.test(head)) {
+    head = head.slice(0, -1);
+  }
+  return `${head}${TRUNCATION_SUFFIX}`;
+};
+
+const clampNullable = <T extends string | null | undefined>(value: T, maxLength: number): T =>
+  (typeof value === 'string' ? clampToIngestLimit(value, maxLength) : value) as T;
+
 type IngestScore = IngestScoresRequestBodyInput['scores'][number];
 
 type BuildIngestRequestSource =
@@ -91,8 +117,12 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
       name: evaluationRun.name,
       ...(evaluationRun.version !== undefined && { version: evaluationRun.version }),
       ...(result?.score !== undefined && { score: result.score }),
-      ...(result?.label !== undefined && { label: result.label }),
-      ...(result?.explanation !== undefined && { explanation: result.explanation }),
+      ...(result?.label !== undefined && {
+        label: clampNullable(result.label, MAX_SCORE_LABEL_LENGTH),
+      }),
+      ...(result?.explanation !== undefined && {
+        explanation: clampNullable(result.explanation, MAX_SCORE_EXPLANATION_LENGTH),
+      }),
       ...(isPlainObject(result?.metadata) && { metadata: result.metadata }),
       ...(evaluationRun.traceId !== undefined && { trace_id: evaluationRun.traceId }),
       direction: evaluationRun.direction,

@@ -7,6 +7,7 @@
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type {
+  DatasetRunResult,
   DefaultEvaluators,
   EvalsExecutorClient,
   EvaluationDataset,
@@ -129,7 +130,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
       log,
     });
 
-    await executorClient.runExperiment(
+    const results = await executorClient.runExperiment(
       {
         datasets: [dataset],
         task: async ({ input }) => task({ input }),
@@ -138,7 +139,26 @@ export const createEvaluateAttackDiscoveryDataset = ({
       },
       experimentEvaluators
     );
+
+    log.info(formatRubricCoverage(results));
   };
 
   return evaluateAttackDiscoveryDataset;
+};
+
+/**
+ * One line per run stating how many rubric cells were scored. An unscored cell (judge failed
+ * after its retries) carries a null score, which the score table's mean silently skips, so
+ * the denominator has to be printed next to it.
+ */
+export const formatRubricCoverage = (results: DatasetRunResult[]): string => {
+  const rubricRuns = results.flatMap((result) =>
+    result.evaluationRuns.filter((run) => run.name === 'AttackDiscoveryRubric')
+  );
+  const unscored = rubricRuns.filter(
+    (run) => run.result?.score === null || run.result?.score === undefined
+  ).length;
+  const passed = rubricRuns.filter((run) => run.result?.score === 1).length;
+  const scored = rubricRuns.length - unscored;
+  return `AttackDiscoveryRubric coverage: scored ${scored}/${rubricRuns.length}, passed ${passed}/${scored}, unscored: ${unscored}`;
 };
