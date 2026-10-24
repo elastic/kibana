@@ -9,6 +9,7 @@
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { loadContractOperations } from '.';
+import { createOperationMatcher } from './match_operation';
 
 const ok = (description: string) => ({ '200': { description } });
 
@@ -324,6 +325,50 @@ describe('x-ms-paths', () => {
           headers: { 'x-ms-lease-action': 'release' },
         })
       ).toEqual({ status: 200, operation: 'Lease_Release' });
+    });
+
+    it('applies the enum next to a $ref in OpenAPI 3.1, and stops at $ref cycles', async () => {
+      const lease = (action: string, schema: Record<string, unknown>) => ({
+        put: {
+          operationId: `Lease_${action}`,
+          parameters: [header('x-ms-lease-action', schema)],
+          responses: ok(action),
+        },
+      });
+      const document = {
+        openapi: '3.1.0',
+        paths: {},
+        'x-ms-paths': {
+          '/c?comp=lease&acquire': lease('Acquire', {
+            $ref: '#/components/schemas/Action',
+            enum: ['acquire'],
+          }),
+          '/c?comp=lease&release': lease('Release', {
+            $ref: '#/components/schemas/Action',
+            enum: ['release'],
+          }),
+          '/d?comp=lease&loop': lease('Loop', { $ref: '#/components/schemas/Loop' }),
+        },
+        components: {
+          schemas: {
+            Action: { type: 'string' },
+            Loop: { $ref: '#/components/schemas/Loop' },
+          },
+        },
+      };
+
+      expect(
+        await route(document, '/c?comp=lease', {
+          method: 'PUT',
+          headers: { 'x-ms-lease-action': 'release' },
+        })
+      ).toEqual({ status: 200, operation: 'Lease_Release' });
+      // The router stops at the cycle; validation isn't reached here.
+      const match = createOperationMatcher(loadContractOperations(openApi(document)));
+      const routed = match('put', new URL('https://vendor.example/d?comp=lease'), {
+        'x-ms-lease-action': 'acquire',
+      });
+      expect('operation' in routed && routed.operation.id).toBe('Lease_Loop');
     });
 
     it('prefers the more specific path template before looking at discriminators', async () => {

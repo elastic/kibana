@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolveObject } from './json_pointer';
+import { getAtPointer, refToPointer } from './json_pointer';
 import { isRecord } from './schema_walk';
 import type { ContractOperation, OperationParameter, OperationServer } from './types';
 
@@ -122,16 +122,41 @@ const singleValue = (
   if (!required || !schema || !isRecord(schema.schema)) {
     return undefined;
   }
-  let node: Record<string, unknown>;
-  try {
-    // Follows the whole `$ref` chain, as specs alias shared enums.
-    ({ value: node } = resolveObject(operation.spec.document, schema.schema, schema.pointer));
-  } catch {
-    return undefined;
+  const {
+    spec: { document, dialect },
+  } = operation;
+  // The values every `enum` and `const` along the `$ref` chain allow, as specs alias shared
+  // enums. OpenAPI 3.1 applies the keywords next to a `$ref` too; 3.0 ignores them.
+  let allowed: unknown[] | undefined;
+  const visited = new Set<string>();
+  let node: unknown = schema.schema;
+  while (isRecord(node)) {
+    const { $ref } = node;
+    const isRef = typeof $ref === 'string';
+    if (!isRef || dialect === 'draft-2020-12') {
+      const own = Array.isArray(node.enum) ? node.enum : 'const' in node ? [node.const] : undefined;
+      if (own) {
+        allowed = allowed === undefined ? own : allowed.filter((value) => own.includes(value));
+      }
+    }
+    if (!isRef) {
+      break;
+    }
+    if (visited.has($ref)) {
+      return undefined;
+    }
+    visited.add($ref);
+    try {
+      node = getAtPointer(document, refToPointer($ref));
+    } catch {
+      return undefined;
+    }
+    if (!isRecord(node)) {
+      return undefined;
+    }
   }
-  const values = Array.isArray(node.enum) ? node.enum : 'const' in node ? [node.const] : [];
-  return values.length === 1 && ['string', 'number', 'boolean'].includes(typeof values[0])
-    ? String(values[0])
+  return allowed?.length === 1 && ['string', 'number', 'boolean'].includes(typeof allowed[0])
+    ? String(allowed[0])
     : undefined;
 };
 
