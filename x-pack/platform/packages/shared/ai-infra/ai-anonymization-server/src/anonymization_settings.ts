@@ -53,7 +53,7 @@ export const anonymizationSettingsSchema = schema.object({
   }),
   // Headroom above 100: a built-in added in a later release is appended to saved rules, and must
   // not make a previously valid full list unsaveable.
-  rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema]), { maxSize: 100 }),
+  rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema]), { maxSize: 150 }),
 });
 
 /**
