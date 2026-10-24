@@ -8,8 +8,7 @@
 import { z } from '@kbn/zod/v4';
 
 // ============================================================================
-// Panel Grid Schema - ideally we should import the schema from dashboard schemas, but they use config-schema library
-// which is not compatible with Zod, so we duplicate the relevant parts here for validation of attachment data.
+// Panel Grid Schema
 // ============================================================================
 
 /**
