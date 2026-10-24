@@ -3527,12 +3527,12 @@ describe('Attack Discovery worker chain', () => {
     describe('managed versions', () => {
       // Both are fixed `yaml` definitions, so the hash alone would upgrade them; the
       // bump is the deliberate signal of what shipped.
-      it('bumps the runner to version 5 for its report step', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(5);
+      it('bumps the runner to version 6 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(6);
       });
 
-      it('bumps the review to version 11 so the proposal read-back is space-scoped', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(11);
+      it('bumps the review to version 12 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(12);
       });
     });
   });

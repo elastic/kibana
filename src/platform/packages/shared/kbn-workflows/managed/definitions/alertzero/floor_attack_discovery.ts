@@ -23,11 +23,11 @@ export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID =
   'system-security-floor-attack-discovery';
 
 export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
+  version: 8,
   yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
     renderScheduledWorkerYaml(
       FLOOR_ATTACK_DISCOVERY_YAML,
