@@ -23,6 +23,7 @@ import type { PageStepRecorder, PageStepTimings } from '../utils/page_step_timin
 import { createPageStepTimings } from '../utils/page_step_timings';
 import { forEachConcurrently } from '../utils/for_each_concurrently';
 import type { ScopedLogger } from '../utils/with_log_context';
+import type { SampledPagesConfig } from './sampled_page_bounds';
 
 interface RunResolutionScoringParams {
   esClient: ElasticsearchClient;
@@ -54,6 +55,8 @@ interface RunResolutionScoringParams {
   preAggregateByEntity?: boolean;
   /** Full runs: read the groups from the entity store instead of the Phase 0 lookup index. */
   membershipFromStore?: boolean;
+  /** With `membershipFromStore`: place every page's range from one sample of the aliases. */
+  sampledPages?: SampledPagesConfig;
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
   /** Collects each page's step times; pass one in to read them after the stage. */
@@ -84,6 +87,7 @@ export const runResolutionScoringStep = async ({
   joinEntityStore,
   preAggregateByEntity,
   membershipFromStore,
+  sampledPages,
   collectScores,
   pageTimings = createPageStepTimings(),
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
@@ -153,6 +157,7 @@ export const runResolutionScoringStep = async ({
     joinEntityStore,
     preAggregateByEntity,
     membershipFromStore,
+    sampledPages,
   };
 
   await forEachConcurrently(discoverResolutionPages(scoringParams), pagesInFlight, async (task) => {

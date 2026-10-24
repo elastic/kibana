@@ -32,7 +32,7 @@ export interface SampledPageBounds {
   sampleRequests: number;
 }
 
-const DEFAULT_SEED = 42;
+export const DEFAULT_SAMPLE_SEED = 42;
 const COMPOSITE_PAGE_SIZE = 10_000;
 
 /** Sorts after every ID of the type, so it can close the last page's range. */
@@ -189,7 +189,7 @@ export const sampleBasePageBounds = async ({
         query,
         aggs: {
           sample: {
-            random_sampler: { probability, seed: config.seed ?? DEFAULT_SEED },
+            random_sampler: { probability, seed: config.seed ?? DEFAULT_SAMPLE_SEED },
             aggs: {
               keys: {
                 composite: {

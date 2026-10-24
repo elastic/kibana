@@ -9,7 +9,15 @@ import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { createPageStepTimings } from '../utils/page_step_timings';
-import { discoverResolutionPagesFromStore, readResolutionTargets } from './resolution_store_pages';
+import {
+  chunkResolutionPage,
+  discoverResolutionPagesFromStore,
+  discoverSampledResolutionPages,
+  readResolutionTargets,
+  readSampledAliasPage,
+  resolutionBoundsFromSample,
+  sampleResolutionPageBounds,
+} from './resolution_store_pages';
 
 const RESOLVED_TO = 'entity.relationships.resolution.resolved_to';
 
@@ -259,5 +267,220 @@ describe('readResolutionTargets', () => {
       tookMs: 0,
     });
     expect(crudClient.listEntities).not.toHaveBeenCalled();
+  });
+});
+
+const aliasFilters = [
+  { term: { 'entity.EngineMetadata.Type': 'user' } },
+  { exists: { field: RESOLVED_TO } },
+];
+
+/** Answers the alias count, then one composite page of sampled targets per call. */
+const aggregatorReturning = (aliases: number, ...samplePages: Array<Array<[string, number]>>) => {
+  const remaining = [...samplePages];
+  const aggregateEntities = jest
+    .fn()
+    .mockImplementation(async (params: { trackTotalHits?: boolean }) => {
+      if (params.trackTotalHits) {
+        return { total: aliases, took: 4 };
+      }
+      const page = remaining.shift() ?? [];
+      const last = page[page.length - 1];
+      return {
+        took: 6,
+        aggregations: {
+          sample: {
+            keys: {
+              buckets: page.map(([target, count]) => ({ key: { target }, doc_count: count })),
+              after_key: last ? { target: last[0] } : undefined,
+            },
+          },
+        },
+      };
+    });
+  return { aggregateEntities };
+};
+
+const weighted = (...targets: Array<[string, number]>) =>
+  targets.map(([target, aliases]) => ({ target, aliases }));
+
+describe('resolutionBoundsFromSample', () => {
+  it('closes a page each time the sampled aliases pass the next share of the total', () => {
+    const sample = weighted(['t1', 1], ['t2', 1], ['t3', 1], ['t4', 1], ['t5', 1], ['t6', 1]);
+
+    expect(resolutionBoundsFromSample(sample, 300, 100)).toEqual(['t2', 't4']);
+  });
+
+  it('weights each target by its sampled aliases', () => {
+    const sample = weighted(['t1', 4], ['t2', 1], ['t3', 1]);
+
+    expect(resolutionBoundsFromSample(sample, 200, 100)).toEqual(['t1']);
+  });
+
+  it('closes one page on a group heavier than several pages', () => {
+    const sample = weighted(['t1', 1], ['t2', 6], ['t3', 1]);
+
+    expect(resolutionBoundsFromSample(sample, 400, 100)).toEqual(['t2']);
+  });
+
+  it('never closes a page on the last sampled target', () => {
+    expect(resolutionBoundsFromSample(weighted(['t1', 1], ['t2', 1]), 200, 100)).toEqual(['t1']);
+  });
+
+  it('makes one page when the aliases fit in one', () => {
+    expect(resolutionBoundsFromSample(weighted(['t1', 1], ['t2', 1]), 90, 100)).toEqual([]);
+  });
+});
+
+describe('sampleResolutionPageBounds', () => {
+  const config = { targetPageSize: 2, samplesPerPage: 1 };
+
+  it('counts the aliases, then samples their targets with a composite inside random_sampler', async () => {
+    const crudClient = aggregatorReturning(4, [
+      ['user:t1', 1],
+      ['user:t2', 1],
+      ['user:t3', 1],
+    ]);
+
+    const bounds = await sampleResolutionPageBounds({
+      crudClient,
+      entityType: EntityType.user,
+      config,
+    });
+
+    expect(crudClient.aggregateEntities).toHaveBeenNthCalledWith(1, {
+      filter: aliasFilters,
+      trackTotalHits: true,
+    });
+    expect(crudClient.aggregateEntities).toHaveBeenNthCalledWith(2, {
+      filter: aliasFilters,
+      aggs: {
+        sample: {
+          random_sampler: { probability: 0.49, seed: 42 },
+          aggs: {
+            keys: {
+              composite: {
+                size: 50_000,
+                sources: [{ target: { terms: { field: RESOLVED_TO } } }],
+              },
+            },
+          },
+        },
+      },
+    });
+    expect(bounds).toEqual({
+      uppers: ['user:t2'],
+      aliases: 4,
+      probability: 0.49,
+      sampledAliases: 3,
+      sampledTargets: 3,
+      countTookMs: 4,
+      sampleTookMs: 6,
+      sampleRequests: 1,
+    });
+  });
+
+  it('samples nothing when the aliases fit in one page', async () => {
+    const crudClient = aggregatorReturning(2);
+
+    const bounds = await sampleResolutionPageBounds({
+      crudClient,
+      entityType: EntityType.user,
+      config,
+    });
+
+    expect(crudClient.aggregateEntities).toHaveBeenCalledTimes(1);
+    expect(bounds.uppers).toEqual([]);
+  });
+});
+
+describe('readSampledAliasPage', () => {
+  it("reads the aliases whose targets fall in the page's range, in resolved_to order", async () => {
+    const crudClient = storeReturning([alias('user:a1', 'user:t1'), alias('user:a2', 'user:t2')]);
+
+    const page = await readSampledAliasPage({
+      crudClient,
+      entityType: EntityType.user,
+      range: { lower: 'user:t0', upper: 'user:t2' },
+    });
+
+    expect(crudClient.listEntities).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: [...aliasFilters, { range: { [RESOLVED_TO]: { gt: 'user:t0', lte: 'user:t2' } } }],
+        sort: [{ [RESOLVED_TO]: 'asc' }],
+      })
+    );
+    expect(page.targetIds).toEqual(['user:t1', 'user:t2']);
+    expect(page.tookMs).toBe(5);
+  });
+
+  it('leaves the range open on the side a page has no bound', async () => {
+    const crudClient = storeReturning([]);
+
+    await readSampledAliasPage({ crudClient, entityType: EntityType.user, range: {} });
+
+    expect(crudClient.listEntities).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: aliasFilters })
+    );
+  });
+});
+
+describe('chunkResolutionPage', () => {
+  it('cuts the targets into consecutive runs, each with its range and its aliases', () => {
+    const entities = [
+      ['user:a1', 'user:t1'],
+      ['user:a2', 'user:t2'],
+      ['user:a3', 'user:t3'],
+    ].map(([id, target]) => ({
+      entity: { id, relationships: { resolution: { resolved_to: target } } },
+    }));
+
+    const chunks = chunkResolutionPage({
+      lower: 'user:t0',
+      aliases: entities,
+      targetIds: ['user:t1', 'user:t2', 'user:t3'],
+      maxTargets: 2,
+    });
+
+    expect(chunks.map(({ targetIds, bounds }) => ({ targetIds, bounds }))).toEqual([
+      { targetIds: ['user:t1', 'user:t2'], bounds: { lower: 'user:t0', upper: 'user:t2' } },
+      { targetIds: ['user:t3'], bounds: { lower: 'user:t2', upper: 'user:t3' } },
+    ]);
+    expect([...chunks[1].aliasEntities.keys()]).toEqual(['user:a3']);
+  });
+});
+
+describe('discoverSampledResolutionPages', () => {
+  const discoverSampled = (crudClient: ReturnType<typeof aggregatorReturning>) =>
+    collect(
+      discoverSampledResolutionPages({
+        crudClient,
+        logger,
+        entityType: EntityType.user,
+        config: { targetPageSize: 2, samplesPerPage: 1 },
+        pageTimings: createPageStepTimings(),
+      })
+    );
+
+  it("hands out every page's range from the sample", async () => {
+    const crudClient = aggregatorReturning(4, [
+      ['user:t1', 1],
+      ['user:t2', 1],
+      ['user:t3', 1],
+    ]);
+
+    const pages = await discoverSampled(crudClient);
+
+    expect(pages.map(({ pageNumber, sampledRange }) => ({ pageNumber, sampledRange }))).toEqual([
+      { pageNumber: 1, sampledRange: { lower: undefined, upper: 'user:t2' } },
+      { pageNumber: 2, sampledRange: { lower: 'user:t2', upper: undefined } },
+    ]);
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('sampled page bounds: aliases=4')
+    );
+  });
+
+  it('finds no pages in a store without aliases', async () => {
+    expect(await discoverSampled(aggregatorReturning(0))).toEqual([]);
   });
 });

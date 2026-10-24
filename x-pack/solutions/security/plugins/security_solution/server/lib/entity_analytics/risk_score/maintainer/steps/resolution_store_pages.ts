@@ -19,6 +19,8 @@ import { createPageStepTimings } from '../utils/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskScoreModifierEntity } from './pipeline_types';
 import type { ResolutionPageTask } from './score_resolution_entities';
+import type { SampledPagesConfig } from './sampled_page_bounds';
+import { DEFAULT_SAMPLE_SEED } from './sampled_page_bounds';
 
 const RESOLVED_TO = 'entity.relationships.resolution.resolved_to';
 
@@ -31,6 +33,13 @@ const MEMBER_FIELDS = [
 ];
 
 type StoreReader = Pick<EntityUpdateClient, 'listEntities'>;
+type StoreAggregator = Pick<EntityUpdateClient, 'aggregateEntities'>;
+
+/** Every alias of the entity type: the documents whose `resolved_to` names their group's target. */
+const aliasFilters = (entityType: EntityType): QueryDslQueryContainer[] => [
+  { term: { 'entity.EngineMetadata.Type': entityType } },
+  { exists: { field: RESOLVED_TO } },
+];
 
 export interface StoreRead {
   entities: RiskScoreModifierEntity[];
@@ -197,10 +206,7 @@ const readAliasPage = async ({
   let tookMs = 0;
   while (!exhausted && targetsInOrder(aliases).length < 2) {
     const read = await readOnePage(crudClient, {
-      filter: [
-        { term: { 'entity.EngineMetadata.Type': entityType } },
-        { exists: { field: RESOLVED_TO } },
-      ],
+      filter: aliasFilters(entityType),
       sort: ALIAS_SORT,
       size,
       searchAfter,
@@ -296,6 +302,255 @@ export const discoverResolutionPagesFromStore = async function* ({
       bounds,
       timer,
       aliasEntities: byEntityId(page.aliases),
+    };
+  }
+};
+
+export interface SampledResolutionBounds {
+  /** Inclusive upper bounds (target IDs) of every page but the last, which runs to the end. */
+  uppers: string[];
+  aliases: number;
+  probability: number;
+  /** Aliases the sample picked, and the targets they belong to. */
+  sampledAliases: number;
+  sampledTargets: number;
+  countTookMs: number;
+  sampleTookMs: number;
+  sampleRequests: number;
+}
+
+/**
+ * Each composite request repeats the sampling pass, so larger pages of keys mean fewer passes; it
+ * stays under the default `search.max_buckets` of 65,536.
+ */
+const SAMPLE_COMPOSITE_PAGE_SIZE = 50_000;
+
+interface ResolutionSampleAggregations {
+  sample: {
+    keys: {
+      buckets: Array<{ key: { target: string }; doc_count: number }>;
+      after_key?: { target: string };
+    };
+  };
+}
+
+/**
+ * Page upper bounds from the targets the sample picked, in order, each weighted by how many of its
+ * aliases were picked. A bound falls wherever the running weight passes the next 1/pages of the
+ * total, so pages hold about the same number of aliases however large the groups are; only the
+ * weights' proportions matter. A bound is always a target, so a group never spans two pages.
+ */
+export const resolutionBoundsFromSample = (
+  sample: Array<{ target: string; aliases: number }>,
+  aliases: number,
+  targetPageSize: number
+): string[] => {
+  const pages = Math.ceil(aliases / targetPageSize);
+  const total = sample.reduce((sum, { aliases: weight }) => sum + weight, 0);
+  const uppers: string[] = [];
+  let running = 0;
+  let next = 1;
+  // The last sampled target never closes a page: the last page runs to the end of the range anyway.
+  for (const { target, aliases: weight } of sample.slice(0, -1)) {
+    running += weight;
+    if (next < pages && running >= (next * total) / pages) {
+      uppers.push(target);
+      // A group heavier than a page crosses several thresholds at once.
+      while (next < pages && running >= (next * total) / pages) {
+        next += 1;
+      }
+    }
+  }
+  return uppers;
+};
+
+/**
+ * Counts the type's aliases and samples them once at the start of the stage, so every page's range
+ * is known up front instead of read page by page. Pages are measured in aliases, so the sampling
+ * probability depends only on the configuration: `samplesPerPage` sampled aliases stand for
+ * `targetPageSize` aliases.
+ */
+export const sampleResolutionPageBounds = async ({
+  crudClient,
+  entityType,
+  config,
+}: {
+  crudClient: StoreAggregator;
+  entityType: EntityType;
+  config: SampledPagesConfig;
+}): Promise<SampledResolutionBounds> => {
+  const filter = aliasFilters(entityType);
+  const count = await crudClient.aggregateEntities({ filter, trackTotalHits: true });
+  const aliases = count.total ?? 0;
+  const probability = Math.min(0.49, config.samplesPerPage / config.targetPageSize);
+
+  const sample: Array<{ target: string; aliases: number }> = [];
+  let sampleTookMs = 0;
+  let sampleRequests = 0;
+  let after: { target: string } | undefined;
+  let more = aliases > config.targetPageSize;
+  while (more) {
+    const response = await crudClient.aggregateEntities<ResolutionSampleAggregations>({
+      filter,
+      aggs: {
+        sample: {
+          random_sampler: { probability, seed: config.seed ?? DEFAULT_SAMPLE_SEED },
+          aggs: {
+            keys: {
+              composite: {
+                size: SAMPLE_COMPOSITE_PAGE_SIZE,
+                sources: [{ target: { terms: { field: RESOLVED_TO } } }],
+                ...(after ? { after } : {}),
+              },
+            },
+          },
+        },
+      },
+    });
+    sampleTookMs += response.took;
+    sampleRequests += 1;
+    const keys = response.aggregations?.sample.keys;
+    const buckets = keys?.buckets ?? [];
+    sample.push(
+      ...buckets.map((bucket) => ({ target: bucket.key.target, aliases: bucket.doc_count }))
+    );
+    after = keys?.after_key;
+    more = buckets.length === SAMPLE_COMPOSITE_PAGE_SIZE && after !== undefined;
+  }
+
+  return {
+    uppers: resolutionBoundsFromSample(sample, aliases, config.targetPageSize),
+    aliases,
+    probability,
+    sampledAliases: sample.reduce((sum, { aliases: weight }) => sum + weight, 0),
+    sampledTargets: sample.length,
+    countTookMs: count.took,
+    sampleTookMs,
+    sampleRequests,
+  };
+};
+
+/**
+ * Reads every alias whose group falls in a sampled page's range `(lower, upper]`; the last page has
+ * no upper bound. A range bounded on both sides only walks the page's own values, unlike the open
+ * range that `search_after` replaced.
+ */
+export const readSampledAliasPage = async ({
+  crudClient,
+  entityType,
+  range,
+}: {
+  crudClient: StoreReader;
+  entityType: EntityType;
+  range: { lower?: string; upper?: string };
+}): Promise<{ aliases: RiskScoreModifierEntity[]; targetIds: string[]; tookMs: number }> => {
+  const bounds = {
+    ...(range.lower !== undefined ? { gt: range.lower } : {}),
+    ...(range.upper !== undefined ? { lte: range.upper } : {}),
+  };
+  const { entities, tookMs } = await readAll(crudClient, {
+    filter: [
+      ...aliasFilters(entityType),
+      ...(Object.keys(bounds).length > 0 ? [{ range: { [RESOLVED_TO]: bounds } }] : []),
+    ],
+    sort: ALIAS_SORT,
+    size: MAX_RESOLUTION_TARGETS_PER_PAGE,
+  });
+  return { aliases: entities, targetIds: targetsInOrder(entities), tookMs };
+};
+
+export interface ResolutionPageChunk {
+  targetIds: string[];
+  bounds: { lower?: string; upper: string };
+  aliasEntities: Map<string, RiskScoreModifierEntity>;
+}
+
+/**
+ * Cuts a page's targets, in order, into runs of at most `maxTargets`, each with its own range, so a
+ * sampled page that came out larger than the scoring query's row limit is scored in parts. Each
+ * run takes its targets' aliases along.
+ */
+export const chunkResolutionPage = ({
+  lower,
+  aliases,
+  targetIds,
+  maxTargets,
+}: {
+  lower?: string;
+  aliases: RiskScoreModifierEntity[];
+  targetIds: string[];
+  maxTargets: number;
+}): ResolutionPageChunk[] => {
+  const chunks: ResolutionPageChunk[] = [];
+  let from = lower;
+  for (let start = 0; start < targetIds.length; start += maxTargets) {
+    const ids = targetIds.slice(start, start + maxTargets);
+    const inChunk = new Set(ids);
+    const upper = ids[ids.length - 1];
+    chunks.push({
+      targetIds: ids,
+      bounds: { lower: from, upper },
+      aliasEntities: byEntityId(aliases.filter((alias) => inChunk.has(resolvedTo(alias) ?? ''))),
+    });
+    from = upper;
+  }
+  return chunks;
+};
+
+/**
+ * Samples the type's aliases once, then hands out every page's range at once. Each page reads its
+ * own aliases when it starts, so the reads run alongside other pages instead of one after another.
+ */
+export const discoverSampledResolutionPages = async function* ({
+  crudClient,
+  logger,
+  entityType,
+  config,
+  abortSignal,
+  pageTimings = createPageStepTimings(),
+}: {
+  crudClient: StoreAggregator;
+  logger: ScopedLogger;
+  entityType: EntityType;
+  config: SampledPagesConfig;
+  abortSignal?: AbortSignal;
+  pageTimings?: PageStepTimings;
+}): AsyncGenerator<ResolutionPageTask> {
+  const firstTimer = pageTimings.startPage();
+  const sample = await firstTimer.time(
+    'discovery',
+    () => sampleResolutionPageBounds({ crudClient, entityType, config }),
+    (result) => result.countTookMs + result.sampleTookMs
+  );
+  logger.info(
+    `[resolution] sampled page bounds: aliases=${sample.aliases}, ` +
+      `probability=${sample.probability.toFixed(5)}, sampled_aliases=${sample.sampledAliases}, ` +
+      `sampled_targets=${sample.sampledTargets}, pages=${sample.uppers.length + 1}, ` +
+      `count_took=${sample.countTookMs}ms, sample_took=${sample.sampleTookMs}ms in ${sample.sampleRequests} requests`
+  );
+  if (sample.aliases === 0) {
+    firstTimer.drop();
+    return;
+  }
+
+  const uppers: Array<string | undefined> = [...sample.uppers, undefined];
+  let lower: string | undefined;
+  for (const [index, upper] of uppers.entries()) {
+    if (abortSignal?.aborted) {
+      if (index === 0) {
+        firstTimer.drop();
+      }
+      logger.info('Resolution scoring aborted between pages');
+      return;
+    }
+    const sampledRange = { lower, upper };
+    lower = upper;
+    yield {
+      pageNumber: index + 1,
+      resolutionTargetIds: [],
+      bounds: undefined,
+      timer: index === 0 ? firstTimer : pageTimings.startPage(),
+      sampledRange,
     };
   }
 };

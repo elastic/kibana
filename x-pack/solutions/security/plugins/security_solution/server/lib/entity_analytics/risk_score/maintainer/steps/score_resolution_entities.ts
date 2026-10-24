@@ -28,9 +28,13 @@ import { buildResolutionModifierEntity } from './resolution_modifiers';
 import { getResolutionPageMemberFilter } from './resolution_member_filter';
 import {
   byEntityId,
+  chunkResolutionPage,
   discoverResolutionPagesFromStore,
+  discoverSampledResolutionPages,
   readResolutionTargets,
+  readSampledAliasPage,
 } from './resolution_store_pages';
+import type { SampledPagesConfig } from './sampled_page_bounds';
 import { parseEsqlResolutionScoreRow } from './parse_esql_row';
 import type { ParsedResolutionScore } from './parse_esql_row';
 import type { ScopedLogger } from '../utils/with_log_context';
@@ -67,6 +71,11 @@ interface ScoreResolutionEntitiesParams {
    * carries its stamped entity ID, which keeps the member filter exact.
    */
   membershipFromStore?: boolean;
+  /**
+   * With `membershipFromStore`: place every page's range from one sample of the aliases at the
+   * start of the stage, instead of reading the next page's aliases one page after another.
+   */
+  sampledPages?: SampledPagesConfig;
 }
 
 interface ResolutionPageResult {
@@ -84,6 +93,8 @@ export interface ResolutionPageTask {
   timer: PageTimer;
   /** Pages found in the entity store: the page's aliases, with their modifiers. */
   aliasEntities?: Map<string, RiskScoreModifierEntity>;
+  /** Sampled pages: the range of targets to read the aliases of when the page starts. */
+  sampledRange?: { lower?: string; upper?: string };
 }
 
 const readsMembershipFromStore = ({
@@ -96,7 +107,9 @@ export const discoverResolutionPages = (
   params: ScoreResolutionEntitiesParams
 ): AsyncGenerator<ResolutionPageTask> =>
   readsMembershipFromStore(params)
-    ? discoverResolutionPagesFromStore(params)
+    ? params.sampledPages
+      ? discoverSampledResolutionPages({ ...params, config: params.sampledPages })
+      : discoverResolutionPagesFromStore(params)
     : discoverResolutionPagesFromLookup(params);
 
 /** Each composite aggregation over the lookup index needs the previous one's `after_key`. */
@@ -165,10 +178,57 @@ export const scoreResolutionPage = (
     : scoreResolutionPageFromLookup(params, task);
 
 /**
- * The page's aliases already came with discovery. Reads the targets' own modifiers, scores the
- * page's range with the store joined, and merges each group's modifiers from both reads.
+ * A sampled page reads its aliases first; one that holds more targets than the scoring query
+ * returns is scored in consecutive parts. Other store pages came with their aliases.
  */
 const scoreResolutionPageFromStore = async (
+  params: ScoreResolutionEntitiesParams,
+  task: ResolutionPageTask
+): Promise<EntityRiskScoreRecord[]> => {
+  if (!task.sampledRange) {
+    return scoreStoreGroups(params, task);
+  }
+  const { sampledRange, timer, pageNumber } = task;
+  const page = await timer.time(
+    'discovery',
+    () =>
+      readSampledAliasPage({
+        crudClient: params.crudClient,
+        entityType: params.entityType,
+        range: sampledRange,
+      }),
+    (result) => result.tookMs
+  );
+  const chunks = chunkResolutionPage({
+    lower: sampledRange.lower,
+    aliases: page.aliases,
+    targetIds: page.targetIds,
+    maxTargets: Math.min(params.pageSize, MAX_RESOLUTION_TARGETS_PER_PAGE),
+  });
+  if (chunks.length > 1) {
+    params.logger.info(
+      `[resolution][page:${pageNumber}] read ${page.aliases.length} aliases of ${page.targetIds.length} targets; scoring it in ${chunks.length} parts`
+    );
+  }
+  const scores: EntityRiskScoreRecord[] = [];
+  for (const chunk of chunks) {
+    scores.push(
+      ...(await scoreStoreGroups(params, {
+        ...task,
+        resolutionTargetIds: chunk.targetIds,
+        bounds: chunk.bounds,
+        aliasEntities: chunk.aliasEntities,
+      }))
+    );
+  }
+  return scores;
+};
+
+/**
+ * The page's aliases are in hand. Reads the targets' own modifiers, scores the page's range with
+ * the store joined, and merges each group's modifiers from both reads.
+ */
+const scoreStoreGroups = async (
   {
     esClient,
     crudClient,

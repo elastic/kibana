@@ -491,6 +491,120 @@ describe('score_resolution_entities', () => {
       expect(esClient.esql.query).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('skipped'));
     });
+
+    describe('with sampled pages', () => {
+      const runSampled = (pageSize: number, targetPageSize: number) =>
+        collectPages(
+          calculateResolutionEntityScores({
+            esClient,
+            crudClient,
+            logger,
+            entityType: EntityType.user,
+            alertsIndex: '.alerts-security.alerts-default',
+            lookupIndex: '.entity_analytics.risk_score.lookup-default',
+            pageSize,
+            sampleSize: 1000,
+            now: '2026-01-01T00:00:00.000Z',
+            calculationRunId: 'run-1',
+            watchlistConfigs: new Map(),
+            alertFilters: [],
+            membershipFromStore: true,
+            sampledPages: { targetPageSize, samplesPerPage: 1 },
+          })
+        );
+      const scoreRow = (target: string) => [
+        1,
+        20,
+        JSON.stringify({ risk_score: '50', id: `alert-${target}`, index: 'alerts', time: 'now' }),
+        `${target}|self`,
+        target,
+      ];
+      const aliasHit = (id: string, target: string) => ({
+        'entity.id': [id],
+        [RESOLVED_TO]: [target],
+      });
+      const rangeFilter = (call: number) =>
+        jest.mocked(crudClient.listEntities).mock.calls[call][0]?.filter;
+
+      it("reads each sampled page's aliases by range and scores the targets it found", async () => {
+        crudClient.aggregateEntities = jest
+          .fn()
+          .mockResolvedValueOnce({ total: 2, took: 1 })
+          .mockResolvedValueOnce({
+            took: 2,
+            aggregations: {
+              sample: {
+                keys: {
+                  buckets: [
+                    { key: { target: 'user:t1' }, doc_count: 1 },
+                    { key: { target: 'user:t2' }, doc_count: 1 },
+                  ],
+                },
+              },
+            },
+          });
+        jest
+          .mocked(crudClient.listEntities)
+          .mockResolvedValueOnce({
+            entities: [],
+            took: 1,
+            fields: [aliasHit('user:a1', 'user:t1')],
+          })
+          .mockResolvedValueOnce({ entities: [], took: 1, fields: [{ 'entity.id': ['user:t1'] }] })
+          .mockResolvedValueOnce({
+            entities: [],
+            took: 1,
+            fields: [aliasHit('user:a2', 'user:t2')],
+          })
+          .mockResolvedValueOnce({ entities: [], took: 1, fields: [{ 'entity.id': ['user:t2'] }] });
+        jest
+          .mocked(esClient.esql.query)
+          .mockResolvedValueOnce({ columns: [], values: [scoreRow('user:t1')] })
+          .mockResolvedValueOnce({ columns: [], values: [scoreRow('user:t2')] });
+
+        const pages = await runSampled(10_000, 1);
+
+        expect(rangeFilter(0)).toContainEqual({ range: { [RESOLVED_TO]: { lte: 'user:t1' } } });
+        expect(rangeFilter(2)).toContainEqual({ range: { [RESOLVED_TO]: { gt: 'user:t1' } } });
+        const [[first], [second]] = jest.mocked(esClient.esql.query).mock.calls;
+        expect(first.query).toContain('resolution_target_id <= "user:t1"');
+        expect(second.query).toContain('resolution_target_id > "user:t1"');
+        expect(second.query).toContain('resolution_target_id <= "user:t2"');
+        expect(pages).toEqual([
+          [expect.objectContaining({ id_value: 'user:t1' })],
+          [expect.objectContaining({ id_value: 'user:t2' })],
+        ]);
+      });
+
+      it('scores a page with more targets than the query returns in consecutive parts', async () => {
+        crudClient.aggregateEntities = jest.fn().mockResolvedValueOnce({ total: 2, took: 1 });
+        jest
+          .mocked(crudClient.listEntities)
+          .mockResolvedValueOnce({
+            entities: [],
+            took: 1,
+            fields: [aliasHit('user:a1', 'user:t1'), aliasHit('user:a2', 'user:t2')],
+          })
+          .mockResolvedValue({ entities: [], took: 1, fields: [] });
+        jest
+          .mocked(esClient.esql.query)
+          .mockResolvedValueOnce({ columns: [], values: [scoreRow('user:t1')] })
+          .mockResolvedValueOnce({ columns: [], values: [scoreRow('user:t2')] });
+
+        const pages = await runSampled(1, 10);
+
+        const [[first], [second]] = jest.mocked(esClient.esql.query).mock.calls;
+        expect(first.query).toContain('resolution_target_id <= "user:t1"');
+        expect(second.query).toContain('resolution_target_id > "user:t1"');
+        expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('scoring it in 2 parts'));
+        expect(pages).toEqual([
+          [
+            expect.objectContaining({ id_value: 'user:t1' }),
+            expect.objectContaining({ id_value: 'user:t2' }),
+          ],
+        ]);
+      });
+    });
   });
 
   it('throws when member fetch receives more than the capped ids', async () => {

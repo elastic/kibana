@@ -678,6 +678,9 @@ const executeEntityTypeRun = async ({
             joinEntityStore: true,
             preAggregateByEntity: true,
             membershipFromStore: RESOLVE_FROM_ENTITY_STORE,
+            // Test setting: page ranges from one sample of the aliases. The alias read shows a
+            // page's size before scoring, so an oversized page costs only a split; pages aim at 9k.
+            sampledPages: { targetPageSize: 9000, samplesPerPage: 250 },
             pageTimings: resolutionPageTimings,
           }),
       });
