@@ -26,14 +26,14 @@ import { transformGetConnectorSpecResponseV1 } from './transforms';
  * GET /internal/actions/connector_types/{id}/spec
  *
  * Returns the serialized connector spec as JSON Schema for client-side
- * form generation and validation.
+ * form generation and validation, plus action input schemas.
  *
  * Only available for connector types with source === 'spec'.
  */
 export const getConnectorSpecRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
-  configurationUtilities: ActionsConfigurationUtilities
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.get(
     {
@@ -43,7 +43,7 @@ export const getConnectorSpecRoute = (
         access: 'internal',
         summary: 'Get connector type specification',
         description:
-          'Returns metadata and JSON Schema for a connector type form (config + secrets). Only available for spec-based connectors.',
+          'Returns metadata, JSON Schema for a connector type form (config + secrets), and action input schemas. Only available for spec-based connectors.',
         tags: ['oas-tag:connectors'],
       },
       validate: {
@@ -70,7 +70,7 @@ export const getConnectorSpecRoute = (
         const { id }: GetConnectorSpecParamsV1 = req.params;
         const specResult = await actionsClient.getConnectorSpec({
           id,
-          configurationUtilities,
+          configurationUtilities: actionsConfigUtils,
         });
         const responseBody: GetConnectorSpecResponseV1 =
           transformGetConnectorSpecResponseV1(specResult);
