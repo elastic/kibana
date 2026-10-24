@@ -1,5 +1,5 @@
 {
-  "sha1": "d98fc77cb3db1776614e88734d860bec89cbee06",
+  "sha1": "c58f09817e72acb4d1520382148c1ef9c3b6791c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -128,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/03_has_setup_with_integrations.spec.ts",
-        "line": 92,
+        "line": 96,
         "column": 10
       }
     },
