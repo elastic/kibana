@@ -391,6 +391,21 @@ describe('OnboardingPage', () => {
             : worker
         ),
       };
+      mockEnsureWorkerServiceAccounts.mockImplementation(
+        async (_http: unknown, _serviceAccounts: unknown, workerIds: string[]) =>
+          new Map(
+            workerIds.map((id) => [
+              id,
+              {
+                ok: true,
+                serviceAccountId:
+                  id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+                    ? 'kibana/existing'
+                    : 'account-a',
+              },
+            ])
+          )
+      );
       renderPage({ canWrite: true, httpPatch, serverWorkers });
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
@@ -401,8 +416,32 @@ describe('OnboardingPage', () => {
           expect.objectContaining({ body: JSON.stringify({ enabled: true }) })
         )
       );
-      expect(mockEnsureWorkerServiceAccounts.mock.calls[0][2]).not.toContain(
-        SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+      // The binding is handed over so a missing account can be replaced, and kept when it exists.
+      expect(mockEnsureWorkerServiceAccounts.mock.calls[0][3].boundAccountIds).toEqual(
+        new Map([[SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, 'kibana/existing']])
+      );
+    });
+
+    it('replaces the account of a worker whose bound account no longer exists', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      const serverWorkers = {
+        workers: ALL_WORKERS_RESPONSE.workers.map((worker) =>
+          worker.id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+            ? { ...worker, enabled: true, settings: { serviceAccountId: 'kibana/gone' } }
+            : worker
+        ),
+      };
+      renderPage({ canWrite: true, httpPatch, serverWorkers });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+
+      await waitFor(() =>
+        expect(httpPatch).toHaveBeenCalledWith(
+          expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+          expect.objectContaining({
+            body: expect.stringContaining('"serviceAccountId":"account-a"'),
+          })
+        )
       );
     });
 

@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { API_VERSIONS, buildWorkerUrl } from '@kbn/alertzero-common';
-import type { ListWorkersResponse } from '@kbn/alertzero-common';
+import type { ListWorkersResponse, Worker } from '@kbn/alertzero-common';
 import { notifyWorkerUpdateError } from '../../hooks/use_workers_api';
 import { queryKeys } from '../../query_keys';
 import { useReportToastError } from '../../telemetry';
@@ -56,17 +56,22 @@ export const useEnableWorkers = (
 
     setIsSaving(true);
     onSavingChange?.(true);
-    // Workers being turned on without a service account get their prebuilt one first. A Worker
-    // whose account cannot be set up stays off; pressing the button again retries it.
+    // Workers being turned on get their prebuilt service account first, including those whose
+    // bound account has since disappeared. A Worker whose account cannot be set up stays off;
+    // pressing the button again retries it.
     const workerById = new Map(cached.workers.map((worker) => [worker.id, worker]));
-    const needsAccount = idsToUpdate.filter(
-      (id) => workerEnabled[id] === true && !workerById.get(id)?.settings?.serviceAccountId
+    const needsAccount = idsToUpdate.filter((id) => workerEnabled[id] === true);
+    const boundAccountIds = new Map(
+      needsAccount.flatMap((id) => {
+        const accountId = workerById.get(id)?.settings?.serviceAccountId;
+        return accountId ? [[id, accountId] as [string, string]] : [];
+      })
     );
     const accounts = await ensureWorkerServiceAccounts(
       services.http!,
       services.serviceAccounts,
       needsAccount,
-      { isServerless: services.isServerless ?? false }
+      { isServerless: services.isServerless ?? false, boundAccountIds }
     );
     const accountFailures = needsAccount.flatMap((id) => {
       const account = accounts.get(id);
@@ -83,22 +88,32 @@ export const useEnableWorkers = (
     // allSettled keeps isSaving true for the full fan-out so a single rejection does
     // not re-enable the button while the remaining PATCHes are still in-flight.
     const results = await Promise.allSettled(
-      idsToPatch.map((id) => {
+      idsToPatch.map(async (id) => {
         const turningOn = workerEnabled[id] === true;
         const account = accounts.get(id);
-        // An existing binding is kept; only a newly set up account is written.
-        const body =
-          turningOn && account?.ok
-            ? {
-                enabled: true,
-                settings: { serviceAccountId: account.serviceAccountId },
-                settingsRevision: workerById.get(id)?.settingsRevision ?? null,
-              }
-            : { enabled: turningOn };
-        return services.http!.patch(buildWorkerUrl(id), {
-          version: API_VERSIONS.internal.v1,
-          body: JSON.stringify(body),
-        });
+        const patchWorker = (body: object) =>
+          services.http!.patch<{ worker: Worker }>(buildWorkerUrl(id), {
+            version: API_VERSIONS.internal.v1,
+            body: JSON.stringify(body),
+          });
+        if (!turningOn || !account?.ok) return patchWorker({ enabled: turningOn });
+        // An existing binding is kept; only a new or replaced account is written.
+        const { serviceAccountId, replacedBound } = account;
+        if (serviceAccountId === boundAccountIds.get(id) && !replacedBound) {
+          return patchWorker({ enabled: true });
+        }
+        let settingsRevision = workerById.get(id)?.settingsRevision ?? null;
+        if (serviceAccountId === boundAccountIds.get(id)) {
+          // The account came back under the same id, which the binding would treat as unchanged
+          // and keep its stale `boundAt`. Clearing it first makes the next write bind afresh.
+          const cleared = await patchWorker({
+            enabled: false,
+            settings: { serviceAccountId: null },
+            settingsRevision,
+          });
+          settingsRevision = cleared.worker.settingsRevision;
+        }
+        return patchWorker({ enabled: true, settings: { serviceAccountId }, settingsRevision });
       })
     );
 

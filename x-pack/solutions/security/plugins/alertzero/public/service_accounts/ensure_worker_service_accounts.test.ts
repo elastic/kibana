@@ -155,6 +155,80 @@ describe('ensureWorkerServiceAccounts', () => {
     expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
   });
 
+  it('waits for a concurrently created account to become usable', async () => {
+    jest.useFakeTimers();
+    try {
+      const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
+      const { http, get, serviceAccounts } = setup();
+      // The other tab has written the account but not yet its credential, so it is not assumable.
+      let listings = 0;
+      get.mockImplementation(async (url: string) => {
+        if (isRoleUrl(url)) return lookupRole(ALL_BUILT_IN_ROLES, url);
+        listings++;
+        return { serviceAccounts: [account(name, { assumable: listings > 1 })] };
+      });
+      serviceAccounts.create.mockRejectedValueOnce(httpError(409));
+
+      const pending = ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], STATEFUL);
+      await jest.runAllTimersAsync();
+
+      expect((await pending).get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('keeps a binding whose account still exists', async () => {
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
+    const { http, serviceAccounts } = setup({
+      pages: [
+        {
+          serviceAccounts: [account('renamed-elsewhere'), { ...account(name), id: 'kibana/bound' }],
+        },
+      ],
+    });
+
+    const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], {
+      ...STATEFUL,
+      boundAccountIds: new Map([[TRIAGE, 'kibana/bound']]),
+    });
+
+    expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: 'kibana/bound' });
+    expect(serviceAccounts.create).not.toHaveBeenCalled();
+  });
+
+  it('recreates the account of a binding whose account no longer exists', async () => {
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
+    const { http, serviceAccounts } = setup();
+
+    const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], {
+      ...STATEFUL,
+      boundAccountIds: new Map([[TRIAGE, 'kibana/gone']]),
+    });
+
+    expect(serviceAccounts.create).toHaveBeenCalledTimes(1);
+    expect(results.get(TRIAGE)).toEqual({
+      ok: true,
+      serviceAccountId: `kibana/${name}`,
+      replacedBound: true,
+    });
+  });
+
+  it('fails a binding whose account exists but is disabled', async () => {
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
+    const { http, serviceAccounts } = setup({
+      pages: [{ serviceAccounts: [{ ...account(name), id: 'kibana/bound', enabled: false }] }],
+    });
+
+    const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], {
+      ...STATEFUL,
+      boundAccountIds: new Map([[TRIAGE, 'kibana/bound']]),
+    });
+
+    expect(results.get(TRIAGE)?.ok).toBe(false);
+    expect(serviceAccounts.create).not.toHaveBeenCalled();
+  });
+
   it('reports a failure when the lookup after a conflict also fails', async () => {
     const { http, get, serviceAccounts } = setup();
     serviceAccounts.create.mockRejectedValueOnce(httpError(409));

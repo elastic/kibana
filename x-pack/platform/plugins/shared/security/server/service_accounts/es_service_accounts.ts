@@ -334,9 +334,30 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       throw e;
     }
 
+    let token: string;
     try {
-      const token = await this.createToken(esClient, namespace, name);
+      token = await this.createToken(esClient, namespace, name);
+    } catch (e) {
+      // A token that already exists means a concurrent create of this name got there first and
+      // owns the account. Rolling back would delete the account, token and credential it just
+      // made, so the loser steps aside and leaves everything in place.
+      if (getErrorStatusCode(e) === 409) {
+        this.logger.warn(
+          `Service account [${serviceAccountId}] was created concurrently, so this create stepped ` +
+            `aside without a rollback: ${getDetailedErrorMessage(e)}`
+        );
+        throw Boom.conflict(`A service account named [${name}] already exists`);
+      }
+      if (!(await this.rollback(esClient, namespace, name))) {
+        cleanup.accountMayRemain = { id: serviceAccountId, name };
+      }
+      this.logger.error(
+        `Failed to create service account [${serviceAccountId}]: ${getDetailedErrorMessage(e)}`
+      );
+      throw e;
+    }
 
+    try {
       await this.credentialStore.set({
         serviceAccountId,
         namespace,
