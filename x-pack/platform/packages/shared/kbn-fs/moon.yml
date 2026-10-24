@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-fs
 dependsOn:
   - '@kbn/repo-info'
+  - '@kbn/content-sanitization'
 tags:
   - shared-common
   - package

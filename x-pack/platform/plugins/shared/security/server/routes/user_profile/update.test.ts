@@ -444,5 +444,81 @@ describe('Update profile routes', () => {
 
       expect(userProfileService.update).toHaveBeenCalledTimes(1);
     });
+
+    it('sanitizes an SVG avatar image before storing it.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      const maliciousSvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(2)</script><rect width="10" height="10"/></svg>';
+      const avatar = {
+        initials: 'ab',
+        color: '#000000',
+        imageUrl: `data:image/svg+xml;base64,${Buffer.from(maliciousSvg).toString('base64')}`,
+      };
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledTimes(1);
+      const [, updatedData] = userProfileService.update.mock.calls[0];
+      const { imageUrl, ...rest } = (updatedData as { avatar: typeof avatar }).avatar;
+      expect(rest).toEqual({ initials: 'ab', color: '#000000' });
+      expect(imageUrl).toMatch(/^data:image\/svg\+xml;base64,/);
+      expect(
+        Buffer.from(imageUrl.replace('data:image/svg+xml;base64,', ''), 'base64').toString('utf8')
+      ).toBe('<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"></rect></svg>');
+    });
+
+    it('stores raster avatar images unchanged.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      const avatar = {
+        initials: null,
+        color: null,
+        imageUrl: 'data:image/png;base64,iVBORw0KGgo=',
+      };
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', { avatar });
+    });
+
+    it('rejects unsupported avatar image media types.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: { avatar: { imageUrl: 'data:text/html;base64,PHNjcmlwdD4=' } },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 415 }));
+
+      expect(userProfileService.update).not.toHaveBeenCalled();
+    });
   });
 });
