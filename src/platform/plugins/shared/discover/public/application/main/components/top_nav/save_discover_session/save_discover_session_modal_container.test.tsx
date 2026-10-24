@@ -460,6 +460,51 @@ describe('DiscoverSessionSaveModalContainer', () => {
           expect(modalProps?.isTimeBased).toBe(true);
         }
       );
+
+      it.each([
+        ['keeps', 'time-based', dataViewWithTimeFieldTab, dataViewMockWithTimeField, true],
+        ['drops', 'not time-based', dataViewNoTimeFieldTab, dataViewMock, false],
+      ])(
+        '%s store time when the data view list that loads during save shows an unopened tab is %s',
+        async (_, __, unopenedTab, unopenedTabDataView, expectedTimeRestore) => {
+          const { modalProps, toolkit } = await setup({
+            additionalPersistedTabs: [unopenedTab],
+            dataViewsList: [],
+            isEmbedded: true,
+            services,
+          });
+          const dataViewList = Promise.withResolvers<void>();
+          const loadDataViewListOnceSpy = jest
+            .spyOn(internalStateActions, 'loadDataViewListOnce')
+            .mockReturnValue(() => dataViewList.promise);
+
+          expect(modalProps?.isTimeBased).toBe(false);
+
+          try {
+            await act(async () => {
+              const savePromise = modalProps?.onSave(getOnSaveProps({ newTimeRestore: true }));
+
+              toolkit.internalState.dispatch(
+                internalStateActions.loadDataViewList.fulfilled(
+                  [unopenedTabDataView] as DataViewListItem[],
+                  'requestId'
+                )
+              );
+              dataViewList.resolve();
+              await savePromise;
+            });
+          } finally {
+            loadDataViewListOnceSpy.mockRestore();
+          }
+
+          const savedTabs = toolkit.internalState.getState().persistedDiscoverSession?.tabs;
+
+          expect(savedTabs?.map(({ timeRestore }) => timeRestore)).toEqual([
+            expectedTimeRestore,
+            expectedTimeRestore,
+          ]);
+        }
+      );
     });
 
     it("should set initialTimeRestore to true if any tab's timeRestore is true", async () => {

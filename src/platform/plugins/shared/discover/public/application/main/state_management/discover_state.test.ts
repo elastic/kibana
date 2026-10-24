@@ -400,6 +400,47 @@ describe('Discover state', () => {
     );
   });
 
+  describe('Initial data view list', () => {
+    test('initializes a persisted data view spec without a prefetched data view list', async () => {
+      const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+      await toolkit.initializeTabs();
+      const { internalState, runtimeStateManager, services } = toolkit;
+      internalState.dispatch(
+        internalStateActions.loadDataViewList.fulfilled([], 'clear-data-views', undefined)
+      );
+      jest.mocked(services.dataViews.getIdsWithTitle).mockClear();
+
+      const tabId = toolkit.getCurrentTab().id;
+      await toolkit.initializeSingleTab({
+        tabId,
+        dataViewSpec: dataViewMock.toSpec(),
+        skipWaitForDataFetching: true,
+      });
+
+      expect(services.dataViews.getIdsWithTitle).toHaveBeenCalledTimes(1);
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(dataViewMock);
+
+      internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+    });
+
+    test('loads the data view list once per Discover instance', async () => {
+      const { internalState, services } = getDiscoverInternalStateMock({
+        persistedDataViews: [dataViewMock],
+      });
+
+      services.dataViews.getIdsWithTitle = jest.fn(async () => []);
+
+      const firstRequest = internalState.dispatch(internalStateActions.loadDataViewListOnce());
+      const secondRequest = internalState.dispatch(internalStateActions.loadDataViewListOnce());
+
+      expect(secondRequest).toBe(firstRequest);
+
+      await firstRequest;
+
+      expect(services.dataViews.getIdsWithTitle).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Loading a session with an inline data view', () => {
     const storedFilters: Filter[] = [
       {

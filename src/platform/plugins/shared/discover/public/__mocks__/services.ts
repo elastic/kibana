@@ -149,6 +149,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   })) as unknown as typeof expressionsPlugin.execute;
 
   const corePluginMock = coreMock.createStart();
+  corePluginMock.http.get.mockResolvedValue(undefined);
 
   const uiSettingsMock: Partial<typeof corePluginMock.uiSettings> = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { loadDataAvailabilityOnce } from './data_availability';
 export * from './data_views';
 export * from './initialize_single_tab';
 export * from './tabs';
