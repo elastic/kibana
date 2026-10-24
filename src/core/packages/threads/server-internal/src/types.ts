@@ -67,6 +67,11 @@ export interface ManagedWorkerStatus {
   /** When the current worker reported ready. */
   readonly startedAt?: Date;
   readonly heapUsed?: number;
+  /**
+   * The worker's effective V8 heap limit in bytes, reported with `ready`. A process-wide
+   * `--max-old-space-size` overrides `resourceLimits.maxOldGenerationSizeMb`.
+   */
+  readonly heapSizeLimit?: number;
 }
 
 export interface ManagedWorker {

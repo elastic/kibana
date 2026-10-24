@@ -24,7 +24,11 @@ const { getHeapStatistics } = require('node:v8');
 // The entry is the consumer's worker file, so its path is only known at runtime.
 require(workerData.__entry); // eslint-disable-line import/no-dynamic-require
 
-parentPort.postMessage({ __kbnManagedWorker: 'ready' });
+// The effective limit, since a process-wide --max-old-space-size overrides resourceLimits.
+parentPort.postMessage({
+  __kbnManagedWorker: 'ready',
+  heapSizeLimit: getHeapStatistics().heap_size_limit,
+});
 
 setInterval(() => {
   parentPort.postMessage({

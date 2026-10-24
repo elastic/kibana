@@ -52,6 +52,8 @@ describe('ManagedWorker with a real worker thread', () => {
       startedAt: expect.any(Date),
       heapUsed: expect.any(Number),
     });
+    // CI sets --max-old-space-size, which overrides the cap, so only presence is asserted.
+    expect(managed.status().heapSizeLimit).toBeGreaterThan(0);
 
     await managed.stop();
     expect(managed.status().state).toBe('stopped');

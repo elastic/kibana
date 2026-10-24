@@ -48,13 +48,19 @@ describe('worker_bootstrap', () => {
     runBootstrap({ dist: false });
     expect(loaded).toEqual(['setup-node-env', 'entry']);
     expect(postMessage).toHaveBeenCalledTimes(1);
-    expect(postMessage).toHaveBeenCalledWith({ __kbnManagedWorker: 'ready' });
+    expect(postMessage).toHaveBeenCalledWith({
+      __kbnManagedWorker: 'ready',
+      heapSizeLimit: expect.any(Number),
+    });
   });
 
   it('sets up the dist environment in a distributable', () => {
     runBootstrap({ dist: true });
     expect(loaded).toEqual(['setup-node-env/dist', 'entry']);
-    expect(postMessage).toHaveBeenCalledWith({ __kbnManagedWorker: 'ready' });
+    expect(postMessage).toHaveBeenCalledWith({
+      __kbnManagedWorker: 'ready',
+      heapSizeLimit: expect.any(Number),
+    });
   });
 
   it('reports heap usage on the health interval', () => {

@@ -86,6 +86,18 @@ describe('createManagedWorker', () => {
     await handle.stop();
   });
 
+  it('reports the effective heap limit from the ready message', async () => {
+    const handle = createManagedWorker(options());
+    handle.start();
+    const [worker] = MockWorker.instances;
+    worker.emit('message', { __kbnManagedWorker: 'ready', heapSizeLimit: 4288 * 1024 * 1024 });
+    expect(handle.status().heapSizeLimit).toBe(4288 * 1024 * 1024);
+    expect(logger.info).toHaveBeenLastCalledWith(
+      `Worker diagnostic ready (thread ${worker.threadId}, heap limit 4288 MB)`
+    );
+    await handle.stop();
+  });
+
   it('restarts after an unexpected exit and ignores stale exit events', async () => {
     const opts = options();
     const handle = createManagedWorker(opts);

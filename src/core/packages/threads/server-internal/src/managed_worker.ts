@@ -28,6 +28,7 @@ const DEFAULT_HEALTH_INTERVAL_MS = 60_000;
 interface ControlMessage {
   __kbnManagedWorker: 'ready' | 'health';
   heapUsed?: number;
+  heapSizeLimit?: number;
 }
 
 const isControlMessage = (message: unknown): message is ControlMessage =>
@@ -52,6 +53,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
   private lastExitCode?: number;
   private threadId?: number;
   private heapUsed?: number;
+  private heapSizeLimit?: number;
   private stopping?: Promise<void>;
   private termination: Promise<void> = Promise.resolve();
   private pendingTerminations = 0;
@@ -83,7 +85,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
   }
 
   public status(): ManagedWorkerStatus {
-    const { state, restarts, lastExitCode, threadId, readyAt, heapUsed } = this;
+    const { state, restarts, lastExitCode, threadId, readyAt, heapUsed, heapSizeLimit } = this;
     return {
       state,
       restarts,
@@ -91,6 +93,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
       threadId,
       startedAt: readyAt === undefined ? undefined : new Date(readyAt),
       heapUsed,
+      heapSizeLimit,
     };
   }
 
@@ -109,6 +112,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     this.readyAt = undefined;
     this.threadId = undefined;
     this.heapUsed = undefined;
+    this.heapSizeLimit = undefined;
     try {
       const worker = new Worker(BOOTSTRAP_PATH, {
         name,
@@ -151,7 +155,11 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     }
   }
 
-  private handleMessage({ __kbnManagedWorker: type, heapUsed }: ControlMessage): void {
+  private handleMessage({
+    __kbnManagedWorker: type,
+    heapUsed,
+    heapSizeLimit,
+  }: ControlMessage): void {
     if (type === 'health') {
       if (typeof heapUsed === 'number') this.heapUsed = heapUsed;
       return;
@@ -161,7 +169,13 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     this.readyTimer = undefined;
     this.readyAt = Date.now();
     this.state = 'running';
-    this.options.logger.info(`Worker ${this.options.name} ready (thread ${this.threadId})`);
+    if (typeof heapSizeLimit === 'number') this.heapSizeLimit = heapSizeLimit;
+    // The effective limit can differ from resourceLimits: --max-old-space-size overrides it.
+    const limit =
+      this.heapSizeLimit === undefined
+        ? ''
+        : `, heap limit ${Math.round(this.heapSizeLimit / 1024 / 1024)} MB`;
+    this.options.logger.info(`Worker ${this.options.name} ready (thread ${this.threadId}${limit})`);
   }
 
   private handleExit(
