@@ -47,18 +47,26 @@ export const useEnableWorkers = (
     // the server response are not sent a PATCH that would return 404.
     const cached = queryClient.getQueryData<ListWorkersResponse>(queryKeys.workers.list());
     if (!cached) {
-      // Cache miss: we cannot safely determine which workers exist server-side.
-      // Bail out rather than blindly PATCHing all IDs and hitting 404s.
       return;
     }
     const visibleIds = new Set(cached.workers.map((w) => w.id));
-    const idsToUpdate = workerIds.filter((id) => visibleIds.has(id));
+    const workerById = new Map(cached.workers.map((worker) => [worker.id, worker]));
+    // A retry must not re-send what the previous press already committed: the list is
+    // refetched between presses, so a worker already on — and already bound to an
+    // account, when turning on — has nothing left to save. Turning off is always
+    // sent: `enabled` alone cannot distinguish "wants it off" from "enable failed".
+    const idsToUpdate = workerIds.filter(
+      (id) =>
+        visibleIds.has(id) &&
+        (workerEnabled[id] !== true ||
+          !workerById.get(id)?.enabled ||
+          !workerById.get(id)?.settings?.serviceAccountId)
+    );
 
     setIsSaving(true);
     onSavingChange?.(true);
     // Workers being turned on without a service account get their prebuilt one first. A Worker
     // whose account cannot be set up stays off; pressing the button again retries it.
-    const workerById = new Map(cached.workers.map((worker) => [worker.id, worker]));
     const needsAccount = idsToUpdate.filter(
       (id) => workerEnabled[id] === true && !workerById.get(id)?.settings?.serviceAccountId
     );
@@ -147,8 +155,8 @@ export const useEnableWorkers = (
       return;
     }
 
-    // Full success: release the save lock, invalidate the cache, and navigate.
-    // Invalidate first so the Watches page gets fresh state on mount.
+    // Full success: release the save lock and navigate. Invalidate first so the
+    // Watches page gets fresh state on mount.
     queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
     onSavingChange?.(false);
     onSuccess?.();
