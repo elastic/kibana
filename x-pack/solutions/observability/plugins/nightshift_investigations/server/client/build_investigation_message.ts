@@ -235,8 +235,8 @@ export interface AlertRecoveredMessageInput {
 }
 
 /**
- * The follow-up can wait behind a running round, so the brief states when the rule found the
- * alert recovered rather than leave the agent to assume it just happened.
+ * The follow-up can wait behind a running round, so the brief states when the recovery was
+ * reported rather than leave the agent to assume it just happened.
  */
 export function buildAlertRecoveredFollowUpMessage({
   alertUuid,
