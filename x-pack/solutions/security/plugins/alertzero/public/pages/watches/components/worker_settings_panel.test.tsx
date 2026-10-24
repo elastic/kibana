@@ -264,6 +264,35 @@ describe('WorkerSettingsPanel models and no-model block', () => {
     expect(enabledSwitch).toBeEnabled();
     expect(enabledSwitch).toHaveAttribute('aria-checked', 'true');
   });
+
+  it.each([
+    ['off', false],
+    ['on', true],
+  ])(
+    'warns about a weak role without locking the switch of a Worker that is %s',
+    async (_state, enabled) => {
+      renderPanel(WORKFLOW_ID, false, { blockingReasons: ['weak_role'], enabled });
+
+      // weak_role is a warning about runs, not an enable gate: the switch stays usable so the
+      // Worker can still be turned off or re-saved while the role is restored out of band.
+      const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`);
+      expect(enabledSwitch).toBeEnabled();
+
+      fireEvent.mouseOver(screen.getByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`));
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(/no longer has its built-in role/);
+      expect(within(tooltip).queryByRole('link')).not.toBeInTheDocument();
+    }
+  );
+
+  it('lists both reasons when a Worker has no model and a weak role', async () => {
+    renderPanel(WORKFLOW_ID, false, { blockingReasons: ['no_model', 'weak_role'], enabled: false });
+
+    fireEvent.mouseOver(screen.getByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent(/may not be configured/);
+    expect(tooltip).toHaveTextContent(/no longer has its built-in role/);
+  });
 });
 
 describe('WorkerSettingsPanel service account', () => {

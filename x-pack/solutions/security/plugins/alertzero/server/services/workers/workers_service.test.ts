@@ -37,6 +37,7 @@ import {
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
+import type { GetPerWorkerBlockingReasons } from './worker_weak_role';
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
@@ -184,7 +185,8 @@ const createPersistentHarness = () => {
     updateWorkflow,
     createService: (
       agentBuilder?: AgentBuilderPluginStart,
-      getBlockingReasons: GetWorkerBlockingReasons = async () => []
+      getBlockingReasons: GetWorkerBlockingReasons = async () => [],
+      getPerWorkerBlockingReasons: GetPerWorkerBlockingReasons = async () => []
     ) => {
       return new WorkersService(
         management,
@@ -194,7 +196,9 @@ const createPersistentHarness = () => {
         async (_request, registration, options) => {
           await install(registration.id, options);
         },
-        getBlockingReasons
+        getBlockingReasons,
+        undefined,
+        getPerWorkerBlockingReasons
       );
     },
   };
@@ -1309,6 +1313,63 @@ describe('WorkersService', () => {
       );
       expect(enabled.outcome).toBe('updated');
       expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(true);
+    });
+  });
+
+  describe('per-Worker blocking reasons', () => {
+    it('appends the per-Worker reason only to the Worker whose account was checked', async () => {
+      const perWorkerMock = jest.fn(async (workerId: string, serviceAccountId: string) =>
+        workerId === TRIAGE && serviceAccountId === 'sa-triage' ? ['weak_role' as const] : []
+      );
+      const service = createPersistentHarness().createService(
+        undefined,
+        async () => [],
+        perWorkerMock as unknown as GetPerWorkerBlockingReasons
+      );
+
+      await service.update(
+        TRIAGE,
+        { enabled: true, settings: { serviceAccountId: 'sa-triage' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+
+      const { workers } = await service.list(request, SPACE);
+
+      expect(workers.find(({ id }) => id === TRIAGE)).toMatchObject({
+        enabled: true,
+        blockingReasons: ['weak_role'],
+      });
+      expect(
+        workers
+          .filter(({ id }) => id !== TRIAGE)
+          .every(({ blockingReasons }) => !blockingReasons.length)
+      ).toBe(true);
+      // Workers without a bound account are not checked at all.
+      const checkedIds = perWorkerMock.mock.calls.map(([workerId]) => workerId);
+      expect(checkedIds.every((workerId) => workerId === TRIAGE)).toBe(true);
+    });
+
+    it('does not gate enabling on a per-Worker reason', async () => {
+      const service = createPersistentHarness().createService(
+        undefined,
+        async () => [],
+        async () => ['weak_role' as const]
+      );
+
+      const result = await service.update(
+        ATTACK_DISCOVERY,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+
+      // `weak_role` warns about runs; the account can be fixed without touching the Worker, so
+      // enabling stays allowed and the saved Worker carries the warning rather than a block.
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error('Expected enable to succeed');
+      expect(result.response.worker.enabled).toBe(true);
+      expect(result.response.worker.blockingReasons).toEqual(['weak_role']);
     });
   });
 

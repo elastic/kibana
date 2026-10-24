@@ -63,6 +63,7 @@ import { installRegisteredWorkerForRequest } from './managed_workflows/worker_re
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
 import { createGetWorkerBlockingReasons } from './services/workers/worker_blocking_reasons';
+import { createGetWorkerWeakRoleReason } from './services/workers/worker_weak_role';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
@@ -421,7 +422,12 @@ export class AlertZeroPlugin
         await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
       },
       createGetWorkerBlockingReasons(plugins.searchInferenceEndpoints, this.logger.get('workers')),
-      this.threatIntelSupplyService
+      this.threatIntelSupplyService,
+      createGetWorkerWeakRoleReason(
+        async () => core.elasticsearch.client.asInternalUser,
+        this.logger.get('workers'),
+        { isServerless: this.isServerless }
+      )
     );
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);

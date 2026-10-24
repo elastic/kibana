@@ -46,10 +46,12 @@ export type WorkerRunStateEnum = typeof WorkerRunState.enum;
 export const WorkerRunStateEnum = WorkerRunState.enum;
 
 /**
- * Why a Worker can't run in this space. `no_model`: the space has no AI model to run it on (no LLM connector and no Elastic Managed LLM, or "use only the default connector" is on with no default set). It applies to every Worker alike, and while it holds the Worker can't be switched on; switching it off is still allowed.
+ * Why a Worker can't run in this space. `no_model`: the space has no AI model to run it on (no LLM connector and no Elastic Managed LLM, or "use only the default connector" is on with no default set). It applies to every Worker alike, and while it holds the Worker can't be switched on; switching it off is still allowed. `weak_role`: this Worker's bound service account no longer carries the Worker's built-in role, so its runs may silently lack required privileges. It is a warning about runs, not a gate: enabling and running stay allowed while it holds, because the role can be restored without touching the Worker.
  */
-export const WorkerBlockingReason = lazySchema(() => z.literal('no_model'));
+export const WorkerBlockingReason = lazySchema(() => z.enum(['no_model', 'weak_role']));
 export type WorkerBlockingReason = z.infer<typeof WorkerBlockingReason>;
+export type WorkerBlockingReasonEnum = typeof WorkerBlockingReason.enum;
+export const WorkerBlockingReasonEnum = WorkerBlockingReason.enum;
 
 /**
  * Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the shared read/update path stays generic; each Worker declares a closed schema for its own extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates against that declaration, rejecting unknown or missing fields by name.

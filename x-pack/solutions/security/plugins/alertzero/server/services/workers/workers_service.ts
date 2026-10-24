@@ -39,6 +39,7 @@ import {
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
+import type { GetPerWorkerBlockingReasons } from './worker_weak_role';
 
 /**
  * Workers hidden until the named skill is registered. These skills may be
@@ -127,7 +128,8 @@ export class WorkersService {
     } = {},
     private readonly installWorkerForRequest: InstallWorkerForRequest,
     private readonly getBlockingReasons: GetWorkerBlockingReasons,
-    private readonly threatIntelSupply?: ThreatIntelSupplyService
+    private readonly threatIntelSupply?: ThreatIntelSupplyService,
+    private readonly getPerWorkerBlockingReasons: GetPerWorkerBlockingReasons = async () => []
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -533,7 +535,14 @@ export class WorkersService {
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.
       workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
-      blockingReasons,
+      blockingReasons: [
+        ...blockingReasons,
+        // A bound account can pick up a weak role at any time, so it is checked per Worker on
+        // every projection rather than once per request like the space-wide reasons.
+        ...(settings.serviceAccountId
+          ? await this.getPerWorkerBlockingReasons(registration.id, settings.serviceAccountId)
+          : []),
+      ],
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }
