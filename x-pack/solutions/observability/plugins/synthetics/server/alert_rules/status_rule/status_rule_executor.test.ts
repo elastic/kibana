@@ -1356,6 +1356,23 @@ describe('StatusRuleExecutor', () => {
         });
       });
 
+      it('uses the location label from monitor info since pending configs have no ping', async () => {
+        const { latestPing, ...pendingConfigWithoutPing } = mockPendingConfigs[FIRST_CONFIG_ID];
+
+        await statusRule.schedulePendingAlertPerConfigId({
+          pendingConfigs: { [FIRST_CONFIG_ID]: pendingConfigWithoutPing },
+          pendingThreshold: 1,
+        });
+
+        expect(scheduleAlertSpy).toHaveBeenCalledTimes(1);
+        expect(scheduleAlertSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            locationNames: [MOCK_FIRST_LOCATION.name],
+            locationIds: [MOCK_FIRST_LOCATION.id],
+          })
+        );
+      });
+
       it('should do nothing if pendingConfigs is empty', async () => {
         // Call the method with empty pendingConfigs
         await statusRule.schedulePendingAlertPerConfigId({

@@ -379,8 +379,9 @@ export class StatusRuleExecutor {
         alertId,
         monitorSummary,
         statusConfig: configs[0],
+        // Pending configs have no ping, so resolve the location label from the monitor's saved object.
         locationNames: configs.map(
-          ({ locationId, latestPing }) => latestPing?.observer.geo.name || locationId
+          ({ locationId, monitorInfo }) => monitorInfo.observer.geo.name || locationId
         ),
         locationIds: configs.map(({ locationId }) => locationId),
       });
