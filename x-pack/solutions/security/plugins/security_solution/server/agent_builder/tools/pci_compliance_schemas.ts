@@ -6,7 +6,7 @@
  */
 
 import { z, isoDateTime } from '@kbn/zod';
-import { PCI_REQUIREMENTS } from './pci_compliance_requirements';
+import { PCI_LEGACY_REQUIREMENT_ID_ALIASES, PCI_REQUIREMENTS } from './pci_compliance_requirements';
 
 /**
  * Allowed index-pattern shape. Elasticsearch index names disallow the characters
@@ -44,12 +44,16 @@ export const pciTimeRangeSchema = z
   });
 
 /**
- * Closed union of PCI DSS requirement identifiers — derived from {@link PCI_REQUIREMENTS}
- * so we cannot drift from the implementation. `"all"` selects every requirement.
+ * Closed union of PCI DSS requirement identifiers — the v4.0.1 catalog ids in
+ * {@link PCI_REQUIREMENTS} plus the sentinel `"all"`, extended with the legacy ids in
+ * {@link PCI_LEGACY_REQUIREMENT_ID_ALIASES}. Legacy ids validate here so that a caller citing the
+ * pre-v4.0.1 numbering gets a check instead of a schema error; the tool resolves them to their
+ * v4.0.1 id before evaluating.
  */
 const requirementLiterals = [
   'all',
   ...(Object.keys(PCI_REQUIREMENTS) as Array<keyof typeof PCI_REQUIREMENTS>),
+  ...Object.keys(PCI_LEGACY_REQUIREMENT_ID_ALIASES),
 ] as const;
 
 export const pciRequirementIdSchema = z.enum(
