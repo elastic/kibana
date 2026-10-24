@@ -7,6 +7,7 @@
 
 import { RE2JS } from 're2js';
 import { DEFAULT_BUILTIN_REGEX_RULES } from './default_builtin_regex_rules';
+import { refineBuiltInMatch } from './builtin_match_filters';
 
 type Engine = 'native' | 're2';
 
@@ -41,6 +42,28 @@ const BUILT_IN_IDS = DEFAULT_BUILTIN_REGEX_RULES.flatMap(({ id }) => (id ? [id] 
 describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
   const expectSpans = (id: string, input: string, expected: string[]) =>
     expect(findAll(engine, patternFor(id), input)).toEqual(expected);
+
+  // What the pipeline actually masks: raw pattern matches that survive the rule's match filter.
+  const expectKept = (id: string, input: string, expected: string[]) => {
+    const kept = (
+      engine === 'native'
+        ? [...input.matchAll(new RegExp(patternFor(id), 'g'))].map(
+            (m) => [m.index ?? 0, m[0]] as const
+          )
+        : (() => {
+            const matcher = RE2JS.compile(patternFor(id)).matcher(input);
+            const found: Array<readonly [number, string]> = [];
+            while (matcher.find()) {
+              found.push([matcher.start(), input.substring(matcher.start(), matcher.end())]);
+            }
+            return found;
+          })()
+    ).flatMap(([start, text]) => {
+      const refined = refineBuiltInMatch(id, input, start, start + text.length);
+      return refined ? [input.slice(refined.start, refined.end)] : [];
+    });
+    expect(kept).toEqual(expected);
+  };
 
   describe('builtin-email', () => {
     const id = 'builtin-email';
@@ -216,6 +239,72 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
     });
   });
 
+  describe('public domain allow-list', () => {
+    it.each([
+      'https://github.com/elastic/kibana',
+      'https://attack.mitre.org/techniques/T1053/',
+      'see ss64.com for syntax',
+      'docs.github.com and GITHUB.COM',
+    ])('leaves public sites in %s unmasked', (input) => {
+      expectKept('builtin-host-name', input, []);
+    });
+
+    it('still masks private hosts and look-alikes of public sites', () => {
+      expectKept(
+        'builtin-host-name',
+        'web-qa-01.corp.example.com notgithub.com github.com.evil.example.com',
+        ['web-qa-01.corp.example.com', 'notgithub.com', 'github.com.evil.example.com']
+      );
+    });
+
+    it('masks a private name that only starts with a public site', () => {
+      expectKept('builtin-host-name', 'secret.github.com.network', ['secret.github.com']);
+    });
+  });
+
+  describe('builtin-ipv6', () => {
+    const id = 'builtin-ipv6';
+
+    it.each([
+      '2001:db8::1',
+      'fe80::1',
+      '::1',
+      '2001:db8::',
+      '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+      '1:2:3:4:5:6:7:8',
+      '2001:db8:0:0:1::1',
+      '::ffff:192.168.1.1',
+      '64:ff9b::192.0.2.33',
+      '2001:db8::ffff:192.0.2.1',
+      '::1:2:3:192.0.2.1',
+      'FE80::ABCD:1234',
+    ])('masks %s whole', (address) => {
+      expectKept(id, address, [address]);
+    });
+
+    it('masks an address in a URL, a log line and a sentence', () => {
+      expectKept(id, 'GET http://[2001:db8::1]:8080/x from fe80::1%eth0.', [
+        '2001:db8::1',
+        'fe80::1',
+      ]);
+    });
+
+    it.each([
+      '12:30:45',
+      '2024-01-01T12:30:45.123Z',
+      '00:1a:2b:3c:4d:5e',
+      'localhost:9200',
+      'std::string',
+      'x = a::int',
+      'Foo::Bar::baz',
+      'ES|QL: field::keyword',
+      '::',
+      'dd:cc',
+    ])('does not match %s', (input) => {
+      expectKept(id, input, []);
+    });
+  });
+
   describe('builtin-account-login', () => {
     const id = 'builtin-account-login';
 
@@ -228,6 +317,38 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
 
     it('masks only the account part of a domain with a space in it', () => {
       expectSpans(id, 'NT AUTHORITY\\SYSTEM', ['AUTHORITY\\SYSTEM']);
+    });
+
+    // Escaped forms: JSON strings, Splunk SPL and tool results carry the separator doubled.
+    it.each([
+      ['{"user":"QACORP\\\\jdoe.sentinel"}', ['QACORP\\\\jdoe.sentinel']],
+      ['user="QACORP\\\\jdoe.sentinel" | stats count', ['QACORP\\\\jdoe.sentinel']],
+      ['CORP\\nancy and CORP\\tom', ['CORP\\nancy', 'CORP\\tom']],
+    ])('finds the account in %s', (input, expected) => {
+      expectSpans(id, input, expected);
+    });
+
+    // Tool results nest JSON inside JSON: each layer doubles the backslashes (finding from the
+    // real-model run: an alert read by a tool reached the model with eight).
+    it.each([4, 8, 16])('finds the account behind %s backslashes', (count) => {
+      const account = `QACORP${'\\'.repeat(count)}jdoe.sentinel`;
+      expectSpans(id, `/user:${account}", "x"`, [account]);
+    });
+
+    it.each([2, 4, 8])('does not match a newline escape nested %s backslashes deep', (count) => {
+      expectSpans(id, `SORT count DESC${'\\'.repeat(count)}n| LIMIT 20`, []);
+      expectSpans(id, `NOW() - 7 DAYS${'\\'.repeat(count)}nFROM logs`, []);
+    });
+
+    // An upper-case word before an escape sequence is text, not a domain (ES|QL, SQL, SPL).
+    it.each([
+      'WHERE @timestamp >= NOW() - 7 DAYS\\nFROM logs',
+      'SORT count DESC\\n| LIMIT 20',
+      'ES|QL\\n### Findings',
+      'SELECT a FROM t ORDER BY a DESC\\n',
+      'WHERE x IS\\tNULL',
+    ])('does not match the escape sequence in %s', (input) => {
+      expectSpans(id, input, []);
     });
 
     it.each([
@@ -243,6 +364,48 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
     });
   });
 
+  describe('account rule match filter', () => {
+    // What the pipeline masks for the account rule: the pattern's matches after the filter.
+    const maskedByAccountRule = (input: string): string[] =>
+      [...input.matchAll(new RegExp(patternFor('builtin-account-login'), 'g'))].flatMap(
+        ({ index, 0: text }) => {
+          const refined = refineBuiltInMatch(
+            'builtin-account-login',
+            input,
+            index ?? 0,
+            (index ?? 0) + text.length
+          );
+          return refined ? [input.slice(refined.start, refined.end)] : [];
+        }
+      );
+
+    it.each([
+      'C:\\WINDOWS\\System32',
+      'C:\\\\WINDOWS\\\\System32',
+      '\\Content.Outlook\\RANDOM\\attachment.hta',
+      '/usr/SHARE\\x',
+    ])('drops path segments in %s', (input) => {
+      expect(maskedByAccountRule(input)).toEqual([]);
+    });
+
+    // The restored value is exact only if the masked text has no backslashes: a `DOMAIN\\name`
+    // masked whole came back from a migration with four times the backslashes.
+    it.each([1, 2, 4, 8, 16])('masks only the name behind %s backslashes', (count) => {
+      const input = `user: QACORP${'\\'.repeat(count)}jdoe.sentinel, ok`;
+
+      expect(maskedByAccountRule(input)).toEqual(['jdoe.sentinel']);
+    });
+
+    it('keeps an account that follows a space, quote or colon', () => {
+      expect(maskedByAccountRule('user: CORP\\jdoe, "QACORP\\\\jdoe"')).toEqual(['jdoe', 'jdoe']);
+    });
+
+    it('never filters custom or unknown rules', () => {
+      expect(refineBuiltInMatch(undefined, 'C:\\A\\b', 3, 6)).toEqual({ start: 3, end: 6 });
+      expect(refineBuiltInMatch('builtin-email', 'x', 0, 1)).toEqual({ start: 0, end: 1 });
+    });
+  });
+
   // A pattern that is quadratic on one long token lets a single tool result exceed the worker's
   // task timeout (15 s by default). Before the rewrite the email pattern took ~19 s on the first
   // input below. The threshold is generous so it only fails on a real complexity regression.
@@ -255,6 +418,8 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       'hyphenated run': 'a-'.repeat(50_000),
       'dotted numbers': '1.2.3.'.repeat(17_000),
       'short labels': 'ab.'.repeat(33_000),
+      'hex groups': 'a:'.repeat(25_000),
+      'double colons': '1::'.repeat(17_000),
     };
 
     it.each(BUILT_IN_IDS)('%s stays fast', (id) => {
@@ -274,6 +439,8 @@ describe('built-in regex rules across engines', () => {
     'web-01.prod.example.com DC01.CORP.EXAMPLE.COM foo.test.ts kibana.dev.yml logger.info',
     'api.example.com.internal https://kibana.example.com/app srv.example.es a.b.c.d.e.f.g.com',
     'CORP\\a.mehta C:\\Users\\jon NT AUTHORITY\\SYSTEM line1\\nline2',
+    '2001:db8::1 fe80::1 ::ffff:1.2.3.4 12:30:45 std::string 1:2:3:4:5:6:7:8 a::int ::1',
+    'QACORP\\\\jdoe SORT count DESC\\n| LIMIT 20 CORP\\nancy C:\\WINDOWS\\System32',
   ];
 
   it.each(BUILT_IN_IDS)('%s matches the same text on native RegExp and RE2', (id) => {

@@ -617,7 +617,7 @@ groups:
       - setting: "ai:anonymizationSettings"
         id: ai-anonymization-settings
         description: |
-          Configuration for anonymizing LLM requests sent through the {{product.kibana}} Inference chat completion API. Requests that bypass that API, such as connectors called directly, are not anonymized. `maskingEnabled` turns anonymization on or off, `onFailure` sets what happens when a rule cannot run (`block` fails the request, `allow_unsafe` sends it unmasked), and `rules` lists the regular expression patterns, including built-in ones, and Named Entity Recognition (NER) models used to identify and anonymize sensitive data.
+          Configuration for anonymizing LLM requests sent through the {{product.kibana}} Inference chat completion API. Requests that bypass that API, such as connectors called directly, are not anonymized. `maskingEnabled` turns anonymization on or off, `onFailure` sets what happens when a rule cannot run (`block` fails the request, `allow_unsafe` skips a pattern that does not compile, falls back to the built-in patterns when the patterns fail to run, and sends the request unmasked only if those fail too), and `rules` lists the regular expression patterns, including built-in ones, and Named Entity Recognition (NER) models used to identify and anonymize sensitive data.
 
           :::{dropdown} Default configuration
           ```json
@@ -644,6 +644,15 @@ groups:
                 "builtIn": true
               },
               {
+                "id": "builtin-ipv6",
+                "name": "IPv6 addresses",
+                "entityClass": "IP",
+                "type": "RegExp",
+                "pattern": "(?:::(?:[fF]{4}:)?(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){1,5}:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){6}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(?:[0-9A-Fa-f]{1,4}:(?::[0-9A-Fa-f]{1,4}){1,6})|(?:(?:[0-9A-Fa-f]{1,4}:){1,2}(?::[0-9A-Fa-f]{1,4}){1,5})|(?:(?:[0-9A-Fa-f]{1,4}:){1,3}(?::[0-9A-Fa-f]{1,4}){1,4})|(?:(?:[0-9A-Fa-f]{1,4}:){1,4}(?::[0-9A-Fa-f]{1,4}){1,3})|(?:(?:[0-9A-Fa-f]{1,4}:){1,5}(?::[0-9A-Fa-f]{1,4}){1,2})|(?:(?:[0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4})|(?:(?:[0-9A-Fa-f]{1,4}:){1,7}:)|(?::(?::[0-9A-Fa-f]{1,4}){1,7})",
+                "enabled": true,
+                "builtIn": true
+              },
+              {
                 "id": "builtin-host-name",
                 "name": "Host and machine names",
                 "entityClass": "HOST_NAME",
@@ -657,7 +666,7 @@ groups:
                 "name": "Account and login names",
                 "entityClass": "USER_NAME",
                 "type": "RegExp",
-                "pattern": "\\b[A-Z][A-Z0-9-]{1,14}\\\\[A-Za-z0-9][A-Za-z0-9._$-]{0,63}",
+                "pattern": "\\b[A-Z][A-Z0-9-]{1,14}\\\\{1,16}(?:[A-Zac-eg-mo-qsw-z1-9][A-Za-z0-9._$-]{0,63}|[nrtbfuv0][a-z0-9][A-Za-z0-9._$-]{0,62})",
                 "enabled": false,
                 "builtIn": true
               },

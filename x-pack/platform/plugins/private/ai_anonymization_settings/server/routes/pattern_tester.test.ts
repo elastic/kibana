@@ -213,11 +213,27 @@ describe('registerPatternTesterRoute', () => {
     );
   });
 
+  it('rejects a lookahead pattern as RE2 syntax, since custom rules run on RE2 and not on native RegExp', async () => {
+    const { handler } = setup();
+
+    const response = await callHandler(handler, {
+      input: { contact: 'foobar' },
+      rules: [{ type: 'RegExp', enabled: true, entityClass: 'MISC', pattern: 'foo(?=bar)' }],
+    });
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 400,
+        body: { message: expect.stringMatching(/RE2/) },
+      })
+    );
+  });
+
   it('returns a 400 when the pattern exceeds the worker timeout', async () => {
     const { handler } = setup();
     jest
       .spyOn(RegexWorkerService.prototype, 'run')
-      .mockRejectedValueOnce(new Error('Regex anonymization task timed out'));
+      .mockRejectedValueOnce(new Error('Anonymization patterns timed out after 15s'));
 
     const response = await callHandler(handler, {
       input: { contact: 'x' },
