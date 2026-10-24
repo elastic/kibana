@@ -351,6 +351,41 @@ describe('scanHostTool', () => {
     expect(data.path).toBe('/home/user/suspicious');
   });
 
+  it('returns an offline scan as queued without polling for completion', async () => {
+    const scan = jest.fn().mockResolvedValue({
+      id: 'action-scan-offline',
+      status: 'pending',
+      wasSuccessful: undefined,
+      hosts: { 'agent-offline': { name: 'offline-host' } },
+    });
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-offline', status: 'offline', packages: ['endpoint'] }],
+        }),
+      },
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    service.getInternalResponseActionsClient = jest.fn(
+      () => ({ scan } as never)
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const { result } = await confirmThenHandle(scanHostTool(service), {
+      hostName: 'offline-host',
+      path: '/tmp/suspicious',
+    });
+    const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+    expect(data).toMatchObject({
+      hostName: 'offline-host',
+      actionId: 'action-scan-offline',
+      status: 'pending',
+      queued: true,
+      message: 'The action is queued and will execute when the endpoint reconnects.',
+    });
+    expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+  });
+
   it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
     'does not dispatch to a non-Elastic-Defend %s agent: its Fleet id is the collector, not the EDR agent id',
     async (integration) => {

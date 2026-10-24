@@ -86,13 +86,13 @@ from chat: say so and point the analyst to the Response Actions UI.
   as cancelled.
 - Call a write tool directly with the hostname the analyst gave. The tool
   resolves the host itself and returns \`reason: endpoint_not_found\` or
-  \`reason: ambiguous_hostname\` instead of acting on a guess, so no
-  \`get_endpoint_status\` pre-check is needed. On \`ambiguous_hostname\`, ask which
+  \`reason: ambiguous_hostname\` or \`reason: ambiguous_ip\` instead of acting on a guess, so no
+  \`get_endpoint_status\` pre-check is needed. On either ambiguity result, ask which
   agent ID is meant, then call the same tool again with that \`agentId\`; never
   pick a candidate.
 - Branch on the typed signals the tools return: a missing host or action is
   \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`
-  (and \`reason: ambiguous_hostname\` when several endpoints share the name);
+  (and \`reason: ambiguous_hostname\` / \`reason: ambiguous_ip\` when several endpoints share the supplied identity);
   \`error: invalid_argument\` means the request itself was out of range (narrow
   filters instead of paging further), while \`error: insufficient_privileges\`
   and \`error: unknown_error\` mean the lookup itself could not run. Details in

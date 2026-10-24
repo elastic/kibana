@@ -115,7 +115,7 @@ export const scanHostTool = (
   return {
     id: SCAN_TOOL_ID,
     type: ToolType.builtin,
-    description: `Scans a file or folder path on a host (identified by hostname, or by agent ID when several endpoints share the hostname) for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
+    description: `Scans a file or folder path on a host (identified by hostname, exact IP address, or agent ID; retry ambiguous_hostname or ambiguous_ip with the selected agent ID) for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
     schema: scanHostSchema,
     // HITL gate enforced by the framework, not skill prose: the runner prompts
     // the analyst for confirmation before every dispatch.
@@ -127,6 +127,7 @@ export const scanHostTool = (
             action: 'scan',
             params: {
               hostName: toolParams.hostName as string | undefined,
+              ip: toolParams.ip as string | undefined,
               agentId: toolParams.agentId as string | undefined,
             },
             context,
@@ -159,12 +160,13 @@ export const scanHostTool = (
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
+        const requestedIp = params.ip as string | undefined;
         const path = params.path as string;
         const comment = params.comment as string | undefined;
 
         const prepared = await prepareDispatch({
           action: 'scan',
-          params: { hostName: requestedHostName, agentId: requestedAgentId },
+          params: { hostName: requestedHostName, ip: requestedIp, agentId: requestedAgentId },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canWriteScanOperations',
@@ -204,17 +206,19 @@ export const scanHostTool = (
           { hosts: { [endpointIds[0]]: { name: hostName } } }
         );
 
-        // The dispatch above returns the action's write-time snapshot
-        // (almost always `pending` — the endpoint agent hasn't checked in
-        // yet). Poll until Elastic Defend reports completion so the chat
-        // response reflects the actual outcome, not just "dispatched".
-        const actionDetails = await waitForActionCompletion(
-          endpointAppContextService,
-          spaceId,
-          dispatchedAction.id,
-          logger,
-          dispatchedAction
-        );
+        // Offline write actions are durably queued. Polling cannot complete
+        // until the endpoint reconnects, so return the write-time snapshot and
+        // action ID immediately; online scans still wait for the real outcome.
+        const actionDetails =
+          target.endpoint.status === 'offline'
+            ? dispatchedAction
+            : await waitForActionCompletion(
+                endpointAppContextService,
+                spaceId,
+                dispatchedAction.id,
+                logger,
+                dispatchedAction
+              );
 
         return {
           results: [
@@ -230,9 +234,13 @@ export const scanHostTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                // Why a failed action failed (bounded); without it the model
-                // sees only `status: failed`.
-                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
+                ...(target.endpoint.status === 'offline'
+                  ? {
+                      queued: true,
+                      message:
+                        'The action is queued and will execute when the endpoint reconnects.',
+                    }
+                  : summarizeActionErrors(actionDetails.errors) ?? {}),
                 hosts: actionDetails.hosts,
                 comment,
               },

@@ -48,7 +48,7 @@ export const getRunningProcessesTool = (
   return {
     id: RUNNING_PROCESSES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the list of running processes from a host by its hostname or agent ID (pass the agent ID, from an ambiguous_hostname result, when several endpoints share the hostname). Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in.`,
+    description: `Retrieves the list of running processes from a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in.`,
     schema: getRunningProcessesSchema,
     maxResultTokens: RUNNING_PROCESSES_MAX_RESULT_TOKENS,
     // HITL gate enforced by the framework, not skill prose: the runner prompts
@@ -61,6 +61,7 @@ export const getRunningProcessesTool = (
             action: 'running-processes',
             params: {
               hostName: toolParams.hostName as string | undefined,
+              ip: toolParams.ip as string | undefined,
               agentId: toolParams.agentId as string | undefined,
             },
             context,
@@ -84,11 +85,12 @@ export const getRunningProcessesTool = (
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
+        const requestedIp = params.ip as string | undefined;
         const comment = params.comment as string | undefined;
 
         const prepared = await prepareDispatch({
           action: 'running-processes',
-          params: { hostName: requestedHostName, agentId: requestedAgentId },
+          params: { hostName: requestedHostName, ip: requestedIp, agentId: requestedAgentId },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canGetRunningProcesses',

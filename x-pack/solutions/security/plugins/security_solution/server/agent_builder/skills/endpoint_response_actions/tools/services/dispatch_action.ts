@@ -6,6 +6,8 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { escapeQuotes } from '@kbn/es-query';
+import { FLEET_ENDPOINT_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
@@ -46,7 +48,7 @@ export type DispatchPrivilege = Extract<
 
 export interface DispatchRequest {
   action: DispatchActionName;
-  params: { hostName?: string; agentId?: string };
+  params: { hostName?: string; ip?: string; agentId?: string };
   context: ToolHandlerContext;
   endpointAppContextService: EndpointAppContextService;
   /** Endpoint privilege the equivalent HTTP route requires for this action. */
@@ -244,6 +246,82 @@ const changedTargetResult = (confirmedAgentId: string, resolvedAgentId: string) 
     `The host resolved for this call changed after the analyst confirmed it (confirmed agent ID ${confirmedAgentId}, which now resolves to ${resolvedAgentId}), so nothing was dispatched. Call the tool again, so the analyst is shown the current target on a new confirmation card.`
   );
 
+const isolationNoOpResult = (
+  action: Extract<DispatchActionName, 'isolate' | 'unisolate'>,
+  target: DispatchTarget
+): ToolHandlerStandardReturn => ({
+  results: [
+    {
+      tool_result_id: getToolResultId(),
+      type: ToolResultType.other,
+      data: {
+        kind: 'response_action_result' as const,
+        action,
+        status: 'completed',
+        wasSuccessful: true,
+        noOp: true,
+        agentId: target.endpoint.agentId,
+        hostName: target.hostLabel,
+        isolated: action === 'isolate',
+        message:
+          action === 'isolate'
+            ? `${target.hostLabel} is already isolated; no response action was dispatched.`
+            : `${target.hostLabel} is already released from isolation; no response action was dispatched.`,
+      },
+    },
+  ],
+});
+
+/** Host isolation refusal shared by the confirmation and dispatch gates. */
+const hostIsolationDisabledMessage = (hostLabel: string): string =>
+  `Host isolation is disabled by the endpoint policy assigned to ${hostLabel}, so the endpoint will refuse this action. Enable linux.advanced.host_isolation.allowed in that policy before trying again.`;
+
+const isHostIsolationDisabled = async (
+  request: DispatchRequest,
+  target: DispatchTarget
+): Promise<boolean> => {
+  // This setting exists only in the Linux policy schema. Unknown, Windows,
+  // and macOS platforms must not be refused based on a sibling Linux block.
+  if (
+    request.action !== 'isolate' ||
+    target.endpoint.platform !== 'linux' ||
+    !target.endpoint.policyId
+  ) {
+    return false;
+  }
+
+  const fleet = request.endpointAppContextService.getInternalFleetServices(request.context.spaceId);
+  const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${FLEET_ENDPOINT_PACKAGE} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids: "${escapeQuotes(
+    target.endpoint.policyId
+  )}"`;
+  const { items } = await fleet.packagePolicy.list(fleet.getSoClient(), {
+    kuery,
+    perPage: 1,
+    spaceId: request.context.spaceId,
+  });
+  const policyValue = items[0]?.inputs?.[0]?.config?.policy?.value as
+    | { linux?: { advanced?: { host_isolation?: { allowed?: boolean } } } }
+    | undefined;
+
+  return policyValue?.linux?.advanced?.host_isolation?.allowed === false;
+};
+
+const getIsolationState = async (
+  request: DispatchRequest,
+  agentId: string
+): Promise<boolean | undefined> => {
+  const quotedAgentId = `"${escapeQuotes(agentId)}"`;
+  const { data } = await request.endpointAppContextService
+    .getEndpointMetadataService(request.context.spaceId)
+    .getHostMetadataList({
+      page: 0,
+      pageSize: 1,
+      kuery: `(united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`,
+    });
+
+  return data?.[0]?.metadata?.Endpoint?.state?.isolation;
+};
+
 /**
  * Resolves the target for the confirmation card. Never throws and never
  * dispatches: an unresolvable host, a missing privilege, or a Fleet/metadata
@@ -285,6 +363,10 @@ export const describeDispatchTargetForConfirmation = async (
     }
 
     const mismatch = findHostNameMismatch(request.params.hostName, target.endpoint);
+
+    if (!mismatch && (await isHostIsolationDisabled(request, target))) {
+      return { kind: 'blocked', message: hostIsolationDisabledMessage(target.hostLabel) };
+    }
 
     return {
       kind: 'resolved',
@@ -365,6 +447,26 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
       kind: 'result',
       result: changedTargetResult(approved.agentId, target.endpoint.agentId),
     };
+  }
+
+  if (await isHostIsolationDisabled(request, target)) {
+    return {
+      kind: 'result',
+      result: responseActionErrorResult(
+        'invalid_argument',
+        hostIsolationDisabledMessage(target.hostLabel)
+      ),
+    };
+  }
+
+  if (request.action === 'isolate' || request.action === 'unisolate') {
+    const isolated = await getIsolationState(request, target.endpoint.agentId);
+    if (
+      (request.action === 'isolate' && isolated === true) ||
+      (request.action === 'unisolate' && isolated === false)
+    ) {
+      return { kind: 'result', result: isolationNoOpResult(request.action, target) };
+    }
   }
 
   return { kind: 'ready', target };
