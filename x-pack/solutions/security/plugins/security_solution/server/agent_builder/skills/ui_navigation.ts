@@ -226,13 +226,25 @@ export const WATCHLISTS_UI_NAVIGATION_CONTENT = `## UI-only operations — redir
 
 Exactly one watchlist operation is intentionally **not** performed in chat: **uploading a CSV** of members. (Editing the name, description, or risk modifier is **not** UI-only — \`security.update_watchlist\` handles those. Configuring the entity source is **not** UI-only either — \`security.set_watchlist_rule_based_data_source\` / \`security.remove_watchlist_rule_based_data_source\` handle that in chat; do not redirect for it.)
 
-For this intent, **decline the action** and point the user to the right place in the UI. Three things in one short reply: what you can't do in chat, why ("the CSV upload lives in the editor"), and where to go — a clickable markdown link.
+For this intent, **decline the action** and point the user to the right place in the UI.
+
+**Required reply shape.** Every reply on this page must contain all three parts, in this order:
+
+1. **Decline** — one sentence naming what you cannot do in chat (e.g. "I can't upload a CSV to a watchlist from chat").
+2. **Why** — one short clause naming the UI-only reason ("the CSV upload lives in the watchlist editor").
+3. **The link** — the clickable markdown link rendered from the \`security.build_redirect_url\` result. A reply that omits the link, or that asks the user for something instead of linking, does not satisfy this intent.
+
+When the user did not name a specific watchlist, the reply has a fourth part:
+
+4. **Pick from the list** — say that the link opens the Watchlists tab and that the user picks the watchlist to edit from the list on that page. The bare tab link on its own is not enough for this intent.
 
 **How to produce the link.** Call \`security.build_redirect_url\` with the \`path\` below and the \`flyout\` object, and render the \`url\` it returns as \`[title](url)\`. The tool applies the deployment base path and current space for you — pass the \`path\` exactly as written (app-relative, starting with \`/\`) and **never** hand-write, guess, or edit the URL. \`security.build_redirect_url\` is **not** a mutation, so calling it for a redirect is expected; do **not** call the mutating tools (\`create\` / \`update\` / \`delete\` / \`add_entities\` / \`remove_entities\`). Do **not** prompt for confirmation, and do **not** claim the operation succeeded.
 
 ### Redirect intent
 
 **Upload a CSV** of watchlist members — the edit flyout's "CSV Data Source" adds members in bulk from a file. The tools here take an explicit id list only (\`security.add_entities_to_watchlist\`); a file upload is UI-only.
+
+**A missing attachment does not change the destination.** When the user asks to upload a CSV without attaching the file, do **not** ask them to attach it and do **not** wait for the file: the upload happens in the watchlist editor, so decline and link exactly as if the file were already attached. Asking the user for the CSV, or offering to upload it once they send one, is the wrong reply.
 
 ### Destination
 
@@ -247,7 +259,7 @@ ${asIndentedJson(buildWatchlistEditFlyoutTemplate())}
   3. Render the returned \`url\`.
 - **No specific watchlist** ("open the watchlists page") → call \`security.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.watchlists
-}'\` (no \`flyout\`) and render the returned \`url\` — the bare Watchlists tab.
+}'\` (no \`flyout\`) and render the returned \`url\` — the bare Watchlists tab. This link opens the tab, not an editor, so the reply must also **tell the user to pick the watchlist from the list in the UI** (reply part 4); a bare "here is the watchlists page" link does not satisfy this intent.
 
 ### Examples
 
@@ -264,7 +276,8 @@ User: "Open the watchlists page so I can pick one to edit."
 
 1. Call \`security.build_redirect_url\` with \`{ path: '${
   ENTITY_ANALYTICS_UI_PATHS.watchlists
-}' }\` (no \`flyout\`) and render the returned \`url\`: [Watchlists](<url from build_redirect_url>).`;
+}' }\` (no \`flyout\`) and render the returned \`url\` as a link, and tell the user to pick the watchlist from the list on that page:
+   > "I can't edit a watchlist from chat — that runs through the watchlist editor. Open [Watchlists](<url from build_redirect_url>) and pick the watchlist you want to edit from the list."`;
 
 export const RESOLUTION_UI_NAVIGATION_CONTENT = `## UI navigation
 
