@@ -588,9 +588,25 @@ export class AIAssistantService {
   private async checkResourcesInstallation(opts: CreateAIAssistantClientParams) {
     const licensing = await opts.licensing;
     if (!hasAIAssistantLicense(licensing.license)) return null;
+
+    const installed = await this.ensureSpaceResources(opts.spaceId);
+    if (!installed) return null;
+  }
+
+  /**
+   * Installs the space-level resources (including the per-space anonymization fields data
+   * stream and its default fields) if they are not installed yet, retrying a failed install.
+   *
+   * Callers that read these resources without creating an AI Assistant data client, such as
+   * Attack Discovery generation, call this first so a space that never opened the AI
+   * Assistant still has them. No license check: the data-client factories do that themselves.
+   *
+   * @returns `false` when the install failed and the retry failed too.
+   */
+  public async ensureSpaceResources(spaceId: string): Promise<boolean> {
     // Check if resources installation has succeeded
     const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
-      opts.spaceId
+      spaceId
     );
 
     // If space level resources initialization failed, retry
@@ -610,27 +626,27 @@ export class AIAssistantService {
         }
       }
 
-      this.resourceInitializationHelper.retry(opts.spaceId, initRetryPromise);
+      this.resourceInitializationHelper.retry(spaceId, initRetryPromise);
 
       const retryResult = await this.resourceInitializationHelper.getInitializedResources(
-        opts.spaceId ?? DEFAULT_NAMESPACE_STRING
+        spaceId ?? DEFAULT_NAMESPACE_STRING
       );
 
       if (!retryResult.result) {
-        const errorLogPrefix = `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId "${opts.spaceId}" - `;
+        const errorLogPrefix = `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId "${spaceId}" - `;
         // Retry also failed
         this.options.logger.warn(
           retryResult.error && error
             ? `${errorLogPrefix}Retry failed with errors: ${error}`
             : `${errorLogPrefix}Original error: ${error}; Error after retry: ${retryResult.error}`
         );
-        return null;
+        return false;
       } else {
-        this.options.logger.info(
-          `Resource installation for "${opts.spaceId}" succeeded after retry`
-        );
+        this.options.logger.info(`Resource installation for "${spaceId}" succeeded after retry`);
       }
     }
+
+    return true;
   }
 
   public async getProductDocumentationStatus(): Promise<InstallationStatus> {

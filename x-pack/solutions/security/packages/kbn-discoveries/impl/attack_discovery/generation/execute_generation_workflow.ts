@@ -638,6 +638,19 @@ export async function executeGenerationWorkflow({
 
     authenticatedUser = createAuthenticatedUserForEventLogging({ authenticationInfo });
 
+    // The anonymization fields data stream is created lazily, when an AI Assistant data client
+    // is first created for the space. A space that never opened the AI Assistant or Attack
+    // discovery UI has none, so install it here rather than fail every batch with
+    // `index_not_found_exception`. A failed install is logged, and the fetch below still fails
+    // with its own error.
+    const { elasticAssistant } = pluginsStart as {
+      elasticAssistant?: { ensureSpaceResources?: (spaceId: string) => Promise<boolean> };
+    };
+
+    if ((await elasticAssistant?.ensureSpaceResources?.(spaceId)) === false) {
+      logger.warn(`Could not install the AI Assistant resources for space '${spaceId}'`);
+    }
+
     const anonymizationFields = await fetchAnonymizationFields({
       esClient,
       logger,

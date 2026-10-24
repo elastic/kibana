@@ -131,6 +131,42 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     const retrieve = () => step('retrieve_alert_ids');
     const query = () => String(retrieve().with?.query);
 
+    // ES|QL has no `ignore_unavailable`: `FROM` on a space that has no alerts index yet fails
+    // with `Unknown index` instead of returning zero rows. The query is therefore gated on
+    // the index existing, rather than loosened, so a real query error still fails the run.
+    describe('in a space with no alerts index yet', () => {
+      const check = () => step('check_alerts_index');
+
+      it('checks that the space alerts index exists before querying it', () => {
+        expect(check().type).toBe('elasticsearch.indices.exists');
+        expect(check().with?.index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
+        expect(parsed.steps?.findIndex((s) => s.name === 'check_alerts_index')).toBeLessThan(
+          parsed.steps?.findIndex((s) => s.name === 'retrieve_alert_ids') ?? -1
+        );
+      });
+
+      it('skips retrieve_alert_ids unless the index exists, and only on that condition', () => {
+        expect(retrieve().if).toBe('${{ steps.check_alerts_index.output.result == true }}');
+        expect(retrieve().type).toBe('elasticsearch.esql.query');
+      });
+
+      it('does not loosen the query, so a genuine ES|QL error still fails the run', () => {
+        expect(retrieve()).not.toHaveProperty('on-failure');
+        expect(retrieve()).not.toHaveProperty('continue');
+        expect(JSON.stringify(retrieve().with)).not.toContain('ignore_unavailable');
+      });
+
+      it('runs no batch when the skipped retrieval left no ids', async () => {
+        const engine = createWorkflowLiquidEngine({ strictFilters: true });
+        const rendered = await engine.parseAndRender(String(step('generate_batches').foreach), {
+          inputs: { batch_size: 100 },
+          steps: { retrieve_alert_ids: {} },
+        });
+
+        expect(JSON.parse(rendered as string)).toEqual([]);
+      });
+    });
+
     it('retrieves ids only, leaving anonymization to each batch', () => {
       expect(retrieve().type).toBe('elasticsearch.esql.query');
       expect(query()).toMatch(/\| KEEP _id$/);

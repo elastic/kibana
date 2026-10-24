@@ -57,6 +57,19 @@ triggers:
           type: string
 
 steps:
+  # A space whose alerts index has not been created yet (no rule has ever
+  # written an alert there) is a quiet run, not a failure. ES|QL has no
+  # `ignore_unavailable`, and `FROM` on a missing index is a hard
+  # `Unknown index` error, so existence is checked first and `retrieve_alert_ids`
+  # is skipped when the index is absent. Gating the query rather than loosening
+  # it keeps every other ES|QL error (syntax, mapping, privilege) fatal. The
+  # alias is checked, not a concrete backing index, so a rolled-over index still
+  # counts as present.
+  - name: check_alerts_index
+    type: elasticsearch.indices.exists
+    with:
+      index: .alerts-security.alerts-{{ workflow.spaceId }}
+
   # Ids only. Each batch's `security.attack-discovery.run` retrieves and anonymizes
   # its own slice with an ES|QL query over those ids, so the replacements its
   # markdown uses are the ones that batch persists. Anonymizing here instead would
@@ -65,6 +78,7 @@ steps:
   # raw alert field values leave this step.
   - name: retrieve_alert_ids
     type: elasticsearch.esql.query
+    if: "${{ steps.check_alerts_index.output.result == true }}"
     timeout: "5m"
     with:
       # Alerts the review already retired: a true-positive or inconclusive attack
