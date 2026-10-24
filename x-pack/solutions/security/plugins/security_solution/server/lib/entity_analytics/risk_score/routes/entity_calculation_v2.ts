@@ -11,6 +11,7 @@ import type {
   KibanaResponseFactory,
   Logger,
 } from '@kbn/core/server';
+import { checkEntityStoreIndexPrivileges } from '@kbn/entity-store/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -21,10 +22,11 @@ import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_V2_URL } from '../../../../../com
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { recalculateEntityRiskScore } from '../recalculate_entity_risk_score';
+import { RiskEngineDataWriter } from '../risk_engine_data_writer';
+import { getIndexPatternDataStream } from '../configurations';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 type Handler = (
@@ -33,7 +35,10 @@ type Handler = (
   response: KibanaResponseFactory
 ) => Promise<IKibanaResponse<RiskScoresEntityCalculationResponse>>;
 
-const handler: (logger: Logger) => Handler = (logger) => async (context, request, response) => {
+const handler: (
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  logger: Logger
+) => Handler = (getStartServices, logger) => async (context, request, response) => {
   const securityContext = await context.securitySolution;
   const coreContext = await context.core;
   const securityConfig = securityContext.getConfig();
@@ -55,6 +60,20 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
     });
   }
 
+  const namespace = securityContext.getSpaceId();
+  const [, { security, entityStore, workflowsExtensions }] = await getStartServices();
+  // The recalculation follows an entity update (e.g. a criticality change), so only users who can
+  // read and write entity store data may trigger it. The scoring itself runs with the internal user
+  // below, since it relies on system-owned indices.
+  const { has_read_permissions: canReadEntityStore, has_write_permissions: canWriteEntityStore } =
+    await checkEntityStoreIndexPrivileges({ request, security, spaceId: namespace });
+  if (!canReadEntityStore || !canWriteEntityStore) {
+    return siemResponse.error({
+      statusCode: 403,
+      body: 'You do not have the privileges required to calculate risk scores for this entity.',
+    });
+  }
+
   securityContext.getAuditLogger()?.log({
     message: 'User triggered custom manual scoring',
     event: {
@@ -66,14 +85,12 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
   });
 
   const soClient = coreContext.savedObjects.client;
-  const esClient = coreContext.elasticsearch.client.asCurrentUser;
-  const namespace = securityContext.getSpaceId();
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
     const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(
       coreContext.uiSettings.client
     );
-    const riskScoreDataClient = securityContext.getRiskScoreDataClient();
 
     await runWithSpan({
       name: ENTITY_ANALYTICS_SPAN_NAMES.riskScoreOndemandCalculate,
@@ -86,11 +103,21 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
         recalculateEntityRiskScore({
           esClient,
           soClient,
-          crudClient: securityContext.getEntityStoreUpdateClient(),
+          crudClient: entityStore.createCRUDClient(
+            esClient,
+            namespace,
+            workflowsExtensions ? () => workflowsExtensions.getClient(request) : undefined
+          ),
           namespace,
           entityId,
           identifierType,
-          getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
+          getWriter: async (ns) =>
+            new RiskEngineDataWriter({
+              esClient,
+              namespace: ns,
+              index: getIndexPatternDataStream(ns).alias,
+              logger,
+            }),
           idBasedRiskScoringEnabled,
           logger,
           alertSampleSizePerShard:
@@ -133,9 +160,6 @@ export const riskScoreEntityCalculationRouteV2 = (
           },
         },
       },
-      withMinimumLicense(
-        withRiskEnginePrivilegeCheck(getStartServices, handler(logger)),
-        'platinum'
-      )
+      withMinimumLicense(handler(getStartServices, logger), 'platinum')
     );
 };
