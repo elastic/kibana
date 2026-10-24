@@ -38,18 +38,18 @@ const readPng = async (imageInfo: string | Buffer): Promise<PNG> => {
 /**
  * Stretches a PNG to `width` x `height` with bilinear interpolation
  */
-const resizePng = (src: PNG, width: number, height: number): PNG => {
+export const resizePng = (src: PNG, width: number, height: number): PNG => {
   const dst = new PNG({ width, height });
   const scaleX = src.width / width;
   const scaleY = src.height / height;
   for (let y = 0; y < height; y++) {
-    const srcY = Math.min((y + 0.5) * scaleY - 0.5, src.height - 1);
-    const y0 = Math.max(Math.floor(srcY), 0);
+    const srcY = Math.min(Math.max((y + 0.5) * scaleY - 0.5, 0), src.height - 1);
+    const y0 = Math.floor(srcY);
     const y1 = Math.min(y0 + 1, src.height - 1);
     const weightY = srcY - y0;
     for (let x = 0; x < width; x++) {
-      const srcX = Math.min((x + 0.5) * scaleX - 0.5, src.width - 1);
-      const x0 = Math.max(Math.floor(srcX), 0);
+      const srcX = Math.min(Math.max((x + 0.5) * scaleX - 0.5, 0), src.width - 1);
+      const x0 = Math.floor(srcX);
       const x1 = Math.min(x0 + 1, src.width - 1);
       const weightX = srcX - x0;
       const topLeft = (y0 * src.width + x0) * 4;
