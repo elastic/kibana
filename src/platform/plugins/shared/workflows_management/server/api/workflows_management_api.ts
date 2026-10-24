@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
+  requiresDelegatedIdentity,
   toWorkflowExecutionEngineModel,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
@@ -82,6 +83,7 @@ import {
 } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { TriggerSelectionKind } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
+import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
 import type { WorkflowsManagementClient } from './workflows_management_client';
 import { createWorkflowsManagementClient } from './workflows_management_client';
 import type {
@@ -262,6 +264,8 @@ export interface RunWorkflowWithAlertPreprocessingParams {
    * supports; a caller that validates selections itself should list only the kinds it checked.
    */
   expandSelections?: readonly TriggerSelectionKind[];
+  /** Set by manual-run entry points to refuse delegated-identity-only workflows. */
+  rejectDelegatedIdentity?: boolean;
 }
 
 export interface RunWorkflowWithAlertPreprocessingResult {
@@ -720,6 +724,24 @@ export class WorkflowsManagementApi {
     return this.workflowsService.disableAllWorkflows(spaceId, request);
   }
 
+  /**
+   * Rejects a manual, top-level run of a workflow that can only execute as the delegated
+   * identity of a parent run. Only manual-run entry points (the Run route, the workflows
+   * connector action) call this. Server-side callers such as `executeWorkflow` are not
+   * gated: they own the run, and an `inherit` step nested in the definition is legitimate.
+   */
+  public assertRunnableStandalone(workflow: WorkflowExecutionEngineModel): void {
+    if (requiresDelegatedIdentity(workflow)) {
+      throw new WorkflowRequiresDelegatedIdentityError(
+        i18n.translate('workflows.api.workflowRequiresDelegatedIdentityErrorMessage', {
+          defaultMessage:
+            "Workflow ''{workflowId}'' delegates its execution identity to a parent workflow and cannot be run standalone.",
+          values: { workflowId: workflow.id },
+        })
+      );
+    }
+  }
+
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
@@ -771,7 +793,11 @@ export class WorkflowsManagementApi {
     metadata,
     eventOverrides,
     expandSelections = ALL_TRIGGER_SELECTION_KINDS,
+    rejectDelegatedIdentity,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
+    if (rejectDelegatedIdentity) {
+      this.assertRunnableStandalone(workflow);
+    }
     const processedInputs = await preprocessTriggerInputs(
       inputs,
       preprocessingContext,
@@ -1039,6 +1065,21 @@ export class WorkflowsManagementApi {
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+    // A test run is still a top-level run: it holds the same concurrency slot and would
+    // fail the same way on an inherited step. Unsaved drafts of delegated-identity-only
+    // workflows reach the engine through this path, so gate it too.
+    this.assertRunnableStandalone(
+      toWorkflowExecutionEngineModel(
+        {
+          id: resolvedWorkflowId,
+          name: workflowJson.name,
+          enabled: workflowJson.enabled,
+          definition: workflowJson.definition,
+          yaml: resolvedYaml,
+        },
+        { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
+      )
+    );
     const { event, ...manualInputs } = inputs;
     const context = {
       event,

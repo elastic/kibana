@@ -32,6 +32,8 @@ import {
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
+import { WorkflowForbiddenError } from './workflow_forbidden_error';
+import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
 import {
   type AlertPreprocessingContext,
   type SmlIndexAttachmentFn,
@@ -977,6 +979,39 @@ steps:
         expect(engine.executeWorkflow).not.toHaveBeenCalled();
       });
 
+      it('refuses a delegated-identity-only workflow before creating a test execution', async () => {
+        // The detail editor's Run button tests unsaved drafts through this path; a draft
+        // whose every path inherits would hold the same concurrency slot and fail the
+        // same way a saved manual run does.
+        mockWorkflowsService.validateWorkflow.mockResolvedValue({
+          valid: true,
+          diagnostics: [],
+          parsedWorkflow: {
+            name: 'Delegated draft',
+            enabled: true,
+            steps: [
+              {
+                name: 'child',
+                type: 'workflow.execute',
+                with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+              },
+            ],
+          } as any,
+        });
+
+        await expect(
+          api.testWorkflow({
+            workflowYaml: 'name: Delegated draft',
+            inputs,
+            spaceId,
+            request: mockRequest,
+          })
+        ).rejects.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+
+        const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+        expect(engine.executeWorkflow).not.toHaveBeenCalled();
+      });
+
       it('should separate event from manual inputs when executing workflow', async () => {
         const complexInputs = {
           event: { type: 'test-event', data: { foo: 'bar' } },
@@ -1443,6 +1478,129 @@ steps:
       );
       expect(result).toEqual({ workflowExecutionId: 'test-exec-id' });
     });
+
+    it('refuses to run a workflow whose every path inherits a parent service account', async () => {
+      // Regression (elastic/kibana#297266): the managed Attack Discovery runner. It must be
+      // refused before any execution is created — a doomed run cancels the scheduled one.
+      const workflow = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Attack Discovery Runner',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: {
+                'workflow-id': 'system-security-attack-discovery-batched-generation',
+                'run-as-mode': 'inherit',
+              },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      } as WorkflowExecutionEngineModel;
+
+      const error = await api
+        .runWorkflowWithAlertPreprocessing({
+          workflow,
+          spaceId: 'default',
+          inputs: {},
+          request: mockRequest,
+          preprocessingContext: {} as AlertPreprocessingContext,
+          rejectDelegatedIdentity: true,
+        })
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(error).toBeInstanceOf(WorkflowForbiddenError);
+      expect((error as Error).message).toMatch(
+        /delegates its execution identity to a parent workflow/
+      );
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('does not refuse delegated-identity workflows unless the caller opts in', async () => {
+      const workflow = {
+        id: 'delegating-workflow',
+        name: 'Delegating',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Delegating',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'child',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+        yaml: 'name: Delegating',
+      } as WorkflowExecutionEngineModel;
+      mockPreprocessTriggerInputs.mockResolvedValue({});
+
+      await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs: {},
+        request: mockRequest,
+        preprocessingContext: {} as AlertPreprocessingContext,
+      });
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not refuse a workflow whose only inherit is conditional, even on the Run path', async () => {
+      // The Run route opts in to the gate, but the gate only refuses workflows that
+      // always need delegation. A conditional inherit may never execute standalone.
+      const conditionalInheritDefinition = {
+        version: '1',
+        name: 'Conditionally delegating',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'route',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'child',
+                type: 'workflow.execute',
+                with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+              },
+            ],
+            else: [],
+          },
+        ],
+      } as unknown as NonNullable<WorkflowExecutionEngineModel['definition']>;
+      const workflow = {
+        id: 'conditionally-delegating',
+        name: 'Conditionally delegating',
+        enabled: true,
+        definition: conditionalInheritDefinition,
+        yaml: 'name: Conditionally delegating',
+      } as WorkflowExecutionEngineModel;
+      mockPreprocessTriggerInputs.mockResolvedValue({});
+
+      await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs: {},
+        request: mockRequest,
+        preprocessingContext: {} as AlertPreprocessingContext,
+        rejectDelegatedIdentity: true,
+      });
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('executeWorkflow', () => {
@@ -1538,6 +1696,74 @@ steps:
         'default',
         { includeOutput: true }
       );
+    });
+
+    it('runs a workflow whose only inherit is conditional (server-side caller, not gated)', async () => {
+      // Regression (Libra P2): shape of the proposals `system-create-proposal` workflow —
+      // an `inherit` step in if/else inside a while loop. A standalone run may complete
+      // without ever executing it, so neither the Run gate nor anything else refuses it;
+      // `executeWorkflow` (agent tools) was never gated to begin with.
+      const definition = {
+        version: '1' as const,
+        name: 'Create proposal shape',
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [
+          {
+            name: 'decision_loop',
+            type: 'while',
+            condition: 'true',
+            steps: [
+              {
+                name: 'approve_with_action',
+                type: 'if',
+                condition: 'true',
+                steps: [
+                  {
+                    name: 'execute_by_approval_mode',
+                    type: 'if',
+                    condition: 'true',
+                    steps: [],
+                    else: [
+                      {
+                        name: 'execute_as_worker',
+                        type: 'workflow.execute',
+                        with: { 'workflow-id': 'worker', 'run-as-mode': 'inherit' },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'system-create-proposal',
+        name: 'Create proposal shape',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Create proposal shape',
+        definition,
+      } as any);
+
+      // Capture rejection immediately so a regression fails the assertion below instead of
+      // surfacing as an unhandled rejection while fake timers advance.
+      const outcome = await runWithTimers(
+        api
+          .executeWorkflow({
+            workflowId: 'system-create-proposal',
+            inputs: {},
+            spaceId: 'default',
+            request: mockRequest,
+            waitForCompletion: false,
+          })
+          .catch((e: unknown) => e)
+      );
+
+      expect(outcome).not.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(outcome).toEqual(expect.objectContaining({ workflowExecutionId: 'test-exec-id' }));
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
     });
 
     it('executes an inline workflow as ephemeral without forcing test-run semantics', async () => {

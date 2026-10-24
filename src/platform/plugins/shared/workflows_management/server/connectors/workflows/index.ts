@@ -89,7 +89,7 @@ export function getConnectorType(
   };
 }
 
-function getWorkflowsConnectorTypeArgs(
+export function getWorkflowsConnectorTypeArgs(
   workflowsManagementApi: WorkflowsManagementApi
 ): GetWorkflowsConnectorTypeArgs {
   // Create workflows service function for the connector
@@ -101,6 +101,8 @@ function getWorkflowsConnectorTypeArgs(
       validateWorkflowForExecution(workflow, workflowId);
 
       const workflowToRun: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel(workflow);
+
+      workflowsManagementApi.assertRunnableStandalone(workflowToRun);
 
       // Run the workflow, @tb: maybe switch to scheduler?
       return workflowsManagementApi.runWorkflow(workflowToRun, spaceId, inputs, request);
