@@ -6,7 +6,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
@@ -16,7 +16,7 @@ import {
   scoreBaseEntities,
 } from './score_base_entities';
 import type { ScopedLogger } from '../utils/with_log_context';
-import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
+import { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 import { BASE_STORE_LOOKUP_FIELDS } from './base_store_lookup';
 
 const buildLogger = (): ScopedLogger =>
@@ -484,6 +484,46 @@ describe('score_base_entities', () => {
       expect(pages.map((page) => page.scores.map((score) => score.id_value))).toEqual([
         ['user:05'],
       ]);
+    });
+
+    describe('the entities it scored', () => {
+      const score = (pagesToRun?: number) =>
+        scoreBaseEntities({
+          esClient,
+          crudClient,
+          logger,
+          writer: new RiskEngineDataWriter({
+            esClient,
+            index: 'risk-score.risk-score-default',
+            namespace: 'default',
+            logger: loggingSystemMock.createLogger(),
+          }),
+          idBasedRiskScoringEnabled: false,
+          createMissingEntities: false,
+          ...baseParams,
+          sampledPages: { targetPageSize: 10, samplesPerPage: 3, pagesToRun },
+        });
+
+      it('hands them to resolution when it scored every page', async () => {
+        jest
+          .mocked(esClient.esql.query)
+          .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:02')] })
+          .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:05')] });
+
+        const { entitiesWithAlerts } = await score();
+
+        expect(entitiesWithAlerts?.count).toBe(2);
+        expect(entitiesWithAlerts?.mightContain('user:02')).toBe(true);
+        expect(entitiesWithAlerts?.mightContain('user:05')).toBe(true);
+      });
+
+      it('hands nothing to resolution when a test scored only some pages', async () => {
+        jest
+          .mocked(esClient.esql.query)
+          .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:05')] });
+
+        expect((await score(1)).entitiesWithAlerts).toBeUndefined();
+      });
     });
 
     it('scores a page again in two halves, split at its middle sampled ID, when it reaches the row limit', async () => {

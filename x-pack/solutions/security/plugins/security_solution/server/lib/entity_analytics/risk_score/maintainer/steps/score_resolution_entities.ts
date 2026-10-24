@@ -35,8 +35,10 @@ import {
   discoverResolutionPagesFromStore,
   discoverSampledResolutionPages,
   halveResolutionChunk,
+  readMembersWithBaseScores,
   readSampledAliasPage,
 } from './resolution_store_pages';
+import type { EntityIdBloomFilter } from '../utils/entity_id_bloom_filter';
 import type { ResolutionTargetLookup } from './resolution_store_lookup';
 import {
   RESOLUTION_TARGET_LOOKUP_FIELDS,
@@ -91,6 +93,16 @@ interface ScoreResolutionEntitiesParams {
    * alerts without one.
    */
   allAlertsStamped?: boolean;
+  /**
+   * With `membershipFromStore`: the entities base scored this run. A member it has never seen has
+   * no alerts, so it is left out of the member filter, whose cost grows with its terms.
+   */
+  entitiesWithAlerts?: EntityIdBloomFilter;
+  /**
+   * Test runs only, with `entitiesWithAlerts`: fill it on each page from the members that have a
+   * stored base score, for sampled runs whose base stage scored only some pages.
+   */
+  testFillMembersFromStore?: boolean;
 }
 
 interface ResolutionPageResult {
@@ -289,6 +301,8 @@ const scoreStoreGroups = async (
     alertFilters,
     preAggregateByEntity = false,
     allAlertsStamped = false,
+    entitiesWithAlerts,
+    testFillMembersFromStore = false,
   }: ScoreResolutionEntitiesParams,
   {
     pageNumber,
@@ -299,7 +313,28 @@ const scoreStoreGroups = async (
     profile: profileThisPage,
   }: ResolutionPageTask
 ): Promise<ResolutionPageScores> => {
-  const pageMemberIds = [...new Set([...resolutionTargetIds, ...aliasEntities.keys()])];
+  const allMemberIds = [...new Set([...resolutionTargetIds, ...aliasEntities.keys()])];
+  if (entitiesWithAlerts && testFillMembersFromStore) {
+    const scored = await timer.time(
+      'testMemberFill',
+      () => readMembersWithBaseScores(crudClient, allMemberIds),
+      (read) => read.tookMs
+    );
+    for (const member of scored.entities) {
+      if (member.entity?.id) {
+        entitiesWithAlerts.add(member.entity.id);
+      }
+    }
+  }
+  const pageMemberIds = entitiesWithAlerts
+    ? allMemberIds.filter((id) => entitiesWithAlerts.mightContain(id))
+    : allMemberIds;
+  if (pageMemberIds.length === 0) {
+    // No member has an alert, so the page has nothing to score. Without members the filter below
+    // would be left out and the query would read every alert.
+    logger.debug(`[resolution][page:${pageNumber}] no member of ${allMemberIds.length} has alerts`);
+    return NO_SCORES;
+  }
   // The store join can't tell a target from an entity in no group, so only the member filter keeps
   // the latter's alerts out. Without one, the page would score entities that aren't targets.
   const memberFilter = getResolutionPageMemberFilter(entityType, pageMemberIds, {
@@ -335,7 +370,8 @@ const scoreStoreGroups = async (
     logger.info(
       `[resolution][page:${pageNumber}] esql profile ${JSON.stringify({
         ...profileSummary,
-        members: pageMemberIds.length,
+        members: allMemberIds.length,
+        membersWithAlerts: pageMemberIds.length,
         memberFilter: true,
       })}`
     );

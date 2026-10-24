@@ -49,6 +49,7 @@ import { withLogContext } from './utils/with_log_context';
 import { ensureLookupIndex, getLookupIndexName } from './lookup/lookup_index';
 import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
+import type { EntityIdBloomFilter } from './utils/entity_id_bloom_filter';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
 import { createRunHealthTracker } from './utils/run_health';
 import type { PageStepTimings } from './utils/page_step_timings';
@@ -574,6 +575,7 @@ const executeEntityTypeRun = async ({
   const baseStartedAtMs = Date.now();
   const basePageTimings = createPageStepTimings();
   let allAlertsStamped = false;
+  let entitiesWithAlerts: EntityIdBloomFilter | undefined;
 
   try {
     const baseSummary = await runWithSpan({
@@ -614,6 +616,7 @@ const executeEntityTypeRun = async ({
     });
     runLogger.debug('completed base scoring pass');
     allAlertsStamped = baseSummary.allAlertsStamped;
+    entitiesWithAlerts = baseSummary.entitiesWithAlerts;
     metricsTracker.recordBase(runMetrics, baseSummary);
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
@@ -693,6 +696,9 @@ const executeEntityTypeRun = async ({
             preAggregateByEntity: true,
             membershipFromStore: RESOLVE_FROM_ENTITY_STORE,
             allAlertsStamped,
+            entitiesWithAlerts,
+            // Test setting: a sampled base stage leaves the filter unset; fill it from stored scores.
+            testFillMembersFromStore: TEST_PAGES_TO_RUN !== undefined,
             skipUnchangedStoreWrites: true,
             // Test setting: page ranges from one sample of the aliases. Only targets with alerts
             // produce rows, so pages aim at 30k aliases, near the member filter's terms limit;

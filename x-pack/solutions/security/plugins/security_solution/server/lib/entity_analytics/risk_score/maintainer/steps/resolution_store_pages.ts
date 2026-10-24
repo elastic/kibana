@@ -122,6 +122,24 @@ const readOnePage = async (
   };
 };
 
+/**
+ * Test runs only: the members that have a stored base score. On static test data that one full run
+ * has scored, those are exactly the members with alerts, so sampled runs, whose base stage scores
+ * only some pages, can still use the member filter full runs build from base scoring.
+ */
+export const readMembersWithBaseScores = (
+  crudClient: StoreReader,
+  memberIds: string[]
+): Promise<StoreRead> =>
+  readAll(crudClient, {
+    filter: [
+      { terms: { 'entity.id': memberIds } },
+      { exists: { field: 'entity.risk.calculated_score' } },
+    ],
+    sort: [{ 'entity.id': 'asc' }],
+    size: 10_000,
+  });
+
 /** Pages through every match. */
 const readAll = async (
   crudClient: StoreReader,

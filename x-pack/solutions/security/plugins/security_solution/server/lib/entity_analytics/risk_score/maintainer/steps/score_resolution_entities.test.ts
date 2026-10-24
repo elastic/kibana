@@ -18,6 +18,7 @@ import {
   scoreResolutionPage,
 } from './score_resolution_entities';
 import { createPageStepTimings } from '../utils/page_step_timings';
+import { EntityIdBloomFilter } from '../utils/entity_id_bloom_filter';
 import {
   getResolutionPageMemberFilter,
   MAX_RESOLUTION_PAGE_MEMBERS,
@@ -488,6 +489,124 @@ describe('score_resolution_entities', () => {
       expect(pages).toEqual([[]]);
       expect(esClient.esql.query).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('skipped'));
+    });
+
+    describe('members without alerts', () => {
+      const params = (overrides: Partial<Parameters<typeof scoreResolutionPage>[0]> = {}) => ({
+        esClient,
+        crudClient,
+        logger,
+        entityType: EntityType.user,
+        alertsIndex: '.alerts-security.alerts-default',
+        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        pageSize: 10_000,
+        sampleSize: 1000,
+        now: '2026-01-01T00:00:00.000Z',
+        calculationRunId: 'run-1',
+        watchlistConfigs: new Map(),
+        alertFilters: [],
+        membershipFromStore: true,
+        allAlertsStamped: true,
+        ...overrides,
+      });
+      const alias = (id: string, target: string) => ({
+        entity: { id, relationships: { resolution: { resolved_to: target } } },
+      });
+      const task = () => ({
+        pageNumber: 2,
+        resolutionTargetIds: ['user:target-a', 'user:target-b'],
+        bounds: { upper: 'user:target-b' },
+        timer: createPageStepTimings().startPage(),
+        aliasEntities: new Map([
+          ['user:alias-a1', alias('user:alias-a1', 'user:target-a')],
+          ['user:alias-b1', alias('user:alias-b1', 'user:target-b')],
+        ]),
+      });
+      const memberTerms = () => {
+        const [[request]] = jest.mocked(esClient.esql.query).mock.calls;
+        return request.filter;
+      };
+
+      beforeEach(() => {
+        jest.mocked(esClient.esql.query).mockResolvedValue({ columns: [], values: [] });
+      });
+
+      it('leaves members base never scored out of the member filter', async () => {
+        const entitiesWithAlerts = EntityIdBloomFilter.forCount(10);
+        entitiesWithAlerts.add('user:target-b');
+        entitiesWithAlerts.add('user:alias-a1');
+
+        await scoreResolutionPage(params({ entitiesWithAlerts }), task());
+
+        expect(memberTerms()).toEqual({
+          bool: {
+            filter: [{ terms: { 'kibana.alert.entity.id': ['user:target-b', 'user:alias-a1'] } }],
+          },
+        });
+      });
+
+      it('sends no query when no member has alerts', async () => {
+        const result = await scoreResolutionPage(
+          params({ entitiesWithAlerts: EntityIdBloomFilter.forCount(10) }),
+          task()
+        );
+
+        expect(result.scores).toEqual([]);
+        expect(esClient.esql.query).not.toHaveBeenCalled();
+      });
+
+      it('fills the filter from stored base scores in test runs', async () => {
+        jest.mocked(crudClient.listEntities).mockResolvedValueOnce({
+          entities: [],
+          took: 2,
+          fields: [{ 'entity.id': ['user:alias-b1'] }],
+        });
+
+        await scoreResolutionPage(
+          params({
+            entitiesWithAlerts: EntityIdBloomFilter.forCount(10),
+            testFillMembersFromStore: true,
+          }),
+          task()
+        );
+
+        expect(crudClient.listEntities).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: [
+              {
+                terms: {
+                  'entity.id': ['user:target-a', 'user:target-b', 'user:alias-a1', 'user:alias-b1'],
+                },
+              },
+              { exists: { field: 'entity.risk.calculated_score' } },
+            ],
+          })
+        );
+        expect(memberTerms()).toEqual({
+          bool: { filter: [{ terms: { 'kibana.alert.entity.id': ['user:alias-b1'] } }] },
+        });
+      });
+
+      it('keeps every member without a filter', async () => {
+        await scoreResolutionPage(params(), task());
+
+        expect(memberTerms()).toEqual({
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'kibana.alert.entity.id': [
+                    'user:target-a',
+                    'user:target-b',
+                    'user:alias-a1',
+                    'user:alias-b1',
+                  ],
+                },
+              },
+            ],
+          },
+        });
+      });
     });
 
     it('marks the targets whose store document already holds the new resolution score', async () => {

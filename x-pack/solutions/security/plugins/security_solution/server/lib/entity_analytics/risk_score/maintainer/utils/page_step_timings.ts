@@ -14,6 +14,8 @@ import { performance } from 'perf_hooks';
 export type PageStep =
   | 'discovery'
   | 'memberFetch'
+  /** Test runs only: which of a resolution page's members have a stored base score. */
+  | 'testMemberFill'
   | 'esql'
   | 'parse'
   | 'entityFetch'

@@ -24,6 +24,7 @@ import {
 import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
+import { EntityIdBloomFilter } from '../utils/entity_id_bloom_filter';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import type { ScoredEntityPage, StepResult } from './pipeline_types';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
@@ -111,6 +112,8 @@ export interface Phase1BaseScoringSummary extends StepResult {
   scoresUnchangedInStore: number;
   /** Every in-scope alert of this type carried its stamped EUID when the stage started. */
   allAlertsStamped: boolean;
+  /** The entities the stage scored, when it scored every page; see `BaseScoringContext`. */
+  entitiesWithAlerts?: EntityIdBloomFilter;
 }
 
 interface EuidPageBounds {
@@ -136,6 +139,12 @@ interface BasePageTask {
 interface BaseScoringContext {
   entityStoreIndex: string;
   stamped: boolean;
+  /**
+   * Every entity this stage scores, so resolution can leave members without alerts out of its
+   * member filter. Set once the sampled bounds give the entity count, and only when every page is
+   * scored: a stage that skips pages would make it drop members that have alerts.
+   */
+  entitiesWithAlerts?: EntityIdBloomFilter;
 }
 
 const prepareBaseScoring = async ({
@@ -165,7 +174,7 @@ const discoverBasePages = (
   context: BaseScoringContext
 ): AsyncGenerator<BasePageTask> =>
   params.sampledPages && context.stamped
-    ? discoverSampledBasePages(params, params.sampledPages)
+    ? discoverSampledBasePages(params, params.sampledPages, context)
     : discoverBasePagesByComposite(params, context);
 
 /**
@@ -182,7 +191,8 @@ const discoverSampledBasePages = async function* (
     abortSignal,
     pageTimings = createPageStepTimings(),
   }: ScoreBaseEntitiesParams,
-  config: SampledPagesConfig
+  config: SampledPagesConfig,
+  context: BaseScoringContext
 ): AsyncGenerator<BasePageTask> {
   const firstTimer = pageTimings.startPage();
   const sample = await firstTimer.time(
@@ -199,6 +209,11 @@ const discoverSampledBasePages = async function* (
   if (sample.entities === 0) {
     firstTimer.drop();
     return;
+  }
+
+  if (config.pagesToRun === undefined) {
+    // The count is an estimate from the sample; headroom keeps the false positive rate near 1%.
+    context.entitiesWithAlerts = EntityIdBloomFilter.forCount(Math.ceil(sample.entities * 1.5));
   }
 
   const uppers = [...sample.uppers, typeIdsEnd(entityType)];
@@ -422,6 +437,9 @@ export const scoreBaseEntities = async ({
   const persistPage = async (page: ScoredEntityPage, timer: PageTimer) => {
     pagesProcessed += 1;
     scoresCalculated += page.scores.length;
+    for (const entityId of page.entityIds) {
+      context.entitiesWithAlerts?.add(entityId);
+    }
     // Scores without a canonical entity would create orphaned risk documents. Create eligible
     // entities from a representative alert when enabled; otherwise drop their scores.
     const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
@@ -526,6 +544,12 @@ export const scoreBaseEntities = async ({
       task.timer.end();
     }
   );
+  if (context.entitiesWithAlerts) {
+    params.logger.info(
+      `[base] entities with alerts: ${context.entitiesWithAlerts.count} in a ` +
+        `${(context.entitiesWithAlerts.bytes / 2 ** 20).toFixed(1)} MB filter`
+    );
+  }
 
   return {
     pagesProcessed,
@@ -541,6 +565,7 @@ export const scoreBaseEntities = async ({
     entityCreationsFailed,
     scoresUnchangedInStore,
     allAlertsStamped: context.stamped,
+    entitiesWithAlerts: context.entitiesWithAlerts,
   };
 };
 

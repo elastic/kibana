@@ -22,8 +22,12 @@ import type { ResolutionStepResult } from './pipeline_types';
 import type { PageStepRecorder, PageStepTimings } from '../utils/page_step_timings';
 import { createPageStepTimings } from '../utils/page_step_timings';
 import { forEachConcurrently } from '../utils/for_each_concurrently';
+import { EntityIdBloomFilter } from '../utils/entity_id_bloom_filter';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { SampledPagesConfig } from './sampled_page_bounds';
+
+/** Sizes a test run's filter: enough for the sampled pages' members with alerts at 20M. */
+const TEST_FILL_EXPECTED_MEMBERS = 1_000_000;
 
 interface RunResolutionScoringParams {
   esClient: ElasticsearchClient;
@@ -61,6 +65,13 @@ interface RunResolutionScoringParams {
   sampledPages?: SampledPagesConfig;
   /** With `membershipFromStore`: base found every in-scope alert of this type stamped. */
   allAlertsStamped?: boolean;
+  /** With `membershipFromStore`: the entities base scored, when it scored every page. */
+  entitiesWithAlerts?: EntityIdBloomFilter;
+  /**
+   * Test runs only: base scored a sample of its pages, so fill a filter page by page from the
+   * members' stored base scores instead. Needs one earlier full run on the same data.
+   */
+  testFillMembersFromStore?: boolean;
   /**
    * Leave out of the entity store write the resolution scores a target's store document already
    * holds. The risk index still gets every score. Store pages only: they read each target's stored
@@ -100,6 +111,8 @@ export const runResolutionScoringStep = async ({
   membershipFromStore,
   sampledPages,
   allAlertsStamped,
+  entitiesWithAlerts,
+  testFillMembersFromStore = false,
   skipUnchangedStoreWrites = false,
   collectScores,
   pageTimings = createPageStepTimings(),
@@ -183,6 +196,13 @@ export const runResolutionScoringStep = async ({
     membershipFromStore,
     sampledPages,
     allAlertsStamped,
+    ...(membershipFromStore && (entitiesWithAlerts || testFillMembersFromStore)
+      ? {
+          entitiesWithAlerts:
+            entitiesWithAlerts ?? EntityIdBloomFilter.forCount(TEST_FILL_EXPECTED_MEMBERS),
+          testFillMembersFromStore: entitiesWithAlerts === undefined,
+        }
+      : {}),
   };
 
   await forEachConcurrently(discoverResolutionPages(scoringParams), pagesInFlight, async (task) => {
