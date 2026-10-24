@@ -31,6 +31,12 @@ export type RuleEbtEventType = z.infer<typeof ruleEbtEventTypeTelemetrySchema>;
 /** Same bound as the rule metadata builder type. */
 const RULE_BUILDER_TYPE_MAX_LENGTH = 64;
 
+/** A dotted path such as `metadata.name` or `schedule.every`. */
+export const UPDATED_FIELD_PATH_MAX_LENGTH = 128;
+
+/** Upper bound for one rule: every leaf of a rule response, with room for new fields. */
+export const UPDATED_FIELDS_MAX_COUNT = 128;
+
 /** Payload shared by every rule-change telemetry event. */
 export const ruleChangedTelemetryDataSchema = lazySchema(() =>
   z.object({
@@ -62,6 +68,13 @@ export const ruleChangedTelemetryDataSchema = lazySchema(() =>
       .optional()
       .describe(
         'Whether the rule was enabled after the operation (for a delete, whether it was enabled when deleted). Absent when the domain rule could not be read.'
+      ),
+    updated_fields: z
+      .array(z.string().min(1).max(UPDATED_FIELD_PATH_MAX_LENGTH))
+      .max(UPDATED_FIELDS_MAX_COUNT)
+      .optional()
+      .describe(
+        'Dotted paths of rule fields whose values differ on a rule update. A nested object is reported at the leaf that changed; an array is reported as one path. Omitted when none differ, and on create, delete, enable, and disable.'
       ),
     origin: eventOriginSchema.describe('Where the change came from.'),
   })

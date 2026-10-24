@@ -91,6 +91,20 @@ const ruleChangedEventSchema: EventTypeOpts<RuleChangedEbtData>['schema'] = {
       optional: true,
     },
   },
+  updated_fields: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A dotted path of a rule field whose value differs.',
+      },
+    },
+    _meta: {
+      description:
+        'Dotted paths of rule fields whose values differ on a rule update. A nested object is reported at the leaf that changed; an array is reported as one path. Omitted when none differ, and on create, delete, enable, and disable.',
+      optional: true,
+    },
+  },
   origin: {
     properties: {
       actor: {
@@ -132,6 +146,16 @@ export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEbtData>>
     schema: ruleChangedEventSchema,
   }));
 
+const updatedFieldsPayload = (
+  updatedFields: readonly string[] | undefined
+): Pick<RuleChangedEbtData, 'updated_fields'> =>
+  updatedFields && updatedFields.length > 0 ? { updated_fields: [...updatedFields] } : {};
+
+interface RuleChangedEventOptions {
+  templateId?: string;
+  updatedFields?: readonly string[];
+}
+
 /**
  * Projects a rule-change telemetry payload. Rule fields are omitted when `rule`
  * is absent. `templateId` is passed separately because the public response no
@@ -141,10 +165,12 @@ export const buildRuleChangedEventData = (
   rule: RuleResponse | undefined,
   origin: EventOrigin,
   ruleId: string,
-  templateId?: string
+  { templateId, updatedFields }: RuleChangedEventOptions = {}
 ): RuleChangedEbtData => {
+  const fields = updatedFieldsPayload(updatedFields);
+
   if (!rule) {
-    return { rule_id: ruleId, origin };
+    return { rule_id: ruleId, ...fields, origin };
   }
 
   const { kind, enabled, created_at: createdAt, metadata } = rule;
@@ -157,6 +183,7 @@ export const buildRuleChangedEventData = (
     kind,
     ...(builderType ? { builder_type: builderType } : {}),
     enabled,
+    ...fields,
     origin,
   };
 };

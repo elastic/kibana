@@ -69,6 +69,7 @@ apiTest.describe(
       );
       await apiServices.alertingV2.rules.update(created.id, {
         metadata: { name: 'ebt-renamed-rule' },
+        schedule: { every: '5m' },
       });
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
@@ -78,6 +79,7 @@ apiTest.describe(
       expect(event.properties).toMatchObject({
         rule_id: created.id,
         enabled: true,
+        updated_fields: ['metadata.name', 'schedule.every', 'updated_at', 'version'],
         origin: API_ORIGIN,
       });
       expect(event.properties.origin.app).toBeUndefined();

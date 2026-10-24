@@ -3332,6 +3332,8 @@ describe('RulesClient', () => {
           }),
         ]
       );
+      const [, [rotated]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
+      expect(rotated).not.toHaveProperty('updatedFields');
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });
@@ -4394,8 +4396,30 @@ describe('RulesClient', () => {
             }),
           ]
         );
+        const [, [emitted]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
+        expect(emitted.updatedFields).toEqual(['version']);
         const { attrs: savedAttrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(savedAttrs.version).toBe(5);
+      });
+
+      it('emits the paths that differ on a name and schedule PATCH', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-fields');
+
+        await client.updateRule({
+          id: 'rule-id-wf-fields',
+          data: { metadata: { name: 'renamed' }, schedule: { every: '5m' } },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
+          { request, origin: { actor: 'user', channel: 'api' } },
+          [
+            expect.objectContaining({
+              ruleId: 'rule-id-wf-fields',
+              updatedFields: ['metadata.name', 'schedule.every'],
+            }),
+          ]
+        );
       });
 
       it('emits only ruleUpdated for a content update on a disabled rule (no lifecycle event via the update path)', async () => {

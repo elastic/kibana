@@ -200,6 +200,50 @@ describe('RuleTelemetrySubscriber', () => {
       expect(ebtService.reportEvent).not.toHaveBeenCalled();
     });
 
+    it('forwards updatedFields on rule.updated', async () => {
+      subscriber.start();
+
+      await handler(RULE_UPDATED_EVENT_TYPE)(
+        eventOfType(RULE_UPDATED_EVENT_TYPE, {
+          ruleId: 'rule-1',
+          spaceId: 'default',
+          rule,
+          updatedFields: ['metadata.name', 'schedule'],
+        }),
+        context
+      );
+
+      expect(ebtService.reportEvent).toHaveBeenCalledWith(
+        RULE_EBT_EVENT_TYPE_BY_OPERATION[RULE_UPDATED_EVENT_TYPE],
+        expect.objectContaining({ updated_fields: ['metadata.name', 'schedule'] })
+      );
+    });
+
+    it('drops updatedFields on create, delete, enable, and disable', async () => {
+      subscriber.start();
+
+      for (const type of [
+        RULE_CREATED_EVENT_TYPE,
+        RULE_DELETED_EVENT_TYPE,
+        RULE_ENABLED_EVENT_TYPE,
+        RULE_DISABLED_EVENT_TYPE,
+      ]) {
+        await handler(type)(
+          eventOfType(type, {
+            ruleId: 'rule-1',
+            spaceId: 'default',
+            rule,
+            updatedFields: ['metadata.name'],
+          }),
+          context
+        );
+      }
+
+      for (const [, data] of ebtService.reportEvent.mock.calls) {
+        expect(data).not.toHaveProperty('updated_fields');
+      }
+    });
+
     it('reports rule_id and origin when the domain rule is missing', async () => {
       subscriber.start();
 
