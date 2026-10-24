@@ -5,9 +5,26 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core/public';
 import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { readVerdict, readVerdicts } from './workflow_task';
+import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  ExecutionStatus,
+  type WorkflowExecutionDto,
+  type WorkflowStepExecutionDto,
+} from '@kbn/workflows';
+import { ALERT_ANALYSIS_EVAL_ALERTS } from './synthetic_alerts';
+import {
+  readVerdict,
+  readVerdicts,
+  runAlertAnalysisWorkflow,
+  withAlertData,
+} from './workflow_task';
+
+/** The tier-1 malicious-file alert the eval seeds: every grounded rationale names its entities. */
+const MALICIOUS_FILE_ALERT = ALERT_ANALYSIS_EVAL_ALERTS.find(
+  ({ id }) => id === 'aa-eval-tier1-malicious-file'
+)!;
 
 const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({
@@ -197,5 +214,98 @@ describe('readVerdicts', () => {
     ];
 
     expect([...readVerdicts(steps).keys()]).toEqual(['a1', 'b2']);
+  });
+});
+
+describe('runAlertAnalysisWorkflow — the alert the rationale judge is graded against', () => {
+  // The rationale criteria judge receives only the example input (`{ alertId }`), the task
+  // output and the metadata. `alertData` on the graded output is the ONLY reason the
+  // "does not invent alert fields, file paths, commands, or entities…" criterion can be
+  // checked against the alert the workflow analysed: without it, every grounded detail the
+  // rationale names (process name, file path, code signer) reads as invented.
+  const alertId = `${MALICIOUS_FILE_ALERT.id}-uuid`;
+  const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
+
+  /** `fetch` as the runner uses it: POST the run, then GET the finished execution. */
+  const fetchReturning = (stepExecutions: WorkflowStepExecutionDto[]): HttpHandler =>
+    jest
+      .fn()
+      .mockResolvedValueOnce({ workflowExecutionId: 'exec-1' })
+      .mockResolvedValueOnce({
+        id: 'exec-1',
+        status: ExecutionStatus.COMPLETED,
+        traceId: 'trace-1',
+        stepExecutions,
+      } as unknown as WorkflowExecutionDto) as unknown as HttpHandler;
+
+  const run = (stepExecutions: WorkflowStepExecutionDto[]) =>
+    runAlertAnalysisWorkflow({
+      fetch: fetchReturning(stepExecutions),
+      log,
+      alertId,
+      alertIndex: '.alerts-security.alerts-default',
+      classificationMethod: 'prompt',
+      alertData: MALICIOUS_FILE_ALERT.doc,
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns the analysed alert document as part of the graded task output', async () => {
+    const result = await run([
+      step({
+        stepId: 'runPrompt_step',
+        stepType: 'ai.prompt',
+        output: {
+          content: {
+            verdicts: [
+              {
+                id: alertId,
+                classification: 'true_positive',
+                confidence_score: 0.95,
+                rationale: 'update_flash.exe was dropped in the user Downloads folder.',
+              },
+            ],
+          },
+        },
+      }),
+    ]);
+
+    expect(result.classification).toBe('true_positive');
+    expect(result.rationale).toBe('update_flash.exe was dropped in the user Downloads folder.');
+    // The very document that was indexed, not a summary of it: the judge grounds the
+    // rationale against these fields.
+    expect(result.alertData).toBe(MALICIOUS_FILE_ALERT.doc);
+    expect(result.alertData?.['process.name']).toBe('update_flash.exe');
+    expect(String(result.alertData?.['file.path'])).toContain('Downloads');
+  });
+
+  it('returns the alert document even when the workflow produced no verdict', async () => {
+    const result = await run([step({ stepId: 'runPrompt_step', stepType: 'ai.prompt' })]);
+
+    expect(result.classification).toBeUndefined();
+    expect(result.alertData).toBe(MALICIOUS_FILE_ALERT.doc);
+  });
+});
+
+describe('withAlertData', () => {
+  it('merges the document next to the verdict fields without mutating the verdict', () => {
+    const verdict = {
+      classification: 'true_positive',
+      confidenceScore: 0.9,
+      rationale: 'update_flash.exe was dropped in Downloads',
+      executionId: 'exec-1',
+      executionStatus: ExecutionStatus.COMPLETED,
+      classificationMethod: 'prompt',
+    } as const;
+
+    const graded = withAlertData(verdict, MALICIOUS_FILE_ALERT.doc);
+
+    expect(graded.classification).toBe('true_positive');
+    expect(graded.rationale).toBe('update_flash.exe was dropped in Downloads');
+    expect(graded.executionId).toBe('exec-1');
+    expect(graded.alertData).toBe(MALICIOUS_FILE_ALERT.doc);
+    expect(Object.keys(verdict)).not.toContain('alertData');
   });
 });

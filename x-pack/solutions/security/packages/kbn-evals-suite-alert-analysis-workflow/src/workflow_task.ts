@@ -90,7 +90,29 @@ export interface AlertAnalysisVerdict {
   toolCallIds?: string[];
   /** True when trace ES was unreachable or the workflow trace id was invalid. */
   toolCallsUnavailable?: boolean;
+  /**
+   * The alert document the workflow analysed, attached by `runAlertAnalysisWorkflow` from the
+   * seeded document its caller passes. The criteria judge reads it out of the graded task
+   * output, so the rationale's grounding criterion ("does not invent alert fields…") is
+   * checked against the real alert instead of the example's `{ alertId }` alone.
+   */
+  alertData?: AlertDocument;
 }
+
+/** A seeded alert document, as it is indexed into the alerts index. */
+export type AlertDocument = Record<string, unknown>;
+
+/**
+ * The graded task output: the workflow verdict plus the alert document it was reached from.
+ *
+ * Kept here — next to the workflow runner the eval spec calls — so the wiring that carries
+ * the alert to the rationale judge is exercised by this package's unit tests rather than
+ * living in an eval spec no jest run can execute.
+ */
+export const withAlertData = <T extends AlertAnalysisVerdict>(
+  verdict: T,
+  alertData: AlertDocument
+): T & { alertData: AlertDocument } => ({ ...verdict, alertData });
 
 export type ClassificationMethod = 'agent' | 'prompt';
 
@@ -244,7 +266,9 @@ const readAgentToolCalls = async ({
 
 /**
  * Runs the managed alert-analysis workflow end-to-end for a single seeded alert and
- * returns the verdict of the classification step (agent or prompt, per the space's settings).
+ * returns the verdict of the classification step (agent or prompt, per the space's settings),
+ * carrying the analysed `alertData` so the rationale judge can check the rationale against
+ * the alert it was reached from (see `AlertAnalysisVerdict.alertData`).
  *
  * Uses the production `alert` trigger path: passing `triggerType: 'alert'` + `alertIds`
  * makes the run route fetch the alert from ES and build the standardized event
@@ -257,6 +281,7 @@ export const runAlertAnalysisWorkflow = async ({
   alertId,
   alertIndex,
   classificationMethod,
+  alertData,
   maxWaitMs = 12 * 60_000,
   pollIntervalMs = 3_000,
 }: {
@@ -267,6 +292,11 @@ export const runAlertAnalysisWorkflow = async ({
   alertIndex: string;
   /** What the space is configured to classify with; decides whether agent tool calls are read. */
   classificationMethod: ClassificationMethod;
+  /**
+   * The document seeded for `alertId`, i.e. the alert the workflow analysed. Required: the
+   * graded output must carry the evidence the rationale is judged against.
+   */
+  alertData: AlertDocument;
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<AlertAnalysisVerdict> => {
@@ -298,18 +328,21 @@ export const runAlertAnalysisWorkflow = async ({
         })
       : { toolCallIds: undefined, unavailable: undefined };
 
-  return {
-    classification: structured?.classification,
-    confidenceScore: structured?.confidence_score,
-    rationale: structured?.rationale,
-    contributingFactors: structured?.contributing_factors,
-    executionId: workflowExecutionId,
-    executionStatus: execution.status,
-    classificationMethod,
-    traceId: execution.traceId,
-    toolCallIds,
-    toolCallsUnavailable: unavailable,
-  };
+  return withAlertData(
+    {
+      classification: structured?.classification,
+      confidenceScore: structured?.confidence_score,
+      rationale: structured?.rationale,
+      contributingFactors: structured?.contributing_factors,
+      executionId: workflowExecutionId,
+      executionStatus: execution.status,
+      classificationMethod,
+      traceId: execution.traceId,
+      toolCallIds,
+      toolCallsUnavailable: unavailable,
+    },
+    alertData
+  );
 };
 
 /** Verdicts of one batched workflow run, keyed by the alert ids that were seeded. */

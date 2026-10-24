@@ -205,6 +205,10 @@ evaluate.describe(
                 });
 
                 try {
+                  // `alertData` rides the graded task output: the example input is only
+                  // `{ alertId }`, and the rationale judge checks the grounding criterion
+                  // ("does not invent alert fields…") against the analysed alert. The merge
+                  // lives in `runAlertAnalysisWorkflow`, under this package's unit tests.
                   return await runAlertAnalysisWorkflow({
                     fetch,
                     log,
@@ -212,6 +216,7 @@ evaluate.describe(
                     alertId: uniqueAlertId,
                     alertIndex,
                     classificationMethod: method,
+                    alertData: document,
                   });
                 } finally {
                   await esClient

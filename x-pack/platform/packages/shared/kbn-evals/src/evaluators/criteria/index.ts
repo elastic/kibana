@@ -140,7 +140,11 @@ export function createCriteriaEvaluator({
       return {
         explanation: results
           .map(({ evaluation, criterion }) => {
-            return `"${criterion.id}": ${evaluation.reason ?? 'No explanation given'}`;
+            // Name the verdict alongside the reason: a FAIL whose judge omitted the reason
+            // otherwise renders exactly like a PASS ("No explanation given").
+            return `"${criterion.id}" (${evaluation.result}): ${
+              evaluation.reason ?? 'No explanation given'
+            }`;
           })
           .join('\n'),
         label: null,
