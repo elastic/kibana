@@ -19,9 +19,14 @@ import {
   CAUSE_COMPLETENESS_EVALUATOR,
   DECISION_TREE_HELPFULNESS_EVALUATOR,
   GOAL_PASS_EVALUATOR,
+  ORCA_CONTROL_EVALUATOR,
+  ORCA_HALLUCINATION_EVALUATOR,
+  ORCA_RCA_ACCURACY_EVALUATOR,
   TRUTHFULNESS_EVALUATOR,
   createInvestigationJudges,
+  createOrcaEvaluators,
 } from './judges';
+import { orcaJudgeConnector } from './orca_judge';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
@@ -74,13 +79,20 @@ export const registerInvestigationEvaluation = ({
           await assertOrcaSource();
         }
         const dataset = await loadDataset(evalsClient);
-        // The judges score with the evaluation connector, not the model under test.
-        const judges = createInvestigationJudges({
-          inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
-          evaluationConnector,
+        // Customer-0 judges use the suite's evaluation connector. ORCA judges use a fixed model,
+        // not the agent under test.
+        const judgeConnector = orca ? orcaJudgeConnector(evaluationConnector) : evaluationConnector;
+        const judgeDeps = {
+          inferenceClient: inferenceClient.bindTo({ connectorId: judgeConnector.id }),
+          evaluationConnector: judgeConnector,
           log,
-        });
-        const evaluators = [...judges, executionSuccessEvaluator];
+        };
+        const judges = createInvestigationJudges(judgeDeps);
+        const evaluators = [
+          ...judges,
+          ...(orca ? createOrcaEvaluators(judgeDeps) : []),
+          executionSuccessEvaluator,
+        ];
         // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
         evaluate.setTimeout(
@@ -226,13 +238,24 @@ export const registerInvestigationEvaluation = ({
                 TRUTHFULNESS_EVALUATOR,
                 DECISION_TREE_HELPFULNESS_EVALUATOR,
                 EXECUTION_SUCCESS_EVALUATOR,
+                ...(orca
+                  ? [
+                      ORCA_RCA_ACCURACY_EVALUATOR,
+                      ORCA_HALLUCINATION_EVALUATOR,
+                      ORCA_CONTROL_EVALUATOR,
+                    ]
+                  : []),
               ])
             );
             for (const exampleScore of exampleScores) {
               expect(exampleScore.evaluator.kind).toBe(
                 exampleScore.evaluator.name === EXECUTION_SUCCESS_EVALUATOR ? 'code' : 'llm'
               );
-              expect(exampleScore.evaluator.direction).toBe('maximize');
+              expect(exampleScore.evaluator.direction).toBe(
+                exampleScore.evaluator.name === ORCA_HALLUCINATION_EVALUATOR
+                  ? 'minimize'
+                  : 'maximize'
+              );
               expect(exampleScore.evaluator.trace_id).not.toBe(output.traceId);
               const { score: judgeScore } = exampleScore.evaluator;
               // Judges emit a normalized [0, 1] score, or null when a dimension does not apply.

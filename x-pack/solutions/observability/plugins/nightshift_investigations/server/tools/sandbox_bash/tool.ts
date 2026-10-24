@@ -10,10 +10,16 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
+import {
+  TELEMETRY_CUTOFF_DIR,
+  TELEMETRY_CUTOFF_PROXY_PATH,
+  TELEMETRY_CUTOFF_PROXY_SOURCE,
+  telemetryCutoffCommand,
+} from './telemetry_cutoff';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
@@ -22,6 +28,7 @@ import {
   MAX_SANDBOX_SECRET_KEY_LENGTH,
 } from '../../../common/sandbox_secrets';
 import type { SandboxSecretsClient } from '../../sandbox_secrets';
+import { isTelemetryNotAfter } from '../../../common';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -106,12 +113,22 @@ export const createSandboxBashTool = ({
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
   sandboxSecretsClient,
+  readTelemetryNotAfter,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   sandboxSecretsClient?: Pick<SandboxSecretsClient, 'resolveForCommand'>;
+  /**
+   * Latest inclusive `@timestamp` this conversation's telemetry queries may return. Unset for
+   * investigations that do not bound telemetry. A thrown read is ignored so those investigations
+   * still run.
+   */
+  readTelemetryNotAfter?: (
+    request: KibanaRequest,
+    conversationId: string
+  ) => Promise<string | undefined>;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
   id: SANDBOX_BASH_TOOL_ID,
@@ -230,8 +247,65 @@ export const createSandboxBashTool = ({
         ...credentialEnv,
       };
 
+      let commandToRun = command;
+      if (readTelemetryNotAfter && mergedEnv.CONNECTOR_CONFIG_URL) {
+        let notAfter: string | undefined;
+        try {
+          notAfter = await readTelemetryNotAfter(context.request, rawConversationId);
+        } catch (error) {
+          logger.warn(
+            `Could not read the telemetry cutoff for conversation ${rawConversationId}: ${
+              error instanceof Error ? error.name : 'Error'
+            }`
+          );
+        }
+        if (notAfter) {
+          if (!isTelemetryNotAfter(notAfter)) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    message: 'Telemetry cutoff is not a UTC timestamp, so the command was not run.',
+                  },
+                },
+              ],
+            };
+          }
+          let written = false;
+          try {
+            await session.mkdirs([TELEMETRY_CUTOFF_DIR]);
+            const [result] = await session.writeFiles([
+              {
+                path: TELEMETRY_CUTOFF_PROXY_PATH,
+                content: Buffer.from(TELEMETRY_CUTOFF_PROXY_SOURCE, 'utf8'),
+              },
+            ]);
+            written = result?.success === true;
+          } catch {
+            written = false;
+          }
+          if (!written) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    message:
+                      'Could not install the telemetry cutoff proxy, so the command was not run.',
+                  },
+                },
+              ],
+            };
+          }
+          mergedEnv.NIGHTSHIFT_TELEMETRY_CUTOFF = notAfter;
+          mergedEnv.NIGHTSHIFT_SANDBOX_COMMAND = command;
+          commandToRun = telemetryCutoffCommand();
+        }
+      }
+
       const result = await session.runCommand({
-        command,
+        command: commandToRun,
         directory: working_directory,
         env: mergedEnv,
         timeout_seconds:

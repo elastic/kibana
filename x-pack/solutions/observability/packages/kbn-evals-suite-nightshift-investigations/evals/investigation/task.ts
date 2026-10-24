@@ -14,6 +14,7 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-plugin/common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { extractAccessedDecisionTrees } from './decision_tree_evidence';
+import { orcaCurrentTimeMs } from './orca_dataset';
 import { extractToolCallTrajectory } from './tool_call_trajectory';
 import type {
   InvestigationExample,
@@ -156,6 +157,16 @@ export const toInvestigationReport = ({
   proposals: proposals.map(({ title, comment, status }) => ({ title, comment, status })),
 });
 
+/** Paper grace: sandbox reads may include telemetry up to five minutes after current_time. */
+const TELEMETRY_CUTOFF_GRACE_MS = 5 * 60 * 1000;
+
+/** UTC instant five minutes after a parseable current_time. */
+const telemetryNotAfter = (currentTime: unknown): string | undefined => {
+  const parsed = orcaCurrentTimeMs(currentTime);
+  if (parsed === undefined) return undefined;
+  return new Date(parsed + TELEMETRY_CUTOFF_GRACE_MS).toISOString();
+};
+
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
@@ -168,6 +179,7 @@ export const runInvestigation = async (
     query: example.input.question,
   };
   let investigation: Investigation | undefined;
+  const notAfter = telemetryNotAfter(example.metadata.current_time);
   try {
     const { investigation_id: investigationId } = await fetch<StartInvestigationResponse>(
       '/internal/nightshift/investigations',
@@ -177,6 +189,7 @@ export const runInvestigation = async (
           subject: { type: 'manual' },
           message: example.input.question,
           connector_id: connector.id,
+          ...(notAfter ? { telemetry_not_after: notAfter } : {}),
         }),
       }
     );

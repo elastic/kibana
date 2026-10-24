@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const investigationTemplate: ConversationTemplate = {
   id: 'investigation',
-  version: 2,
+  version: 3,
   name: 'Investigation',
   description: 'Use for investigations',
   fields: {
@@ -60,6 +60,13 @@ export const investigationTemplate: ConversationTemplate = {
       input_type: 'TEXT_ARRAY',
       required: false,
       description: 'Workflow executions that have worked on this investigation.',
+    },
+    telemetry_not_after: {
+      input_type: 'TEXT',
+      required: false,
+      max_length: 40,
+      description:
+        'Latest inclusive @timestamp sandbox telemetry queries for this investigation may return. Not part of the prompt.',
     },
   },
 };

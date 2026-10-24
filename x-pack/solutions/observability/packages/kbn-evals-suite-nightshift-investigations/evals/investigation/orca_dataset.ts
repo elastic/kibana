@@ -47,6 +47,13 @@ export const getOrcaDatasetHash = (
   return createHash('sha256').update(serialized).digest('hex');
 };
 
+/** Milliseconds for a parseable ORCA `metadata.current_time`, otherwise undefined. */
+export const orcaCurrentTimeMs = (value: unknown): number | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
 /** Validates the Golden release before any investigation is started. */
 export const validateOrcaDataset = (
   dataset: NonNullable<Awaited<ReturnType<EvalsClient['getDatasetByName']>>>,
@@ -65,6 +72,10 @@ export const validateOrcaDataset = (
   assert(
     getOrcaDatasetHash(examples) === release.sha256,
     'ORCA dataset content differs from the pinned release; publish and review a new dataset release'
+  );
+  assert(
+    examples.every((example) => orcaCurrentTimeMs(example.metadata.current_time) !== undefined),
+    'ORCA dataset examples must record a parseable metadata.current_time'
   );
   return {
     name: dataset.name,

@@ -261,6 +261,13 @@ EOF
         fi
         fanout_step_keys+=("$step_key")
 
+        step_judge_connector="${EVAL_CONNECTOR_ID:-}"
+        if [[ "$shard_id" == "orcabench" ]]; then
+          # Same id as ORCA_JUDGE_CONNECTOR_ID in evals/investigation/orca_judge.ts.
+          # The agent model stays EVAL_PROJECT. Customer-0 is unchanged.
+          step_judge_connector="eis-openai-gpt-5-4"
+        fi
+
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${step_label}"
         key: "${step_key}"
@@ -271,7 +278,7 @@ EOF
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
           EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
-          EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
+          EVAL_CONNECTOR_ID: "${step_judge_connector}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
