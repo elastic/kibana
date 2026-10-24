@@ -8,7 +8,6 @@
  */
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
-import { sampleBoundaryResponse } from './sample_response';
 
 const spec = {
   openapi: '3.0.3',
@@ -93,6 +92,64 @@ describe('sampleResponse', () => {
     expect((await response.json()).detail).toContain('application/json');
   });
 
+  it('leaves out content types the most specific Accept range excludes with q=0', async () => {
+    const { fetch: reportFetch } = createEmulatorFetch({
+      specs: [
+        {
+          ...spec,
+          paths: {
+            '/report': {
+              get: { responses: { '202': spec.paths['/report'].get.responses['202'] } },
+            },
+          },
+        },
+      ],
+    });
+
+    const response = await reportFetch('https://api.example.com/report', {
+      headers: { accept: 'application/json;q=0, */*;q=1' },
+    });
+
+    expect(response.headers.get('content-type')).toBe('text/csv');
+  });
+
+  it.each([
+    ['*/*', 'application/json', 'application/json'],
+    ['*/*', undefined, 'application/json'],
+    ['text/*', 'text/csv', 'text/csv'],
+    ['text/*', '*/*', 'text/plain'],
+  ])(
+    'sends content declared as %s as a concrete type for Accept %s',
+    async (declared, accept, sent) => {
+      const { fetch: anyFetch } = createEmulatorFetch({
+        specs: [
+          {
+            ...spec,
+            paths: {
+              '/any': {
+                get: {
+                  responses: {
+                    '200': {
+                      description: 'ok',
+                      content: { [declared]: { schema: { type: 'string', example: 'x' } } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      const response = await anyFetch('https://api.example.com/any', {
+        headers: accept ? { accept } : {},
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('content-type')).toBe(sent);
+    }
+  );
+
   it('answers vendor JSON types the spec does not declare with its JSON content', async () => {
     const response = await fetch('https://api.example.com/report', {
       headers: { accept: 'application/vnd.github+json' },
@@ -148,12 +205,13 @@ describe('sampleResponse', () => {
     expect(statusCalls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
   });
 
-  it('answers at the schema bounds with sampleBoundaryResponse', async () => {
+  it("answers at the schema bounds with sampling: 'boundary', fixtures still winning", async () => {
     const { fetch: boundaryFetch, calls: boundaryCalls } = createEmulatorFetch({
       specs: [
         {
           ...spec,
           paths: {
+            '/report': spec.paths['/report'],
             '/monitors': {
               get: {
                 responses: {
@@ -182,16 +240,24 @@ describe('sampleResponse', () => {
           },
         },
       ],
-      respond: sampleBoundaryResponse,
+      sampling: 'boundary',
+      fixtures: [
+        {
+          operation: { method: 'get', path: '/report' },
+          response: { status: 200, body: { rows: 1 } },
+        },
+      ],
     });
 
     const response = await boundaryFetch('https://api.example.com/monitors');
+    const report = await boundaryFetch('https://api.example.com/report');
 
     expect(await response.json()).toEqual([
       { name: 'strin', priority: 5 },
       { name: 'strin', priority: 5 },
     ]);
     expect(boundaryCalls[0].responseViolations).toEqual([]);
+    expect(await report.json()).toEqual({ rows: 1 });
   });
 
   it('serves the first media type example that matches the schema, following refs', async () => {

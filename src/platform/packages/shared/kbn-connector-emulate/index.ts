@@ -53,6 +53,7 @@ export type {
   NamedOperationRef,
   ProtocolExchange,
   Responder,
+  ResponderContext,
   Violation,
 } from './src/contract/types';
 export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';

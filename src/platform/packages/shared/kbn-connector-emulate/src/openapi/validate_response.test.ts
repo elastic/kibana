@@ -88,4 +88,32 @@ describe('validateResponse', () => {
       'Response body: Instance does not have required property "id".',
     ]);
   });
+
+  it('splits comma-separated array headers before validating them', () => {
+    const [listed] = loadContractOperations({
+      openapi: '3.0.3',
+      info: { title: 'Test', version: '1' },
+      paths: {
+        '/ids': {
+          get: {
+            responses: {
+              '204': {
+                description: 'ok',
+                headers: { 'X-Ids': { schema: { type: 'array', items: { type: 'integer' } } } },
+              },
+            },
+          },
+        },
+      },
+    });
+    const check = (ids: string) =>
+      validateResponse(listed, { statusCode: 204, headers: { 'x-ids': ids } }).map(
+        ({ message }) => message
+      );
+
+    expect(check('1, 2')).toEqual([]);
+    expect(check('1,b')).toEqual([
+      'Response header X-Ids at /1: Instance type "string" is invalid. Expected "integer".',
+    ]);
+  });
 });

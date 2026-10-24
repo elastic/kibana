@@ -117,6 +117,15 @@ describe('createOperationMatcher', () => {
     });
   });
 
+  it('answers 405 for methods a literal path lacks instead of falling through to a template', () => {
+    const matcher = createMatcher([{ url: 'https://api.example.com' }]);
+
+    expect(match(matcher, 'DELETE', 'https://api.example.com/items/new')).toEqual({
+      status: 405,
+      message: 'The path only allows GET',
+    });
+  });
+
   it('prefers the template with more literal text among as many parameters', () => {
     const matcher = createMatcher([{ url: 'https://api.example.com' }]);
 

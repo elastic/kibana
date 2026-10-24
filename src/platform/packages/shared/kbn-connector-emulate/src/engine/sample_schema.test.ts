@@ -72,6 +72,22 @@ describe('sampleSchema', () => {
     expect(sampleSchema(schema, {}, { boundary: true })).toEqual(expected);
   });
 
+  it.each([
+    [{ type: 'string' }, ['string', 'string1', 'string2']],
+    [{ type: 'string', maxLength: 6 }, ['string', 'strin1', 'strin2']],
+    [{ type: 'string', enum: ['open', 'closed', 'merged'] }, ['open', 'closed', 'merged']],
+    [{ type: 'integer', maximum: 1 }, [0, 1, -2]],
+    [{ type: 'boolean' }, [true, false]],
+    [
+      { type: 'object', required: ['id'], properties: { id: { type: 'integer' } } },
+      [{ id: 0 }, { id: 1 }, { id: 2 }],
+    ],
+  ])('samples distinct items of %j for uniqueItems arrays', (items, expected) => {
+    const schema = { type: 'array', uniqueItems: true, minItems: expected.length, items };
+
+    expect(sampleSchema(schema, {})).toEqual(expected);
+  });
+
   it('skips the null that nullable enums end with in boundary mode', () => {
     expect(
       sampleSchema({ type: ['string', 'null'], enum: ['a', 'b', null] }, {}, { boundary: true })

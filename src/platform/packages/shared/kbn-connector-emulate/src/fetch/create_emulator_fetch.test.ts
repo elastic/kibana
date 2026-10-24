@@ -140,6 +140,121 @@ describe('createEmulatorFetch', () => {
     expect(valid.status).toBe(201);
   });
 
+  describe('with JSON bodies that are strings', () => {
+    const notes = {
+      ...spec,
+      paths: {
+        '/notes': {
+          get: {
+            responses: {
+              '200': {
+                description: 'ok',
+                content: { 'application/json': { schema: { type: ['string', 'null'] } } },
+              },
+            },
+          },
+          post: {
+            requestBody: { content: { 'application/json': { schema: { type: 'string' } } } },
+            responses: { '204': { description: 'created' } },
+          },
+        },
+      },
+    };
+
+    it('reports request bodies that are not JSON, though the raw text fits the schema', async () => {
+      const { fetch, calls } = createEmulatorFetch({ specs: [notes] });
+      const post = (body: string) =>
+        fetch(`${BASE_URL}/notes`, { method: 'POST', headers: json, body });
+
+      const malformed = await post('hello');
+      const valid = await post('"hello"');
+
+      expect(malformed.status).toBe(422);
+      expect(calls[0].requestViolations).toEqual([
+        expect.objectContaining({ path: ['body'], code: 'syntax' }),
+      ]);
+      expect(valid.status).toBe(204);
+    });
+
+    it.each([
+      ['hello', '"hello"'],
+      [null, 'null'],
+    ])('serializes the JSON response body %j', async (body, text) => {
+      const { fetch } = createEmulatorFetch({
+        specs: [notes],
+        respond: () => ({ statusCode: 200, headers: json, body }),
+      });
+
+      const response = await fetch(`${BASE_URL}/notes`);
+
+      expect(await response.text()).toBe(text);
+    });
+  });
+
+  describe('with a responder in front of the default chain', () => {
+    const CREATED = Symbol('created items');
+    // Remembers created items for the run and lists them back; defers the rest to next().
+    const remember: Responder = async (operation, request, { state, next }) => {
+      const created = (state.get(CREATED) as unknown[] | undefined) ?? [];
+      if (operation.id === 'createItem') {
+        state.set(CREATED, [...created, request.body]);
+        return { statusCode: 201, headers: json, body: request.body };
+      }
+      if (operation.id === 'listItems') {
+        return { statusCode: 200, headers: json, body: created };
+      }
+      return next();
+    };
+
+    it('keeps state across requests until reset, and validates its answers', async () => {
+      const { fetch, calls, reset } = createEmulatorFetch({ specs: [spec], respond: remember });
+
+      await fetch(`${BASE_URL}/items`, postJson({ name: 'a' }));
+      const listed = await fetch(`${BASE_URL}/items`);
+      reset();
+      const afterReset = await fetch(`${BASE_URL}/items`);
+
+      expect(await listed.json()).toEqual([{ name: 'a' }]);
+      expect(await afterReset.json()).toEqual([]);
+      expect(calls).toEqual([
+        expect.objectContaining({ operation: 'listItems', status: 200, responseViolations: [] }),
+      ]);
+    });
+
+    it('sees requests the default chain would answer, which next() then answers', async () => {
+      const seen: string[] = [];
+      const { fetch } = createEmulatorFetch({
+        specs: [spec],
+        fixtures: [
+          {
+            operation: { method: 'get', path: '/items' },
+            response: { status: 200, body: [{ name: 'fixture' }] },
+          },
+        ],
+        respond: async (operation, _request, { next }) => {
+          seen.push(operation.id);
+          return next();
+        },
+      });
+
+      const response = await fetch(`${BASE_URL}/items`);
+
+      expect(seen).toEqual(['listItems']);
+      expect(await response.json()).toEqual([{ name: 'fixture' }]);
+    });
+
+    it('reports answers that break the spec', async () => {
+      const { fetch, calls } = createEmulatorFetch({
+        specs: [spec],
+        respond: async () => ({ statusCode: 200, headers: json, body: [{ id: 1 }] }),
+      });
+
+      await fetch(`${BASE_URL}/items`);
+
+      expect(calls[0].responseViolations).toEqual([expect.objectContaining({ code: 'required' })]);
+    });
+  });
+
   it('records responses that break the spec', async () => {
     const respond: Responder = () => ({ statusCode: 200, headers: json, body: [{ id: 1 }] });
     const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond });
