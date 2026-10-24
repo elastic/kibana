@@ -9,7 +9,7 @@ export { DispatchOutcome } from './dispatch_outcome';
 export { DispatchPlan } from './dispatch_plan';
 export { AlertScan } from './alert_scan';
 export { AlertTriage, type SuppressedAlert } from './alert_triage';
-export { PolicyCatalog } from './policy_catalog';
+export { PolicyCatalog, resolveThrottleStrategy } from './policy_catalog';
 export { PolicyMatcher } from './policy_matcher';
 export { RuleCatalog } from './rule_catalog';
 export { SuppressionIndex } from './suppression_index';

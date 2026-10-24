@@ -11,24 +11,38 @@ import type {
   RuleChangedEbtData,
   RuleEbtEventType,
 } from '../../../../server/lib/telemetry/rule_ebt_schema';
-import { COMMON_HEADERS } from '../constants';
+import {
+  WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,
+  type WorkflowDispatchedEbtData,
+} from '../../../../server/lib/telemetry/workflow_ebt_schema';
+import { COMMON_HEADERS, POLL_TIMEOUT_MS } from '../constants';
 
 const EBT_HELPERS_PATH = '/internal/analytics_ftr_helpers';
 const DEFAULT_EVENT_TIMEOUT_MS = 10_000;
 
 /** An EBT event as buffered by the `analytics_ftr_helpers` server shipper. */
-export interface RuleChangedEbtEvent {
+export interface EbtEvent<TProps> {
   event_type: string;
   timestamp: string;
-  properties: RuleChangedEbtData;
+  properties: TProps;
 }
 
-export interface WaitForRuleChangedEventsParams {
-  ruleId: string;
-  eventType: RuleEbtEventType;
+export type RuleChangedEbtEvent = EbtEvent<RuleChangedEbtData>;
+export type WorkflowDispatchedEbtEvent = EbtEvent<WorkflowDispatchedEbtData>;
+
+export interface WaitForEventsOptions {
   /** Number of matching events to wait for. Defaults to 1. */
   count?: number;
   timeoutMs?: number;
+}
+
+export interface WaitForRuleChangedEventsParams extends WaitForEventsOptions {
+  ruleId: string;
+  eventType: RuleEbtEventType;
+}
+
+export interface WaitForWorkflowDispatchedEventsParams extends WaitForEventsOptions {
+  workflowId: string;
 }
 
 /**
@@ -47,6 +61,13 @@ export interface EbtService {
   waitForRuleChangedEvents: (
     params: WaitForRuleChangedEventsParams
   ) => Promise<RuleChangedEbtEvent[]>;
+  /**
+   * Resolves with the `alerting_v2_workflow_dispatched` events reported for the workflow.
+   * Returns as soon as `count` events arrived and throws if they do not within the timeout.
+   */
+  waitForWorkflowDispatchedEvents: (
+    params: WaitForWorkflowDispatchedEventsParams
+  ) => Promise<WorkflowDispatchedEbtEvent[]>;
 }
 
 export const getEbtService = ({
@@ -66,6 +87,47 @@ export const getEbtService = ({
       });
     });
 
+  /**
+   * Waits on the helpers plugin's long poll for events of `eventType` whose `filter.key`
+   * property equals `filter.value`. Throws if fewer than `count` arrive within `timeoutMs`.
+   */
+  const waitForEvents = <TProps>({
+    eventType,
+    filter,
+    subject,
+    label,
+    count,
+    timeoutMs,
+  }: {
+    eventType: string;
+    filter: { key: string; value: string };
+    /** Names the entity waited on in the error message, for example `rule 'abc'`. */
+    subject: string;
+    label: string;
+    count: number;
+    timeoutMs: number;
+  }) =>
+    measurePerformanceAsync(log, `ebt.${label}`, async () => {
+      const { data: events } = await kbnClient.request<Array<EbtEvent<TProps>>>({
+        method: 'GET',
+        path: `${EBT_HELPERS_PATH}/events`,
+        headers: COMMON_HEADERS,
+        query: {
+          takeNumberOfEvents: count,
+          eventTypes: JSON.stringify([eventType]),
+          withTimeoutMs: timeoutMs,
+          filters: JSON.stringify({ [filter.key]: { eq: filter.value } }),
+        },
+      });
+
+      if (events.length < count) {
+        throw new Error(
+          `Expected ${count} '${eventType}' event(s) for ${subject} within ${timeoutMs}ms, received ${events.length}`
+        );
+      }
+      return events;
+    });
+
   return {
     optIn: () => setConsent(true),
     optOut: () => setConsent(false),
@@ -75,28 +137,24 @@ export const getEbtService = ({
       count = 1,
       timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
     }) =>
-      measurePerformanceAsync(log, `ebt.waitForRuleChangedEvents[${eventType}]`, async () => {
-        const response = await kbnClient.request<RuleChangedEbtEvent[]>({
-          method: 'GET',
-          path: `${EBT_HELPERS_PATH}/events`,
-          headers: COMMON_HEADERS,
-          query: {
-            takeNumberOfEvents: count,
-            eventTypes: JSON.stringify([eventType]),
-            withTimeoutMs: timeoutMs,
-            filters: JSON.stringify({
-              'properties.rule_id': { eq: ruleId },
-            }),
-          },
-        });
-
-        const events = response.data;
-        if (events.length < count) {
-          throw new Error(
-            `Expected ${count} '${eventType}' event(s) for rule '${ruleId}' within ${timeoutMs}ms, received ${events.length}`
-          );
-        }
-        return events;
+      waitForEvents<RuleChangedEbtData>({
+        eventType,
+        filter: { key: 'properties.rule_id', value: ruleId },
+        subject: `rule '${ruleId}'`,
+        label: `waitForRuleChangedEvents[${eventType}]`,
+        count,
+        timeoutMs,
+      }),
+    // Dispatch is paced by Task Manager and the dispatcher tick, so it takes longer to reach
+    // telemetry than a rule change, which is reported synchronously with the API call.
+    waitForWorkflowDispatchedEvents: ({ workflowId, count = 1, timeoutMs = POLL_TIMEOUT_MS }) =>
+      waitForEvents<WorkflowDispatchedEbtData>({
+        eventType: WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,
+        filter: { key: 'properties.workflow_id', value: workflowId },
+        subject: `workflow '${workflowId}'`,
+        label: 'waitForWorkflowDispatchedEvents',
+        count,
+        timeoutMs,
       }),
   };
 };

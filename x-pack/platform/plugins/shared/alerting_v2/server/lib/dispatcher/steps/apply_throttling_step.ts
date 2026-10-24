@@ -12,7 +12,7 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getLastNotifiedTimestampsQueries } from '../queries';
-import { DispatchPlan, AlertTriage, PolicyCatalog } from '../state';
+import { DispatchPlan, AlertTriage, PolicyCatalog, resolveThrottleStrategy } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -154,8 +154,7 @@ function shouldDispatch(
   if (!lastRecord) return true;
 
   const { mode } = policy.grouping;
-  const strategy =
-    policy.throttle?.strategy ?? (mode === 'per_alert' ? 'on_status_change' : 'time_interval');
+  const strategy = resolveThrottleStrategy(policy);
 
   if (strategy === 'every_time') return true;
 

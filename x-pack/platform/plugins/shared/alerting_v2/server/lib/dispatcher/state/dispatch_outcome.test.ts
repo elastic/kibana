@@ -21,6 +21,29 @@ describe('DispatchOutcome', () => {
     expect(outcome.hasFailures()).toBe(false);
   });
 
+  describe('deliveries', () => {
+    it('exposes every successful (group, workflow) delivery with its execution id', () => {
+      const deliveries = [
+        { actionGroupId: 'g1', workflowId: 'wf-1', workflowExecutionId: 'exec-1' },
+        { actionGroupId: 'g1', workflowId: 'wf-2', workflowExecutionId: 'exec-2' },
+      ];
+      const outcome = DispatchOutcome.of({
+        executionsByGroup: new Map([['g1', ['exec-1', 'exec-2']]]),
+        failures: [],
+        deliveries,
+      });
+
+      expect(outcome.deliveries).toEqual(deliveries);
+    });
+
+    it('defaults to no deliveries', () => {
+      expect(DispatchOutcome.of({ executionsByGroup: new Map(), failures: [] }).deliveries).toEqual(
+        []
+      );
+      expect(DispatchOutcome.empty().deliveries).toEqual([]);
+    });
+  });
+
   describe('deliveredDestinationsFor', () => {
     const group = createActionGroup({
       id: 'g1',

@@ -23,6 +23,7 @@ import {
   DispatchStep,
   StoreActionsStep,
   StoreExecutionHistoryStep,
+  ReportTelemetryStep,
 } from '../lib/dispatcher/steps';
 
 export const bindDispatcherExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
@@ -44,6 +45,7 @@ export const bindDispatcherExecutionServices = ({ bind }: ContainerModuleLoadOpt
   bind(DispatcherExecutionStepsToken).to(DispatchStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(StoreActionsStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(StoreExecutionHistoryStep).inSingletonScope();
+  bind(DispatcherExecutionStepsToken).to(ReportTelemetryStep).inSingletonScope();
 
   bind(DispatcherPipeline).toSelf().inSingletonScope();
 };

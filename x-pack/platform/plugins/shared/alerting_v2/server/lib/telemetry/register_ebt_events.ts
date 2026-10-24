@@ -6,9 +6,11 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import { workflowDispatchedTelemetryEvent } from './workflow_dispatched_ebt_event';
 import { ruleChangeTelemetryEvents } from './rule_ebt_event';
 
 /** Registers every rule-lifecycle EBT event type with Core analytics. */
 export const registerTelemetryEvents = (analytics: AnalyticsServiceSetup): void => {
   ruleChangeTelemetryEvents.forEach((eventConfig) => analytics.registerEventType(eventConfig));
+  analytics.registerEventType(workflowDispatchedTelemetryEvent);
 };

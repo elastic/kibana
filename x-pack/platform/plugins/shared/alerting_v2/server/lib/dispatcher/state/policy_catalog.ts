@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { DEFAULT_GROUPING } from '../constants';
 import type { ActionPolicy, ActionPolicyId } from '../types';
 
@@ -47,7 +48,22 @@ export class PolicyCatalog {
     return this.byId.get(id)?.grouping.mode ?? DEFAULT_GROUPING.mode;
   }
 
+  /** Throttle strategy in effect for the policy, including the default its grouping mode implies. */
+  public throttleStrategyOf(id: ActionPolicyId): ThrottleStrategy {
+    const policy = this.byId.get(id);
+    return policy
+      ? resolveThrottleStrategy(policy)
+      : defaultThrottleStrategy(DEFAULT_GROUPING.mode);
+  }
+
   public apiKeyOf(id: ActionPolicyId): string | undefined {
     return this.byId.get(id)?.apiKey;
   }
 }
+
+const defaultThrottleStrategy = (mode: ActionPolicy['grouping']['mode']): ThrottleStrategy =>
+  mode === 'per_alert' ? 'on_status_change' : 'time_interval';
+
+/** The throttle strategy of the policy, or the default its grouping mode implies when it sets none. */
+export const resolveThrottleStrategy = (policy: ActionPolicy): ThrottleStrategy =>
+  policy.throttle?.strategy ?? defaultThrottleStrategy(policy.grouping.mode);

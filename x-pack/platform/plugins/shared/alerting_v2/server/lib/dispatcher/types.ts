@@ -183,6 +183,16 @@ export interface DispatchFailure {
   message: string;
 }
 
+/**
+ * One successful (group, destination) workflow schedule: which action group was
+ * delivered to which workflow, and the execution the workflow run was assigned.
+ */
+export interface DispatchDelivery {
+  actionGroupId: ActionGroupId;
+  workflowId: string;
+  workflowExecutionId: string;
+}
+
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly eventWatermark: Date;

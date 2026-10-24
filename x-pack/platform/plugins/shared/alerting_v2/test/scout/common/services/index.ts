@@ -67,6 +67,8 @@ export type {
   EbtService,
   RuleChangedEbtEvent,
   WaitForRuleChangedEventsParams,
+  WorkflowDispatchedEbtEvent,
+  WaitForWorkflowDispatchedEventsParams,
 } from './ebt_service';
 export { getEbtService } from './ebt_service';
 

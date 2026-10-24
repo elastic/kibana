@@ -39,6 +39,7 @@ import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
+  DispatchDelivery,
   DispatchFailure,
 } from '../types';
 import { DispatchOutcome, DispatchPlan, PolicyCatalog } from '../state';
@@ -101,6 +102,7 @@ export class DispatchStep implements DispatcherStep {
     const { signal } = state.input;
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
+    const deliveries: DispatchDelivery[] = [];
     const dispatchFailures: DispatchFailure[] = [];
     const done = (): DispatcherStepOutput => ({
       type: 'continue',
@@ -108,6 +110,7 @@ export class DispatchStep implements DispatcherStep {
         outcome: DispatchOutcome.of({
           executionsByGroup: dispatchedExecutions,
           failures: dispatchFailures,
+          deliveries,
         }),
       },
     });
@@ -160,6 +163,7 @@ export class DispatchStep implements DispatcherStep {
           pending.slice(offset, offset + DISPATCH_CHUNK_SIZE),
           this.workflowsManagement.getClient(request),
           dispatchedExecutions,
+          deliveries,
           dispatchFailures,
           logger
         );
@@ -369,6 +373,7 @@ export class DispatchStep implements DispatcherStep {
     chunk: PendingSchedule[],
     client: WorkflowsManagementClient,
     dispatchedExecutions: Map<ActionGroupId, string[]>,
+    deliveries: DispatchDelivery[],
     dispatchFailures: DispatchFailure[],
     logger: LoggerServiceContract
   ): Promise<void> {
@@ -381,6 +386,7 @@ export class DispatchStep implements DispatcherStep {
           chunk[i],
           results[i],
           dispatchedExecutions,
+          deliveries,
           dispatchFailures,
           logger
         );
@@ -403,11 +409,17 @@ export class DispatchStep implements DispatcherStep {
     pending: PendingSchedule,
     result: BulkScheduleWorkflowResult[number] | undefined,
     dispatchedExecutions: Map<ActionGroupId, string[]>,
+    deliveries: DispatchDelivery[],
     dispatchFailures: DispatchFailure[],
     logger: LoggerServiceContract
   ): void {
     if (result?.status === 'scheduled' && result.workflowExecutionId) {
       pushMapList(dispatchedExecutions, pending.group.id, result.workflowExecutionId);
+      deliveries.push({
+        actionGroupId: pending.group.id,
+        workflowId: pending.workflowId,
+        workflowExecutionId: result.workflowExecutionId,
+      });
       return;
     }
 

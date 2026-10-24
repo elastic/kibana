@@ -18,9 +18,9 @@ import type { ScoutServerConfig } from '../../../../../types';
  * cleanup suite is stateful-classic only, so this variant omits the dispatcher arg.
  */
 
-// Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so the
-// rules tests can assert on rule-lifecycle EBT. Loaded as a server arg, so those
-// assertions are local-only: Cloud attaches to an existing deployment.
+// Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so API tests
+// can assert on the plugin's EBT events (for example `alerting_v2_workflow_dispatched`). A config
+// set is server args, so those assertions are local-only: Cloud attaches to an existing deployment.
 const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
   'src/platform/test/analytics/plugins/analytics_ftr_helpers'

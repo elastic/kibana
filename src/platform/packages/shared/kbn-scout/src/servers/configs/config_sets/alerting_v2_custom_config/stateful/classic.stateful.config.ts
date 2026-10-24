@@ -27,10 +27,10 @@ import { defaultConfig } from '../../default/stateful/base.config';
 const DISPATCHER_CLEANUP_ENABLED =
   '--xpack.alerting_v2.retention.alertActions.dispatcher.enabled=true';
 
-// Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so the
-// rules tests can assert on rule-lifecycle EBT (`alerting_v2_rule_created` and the other
-// `alerting_v2_rule_*` event types). Loaded as a server arg, so those assertions are
-// local-only: Cloud attaches to an existing deployment.
+// Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so
+// API tests can assert on the plugin's EBT events (for example `alerting_v2_workflow_dispatched`).
+// Loaded as a server arg, so those assertions are local-only: Cloud attaches to an
+// existing deployment.
 const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
   'src/platform/test/analytics/plugins/analytics_ftr_helpers'
