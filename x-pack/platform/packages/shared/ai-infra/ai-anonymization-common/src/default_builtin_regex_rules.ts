@@ -55,8 +55,8 @@ const IPV4_PATTERN = `\\b(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}(?:\\.[0-9]{1,3}){0
 // are rejected by `refineBuiltInMatch`.
 const IPV6_GROUP = '[0-9A-Fa-f]{1,4}';
 const IPV6_PATTERN = [
-  `::(?:[fF]{4}:)?(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
-  `(?:${IPV6_GROUP}:){1,5}:(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
+  `::(?:${IPV6_GROUP}:){0,5}(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
+  `(?:${IPV6_GROUP}:){1,6}:(?:${IPV6_GROUP}:){0,5}(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
   `(?:${IPV6_GROUP}:){6}(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
   `(?:${IPV6_GROUP}:){7}${IPV6_GROUP}`,
   `${IPV6_GROUP}:(?::${IPV6_GROUP}){1,6}`,

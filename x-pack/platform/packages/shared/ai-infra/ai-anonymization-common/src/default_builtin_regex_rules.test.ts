@@ -275,6 +275,8 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       '2001:db8:0:0:1::1',
       '::ffff:192.168.1.1',
       '64:ff9b::192.0.2.33',
+      '2001:db8::ffff:192.0.2.1',
+      '::1:2:3:192.0.2.1',
       'FE80::ABCD:1234',
     ])('masks %s whole', (address) => {
       expectKept(id, address, [address]);
