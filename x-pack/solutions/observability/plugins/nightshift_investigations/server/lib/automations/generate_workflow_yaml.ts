@@ -145,6 +145,7 @@ function generateAlertWorkflow(
       {
         name: hasMultipleTriggers ? 'trigger_investigation_alert' : 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
+        ...(alertRows.length > 0 ? { if: ALERT_ACTIVE_STEP_CONDITION } : {}),
         with: {
           automation_id: automationId,
           subject_type: alertRows.length > 0 ? 'alert' : 'manual',
@@ -162,9 +163,35 @@ function generateAlertWorkflow(
           ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },
+      ...(alertRows.length > 0 ? [RECOVERED_ALERT_STEP] : []),
     ],
   };
 }
+
+const ALERT_ACTIVE_STEP_CONDITION = "${{ event.alert.status == 'active' }}";
+
+/**
+ * Continues the open investigation that holds a recovered alert with the recovery brief, or does
+ * nothing when no open investigation holds it. It never starts an investigation, so it does not
+ * consume the automation's daily limit.
+ */
+const RECOVERED_ALERT_STEP = {
+  name: 'follow_up_recovered_alert',
+  type: 'nightshift.followUpRecoveredAlert',
+  if: "${{ event.alert.status == 'recovered' }}",
+  with: {
+    alert_uuid: '{{ event.alert.uuid }}',
+    alert_id: '${{ event.alert.id }}',
+    alert_start: '${{ event.alert.start }}',
+    // Stamped when the event is dispatched to workflows, after the rule run that found the alert
+    // recovered has saved its state.
+    recovered_at: '{{ event.timestamp }}',
+    rule_id: '{{ event.rule.id }}',
+    rule_name: '${{ event.rule.name }}',
+    rule_type_id: '{{ event.rule.ruleTypeId }}',
+    rule_tags: '${{ event.rule.tags }}',
+  },
+};
 
 function buildAlertContext() {
   return {
@@ -229,9 +256,11 @@ type TriggerKind = 'alert' | 'slack' | 'schedule';
 
 /**
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
- * previous one. Scheduled runs have no event payload and share one concurrency key per automation.
+ * previous one. An alert's recovery is keyed apart from its activation, so it is not dropped while
+ * the activation's run is still in progress. Scheduled runs have no event payload and share one
+ * concurrency key per automation.
  */
-const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}';
+const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}-{{ event.alert.status }}';
 const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
 
 function buildConcurrencyKey(
@@ -469,10 +498,10 @@ function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert
   return rowConditions.map((c) => `(${c})`).join(' OR ');
 }
 
-const ACTIVE_ALERT_CONDITION = 'event.alert.status: "active"';
+const ALERT_STATUS_CONDITION = '(event.alert.status: "active" OR event.alert.status: "recovered")';
 
 function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
-  const parts: string[] = [ACTIVE_ALERT_CONDITION];
+  const parts: string[] = [ALERT_STATUS_CONDITION];
 
   if (row.ruleNamePattern) {
     parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);

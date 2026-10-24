@@ -90,7 +90,7 @@ function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
 
-/** `inputs.context.follow_up` of the investigation runs the alert recovery workflow starts. */
+/** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
 const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
 const isAlertRecoveredFollowUp = (inputs: Record<string, unknown> | undefined): boolean => {
@@ -298,6 +298,13 @@ const toNotifiableInvestigation = (
     })),
 });
 
+type StoredWorkflow = NonNullable<
+  Awaited<ReturnType<WorkflowsServerPluginSetup['management']['getWorkflow']>>
+>;
+type InstalledWorkflow = StoredWorkflow & {
+  definition: NonNullable<StoredWorkflow['definition']>;
+};
+
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -417,7 +424,7 @@ export class NightshiftInvestigationsClient {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
-    const { workflowsManagement, agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     if (!this.inference || !this.savedObjects || !this.uiSettings) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -442,19 +449,7 @@ export class NightshiftInvestigationsClient {
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
 
-    const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
-    const workflow = await workflowsManagement.management.getWorkflow(
-      workflowId,
-      spaceId,
-      this.request
-    );
-
-    if (!workflow?.definition) {
-      this.logger.error(
-        `Investigation workflow "${workflowId}" is not installed in space "${spaceId}"`
-      );
-      throw new InvestigationUnavailableError('Investigations are not configured in this space');
-    }
+    const workflow = await this.getInvestigationWorkflow(spaceId);
 
     const { alerts } = prepared;
     const newInvestigationId = uuidv4();
@@ -492,16 +487,6 @@ export class NightshiftInvestigationsClient {
     });
 
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
-    const rearmedSubjects = subjects.filter((s) =>
-      recorded.some(
-        (r) => r.subjectType === s.type && r.subjectId === s.id && r.snapshot?.recovery_execution_id
-      )
-    );
-    if (rearmedSubjects.length > 0) {
-      await agenticInvestigations
-        .getSubjectsClient(this.request)
-        .upsertSubjects(investigationId, rearmedSubjects);
-    }
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
     const inputs = {
@@ -532,21 +517,11 @@ export class NightshiftInvestigationsClient {
       },
     };
 
-    const executionId = await workflowsManagement.management.runWorkflow(
-      {
-        ...workflow,
-        definition:
-          timeout_seconds === undefined
-            ? workflow.definition
-            : {
-                ...workflow.definition,
-                settings: { ...workflow.definition.settings, timeout: `${timeout_seconds}s` },
-              },
-      },
+    const executionId = await this.runInvestigationWorkflow(
+      workflow,
       spaceId,
       inputs,
-      this.request,
-      'nightshift-investigations'
+      timeout_seconds
     );
 
     if (!isFollowUp) {
@@ -595,6 +570,48 @@ export class NightshiftInvestigationsClient {
         }`
       );
     }
+  }
+
+  private async getInvestigationWorkflow(spaceId: string): Promise<InstalledWorkflow> {
+    const { workflowsManagement } = this.requireWriteDeps();
+    const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+    const workflow = await workflowsManagement.management.getWorkflow(
+      workflowId,
+      spaceId,
+      this.request
+    );
+    if (!workflow?.definition) {
+      this.logger.error(
+        `Investigation workflow "${workflowId}" is not installed in space "${spaceId}"`
+      );
+      throw new InvestigationUnavailableError('Investigations are not configured in this space');
+    }
+    return { ...workflow, definition: workflow.definition };
+  }
+
+  private async runInvestigationWorkflow(
+    workflow: InstalledWorkflow,
+    spaceId: string,
+    inputs: Record<string, unknown>,
+    timeoutSeconds?: number
+  ): Promise<string> {
+    const { workflowsManagement } = this.requireWriteDeps();
+    return workflowsManagement.management.runWorkflow(
+      {
+        ...workflow,
+        definition:
+          timeoutSeconds === undefined
+            ? workflow.definition
+            : {
+                ...workflow.definition,
+                settings: { ...workflow.definition.settings, timeout: `${timeoutSeconds}s` },
+              },
+      },
+      spaceId,
+      inputs,
+      this.request,
+      'nightshift-investigations'
+    );
   }
 
   /** Charges the daily automatic quota for a start that opens a new investigation. */
@@ -1072,20 +1089,59 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
-   * The open investigation holding a recovered alert, and the follow-up brief for it. Delivery is
-   * at least once, so the alert subject records the execution handling the recovery. Another
-   * execution's recovery is a duplicate only when that execution completed: the workflow runs one
-   * execution per alert at a time, so one that failed, was cancelled, or no longer exists
-   * abandoned the recovery, and this execution takes it over.
+   * Runs a recovery round on the open investigation holding a recovered alert, with a brief
+   * asking whether the recovery confirms its root cause. Resolves to undefined, and runs nothing,
+   * when no open investigation holds the alert: a recovery never starts an investigation, so it is
+   * not charged to the automatic quota. The round waits in the investigation's queue and only
+   * works on the investigation if it is still open when its turn comes; the returned execution
+   * records what became of it.
    */
-  async findAlertRecovered({
-    executionId,
-    ...alertInput
-  }: Omit<AlertRecoveredMessageInput, 'snapshot'> & {
-    executionId: string;
-  }): Promise<{ investigation_id: string; message: string; duplicate?: true } | undefined> {
-    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+  async followUpRecoveredAlert(
+    alertInput: Omit<AlertRecoveredMessageInput, 'snapshot'>
+  ): Promise<{ investigation_id: string; execution_id: string } | undefined> {
+    if (!(await this.checkInfrastructureAvailability())) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
+    const { agenticInvestigations } = this.requireWriteDeps();
     const { alertUuid } = alertInput;
+    const existing = await this.findOpenInvestigationHoldingAlert(alertUuid);
+    if (!existing) {
+      this.logger.debug(`No open investigation holds alert/${alertUuid}; no recovery round to run`);
+      return undefined;
+    }
+
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const alertSubject = (await subjectsClient.listByConversationIds([existing.id])).find(
+      ({ subjectType, subjectId }) => subjectType === 'alert' && subjectId === alertUuid
+    );
+    const message = buildAlertRecoveredFollowUpMessage({
+      ...alertInput,
+      snapshot: alertSubject?.snapshot,
+    });
+
+    const spaceId = this.getSpaceId();
+    this.warnOnSpaceMismatch(spaceId);
+    const workflow = await this.getInvestigationWorkflow(spaceId);
+    const executionId = await this.runInvestigationWorkflow(workflow, spaceId, {
+      investigation_id: existing.id,
+      message,
+      context: { source: 'alert', follow_up: ALERT_RECOVERED_FOLLOW_UP },
+    });
+    this.logger.info(
+      `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`
+    );
+    return { investigation_id: existing.id, execution_id: executionId };
+  }
+
+  /**
+   * The most recently updated open investigation that records the alert as a subject. Subjects are
+   * recorded by an investigation's first run, so an investigation whose first run has not started
+   * yet is not found.
+   */
+  private async findOpenInvestigationHoldingAlert(
+    alertUuid: string
+  ): Promise<InvestigationConversation | undefined> {
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     const open = await agenticInvestigations
       .getInvestigationsClient(this.request)
       .findOpenBySubjects([{ type: 'alert', id: alertUuid }]);
@@ -1097,46 +1153,7 @@ export class NightshiftInvestigationsClient {
       conversations,
       open.map(({ id }) => id)
     );
-    const existing = candidates.find(({ status }) => status === 'open');
-    if (!existing) return undefined;
-
-    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
-    const alertSubject = (await subjectsClient.listByConversationIds([existing.id])).find(
-      ({ subjectType, subjectId }) => subjectType === 'alert' && subjectId === alertUuid
-    );
-    const snapshot = alertSubject?.snapshot;
-    const recordedExecutionId = asString(snapshot?.recovery_execution_id);
-    const message = buildAlertRecoveredFollowUpMessage({ ...alertInput, snapshot });
-
-    if (recordedExecutionId === executionId) {
-      return { investigation_id: existing.id, message };
-    }
-    if (recordedExecutionId && (await this.holdsRecovery(recordedExecutionId))) {
-      return { investigation_id: existing.id, message, duplicate: true };
-    }
-    await subjectsClient.upsertSubjects(existing.id, [
-      {
-        type: 'alert',
-        id: alertUuid,
-        snapshot: { ...snapshot, recovery_execution_id: executionId },
-      },
-    ]);
-    return { investigation_id: existing.id, message };
-  }
-
-  /** Whether the execution still holds the recovery it recorded: it completed or still runs. */
-  private async holdsRecovery(executionId: string): Promise<boolean> {
-    const { workflowsManagement } = this.requireWriteDeps();
-    const execution = await workflowsManagement.management.getWorkflowExecution(
-      executionId,
-      this.getSpaceId(),
-      { includeOutput: false, request: this.request }
-    );
-    return (
-      execution != null &&
-      (execution.status === ExecutionStatus.COMPLETED ||
-        !TerminalExecutionStatuses.includes(execution.status))
-    );
+    return candidates.find(({ status }) => status === 'open');
   }
 
   /**
