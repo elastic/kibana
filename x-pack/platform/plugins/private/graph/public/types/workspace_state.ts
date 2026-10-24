@@ -22,7 +22,7 @@ export interface WorkspaceNode {
     term: string;
   };
   scaledSize: number;
-  parent: WorkspaceNode | null;
+  parent?: WorkspaceNode | null;
   color: string;
   numChildren: number;
   isSelected?: boolean;
@@ -36,6 +36,7 @@ export interface WorkspaceEdge {
   id?: string;
   weight: number;
   width: number;
+  doc_count?: number;
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
@@ -82,25 +83,18 @@ export interface TermIntersect {
 export interface Workspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
+  edgesMap: Record<string, WorkspaceEdge>;
   nodes: WorkspaceNode[];
   selectedNodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
   blocklistedNodes: BlockListedNode[];
-  undoLog: string;
-  redoLog: string;
   force: ReturnType<typeof d3.layout.force>;
   lastRequest: string;
   lastResponse: string;
 
-  undo: () => void;
-  redo: () => void;
   expandSelecteds: (targetOptions: TargetOptions) => {};
-  deleteSelection: () => void;
-  blocklistSelection: () => void;
   selectNone: () => void;
   deselectNode: (node: WorkspaceNode) => void;
-  groupSelections: (node: WorkspaceNode | undefined) => void;
-  ungroup: (node: WorkspaceNode | undefined) => void;
   callElasticsearch: (request: any) => void;
   search: (qeury: any, fieldsChoice: WorkspaceField[] | undefined, numHops: number) => void;
   simpleSearch: (
@@ -113,11 +107,7 @@ export interface Workspace {
     nodes: WorkspaceNode[]
   ) => void;
   toggleNodeSelection: (node: WorkspaceNode) => boolean;
-  mergeIds: (term1: string, term2: string) => void;
   changeHandler: () => void;
-  unblockNode: (node: BlockListedNode) => void;
-  unblockAll: () => void;
-  clearGraph: () => void;
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];
@@ -163,6 +153,7 @@ export type WorkspaceOptions = Partial<{
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
   topologyChangeHandler: () => void;
+  graphMergeStarted: () => void;
   graphExploreProxy: (
     indexPattern: string,
     request: ExploreRequest,

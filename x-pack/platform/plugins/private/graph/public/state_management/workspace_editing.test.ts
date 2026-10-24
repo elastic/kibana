@@ -7,28 +7,42 @@
 
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
 import { getIcon } from '../helpers/style_choices';
+import { datasourceLoaded } from './datasource';
 import { createMockGraphStore } from './mocks';
 import { createGraphStore, type GraphStore } from './store';
 import {
+  blocklistSelectedNodes,
   clearNodeSelection,
   colorSelectedNodes,
   createWorkspaceState,
+  deleteSelectedNodes,
+  groupSelectedNodes,
+  mergeNodes,
+  redoWorkspace,
   selectNeighborNodes,
   setNodeLabel,
   toggleEdgeSelection,
   toggleNodeSelection,
-  workspaceChanged,
+  unblockAllNodes,
+  unblockNode,
+  undoWorkspace,
+  ungroupNode,
+  workspaceGraphMergeStarted,
+  workspaceGraphMerged,
+  workspaceLoaded,
+  workspaceRuntimeChanged,
 } from './workspace';
 
 const createEnvironment = () => {
   const workspace = createWorkspace({
-    changeHandler: jest.fn(),
-    topologyChangeHandler: () => store.dispatch(workspaceChanged(createWorkspaceState(workspace))),
+    graphMergeStarted: () => store.dispatch(workspaceGraphMergeStarted()),
+    topologyChangeHandler: () =>
+      store.dispatch(workspaceGraphMerged(createWorkspaceState(workspace))),
   });
   const { mockedDeps } = createMockGraphStore({});
   mockedDeps.getWorkspace.mockReturnValue(workspace);
   mockedDeps.notifyReact.mockImplementation(() =>
-    store.dispatch(workspaceChanged(createWorkspaceState(workspace)))
+    store.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)))
   );
   const store: GraphStore = createGraphStore(mockedDeps);
   const graph = {
@@ -45,11 +59,12 @@ const createEnvironment = () => {
   };
   workspace.mergeGraph(graph);
   workspace.stopLayout();
+  store.dispatch(workspaceLoaded(createWorkspaceState(workspace)));
   workspace.nodesMap['field..first'].x = 10;
   workspace.nodesMap['field..first'].y = 20;
   workspace.nodesMap['field..second'].x = 30;
   workspace.nodesMap['field..second'].y = 40;
-  return { store, workspace, graph };
+  return { store, workspace, graph, mockedDeps };
 };
 
 describe('workspace editing', () => {
@@ -72,14 +87,15 @@ describe('workspace editing', () => {
     const remainingNode = workspace.nodesMap['field..second'];
     store.dispatch(setNodeLabel({ nodeId: 'field..first', label: 'Custom label' }));
     store.dispatch(colorSelectedNodes('red'));
-    workspace.deleteSelection();
+    store.dispatch(deleteSelectedNodes());
     expect(workspace.nodesMap['field..first']).toBeUndefined();
     expect(workspace.edges).toHaveLength(0);
     expect(workspace.nodesMap['field..second']).toBe(remainingNode);
     expect(remainingNode).toMatchObject({ x: 30, y: 40 });
+    expect(store.getState().workspace.undoHistory).toHaveLength(1);
 
     remainingNode.x = 50;
-    workspace.undo();
+    store.dispatch(undoWorkspace());
     expect(workspace.nodesMap['field..first']).toMatchObject({
       x: 10,
       y: 20,
@@ -87,32 +103,62 @@ describe('workspace editing', () => {
       color: 'red',
       icon: originalIcon,
     });
+    expect(workspace.selectedNodes.map(({ id }) => id)).toEqual(['field..first']);
+    expect(workspace.getEdgeSelection()).toHaveLength(1);
     expect(workspace.edges[0]).toMatchObject({ weight: 5, width: 3, doc_count: 7 });
-    workspace.redo();
+    store.dispatch(redoWorkspace());
     expect(workspace.nodesMap['field..second'].x).toBe(50);
+    for (const property of ['deleteSelection', 'undo', 'redo', 'undoLog', 'redoLog']) {
+      expect(workspace).not.toHaveProperty(property);
+    }
+    expect(JSON.parse(JSON.stringify(store.getState().workspace))).toEqual(
+      store.getState().workspace
+    );
+  });
+
+  it('removes a selected group, its descendants and dangling edges from Redux and the runtime', () => {
+    const { store, workspace } = setup();
+    store.dispatch(mergeNodes({ parentId: 'field..third', childId: 'field..second' }));
+    store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
+
+    expect(workspace.nodesMap['field..second'].parent?.id).toBe('field..third');
+    expect(workspace.edges).toHaveLength(1);
+    expect(store.getState().workspace.edgeIds).toHaveLength(1);
+
+    store.dispatch(deleteSelectedNodes());
+
+    const { nodeIds, nodesById, edgeIds, edgesById } = store.getState().workspace;
+    expect(nodeIds).toEqual(['field..first']);
+    expect(Object.keys(nodesById)).toEqual(['field..first']);
+    expect(edgeIds).toEqual([]);
+    expect(edgesById).toEqual({});
+    expect(workspace.nodes.map(({ id }) => id)).toEqual(['field..first']);
+    expect(workspace.nodesMap['field..second']).toBeUndefined();
+    expect(workspace.nodesMap['field..third']).toBeUndefined();
+    expect(workspace.edges).toEqual([]);
   });
 
   it('projects grouping, merging and ungrouping, including visible edge endpoints', () => {
     const { store, workspace } = setup();
     store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: true }));
     store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: false }));
-    workspace.groupSelections(workspace.nodesMap['field..third']);
+    store.dispatch(groupSelectedNodes('field..third'));
     expect(workspace.nodesMap['field..second'].parent?.id).toBe('field..third');
     expect(workspace.edges[0].topTarget.id).toBe('field..third');
     store.dispatch(selectNeighborNodes());
     expect(store.getState().workspace.selectedNodeIds).toContain('field..first');
-    workspace.ungroup(workspace.nodesMap['field..third']);
+    store.dispatch(ungroupNode('field..third'));
     expect(workspace.nodesMap['field..second'].parent).toBeUndefined();
-    workspace.mergeIds('field..first', 'field..second');
+    store.dispatch(mergeNodes({ parentId: 'field..first', childId: 'field..second' }));
     expect(workspace.nodesMap['field..second'].parent?.id).toBe('field..first');
-    workspace.undo();
+    store.dispatch(undoWorkspace());
     expect(workspace.nodesMap['field..second'].parent).toBeUndefined();
   });
 
   it('preserves grouped styling for descendants without styling unselected nodes', () => {
     const { store, workspace } = setup();
     store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: true }));
-    workspace.groupSelections(workspace.nodesMap['field..third']);
+    store.dispatch(groupSelectedNodes('field..third'));
     store.dispatch(colorSelectedNodes('green'));
     expect(workspace.nodesMap['field..second'].color).toBe('green');
     expect(workspace.nodesMap['field..third'].color).toBe('green');
@@ -123,46 +169,87 @@ describe('workspace editing', () => {
     expect(workspace.nodesMap['field..third'].color).toBe('green');
   });
 
-  it('publishes grouped edge endpoints in normalized snapshots after layout', () => {
-    const { store, workspace } = setup();
+  it('updates grouped edge endpoints in Redux without relying on layout', () => {
+    const { workspace } = setup();
+    const { store } = createMockGraphStore({});
+    store.dispatch(workspaceLoaded(createWorkspaceState(workspace)));
     store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: true }));
-    workspace.groupSelections(workspace.nodesMap['field..third']);
+    store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: false }));
+    store.dispatch(groupSelectedNodes('field..third'));
     const { edgeIds, edgesById } = store.getState().workspace;
     expect(edgesById[edgeIds[0]].topTargetId).toBe('field..third');
-    workspace.undo();
+    store.dispatch(selectNeighborNodes());
+    expect(store.getState().workspace.selectedNodeIds).toContain('field..first');
+    store.dispatch(mergeNodes({ parentId: 'field..second', childId: 'field..third' }));
+    expect(store.getState().workspace.nodesById['field..third'].parentId).toBeUndefined();
+    store.dispatch(undoWorkspace());
     expect(store.getState().workspace.edgesById[edgeIds[0]].topTargetId).toBe('field..second');
   });
 
-  it('publishes blocklist changes without removing unrelated nodes', () => {
+  it('restores the blocklist through undo/redo and unblock operations', () => {
     const { store, workspace } = setup();
     store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
-    workspace.blocklistSelection();
+    store.dispatch(blocklistSelectedNodes());
     expect(workspace.blocklistedNodes.map(({ data }) => data.term)).toEqual(['first']);
     expect(workspace.nodesMap['field..second']).toBeDefined();
-    workspace.unblockNode(workspace.blocklistedNodes[0]);
+    store.dispatch(undoWorkspace());
+    expect(workspace.blocklistedNodes).toEqual([]);
+    expect(workspace.nodesMap['field..first']).toBeDefined();
+    store.dispatch(redoWorkspace());
+    store.dispatch(unblockNode('field..first'));
     expect(workspace.blocklistedNodes).toEqual([]);
     expect(store.getState().workspace.blocklistedNodeIds).toEqual([]);
+    store.dispatch(undoWorkspace());
+    expect(workspace.blocklistedNodes).toHaveLength(1);
+    store.dispatch(unblockAllNodes());
+    expect(workspace.blocklistedNodes).toEqual([]);
+    store.dispatch(undoWorkspace());
+    expect(workspace.blocklistedNodes).toHaveLength(1);
   });
 
   it('records response merges and preserves settled positions through merge undo/redo', () => {
-    const { workspace, graph } = setup();
-    const historyLength = workspace.undoLog.length;
+    const { store, workspace, graph } = setup();
     workspace.mergeGraph({ nodes: [{ ...graph.nodes[0], term: 'new', label: 'new' }], edges: [] });
-    expect(workspace.undoLog).toHaveLength(historyLength + 1);
-    workspace.undo();
+    expect(store.getState().workspace.undoHistory).toHaveLength(1);
+    expect(store.getState().workspace.undoHistory[0].nodesById['field..second'].x).toBe(30);
+    store.dispatch(undoWorkspace());
     expect(workspace.nodesMap['field..new']).toBeUndefined();
     expect(workspace.nodesMap['field..second'].x).toBe(30);
-    workspace.redo();
+    store.dispatch(redoWorkspace());
     expect(workspace.nodesMap['field..new']).toBeDefined();
   });
 
-  it('clears topology, selections, blocklists and history when clearing the workspace', () => {
+  it('preserves Redux selection across runtime snapshots and clears history when loading or switching', () => {
     const { store, workspace } = setup();
+    store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+    workspace.selectedNodes = [];
+    store.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
+    expect(store.getState().workspace.selectedNodeIds).toEqual(['field..first']);
+    store.dispatch(deleteSelectedNodes());
+    expect(store.getState().workspace.undoHistory).toHaveLength(1);
+    store.dispatch(workspaceLoaded(createWorkspaceState(workspace)));
+    expect(store.getState().workspace.undoHistory).toEqual([]);
+    store.dispatch(deleteSelectedNodes());
+    store.dispatch(datasourceLoaded());
+    expect(store.getState().workspace).toMatchObject({
+      nodeIds: [],
+      edgeIds: [],
+      blocklistedNodeIds: [],
+      selectedNodeIds: [],
+      selectedEdgeIds: [],
+      undoHistory: [],
+      redoHistory: [],
+      isInitialized: false,
+    });
+  });
+
+  it('clears topology, selections, blocklists and history when loading an empty workspace', () => {
+    const { store, workspace, mockedDeps } = setup();
     store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
-    workspace.blocklistSelection();
+    store.dispatch(blocklistSelectedNodes());
     store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: true }));
-    workspace.groupSelections(workspace.nodesMap['field..first']);
-    workspace.undo();
+    store.dispatch(groupSelectedNodes('field..first'));
+    store.dispatch(undoWorkspace());
     store.dispatch(clearNodeSelection());
     store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
     store.dispatch(toggleEdgeSelection(store.getState().workspace.edgeIds[0]));
@@ -172,33 +259,43 @@ describe('workspace editing', () => {
     expect(workspace.blocklistedNodes).toHaveLength(1);
     expect(workspace.selectedNodes).toHaveLength(1);
     expect(workspace.getEdgeSelection()).toHaveLength(1);
-    expect(workspace.undoLog).toHaveLength(1);
-    expect(workspace.redoLog).toHaveLength(1);
+    expect(store.getState().workspace.undoHistory).toHaveLength(1);
+    expect(store.getState().workspace.redoHistory).toHaveLength(1);
 
-    workspace.clearGraph();
+    const emptyWorkspace = createWorkspace({});
+    emptyWorkspace.stopLayout();
+    mockedDeps.getWorkspace.mockReturnValue(emptyWorkspace);
+    store.dispatch(workspaceLoaded(createWorkspaceState(emptyWorkspace)));
 
-    expect(workspace.nodes).toEqual([]);
-    expect(workspace.edges).toEqual([]);
-    expect(workspace.blocklistedNodes).toEqual([]);
-    expect(workspace.selectedNodes).toEqual([]);
-    expect(workspace.getEdgeSelection()).toEqual([]);
-    expect(workspace.undoLog).toEqual([]);
-    expect(workspace.redoLog).toEqual([]);
+    expect(emptyWorkspace.nodes).toEqual([]);
+    expect(emptyWorkspace.edges).toEqual([]);
+    expect(emptyWorkspace.blocklistedNodes).toEqual([]);
+    expect(emptyWorkspace.selectedNodes).toEqual([]);
+    expect(emptyWorkspace.getEdgeSelection()).toEqual([]);
+    expect(store.getState().workspace).toMatchObject({
+      nodeIds: [],
+      edgeIds: [],
+      blocklistedNodeIds: [],
+      selectedNodeIds: [],
+      selectedEdgeIds: [],
+      undoHistory: [],
+      redoHistory: [],
+    });
   });
 
   it('bounds undo history and discards redo after a new edit', () => {
-    const { workspace } = setup();
+    const { store } = setup();
     for (let index = 0; index < 55; index++) {
       if (index % 2 === 0) {
-        workspace.mergeIds('field..first', 'field..second');
+        store.dispatch(mergeNodes({ parentId: 'field..first', childId: 'field..second' }));
       } else {
-        workspace.ungroup(workspace.nodesMap['field..first']);
+        store.dispatch(ungroupNode('field..first'));
       }
     }
-    expect(workspace.undoLog).toHaveLength(50);
-    workspace.undo();
-    expect(workspace.redoLog).toHaveLength(1);
-    workspace.deleteSelection();
-    expect(workspace.redoLog).toEqual([]);
+    expect(store.getState().workspace.undoHistory).toHaveLength(50);
+    store.dispatch(undoWorkspace());
+    expect(store.getState().workspace.redoHistory).toHaveLength(1);
+    store.dispatch(deleteSelectedNodes());
+    expect(store.getState().workspace.redoHistory).toEqual([]);
   });
 });

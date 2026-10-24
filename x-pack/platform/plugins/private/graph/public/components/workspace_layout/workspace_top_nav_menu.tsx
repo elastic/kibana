@@ -16,9 +16,21 @@ import type {
 } from '@kbn/inspector-plugin/public';
 import { AppHeader, type AppHeaderBack, type AppHeaderMenu } from '@kbn/app-header';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { GraphState } from '../../state_management';
-import { datasourceSelector, hasFieldsSelector, metaDataSelector } from '../../state_management';
-import type { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
+import type { GraphDispatch, GraphState } from '../../state_management';
+import {
+  datasourceSelector,
+  hasFieldsSelector,
+  metaDataSelector,
+  unblockAllNodes,
+  unblockNode,
+} from '../../state_management';
+import type {
+  BlockListedNode,
+  GraphSavePolicy,
+  GraphWorkspaceSavedObject,
+  Workspace,
+  WorkspaceNode,
+} from '../../types';
 import type { AsObservable, SettingsWorkspaceProps } from '../settings';
 import { Settings } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
@@ -44,6 +56,7 @@ interface WorkspaceTopNavMenuProps {
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const store = useStore<GraphState>();
+  const dispatch = store.dispatch as GraphDispatch;
   const location = useLocation();
   const history = useHistory();
   const title = useSelector(metaDataSelector).title;
@@ -131,8 +144,9 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
 
           const settingsObservable = asSyncedObservable(() => ({
             blocklistedNodes: currentWorkspace.blocklistedNodes,
-            unblockNode: currentWorkspace.unblockNode,
-            unblockAll: currentWorkspace.unblockAll,
+            unblockNode: (node: BlockListedNode) =>
+              dispatch(unblockNode((node as WorkspaceNode).id)),
+            unblockAll: () => dispatch(unblockAllNodes()),
             canEditDrillDownUrls: props.canEditDrillDownUrls,
           })) as unknown as AsObservable<SettingsWorkspaceProps>['observable'];
 
@@ -199,6 +213,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     canSave,
     confirmWipeWorkspace,
     datasource,
+    dispatch,
     hasFields,
     history,
     isInspectDisabled,
