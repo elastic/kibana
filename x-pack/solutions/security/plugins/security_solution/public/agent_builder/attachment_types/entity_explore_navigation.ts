@@ -14,6 +14,7 @@ import {
   encodeFlyoutV2UrlParam,
   FLYOUT_DESCRIPTOR_KIND,
   FLYOUT_V2_URL_PARAM,
+  toEntityDescriptorMode,
   type FlyoutDescriptor,
   type FlyoutV2UrlParamValue,
 } from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
@@ -33,6 +34,7 @@ import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_le
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import type { EntityAttachmentIdentifier } from './entity_attachment/types';
 import { isFlyoutCapableIdentifierType } from './entity_attachment/types';
 
@@ -80,12 +82,13 @@ const getEntityDescriptorContext = (
   const { id, params } = right;
   const entityId = params.entityId as string | undefined;
   const scopeId = params.scopeId as string | undefined;
+  const mode = toEntityDescriptorMode(params.mode as string | undefined);
 
   if (id === HostPanelKey) {
     const hostName = params.hostName as string | undefined;
     if (!hostName) return null;
     return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName, entityId, scopeId },
+      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName, entityId, scopeId, mode },
       context: { entityType: 'host', entityName: hostName, entityId, scopeId },
     };
   }
@@ -94,7 +97,7 @@ const getEntityDescriptorContext = (
     const userName = params.userName as string | undefined;
     if (!userName) return null;
     return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.user, userName, entityId, scopeId },
+      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.user, userName, entityId, scopeId, mode },
       context: { entityType: 'user', entityName: userName, entityId, scopeId },
     };
   }
@@ -103,7 +106,7 @@ const getEntityDescriptorContext = (
     const serviceName = params.serviceName as string | undefined;
     if (!serviceName) return null;
     return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.service, serviceName, entityId, scopeId },
+      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.service, serviceName, entityId, scopeId, mode },
       context: { entityType: 'service', entityName: serviceName, entityId, scopeId },
     };
   }
@@ -287,7 +290,9 @@ export type EntityFlyoutRightPanel =
  * to an unfiltered `navigateToEntityAnalyticsHomePageInApp` in those cases.
  */
 export const buildEntityRightPanel = (
-  identifier: EntityAttachmentIdentifier
+  identifier: EntityAttachmentIdentifier,
+  /** `resolved` opens the entity's resolution group, as the Entity Analytics grid does. */
+  mode?: EntityViewMode
 ): EntityFlyoutRightPanel | null => {
   const { identifierType, identifier: displayName, entityStoreId } = identifier;
   if (!entityStoreId || !isFlyoutCapableIdentifierType(identifierType)) {
@@ -296,12 +301,13 @@ export const buildEntityRightPanel = (
 
   const contextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+  const withMode = mode === 'resolved' ? { mode } : {};
 
   switch (identifierType) {
     case 'host':
       return {
         id: HostPanelKey,
-        params: { contextID, scopeId, hostName: displayName, entityId: entityStoreId },
+        params: { contextID, scopeId, hostName: displayName, entityId: entityStoreId, ...withMode },
       };
     case 'user':
       return {
@@ -312,12 +318,19 @@ export const buildEntityRightPanel = (
           userName: displayName,
           identityFields: { 'user.name': displayName },
           entityId: entityStoreId,
+          ...withMode,
         },
       };
     case 'service':
       return {
         id: ServicePanelKey,
-        params: { contextID, scopeId, serviceName: displayName, entityId: entityStoreId },
+        params: {
+          contextID,
+          scopeId,
+          serviceName: displayName,
+          entityId: entityStoreId,
+          ...withMode,
+        },
       };
     default:
       return null;
