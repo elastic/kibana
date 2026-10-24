@@ -10,7 +10,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { TableGridProps } from './table_grid';
-import { TableGrid, GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid';
+import { TableGrid } from './table_grid';
+import { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid_constants';
 import { FieldRow } from './field_row';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { buildHitMock } from '../../__mocks__';
