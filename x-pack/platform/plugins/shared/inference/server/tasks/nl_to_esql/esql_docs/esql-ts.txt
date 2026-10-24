@@ -1,6 +1,6 @@
 # TS
 
-The TS source command enables time series semantics and allows the use of time series aggregation functions within the STATS command, such as AVG_OVER_TIME() or RATE. These functions are evaluated per time series and then aggregated by group using a secondary aggregation function. TS is similar to the FROM source command, but specifically targets time series indices and supports time series aggregations.
+The `TS` source command targets time series indices and enables time series aggregation functions inside the `STATS` command.
 
 ## Syntax
 
@@ -8,17 +8,19 @@ The TS source command enables time series semantics and allows the use of time s
 
 ### Parameters
 
-#### index_pattern
+#### `index_pattern`
 
-A list of indices, data streams, or aliases to query. Supports wildcards and date math.
+A list of indices, data streams, or aliases. Supports wildcards and date math.
 
-#### fields
+#### `fields`
 
-A comma-separated list of metadata fields to retrieve. This parameter is optional.
+Optional.
+
+A comma-separated list of metadata fields to retrieve.
 
 ## Examples
 
-Calculates the total rate of search requests per host and hour for the past hour.
+Calculate the total rate of search requests per host and hour.
 
 ```esql
 TS metrics
@@ -26,25 +28,35 @@ TS metrics
   | STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
 ```
 
-Returns the average of the most recent memory usage values for each time series.
+Return the average of the last memory usage values per time series using implicit `LAST_OVER_TIME()`.
 
 ```esql
 TS metrics | STATS AVG(memory_usage)
-```
 
-Returns the average of the most recent memory usage values for each time series, explicitly using the LAST_OVER_TIME function.
-
-```esql
 TS metrics | STATS AVG(LAST_OVER_TIME(memory_usage))
 ```
 
-Calculates the average memory usage by first averaging per time series and then averaging those results.
+Calculate the average memory usage across per-time-series averages.
 
 ```esql
 TS metrics | STATS AVG(AVG_OVER_TIME(memory_usage))
 ```
 
-Calculates the sum of average memory usage per host and hourly bucket for the last day.
+Use a time series aggregation function directly in `STATS`.
+
+```esql
+TS metrics
+| WHERE TRANGE(1 day)
+| STATS RATE(search_requests) BY TBUCKET(1 hour)
+```
+
+Use `SUM` as the outer aggregation to sum counter rates across hosts.
+
+```esql
+TS metrics | STATS SUM(RATE(search_requests)) BY host
+```
+
+Use `AVG_OVER_TIME` to compute per-time-series averages, then group the results by host and time bucket.
 
 ```esql
 TS metrics
@@ -52,10 +64,98 @@ TS metrics
 | STATS SUM(AVG_OVER_TIME(memory_usage)) BY host, TBUCKET(1 hour)
 ```
 
+Compute per-minute network rates per cluster, then derive percentile, peak, and headroom metrics.
+
+```esql
+TS k8s
+| WHERE @timestamp >= now() - 1 hour
+| STATS rate = MAX(RATE(network.total_bytes_in)) BY cluster, TBUCKET(1 minute)
+| STATS p95 = PERCENTILE(rate, 95), peak = MAX(rate) BY cluster
+| EVAL headroom = peak - p95
+| SORT headroom DESC
+```
+
+Group bare time series aggregation results by all dimensions implicitly.
+
+```esql
+TS k8s
+| STATS avg = avg_over_time(network.cost)
+| SORT avg DESC
+```
+
+avg:double | _timeseries:keyword
+8.375 | {"cluster":"prod","pod":"three","region":["eu","us"]}
+7.262931034482759 | {"cluster":"qa","pod":"one"}
+6.870689655172414 | {"cluster":"qa","pod":"two"}
+6.635416666666667 | {"cluster":"qa","pod":"three"}
+6.46875 | {"cluster":"staging","pod":"two","region":"us"}
+5.869791666666667 | {"cluster":"staging","pod":"three","region":"us"}
+5.586956521739131 | {"cluster":"prod","pod":"one","region":["eu","us"]}
+5.1826923076923075 | {"cluster":"staging","pod":"one","region":"us"}
+4.0703125 | {"cluster":"prod","pod":"two","region":["eu","us"]}
+
+Use `WITHOUT` to group by every dimension except `pod`.
+
+```esql
+TS k8s
+| STATS total_cost = sum(network.cost) BY WITHOUT(pod)
+| SORT total_cost
+```
+
+total_cost:double | _timeseries:keyword
+15.875 | {"cluster":"staging","region":"us"}
+18.625 | {"cluster":"prod","region":["eu","us"]}
+26.5 | {"cluster":"qa"}
+
+Combine `WITHOUT` with `TBUCKET` to group by surviving dimensions and time bucket.
+
+```esql
+TS k8s
+| STATS total_cost = sum(network.cost) BY WITHOUT(pod), tbucket = TBUCKET(1 hour)
+| SORT total_cost
+```
+
+total_cost:double | _timeseries:keyword | tbucket:datetime
+15.875 | {"cluster":"staging","region":"us"} | 2024-05-10T00:00:00.000Z
+18.625 | {"cluster":"prod","region":["eu","us"]} | 2024-05-10T00:00:00.000Z
+26.5 | {"cluster":"qa"} | 2024-05-10T00:00:00.000Z
+
+Calculate garbage collection event count, average duration, and 99th-percentile duration from histogram metrics.
+
+```esql
+TS metrics-*
+| WHERE TRANGE(1 hour)
+| STATS count = COUNT(jvm.gc.duration),
+        avg = AVG(jvm.gc.duration),
+        p99 = PERCENTILE(jvm.gc.duration, 99)
+  BY jvm.gc.action, TBUCKET(5 minutes)
+```
+
+Use `RATE()` instead of summing raw counter values.
+
+```esql
+TS metrics | STATS SUM(RATE(request_count)) BY host
+```
+
+Use `AVG_OVER_TIME` to avoid weighting time series with more frequent samples more heavily.
+
+```esql
+TS metrics
+| STATS AVG(AVG_OVER_TIME(cpu_usage)) BY cluster, TBUCKET(1 minute)
+```
+
+Using a time series aggregation function in combination with an inner time series function causes an error.
+
+```esql
+TS metrics | STATS AVG_OVER_TIME(RATE(memory_usage))
+```
+
 ## Limitations
 
-- TS can only be used with time series indices.
-- Time series aggregation functions must be wrapped inside a regular aggregation function in STATS. Using a time series aggregation function as the outer function causes an error.
-- TS cannot be combined with certain operations (such as FORK) before the STATS command is applied.
-- Avoid aggregating multiple metrics with different dimensional cardinalities in the same query, as this can result in null values for some dimension combinations.
-- It is recommended to add a time range filter on `@timestamp` to limit the data volume scanned and improve query performance.
+- `TS` targets only time series indices.
+- `COUNT(*)` under `TS` counts grouped rows after the first `STATS`, not raw metric documents. To count samples for a specific metric, use `COUNT(<field>)` or `COUNT_OVER_TIME()` against a named field.
+- Commands that change row order, such as `SORT` or `FORK`, cannot appear between `TS` and the first `STATS`. After the first `STATS`, these commands are available again.
+- Time series aggregation functions enforce the field’s `metric_type` mapping. For example, `RATE()` requires a counter and rejects gauge fields.
+- A time series aggregation function cannot be combined with an inner time series aggregation function.
+- `WITHOUT` can only be used inside the first `STATS` command under a `TS` source.
+- When combining a bare time series function with other groupings, only grouping functions such as `TBUCKET` or `WITHOUT` are allowed in the `BY` clause. Bare dimension columns are not allowed.

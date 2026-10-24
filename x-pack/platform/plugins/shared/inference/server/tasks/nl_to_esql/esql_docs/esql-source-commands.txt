@@ -4,8 +4,6 @@ A source command produces a table, typically with data from Elasticsearch. A que
 
 ## Syntax
 
-`<source-command>`
-
 Supported source commands:
 
 - `FROM`
