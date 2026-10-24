@@ -88,6 +88,12 @@ const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
  */
 const RESOLVE_FROM_ENTITY_STORE = true;
 
+/**
+ * Test setting: score only this many sampled pages per stage, spread evenly over the IDs and each
+ * profiled, and skip reset to zero. Undefined scores every page.
+ */
+const TEST_PAGES_TO_RUN: number | undefined = 16;
+
 type LookupIndexReadinessStatus = 'ready' | 'mapping_upgrade_failed';
 
 interface LookupIndexReadiness {
@@ -596,7 +602,11 @@ const executeEntityTypeRun = async ({
           pagesInFlight: 2,
           // Test setting: page bounds from one sample. A page that reaches the 10k row limit is only
           // found after scoring, so pages aim at 8k, where that practically never happens.
-          sampledPages: { targetPageSize: 8000, samplesPerPage: 250 },
+          sampledPages: {
+            targetPageSize: 8000,
+            samplesPerPage: 250,
+            pagesToRun: TEST_PAGES_TO_RUN,
+          },
           pageTimings: basePageTimings,
         }),
     });
@@ -681,7 +691,11 @@ const executeEntityTypeRun = async ({
             // Test setting: page ranges from one sample of the aliases. Only targets with alerts
             // produce rows, so pages aim at 30k aliases, near the member filter's terms limit;
             // splits keep each part's members and rows within their limits.
-            sampledPages: { targetPageSize: 30_000, samplesPerPage: 250 },
+            sampledPages: {
+              targetPageSize: 30_000,
+              samplesPerPage: 250,
+              pagesToRun: TEST_PAGES_TO_RUN,
+            },
             pageTimings: resolutionPageTimings,
           }),
       });
@@ -756,8 +770,9 @@ const executeEntityTypeRun = async ({
       );
     }
 
-    // Stage 3: reset stale positive scores not touched in this run.
-    if (runConfig.configuration.enableResetToZero !== false) {
+    // Stage 3: reset stale positive scores not touched in this run. A run that scores a sample of
+    // its pages leaves most scores untouched, so resetting them would zero nearly every entity.
+    if (runConfig.configuration.enableResetToZero !== false && TEST_PAGES_TO_RUN === undefined) {
       const resetStage = runTelemetry.startResetStage();
       const resetStartedAtMs = Date.now();
       try {
@@ -809,7 +824,11 @@ const executeEntityTypeRun = async ({
         runLogger.error(`error resetting risk scores to zero: ${errorMessage}`);
       }
     } else {
-      runLogger.debug('reset_to_zero disabled in configuration');
+      runLogger.debug(
+        TEST_PAGES_TO_RUN === undefined
+          ? 'reset_to_zero disabled in configuration'
+          : 'reset_to_zero skipped: the run scores a sample of its pages'
+      );
       runTelemetry.startResetStage().skipped();
       frameworkTelemetryStages.push({
         name: 'reset_to_zero',

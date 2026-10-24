@@ -542,4 +542,26 @@ describe('discoverSampledResolutionPages', () => {
   it('finds no pages in a store without aliases', async () => {
     expect(await discoverSampled(aggregatorReturning(0))).toEqual([]);
   });
+
+  it('hands out only the requested number of pages, each profiled, when a test sets one', async () => {
+    const pages = await collect(
+      discoverSampledResolutionPages({
+        crudClient: aggregatorReturning(4, [
+          ['user:t1', 1],
+          ['user:t2', 1],
+          ['user:t3', 1],
+        ]),
+        logger,
+        entityType: EntityType.user,
+        config: { targetPageSize: 2, samplesPerPage: 1, pagesToRun: 1 },
+        pageTimings: createPageStepTimings(),
+      })
+    );
+
+    expect(
+      pages.map(({ pageNumber, sampledRange, profile }) => ({ pageNumber, sampledRange, profile }))
+    ).toEqual([
+      { pageNumber: 2, sampledRange: { lower: 'user:t2', upper: undefined }, profile: true },
+    ]);
+  });
 });

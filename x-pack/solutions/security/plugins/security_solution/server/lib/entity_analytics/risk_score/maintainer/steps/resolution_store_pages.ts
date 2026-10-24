@@ -20,7 +20,7 @@ import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskScoreModifierEntity } from './pipeline_types';
 import type { ResolutionPageTask } from './score_resolution_entities';
 import type { SampledPagesConfig } from './sampled_page_bounds';
-import { DEFAULT_SAMPLE_SEED } from './sampled_page_bounds';
+import { DEFAULT_SAMPLE_SEED, pagesToRunIndices } from './sampled_page_bounds';
 
 const RESOLVED_TO = 'entity.relationships.resolution.resolved_to';
 
@@ -585,23 +585,31 @@ export const discoverSampledResolutionPages = async function* ({
   }
 
   const uppers: Array<string | undefined> = [...sample.uppers, undefined];
-  let lower: string | undefined;
-  for (const [index, upper] of uppers.entries()) {
+  const ranges = uppers.map((upper, index) => ({
+    lower: index === 0 ? undefined : sample.uppers[index - 1],
+    upper,
+  }));
+  const selected = pagesToRunIndices(ranges.length, config.pagesToRun);
+  if (selected.length < ranges.length) {
+    logger.info(
+      `[resolution] test setting: scoring ${selected.length} of ${ranges.length} sampled pages`
+    );
+  }
+  for (const [position, index] of selected.entries()) {
     if (abortSignal?.aborted) {
-      if (index === 0) {
+      if (position === 0) {
         firstTimer.drop();
       }
       logger.info('Resolution scoring aborted between pages');
       return;
     }
-    const sampledRange = { lower, upper };
-    lower = upper;
     yield {
       pageNumber: index + 1,
       resolutionTargetIds: [],
       bounds: undefined,
-      timer: index === 0 ? firstTimer : pageTimings.startPage(),
-      sampledRange,
+      timer: position === 0 ? firstTimer : pageTimings.startPage(),
+      sampledRange: ranges[index],
+      profile: config.pagesToRun !== undefined || undefined,
     };
   }
 };

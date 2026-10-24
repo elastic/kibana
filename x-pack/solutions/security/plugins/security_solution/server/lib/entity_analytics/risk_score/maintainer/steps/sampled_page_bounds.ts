@@ -17,6 +17,11 @@ export interface SampledPagesConfig {
   /** Sampled entity IDs per page: more gives evener pages for a costlier sample. */
   samplesPerPage: number;
   seed?: number;
+  /**
+   * Test setting: score only this many of the sampled pages, spread evenly over the type's IDs,
+   * and profile each of them. The other pages are skipped, so a run measures a sample of pages.
+   */
+  pagesToRun?: number;
 }
 
 export interface SampledPageBounds {
@@ -34,6 +39,17 @@ export interface SampledPageBounds {
 
 export const DEFAULT_SAMPLE_SEED = 42;
 const COMPOSITE_PAGE_SIZE = 10_000;
+
+/**
+ * Which of `pageCount` pages to run, in order: all of them, or `pagesToRun` spread evenly over the
+ * range, one from the middle of each equal share.
+ */
+export const pagesToRunIndices = (pageCount: number, pagesToRun?: number): number[] =>
+  !pagesToRun || pagesToRun >= pageCount
+    ? Array.from({ length: pageCount }, (_, index) => index)
+    : Array.from({ length: pagesToRun }, (_, share) =>
+        Math.floor(((share + 0.5) * pageCount) / pagesToRun)
+      );
 
 /** Sorts after every ID of the type, so it can close the last page's range. */
 export const typeIdsEnd = (entityType: EntityType): string => `${entityType};`;

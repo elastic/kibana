@@ -429,7 +429,7 @@ describe('score_base_entities', () => {
       );
     });
 
-    const run = (pageSize = 100) =>
+    const run = (pageSize = 100, pagesToRun?: number) =>
       collectPages(
         calculateBaseEntityScores({
           esClient,
@@ -438,7 +438,7 @@ describe('score_base_entities', () => {
           createMissingEntities: false,
           ...baseParams,
           pageSize,
-          sampledPages: { targetPageSize: 10, samplesPerPage: 3 },
+          sampledPages: { targetPageSize: 10, samplesPerPage: 3, pagesToRun },
         })
       );
     // The first ES|QL request is the entity count; the rest score pages.
@@ -463,6 +463,25 @@ describe('score_base_entities', () => {
       ]);
       expect(pages.map((page) => page.scores.map((score) => score.id_value))).toEqual([
         ['user:02'],
+        ['user:05'],
+      ]);
+    });
+
+    it('scores only the requested number of sampled pages, each profiled, when a test sets one', async () => {
+      jest
+        .mocked(esClient.esql.query)
+        .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:05')] });
+
+      const pages = await run(100, 1);
+
+      expect(scoringFilters()).toEqual([range({ gt: 'user:03', lte: 'user;' })]);
+      expect(jest.mocked(esClient.esql.query).mock.calls[1][0]).toEqual(
+        expect.objectContaining({ profile: true })
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('scoring 1 of 2 sampled pages')
+      );
+      expect(pages.map((page) => page.scores.map((score) => score.id_value))).toEqual([
         ['user:05'],
       ]);
     });

@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import {
   boundsFromSample,
+  pagesToRunIndices,
   sampleBasePageBounds,
   samplingProbability,
   splitPoint,
@@ -48,6 +49,20 @@ const sampleResponse = (keys: string[], afterKey?: string) =>
 
 const ids = (prefix: string, count: number, from = 0) =>
   Array.from({ length: count }, (_, i) => `${prefix}${String(from + i).padStart(6, '0')}`);
+
+describe('pagesToRunIndices', () => {
+  it('runs every page by default', () => {
+    expect(pagesToRunIndices(4)).toEqual([0, 1, 2, 3]);
+  });
+
+  it('picks the requested number of pages from the middle of equal shares', () => {
+    expect(pagesToRunIndices(10, 3)).toEqual([1, 5, 8]);
+  });
+
+  it('runs every page when asked for at least as many as there are', () => {
+    expect(pagesToRunIndices(3, 5)).toEqual([0, 1, 2]);
+  });
+});
 
 describe('samplingProbability', () => {
   it('gives each page the requested samples, sampling alerts', () => {

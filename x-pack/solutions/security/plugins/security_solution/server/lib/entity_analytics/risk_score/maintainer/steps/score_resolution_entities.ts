@@ -100,6 +100,8 @@ export interface ResolutionPageTask {
   aliasEntities?: Map<string, RiskScoreModifierEntity>;
   /** Sampled pages: the range of targets to read the aliases of when the page starts. */
   sampledRange?: { lower?: string; upper?: string };
+  /** Profile this page's scoring queries regardless of its number. */
+  profile?: boolean;
 }
 
 const readsMembershipFromStore = ({
@@ -263,7 +265,14 @@ const scoreStoreGroups = async (
     alertFilters,
     preAggregateByEntity = false,
   }: ScoreResolutionEntitiesParams,
-  { pageNumber, resolutionTargetIds, bounds, timer, aliasEntities = new Map() }: ResolutionPageTask
+  {
+    pageNumber,
+    resolutionTargetIds,
+    bounds,
+    timer,
+    aliasEntities = new Map(),
+    profile: profileThisPage,
+  }: ResolutionPageTask
 ): Promise<EntityRiskScoreRecord[]> => {
   const targets = await timer.time(
     'memberFetch',
@@ -299,7 +308,7 @@ const scoreStoreGroups = async (
     alertsIndex,
     lookupIndex,
     alertFilters: [...alertFilters, memberFilter],
-    profile: shouldProfilePage(pageNumber),
+    profile: profileThisPage ?? shouldProfilePage(pageNumber),
     timer,
   });
   if (profileSummary) {
