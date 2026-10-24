@@ -7,6 +7,7 @@
 
 import { createHash } from 'node:crypto';
 import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contracts/enrichment';
+import type { IocType } from '../../../common/threat_intel';
 import type { ExtractedIoc, ExtractIocsResult, IocTier } from './extract_iocs';
 
 const SEMANTIC_INDICATOR_PREFIX = 'semantic_indicator:';
@@ -130,8 +131,11 @@ const isSameOrigin = (ioc: ExtractedIoc, articleUrl?: string): boolean => {
   return ioc.type === 'domain' && ioc.value.toLowerCase() === articleHost;
 };
 
+const SEMANTIC_CANDIDATE_TYPES: ReadonlySet<IocType> = new Set(['url', 'domain', 'hash']);
+const isSemanticCandidateType = (type: IocType): boolean => SEMANTIC_CANDIDATE_TYPES.has(type);
+
 const isSemanticCandidate = (ioc: ExtractedIoc): boolean =>
-  (ioc.type === 'url' || ioc.type === 'domain') && PROMOTABLE_TIERS.has(ioc.tier);
+  isSemanticCandidateType(ioc.type) && PROMOTABLE_TIERS.has(ioc.tier);
 
 const tierPriority = (tier: IocTier): number => {
   if (tier === 'discriminating') return 0;
@@ -394,12 +398,13 @@ export const reconcileIocAdjudication = (
         );
   }
 
-  // Deferred URL/domain candidates keep heuristic tiers in `iocs`, but stay out
-  // of anchors / promotion until a model pass reviews them. Correlation hash is separate.
+  // Deferred URL/domain/hash candidates keep heuristic tiers in `iocs`, but stay
+  // out of anchors / promotion until a model pass reviews them. Correlation hash
+  // is separate.
   for (let index = 0; index < output.length; index++) {
     const ioc = output[index];
     if (
-      (ioc.type === 'url' || ioc.type === 'domain') &&
+      isSemanticCandidateType(ioc.type) &&
       PROMOTABLE_TIERS.has(ioc.tier) &&
       !reviewedIndexes.has(index)
     ) {
@@ -414,7 +419,7 @@ export const reconcileIocAdjudication = (
 
   const anchorIocs = strippedOutput.filter((ioc, index) => {
     if (!PROMOTABLE_TIERS.has(ioc.tier)) return false;
-    if ((ioc.type === 'url' || ioc.type === 'domain') && !reviewedIndexes.has(index)) {
+    if (isSemanticCandidateType(ioc.type) && !reviewedIndexes.has(index)) {
       return false;
     }
     return true;

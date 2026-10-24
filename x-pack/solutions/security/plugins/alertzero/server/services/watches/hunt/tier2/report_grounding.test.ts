@@ -111,6 +111,205 @@ describe('assertEsqlGroundedInReport', () => {
     });
   });
 
+  describe('excluded IOC denylist', () => {
+    const excluded = '169.254.169.254';
+    const reportWithExcluded = `${reportText} Metadata endpoint ${excluded} appeared in the article.`;
+
+    it('rejects a query whose only predicate is an excluded value even when it is in the report', () => {
+      const query = `FROM logs-* | WHERE source.ip == "${excluded}" | LIMIT 10`;
+      const result = assertEsqlGroundedInReport(query, {
+        reportText: reportWithExcluded,
+        iocValues: [],
+        excludedIocValues: [excluded],
+      });
+      expect(result).toEqual({
+        ok: false,
+        reason: `query filters on a value intel review rejected (${excluded})`,
+      });
+    });
+
+    it.each([
+      ['LIKE', `FROM logs-* | WHERE message LIKE "*${excluded}*" | LIMIT 10`],
+      [
+        'RLIKE',
+        // Same escape shape as the existing RLIKE domain fixtures in this file.
+        String.raw`FROM logs-* | WHERE message RLIKE ".*169\\.254\\.169\\.254.*" | LIMIT 10`,
+      ],
+      ['IN', `FROM logs-* | WHERE source.ip IN ("${excluded}") | LIMIT 10`],
+    ])('rejects a %s query carrying an excluded fragment', (_name, query) => {
+      const result = assertEsqlGroundedInReport(query, {
+        reportText: reportWithExcluded,
+        iocValues: [],
+        excludedIocValues: [excluded],
+      });
+      expect(result.ok).toBe(false);
+      expect(result).toEqual(
+        expect.objectContaining({
+          reason: expect.stringContaining('query filters on a value intel review rejected'),
+        })
+      );
+    });
+
+    it('rejects a compound query that ANDs a grounded predicate with an excluded literal', () => {
+      const query = `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND source.ip == "${excluded}" | LIMIT 10`;
+      const result = assertEsqlGroundedInReport(query, {
+        reportText: reportWithExcluded,
+        iocValues: [],
+        excludedIocValues: [excluded],
+      });
+      expect(result).toEqual({
+        ok: false,
+        reason: `query filters on a value intel review rejected (${excluded})`,
+      });
+    });
+
+    it('lets iocValues win when the same value is also listed as excluded', () => {
+      const query = `FROM logs-* | WHERE source.ip == "${excluded}" | LIMIT 10`;
+      expect(
+        assertEsqlGroundedInReport(query, {
+          reportText: 'unrelated',
+          iocValues: [excluded],
+          excludedIocValues: [excluded],
+        }).ok
+      ).toBe(true);
+    });
+
+    it('is unaffected when excludedIocValues is absent or empty', () => {
+      const query = 'FROM logs-aws.* | WHERE aws.cloudtrail.event_name == "AssumeRole" | LIMIT 100';
+      expect(assertEsqlGroundedInReport(query, { reportText, iocValues }).ok).toBe(true);
+      expect(
+        assertEsqlGroundedInReport(query, { reportText, iocValues, excludedIocValues: [] }).ok
+      ).toBe(true);
+    });
+
+    it('rejects a query that only negates an excluded value', () => {
+      const hash = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+      const query = `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND file.hash.sha256 != "${hash}" | LIMIT 10`;
+      expect(
+        assertEsqlGroundedInReport(query, {
+          reportText: `${reportText} ${hash}`,
+          iocValues: [],
+          excludedIocValues: [hash],
+        })
+      ).toEqual({
+        ok: false,
+        reason: `query filters on a value intel review rejected (${hash})`,
+      });
+
+      const notIn = `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND file.hash.sha256 NOT IN ("${hash}") | LIMIT 10`;
+      expect(
+        assertEsqlGroundedInReport(notIn, {
+          reportText: `${reportText} ${hash}`,
+          iocValues: [],
+          excludedIocValues: [hash],
+        }).ok
+      ).toBe(false);
+    });
+
+    it('does not treat an excluded field-name string as rejecting use of that field', () => {
+      const text = 'whoami ran on web-01 during the intrusion.';
+      const query =
+        'FROM logs-* | WHERE process.name == "whoami" AND host.name == "web-01" | LIMIT 10';
+      expect(
+        assertEsqlGroundedInReport(query, {
+          reportText: text,
+          iocValues: [],
+          excludedIocValues: ['process.name', 'host.name'],
+        }).ok
+      ).toBe(true);
+    });
+
+    describe('fragments and embeddings of a rejected value', () => {
+      const hash = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+      const reportWithBoth = `${reportWithExcluded} The dropper's SHA-256 was ${hash}.`;
+      const options = {
+        reportText: reportWithBoth,
+        iocValues: [],
+        excludedIocValues: [excluded, hash],
+      };
+
+      it.each([
+        [
+          'a LIKE prefix of the rejected address',
+          'FROM logs-* | WHERE source.ip LIKE "169.254.169*" | LIMIT 10',
+          '169.254.169',
+        ],
+        [
+          'a LIKE infix of the rejected address',
+          'FROM logs-* | WHERE message LIKE "*169.254.169*" | LIMIT 10',
+          '169.254.169',
+        ],
+        [
+          'a LIKE prefix of the rejected hash',
+          'FROM logs-* | WHERE file.hash.sha256 LIKE "deadbeefdeadbeefdeadbeef*" | LIMIT 10',
+          'deadbeefdeadbeefdeadbeef',
+        ],
+      ])(
+        'rejects %s, which grounds on nothing but the rejected mention',
+        (_name, query, fragment) => {
+          expect(assertEsqlGroundedInReport(query, options)).toEqual({
+            ok: false,
+            reason: `query filters on a fragment of a value intel review rejected (${fragment})`,
+          });
+        }
+      );
+
+      it.each([
+        [
+          'a CIDR built on the rejected address',
+          `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND CIDR_MATCH(source.ip, "${excluded}/32") | LIMIT 10`,
+        ],
+        [
+          'a URL under the rejected address',
+          `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND url.full LIKE "*http://${excluded}/latest*" | LIMIT 10`,
+        ],
+        [
+          'an EVAL assignment a later WHERE filters on',
+          `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" | EVAL m = source.ip == "${excluded}" | WHERE m | LIMIT 10`,
+        ],
+      ])('rejects %s even beside a grounded predicate', (_name, query) => {
+        expect(assertEsqlGroundedInReport(query, options)).toEqual({
+          ok: false,
+          reason: `query filters on a value intel review rejected (${excluded})`,
+        });
+      });
+
+      it('keeps a fragment grounded when the report also uses it outside the rejected mention', () => {
+        const text = 'Kubernetes clusters were targeted; the actor read kubernetes.io docs first.';
+        const query = 'FROM logs-* | WHERE message LIKE "*kubernetes*" | LIMIT 10';
+        expect(
+          assertEsqlGroundedInReport(query, {
+            reportText: text,
+            iocValues: [],
+            excludedIocValues: ['kubernetes.io'],
+          }).ok
+        ).toBe(true);
+      });
+
+      it('keeps an eligible URL under a rejected shared-platform root grounded', () => {
+        const repo = 'https://github.com/attacker/stage2';
+        const text = `The dropper was fetched from ${repo} by the loader.`;
+        const eligibleWins = {
+          reportText: text,
+          iocValues: [repo],
+          excludedIocValues: ['github.com'],
+        };
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE url.full == "${repo}" | LIMIT 10`,
+            eligibleWins
+          ).ok
+        ).toBe(true);
+        expect(
+          assertEsqlGroundedInReport(
+            'FROM logs-* | WHERE url.full LIKE "*github.com/attacker/stage2*" | LIMIT 10',
+            eligibleWins
+          ).ok
+        ).toBe(true);
+      });
+    });
+  });
+
   it.each([
     [
       'an EVAL assignment',

@@ -433,6 +433,86 @@ const listValuesOf = (args: ESQLAstNode[]): string[] | undefined => {
   return literals.length === list.values.length ? literals : [];
 };
 
+/**
+ * The first rejected value a literal anywhere in the query carries, or undefined.
+ *
+ * Every function's literals are read, not only the `WHERE` predicates': `EVAL m = source.ip ==
+ * "<rejected>" | WHERE m` filters on the value from an assignment. A literal carries a rejected
+ * value when it equals one or embeds one as a term — a CIDR built on the rejected address, a URL
+ * under the rejected domain — unless an eligible IOC embeds the literal the same way (an approved
+ * URL under a rejected shared-platform root), in which case the eligible IOC wins as it does for
+ * an exact match. `LIKE` patterns are read as their wildcard-free fragments so the `*` around a
+ * fragment is not itself taken for an embedding.
+ */
+const rejectedValueCarriedBy = (
+  query: ESQLAstQueryExpression,
+  rejected: ReadonlySet<string>,
+  eligible: ReadonlySet<string>
+): string | undefined => {
+  const eligibleValues = [...eligible];
+  let found: string | undefined;
+  Walker.walk(query, {
+    visitFunction: (fn) => {
+      if (found !== undefined) return;
+      const operator = fn.name.toLowerCase();
+      const literals = listValuesOf(fn.args) ?? literalsOf(fn.args);
+      for (const literal of literals) {
+        const candidates =
+          operator === 'like'
+            ? literal.split(LIKE_WILDCARDS)
+            : groundingRequirements(operator, literal).flat();
+        for (const candidate of candidates) {
+          const value = normalize(candidate);
+          if (value.length < MIN_GROUNDING_LENGTH) continue;
+          if (rejected.has(value)) {
+            found = value;
+            return;
+          }
+          if (eligibleValues.some((ioc) => ioc.includes(value))) continue;
+          for (const rejectedValue of rejected) {
+            if (appearsAsTerm(value, rejectedValue)) {
+              found = rejectedValue;
+              return;
+            }
+          }
+        }
+      }
+    },
+  });
+  return found;
+};
+
+/**
+ * `text` with every term occurrence of a rejected value blanked, so no fragment of one can ground
+ * a pattern. An occurrence inside an eligible IOC's own occurrence is kept: the `github.com` in an
+ * approved `https://github.com/<actor>/<repo>` is that IOC's text, not a rejected mention.
+ * Blanks keep the length so the occurrence offsets stay valid while scanning.
+ */
+const withoutRejectedMentions = (
+  text: string,
+  rejected: ReadonlySet<string>,
+  eligible: ReadonlySet<string>
+): string => {
+  const kept: Array<[number, number]> = [];
+  for (const ioc of eligible) {
+    for (let at = text.indexOf(ioc); at !== -1; at = text.indexOf(ioc, at + 1)) {
+      kept.push([at, at + ioc.length]);
+    }
+  }
+  let scrubbed = text;
+  for (const value of rejected) {
+    for (let at = scrubbed.indexOf(value); at !== -1; at = scrubbed.indexOf(value, at + 1)) {
+      const end = at + value.length;
+      const before = scrubbed[at - 1] ?? ' ';
+      const after = scrubbed[end] ?? ' ';
+      if (WORD_CHARACTER.test(before) || WORD_CHARACTER.test(after)) continue;
+      if (kept.some(([start, stop]) => at < stop && end > start)) continue;
+      scrubbed = `${scrubbed.slice(0, at)}${' '.repeat(value.length)}${scrubbed.slice(end)}`;
+    }
+  }
+  return scrubbed;
+};
+
 interface GroundingRules {
   /** Whether a literal read by this operator is a value drawn from the report. */
   grounds: (operator: string, literal: string) => boolean;
@@ -539,7 +619,11 @@ const isPipelineGrounded = (
  */
 export const assertEsqlGroundedInReport = (
   query: string,
-  { reportText, iocValues }: { reportText: string; iocValues: string[] }
+  {
+    reportText,
+    iocValues,
+    excludedIocValues,
+  }: { reportText: string; iocValues: string[]; excludedIocValues?: string[] }
 ): EsqlGroundedResult => {
   const { root, errors } = Parser.parse(query);
   if (errors.length > 0) {
@@ -559,29 +643,85 @@ export const assertEsqlGroundedInReport = (
   const sources = new Set<string>();
   Walker.walk(root, { visitSource: ({ name }) => sources.add(normalize(name)) });
 
-  const haystack = normalize(reportText);
   const groundingIocs = new Set(iocValues.map(normalize).filter((value) => value.length > 0));
+  // Adjudicated-out values must not ground a query even when they appear in report text. A value
+  // still listed in `iocValues` wins (eligible to hunt), so it is removed from the denylist.
+  const excludedSet = new Set(
+    (excludedIocValues ?? [])
+      .map(normalize)
+      .filter((value) => value.length >= MIN_GROUNDING_LENGTH && !groundingIocs.has(value))
+  );
+  const rejected =
+    excludedSet.size > 0 ? rejectedValueCarriedBy(root, excludedSet, groundingIocs) : undefined;
+  if (rejected !== undefined) {
+    return {
+      ok: false,
+      reason: `query filters on a value intel review rejected (${rejected})`,
+    };
+  }
 
-  const qualifies = (candidate: string, standalone: boolean): boolean => {
-    const value = normalize(candidate);
-    if (value.length < MIN_GROUNDING_LENGTH || sources.has(value)) {
-      return false;
-    }
-    if (groundingIocs.has(value)) {
-      return true;
-    }
-    return standalone ? appearsAsTerm(haystack, value) : haystack.includes(value);
-  };
+  // A rejected mention cannot lend its text to a pattern either. With `169.254.169.254` in the
+  // report, `LIKE "169.254.169*"` carries no rejected value yet grounds on nothing but that
+  // mention, so the mentions are blanked out of the text the fragments are checked against. A
+  // fragment the report also uses on its own (`kubernetes` as a word, not only inside a rejected
+  // `kubernetes.io`) still grounds; one found nowhere else no longer does.
+  const rawHaystack = normalize(reportText);
+  const haystack =
+    excludedSet.size > 0
+      ? withoutRejectedMentions(rawHaystack, excludedSet, groundingIocs)
+      : rawHaystack;
 
-  const grounds = (operator: string, literal: string): boolean => {
-    const standalone = !PATTERN_OPERATORS.has(operator);
-    return groundingRequirements(operator, literal).every((alternatives) =>
-      alternatives.some((candidate) => qualifies(candidate, standalone))
-    );
-  };
+  const qualifiesIn =
+    (text: string) =>
+    (candidate: string, standalone: boolean): boolean => {
+      const value = normalize(candidate);
+      if (value.length < MIN_GROUNDING_LENGTH || sources.has(value)) {
+        return false;
+      }
+      if (groundingIocs.has(value)) {
+        return true;
+      }
+      return standalone ? appearsAsTerm(text, value) : text.includes(value);
+    };
+
+  const groundsIn =
+    (text: string) =>
+    (operator: string, literal: string): boolean => {
+      const standalone = !PATTERN_OPERATORS.has(operator);
+      const qualifies = qualifiesIn(text);
+      return groundingRequirements(operator, literal).every((alternatives) =>
+        alternatives.some((candidate) => qualifies(candidate, standalone))
+      );
+    };
+
+  const grounds = groundsIn(haystack);
 
   if (isPipelineGrounded(root, grounds)) {
     return { ok: true };
+  }
+
+  // Grounded only while the rejected mentions were still in the text: the query steers on a
+  // fragment of a rejected value. Name the fragment so the retry instruction can say which.
+  if (excludedSet.size > 0 && isPipelineGrounded(root, groundsIn(rawHaystack))) {
+    const qualifiesRaw = qualifiesIn(rawHaystack);
+    const qualifiesScrubbed = qualifiesIn(haystack);
+    let fragment: string | undefined;
+    Walker.walk(root, {
+      visitLiteral: (literal) => {
+        if (fragment !== undefined) return;
+        fragment = groundingRequirements('like', valueOf(literal))
+          .flat()
+          .find(
+            (candidate) => qualifiesRaw(candidate, false) && !qualifiesScrubbed(candidate, false)
+          );
+      },
+    });
+    return {
+      ok: false,
+      reason: `query filters on a fragment of a value intel review rejected${
+        fragment !== undefined ? ` (${normalize(fragment)})` : ''
+      }`,
+    };
   }
 
   // Deliberately permissive — it only chooses the wording of a rejection, never accepts one — so
