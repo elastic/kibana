@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { StreamsV2 } from '@kbn/streams-schema';
 import type { DestinationNameValidationError } from './destination_helpers';
 
 /**
@@ -17,7 +18,7 @@ export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
 /** Unit destination types the UI can list and create. */
 export type DestinationType = 'elasticsearch';
 
-export type DestinationSignal = 'logs' | 'metrics' | 'traces';
+export type DestinationSignal = StreamsV2.OtlpSignal;
 
 /** Default write-role globs for auto destinations, one per ingest signal. */
 export const AUTO_INDEX_PATTERNS: readonly string[] = ['logs-*-*', 'metrics-*-*', 'traces-*-*'];

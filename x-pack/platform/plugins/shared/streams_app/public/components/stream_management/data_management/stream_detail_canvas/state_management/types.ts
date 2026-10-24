@@ -9,6 +9,12 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { XYPosition } from '@xyflow/react';
 import type { Unit, UnitRepository } from '../../../../../services/unit_repository';
+import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
+import type {
+  ProcessingFlyoutActorRef,
+  ProcessingSaveRequest,
+  ProcessingStepPosition,
+} from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
 import type { DestinationsActorRef } from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
 import type { SourcesActorRef } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
 import type { SourceApiKeyGenerationDeps } from '../../../../streams_layout/sources/source_api_keys';
@@ -55,6 +61,13 @@ export const defaultCanvasUrlState: CanvasUrlInput = {
 export type RouteEditModes = 'processing' | 'routing';
 export type RouteEdit = [string, RouteEditModes];
 
+export interface CanvasProcessingFlyout {
+  slot: ProcessingNodeRef;
+  ref: ProcessingFlyoutActorRef;
+  /** Set when `slot` is the pipeline a shared source line moves onto when the processing saves. */
+  line?: UnitLine;
+}
+
 export interface CanvasState {
   urlState: CanvasUrlInput;
   unit: Unit;
@@ -62,8 +75,13 @@ export interface CanvasState {
   savingUnit?: Unit;
   savingComponentIds?: string[];
   savingComponentKind?: 'source' | 'destination';
-  savingComponentIntent?: 'create' | 'delete' | 'connect';
+  savingComponentIntent?: 'create' | 'delete' | 'connect' | 'processing';
   editingRoute: Partial<RouteEdit>;
+  processingFlyout?: CanvasProcessingFlyout;
+  /** Staged unit to return to when a processing flyout save fails. */
+  processingRollbackUnit?: Unit;
+  /** Processor ids written for the flyout's steps, in step order, while they save. */
+  processingSaveIds?: string[];
   nodePositions: Record<string, XYPosition>;
   sourcesRef: SourcesActorRef;
   destinationsRef: DestinationsActorRef;
@@ -108,4 +126,13 @@ export type CanvasUrlEvent =
   | { type: 'flyout.close' }
   | { type: 'search.change'; query: string }
   | { type: 'routing.edit.open'; edgeId: string; mode: RouteEditModes }
-  | { type: 'routing.edit.close' };
+  | { type: 'routing.edit.close' }
+  | {
+      type: 'processing.open';
+      slot: ProcessingNodeRef;
+      /** Starts creating a processor at this end of the slot's list. */
+      position?: ProcessingStepPosition;
+    }
+  | { type: 'processing.open'; line: UnitLine }
+  | { type: 'processing.close' }
+  | ProcessingSaveRequest;
