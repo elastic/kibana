@@ -6,8 +6,7 @@
  */
 
 import { parseMermaidDecisionTree } from '@kbn/nightshift-decision-trees';
-import { gradeSubmissions, parseSubmissions, parseTreeMarkdown } from './arguments';
-import { reinforcementExamples } from './traces';
+import { gradeSubmissions, parseSubmissions } from './arguments';
 
 const PRIOR = `flowchart TD
     S1([EQL SLO burn]) --> E1[Read errors]
@@ -54,6 +53,7 @@ describe('gradeSubmissions', () => {
       ],
       prior,
       submitted,
+      response: '{"status":"confirmed","candidate":"pod deleted"}',
     });
 
     expect(score).toBe(1);
@@ -71,6 +71,7 @@ describe('gradeSubmissions', () => {
       ],
       prior,
       submitted: prior,
+      response: '{"status":"confirmed","candidate":"pod deleted"}',
     });
 
     expect(score).toBe(0);
@@ -92,6 +93,7 @@ describe('gradeSubmissions', () => {
       ],
       prior,
       submitted: prior,
+      response: '{"status":"confirmed","candidate":"pod deleted"}',
     });
 
     expect(score).toBe(0);
@@ -111,6 +113,7 @@ describe('gradeSubmissions', () => {
       ],
       prior,
       submitted: prior,
+      response: 'No confirmed cause.',
     });
 
     expect(score).toBe(0);
@@ -118,17 +121,115 @@ describe('gradeSubmissions', () => {
   });
 
   it('scores a missing submit as zero', () => {
-    expect(gradeSubmissions({ submissions: [], prior, submitted }).score).toBe(0);
+    expect(gradeSubmissions({ submissions: [], prior, submitted, response: '' }).score).toBe(0);
     expect(parseSubmissions(undefined)).toEqual([]);
     expect(parseSubmissions('not-json')).toEqual([]);
   });
-});
 
-describe('reinforcement examples', () => {
-  it('parses every committed prior tree', () => {
-    for (const example of reinforcementExamples) {
-      const { tree_id: treeId, markdown } = example.input.prior_tree;
-      expect(parseTreeMarkdown(markdown, treeId)?.nodes.length).toBeGreaterThan(0);
-    }
+  it('rejects a submit that records no traversal', () => {
+    const { score, explanation } = gradeSubmissions({
+      submissions: [{ summary: 'Nothing to add.', symptom_trees: [], traversals: [] }],
+      prior,
+      submitted: prior,
+      response: 'No confirmed cause.',
+    });
+
+    expect(score).toBe(0);
+    expect(explanation).toContain('no traversal');
+  });
+
+  it('rejects a confirmed response whose causal path is empty', () => {
+    const { score, explanation } = gradeSubmissions({
+      submissions: [
+        {
+          traversals: [
+            {
+              tree_id: 'symptom:eql-slo-burn-rate',
+              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              causal_path: [],
+            },
+          ],
+        },
+      ],
+      prior,
+      submitted: prior,
+      response: '{"status":"confirmed","candidate":"pod deleted"}',
+    });
+
+    expect(score).toBe(0);
+    expect(explanation).toContain('causal_path');
+    expect(explanation).toContain('empty');
+  });
+
+  it('accepts a new tree when the round did not start from a prior one', () => {
+    const { score } = gradeSubmissions({
+      submissions: [
+        {
+          symptom_trees: [{ tree_id: 'symptom:eql-slo-burn-rate', merged_nodes: [] }],
+          traversals: [
+            {
+              tree_id: 'symptom:eql-slo-burn-rate',
+              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              causal_path: [],
+            },
+          ],
+        },
+      ],
+      prior: undefined,
+      submitted: prior,
+      response: 'No confirmed cause.',
+    });
+
+    expect(score).toBe(1);
+  });
+
+  it('rejects declared merges when the round has no prior tree', () => {
+    const { score, explanation } = gradeSubmissions({
+      submissions: [
+        {
+          symptom_trees: [
+            {
+              tree_id: 'symptom:eql-slo-burn-rate',
+              merged_nodes: [{ from: ['E3'], into: 'E2' }],
+            },
+          ],
+          traversals: [
+            {
+              tree_id: 'symptom:eql-slo-burn-rate',
+              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              causal_path: [],
+            },
+          ],
+        },
+      ],
+      prior: undefined,
+      submitted: prior,
+      response: 'No confirmed cause.',
+    });
+
+    expect(score).toBe(0);
+    expect(explanation).toContain('no prior tree');
+  });
+
+  it('rejects a causal path when the response does not confirm a cause', () => {
+    const { score, explanation } = gradeSubmissions({
+      submissions: [
+        {
+          traversals: [
+            {
+              tree_id: 'symptom:eql-slo-burn-rate',
+              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              causal_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+            },
+          ],
+        },
+      ],
+      prior,
+      submitted: prior,
+      response: '{"status":"rejected","candidate":"proxy errors limited to one pod"}',
+    });
+
+    expect(score).toBe(0);
+    expect(explanation).toContain('does not confirm a cause');
   });
 });

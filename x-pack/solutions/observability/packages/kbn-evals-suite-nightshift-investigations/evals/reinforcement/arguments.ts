@@ -12,9 +12,39 @@ import {
   resolveEdgeRefs,
 } from '@kbn/nightshift-decision-trees';
 import type { DecisionEdgeRef, DecisionTreeView } from '@kbn/nightshift-decision-trees';
-import type { EdgeRef, SubmitArguments } from './types';
+import type { EdgeRef, SubmitArguments, TraversalSubmission } from './types';
 
 const SUBMIT_TOOL = 'nightshift_submit_optimizer_result';
+
+/**
+ * Same signal `deriveCausalConfirmed` uses in the reinforcement turn script: a confirmed
+ * hypothesis is what makes a path causal.
+ */
+const CONFIRMED_CAUSE_RE = /"status"\s*:\s*"confirmed"|\bstatus:\s*['"]?confirmed\b/i;
+
+/** Keeps the merges and traversals that name `treeId`, so one submit can be graded per tree. */
+export const submissionsForTree = (
+  submissions: SubmitArguments[],
+  treeId: string
+): SubmitArguments[] =>
+  submissions.map((submission) => ({
+    ...submission,
+    symptom_trees: (submission.symptom_trees ?? []).filter(
+      (tree) => !tree.tree_id || tree.tree_id === treeId
+    ),
+    traversals: (submission.traversals ?? []).filter(
+      (traversal) => !traversal.tree_id || traversal.tree_id === treeId
+    ),
+  }));
+
+/** Tree ids named on one submit call, in first-seen order. */
+export const treeIdsInSubmission = (submission: SubmitArguments | undefined): string[] => {
+  const ids = [
+    ...(submission?.traversals ?? []).map((traversal) => traversal.tree_id),
+    ...(submission?.symptom_trees ?? []).map((tree) => tree.tree_id),
+  ].filter((id): id is string => Boolean(id));
+  return [...new Set(ids)];
+};
 
 /** Parses the reinforce step's `submissions_json`. A bad payload is no submissions. */
 export const parseSubmissions = (json: string | undefined): SubmitArguments[] => {
@@ -64,18 +94,22 @@ const formatArguments = (submission: SubmitArguments): string =>
   );
 
 /**
- * Structural check of the last submit call against the tree before the run and the tree after it.
- * A score of 1 means the arguments are consistent with those two trees. Whether the merges and
- * paths are the right ones for the investigation is the LLM judge's job.
+ * Structural check of the last submit call against the investigation response, the tree before
+ * the run, and the tree after it. A score of 1 means the agent passed a traversal for this tree,
+ * the visit path is non-empty, the causal path is present only when the response confirms a
+ * cause, and any declared merges agree with the two trees. Whether those merges and paths are
+ * the right ones for the investigation is the LLM judge's job.
  */
 export const gradeSubmissions = ({
   submissions,
   prior,
   submitted,
+  response,
 }: {
   submissions: SubmitArguments[];
   prior: DecisionTreeView | undefined;
   submitted: DecisionTreeView | undefined;
+  response: string;
 }): { score: 0 | 1; explanation: string } => {
   if (submissions.length === 0) {
     return {
@@ -87,9 +121,10 @@ export const gradeSubmissions = ({
   const last = submissions[submissions.length - 1];
   const problems: string[] = [];
   const treeId = submitted?.tree_id ?? prior?.tree_id;
-  if (!prior || !submitted || !treeId) {
-    problems.push('The prior or submitted tree could not be parsed.');
+  if (!submitted || !treeId) {
+    problems.push('The submitted tree could not be parsed.');
   } else {
+    problems.push(...traversalProblems(last, treeId, response));
     problems.push(...mergeProblems(last, prior, submitted));
     problems.push(...pathProblems(last, submitted));
   }
@@ -104,12 +139,54 @@ export const gradeSubmissions = ({
   };
 };
 
+const traversalsForTree = (submission: SubmitArguments, treeId: string): TraversalSubmission[] =>
+  (submission.traversals ?? []).filter(
+    (traversal) => !traversal.tree_id || traversal.tree_id === treeId
+  );
+
+/** The submit has to name the path this round followed, and a causal path only when it confirmed one. */
+const traversalProblems = (
+  submission: SubmitArguments,
+  treeId: string,
+  response: string
+): string[] => {
+  const traversals = traversalsForTree(submission, treeId);
+  if (traversals.length === 0) {
+    return [`The submit has no traversal for ${treeId}.`];
+  }
+  const confirmed = CONFIRMED_CAUSE_RE.test(response);
+  const problems: string[] = [];
+  for (const traversal of traversals) {
+    if ((traversal.visited_path ?? []).length === 0) {
+      problems.push(`visited_path for ${treeId} is empty.`);
+    }
+    const causal = traversal.causal_path ?? [];
+    if (confirmed && causal.length === 0) {
+      problems.push(`The response confirms a cause, but causal_path for ${treeId} is empty.`);
+    }
+    if (!confirmed && causal.length > 0) {
+      problems.push(`The response does not confirm a cause, but causal_path for ${treeId} is set.`);
+    }
+  }
+  return problems;
+};
+
 const mergeProblems = (
   submission: SubmitArguments,
-  prior: DecisionTreeView,
+  prior: DecisionTreeView | undefined,
   submitted: DecisionTreeView
 ): string[] => {
   const problems: string[] = [];
+  if (!prior) {
+    const declared = (submission.symptom_trees ?? []).some(
+      (tree) =>
+        (!tree.tree_id || tree.tree_id === submitted.tree_id) &&
+        (tree.merged_nodes ?? []).length > 0
+    );
+    return declared
+      ? ['merged_nodes were declared, but this round has no prior tree to merge.']
+      : [];
+  }
   const priorIds = new Set(prior.nodes.map((node) => node.node_id));
   const submittedIds = new Set(submitted.nodes.map((node) => node.node_id));
   const absorbed = new Set<string>();

@@ -160,7 +160,8 @@ export const toInvestigationReport = ({
 export const runInvestigation = async (
   fetch: HttpHandler,
   example: InvestigationExample,
-  connector: Pick<EvalConnector, 'id'>
+  connector: Pick<EvalConnector, 'id'>,
+  { timeoutMs = INVESTIGATION_TIMEOUT_MS }: { timeoutMs?: number } = {}
 ): Promise<InvestigationTaskOutput> => {
   const started = Date.now();
   const output: InvestigationTaskOutput = {
@@ -185,8 +186,8 @@ export const runInvestigation = async (
     investigation = await readInvestigation(fetch, investigationId);
     while (!investigation || investigation.in_progress) {
       output.workflow_status = 'running';
-      if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
-        const minutes = INVESTIGATION_TIMEOUT_MS / 60_000;
+      if (Date.now() - started > timeoutMs) {
+        const minutes = timeoutMs / 60_000;
         throw new Error(
           investigation
             ? `Investigation was still in progress after ${minutes} minutes`
