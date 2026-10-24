@@ -186,16 +186,28 @@ describe('SandboxConnectorsTable', () => {
     );
   });
 
-  it('locks remove when the user cannot edit the agent', async () => {
+  it('locks remove and delete when the user cannot edit the agent', async () => {
     setup({ connectors: [connector('github')], canUpdateAgent: false });
 
     expect(await screen.findByTestId('nightshiftConnectorRemove-github')).toBeDisabled();
+    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
   });
 
-  it('locks remove without the Agent Builder manage agents privilege', async () => {
+  it('locks remove and delete without the Agent Builder manage agents privilege', async () => {
     setup({ connectors: [connector('github')], canManageAgents: false });
 
     expect(await screen.findByTestId('nightshiftConnectorRemove-github')).toBeDisabled();
+    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
+  });
+
+  it('locks delete without the connector delete privilege', async () => {
+    setup({
+      connectors: [connector('github')],
+      capabilities: { show: true, save: true, delete: false },
+    });
+
+    expect(await screen.findByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
+    expect(screen.getByTestId('nightshiftConnectorRemove-github')).toBeEnabled();
   });
 
   it('reports an update that failed', async () => {

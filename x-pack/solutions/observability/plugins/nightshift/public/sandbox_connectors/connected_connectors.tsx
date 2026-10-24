@@ -23,12 +23,9 @@ import { useFetchSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { useAgentConnectors } from './use_agent_connectors';
 import { useEditConnector } from './use_edit_connector';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
+import { preconfiguredTooltip } from './sandbox_connectors';
 import { SourceCard } from './source_card';
 import { sourceGridStyles } from './source_grid_styles';
-
-const preconfiguredTooltip = i18n.translate('xpack.nightshift.connectedConnectors.preconfigured', {
-  defaultMessage: 'This connector is configured in kibana.yml and cannot be changed here.',
-});
 
 const noPermissionTooltip = i18n.translate('xpack.nightshift.connectedConnectors.noPermission', {
   defaultMessage: 'You need permission to edit connectors.',
@@ -64,11 +61,12 @@ export function ConnectedConnectors({
   const connected = (data?.connectors ?? []).filter(({ id }) => agent.assignedIds.includes(id));
   const isEmpty = connected.length === 0;
   if (defaultOpen.current === undefined) defaultOpen.current = isEmpty;
+  const isExpanded = isOpen ?? defaultOpen.current;
 
   return (
     <EuiAccordion
       id={accordionId}
-      forceState={isOpen ?? defaultOpen.current ? 'open' : 'closed'}
+      forceState={isExpanded ? 'open' : 'closed'}
       onToggle={setIsOpen}
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

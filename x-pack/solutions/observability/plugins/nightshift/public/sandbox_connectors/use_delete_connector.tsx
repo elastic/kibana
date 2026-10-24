@@ -29,7 +29,8 @@ export function useDeleteConnector(): {
     if (!pending) return;
     setPending(undefined);
     try {
-      await agentBuilder?.agents.removeConnectorFromAgent({
+      if (!agentBuilder) throw new Error('Agent Builder is unavailable');
+      await agentBuilder.agents.removeConnectorFromAgent({
         agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
         connectorId: pending.id,
       });

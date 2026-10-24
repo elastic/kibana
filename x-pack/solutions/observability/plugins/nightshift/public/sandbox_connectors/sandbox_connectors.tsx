@@ -31,9 +31,10 @@ import { useDeleteConnector } from './use_delete_connector';
 import { useEditConnector } from './use_edit_connector';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 
-const preconfiguredTooltip = i18n.translate('xpack.nightshift.sandboxConnectors.preconfigured', {
-  defaultMessage: 'This connector is configured in kibana.yml and cannot be changed here.',
-});
+export const preconfiguredTooltip = i18n.translate(
+  'xpack.nightshift.sandboxConnectors.preconfigured',
+  { defaultMessage: 'This connector is configured in kibana.yml and cannot be changed here.' }
+);
 
 const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors';
 
@@ -134,11 +135,13 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
           });
           const deleteDisabledReason = connector.is_preconfigured
             ? preconfiguredTooltip
-            : canDelete
-            ? undefined
-            : i18n.translate('xpack.nightshift.sandboxConnectors.deleteNoPermission', {
+            : !canDelete
+            ? i18n.translate('xpack.nightshift.sandboxConnectors.deleteNoPermission', {
                 defaultMessage: 'You need permission to delete connectors.',
-              });
+              })
+            : !canEditAgent
+            ? noAgentPermissionReason
+            : undefined;
           return (
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
