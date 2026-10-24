@@ -28,6 +28,10 @@ import {
   enabledRuleForBulkOpsWithActions2WithUiam,
 } from '../../../../rules_client/tests/test_helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import type { AlertsService } from '../../../../alerts_service';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
@@ -39,6 +43,17 @@ import type { RegistryRuleType } from '../../../../rule_type_registry';
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
+  bulkMigrateLegacyActions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => ({
   softDeleteGapsByQuery: jest.fn(),
@@ -87,6 +102,7 @@ const getBulkOperationStatusErrorResponse = (statusCode: number, message = 'UPS'
 beforeEach(() => {
   jest.clearAllMocks();
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
+  (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
 });
 
 setGlobalDate();
@@ -212,6 +228,34 @@ describe('bulkDelete', () => {
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
+    });
+  });
+
+  describe('legacy SIEM actions', () => {
+    test('migrates the legacy actions in memory so the deleted rules are returned with them', async () => {
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(bulkMigrateLegacyActions).toHaveBeenCalledWith(
+        expect.objectContaining({ skipActionsValidation: true })
+      );
+    });
+
+    test('deletes the legacy actions only for the migrated rules that were deleted', async () => {
+      (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['id1', 'id2']);
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          getBulkOperationStatusErrorResponse(500),
+          { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['id1']);
+      expect(
+        (unsecuredSavedObjectsClient.bulkDelete as jest.Mock).mock.invocationCallOrder[0]
+      ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
     });
   });
 

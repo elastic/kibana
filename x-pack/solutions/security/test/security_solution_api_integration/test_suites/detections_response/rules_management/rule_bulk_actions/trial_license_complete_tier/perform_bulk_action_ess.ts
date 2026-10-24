@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { v4 as uuidv4 } from 'uuid';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
@@ -51,9 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
-  // Failing: See https://github.com/elastic/kibana/issues/196462
-
-  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
+  describe('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -175,73 +174,91 @@ export default ({ getService }: FtrProviderContext): void => {
       await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(404);
     });
 
-    it('should enable rules and migrate actions', async () => {
-      const ruleId = 'ruleId';
-      const [connector, rule] = await Promise.all([
-        supertest
-          .post(`/api/actions/connector`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'My action',
-            connector_type_id: '.slack',
-            secrets: {
-              webhookUrl: 'http://localhost:1234',
-            },
-          }),
-        createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: ruleId,
-            index: ['*'],
-            interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
-            enabled: false,
+    describe('enable action', () => {
+      // Empty index owned by these tests. A rule matching every index hits the maximum alert limit once other tests leave data behind. Only used in this test because it
+      // is the only test that verifies that a rule ran
+      const enableTestIndex = `bulk-action-enable-test-${uuidv4()}`;
+
+      beforeEach(async () => {
+        await es.indices.create({
+          index: enableTestIndex,
+          mappings: { properties: { '@timestamp': { type: 'date' } } },
+        });
+      });
+
+      afterEach(async () => {
+        await es.indices.delete({ index: enableTestIndex, ignore_unavailable: true });
+      });
+
+      it('should enable rules and migrate actions', async () => {
+        const ruleId = 'ruleId';
+        const [connector, rule] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: ruleId,
+              index: [enableTestIndex],
+              interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+              enabled: false,
+            })
+          ),
+        ]);
+        await createLegacyRuleAction(supertest, rule.id, connector.body.id);
+
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).toBe(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule.id);
+
+        const { body } = await detectionsApi
+          .performRulesBulkAction({
+            body: { query: '', action: BulkActionTypeEnum.enable },
+            query: {},
           })
-        ),
-      ]);
-      await createLegacyRuleAction(supertest, rule.id, connector.body.id);
+          .expect(200);
 
-      // check for legacy sidecar action
-      const sidecarActionsResults = await getLegacyActionSO(es);
-      expect(sidecarActionsResults.hits.hits.length).toBe(1);
-      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule.id);
+        expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
-      const { body } = await detectionsApi
-        .performRulesBulkAction({
-          body: { query: '', action: BulkActionTypeEnum.enable },
-          query: {},
-        })
-        .expect(200);
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].enabled).toBeTruthy();
 
-      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+        // Check that the updates have been persisted
+        const { body: ruleBody } = await detectionsApi
+          .readRule({ query: { rule_id: ruleId } })
+          .expect(200);
 
-      // Check that the updated rule is returned with the response
-      expect(body.attributes.results.updated[0].enabled).toBeTruthy();
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
 
-      // Check that the updates have been persisted
-      const { body: ruleBody } = await detectionsApi
-        .readRule({ query: { rule_id: ruleId } })
-        .expect(200);
-
-      // legacy sidecar action should be gone
-      const sidecarActionsPostResults = await getLegacyActionSO(es);
-      expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
-
-      expect(ruleBody.enabled).toBeTruthy();
-      expect(ruleBody.actions).toEqual([
-        {
-          action_type_id: '.slack',
-          group: 'default',
-          id: connector.body.id,
-          params: {
-            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+        expect(ruleBody.enabled).toBeTruthy();
+        expect(ruleBody.actions).toEqual([
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector.body.id,
+            params: {
+              message:
+                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+            uuid: expect.any(String),
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
-          uuid: expect.any(String),
-          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
-        },
-      ]);
-      // we want to ensure rule is executing successfully, to prevent any AAD issues related to partial update of rule SO
-      await waitForRuleSuccess({ id: rule.id, supertest, log });
+        ]);
+        // we want to ensure rule is executing successfully, to prevent any AAD issues related to partial update of rule SO
+        await waitForRuleSuccess({ id: rule.id, supertest, log });
+      });
     });
 
     it('should disable rules and migrate actions', async () => {
@@ -712,7 +729,10 @@ export default ({ getService }: FtrProviderContext): void => {
             ),
             createRuleThroughAlertingEndpoint(
               supertest,
-              getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+              // The fixture has the same name as the legacy rule, and the assertions below tell the rules apart by name
+              getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray({
+                name: 'Test investigation fields empty array',
+              })
             ),
             createRule(supertest, log, {
               ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),
@@ -952,7 +972,10 @@ export default ({ getService }: FtrProviderContext): void => {
           ),
           createRuleThroughAlertingEndpoint(
             supertest,
-            getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+            // The fixture has the same name as the legacy rule, and the assertions below tell the rules apart by name
+            getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray({
+              name: 'Test investigation fields empty array',
+            })
           ),
           createRule(supertest, log, {
             ...getCustomQueryRuleParams({ rule_id: 'rule-with-investigation-field' }),

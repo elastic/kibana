@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient } from '../../../../rules_client/rules_client';
@@ -20,6 +21,10 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RuleDomain } from '../../types';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { getRulesClientMockParams } from '../../../../test_utils';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -39,6 +44,17 @@ jest.mock('uuid', () => {
   let uuid = 100;
   return { v4: () => `${uuid++}` };
 });
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
+  bulkMigrateLegacyActions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
@@ -174,6 +190,96 @@ describe('update()', () => {
         params: { validate: (params) => params },
       },
       validLegacyConsumers: [],
+    });
+  });
+
+  describe('legacy SIEM actions', () => {
+    const data = {
+      schedule: { interval: '1m' },
+      name: 'abc',
+      tags: ['foo'],
+      params: { bar: true },
+      actions: [],
+    };
+
+    beforeEach(() => {
+      (bulkMigrateLegacyActions as jest.Mock).mockReset().mockResolvedValue(['1']);
+      (deleteLegacyActionsForRules as jest.Mock).mockReset();
+    });
+
+    test('deletes the migrated legacy actions only after the rule is saved', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: { bar: true },
+          actions: [],
+          notifyWhen: 'onActiveAlert',
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+        },
+        references: [],
+      });
+
+      await rulesClient.update({ id: '1', data });
+
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+      expect(
+        (unsecuredSavedObjectsClient.create as jest.Mock).mock.invocationCallOrder[0]
+      ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+    });
+
+    test('migrates again on the retry after a version conflict, and deletes the legacy actions once the retry saves', async () => {
+      unsecuredSavedObjectsClient.create
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, '1')
+        )
+        .mockResolvedValueOnce({
+          id: '1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: {
+            enabled: true,
+            schedule: { interval: '1m' },
+            params: { bar: true },
+            actions: [],
+            notifyWhen: 'onActiveAlert',
+            revision: 1,
+            scheduledTaskId: 'task-123',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            executionStatus: {
+              lastExecutionDate: '2019-02-12T21:01:22.479Z',
+              status: 'pending',
+            },
+          },
+          references: [],
+        });
+
+      await rulesClient.update({ id: '1', data });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+      expect(bulkMigrateLegacyActions).toHaveBeenCalledTimes(2);
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+      expect(
+        (unsecuredSavedObjectsClient.create as jest.Mock).mock.invocationCallOrder[1]
+      ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+    });
+
+    test('keeps the legacy actions when saving the rule fails, so the retry can migrate them', async () => {
+      unsecuredSavedObjectsClient.create.mockRejectedValue(new Error('Fail'));
+
+      await expect(rulesClient.update({ id: '1', data })).rejects.toThrow('Fail');
+
+      expect(deleteLegacyActionsForRules).not.toHaveBeenCalled();
     });
   });
 

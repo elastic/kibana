@@ -21,7 +21,7 @@ import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { bulkMigrateLegacyActions } from '../../lib';
+import { bulkMigrateLegacyActions, deleteLegacyActionsForRules } from '../../lib';
 import { bulkCreateRulesSo } from '../../../data/rule';
 import type { BulkOperationError, RulesClientContext } from '../../types';
 import {
@@ -74,6 +74,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   const username = await context.getUserName();
   const profileUid = await context.getProfileUid();
   const prevInterval: string[] = [];
+  const migratedRuleIds = new Set<string>();
 
   for await (const response of rulesFinder.find()) {
     if (options.shouldValidateSchedule) {
@@ -85,7 +86,11 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
       prevInterval.concat(intervals);
     }
 
-    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+    const migratedIds = await bulkMigrateLegacyActions({
+      context,
+      rules: response.saved_objects,
+    });
+    migratedIds.forEach((id) => migratedRuleIds.add(id));
 
     await pMap(
       response.saved_objects,
@@ -98,6 +103,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
           errors,
           username,
           profileUid,
+          hasMigratedLegacyActions: migratedRuleIds.has(rule.id),
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );
@@ -168,6 +174,14 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
     changeTracking: options.changeTracking,
   });
+
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  await deleteLegacyActionsForRules(
+    context,
+    result.saved_objects
+      .filter((rule) => !isSavedObjectErrorResult(rule) && migratedRuleIds.has(rule.id))
+      .map(({ id }) => id)
+  );
 
   return {
     apiKeysToInvalidate: options.shouldInvalidateApiKeys ? apiKeysToInvalidate : [],

@@ -14,7 +14,10 @@ import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/li
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -36,6 +39,13 @@ jest.mock('../get_schedule_frequency', () => ({
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
   bulkMigrateLegacyActions: jest.fn(),
 }));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 const {
   rulesClientParams,
@@ -181,6 +191,7 @@ describe('bulkUpdateRules', () => {
     (validateScheduleLimit as jest.Mock).mockReset();
     (bulkMigrateLegacyActions as jest.Mock).mockReset();
     (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
+    (deleteLegacyActionsForRules as jest.Mock).mockReset();
     rulesClient = new RulesClient(rulesClientParams);
     actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockResolvedValue([
@@ -497,6 +508,47 @@ describe('bulkUpdateRules', () => {
   });
 
   describe('legacy actions migration', () => {
+    test('deletes the migrated legacy actions only for the rules that were saved', async () => {
+      (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['id-1', 'id-2']);
+      mockPit([so('id-1'), so('id-2')]);
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([
+          { id: 'id-1' },
+          { id: 'id-2', error: { message: 'boom', statusCode: 500 } },
+        ])
+      );
+
+      await rulesClient.bulkUpdateRules({ rules: [item('id-1'), item('id-2')] });
+
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['id-1']);
+    });
+
+    test('keeps the legacy actions of a conflicted rule until the retry saves it', async () => {
+      (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['id-1', 'id-2']);
+      mockPit(
+        [so('id-1', { version: '1' } as never), so('id-2', { version: '1' } as never)],
+        [so('id-2', { version: '2' } as never)]
+      );
+      unsecuredSavedObjectsClient.bulkCreate
+        .mockResolvedValueOnce(
+          buildBulkResponse([
+            { id: 'id-1' },
+            { id: 'id-2', error: { message: 'conflict', statusCode: 409 } },
+          ])
+        )
+        .mockResolvedValueOnce(buildBulkResponse([{ id: 'id-2' }]));
+
+      await rulesClient.bulkUpdateRules({ rules: [item('id-1'), item('id-2')] });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['id-1', 'id-2']);
+      expect(
+        (unsecuredSavedObjectsClient.bulkCreate as jest.Mock).mock.invocationCallOrder[1]
+      ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+    });
+
     test('migrate throw: log and continue, earlier batch ids kept', async () => {
       mockPit(
         nSos(10),

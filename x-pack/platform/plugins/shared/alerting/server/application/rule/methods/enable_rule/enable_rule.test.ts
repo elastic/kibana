@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { ApiKeyType } from '../../../../task_runner/types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   RULE_SAVED_OBJECT_TYPE,
@@ -23,6 +27,13 @@ jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actio
     bulkMigrateLegacyActions: jest.fn(),
   };
 });
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -117,6 +128,7 @@ describe('enable()', () => {
     });
     taskManager.get.mockResolvedValue(mockTask);
     (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
+    (deleteLegacyActionsForRules as jest.Mock).mockReset();
   });
 
   describe('authorization', () => {
@@ -493,6 +505,47 @@ describe('enable()', () => {
     expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+  });
+
+  test('deletes the migrated legacy actions only after the rule is saved', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+    expect(
+      (unsecuredSavedObjectsClient.create as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
+  test('migrates again on the retry after a version conflict, and deletes the legacy actions once the retry saves', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+    unsecuredSavedObjectsClient.create.mockReset();
+    unsecuredSavedObjectsClient.create
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, '1')
+      )
+      .mockResolvedValueOnce({} as never);
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(bulkMigrateLegacyActions).toHaveBeenCalledTimes(2);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+    expect(
+      (unsecuredSavedObjectsClient.create as jest.Mock).mock.invocationCallOrder[1]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
+  test('keeps the legacy actions when the rule saved object write fails, so the retry can migrate them', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+    unsecuredSavedObjectsClient.create.mockReset();
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail to update'));
+
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrow('Fail to update');
+
+    expect(deleteLegacyActionsForRules).not.toHaveBeenCalled();
   });
 
   test('throws when the rule saved object write fails', async () => {
