@@ -366,6 +366,7 @@ Some functions, like `MATCH`, support named parameters for additional options:
 
 ## Limitations 
 
-- ES|QL currently does not support pagination
+- ES|QL currently does not support pagination: there is no `OFFSET`, no page parameter and no `LIMIT ... OFFSET ...`, and `LIMIT` returns the first n rows only.
+- There are no window functions: `ROW_NUMBER`, `RANK`, `LAG` and `LEAD` are not ES|QL functions. Compute per-group values with `STATS ... BY` instead.
 - A query will never return more than 10000 rows
 - Some field types, such as `binary`, `nested`, and `histogram`, are not yet supported.

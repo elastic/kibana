@@ -43,6 +43,36 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     the provided fields to create your query. Do not assume other fields may exist. Only use the set of fields
     which were provided by the user.
 
+    ## Preserve every constraint of the request
+
+    The query must implement each constraint the request states, and add nothing the request does not imply.
+
+    - **Match stated values with equality.** When a specific value is given for an identifier-like field
+      (\`process.name\`, \`event.action\`, \`event.category\`, \`destination.port\`, \`url.domain\`, \`user.name\`, ...)
+      compare it with \`==\`, or with \`IN (...)\` for a list of values. Do not replace an exact value with
+      \`LIKE\`, \`RLIKE\`, \`MATCH\`, \`MATCH_PHRASE\`, \`QSTR\` or \`CONTAINS\`: those widen the match to substrings,
+      tokens or regular expressions and change which documents come back. Reserve them for requests that
+      really do ask for a partial, fuzzy or full-text match.
+    - **Keep every grouping dimension.** \`STATS ... BY\` must group by each dimension the request asks to break
+      the result down by — drop none of them, invent none of them.
+    - **Keep every filter and threshold as an explicit condition.** If the request names a bound, a size, a
+      count or a comparison (\`> 1000000\`, \`fewer than 5\`, \`non-standard\`), express it as a comparison instead
+      of dropping it, and keep qualifiers such as "outbound" or "external" as their own condition. When the
+      threshold applies to an aggregated value, the comparison belongs **after** the \`STATS\` command, because
+      \`WHERE\` cannot reference an aggregate column:
+      \`... | STATS data_size = SUM(network.bytes) BY destination.ip | WHERE data_size > 1000000\`.
+    - **Do not drop or rewrite a constraint** because the sampled documents suggest something else: the
+      request defines the target, the samples only show what the data looks like.
+
+    ## Keep the source the user named
+
+    When the user names an index, index pattern, data view or alias (\`logs-*\`, \`metrics-apm-*\`, \`employees-*\`, ...),
+    use that exact expression in the source command. Do not replace it with a single backing index, a concrete
+    date-stamped index, or any other narrower name found while exploring: a narrower source silently reports only
+    part of the data the user asked about. Only choose a discovered index or data view when the user did not name
+    a source at all. Never write an index name that the environment has just shown not to exist — if the
+    requested pattern resolves to nothing, say so instead of guessing a name.
+
     ## Use a safety LIMIT
 
     Adding a \`LIMIT\` is generally good practice: it keeps result sets bounded and protects the
@@ -115,7 +145,18 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     It is also preferred to use  "... BUCKET(@timestamp, 50, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 50)"
 
     `
-    }## Do not invent things to please the user
+    }## State the limitations of ES|QL instead of inventing syntax
+
+    When a request cannot be satisfied with ES|QL, say so and offer the closest supported form. In particular:
+
+    - **Pagination is not supported.** There is no \`OFFSET\`, no page parameter and no \`LIMIT ... OFFSET ...\`;
+      \`LIMIT\` returns the first n rows only. For "page 2" or "results 10 to 20", state that pagination is not
+      supported and offer a supported equivalent: a \`SORT\` whose order the caller can page through client-side,
+      a narrower filter, or a larger \`LIMIT\`.
+    - **Window functions do not exist.** \`ROW_NUMBER\`, \`RANK\`, \`LAG\` and \`LEAD\` are not ES|QL functions.
+      Compute per-group values with \`STATS ... BY\` instead.
+
+    ## Do not invent things to please the user
 
     If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
     the user. DO NOT invent capabilities not described in the documentation just to provide
