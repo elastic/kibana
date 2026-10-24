@@ -12,7 +12,12 @@ import * as path from 'path';
 import * as JSON5 from 'json5';
 import { getKibanaDir } from '../../utils.ts';
 import { getModuleLookup } from '../../affected-packages/module_lookup.ts';
-import { FTR_EXCLUDED_MODULES, shouldSkipFtrTests } from './selective_ftr.ts';
+import {
+  FTR_EXCLUDED_MODULES,
+  isPlatformOwnedFtrConfig,
+  resolveAffectedFtrDomains,
+  shouldSkipFtrTests,
+} from './selective_ftr.ts';
 
 /**
  * Instead of asserting specific IDs in/out of the list (which just mirrors the
@@ -198,6 +203,77 @@ describe('shouldSkipFtrTests', () => {
         'src/platform/plugins/shared/discover/test/scout/core/ui/tests/foo.spec.ts',
         'src/platform/plugins/shared/discover/public/application/main.tsx',
       ])
+    ).toBe(false);
+  });
+});
+
+describe('resolveAffectedFtrDomains', () => {
+  it('narrows a solution-only diff to that solution', () => {
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
+      ])
+    ).toEqual({ solutions: new Set(['security']), platformAffected: false });
+  });
+
+  it('collects every touched solution', () => {
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
+        'x-pack/solutions/observability/plugins/apm/public/plugin.ts',
+      ])
+    ).toEqual({ solutions: new Set(['security', 'observability']), platformAffected: false });
+  });
+
+  it('ignores irrelevant files and excluded modules next to a solution change', () => {
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/search/plugins/enterprise_search/public/index.ts',
+        'x-pack/solutions/search/plugins/enterprise_search/README.md',
+        'src/platform/packages/shared/kbn-scout/src/index.ts',
+      ])
+    ).toEqual({ solutions: new Set(['search']), platformAffected: false });
+  });
+
+  it('flags platform and keeps the solutions reached downstream of a platform module', () => {
+    const affected = resolveAffectedFtrDomains([
+      'x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts',
+    ]);
+    expect(affected?.platformAffected).toBe(true);
+    expect(affected?.solutions.has('observability')).toBe(true);
+  });
+
+  it.each([
+    ['a critical path', 'pnpm-lock.yaml'],
+    ['a file outside any module', 'some_random_root_script.sh'],
+  ])('returns null when %s changes', (_, file) => {
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
+        file,
+      ])
+    ).toBeNull();
+  });
+
+  it('returns null when nothing relevant changed', () => {
+    expect(resolveAffectedFtrDomains(['docs/extend/testing.md'])).toBeNull();
+  });
+});
+
+describe('isPlatformOwnedFtrConfig', () => {
+  it('detects platform-owned configs filed in solution manifests', () => {
+    expect(
+      isPlatformOwnedFtrConfig(
+        'x-pack/platform/test/serverless/functional/configs/security/config.group1.ts'
+      )
+    ).toBe(true);
+  });
+
+  it('rejects solution-owned configs', () => {
+    expect(
+      isPlatformOwnedFtrConfig(
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx'
+      )
     ).toBe(false);
   });
 });

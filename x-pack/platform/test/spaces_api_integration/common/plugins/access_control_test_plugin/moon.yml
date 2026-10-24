@@ -23,7 +23,8 @@ dependsOn:
 tags:
   - plugin
   - prod
-  - group-undefined
+  - group-platform
+  - private
 fileGroups:
   src:
     - '**/*.ts'

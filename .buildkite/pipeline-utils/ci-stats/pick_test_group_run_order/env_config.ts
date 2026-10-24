@@ -16,6 +16,8 @@ import {
 
 const VALID_SOLUTIONS = ['observability', 'search', 'security', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
+const VALID_FTR_SOLUTION_SELECTIONS = ['off', 'dry-run', 'enabled'] as const;
+type FtrSolutionSelection = (typeof VALID_FTR_SOLUTION_SELECTIONS)[number];
 
 // Defaults mirror `.buildkite/scripts/common/env.sh` so this script can also run
 // outside the standard Buildkite bootstrap (locally, ad-hoc pipelines, etc.).
@@ -58,6 +60,13 @@ export function loadRunOrderConfig() {
 
     limitConfigType: parseLimitConfigType(),
     limitSolutions: parseLimitSolutions(),
+    ftrSolutionSelection: parseFtrSolutionSelection(),
+    includeSharedFtr: !['false', 'no', '0'].includes(
+      process.env.INCLUDE_SHARED_FTR?.toLowerCase() || 'true'
+    ),
+    narrowPlatformFtr: ['true', 'yes', '1'].includes(
+      process.env.NARROW_PLATFORM_FTR?.toLowerCase() || 'false'
+    ),
     ftrConfigPatterns: parseCsvEnv('FTR_CONFIG_PATTERNS'),
     ftrTestChannels: new Set(
       parseCsvEnv('FTR_TEST_CHANNELS')?.map(ftrTestChannel.fromString) || ftrTestChannels.default
@@ -169,6 +178,22 @@ function parseLimitConfigType(): string[] {
     );
   }
   return values;
+}
+
+function parseFtrSolutionSelection(): FtrSolutionSelection {
+  const value = process.env.FTR_SOLUTION_SELECTION || 'off';
+  if (!isFtrSolutionSelection(value)) {
+    throw new Error(
+      `invalid FTR_SOLUTION_SELECTION value: ${value}. Valid values: ${VALID_FTR_SOLUTION_SELECTIONS.join(
+        ', '
+      )}`
+    );
+  }
+  return value;
+}
+
+function isFtrSolutionSelection(value: string): value is FtrSolutionSelection {
+  return (VALID_FTR_SOLUTION_SELECTIONS as readonly string[]).includes(value);
 }
 
 function parseLimitSolutions(): string[] | undefined {

@@ -118,6 +118,28 @@ describe('loadRunOrderConfig', () => {
     expect(cfg.limitSolutions).toEqual(['observability', 'security']);
   });
 
+  it('defaults FTR solution selection to off with shared FTR included', () => {
+    const cfg = loadRunOrderConfig();
+    expect(cfg.ftrSolutionSelection).toBe('off');
+    expect(cfg.includeSharedFtr).toBe(true);
+    expect(cfg.narrowPlatformFtr).toBe(false);
+  });
+
+  it('parses FTR_SOLUTION_SELECTION, INCLUDE_SHARED_FTR and NARROW_PLATFORM_FTR', () => {
+    process.env.FTR_SOLUTION_SELECTION = 'dry-run';
+    process.env.INCLUDE_SHARED_FTR = 'false';
+    process.env.NARROW_PLATFORM_FTR = 'true';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.ftrSolutionSelection).toBe('dry-run');
+    expect(cfg.includeSharedFtr).toBe(false);
+    expect(cfg.narrowPlatformFtr).toBe(true);
+  });
+
+  it('rejects unknown FTR_SOLUTION_SELECTION values', () => {
+    process.env.FTR_SOLUTION_SELECTION = 'on';
+    expect(() => loadRunOrderConfig()).toThrow(/invalid FTR_SOLUTION_SELECTION/);
+  });
+
   it('treats empty FTR_CONFIGS_DEPS as explicit empty list', () => {
     process.env.FTR_CONFIGS_DEPS = '';
     const cfg = loadRunOrderConfig();
