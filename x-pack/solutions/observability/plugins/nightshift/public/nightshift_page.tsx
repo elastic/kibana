@@ -31,7 +31,6 @@ import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
 import { StartInvestigationPanel } from './investigation/start_investigation_panel';
-import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
@@ -135,14 +134,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const canUseAutomationsPage = canUseAutomations && pathname.startsWith('/automations');
   const isAutomationDetailRoute = pathname.startsWith('/automations/');
 
-  // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
-  const canManageSandboxSecrets =
-    canManage && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
-  const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
-  const openSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(true), []);
-  const closeSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(false), []);
-
-  // Like the secrets API, the custom context API is disabled (404) unless the flag is on.
+  // The custom context API is disabled (404) unless the nightshift.enabled flag is on.
   const canViewCustomContext =
     canShow && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
   const [isCustomContextFlyoutOpen, setIsCustomContextFlyoutOpen] = useState(false);
@@ -278,9 +270,6 @@ export function NightshiftPage(): React.ReactElement | null {
                 sourcesHref,
                 onKnowledgeClick: navigateToKnowledge,
                 knowledgeHref,
-                onSandboxSecretsClick: canManageSandboxSecrets
-                  ? openSandboxSecretsFlyout
-                  : undefined,
                 onCustomContextClick: canViewCustomContext ? openCustomContextFlyout : undefined,
                 onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
                 automationsHref: canUseAutomations ? automationsHref : undefined,
@@ -306,9 +295,6 @@ export function NightshiftPage(): React.ReactElement | null {
                   knowledgeHref,
                   onSettingsClick: canManageAndConfigure ? navigateToDetectionSettings : undefined,
                   settingsHref: canManageAndConfigure ? detectionSettingsHref : undefined,
-                  onSandboxSecretsClick: canManageSandboxSecrets
-                    ? openSandboxSecretsFlyout
-                    : undefined,
                   onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
                   automationsHref: canUseAutomations ? automationsHref : undefined,
                 }}
@@ -334,9 +320,6 @@ export function NightshiftPage(): React.ReactElement | null {
                   knowledgeHref,
                   onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
                   settingsHref: canManageAndConfigure ? settingsHref : undefined,
-                  onSandboxSecretsClick: canManageSandboxSecrets
-                    ? openSandboxSecretsFlyout
-                    : undefined,
                   onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
                   automationsHref: canUseAutomations ? automationsHref : undefined,
                 }}
@@ -362,9 +345,6 @@ export function NightshiftPage(): React.ReactElement | null {
                   sourcesHref,
                   onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
                   settingsHref: canManageAndConfigure ? settingsHref : undefined,
-                  onSandboxSecretsClick: canManageSandboxSecrets
-                    ? openSandboxSecretsFlyout
-                    : undefined,
                   onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
                   automationsHref: canUseAutomations ? automationsHref : undefined,
                 }}
@@ -384,7 +364,6 @@ export function NightshiftPage(): React.ReactElement | null {
             knowledgeHref={knowledgeHref}
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
             settingsHref={canManageAndConfigure ? settingsHref : undefined}
-            onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
             onAutomationsClick={
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
@@ -434,9 +413,6 @@ export function NightshiftPage(): React.ReactElement | null {
       )}
       {canStartInvestigation && isStartInvestigationOpen && (
         <StartInvestigationPanel onClose={closeStartInvestigation} />
-      )}
-      {canManageSandboxSecrets && isSandboxSecretsFlyoutOpen && (
-        <SandboxSecretsFlyout onClose={closeSandboxSecretsFlyout} />
       )}
       {canViewCustomContext && isCustomContextFlyoutOpen && (
         <CustomContextFlyout canEdit={canManage} onClose={closeCustomContextFlyout} />

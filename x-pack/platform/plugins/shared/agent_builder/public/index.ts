@@ -30,6 +30,15 @@ export { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges, MCP_SERVER_
 export { type CreateSkillResponse, SKILLS_API_PATH };
 export { ConversationInputShell } from '@kbn/agent-builder-browser';
 export type { ConversationInputShellProps } from '@kbn/agent-builder-browser';
+export {
+  AddConnectorMenu,
+  ConnectorLibraryPanel,
+  ConnectorsCustomizeEmptyState,
+  type AddConnectorMenuProps,
+  type ConnectorLibraryConnector,
+  type ConnectorLibraryPanelProps,
+  type ConnectorsCustomizeEmptyStateProps,
+} from './components/agent_connectors';
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

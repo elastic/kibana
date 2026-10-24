@@ -53,10 +53,6 @@ const managementLabel = i18n.translate('xpack.nightshift.managementLinkLabel', {
   defaultMessage: 'Management',
 });
 
-const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkLabel', {
-  defaultMessage: 'Sandbox secrets',
-});
-
 const investigateLabel = i18n.translate('xpack.nightshift.header.investigateButtonText', {
   defaultMessage: 'Investigate',
 });
@@ -111,8 +107,6 @@ export interface NightshiftAppHeaderProps {
   knowledgeHref?: string;
   onSettingsClick?: () => void | Promise<void>;
   settingsHref?: string;
-  /** Shows the sandbox secrets menu item when set. */
-  onSandboxSecretsClick?: () => void;
   onAutomationsClick?: () => void | Promise<void>;
   automationsHref?: string;
   /** Renders "Investigate" (opens the start investigation panel) as the primary action when set. */
@@ -131,7 +125,6 @@ export function NightshiftAppHeader({
   knowledgeHref,
   onSettingsClick,
   settingsHref,
-  onSandboxSecretsClick,
   onAutomationsClick,
   automationsHref,
   onStartInvestigationClick,
@@ -169,18 +162,6 @@ export function NightshiftAppHeader({
                 testId: 'nightshiftAutomationsPrimaryAction',
                 // The menu shows two buttons; Detections keeps them for Sources and Settings.
                 overflow: isDetectionPage,
-              },
-            ]
-          : []),
-        ...(onSandboxSecretsClick
-          ? [
-              {
-                id: 'nightshiftSandboxSecrets',
-                label: sandboxSecretsLabel,
-                iconType: 'lock',
-                run: () => onSandboxSecretsClick(),
-                testId: 'nightshiftSandboxSecretsLink',
-                overflow: true,
               },
             ]
           : []),
@@ -262,7 +243,6 @@ export function NightshiftAppHeader({
       onAutomationsClick,
       onKnowledgeClick,
       onManagementClick,
-      onSandboxSecretsClick,
       onSourcesClick,
       onSettingsClick,
       onStartInvestigationClick,

@@ -48,7 +48,6 @@ type SettingsPageHeaderProps = Pick<
   | 'sourcesHref'
   | 'onKnowledgeClick'
   | 'knowledgeHref'
-  | 'onSandboxSecretsClick'
   | 'onAutomationsClick'
   | 'automationsHref'
 > & {

@@ -163,22 +163,10 @@ export {
 } from './locators';
 
 export {
-  SANDBOX_SECRETS_API_PATH,
-  SANDBOX_SECRET_KEY_REGEX,
-  MAX_SANDBOX_SECRET_KEY_LENGTH,
-  MIN_SANDBOX_SECRET_VALUE_LENGTH,
-  MAX_SANDBOX_SECRET_VALUE_LENGTH,
-  MAX_SANDBOX_SECRETS,
-  MAX_SANDBOX_SECRETS_VERSION_LENGTH,
-  validateSandboxSecretKey,
-  validateSandboxSecretValue,
-  hasSandboxSecretValueLineBreak,
-  type SandboxSecretEntry,
-  type GetSandboxSecretsResponse,
-  type PutSandboxSecretsRequest,
-  type PutSandboxSecretsResponse,
-} from './sandbox_secrets';
-
+  SANDBOX_CONNECTORS_API_PATH,
+  type SandboxConnector,
+  type GetSandboxConnectorsResponse,
+} from './sandbox_connectors';
 export {
   CUSTOM_CONTEXT_API_PATH,
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
@@ -206,6 +194,7 @@ export {
   type OnboardingSuggestionsStatus,
   type OnboardingSuggestionsExecution,
   type GetOnboardingResponse,
+  type EnableOnboardingResponse,
   type StartOnboardingSuggestionsResponse,
 } from './onboarding';
 
