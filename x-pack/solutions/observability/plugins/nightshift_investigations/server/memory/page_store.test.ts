@@ -794,7 +794,7 @@ describe('createMemoryPageStore', () => {
       now: () => T0,
     });
 
-    const pages = await store.retrieve({ size: 20 });
+    const { pages } = await store.retrieve({ size: 20 });
     expect(pages.map((page) => page.id)).toEqual(['memory_kafka-lag']);
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -829,7 +829,7 @@ describe('createMemoryPageStore', () => {
       now: () => T0,
     });
 
-    const pages = await store.retrieve({ size: 20 });
+    const { pages } = await store.retrieve({ size: 20 });
 
     expect(pages.map(({ id }) => id)).toEqual(['memory_kafka-lag']);
   });
@@ -1091,7 +1091,8 @@ describe('createMemoryPageStore', () => {
     });
 
     const browsed = await store.retrieve({ size: 20 });
-    expect(browsed).toHaveLength(1);
+    expect(browsed.pages).toHaveLength(1);
+    expect(browsed.mode).toBe('browse');
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         size: 20,
@@ -1105,7 +1106,9 @@ describe('createMemoryPageStore', () => {
       expect.anything()
     );
 
-    await store.retrieve({ query: 'checkout lag', size: 50 });
+    await expect(store.retrieve({ query: 'checkout lag', size: 50 })).resolves.toEqual(
+      expect.objectContaining({ mode: 'hybrid' })
+    );
     expect(esClient.search).toHaveBeenLastCalledWith(
       expect.objectContaining({
         size: 50,
@@ -1143,9 +1146,11 @@ describe('createMemoryPageStore', () => {
       now: () => T0,
     });
 
-    await expect(store.retrieve({ query: 'checkout lag', size: 50 })).resolves.toEqual([
-      expect.objectContaining({ id: 'memory_kafka-lag' }),
-    ]);
+    // Callers must be able to tell these keyword-only hits from a hybrid result.
+    await expect(store.retrieve({ query: 'checkout lag', size: 50 })).resolves.toEqual({
+      pages: [expect.objectContaining({ id: 'memory_kafka-lag' })],
+      mode: 'bm25',
+    });
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(esClient.search.mock.calls[1][0]).toEqual(
       expect.objectContaining({
@@ -1172,7 +1177,10 @@ describe('createMemoryPageStore', () => {
       now: () => T0,
     });
 
-    await expect(store.retrieve({ query: 'checkout lag', size: 50 })).resolves.toEqual([]);
+    await expect(store.retrieve({ query: 'checkout lag', size: 50 })).resolves.toEqual({
+      pages: [],
+      mode: 'hybrid',
+    });
     expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 
@@ -1189,7 +1197,9 @@ describe('createMemoryPageStore', () => {
       now: () => T0,
     });
 
-    await store.retrieve({ query: 'Checkout Redis', size: 5, match: 'content' });
+    await expect(
+      store.retrieve({ query: 'Checkout Redis', size: 5, match: 'content' })
+    ).resolves.toEqual(expect.objectContaining({ mode: 'bm25' }));
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         size: 5,

@@ -157,6 +157,7 @@ export interface NightshiftWorkflowFixture {
 
 const MEMORY_SUMMARY = {
   retrievalMode: 'browse' as const,
+  retriever: 'browse' as const,
   searchFallback: false,
   candidateCount: 3,
   recalledCount: 2,
