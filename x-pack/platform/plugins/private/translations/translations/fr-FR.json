@@ -37153,7 +37153,6 @@
     "xpack.osquery.agents.selectAgentLabel": "Sélectionner les agents ou les groupes à interroger",
     "xpack.osquery.agents.selectionLabel": "Agents",
     "xpack.osquery.appNavigation.historyLinkText": "Historique",
-    "xpack.osquery.appNavigation.manageIntegrationButton": "Gérer l'intégration",
     "xpack.osquery.appNavigation.packsLinkText": "Packs",
     "xpack.osquery.appNavigation.queriesLinkText": "Requêtes",
     "xpack.osquery.appNavigation.title": "Osquery",

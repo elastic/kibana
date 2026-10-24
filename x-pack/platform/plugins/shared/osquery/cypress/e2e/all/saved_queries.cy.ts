@@ -133,7 +133,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
         .within(() => {
           cy.get('[aria-label="Details"]').click();
         });
-      cy.contains('Query results');
+      cy.getBySel('appHeaderBack');
       cy.getBySel('save-query-button').should('exist').click();
       cy.getBySel('osquery-save-query-flyout').should('exist');
       cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);

@@ -37240,7 +37240,6 @@
     "xpack.osquery.agents.selectAgentLabel": "Wählen Sie Agenten oder Gruppen zur Abfrage aus",
     "xpack.osquery.agents.selectionLabel": "Agenten",
     "xpack.osquery.appNavigation.historyLinkText": "Verlauf",
-    "xpack.osquery.appNavigation.manageIntegrationButton": "Integration verwalten",
     "xpack.osquery.appNavigation.packsLinkText": "Pakete",
     "xpack.osquery.appNavigation.queriesLinkText": "Abfragen",
     "xpack.osquery.appNavigation.title": "Osquery",

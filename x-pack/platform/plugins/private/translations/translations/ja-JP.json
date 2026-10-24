@@ -37355,7 +37355,6 @@
     "xpack.osquery.agents.selectAgentLabel": "クエリーを実行するエージェントまたはグループを選択",
     "xpack.osquery.agents.selectionLabel": "エージェント",
     "xpack.osquery.appNavigation.historyLinkText": "履歴",
-    "xpack.osquery.appNavigation.manageIntegrationButton": "統合を管理",
     "xpack.osquery.appNavigation.packsLinkText": "パック",
     "xpack.osquery.appNavigation.queriesLinkText": "クエリ",
     "xpack.osquery.appNavigation.title": "Osquery",

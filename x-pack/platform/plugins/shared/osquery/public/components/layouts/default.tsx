@@ -26,6 +26,13 @@ export const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
   minWidth: 0,
 });
 
+/** Query results pages: content starts 12px under the AppHeader, aligned with its 16px inset. */
+export const resultsContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  padding: `${euiTheme.size.m} ${euiTheme.size.base} ${euiTheme.size.l}`,
+  flex: 1,
+  minWidth: 0,
+});
+
 export const fullWidthFormContentCss = (theme: UseEuiTheme) => ({
   ...fullWidthContentCss(theme),
   maxWidth: 1200,
