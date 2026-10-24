@@ -5,6 +5,42 @@
  * 2.0.
  */
 
+describe('classify — unknown row_count', () => {
+  const base = (returned: { columns?: string[]; row_count?: number }) =>
+    ({
+      signal_id: 's1',
+      '@timestamp': '2026-09-15T00:00:00.000Z',
+      signal_type: 'tool_call',
+      trace_ids: ['t1'],
+      tags: [],
+      data: {
+        tool: 'platform.core.execute_esql',
+        query_kind: 'ki_retrieval',
+        target_index: 'ai-index-idx-x',
+        status: 'Ok',
+        looped: false,
+        fell_back_to_raw: false,
+        producer: 'trace_tool',
+        span_id: 'sp1',
+        returned,
+        duration_ms: 1,
+        round_signals: { esql_count: 1, raw_query_count: 0, ki_retrieval_count: 1 },
+      },
+    } as any);
+
+  it('does not tag empty_retrieval when row_count is unknown (undefined)', () => {
+    expect(classify(base({ row_count: undefined } as any))).toEqual([]);
+  });
+
+  it('tags empty_retrieval when row_count is known to be zero', () => {
+    expect(classify(base({ columns: [], row_count: 0 }))).toEqual(['empty_retrieval']);
+  });
+
+  it('does not tag empty_retrieval when rows were returned', () => {
+    expect(classify(base({ columns: ['a'], row_count: 3 }))).toEqual([]);
+  });
+});
+
 import { classify } from './classify';
 import type { EsqlToolCallSignal } from '../../common/http_api/signals';
 
