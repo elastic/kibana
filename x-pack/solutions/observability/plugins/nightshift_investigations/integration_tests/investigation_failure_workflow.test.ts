@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import {
   ExecutionStatus,
@@ -80,6 +81,7 @@ const setup = (failure?: Failure, persistenceFailures = 0) => {
       }),
     })) as never,
     getActions: () => ({ getActionsClientWithRequestInSpace: async () => ({ execute }) } as never),
+    getRuntime: isomerPluginMock.createStartContract().getRuntime,
     getRoutingClient: async () => routing.client,
     getTriggerEmitter: () => emitter,
   };
