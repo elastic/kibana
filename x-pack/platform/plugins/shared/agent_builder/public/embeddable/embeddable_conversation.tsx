@@ -13,10 +13,34 @@ import { EmbeddableConversationsProvider } from '../application/context/conversa
 import { Conversation } from '../application/components/conversations/conversation';
 import { EmbeddableConversationHeader } from '../application/components/conversations/embeddable_conversation_header/embeddable_conversation_header';
 import { conversationBackgroundStyles } from '../application/components/conversations/conversation.styles';
+import { ActivityLogPanel } from '../application/components/conversations/activity_log/activity_log_panel';
+import {
+  ActivityLogViewProvider,
+  useActivityLogView,
+} from '../application/components/conversations/activity_log/activity_log_view_context';
 import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
 import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
 
 const EMBEDDABLE_HEADER_HEIGHT = 64;
+
+const EmbeddableBodyContent: React.FC = () => {
+  const activityLog = useActivityLogView();
+  const isLogOpen = Boolean(activityLog?.isOpen);
+
+  return (
+    <>
+      <div
+        data-test-subj="agentBuilderEmbeddableConversationSlot"
+        css={css`
+          display: ${isLogOpen ? 'none' : 'contents'};
+        `}
+      >
+        <Conversation />
+      </div>
+      {activityLog && isLogOpen && <ActivityLogPanel onClose={activityLog.close} />}
+    </>
+  );
+};
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -64,13 +88,15 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     <div css={wrapperStyles} data-test-subj="agentBuilderConversation">
       <EmbeddableConversationsProvider {...props}>
         <EmbeddableAccessBoundary onClose={onClose}>
-          <EuiFlyoutHeader css={headerStyles}>
-            <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
-          </EuiFlyoutHeader>
-          <EmbeddableWelcomeMessage />
-          <EuiFlyoutBody css={bodyStyles}>
-            <Conversation />
-          </EuiFlyoutBody>
+          <ActivityLogViewProvider>
+            <EuiFlyoutHeader css={headerStyles}>
+              <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+            </EuiFlyoutHeader>
+            <EmbeddableWelcomeMessage />
+            <EuiFlyoutBody css={bodyStyles}>
+              <EmbeddableBodyContent />
+            </EuiFlyoutBody>
+          </ActivityLogViewProvider>
         </EmbeddableAccessBoundary>
       </EmbeddableConversationsProvider>
     </div>
