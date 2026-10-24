@@ -116,4 +116,23 @@ describe('buildEpisodeMenuPanels', () => {
     });
     expect(assignee.execute).not.toHaveBeenCalled();
   });
+
+  it('renders an incompatible action as disabled and does not execute it', () => {
+    const unresolve = makeAction('ALERTING_V2_UNRESOLVE_EPISODE', {
+      displayName: 'Unresolve',
+      isCompatible: () => false,
+      disabledTooltip: 'Unresolve is not available for classic alerts',
+    });
+    const [item] = getItems([unresolve]) ?? [];
+
+    expect(item).toEqual({
+      name: 'Unresolve',
+      icon: 'check',
+      disabled: true,
+      toolTipContent: 'Unresolve is not available for classic alerts',
+      'data-test-subj': 'alertingV2EpisodeTakeAction-ALERTING_V2_UNRESOLVE_EPISODE',
+    });
+    expect(item.onClick).toBeUndefined();
+    expect(unresolve.execute).not.toHaveBeenCalled();
+  });
 });
