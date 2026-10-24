@@ -1,12 +1,12 @@
-# METRICS-INFO
+# METRICS_INFO
 
-The `METRICS_INFO` processing command retrieves information about the metrics available in time series data streams, along with their applicable dimensions and other metadata.
+The `METRICS_INFO` processing command retrieves information about the metrics available in time series data streams, along with their applicable dimensions and other metadata. Use `METRICS_INFO` to discover which metrics exist, what types and units they have, and which dimensions apply to them without inspecting index mappings or relying on the field capabilities API.
 
-Use `METRICS_INFO` to discover which metrics exist, what types and units they have, and which dimensions apply to them without inspecting index mappings or relying on the field capabilities API. Any `WHERE` filters that precede `METRICS_INFO` narrow the set of time series considered, so only metrics with matching data are returned.
+Any `WHERE` filters that precede `METRICS_INFO` narrow the set of time series considered, so only metrics with matching data are returned.
 
-`METRICS_INFO` produces one row per distinct metric signature: each unique combination of metric name and its properties across backing indices. When the same metric is defined with different properties, such as different units, in different data streams, separate rows are returned for each variant.
+`METRICS_INFO` produces one row per distinct metric signature: each unique combination of metric name and its properties across backing indices. When the same metric is defined with different properties, such as different units in different data streams, separate rows are returned for each variant.
 
-The output contains these `keyword` columns: `metric_name`, `data_stream`, `unit`, `metric_type`, `field_type`, and `dimension_fields`.
+The output contains the following `keyword` columns: `metric_name`, `data_stream`, `unit`, `metric_type`, `field_type`, and `dimension_fields`.
 
 ## Syntax
 
@@ -18,7 +18,7 @@ The output contains these `keyword` columns: `metric_name`, `data_stream`, `unit
 
 ## Examples
 
-List every metric available in the targeted time series data stream, sorted by metric name:
+List every metric available in the targeted time series data stream, sorted alphabetically by name.
 
 ```esql
 TS k8s
@@ -32,7 +32,7 @@ network.eth0.tx | k8s | packets | gauge | integer | [cluster, pod, region]
 network.total_bytes_in | k8s | bytes | counter | long | [cluster, pod, region]
 network.total_cost | k8s | usd | counter | double | [cluster, pod, region]
 
-Discover metrics with data matching a `cluster` filter:
+Discover metrics with matching data in the `prod` cluster.
 
 ```esql
 TS k8s
@@ -47,7 +47,7 @@ network.eth0.tx | k8s | packets | gauge | integer | [cluster, pod, region]
 network.total_bytes_in | k8s | bytes | counter | long | [cluster, pod, region]
 network.total_cost | k8s | usd | counter | double | [cluster, pod, region]
 
-Return only metric names and metric types:
+Return only the metric name and metric type columns.
 
 ```esql
 TS k8s
@@ -63,7 +63,7 @@ network.eth0.tx | gauge
 network.total_bytes_in | counter
 network.total_cost | counter
 
-Filter metadata rows to counter metrics:
+Filter the metric metadata to only counter metrics.
 
 ```esql
 TS k8s
@@ -76,7 +76,7 @@ metric_name:keyword | data_stream:keyword | unit:keyword | metric_type:keyword |
 network.total_bytes_in | k8s | bytes | counter | long | [cluster, pod, region]
 network.total_cost | k8s | usd | counter | double | [cluster, pod, region]
 
-Find metrics whose names match a `network.eth0*` pattern:
+Find metrics with names matching the `network.eth0*` pattern.
 
 ```esql
 TS k8s
@@ -89,7 +89,7 @@ metric_name:keyword | data_stream:keyword | unit:keyword | metric_type:keyword |
 network.eth0.rx | k8s | packets | gauge | integer | [cluster, pod, region]
 network.eth0.tx | k8s | packets | gauge | integer | [cluster, pod, region]
 
-Count distinct metrics whose names match a pattern:
+Count distinct metrics with names matching the `network.total*` pattern.
 
 ```esql
 TS k8s
@@ -101,7 +101,7 @@ TS k8s
 matching_metrics:long
 2
 
-Count metrics grouped by metric type:
+Count metrics grouped by metric type.
 
 ```esql
 TS k8s

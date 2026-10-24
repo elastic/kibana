@@ -1,6 +1,6 @@
 # EVAL
 
-The EVAL command allows you to add new columns to your results by calculating values using expressions, literals, or functions. You can use existing columns or previously defined columns in your calculations.
+The `EVAL` processing command appends new columns with calculated values. `EVAL` supports functions for calculating values.
 
 ## Syntax
 
@@ -10,15 +10,16 @@ The EVAL command allows you to add new columns to your results by calculating va
 
 #### columnX
 
-The name of the column to be created or replaced. If a column with the same name already exists, it will be dropped and replaced by the new column. If a column name is used more than once, only the rightmost duplicate creates a column.
+Optional. The column name. If a column with the same name already exists, the existing column is dropped. If a column name is used more than once, only the rightmost duplicate creates a column.
 
 #### valueX
 
-The value assigned to the column. This can be a literal, an expression, or a function. You can reference columns defined to the left of this one.
+The value for the column. Can be a literal, an expression, or a function. Can use columns defined left of this one.
 
 ## Examples
 
-Calculate height in feet and centimeters for each employee:
+Append calculated height conversion columns:
+
 ```esql
 FROM employees
 | SORT emp_no
@@ -26,7 +27,8 @@ FROM employees
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 ```
 
-Replace the existing height column with its value converted to feet:
+Overwrite the existing `height` column with a calculated value:
+
 ```esql
 FROM employees
 | SORT emp_no
@@ -34,7 +36,8 @@ FROM employees
 | EVAL height = height * 3.281
 ```
 
-Add a new column for height in feet without specifying a name, so the column is named after the expression:
+Add an auto-named column using the expression as the column name:
+
 ```esql
 FROM employees
 | SORT emp_no
@@ -42,9 +45,14 @@ FROM employees
 | EVAL height * 3.281
 ```
 
-Calculate height in feet and then compute the average height in feet, referencing the column with special characters using backticks:
+Reference an auto-named column with backticks in a subsequent command:
+
 ```esql
 FROM employees
 | EVAL height * 3.281
 | STATS avg_height_feet = AVG(`height * 3.281`)
 ```
+
+## Limitations
+
+Runtime fields defined in the index mapping are respected, but new runtime fields cannot be defined at search time. Use `EVAL` to create computed columns at query time instead.
