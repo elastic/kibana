@@ -14,6 +14,7 @@ export {
   type ApprovalOutcomeStatus,
   type ApprovalPhase,
 } from './src/approval_outcome';
+export { getProposalBadge } from './src/proposal_badge';
 export {
   ProposedActionStatusBadge,
   type ProposedActionStatusBadgeProps,
@@ -24,6 +25,8 @@ export {
   getProposalDecision,
   getProposalTone,
   isProposalExpired,
+  getExpiredCaption,
+  getProposalPhase,
 } from './src/proposal_helpers';
 export type {
   ApprovalProposal,

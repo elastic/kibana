@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import moment from 'moment';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
@@ -194,6 +195,69 @@ describe('ProposedActionButton', () => {
     expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
   });
 
+  describe('opening the modal while an approval is being sent', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-22T12:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const hhmm = (iso: string) => moment(iso).format('HH:mm');
+
+    it('shows when the approval started, not when the modal was opened', () => {
+      const { rerender } = renderButton({ currentActorName: 'Kate Sosedova' });
+      rerender(
+        <ProposedActionButton
+          {...baseProps}
+          isSubmitting="applying"
+          currentActorName="Kate Sosedova"
+        />
+      );
+      act(() => {
+        jest.advanceTimersByTime(10 * 60 * 1000);
+      });
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      const banner = within(screen.getByRole('dialog')).getAllByText(/Kate Sosedova on/)[0];
+      expect(banner).toHaveTextContent(hhmm('2026-10-22T12:00:00.000Z'));
+      expect(banner).not.toHaveTextContent(hhmm('2026-10-22T12:10:00.000Z'));
+    });
+
+    it('shows no start time when the row mounts already submitting', () => {
+      renderButton({ isSubmitting: 'applying', currentActorName: 'Kate Sosedova' });
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      const banner = within(screen.getByRole('dialog')).getAllByText(/Kate Sosedova/)[0];
+      expect(banner).not.toHaveTextContent(' on ');
+    });
+  });
+
+  describe('a proposal with a deadline still ahead', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-22T12:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('keeps Needs review on the row and warns about the deadline in the modal', () => {
+      renderButton({ proposal: { ...mockProposal, expiresAt: '2026-10-23T12:00:00.000Z' } });
+
+      expect(within(screen.getByTestId('proposedAction')).getByText('Needs review')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      const dialog = within(screen.getByRole('dialog'));
+      expect(dialog.getByText('Needs review')).toBeVisible();
+      expect(dialog.getAllByText(/Expires soon/).length).toBeGreaterThan(0);
+    });
+  });
+
   describe('a decided proposal', () => {
     const decidedProposal: ApprovalProposal = {
       ...mockProposal,
@@ -212,12 +276,11 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Irreversible')).not.toBeInTheDocument();
     });
 
-    it('shows the full date and time in a tooltip on the time of the decision', async () => {
+    it('shows the full date and time of the decision, not how long ago it was', () => {
       renderButton({ proposal: decidedProposal });
 
-      fireEvent.mouseOver(screen.getByText(/^\d{1,2}:\d{2}/));
-
-      expect(await screen.findByRole('tooltip')).toHaveTextContent(/^1 Jan 2024, \d{2}:\d{2}$/);
+      expect(screen.getByText(/1 Jan 2024, \d{2}:\d{2}/)).toBeInTheDocument();
+      expect(screen.queryByText(/ago$/)).not.toBeInTheDocument();
     });
 
     it('shows a Declined badge for a dismissed proposal', () => {
@@ -227,10 +290,8 @@ describe('ProposedActionButton', () => {
     });
 
     it.each<[string, Partial<ApprovalProposal>, RegExp]>([
-      ['approved', {}, /^Approved by\s/],
-      ['declined', { decision: 'dismissed' }, /^Declined by\s/],
-      ['failed', { status: 'failed' }, /^Executed by\s/],
-      ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, /^Applied by\s/],
+      ['approved', {}, /1 Jan 2024/],
+      ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, /1 Jan 2024/],
     ])('captions a %s proposal with who acted and when', (_, overrides, caption) => {
       renderButton({ proposal: { ...decidedProposal, ...overrides } });
 
@@ -244,7 +305,7 @@ describe('ProposedActionButton', () => {
       fireEvent.click(screen.getByTestId('proposedAction'));
 
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+      expect(within(dialog).getAllByText('Applied').length).toBeGreaterThan(0);
       expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
     });
 
@@ -264,10 +325,10 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
-    it('keeps the badge label as the caption for an expired proposal that has an actor', () => {
+    it('captions why it expired, not who acted, for an expired proposal that has an actor', () => {
       renderButton({ proposal: { ...decidedProposal, status: 'expired' } });
 
-      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText('Decision timed out')).toBeInTheDocument();
       expect(screen.queryByText(/Approved by/)).not.toBeInTheDocument();
     });
 
@@ -286,10 +347,38 @@ describe('ProposedActionButton', () => {
     it('shows an Expired badge instead of Needs review, though nobody ever decided it', () => {
       renderButton({ proposal: expiredProposal });
 
-      // The badge and the caption below it both read "Expired": nobody names a decider, so the
-      // caption falls back to the same label rather than a fabricated "by Unknown".
-      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      // The badge says "Expired"; nobody names a decider, so the caption says why instead of a
+      // fabricated "by Unknown".
+      expect(screen.getByText('Expired')).toBeInTheDocument();
+      expect(screen.getByText('Decision timed out')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    });
+
+    describe('relative to its deadline', () => {
+      beforeEach(() => {
+        jest.useFakeTimers().setSystemTime(new Date('2026-10-22T12:00:00.000Z'));
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('does not say it timed out when settled before its deadline', () => {
+        renderButton({
+          proposal: { ...expiredProposal, expiresAt: '2026-10-23T12:00:00.000Z' },
+        });
+
+        expect(screen.getByText('Can no longer be applied')).toBeInTheDocument();
+        expect(screen.queryByText('Decision timed out')).not.toBeInTheDocument();
+      });
+
+      it('says it timed out once the deadline has passed', () => {
+        renderButton({
+          proposal: { ...expiredProposal, expiresAt: '2026-10-21T12:00:00.000Z' },
+        });
+
+        expect(screen.getByText('Decision timed out')).toBeInTheDocument();
+      });
     });
 
     it('is still clickable, opening a read-only modal with no actions to take', () => {
@@ -298,7 +387,7 @@ describe('ProposedActionButton', () => {
       fireEvent.click(screen.getByTestId('proposedAction'));
 
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByText('Expired')).toBeInTheDocument();
+      expect(within(dialog).getAllByText('Expired').length).toBeGreaterThan(0);
       expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
       expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
     });

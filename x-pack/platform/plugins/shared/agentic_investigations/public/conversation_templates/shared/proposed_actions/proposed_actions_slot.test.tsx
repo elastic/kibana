@@ -164,7 +164,7 @@ describe('ProposedActionsSlot', () => {
     mockConversationProposalsPage([mockProposal]);
     renderSlot();
     fireEvent.click(screen.getByText('Isolate cfo-mbp-14 — host isolation'));
-    expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
     expect(approveMutateAsync).not.toHaveBeenCalled();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
@@ -231,7 +231,7 @@ describe('ProposedActionsSlot', () => {
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-2'));
 
     const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+    expect(within(dialog).getAllByText('Applied').length).toBeGreaterThan(0);
     expect(
       screen.queryByTestId('investigationFlyoutProposedAction-proposal-2-modal-confirm')
     ).not.toBeInTheDocument();

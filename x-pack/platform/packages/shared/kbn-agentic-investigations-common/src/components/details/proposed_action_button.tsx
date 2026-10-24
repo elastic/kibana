@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiText,
@@ -17,18 +17,17 @@ import {
 import {
   ApprovalActorTime,
   ApprovalModal,
-  type ApprovalActorTimeProps,
-  getApprovalOutcomeBadge,
+  getProposalBadge,
+  getProposalPhase,
+  getExpiredCaption,
   getProposalCaption,
   ProposalCaption,
   getProposalDecision,
   ProposedActionStatusBadge,
-  type ApprovalPhase,
   type ApprovalProposal,
   type DeclineParams,
 } from '@kbn/proposals-ui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
-import { getEmptyValue } from '../helpers';
 import { useIsTextTruncated } from '../use_is_text_truncated';
 
 export interface ProposedActionButtonProps {
@@ -56,22 +55,6 @@ export interface ProposedActionButtonProps {
   isReopening?: boolean;
   'data-test-subj'?: string;
 }
-
-const ACTOR_OUTCOME_BY_STATUS: Partial<Record<ApprovalPhase, ApprovalActorTimeProps['outcome']>> = {
-  applied: 'approved',
-  applying: 'approved',
-  // A to-do proposal, marked as applied by the human who carried it out.
-  marked_applied: 'applied',
-  declined: 'declined',
-  failed: 'executed',
-};
-
-const PENDING_BADGE = {
-  color: 'primary' as const,
-  iconType: 'clock' as const,
-  label: DETAILS_FLYOUT_LABELS.proposedAction.needsReviewBadge,
-  isLoading: false,
-};
 
 /**
  * A native button styled like a "What's happened" row (`GroupedAttachmentRow`), rather than a
@@ -117,6 +100,9 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     ${euiTextTruncate()}
   `,
   // The tooltip anchor must stretch like the button it wraps, or the grid collapses to content.
+  noType: css`
+    color: ${euiTheme.colors.textDisabled};
+  `,
   tooltipAnchor: css`
     display: block;
     min-inline-size: 0;
@@ -155,34 +141,71 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const openModal = useCallback(() => setIsModalOpen(true), []);
     const closeModal = useCallback(() => setIsModalOpen(false), []);
 
-    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
+    const approvalPhase = getProposalPhase(proposal, isSubmitting);
 
-    const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
+    // Only an undecided proposal is restricted: a decided one reports its outcome to everyone.
+    const isRestricted = readOnly && approvalPhase === 'pending';
+
+    // The same badge the modal shows in its header.
+    const badge = getProposalBadge(proposal, { readOnly, isSubmitting });
 
     const pendingCaption = getProposalCaption(proposal) && <ProposalCaption proposal={proposal} />;
 
-    // A decision with no `actorName` is a terminal state nobody actually decided (expired,
-    // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds
-    // "by {name}" when there is a real actor to name. Only the outcomes below read naturally with
-    // one; any other status (an expired proposal that has an actor, say) keeps the badge label.
-    const actorOutcome = decision ? ACTOR_OUTCOME_BY_STATUS[decision.status] : undefined;
-    const caption =
-      decision?.actorName && actorOutcome ? (
-        <ApprovalActorTime
-          actorName={decision.actorName}
-          at={decision.decidedAt}
-          outcome={actorOutcome}
-        />
-      ) : decision ? (
-        badge.label
-      ) : pendingCaption ? (
-        pendingCaption
-      ) : (
-        getEmptyValue()
-      );
+    // Who and when: the saved decision when there is one, else the current user from when their
+    // click went out. A decision with no `actorName` is one nobody made (expired, chiefly) — the
+    // badge label alone ("Expired") already says what happened — and so is an expired proposal
+    // that has an actor. Only a start seen after mount is timed: a row that mounts already
+    // submitting (a reopened flyout) does not know when it began, so shows no time.
+    const [submittedAt, setSubmittedAt] = useState<string | undefined>();
+    const wasSubmitting = useRef(isSubmitting);
+    useEffect(() => {
+      if (!isSubmitting) {
+        setSubmittedAt(undefined);
+      } else if (!wasSubmitting.current) {
+        setSubmittedAt(new Date().toISOString());
+      }
+      wasSubmitting.current = isSubmitting;
+    }, [isSubmitting]);
+    const actorName =
+      decision?.status === 'expired'
+        ? undefined
+        : decision?.actorName ?? (isSubmitting ? currentActorName : undefined);
+    const actedAt = decision?.decidedAt ?? submittedAt;
+
+    const isExpired = decision?.status === 'expired';
+    // Why it can no longer be decided: the same text the modal's callout repeats.
+    const expiredReason = isExpired ? getExpiredCaption(proposal) : undefined;
+
+    // Nothing to say about the action itself: the caption says so, in a disabled colour, rather
+    // than leaving a bare dash.
+    const hasNoType = !pendingCaption && !(actorName || isRestricted || decision);
+
+    const caption = expiredReason ? (
+      expiredReason
+    ) : hasNoType ? (
+      DETAILS_FLYOUT_LABELS.proposedAction.noTypeCaption
+    ) : actorName ? (
+      <ApprovalActorTime
+        actorName={actorName}
+        at={actedAt}
+        isUnknown={decision?.isActorUnknown}
+        live={approvalPhase === 'applying' || approvalPhase === 'declining'}
+      />
+    ) : isRestricted ? (
+      DETAILS_FLYOUT_LABELS.proposedAction.restrictedCaption
+    ) : decision ? (
+      badge.label
+    ) : (
+      pendingCaption
+    );
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
     const isTitleTruncated = useIsTextTruncated(titleElement, proposal.title);
+    // A reason (an error, a decline, why it expired) can be as long as whoever wrote it, so it is
+    // cut to one line too. Only plain-text captions are measured; the rest are short components.
+    const captionText = typeof caption === 'string' ? caption : undefined;
+    const [captionElement, setCaptionElement] = useState<HTMLSpanElement | null>(null);
+    const isCaptionTruncated = useIsTextTruncated(captionElement, captionText ?? '');
     const styles = useEuiMemoizedStyles(rowStyles);
 
     const button = (
@@ -203,9 +226,16 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             </EuiText>
           </span>
           {caption && (
-            <EuiText size="xs" color="subdued" component="span">
-              {caption}
-            </EuiText>
+            <span ref={setCaptionElement} css={captionText !== undefined && styles.title}>
+              <EuiText
+                size="xs"
+                color={!hasNoType && (isRestricted || isExpired) ? 'warning' : 'subdued'}
+                component="span"
+                css={hasNoType && styles.noType}
+              >
+                {caption}
+              </EuiText>
+            </span>
           )}
         </span>
         <ProposedActionStatusBadge
@@ -213,16 +243,28 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           iconType={badge.iconType}
           label={badge.label}
           isLoading={badge.isLoading}
+          isDisabled={badge.isDisabled}
         />
       </button>
     );
 
     return (
       <li>
-        {/* Anchored on the button itself, so keyboard focus reveals the full title too. */}
-        {isTitleTruncated ? (
+        {/* Anchored on the button itself, so keyboard focus reveals the full text too. One tooltip
+            for the pair: the title, and under it the reason when that is cut off as well. */}
+        {isTitleTruncated || isCaptionTruncated ? (
           <EuiToolTip
-            content={proposal.title}
+            content={
+              isCaptionTruncated ? (
+                <>
+                  <strong>{proposal.title}</strong>
+                  <br />
+                  {captionText}
+                </>
+              ) : (
+                proposal.title
+              )
+            }
             position="top"
             anchorProps={{ css: styles.tooltipAnchor }}
           >
@@ -240,6 +282,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             onClose={closeModal}
             onDismiss={onDismiss}
             isSubmitting={isSubmitting}
+            submittedAt={submittedAt}
             currentActorName={currentActorName}
             onReopen={onReopen}
             isReopening={isReopening}

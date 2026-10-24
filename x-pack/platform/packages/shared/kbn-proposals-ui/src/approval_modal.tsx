@@ -7,12 +7,12 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiModal, useGeneratedHtmlId } from '@elastic/eui';
 import { ApprovalContent } from './approval_content';
 import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
 export interface ApprovalModalProps {
-  /** Disables the Approve/Decline actions without hiding them, so a reopened decided-or-expired-looking proposal still reads the same. */
+  /** The user cannot decide: an undecided proposal shows a restricted notice in place of Approve/Decline. */
   readOnly?: boolean;
   alwaysAllow?: AlwaysAllowOption;
   proposal: ApprovalProposal;
@@ -33,6 +33,8 @@ export interface ApprovalModalProps {
    * reopened mid-submission.
    */
   isSubmitting?: 'applying' | 'declining';
+  /** ISO timestamp the host started the in-flight approve/decline at, if it knows it. */
+  submittedAt?: string;
   /** Who's approving, for the "Applying"/"Declining" caption before the server confirms a decider. */
   currentActorName?: string;
   /** See `ApprovalContentProps.onReopen`. */
@@ -63,25 +65,28 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     onClose,
     onDismiss,
     isSubmitting,
+    submittedAt,
     currentActorName,
     onReopen,
     isReopening,
     'data-test-subj': dataTestSubj,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'ApprovalModal' });
 
     return (
       <EuiModal
         aria-labelledby={titleId}
         onClose={onClose}
-        css={css({ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.xs })}
+        // Clicking outside dismisses it, like Escape or the close button.
+        outsideClickCloses
+        css={css({ maxWidth: 640, width: '100%' })}
         data-test-subj={dataTestSubj}
       >
         <ApprovalContent
           proposal={proposal}
           titleId={titleId}
           isSubmitting={isSubmitting}
+          submittedAt={submittedAt}
           currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}
           readOnly={readOnly}

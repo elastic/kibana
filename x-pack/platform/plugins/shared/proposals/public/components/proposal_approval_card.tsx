@@ -7,14 +7,13 @@
 
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiLoadingSpinner, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { EuiCallOut, EuiLoadingSpinner, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ApprovalContent } from '@kbn/proposals-ui';
-import type { ApprovalAction, DeclineParams } from '@kbn/proposals-ui';
+import type { DeclineParams } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { isAwaitingDecision, isTodoProposal } from '@kbn/proposals-common';
+import { isAwaitingDecision } from '@kbn/proposals-common';
 import {
   useApproveProposal,
   useDismissProposal,
@@ -130,8 +129,11 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
 
   if (proposalQuery.isError || !liveProposal) {
     return (
-      <KbnDangerCallout
+      // eslint-disable-next-line @kbn/kbn-ui/prefer_kbn_ui_callout
+      <EuiCallOut
+        announceOnMount
         size="s"
+        color="danger"
         title={i18n.translate('xpack.proposals.proposalCard.loadError', {
           defaultMessage: 'Unable to load this proposal. Try refreshing the page.',
         })}
@@ -142,28 +144,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const isReplaced =
     liveProposal.supersededBy !== undefined || liveProposal.status === 'superseded';
   const isPending = isAwaitingDecision(liveProposal);
-  // Marked as applied, then as not applied: the successor card below it is the live one, and
-  // there is nothing on this one left to decide.
-  const isUnapplied =
-    isReplaced &&
-    isTodoProposal(liveProposal) &&
-    liveProposal.decision === 'approved' &&
-    liveProposal.status === 'no_action';
-  const secondaryActions: ApprovalAction[] | undefined =
-    isReplaced && !isUnapplied
-      ? [
-          {
-            label: i18n.translate('xpack.proposals.proposalCard.dismiss', {
-              defaultMessage: 'Dismiss',
-            }),
-            color: 'danger',
-            onClick: () => undefined,
-            isDisabled: true,
-            'data-test-subj': `proposalDismiss-${proposalId}`,
-          },
-        ]
-      : undefined;
-
   return (
     <div
       css={css({ padding: `${euiTheme.size.xs}` })}
@@ -176,34 +156,12 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         readOnly={isReplaced}
         isSubmitting={isReplaced ? undefined : isSubmitting}
         currentActorName={currentActorName}
-        onApprove={(isPending || isReplaced) && !isUnapplied ? handleApprove : undefined}
-        secondaryActions={secondaryActions}
+        onApprove={isPending || isReplaced ? handleApprove : undefined}
         onDismiss={isPending && !isReplaced ? handleDismiss : undefined}
         onReopen={handleReopen}
         isReopening={isReopening}
         data-test-subj={`proposalCard-${proposalId}`}
       />
-      {isReplaced && (
-        <>
-          <EuiSpacer size="m" />
-          <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
-            <KbnInfoCallout
-              announceOnMount
-              size="s"
-              title={
-                isUnapplied
-                  ? i18n.translate('xpack.proposals.proposalCard.unappliedTitle', {
-                      defaultMessage: 'Marked as not applied. It is offered again below.',
-                    })
-                  : i18n.translate('xpack.proposals.proposalCard.replacedTitle', {
-                      defaultMessage: 'This proposal has been replaced.',
-                    })
-              }
-            />
-          </div>
-          <EuiSpacer size="m" />
-        </>
-      )}
     </div>
   );
 });

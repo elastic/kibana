@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
+import { InlineCalloutTitle } from './inline_callout_title';
+import {
+  EXPIRES_SOON_WINDOW_MS,
+  formatDateTime,
+  hasDeadlinePassed,
+  isExpiringSoon,
+} from './proposal_helpers';
 
 interface ApprovalStatusCalloutsProps {
   /** Only shown while still pending — a decided proposal's outcome banner already covers it. */
@@ -28,16 +34,89 @@ interface ApprovalStatusCalloutsProps {
    * hold for either cause since this flag does not distinguish them.
    */
   isExpired: boolean;
-  /** Why the proposal expired, if known. */
-  expiredReason?: string;
+  /** Why it can no longer be decided, as the flyout row captions it (`getExpiredCaption`). */
+  expiredCaption?: string;
+  /** Replaced by a successor: read-only, and the callout says why there is nothing to decide. */
+  isReplaced?: boolean;
+  /** ISO 8601 deadline, when the proposal carries one: the callout says when it expired. */
+  expiresAt?: string;
+  /** ISO 8601 deadline of a proposal still awaiting a decision: a warning says when, if it is within a day. */
+  upcomingExpiry?: string;
+  /** The user cannot decide: an undecided proposal they have no permission to approve. */
+  isRestricted?: boolean;
+  'data-test-subj'?: string;
+}
+
+interface StatusCalloutProps {
+  color: 'danger' | 'warning' | 'primary';
+  /** The state word, in the callout's own bold title. */
+  title: string;
+  /** Detail on the same line, in regular weight; omitted when the title says it all. */
+  description?: string;
   'data-test-subj'?: string;
 }
 
 /**
- * The callouts `ApprovalContent` shows between the body and the footer: why a proposal is
- * being offered again after a failed attempt, why a replaced attempt failed, and why an expired
- * one can no longer be actioned. Split out from `ApprovalContent` itself only because every
- * condition renders the same spacer-callout-spacer shape, not because they share any state.
+ * One status callout in the shape every condition shares — spacer, padded callout, spacer — with
+ * its title and description on a single line. EUI's own title stays bold; only the description is
+ * set back to regular weight, so the state word reads first.
+ */
+const StatusCallout = ({
+  color,
+  title,
+  description,
+  'data-test-subj': dataTestSubj,
+}: StatusCalloutProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <div css={css({ padding: `0 ${euiTheme.size.base}` })}>
+        {/* eslint-disable-next-line @kbn/kbn-ui/prefer_kbn_ui_callout */}
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          color={color}
+          title={<InlineCalloutTitle title={title} description={description} />}
+          data-test-subj={dataTestSubj}
+        />
+        <EuiSpacer size="m" />
+      </div>
+    </>
+  );
+};
+
+/** The longest delay `setTimeout` accepts. */
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
+
+/**
+ * Renders again when a deadline enters its warning window, and again when it passes, so a
+ * callout left open does not keep showing what was true when it opened.
+ */
+const useRerenderAtExpiryBoundaries = (expiresAt: string | undefined) => {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (expiresAt === undefined) {
+      return;
+    }
+    const deadline = new Date(expiresAt).getTime();
+    const now = Date.now();
+    const next = [deadline - EXPIRES_SOON_WINDOW_MS, deadline].find((at) => at > now);
+    if (next === undefined) {
+      return;
+    }
+    const id = setTimeout(() => setTick((tick) => tick + 1), Math.min(next - now, MAX_TIMEOUT_MS));
+    return () => clearTimeout(id);
+  });
+};
+
+/**
+ * The callouts `ApprovalContent` shows between the body and the footer: why a proposal is offered
+ * again after a failed attempt, when it expires, why the user cannot decide it, why a replaced
+ * attempt failed, and why an expired one can no longer be applied. Split out from
+ * `ApprovalContent` itself only because every condition renders the same spacer-callout-spacer
+ * shape, not because they share any state.
  */
 export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
   ({
@@ -45,63 +124,88 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
     previousExecutionError,
     failedAttemptError,
     isExpired,
-    expiredReason,
+    expiredCaption,
+    expiresAt,
+    upcomingExpiry,
+    isRestricted = false,
+    isReplaced = false,
     'data-test-subj': dataTestSubj,
   }) => {
-    const { euiTheme } = useEuiTheme();
+    useRerenderAtExpiryBoundaries(upcomingExpiry ?? expiresAt);
+    const deadlinePassed = hasDeadlinePassed({ expiresAt });
+    const testSubj = (suffix: string) => (dataTestSubj ? `${dataTestSubj}-${suffix}` : undefined);
 
     return (
       <>
-        {/* Why this proposal is being offered again, when it is a retry. */}
+        {/* Why this proposal is being offered again, when a revision follows a failed attempt. */}
         {isPending && previousExecutionError && (
-          <>
-            <EuiSpacer size="m" />
-            <div css={css({ padding: `0 ${euiTheme.size.base}` })}>
-              <KbnDangerCallout
-                announceOnMount
-                size="s"
-                title={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutTitle}
-                data-test-subj={dataTestSubj ? `${dataTestSubj}-previous-failure` : undefined}
-              >
-                {previousExecutionError}
-              </KbnDangerCallout>
-              <EuiSpacer size="m" />
-            </div>
-          </>
+          <StatusCallout
+            color="danger"
+            title={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutTitle}
+            description={previousExecutionError}
+            data-test-subj={testSubj('previous-failure')}
+          />
+        )}
+
+        {upcomingExpiry && isExpiringSoon({ expiresAt: upcomingExpiry }) && (
+          <StatusCallout
+            color="warning"
+            title={APPROVAL_MODAL_TRANSLATIONS.expiresSoonCalloutTitle}
+            description={formatDateTime(upcomingExpiry)}
+            data-test-subj={testSubj('expires')}
+          />
+        )}
+
+        {isRestricted && (
+          <StatusCallout
+            color="warning"
+            title={APPROVAL_MODAL_TRANSLATIONS.restrictedCalloutBody}
+            data-test-subj={testSubj('restricted')}
+          />
+        )}
+
+        {isReplaced && !isExpired && !failedAttemptError && (
+          // Looks exactly like the callout of a replaced proposal nobody decided.
+          <StatusCallout
+            color="warning"
+            title={APPROVAL_MODAL_TRANSLATIONS.replacedCalloutTitle}
+            data-test-subj={testSubj('replaced')}
+          />
         )}
 
         {failedAttemptError && (
-          <>
-            <EuiSpacer size="m" />
-            <div css={css({ padding: `0 ${euiTheme.size.base}` })}>
-              <KbnDangerCallout
-                announceOnMount
-                size="s"
-                title={APPROVAL_MODAL_TRANSLATIONS.failedAttemptCalloutTitle}
-                data-test-subj={dataTestSubj ? `${dataTestSubj}-failed-attempt` : undefined}
-              >
-                {failedAttemptError}
-              </KbnDangerCallout>
-              <EuiSpacer size="m" />
-            </div>
-          </>
+          <StatusCallout
+            color="danger"
+            title={APPROVAL_MODAL_TRANSLATIONS.failedAndReplacedCalloutTitle}
+            description={failedAttemptError}
+            data-test-subj={testSubj('failed-attempt')}
+          />
         )}
 
         {isExpired && (
-          <>
-            <EuiSpacer size="m" />
-            <div css={css({ padding: `0 ${euiTheme.size.base}` })}>
-              <KbnWarningCallout
-                announceOnMount
-                size="s"
-                title={APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle}
-                data-test-subj={dataTestSubj ? `${dataTestSubj}-expired` : undefined}
-              >
-                {expiredReason}
-              </KbnWarningCallout>
-              <EuiSpacer size="m" />
-            </div>
-          </>
+          <StatusCallout
+            color="warning"
+            title={
+              isReplaced
+                ? APPROVAL_MODAL_TRANSLATIONS.replacedCalloutTitle
+                : APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle
+            }
+            // Why, the same text the card shows, then when (only once the deadline has really
+            // passed). The generic "can no longer be applied" is the title's own message already.
+            description={
+              isReplaced
+                ? undefined
+                : [
+                    expiredCaption !== APPROVAL_MODAL_TRANSLATIONS.expiredGenericCaption
+                      ? expiredCaption
+                      : undefined,
+                    expiresAt && deadlinePassed ? formatDateTime(expiresAt) : undefined,
+                  ]
+                    .filter(Boolean)
+                    .join('. ') || undefined
+            }
+            data-test-subj={testSubj('expired')}
+          />
         )}
       </>
     );

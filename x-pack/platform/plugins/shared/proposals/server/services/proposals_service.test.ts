@@ -178,7 +178,7 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const { service } = createService(storage);
 
-      // "I've applied" would otherwise approve the gate and run the action again.
+      // "Mark as applied" would otherwise approve the gate and run the action again.
       await expect(
         service.create(
           {
@@ -3429,7 +3429,7 @@ describe('ProposalsService.reopen', () => {
           conversationId: 'conv-1',
           title: 'Tune the noisy rule',
           origin: 'nightshift',
-          // Still a to-do, so "I've applied" is offered on it again.
+          // Still a to-do, so "Mark as applied" is offered on it again.
           category: 'todo',
           proposalId,
         }),

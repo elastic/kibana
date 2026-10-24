@@ -247,14 +247,18 @@ describe('ProposalApprovalCard', () => {
   describe('error / no-data state', () => {
     it('renders a danger callout when the query errors', () => {
       setupMocks(null, { isError: true });
-      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('danger-callout')).toBeInTheDocument();
+      const { getByText } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(
+        getByText('Unable to load this proposal. Try refreshing the page.')
+      ).toBeInTheDocument();
     });
 
     it('renders a danger callout when query succeeds but returns no data', () => {
       setupMocks(null);
-      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('danger-callout')).toBeInTheDocument();
+      const { getByText } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(
+        getByText('Unable to load this proposal. Try refreshing the page.')
+      ).toBeInTheDocument();
     });
   });
 
@@ -432,7 +436,7 @@ describe('ProposalApprovalCard', () => {
         })
       );
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Someone');
+      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Unknown approver');
     });
   });
 
@@ -460,37 +464,14 @@ describe('ProposalApprovalCard', () => {
       );
 
       expect(getByText('Original recommendation')).toBeInTheDocument();
-      expect(getByText('This proposal has been replaced.')).toBeInTheDocument();
       expect(
         container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
-      ).toBeDisabled();
-      expect(
-        container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')
       ).toBeDisabled();
       expect(queryByText(/No further action is needed/)).not.toBeInTheDocument();
       expect(container.querySelector('[data-test-subj="approval-decision"]')).toBeNull();
       expect(container.querySelector('[data-test-subj="approval-is-submitting"]')).toBeNull();
       expect(queryByText(/The decision deadline has passed/)).not.toBeInTheDocument();
       expect(useProposalMock.mock.calls.every(([id]) => id === PROPOSAL_ID)).toBe(true);
-    });
-
-    it('says a to-do proposal marked as not applied is offered again, with nothing to decide', () => {
-      setupMocks(
-        baseProposal({
-          actionWorkflowId: undefined,
-          category: 'todo',
-          decision: 'approved',
-          status: 'no_action',
-          supersededBy: 'proposal-2',
-        })
-      );
-      const { container, getByText } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      expect(getByText('Marked as not applied. It is offered again below.')).toBeInTheDocument();
-      expect(
-        container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
-      ).toBeNull();
-      expect(container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')).toBeNull();
     });
 
     it('hides an open dismissal form when the proposal is replaced', () => {
@@ -519,9 +500,6 @@ describe('ProposalApprovalCard', () => {
       );
       expect(container.querySelector('[data-test-subj="mock-dismiss-form"]')).toBeNull();
       expect(latestOnDismiss).toBeUndefined();
-      expect(
-        container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')
-      ).toBeDisabled();
     });
   });
 

@@ -101,15 +101,13 @@ describe('ProposalDecision', () => {
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')).toBeEnabled();
   });
 
-  it("offers only I've applied for a to-do proposal", () => {
+  it('offers Mark as applied and a decline for a to-do proposal', () => {
     setup({ data: { ...proposal, category: 'todo' } });
 
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toHaveTextContent(
-      "I've applied"
+      'Mark as applied'
     );
-    expect(
-      screen.queryByTestId('investigationHypothesisTreeProposal-p-1-dismiss')
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')).toBeEnabled();
   });
 
   it('marks a to-do proposal marked as applied as not applied, and reads the investigation again', async () => {
@@ -126,7 +124,9 @@ describe('ProposalDecision', () => {
   it('disables the decision without the decide capability', () => {
     setup({ canDecide: false });
 
-    expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toBeDisabled();
+    expect(
+      screen.queryByTestId('investigationHypothesisTreeProposal-p-1-confirm')
+    ).not.toBeInTheDocument();
   });
 
   it('says so when the proposal cannot be read', () => {
