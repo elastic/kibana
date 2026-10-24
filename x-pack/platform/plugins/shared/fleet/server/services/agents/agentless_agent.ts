@@ -222,6 +222,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
       requestConfig.data.is_elastic_staff_owned = cloudSetup?.isElasticStaffOwned ?? false;
+      Object.assign(requestConfig.data, this.getCloudDeploymentIds());
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -338,6 +339,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       method: 'PUT',
       data: {
         stack_version: kibanaVersion,
+        ...this.getCloudDeploymentIds(),
       },
       ...this.getHeaders(tlsConfig, traceId),
     };
@@ -482,6 +484,23 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
   ) {
     return {
       output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
+    };
+  }
+
+  /**
+   * The Elastic Cloud deployment ID and the Elasticsearch cluster ID of this deployment.
+   * Returns an empty object on Serverless or when Cloud does not expose the IDs.
+   */
+  private getCloudDeploymentIds(): { deployment_id?: string; elasticsearch_cluster_id?: string } {
+    const cloudSetup = appContextService.getCloud();
+    if (!cloudSetup?.isCloudEnabled || cloudSetup.isServerlessEnabled) {
+      return {};
+    }
+    return {
+      ...(cloudSetup.deploymentId ? { deployment_id: cloudSetup.deploymentId } : {}),
+      ...(cloudSetup.elasticsearchClusterId
+        ? { elasticsearch_cluster_id: cloudSetup.elasticsearchClusterId }
+        : {}),
     };
   }
 
