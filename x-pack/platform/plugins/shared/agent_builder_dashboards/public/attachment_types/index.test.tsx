@@ -240,14 +240,6 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     conversationId?: string;
   }) => {
     const attachment = getAttachment();
-    uiDefinition.getActionButtons?.({
-      attachment,
-      isSidebar: false,
-      isCanvas: false,
-      openCanvas: jest.fn(),
-      updateOrigin: (origin: string) =>
-        deps.updateAttachmentOrigin(conversationId, attachment.id, origin),
-    });
 
     deps.dashboardAppClientApi$.next(api);
     deps.emitConversationChange({

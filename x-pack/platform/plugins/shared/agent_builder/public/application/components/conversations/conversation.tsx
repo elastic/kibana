@@ -92,8 +92,15 @@ export const Conversation: React.FC<{}> = () => {
     if (staleAttachmentInputs.length > 0) {
       upsertAttachments?.(staleAttachmentInputs);
     }
+    staleAttachmentInputs.forEach(({ id, type, data }) => {
+      if (id) {
+        attachmentsService
+          .getAttachmentUiDefinition(type)
+          ?.onStaleUpdateStaged?.({ id, type, data });
+      }
+    });
     setDismissStaleAttachments(true);
-  }, [staleAttachmentInputs, upsertAttachments]);
+  }, [staleAttachmentInputs, upsertAttachments, attachmentsService]);
 
   // Display stale attachments panel when stale attachments response changes or conversationId changes
   useEffect(() => {

@@ -203,6 +203,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   onClick?: (args: { attachment: TAttachment; version?: AttachmentVersion }) => void;
   /**
+   * Optional handler invoked when the user stages the updated version of a stale attachment
+   * from the conversation's stale attachments panel. The attachment carries the updated data.
+   */
+  onStaleUpdateStaged?: (attachment: TAttachment) => void;
+  /**
    * Optional custom content renderer for inline attachment display.
    * When provided, attachments can be rendered inline in the conversation
    * using the <render_attachment> tag.

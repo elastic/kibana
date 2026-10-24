@@ -115,7 +115,7 @@ describe('createDashboardAttachmentType', () => {
     expect(result?.panels).toHaveLength(1);
   });
 
-  it('isStale should return true when the dashboard changed after the snapshot', async () => {
+  it('isStale should return true when the dashboard changed after the latest attachment version', async () => {
     const dashboardClient = createDashboardClient();
     const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({

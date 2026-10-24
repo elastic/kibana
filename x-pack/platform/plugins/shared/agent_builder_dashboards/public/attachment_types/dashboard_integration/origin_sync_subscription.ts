@@ -8,7 +8,6 @@
 import type { Subscription } from 'rxjs';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
-import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 
 /*
  * keep the attachment's origin in sync with the dashboard's saved object id on dashboard save,
@@ -24,10 +23,7 @@ export const createOriginSyncSubscription = ({
   api: DashboardApi;
   getAttachments: () => undefined | DashboardAttachment[];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
-  updateOrigin: (
-    attachmentId: string,
-    origin: string
-  ) => Promise<UpdateOriginResponse | undefined> | undefined;
+  updateOrigin: (attachmentId: string, origin: string) => Promise<void>;
 }): Subscription => {
   return api.onSave$.subscribe(async ({ previousDashboardId, dashboardId }: DashboardSaveEvent) => {
     if (!dashboardId) {
