@@ -26,7 +26,7 @@ trash
 target
 /build
 .jruby
-.idea
+/.idea/*
 .claude/*.local.json
 .claude/worktrees/
 /.cursor/*
@@ -36,6 +36,7 @@ target
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
 *.iml
+!/.idea/kibana.iml
 *.log
 .oxlintrc.with_types.json
 __tmp__
