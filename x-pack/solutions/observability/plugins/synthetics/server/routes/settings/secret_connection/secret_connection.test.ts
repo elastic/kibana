@@ -10,11 +10,19 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { HashiCorpVaultConfig } from '../../../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
-import { deleteSecretConnectionRoute, saveSecretConnectionRoute } from './secret_connection';
+import {
+  deleteSecretConnectionRoute,
+  saveSecretConnectionRoute,
+  testSecretConnectionRoute,
+} from './secret_connection';
+import { testHashiCorpVault } from './vault_client';
 import { SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
 import { hostNotAllowedMessage } from './address_guard';
 import { connectionInUseMessage, SECRET_CONNECTIONS_DISABLED_MESSAGE } from './connection_utils';
 
+jest.mock('./vault_client', () => ({
+  testHashiCorpVault: jest.fn().mockResolvedValue({ ok: true }),
+}));
 jest.mock('../../../tasks/sync_global_params_task', () => ({
   asyncGlobalParamsPropagation: jest.fn(),
 }));
@@ -66,6 +74,7 @@ const setup = ({
     },
     server: {
       config: { secretConnections: { allowedHosts: ['*'], ...secretConnections } },
+      logger: { warn: jest.fn(), debug: jest.fn() },
       encryptedSavedObjects: {
         getClient: (options?: { includedHiddenTypes?: string[] }) =>
           encryptedClient(options?.includedHiddenTypes),
@@ -80,23 +89,73 @@ describe('secret connection routes', () => {
     jest.clearAllMocks();
   });
 
-  describe('PUT', () => {
-    const save = (routeContext: unknown) =>
-      saveSecretConnectionRoute().handler(routeContext as any);
+  describe('POST _test', () => {
+    const runTest = (routeContext: unknown) =>
+      testSecretConnectionRoute().handler(routeContext as any);
 
-    it('responds 404 without writing while secret connections are disabled', async () => {
-      const { routeContext, create, response } = setup({
-        body: { name: 'prod', config: storedConfig, secrets: { token: 't' } },
+    it.each([
+      ['the address changed', { ...storedConfig, address: 'https://attacker.example' }],
+      ['TLS verification is turned off', { ...storedConfig, tlsSkipVerify: true }],
+      ['the auth method changed', { ...storedConfig, authMethod: 'approle', roleId: 'role' }],
+    ])('does not send the stored secret anywhere when %s', async (_label, config) => {
+      const { routeContext } = setup({
+        body: { name: 'prod', config },
+        stored: { config: storedConfig, secrets: { token: 'stored-token' } },
+      });
+
+      const result = await runTest(routeContext);
+
+      expect(result).toEqual({ ok: false, message: SECRET_REENTRY_REQUIRED_MESSAGE });
+      expect(testHashiCorpVault).not.toHaveBeenCalled();
+    });
+
+    it('reuses the stored secret when nothing credential-sensitive changed', async () => {
+      const { routeContext } = setup({
+        body: { name: 'prod', config: { ...storedConfig, kvMount: 'kv' } },
+        stored: { config: storedConfig, secrets: { token: 'stored-token' } },
+      });
+
+      await runTest(routeContext);
+
+      expect(testHashiCorpVault).toHaveBeenCalledWith(
+        expect.objectContaining({ address: storedConfig.address, token: 'stored-token' }),
+        routeContext.server.logger
+      );
+    });
+
+    it('makes no Vault request to a host outside allowedHosts', async () => {
+      const { routeContext } = setup({
+        body: { config: { ...storedConfig, address: 'https://other.example' }, secrets: {} },
+        secretConnections: { allowedHosts: ['vault.example.com'] },
+      });
+
+      const result = await runTest(routeContext);
+
+      expect(result).toEqual({
+        ok: false,
+        message: hostNotAllowedMessage('https://other.example'),
+      });
+      expect(testHashiCorpVault).not.toHaveBeenCalled();
+    });
+
+    it('responds 404 without a Vault request while secret connections are disabled', async () => {
+      const { routeContext, response } = setup({
+        body: { config: storedConfig, secrets: { token: 't' } },
         secretConnections: { enabled: false },
       });
 
-      await save(routeContext);
+      await runTest(routeContext);
 
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE },
       });
-      expect(create).not.toHaveBeenCalled();
+      expect(testHashiCorpVault).not.toHaveBeenCalled();
     });
+  });
+
+  describe('PUT', () => {
+    const save = (routeContext: unknown) =>
+      saveSecretConnectionRoute().handler(routeContext as any);
 
     it('writes nothing for a host outside allowedHosts', async () => {
       const { routeContext, create, response } = setup({
