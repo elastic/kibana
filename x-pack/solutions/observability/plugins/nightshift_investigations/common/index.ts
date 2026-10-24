@@ -76,7 +76,19 @@ export interface StartInvestigationRequest {
   notificationDestinations?: InvestigationNotificationDestination[];
   /** The Slack thread the investigation is about, so a reply in it continues the investigation. */
   slack_thread?: SlackThreadReference;
+  /**
+   * Latest inclusive `@timestamp` sandbox telemetry queries for this investigation may return.
+   * Not part of the agent prompt. The ORCA eval sets it to `metadata.current_time` plus five minutes.
+   */
+  telemetry_not_after?: string;
 }
+
+/** A UTC timestamp, with optional milliseconds. */
+const TELEMETRY_NOT_AFTER_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
+
+/** True when the value is a UTC timestamp the telemetry cutoff can enforce. */
+export const isTelemetryNotAfter = (value: string): boolean =>
+  TELEMETRY_NOT_AFTER_PATTERN.test(value) && !Number.isNaN(Date.parse(value));
 
 /** A Slack thread, by the workspace and channel ids and the thread's root message ts. */
 export interface SlackThreadReference {

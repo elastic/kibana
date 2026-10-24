@@ -106,6 +106,28 @@ it('starts a manual investigation from the question alone', async () => {
   });
 });
 
+it('forwards a telemetry cutoff on a manual investigation', async () => {
+  const body = schema.parse({
+    subject: { type: 'manual' },
+    message: 'Why did checkout p99 spike?',
+    telemetry_not_after: '2026-04-19T16:27:00.000Z',
+  });
+
+  await handler({
+    request: {},
+    getInvestigationsClient,
+    getAlertsClient,
+    params: { body },
+  } as never);
+
+  expect(start).toHaveBeenCalledWith({
+    subject: { type: 'manual', id: 'manual' },
+    message: 'Why did checkout p99 spike?',
+    telemetry_not_after: '2026-04-19T16:27:00.000Z',
+    trigger_type: 'manual',
+  });
+});
+
 it('forwards connector_id for a manual investigation', async () => {
   const body = schema.parse({
     subject: { type: 'manual' },

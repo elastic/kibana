@@ -1393,6 +1393,30 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
+  it('records a telemetry cutoff on the new conversation', async () => {
+    withExecution({
+      inputs: {
+        title: 'Latency is too high',
+        investigation_id: 'inv-1',
+        subjects,
+        telemetry_not_after: '2026-04-19T16:27:00.000Z',
+      },
+    });
+
+    await makeClient().ensureOrCreate('inv-1', 'exec-1');
+
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          severity: 'medium',
+          workflow_execution_ids: ['exec-1'],
+          telemetry_not_after: '2026-04-19T16:27:00.000Z',
+        }),
+      })
+    );
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+  });
+
   it('appends the run to the runs an investigation already records, once', async () => {
     withExecution();
     withConversations(makeConversation({ id: 'inv-1', workflowExecutionIds: ['exec-0'] }));

@@ -123,6 +123,32 @@ it('executes the manual investigation and reads what it recorded from the shared
   expect(result.execution_error).toBeUndefined();
 });
 
+it('bounds telemetry reads at current_time plus five minutes', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    .mockResolvedValueOnce(investigation())
+    .mockResolvedValueOnce({
+      rounds: [{ status: ConversationRoundStatus.completed, steps: [] }],
+    });
+
+  await runInvestigation(
+    fetch,
+    {
+      ...example,
+      metadata: { case_id: 'timeouts', current_time: '2026-04-19T16:22:00.000Z' },
+    },
+    connector
+  );
+
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+    subject: { type: 'manual' },
+    message: example.input.question,
+    connector_id: connector.id,
+    telemetry_not_after: '2026-04-19T16:27:00.000Z',
+  });
+});
+
 it('keeps multi-megabyte conversation evidence out of the persisted score output', async () => {
   const conversation = {
     rounds: [

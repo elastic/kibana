@@ -19,12 +19,16 @@ import {
   CauseCompletenessJudgePrompt,
   DecisionTreeHelpfulnessJudgePrompt,
   GoalPassJudgePrompt,
+  OrcaControlJudgePrompt,
+  OrcaFlagsJudgePrompt,
   TruthfulnessJudgePrompt,
 } from './prompts';
+import { scoreOrcaControl, scoreOrcaHallucination, scoreOrcaRcaAccuracy } from './orca_scoring';
 import type { JudgeInputs } from './scoring';
 import {
   buildJudgeInputs,
   clampUnitScore,
+  composeAnswerText,
   goalScorePassed,
   normalizeDecisionTreeHelpfulnessScore,
   normalizeGoalScore,
@@ -36,6 +40,9 @@ export const CAUSE_COMPLETENESS_EVALUATOR = 'rca_cause_completeness';
 export const ANTI_LEAKAGE_EVALUATOR = 'rca_anti_leakage';
 export const TRUTHFULNESS_EVALUATOR = 'truthfulness';
 export const DECISION_TREE_HELPFULNESS_EVALUATOR = 'decision_tree_helpfulness';
+export const ORCA_RCA_ACCURACY_EVALUATOR = 'orca_rca_accuracy';
+export const ORCA_HALLUCINATION_EVALUATOR = 'orca_hallucination';
+export const ORCA_CONTROL_EVALUATOR = 'orca_control';
 
 type InvestigationEvaluator = Evaluator<InvestigationExample, InvestigationTaskOutput>;
 
@@ -333,3 +340,153 @@ export const createInvestigationJudges = (deps: JudgeDeps): InvestigationEvaluat
   createTruthfulnessEvaluator(deps),
   createDecisionTreeHelpfulnessEvaluator(deps),
 ];
+
+const stringList = (value: unknown): string[] | undefined =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string') ? value : undefined;
+
+const isOrcaControl = (metadata: InvestigationExample['metadata']): boolean =>
+  metadata.control === true || metadata.task_type === 'control';
+
+/** A default severity alone is not a report. ORCA creates every conversation at medium. */
+const reportHasFindings = (report: InvestigationTaskOutput['structured_report']): boolean =>
+  Boolean(report?.conclusion || report?.summary || report?.hypotheses?.length);
+
+const quietWindowText = (metadata: InvestigationExample['metadata']): string => {
+  const window = metadata.quiet_window;
+  if (window === undefined || window === null) return '';
+  const text = JSON.stringify(window);
+  return text.length > 4_000 ? text.slice(0, 4_000) : text;
+};
+
+/** ORCA set scores. `goal_pass` still scores the single best hypothesis. */
+export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] => [
+  {
+    name: ORCA_RCA_ACCURACY_EVALUATOR,
+    kind: 'LLM',
+    direction: 'maximize',
+    getModel: getModelFactory(deps.evaluationConnector),
+    evaluate: async ({ output, expected, metadata }) => {
+      const flags = stringList(metadata.plausible_flags);
+      if (!flags?.length || isOrcaControl(metadata)) {
+        return {
+          score: null,
+          label: 'n/a',
+          explanation: 'RCA accuracy applies to an incident with a non-empty plausible flag set.',
+        };
+      }
+      if (!reportHasFindings(output.structured_report)) {
+        return {
+          score: 0,
+          label: 'fail',
+          explanation: 'The report names none of the plausible flags.',
+        };
+      }
+      const answer = composeAnswerText(output.structured_report);
+      const result = await invokeJudge<{ named_flags: unknown; reasoning: string }>(
+        deps,
+        ORCA_RCA_ACCURACY_EVALUATOR,
+        OrcaFlagsJudgePrompt,
+        {
+          plausibleFlags: flags.join(', '),
+          reference: extractReference(expected),
+          answer,
+        }
+      );
+      const named = stringList(result.named_flags);
+      if (!named) throw new Error('ORCA accuracy judge returned no flag list');
+      const score = scoreOrcaRcaAccuracy({ plausibleFlags: flags, namedFlags: named });
+      return {
+        score,
+        label: score === 1 ? 'pass' : 'fail',
+        explanation: result.reasoning,
+        metadata: { plausible_flags: flags, named_flags: named },
+      };
+    },
+  },
+  {
+    name: ORCA_HALLUCINATION_EVALUATOR,
+    kind: 'LLM',
+    direction: 'minimize',
+    getModel: getModelFactory(deps.evaluationConnector),
+    evaluate: async ({ output, expected, metadata }) => {
+      const flags = stringList(metadata.plausible_flags);
+      if (!flags) {
+        return {
+          score: null,
+          label: 'n/a',
+          explanation:
+            'Hallucination needs the example plausible flag set, which may be empty for a control.',
+        };
+      }
+      if (!reportHasFindings(output.structured_report)) {
+        return { score: 0, label: 'pass', explanation: 'The report names no cause.' };
+      }
+      const answer = composeAnswerText(output.structured_report);
+      const result = await invokeJudge<{ named_causes: unknown; reasoning: string }>(
+        deps,
+        ORCA_HALLUCINATION_EVALUATOR,
+        OrcaFlagsJudgePrompt,
+        {
+          plausibleFlags: flags.join(', '),
+          reference: extractReference(expected),
+          answer,
+        }
+      );
+      const named = stringList(result.named_causes);
+      if (!named) throw new Error('ORCA hallucination judge returned no cause list');
+      const score = scoreOrcaHallucination({ plausibleFlags: flags, namedCauses: named });
+      return {
+        score,
+        label: score === 1 ? 'hallucinated' : 'pass',
+        explanation: result.reasoning,
+        metadata: { plausible_flags: flags, named_causes: named },
+      };
+    },
+  },
+  {
+    name: ORCA_CONTROL_EVALUATOR,
+    kind: 'LLM',
+    direction: 'maximize',
+    getModel: getModelFactory(deps.evaluationConnector),
+    evaluate: async ({ output, expected, metadata }) => {
+      if (!isOrcaControl(metadata)) {
+        return { score: null, label: 'n/a', explanation: 'Control applies to a no-incident task.' };
+      }
+      if (!reportHasFindings(output.structured_report)) {
+        return { score: 1, label: 'pass', explanation: 'An empty control report passes.' };
+      }
+      const answer = composeAnswerText(output.structured_report);
+      const quietWindow = quietWindowText(metadata);
+      const reference = extractReference(expected);
+      if (!quietWindow && !reference) {
+        return {
+          score: null,
+          label: 'n/a',
+          explanation: 'Control needs a quiet window or a reference answer.',
+        };
+      }
+      const result = await invokeJudge<{
+        incident_inside_quiet_window: unknown;
+        reasoning: string;
+      }>(deps, ORCA_CONTROL_EVALUATOR, OrcaControlJudgePrompt, { quietWindow, reference, answer });
+      if (typeof result.incident_inside_quiet_window !== 'boolean') {
+        throw new Error('ORCA control judge returned no window decision');
+      }
+      const score = scoreOrcaControl({
+        emptyReport: false,
+        incidentInsideQuietWindow: result.incident_inside_quiet_window,
+      });
+      return {
+        score,
+        label: score === 1 ? 'pass' : 'fail',
+        explanation: result.reasoning,
+        metadata: { incident_inside_quiet_window: result.incident_inside_quiet_window },
+      };
+    },
+  },
+];
+
+const extractReference = (expected: InvestigationExample['output']): string => {
+  const reference = expected?.reference_answer;
+  return typeof reference === 'string' ? reference : '';
+};

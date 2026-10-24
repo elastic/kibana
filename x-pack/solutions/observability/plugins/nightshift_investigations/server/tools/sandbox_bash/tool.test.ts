@@ -25,10 +25,12 @@ const setup = ({
     secretValues: [GITHUB_TOKEN],
   }),
   resolveConnectorCredentials,
+  readTelemetryNotAfter,
   stdout = '',
 }: {
   resolveForCommand?: jest.Mock;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  readTelemetryNotAfter?: jest.Mock;
   stdout?: string;
 } = {}) => {
   const runCommand = jest.fn().mockResolvedValue({
@@ -53,6 +55,7 @@ const setup = ({
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
     sandboxSecretsClient: { resolveForCommand },
+    readTelemetryNotAfter,
     logger,
   });
 
@@ -252,5 +255,87 @@ describe('sandbox bash tool — output size', () => {
     expect((results[0] as { data: { message: string } }).data.message).toContain(
       'redirect it to a file'
     );
+  });
+});
+
+describe('sandbox bash tool — telemetry cutoff', () => {
+  const telemetryCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+    env: {
+      CONNECTOR_CONFIG_URL: 'https://telemetry.example',
+      CONNECTOR_HEADER_AUTHORIZATION: 'ApiKey abc',
+    },
+    secretValues: ['ApiKey abc'],
+  });
+
+  it('leaves the connector URL unchanged when the investigation has no cutoff', async () => {
+    const readTelemetryNotAfter = jest.fn().mockResolvedValue(undefined);
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: telemetryCredentials,
+      readTelemetryNotAfter,
+    });
+
+    await run({
+      connector_id: 'nightshift-evals-telemetry',
+      command: 'curl "$CONNECTOR_CONFIG_URL"',
+    });
+
+    expect(runCommand.mock.calls[0][0].command).toBe('curl "$CONNECTOR_CONFIG_URL"');
+    expect(runCommand.mock.calls[0][0].env.CONNECTOR_CONFIG_URL).toBe('https://telemetry.example');
+    expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('NIGHTSHIFT_TELEMETRY_UPSTREAM');
+  });
+
+  it('does not proxy a connector that has no telemetry URL', async () => {
+    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+      env: { CONNECTOR_CONFIG_APIURL: 'https://api.github.com' },
+      secretValues: [],
+    });
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials,
+      readTelemetryNotAfter: jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z'),
+    });
+
+    await run({ connector_id: 'github', command: 'curl "$CONNECTOR_CONFIG_APIURL"' });
+
+    expect(runCommand.mock.calls[0][0].command).toBe('curl "$CONNECTOR_CONFIG_APIURL"');
+  });
+
+  it('runs the command through the cutoff proxy and keeps the cluster URL out of the command', async () => {
+    const { run, runCommand, writeFiles } = setup({
+      resolveConnectorCredentials: telemetryCredentials,
+      readTelemetryNotAfter: jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z'),
+    });
+
+    await run({
+      connector_id: 'nightshift-evals-telemetry',
+      command: 'curl "$CONNECTOR_CONFIG_URL"',
+    });
+
+    const { command, env } = runCommand.mock.calls[0][0];
+    expect(command).toContain('unset NIGHTSHIFT_TELEMETRY_UPSTREAM');
+    expect(command).not.toContain('https://telemetry.example');
+    expect(env.NIGHTSHIFT_TELEMETRY_CUTOFF).toBe('2026-04-19T16:27:00.000Z');
+    expect(env.NIGHTSHIFT_SANDBOX_COMMAND).toBe('curl "$CONNECTOR_CONFIG_URL"');
+    expect(env).not.toHaveProperty('NIGHTSHIFT_TELEMETRY_UPSTREAM');
+    expect(writeFiles).toHaveBeenCalled();
+  });
+
+  it('does not run the command when the cutoff proxy cannot be installed', async () => {
+    const { run, runCommand, writeFiles } = setup({
+      resolveConnectorCredentials: telemetryCredentials,
+      readTelemetryNotAfter: jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z'),
+    });
+    writeFiles.mockResolvedValue([{ success: false }]);
+
+    const { results } = await run({ connector_id: 'nightshift-evals-telemetry' });
+
+    expect(runCommand).not.toHaveBeenCalled();
+    expect(results).toEqual([
+      {
+        type: ToolResultType.error,
+        data: {
+          message: 'Could not install the telemetry cutoff proxy, so the command was not run.',
+        },
+      },
+    ]);
   });
 });

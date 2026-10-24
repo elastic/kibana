@@ -546,11 +546,33 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 `orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v2`
 against the ORCA telemetry cluster: 40 incident tasks over 28 incidents and 10 no-incident
 controls. Each question uses ORCA's own wording: a stated current time, a vague or offset report
-time and the user-facing symptom, without the incident onset or an analysis window. The cluster
-holds all six days, so an agent can still read telemetry after the stated current time; each
-example records it as `metadata.current_time`. CI runs it as its own shard under the
-`evals:nightshift-investigations` label, next to the `customer0` shard that runs the smoke and
-trace-only evals, so each Scout server's telemetry connector points at one cluster.
+time and the user-facing symptom, without the incident onset or an analysis window. CI runs it as
+its own shard under the `evals:nightshift-investigations` label, next to the `customer0` shard
+that runs the smoke and trace-only evals, so each Scout server's telemetry connector points at
+one cluster. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+and is not this ORCA benchmark; CI does not run it.
+
+Each example records `metadata.current_time`. The eval sends `telemetry_not_after`, five minutes
+later, on the investigation. That value is stored on the conversation and is not part of the
+agent prompt. While it is set, sandbox commands that call the telemetry connector go through a
+proxy in that investigation's sandbox: a query whose `@timestamp` lower bounds are all after the
+cutoff returns no rows, and an in-window ES|QL query is forwarded with `@timestamp <=` that
+instant. Customer-0 and smoke never set the field, so their telemetry reads are unchanged. Eight
+investigations run at once and each has its own cutoff, so the bound is not a cluster setting.
+
+ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
+evaluation connector. `goal_pass` is unchanged: it scores the single best hypothesis and passes at
+4/5. ORCA also records three scores. RCA accuracy is 1 only when the report names every flag in
+`metadata.plausible_flags`. Hallucination is 1 when a named cause matches none of that set, and
+its direction is minimize. Control passes an empty report and fails when a report places an
+incident inside `metadata.quiet_window`. A release that adds those fields is a new Golden release
+and a pin bump. `rca_anti_leakage` judges trajectory leakage of incident records and
+post-resolution writeups. It does not see prompt leakage, and a feature-flag key in telemetry is
+a legitimate signal.
+
+Do not compare these scores with the paper's published rates. This agent has ES|QL and does not
+have the Astronomy Shop source. The paper's agents have that repository and Grafana (Prometheus,
+Jaeger, OpenSearch).
 
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and

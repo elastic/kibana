@@ -156,6 +156,17 @@ export const toInvestigationReport = ({
   proposals: proposals.map(({ title, comment, status }) => ({ title, comment, status })),
 });
 
+/** Paper grace: sandbox reads may include telemetry up to five minutes after current_time. */
+const TELEMETRY_CUTOFF_GRACE_MS = 5 * 60 * 1000;
+
+/** UTC instant five minutes after a parseable current_time. */
+const telemetryNotAfter = (currentTime: unknown): string | undefined => {
+  if (typeof currentTime !== 'string') return undefined;
+  const parsed = Date.parse(currentTime);
+  if (Number.isNaN(parsed)) return undefined;
+  return new Date(parsed + TELEMETRY_CUTOFF_GRACE_MS).toISOString();
+};
+
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
@@ -168,6 +179,7 @@ export const runInvestigation = async (
     query: example.input.question,
   };
   let investigation: Investigation | undefined;
+  const notAfter = telemetryNotAfter(example.metadata.current_time);
   try {
     const { investigation_id: investigationId } = await fetch<StartInvestigationResponse>(
       '/internal/nightshift/investigations',
@@ -177,6 +189,7 @@ export const runInvestigation = async (
           subject: { type: 'manual' },
           message: example.input.question,
           connector_id: connector.id,
+          ...(notAfter ? { telemetry_not_after: notAfter } : {}),
         }),
       }
     );

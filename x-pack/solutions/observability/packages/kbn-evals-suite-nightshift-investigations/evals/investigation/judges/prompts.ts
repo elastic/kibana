@@ -6,7 +6,7 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * LLM-as-judge prompts ported from Elastic's private `deductive` repo (commit
@@ -511,6 +511,113 @@ export const AntiLeakageJudgePrompt = createPrompt({
             },
           },
           required: ['leaked_root_cause', 'reasoning'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+const ORCA_FLAGS_SYSTEM = `You extract root causes from an investigation report.
+
+## Plausible feature flags
+{{{plausibleFlags}}}
+
+## Reference
+{{{reference}}}
+
+Call the \`score\` tool with:
+- named_flags: every plausible flag the report names, copied exactly from the list above. Include a flag only when the report states it as a cause. An empty list is valid.
+- named_causes: every root cause the report asserts, whether or not it is in the list. Use the flag id when the cause is one of the flags; otherwise use the report's wording.
+- reasoning: one sentence.`;
+
+const ORCA_FLAGS_USER = `## Report
+{{{answer}}}
+
+Call the \`score\` tool.`;
+
+export const OrcaFlagsJudgePrompt = createPrompt({
+  name: 'nightshift_orca_flags_judge',
+  description:
+    'Extracts the feature flags and other causes an ORCA report names. Scoring is applied in code.',
+  input: lazySchema(() =>
+    z.object({
+      plausibleFlags: z.string().max(4_000),
+      reference: z.string().max(20_000),
+      answer: z.string().max(20_000),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: ORCA_FLAGS_SYSTEM } },
+    template: { mustache: { template: ORCA_FLAGS_USER } },
+    tools: {
+      score: {
+        description: 'Return the flags and causes the report names.',
+        schema: {
+          type: 'object',
+          properties: {
+            named_flags: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Plausible flag ids the report names, copied exactly.',
+            },
+            named_causes: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Every root cause the report asserts.',
+            },
+            reasoning: { type: 'string', description: 'One sentence.' },
+          },
+          required: ['named_flags', 'named_causes', 'reasoning'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+const ORCA_CONTROL_SYSTEM = `You judge a no-incident control report.
+
+## Quiet window
+{{{quietWindow}}}
+
+## Reference
+{{{reference}}}
+
+The quiet window is the time range in which no incident occurred. Call the \`score\` tool with incident_inside_quiet_window true only when the report places an incident strictly inside that window. A report that names no incident, or places one outside the window, is false.`;
+
+const ORCA_CONTROL_USER = `## Report
+{{{answer}}}
+
+Call the \`score\` tool.`;
+
+export const OrcaControlJudgePrompt = createPrompt({
+  name: 'nightshift_orca_control_judge',
+  description: 'Decides whether a control report places an incident inside the quiet window.',
+  input: lazySchema(() =>
+    z.object({
+      quietWindow: z.string().max(4_000),
+      reference: z.string().max(20_000),
+      answer: z.string().max(20_000),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: ORCA_CONTROL_SYSTEM } },
+    template: { mustache: { template: ORCA_CONTROL_USER } },
+    tools: {
+      score: {
+        description: 'Return whether the report places an incident inside the quiet window.',
+        schema: {
+          type: 'object',
+          properties: {
+            incident_inside_quiet_window: {
+              type: 'boolean',
+              description:
+                'True only when the report places an incident strictly inside the quiet window.',
+            },
+            reasoning: { type: 'string', description: 'One sentence.' },
+          },
+          required: ['incident_inside_quiet_window', 'reasoning'],
         },
       },
     },
