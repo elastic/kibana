@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from './constants';
+export {
+  DATA_IMAGE_URL_PATTERN,
+  DEFAULT_OBJECT_FIT,
+  IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS,
+  MAX_IMAGE_URL_LENGTH,
+} from './constants';

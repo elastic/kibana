@@ -160502,7 +160502,8 @@ components:
                             - url
                           type: string
                         url:
-                          description: URL of the image
+                          description: URL of the image. Either an http(s) URL or a base64 encoded png, jpeg, gif or webp data URL
+                          maxLength: 700000
                           type: string
                       required:
                         - type
