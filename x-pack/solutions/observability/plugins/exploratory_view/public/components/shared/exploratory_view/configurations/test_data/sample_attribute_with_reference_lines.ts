@@ -58,7 +58,7 @@ export const sampleAttributeWithReferenceLines = {
                 filter: {
                   language: 'kuery',
                   query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
+                    '((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : * and service.name: (elastic or kibana)',
                 },
                 isBucketed: false,
                 label: 'test-series',
@@ -71,7 +71,7 @@ export const sampleAttributeWithReferenceLines = {
                     },
                   },
                   formula:
-                    "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)'))",
+                    "count(kql='((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : * and service.name: (elastic or kibana)') / overall_sum(count(kql='((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : * and service.name: (elastic or kibana)'))",
                   isFormulaBroken: false,
                 },
                 references: [],
@@ -153,7 +153,7 @@ export const sampleAttributeWithReferenceLines = {
     query: {
       language: 'kuery',
       query:
-        'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana) and transaction.duration.us < 60000000',
+        '((transaction.type: page-load and processor.event: transaction) or name: documentLoad) and transaction.type : * and service.name: (elastic or kibana) and transaction.duration.us < 60000000',
     },
     visualization: {
       axisTitlesVisibilitySettings: {

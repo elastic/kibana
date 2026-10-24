@@ -9,6 +9,7 @@ import type { Location } from 'history';
 import { toQuery } from '@kbn/observability-plugin/public';
 import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
+import { serviceNameFromPath } from '../../utils/ux_app_path';
 import { getDateRange, removeUndefinedProps, toBoolean, toNumber, toString } from './helpers';
 import type { UrlParams, UxUrlParams } from './types';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -31,11 +32,34 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeFrom,
     rangeTo,
     environment,
+    platform,
     searchTerm,
     percentile,
+    frustration,
+    pageUrl,
+    errorGroup,
+    sessionIds,
+    user,
+    click,
+    account,
+    sessionQuery,
+    includeBots,
+    botUa,
+    kuery,
+    breakpoint,
+    connection,
+    device,
+    compare,
+    includePii,
+    goalId,
+    includeRaw,
+    analyticsMode,
+    hasReplay,
+    hasBounced,
   } = query;
 
   const localUIFilters = pickKeys(query, ...uxLocalUIFilterNames);
+  const pathServiceName = serviceNameFromPath(location.pathname);
 
   return removeUndefinedProps({
     // date params
@@ -47,13 +71,36 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
 
     // query params
     environment: toString(environment) || ENVIRONMENT_ALL.value,
+    platform: toString(platform),
     sortDirection,
     sortField,
     page: toNumber(page) || 0,
     pageSize: pageSize ? toNumber(pageSize) : undefined,
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
+    frustration: toString(frustration),
+    pageUrl: toString(pageUrl),
+    errorGroup: toString(errorGroup),
+    sessionIds: toString(sessionIds),
+    user: toString(user),
+    click: toString(click),
+    account: toString(account),
+    sessionQuery: toString(sessionQuery),
+    includeBots: toString(includeBots),
+    botUa: toString(botUa),
+    kuery: toString(kuery),
+    breakpoint: toString(breakpoint),
+    connection: toString(connection),
+    device: toString(device),
+    compare: toString(compare),
+    includePii: toString(includePii),
+    goalId: toString(goalId),
+    includeRaw: toString(includeRaw),
+    analyticsMode: toString(analyticsMode),
+    hasReplay: toString(hasReplay),
+    hasBounced: toString(hasBounced),
 
     ...localUIFilters,
+    ...(pathServiceName ? { serviceName: pathServiceName } : {}),
   });
 }

@@ -8,6 +8,7 @@
 import type { ESFilter } from '@kbn/es-types';
 
 import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
+import { OTEL_SERVICE_ENVIRONMENT } from '../../../../../common/otel_rum';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -21,8 +22,27 @@ export function environmentQuery(environment: string): QueryDslQueryContainer[] 
   }
 
   if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-    return [{ bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } }];
+    return [
+      {
+        bool: {
+          must_not: [
+            { exists: { field: SERVICE_ENVIRONMENT } },
+            { exists: { field: OTEL_SERVICE_ENVIRONMENT } },
+          ],
+        },
+      },
+    ];
   }
 
-  return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
+  return [
+    {
+      bool: {
+        should: [
+          { term: { [SERVICE_ENVIRONMENT]: environment } },
+          { term: { [OTEL_SERVICE_ENVIRONMENT]: environment } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
 }

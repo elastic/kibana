@@ -6,15 +6,11 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_ENVIRONMENT } from '../../../common/elasticsearch_fieldnames';
+import { OTEL_SERVICE_ENVIRONMENT } from '../../../common/otel_rum';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
+import { rumPageLoadFilter, rumServiceNameFilter } from './rum_otel_filters';
 
 export function transformEnvironmentsResponse<T>(
   response?: ESSearchResponse<T, ReturnType<typeof getEnvironments>>
@@ -22,10 +18,13 @@ export function transformEnvironmentsResponse<T>(
   if (!response) return response;
 
   const aggs = response.aggregations;
-  const environmentsBuckets = aggs?.environments.buckets || [];
+  const environmentsBuckets = [
+    ...(aggs?.environments.buckets || []),
+    ...(aggs?.otelEnvironments?.buckets || []),
+  ];
 
-  const environments = environmentsBuckets.map(
-    (environmentBucket) => environmentBucket.key as string
+  const environments = Array.from(
+    new Set(environmentsBuckets.map((environmentBucket) => environmentBucket.key as string))
   );
 
   return environments as Environment[];
@@ -56,19 +55,10 @@ export function getEnvironments({
               },
             },
           },
-          {
-            term: {
-              [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
-            },
-          },
-          {
-            term: {
-              [PROCESSOR_EVENT]: 'transaction',
-            },
-          },
+          rumPageLoadFilter(),
           ...(serviceName === undefined || serviceName === null
             ? []
-            : [{ term: { [SERVICE_NAME]: serviceName } }]),
+            : [rumServiceNameFilter(serviceName)]),
         ],
       },
     },
@@ -76,6 +66,13 @@ export function getEnvironments({
       environments: {
         terms: {
           field: SERVICE_ENVIRONMENT,
+          missing: ENVIRONMENT_NOT_DEFINED.value,
+          size,
+        },
+      },
+      otelEnvironments: {
+        terms: {
+          field: OTEL_SERVICE_ENVIRONMENT,
           missing: ENVIRONMENT_NOT_DEFINED.value,
           size,
         },

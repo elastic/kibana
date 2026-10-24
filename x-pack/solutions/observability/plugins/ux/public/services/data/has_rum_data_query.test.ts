@@ -43,7 +43,7 @@ describe('hasRumDataQuery', () => {
     const { filter } = hasRumDataQuery().query.bool;
 
     expect(filter).not.toContainEqual(TIER_CLAUSE);
-    expect(filter).toHaveLength(2);
+    expect(filter).toHaveLength(1);
   });
 
   describe('lookback window', () => {
@@ -59,8 +59,11 @@ describe('hasRumDataQuery', () => {
 
     it('leaves the range open ended, so documents ahead of the clock still match', () => {
       const { filter } = hasRumDataQuery({ since: 'now-1d' }).query.bool;
+      const range = filter.find(
+        (clause) => typeof clause === 'object' && clause !== null && 'range' in clause
+      );
 
-      expect(JSON.stringify(filter)).not.toContain('lte');
+      expect(range).toEqual({ range: { '@timestamp': { gte: 'now-1d' } } });
     });
 
     it('omits the range when no window is given, so the fallback stays unbounded in time', () => {

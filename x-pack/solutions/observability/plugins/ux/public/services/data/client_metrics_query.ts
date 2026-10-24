@@ -11,6 +11,7 @@ import {
   TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
+import { OTEL_TRANSACTION_DURATION_US } from '../../../common/otel_rum';
 import { getRumPageLoadTransactionsProjection } from './projections';
 
 export function clientMetricsQuery(
@@ -35,12 +36,28 @@ export function clientMetricsQuery(
     aggs: {
       hasFetchStartField: {
         filter: {
-          exists: { field: 'transaction.marks.navigationTiming.fetchStart' },
+          bool: {
+            should: [
+              { exists: { field: 'transaction.marks.navigationTiming.fetchStart' } },
+              { term: { name: 'documentLoad' } },
+            ],
+            minimum_should_match: 1,
+          },
         },
         aggs: {
           totalPageLoadDuration: {
             percentiles: {
               field: TRANSACTION_DURATION,
+              percents: [percentile],
+              hdr: {
+                number_of_significant_value_digits: 3,
+              },
+            },
+          },
+          // OTel documentLoad duration (also µs when present)
+          otelPageLoadDuration: {
+            percentiles: {
+              field: OTEL_TRANSACTION_DURATION_US,
               percents: [percentile],
               hdr: {
                 number_of_significant_value_digits: 3,

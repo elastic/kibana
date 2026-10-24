@@ -26,7 +26,7 @@ const setup = () => {
   const registerSections = jest.fn();
   const plugin = new UxPlugin({ env: { mode: { dev: false } } } as PluginInitializerContext);
   plugin.setup(
-    coreSetup as unknown as CoreSetup,
+    coreSetup as unknown as CoreSetup<ApmPluginStartDeps>,
     {
       observabilityShared: { navigation: { registerSections } },
     } as unknown as ApmPluginSetupDeps

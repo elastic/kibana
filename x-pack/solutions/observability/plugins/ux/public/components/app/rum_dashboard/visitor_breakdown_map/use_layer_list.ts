@@ -28,14 +28,14 @@ import {
 
 import { useMemo } from 'react';
 import type { Writable } from '@kbn/utility-types';
-import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
+import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
+import { RUM_PAGE_LOAD_KQL } from '../../../../../common/otel_rum';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
 
 const getWhereQuery = (serviceName: string) => {
   return {
-    query: `${TRANSACTION_TYPE} : "${TRANSACTION_PAGE_LOAD}" and ${SERVICE_NAME} : "${serviceName}"`,
+    query: `(${RUM_PAGE_LOAD_KQL}) and ${SERVICE_NAME} : "${serviceName}"`,
     language: 'kuery',
   };
 };
@@ -81,7 +81,7 @@ export function useLayerList() {
       term: 'client.geo.region_iso_code',
       metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
       whereQuery: {
-        query: 'transaction.type : "page-load"',
+        query: RUM_PAGE_LOAD_KQL,
         language: 'kuery',
       },
       indexPatternId: getStaticDataViewId(spaceId),

@@ -16,6 +16,17 @@ Object {
             ],
           },
         },
+        "otelPageLoadDuration": Object {
+          "percentiles": Object {
+            "field": "attributes.transaction.duration.us",
+            "hdr": Object {
+              "number_of_significant_value_digits": 3,
+            },
+            "percents": Array [
+              50,
+            ],
+          },
+        },
         "totalPageLoadDuration": Object {
           "percentiles": Object {
             "field": "transaction.duration.us",
@@ -29,8 +40,20 @@ Object {
         },
       },
       "filter": Object {
-        "exists": Object {
-          "field": "transaction.marks.navigationTiming.fetchStart",
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "exists": Object {
+                "field": "transaction.marks.navigationTiming.fetchStart",
+              },
+            },
+            Object {
+              "term": Object {
+                "name": "documentLoad",
+              },
+            },
+          ],
         },
       },
     },
@@ -48,20 +71,48 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "terms": Object {
-            "processor.event": Array [
-              "transaction",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "term": Object {
+                        "transaction.type": "page-load",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "processor.event": "transaction",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
             ],
           },
         },
         Object {
-          "term": Object {
-            "service.environment": "staging",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "term": Object {
+                  "service.environment": "staging",
+                },
+              },
+              Object {
+                "term": Object {
+                  "resource.attributes.deployment.environment": "staging",
+                },
+              },
+            ],
           },
         },
       ],

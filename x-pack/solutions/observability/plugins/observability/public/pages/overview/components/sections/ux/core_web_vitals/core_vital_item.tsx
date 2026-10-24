@@ -44,6 +44,8 @@ interface Props {
   isCls?: boolean;
   helpLabel: string;
   dataTestSubj?: string;
+  showLegend?: boolean;
+  compact?: boolean;
 }
 
 export function getCoreVitalTooltipMessage(
@@ -86,6 +88,8 @@ export function CoreVitalItem({
   isCls,
   helpLabel,
   dataTestSubj,
+  showLegend = true,
+  compact = false,
 }: Props) {
   const palette = euiPaletteForStatus(3);
   const [inFocusInd, setInFocusInd] = useState<number | null>(null);
@@ -99,12 +103,12 @@ export function CoreVitalItem({
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
 
-  return (
+  const content = (
     <>
       <EuiStat
         data-test-subj={dataTestSubj}
         aria-label={`${title} ${value}`} // aria-label is required when passing a component, instead of a string, as the description
-        titleSize="s"
+        titleSize={compact ? 'm' : 's'}
         title={value ?? ''}
         description={
           <>
@@ -115,13 +119,8 @@ export function CoreVitalItem({
         isLoading={loading}
         titleColor={colorsStatus[biggestValIndex]}
       />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="flexStart"
-        style={{ maxWidth: 350 }}
-        responsive={false}
-      >
+      <EuiSpacer size={compact ? 'm' : 's'} />
+      <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
         {palette.map((hexCode, ind) => (
           <ColorPaletteFlexItem
             hexCode={hexCode}
@@ -130,19 +129,26 @@ export function CoreVitalItem({
             inFocus={inFocusInd !== ind && inFocusInd !== null}
             percentage={ranks[ind]}
             tooltip={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind], isCls)}
+            barHeight={compact ? 20 : 16}
           />
         ))}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <PaletteLegends
-        ranks={ranks}
-        thresholds={thresholds}
-        title={title}
-        onItemHover={(ind) => {
-          setInFocusInd(ind);
-        }}
-        isCls={isCls}
-      />
+      {showLegend && (
+        <>
+          <EuiSpacer size="s" />
+          <PaletteLegends
+            ranks={ranks}
+            thresholds={thresholds}
+            title={title}
+            onItemHover={(ind) => {
+              setInFocusInd(ind);
+            }}
+            isCls={isCls}
+          />
+        </>
+      )}
     </>
   );
+
+  return content;
 }

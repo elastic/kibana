@@ -12,9 +12,8 @@ import {
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   TRANSACTION_ID,
-  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
+import { OTEL_EXCEPTION_MESSAGE, OTEL_EXCEPTION_TYPE } from '../../../common/otel_rum';
 import { getRumErrorsProjection } from './projections';
 
 export function jsErrorsQuery(
@@ -39,6 +38,8 @@ export function jsErrorsQuery(
     aggs: {
       totalErrorGroups: {
         cardinality: {
+          // Classic grouping_key; OTel falls back via multi-field script would be better,
+          // but cardinality on classic field still works when classic errors exist.
           field: ERROR_GROUP_ID,
         },
       },
@@ -61,8 +62,12 @@ export function jsErrorsQuery(
           },
           impactedPages: {
             filter: {
-              term: {
-                [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
+              bool: {
+                should: [
+                  { term: { 'transaction.type': 'page-load' } },
+                  { term: { event_name: 'exception' } },
+                ],
+                minimum_should_match: 1,
               },
             },
             aggs: {
@@ -75,7 +80,36 @@ export function jsErrorsQuery(
           },
           sample: {
             top_hits: {
-              _source: [ERROR_EXC_MESSAGE, ERROR_EXC_TYPE, ERROR_GROUP_ID, '@timestamp'],
+              _source: [
+                ERROR_EXC_MESSAGE,
+                ERROR_EXC_TYPE,
+                ERROR_GROUP_ID,
+                OTEL_EXCEPTION_MESSAGE,
+                OTEL_EXCEPTION_TYPE,
+                '@timestamp',
+              ],
+              sort: [{ '@timestamp': 'desc' as const }],
+              size: 1,
+            },
+          },
+        },
+      },
+      // OTel exceptions group by exception.type when no error.grouping_key
+      otelErrors: {
+        terms: {
+          field: OTEL_EXCEPTION_TYPE,
+          size: 500,
+        },
+        aggs: {
+          bucket_truncate: {
+            bucket_sort: {
+              size: pageSize,
+              from: pageIndex * pageSize,
+            },
+          },
+          sample: {
+            top_hits: {
+              _source: [OTEL_EXCEPTION_MESSAGE, OTEL_EXCEPTION_TYPE, '@timestamp'],
               sort: [{ '@timestamp': 'desc' as const }],
               size: 1,
             },

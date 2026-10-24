@@ -6,12 +6,15 @@
  */
 
 import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { RECORDS_FIELD, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
+import { uxAppHref } from '../utils/rum_search';
+import { uxSettingsSuffix } from '../utils/ux_app_path';
 import { useKibanaServices } from './use_kibana_services';
 
 const ANALYZE_DATA = i18n.translate('xpack.ux.analyzeDataButtonLabel', {
@@ -23,8 +26,29 @@ const ANALYZE_MESSAGE = i18n.translate('xpack.ux.analyzeDataButtonLabel.message'
     'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
+const SETTINGS_LABEL = i18n.translate('xpack.ux.headerSettingsButtonLabel', {
+  defaultMessage: 'Settings',
+});
+
+const SETTINGS_MESSAGE = i18n.translate('xpack.ux.headerSettingsButtonLabel.message', {
+  defaultMessage: 'UX-wide capture and analytics settings.',
+});
+
+const APP_SETTINGS_MESSAGE = i18n.translate('xpack.ux.headerSettingsButtonLabel.appMessage', {
+  defaultMessage: 'Settings for this application.',
+});
+
+const INJECT_SNIPPET_LABEL = i18n.translate('xpack.ux.headerInjectSnippetLinkText', {
+  defaultMessage: 'Inject snippet',
+});
+
+const INJECT_SNIPPET_MESSAGE = i18n.translate('xpack.ux.headerInjectSnippetTooltip', {
+  defaultMessage: 'Load the browser SDK from the collector, or copy a CSP-safe console snippet.',
+});
+
 export function useAppMenu(enableInspector: boolean) {
   const { application, http, inspector } = useKibanaServices();
+  const { search } = useLocation();
   const { urlParams } = useLegacyUrlParams();
   const { inspectorAdapters } = useInspectorContext();
   const { rangeTo, rangeFrom, serviceName } = urlParams;
@@ -48,7 +72,34 @@ export function useAppMenu(enableInspector: boolean) {
       http.basePath.get()
     );
 
+    const uxSettingsHref = uxAppHref(http.basePath.prepend, {
+      search,
+      serviceName,
+      suffix: uxSettingsSuffix(serviceName),
+    });
+    const uxInjectHref = uxAppHref(http.basePath.prepend, {
+      search,
+      serviceName,
+      suffix: '/settings/inject',
+    });
+
     const items = [
+      {
+        id: 'settings',
+        label: SETTINGS_LABEL,
+        href: uxSettingsHref,
+        iconType: 'gear',
+        testId: 'uxHeaderSettingsLink',
+        tooltipContent: serviceName ? APP_SETTINGS_MESSAGE : SETTINGS_MESSAGE,
+      },
+      {
+        id: 'injectSnippet',
+        label: INJECT_SNIPPET_LABEL,
+        href: uxInjectHref,
+        iconType: 'code',
+        testId: 'uxHeaderInjectSnippetLink',
+        tooltipContent: INJECT_SNIPPET_MESSAGE,
+      },
       {
         id: 'addData',
         label: i18n.translate('xpack.ux.addDataButtonLabel', {
@@ -66,6 +117,7 @@ export function useAppMenu(enableInspector: boolean) {
           defaultMessage: 'Inspect',
         }),
         iconType: 'inspect',
+        testId: 'uxInspectHeaderLink',
         run: () => inspector.open(inspectorAdapters),
         overflow: true,
       });
@@ -90,6 +142,7 @@ export function useAppMenu(enableInspector: boolean) {
     inspectorAdapters,
     rangeFrom,
     rangeTo,
+    search,
     serviceName,
   ]);
   return { appMenu };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSelect } from '@elastic/eui';
+import { EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import React from 'react';
@@ -86,20 +86,28 @@ export function EnvironmentFilter({
     defaultMessage: 'Environment',
   });
 
+  const isAllSelected = !environment || environment === ENVIRONMENT_ALL.value;
+  if (environments.length < 2 && isAllSelected) {
+    return null;
+  }
+
   return (
-    <EuiSelect
-      data-test-subj="uxEnvironmentFilterSelect"
-      fullWidth
-      prepend={environmentLabel}
-      options={options}
-      value={environment}
-      onChange={(event) => {
-        updateEnvironmentUrl(history, location, event.target.value);
-      }}
-      isLoading={loading}
-      style={{ minWidth }}
-      aria-label={environmentLabel}
-    />
+    <EuiFlexItem grow={false} style={{ minWidth, maxWidth: 280 }}>
+      <EuiSelect
+        data-test-subj="uxEnvironmentFilterSelect"
+        fullWidth
+        compressed
+        prepend={environmentLabel}
+        options={options}
+        value={environment}
+        onChange={(event) => {
+          updateEnvironmentUrl(history, location, event.target.value);
+        }}
+        isLoading={loading}
+        style={{ minWidth }}
+        aria-label={environmentLabel}
+      />
+    </EuiFlexItem>
   );
 }
 

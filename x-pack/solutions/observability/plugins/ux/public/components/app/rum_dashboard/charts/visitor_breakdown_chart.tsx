@@ -14,20 +14,22 @@ import type {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { EuiText } from '@elastic/eui';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
+import { OTEL_BROWSER_NAME, OTEL_BROWSER_OS } from '../../../../../common/otel_rum';
 import { getEsFilter } from '../../../../services/data/get_es_filter';
+import {
+  rumPageLoadFilter,
+  rumUrlWildcardFilter,
+} from '../../../../services/data/rum_otel_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { UxUIFilters } from '../../../../../typings/ui_filters';
 
 const BUCKET_SIZE = 9;
 
 export enum VisitorBreakdownMetric {
-  OS_BREAKDOWN = 'user_agent.os.name',
-  UA_BREAKDOWN = 'user_agent.name',
+  OS_BREAKDOWN = 'ux.visitor.os',
+  UA_BREAKDOWN = 'ux.visitor.browser',
 }
 
 interface LensAttributes {
@@ -119,6 +121,22 @@ const visConfig = {
   shape: 'pie',
 };
 
+const VISITOR_BROWSER_SCRIPT = `
+if (doc.containsKey('user_agent.name') && doc['user_agent.name'].size() != 0) {
+  emit(doc['user_agent.name'].value);
+} else if (doc.containsKey('${OTEL_BROWSER_NAME}') && doc['${OTEL_BROWSER_NAME}'].size() != 0) {
+  emit(doc['${OTEL_BROWSER_NAME}'].value);
+}
+`.trim();
+
+const VISITOR_OS_SCRIPT = `
+if (doc.containsKey('user_agent.os.name') && doc['user_agent.os.name'].size() != 0) {
+  emit(doc['user_agent.os.name'].value);
+} else if (doc.containsKey('${OTEL_BROWSER_OS}') && doc['${OTEL_BROWSER_OS}'].size() != 0) {
+  emit(doc['${OTEL_BROWSER_OS}'].value);
+}
+`.trim();
+
 export function getVisitorBreakdownLensAttributes({
   uiFilters,
   urlQuery,
@@ -130,6 +148,17 @@ export function getVisitorBreakdownLensAttributes({
 }): TypedLensByValueInput['attributes'] {
   const localDataView = dataView.toSpec(false);
   localDataView.id = localDataViewId;
+  localDataView.runtimeFieldMap = {
+    ...localDataView.runtimeFieldMap,
+    [VisitorBreakdownMetric.UA_BREAKDOWN]: {
+      type: 'keyword',
+      script: { source: VISITOR_BROWSER_SCRIPT },
+    },
+    [VisitorBreakdownMetric.OS_BREAKDOWN]: {
+      type: 'keyword',
+      script: { source: VISITOR_OS_SCRIPT },
+    },
+  };
 
   const dataLayer: PersistedIndexPatternLayer = {
     incompleteColumns: {},
@@ -202,27 +231,9 @@ export function getVisitorBreakdownLensAttributes({
           query: {
             bool: {
               filter: [
-                { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-                {
-                  terms: {
-                    [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
-                  },
-                },
-                {
-                  exists: {
-                    field: 'transaction.marks.navigationTiming.fetchStart',
-                  },
-                },
+                rumPageLoadFilter(),
                 ...getEsFilter(uiFilters),
-                ...(urlQuery
-                  ? [
-                      {
-                        wildcard: {
-                          'url.full': `*${urlQuery}*`,
-                        },
-                      },
-                    ]
-                  : []),
+                ...(urlQuery ? [rumUrlWildcardFilter(urlQuery)] : []),
               ],
               must_not: [...getEsFilter(uiFilters, true)],
             },

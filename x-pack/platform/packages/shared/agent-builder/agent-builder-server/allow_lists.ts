@@ -53,6 +53,11 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_runtime_metrics`,
   `${internalNamespaces.observability}.get_logs`,
   `${internalNamespaces.observability}.get_apm_correlations`,
+  `${internalNamespaces.observability}.ux.get_overview`,
+  `${internalNamespaces.observability}.ux.find_sessions`,
+  `${internalNamespaces.observability}.ux.get_errors`,
+  `${internalNamespaces.observability}.ux.get_pages`,
+  `${internalNamespaces.observability}.ux.get_report`,
 
   // ML anomaly detection (Agent Builder skill tools)
   `${internalNamespaces.ml}.ad_get_job_info`,
@@ -199,6 +204,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
+  `${internalNamespaces.observability}.ux.rum-analyst-type`,
   `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
   `${internalNamespaces.platformSignificantEvents}.ki-query-generation-type`,
   `${internalNamespaces.platformContextEngine}.setup-type`,
@@ -304,6 +310,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.investigation',
   'observability.service-map',
   'observability.investigate-service-map',
+  'observability.ux.rum-slow-users',
+  'observability.ux.rum-slow-pages',
+  'observability.ux.rum-errors',
+  'observability.ux.rum-frustration',
+  'observability.ux.rum-report',
 
   // ML
   `${internalNamespaces.ml}.anomaly-detection`,

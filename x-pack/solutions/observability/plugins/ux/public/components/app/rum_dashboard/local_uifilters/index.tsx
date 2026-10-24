@@ -29,16 +29,24 @@ import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_ur
 import type { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 import { uxFiltersByName, uxLocalUIFilterNames } from '../../../../../common/ux_ui_filter';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
+import { OTEL_BROWSER_NAME, OTEL_BROWSER_OS } from '../../../../../common/otel_rum';
+import {
+  rumPageLoadFilter,
+  rumServiceNameFilter,
+} from '../../../../services/data/rum_otel_filters';
 
 const filterNames: UxLocalUIFilterName[] = ['location', 'device', 'os', 'browser'];
+
+const FILTER_SOURCE_FIELD: Partial<Record<UxLocalUIFilterName, string>> = {
+  browser: OTEL_BROWSER_NAME,
+  os: OTEL_BROWSER_OS,
+};
 
 export const getExcludedName = (filterName: string) => {
   return `${filterName}Excluded` as UxLocalUIFilterName;
 };
 
-const RUM_DATA_FILTERS = [{ term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } }];
+const RUM_DATA_FILTERS = [rumPageLoadFilter()];
 
 function LocalUIFilters() {
   const { dataViewTitle, dataView } = useDataView();
@@ -62,11 +70,7 @@ function LocalUIFilters() {
       ...environmentQuery(environment || ENVIRONMENT_ALL.value),
     ];
     if (serviceName) {
-      dataFilters.push({
-        term: {
-          [SERVICE_NAME]: serviceName,
-        },
-      });
+      dataFilters.push(rumServiceNameFilter(serviceName));
     }
     return dataFilters;
   }, [environment, serviceName]);
@@ -94,7 +98,9 @@ function LocalUIFilters() {
             {filterNames.map((filterName) => (
               <FieldValueSuggestions
                 key={filterName}
-                sourceField={uxFiltersByName[filterName].fieldName}
+                sourceField={
+                  FILTER_SOURCE_FIELD[filterName] ?? uxFiltersByName[filterName].fieldName
+                }
                 dataViewTitle={dataViewTitle}
                 label={uxFiltersByName[filterName].title}
                 asCombobox={false}
