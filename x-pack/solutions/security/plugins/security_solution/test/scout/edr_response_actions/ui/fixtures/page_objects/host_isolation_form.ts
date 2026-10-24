@@ -32,14 +32,18 @@ export class HostIsolationFormPage {
   }
 }
 
-interface IsolateActionResponseBody {
+interface EndpointActionResponseBody {
   data: ActionDetails;
 }
 
-/** Arms the action response listener before `submit` clicks Confirm. */
+/**
+ * Arms a listener for the `POST /api/endpoint/action/<command>` response before `submit`
+ * sends the action (Confirm in the isolation form, or the response console submit button), and
+ * returns the created action. Fails if the request is not successful.
+ */
 export const captureEndpointAction = async (
   page: ScoutPage,
-  command: 'isolate' | 'unisolate',
+  command: 'isolate' | 'unisolate' | 'get_file',
   submit: () => Promise<void>
 ): Promise<ActionDetails> => {
   const responsePromise = page.waitForResponse(
@@ -55,6 +59,6 @@ export const captureEndpointAction = async (
       `${command} request failed with ${response.status()}: ${responseText.slice(0, 500)}`
     );
   }
-  const body = (await response.json()) as IsolateActionResponseBody;
+  const body = (await response.json()) as EndpointActionResponseBody;
   return body.data;
 };

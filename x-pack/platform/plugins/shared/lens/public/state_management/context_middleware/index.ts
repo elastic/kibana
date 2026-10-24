@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI, PayloadAction } from 'redux-toolkit-v1';
+import { isAction, type Dispatch, type Middleware } from '@reduxjs/toolkit';
 import moment from 'moment';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { LensAppState, LensState, LensStoreDeps, DatasourceMap } from '@kbn/lens-common';
-import type { LensDispatch } from '..';
+import type { LensState, LensStoreDeps, DatasourceMap } from '@kbn/lens-common';
 import { setExecutionContext, navigateAway, applyChanges, selectAutoApplyEnabled } from '..';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
@@ -27,31 +26,41 @@ function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
   );
 }
 
-export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
-  let unsubscribeFromExternalContext: (() => void) | undefined;
-  return (next: Dispatch) => (action: PayloadAction<unknown>) => {
-    if (
-      !(action.payload as Partial<LensAppState>)?.searchSessionId &&
-      !onActiveDataChange.match(action) &&
-      (selectAutoApplyEnabled(store.getState()) || applyChanges.match(action)) &&
-      isTimeBased(store.getState(), storeDeps.datasourceMap)
-    ) {
-      updateTimeRange(storeDeps.lensServices.data, store.dispatch);
-    }
-    if (navigateAway.match(action) && unsubscribeFromExternalContext) {
-      return unsubscribeFromExternalContext();
-    }
-    next(action);
-    // store stopped loading and external context is not subscribed to yet - do it now
-    if (!store.getState().lens.isLoading && !unsubscribeFromExternalContext) {
-      unsubscribeFromExternalContext = subscribeToExternalContext(
-        storeDeps.lensServices,
-        store.getState,
-        store.dispatch
-      );
-    }
+export const contextMiddleware =
+  (storeDeps: LensStoreDeps): Middleware<{}, LensState> =>
+  (store) => {
+    let unsubscribeFromExternalContext: (() => void) | undefined;
+    return (next) => (action) => {
+      // Avoid starting another search session when the action already supplies one.
+      const hasSearchSessionId =
+        isAction(action) &&
+        'payload' in action &&
+        typeof action.payload === 'object' &&
+        action.payload !== null &&
+        'searchSessionId' in action.payload &&
+        action.payload.searchSessionId;
+      if (
+        !hasSearchSessionId &&
+        !onActiveDataChange.match(action) &&
+        (selectAutoApplyEnabled(store.getState()) || applyChanges.match(action)) &&
+        isTimeBased(store.getState(), storeDeps.datasourceMap)
+      ) {
+        updateTimeRange(storeDeps.lensServices.data, store.dispatch);
+      }
+      if (navigateAway.match(action) && unsubscribeFromExternalContext) {
+        return unsubscribeFromExternalContext();
+      }
+      next(action);
+      // store stopped loading and external context is not subscribed to yet - do it now
+      if (!store.getState().lens.isLoading && !unsubscribeFromExternalContext) {
+        unsubscribeFromExternalContext = subscribeToExternalContext(
+          storeDeps.lensServices,
+          store.getState,
+          store.dispatch
+        );
+      }
+    };
   };
-};
 
 const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
 const TIME_LAG_MIN_LIMIT = 10000; // for a small timerange to avoid infinite data refresh timelag minimum is TIME_LAG_ABSOLUTE ms
@@ -60,7 +69,7 @@ const TIME_LAG_MIN_LIMIT = 10000; // for a small timerange to avoid infinite dat
  * checks if TIME_LAG_PERCENTAGE_LIMIT passed to renew searchSessionId
  * and request new data.
  */
-function updateTimeRange(data: DataPublicPluginStart, dispatch: LensDispatch) {
+function updateTimeRange(data: DataPublicPluginStart, dispatch: Dispatch) {
   const timefilter = data.query.timefilter.timefilter;
   const unresolvedTimeRange = timefilter.getTime();
   if (

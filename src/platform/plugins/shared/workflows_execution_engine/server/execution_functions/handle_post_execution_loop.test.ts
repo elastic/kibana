@@ -11,7 +11,10 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowWakeTaskId,
+  type WorkflowTaskManager,
+} from '../workflow_task_manager/workflow_task_manager';
 
 const mockResumeSyncParentIfNeeded = jest.fn();
 jest.mock('./resume_sync_parent_if_needed', () => ({
@@ -62,13 +65,15 @@ describe('handlePostExecutionLoop', () => {
   });
 
   it.each([ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED])(
-    'removes the remaining tasks of a %s execution after resuming its sync parent',
+    'removes the remaining tasks of a %s execution, except its wake task, after resuming its sync parent',
     async (status) => {
       mockExecution({ status });
 
       await run();
 
-      expect(workflowTaskManager.removeTasksForExecution).toHaveBeenCalledWith(workflowRunId);
+      expect(workflowTaskManager.removeTasksForExecution).toHaveBeenCalledWith(workflowRunId, {
+        exceptTaskId: getWorkflowWakeTaskId(workflowRunId),
+      });
       expect(mockResumeSyncParentIfNeeded.mock.invocationCallOrder[0]).toBeLessThan(
         workflowTaskManager.removeTasksForExecution.mock.invocationCallOrder[0]
       );
