@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { createSkillAttachmentType } from './skill';
+import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_helpers';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
 const validSkill: SkillAttachmentData = {
@@ -123,5 +124,77 @@ describe('skill attachment type', () => {
       expect(description).toBeDefined();
       expect(description).toContain('render_attachment');
     });
+  });
+});
+
+describe('skill toSurfaceComposition', () => {
+  const definition = createSkillAttachmentType();
+
+  it('shows the description, tools, files and content', async () => {
+    const composition = await definition.toSurfaceComposition?.(
+      buildAttachment(validSkill),
+      surfaceContext
+    );
+
+    expect(composition).toEqual({
+      type: 'view',
+      title: 'Incident triage',
+      subtitle: 'incident-triage',
+      body: [
+        { type: 'markdown', text: 'Use when investigating production incidents.' },
+        {
+          type: 'fields',
+          items: [
+            { label: 'Tools', value: 'platform.core.execute_esql' },
+            { label: 'Files', value: './examples/examples.md' },
+          ],
+        },
+        {
+          type: 'code',
+          language: 'markdown',
+          text: '## When to Use\n\nUse this skill when triaging incidents.',
+        },
+      ],
+    });
+    expect((await renderSurface(composition)).valid).toBe(true);
+  });
+
+  it('links to the skill in Management once it is persisted', async () => {
+    const composition = await definition.toSurfaceComposition?.(
+      { ...buildAttachment(validSkill), origin: 'incident triage' },
+      surfaceContext
+    );
+
+    expect(composition?.body.at(-1)).toEqual({
+      type: 'link',
+      label: 'Edit in Management',
+      app: 'agent_builder',
+      path: '/manage/skills/incident%20triage',
+    });
+
+    const { valid, slack } = await renderSurface(composition);
+    expect(valid).toBe(true);
+    expect(slack).toContain(
+      `${SURFACE_BASE_URL}/app/agent_builder/manage/skills/incident%20triage`
+    );
+  });
+
+  it('cuts long content and says so, and still renders', async () => {
+    const content = 'x'.repeat(20000);
+    const composition = await definition.toSurfaceComposition?.(
+      buildAttachment({
+        ...validSkill,
+        skill: { ...validSkill.skill, content, tool_ids: Array(400).fill('platform.core.tool') },
+      }),
+      surfaceContext
+    );
+
+    expect(JSON.stringify(composition)).toContain(
+      'Showing the first 12000 of 20000 characters of SKILL.md.'
+    );
+
+    const { valid, errors } = await renderSurface(composition);
+    expect(errors).toEqual([]);
+    expect(valid).toBe(true);
   });
 });
