@@ -35,13 +35,14 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, fetch, evaluators, executorClient, traceEsClient }, use) => {
+    ({ chatClient, fetch, evaluators, executorClient, log, traceEsClient }, use) => {
       use(
         createEvaluateAttackDiscoveryAgentBuilderDataset({
           chatClient,
           fetch,
           evaluators,
           executorClient,
+          log,
           traceEsClient,
         })
       );

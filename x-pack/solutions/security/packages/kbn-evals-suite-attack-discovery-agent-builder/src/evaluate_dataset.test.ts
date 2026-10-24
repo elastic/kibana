@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DatasetRunResult } from '@kbn/evals';
 import {
   ALERT_INDEX_FAMILY,
   buildWorkflow,
@@ -16,6 +17,7 @@ import {
   extractRetrievalEvidence,
   extractUnscopedAlertRetrievalRowCounts,
   findAdToolResult,
+  formatRubricCoverage,
   insightsForResponse,
   insightsFromValidatedDiscoveries,
   trackedStageKeys,
@@ -1851,6 +1853,7 @@ describe('slow-path handoff (#293046): task-level backfill', () => {
             for (const example of datasets[0].examples) {
               taskOutput = await task({ input: example });
             }
+            return [];
           }
         ),
       };
@@ -1860,6 +1863,7 @@ describe('slow-path handoff (#293046): task-level backfill', () => {
         fetch: fetch as never,
         evaluators: { traceBasedEvaluators: {} } as never,
         executorClient: executorClient as never,
+        log: { info: jest.fn() } as never,
         traceEsClient: {} as never,
       });
 
@@ -1894,5 +1898,56 @@ describe('slow-path handoff (#293046): task-level backfill', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+});
+
+type EvaluationRun = DatasetRunResult['evaluationRuns'][number];
+
+const evaluationRun = (name: string, score: number | null | undefined): EvaluationRun => ({
+  name,
+  result: score === undefined ? undefined : { score },
+  experimentRunId: 'r',
+  direction: 'maximize',
+});
+
+const datasetRunResult = (evaluationRuns: EvaluationRun[]): DatasetRunResult => ({
+  id: 'exp',
+  experimentName: 'exp',
+  datasetId: 'ds',
+  datasetName: 'ds',
+  runs: {},
+  evaluationRuns,
+});
+
+describe('formatRubricCoverage', () => {
+  // Build 01a12766 lost 2 of 30 Rubric cells to a judge failure; the mean silently
+  // skips a null score, so the unscored count has to be printed next to it.
+  it('counts unscored rubric cells explicitly instead of dropping them from the denominator', () => {
+    const line = formatRubricCoverage([
+      datasetRunResult([
+        evaluationRun('Rubric', 1),
+        evaluationRun('Rubric', 0),
+        evaluationRun('Rubric', null),
+        evaluationRun('Rubric', undefined),
+        evaluationRun('AttackDiscoveryBasic', 1),
+      ]),
+    ]);
+
+    expect(line).toBe('Rubric coverage: scored 2/4, passed 1/2, unscored: 2');
+  });
+
+  it('reports unscored: 0 when every rubric cell was scored', () => {
+    expect(formatRubricCoverage([datasetRunResult([evaluationRun('Rubric', 1)])])).toBe(
+      'Rubric coverage: scored 1/1, passed 1/1, unscored: 0'
+    );
+  });
+
+  it('aggregates across every experiment of the run', () => {
+    expect(
+      formatRubricCoverage([
+        datasetRunResult([evaluationRun('Rubric', 1), evaluationRun('Rubric', null)]),
+        datasetRunResult([evaluationRun('Rubric', 1)]),
+      ])
+    ).toBe('Rubric coverage: scored 2/3, passed 2/2, unscored: 1');
   });
 });
