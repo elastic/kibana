@@ -672,4 +672,62 @@ describe('registerCasesWorkflowEventBridge', () => {
       );
     });
   });
+
+  describe('incremental id assigned trigger task', () => {
+    const task = { schedule: jest.fn(), runSoon: jest.fn() };
+
+    beforeEach(() => {
+      task.schedule.mockReset();
+      task.runSoon.mockReset();
+      eventBus = new CasesEventBus();
+      registerCasesWorkflowEventBridge(
+        eventBus,
+        workflowsExtensions,
+        logger,
+        // @ts-expect-error: only the used methods are mocked
+        task
+      );
+    });
+
+    it('schedules the trigger task with the request of the case creator', async () => {
+      eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });
+
+      await flushMicrotasks();
+
+      expect(task.schedule).toHaveBeenCalledWith(request, {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+      });
+    });
+
+    it('runs the trigger tasks soon when incremental ids were assigned', async () => {
+      const payload = { caseIds: ['case-1'] };
+
+      eventBus.emitIncrementalIdsAssigned(payload);
+
+      await flushMicrotasks();
+
+      expect(task.runSoon).toHaveBeenCalledWith(payload);
+    });
+
+    it('does not emit a workflow trigger itself when incremental ids were assigned', async () => {
+      eventBus.emitIncrementalIdsAssigned({ caseIds: [] });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).not.toHaveBeenCalled();
+    });
+
+    it('works without the trigger task', async () => {
+      eventBus = new CasesEventBus();
+      registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
+
+      eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });
+      eventBus.emitIncrementalIdsAssigned({ caseIds: [] });
+
+      await flushMicrotasks();
+
+      expect(task.schedule).not.toHaveBeenCalled();
+    });
+  });
 });

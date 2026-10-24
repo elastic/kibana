@@ -22,6 +22,7 @@ import {
   ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
 import { buildExtendedFieldsUpdatedPayload } from './extended_fields_updated_payload';
+import type { IncrementalIdAssignedTriggerTask } from './incremental_id_assigned_task';
 
 // We want comment attachments to always be used with the `comment` type,
 // even for legacy `user` types
@@ -40,7 +41,8 @@ const withDeprecatedAttachmentIds = <Payload extends { ids: string[] }>(payload:
 export function registerCasesWorkflowEventBridge(
   casesEventBus: CasesEventBus,
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined,
-  logger: Logger
+  logger: Logger,
+  incrementalIdAssignedTriggerTask?: IncrementalIdAssignedTriggerTask
 ): void {
   if (!workflowsExtensions) {
     return;
@@ -50,6 +52,12 @@ export function registerCasesWorkflowEventBridge(
 
   casesEventBus.onCaseCreated((event) => {
     void forward(CaseCreatedTriggerId, event.payload, event.request);
+
+    // The incremental ID is assigned later by a background job that has no user request, so the
+    // credentials for `cases.caseUpdated` for the assigned ID have to be captured here, at creation.
+    // The task id is derived from the case id inside `schedule`, so callers never handle it.
+    const { caseId, owner } = event.payload;
+    void incrementalIdAssignedTriggerTask?.schedule(event.request, { caseId, owner });
   });
 
   casesEventBus.onCaseUpdated((event, { previousCase, updatedCase }) => {
@@ -125,4 +133,8 @@ export function registerCasesWorkflowEventBridge(
       event.request
     );
   });
+
+  casesEventBus.onIncrementalIdsAssigned((payload) =>
+    incrementalIdAssignedTriggerTask?.runSoon(payload)
+  );
 }

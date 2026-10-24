@@ -78,6 +78,7 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { IncrementalIdAssignedTriggerTask } from './workflows/triggers/incremental_id_assigned_task';
 import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
 
@@ -99,6 +100,7 @@ export class CasePlugin
   private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
+  private incrementalIdAssignedTriggerTask?: IncrementalIdAssignedTriggerTask;
   private templatesMigrationTaskManager?: TemplatesMigrationTaskManager;
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
@@ -204,7 +206,13 @@ export class CasePlugin
           plugins.taskManager,
           this.caseConfig.incrementalId,
           this.logger,
-          plugins.usageCollection
+          plugins.usageCollection,
+          this.casesEventBus
+        );
+        this.incrementalIdAssignedTriggerTask = new IncrementalIdAssignedTriggerTask(
+          plugins.taskManager,
+          this.caseConfig.incrementalId.taskIntervalMinutes,
+          this.logger
         );
       }
 
@@ -365,6 +373,11 @@ export class CasePlugin
 
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+        this.incrementalIdAssignedTriggerTask?.start({
+          core,
+          taskManager: plugins.taskManager,
+          workflowsExtensions: plugins.workflowsExtensions,
+        });
       }
 
       if (this.caseConfig.templates.enabled && this.templatesMigrationTaskManager) {
@@ -481,9 +494,14 @@ export class CasePlugin
       licensingPluginStart: plugins.licensing,
     });
 
-    // this.casesEventBus will be set to a defined value in the setup() function
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
+    registerCasesWorkflowEventBridge(
+      // this.casesEventBus will be set to a defined value in the setup() function
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.casesEventBus!,
+      plugins.workflowsExtensions,
+      this.logger,
+      this.incrementalIdAssignedTriggerTask
+    );
 
     this.clientFactory.initialize({
       // securityPluginSetup will be set to a defined value in the setup() function

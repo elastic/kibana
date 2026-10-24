@@ -74,12 +74,14 @@ export const createCasesEventBusMock = (): CasesEventBus =>
     emitAttachmentsDeleted: jest.fn(),
     emitObservablesAdded: jest.fn(),
     emitAlertStatusChanged: jest.fn(),
+    emitIncrementalIdsAssigned: jest.fn(),
     onCaseCreated: jest.fn(),
     onCaseUpdated: jest.fn(),
     onAttachmentsAdded: jest.fn(),
     onAttachmentsDeleted: jest.fn(),
     onObservablesAdded: jest.fn(),
     onAlertStatusChanged: jest.fn(),
+    onIncrementalIdsAssigned: jest.fn(),
     hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
   });
 
