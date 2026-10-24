@@ -155,6 +155,115 @@ describe('createManagedWorker', () => {
     await handle.stop();
   });
 
+  describe('when a ready-timeout worker terminates slower than the backoff', () => {
+    const deferTermination = (worker: MockWorker) => {
+      const termination = { resolve: () => {}, reject: (error: Error) => {} };
+      worker.terminate.mockImplementationOnce(
+        () =>
+          new Promise<number>((resolve, reject) => {
+            termination.resolve = () => resolve(1);
+            termination.reject = reject;
+          })
+      );
+      return termination;
+    };
+    const timeOut = async () => {
+      jest.advanceTimersByTime(500);
+      await flushImmediate();
+      jest.advanceTimersByTime(100);
+    };
+
+    it('spawns the replacement only after the old worker has terminated', async () => {
+      const handle = createManagedWorker(options());
+      handle.start();
+      const settle = deferTermination(MockWorker.instances[0]);
+      await timeOut();
+      expect(MockWorker.instances).toHaveLength(1);
+      expect(handle.status().state).toBe('restarting');
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Worker diagnostic waiting for the previous worker to terminate'
+      );
+
+      settle.resolve();
+      await flushImmediate();
+      expect(MockWorker.instances).toHaveLength(2);
+      await handle.stop();
+    });
+
+    it('spawns nothing while termination stays pending', async () => {
+      const handle = createManagedWorker(options());
+      handle.start();
+      deferTermination(MockWorker.instances[0]);
+      await timeOut();
+      jest.advanceTimersByTime(60_000);
+      await flushImmediate();
+      expect(MockWorker.instances).toHaveLength(1);
+      expect(handle.status().state).toBe('restarting');
+    });
+
+    it('drops the waiting replacement when stopped', async () => {
+      const handle = createManagedWorker(options());
+      handle.start();
+      const settle = deferTermination(MockWorker.instances[0]);
+      await timeOut();
+
+      const stopping = handle.stop();
+      settle.resolve();
+      await stopping;
+      await flushImmediate();
+      expect(MockWorker.instances).toHaveLength(1);
+      expect(handle.status().state).toBe('stopped');
+    });
+
+    it('makes start after exhaustion wait for the discarded worker', async () => {
+      const handle = createManagedWorker(options({ restart: { maxAttempts: 0 } }));
+      handle.start();
+      const settle = deferTermination(MockWorker.instances[0]);
+      jest.advanceTimersByTime(500);
+      await flushImmediate();
+      expect(handle.status().state).toBe('exhausted');
+
+      handle.start();
+      expect(MockWorker.instances).toHaveLength(1);
+      expect(handle.status().state).toBe('starting');
+
+      settle.resolve();
+      await flushImmediate();
+      expect(MockWorker.instances).toHaveLength(2);
+      await handle.stop();
+    });
+
+    it('spawns the replacement when termination fails', async () => {
+      const handle = createManagedWorker(options());
+      handle.start();
+      const settle = deferTermination(MockWorker.instances[0]);
+      await timeOut();
+
+      settle.reject(new Error('termination failed'));
+      await flushImmediate();
+      expect(MockWorker.instances).toHaveLength(2);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('termination failed'));
+      await expect(handle.stop()).rejects.toThrow('termination failed');
+    });
+
+    it('drops the waiting replacement when stopped, even if started again right away', async () => {
+      const handle = createManagedWorker(options());
+      handle.start();
+      const settle = deferTermination(MockWorker.instances[0]);
+      await timeOut();
+
+      // Start again at the earliest point stop() allows, before the waiting restart resumes.
+      const restarted = handle.stop().then(() => handle.start());
+      settle.resolve();
+      await restarted;
+      await flushImmediate();
+      expect(MockWorker.instances).toHaveLength(2);
+      expect(handle.status().state).toBe('starting');
+      await handle.stop();
+    });
+  });
+
   it('accepts a ready message queued behind an expired ready timer', async () => {
     const opts = options();
     const handle = createManagedWorker(opts);
