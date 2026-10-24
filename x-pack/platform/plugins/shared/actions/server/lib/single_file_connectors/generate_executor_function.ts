@@ -41,6 +41,29 @@ interface FetchOptions {
 }
 
 const DEFAULT_RESPONSE_SIZE_HEADER = 'content-length';
+const RATE_LIMIT_RESET_HEADERS = ['x-ratelimit-reset', 'ratelimit-reset'] as const;
+// Reset headers above this are epoch seconds (e.g. GitHub's `x-ratelimit-reset`), not a delay.
+const MIN_EPOCH_SECONDS = 1_000_000_000;
+
+interface AxiosLikeError {
+  response?: { status?: unknown; headers?: unknown };
+  request?: { res?: { headers?: unknown } };
+}
+
+const getErrorHeaderValue = ({
+  error,
+  headerName,
+}: {
+  error: unknown;
+  headerName: string;
+}): unknown => {
+  const { response, request } = (error ?? {}) as AxiosLikeError;
+  const headerValue =
+    getHeaderValue({ headers: response?.headers, headerName }) ??
+    getHeaderValue({ headers: request?.res?.headers, headerName });
+
+  return Array.isArray(headerValue) ? headerValue[0] : headerValue;
+};
 
 const getResponseSizeHeaderBytes = ({
   error,
@@ -48,17 +71,39 @@ const getResponseSizeHeaderBytes = ({
 }: {
   error: unknown;
   headerName: string;
-}): number | undefined => {
-  const axiosError = error as {
-    response?: { headers?: unknown };
-    request?: { res?: { headers?: unknown } };
+}): number | undefined => getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
+
+const secondsUntil = (epochMs: number): number =>
+  Math.max(0, Math.ceil((epochMs - Date.now()) / 1000));
+
+const getRetryAfterSeconds = (error: unknown): number | undefined => {
+  const retryAfter = getErrorHeaderValue({ error, headerName: 'retry-after' });
+  if (typeof retryAfter === 'string' && retryAfter.trim() !== '') {
+    const seconds = getFinitePositiveNumber(retryAfter.trim());
+    if (seconds !== undefined) return Math.ceil(seconds);
+    const dateMs = Date.parse(retryAfter);
+    if (!Number.isNaN(dateMs)) return secondsUntil(dateMs);
+  }
+
+  for (const headerName of RATE_LIMIT_RESET_HEADERS) {
+    const reset = getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
+    if (reset !== undefined) {
+      return reset >= MIN_EPOCH_SECONDS ? secondsUntil(reset * 1000) : Math.ceil(reset);
+    }
+  }
+
+  return undefined;
+};
+
+const getHttpErrorMeta = (error: unknown): { statusCode?: number; retryAfterSeconds?: number } => {
+  const status = (error as AxiosLikeError | undefined)?.response?.status;
+  if (typeof status !== 'number') return {};
+
+  const retryAfterSeconds = getRetryAfterSeconds(error);
+  return {
+    statusCode: status,
+    ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
   };
-
-  const headerValue =
-    getHeaderValue({ headers: axiosError.response?.headers, headerName }) ??
-    getHeaderValue({ headers: axiosError.request?.res?.headers, headerName });
-
-  return getFinitePositiveNumber(Array.isArray(headerValue) ? headerValue[0] : headerValue);
 };
 
 const getErrorMeta = ({
@@ -73,6 +118,7 @@ const getErrorMeta = ({
   // precedence over generic header-derived values.
   const errorMeta = {
     ...(contentLengthBytes !== undefined ? { contentLengthBytes } : {}),
+    ...getHttpErrorMeta(error),
     ...connectorActionErrorMeta,
   };
 

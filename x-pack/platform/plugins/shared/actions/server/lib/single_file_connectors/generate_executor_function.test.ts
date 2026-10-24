@@ -1352,6 +1352,121 @@ describe('generateExecutorFunction', () => {
       });
     });
 
+    describe('HTTP error metadata', () => {
+      const now = Date.parse('2026-10-23T12:00:00Z');
+
+      const makeHttpError = (
+        status: number,
+        headers: Record<string, string> = {}
+      ): Error & { response: { status: number; headers: Record<string, string> } } =>
+        Object.assign(new Error(`Request failed with status code ${status}`), {
+          response: { status, headers },
+        });
+
+      const executeWithError = async (error: unknown) => {
+        mockHandler.mockRejectedValue(error);
+        return makeExecutor()(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+      };
+
+      let dateNowSpy: jest.SpyInstance<number, []>;
+
+      beforeEach(() => {
+        dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(now);
+      });
+
+      afterEach(() => {
+        dateNowSpy.mockRestore();
+      });
+
+      it('includes the status code and Retry-After seconds for a 429', async () => {
+        const result = await executeWithError(makeHttpError(429, { 'Retry-After': '30' }));
+
+        expect(result).toEqual({
+          status: 'error',
+          message: 'Request failed with status code 429',
+          actionId: connectorId,
+          errorMeta: { statusCode: 429, retryAfterSeconds: 30 },
+        });
+      });
+
+      it('converts an HTTP-date Retry-After to seconds', async () => {
+        const retryAt = new Date(now + 90_000).toUTCString();
+
+        const result = await executeWithError(makeHttpError(503, { 'retry-after': retryAt }));
+
+        expect(result.errorMeta).toEqual({ statusCode: 503, retryAfterSeconds: 90 });
+      });
+
+      it('reports zero seconds for an HTTP-date Retry-After in the past', async () => {
+        const retryAt = new Date(now - 60_000).toUTCString();
+
+        const result = await executeWithError(makeHttpError(429, { 'retry-after': retryAt }));
+
+        expect(result.errorMeta).toEqual({ statusCode: 429, retryAfterSeconds: 0 });
+      });
+
+      it('falls back to a delta-seconds ratelimit-reset header', async () => {
+        const result = await executeWithError(makeHttpError(429, { 'ratelimit-reset': '12' }));
+
+        expect(result.errorMeta).toEqual({ statusCode: 429, retryAfterSeconds: 12 });
+      });
+
+      it('falls back to an epoch-seconds x-ratelimit-reset header', async () => {
+        const resetAt = String(now / 1000 + 45);
+
+        const result = await executeWithError(makeHttpError(403, { 'x-ratelimit-reset': resetAt }));
+
+        expect(result.errorMeta).toEqual({ statusCode: 403, retryAfterSeconds: 45 });
+      });
+
+      it('prefers Retry-After over rate-limit reset headers', async () => {
+        const result = await executeWithError(
+          makeHttpError(429, { 'retry-after': '5', 'x-ratelimit-reset': '60' })
+        );
+
+        expect(result.errorMeta).toEqual({ statusCode: 429, retryAfterSeconds: 5 });
+      });
+
+      it('includes only the status code when no retry header is present', async () => {
+        const result = await executeWithError(makeHttpError(400));
+
+        expect(result.errorMeta).toEqual({ statusCode: 400 });
+      });
+
+      it('ignores an unparseable Retry-After', async () => {
+        const result = await executeWithError(makeHttpError(429, { 'retry-after': 'soon' }));
+
+        expect(result.errorMeta).toEqual({ statusCode: 429 });
+      });
+
+      it('keeps connector-provided metadata alongside the HTTP metadata', async () => {
+        const error = makeHttpError(413, { 'content-length': '2048' });
+        setConnectorActionErrorMeta(error, { estimatedOutputBytes: 4096 });
+
+        const result = await executeWithError(error);
+
+        expect(result.errorMeta).toEqual({
+          contentLengthBytes: 2048,
+          estimatedOutputBytes: 4096,
+          statusCode: 413,
+        });
+      });
+
+      it('does not add HTTP metadata to errors without a response status', async () => {
+        const error = Object.assign(new Error('socket hang up'), {
+          response: { headers: { 'retry-after': '30' } },
+        });
+
+        const result = await executeWithError(error);
+
+        expect(result).toEqual({
+          status: 'error',
+          message: 'socket hang up',
+          actionId: connectorId,
+        });
+      });
+    });
+
     it('logs the error message when the handler throws', async () => {
       mockHandler.mockRejectedValue(new Error('handler failed'));
 
