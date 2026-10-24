@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type {
   EmbeddableApiContext,
   HasParentApi,
@@ -17,12 +18,14 @@ import type {
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
+  apiHasType,
   apiHasUniqueId,
   getInheritedViewMode,
   getContainerParentFromAPI,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { usageCollection } from '../../kibana_services';
 import { ACTION_REMOVE_PANEL } from './constants';
 
 export type RemovePanelActionApi = PublishesViewMode &
@@ -31,7 +34,6 @@ export type RemovePanelActionApi = PublishesViewMode &
 
 const isApiCompatible = (api: unknown | null): api is RemovePanelActionApi =>
   Boolean(apiHasUniqueId(api) && apiCanAccessViewMode(api) && getContainerParentFromAPI(api));
-
 export class RemovePanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_REMOVE_PANEL;
   public readonly id = ACTION_REMOVE_PANEL;
@@ -61,6 +63,14 @@ export class RemovePanelAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    embeddable.parentApi?.removePanel(embeddable.uuid);
+    const { parentApi } = embeddable;
+    parentApi?.removePanel(embeddable.uuid);
+    if (apiHasType(embeddable) && apiHasType(parentApi)) {
+      usageCollection?.reportUiCounter?.(
+        parentApi.type,
+        METRIC_TYPE.CLICK,
+        `${embeddable.type}:panel_remove`
+      );
+    }
   }
 }
