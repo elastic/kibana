@@ -50,7 +50,7 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
 
   // Validate each filter name (basic validation)
   for (const filter of filters) {
-    const filterName = filter.split('(')[0].trim();
+    const filterName = filter.split(/[(:]/)[0].trim();
     // Check if filter name follows JavaScript identifier rules (no numbers at start, no $ at start, no special chars except _)
     if (!/^[a-zA-Z_][a-zA-Z0-9_$]*$/.test(filterName)) {
       errors.push(`Invalid filter name: ${filterName}`);

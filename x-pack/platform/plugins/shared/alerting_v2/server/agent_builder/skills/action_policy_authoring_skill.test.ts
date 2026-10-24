@@ -8,6 +8,7 @@
 import { ACTION_POLICY_AUTHORING_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
+import { AttachmentsService } from '../../lib/services/attachments_service';
 import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
 import {
@@ -26,6 +27,7 @@ const createDeps = (): ManageActionPolicyToolDeps & {
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
+  attachmentsService: new AttachmentsService(),
   getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn(async () => null) })),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
   availability: createAlertingV2Availability({
@@ -70,14 +72,18 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the manage action policy inline tool', async () => {
+  it('exposes the manage action policy and link action policy inline tools', async () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageActionPolicy]);
+    expect(inlineToolIds).toEqual([
+      ALERTING_TOOL_IDS.manageActionPolicy,
+      ALERTING_TOOL_IDS.linkActionPolicyToRule,
+    ]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageRule);
+    expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.linkRuleToActionPolicy);
   });
 
   it('includes action policy discovery and default notification setup instructions', () => {
@@ -88,6 +94,8 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(skill.content).not.toContain('Part 1: Action Policies');
     expect(skill.content).toContain('Default Notification Setup');
     expect(skill.content).toContain('action-policy-single-rule.md');
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.linkActionPolicyToRule);
+    expect(skill.content).toContain('rule_saved');
     expect(skill.content).toContain('action-policy-multi-rule.md');
     expect(skill.content).not.toContain('## Multi-rule policies');
     expect(skill.content).not.toContain('Step 2 — Create a Default Action Policy');
