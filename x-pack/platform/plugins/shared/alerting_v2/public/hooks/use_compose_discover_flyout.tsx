@@ -26,6 +26,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useAlertingLocators } from '../application/locator_context';
+import type { AlertingV2RulesLocatorParams } from '../locators';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
@@ -67,6 +68,13 @@ interface UseComposeDiscoverFlyoutOptions {
   onDismiss?: () => void;
 }
 
+type RulesLocatorPage = NonNullable<AlertingV2RulesLocatorParams['page']>;
+
+/** Builders that author on their own page instead of the flyout, keyed by builder type. */
+const PAGE_BUILDERS: Record<string, { editPage: RulesLocatorPage; clonePage: RulesLocatorPage }> = {
+  sequence: { editPage: 'sequence_edit', clonePage: 'sequence_clone' },
+};
+
 export const useComposeDiscoverFlyout = ({
   createSuccessRedirectPath,
   historyKey: sharedHistoryKey,
@@ -88,7 +96,7 @@ export const useComposeDiscoverFlyout = ({
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
   const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
-  const { actionPolicyLocators } = useAlertingLocators();
+  const { actionPolicyLocators, rulesLocators } = useAlertingLocators();
   const getActionPolicyEditHref = useCallback(
     (actionPolicyId: string) =>
       actionPolicyLocators.getRedirectUrl({ page: 'edit', actionPolicyId }),
@@ -263,13 +271,31 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const openEditFlyout = useCallback(
-    (rule: RuleApiResponse) => openRuleFlyout(rule, 'edit'),
-    [openRuleFlyout]
+    (rule: RuleApiResponse) => {
+      const pageBuilder = rule.metadata?.builder
+        ? PAGE_BUILDERS[rule.metadata.builder.type]
+        : undefined;
+      if (pageBuilder) {
+        rulesLocators.navigateSync({ page: pageBuilder.editPage, ruleId: rule.id });
+        return;
+      }
+      openRuleFlyout(rule, 'edit');
+    },
+    [openRuleFlyout, rulesLocators]
   );
 
   const openCloneFlyout = useCallback(
-    (rule: RuleApiResponse) => openRuleFlyout(rule, 'clone'),
-    [openRuleFlyout]
+    (rule: RuleApiResponse) => {
+      const pageBuilder = rule.metadata?.builder
+        ? PAGE_BUILDERS[rule.metadata.builder.type]
+        : undefined;
+      if (pageBuilder) {
+        rulesLocators.navigateSync({ page: pageBuilder.clonePage, ruleId: rule.id });
+        return;
+      }
+      openRuleFlyout(rule, 'clone');
+    },
+    [openRuleFlyout, rulesLocators]
   );
 
   const openCreateFromTemplateFlyout = useCallback(
