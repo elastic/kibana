@@ -71,3 +71,42 @@ describe('createPlaywrightEvalsConfig concurrency', () => {
     );
   });
 });
+
+describe('createPlaywrightEvalsConfig tracesUnavailableForSuiteMode', () => {
+  const previousEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env.EVAL_CONNECTOR_ID = 'judge';
+  });
+
+  afterEach(() => {
+    process.env = { ...previousEnv };
+  });
+
+  const projectOptIn = (options: { tracesUnavailableForSuiteMode?: boolean } = {}): unknown[] =>
+    (createPlaywrightEvalsConfig({ testDir: '/evals', ...options }).projects ?? []).map(
+      ({ use }) =>
+        (use as { tracesUnavailableForSuiteMode?: boolean } | undefined)
+          ?.tracesUnavailableForSuiteMode
+    );
+
+  it('sets the per-project option when the suite opts in', () => {
+    expect(projectOptIn({ tracesUnavailableForSuiteMode: true })).toEqual([true, true]);
+  });
+
+  it('defaults the option to false for suites that did not opt in', () => {
+    expect(projectOptIn()).toEqual([false, false]);
+  });
+
+  it('does not touch the process environment, so the opt-in cannot leak across suites', () => {
+    const before = { ...process.env };
+    createPlaywrightEvalsConfig({ testDir: '/evals', tracesUnavailableForSuiteMode: true });
+    expect(process.env).toEqual(before);
+    expect(process.env.KBN_EVALS_TRACES_UNAVAILABLE).toBeUndefined();
+  });
+
+  it('ignores a stray KBN_EVALS_TRACES_UNAVAILABLE in the environment', () => {
+    process.env.KBN_EVALS_TRACES_UNAVAILABLE = 'true';
+    expect(projectOptIn()).toEqual([false, false]);
+  });
+});
