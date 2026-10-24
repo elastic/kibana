@@ -10,6 +10,7 @@ import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
   CreateServiceAccountServerParams,
   ServiceAccount,
+  ServiceAccountSummary,
   UiamProjectType,
 } from '@kbn/core-security-server';
 
@@ -55,6 +56,15 @@ export interface ServiceAccountsBackend {
    * Fetches one service account by id, with the same authorization model as {@link list}.
    */
   get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
+
+  /**
+   * Reads the name and status of one service account as Kibana, resolving `null` when there is no
+   * such account. Performs no user authorization: it backs
+   * `core.security.serviceAccounts.getServiceAccountSummary`, whose callers authorize their users
+   * against a workload first. Unlike {@link get}, `assumable` is taken from the credential Kibana
+   * stored, without asking the identity provider.
+   */
+  getSummary(id: string): Promise<ServiceAccountSummary | null>;
 
   /**
    * Deletes one service account, rejecting with a 404 when there is no such account. Requires the
