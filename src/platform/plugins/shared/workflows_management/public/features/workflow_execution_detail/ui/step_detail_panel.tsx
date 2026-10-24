@@ -43,9 +43,6 @@ import {
   resumeSchemaForStepExecution,
 } from '../model/use_waiting_step_resume';
 
-/** Hard constant: content must not flex the panels. */
-export const STEP_DETAIL_WIDTH = 560;
-
 const closeLabel = i18n.translate('workflows.executionFlyout.close', { defaultMessage: 'Close' });
 
 interface StepDetailHeaderProps {
@@ -435,14 +432,11 @@ export const StepDetailPanel = ({
   return (
     <div
       css={{
-        width: `${STEP_DETAIL_WIDTH}px`,
-        minWidth: `${STEP_DETAIL_WIDTH}px`,
-        maxWidth: `${STEP_DETAIL_WIDTH}px`,
-        flex: `0 0 ${STEP_DETAIL_WIDTH}px`,
-        boxSizing: 'border-box',
+        flex: 1,
+        minHeight: 0,
+        minWidth: 0,
         display: 'flex',
         flexDirection: 'column',
-        borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
         overflow: 'hidden',
       }}
     >
