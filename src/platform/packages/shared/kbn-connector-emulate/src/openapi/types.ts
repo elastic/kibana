@@ -114,7 +114,7 @@ export type SecurityRequirement = readonly SecurityScheme[];
 
 export interface FixedQueryParameter {
   readonly name: string;
-  readonly value?: string;
+  readonly value: string;
 }
 
 export interface ContractOperation {
@@ -125,8 +125,8 @@ export interface ContractOperation {
   /** The key in `paths`, or in `x-ms-paths` including its query part, such as `/?comp=list`. */
   readonly path: string;
   /**
-   * The query parameters an `x-ms-paths` key fixes, which tell operations on the same path
-   * apart; a parameter without a value only has to be present.
+   * The query parameters an `x-ms-paths` key fixes (its `name=value` pairs), which tell
+   * operations on the same path apart.
    */
   readonly fixedQuery?: readonly FixedQueryParameter[];
   readonly servers: readonly OperationServer[];

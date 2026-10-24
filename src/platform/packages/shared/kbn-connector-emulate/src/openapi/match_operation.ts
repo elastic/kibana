@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractOperation, OperationServer } from './types';
+import { getAtPointer, refToPointer } from './json_pointer';
+import { isRecord } from './schema_walk';
+import type { ContractOperation, OperationParameter, OperationServer } from './types';
 
 export interface OperationMatch {
   readonly operation: ContractOperation;
@@ -101,11 +103,79 @@ const compileRoute = (operation: ContractOperation): Route => {
 };
 
 const hasFixedQuery = ({ operation: { fixedQuery = [] } }: Route, url: URL): boolean =>
-  fixedQuery.every(({ name, value }) =>
-    value === undefined ? url.searchParams.has(name) : url.searchParams.getAll(name).includes(value)
-  );
+  fixedQuery.every(({ name, value }) => url.searchParams.getAll(name).includes(value));
 
-const fixedQueryCount = ({ operation: { fixedQuery = [] } }: Route): number => fixedQuery.length;
+/** The query string and lowercase headers a request sends, for telling operations apart. */
+export interface RequestDiscriminators {
+  readonly url: URL;
+  readonly headers?: Readonly<Record<string, string>>;
+}
+
+// The one value a required parameter allows, such as `comp: ['list']` or
+// `x-ms-lease-action: ['acquire']` in Azure specs, which tells operations on a path apart.
+const singleValue = (
+  { required, schema }: OperationParameter,
+  operation: ContractOperation
+): string | undefined => {
+  if (!required || !schema || !isRecord(schema.schema)) {
+    return undefined;
+  }
+  const { $ref } = schema.schema;
+  const node =
+    typeof $ref === 'string'
+      ? getAtPointer(operation.spec.document, refToPointer($ref))
+      : schema.schema;
+  if (!isRecord(node)) {
+    return undefined;
+  }
+  const values = Array.isArray(node.enum) ? node.enum : 'const' in node ? [node.const] : [];
+  return values.length === 1 && ['string', 'number', 'boolean'].includes(typeof values[0])
+    ? String(values[0])
+    : undefined;
+};
+
+const sentValues = (
+  { name, in: location }: OperationParameter,
+  { url, headers = {} }: RequestDiscriminators
+): string[] | undefined => {
+  if (location === 'query') {
+    return url.searchParams.has(name) ? url.searchParams.getAll(name) : undefined;
+  }
+  const header = location === 'header' ? headers[name.toLowerCase()] : undefined;
+  return header === undefined ? undefined : [header];
+};
+
+interface Discrimination {
+  /** A discriminator the request sends with another value. */
+  readonly conflicts: boolean;
+  /** The fixed query parameters, and the declared ones the request sends without a conflict. */
+  readonly matched: number;
+  /** The required query and header parameters the request doesn't send. */
+  readonly missing: number;
+}
+
+const discriminate = ({ operation }: Route, request: RequestDiscriminators): Discrimination => {
+  const matched = new Set((operation.fixedQuery ?? []).map(({ name }) => name));
+  let conflicts = false;
+  let missing = 0;
+  for (const parameter of operation.parameters) {
+    if (parameter.in !== 'query' && parameter.in !== 'header') {
+      continue;
+    }
+    const sent = sentValues(parameter, request);
+    if (sent === undefined) {
+      missing += parameter.required ? 1 : 0;
+      continue;
+    }
+    const value = singleValue(parameter, operation);
+    if (value === undefined || sent.includes(value)) {
+      matched.add(parameter.name);
+    } else {
+      conflicts = true;
+    }
+  }
+  return { conflicts, matched: matched.size, missing };
+};
 
 // Strips the longest matching server URL, e.g. `https://api.trello.com/1` from a Trello URL.
 const getOperationPath = ({ servers }: Route, url: URL): string | undefined => {
@@ -135,13 +205,21 @@ const decodePathSegment = (segment: string): string => {
  * Creates a router that finds the operation for a request. When several path templates match,
  * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`,
  * then the one with the most literal text, so `/items/{id}:archive` takes precedence over
- * `/items/{id}`, then the one with the most fixed query parameters (`x-ms-paths`), so
- * `/?restype=service&comp=properties` takes precedence over `/?comp=properties`.
+ * `/items/{id}`. Operations on the same path, as `x-ms-paths` declares them, are told apart by
+ * the query parameters their keys fix and their required parameters with one allowed value:
+ * those the request sends with another value are left out, unless every operation is, then the
+ * one that declares the most of the query and header parameters the request sends wins, then the
+ * one with the fewest required parameters missing. So `/?restype=service&comp=properties` takes precedence over `/?comp=properties`, and
+ * a lease request goes to the operation whose `x-ms-lease-action` it sends.
  */
 export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
   const routes = operations.map(compileRoute);
 
-  return (method: string, url: URL): OperationMatch | OperationMismatch => {
+  return (
+    method: string,
+    url: URL,
+    headers?: Readonly<Record<string, string>>
+  ): OperationMatch | OperationMismatch => {
     const pathMatches = routes.flatMap((route) => {
       const path = getOperationPath(route, url);
       const match = path === undefined ? null : route.path.exec(path);
@@ -160,14 +238,19 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
         )}`,
       };
     }
-    const [best] = candidates
+    const forMethod = candidates
       .filter(({ route }) => route.operation.method === method.toLowerCase())
-      .sort(
-        (a, b) =>
-          a.route.parameterNames.length - b.route.parameterNames.length ||
-          b.route.literalLength - a.route.literalLength ||
-          fixedQueryCount(b.route) - fixedQueryCount(a.route)
-      );
+      .map((candidate) => ({ ...candidate, ...discriminate(candidate.route, { url, headers }) }));
+    // A conflicting discriminator rules an operation out only when another is left, so a request
+    // to a single operation still reaches validation, which names the wrong value.
+    const consistent = forMethod.filter(({ conflicts }) => !conflicts);
+    const [best] = (consistent.length > 0 ? consistent : forMethod).sort(
+      (a, b) =>
+        a.route.parameterNames.length - b.route.parameterNames.length ||
+        b.route.literalLength - a.route.literalLength ||
+        b.matched - a.matched ||
+        a.missing - b.missing
+    );
     if (!best) {
       const allowed = [...new Set(candidates.map(({ route }) => route.operation.method))];
       return {

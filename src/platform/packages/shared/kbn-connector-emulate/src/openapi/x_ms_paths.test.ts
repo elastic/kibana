@@ -12,7 +12,26 @@ import { loadContractOperations } from '.';
 
 const ok = (description: string) => ({ '200': { description } });
 
+const container = { name: 'containerName', in: 'path', required: true, type: 'string' };
+const blobName = {
+  name: 'blob',
+  in: 'path',
+  required: true,
+  type: 'string',
+  'x-ms-skip-url-encoding': true,
+};
+// Azure declares the parameters its keys fix as required, with the one value they allow.
+const only = (name: string, value: string, location = 'query') => ({
+  name,
+  in: location,
+  required: true,
+  type: 'string',
+  enum: [value],
+});
+
 // Shaped like Azure Blob Storage's data-plane spec, which has all its operations in `x-ms-paths`.
+// Bare tokens in its keys (`&flat`, `&acquire`, `?BlockBlob`) only tell keys apart for AutoRest;
+// the requests the service takes carry the operation's discriminators as declared parameters.
 const blob = {
   swagger: '2.0',
   info: { title: 'Blob', version: '2021-12-02' },
@@ -22,7 +41,7 @@ const blob = {
     '/?comp=list': {
       get: {
         operationId: 'Service_ListContainersSegment',
-        parameters: [{ name: 'prefix', in: 'query', type: 'string' }],
+        parameters: [only('comp', 'list'), { name: 'prefix', in: 'query', type: 'string' }],
         responses: ok('containers'),
       },
     },
@@ -33,27 +52,89 @@ const blob = {
     '/?comp=properties': {
       get: { operationId: 'Other_GetProperties', responses: ok('other') },
     },
+    '/?mode=a%2Fb': {
+      get: { operationId: 'Encoded', responses: ok('encoded') },
+    },
+    '/{containerName}?restype=container': {
+      get: {
+        operationId: 'Container_GetProperties',
+        parameters: [container, only('restype', 'container')],
+        responses: ok('container'),
+      },
+      put: {
+        operationId: 'Container_Create',
+        parameters: [container, only('restype', 'container')],
+        responses: ok('created'),
+      },
+    },
     '/{containerName}?restype=container&comp=list&flat': {
       get: {
         operationId: 'Container_ListBlobFlatSegment',
-        parameters: [{ name: 'containerName', in: 'path', required: true, type: 'string' }],
+        parameters: [container, only('restype', 'container'), only('comp', 'list')],
         responses: ok('blobs'),
+      },
+    },
+    '/{containerName}?restype=container&comp=list&hierarchy': {
+      get: {
+        operationId: 'Container_ListBlobHierarchySegment',
+        parameters: [
+          container,
+          only('restype', 'container'),
+          only('comp', 'list'),
+          { name: 'delimiter', in: 'query', required: true, type: 'string' },
+        ],
+        responses: ok('blobs by prefix'),
+      },
+    },
+    '/{containerName}?comp=lease&restype=container&acquire': {
+      put: {
+        operationId: 'Container_AcquireLease',
+        parameters: [
+          container,
+          only('comp', 'lease'),
+          only('restype', 'container'),
+          only('x-ms-lease-action', 'acquire', 'header'),
+        ],
+        responses: ok('acquired'),
+      },
+    },
+    '/{containerName}?comp=lease&restype=container&release': {
+      put: {
+        operationId: 'Container_ReleaseLease',
+        parameters: [
+          container,
+          only('comp', 'lease'),
+          only('restype', 'container'),
+          only('x-ms-lease-action', 'release', 'header'),
+          { name: 'x-ms-lease-id', in: 'header', required: true, type: 'string' },
+        ],
+        responses: ok('released'),
       },
     },
     '/{containerName}/{blob}': {
       get: {
         operationId: 'Blob_Download',
-        parameters: [
-          { name: 'containerName', in: 'path', required: true, type: 'string' },
-          {
-            name: 'blob',
-            in: 'path',
-            required: true,
-            type: 'string',
-            'x-ms-skip-url-encoding': true,
-          },
-        ],
+        parameters: [container, blobName],
         responses: ok('blob'),
+      },
+    },
+    '/{containerName}/{blob}?BlockBlob': {
+      put: {
+        operationId: 'BlockBlob_Upload',
+        parameters: [container, blobName, only('x-ms-blob-type', 'BlockBlob', 'header')],
+        responses: ok('uploaded'),
+      },
+    },
+    '/{containerName}/{blob}?PageBlob': {
+      put: {
+        operationId: 'PageBlob_Create',
+        parameters: [
+          container,
+          blobName,
+          only('x-ms-blob-type', 'PageBlob', 'header'),
+          { name: 'x-ms-blob-content-length', in: 'header', required: true, type: 'integer' },
+        ],
+        responses: ok('page blob'),
       },
     },
   },
@@ -61,89 +142,111 @@ const blob = {
 
 describe('x-ms-paths', () => {
   const { fetch, calls } = createEmulatorFetch({ specs: [blob] });
-  const send = (path: string, method = 'GET') =>
-    fetch(`https://account.blob.core.windows.net${path}`, { method });
+  const send = (path: string, method = 'GET', headers: Record<string, string> = {}) =>
+    fetch(`https://account.blob.core.windows.net${path}`, { method, headers });
 
   afterEach(() => {
     calls.length = 0;
   });
 
-  it('loads operations from x-ms-paths with the fixed query parameters of their keys', () => {
+  it('loads operations from x-ms-paths with the name=value pairs of their keys', () => {
     const operations = loadContractOperations(blob);
+    const byId = new Map(operations.map(({ id, path, fixedQuery }) => [id, { path, fixedQuery }]));
 
-    expect(
-      operations.map(({ id, method, path, fixedQuery }) => ({ id, method, path, fixedQuery }))
-    ).toEqual([
-      {
-        id: 'Service_ListContainersSegment',
-        method: 'get',
-        path: '/?comp=list',
-        fixedQuery: [{ name: 'comp', value: 'list' }],
-      },
-      {
-        id: 'Service_GetProperties',
-        method: 'get',
-        path: '/?restype=service&comp=properties',
-        fixedQuery: [
-          { name: 'restype', value: 'service' },
-          { name: 'comp', value: 'properties' },
-        ],
-      },
-      {
-        id: 'Service_SetProperties',
-        method: 'put',
-        path: '/?restype=service&comp=properties',
-        fixedQuery: [
-          { name: 'restype', value: 'service' },
-          { name: 'comp', value: 'properties' },
-        ],
-      },
-      {
-        id: 'Other_GetProperties',
-        method: 'get',
-        path: '/?comp=properties',
-        fixedQuery: [{ name: 'comp', value: 'properties' }],
-      },
-      {
-        id: 'Container_ListBlobFlatSegment',
-        method: 'get',
-        path: '/{containerName}?restype=container&comp=list&flat',
-        fixedQuery: [
-          { name: 'restype', value: 'container' },
-          { name: 'comp', value: 'list' },
-          { name: 'flat' },
-        ],
-      },
-      {
-        id: 'Blob_Download',
-        method: 'get',
-        path: '/{containerName}/{blob}',
-        fixedQuery: undefined,
-      },
-    ]);
+    expect(byId.get('Service_GetProperties')).toEqual({
+      path: '/?restype=service&comp=properties',
+      fixedQuery: [
+        { name: 'restype', value: 'service' },
+        { name: 'comp', value: 'properties' },
+      ],
+    });
+    // Bare tokens are left out: clients don't send them.
+    expect(byId.get('Container_ListBlobFlatSegment')).toEqual({
+      path: '/{containerName}?restype=container&comp=list&flat',
+      fixedQuery: [
+        { name: 'restype', value: 'container' },
+        { name: 'comp', value: 'list' },
+      ],
+    });
+    expect(byId.get('BlockBlob_Upload')).toEqual({
+      path: '/{containerName}/{blob}?BlockBlob',
+      fixedQuery: undefined,
+    });
+    // Values are decoded as a request's query is.
+    expect(byId.get('Encoded')?.fixedQuery).toEqual([{ name: 'mode', value: 'a/b' }]);
+    expect(byId.get('Blob_Download')?.fixedQuery).toBeUndefined();
   });
 
-  it('routes requests by their fixed query parameters, preferring the operation with most', async () => {
-    expect((await send('/?comp=list&prefix=logs')).status).toBe(200);
-    expect((await send('/?comp=properties&restype=service')).status).toBe(200);
-    expect((await send('/?comp=properties')).status).toBe(200);
-    expect((await send('/?restype=service&comp=properties', 'PUT')).status).toBe(200);
-    expect((await send('/logs?restype=container&comp=list&flat')).status).toBe(200);
-    expect((await send('/logs/2024/01/app.log')).status).toBe(200);
+  it('routes the requests clients send to the operation their parameters select', async () => {
+    const requests: Array<[string, string?, Record<string, string>?]> = [
+      ['/?comp=list&prefix=logs'],
+      ['/?comp=properties&restype=service'],
+      ['/?comp=properties'],
+      ['/?restype=service&comp=properties', 'PUT'],
+      ['/?mode=a%2Fb'],
+      ['/logs?restype=container'],
+      ['/logs?restype=container', 'PUT'],
+      ['/logs?restype=container&comp=list'],
+      ['/logs?restype=container&comp=list&delimiter=%2F'],
+      ['/logs?comp=lease&restype=container', 'PUT', { 'x-ms-lease-action': 'acquire' }],
+      [
+        '/logs?comp=lease&restype=container',
+        'PUT',
+        { 'x-ms-lease-action': 'release', 'x-ms-lease-id': 'lease-1' },
+      ],
+      ['/logs/2024/01/app.log'],
+      ['/logs/app.log', 'PUT', { 'x-ms-blob-type': 'BlockBlob' }],
+      [
+        '/logs/disk.vhd',
+        'PUT',
+        { 'x-ms-blob-type': 'PageBlob', 'x-ms-blob-content-length': '512' },
+      ],
+    ];
+    for (const [path, method, headers] of requests) {
+      expect((await send(path, method, headers)).status).toBe(200);
+    }
 
     expect(calls.map(({ operation }) => operation)).toEqual([
       'Service_ListContainersSegment',
       'Service_GetProperties',
       'Other_GetProperties',
       'Service_SetProperties',
+      'Encoded',
+      'Container_GetProperties',
+      'Container_Create',
       'Container_ListBlobFlatSegment',
+      'Container_ListBlobHierarchySegment',
+      'Container_AcquireLease',
+      'Container_ReleaseLease',
       'Blob_Download',
+      'BlockBlob_Upload',
+      'PageBlob_Create',
     ]);
     expect(calls.flatMap(({ requestViolations }) => requestViolations)).toEqual([]);
-    expect(calls[4].matched).toEqual({
+    expect(calls[7].matched).toEqual({
       method: 'get',
       path: '/{containerName}?restype=container&comp=list&flat',
     });
+  });
+
+  it('routes a request missing a discriminator to an operation it fits, whose validation names it', async () => {
+    const response = await send('/logs?comp=lease&restype=container', 'PUT');
+
+    expect(response.status).toBe(422);
+    expect(calls[0].operation).toBe('Container_AcquireLease');
+    expect(calls[0].requestViolations).toEqual([
+      expect.objectContaining({ path: ['header', 'x-ms-lease-action'], code: 'required' }),
+    ]);
+  });
+
+  it('still routes a request whose discriminator no operation allows, so validation names it', async () => {
+    const response = await send('/logs/app.log', 'PUT', { 'x-ms-blob-type': 'AppendBlob' });
+
+    expect(response.status).toBe(422);
+    expect(calls[0].operation).toBe('BlockBlob_Upload');
+    expect(calls[0].requestViolations).toEqual([
+      expect.objectContaining({ path: ['header', 'x-ms-blob-type'], code: 'enum' }),
+    ]);
   });
 
   it('answers 404 naming the expected query when none of the operations on the path match', async () => {
@@ -151,7 +254,7 @@ describe('x-ms-paths', () => {
 
     expect(response.status).toBe(404);
     expect((await response.json()).detail).toBe(
-      'GET https://account.blob.core.windows.net/: No operation matches the query; operations on the path expect /?comp=list, or /?restype=service&comp=properties, or /?comp=properties'
+      'GET https://account.blob.core.windows.net/: No operation matches the query; operations on the path expect /?comp=list, or /?restype=service&comp=properties, or /?comp=properties, or /?mode=a%2Fb'
     );
   });
 

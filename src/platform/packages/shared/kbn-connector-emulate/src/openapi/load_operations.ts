@@ -118,20 +118,23 @@ const toCredential = (scheme: Record<string, unknown>): Credential | undefined =
   return undefined;
 };
 
-// `flat` in `/{containerName}?restype=container&comp=list&flat` only has to be present.
+// The `name=value` pairs of an `x-ms-paths` key, decoded as `URL.searchParams` decodes a
+// request's. Bare tokens such as `flat` in `/{containerName}?restype=container&comp=list&flat`
+// only tell keys apart for AutoRest: clients never send them.
 const toFixedQuery = (path: string): FixedQueryParameter[] | undefined => {
   const start = path.indexOf('?');
   if (start === -1) {
     return undefined;
   }
-  return path
+  const pairs = path
     .slice(start + 1)
     .split('&')
-    .filter(Boolean)
-    .map((pair) => {
-      const [name, ...value] = pair.split('=');
-      return value.length === 0 ? { name } : { name, value: value.join('=') };
-    });
+    .filter((pair) => pair.includes('='));
+  const fixed = [...new URLSearchParams(pairs.join('&'))].map(([name, value]) => ({
+    name,
+    value,
+  }));
+  return fixed.length > 0 ? fixed : undefined;
 };
 
 const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
