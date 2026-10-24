@@ -69,9 +69,15 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
+  const { user } = manager.deps;
   const toolRegistry = await toolsService.getRegistry({ request });
-  const agentRegistry = await manager.deps.agentsService.getRegistry({ request });
-  const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
+  const agentRegistry = await manager.deps.agentsService.getRegistry({ request, user });
+  const conversationClient = user
+    ? await manager.deps.conversationService.getScopedClientAsUser({
+        request,
+        user: { ...user, isAdmin: false },
+      })
+    : await manager.deps.conversationService.getScopedClient({ request });
   const deployment = await resolveDeploymentContext({
     deploymentInfo,
     request,
@@ -90,6 +96,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
 
   return {
     request,
+    user,
     spaceId,
     deployment,
     defaultConnectorId: manager.deps.defaultConnectorId,
@@ -164,10 +171,10 @@ export const runAgent = async ({
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, executionId } = agentExecutionParams;
-  const { agentsService, request, modelProvider } = parentManager.deps;
+  const { agentsService, request, modelProvider, user } = parentManager.deps;
 
   const resolveAgent = async () => {
-    const agentRegistry = await agentsService.getRegistry({ request });
+    const agentRegistry = await agentsService.getRegistry({ request, user });
     const resolvedAgent = await agentRegistry.get(agentId, { access: 'use' });
     // Layer runtime overrides onto the agent's own config first, then merge with the type base.
     const agentWithOverrides = {

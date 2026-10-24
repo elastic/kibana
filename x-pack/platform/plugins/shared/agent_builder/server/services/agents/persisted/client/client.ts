@@ -33,7 +33,7 @@ import {
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
-import { getUserFromRequest } from '../../../utils';
+import { getUserFromRequest, isAdminFromRequest } from '../../../utils';
 import type {
   AgentAccessControlUpdateRequest,
   AgentCreateRequest,
@@ -272,6 +272,7 @@ export const createClient = async ({
   security,
   toolsService,
   logger,
+  user: actingUser,
 }: {
   space: string;
   request: KibanaRequest;
@@ -279,13 +280,21 @@ export const createClient = async ({
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
+  /** Identity to authorize as instead of the request's own, e.g. the user a task runs for. */
+  user?: UserIdAndName;
 }): Promise<AgentClient> => {
   const scopedClient = elasticsearch.client.asScoped(request);
-  const user = await getUserFromRequest({
-    request,
-    security,
-    esClient: scopedClient.asCurrentUser,
-  });
+  const user = actingUser
+    ? {
+        id: actingUser.id,
+        username: actingUser.username,
+        isAdmin: await isAdminFromRequest({ esClient: scopedClient.asCurrentUser }),
+      }
+    : await getUserFromRequest({
+        request,
+        security,
+        esClient: scopedClient.asCurrentUser,
+      });
   const esClient = scopedClient.asInternalUser;
   const storage = createStorage({ logger, esClient });
 

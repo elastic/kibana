@@ -14,6 +14,7 @@ import type {
   ChatAgentEvent,
   AgentExecutionMode,
   InteractivityConfigInput,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { AgentParams, AgentResponse, ExecutionConversationAccess } from './provider';
 
@@ -48,6 +49,11 @@ export interface RunAgentParams {
    * the sub-agents the run spawns so their rounds join to the same workflow run.
    */
   workflowExecutionId?: string;
+  /**
+   * Identity the run acts as when it differs from the request's own, e.g. the user who scheduled a
+   * Task Manager run, whose fake request may not carry their profile uid.
+   */
+  user?: UserIdAndName;
   /**
    * ID of the agent to call.
    */

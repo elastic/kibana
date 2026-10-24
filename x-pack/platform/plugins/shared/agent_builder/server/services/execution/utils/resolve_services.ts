@@ -18,7 +18,7 @@ import type {
   InferenceConnector,
 } from '@kbn/inference-common';
 import { getSupportedReasoningEffortLevels } from '@kbn/inference-common';
-import type { AgentConfiguration } from '@kbn/agent-builder-common';
+import type { AgentConfiguration, UserIdAndName } from '@kbn/agent-builder-common';
 import { createAgentNotFoundError, isAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import type { AgentRegistry, AgentsServiceStart } from '../../agents';
@@ -118,6 +118,7 @@ export const resolveServices = async ({
   spaces,
   security,
   elasticsearch,
+  user,
 }: {
   agentId: string;
   connectorId?: string;
@@ -131,8 +132,10 @@ export const resolveServices = async ({
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
+  /** Identity to authorize the agent lookup as, when it differs from the request's own. */
+  user?: UserIdAndName;
 }): Promise<ResolvedServices> => {
-  const agentRegistry = await agentService.getRegistry({ request });
+  const agentRegistry = await agentService.getRegistry({ request, user });
   const { inference_feature_id: agentInferenceFeatureId, reasoning_level: agentReasoningLevel } =
     await getAgentConfiguration({ agentRegistry, agentId });
   const inferenceFeatureId = connectorId === undefined ? agentInferenceFeatureId : undefined;

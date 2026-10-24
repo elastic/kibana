@@ -147,7 +147,7 @@ export class AgentsService {
       });
     };
 
-    const getRegistry = async ({ request }: { request: KibanaRequest }) => {
+    const getRegistry: AgentsServiceStart['getRegistry'] = async ({ request, user }) => {
       const space = getCurrentSpaceId({ request, spaces });
       return createAgentRegistry({
         request,
@@ -156,7 +156,7 @@ export class AgentsService {
         savedObjects,
         typeRegistry: this.typeRegistry,
         builtinProvider: await builtinProviderFn({ request, space }),
-        persistedProvider: await persistedProviderFn({ request, space }),
+        persistedProvider: await persistedProviderFn({ request, space, user }),
       });
     };
 

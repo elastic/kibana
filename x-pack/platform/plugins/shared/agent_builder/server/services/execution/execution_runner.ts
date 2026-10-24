@@ -279,6 +279,7 @@ const handleConversationExecution = async ({
       reasoningLevel,
       telemetryMetadata: roundTelemetryMetadata,
       request,
+      user: owner,
       ...deps,
     });
 
@@ -307,6 +308,7 @@ const handleConversationExecution = async ({
       workflowExecutionId,
       roundId,
       conversationAccess,
+      user: owner,
     });
 
     // Generate title when creating a new conversation
@@ -320,7 +322,9 @@ const handleConversationExecution = async ({
           ? modelProvider.selectModel({ effortLevel: 'low' }).then((model) => model.chatModel)
           : undefined,
         modelProvider.getDefaultModel(),
-        agentService.getRegistry({ request }).then((registry) => registry.get(agentId)),
+        agentService
+          .getRegistry({ request, user: owner })
+          .then((registry) => registry.get(agentId)),
         loadTracingPrivacySettings({
           uiSettingsClient: deps.uiSettings.asScopedToClient(
             deps.savedObjects.getScopedClient(request)
@@ -675,6 +679,7 @@ const handleStandaloneExecution = async ({
     reasoningLevel,
     telemetryMetadata: roundTelemetryMetadata,
     request,
+    user: execution.owner,
     ...deps,
   });
 
@@ -697,6 +702,7 @@ const handleStandaloneExecution = async ({
     interactivity,
     workflowExecutionId,
     parentExecutionId: execution.parentExecutionId,
+    user: execution.owner,
   });
 
   return agentEvents$.pipe(

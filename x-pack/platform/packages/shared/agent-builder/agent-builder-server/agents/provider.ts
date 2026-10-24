@@ -22,6 +22,7 @@ import type {
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
@@ -237,6 +238,10 @@ export interface AgentHandlerContext {
    * Can be used to create scoped services not directly exposed by this context.
    */
   request: KibanaRequest;
+  /**
+   * Identity the run acts as, when it differs from the request's own (e.g. a Task Manager run).
+   */
+  user?: UserIdAndName;
   /**
    * Id of the space associated with the request
    */

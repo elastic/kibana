@@ -17,6 +17,7 @@ import type {
   AgentConfiguration,
   AgentCreateRequest,
   AgentDefinition,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from './agent_registry';
 import type { AgentsUsingSkillsResult, AgentsUsingToolsResult } from './persisted/types';
@@ -44,7 +45,8 @@ export interface SkillRefsParams {
 }
 
 export interface AgentsServiceStart {
-  getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+  /** Pass `user` to authorize as that identity instead of the request's own. */
+  getRegistry: (opts: { request: KibanaRequest; user?: UserIdAndName }) => Promise<AgentRegistry>;
   ensure: (opts: {
     spaceId: string;
     agent: AgentCreateRequest;
