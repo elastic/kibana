@@ -14,7 +14,7 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
 } from '../../../common/fixtures/constants';
-import { forceLogExtraction } from '../../../common/fixtures/helpers';
+import { forceLogExtraction, uninstallAllEntityTypes } from '../../../common/fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
@@ -29,7 +29,7 @@ apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, kbnClient, apiClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -40,6 +40,11 @@ apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
       ...INTERNAL_HEADERS,
     };
     await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+    await uninstallAllEntityTypes(apiClient, defaultHeaders);
+  });
+
+  apiTest.afterEach(async ({ apiClient }) => {
+    await uninstallAllEntityTypes(apiClient, defaultHeaders);
   });
 
   const install = async (
