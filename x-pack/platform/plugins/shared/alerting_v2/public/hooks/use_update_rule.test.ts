@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useUpdateRule } from './use_update_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
@@ -74,13 +74,16 @@ describe('useUpdateRule', () => {
     mockUpdateRule.mockResolvedValue(mockRuleResponse);
     const { result } = renderHook(() => useUpdateRule(), { wrapper: createWrapper() });
 
-    result.current.mutate({ id: 'rule-1', payload: { metadata: { name: 'My CPU Alert' } } });
-
-    await waitFor(() => {
-      expect(mockUpdateRule).toHaveBeenCalledWith('rule-1', { metadata: { name: 'My CPU Alert' } });
-      expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" updated successfully');
-      expect(mockAddError).not.toHaveBeenCalled();
+    await act(async () => {
+      await result.current.mutateAsync({
+        id: 'rule-1',
+        payload: { metadata: { name: 'My CPU Alert' } },
+      });
     });
+
+    expect(mockUpdateRule).toHaveBeenCalledWith('rule-1', { metadata: { name: 'My CPU Alert' } });
+    expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" updated successfully');
+    expect(mockAddError).not.toHaveBeenCalled();
   });
 
   it('should surface the server error message in the modal and a friendly status in the toast', async () => {
@@ -92,20 +95,22 @@ describe('useUpdateRule', () => {
     mockUpdateRule.mockRejectedValue(httpError);
     const { result } = renderHook(() => useUpdateRule(), { wrapper: createWrapper() });
 
-    result.current.mutate({ id: 'rule-1', payload: {} });
-
-    await waitFor(() => {
-      expect(mockAddError).toHaveBeenCalledTimes(1);
-      const [enrichedError, options] = mockAddError.mock.calls[0];
-      expect(enrichedError.message).toBe('forbidden action');
-      expect(enrichedError.stack).toBe('Error: Forbidden\n    at fetch');
-      expect(options).toEqual({
-        title: 'Edits not saved',
-        toastMessage:
-          'Your role needs additional privileges to save rules. Contact your administrator for help.',
-      });
-      expect(mockAddSuccess).not.toHaveBeenCalled();
+    await act(async () => {
+      await expect(result.current.mutateAsync({ id: 'rule-1', payload: {} })).rejects.toBe(
+        httpError
+      );
     });
+
+    expect(mockAddError).toHaveBeenCalledTimes(1);
+    const [enrichedError, options] = mockAddError.mock.calls[0];
+    expect(enrichedError.message).toBe('forbidden action');
+    expect(enrichedError.stack).toBe('Error: Forbidden\n    at fetch');
+    expect(options).toEqual({
+      title: 'Edits not saved',
+      toastMessage:
+        'Your role needs additional privileges to save rules. Contact your administrator for help.',
+    });
+    expect(mockAddSuccess).not.toHaveBeenCalled();
   });
 
   it('should fall back to the raw error message when the status is unknown', async () => {
@@ -113,13 +118,13 @@ describe('useUpdateRule', () => {
     mockUpdateRule.mockRejectedValue(error);
     const { result } = renderHook(() => useUpdateRule(), { wrapper: createWrapper() });
 
-    result.current.mutate({ id: 'rule-1', payload: {} });
+    await act(async () => {
+      await expect(result.current.mutateAsync({ id: 'rule-1', payload: {} })).rejects.toBe(error);
+    });
 
-    await waitFor(() => {
-      expect(mockAddError).toHaveBeenCalledWith(error, {
-        title: 'Edits not saved',
-        toastMessage: 'Network down',
-      });
+    expect(mockAddError).toHaveBeenCalledWith(error, {
+      title: 'Edits not saved',
+      toastMessage: 'Network down',
     });
   });
 });
