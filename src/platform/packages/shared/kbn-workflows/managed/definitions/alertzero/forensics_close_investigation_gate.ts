@@ -26,10 +26,10 @@ export const ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID =
  * Owns no trigger of its own, so enablement is `enforced`.
  */
 export const ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: FORENSICS_CLOSE_INVESTIGATION_GATE_YAML,
 } as const satisfies ManagedWorkflowDefinition;

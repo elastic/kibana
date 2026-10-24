@@ -30,10 +30,10 @@ export const ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID =
  * silently break its dispatcher).
  */
 export const ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 5,
+  version: 6,
   yaml: FORENSICS_PROPOSAL_GATE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
