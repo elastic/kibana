@@ -10,7 +10,7 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { registerUISettings } from './ui_settings';
 
 describe('registerUISettings', () => {
-  it('registers the Context Engine setting, disabled by default', () => {
+  it('registers the Context Engine setting, enabled by default', () => {
     const { uiSettings } = coreMock.createSetup();
 
     registerUISettings({ uiSettings });
@@ -21,7 +21,7 @@ describe('registerUISettings', () => {
     expect(registeredSettings[CONTEXT_ENGINE_ENABLED_SETTING_ID]).toEqual(
       expect.objectContaining({
         name: 'Context Engine',
-        value: false,
+        value: true,
         experimental: true,
       })
     );
