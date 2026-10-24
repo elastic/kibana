@@ -130,7 +130,8 @@ export interface ToolManager {
   getExecutable(toolId: string): ExecutableTool | undefined;
 
   /**
-   * Gets the internal tool IDs of all dynamic tools currently in the tool manager.
+   * Gets the internal tool IDs of all dynamic tools currently in the tool manager: those bound
+   * with the `dynamic` option, then those added with a `dynamic` input.
    * Returns internal tool IDs (not LangChain names) for persistence.
    * @returns array of internal tool IDs
    */

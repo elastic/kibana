@@ -373,17 +373,24 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentConfiguration,
     });
 
-    // Then add dynamic tools
-    await toolManager.addTools(
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger,
-      },
-      {
-        dynamic: true,
-      }
-    );
+    // Then add the dynamic tools
+    if (experimentalFeatures.dynamicTools) {
+      // tools loaded in previous rounds in the registry behind
+      // `execute_dynamic_tool` when the feature is on
+      await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools: dynamicTools });
+    } else {
+      // LRU bound tools with feature off
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: dynamicTools,
+          logger,
+        },
+        {
+          dynamic: true,
+        }
+      );
+    }
 
     const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
