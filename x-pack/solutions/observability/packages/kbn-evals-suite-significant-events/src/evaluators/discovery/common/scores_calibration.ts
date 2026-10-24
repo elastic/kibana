@@ -5,18 +5,37 @@
  * 2.0.
  */
 
-import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
+import type { EvaluationCriterion } from '@kbn/evals';
 import { SEVERITY_CONTRACT_RULE } from '@kbn/significant-events-schema';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
+import type {
+  DiscoveryAgentOutput,
+  DiscoveryEvaluationExample,
+  DiscoveryEvaluator,
+} from '../types';
 
-type CalibrationCriteriaFn = CreateScenarioCriteriaLlmEvaluatorOptions['criteriaFn'];
+type CalibrationCriteriaFn = CreateScenarioCriteriaLlmEvaluatorOptions<
+  DiscoveryEvaluationExample,
+  DiscoveryAgentOutput
+>['criteriaFn'];
+
+const skipWhenNoActiveEvents = (output: DiscoveryAgentOutput): string | undefined =>
+  output.significantEvents.some(({ status }) => status === 'active')
+    ? undefined
+    : 'No active significant events to evaluate';
 
 const createCalibrationEvaluator = (
   name: string,
   criteria: EvaluationCriterion[],
   criteriaFn: CalibrationCriteriaFn
-): Evaluator => createScenarioCriteriaLlmEvaluator({ name, criteria, criteriaFn });
+): DiscoveryEvaluator =>
+  createScenarioCriteriaLlmEvaluator<DiscoveryEvaluationExample, DiscoveryAgentOutput>({
+    name,
+    criteria,
+    criteriaFn,
+    skipWhen: skipWhenNoActiveEvents,
+  });
 
 const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
@@ -64,7 +83,7 @@ export const createSeverityCalibrationEvaluator = ({
   criteriaFn,
 }: {
   criteriaFn: CalibrationCriteriaFn;
-}): Evaluator =>
+}): DiscoveryEvaluator =>
   createCalibrationEvaluator('severity_calibration', SEVERITY_CALIBRATION_CRITERIA, criteriaFn);
 
 /** LLM evaluator: scores whether `confidence` reflects evidence/KI backing, with the no-KI ceiling. */
@@ -72,5 +91,5 @@ export const createConfidenceCalibrationEvaluator = ({
   criteriaFn,
 }: {
   criteriaFn: CalibrationCriteriaFn;
-}): Evaluator =>
+}): DiscoveryEvaluator =>
   createCalibrationEvaluator('confidence_calibration', CONFIDENCE_CALIBRATION_CRITERIA, criteriaFn);

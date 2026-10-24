@@ -179,7 +179,7 @@ describe('withMajorityVote', () => {
     expect(result.score).toBe(1);
   });
 
-  it('counts N/A as passing', async () => {
+  it('excludes N/A votes when deciding the majority', async () => {
     const wrapped = withMajorityVote(
       baseFromRuns([
         { metadata: { criteria: [criterion('c1', 'N/A')] } },
@@ -189,14 +189,33 @@ describe('withMajorityVote', () => {
       3
     );
     const result = await wrapped.evaluate(voteArgs);
-    expect(result.score).toBe(1);
+    expect(result.score).toBe(0);
+    expect(votedCriteria(result)).toEqual([expect.objectContaining({ id: 'c1', result: 'FAIL' })]);
   });
 
-  it('weights the aggregate score by criterion weight', async () => {
+  it('returns a null score when every vote is N/A', async () => {
+    const wrapped = withMajorityVote(
+      baseFromRuns([
+        { metadata: { criteria: [criterion('c1', 'N/A')] } },
+        { metadata: { criteria: [criterion('c1', 'N/A')] } },
+        { metadata: { criteria: [criterion('c1', 'N/A')] } },
+      ]),
+      3
+    );
+    const result = await wrapped.evaluate(voteArgs);
+    expect(result.score).toBeNull();
+    expect(votedCriteria(result)).toEqual([expect.objectContaining({ id: 'c1', result: 'N/A' })]);
+  });
+
+  it('weights the aggregate score using only applicable criteria', async () => {
     const runs: EvaluationResult[] = [
       {
         metadata: {
-          criteria: [criterion('c1', 'PASS', 3), criterion('c2', 'FAIL', 1)],
+          criteria: [
+            criterion('c1', 'PASS', 3),
+            criterion('c2', 'FAIL', 1),
+            criterion('c3', 'N/A', 4),
+          ],
         },
       },
     ];
