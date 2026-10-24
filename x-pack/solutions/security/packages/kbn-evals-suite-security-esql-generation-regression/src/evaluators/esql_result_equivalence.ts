@@ -23,8 +23,8 @@ interface EsqlQueryResult {
  * Options that control how rows are normalised before comparison.
  *
  * Normalisation happens independently on both result sets, so two queries
- * whose raw outputs differ only in row order (or float precision) will still
- * produce a Jaccard score of 1.
+ * whose raw outputs differ only in row order, result-column order, or float
+ * precision will still produce a Jaccard score of 1.
  */
 export interface NormalizeOptions {
   /**
@@ -59,29 +59,68 @@ function serializeValue(value: unknown, floatTolerance?: number): unknown {
 }
 
 /**
+ * Whether two result sets expose the same columns, ignoring the ones the
+ * caller asked to ignore.
+ *
+ * Row keying by column name is only meaningful when both sides agree on the
+ * column set; when they don't, the two shapes are not comparable by name.
+ */
+function sameColumnNames(
+  goldColumns: Array<{ name: string; type: string }>,
+  candidateColumns: Array<{ name: string; type: string }>,
+  ignoreFields: string[] = []
+): boolean {
+  const names = (columns: Array<{ name: string }>) =>
+    columns
+      .map((col) => col.name)
+      .filter((name) => !ignoreFields.includes(name))
+      .sort();
+  const gold = names(goldColumns);
+  const candidate = names(candidateColumns);
+  return gold.length === candidate.length && gold.every((name, idx) => name === candidate[idx]);
+}
+
+/**
  * Convert an ES|QL result set into an array of serialised row strings,
  * applying the given normalisation options.
  *
- * Each string is the JSON serialisation of one row's (filtered, rounded)
- * values. The returned array is optionally sorted so that row order does
- * not affect the Jaccard calculation.
+ * `keyRowsByColumnName` selects the row key. When both result sets expose the
+ * same columns, each row is serialised as its (filtered, rounded)
+ * `[columnName, value]` pairs in name order, so result-column order cannot
+ * change the comparison: `STATS avg_cpu = AVG(x) BY bucket, host.name` and the
+ * same statement with `BY host.name, bucket` return the same rows and must
+ * score 1. When the two result sets expose different columns, the shapes are
+ * not comparable by name and the historical positional serialisation (values
+ * only, in result order) is kept — so no pair that matched before this change
+ * can stop matching because of it.
+ *
+ * The returned array is optionally sorted so that row order does not affect the
+ * Jaccard calculation either.
  */
 function normalizeRows(
   columns: Array<{ name: string; type: string }>,
   values: unknown[][],
-  options: NormalizeOptions
+  options: NormalizeOptions,
+  keyRowsByColumnName: boolean
 ): string[] {
   const { sortRows = true, ignoreFields = [], floatTolerance } = options;
 
-  const keepIndices = columns
+  const keepColumns = columns
     .map((col, idx) => ({ col, idx }))
-    .filter(({ col }) => !ignoreFields.includes(col.name))
-    .map(({ idx }) => idx);
+    .filter(({ col }) => !ignoreFields.includes(col.name));
 
-  const serialized = values.map((row) => {
-    const kept = keepIndices.map((idx) => serializeValue(row[idx], floatTolerance));
-    return JSON.stringify(kept);
-  });
+  const projectRow = keyRowsByColumnName
+    ? (row: unknown[]) => {
+        // Result-column order is not part of a row's identity, so the pairs go
+        // out in name order.
+        const byName = [...keepColumns].sort((a, b) =>
+          a.col.name < b.col.name ? -1 : a.col.name > b.col.name ? 1 : 0
+        );
+        return byName.map(({ col, idx }) => [col.name, serializeValue(row[idx], floatTolerance)]);
+      }
+    : (row: unknown[]) => keepColumns.map(({ idx }) => serializeValue(row[idx], floatTolerance));
+
+  const serialized = values.map((row) => JSON.stringify(projectRow(row)));
 
   return sortRows ? serialized.sort() : serialized;
 }
@@ -284,8 +323,22 @@ export function createEsqlResultEquivalenceEvaluator<
       const goldValues = gold.values ?? [];
       const candidateValues = candidate.values ?? [];
 
-      const goldRows = normalizeRows(goldColumns, goldValues, normalize);
-      const candidateRows = normalizeRows(candidateColumns, candidateValues, normalize);
+      // Result-column order is not part of a row's identity, but keying rows by
+      // column name only makes sense while both result sets expose the same
+      // columns; otherwise the two shapes stay comparable positionally.
+      const keyRowsByColumnName = sameColumnNames(
+        goldColumns,
+        candidateColumns,
+        normalize.ignoreFields
+      );
+
+      const goldRows = normalizeRows(goldColumns, goldValues, normalize, keyRowsByColumnName);
+      const candidateRows = normalizeRows(
+        candidateColumns,
+        candidateValues,
+        normalize,
+        keyRowsByColumnName
+      );
 
       const goldRowCount = goldRows.length;
       const candidateRowCount = candidateRows.length;
