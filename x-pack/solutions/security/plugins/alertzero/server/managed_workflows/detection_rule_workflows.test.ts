@@ -471,8 +471,9 @@ describe('detection rule workflows', () => {
       const exceptionActionInput = exceptionInputs.actionInput as Record<string, string>;
       expect(exceptionActionInput.rule_id).toBe('{{ inputs.rule_uuid }}');
       // `${{ }}` keeps the entries as objects.
+      // The bounded copy, never the raw agent output.
       expect(exceptionActionInput.entries).toBe(
-        '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
+        '${{ steps.bound_exception_entries.output.entries_json | json_parse }}'
       );
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
@@ -1123,7 +1124,7 @@ describe('detection rule workflows', () => {
         expect(accepts([])).toBe(false);
         // Only `${{ }}` keeps objects; `{{ }}` renders a string.
         expect(
-          accepts('${{ steps.diagnose_rule.output.structured_output.exception_entries }}')
+          accepts('${{ steps.bound_exception_entries.output.entries_json | json_parse }}')
         ).toBe(false);
       });
 
@@ -1583,6 +1584,132 @@ describe('detection rule workflows', () => {
         expect(properties.preview_invocation_count).toEqual(
           expect.objectContaining({ minimum: 1, maximum: 10 })
         );
+      });
+
+      describe('diagnosis schema and exception caps', () => {
+        const diagnose = reviewSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const diagnosisSchema = (diagnose.with as Record<string, unknown>).schema as {
+          type?: string;
+          oneOf: Array<{ properties: Record<string, any> }>;
+        };
+        const exceptionBranch = diagnosisSchema.oneOf.find(
+          ({ properties }) => properties.change_type?.const === 'exception'
+        )!;
+        const bound = reviewSteps.find(({ name }) => name === 'bound_exception_entries')!;
+        const consts = review.consts as Record<string, number>;
+
+        const collectKeys = (node: unknown, key: string): unknown[] =>
+          node && typeof node === 'object'
+            ? Object.entries(node).flatMap(([k, v]) => [
+                ...(k === key ? [v] : []),
+                ...collectKeys(v, key),
+              ])
+            : [];
+
+        const runBound = (entries: unknown[]): Array<Record<string, unknown>> => {
+          const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+            String((bound.with as Record<string, string>).entries_json),
+            {
+              consts,
+              steps: {
+                diagnose_rule: { output: { structured_output: { exception_entries: entries } } },
+              },
+            }
+          );
+          return JSON.parse(rendered);
+        };
+
+        // Gemini answers 400 to the schema when either cap is present, so the caps
+        // live after parsing instead (see the bound_exception_entries tests below).
+        it('sends no maxItems on exception_entries or on any entry values', () => {
+          const { exception_entries: entries } = exceptionBranch.properties;
+          expect(entries.type).toBe('array');
+          expect(entries).not.toHaveProperty('maxItems');
+          expect(entries.minItems).toBe(1);
+          expect(collectKeys(diagnosisSchema, 'maxItems')).toEqual([5]);
+        });
+
+        // Claude rejects an unwrapped root oneOf, so the root must keep its shape for
+        // the ai.agent wrap-and-pick behaviour.
+        it('keeps the schema root a typeless oneOf', () => {
+          expect(diagnosisSchema).not.toHaveProperty('type');
+          expect(Array.isArray(diagnosisSchema.oneOf)).toBe(true);
+          expect(
+            diagnosisSchema.oneOf.map(({ properties }) => properties.change_type.const)
+          ).toEqual(
+            expect.arrayContaining([
+              'exception',
+              'query',
+              'risk_score',
+              'threshold',
+              'schedule',
+              'manual',
+            ])
+          );
+        });
+
+        it('declares the platform caps as consts', () => {
+          expect(consts.max_exception_entries).toBe(100);
+          expect(consts.max_exception_values).toBe(1000);
+        });
+
+        it('caps oversized exception entries at consts.max_exception_entries', () => {
+          const oversized = Array.from({ length: consts.max_exception_entries + 25 }, (_, i) => ({
+            field: `host.name.${i}`,
+            operator: 'is',
+            value: `v${i}`,
+          }));
+
+          const result = runBound(oversized);
+
+          expect(result).toHaveLength(consts.max_exception_entries);
+          expect(result[0]).toEqual(oversized[0]);
+          expect(result[result.length - 1]).toEqual(oversized[consts.max_exception_entries - 1]);
+        });
+
+        it('caps oversized values at consts.max_exception_values and keeps the order', () => {
+          const values = Array.from(
+            { length: consts.max_exception_values + 40 },
+            (_, i) => `v${i}`
+          );
+
+          const [entry] = runBound([{ field: 'host.name', operator: 'is_one_of', values }]);
+
+          expect(entry.field).toBe('host.name');
+          expect(entry.operator).toBe('is_one_of');
+          expect(entry.values).toEqual(values.slice(0, consts.max_exception_values));
+        });
+
+        it('passes in-bound entries of every operator shape through unchanged', () => {
+          const entries = [
+            { field: 'user.name', operator: 'is', value: 'svc "quoted"' },
+            { field: 'host.name', operator: 'is_not_one_of', values: ['a', 'b\\c'] },
+            { field: 'a.b', operator: 'exists' },
+          ];
+
+          expect(runBound(entries)).toEqual(entries);
+        });
+
+        it('feeds only the bounded entries to every consumer', () => {
+          const raw = 'steps.diagnose_rule.output.structured_output.exception_entries';
+          const consumers = reviewSteps.filter(({ with: w }) =>
+            JSON.stringify(w ?? {}).includes('bound_exception_entries')
+          );
+          expect(consumers.map(({ name }) => name)).toEqual(
+            expect.arrayContaining([
+              'build_exception_filter',
+              'attach_exception',
+              'propose_exception',
+              'compose_proposal',
+            ])
+          );
+          const rawUsers = reviewSteps.filter(
+            ({ name, with: w }) =>
+              name !== 'bound_exception_entries' && JSON.stringify(w ?? {}).includes(raw)
+          );
+          expect(rawUsers.map(({ name }) => name)).toEqual([]);
+          expect(bound.if).toContain("change_type == 'exception'");
+        });
       });
 
       // security.setAlertTags declares its inputs as a zod union, so a whole-array
