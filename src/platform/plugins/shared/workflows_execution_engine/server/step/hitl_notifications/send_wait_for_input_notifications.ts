@@ -38,6 +38,8 @@ import {
   TEAMS_CONTENT_MAX_LENGTH,
   teamsHtmlLink,
 } from './hitl_connector_helpers';
+import type { HitlSlackInteractiveResumeContext } from './hitl_slack_interactive_blocks';
+import { buildHitlSlackInputBlocksFromSchema } from './hitl_slack_interactive_blocks';
 import type { ConnectorExecutor } from '../../connector_executor';
 
 type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['channels']>;
@@ -162,6 +164,8 @@ export async function sendWaitForInputNotifications({
   stepMessage,
   formUrl,
   kibanaUrl,
+  inputSchema,
+  slackInteractiveResume,
   renderTemplate,
   connectorExecutor,
   abortController,
@@ -170,6 +174,9 @@ export async function sendWaitForInputNotifications({
   stepMessage: string;
   formUrl: string;
   kibanaUrl: string;
+  inputSchema?: unknown;
+  /** Required when `channels.slack2.interactive` is true. */
+  slackInteractiveResume?: HitlSlackInteractiveResumeContext;
   renderTemplate: (template: string) => string;
   connectorExecutor: ConnectorExecutor;
   abortController: AbortController;
@@ -267,21 +274,36 @@ export async function sendWaitForInputNotifications({
   const slack2ConnectorId = slack2Config?.['connector-id'];
   const slack2Channels = slack2Config?.channels;
   if (slack2ConnectorId && slack2Channels?.length) {
-    const text =
-      slack2Config.message != null
-        ? resolveWaitForInputChannelMessage({
-            channelMessageTemplate: slack2Config.message,
-            stepMessage,
-            formUrl,
-            renderTemplate,
+    const interactive = slack2Config.interactive === true;
+    if (interactive && !slackInteractiveResume) {
+      throw new Error('Slack interactive HITL input requires resume correlation context');
+    }
+    const text = interactive
+      ? stepMessage.length > 0
+        ? stepMessage
+        : 'Provide the requested input'
+      : slack2Config.message != null
+      ? resolveWaitForInputChannelMessage({
+          channelMessageTemplate: slack2Config.message,
+          stepMessage,
+          formUrl,
+          renderTemplate,
+        })
+      : buildDefaultInputSlackMessage({ stepMessage, formUrl });
+    const blocks =
+      interactive && slackInteractiveResume
+        ? buildHitlSlackInputBlocksFromSchema({
+            message: stepMessage,
+            schema: inputSchema,
+            resume: slackInteractiveResume,
           })
-        : buildDefaultInputSlackMessage({ stepMessage, formUrl });
+        : undefined;
 
     for (const channel of slack2Channels) {
       const result = await connectorExecutor.execute({
         connectorType: 'slack2',
         connectorNameOrId: slack2ConnectorId,
-        input: buildSlack2SendMessageInput(channel, text),
+        input: buildSlack2SendMessageInput(channel, text, blocks),
         abortController,
       });
       assertConnectorSucceeded(result);

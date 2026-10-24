@@ -203,6 +203,38 @@ describe('sendWaitForInputNotifications', () => {
     );
   });
 
+  it('posts schema input blocks instead of the form link when slack2 is interactive', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        slack2: { 'connector-id': 'slack2-1', channels: ['C0123'], interactive: true },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form?token=abc',
+      kibanaUrl: 'https://kibana.example',
+      inputSchema: {
+        type: 'object',
+        properties: { reason: { type: 'string', title: 'Reason' } },
+      },
+      slackInteractiveResume: {
+        executionId: 'exec-1',
+        stepId: 'step-1',
+        token: 'token-1',
+        spaceId: 'default',
+      },
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    const params = execute.mock.calls[0][0].input.subActionParams;
+    expect(params.text).toBe('Please provide input');
+    expect(params.text).not.toContain('https://kibana.example');
+    expect(params.blocks.some((block: { type: string }) => block.type === 'input')).toBe(true);
+    expect(params.blocks.at(-1).elements[0].action_id).toBe('workflows.hitl.submit');
+  });
+
   it('posts a Teams channel message with the form link and an optional message override', async () => {
     const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 

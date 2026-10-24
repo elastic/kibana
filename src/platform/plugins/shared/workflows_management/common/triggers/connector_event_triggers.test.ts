@@ -8,7 +8,10 @@
  */
 
 import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
-import { getConnectorTypeIdForTriggerEventId } from './connector_event_triggers';
+import {
+  getConnectorEventTriggerDefinitions,
+  getConnectorTypeIdForTriggerEventId,
+} from './connector_event_triggers';
 
 describe('getConnectorTypeIdForTriggerEventId', () => {
   it('maps inboundWebhook.received to .inboundWebhook', () => {
@@ -20,5 +23,16 @@ describe('getConnectorTypeIdForTriggerEventId', () => {
   it('returns undefined for built-in or unregistered trigger ids', () => {
     expect(getConnectorTypeIdForTriggerEventId('cases.updated')).toBeUndefined();
     expect(getConnectorTypeIdForTriggerEventId('manual')).toBeUndefined();
+  });
+});
+
+describe('getConnectorEventTriggerDefinitions', () => {
+  it('keeps slack2.hitl_action off the workflow start catalog', () => {
+    const ids = getConnectorEventTriggerDefinitions({ inboundEventsEnabled: true }).map(
+      (definition) => definition.id
+    );
+
+    expect(ids).toContain('slack2.message');
+    expect(ids).not.toContain('slack2.hitl_action');
   });
 });

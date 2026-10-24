@@ -13,6 +13,7 @@ import type {
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
 import { REQUIRED_LICENSE_TYPE } from '../api/constants';
+import { resumeWorkflowExecutionExternallyWithInput } from '../api/external_resume/external_resume_service';
 import type { WorkflowsService } from '../api/workflows_management_service';
 import type { WorkflowsManagementConfig } from '../config';
 
@@ -33,6 +34,15 @@ export const createWorkflowsClientProvider = (
           return;
         }
         return workflowsExecutionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
+      },
+      resumeExternalHitl: async (params) => {
+        if (!isWorkflowsAvailable) {
+          logger.debug(
+            'Workflows is not available in this environment. External HITL resume ignored.'
+          );
+          return;
+        }
+        await resumeWorkflowExecutionExternallyWithInput(workflowsService, params);
       },
       managedWorkflows: {
         install: async (pluginId, id, options) => {

@@ -17,7 +17,11 @@ export type {
   ManagedFilter,
   WorkflowQueryFilter,
 } from './lib/workflow_filters';
-export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
+export type {
+  ResumeExternalHitlParams,
+  WorkflowsApiRequestHandlerContext,
+  WorkflowsClient,
+} from './types';
 
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';

@@ -188,6 +188,12 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       approveLabel,
       rejectLabel,
       resumeLinks,
+      slackInteractiveResume: {
+        executionId: execution.id,
+        stepId: this.stepExecutionRuntime.stepExecutionId,
+        token,
+        spaceId,
+      },
       spaceId,
       workflowId: execution.workflowId,
       executionId: execution.id,

@@ -25,6 +25,11 @@ import {
   SLACK_FILE_PUBLIC_EVENT_KEY,
   SLACK_FILE_SHARED_EVENT_ID,
   SLACK_FILE_SHARED_EVENT_KEY,
+  SLACK_HITL_ACTION_APPROVE,
+  SLACK_HITL_ACTION_EVENT_ID,
+  SLACK_HITL_ACTION_EVENT_KEY,
+  SLACK_HITL_ACTION_REJECT,
+  SLACK_HITL_ACTION_SUBMIT,
   SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID,
   SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY,
   SLACK_MESSAGE_EVENT_ID,
@@ -170,9 +175,45 @@ const SlackMemberJoinedChannelEventSchema = lazySchema(() =>
   })
 );
 
+const SLACK_RESPONSE_URL_MAX = 2048;
+
+const SlackHitlActionEventSchema = lazySchema(() =>
+  z.object({
+    executionId: slackId('Workflow execution id from the HITL correlation payload.'),
+    stepId: slackId('HITL step execution id from the correlation payload.'),
+    token: z
+      .string()
+      .min(1)
+      .max(128)
+      .describe('External resume token from the correlation payload.'),
+    spaceId: z.string().min(1).max(SLACK_EVENT_ID_MAX).describe('Kibana space id.'),
+    kind: z
+      .enum(['approval', 'input'])
+      .describe('Which HITL wait step kind this interaction resumes.'),
+    approved: z
+      .boolean()
+      .optional()
+      .describe('Present for approval actions: true when Approve was clicked.'),
+    inputJson: z
+      .string()
+      .max(SLACK_EVENT_TEXT_MAX)
+      .optional()
+      .describe(
+        'JSON object string of waitForInput field values collected from Slack state.values.'
+      ),
+    responseUrl: z
+      .string()
+      .min(1)
+      .max(SLACK_RESPONSE_URL_MAX)
+      .optional()
+      .describe('Slack response_url used to replace the interactive message after resume.'),
+    slackUserId: optionalSlackId('Slack user id of the person who clicked the control.'),
+  })
+);
+
 interface ParsedSlackEvent {
   readonly eventId: string;
-  readonly payload: Record<string, string>;
+  readonly payload: Record<string, unknown>;
 }
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
@@ -492,6 +533,187 @@ const getUrlVerificationChallenge = (rawBody: Record<string, unknown>): string |
   return challenge;
 };
 
+const HITL_CORRELATION_VALUE_MAX = 2000;
+
+const decodeHitlCorrelation = (
+  value: string
+):
+  | {
+      executionId: string;
+      stepId: string;
+      token: string;
+      spaceId: string;
+      kind: 'approval' | 'input';
+    }
+  | undefined => {
+  if (value.length === 0 || value.length > HITL_CORRELATION_VALUE_MAX) {
+    return undefined;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+  if (!isPlainObject(parsed) || parsed.v !== 1) {
+    return undefined;
+  }
+  const executionId = readId(parsed.e);
+  const stepId = readId(parsed.s);
+  const token = readBoundedString(parsed.t, 128);
+  const spaceId = readBoundedString(parsed.p, SLACK_EVENT_ID_MAX);
+  if (!executionId || !stepId || !token || !spaceId) {
+    return undefined;
+  }
+  if (parsed.k !== 'a' && parsed.k !== 'i') {
+    return undefined;
+  }
+  return {
+    executionId,
+    stepId,
+    token,
+    spaceId,
+    kind: parsed.k === 'a' ? 'approval' : 'input',
+  };
+};
+
+const mapSlackStateValuesToInputJson = (stateValues: unknown): string | undefined => {
+  if (!isPlainObject(stateValues)) {
+    return undefined;
+  }
+  const input: Record<string, string | number | boolean> = {};
+  for (const block of Object.values(stateValues)) {
+    if (!isPlainObject(block)) {
+      continue;
+    }
+    for (const [actionId, rawField] of Object.entries(block)) {
+      if (!isPlainObject(rawField)) {
+        continue;
+      }
+      const type = typeof rawField.type === 'string' ? rawField.type : undefined;
+      if (type === 'plain_text_input' || type === 'email_text_input' || type === 'url_text_input') {
+        if (typeof rawField.value === 'string') {
+          input[actionId] = rawField.value;
+        }
+        continue;
+      }
+      if (type === 'number_input' && typeof rawField.value === 'string' && rawField.value.length) {
+        const asNumber = Number(rawField.value);
+        input[actionId] = Number.isFinite(asNumber) ? asNumber : rawField.value;
+        continue;
+      }
+      if (type === 'static_select' || type === 'radio_buttons') {
+        const selected = isPlainObject(rawField.selected_option)
+          ? rawField.selected_option
+          : undefined;
+        if (selected && typeof selected.value === 'string') {
+          if (
+            type === 'radio_buttons' &&
+            (selected.value === 'true' || selected.value === 'false')
+          ) {
+            input[actionId] = selected.value === 'true';
+          } else {
+            input[actionId] = selected.value;
+          }
+        }
+      }
+    }
+  }
+  return JSON.stringify(input);
+};
+
+/**
+ * Interactivity payloads are often form-urlencoded as `{ payload: "<json>" }`.
+ */
+const resolveInteractivityEnvelope = (
+  rawBody: Record<string, unknown>
+): Record<string, unknown> | undefined => {
+  if (typeof rawBody.payload === 'string') {
+    try {
+      const parsed = JSON.parse(rawBody.payload);
+      return isPlainObject(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  if (rawBody.type === 'block_actions') {
+    return rawBody;
+  }
+  return undefined;
+};
+
+const parseHitlBlockActions = (
+  envelope: Record<string, unknown>
+): (ParsedSlackEvent & { correlationKey: string }) | undefined => {
+  if (envelope.type !== 'block_actions' || !Array.isArray(envelope.actions)) {
+    return undefined;
+  }
+  const action = envelope.actions[0];
+  if (!isPlainObject(action) || typeof action.action_id !== 'string') {
+    return undefined;
+  }
+  const { action_id: actionId } = action;
+  if (
+    actionId !== SLACK_HITL_ACTION_APPROVE &&
+    actionId !== SLACK_HITL_ACTION_REJECT &&
+    actionId !== SLACK_HITL_ACTION_SUBMIT
+  ) {
+    return undefined;
+  }
+  if (typeof action.value !== 'string') {
+    return undefined;
+  }
+  const correlation = decodeHitlCorrelation(action.value);
+  if (!correlation) {
+    return undefined;
+  }
+
+  const responseUrl = readBoundedString(envelope.response_url, SLACK_RESPONSE_URL_MAX);
+  const user = isPlainObject(envelope.user) ? envelope.user : undefined;
+  const slackUserId = user ? readId(user.id) : undefined;
+  const responseFields = {
+    ...(responseUrl ? { responseUrl } : {}),
+    ...(slackUserId ? { slackUserId } : {}),
+  };
+
+  if (actionId === SLACK_HITL_ACTION_APPROVE || actionId === SLACK_HITL_ACTION_REJECT) {
+    if (correlation.kind !== 'approval') {
+      return undefined;
+    }
+    return {
+      eventId: SLACK_HITL_ACTION_EVENT_ID,
+      correlationKey: uuidv4(),
+      payload: {
+        executionId: correlation.executionId,
+        stepId: correlation.stepId,
+        token: correlation.token,
+        spaceId: correlation.spaceId,
+        kind: 'approval',
+        approved: actionId === SLACK_HITL_ACTION_APPROVE,
+        ...responseFields,
+      },
+    };
+  }
+
+  if (correlation.kind !== 'input') {
+    return undefined;
+  }
+  const state = isPlainObject(envelope.state) ? envelope.state.values : undefined;
+  return {
+    eventId: SLACK_HITL_ACTION_EVENT_ID,
+    correlationKey: uuidv4(),
+    payload: {
+      executionId: correlation.executionId,
+      stepId: correlation.stepId,
+      token: correlation.token,
+      spaceId: correlation.spaceId,
+      kind: 'input',
+      inputJson: mapSlackStateValuesToInputJson(state) ?? '{}',
+      ...responseFields,
+    },
+  };
+};
+
 const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
   if (!isPlainObject(ctx.rawBody)) {
     return { type: 'emit', events: [] };
@@ -506,6 +728,25 @@ const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEv
         body: { challenge },
       },
     };
+  }
+
+  const interactivityEnvelope = resolveInteractivityEnvelope(ctx.rawBody);
+  if (interactivityEnvelope) {
+    const hitl = parseHitlBlockActions(interactivityEnvelope);
+    if (hitl) {
+      return {
+        type: 'emit',
+        events: [
+          {
+            eventId: hitl.eventId,
+            correlationKey: hitl.correlationKey,
+            payload: hitl.payload,
+          },
+        ],
+      };
+    }
+    // Non-HITL interactivity is ignored (no workflow start).
+    return { type: 'emit', events: [] };
   }
 
   const parsed = parseSlackCallback(ctx.rawBody);
@@ -607,6 +848,17 @@ export const slackEvents: ConnectorSpecEvents = {
         defaultMessage: 'A user joined a Slack channel.',
       }),
       eventSchema: SlackMemberJoinedChannelEventSchema,
+    },
+    [SLACK_HITL_ACTION_EVENT_KEY]: {
+      eventId: SLACK_HITL_ACTION_EVENT_ID,
+      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.hitlAction.title', {
+        defaultMessage: 'Workflow HITL action',
+      }),
+      description: i18n.translate('core.kibanaConnectorSpecs.slack.events.hitlAction.description', {
+        defaultMessage:
+          'A human-in-the-loop Approve, Decline, or Submit control was used in Slack. Resumes a paused workflow; not intended as a workflow start trigger.',
+      }),
+      eventSchema: SlackHitlActionEventSchema,
     },
   },
   handleEvents: handleSlackEvents,
