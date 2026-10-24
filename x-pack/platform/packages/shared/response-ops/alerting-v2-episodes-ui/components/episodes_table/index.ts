@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { EpisodesHistogram } from './episodes_histogram';
-export type { EpisodesHistogramProps } from './episodes_histogram';
+export { EpisodesTable } from './episodes_table';
+export type { EpisodesTableProps, EpisodesTableServices } from './episodes_table';

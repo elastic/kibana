@@ -34,15 +34,6 @@ import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import {
-  FLYOUT_TAKE_ACTION,
-  formatMetadataListDuration,
-} from '@kbn/alerting-v2-episodes-ui/components/details/translations';
-import { useAlertDetailsFlyoutWidth } from '@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_flyout_width';
-import {
-  CLASSIC_SOURCE_LABEL,
-  ELASTIC_SOURCE_ICON,
-} from '@kbn/alerting-v2-episodes-ui/source_labels';
-import {
   ALERT_DURATION,
   ALERT_REASON,
   ALERT_RULE_NAME,
@@ -55,17 +46,21 @@ import {
   STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { EpisodeFooterActionMenu } from '@kbn/alerting-v2-episodes-ui/components/details/footer_action_menu';
-import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { mapClassicAlertToEpisode } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
-import type { ClassicAlertSource } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
-import { CLASSIC_EPISODE_SOURCE_ID } from '@kbn/alerting-v2-episodes-ui/classic_alerts/constants';
-import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
-import { enrichClassicEpisodesWithSnoozeState } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes';
-import type { ClassicAlertFields } from '@kbn/alerting-v2-episodes-ui/classic_alerts/types';
-import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
-import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../../../alert_sources';
-import * as i18n from '../translations';
+import { FLYOUT_TAKE_ACTION, formatMetadataListDuration } from './details/translations';
+import { useAlertDetailsFlyoutWidth } from './details/use_alert_details_flyout_width';
+import { CLASSIC_SOURCE_LABEL, ELASTIC_SOURCE_ICON } from '../source_labels';
+import { EpisodeFooterActionMenu } from './details/footer_action_menu';
+import type { EpisodeAction } from '../actions';
+import { mapClassicAlertToEpisode } from '../classic_alerts/utils/map_alert';
+import type { ClassicAlertSource } from '../classic_alerts/utils/map_alert';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
+import { fetchClassicAlertById } from '../classic_alerts/apis/fetch_classic_alert_by_id';
+import { enrichClassicEpisodesWithSnoozeState } from '../classic_alerts/apis/fetch_classic_episodes';
+import type { ClassicAlertFields } from '../classic_alerts/types';
+import { classicAlertQueryKeys } from '../classic_alerts/query_keys';
+import { CLASSIC_OBS_AND_STACK_RULE_TYPE_IDS } from '../classic_alerts/constants';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import * as i18n from './translations';
 
 /**
  * Bridges ClassicAlertFields (Record<string, unknown>) to the Alert type that
@@ -157,12 +152,14 @@ export const ClassicAlertDetailsFlyout = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
   const initialWidth = useAlertDetailsFlyoutWidth();
+  const ruleTypeIds =
+    useAdditionalEpisodesDataSource()?.ruleTypeIds ?? CLASSIC_OBS_AND_STACK_RULE_TYPE_IDS;
 
   const { data, isLoading, isError } = useQuery({
     queryKey: classicAlertQueryKeys.alert(alertId),
     queryFn: async ({ signal }) => {
       const fetched = await fetchClassicAlertById({
-        ruleTypeIds: CLASSIC_ALERT_RULE_TYPE_IDS,
+        ruleTypeIds,
         id: alertId,
         services,
         abortSignal: signal,

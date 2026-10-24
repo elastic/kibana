@@ -5,104 +5,71 @@
  * 2.0.
  */
 
+import React, { Suspense, lazy, useMemo } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import type { BoolQuery } from '@kbn/es-query';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
+import { encode } from '@kbn/rison';
+import type { CoreStart } from '@kbn/core/public';
+import { shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
+import {
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { useHasData } from '../../../../../hooks/use_has_data';
+import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
+import { useKibana } from '../../../../../utils/kibana_react';
 import { SectionContainer } from '../section_container';
 import { paths } from '../../../../../../common/locators/paths';
-import { observabilityAlertFeatureIds } from '../../../../../../common/constants';
-import { ObservabilityAlertsTable } from '../../../../../components/alerts_table/alerts_table';
-import { getAlertSummaryTimeRange } from '../../../../../utils/alert_summary_widget';
-import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
-
-import { getColumns } from '../../../../../components/alerts_table/common/get_columns';
-import { useKibana } from '../../../../../utils/kibana_react';
-import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../../../../constants';
 import type { BucketSize } from '../../../helpers/calculate_bucket_size';
-import { buildEsQuery } from '../../../../../utils/build_es_query';
+import { ClassicAlertsSection } from './classic_alerts_section';
 
-const ALERTS_PER_PAGE = 10;
-const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
-const tableColumns = getColumns({ showRuleName: true });
+const UniversalAlertsSection = lazy(() => import('./universal_alerts_section'));
+
+const SECTION_TITLE = i18n.translate('xpack.observability.overview.alerts.title', {
+  defaultMessage: 'Alerts',
+});
+
+const SECTION_APP_LINK_LABEL = i18n.translate('xpack.observability.overview.alerts.appLink', {
+  defaultMessage: 'Show alerts',
+});
 
 export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {
-  const {
-    http,
-    triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
-    data,
-    notifications,
-    fieldFormats,
-    application,
-    licensing,
-    cases,
-    settings,
-  } = useKibana().services;
-  const { relativeStart, relativeEnd } = useDatePickerContext();
+  const services = useKibana().services;
   const { hasDataMap } = useHasData();
+  const { relativeStart, relativeEnd } = useDatePickerContext();
 
-  const esQuery = useMemo<{ bool: BoolQuery }>(
-    () => buildEsQuery({ timeRange: { from: relativeStart, to: relativeEnd } }),
-    [relativeStart, relativeEnd]
-  );
-  const alertSummaryTimeRange = useMemo(
-    () =>
-      getAlertSummaryTimeRange(
-        {
-          from: relativeStart,
-          to: relativeEnd,
-        },
-        bucketSize?.intervalString || DEFAULT_INTERVAL,
-        bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
-      ),
-    [bucketSize, relativeEnd, relativeStart]
-  );
+  const showClassic =
+    !services.settings || shouldShowV1ObservabilityAlertsTable(services as CoreStart);
+  const alertingVTwo = services.alertingVTwo;
+  const showUniversal = !showClassic && alertingVTwo != null;
 
-  if (!hasDataMap.alert?.hasData) {
+  const hasAlertingRules = !!hasDataMap.alert?.hasData;
+
+  const appLinkHref = useMemo(() => {
+    if (!showUniversal) {
+      return paths.observability.alerts;
+    }
+    const appState = encode({ alertsList: { timeFrom: relativeStart, timeTo: relativeEnd } });
+    return `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_ALERTS_PATH}?_a=${appState}`;
+  }, [showUniversal, relativeStart, relativeEnd]);
+
+  if (!hasAlertingRules) {
     return null;
   }
 
   return (
     <SectionContainer
-      title={i18n.translate('xpack.observability.overview.alerts.title', {
-        defaultMessage: 'Alerts',
-      })}
-      data-test-subj="obltOverviewAlerts"
-      appLink={{
-        href: paths.observability.alerts,
-        label: i18n.translate('xpack.observability.overview.alerts.appLink', {
-          defaultMessage: 'Show alerts',
-        }),
-      }}
+      title={SECTION_TITLE}
+      appLink={{ href: appLinkHref, label: SECTION_APP_LINK_LABEL }}
       hasError={false}
     >
-      <AlertSummaryWidget
-        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-        consumers={observabilityAlertFeatureIds}
-        filter={esQuery}
-        fullSize
-        timeRange={alertSummaryTimeRange}
-      />
-      <ObservabilityAlertsTable
-        id={ALERTS_TABLE_ID}
-        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-        consumers={observabilityAlertFeatureIds}
-        query={esQuery}
-        pageSize={ALERTS_PER_PAGE}
-        columns={tableColumns}
-        showInspectButton
-        services={{
-          data,
-          http,
-          notifications,
-          fieldFormats,
-          application,
-          licensing,
-          cases,
-          settings,
-        }}
-      />
+      {showUniversal ? (
+        <Suspense fallback={<EuiLoadingSpinner data-test-subj="obltOverviewAlertsLoading" />}>
+          <UniversalAlertsSection alertingVTwo={alertingVTwo} />
+        </Suspense>
+      ) : (
+        <ClassicAlertsSection bucketSize={bucketSize} />
+      )}
     </SectionContainer>
   );
 }
