@@ -7,6 +7,8 @@
 
 import type { Logger } from '@kbn/logging';
 import type {
+  AggregationsAggregate,
+  AggregationsAggregationContainer,
   BulkOperationContainer,
   BulkUpdateAction,
   QueryDslFieldAndFormat,
@@ -65,6 +67,15 @@ interface CRUDClientDependencies {
   emitWorkflowTriggerEvent?: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
 }
 
+const filterQuery = (
+  filter: QueryDslQueryContainer | QueryDslQueryContainer[] | undefined
+): QueryDslQueryContainer => {
+  if (!filter) {
+    return { match_all: {} };
+  }
+  return { bool: { filter: Array.isArray(filter) ? filter : [filter] } };
+};
+
 export interface ListEntitiesParams {
   filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   size?: number;
@@ -99,6 +110,20 @@ export interface ListEntitiesResult {
   page?: number;
   per_page?: number;
   inspect?: SearchEntitiesV2Inspect;
+}
+
+export interface AggregateEntitiesParams {
+  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
+  aggs?: Record<string, AggregationsAggregationContainer>;
+  /** Count every matching document exactly; the count comes back in `total`. */
+  trackTotalHits?: boolean;
+}
+
+export interface AggregateEntitiesResult<TAggregations> {
+  aggregations?: TAggregations;
+  total?: number;
+  /** Elasticsearch's own time for the search, in milliseconds. */
+  took: number;
 }
 
 export type ListEntitiesBatchParams = SearchEntitiesV2Params;
@@ -304,6 +329,25 @@ export class CRUDClient {
 
     Object.defineProperty(this, 'listEntities', {
       value: tracedListEntities,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseAggregateEntities = this.aggregateEntities.bind(this);
+    const tracedAggregateEntities = <TAggregations = Record<string, AggregationsAggregate>>(
+      params: AggregateEntitiesParams
+    ): Promise<AggregateEntitiesResult<TAggregations>> =>
+      runWithSpan({
+        name: 'entityStore.crud.aggregate_entities',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'aggregate_entities',
+        },
+        cb: () => baseAggregateEntities<TAggregations>(params),
+      });
+
+    Object.defineProperty(this, 'aggregateEntities', {
+      value: tracedAggregateEntities,
       configurable: true,
       writable: true,
     });
@@ -716,20 +760,11 @@ export class CRUDClient {
     const { filter, size, searchAfter, source, fields, sort, docValueFields } = p;
     const readDocValues = docValueFields !== undefined && docValueFields.length > 0;
 
-    let query: QueryDslQueryContainer = { match_all: {} };
-    if (filter) {
-      if (Array.isArray(filter)) {
-        query = { bool: { filter } };
-      } else {
-        query = { bool: { filter: [filter] } };
-      }
-    }
-
     const resp = await this.esClient.search<Entity>({
       allow_no_indices: true,
       ignore_unavailable: true,
       index: await this.latestIndexName(),
-      query,
+      query: filterQuery(filter),
       size,
       sort: [...(sort ?? [{ '@timestamp': 'desc' }]), { _shard_doc: 'desc' }],
       search_after: searchAfter,
@@ -752,6 +787,32 @@ export class CRUDClient {
       nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
       took: resp.took,
       ...(entityFields ? { fields: entityFields } : {}),
+    };
+  }
+
+  /**
+   * Runs aggregations over the latest index's matching documents, and optionally counts them
+   * exactly, without reading any document.
+   */
+  public async aggregateEntities<TAggregations = Record<string, AggregationsAggregate>>({
+    filter,
+    aggs,
+    trackTotalHits = false,
+  }: AggregateEntitiesParams): Promise<AggregateEntitiesResult<TAggregations>> {
+    const resp = await this.esClient.search<Entity, TAggregations>({
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      index: await this.latestIndexName(),
+      query: filterQuery(filter),
+      size: 0,
+      track_total_hits: trackTotalHits,
+      ...(aggs ? { aggs } : {}),
+    });
+    const { total } = resp.hits;
+    return {
+      aggregations: resp.aggregations,
+      total: typeof total === 'number' ? total : total?.value,
+      took: resp.took,
     };
   }
 

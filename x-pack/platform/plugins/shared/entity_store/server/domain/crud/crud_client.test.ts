@@ -149,6 +149,34 @@ describe('CRUDClient', () => {
     });
   });
 
+  describe('aggregateEntities', () => {
+    it('runs the aggregations over the filtered latest index without reading documents', async () => {
+      esClient.search.mockResolvedValue({
+        took: 3,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 42, relation: 'eq' }, hits: [] },
+        aggregations: { types: { buckets: [] } },
+      });
+
+      const result = await client.aggregateEntities({
+        filter: { term: { 'entity.EngineMetadata.Type': 'user' } },
+        aggs: { types: { terms: { field: 'entity.id' } } },
+        trackTotalHits: true,
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { bool: { filter: [{ term: { 'entity.EngineMetadata.Type': 'user' } }] } },
+          size: 0,
+          track_total_hits: true,
+          aggs: { types: { terms: { field: 'entity.id' } } },
+        })
+      );
+      expect(result).toEqual({ aggregations: { types: { buckets: [] } }, total: 42, took: 3 });
+    });
+  });
+
   describe('latestIndexName', () => {
     it('resolves the index name once per client', async () => {
       const first = await client.latestIndexName();
