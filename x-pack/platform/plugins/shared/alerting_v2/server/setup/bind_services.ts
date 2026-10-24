@@ -87,6 +87,7 @@ import {
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
+import { AttachmentsService, AttachmentsServiceToken } from '../lib/services/attachments_service';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import {
   RuleSavedObjectsClientToken,
@@ -159,6 +160,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);
+  bind(AttachmentsService).toSelf().inSingletonScope();
+  bind(AttachmentsServiceToken).toService(AttachmentsService);
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
