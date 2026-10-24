@@ -60,6 +60,68 @@ type ESQLResults = Array<
 // strings themselves sorts them as text, which puts a score of 100 below 21 and 9 above 80.
 const RISK_INPUTS_TOP = `TOP(risk_score, ${MAX_INPUTS_COUNT}, "desc", input)`;
 
+/**
+ * Joins a risk input's fields, with the rule name last: it is the only free text, so the parser
+ * takes everything after the last separator it expects and nothing needs escaping. Scores,
+ * timestamps and alert IDs never contain it.
+ */
+export const RISK_INPUT_SEPARATOR = '|';
+const RISK_INPUT_FIELDS = ['risk_score::keyword', 'time::keyword', 'alert_id', 'rule_name'].join(
+  `, "${RISK_INPUT_SEPARATOR}", `
+);
+
+/**
+ * The parts of an entity type's documents filter that don't depend on its identity fields, so they
+ * still apply when every alert's stamp stands in for those fields. Mirrors the entity store's user
+ * definition, which excludes failed outcomes; a test checks that it still does.
+ */
+export const STAMPED_ALERT_CONDITIONS: Partial<Record<EntityType, string>> = {
+  user: '(TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != "failure")',
+};
+
+/**
+ * Takes this type's stamped EUID from `kibana.alert.entity.id`, falling back to `fallback`. The field
+ * holds at most one EUID per entity type (host/user/service), so at most 3 elements. Scanning every
+ * position with MV_SLICE handles multi-entity alerts regardless of write order, mirroring the
+ * Painless loop in buildEuidRuntimeMappingWithStoredFieldFastPath.
+ */
+const stampedEntityIdClause = (entityType: EntityType, fallback: string): string => {
+  const f = ALERT_ENTITY_ID;
+  const p = `"${entityType}:"`;
+  return (
+    `| EVAL entity_id = CASE(` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
+    `${fallback})`
+  );
+};
+
+/**
+ * The clauses that give each alert its `entity_id`. When the run found every in-scope alert
+ * stamped, the stamp is the ID and no identity field is read; otherwise the ID is worked out from
+ * the identity fields and the stamp overrides it where present.
+ */
+const alertEntityIdClauses = (entityType: EntityType, allAlertsStamped: boolean): string => {
+  if (allAlertsStamped) {
+    const conditions = STAMPED_ALERT_CONDITIONS[entityType];
+    return [
+      `| WHERE kibana.alert.risk_score IS NOT NULL${conditions ? ` AND ${conditions}` : ''}`,
+      stampedEntityIdClause(entityType, 'NULL'),
+    ].join('\n    ');
+  }
+  const definition = getBuiltInEntityDefinition(entityType);
+  const fieldEvals = euid.esql.getFieldEvaluations(definition);
+  return [
+    `| WHERE kibana.alert.risk_score IS NOT NULL AND (${euid.esql.getEuidDocumentsContainsIdFilter(
+      definition
+    )})`,
+    ...(fieldEvals ? [`| EVAL ${fieldEvals}`] : []),
+    `| EVAL ${euid.esql.getEuidEvaluation(definition, 'entity_id', { withTypeId: true })}`,
+    stampedEntityIdClause(entityType, 'entity_id'),
+  ].join('\n    ');
+};
+
 const escapeEsqlStringLiteral = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
@@ -592,16 +654,10 @@ export const getBaseScoreESQL = (
    * When given, each score row also carries these fields from the entity's store document, joined
    * on `entity.id`. The first four columns stay as they are without the join.
    */
-  entityStoreLookup?: { index: string; fields: string[] }
+  entityStoreLookup?: { index: string; fields: string[] },
+  /** The run found every in-scope alert stamped: take the stamp as the ID, read no identity field. */
+  { allAlertsStamped = false }: { allAlertsStamped?: boolean } = {}
 ): string => {
-  const definition = getBuiltInEntityDefinition(entityType);
-  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
-  const fieldEvals = euid.esql.getFieldEvaluations(definition);
-  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
-  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(definition, 'entity_id', {
-    withTypeId: true,
-  })}`;
-
   if (!bounds.lower && !bounds.upper) {
     throw new Error('Either lower or upper bound must be provided for EUID pagination');
   }
@@ -622,39 +678,18 @@ export const getBaseScoreESQL = (
     : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
-  // Prefer the pre-stamped field over the EVAL-derived value. The array holds at most one EUID
-  // per entity type (host/user/service), so at most 3 elements. Scan all positions with
-  // MV_SLICE so multi-entity alerts are handled regardless of write order, mirroring the
-  // Painless loop in buildEuidRuntimeMappingWithStoredFieldFastPath.
-  const f = ALERT_ENTITY_ID;
-  const p = `"${entityType}:"`;
-  const storedEuidCoalesceClause =
-    `| EVAL entity_id = CASE(` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
-    `entity_id)`;
-
-  // Filter on entity_id (computed from cheap field evals) BEFORE the
-  // CONCAT/base64 builders run, so non-matching alerts skip the per-row
+  // Filter on entity_id BEFORE the input CONCAT runs, so non-matching alerts skip the per-row
   // string-allocation work.
   const query = /* esql */ `
   SET unmapped_fields="nullify";
-  FROM ${index} METADATA _index
-    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
-    ${fieldEvalsClause}
-    ${euidEvalClause}
-    ${storedEuidCoalesceClause}
+  FROM ${index}
+    ${alertEntityIdClauses(entityType, allAlertsStamped)}
     | WHERE ${rangeClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
-             kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
-             event.kind as category,
              @timestamp as time
-    | EVAL rule_name_b64 = TO_BASE64(rule_name),
-           category_b64 = TO_BASE64(category)
-    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | EVAL input = CONCAT(${RISK_INPUT_FIELDS})
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
@@ -785,6 +820,7 @@ export const getResolutionScoreESQLByRange = (
     entityStoreIndex,
     preAggregate = false,
     targetStoreLookup,
+    allAlertsStamped = false,
   }: {
     entityStoreIndex?: string;
     preAggregate?: boolean;
@@ -793,6 +829,8 @@ export const getResolutionScoreESQLByRange = (
      * document, joined on `entity.id` after the LIMIT. The first five columns stay as they are.
      */
     targetStoreLookup?: { index: string; fields: string[] };
+    /** The run found every in-scope alert stamped: take the stamp as the ID, read no identity field. */
+    allAlertsStamped?: boolean;
   } = {}
 ): string => {
   assertEsqlInterpolatableIds(
@@ -823,6 +861,7 @@ export const getResolutionScoreESQLByRange = (
     entityStoreIndex,
     preAggregate,
     targetStoreLookup,
+    allAlertsStamped,
   });
 };
 
@@ -836,6 +875,7 @@ const buildResolutionScoreESQL = ({
   entityStoreIndex,
   preAggregate = false,
   targetStoreLookup,
+  allAlertsStamped = false,
 }: {
   entityType: EntityType;
   /** Filters joined alert rows down to the page's resolution groups. */
@@ -850,40 +890,22 @@ const buildResolutionScoreESQL = ({
   preAggregate?: boolean;
   /** Joins each scored target's own store fields; see `getResolutionScoreESQLByRange`. */
   targetStoreLookup?: { index: string; fields: string[] };
+  /** Takes each alert's stamp as its ID; see `getResolutionScoreESQLByRange`. */
+  allAlertsStamped?: boolean;
 }): string => {
-  const definition = getBuiltInEntityDefinition(entityType);
-  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
-  const fieldEvals = euid.esql.getFieldEvaluations(definition);
-  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
-  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(definition, 'entity_id', {
-    withTypeId: true,
-  })}`;
-
-  const f = ALERT_ENTITY_ID;
-  const p = `"${entityType}:"`;
-  const storedEuidCoalesceClause =
-    `| EVAL entity_id = CASE(` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
-    `entity_id)`;
-
-  // Compute entity_id (cheap), then override with the pre-stamped field when present,
-  // then LOOKUP JOIN to recover resolution_target_id, then filter on resolution_target_id
-  // BEFORE the CONCAT/base64 builders run so per-row string-allocation work only
+  // Give each alert its entity_id, then LOOKUP JOIN to recover resolution_target_id, then filter
+  // on resolution_target_id BEFORE the input CONCAT runs so per-row string-allocation work only
   // happens for alerts that belong to the page's groups.
   // The alert timestamp is renamed before the join because lookup rows have their own
   // @timestamp, which would otherwise replace the alert's (and null it on unmatched rows).
   const alertFieldsRename = `| RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
-             kibana.alert.rule.uuid as rule_id,
-             kibana.alert.uuid as alert_id,
-             event.kind as category`;
-  // Store documents carry fields alerts have too (such as \`event.kind\` and \`entity.id\`), and
-  // joined fields replace the alert's, so only the alert columns used below go into that join.
+             kibana.alert.uuid as alert_id`;
+  // Store documents carry fields alerts have too (such as \`entity.id\`), and joined fields replace
+  // the alert's, so only the alert columns used below go into that join.
   const membershipJoin = entityStoreIndex
     ? `${alertFieldsRename}
-    | KEEP entity_id, time, _index, risk_score, rule_name, rule_id, alert_id, category
+    | KEEP entity_id, time, risk_score, rule_name, alert_id
     | LOOKUP JOIN ${entityStoreIndex} ON entity_id == entity.id
     | EVAL resolution_target_id = COALESCE(entity.relationships.resolution.resolved_to, entity_id),
            relationship_type = CASE(
@@ -903,18 +925,18 @@ const buildResolutionScoreESQL = ({
       ', '
     )}`
     : '';
+  // With every alert stamped, an alert without this type's stamp has no entity of this type.
   const alertsSource = `
   SET unmapped_fields="nullify";
-  FROM ${alertsIndex} METADATA _index
-    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
-    ${fieldEvalsClause}
-    ${euidEvalClause}
-    ${storedEuidCoalesceClause}
+  FROM ${alertsIndex}
+    ${alertEntityIdClauses(entityType, allAlertsStamped)}${
+    allAlertsStamped ? '\n    | WHERE entity_id IS NOT NULL' : ''
+  }
     | RENAME @timestamp as time`;
 
   if (preAggregate) {
     // Each input starts with its score, zero padded, so sorting inputs as strings sorts them by
-    // score at both levels. The parser drops `sort_key`.
+    // score at both levels. The parser skips that key.
     const targetJoin = entityStoreIndex
       ? `| LOOKUP JOIN ${entityStoreIndex} ON entity_id == entity.id
     | EVAL resolution_target_id = COALESCE(entity.relationships.resolution.resolved_to, entity_id),
@@ -927,10 +949,8 @@ const buildResolutionScoreESQL = ({
 
     return /* esql */ `${alertsSource}
     ${alertFieldsRename}
-    | EVAL rule_name_b64 = TO_BASE64(rule_name),
-           category_b64 = TO_BASE64(category),
-           score_key = TO_STRING(TO_LONG(ROUND(risk_score * 1000)))
-    | EVAL input = CONCAT(""" {"sort_key": """", REPEAT("0", 10 - LENGTH(score_key)), score_key, """", "risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | EVAL score_key = TO_STRING(TO_LONG(ROUND(risk_score * 1000)))
+    | EVAL input = CONCAT(REPEAT("0", 10 - LENGTH(score_key)), score_key, "${RISK_INPUT_SEPARATOR}", ${RISK_INPUT_FIELDS})
     | STATS
         member_alert_count = COUNT(risk_score),
         member_scores = TOP(risk_score, ${sample}, "desc"),
@@ -953,9 +973,7 @@ const buildResolutionScoreESQL = ({
 
   const query = /* esql */ `${alertsSource}
     ${membershipJoin}
-    | EVAL rule_name_b64 = TO_BASE64(rule_name),
-           category_b64 = TO_BASE64(category)
-    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | EVAL input = CONCAT(${RISK_INPUT_FIELDS})
     | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
     | STATS
         alert_count = count(risk_score),

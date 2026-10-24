@@ -7,7 +7,9 @@
 
 import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
+  STAMPED_ALERT_CONDITIONS,
   buildEuidRuntimeMappingWithStoredFieldFastPath,
   buildRiskScoreBucket,
   getBaseScoreESQL,
@@ -223,7 +225,9 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('alert_count = SUM(member_alert_count)');
       expect(query).toContain('TOP(member_scores, 500, "desc")');
       // Inputs start with a zero-padded score, so ordering them as strings orders them by score.
-      expect(query).toContain('{"sort_key": """", REPEAT("0", 10 - LENGTH(score_key)), score_key');
+      expect(query).toContain(
+        'input = CONCAT(REPEAT("0", 10 - LENGTH(score_key)), score_key, "|", risk_score::keyword'
+      );
     });
 
     it("finds each alert's target in the entity store when given its index", () => {
@@ -249,12 +253,11 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain(
         '| WHERE resolution_target_id > "user:target-a" AND resolution_target_id <= "user:target-m"'
       );
-      // Store documents carry fields alerts have too, such as event.kind and entity.id, so only
-      // the alert columns used later go into the join.
-      expect(query.indexOf('event.kind as category')).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
-      expect(query.indexOf('| KEEP entity_id, time, _index')).toBeLessThan(
-        query.indexOf('| LOOKUP JOIN')
-      );
+      // Store documents carry fields alerts have too, such as entity.id, so only the alert columns
+      // used later go into the join.
+      const keep = query.indexOf('| KEEP entity_id, time, risk_score, rule_name, alert_id');
+      expect(keep).toBeGreaterThan(-1);
+      expect(keep).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
     });
 
     it('escapes quote and backslash characters in resolution target bounds', () => {
@@ -373,6 +376,102 @@ describe('Calculate risk scores with ESQL', () => {
       for (const query of queries) {
         expect(query).toContain('risk_inputs = TOP(risk_score, 10, "desc", input)');
       }
+    });
+
+    it('joins risk input fields with a separator, rule name last, in the maintainer queries', () => {
+      const queries = [
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        ),
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        ),
+      ];
+
+      for (const query of queries) {
+        expect(query).toContain(
+          '| EVAL input = CONCAT(risk_score::keyword, "|", time::keyword, "|", alert_id, "|", rule_name)'
+        );
+        expect(query).not.toContain('TO_BASE64');
+        expect(query).not.toContain('METADATA _index');
+        expect(query).not.toContain('kibana.alert.rule.uuid');
+      }
+    });
+  });
+
+  describe('every alert stamped', () => {
+    const baseQuery = (entityType: EntityType, allAlertsStamped: boolean) =>
+      getBaseScoreESQL(
+        entityType,
+        { lower: `${entityType}:a`, upper: `${entityType}:z` },
+        500,
+        10000,
+        '.alerts-security.alerts-default',
+        undefined,
+        { allAlertsStamped }
+      );
+    const resolutionQuery = (entityType: EntityType, allAlertsStamped: boolean) =>
+      getResolutionScoreESQLByRange(
+        entityType,
+        { upper: `${entityType}:z` },
+        'run-1',
+        500,
+        10000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default',
+        {
+          entityStoreIndex: '.entities.v2.latest.default-00001',
+          preAggregate: true,
+          allAlertsStamped,
+        }
+      );
+
+    it.each([EntityType.host, EntityType.user])(
+      'takes the %s stamp as the ID without reading identity fields',
+      (entityType) => {
+        for (const query of [baseQuery(entityType, true), resolutionQuery(entityType, true)]) {
+          expect(query).toContain('MV_FIRST(MV_SLICE(kibana.alert.entity.id, 2, 2)), NULL)');
+          expect(query).not.toContain(`${entityType}.name`);
+          expect(query).not.toContain('event.module');
+        }
+        for (const query of [baseQuery(entityType, false), resolutionQuery(entityType, false)]) {
+          expect(query).toContain(`${entityType}.name`);
+          expect(query).toContain('MV_FIRST(MV_SLICE(kibana.alert.entity.id, 2, 2)), entity_id)');
+        }
+      }
+    );
+
+    it('keeps the part of the user documents filter that does not depend on identity fields', () => {
+      const conditions = STAMPED_ALERT_CONDITIONS.user ?? '';
+
+      // The same ES|QL the entity store generates for its user documents filter, so it can't drift.
+      expect(conditions).not.toBe('');
+      expect(
+        euid.esql.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition(EntityType.user))
+      ).toContain(conditions);
+      expect(baseQuery(EntityType.user, true)).toContain(
+        `| WHERE kibana.alert.risk_score IS NOT NULL AND ${conditions}`
+      );
+      expect(resolutionQuery(EntityType.user, true)).toContain(conditions);
+      expect(baseQuery(EntityType.host, true)).toMatch(
+        /\| WHERE kibana\.alert\.risk_score IS NOT NULL\n/
+      );
+    });
+
+    it('drops alerts without a stamp of the type before resolution joins them', () => {
+      expect(resolutionQuery(EntityType.host, true)).toContain('| WHERE entity_id IS NOT NULL');
+      expect(resolutionQuery(EntityType.host, false)).not.toContain(
+        '| WHERE entity_id IS NOT NULL'
+      );
     });
   });
 

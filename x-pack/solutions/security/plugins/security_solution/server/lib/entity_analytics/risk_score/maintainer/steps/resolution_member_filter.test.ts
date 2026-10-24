@@ -35,6 +35,14 @@ describe('getResolutionPageMemberFilter', () => {
     });
   });
 
+  it('keeps only the members when every alert is stamped', () => {
+    expect(
+      getResolutionPageMemberFilter(EntityType.host, ['host:target-1', 'host:alias-1'], {
+        allAlertsStamped: true,
+      })
+    ).toEqual({ terms: { 'kibana.alert.entity.id': ['host:target-1', 'host:alias-1'] } });
+  });
+
   it('builds nothing for a page without members', () => {
     expect(getResolutionPageMemberFilter(EntityType.user, [])).toBeUndefined();
   });

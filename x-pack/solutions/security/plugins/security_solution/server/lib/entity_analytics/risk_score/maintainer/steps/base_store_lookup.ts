@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AssetCriticalityLevel } from '../../../../../../common/api/entity_analytics/asset_criticality/common.gen';
+import { toCriticalityLevel } from './criticality_level';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 import { normalizeModifierEntity } from '../utils/fetch_entities_by_ids';
 import type { RiskScoreModifierEntity } from './pipeline_types';
@@ -66,14 +66,13 @@ export const readBaseStoreLookup = (
   for (const row of rows) {
     const id = storeEntityId(row);
     if (id !== undefined) {
-      const criticality = AssetCriticalityLevel.safeParse(valueAt(row, STORE_FIELDS.criticality));
       const entity = normalizeModifierEntity({
         entity: {
           id,
           attributes: { watchlists: valueAt(row, STORE_FIELDS.watchlists) },
           relationships: { resolution: { resolved_to: valueAt(row, STORE_FIELDS.resolvedTo) } },
         },
-        asset: { criticality: criticality.success ? criticality.data : undefined },
+        asset: { criticality: toCriticalityLevel(valueAt(row, STORE_FIELDS.criticality)) },
       });
       if (entity) {
         entities.set(id, entity);

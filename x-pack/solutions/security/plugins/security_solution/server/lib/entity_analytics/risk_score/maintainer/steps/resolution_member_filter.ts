@@ -23,21 +23,30 @@ export const MAX_RESOLUTION_PAGE_MEMBERS = 65_536;
  * and only gets faster as that share grows. The check is per type: an alert stamped for another
  * type only can still belong to a group of this one.
  *
+ * When the run found every in-scope alert stamped (checked once per run, before base scoring), no
+ * alert needs its ID worked out, and the filter is the members alone. The clause for unstamped
+ * alerts is costly even when it matches nothing: its prefix query walks every stamp of the type.
+ *
  * Returns undefined when there are no members or more than a terms query accepts, and the page
  * then reads every alert as before.
  */
 export const getResolutionPageMemberFilter = (
   entityType: EntityType,
-  memberIds: string[]
+  memberIds: string[],
+  { allAlertsStamped = false }: { allAlertsStamped?: boolean } = {}
 ): QueryDslQueryContainer | undefined => {
   if (memberIds.length === 0 || memberIds.length > MAX_RESOLUTION_PAGE_MEMBERS) {
     return undefined;
   }
 
+  const members = { terms: { [ALERT_ENTITY_ID]: memberIds } };
+  if (allAlertsStamped) {
+    return members;
+  }
   return {
     bool: {
       should: [
-        { terms: { [ALERT_ENTITY_ID]: memberIds } },
+        members,
         {
           bool: {
             filter: [

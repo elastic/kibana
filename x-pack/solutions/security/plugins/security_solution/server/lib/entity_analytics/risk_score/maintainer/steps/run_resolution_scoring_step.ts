@@ -59,6 +59,8 @@ interface RunResolutionScoringParams {
   membershipFromStore?: boolean;
   /** With `membershipFromStore`: place every page's range from one sample of the aliases. */
   sampledPages?: SampledPagesConfig;
+  /** With `membershipFromStore`: base found every in-scope alert of this type stamped. */
+  allAlertsStamped?: boolean;
   /**
    * Leave out of the entity store write the resolution scores a target's store document already
    * holds. The risk index still gets every score. Store pages only: they read each target's stored
@@ -97,6 +99,7 @@ export const runResolutionScoringStep = async ({
   preAggregateByEntity,
   membershipFromStore,
   sampledPages,
+  allAlertsStamped,
   skipUnchangedStoreWrites = false,
   collectScores,
   pageTimings = createPageStepTimings(),
@@ -179,6 +182,7 @@ export const runResolutionScoringStep = async ({
     preAggregateByEntity,
     membershipFromStore,
     sampledPages,
+    allAlertsStamped,
   };
 
   await forEachConcurrently(discoverResolutionPages(scoringParams), pagesInFlight, async (task) => {

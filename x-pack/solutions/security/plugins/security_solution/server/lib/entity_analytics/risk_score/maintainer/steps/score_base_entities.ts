@@ -109,6 +109,8 @@ export interface Phase1BaseScoringSummary extends StepResult {
   entityCreationsFailed: number;
   /** In-store scores left out of the store write because the store already holds them. */
   scoresUnchangedInStore: number;
+  /** Every in-scope alert of this type carried its stamped EUID when the stage started. */
+  allAlertsStamped: boolean;
 }
 
 interface EuidPageBounds {
@@ -538,6 +540,7 @@ export const scoreBaseEntities = async ({
     entityCreationsSkipped,
     entityCreationsFailed,
     scoresUnchangedInStore,
+    allAlertsStamped: context.stamped,
   };
 };
 
@@ -640,10 +643,15 @@ const scorePageFromAlerts = async ({
   storeLookup: BaseStoreLookup;
   profileSummary?: EsqlPageProfileSummary;
 }> => {
-  const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex, {
-    index: entityStoreIndex,
-    fields: BASE_STORE_LOOKUP_FIELDS,
-  });
+  const query = getBaseScoreESQL(
+    entityType,
+    bounds,
+    sampleSize,
+    pageSize,
+    alertsIndex,
+    { index: entityStoreIndex, fields: BASE_STORE_LOOKUP_FIELDS },
+    { allAlertsStamped: stamped }
+  );
   const startedAt = Date.now();
   const esqlResponse = await timer.time(
     'esql',

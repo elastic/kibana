@@ -10,7 +10,7 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import { AssetCriticalityLevel } from '../../../../../../common/api/entity_analytics/asset_criticality/common.gen';
+import { toCriticalityLevel } from './criticality_level';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { MAX_RESOLUTION_TARGETS_PER_PAGE } from '../../constants';
 import { normalizeModifierEntity } from '../utils/fetch_entities_by_ids';
@@ -59,14 +59,13 @@ const toModifierEntity = (
   if (!fields || typeof id !== 'string') {
     return undefined;
   }
-  const criticality = AssetCriticalityLevel.safeParse(firstValue(fields, 'asset.criticality'));
   return normalizeModifierEntity({
     entity: {
       id,
       attributes: { watchlists: fields['entity.attributes.watchlists'] },
       relationships: { resolution: { resolved_to: firstValue(fields, RESOLVED_TO) } },
     },
-    asset: { criticality: criticality.success ? criticality.data : undefined },
+    asset: { criticality: toCriticalityLevel(firstValue(fields, 'asset.criticality')) },
   });
 };
 

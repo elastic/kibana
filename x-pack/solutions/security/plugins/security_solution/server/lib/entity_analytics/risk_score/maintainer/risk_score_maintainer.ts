@@ -573,6 +573,7 @@ const executeEntityTypeRun = async ({
   const baseStage = runTelemetry.startBaseStage();
   const baseStartedAtMs = Date.now();
   const basePageTimings = createPageStepTimings();
+  let allAlertsStamped = false;
 
   try {
     const baseSummary = await runWithSpan({
@@ -612,6 +613,7 @@ const executeEntityTypeRun = async ({
         }),
     });
     runLogger.debug('completed base scoring pass');
+    allAlertsStamped = baseSummary.allAlertsStamped;
     metricsTracker.recordBase(runMetrics, baseSummary);
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
@@ -690,6 +692,7 @@ const executeEntityTypeRun = async ({
             joinEntityStore: true,
             preAggregateByEntity: true,
             membershipFromStore: RESOLVE_FROM_ENTITY_STORE,
+            allAlertsStamped,
             skipUnchangedStoreWrites: true,
             // Test setting: page ranges from one sample of the aliases. Only targets with alerts
             // produce rows, so pages aim at 30k aliases, near the member filter's terms limit;

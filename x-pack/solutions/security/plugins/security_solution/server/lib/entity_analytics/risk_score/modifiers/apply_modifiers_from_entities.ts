@@ -137,15 +137,6 @@ export const applyScoreModifiersFromEntities = ({
     ? getGlobalWeightForIdentifierType(identifierType, weights)
     : undefined;
 
-  const modifiers = scores.map((score) => {
-    const entityId = score.entity_id;
-    const entity = entities.get(entityId);
-    return extractModifiersFromEntity(entity, globalWeight, watchlistConfigs);
-  });
-
-  const criticality = modifiers.map(([c]) => c);
-  const watchlists = modifiers.map(([, w]) => w);
-
   const factory = v2RiskScoreDocFactory({
     now,
     identifierField: page.identifierField,
@@ -154,7 +145,14 @@ export const applyScoreModifiersFromEntities = ({
     globalWeight,
   });
 
-  return scores.map((score, i) => factory(score, criticality[i], watchlists[i]));
+  return scores.map((score) => {
+    const [criticality, watchlists] = extractModifiersFromEntity(
+      entities.get(score.entity_id),
+      globalWeight,
+      watchlistConfigs
+    );
+    return factory(score, criticality, watchlists);
+  });
 };
 
 interface RiskScoreDocFactoryParams {

@@ -85,6 +85,12 @@ interface ScoreResolutionEntitiesParams {
    * start of the stage, instead of reading the next page's aliases one page after another.
    */
   sampledPages?: SampledPagesConfig;
+  /**
+   * With `membershipFromStore`: the base stage found every in-scope alert of this type stamped, so
+   * the scoring query takes each alert's stamp as its ID and the member filter needs no clause for
+   * alerts without one.
+   */
+  allAlertsStamped?: boolean;
 }
 
 interface ResolutionPageResult {
@@ -282,6 +288,7 @@ const scoreStoreGroups = async (
     watchlistConfigs,
     alertFilters,
     preAggregateByEntity = false,
+    allAlertsStamped = false,
   }: ScoreResolutionEntitiesParams,
   {
     pageNumber,
@@ -295,7 +302,9 @@ const scoreStoreGroups = async (
   const pageMemberIds = [...new Set([...resolutionTargetIds, ...aliasEntities.keys()])];
   // The store join can't tell a target from an entity in no group, so only the member filter keeps
   // the latter's alerts out. Without one, the page would score entities that aren't targets.
-  const memberFilter = getResolutionPageMemberFilter(entityType, pageMemberIds);
+  const memberFilter = getResolutionPageMemberFilter(entityType, pageMemberIds, {
+    allAlertsStamped,
+  });
   if (!memberFilter) {
     logger.warn(
       `[resolution][page:${pageNumber}] skipped: members=${pageMemberIds.length} exceed a terms query`
@@ -312,6 +321,7 @@ const scoreStoreGroups = async (
     entityStoreIndex,
     targetStoreLookup: { index: entityStoreIndex, fields: RESOLUTION_TARGET_LOOKUP_FIELDS },
     preAggregate: preAggregateByEntity,
+    allAlertsStamped,
     calculationRunId,
     sampleSize,
     pageSize,
@@ -690,6 +700,7 @@ const runResolutionScoringQuery = async ({
   entityStoreIndex,
   targetStoreLookup,
   preAggregate,
+  allAlertsStamped = false,
   calculationRunId,
   sampleSize,
   pageSize,
@@ -707,6 +718,8 @@ const runResolutionScoringQuery = async ({
   /** Joins each scored target's own store fields onto its row; range pages only. */
   targetStoreLookup?: { index: string; fields: string[] };
   preAggregate: boolean;
+  /** Range pages only; see `getResolutionScoreESQLByRange`. */
+  allAlertsStamped?: boolean;
   calculationRunId: string;
   sampleSize: number;
   pageSize: number;
@@ -730,7 +743,7 @@ const runResolutionScoringQuery = async ({
         pageSize,
         alertsIndex,
         lookupIndex,
-        { entityStoreIndex, preAggregate, targetStoreLookup }
+        { entityStoreIndex, preAggregate, targetStoreLookup, allAlertsStamped }
       )
     : getResolutionScoreESQLByIds(
         entityType,
@@ -757,7 +770,11 @@ const runResolutionScoringQuery = async ({
   const wallMs = Date.now() - startedAt;
   return {
     parsedScores: timer.timeSync('parse', () =>
-      (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex, sampleSize))
+      (esqlResponse.values ?? []).map(
+        parseEsqlResolutionScoreRow(alertsIndex, sampleSize, {
+          sortKeyed: bounds !== undefined && preAggregate,
+        })
+      )
     ),
     esqlRows: esqlResponse.values?.length ?? 0,
     profileSummary: profile ? summarizeEsqlPage(esqlResponse, wallMs) : undefined,
