@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MitreDataUnavailableError } from '@kbn/security-mitre-attack-common';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { findRules } from '../../../logic/search/find_rules';
@@ -207,7 +208,11 @@ describe('handleCoverageOverviewRequest', () => {
     });
 
     const failingList = jest.fn().mockRejectedValue(new Error('SO unavailable'));
-    const mitreDataClient: MitreAttackDataClient = { list: failingList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = {
+      list: failingList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const result = await handleCoverageOverviewRequest({
       params: {},
@@ -250,8 +255,12 @@ describe('handleCoverageOverviewRequest', () => {
     // Simulates the state where the managed SO has not yet been populated.
     const emptyList = jest
       .fn()
-      .mockResolvedValue({ tactics: [], techniques: [], subtechniques: [] });
-    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+      .mockRejectedValue(new MitreDataUnavailableError('population_failed'));
+    const mitreDataClient: MitreAttackDataClient = {
+      list: emptyList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const result = await handleCoverageOverviewRequest({
       params: {},
@@ -260,6 +269,62 @@ describe('handleCoverageOverviewRequest', () => {
 
     // Rule must still appear in rules_data and coverage; invalid-ID detection is
     // skipped entirely so no false positives appear in invalid_mitre_ids.
+    expect(result.rules_data['rule-with-mitre']).toBeDefined();
+    expect(result.invalid_mitre_ids).toEqual({});
+  });
+
+  it('skips invalid-ID detection when MITRE data is degraded, avoiding false positives from partial data', async () => {
+    const ruleWithMitre: Rule = {
+      id: 'rule-with-mitre',
+      name: 'Some Rule',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: VALID_TACTIC_ID,
+              name: 'Defense Evasion',
+              reference: 'https://attack.mitre.org/tactics/TA0005/',
+            },
+            technique: [
+              {
+                id: 'T1059',
+                name: 'Command and Scripting Interpreter',
+                reference: 'https://attack.mitre.org/techniques/T1059/',
+              },
+            ],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      total: 1,
+      page: 1,
+      perPage: 10000,
+      data: [ruleWithMitre],
+    });
+
+    // Partial data: T1059 is missing, which would be flagged as invalid if validated.
+    const partialBuckets = makeManagedBuckets(
+      buildValidMitreIdsFromBuckets({
+        tactics: [{ id: VALID_TACTIC_ID }],
+        techniques: [{ id: 'T1566' }],
+        subtechniques: [],
+      })
+    );
+    const mitreDataClient: MitreAttackDataClient = {
+      list: jest.fn().mockResolvedValue(partialBuckets),
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'degraded' }),
+    };
+
+    const result = await handleCoverageOverviewRequest({
+      params: {},
+      deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
+    });
+
     expect(result.rules_data['rule-with-mitre']).toBeDefined();
     expect(result.invalid_mitre_ids).toEqual({});
   });
@@ -273,7 +338,11 @@ describe('handleCoverageOverviewRequest', () => {
 
     const managedBuckets = makeManagedBuckets(validIdSets);
     const mockList = jest.fn().mockResolvedValue(managedBuckets);
-    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = {
+      list: mockList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const ruleWithBogusIds: Rule = {
       id: 'rule-bogus',
@@ -415,6 +484,7 @@ describe('handleCoverageOverviewRequest', () => {
         return enterpriseBuckets;
       }),
       getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
     });
 
     const run = async (rules: Rule[], mitreDataClient: MitreAttackDataClient) => {

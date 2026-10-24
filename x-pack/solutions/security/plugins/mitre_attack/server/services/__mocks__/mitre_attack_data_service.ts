@@ -11,6 +11,8 @@ export interface MitreAttackDataServiceMock {
   ensureInitialized: jest.MockedFunction<MitreAttackDataService['ensureInitialized']>;
   populate: jest.MockedFunction<MitreAttackDataService['populate']>;
   initialize: jest.MockedFunction<MitreAttackDataService['initialize']>;
+  getStatus: jest.MockedFunction<MitreAttackDataService['getStatus']>;
+  reportEmptyWhileReady: jest.MockedFunction<MitreAttackDataService['reportEmptyWhileReady']>;
   isInitialized: boolean;
 }
 
@@ -18,6 +20,8 @@ const createMitreAttackDataServiceMock = (): MitreAttackDataServiceMock => ({
   ensureInitialized: jest.fn().mockResolvedValue(true),
   populate: jest.fn().mockResolvedValue(true),
   initialize: jest.fn(),
+  getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+  reportEmptyWhileReady: jest.fn(),
   isInitialized: false,
 });
 

@@ -56,6 +56,9 @@ export type { ThreatFrameworkGroup } from './src/group_threats_by_framework';
 
 export { buildSoId, getMitreEntityDisplayName } from './src/utils';
 
+export { MitreDataUnavailableError } from './src/mitre_data_unavailable_error';
+export type { MitreDataUnavailableReason } from './src/mitre_data_unavailable_error';
+
 export { GetMitreEntitiesRequestQuery } from './src/api';
 
 export type {

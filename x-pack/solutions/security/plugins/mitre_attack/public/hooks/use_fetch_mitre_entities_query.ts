@@ -7,6 +7,7 @@
 
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core/public';
 import type {
   GetMitreEntitiesRequestParams,
@@ -15,14 +16,24 @@ import type {
 import { GET_MITRE_ENTITIES_URL } from '@kbn/security-mitre-attack-common';
 import { fetchMitreEntities } from '../api/fetch_mitre_entities';
 
-// MITRE reference data is static per Kibana process, so it never goes stale within a
-// session. retry: false ensures the UI error state surfaces immediately on failure
-// rather than silently retrying.
-const DEFAULT_OPTIONS = {
+// The managed route returns 503 when population has not finished; other errors are permanent.
+const isServiceUnavailable = (error: unknown): boolean => {
+  const httpError = error as IHttpFetchError<{ statusCode?: number }>;
+  return httpError?.response?.status === 503 || httpError?.body?.statusCode === 503;
+};
+
+const MAX_RETRIES = 3;
+const RETRY_BASE_DELAY_MS = 1000;
+const MAX_RETRY_DELAY_MS = 30_000;
+
+// Only retry transient 503s (population in progress); all other failures are final.
+// Exponential backoff gives the data service time to finish populating saved objects.
+const DEFAULT_OPTIONS: UseQueryOptions<GetMitreEntitiesResponse> = {
   staleTime: Infinity,
-  retry: false,
+  retry: (failureCount, error) => isServiceUnavailable(error) && failureCount < MAX_RETRIES,
+  retryDelay: (attempt) => Math.min(RETRY_BASE_DELAY_MS * 2 ** attempt, MAX_RETRY_DELAY_MS),
   refetchOnWindowFocus: false,
-} as const;
+};
 
 export const FETCH_MITRE_ENTITIES_QUERY_KEY = ['GET', GET_MITRE_ENTITIES_URL] as const;
 

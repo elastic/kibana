@@ -79,6 +79,9 @@ export async function handleCoverageOverviewRequest({
       referencedFrameworks.add(framework);
     }
   }
+  // Snapshot status before the async read so a repair finishing mid-read
+  // does not promote partial data to ready.
+  const isDegraded = mitreDataClient?.getStatus().status === 'degraded';
   const bucketsByFramework = await resolveMitreBucketsByFramework(
     mitreDataClient,
     Array.from(referencedFrameworks),
@@ -87,11 +90,15 @@ export async function handleCoverageOverviewRequest({
   const validIdsByFramework: ValidMitreIdSetsByFramework = {};
   for (const framework of referencedFrameworks) {
     const buckets = bucketsByFramework[framework];
-    if (buckets) {
+    if (buckets && !isDegraded) {
       validIdsByFramework[framework] = buildValidMitreIdsFromBuckets(buckets);
-    } else {
+    } else if (!buckets) {
       logger?.debug(
         `MITRE buckets unavailable for framework "${framework}"; invalid-ID detection will be skipped for it`
+      );
+    } else {
+      logger?.debug(
+        `MITRE data is degraded for framework "${framework}"; invalid-ID detection will be skipped to avoid false positives`
       );
     }
   }

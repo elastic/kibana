@@ -7,6 +7,7 @@
 
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { MitreDataUnavailableError } from '@kbn/security-mitre-attack-common';
 import {
   resolveMitreBuckets,
   resolveMitreBucketsByFramework,
@@ -38,14 +39,28 @@ jest.mock('../../../../common/detection_engine/mitre/mitre_tactics_techniques', 
   subtechniques: [],
 }));
 
-const makeClient = (empty = false): { client: MitreAttackDataClient; mockList: jest.Mock } => {
+const makeClient = (): { client: MitreAttackDataClient; mockList: jest.Mock } => {
   const mockList = jest.fn().mockResolvedValue({
     framework: 'enterprise' as const,
-    tactics: empty ? [] : [{ id: 'TA0099', name: 'Managed Tactic' }],
-    techniques: empty ? [] : [{ id: 'T9001', name: 'Managed Technique' }],
+    tactics: [{ id: 'TA0099', name: 'Managed Tactic' }],
+    techniques: [{ id: 'T9001', name: 'Managed Technique' }],
     subtechniques: [],
   });
-  const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+  const client: MitreAttackDataClient = {
+    list: mockList,
+    getById: jest.fn(),
+    getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+  };
+  return { client, mockList };
+};
+
+const makeUnavailableClient = (): { client: MitreAttackDataClient; mockList: jest.Mock } => {
+  const mockList = jest.fn().mockRejectedValue(new MitreDataUnavailableError('population_failed'));
+  const client: MitreAttackDataClient = {
+    list: mockList,
+    getById: jest.fn(),
+    getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+  };
   return { client, mockList };
 };
 
@@ -81,12 +96,13 @@ describe('resolveMitreBuckets — managed path', () => {
     expect(mockList).toHaveBeenCalledWith({ framework: 'atlas' });
   });
 
-  it('includes the framework in the "not initialized" error', async () => {
-    const { client } = makeClient(true);
+  it('propagates MitreDataUnavailableError from list() for the requested framework', async () => {
+    const { client, mockList } = makeUnavailableClient();
 
-    await expect(resolveMitreBuckets(client, 'atlas')).rejects.toThrow(
-      'Managed MITRE data is not initialized (framework: atlas)'
+    await expect(resolveMitreBuckets(client, 'atlas')).rejects.toBeInstanceOf(
+      MitreDataUnavailableError
     );
+    expect(mockList).toHaveBeenCalledWith({ framework: 'atlas' });
   });
 
   it('calls list() on every invocation so runtime data changes are always visible', async () => {
@@ -100,15 +116,14 @@ describe('resolveMitreBuckets — managed path', () => {
     expect(second.tactics[0]).toMatchObject({ id: 'TA0099' });
   });
 
-  it('rejects with "not initialized" when the managed collection is empty', async () => {
-    const { client, mockList } = makeClient(true /* empty */);
+  it('rejects with MitreDataUnavailableError when the data client reports unavailable data', async () => {
+    const { client, mockList } = makeUnavailableClient();
 
-    await expect(resolveMitreBuckets(client)).rejects.toThrow(
-      'Managed MITRE data is not initialized'
-    );
-    await expect(resolveMitreBuckets(client)).rejects.toThrow(
-      'Managed MITRE data is not initialized'
-    );
+    await expect(resolveMitreBuckets(client)).rejects.toMatchObject({
+      name: 'MitreDataUnavailableError',
+      reason: 'population_failed',
+    });
+    await expect(resolveMitreBuckets(client)).rejects.toBeInstanceOf(MitreDataUnavailableError);
 
     // Each call goes to list() because managed results are never cached.
     expect(mockList).toHaveBeenCalledTimes(2);
@@ -124,7 +139,11 @@ describe('resolveMitreBuckets — managed path', () => {
         techniques: [],
         subtechniques: [],
       });
-    const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const client: MitreAttackDataClient = {
+      list: mockList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     await expect(resolveMitreBuckets(client)).rejects.toThrow('SO unavailable');
     const result = await resolveMitreBuckets(client);
@@ -178,7 +197,14 @@ describe('resolveMitreBucketsByFramework', () => {
           subtechniques: [],
         };
       });
-    return { client: { list: mockList, getById: jest.fn() }, mockList };
+    return {
+      client: {
+        list: mockList,
+        getById: jest.fn(),
+        getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+      },
+      mockList,
+    };
   };
 
   it('returns buckets for both frameworks when both resolve', async () => {
@@ -213,7 +239,11 @@ describe('resolveMitreBucketsByFramework', () => {
 
   it('returns an empty record when every framework rejects', async () => {
     const mockList = jest.fn().mockRejectedValue(new Error('SO unavailable'));
-    const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const client: MitreAttackDataClient = {
+      list: mockList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'atlas']);
 

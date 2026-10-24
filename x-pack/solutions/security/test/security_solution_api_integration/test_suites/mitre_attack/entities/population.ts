@@ -193,6 +193,10 @@ export default ({ getService }: FtrProviderContext) => {
     // an empty data source. The after() hook restores data so subsequent suites
     // (in other files) are not affected.
     describe('empty data source', () => {
+      beforeEach(async () => {
+        await deleteAllMitreEntities(es);
+      });
+
       after(async () => {
         // Unconditional restore: even a partial state (some docs present) can
         // leak to later files, so always delete then reseed to ensure a clean slate.
@@ -200,17 +204,36 @@ export default ({ getService }: FtrProviderContext) => {
         await seedMitreEntities(es, loadMitreArtifact());
       });
 
-      it('returns 200 with empty buckets when no saved objects exist (never a 5xx)', async () => {
-        await deleteAllMitreEntities(es);
+      it('returns 503 when no saved objects exist', async () => {
+        const { status } = await mitreAttackApi.getEntities();
 
-        const { body, status } = await mitreAttackApi.getEntities();
+        // The data client detects the empty result and throws
+        // MitreDataUnavailableError('population_failed'), which the route maps to 503.
+        // This also triggers background repopulation via reportEmptyWhileReady().
+        expect(status).to.eql(503);
 
-        // The plugin's state is already 'ready' from the before() call above,
-        // so ensureInitialized() returns immediately and list() reads the now-empty index.
-        expect(status).to.eql(200);
-        expect(body.tactics).to.eql([]);
-        expect(body.techniques).to.eql([]);
-        expect(body.subtechniques).to.eql([]);
+        // reportEmptyWhileReady() fires async repopulation; wait for it to finish
+        // so it does not race with the next test's beforeEach or the after() cleanup.
+        await waitForMitrePopulation(es, log, loadMitreArtifact().length);
+      });
+
+      it('returns 503 for a non-enterprise framework query when no saved objects exist', async () => {
+        const { status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
+
+        expect(status).to.eql(503);
+
+        await waitForMitrePopulation(es, log, loadMitreArtifact().length);
+      });
+
+      it('returns 503 for a types-filtered query when no saved objects exist', async () => {
+        const { status } = await mitreAttackApi.getEntities({
+          framework: 'enterprise',
+          types: 'tactic',
+        });
+
+        expect(status).to.eql(503);
+
+        await waitForMitrePopulation(es, log, loadMitreArtifact().length);
       });
 
       it('serves data for every framework after the index is repopulated with the full artifact via bulk insert', async () => {

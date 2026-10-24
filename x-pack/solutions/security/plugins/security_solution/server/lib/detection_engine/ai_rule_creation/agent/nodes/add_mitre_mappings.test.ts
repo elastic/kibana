@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MitreDataUnavailableError } from '@kbn/security-mitre-attack-common';
 import { formatMitreMapping, addMitreMappingsNode } from './add_mitre_mappings';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import {
@@ -132,7 +133,11 @@ const atlasBuckets = buildMockMitreEntitySummaryBuckets({
 const buildNode = (list: jest.Mock) =>
   addMitreMappingsNode({
     model: {} as Parameters<typeof addMitreMappingsNode>[0]['model'],
-    mitreDataClient: { list, getById: jest.fn() } as MitreAttackDataClient,
+    mitreDataClient: {
+      list,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    } as MitreAttackDataClient,
   });
 
 const buildState = () =>
@@ -371,7 +376,11 @@ describe('addMitreMappingsNode', () => {
     const mockList = listByFramework(() =>
       Promise.resolve({ framework: 'atlas', ...atlasBuckets })
     );
-    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = {
+      list: mockList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const node = addMitreMappingsNode({
       model: {} as Parameters<typeof addMitreMappingsNode>[0]['model'],
@@ -408,13 +417,14 @@ describe('addMitreMappingsNode', () => {
     });
 
     // Simulates the state where the managed SO has not yet been populated.
-    const emptyList = jest.fn().mockResolvedValue({
-      framework: 'enterprise',
-      tactics: [],
-      techniques: [],
-      subtechniques: [],
-    });
-    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+    const emptyList = jest
+      .fn()
+      .mockRejectedValue(new MitreDataUnavailableError('population_failed'));
+    const mitreDataClient: MitreAttackDataClient = {
+      list: emptyList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const node = addMitreMappingsNode({
       model: {} as Parameters<typeof addMitreMappingsNode>[0]['model'],

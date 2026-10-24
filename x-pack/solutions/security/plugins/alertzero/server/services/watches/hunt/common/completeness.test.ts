@@ -49,6 +49,7 @@ describe('huntCompletenessOf', () => {
     'refs_unavailable',
     'nothing_searched',
     'input_truncated',
+    'catalog_disabled',
   ])('treats %s as final, so the report is retired rather than re-swept', (reason) => {
     expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_final');
     // Retired, because re-running reproduces the same gap and re-spends the run.
