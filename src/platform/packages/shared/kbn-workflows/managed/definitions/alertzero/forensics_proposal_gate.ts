@@ -20,19 +20,20 @@ export const ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID =
 /**
  * Child dispatched via `workflow.executeAsync`, one per containment Proposal, by the
  * Endpoint analysis run (`forensics_run_endpoint_analysis.yaml`). Wraps
- * `system-create-alertzero-proposal`'s single `waitForApproval`, then closes the
- * Investigation through the investigations status route once every Proposal on it is
- * decided. Separate from `hunt_proposal_gate.yaml` because that gate closes with an
- * owner-only metadata patch, which only works when the gate runs as the account that
- * opened the Investigation; Endpoint analysis closes Investigations other Workers opened.
+ * `system-create-alertzero-proposal`'s single `waitForApproval`, then, once every
+ * Proposal on the Investigation is decided, dispatches the close gate
+ * (`forensics_close_investigation_gate.yaml`), which asks the analyst whether to close
+ * the Investigation. Separate from `hunt_proposal_gate.yaml` because that gate closes
+ * the Investigation itself with an owner-only metadata patch; Endpoint analysis works
+ * on Investigations other Workers opened, and never closes one without asking.
  * Owns no trigger of its own, so enablement is `enforced` (a disabled child would
  * silently break its dispatcher).
  */
 export const ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 6,
   yaml: FORENSICS_PROPOSAL_GATE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
