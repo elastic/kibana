@@ -211,6 +211,30 @@ describe('gradeSubmissions', () => {
     expect(explanation).toContain('no prior tree');
   });
 
+  it('rejects an empty merge when this round has duplicate nodes to fold', () => {
+    const { score, explanation } = gradeSubmissions({
+      submissions: [
+        {
+          symptom_trees: [{ tree_id: 'symptom:eql-slo-burn-rate', merged_nodes: [] }],
+          traversals: [
+            {
+              tree_id: 'symptom:eql-slo-burn-rate',
+              visited_path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+              causal_path: [],
+            },
+          ],
+        },
+      ],
+      prior,
+      submitted: prior,
+      response: 'No confirmed cause.',
+      requireMerge: true,
+    });
+
+    expect(score).toBe(0);
+    expect(explanation).toContain('merged_nodes is empty');
+  });
+
   it('rejects a causal path when the response does not confirm a cause', () => {
     const { score, explanation } = gradeSubmissions({
       submissions: [
