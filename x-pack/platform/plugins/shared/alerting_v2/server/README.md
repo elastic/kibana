@@ -288,5 +288,6 @@ If your change is about...
 - Prefer changing the smallest owning subsystem instead of threading behavior through multiple layers.
 - If you add fields to stored documents, update the resources definitions and any readers/writers that depend on them.
 - If you add pipeline state, add it to the relevant `types.ts`, update the step bindings, and add tests at the step and pipeline level.
+- If you add or change a log line, follow the logging rules in [`lib/services/logger_service/README.md`](lib/services/logger_service/README.md): log through `LoggerService` from a subsystem logger, keep IDs in `labels`, attach a `code` to every `warn` / `error`, and never log user-authored text or credentials.
 - If you are tempted to make the dispatcher understand rule execution internals, that logic probably belongs earlier in the rule executor.
 - If you are tempted to make the director send notifications, that logic probably belongs later in the dispatcher.
