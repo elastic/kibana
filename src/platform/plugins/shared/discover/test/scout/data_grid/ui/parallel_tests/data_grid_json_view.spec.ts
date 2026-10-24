@@ -17,7 +17,8 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags } from '../fixtures';
 
 const DOC_TABLE_TEST_SUBJ = 'discoverDocTable';
-const DISPLAY_POPOVER_TEST_SUBJ = 'dataGridDisplaySelectorPopover';
+// The open panel of the display settings, which EuiDataGrid and `@kbn/data-grid` both render.
+const DISPLAY_POPOVER_SELECTOR = '.euiDataGrid__displayPopoverPanel[data-popover-open]';
 const DENSITY_BUTTON_GROUP_TEST_SUBJ = 'densityButtonGroup';
 const ROW_HEIGHT_BUTTON_GROUP_TEST_SUBJ = 'unifiedDataTableRowHeightSettings_rowHeightButtonGroup';
 const RENDERED_NODES_SETTINGS_TEST_SUBJ = 'unifiedDataTableRenderedNodesSettings';
@@ -83,7 +84,7 @@ spaceTest.describe('Discover data grid JSON view', { tag: tags.stateful.classic 
         await expect(page.getByTestId(ROW_HEIGHT_BUTTON_GROUP_TEST_SUBJ)).toBeHidden();
 
         const { violations } = await page.checkA11y({
-          include: [`[data-test-subj="${DISPLAY_POPOVER_TEST_SUBJ}"]`],
+          include: [DISPLAY_POPOVER_SELECTOR],
         });
         expect(violations).toStrictEqual([]);
       });

@@ -55,14 +55,14 @@ spaceTest.describe('Discover data grid - doc table', { tag: tags.stateful.all },
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('renders rows by default', async ({ page }) => {
+  spaceTest('renders rows by default', async ({ page, pageObjects }) => {
     await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
-    const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
+    const rows = pageObjects.dataGrid.getRenderedRows(page.testSubj.locator('discoverDocTable'));
     expect(await rows.count()).toBeGreaterThan(0);
   });
 
   spaceTest('refreshes the table when the time range changes', async ({ page, pageObjects }) => {
-    const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
+    const rows = pageObjects.dataGrid.getRenderedRows(page.testSubj.locator('discoverDocTable'));
     const initialCount = await rows.count();
     expect(initialCount).toBeGreaterThan(0);
 

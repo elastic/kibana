@@ -63,7 +63,7 @@ spaceTest.describe('Discover shared links', { tag: '@local-stateful-classic' }, 
       await pageObjects.discover.selectDataView(testData.DEFAULT_DATA_VIEW);
 
       await expect(page).toHaveURL(DEFAULT_SORT_URL_STATE);
-      await expect(page.locator('[data-grid-row-index="0"]')).toContainText(
+      await expect(pageObjects.dataGrid.getRowByDataIndex(0)).toContainText(
         EXPECTED_FIRST_ROW_TIMESTAMP
       );
     }

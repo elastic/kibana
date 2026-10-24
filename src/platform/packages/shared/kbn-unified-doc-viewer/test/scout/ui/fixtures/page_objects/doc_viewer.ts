@@ -25,6 +25,16 @@ interface MonacoJsonEnvironment {
   };
 }
 
+// The element that scrolls the fields table: EuiDataGrid scrolls an inner element, `@kbn/data-grid`
+// (`discover.kbnDataGridEnabled`) the grid itself.
+const FIELDS_GRID_SCROLLER_SELECTOR =
+  '.euiDataGrid__virtualized, [role="grid"]:not(:has(.euiDataGrid__virtualized))';
+const CELL_EXPAND_BUTTON_SELECTOR = '[data-test-subj="euiDataGridCellExpandButton"]';
+// `@kbn/data-grid` collapses the actions of a hovered cell behind this trigger: hovering it shows them
+// (possibly in a layer outside the cell), clicking it expands the cell.
+const CELL_ACTIONS_TRIGGER_SELECTOR = '[data-test-subj="kbnDataGridCellActionsButton"]';
+const GRID_CELL_ANCESTOR = 'xpath=ancestor::*[@data-gridcell-column-id][1]';
+
 /**
  * Page object for the unified document viewer flyout that is opened from the
  * data grid (e.g. in Discover). Kept separate from `DataGrid` so grid and
@@ -35,6 +45,14 @@ export class DocViewer {
 
   constructor(private readonly page: ScoutPage) {
     this.dataGrid = new DataGrid(page);
+  }
+
+  /** Shows the actions of a hovered grid cell, which `@kbn/data-grid` keeps behind a trigger. */
+  private async revealCellActions(gridCell: Locator) {
+    const trigger = gridCell.locator(CELL_ACTIONS_TRIGGER_SELECTOR);
+    if (await trigger.isVisible()) {
+      await trigger.hover();
+    }
   }
 
   private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
@@ -264,7 +282,7 @@ export class DocViewer {
   async scrollFieldsTableToBottom() {
     await this.page.testSubj
       .locator('docViewerFlyout')
-      .locator('.euiDataGrid__virtualized')
+      .locator(FIELDS_GRID_SCROLLER_SELECTOR)
       .evaluate((el) => el.scrollTo(0, el.scrollHeight));
   }
 
@@ -360,8 +378,10 @@ export class DocViewer {
         el.scrollIntoView({ block: 'center', inline: 'nearest' });
       });
       await cell.hover();
+      await this.revealCellActions(cell.locator(GRID_CELL_ANCESTOR));
 
-      const actionBtn = flyout.locator(`[data-test-subj="${actionName}-${fieldName}"]`);
+      // Not scoped to the flyout: the actions of `@kbn/data-grid` can open in a layer outside of it.
+      const actionBtn = this.page.testSubj.locator(`${actionName}-${fieldName}`);
       await actionBtn.waitFor({ state: 'visible' });
       await actionBtn.click();
     }).toPass({ timeout: 15_000 });
@@ -383,8 +403,10 @@ export class DocViewer {
         el.scrollIntoView({ block: 'center', inline: 'nearest' });
       });
       await nameCell.hover();
+      await this.revealCellActions(nameCell.locator(GRID_CELL_ANCESTOR));
 
-      const action = flyout.locator(`[data-test-subj="${actionTestSubj}-${fieldName}"]`);
+      // Not scoped to the flyout: the actions of `@kbn/data-grid` can open in a layer outside of it.
+      const action = this.page.testSubj.locator(`${actionTestSubj}-${fieldName}`);
       await action.waitFor({ state: 'visible' });
       await action.scrollIntoViewIfNeeded();
       await action.click();
@@ -407,14 +429,19 @@ export class DocViewer {
 
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
-    const gridCell = nameCell.locator('xpath=ancestor::*[@data-gridcell-column-id][1]');
+    const gridCell = nameCell.locator(GRID_CELL_ANCESTOR);
 
     await nameCell.evaluate((el) => {
       el.scrollIntoView({ block: 'center', inline: 'nearest' });
     });
 
     await gridCell.hover();
-    await gridCell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+    // EuiDataGrid shows the expand button of the hovered cell, `@kbn/data-grid` a trigger that expands
+    // the cell when clicked.
+    await gridCell
+      .locator(CELL_EXPAND_BUTTON_SELECTOR)
+      .or(gridCell.locator(CELL_ACTIONS_TRIGGER_SELECTOR))
+      .click();
 
     await this.page.testSubj.locator('euiDataGridExpansionPopover').waitFor({ state: 'visible' });
   }

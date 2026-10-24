@@ -117,7 +117,8 @@ export class SecurityDiscoverFlyout {
     this.iocOverviewTitle = page.testSubj.locator(TS.IOC_OVERVIEW_TITLE);
     this.attackHeaderTitle = page.testSubj.locator(TS.ATTACK_HEADER_TITLE);
     this.attackOverview = page.testSubj.locator(TS.ATTACK_OVERVIEW);
-    const dataGridBody = page.testSubj.locator('euiDataGridBody');
+    // The rows of the grid, EuiDataGrid or `@kbn/data-grid`.
+    const dataGridBody = page.locator('[role="grid"]');
     this.ruleNameCellLink = dataGridBody.locator(`[data-test-subj="${CR.RULE_NAME_LINK}"]`);
     this.ipCellLink = dataGridBody.locator(`[data-test-subj="${CR.IP_LINK}"]`);
     this.networkFlyoutTitle = page.testSubj.locator(CR.NETWORK_FLYOUT_TITLE);

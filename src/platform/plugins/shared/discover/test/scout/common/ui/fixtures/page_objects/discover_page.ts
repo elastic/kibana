@@ -10,7 +10,6 @@
 import type { Locator } from '@kbn/scout';
 import { DiscoverApp, resolveSelector } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { euiSelectors } from '@kbn/scout';
 
 const SAVE_MODAL_TIMEOUT = 30_000;
 
@@ -423,7 +422,7 @@ export class DiscoverPage extends DiscoverApp {
 
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
-    const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
+    const row = this.dataGrid.getRowByDataIndex(rowIndex);
     return await row.innerText();
   }
 
@@ -434,17 +433,14 @@ export class DiscoverPage extends DiscoverApp {
   async getDocTableField(index: number): Promise<string> {
     const rowIndex = index - 1;
     await this.page.testSubj.click('dataGridFullScreenButton');
-    const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
+    const row = this.dataGrid.getRowByDataIndex(rowIndex);
     const text = await row.innerText();
     await this.page.testSubj.click('dataGridFullScreenButton');
     return text.trim();
   }
 
   getDocHeaderLabels(): Locator {
-    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
-    return this.page.locator(
-      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
-    );
+    return this.dataGrid.getColumnTitleLabels();
   }
 
   async getDocHeader(): Promise<string[]> {
@@ -482,8 +478,11 @@ export class DiscoverPage extends DiscoverApp {
         }
         if (!cell.classList.contains('euiDataGridRowCell--controlColumn')) {
           const content =
-            cell.querySelector<HTMLElement>('.euiDataGridRowCell__content') ??
-            (cell as HTMLElement);
+            // The content element of EuiDataGrid or `@kbn/data-grid`, without the hidden markers
+            // the cells add for copying.
+            cell.querySelector<HTMLElement>(
+              '.euiDataGridRowCell__content, .kbnDataGrid__cellContent'
+            ) ?? (cell as HTMLElement);
           rows[rowIdx].push(content.innerText.trim());
         }
       });
@@ -498,7 +497,7 @@ export class DiscoverPage extends DiscoverApp {
   }
 
   async dragFieldToGrid(fieldName: string[]) {
-    const gridLocator = this.page.testSubj.locator('euiDataGridBody');
+    const gridLocator = this.dataGrid.getGrids(this.page.testSubj.locator('discoverDocTable'));
     for (const field of fieldName) {
       // Fields can appear in both "Popular fields" and the full field list.
       await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);

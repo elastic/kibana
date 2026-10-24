@@ -122,6 +122,7 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/unified-data-table'
+  - '@kbn/data-grid'
   - '@kbn/shared-ux-markdown'
   - '@kbn/licensing-plugin'
   - '@kbn/react-kibana-context-render'

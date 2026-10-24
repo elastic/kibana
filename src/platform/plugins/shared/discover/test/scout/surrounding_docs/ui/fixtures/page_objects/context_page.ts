@@ -31,7 +31,10 @@ export class ContextPage {
     this.predecessorsCountPicker = page.testSubj.locator('predecessorsCountPicker');
     this.successorsCountPicker = page.testSubj.locator('successorsCountPicker');
     this.docTable = page.testSubj.locator('discoverDocTable');
-    this.rows = this.docTable.locator('[data-grid-row-index]');
+    // Rows of data cells, which EuiDataGrid and `@kbn/data-grid` both mark with their row index.
+    this.rows = this.docTable.locator(
+      '[role="row"]:has([role="gridcell"][data-gridcell-row-index])'
+    );
   }
 
   async navigateTo(dataViewId: string, anchorId: string, overrideInitialState = {}) {
@@ -100,7 +103,9 @@ export class ContextPage {
   }
 
   async openRowActions(rowIndex: number) {
-    const row = this.page.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    const row = this.page.locator(
+      `[role="row"]:has([data-gridcell-visible-row-index="${rowIndex}"])`
+    );
     const expandButton = row.locator(
       '[data-test-subj="docTableExpandToggleColumn"], [data-test-subj="docTableExpandToggleColumnAnchor"]'
     );
@@ -139,7 +144,10 @@ export class ContextPage {
     return this.page.locator(anchorCellSelector).evaluateAll((cells) =>
       cells.map((cell) => {
         const content =
-          cell.querySelector<HTMLElement>('.euiDataGridRowCell__content') ?? (cell as HTMLElement);
+          // The content element of EuiDataGrid or `@kbn/data-grid`, without the hidden copy markers.
+          cell.querySelector<HTMLElement>(
+            '.euiDataGridRowCell__content, .kbnDataGrid__cellContent'
+          ) ?? (cell as HTMLElement);
         return content.innerText.trim();
       })
     );

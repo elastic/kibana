@@ -280,6 +280,7 @@ export function ContextAppContent({
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGrid
             ariaLabelledBy="surDocumentsAriaLabel"
+            isKbnDataGridEnabled={services.discoverFeatureFlags.getKbnDataGridEnabled()}
             renderCustomToolbar={renderCustomToolbar}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}

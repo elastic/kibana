@@ -44,15 +44,6 @@ const addFilterForFieldValueFromSidebar = async ({
   await dataGrid.waitForLoad();
 };
 
-const firstRowTimestampCell = (page: ScoutPage) =>
-  page.locator('[data-grid-visible-row-index="0"] [data-gridcell-column-id="@timestamp"]');
-
-const getColumnTitles = async (page: ScoutPage): Promise<string[]> => {
-  const titles = await page.locator('.euiDataGridHeaderCell__content').allInnerTexts();
-
-  return titles.map((title) => title.trim());
-};
-
 const normalizeTimestamp = (timestamp: string) => timestamp.replace('↦', '').trim();
 
 const openAnchorDocumentDetails = async (
@@ -107,7 +98,9 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
       await pageObjects.dataGrid.waitForLoad();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
-      const firstTimestamp = normalizeTimestamp(await firstRowTimestampCell(page).innerText());
+      const firstTimestamp = normalizeTimestamp(
+        await pageObjects.dataGrid.getCell(0, '@timestamp').innerText()
+      );
 
       await pageObjects.docViewer.openSurroundingDocuments(0);
       await expect(page).toHaveURL(/#\/context/);
@@ -115,7 +108,9 @@ spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-
 
       // Covers the original FTR assertions for same columns, disabled filters, toolbar,
       // and selected document as anchor in one independent context-navigation flow.
-      await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', CONTEXT_COLUMN]);
+      await expect
+        .poll(() => pageObjects.dataGrid.getColumnTitles())
+        .toStrictEqual(['@timestamp', CONTEXT_COLUMN]);
       await expect(page.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
 
       for (const filter of CONTEXT_FILTERS) {

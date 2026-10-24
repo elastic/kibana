@@ -65,6 +65,14 @@ export const lensFeatureFlags = {
     type: 'boolean',
     fallback: false as boolean,
   },
+  /**
+   * Renders the Lens table visualization with the generic `@kbn/data-grid` instead of EuiDataGrid.
+   */
+  enableTanstackDatatable: {
+    id: 'lens.enableTanstackDatatable',
+    type: 'boolean',
+    fallback: false as boolean,
+  },
 } satisfies Record<string, LensFeatureFlag>;
 
 export type LensFeatureFlags = GetFlagTypes<typeof lensFeatureFlags>;

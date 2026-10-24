@@ -28,22 +28,56 @@ const DOCUMENTS_DISPLAY_MODE_TEST_SUBJS: Readonly<Record<DataGridDocumentsDispla
   JSON: 'unifiedDataTableViewModeSettings_viewMode_json',
 };
 
+/**
+ * Selectors both EuiDataGrid and `@kbn/data-grid` (`discover.kbnDataGridEnabled`) match: their cells
+ * carry the id of their column and the index of their row in the page, their rows are ARIA rows.
+ */
+const getCellSelector = (rowIndex: number, columnId: string) =>
+  `[data-gridcell-visible-row-index="${rowIndex}"][data-gridcell-column-id="${columnId}"]`;
+const getRowSelector = (rowIndex: number) =>
+  `[role="row"]:has([data-gridcell-visible-row-index="${rowIndex}"])`;
+// The index of the row in the data, unlike the visible one not changed by pagination.
+const getDataRowSelector = (rowIndex: number) =>
+  `[role="row"]:has([role="gridcell"][data-gridcell-row-index="${rowIndex}"])`;
+const DATA_ROW_SELECTOR = '[role="row"]:has([role="gridcell"][data-gridcell-row-index])';
+const HEADER_ROW_SELECTOR = '[role="row"]:has([role="columnheader"])';
+const GRID_SELECTOR = '[role="grid"]';
+// EuiDataGrid gives its header cells a row index too: only rows of grid cells hold data.
+const BODY_ROW_SELECTOR = '[role="row"]:has([role="gridcell"][data-gridcell-visible-row-index])';
+// The element that scrolls the rows, in both grids.
+const VIRTUALIZED_GRID_SELECTOR = '.euiDataGrid__virtualized';
+// EuiDataGrid marks the headers of control columns with this class, the adapter of `@kbn/data-grid` too.
+const HEADER_CELL_CLASS = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
+const DATA_COLUMN_HEADER_SELECTOR = `[role="columnheader"]:not(${HEADER_CELL_CLASS}--controlColumn)`;
+// The title of a data column: EuiDataGrid keeps it in a content element next to screen-reader-only
+// text, the headers of `@kbn/data-grid` hold nothing but the title.
+const DATA_COLUMN_TITLE_SELECTOR = [
+  `${DATA_COLUMN_HEADER_SELECTOR} ${HEADER_CELL_CLASS}__content`,
+  `${DATA_COLUMN_HEADER_SELECTOR}:not(:has(${HEADER_CELL_CLASS}__content))`,
+].join(', ');
+const CELL_EXPAND_BUTTON_SELECTOR = '[data-test-subj="euiDataGridCellExpandButton"]';
+// `@kbn/data-grid` collapses the actions of a cell, the expand button included, behind this trigger.
+// Clicking it expands the cell, hovering it shows the actions.
+const CELL_ACTIONS_TRIGGER_SELECTOR = '[data-test-subj="kbnDataGridCellActionsButton"]';
+
+/**
+ * Accepts the wording of the sort actions of EuiDataGrid (`Sort A-Z`) and of `@kbn/data-grid`
+ * (`Sort A → Z`), which differ for strings only.
+ */
+const getSortOptionName = (sortOption: string): string | RegExp => {
+  const match = sortOption.match(/^Sort ([AZ])-([AZ])$/);
+  return match ? new RegExp(`^Sort ${match[1]}( → |-)${match[2]}$`) : sortOption;
+};
+
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
 
   private getRowSelectionCheckbox(rowIndex: number): Locator {
-    return this.page.locator(
-      `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] input[type="checkbox"]`
-    );
+    return this.page.locator(`${getCellSelector(rowIndex, 'select')} input[type="checkbox"]`);
   }
 
   private async readHeaderLabels(scope: Locator, limit: number): Promise<string[]> {
-    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
-    const headerCellContent = scope.locator(
-      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
-    );
-
-    const labels = await headerCellContent.allInnerTexts();
+    const labels = await scope.locator(DATA_COLUMN_TITLE_SELECTOR).allInnerTexts();
     return labels
       .map((label) => label.trim())
       .filter(Boolean)
@@ -133,7 +167,8 @@ export class DataGrid {
       await this.page.keyboard.press('Escape');
       await expect(expansionPopover).toBeHidden();
     }
-    const expandButton = cell.locator('[data-test-subj="euiDataGridCellExpandButton"]');
+    const expandButton = cell.locator(CELL_EXPAND_BUTTON_SELECTOR);
+    const actionsTrigger = cell.locator(CELL_ACTIONS_TRIGGER_SELECTOR);
     // A refetch can remount the cell (e.g. a grid embedded in a dashboard). The remounted
     // node gets no mouseenter under a stationary cursor, so its expand button stays hidden
     // and a pending click waits on a detached element; a remount right after the click takes
@@ -143,7 +178,9 @@ export class DataGrid {
     await expect(async () => {
       if (await expansionPopover.isVisible()) return;
       await cell.hover();
-      await expandButton.click({ timeout: 2_000 });
+      // EuiDataGrid shows the expand button of the hovered cell, `@kbn/data-grid` a trigger that
+      // expands the cell when clicked.
+      await expandButton.or(actionsTrigger).click({ timeout: 2_000 });
       await expect(expansionPopover).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 20_000 });
   }
@@ -176,9 +213,32 @@ export class DataGrid {
   }
 
   getCell(rowIndex: number, columnId: string): Locator {
-    return this.page.locator(
-      `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="${columnId}"]`
-    );
+    return this.page.locator(getCellSelector(rowIndex, columnId));
+  }
+
+  /** The titles of the data columns (without the control columns), works for both grids. */
+  getColumnTitleLabels(scope?: Locator): Locator {
+    return (scope ?? this.page.locator(':root')).locator(DATA_COLUMN_TITLE_SELECTOR);
+  }
+
+  /** A row by its index in the data, not changed by pagination. */
+  getRowByDataIndex(rowIndex: number, scope?: Locator): Locator {
+    return (scope ?? this.page.locator(':root')).locator(getDataRowSelector(rowIndex));
+  }
+
+  /** A row by its index in the current page. */
+  getRowByVisibleIndex(rowIndex: number, scope?: Locator): Locator {
+    return (scope ?? this.page.locator(':root')).locator(getRowSelector(rowIndex));
+  }
+
+  /** The rendered data rows, the header excluded. Grids only render the rows in view. */
+  getRenderedRows(scope?: Locator): Locator {
+    return (scope ?? this.page.locator(':root')).locator(DATA_ROW_SELECTOR);
+  }
+
+  /** The grids on the page, each with its header and rows, e.g. to scope locators or as a drop target. */
+  getGrids(scope?: Locator): Locator {
+    return (scope ?? this.page.locator(':root')).locator(GRID_SELECTOR);
   }
 
   /**
@@ -187,11 +247,9 @@ export class DataGrid {
    * multi-attribute selector when you need to count or compare cells across multiple grid instances.
    */
   getCellsAtVisibleRowIndex(columnId: string, visibleRowIndex: number): Locator {
-    return this.page.testSubj
-      .locator('euiDataGridBody')
-      .locator(
-        `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnId}"][data-gridcell-visible-row-index="${visibleRowIndex}"]`
-      );
+    return this.getGrids().locator(
+      `[role="gridcell"][data-gridcell-column-id="${columnId}"][data-gridcell-visible-row-index="${visibleRowIndex}"]`
+    );
   }
 
   /**
@@ -274,9 +332,7 @@ export class DataGrid {
    * indexing a page-wide list would depend on how many rows and grids the page happens to render.
    */
   getRowLeadingControl(rowIndex: number, controlTestSubj: string): Locator {
-    return this.page.locator(
-      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="${controlTestSubj}"]`
-    );
+    return this.page.locator(`${getRowSelector(rowIndex)} [data-test-subj="${controlTestSubj}"]`);
   }
 
   async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DataGridRowHeight> {
@@ -329,9 +385,7 @@ export class DataGrid {
 
   async getDataGridHeaderFieldTokens(limit = 10): Promise<string[]> {
     await this.waitForDocTableRendered();
-    const header = this.page.testSubj
-      .locator('euiDataGridBody')
-      .locator('[data-test-subj="dataGridHeader"]');
+    const header = this.getGrids().locator(HEADER_ROW_SELECTOR);
     await header.waitFor({ state: 'visible' });
     return this.readHeaderLabels(header, limit);
   }
@@ -340,7 +394,26 @@ export class DataGrid {
     await this.waitForDocTableRendered();
     const table = this.page.testSubj.locator('docTable');
     await table.waitFor({ state: 'visible' });
-    return table.locator('.euiDataGridRowCell--firstColumn').count();
+    // Grids only render the rows in view, how many depends on the grid: scroll to the end and read the
+    // index of the last row in the page, then scroll back.
+    const scroller = table.locator(VIRTUALIZED_GRID_SELECTOR);
+    const scrollToRows = (position: 'end' | 'start') =>
+      scroller.evaluate(
+        (element, to) =>
+          new Promise<void>((resolve) => {
+            element.scrollTop = to === 'end' ? element.scrollHeight : 0;
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          }),
+        position
+      );
+    await scrollToRows('end');
+    const rowIndexes = await table
+      .locator('[data-gridcell-visible-row-index]')
+      .evaluateAll((cells) =>
+        cells.map((cell) => Number(cell.getAttribute('data-gridcell-visible-row-index')))
+      );
+    await scrollToRows('start');
+    return rowIndexes.length > 0 ? Math.max(...rowIndexes) + 1 : 0;
   }
 
   getDocumentColumnFieldValue(rowIndex: number, fieldName: string): Locator {
@@ -390,7 +463,7 @@ export class DataGrid {
   async getNumberOfSelectedRowsOnCurrentPage(): Promise<number> {
     return this.page
       .locator(
-        `${euiSelectors.dataGrid.ROW_SELECTOR} [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
+        `${BODY_ROW_SELECTOR} [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
       )
       .count();
   }
@@ -519,7 +592,7 @@ export class DataGrid {
 
   async getComparisonRow(rowIndex: number): Promise<{ fieldName: string; values: string[] }> {
     const comparisonGrid = this.page.testSubj.locator('unifiedDataTableCompareDocuments');
-    const row = comparisonGrid.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    const row = comparisonGrid.locator(getRowSelector(rowIndex));
     const fieldName = (
       await row.locator('[data-test-subj="unifiedDataTableComparisonFieldName"]').innerText()
     ).trim();
@@ -533,7 +606,7 @@ export class DataGrid {
     colIndex: number
   ): Promise<Array<{ decoration: 'removed' | 'added' | undefined; value: string }>> {
     const comparisonGrid = this.page.testSubj.locator('unifiedDataTableCompareDocuments');
-    const row = comparisonGrid.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    const row = comparisonGrid.locator(getRowSelector(rowIndex));
     // showDiffDecorations controls CSS text-decoration only (not DOM classes),
     // so we read computed style to detect decoration state faithfully.
     return row.evaluate((rowEl, colIdx) => {
@@ -601,7 +674,7 @@ export class DataGrid {
 
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
     const expandButton = this.page.locator(
-      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
+      `${getRowSelector(rowIndex)} [data-test-subj="docTableExpandToggleColumn"]`
     );
 
     await expandButton.waitFor({ state: 'visible' });
@@ -758,6 +831,6 @@ export class DataGrid {
    */
   async sortColumn(field: string, sortOption: string) {
     await this.openColumnMenuByField(field);
-    await this.page.getByRole('button', { name: sortOption }).click();
+    await this.page.getByRole('button', { name: getSortOptionName(sortOption) }).click();
   }
 }

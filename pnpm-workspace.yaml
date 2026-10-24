@@ -782,6 +782,7 @@ packages:
   - 'src/platform/packages/shared/kbn-cypress-config'
   - 'src/platform/packages/shared/kbn-cypress-test-helper'
   - 'src/platform/packages/shared/kbn-dag-layout'
+  - 'src/platform/packages/shared/kbn-data-grid'
   - 'src/platform/packages/shared/kbn-data-grid-in-table-search'
   - 'src/platform/packages/shared/kbn-data-service'
   - 'src/platform/packages/shared/kbn-data-service-server'
