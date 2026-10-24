@@ -7,7 +7,14 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { esqlGenerationDataset } from '../dataset';
 import { esqlFixtureDocumentRequests } from './documents';
+import {
+  enrichPolicyNamesInGoldQueries,
+  esqlFixtureEnrichIndexWildcards,
+  esqlFixtureEnrichPolicies,
+  goldQueriesFromDataset,
+} from './enrich';
 import { esqlFixtureIndexWildcards, esqlFixtureIndicesCreateRequests } from './indices';
 
 /**
@@ -29,6 +36,12 @@ import { esqlFixtureIndexWildcards, esqlFixtureIndicesCreateRequests } from './i
  * `verification_exception` from missing indices). Surfacing the failure
  * here lets CI fail loudly instead of silently regressing to a fully
  * non-executable suite.
+ *
+ * The same rule applies to the enrichment policies the gold queries
+ * reference (see `./enrich.ts`): a gold whose `ENRICH` step resolves to
+ * nothing is equally unexecutable, so the policies are installed here and
+ * every gold's `ENRICH` target is asserted to resolve before the dataset
+ * runs.
  */
 export async function setupEsqlFixtures({
   esClient,
@@ -37,10 +50,15 @@ export async function setupEsqlFixtures({
   esClient: EsClient;
   log: ToolingLog;
 }): Promise<void> {
+  const indexCreateRequests = [
+    ...esqlFixtureIndicesCreateRequests,
+    ...esqlFixtureEnrichPolicies.map((fixture) => fixture.sourceIndexCreateRequest),
+  ];
+
   log.info('[esql-regression] creating fixture indices');
 
   await Promise.all(
-    esqlFixtureIndicesCreateRequests.map(async (request) => {
+    indexCreateRequests.map(async (request) => {
       try {
         await esClient.indices.create(request);
       } catch (err) {
@@ -56,11 +74,21 @@ export async function setupEsqlFixtures({
     })
   );
 
+  const documentRequests = [
+    ...esqlFixtureDocumentRequests,
+    ...esqlFixtureEnrichPolicies.flatMap((fixture) =>
+      fixture.sourceDocuments.map((document) => ({
+        index: fixture.sourceIndexCreateRequest.index,
+        document,
+      }))
+    ),
+  ];
+
   log.info(
-    `[esql-regression] indexing ${esqlFixtureDocumentRequests.length} sample documents (APM fixtures)`
+    `[esql-regression] indexing ${documentRequests.length} sample documents (APM fixtures + enrich lookups)`
   );
 
-  for (const request of esqlFixtureDocumentRequests) {
+  for (const request of documentRequests) {
     try {
       await esClient.index({ ...request, refresh: 'wait_for' });
     } catch (err) {
@@ -71,10 +99,75 @@ export async function setupEsqlFixtures({
   }
 
   await esClient.indices.refresh({
-    index: esqlFixtureIndicesCreateRequests
+    index: indexCreateRequests
       .map((req) => req.index)
-      .concat(esqlFixtureDocumentRequests.map((req) => req.index)),
+      .concat(documentRequests.map((req) => req.index)),
   });
+
+  await installEnrichPolicies({ esClient, log });
+}
+
+/**
+ * Install and execute the enrichment policies the gold queries reference,
+ * then prove each one resolves by running a probe query derived from the
+ * policy itself.
+ *
+ * `enrich.putPolicy` alone is not enough: an unexecuted policy has no enrich
+ * index, so `ENRICH` still fails — the probe is what makes "installed" mean
+ * "usable". Any failure is fatal, because the alternative is a run whose
+ * `ES|QL Result Equivalence` scores are decided by the fixture gap.
+ */
+async function installEnrichPolicies({
+  esClient,
+  log,
+}: {
+  esClient: EsClient;
+  log: ToolingLog;
+}): Promise<void> {
+  const goldPolicies = enrichPolicyNamesInGoldQueries(
+    goldQueriesFromDataset(esqlGenerationDataset)
+  );
+  const installedPolicies = new Set(esqlFixtureEnrichPolicies.map((fixture) => fixture.policyName));
+
+  const missing = goldPolicies.filter((name) => !installedPolicies.has(name));
+  if (missing.length > 0) {
+    throw new Error(
+      `[esql-regression] dataset gold queries reference enrich policies no fixture installs: ${missing.join(
+        ', '
+      )}. Add them to src/fixtures/enrich.ts — an unprovisioned policy makes the gold unexecutable on every model.`
+    );
+  }
+
+  for (const fixture of esqlFixtureEnrichPolicies) {
+    log.info(`[esql-regression] installing enrich policy ${fixture.policyName}`);
+
+    try {
+      await esClient.enrich.putPolicy({ name: fixture.policyName, match: fixture.policy });
+      await esClient.enrich.executePolicy({
+        name: fixture.policyName,
+        wait_for_completion: true,
+      });
+    } catch (err) {
+      throw new Error(`[esql-regression] failed to install enrich policy "${fixture.policyName}"`, {
+        cause: err instanceof Error ? err : new Error(String(err)),
+      });
+    }
+  }
+
+  for (const fixture of esqlFixtureEnrichPolicies) {
+    try {
+      await esClient.esql.query({ query: fixture.probeQuery });
+    } catch (err) {
+      throw new Error(
+        `[esql-regression] enrich policy "${fixture.policyName}" does not resolve on the cluster; gold queries that use it cannot execute. Probe query: ${fixture.probeQuery}`,
+        { cause: err instanceof Error ? err : new Error(String(err)) }
+      );
+    }
+  }
+
+  log.info(
+    `[esql-regression] ${esqlFixtureEnrichPolicies.length} enrich policies installed and verified`
+  );
 }
 
 /**
@@ -90,6 +183,10 @@ export async function setupEsqlFixtures({
  * Tolerates missing indices (`ignore_unavailable: true` on resolve) so a
  * partially-completed setup doesn't cascade into a fixture leak on the
  * next run.
+ *
+ * The enrichment policies go first: deleting a policy removes its
+ * `.enrich-*` index, and a policy left behind would leak into the next
+ * run's cluster state (changing what a gold resolves to).
  */
 export async function cleanupEsqlFixtures({
   esClient,
@@ -100,8 +197,22 @@ export async function cleanupEsqlFixtures({
 }): Promise<void> {
   log.info('[esql-regression] cleaning up fixture indices');
 
+  for (const fixture of esqlFixtureEnrichPolicies) {
+    try {
+      await esClient.enrich.deletePolicy({ name: fixture.policyName }, { ignore: [404] });
+      log.debug(`[esql-regression] deleted enrich policy: ${fixture.policyName}`);
+    } catch (err) {
+      log.warning(
+        new Error(
+          `[esql-regression] cleanup failed to delete enrich policy ${fixture.policyName} — continuing`,
+          { cause: err instanceof Error ? err : new Error(String(err)) }
+        )
+      );
+    }
+  }
+
   const resolveResponses = await Promise.all(
-    esqlFixtureIndexWildcards.map(async (pattern) => {
+    [...esqlFixtureIndexWildcards, ...esqlFixtureEnrichIndexWildcards].map(async (pattern) => {
       try {
         return await esClient.indices.resolveIndex({
           name: pattern,
