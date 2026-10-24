@@ -263,7 +263,83 @@ selection alone does not restart Scout. `run` and `start --skip-server` use your
 whose Task Manager capacity you must configure yourself. Wait for any active eval to finish before
 restarting a shared local stack.
 
-## Remote telemetry investigations
+## Telemetry targets
+
+An investigation selects its telemetry source with `input.telemetry_target` on its eval example.
+Named targets coexist on one Scout stack, so a weekly job can run c0 and ORCA examples together.
+The target selects the sandbox connector and its readable-index guidance; `connector_id` on the
+investigation request continues to select the LLM.
+
+Configure both sources in the profile's Vault config (or private local profile JSON), alongside
+`sandbox`:
+
+```json
+"nightshift": {
+  "defaultTelemetryTarget": "c0",
+  "telemetryTargets": {
+    "c0": {
+      "url": "https://customer0.example.com",
+      "apiKey": "...",
+      "readableIndices": "Read remote-a:logs-service-*"
+    },
+    "orca": {
+      "url": "https://orca.example.com",
+      "apiKey": "...",
+      "readableIndices": "Read logs-orcabench.*, metrics-orcabench.*, traces-orcabench.*"
+    }
+  }
+}
+```
+
+Each named block supplies its own URL and API key; named credentials are never completed from the
+shell. Names start with a lowercase letter and contain only lowercase letters, digits, underscores
+and hyphens, up to 64 characters. At most 20 named targets are supported. `none` is reserved for
+investigations that need no telemetry. URLs with embedded credentials and unknown default targets
+fail before Scout starts.
+
+The hook exports every configured target's URL, key and index hint. It generates a config file
+under `target/nightshift-evals-telemetry/` containing only names and environment references; no
+credential values or index hints are written to that file. Existing preconfigured connectors are
+preserved. Changing any target's settings makes a reused Scout stack stale; changing an example's
+target does not restart Scout. The hook requires `jq` and `shasum`.
+
+Examples from both sources can share one examples file or stored dataset:
+
+```json
+{
+  "dataset": "nightshift/mixed-investigations",
+  "examples": [
+    {
+      "input": { "question": "Investigate the c0 incident in its incident window.", "telemetry_target": "c0" },
+      "metadata": { "case_id": "c0-incident" }
+    },
+    {
+      "input": { "question": "Investigate the ORCA incident in its incident window.", "telemetry_target": "orca" },
+      "metadata": { "case_id": "orca-incident" }
+    }
+  ]
+}
+```
+
+The plugin reads `sandbox.telemetry_targets.<name>.connector_id` and optional `readable_indices`
+from Kibana config. `sandbox.default_telemetry_target` supplies an optional default. The hook fills
+these settings from the profile blocks above. An omitted target preserves the existing
+`nightshift.telemetry` connector unless a default is configured. Defaults are applied only when
+creating a conversation; older conversations without target metadata keep the legacy connector.
+Explicit `none` selects no configured telemetry connector; bundled synthetic examples use it.
+
+All investigations use the single `nightshift.investigation` agent. The conversation stores
+`telemetry_target` in its initial metadata alongside the creating workflow run. Later turns retain
+that target, and an existing investigation cannot switch to a different one. The agent type allows
+all configured telemetry connectors; the sandbox workspace manager reads the conversation metadata
+and narrows the per-call connector list before writing manifests, resolving credentials, or loading
+the output redactor. Only the selected connector's authorized hint reaches `/workspace/elastic.md`.
+Decision-tree reinforcement uses the same conversation target. Unknown targets fail before execution.
+Custom sandbox agents keep selection through their own connector allow-list. Legacy investigations
+retain the sandbox-secret fallback when no telemetry connector is usable; named targets and `none`
+do not fall back to a different Elasticsearch source.
+
+### Legacy remote telemetry configuration
 
 Use the same `trace-only` selection, dataset loader, investigation task, placeholder evaluator and
 trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry
@@ -290,9 +366,11 @@ reads it without adding Nightshift fields to the shared CLI or global config sch
 }
 ```
 
-`url` and `apiKey` are required together; `readableIndices` is optional. Profile values take
-precedence over the following shell fallbacks. The hook selects the telemetry YAML only when the
-URL and key are configured, and requires sandbox credentials for remote investigations.
+`url` and `apiKey` are required together; `readableIndices` is optional. The URL and key come from
+the profile block, or from the shell variables below when the block has neither. A profile URL is
+never paired with a shell key or the other way round; the hook used to accept that mix and now
+fails. `readableIndices` falls back to the shell on its own. The hook also fails when `url` embeds
+credentials, and requires sandbox credentials for remote investigations.
 
 | Variable | Purpose |
 | --- | --- |
@@ -556,7 +634,9 @@ The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and
 `view_index_metadata` on `logs-orcabench.otel-*`, `traces-orcabench.otel-*` and
 `metrics-orcabench.otel-*`. An optional `readableIndices` in that block replaces the index hint
-the agent's manifest gets.
+the agent's manifest gets. The ORCA shard ignores `nightshift.defaultTelemetryTarget` and binds
+its legacy telemetry connector to this block, so a profile's `c0` or `none` default cannot
+redirect the benchmark. Configured named targets remain available for explicit selection.
 
 - The dataset's ID, case count and content digest are pinned in
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any

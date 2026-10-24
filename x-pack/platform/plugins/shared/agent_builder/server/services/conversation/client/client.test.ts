@@ -2328,6 +2328,125 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('immutable metadata', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      getTemplateMock.mockReturnValue(
+        makeTemplate('investigation', {
+          telemetry_target: { input_type: 'TEXT', immutable: true },
+          summary: { input_type: 'TEXT' },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'investigation',
+          metadata: { telemetry_target: 'orca' },
+        })
+      );
+    });
+
+    it.each(['c0', 'none', ''])('rejects changing the target to %p', async (target) => {
+      await expect(
+        client.patchMetadata(
+          'conversation-1',
+          { telemetry_target: target, summary: 'must not be written' },
+          { source: 'http_api' }
+        )
+      ).rejects.toThrow('field "telemetry_target" is immutable');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects assigning a target to a legacy investigation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({ templateId: 'investigation' })
+      );
+      await expect(
+        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'workflow' })
+      ).rejects.toThrow('field "telemetry_target" is immutable');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows trusted writers to replace metadata without template validation', async () => {
+      await client.update(
+        { id: 'conversation-1', metadata: { telemetry_target: 'c0' } },
+        { source: 'workflow' }
+      );
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+        telemetry_target: 'c0',
+      });
+    });
+
+    it('revalidates against stored metadata after an OCC conflict', async () => {
+      mockGetDocumentResponseOnce(
+        createConversationDocumentWithTemplate({
+          templateId: 'investigation',
+          metadata: { telemetry_target: 'orca' },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'investigation',
+          metadata: { telemetry_target: 'c0' },
+        })
+      );
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+
+      await expect(
+        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'http_api' })
+      ).rejects.toThrow('field "telemetry_target" is immutable');
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows the same target alongside unrelated metadata updates', async () => {
+      const { changedFields } = await client.patchMetadata(
+        'conversation-1',
+        { telemetry_target: 'orca', summary: 'Updated summary' },
+        { source: 'http_api' }
+      );
+      expect(changedFields).toEqual(['summary']);
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+        telemetry_target: 'orca',
+        summary: 'Updated summary',
+      });
+    });
+
+    it.each<Record<string, SerializedMetadataValue>>([{ telemetry_target: 'orca' }, {}])(
+      'preserves the target binding when reapplying the template: %p',
+      async (metadata) => {
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({ templateId: 'investigation', metadata })
+        );
+        await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
+        expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual(metadata);
+      }
+    );
+
+    it('allows template migrations to add an immutable field with a default', async () => {
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({ templateId: 'investigation' })
+      );
+      getTemplateMock.mockReturnValue(
+        makeTemplate('investigation', {
+          telemetry_target: { input_type: 'TEXT', immutable: true, default_value: 'orca' },
+        })
+      );
+      await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+        telemetry_target: 'orca',
+      });
+    });
+
+    it('allows template migrations to remove an immutable field', async () => {
+      getTemplateMock.mockReturnValue(
+        makeTemplate('investigation', { summary: { input_type: 'TEXT', default_value: 'Summary' } })
+      );
+
+      await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({ summary: 'Summary' });
+    });
+  });
+
   describe('patchMetadata', () => {
     beforeEach(() => {
       jest.clearAllMocks();

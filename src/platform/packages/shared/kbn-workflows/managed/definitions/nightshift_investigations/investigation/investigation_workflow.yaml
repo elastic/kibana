@@ -74,6 +74,10 @@ triggers:
           description: >
             Subjects to record on the investigation (alerts, significant events, questions), as
             the start API passes them. Without it the subject is derived from the context.
+        telemetry_target:
+          type: string
+          maxLength: 64
+          description: Named sandbox telemetry target; none disables telemetry for this investigation.
         notificationDestinations:
           type: array
           maxItems: 5

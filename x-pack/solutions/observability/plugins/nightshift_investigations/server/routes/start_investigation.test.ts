@@ -204,3 +204,37 @@ it('returns bad request for runtime notification validation failures', async () 
     } as never)
   ).rejects.toMatchObject({ output: { statusCode: 400 } });
 });
+
+it.each(['c0', 'orca', 'none'])(
+  'accepts the telemetry target %s independently of the model',
+  async (target) => {
+    const body = schema.parse({
+      subject: { type: 'manual' },
+      message: 'Investigate',
+      connector_id: 'model',
+      telemetry_target: target,
+    });
+    await handler({
+      request: {},
+      getInvestigationsClient,
+      getAlertsClient,
+      params: { body },
+    } as never);
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({ connector_id: 'model', telemetry_target: target })
+    );
+  }
+);
+
+it.each(['', 'UPPERCASE', 'a'.repeat(65), '../orca'])(
+  'rejects malformed telemetry target names',
+  (target) => {
+    expect(
+      schema.safeParse({
+        subject: { type: 'manual' },
+        message: 'Investigate',
+        telemetry_target: target,
+      }).success
+    ).toBe(false);
+  }
+);

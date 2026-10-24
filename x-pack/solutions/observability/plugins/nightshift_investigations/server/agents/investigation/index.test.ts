@@ -248,3 +248,22 @@ describe('Nightshift investigation agent type', () => {
     });
   });
 });
+
+it('allows configured telemetry connectors on the single investigator type', () => {
+  const base = staticBase(
+    getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: false,
+      ...ALL_PLUGINS,
+      telemetryConfig: {
+        telemetry_connector_id: 'legacy',
+        telemetry_targets: {
+          c0: { connector_id: 'customer0' },
+          orca: { connector_id: 'orca' },
+          alias: { connector_id: 'orca' },
+        },
+      },
+    })
+  );
+  expect(base.connector_ids).toEqual(['legacy', 'customer0', 'orca']);
+});

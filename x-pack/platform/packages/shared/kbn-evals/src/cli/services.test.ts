@@ -17,6 +17,7 @@ import {
   isEdotStale,
   isScoutStale,
   scoutEnvHash,
+  startService,
   stopService,
 } from './services';
 
@@ -168,6 +169,40 @@ describe('isScoutStale', () => {
     writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
 
     expect(isScoutStale(repoRoot, undefined, {}).stale).toBe(true);
+  });
+
+  it('restarts a Scout whose suite scoutHook output changed, without naming the values', () => {
+    writeScoutState({ envHash: scoutEnvHash({ SUITE_API_KEY: 'started-key' }) });
+
+    expect(isScoutStale(repoRoot, undefined, { SUITE_API_KEY: 'SECRET_ROTATED_KEY' })).toEqual({
+      stale: true,
+      reason: "TRACING_EXPORTERS, GCS_CREDENTIALS or the suite's scoutHook output changed",
+    });
+  });
+});
+
+describe('startService', () => {
+  let repoRoot: string;
+
+  beforeEach(() => {
+    repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-services-'));
+  });
+
+  afterEach(() => {
+    Fs.rmSync(repoRoot, { recursive: true, force: true });
+  });
+
+  it('persists only a hash of the env a service was started with', () => {
+    const env = { SUITE_API_KEY: 'SECRET_SUITE_KEY', GCS_CREDENTIALS: 'SECRET_GCS_JSON' };
+
+    startService(repoRoot, 'scout', process.execPath, ['-e', ''], new ToolingLog(), {
+      envHash: scoutEnvHash(env),
+      env,
+    });
+
+    const state = Fs.readFileSync(Path.join(repoRoot, 'target/evals/services.json'), 'utf8');
+    expect(JSON.parse(state).scout.envHash).toBe(scoutEnvHash(env));
+    expect(state).not.toContain('SECRET');
   });
 });
 

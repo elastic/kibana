@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
@@ -22,7 +22,10 @@ export const decisionTreePrepareStepDefinition = ({
   logger,
   isEnabled,
 }: {
-  getTelemetryConnectorId: () => string | undefined;
+  getTelemetryConnectorId: (
+    request: KibanaRequest,
+    conversationId?: string
+  ) => string | undefined | Promise<string | undefined>;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -34,6 +37,7 @@ export const decisionTreePrepareStepDefinition = ({
       'Builds the closing reinforcement message for a completed investigation round: the decision ' +
       'trees available to edit, the learnings already on file, and the turn script.',
     inputSchema: z.object({
+      conversation_id: z.string().max(512).optional(),
       response: z
         .string()
         .max(MAX_INPUT_CHARS)
@@ -87,7 +91,10 @@ export const decisionTreePrepareStepDefinition = ({
         return skippedOutput;
       }
 
-      const telemetryConnectorId = getTelemetryConnectorId();
+      const telemetryConnectorId = await getTelemetryConnectorId(
+        context.contextManager.getFakeRequest(),
+        context.input.conversation_id
+      );
       const { spaceId } = context.contextManager.getContext().workflow;
       const { message, treeCount, turnKind } = await prepareReinforcementTurn({
         response,
