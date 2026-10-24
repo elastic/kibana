@@ -19,7 +19,12 @@ import {
   registerSignalGeneratorTaskDefinition,
   scheduleSignalGenerator,
 } from './signal_generator_task';
-import { buildConvAgentMap, spaceFromTracesIndex } from './traces_repository';
+import { errors } from '@elastic/elasticsearch';
+import {
+  buildConvAgentMap,
+  isEsqlUnknownColumnError,
+  spaceFromTracesIndex,
+} from './traces_repository';
 
 describe('spaceFromTracesIndex', () => {
   it('derives space from the data-stream name', () => {
@@ -55,6 +60,161 @@ describe('buildConvAgentMap', () => {
       { trace_id: 'trace-1', 'attributes.gen_ai.agent.id': 'agent-b' },
     ]);
     expect(map.get('trace-1')?.id).toBe('agent-a');
+  });
+});
+
+describe('isEsqlUnknownColumnError', () => {
+  const responseError = (statusCode: number, type: string, reason: string) =>
+    new errors.ResponseError({
+      warnings: [],
+
+      meta: {} as any,
+      statusCode,
+      body: { error: { type, reason } },
+    });
+
+  it('matches the verification_exception ES|QL emits for a missing column', () => {
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 1 problem\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]'
+        )
+      )
+    ).toBe(true);
+  });
+
+  it('matches when both optional tool-detail columns are unknown together', () => {
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 2 problems\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]\nline 6:147: Unknown column [attributes.gen_ai.tool.call.result]'
+        )
+      )
+    ).toBe(true);
+  });
+
+  it('does not match other verification errors', () => {
+    expect(
+      isEsqlUnknownColumnError(responseError(400, 'verification_exception', 'Unknown index [x]'))
+    ).toBe(false);
+    expect(
+      isEsqlUnknownColumnError(responseError(404, 'verification_exception', 'Unknown column [x]'))
+    ).toBe(false);
+    expect(
+      isEsqlUnknownColumnError(responseError(400, 'parse_exception', 'Unknown column [x]'))
+    ).toBe(false);
+    expect(isEsqlUnknownColumnError(new Error('Unknown column [x]'))).toBe(false);
+  });
+
+  it('does not match an unknown column outside the optional tool-detail set (a real regression)', () => {
+    // A misspelled/renamed *required* column (e.g. trace_id, @timestamp) must
+    // NOT be swallowed into an empty batch — this is exactly the case the
+    // reviewer flagged: runEsqlQuery is shared by execute-tool, invoke-agent,
+    // and self-analysis queries, so a broken required column anywhere must
+    // surface as a real failure.
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 1 problem\nline 1:1: Unknown column [trace_id]'
+        )
+      )
+    ).toBe(false);
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 1 problem\nline 1:1: Unknown column [attributes.gen_ai.agent.id]'
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('does not match when an optional column is unknown alongside a genuinely unknown column', () => {
+    // Mixed case: one known-optional column plus one unrelated/unexpected
+    // column in the same verification_exception. The whole error must be
+    // treated as a real failure, not partially forgiven.
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 2 problems\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]\nline 7:1: Unknown column [@timestamp]'
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('does not match when an allowed missing column is reported alongside a non-column problem', () => {
+    // The exact case the second review flagged: ES reports `Found 2 problems`, one of
+    // which is a tolerable missing optional column, while the other is a genuine
+    // verifier failure. Extracting only `Unknown column [...]` entries would check the
+    // allowed name, ignore the type error, and swallow the whole regression into an
+    // empty batch. (Wording taken from a live ES|QL run against the VP cluster.)
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 2 problems\n' +
+            'line 1:31: Unknown column [attributes.gen_ai.tool.call.arguments]\n' +
+            'line 1:35: second argument of [n + "str"] must be [date_nanos, datetime, numeric or dense_vector], found value ["str"] type [keyword]'
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('does not match a non-column verifier problem even with no unknown column at all', () => {
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 1 problem\nline 1:35: second argument of [n + "str"] must be [date_nanos, datetime, numeric or dense_vector], found value ["str"] type [keyword]'
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('fails closed when the declared problem count does not match the reported lines', () => {
+    // A truncated or reworded reason must not be forgiven: it may be hiding a
+    // problem line this matcher cannot see.
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 2 problems\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]'
+        )
+      )
+    ).toBe(false);
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Found 1 problem\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]\nline 6:147: Unknown column [attributes.gen_ai.tool.call.result]'
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('does not match a reason that is not a problem list at all', () => {
+    expect(
+      isEsqlUnknownColumnError(
+        responseError(
+          400,
+          'verification_exception',
+          'Unknown column [attributes.gen_ai.tool.call.arguments]'
+        )
+      )
+    ).toBe(false);
   });
 });
 
@@ -245,6 +405,81 @@ describe('signal generator task run()', () => {
     expect(result.state).toEqual({ watermark: 'prev' });
     expect((esClient.esql.query as jest.Mock).mock.calls).toHaveLength(0);
     expect(writes).toHaveLength(0);
+  });
+
+  it('treats a missing-column verification_exception as an empty batch instead of failing the task', async () => {
+    // Reproduces the failure mode of a cluster where
+    // `agentBuilder:tracing:includeToolDetails` was never enabled: the traces
+    // mapping lacks `tool.call.arguments` / `.result` and every span query
+    // fails ES|QL verification. The run must complete without writes rather
+    // than throw into the task manager's retry budget.
+    const unknownColumn = new errors.ResponseError({
+      warnings: [],
+
+      meta: {} as any,
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'verification_exception',
+          reason:
+            'Found 2 problems\nline 6:108: Unknown column [attributes.gen_ai.tool.call.arguments]\nline 6:147: Unknown column [attributes.gen_ai.tool.call.result]',
+        },
+      },
+    });
+    const esClient = {
+      esql: { query: jest.fn(async () => Promise.reject(unknownColumn)) },
+    } as unknown as ElasticsearchClient;
+    const { service, writes } = createSignalsService();
+    const definition = registerRunner({
+      esClient,
+      signalsService: service,
+      enabled: true,
+      logger: loggingSystemMock.createLogger(),
+    });
+    const runner = definition.createTaskRunner({
+      taskInstance: { state: {} },
+      signal: new AbortController().signal,
+    });
+
+    const result = await runner.run();
+
+    expect(result.state).toEqual({});
+    expect(writes).toHaveLength(0);
+  });
+
+  it('propagates a verification_exception naming an unrelated required column instead of swallowing it', async () => {
+    // Guards the regression the reviewer flagged: a misspelled/renamed
+    // required column (not one of the two optional tool-detail columns)
+    // must fail the task run so the retry budget + alerting surface the
+    // problem, rather than being silently treated as an empty batch.
+    const unrelatedUnknownColumn = new errors.ResponseError({
+      warnings: [],
+
+      meta: {} as any,
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'verification_exception',
+          reason: 'Found 1 problem\nline 1:1: Unknown column [trace_id]',
+        },
+      },
+    });
+    const esClient = {
+      esql: { query: jest.fn(async () => Promise.reject(unrelatedUnknownColumn)) },
+    } as unknown as ElasticsearchClient;
+    const { service } = createSignalsService();
+    const definition = registerRunner({
+      esClient,
+      signalsService: service,
+      enabled: true,
+      logger: loggingSystemMock.createLogger(),
+    });
+    const runner = definition.createTaskRunner({
+      taskInstance: { state: {} },
+      signal: new AbortController().signal,
+    });
+
+    await expect(runner.run()).rejects.toThrow(unrelatedUnknownColumn);
   });
 
   it('builds + classifies + writes signals to the originating space and advances the watermark', async () => {
