@@ -8,9 +8,7 @@
 import { isIPv6 } from 'node:net';
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
 import { curry } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ActionsConfig, CustomHostSettings } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
@@ -121,12 +119,15 @@ function parseUri(uri: string): URL {
 }
 
 function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
-  return pipe(
-    tryCatch(() => parseUri(uri)),
-    map((parsedUrl) => parsedUrl.hostname),
-    mapNullable((hostname) => isAllowed(config, hostname)),
-    getOrElse<boolean>(() => false)
-  );
+  // unparseable URIs are treated as having no hostname, so only a `*` allowlist accepts them
+  let hostname: string | null = null;
+  try {
+    hostname = parseUri(uri).hostname;
+  } catch (err) {
+    hostname = null;
+  }
+
+  return isAllowed(config, hostname);
 }
 
 function isActionTypeEnabledInConfig(

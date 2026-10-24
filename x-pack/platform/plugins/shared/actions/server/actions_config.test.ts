@@ -89,6 +89,17 @@ describe('ensureUriAllowed', () => {
     );
   });
 
+  test('does not throw for an unparseable uri when "any" hostnames are allowed', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: [AllowedHosts.Any],
+      enabledActionTypes: [],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).ensureUriAllowed('https//test.com')
+    ).toBeUndefined();
+  });
+
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
@@ -169,6 +180,24 @@ describe('isUriAllowed', () => {
     expect(getActionsConfigurationUtilities(config).isUriAllowed('github.com/elastic')).toEqual(
       false
     );
+  });
+
+  test('returns true for an unparseable uri when "any" hostnames are allowed', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: [AllowedHosts.Any],
+      enabledActionTypes: [],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('https//test.com')).toEqual(true);
+  });
+
+  test('returns false for an unparseable uri when only specific hostnames are allowed', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['test.com'],
+      enabledActionTypes: [],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('https//test.com')).toEqual(false);
   });
 
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
