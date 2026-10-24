@@ -16,5 +16,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../test_suites/cases/attachments'));
     loadTestFile(require.resolve('../test_suites/serverless_search'));
     loadTestFile(require.resolve('../test_suites/platform_security'));
+    // Keep last: watches for ML models/deployments created by background work during the run
+    loadTestFile(require.resolve('../test_suites/ml'));
   });
 }
