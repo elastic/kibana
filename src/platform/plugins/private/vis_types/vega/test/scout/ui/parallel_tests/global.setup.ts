@@ -10,8 +10,12 @@
 import { globalSetupHook } from '@kbn/scout';
 
 export const VEGA_TEST_INDEX = 'vega-test-index';
+const DASHBOARD_DATA_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data';
 
-globalSetupHook('Setup Vega tests data', async ({ esClient }) => {
+globalSetupHook('Setup Vega tests data', async ({ esClient, esArchiver }) => {
+  await esArchiver.loadIfNeeded(DASHBOARD_DATA_ARCHIVE);
+
   const exists = await esClient.indices.exists({ index: VEGA_TEST_INDEX });
   if (!exists) {
     await esClient.indices.create({ index: VEGA_TEST_INDEX });
