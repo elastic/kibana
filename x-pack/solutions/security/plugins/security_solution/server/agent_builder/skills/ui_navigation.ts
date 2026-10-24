@@ -42,6 +42,73 @@ export const ENTITY_ANALYTICS_UI_PATHS = {
   entityResolutionHomePage: ENTITY_ANALYTICS_HOME_PAGE_BASE,
 } as const;
 
+/**
+ * Machine-readable manifest of the intents the "UI-guided navigation" sections below
+ * declare UI-only: for these the agent declines and redirects instead of acting in chat.
+ *
+ * `marker` must appear verbatim in one of the content constants below — `ui_navigation.test.ts`
+ * asserts that, so this manifest cannot drift from the instructions the model actually reads.
+ *
+ * The entity-analytics eval suite asserts its UI-navigation fixtures against this manifest
+ * (`kbn-evals-suite-entity-analytics/src/ui_navigation_intents.test.ts`), so an eval fixture
+ * cannot keep asserting a redirect for an intent the product now handles in chat.
+ */
+export const UI_ONLY_NAVIGATION_INTENTS = [
+  {
+    id: 'entity_analytics.settings',
+    marker: 'global controls at the **top of the Entity Analytics management page**',
+  },
+  {
+    id: 'entity_analytics.clear_data',
+    marker: '**clear** / **delete** / **reset** **all entity data**',
+  },
+  {
+    id: 'risk_engine.scoring_config',
+    marker: '**configure** / **change settings** for risk scoring',
+  },
+  {
+    id: 'asset_criticality.bulk_edit',
+    marker: '**bulk-set** / **bulk-import** / **bulk-update** criticality across many entities',
+  },
+  {
+    id: 'entity_resolution.bulk_csv',
+    marker: '"**bulk**-link entities"',
+  },
+  {
+    id: 'entity_resolution.flyout',
+    marker: 'explicitly asks to **see** / **open** the resolution panel in the UI',
+  },
+  {
+    id: 'entity_store.status',
+    marker: '**see the status** of the **entity store** / **entity engines**',
+  },
+  {
+    id: 'watchlist.csv_upload',
+    marker: '**Upload a CSV** of watchlist members',
+  },
+  {
+    id: 'watchlist.bare_tab',
+    marker: '**No specific watchlist**',
+  },
+] as const;
+
+/**
+ * Intents that a *different* product skill performs in chat. A "UI-guided navigation"
+ * section must never redirect for these — the sections below say so explicitly, and the
+ * `marker` is the phrase that says it (asserted in `ui_navigation.test.ts`).
+ *
+ * `questionPhrases` are the words a redirect fixture would use for the intent. The
+ * entity-analytics eval suite fails when one of its navigation examples asks for a
+ * chat-handled intent: that is how a fixture ends up asserting behaviour the skill forbids.
+ */
+export const CHAT_HANDLED_NAVIGATION_INTENTS = [
+  {
+    id: 'watchlist.entity_source',
+    marker: 'Configuring the entity source is **not** UI-only either',
+    questionPhrases: ['entity source'],
+  },
+] as const;
+
 // Legacy expandable-flyout panel keys
 export const ENTITY_RESOLUTION_GROUP_TAB = 'resolution_group';
 export const WATCHLISTS_FLYOUT_KEY = 'watchlists-flyout';
