@@ -38,6 +38,38 @@ describe('loadRulesWithKueryFilter', () => {
     `);
   });
 
+  test('should return errors returned by the find API', async () => {
+    const resolvedValue = {
+      page: 1,
+      per_page: 10,
+      total: 1,
+      data: [],
+      errors: [
+        {
+          message:
+            'Error injecting reference into rule params for rule id 2 - something went wrong',
+          rule: { id: '2', name: 'broken rule' },
+        },
+      ],
+    };
+    http.post.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadRulesWithKueryFilter({ http, page: { index: 0, size: 10 } });
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 1,
+      data: [],
+      errors: [
+        {
+          message:
+            'Error injecting reference into rule params for rule id 2 - something went wrong',
+          rule: { id: '2', name: 'broken rule' },
+        },
+      ],
+    });
+  });
+
   test('should call find API with searchText', async () => {
     const resolvedValue = {
       page: 1,

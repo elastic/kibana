@@ -18,6 +18,7 @@ import {
 } from '../../../../rules_client/common/filters';
 import { AlertingAuthorizationEntity } from '../../../../authorization/types';
 import type { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
+import type { RuleDomain } from '../../types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
@@ -32,12 +33,21 @@ import {
 } from '../../../../rules_client/common/mapped_params_utils';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { formatLegacyActions, getAlertFromRaw } from '../../../../rules_client/lib';
+import { formatLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { FindRulesParams } from './types';
 import { findRulesParamsSchema } from './schemas';
-import type { Rule, RuleParams } from '../../types';
+import type { RuleParams } from '../../types';
 import { findRulesSo } from '../../../../data/rule';
+import { transformRuleAttributesToRuleDomain } from '../../transforms';
+
+export interface FindRuleError {
+  message: string;
+  rule: {
+    id: string;
+    name?: string;
+  };
+}
 
 export interface FindResult<Params extends RuleParams> {
   page: number;
@@ -45,6 +55,7 @@ export interface FindResult<Params extends RuleParams> {
   total: number;
   searchAfter?: SortResults;
   data: Array<SanitizedRule<Params>>;
+  errors?: FindRuleError[];
   aggregations?: Record<string, unknown>;
 }
 
@@ -136,9 +147,10 @@ export async function findRules<Params extends RuleParams = never>(
 
   const searchAfter = data.length > 0 ? data[data.length - 1]?.sort : undefined;
 
-  const siemRules: Rule[] = [];
+  const siemRules: RuleDomain<Params>[] = [];
+  const errors: FindRuleError[] = [];
 
-  const authorizedData = data.map(({ id, attributes, references }) => {
+  const authorizedData = data.flatMap(({ id, attributes, references }) => {
     try {
       ensureRuleTypeIsAuthorized(
         attributes.alertTypeId,
@@ -156,22 +168,37 @@ export async function findRules<Params extends RuleParams = never>(
       throw error;
     }
 
-    const rule = getAlertFromRaw<Params>({
-      id,
-      isSystemAction: context.isSystemAction,
-      logger: context.logger,
-      rawRule: (fields ? pick(attributes, fields) : attributes) as RawRule,
-      references,
-      ruleTypeId: attributes.alertTypeId,
-      ruleTypeRegistry: context.ruleTypeRegistry,
-    });
+    let rule;
+    try {
+      const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+      rule = transformRuleAttributesToRuleDomain<Params>(
+        (fields ? pick(attributes, fields) : attributes) as RawRule,
+        {
+          id,
+          logger: context.logger,
+          references,
+          ruleType,
+        },
+        context.isSystemAction
+      );
+    } catch (error) {
+      // A rule that cannot be transformed at all is omitted rather than failing the whole find
+      context.logger.warn(
+        `Error transforming rule with id ${id}, the rule will be omitted from the results: ${error.message}`
+      );
+      errors.push({
+        message: error.message,
+        rule: { id, ...(attributes.name && { name: attributes.name }) },
+      });
+      return [];
+    }
 
     // collect SIEM rule for further formatting legacy actions
     if (attributes.consumer === AlertConsumers.SIEM) {
-      siemRules.push(rule as Rule);
+      siemRules.push(rule);
     }
 
-    return rule;
+    return [rule];
   });
 
   authorizedData.forEach(({ id, name }) =>
@@ -201,6 +228,7 @@ export async function findRules<Params extends RuleParams = never>(
       total,
       ...(searchAfter !== undefined ? { searchAfter } : {}),
       ...(aggregations !== undefined ? { aggregations } : {}),
+      ...(errors.length > 0 ? { errors } : {}),
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };
@@ -212,6 +240,7 @@ export async function findRules<Params extends RuleParams = never>(
     total,
     ...(searchAfter !== undefined ? { searchAfter } : {}),
     ...(aggregations !== undefined ? { aggregations } : {}),
+    ...(errors.length > 0 ? { errors } : {}),
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

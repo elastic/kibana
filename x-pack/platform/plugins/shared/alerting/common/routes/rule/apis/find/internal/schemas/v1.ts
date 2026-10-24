@@ -69,9 +69,22 @@ export const findRulesInternalRequestBodySchema = schema.object({
 
 const findRulesInternalResponseDataSchema = schema.arrayOf(ruleResponseInternalSchema);
 
+const findRulesInternalResponseErrorSchema = schema.object({
+  message: schema.string(),
+  rule: schema.object({
+    id: schema.string(),
+    name: schema.maybe(schema.string()),
+  }),
+});
+
 export const findRulesInternalResponseSchema = schema.object({
   page: schema.number(),
   per_page: schema.number(),
   total: schema.number(),
   data: findRulesInternalResponseDataSchema,
+  errors: schema.maybe(
+    schema.arrayOf(findRulesInternalResponseErrorSchema, {
+      maxSize: MAX_PER_PAGE,
+    })
+  ),
 });
