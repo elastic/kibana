@@ -31,6 +31,12 @@ const ENV_DOCS = [
     example: 'EVAL_CONCURRENCY=8',
   },
   {
+    name: 'EVAL_TIMEOUT_MINUTES',
+    description:
+      'Overrides the Playwright per-test timeout, in whole minutes, for suites that run every example in one test and outlast their configured timeout.',
+    example: 'EVAL_TIMEOUT_MINUTES=360',
+  },
+  {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
     description:
       'Skip automatic connector setup/teardown. Use this option when evaluating with pre-defined connectors.',
