@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { deletePipeline } from '../../helpers';
 import { test, testData } from '../fixtures';
+import { mockEmptyPipelinesList } from '../fixtures/mocks';
 
 const sharedDeploymentTags = [
   ...tags.stateful.classic,
@@ -16,6 +17,9 @@ const sharedDeploymentTags = [
   ...tags.serverless.search,
   ...tags.serverless.security.complete,
 ];
+
+// The details flyout renders in an EUI portal outside .kbnAppWrapper.
+const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
 
 test.describe('Ingest pipelines home and list', { tag: sharedDeploymentTags }, () => {
   test.beforeAll(async ({ esClient }) => {
@@ -45,7 +49,7 @@ test.describe('Ingest pipelines home and list', { tag: sharedDeploymentTags }, (
     await expect(pageObjects.ingestPipelines.appTitle).toHaveText('Ingest pipelines');
   });
 
-  test('displays the test pipeline in the list of pipelines', async ({ pageObjects }) => {
+  test('displays the test pipeline in the list of pipelines', async ({ page, pageObjects }) => {
     await pageObjects.ingestPipelines.increasePipelineListPageSize();
     await expect
       .poll(async () =>
@@ -54,13 +58,29 @@ test.describe('Ingest pipelines home and list', { tag: sharedDeploymentTags }, (
         })
       )
       .toContain(testData.TEST_PIPELINE_NAME);
+
+    const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+    expect(violations).toStrictEqual([]);
   });
 
-  test('opens the details flyout', async ({ pageObjects, log }) => {
+  test('opens the details flyout', async ({ page, pageObjects, log }) => {
     await log.debug('Clicking the first pipeline in the list.');
 
     await pageObjects.ingestPipelines.openPipelineDetailsByName(testData.TEST_PIPELINE_NAME);
 
     await expect(pageObjects.ingestPipelines.detailsFlyout).toBeVisible();
+
+    const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+    expect(violations).toStrictEqual([]);
+  });
+
+  test('shows the empty state when there are no pipelines', async ({ page, pageObjects }) => {
+    await mockEmptyPipelinesList(page);
+    await pageObjects.ingestPipelines.goto();
+
+    await expect(pageObjects.ingestPipelines.emptyListPrompt).toBeVisible();
+
+    const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+    expect(violations).toStrictEqual([]);
   });
 });

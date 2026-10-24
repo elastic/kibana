@@ -41,9 +41,11 @@ export class CollapsibleNav {
   ) {
     await this.expandNav();
     const itemId = lowercase ? itemName.toLocaleLowerCase() : itemName;
-    return this.config.serverless
-      ? this.page.testSubj.click(`*nav-item-id-${itemId}`)
-      : this.page.click(`[title="${itemName}"]`);
+    if (this.config.serverless) {
+      return this.page.testSubj.click(`*nav-item-id-${itemId}`);
+    }
+    // Stateful deployments render either the classic nav (title attribute) or the project nav.
+    return this.page.click(`[title="${itemName}"], [data-test-subj*="nav-item-id-${itemId}"]`);
   }
 
   async getNavLinks() {

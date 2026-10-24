@@ -2790,11 +2790,9 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/ccs/ccs_discover.ts @elastic/kibana-discover
 /x-pack/platform/test/functional/services/data_stream.ts @elastic/kibana-dashboards
-/x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/index_lifecycle_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-discover
 /src/platform/test/functional/services/management @elastic/search-ml-ux
@@ -2805,19 +2803,10 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /src/platform/test/functional/page_objects/console_page.ts @elastic/kibana-management
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
 /src/platform/test/accessibility/apps/management.ts @elastic/kibana-discover
-/x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/management/advanced_settings.ts @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/management/disabled_uis.ts @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/management/landing_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/apps/rollup_job/ @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/advanced_settings.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/**/grok_debugger.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/helpers.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/home.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/index_lifecycle_management.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/ingest_node_pipelines.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/search_profiler.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
 
 ## Kibana Cases
 
