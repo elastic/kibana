@@ -2621,7 +2621,7 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('should order a conversation history newest first when asked, undecided leading', async () => {
+    it('should order a conversation history newest first, without moving a row when it is decided', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
@@ -2629,7 +2629,6 @@ describe('ProposalsService', () => {
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.sort).toEqual([
-        { decidedAt: { order: 'desc', missing: '_first' } },
         { createdAt: { order: 'desc' } },
         { rootProposalId: { order: 'asc' } },
         { revision: { order: 'asc' } },

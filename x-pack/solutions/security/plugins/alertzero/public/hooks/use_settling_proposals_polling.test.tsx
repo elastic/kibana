@@ -26,7 +26,8 @@ const createWrapper = () => {
 
 const proposal = (overrides: Partial<Proposal>) => overrides as Proposal;
 const executing = proposal({ decision: 'approved', status: 'executing' });
-const settled = proposal({ decision: 'approved', status: 'failed' });
+const settled = proposal({ decision: 'approved', status: 'failed', supersededBy: 'retry-1' });
+const awaitingRetry = proposal({ decision: 'approved', status: 'failed' });
 const pending = proposal({ status: 'pending' });
 
 const tick = async () => {
@@ -55,6 +56,20 @@ describe('useSettlingProposalsPolling', () => {
       { queryKey: platformQueryKeys.proposals.all },
       { cancelRefetch: false }
     );
+  });
+
+  it('polls while a failed proposal has no retry yet, and stops once it has one', async () => {
+    const { Wrapper, invalidate } = createWrapper();
+    const { rerender } = renderHook(({ list }) => useSettlingProposalsPolling(list), {
+      wrapper: Wrapper,
+      initialProps: { list: [awaitingRetry] },
+    });
+    await tick();
+    expect(invalidate).toHaveBeenCalledTimes(1);
+
+    rerender({ list: [settled] });
+    await tick();
+    expect(invalidate).toHaveBeenCalledTimes(1);
   });
 
   it('does not poll when every proposal is pending or settled', async () => {

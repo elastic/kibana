@@ -7,19 +7,26 @@
 
 import { useEffect } from 'react';
 import { focusManager, useQueryClient } from '@kbn/react-query';
-import { PROPOSAL_SETTLING_POLL_INTERVAL_MS, isProposalSettling } from '@kbn/proposals-common';
+import {
+  PROPOSAL_SETTLING_POLL_INTERVAL_MS,
+  isAwaitingRetry,
+  isProposalSettling,
+} from '@kbn/proposals-common';
 import type { Proposal } from '@kbn/proposals-common';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 
 /**
- * Refreshes the queue every few seconds while an approved action is still running.
+ * Refreshes the queue every few seconds while an approved action runs, or while a failed action
+ * waits for its retry.
  * The queue polls once a minute. The flyout uses its own `QueryClient`, so it cannot tell this
  * page that the action ended. Without this poll, the row shows "Applying" after the flyout shows
- * the result. The poll stops when no listed proposal is running.
+ * the result. The poll stops when no listed proposal is in either state.
  */
 export const useSettlingProposalsPolling = (proposals: Iterable<Proposal>): void => {
   const queryClient = useQueryClient();
-  const hasSettling = [...proposals].some(isProposalSettling);
+  const hasSettling = [...proposals].some(
+    (proposal) => isProposalSettling(proposal) || isAwaitingRetry(proposal)
+  );
 
   useEffect(() => {
     if (!hasSettling) {

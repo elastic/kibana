@@ -23,6 +23,7 @@ import {
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
+  isAwaitingRetry,
   isProposalSettling,
 } from '@kbn/proposals-common';
 import type {
@@ -36,8 +37,12 @@ import { mutationKeys, queryKeys } from '../query_keys';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 import { useProposalDecisionSignal } from './use_proposal_decision_signal';
 
+/** Running, or failed with no retry yet. Poll while this is true. */
+const isInFlux = (proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'>): boolean =>
+  isProposalSettling(proposal) || isAwaitingRetry(proposal);
+
 const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
-  response?.proposals.some(isProposalSettling) ?? false;
+  response?.proposals.some(isInFlux) ?? false;
 
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
@@ -170,7 +175,7 @@ export const useProposal = (id: string | undefined) => {
     },
     enabled: Boolean(id),
     refetchInterval: (data) =>
-      data && isProposalSettling(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
+      data && isInFlux(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };

@@ -131,12 +131,11 @@ const PRIORITY_SORT: SortCombinations[] = [
 ];
 
 /**
- * A conversation's history, newest first. An undecided proposal has no `decidedAt` yet and is the
- * live one, so it leads; a retry inherits its original's `createdAt`, which therefore cannot
- * order a chain. The chain keys make the order total, so paging cannot repeat or skip a row.
+ * A conversation's history, newest first. A decision or a status change must not move a row,
+ * so the order uses only fields that never change. A retry inherits its original's `createdAt`,
+ * so the chain keys make the order total and paging cannot repeat or skip a row.
  */
 const NEWEST_SORT: SortCombinations[] = [
-  { decidedAt: { order: 'desc', missing: '_first' } },
   { createdAt: { order: 'desc' } },
   { rootProposalId: { order: 'asc' } },
   { revision: { order: 'asc' } },

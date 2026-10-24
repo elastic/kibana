@@ -340,6 +340,7 @@ const renderPage = (
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
 const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const setStatusMutate = jest.fn();
+const setStatusMutateAsync = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
@@ -353,7 +354,12 @@ beforeEach(() => {
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
-  mockUseSetInvestigationStatus.mockReturnValue({ mutate: setStatusMutate, isLoading: false });
+  setStatusMutateAsync.mockReset().mockResolvedValue({});
+  mockUseSetInvestigationStatus.mockReturnValue({
+    mutate: setStatusMutate,
+    mutateAsync: setStatusMutateAsync,
+    isLoading: false,
+  });
   mockUseInvestigationClosePreview.mockReturnValue({
     data: { pending_proposal_count: 0, pending_proposals: [] },
     isLoading: false,
@@ -722,6 +728,58 @@ describe('ConversationsPage decisions', () => {
     expect(setStatusMutate).toHaveBeenCalledWith({
       investigationId: 'inv-1',
       body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
+    });
+  });
+
+  describe('reopening a closed investigation', () => {
+    const closedInvestigationProposal = {
+      ...actionProposal,
+      conversationStatus: 'closed' as const,
+    };
+
+    const openMenuOf = () => {
+      mockProposals({ investigate: [closedInvestigationProposal] });
+      const rendered = renderPage('/', { capabilities: { manageInvestigations: true } });
+      fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+      return rendered;
+    };
+
+    it('offers Open instead of Close for a closed investigation', () => {
+      openMenuOf();
+
+      expect(screen.getByText('Open investigation')).toBeInTheDocument();
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+    });
+
+    it('reopens the investigation at once, with a success toast and no modal', async () => {
+      const { core } = openMenuOf();
+
+      fireEvent.click(screen.getByText('Open investigation'));
+
+      await waitFor(() =>
+        expect(setStatusMutateAsync).toHaveBeenCalledWith({
+          investigationId: 'inv-1',
+          body: { status: 'open' },
+        })
+      );
+      await waitFor(() =>
+        expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Investigation reopened')
+      );
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('shows an error toast when the reopen fails', async () => {
+      setStatusMutateAsync.mockRejectedValueOnce(new Error('boom'));
+      const { core } = openMenuOf();
+
+      fireEvent.click(screen.getByText('Open investigation'));
+
+      await waitFor(() =>
+        expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'Could not reopen the investigation'
+        )
+      );
+      expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
     });
   });
 
