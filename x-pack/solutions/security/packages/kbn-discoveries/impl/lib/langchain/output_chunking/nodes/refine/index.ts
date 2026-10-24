@@ -7,6 +7,7 @@
 
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
+import { getBoundedResponsePreview } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../../types';
@@ -18,12 +19,16 @@ import {
   attackDiscoveryRefineTemplateRequest,
   type AttackDiscoveryTemplateCompletion,
 } from '../../../../../attack_discovery/graphs/template_completion';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { getCombinedRefinePrompt } from './helpers/get_combined_refine_prompt';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getMaxHallucinationFailuresReached } from '../../helpers/get_max_hallucination_failures_reached';
 import { getMaxRetriesReached } from '../../helpers/get_max_retries_reached';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
+import {
+  getEmptyModelResponseError,
+  isEmptyModelResponseError,
+} from '../helpers/empty_model_response';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
 
 export const getRefineNode = <T extends GraphInsightTypes>({
@@ -95,6 +100,50 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
 
+      // An empty completion is a model or connector failure, not a "refinement": record it as an
+      // error and do NOT add it to `refinements` (see getEmptyModelResponseError).
+      if (partialResponse.trim() === '') {
+        logger?.debug(
+          () =>
+            `refine node received an empty response (${llmType}) on attempt ${generationAttempts}; recording an error instead of treating it as a repeated generation`
+        );
+
+        const maxRetriesReached = getMaxRetriesReached({
+          generationAttempts: generationAttempts + 1,
+          maxGenerationAttempts,
+        });
+
+        const maxHallucinationFailuresReached = getMaxHallucinationFailuresReached({
+          hallucinationFailures,
+          maxHallucinationFailures,
+        });
+
+        // same fallback as the parse-error path below: when the attempts are exhausted, the
+        // unrefined results from the generate step are still the best answer we have:
+        const useUnrefinedResults = getUseUnrefinedResults({
+          maxHallucinationFailuresReached,
+          maxRetriesReached,
+        });
+
+        // `...state` deliberately keeps the accumulated `combinedRefinements`: this attempt produced
+        // no content, so there is nothing to add and nothing to invalidate. The catch block below
+        // follows the same rule via getCombinedAfterFailedAttempt, so an empty completion leaves the
+        // same state whether the LLM guard threw or this node noticed it.
+        return {
+          ...state,
+          insights: useUnrefinedResults ? unrefinedResults : null,
+          errors: [
+            ...state.errors,
+            getEmptyModelResponseError({
+              generationAttempts,
+              llmType,
+              nodeName: 'refine',
+            }),
+          ],
+          generationAttempts: generationAttempts + 1,
+        };
+      }
+
       // if the response is hallucinated, discard it:
       if (responseIsHallucinated(partialResponse)) {
         logger?.debug(
@@ -152,12 +201,27 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
-      const parsingError = `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
+      const parsingError = isEmptyModelResponseError(error)
+        ? getEmptyModelResponseError({
+            cause: error,
+            generationAttempts,
+            llmType: llm._llmType(),
+            nodeName: 'refine',
+          })
+        : `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
       logger?.debug(
         () =>
           `refine node raw response that failed to parse (${llm._llmType()}) from attempt ${generationAttempts}:\n${rawResponse}`
       );
+
+      // Persist a bounded prefix of the raw response with the error: on serverless there is no
+      // log-level switch, so a debug-only log leaves the bytes unrecoverable in support.
+      const rawResponsePreview = getBoundedResponsePreview(rawResponse);
+      const persistedError =
+        rawResponse.length > 0
+          ? `${parsingError}; raw response (${rawResponse.length} characters): "${rawResponsePreview}"`
+          : parsingError;
 
       const maxRetriesReached = getMaxRetriesReached({
         generationAttempts: generationAttempts + 1,
@@ -185,10 +249,16 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       return {
         ...state,
         insights: useUnrefinedResults ? unrefinedResults : null,
-        combinedRefinements: combinedResponse,
-        errors: [...state.errors, parsingError],
+        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
+        // the failure produced no content; getCombinedAfterFailedAttempt then keeps the accumulated
+        // refinements instead of dropping them (see its doc comment).
+        combinedRefinements: getCombinedAfterFailedAttempt({
+          combinedGenerations: combinedRefinements,
+          combinedResponse,
+        }),
+        errors: [...state.errors, persistedError],
         generationAttempts: generationAttempts + 1,
-        refinements: [...refinements, partialResponse],
+        refinements: partialResponse.length > 0 ? [...refinements, partialResponse] : refinements,
       };
     }
   };
