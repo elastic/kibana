@@ -11,8 +11,7 @@
     "**/*.ts",
   ],
   "kbn_references": [
-    "@kbn/logging",
-    "@kbn/std"
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*",

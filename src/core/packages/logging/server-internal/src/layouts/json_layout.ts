@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { Ecs } from '@elastic/ecs';
 import type { LogRecord, Layout } from '@kbn/logging';
-import { toEcsLog } from '@kbn/core-logging-common-internal';
+import { toEcsLog } from '@kbn/logging-ecs';
 
 const { literal, object } = schema;
 

@@ -1797,6 +1797,8 @@
       "@kbn/lock-manager/*": ["./src/platform/packages/shared/kbn-lock-manager/*"],
       "@kbn/logging": ["./src/platform/packages/shared/kbn-logging"],
       "@kbn/logging/*": ["./src/platform/packages/shared/kbn-logging/*"],
+      "@kbn/logging-ecs": ["./src/platform/packages/private/kbn-logging-ecs"],
+      "@kbn/logging-ecs/*": ["./src/platform/packages/private/kbn-logging-ecs/*"],
       "@kbn/logging-mocks": ["./src/platform/packages/shared/kbn-logging-mocks"],
       "@kbn/logging-mocks/*": ["./src/platform/packages/shared/kbn-logging-mocks/*"],
       "@kbn/logs-data-access-plugin": ["./x-pack/platform/plugins/shared/logs_data_access"],

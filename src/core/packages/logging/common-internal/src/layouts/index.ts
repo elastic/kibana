@@ -8,7 +8,6 @@
  */
 
 export { PatternLayout } from './pattern_layout';
-export { toEcsLog } from './json_log';
 export {
   DateConversion,
   LoggerConversion,

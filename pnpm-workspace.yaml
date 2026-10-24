@@ -611,6 +611,7 @@ packages:
   - 'src/platform/packages/private/kbn-journeys'
   - 'src/platform/packages/private/kbn-language-documentation'
   - 'src/platform/packages/private/kbn-lens-formula-docs'
+  - 'src/platform/packages/private/kbn-logging-ecs'
   - 'src/platform/packages/private/kbn-managed-content-badge'
   - 'src/platform/packages/private/kbn-mapbox-gl'
   - 'src/platform/packages/private/kbn-migrator-test-kit'
