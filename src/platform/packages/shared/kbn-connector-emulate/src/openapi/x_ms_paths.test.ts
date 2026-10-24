@@ -273,6 +273,121 @@ describe('x-ms-paths', () => {
     ]);
   });
 
+  describe('when telling operations apart', () => {
+    const openApi = (document: Record<string, unknown>) => ({
+      openapi: '3.0.3',
+      info: { title: 'Vendor', version: '1' },
+      servers: [{ url: 'https://vendor.example' }],
+      ...document,
+    });
+    const header = (name: string, schema: Record<string, unknown>) => ({
+      name,
+      in: 'header',
+      required: true,
+      schema,
+    });
+    const route = async (document: Record<string, unknown>, path: string, init?: RequestInit) => {
+      const emulator = createEmulatorFetch({ specs: [openApi(document)] });
+      const { status } = await emulator.fetch(`https://vendor.example${path}`, init);
+      return { status, operation: emulator.calls[0].operation };
+    };
+
+    it('follows $ref chains to the one value a parameter allows', async () => {
+      const lease = (action: string) => ({
+        put: {
+          operationId: `Lease_${action}`,
+          parameters: [
+            header('x-ms-lease-action', { $ref: `#/components/schemas/${action}Alias` }),
+          ],
+          responses: ok(action),
+        },
+      });
+      const document = {
+        paths: {},
+        'x-ms-paths': {
+          '/c?comp=lease&acquire': lease('Acquire'),
+          '/c?comp=lease&release': lease('Release'),
+        },
+        components: {
+          schemas: {
+            AcquireAlias: { $ref: '#/components/schemas/Acquire' },
+            Acquire: { type: 'string', enum: ['acquire'] },
+            ReleaseAlias: { $ref: '#/components/schemas/Release' },
+            Release: { type: 'string', enum: ['release'] },
+          },
+        },
+      };
+
+      expect(
+        await route(document, '/c?comp=lease', {
+          method: 'PUT',
+          headers: { 'x-ms-lease-action': 'release' },
+        })
+      ).toEqual({ status: 200, operation: 'Lease_Release' });
+    });
+
+    it('prefers the more specific path template before looking at discriminators', async () => {
+      const document = {
+        paths: {
+          '/items/new': {
+            get: {
+              operationId: 'getNewItem',
+              parameters: [
+                {
+                  name: 'mode',
+                  in: 'query',
+                  required: true,
+                  schema: { type: 'string', enum: ['full'] },
+                },
+              ],
+              responses: ok('new'),
+            },
+          },
+          '/items/{id}': {
+            get: {
+              operationId: 'getItem',
+              parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+              responses: ok('item'),
+            },
+          },
+        },
+      };
+
+      // Validation of the literal endpoint names the wrong value, rather than `/items/{id}`
+      // taking the request.
+      expect(await route(document, '/items/new?mode=brief')).toEqual({
+        status: 422,
+        operation: 'getNewItem',
+      });
+    });
+
+    it('prefers the operation with more fixed query parameters before counting the others', async () => {
+      const optional = (name: string, location: string) => ({
+        name,
+        in: location,
+        schema: { type: 'string' },
+      });
+      const document = {
+        paths: {
+          '/': {
+            get: {
+              operationId: 'Root',
+              parameters: [optional('comp', 'query'), optional('x-ms-version', 'header')],
+              responses: ok('root'),
+            },
+          },
+        },
+        'x-ms-paths': {
+          '/?comp=list': { get: { operationId: 'List', responses: ok('list') } },
+        },
+      };
+
+      expect(
+        await route(document, '/?comp=list', { headers: { 'x-ms-version': '2021-12-02' } })
+      ).toEqual({ status: 200, operation: 'List' });
+    });
+  });
+
   it('loads x-ms-paths of OpenAPI 3 documents', () => {
     const operations = loadContractOperations({
       openapi: '3.0.3',
