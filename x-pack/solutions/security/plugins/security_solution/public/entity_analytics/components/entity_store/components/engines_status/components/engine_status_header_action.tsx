@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiButtonEmpty, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useInstallEntityStoreMutation } from '../../../hooks/use_entity_store';
 import type { GetEntityStoreStatusResponse } from '../../../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type { EntityType } from '../../../../../../../common/entity_analytics/types';
+import { useEntityEnginePrivileges } from '../../../hooks/use_entity_engine_privileges';
 import { isEngineLoading } from '../helpers';
 
 export function EngineStatusHeaderAction({
@@ -24,6 +25,15 @@ export function EngineStatusHeaderAction({
   const installEntityStore = () => {
     installEntityStoreMutation.mutate({ entityTypes: [type] });
   };
+  const { data: privileges, isLoading: isLoadingPrivileges } = useEntityEnginePrivileges();
+  // Install and reinstall hit the same route, which enforces the install privileges server-side.
+  const canInstall = !isLoadingPrivileges && !!privileges?.has_install_permissions;
+  const missingPrivilegesTooltip = canInstall ? undefined : (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.missingInstallPrivilegesToolTip"
+      defaultMessage="You don't have the privileges required to install the Entity Store. Ask an administrator to do it."
+    />
+  );
   const hasUninstalledComponent = engine?.components?.some(({ installed }) => !installed);
 
   if (installEntityStoreMutation.isLoading || isEngineLoading(engine?.status)) {
@@ -32,24 +42,33 @@ export function EngineStatusHeaderAction({
 
   if (!engine) {
     return (
-      <EuiButtonEmpty onClick={installEntityStore}>
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.installButton"
-          defaultMessage="Install"
-        />
-      </EuiButtonEmpty>
+      <EuiToolTip content={missingPrivilegesTooltip}>
+        <EuiButtonEmpty onClick={installEntityStore} isDisabled={!canInstall}>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.installButton"
+            defaultMessage="Install"
+          />
+        </EuiButtonEmpty>
+      </EuiToolTip>
     );
   }
 
   if (hasUninstalledComponent) {
     return (
       <div>
-        <EuiButtonEmpty onClick={installEntityStore} iconType="refresh" color="warning">
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.reinstallButton"
-            defaultMessage="Reinstall"
-          />
-        </EuiButtonEmpty>
+        <EuiToolTip content={missingPrivilegesTooltip}>
+          <EuiButtonEmpty
+            onClick={installEntityStore}
+            iconType="refresh"
+            color="warning"
+            isDisabled={!canInstall}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.reinstallButton"
+              defaultMessage="Reinstall"
+            />
+          </EuiButtonEmpty>
+        </EuiToolTip>
 
         <EuiIconTip
           content={
