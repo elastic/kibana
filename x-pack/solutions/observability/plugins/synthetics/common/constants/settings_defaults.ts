@@ -7,6 +7,13 @@
 
 import type { DynamicSettings } from '../runtime_types';
 
+export const DEFAULT_RULE_SETTINGS = [
+  'defaultConnectors',
+  'defaultEmail',
+  'defaultStatusRuleEnabled',
+  'defaultTLSRuleEnabled',
+] as const;
+
 export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
   certAgeThreshold: 730,
   certExpirationThreshold: 30,

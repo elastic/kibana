@@ -12,14 +12,13 @@ import type {
 import { apiService } from '../../../../utils/api_service';
 import type {
   DynamicSettings,
-  DynamicSettingsSaveResponse,
   LocationMonitorsResponse,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type { LocationMonitor } from '.';
 
 interface SaveApiRequest {
-  settings: DynamicSettings;
+  settings: Partial<DynamicSettings>;
 }
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
@@ -28,17 +27,8 @@ export const getDynamicSettings = async (): Promise<DynamicSettings> => {
 
 export const setDynamicSettings = async ({
   settings,
-}: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
-  const newSettings: DynamicSettings = {
-    certAgeThreshold: settings.certAgeThreshold,
-    certExpirationThreshold: settings.certExpirationThreshold,
-    defaultConnectors: settings.defaultConnectors,
-    defaultEmail: settings.defaultEmail,
-    defaultTLSRuleEnabled: settings.defaultTLSRuleEnabled,
-    defaultStatusRuleEnabled: settings.defaultStatusRuleEnabled,
-    rebalancePrivateLocationShardsEnabled: settings.rebalancePrivateLocationShardsEnabled,
-  };
-  return await apiService.put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, newSettings, {
+}: SaveApiRequest): Promise<DynamicSettings> => {
+  return await apiService.put<DynamicSettings>(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, settings, {
     version: '2023-10-31',
   });
 };

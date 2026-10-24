@@ -12,9 +12,10 @@ import { createAsyncAction } from '../utils/actions';
 export const getDynamicSettingsAction = createAsyncAction<void, DynamicSettings>(
   'GET_DYNAMIC_SETTINGS'
 );
-export const setDynamicSettingsAction = createAsyncAction<DynamicSettings, DynamicSettings>(
-  'SET_DYNAMIC_SETTINGS'
-);
+export const setDynamicSettingsAction = createAsyncAction<
+  Partial<DynamicSettings>,
+  DynamicSettings
+>('SET_DYNAMIC_SETTINGS');
 export const getConnectorsAction = createAsyncAction<void, ActionConnector[]>('GET CONNECTORS');
 
 export const getLocationMonitorsAction = createAsyncAction<void, any>('GET LOCATION MONITORS');
