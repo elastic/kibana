@@ -21,4 +21,77 @@ This editor component allows easy access to:
 
 The Monaco editor doesn't automatically resize the editor area on window or container resize so this component includes a [resize detector](https://github.com/maslianok/react-resize-detector) to cause the Monaco editor to re-layout and adjust its size when the window or container size changes
 
-## API
+## Theming
+
+Monaco has one active theme per page, as such Kibana defines exactly one. Syntax colors are scoped per language inside it by `@kbn/monaco`; see
+[its theming README](../../../kbn-monaco/src/languages/theming/README.md) for the reasoning, the Monaco internals involved. What this package owns is the
+other axis: how **one editor instance** looks. 
+
+There is no theme id prop and the monaco`options.theme` is not accepted, on purpose. Every theme id in Monaco is a call to the global `setTheme`, 
+so a second theme is a second look for every editor on the page, chosen by whichever mounted last.
+
+### Customizing the editor chrome, leverage the `chromeOverrides` prop
+
+Chrome is everything that is not a token color: editor background, gutter and line numbers, selection, suggest and hover widgets, diff decorations. 
+Monaco publishes the active theme's colors as CSS custom properties in one global rule and consumes them through the CSS `var()` function, like so:
+
+```css
+.monaco-editor, .monaco-diff-editor, .monaco-component { --vscode-editor-background: …; … }
+.monaco-editor { background-color: var(--vscode-editor-background); }
+```
+
+A property set inline on an editor's own nodes beats that rule, is inherited by the editor's descendants, and reaches nothing else as defined by the CSS spec for variables. 
+Given that Monaco only ever writes `width` and `height` to the root's `style`, inline properties survive relayout and this is the basis for the whole mechanism of `chrome_overrides.ts`.
+
+```tsx
+// Declare once at module scope: a new function per render re-applies on every render.
+const myChrome: KbnCodeEditorChromeOverrides = ({ euiTheme }) => ({
+  'editor.background': 'transparent',
+  'editorSuggestWidget.selectedBackground': euiTheme.colors.primary,
+  '--vscode-cornerRadius-large': euiTheme.border.radius.medium, // raw properties pass through
+});
+
+<CodeEditor languageId="xjson" value={value} chromeOverrides={myChrome} />
+```
+
+- Keys are Monaco color ids (`<group>.<name>`), the same vocabulary as `IStandaloneThemeData.colors`.
+  The ids Kibana's default chrome sets are offered for completion; any other Monaco id is accepted,
+  as is any raw `--vscode-*` property. A bare `background` or a `--my-var` is a type error.
+- Values are CSS color strings. The function receives the EUI theme, so overrides follow light,
+  dark and high-contrast mode; the editor re-applies them when the EUI theme changes.
+- The properties are set on two nodes: the editor root, and the overflow-widgets container this
+  component portals to `document.body` so suggest and hover widgets can escape `overflow: hidden`
+  ancestors. Diff editors nest two `.monaco-editor` roots that Monaco's global rule targets
+  directly, so those descendants are set too.
+- `transparentBackground` is a one-key override merged under yours; explicit overrides win.
+- Canvas-drawn parts (minimap, overview ruler) read the theme object, not CSS, and keep the default.
+
+Editors created directly with `monaco.editor.create*` bypass the component and do two things
+themselves: call `initializeRegisteredLanguagesTheme(useEuiTheme())` before creating (nothing else
+guarantees the theme exists, and Monaco silently falls back to `vs` for an unknown id), and apply
+the chrome in an effect keyed on the EUI theme:
+
+```ts
+const chrome = applyKbnCodeEditorChromeOverrides([editor.getDomNode()], myChrome, euiThemeContext);
+return () => chrome.dispose(); // removes exactly the properties it set; applications do not stack
+```
+
+For a diff editor pass `diffEditor.getContainerDomNode()`.
+
+### Customizing the editor's DOM structure: leverage the `scopedCss` prop
+
+Structural rules (hiding a widget part, z-index, padding) need selectors, so this component stamps
+a generated `data-kbn-code-editor-id` on both of its nodes and hands `scopedCss` ready-made
+selectors: `scope.editor` for the inline container, `scope.overflowWidgets` for the portaled node.
+Rules written against them cannot reach another editor.
+
+```tsx
+<CodeEditor
+  scopedCss={(scope) => css`
+    ${scope.overflowWidgets} .suggest-widget { z-index: ${euiTheme.levels.toast} !important; }
+  `}
+/>
+```
+
+`classNameCss` still exists and is unscoped: a `.monaco-editor` rule there restyles every editor on
+the page. Prefer `chromeOverrides` for colors and `scopedCss` for structure.

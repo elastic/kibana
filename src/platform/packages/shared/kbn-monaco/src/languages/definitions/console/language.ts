@@ -16,7 +16,7 @@ import { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
 import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS, ESQLLang } from '../esql';
 import { wrapAsMonacoSuggestions } from '../esql/lib/converters/suggestions';
 import { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
-import { buildConsoleTheme } from './theme';
+import { buildConsoleOutputTheme, buildConsoleTheme } from './theme';
 import {
   checkForTripleQuotesAndEsqlQuery,
   findRequestLineNumber,
@@ -185,13 +185,8 @@ export const ConsoleOutputLang: LangModuleType = {
   lexerRules: consoleOutputLexerRules,
   languageConfiguration: consoleOutputLanguageConfiguration,
   foldingRangeProvider,
+  languageThemeResolver: buildConsoleOutputTheme,
 };
-
-// Theme id is the same as lang id, as we register only one theme resolver that's color mode aware
-export const CONSOLE_THEME_ID = CONSOLE_LANG_ID;
-
-// console output theme is the same as console theme
-export const CONSOLE_OUTPUT_THEME_ID = CONSOLE_THEME_ID;
 
 export const getParsedRequestsProvider = (model: monaco.editor.ITextModel | null) => {
   return new ConsoleParsedRequestsProvider(workerProxyService, model);

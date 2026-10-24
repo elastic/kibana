@@ -10,10 +10,12 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import type { monaco } from '../../../../monaco_imports';
 
+/**
+ * ES|QL's own token rules. Editor chrome is not a language concern — see the theming README.
+ */
 export const buildEsqlTheme = ({
   euiTheme,
-  colorMode,
-}: UseEuiTheme): monaco.editor.IStandaloneThemeData => {
+}: UseEuiTheme): Pick<monaco.editor.IStandaloneThemeData, 'rules'> => {
   const { colors } = euiTheme;
 
   const rules: monaco.editor.IStandaloneThemeData['rules'] = [
@@ -109,29 +111,5 @@ export const buildEsqlTheme = ({
     },
   ];
 
-  // `lightestShade` and `emptyShade` are deprecated, so we backfill them with
-  // equivalent colors from the theme.
-  const borderColor = colors.lightestShade || colors.borderBasePlain;
-  const bgColor = colors.emptyShade || colors.backgroundBasePlain;
-
-  return {
-    base: colorMode === 'DARK' ? 'vs-dark' : 'vs',
-    inherit: true,
-    rules,
-    colors: {
-      'editor.foreground': colors.textParagraph,
-      'editor.background': colors.backgroundBasePlain,
-      'editor.lineHighlightBackground': borderColor,
-      'editor.lineHighlightBorder': borderColor,
-      'editor.selectionHighlightBackground': borderColor,
-      'editor.selectionHighlightBorder': borderColor,
-      'editorSuggestWidget.background': bgColor,
-      'editorSuggestWidget.border': bgColor,
-      'editorSuggestWidget.focusHighlightForeground': bgColor,
-      'editorSuggestWidget.foreground': colors.textParagraph,
-      'editorSuggestWidget.highlightForeground': colors.primary,
-      'editorSuggestWidget.selectedBackground': colors.primary,
-      'editorSuggestWidget.selectedForeground': bgColor,
-    },
-  };
+  return { rules };
 };

@@ -14,12 +14,6 @@ import { z } from '@kbn/zod/v4';
 import type { StepExecuteModalProps } from './step_execute_modal';
 import { StepExecuteModal } from './step_execute_modal';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
-
 jest.mock('./step_execute_manual_form', () => ({
   StepExecuteManualForm: ({ value, setValue, errors, warnings }: any) => (
     <div data-test-subj="mockManualForm">

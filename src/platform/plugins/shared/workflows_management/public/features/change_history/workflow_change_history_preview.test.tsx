@@ -15,11 +15,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useDefineWorkflowsMonacoTheme: jest.fn(),
-}));
-
 jest.mock('./use_workflow_change_history_preview_validation', () => ({
   useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
     validationResults: [],
@@ -39,6 +34,9 @@ jest.mock('@kbn/code-editor', () => {
   const actual = jest.requireActual('@kbn/code-editor');
 
   return {
+    CODE_EDITOR_DEFAULT_THEME_ID: actual.CODE_EDITOR_DEFAULT_THEME_ID,
+    initializeRegisteredLanguagesTheme: jest.fn(),
+    applyKbnCodeEditorChromeOverrides: jest.fn(() => ({ dispose: jest.fn() })),
     monaco: {
       ...actual.monaco,
       MarkerSeverity: { Error: 8 },
@@ -48,6 +46,7 @@ jest.mock('@kbn/code-editor', () => {
         create: jest.fn(() => ({
           dispose: jest.fn(),
           layout: jest.fn(),
+          getDomNode: jest.fn(() => document.createElement('div')),
           getModel: jest.fn(() => ({ dispose: jest.fn() })),
           updateOptions: jest.fn(),
           createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
@@ -56,6 +55,7 @@ jest.mock('@kbn/code-editor', () => {
           setModel: jest.fn(),
           dispose: jest.fn(),
           layout: jest.fn(),
+          getContainerDomNode: jest.fn(() => document.createElement('div')),
           updateOptions: jest.fn(),
           getLineChanges: jest.fn(() => []),
           onDidUpdateDiff: jest.fn(() => ({ dispose: jest.fn() })),

@@ -1859,6 +1859,7 @@
     "@kbn/eslint-plugin-eslint": "workspace:*",
     "@kbn/eslint-plugin-i18n": "workspace:*",
     "@kbn/eslint-plugin-imports": "workspace:*",
+    "@kbn/eslint-plugin-kbn-monaco": "workspace:*",
     "@kbn/eslint-plugin-kbn-ui": "workspace:*",
     "@kbn/eslint-plugin-telemetry": "workspace:*",
     "@kbn/esql-resource-browser-storybook-config": "workspace:*",

@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const CODE_EDITOR_DEFAULT_THEME_ID = 'codeEditorDefaultTheme' as const;
-export const CODE_EDITOR_TRANSPARENT_THEME_ID = 'codeEditorTransparentTheme' as const;
+import type { monaco } from '../../monaco_imports';
+
+export const themeRuleGroupBuilderFactory =
+  (postfix: string = '') =>
+  (tokens: string[], color: string, isBold: boolean = false): monaco.editor.ITokenThemeRule[] =>
+    tokens.map((i) => ({
+      token: i + postfix,
+      foreground: color,
+      fontStyle: isBold ? 'bold' : '',
+    }));

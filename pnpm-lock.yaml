@@ -5499,6 +5499,9 @@ importers:
       '@kbn/eslint-plugin-imports':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-imports
+      '@kbn/eslint-plugin-kbn-monaco':
+        specifier: workspace:*
+        version: link:packages/kbn-eslint-plugin-kbn-monaco
       '@kbn/eslint-plugin-kbn-ui':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-kbn-ui
@@ -7005,6 +7008,8 @@ importers:
   packages/kbn-eslint-plugin-i18n: {}
 
   packages/kbn-eslint-plugin-imports: {}
+
+  packages/kbn-eslint-plugin-kbn-monaco: {}
 
   packages/kbn-eslint-plugin-kbn-ui: {}
 

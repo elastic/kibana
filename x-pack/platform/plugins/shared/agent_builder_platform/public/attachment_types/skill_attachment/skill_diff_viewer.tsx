@@ -8,7 +8,13 @@
 import React, { useEffect, useRef } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { monaco } from '@kbn/code-editor';
+import {
+  applyKbnCodeEditorChromeOverrides,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+  monaco,
+  type KbnCodeEditorChromeOverrides,
+} from '@kbn/code-editor';
 
 const LINE_HEIGHT = 18;
 const EDITOR_HEIGHT = 240;
@@ -41,9 +47,33 @@ interface UseDiffEditorParams {
   afterContent: string;
 }
 
+/**
+ * The diff sits on the code block surface. The gutter and sticky scroll backgrounds default to the
+ * editor background when a theme is built, which a per-instance override cannot reproduce, so the
+ * value is repeated for them.
+ */
+export const skillDiffChromeOverrides: KbnCodeEditorChromeOverrides = ({ euiTheme }) => {
+  const background = euiTheme.components.codeBackground;
+
+  return {
+    'editor.background': background,
+    'editorGutter.background': background,
+    'editorStickyScroll.background': background,
+    'editorStickyScrollGutter.background': background,
+  };
+};
+
 /** Creates and manages a Monaco inline diff editor bound to `containerRef`. */
 const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEditorParams) => {
-  const { colorMode, euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const editorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(null);
+
+  // The editor is created directly with `monaco.editor.createDiffEditor`, so nothing else
+  // guarantees the shared Kibana theme is registered before it mounts. Declared before the
+  // editor-creating effect so it runs first.
+  useEffect(() => {
+    initializeRegisteredLanguagesTheme(euiThemeContext);
+  }, [euiThemeContext]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -51,20 +81,11 @@ const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEdi
       return;
     }
 
-    // Redefine before creating the editor so the background tracks the EUI token value.
-    const theme = colorMode === 'DARK' ? 'skill-diff-dark' : 'skill-diff-light';
-    monaco.editor.defineTheme(theme, {
-      base: colorMode === 'DARK' ? 'vs-dark' : 'vs',
-      inherit: true,
-      rules: [],
-      colors: { 'editor.background': euiTheme.components.codeBackground },
-    });
-
     const originalModel = monaco.editor.createModel(beforeContent, 'markdown');
     const modifiedModel = monaco.editor.createModel(afterContent, 'markdown');
 
     const diffEditor = monaco.editor.createDiffEditor(container, {
-      theme,
+      theme: CODE_EDITOR_DEFAULT_THEME_ID,
       readOnly: true,
       renderSideBySide: false,
       minimap: { enabled: false },
@@ -92,13 +113,32 @@ const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEdi
     });
 
     diffEditor.setModel({ original: originalModel, modified: modifiedModel });
+    editorRef.current = diffEditor;
 
     return () => {
+      editorRef.current = null;
       diffEditor.dispose();
       originalModel.dispose();
       modifiedModel.dispose();
     };
-  }, [containerRef, beforeContent, afterContent, colorMode, euiTheme]);
+  }, [containerRef, beforeContent, afterContent]);
+
+  // Per-instance chrome. Keyed on the inputs that re-create the editor above, plus the EUI theme,
+  // so a light/dark switch re-applies the colours without re-creating the editor.
+  useEffect(() => {
+    const node = editorRef.current?.getContainerDomNode();
+    if (!node) {
+      return;
+    }
+
+    const chrome = applyKbnCodeEditorChromeOverrides(
+      [node],
+      skillDiffChromeOverrides,
+      euiThemeContext
+    );
+
+    return chrome.dispose;
+  }, [containerRef, beforeContent, afterContent, euiThemeContext]);
 };
 
 interface SkillDiffViewerProps {

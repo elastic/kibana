@@ -9,7 +9,17 @@
 
 import './src/register_globals';
 
-export { monaco, jsonDefaults, isCancellationError } from './src/monaco_imports';
+export {
+  monaco,
+  jsonDefaults,
+  isCancellationError,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+} from './src/monaco_imports';
+export type {
+  KbnMonacoLanguageThemeResolver,
+  KbnCodeEditorThemeColorId,
+} from './src/languages/theming';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/editor/editor.api.js';
@@ -21,12 +31,6 @@ export { getWorker } from './src/languages/worker_factory';
 
 export { BarePluginApi };
 export type * from './src/types';
-
-export {
-  defaultThemesResolvers,
-  CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
-} from './src/code_editor';
 
 export { getUndoRedoService } from './src/common/undo_redo_service';
 export type { UndoRedoService, UndoRedoElement } from './src/common/undo_redo_service';

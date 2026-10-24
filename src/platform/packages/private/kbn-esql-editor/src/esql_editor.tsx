@@ -27,7 +27,7 @@ import type { ESQLTelemetryCallbacks, ESQLRegistrySolutionId } from '@kbn/esql-t
 import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
+import { ESQL_LANG_ID, monaco, type CodeEditorScope } from '@kbn/code-editor';
 import { DataSourceBrowser, FieldsBrowser } from '@kbn/esql-resource-browser';
 import { useStableCallback } from '@kbn/react-hooks';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
@@ -67,7 +67,8 @@ import {
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import { useEsqlEditorActionsRegistration } from './editor_actions_context';
 import {
-  getEditorOverwrites,
+  esqlEditorChromeOverrides,
+  getEditorScopedStyles,
   shouldAutoTriggerSuggestions,
   trackSuggestionPopupState,
   onKeyDownResizeHandler,
@@ -793,6 +794,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
 
+  const editorScopedStyles = useCallback(
+    (scope: CodeEditorScope) => getEditorScopedStyles(theme, scope),
+    [theme]
+  );
+
   const editorPanel = (
     <>
       <Global
@@ -853,7 +859,8 @@ const ESQLEditorInternal = function ESQLEditor({
                   defaultMessage: 'ES|QL editor',
                 })}
                 languageId={ESQL_LANG_ID}
-                classNameCss={getEditorOverwrites(theme)}
+                chromeOverrides={esqlEditorChromeOverrides}
+                scopedCss={editorScopedStyles}
                 value={code}
                 placeholder={placeholder}
                 options={codeEditorOptions}

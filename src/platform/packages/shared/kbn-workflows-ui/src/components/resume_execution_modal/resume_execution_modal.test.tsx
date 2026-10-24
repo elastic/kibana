@@ -18,11 +18,6 @@ import { z } from '@kbn/zod/v4';
 import type { ResumeExecutionModalProps } from './resume_execution_modal';
 import { ResumeExecutionModal } from './resume_execution_modal';
 
-jest.mock('../../hooks/use_workflows_monaco_theme', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
-
 jest.mock('@kbn/code-editor', () => {
   const actual = jest.requireActual('@kbn/code-editor');
 

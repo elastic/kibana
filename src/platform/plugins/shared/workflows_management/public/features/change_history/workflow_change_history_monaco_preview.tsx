@@ -8,21 +8,26 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiText, transparentize } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ChangeHistoryDiffTelemetry } from '@kbn/change-history-ui';
-import { monaco } from '@kbn/code-editor';
+import {
+  applyKbnCodeEditorChromeOverrides,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+  monaco,
+} from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   getWorkflowValidationDisplayOptions,
-  useDefineWorkflowsMonacoTheme,
   WORKFLOW_CHANGE_HISTORY_DIFF_GLOBAL_EDITOR_OPTIONS,
   WORKFLOW_CHANGE_HISTORY_DIFF_MONACO_BASE_OPTIONS,
   WORKFLOW_CHANGE_HISTORY_PREVIEW_MONACO_OPTIONS,
   WORKFLOW_CHANGE_HISTORY_SPLIT_DIFF_EDITOR_OPTIONS,
   WORKFLOW_CHANGE_HISTORY_UNIFIED_DIFF_EDITOR_OPTIONS,
   WORKFLOW_CHANGE_HISTORY_UNIFIED_DIFF_MODIFIED_EDITOR_OPTIONS,
+  workflowsEditorChromeOverrides,
 } from '@kbn/workflows-ui';
 import type { WorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
 import { useWorkflowChangeHistoryPreviewValidation } from './use_workflow_change_history_preview_validation';
@@ -153,6 +158,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
   compareIndicator,
 }: WorkflowChangeHistoryMonacoPreviewProps): JSX.Element => {
   const styles = useMemoCss(componentStyles);
+  const euiThemeContext = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -210,7 +216,12 @@ export const WorkflowChangeHistoryMonacoPreview = ({
     [diffTelemetry]
   );
 
-  useDefineWorkflowsMonacoTheme();
+  // The editors below are created directly with `monaco.editor.create*`, so nothing else guarantees
+  // the global Kibana theme is registered before they mount. Must stay a layout effect declared
+  // before the editor-creating layout effect so it runs first.
+  useLayoutEffect(() => {
+    initializeRegisteredLanguagesTheme(euiThemeContext);
+  }, [euiThemeContext]);
 
   useEffect(() => {
     if (!diffTelemetry || !useDiffEditor || baselineYaml == null) {
@@ -242,10 +253,10 @@ export const WorkflowChangeHistoryMonacoPreview = ({
       const mountCompareMode = compareModeRef.current;
       const originalModel = monaco.editor.createModel(baselineYaml, 'yaml');
       const modifiedModel = monaco.editor.createModel(targetYaml, 'yaml');
-      const diffEditor = monaco.editor.createDiffEditor(
-        container,
-        getDiffEditorOptions(mountCompareMode, false)
-      );
+      const diffEditor = monaco.editor.createDiffEditor(container, {
+        ...getDiffEditorOptions(mountCompareMode, false),
+        theme: CODE_EDITOR_DEFAULT_THEME_ID,
+      });
 
       diffEditor.setModel({ original: originalModel, modified: modifiedModel });
       configureDiffEditors(diffEditor, mountCompareMode, false);
@@ -282,6 +293,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
     const editor = monaco.editor.create(container, {
       ...WORKFLOW_CHANGE_HISTORY_PREVIEW_MONACO_OPTIONS,
       ...getWorkflowValidationDisplayOptions(false),
+      theme: CODE_EDITOR_DEFAULT_THEME_ID,
       model,
     });
     editor.layout();
@@ -301,6 +313,24 @@ export const WorkflowChangeHistoryMonacoPreview = ({
       setIsEditorMounted(false);
     };
   }, [baselineYaml, targetYaml, updateDiffState, useDiffEditor]);
+
+  // Per-instance chrome (widget surfaces, gutter, diff colours). Keyed on the same inputs that
+  // re-create the editor above, plus the EUI theme so a light/dark switch re-applies without
+  // re-creating the editor.
+  useEffect(() => {
+    const node = editorRef.current?.getDomNode() ?? diffEditorRef.current?.getContainerDomNode();
+    if (!node) {
+      return;
+    }
+
+    const chrome = applyKbnCodeEditorChromeOverrides(
+      [node],
+      workflowsEditorChromeOverrides,
+      euiThemeContext
+    );
+
+    return () => chrome.dispose();
+  }, [baselineYaml, targetYaml, useDiffEditor, euiThemeContext]);
 
   useEffect(() => {
     const diffEditor = diffEditorRef.current;

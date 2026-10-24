@@ -52,6 +52,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/eslint-plugin-imports',
   '@kbn/eslint-plugin-telemetry',
   '@kbn/eslint-plugin-kbn-ui',
+  '@kbn/eslint-plugin-kbn-monaco',
   '@kbn/check-kibana-settings-cli',
 ]);
 
