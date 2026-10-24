@@ -1,0 +1,112 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "00140285-b827-4aee-aa09-8113f58a08f3"
+  },
+  "chain": "bits-mshta",
+  "step": "LSASS via comsvcs.dll MiniDump",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "rundll32.exe",
+            "executable": "C:\\Windows\\System32\\rundll32.exe",
+            "command_line": "rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump 624 C:\\ProgramData\\l.dmp full",
+            "args": [
+              "rundll32.exe",
+              "C:\\Windows\\System32\\comsvcs.dll,",
+              "MiniDump",
+              "624",
+              "C:\\ProgramData\\l.dmp",
+              "full"
+            ],
+            "entity_id": "azqa-rundll32.exe-691407",
+            "parent": {
+              "name": "powershell.exe",
+              "executable": "C:\\Windows\\System32\\powershell.exe",
+              "entity_id": "azqa-powershell.exe-249915"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "rundll32 loads a Control Panel applet instead of comsvcs MiniDump",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "rundll32.exe",
+            "executable": "C:\\Windows\\System32\\rundll32.exe",
+            "command_line": "rundll32.exe shell32.dll,Control_RunDLL desk.cpl",
+            "args": [
+              "rundll32.exe",
+              "shell32.dll,Control_RunDLL",
+              "desk.cpl"
+            ],
+            "entity_id": "azqa-rundll32.exe-496233",
+            "parent": {
+              "name": "explorer.exe",
+              "executable": "C:\\Windows\\System32\\explorer.exe",
+              "entity_id": "azqa-explorer.exe-211212"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
