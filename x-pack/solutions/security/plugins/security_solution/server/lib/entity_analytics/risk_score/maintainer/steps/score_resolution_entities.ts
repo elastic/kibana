@@ -25,12 +25,17 @@ import { shouldProfilePage, summarizeEsqlPage } from '../utils/esql_page_profile
 import type { PageStepRecorder, PageStepTimings, PageTimer } from '../utils/page_step_timings';
 import { createPageStepTimings } from '../utils/page_step_timings';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
-import { getResolutionPageMemberFilter } from './resolution_member_filter';
+import {
+  getResolutionPageMemberFilter,
+  MAX_RESOLUTION_PAGE_MEMBERS,
+} from './resolution_member_filter';
+import type { ResolutionPageChunk } from './resolution_store_pages';
 import {
   byEntityId,
   chunkResolutionPage,
   discoverResolutionPagesFromStore,
   discoverSampledResolutionPages,
+  halveResolutionChunk,
   readResolutionTargets,
   readSampledAliasPage,
 } from './resolution_store_pages';
@@ -178,8 +183,10 @@ export const scoreResolutionPage = (
     : scoreResolutionPageFromLookup(params, task);
 
 /**
- * A sampled page reads its aliases first; one that holds more targets than the scoring query
- * returns is scored in consecutive parts. Other store pages came with their aliases.
+ * A sampled page reads its aliases first. Only targets with alerts produce rows, so a page can
+ * hold many more targets than the scoring query returns: it's cut into parts only where its
+ * members wouldn't fit one terms query, and a part whose result comes back full is halved and
+ * scored again. Other store pages came with their aliases.
  */
 const scoreResolutionPageFromStore = async (
   params: ScoreResolutionEntitiesParams,
@@ -203,23 +210,35 @@ const scoreResolutionPageFromStore = async (
     lower: sampledRange.lower,
     aliases: page.aliases,
     targetIds: page.targetIds,
-    maxTargets: Math.min(params.pageSize, MAX_RESOLUTION_TARGETS_PER_PAGE),
+    maxMembers: MAX_RESOLUTION_PAGE_MEMBERS,
   });
   if (chunks.length > 1) {
     params.logger.info(
       `[resolution][page:${pageNumber}] read ${page.aliases.length} aliases of ${page.targetIds.length} targets; scoring it in ${chunks.length} parts`
     );
   }
+  const rowLimit = Math.min(params.pageSize, MAX_RESOLUTION_TARGETS_PER_PAGE);
+  const scoreChunk = async (chunk: ResolutionPageChunk): Promise<EntityRiskScoreRecord[]> => {
+    const scores = await scoreStoreGroups(params, {
+      ...task,
+      resolutionTargetIds: chunk.targetIds,
+      bounds: chunk.bounds,
+      aliasEntities: chunk.aliasEntities,
+    });
+    const halves = scores.length >= rowLimit ? halveResolutionChunk(chunk) : undefined;
+    if (!halves) {
+      return scores;
+    }
+    params.logger.info(
+      `[resolution][page:${pageNumber}] a part of ${chunk.targetIds.length} targets reached ${rowLimit} rows; scoring it in two halves`
+    );
+    const left = await scoreChunk(halves[0]);
+    const right = await scoreChunk(halves[1]);
+    return [...left, ...right];
+  };
   const scores: EntityRiskScoreRecord[] = [];
   for (const chunk of chunks) {
-    scores.push(
-      ...(await scoreStoreGroups(params, {
-        ...task,
-        resolutionTargetIds: chunk.targetIds,
-        bounds: chunk.bounds,
-        aliasEntities: chunk.aliasEntities,
-      }))
-    );
+    scores.push(...(await scoreChunk(chunk)));
   }
   return scores;
 };

@@ -12,6 +12,7 @@ import { createPageStepTimings } from '../utils/page_step_timings';
 import {
   chunkResolutionPage,
   discoverResolutionPagesFromStore,
+  halveResolutionChunk,
   discoverSampledResolutionPages,
   readResolutionTargets,
   readSampledAliasPage,
@@ -425,21 +426,22 @@ describe('readSampledAliasPage', () => {
   });
 });
 
-describe('chunkResolutionPage', () => {
-  it('cuts the targets into consecutive runs, each with its range and its aliases', () => {
-    const entities = [
-      ['user:a1', 'user:t1'],
-      ['user:a2', 'user:t2'],
-      ['user:a3', 'user:t3'],
-    ].map(([id, target]) => ({
-      entity: { id, relationships: { resolution: { resolved_to: target } } },
-    }));
+const aliasEntities = (...pairs: Array<[string, string]>) =>
+  pairs.map(([id, target]) => ({
+    entity: { id, relationships: { resolution: { resolved_to: target } } },
+  }));
 
+describe('chunkResolutionPage', () => {
+  it('cuts the targets into consecutive runs whose members fit the limit', () => {
     const chunks = chunkResolutionPage({
       lower: 'user:t0',
-      aliases: entities,
+      aliases: aliasEntities(
+        ['user:a1', 'user:t1'],
+        ['user:a2', 'user:t2'],
+        ['user:a3', 'user:t3']
+      ),
       targetIds: ['user:t1', 'user:t2', 'user:t3'],
-      maxTargets: 2,
+      maxMembers: 4,
     });
 
     expect(chunks.map(({ targetIds, bounds }) => ({ targetIds, bounds }))).toEqual([
@@ -447,6 +449,63 @@ describe('chunkResolutionPage', () => {
       { targetIds: ['user:t3'], bounds: { lower: 'user:t2', upper: 'user:t3' } },
     ]);
     expect([...chunks[1].aliasEntities.keys()]).toEqual(['user:a3']);
+  });
+
+  it('keeps a page whose members fit in one run', () => {
+    const chunks = chunkResolutionPage({
+      aliases: aliasEntities(['user:a1', 'user:t1'], ['user:a2', 'user:t2']),
+      targetIds: ['user:t1', 'user:t2'],
+      maxMembers: 65_536,
+    });
+
+    expect(chunks).toHaveLength(1);
+  });
+
+  it('gives a group larger than the limit a run of its own', () => {
+    const chunks = chunkResolutionPage({
+      aliases: aliasEntities(
+        ['user:a1', 'user:t1'],
+        ['user:b1', 'user:t2'],
+        ['user:b2', 'user:t2']
+      ),
+      targetIds: ['user:t1', 'user:t2'],
+      maxMembers: 2,
+    });
+
+    expect(chunks.map(({ targetIds }) => targetIds)).toEqual([['user:t1'], ['user:t2']]);
+  });
+});
+
+describe('halveResolutionChunk', () => {
+  it('splits a part at its middle target, each half with its range and aliases', () => {
+    const [chunk] = chunkResolutionPage({
+      lower: 'user:t0',
+      aliases: aliasEntities(
+        ['user:a1', 'user:t1'],
+        ['user:a2', 'user:t2'],
+        ['user:a3', 'user:t3']
+      ),
+      targetIds: ['user:t1', 'user:t2', 'user:t3'],
+      maxMembers: 65_536,
+    });
+
+    const halves = halveResolutionChunk(chunk);
+
+    expect(halves?.map(({ targetIds, bounds }) => ({ targetIds, bounds }))).toEqual([
+      { targetIds: ['user:t1'], bounds: { lower: 'user:t0', upper: 'user:t1' } },
+      { targetIds: ['user:t2', 'user:t3'], bounds: { lower: 'user:t1', upper: 'user:t3' } },
+    ]);
+    expect([...(halves?.[1].aliasEntities.keys() ?? [])]).toEqual(['user:a2', 'user:a3']);
+  });
+
+  it('leaves a single target whole', () => {
+    const [chunk] = chunkResolutionPage({
+      aliases: aliasEntities(['user:a1', 'user:t1']),
+      targetIds: ['user:t1'],
+      maxMembers: 65_536,
+    });
+
+    expect(halveResolutionChunk(chunk)).toBeUndefined();
   });
 });
 

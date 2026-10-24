@@ -465,36 +465,85 @@ export interface ResolutionPageChunk {
   aliasEntities: Map<string, RiskScoreModifierEntity>;
 }
 
+const chunkOf = (
+  targetIds: string[],
+  bounds: { lower?: string; upper: string },
+  aliases: Iterable<RiskScoreModifierEntity>
+): ResolutionPageChunk => {
+  const inChunk = new Set(targetIds);
+  return {
+    targetIds,
+    bounds,
+    aliasEntities: byEntityId([...aliases].filter((alias) => inChunk.has(resolvedTo(alias) ?? ''))),
+  };
+};
+
 /**
- * Cuts a page's targets, in order, into runs of at most `maxTargets`, each with its own range, so a
- * sampled page that came out larger than the scoring query's row limit is scored in parts. Each
- * run takes its targets' aliases along.
+ * Cuts a page's targets, in order, into runs whose members (each target and its aliases) fit one
+ * terms query, each with its own range, so the member filter never has to skip a large page. A
+ * group larger than the limit gets a run of its own, which the member filter then skips.
  */
 export const chunkResolutionPage = ({
   lower,
   aliases,
   targetIds,
-  maxTargets,
+  maxMembers,
 }: {
   lower?: string;
   aliases: RiskScoreModifierEntity[];
   targetIds: string[];
-  maxTargets: number;
+  maxMembers: number;
 }): ResolutionPageChunk[] => {
-  const chunks: ResolutionPageChunk[] = [];
-  let from = lower;
-  for (let start = 0; start < targetIds.length; start += maxTargets) {
-    const ids = targetIds.slice(start, start + maxTargets);
-    const inChunk = new Set(ids);
-    const upper = ids[ids.length - 1];
-    chunks.push({
-      targetIds: ids,
-      bounds: { lower: from, upper },
-      aliasEntities: byEntityId(aliases.filter((alias) => inChunk.has(resolvedTo(alias) ?? ''))),
-    });
-    from = upper;
+  const aliasCounts = new Map<string, number>();
+  for (const alias of aliases) {
+    const target = resolvedTo(alias);
+    if (target !== undefined) {
+      aliasCounts.set(target, (aliasCounts.get(target) ?? 0) + 1);
+    }
   }
-  return chunks;
+  const runs: string[][] = [];
+  let run: string[] = [];
+  let members = 0;
+  for (const target of targetIds) {
+    const groupMembers = 1 + (aliasCounts.get(target) ?? 0);
+    if (run.length > 0 && members + groupMembers > maxMembers) {
+      runs.push(run);
+      run = [];
+      members = 0;
+    }
+    run.push(target);
+    members += groupMembers;
+  }
+  if (run.length > 0) {
+    runs.push(run);
+  }
+  let from = lower;
+  return runs.map((ids) => {
+    const upper = ids[ids.length - 1];
+    const chunk = chunkOf(ids, { lower: from, upper }, aliases);
+    from = upper;
+    return chunk;
+  });
+};
+
+/**
+ * Halves a part at its middle target, for a part whose scoring query came back full: the query
+ * keeps at most its row limit of targets, so a full result may have dropped some.
+ */
+export const halveResolutionChunk = (
+  chunk: ResolutionPageChunk
+): [ResolutionPageChunk, ResolutionPageChunk] | undefined => {
+  if (chunk.targetIds.length < 2) {
+    return undefined;
+  }
+  const middle = Math.floor(chunk.targetIds.length / 2);
+  const left = chunk.targetIds.slice(0, middle);
+  const split = left[left.length - 1];
+  const aliases = [...chunk.aliasEntities.values()];
+  return [
+    chunkOf(left, { lower: chunk.bounds.lower, upper: split }, aliases),
+    chunkOf(chunk.targetIds.slice(middle), { lower: split, upper: chunk.bounds.upper }, aliases),
+  ];
 };
 
 /**

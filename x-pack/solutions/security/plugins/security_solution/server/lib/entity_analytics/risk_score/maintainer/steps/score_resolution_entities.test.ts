@@ -576,7 +576,7 @@ describe('score_resolution_entities', () => {
         ]);
       });
 
-      it('scores a page with more targets than the query returns in consecutive parts', async () => {
+      it('halves a part whose result reached the row limit and scores the halves again', async () => {
         crudClient.aggregateEntities = jest.fn().mockResolvedValueOnce({ total: 2, took: 1 });
         jest
           .mocked(crudClient.listEntities)
@@ -589,14 +589,19 @@ describe('score_resolution_entities', () => {
         jest
           .mocked(esClient.esql.query)
           .mockResolvedValueOnce({ columns: [], values: [scoreRow('user:t1')] })
+          .mockResolvedValueOnce({ columns: [], values: [scoreRow('user:t1')] })
           .mockResolvedValueOnce({ columns: [], values: [scoreRow('user:t2')] });
 
         const pages = await runSampled(1, 10);
 
-        const [[first], [second]] = jest.mocked(esClient.esql.query).mock.calls;
-        expect(first.query).toContain('resolution_target_id <= "user:t1"');
-        expect(second.query).toContain('resolution_target_id > "user:t1"');
-        expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('scoring it in 2 parts'));
+        const [[whole], [left], [right]] = jest.mocked(esClient.esql.query).mock.calls;
+        expect(whole.query).toContain('resolution_target_id <= "user:t2"');
+        expect(left.query).toContain('resolution_target_id <= "user:t1"');
+        expect(right.query).toContain('resolution_target_id > "user:t1"');
+        expect(right.query).toContain('resolution_target_id <= "user:t2"');
+        expect(logger.info).toHaveBeenCalledWith(
+          expect.stringContaining('reached 1 rows; scoring it in two halves')
+        );
         expect(pages).toEqual([
           [
             expect.objectContaining({ id_value: 'user:t1' }),
