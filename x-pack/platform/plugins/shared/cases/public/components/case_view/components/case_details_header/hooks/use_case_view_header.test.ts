@@ -244,6 +244,22 @@ describe('useCaseViewHeader', () => {
     expect(statusBadge).toBeDefined();
   });
 
+  it('labels severity and status badges with their context for screen readers', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const severityBadge = result.current.badges.find(
+      (b) => b['data-test-subj'] === 'case-view-severity-badge'
+    );
+    const statusBadge = result.current.badges.find(
+      (b) => b['data-test-subj'] === 'case-view-status-badge'
+    );
+
+    expect(severityBadge?.onClickAriaLabel).toBe('Severity: Low');
+    expect(statusBadge?.onClickAriaLabel).toBe('Status: Open');
+  });
+
   it('includes alerts count badge when totalAlerts > 0', () => {
     const caseWithAlerts: CaseUI = { ...basicCase, totalAlerts: 5 };
     const { result } = renderHook(

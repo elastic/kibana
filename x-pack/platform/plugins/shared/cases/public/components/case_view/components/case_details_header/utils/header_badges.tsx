@@ -13,6 +13,7 @@ import { CaseStatuses } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import { statuses } from '../../../../status/config';
 import { severities } from '../../../../severity/config';
+import * as i18n from '../../../translations';
 
 interface GetBadgesArgs {
   caseData: CaseUI;
@@ -32,8 +33,10 @@ export const getBadges = ({
   const result: AppHeaderBadge[] = [];
 
   const severityConfig = severities[caseData.severity];
+  const severityLabel = severityConfig?.label ?? caseData.severity;
   const severityBadge: AppHeaderBadge = {
-    label: severityConfig?.label ?? caseData.severity,
+    label: severityLabel,
+    onClickAriaLabel: i18n.SEVERITY_BADGE_ARIA_LABEL(severityLabel),
     color: severityConfig?.badgeColor ?? 'default',
     'data-test-subj': 'case-view-severity-badge',
   };
@@ -50,6 +53,7 @@ export const getBadges = ({
   const statusConfig = statuses[caseData.status];
   const statusBadge: AppHeaderBadge = {
     label: statusConfig.label,
+    onClickAriaLabel: i18n.STATUS_BADGE_ARIA_LABEL(statusConfig.label),
     color: statusConfig.color as AppHeaderBadge['color'],
     'data-test-subj': 'case-view-status-badge',
   };
