@@ -96,7 +96,7 @@ export class RuleCreateWizardPage {
     this.addMitreTechniqueButton = this.page.testSubj.locator('addMitreAttackTechnique');
     this.addMitreSubtechniqueButton = this.page.testSubj.locator('addMitreAttackSubtechnique');
     // Rule details page, reached after the rule is created.
-    this.ruleDetailsTitle = this.page.testSubj.locator('header-page-title');
+    this.ruleDetailsTitle = this.page.testSubj.locator('appHeaderTitle');
     const aboutSection = this.page.testSubj.locator('aboutRule');
     this.savedThreatTactics = aboutSection.locator('[data-test-subj="threatTacticLink"]');
     this.savedThreatTechniques = aboutSection.locator('[data-test-subj="threatTechniqueLink"]');

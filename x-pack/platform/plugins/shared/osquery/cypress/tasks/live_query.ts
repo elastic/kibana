@@ -132,21 +132,28 @@ export const navigateToRule = (ruleName: string) => {
   waitForAlertsToPopulate();
 };
 
+// Enables or disables the rule from the rule details header badge menu, then closes the menu.
+const toggleRuleOnDetailsPage = (expectedLabel: 'Enabled' | 'Disabled') => {
+  cy.getBySel('ruleDetailsEnabledBadge').click();
+  cy.getBySel(
+    expectedLabel === 'Enabled' ? 'ruleDetailsEnableRule' : 'ruleDetailsDisableRule'
+  ).click();
+  cy.getBySel('ruleDetailsEnabledBadge').should('contain.text', expectedLabel);
+  cy.focused().type('{esc}');
+};
+
 export const loadRuleAlerts = (ruleName: string) => {
   navigateToRule(ruleName);
-  cy.getBySel('ruleSwitch')
-    .invoke('attr', 'aria-checked')
-    .then((ariaChecked) => {
-      if (ariaChecked === 'true') {
+  cy.getBySel('ruleDetailsEnabledBadge')
+    .invoke('text')
+    .then((label) => {
+      if (label.includes('Enabled')) {
         // Rule is on - turn off first, then back on to refresh
-        cy.getBySel('ruleSwitch').click();
-        cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
-        cy.getBySel('ruleSwitch').click();
-        cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+        toggleRuleOnDetailsPage('Disabled');
+        toggleRuleOnDetailsPage('Enabled');
       } else {
         // Rule is off - turn it on
-        cy.getBySel('ruleSwitch').click();
-        cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+        toggleRuleOnDetailsPage('Enabled');
       }
     });
 };

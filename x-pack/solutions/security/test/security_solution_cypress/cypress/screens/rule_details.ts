@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const POPOVER_ACTIONS_TRIGGER_BUTTON =
-  '[data-test-subj="rules-details-popover-button-icon"]';
+export const POPOVER_ACTIONS_TRIGGER_BUTTON = '[data-test-subj="app-menu-overflow-button"]';
 
 export const EXPORT_RULE_ACTION_BUTTON = '[data-test-subj="rules-details-export-rule"]';
 
@@ -68,7 +67,8 @@ export const FIELDS_BROWSER_BTN =
 export const LAST_EXECUTION_STATUS_REFRESH_BUTTON =
   '[data-test-subj="ruleLastExecutionStatusRefreshButton"]';
 
-export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
+export const RULE_NAME_HEADER =
+  '[data-test-subj="header-page-title"], [data-test-subj="appHeaderTitle"]';
 
 export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 
@@ -83,7 +83,11 @@ export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-ac
 
 export const EDIT_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-edit"]';
 
-export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
+export const RULE_ENABLED_BADGE = '[data-test-subj="ruleDetailsEnabledBadge"]';
+
+export const RULE_ENABLE_ACTION = '[data-test-subj="ruleDetailsEnableRule"]';
+
+export const RULE_DISABLE_ACTION = '[data-test-subj="ruleDetailsDisableRule"]';
 
 export const RULE_TYPE_DETAILS = 'Rule type';
 

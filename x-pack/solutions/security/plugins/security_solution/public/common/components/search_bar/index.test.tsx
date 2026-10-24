@@ -89,6 +89,22 @@ describe('SearchBarComponent', () => {
     (useKibana as jest.Mock).mockReturnValue(useKibanaMock);
   });
 
+  it('passes the data view picker override to the search bar', () => {
+    const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent {...props} dataViewPickerOverride={dataViewPickerOverride} />
+      </TestProviders>
+    );
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({ dataViewPickerOverride }),
+      expect.anything()
+    );
+  });
+
   it('passes dashboard data views to the filter bar with the page data view', () => {
     const panelDataView = createStubDataView({
       spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },

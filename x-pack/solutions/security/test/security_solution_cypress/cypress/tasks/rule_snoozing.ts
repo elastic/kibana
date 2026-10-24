@@ -7,7 +7,10 @@
 
 import moment from 'moment';
 import { RULE_NAME, TOASTER } from '../screens/alerts_detection_rules';
+import { TOOLTIP } from '../screens/common';
 import {
+  RULE_DETAILS_SET_SNOOZE_BUTTON,
+  RULE_DETAILS_SNOOZED_BADGE,
   SNOOZED_BADGE,
   SNOOZE_POPOVER_APPLY_BUTTON,
   SNOOZE_POPOVER_CANCEL_BUTTON,
@@ -15,6 +18,7 @@ import {
   SNOOZE_POPOVER_INTERVAL_VALUE_INPUT,
   UNSNOOZED_BADGE,
 } from '../screens/rule_snoozing';
+import { openAppMenuOverflow } from './app_menu';
 
 type SnoozeUnits = 'minutes' | 'hours' | 'days' | 'weeks' | 'months';
 type SnoozeDuration = `${number} ${SnoozeUnits}`;
@@ -89,6 +93,37 @@ export function expectRuleUnsnoozedInTable({ tableSelector, ruleName }: TableRul
   findRuleRowInTable(tableSelector, ruleName).find(UNSNOOZED_BADGE).should('exist');
 }
 
+/**
+ * Snoozes a rule from the rule details page "Set snooze" menu item and its modal.
+ */
+export function snoozeRuleOnDetailsPage(duration: SnoozeDuration): void {
+  openSnoozeModalOnDetailsPage();
+  snoozeRuleInOpenPopover(duration);
+}
+
+export function unsnoozeRuleOnDetailsPage(): void {
+  openSnoozeModalOnDetailsPage();
+  cy.get(SNOOZE_POPOVER_CANCEL_BUTTON).click();
+  expectRuleUnsnoozedOnDetailsPage();
+}
+
+export function expectRuleSnoozedOnDetailsPage(duration: SnoozeDuration): void {
+  cy.get(RULE_DETAILS_SNOOZED_BADGE).contains(expectedSnoozeBadgeText(duration));
+}
+
+export function expectRuleUnsnoozedOnDetailsPage(): void {
+  cy.get(RULE_DETAILS_SNOOZED_BADGE).should('not.exist');
+}
+
+export function expectSnoozeDisabledOnDetailsPage(tooltip?: string): void {
+  openAppMenuOverflow();
+  cy.get(RULE_DETAILS_SET_SNOOZE_BUTTON).should('be.disabled');
+  if (tooltip) {
+    cy.get(RULE_DETAILS_SET_SNOOZE_BUTTON).trigger('mouseover', { force: true }); // Have to force because button element is disabled
+    cy.get(TOOLTIP).contains(tooltip);
+  }
+}
+
 export function findRuleRowInTable(
   tableSelector: string,
   ruleName: string
@@ -101,6 +136,11 @@ export function findRuleRowInTable(
  */
 function openSnoozePopover(): void {
   cy.get(UNSNOOZED_BADGE).click();
+}
+
+function openSnoozeModalOnDetailsPage(): void {
+  openAppMenuOverflow();
+  cy.get(RULE_DETAILS_SET_SNOOZE_BUTTON).click();
 }
 
 /**

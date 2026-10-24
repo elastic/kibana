@@ -19,3 +19,7 @@ export const SNOOZE_POPOVER_INTERVAL_UNIT_INPUT = '[data-test-subj="ruleSnoozeIn
 export const SNOOZE_POPOVER_APPLY_BUTTON = '[data-test-subj="ruleSnoozeApply"]';
 
 export const SNOOZE_POPOVER_CANCEL_BUTTON = '[data-test-subj="ruleSnoozeCancel"]';
+
+export const RULE_DETAILS_SET_SNOOZE_BUTTON = '[data-test-subj="rules-details-snooze-rule"]';
+
+export const RULE_DETAILS_SNOOZED_BADGE = '[data-test-subj="ruleDetailsSnoozedBadge"]';

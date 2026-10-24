@@ -7,6 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
+import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux-v7';
 import { connect, useDispatch } from 'react-redux-v7';
@@ -65,6 +66,10 @@ interface SiemSearchBarProps {
    * Controls the search bar's padding and border. Use 'inPage' to align it with the page content.
    */
   displayStyle?: 'inPage' | 'detached' | 'withBorders';
+  /**
+   * Replaces the data view picker rendered before the KQL input.
+   */
+  dataViewPickerOverride?: ReactNode;
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
@@ -72,6 +77,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     dataTestSubj,
     dataView,
     additionalDataViews,
+    dataViewPickerOverride,
     displayStyle,
     end,
     filterQuery,
@@ -356,6 +362,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           allowSavingQueries
           dataTestSubj={dataTestSubj}
           displayStyle={displayStyle}
+          dataViewPickerOverride={dataViewPickerOverride}
         />
       </div>
     ) : null;
@@ -374,6 +381,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
     prevProps.displayStyle === nextProps.displayStyle &&
+    prevProps.dataViewPickerOverride === nextProps.dataViewPickerOverride &&
     deepEqual(prevProps.queries, nextProps.queries) &&
     deepEqual(prevProps.dataView, nextProps.dataView) &&
     deepEqual(prevProps.additionalDataViews, nextProps.additionalDataViews)

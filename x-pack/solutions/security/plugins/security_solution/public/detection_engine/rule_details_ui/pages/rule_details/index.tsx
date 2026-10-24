@@ -10,14 +10,12 @@
 
 import type { EuiResizeObserverProps } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiResizeObserver,
   EuiSpacer,
-  EuiToolTip,
   EuiWindowEvent,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -41,6 +39,7 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../../data_view_manager/constants';
+import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -53,14 +52,12 @@ import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_
 import { AlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import {
   getDetectionEngineUrl,
@@ -80,28 +77,19 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
-import { RuleSwitch } from '../../../common/components/rule_switch';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
   getStepsData,
   redirectToDetections,
 } from '../../../common/helpers';
-import {
-  CreatedBy,
-  UpdatedBy,
-  RuleVersion,
-  RuleRevision,
-} from '../../../../detections/components/rules/rule_info';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { RuleActionsOverflow } from './rule_actions_overflow';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
+import { RuleDetailsAppHeader } from './rule_details_app_header';
+import { RuleDetailsStickyHeader } from './rule_details_sticky_header';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_UI_ID, ENABLE_RULE_CHANGES_HISTORY_SETTING } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 import {
@@ -109,16 +97,8 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
-import {
-  canEditRuleWithActions,
-  explainLackOfPermission,
-  isBoolean,
-} from '../../../../common/utils/privileges';
-import {
-  RuleStatus,
-  RuleStatusFailedCallOut,
-  ruleStatusI18n,
-} from '../../../common/components/rule_execution_status';
+import { isBoolean } from '../../../../common/utils/privileges';
+import { RuleStatusFailedCallOut } from '../../../common/components/rule_execution_status';
 import { ExecutionResultsTable } from './execution_results/execution_results_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
@@ -131,35 +111,29 @@ import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/compo
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import { useRuleAuthorDisplayNames } from '../../../rule_management/logic/use_rule_author_display_names';
 import { useSyncShowBuildingBlockAlerts } from './use_sync_show_building_block_alerts';
-import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import { type RuleResponse, type Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
-import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
-import { EditRuleSettingButtonLink } from './edit_rule_settings_button_link/edit_rule_settings_button_link';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
-import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
-import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
-import { AddRuleAttachmentToChatButton } from '../../../rule_creation_ui/components/add_rule_attachment_to_chat_button';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { FiltersGlobal } from '../../../../common/components/filters_global';
+
+// Module-level so the search bar keeps a stable prop reference between renders.
+const ALERTS_DATA_VIEW_PICKER = <DataViewPicker scope={PageScope.alerts} disabled />;
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -237,15 +211,6 @@ export const RuleDetailsPage = connector(
     clearEventsLoading,
     clearSelected,
   }: DetectionEngineComponentProps) {
-    const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled(
-      'ruleChangesHistoryEnabled'
-    );
-    const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
-      ENABLE_RULE_CHANGES_HISTORY_SETTING
-    );
-    const isRuleChangesHistoryEnabled =
-      ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
-
     const {
       application,
       timelines: timelinesUi,
@@ -287,12 +252,6 @@ export const RuleDetailsPage = connector(
         hasIndexMaintenance,
       },
     ] = useUserData();
-    const {
-      rules: { edit: canEditRules },
-      enableDisable: { edit: canEnableDisableRules },
-      customHighlightedFields: { edit: canEditCustomHighlightedFields },
-      investigationGuide: { edit: canEditInvestigationGuides },
-    } = useUserPrivileges().rulesPrivileges;
     const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
@@ -349,12 +308,8 @@ export const RuleDetailsPage = connector(
     // Page lifetime so tab navigation does not remount and reset the toolbar filter.
     useSyncShowBuildingBlockAlerts(rule?.building_block_type != null);
 
-    const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-    // TODO: Refactor license check + hasMlAdminPermissions to common check
-    const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
-    const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
     const hasActionsPrivileges = useMemo(() => {
       if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
@@ -399,53 +354,12 @@ export const RuleDetailsPage = connector(
       [status, isAlertsLoading, loading]
     );
 
-    const title = useMemo(
-      () => (
-        <>
-          {rule?.name} {ruleLoading && <EuiLoadingSpinner size="m" />}
-        </>
-      ),
-      [rule, ruleLoading]
-    );
-    const badgeOptions = useMemo<BadgeOptions | undefined>(
-      () =>
-        !ruleLoading && !isExistingRule
-          ? {
-              text: i18n.DELETED_RULE,
-              color: 'default',
-            }
-          : undefined,
-      [isExistingRule, ruleLoading]
-    );
     const { createdBy, updatedBy } = useRuleAuthorDisplayNames({
       createdBy: rule?.created_by,
       createdByProfileUid: rule?.created_by_profile_uid,
       updatedBy: rule?.updated_by,
       updatedByProfileUid: rule?.updated_by_profile_uid,
     });
-    const subTitle = useMemo(
-      () =>
-        rule ? (
-          [
-            <CreatedBy createdBy={createdBy} createdAt={rule.created_at} />,
-            rule.updated_by != null ? (
-              <UpdatedBy updatedBy={updatedBy} updatedAt={rule.updated_at} />
-            ) : (
-              ''
-            ),
-            isRuleChangesHistoryEnabled && rule.rule_source.type === 'external' ? (
-              <RuleVersion version={rule.version} />
-            ) : (
-              ''
-            ),
-            isRuleChangesHistoryEnabled ? <RuleRevision revision={rule.revision} /> : '',
-          ].filter(Boolean)
-        ) : ruleLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : null,
-      [rule, ruleLoading, isRuleChangesHistoryEnabled, createdBy, updatedBy]
-    );
-
     // Callback for when open/closed filter changes
     const onFilterGroupChangedCallback = useCallback(
       (newFilterGroup: Status) => {
@@ -485,42 +399,15 @@ export const RuleDetailsPage = connector(
       onUpgrade: refreshRule,
     });
 
-    const ruleStatusInfo = useMemo(() => {
-      return (
-        <>
-          {ruleLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-            </EuiFlexItem>
-          ) : (
-            <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-              <EuiToolTip content={ruleI18n.REFRESH} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  data-test-subj="ruleLastExecutionStatusRefreshButton"
-                  color="primary"
-                  onClick={refreshRule}
-                  iconType="refresh"
-                  aria-label={ruleI18n.REFRESH}
-                  isDisabled={!isExistingRule}
-                />
-              </EuiToolTip>
-            </RuleStatus>
-          )}
-          <EuiFlexItem grow={false}>
-            <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
-          </EuiFlexItem>
-        </>
-      );
-    }, [ruleId, lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
-
     // Extract rule index if available on rule type
     let ruleIndex: string[] | undefined;
     if (rule != null && 'index' in rule && Array.isArray(rule.index)) {
       ruleIndex = rule.index;
     }
 
+    // Only the first load shows a spinner. A refresh keeps the callout in place to avoid layout jumps.
     const ruleError = useMemo(() => {
-      return ruleLoading ? (
+      return isLoading ? (
         <EuiFlexItem>
           <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
         </EuiFlexItem>
@@ -541,7 +428,7 @@ export const RuleDetailsPage = connector(
       lastExecutionStatus,
       lastExecutionDate,
       lastExecutionMessage,
-      ruleLoading,
+      isLoading,
       rule?.immutable,
       rule?.name,
       ruleIndex,
@@ -674,15 +561,8 @@ export const RuleDetailsPage = connector(
 
     const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
 
-    const isRuleEditButtonEnabled =
-      canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
-
     return (
       <>
-        <NeedAdminForUpdateRulesCallOut />
-        <MissingDetectionsPrivilegesCallOut />
-        {upgradeCallout}
-        {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (
           <BulkActionDuplicateExceptionsConfirmation
             onCancel={cancelRuleDuplication}
@@ -713,98 +593,30 @@ export const RuleDetailsPage = connector(
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <RuleCustomizationsContextProvider rule={rule}>
+            <RuleDetailsStickyHeader>
+              <RuleDetailsAppHeader
+                rule={rule}
+                ruleId={ruleId}
+                ruleLoading={ruleLoading}
+                isExistingRule={isExistingRule}
+                hasActionsPrivileges={hasActionsPrivileges}
+                createdBy={createdBy}
+                updatedBy={updatedBy}
+                tabs={pageTabs}
+                refreshRule={refreshRule}
+                onRuleEnabledChange={handleOnChangeEnabledRule}
+                startMlJobsIfNeeded={startMlJobsIfNeeded}
+                showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+                confirmDeletion={confirmDeletion}
+              />
+            </RuleDetailsStickyHeader>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
+              <NeedAdminForUpdateRulesCallOut />
+              <MissingDetectionsPrivilegesCallOut />
+              {upgradeCallout}
+              {deprecationCallout}
               <Display show={!globalFullScreen}>
-                <HeaderPage
-                  border
-                  subtitle={subTitle}
-                  subtitle2={
-                    <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                      <ModifiedRuleBadge rule={rule} />
-                      <EuiFlexGroup alignItems="center" gutterSize="xs">
-                        <EuiFlexItem grow={false}>
-                          {ruleStatusI18n.STATUS}
-                          {':'}
-                        </EuiFlexItem>
-                        {ruleStatusInfo}
-                      </EuiFlexGroup>
-                    </EuiFlexGroup>
-                  }
-                  title={title}
-                  badgeOptions={badgeOptions}
-                >
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        position="top"
-                        content={explainLackOfPermission(
-                          rule,
-                          hasMlPermissions,
-                          hasActionsPrivileges,
-                          canEnableDisableRules
-                        )}
-                      >
-                        <EuiFlexGroup>
-                          <RuleSwitch
-                            id={rule?.id ?? '-1'}
-                            isDisabled={
-                              !rule ||
-                              !isExistingRule ||
-                              !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                              !canEnableDisableRules ||
-                              (isMlRule(rule?.type) && !hasMlPermissions)
-                            }
-                            enabled={isRuleEnabled}
-                            startMlJobsIfNeeded={startMlJobsIfNeeded}
-                            onChange={handleOnChangeEnabledRule}
-                            ruleName={rule?.name}
-                          />
-                          <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                        {isAgentChatExperienceEnabled && rule != null ? (
-                          <EuiFlexItem grow={false}>
-                            <AddRuleAttachmentToChatButton rule={rule} pathway="rule_details" />
-                          </EuiFlexItem>
-                        ) : null}
-                        <EuiFlexItem grow={false}>
-                          <EditRuleSettingButtonLink
-                            ruleId={ruleId}
-                            disabled={
-                              !isExistingRule ||
-                              !isRuleEditButtonEnabled ||
-                              (isMlRule(rule?.type) && !hasMlPermissions)
-                            }
-                            disabledReason={explainLackOfPermission(
-                              rule,
-                              hasMlPermissions,
-                              hasActionsPrivileges,
-                              isRuleEditButtonEnabled
-                            )}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <RuleActionsOverflow
-                            rule={rule}
-                            ruleId={ruleId}
-                            isDisabled={!isExistingRule}
-                            canDuplicateRuleWithActions={canEditRuleWithActions(
-                              rule,
-                              hasActionsPrivileges
-                            )}
-                            showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
-                            showManualRuleRunConfirmation={showManualRuleRunConfirmation}
-                            confirmDeletion={confirmDeletion}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </HeaderPage>
-                <TabNavigation navTabs={pageTabs} />
                 {ruleError}
                 <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
               </Display>
@@ -891,7 +703,11 @@ export const RuleDetailsPage = connector(
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
                         <FiltersGlobal>
-                          <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
+                          <SiemSearchBar
+                            dataView={dataView}
+                            id={InputsModelId.global}
+                            dataViewPickerOverride={ALERTS_DATA_VIEW_PICKER}
+                          />
                         </FiltersGlobal>
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">

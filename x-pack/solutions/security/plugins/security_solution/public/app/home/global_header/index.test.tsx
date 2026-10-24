@@ -235,8 +235,26 @@ describe('global header', () => {
     expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it('mounts the header action menu on the rule details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123' });
+  it('does not mount the legacy header action menu on the rule details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123/overview' });
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
+    expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('keeps the legacy header action menu on the rule editing page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123/edit' });
     const setHeaderActionMenu = jest.fn();
     (useKibana as jest.Mock).mockReturnValue({
       ...mockUseKibana(),

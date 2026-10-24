@@ -19,13 +19,15 @@ import { RULES_MANAGEMENT_TABLE, RULE_NAME } from '../../../../../screens/alerts
 import {
   expectRuleSnoozed,
   expectRuleSnoozedInTable,
-  expectRuleUnsnoozed,
+  expectRuleSnoozedOnDetailsPage,
+  expectRuleUnsnoozedOnDetailsPage,
+  expectSnoozeDisabledOnDetailsPage,
   expectRuleUnsnoozedInTable,
   expectSnoozeErrorToast,
   expectSnoozeSuccessToast,
   expectUnsnoozeSuccessToast,
-  snoozeRule,
   snoozeRuleInTable,
+  snoozeRuleOnDetailsPage,
   unsnoozeRuleInTable,
 } from '../../../../../tasks/rule_snoozing';
 import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
@@ -39,8 +41,6 @@ import { goToRuleEditSettings, visitRuleDetailsPage } from '../../../../../tasks
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 import { addEmailConnectorAndRuleAction } from '../../../../../tasks/common/rule_actions';
 import { saveEditedRule, visitRuleEditPage } from '../../../../../tasks/edit_rule';
-import { DISABLED_SNOOZE_BADGE } from '../../../../../screens/rule_snoozing';
-import { TOOLTIP } from '../../../../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
@@ -69,7 +69,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
     // Open rule detail page
     cy.get(RULE_NAME).contains('Test on all pages').click();
 
-    expectRuleSnoozed('1 hours');
+    expectRuleSnoozedOnDetailsPage('1 hours');
 
     // Open rule editing page actions tab
     goToRuleEditSettings();
@@ -229,11 +229,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
         visitRuleDetailsPage(rule.id);
       });
 
-      cy.get(DISABLED_SNOOZE_BADGE).find('[role="progressbar"]').should('not.exist');
-      cy.get(DISABLED_SNOOZE_BADGE).parent('.euiToolTipAnchor').scrollIntoView();
-      cy.get(DISABLED_SNOOZE_BADGE).parent('.euiToolTipAnchor').trigger('mouseover');
-
-      cy.get(TOOLTIP).contains('Unable to fetch snooze settings');
+      expectSnoozeDisabledOnDetailsPage('Unable to fetch snooze settings');
     });
 
     it('shows an error if unable to save snooze settings', () => {
@@ -243,10 +239,10 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
         visitRuleDetailsPage(rule.id);
       });
 
-      snoozeRule('3 days');
+      snoozeRuleOnDetailsPage('3 days');
 
       expectSnoozeErrorToast();
-      expectRuleUnsnoozed();
+      expectRuleUnsnoozedOnDetailsPage();
     });
   });
 });

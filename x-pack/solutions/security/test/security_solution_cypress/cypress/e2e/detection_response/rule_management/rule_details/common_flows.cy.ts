@@ -13,7 +13,7 @@ import {
   RULES_ROW,
 } from '../../../../screens/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { getDetails } from '../../../../tasks/rule_details';
+import { enableRuleOnDetailsPage, getDetails } from '../../../../tasks/rule_details';
 import { shouldHaveTagsText } from '../../../../helpers/tags';
 import { ruleFields } from '../../../../data/detection_engine';
 import { getExistingRule, getNewRule } from '../../../../objects/rule';
@@ -33,7 +33,6 @@ import {
   removeExternalLinkText,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
-  RULE_SWITCH,
   RULE_TYPE_DETAILS,
   RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
@@ -110,8 +109,7 @@ describe(
       cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as(
         'bulk_action'
       );
-      cy.get(RULE_SWITCH).should('be.visible');
-      cy.get(RULE_SWITCH).click();
+      enableRuleOnDetailsPage();
       cy.wait('@bulk_action').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.attributes.results.updated[0].max_signals).should(
