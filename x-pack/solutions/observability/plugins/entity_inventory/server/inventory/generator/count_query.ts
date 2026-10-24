@@ -10,10 +10,13 @@ import { quoteIdentifier } from './esql_syntax';
 import { ENTITY_ID_COLUMN, resolveIdentityPlan } from './identity';
 import type { IdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
-import type { GeneratedQuery, QueryPlan, TimeWindow } from './types';
+import type { GeneratedQuery, NamedParams, QueryPlan, TimeWindow } from './types';
 
-/** The single column the count query returns. */
+/** The column holding the number of distinct entities. */
 export const COUNT_COLUMN = 'count';
+
+/** The column holding the number of raw identity groups before they are merged by id. */
+export const RAW_GROUPS_COLUMN = 'raw_groups';
 
 /** What the count query is built from: the plans, the resolved identity and the window. */
 export interface BuildCountQueryInput {
@@ -24,35 +27,46 @@ export interface BuildCountQueryInput {
 
 const TIMESTAMP = quoteIdentifier('@timestamp');
 const INDEX = quoteIdentifier('_index');
+// Never selected by the caller; it only carries the per-id group count between two `STATS`.
+const ROWS = quoteIdentifier('rows');
 
-// `_index` holds the concrete index, so each pattern gets two clauses: the first matches a plain
-// index, the second the backing indices of a data stream, `.ds-<name>-<yyyy.MM.dd>-<generation>`,
-// which a pattern naming the stream, wildcard or not, does not match on its own. The date segment
-// keeps a stream name from matching the backing indices of a longer stream (`foo-bar` against
-// `foo-bar-baz`). The pattern is placed inside a double-quoted string unescaped: `planSources` has
-// validated it against the index pattern character set, which admits neither `"` nor `\`, so it
-// cannot close the string or start an escape. Its `*` and `?` carry over as `LIKE` wildcards.
-const indexMatches = (indexPattern: string): string =>
-  `(${INDEX} LIKE "${indexPattern}" OR ${INDEX} LIKE ".ds-${indexPattern}-????.??.??-*")`;
+// One parameter per concrete index, named after the plan and the position: `?i<plan>_<n>`. The
+// leading `i` keeps the names apart from `?from` and `?to`.
+const indexParamName = (planIndex: number, position: number): string => `i${planIndex}_${position}`;
 
-const planPredicate = ({ indexPattern, filter }: QueryPlan): string =>
-  filter === undefined
-    ? indexMatches(indexPattern)
-    : `(${indexMatches(indexPattern)} AND (${filter}))`;
+// `_index` holds the concrete index name, which is exactly what the resolver returned for the plan.
+const planPredicate = ({ index, indices, filter }: QueryPlan): string => {
+  const indexMatches = `${INDEX} IN (${indices
+    .map((_name, position) => `?${indexParamName(index, position)}`)
+    .join(', ')})`;
+  return filter === undefined ? `(${indexMatches})` : `(${indexMatches} AND (${filter}))`;
+};
 
-// With one plan the source already selects its documents, so only its filter remains; with several
-// each document must pass the filter of a plan whose pattern matched its index.
+// A single plan over its whole pattern is selected by the source list alone, so only its filter
+// remains. Otherwise each document must pass the filter of the plan whose indices hold it: several
+// plans share a `FROM`, and a plan split from its source covers only part of its pattern.
+const needsIndexClause = (plans: QueryPlan[]): boolean =>
+  plans.length > 1 || plans[0].queryTarget === 'indices';
+
 const sourcePredicate = (plans: QueryPlan[]): string | undefined => {
-  if (plans.length === 1) {
+  if (!needsIndexClause(plans)) {
     const [{ filter }] = plans;
     return filter === undefined ? undefined : `(${filter})`;
   }
   return `(${plans.map(planPredicate).join(' OR ')})`;
 };
 
+const indexParams = (plans: QueryPlan[]): NamedParams =>
+  needsIndexClause(plans)
+    ? plans.flatMap(({ index, indices }) =>
+        indices.map((name, position) => ({ [indexParamName(index, position)]: name }))
+      )
+    : [];
+
 /**
  * Builds the query counting the distinct entities across every plan in the window, as a single
- * `FROM` over the deduplicated patterns, in a column named {@link COUNT_COLUMN}.
+ * `FROM` over the deduplicated patterns, in a column named {@link COUNT_COLUMN}, with the raw
+ * identity groups behind them in {@link RAW_GROUPS_COLUMN}.
  */
 export const buildCountQuery = ({
   plans,
@@ -65,25 +79,27 @@ export const buildCountQuery = ({
   const { groupingFields, presenceFilter, idEvaluation } = identity;
   const patterns = [...new Set(plans.map(({ indexPattern }) => indexPattern))];
   // Bare: Elasticsearch rejects a quoted name in `METADATA` ("Unresolved metadata pattern").
-  const metadata = plans.length > 1 ? ' METADATA _index' : '';
+  const metadata = needsIndexClause(plans) ? ' METADATA _index' : '';
   const predicates = [
     `${TIMESTAMP} >= ?from AND ${TIMESTAMP} < ?to`,
     presenceFilter,
     sourcePredicate(plans),
   ].filter((predicate): predicate is string => predicate !== undefined);
   const countColumn = quoteIdentifier(COUNT_COLUMN);
-  // A single field maps groups to ids one to one, so the groups can be counted directly. With
-  // several fields two groups can share an id (a ranking falls back to another field, a composition
-  // `CONCAT(a, "/", b)` joins `("a/b", "c")` and `("a", "b/c")`), so the ids are grouped again and
-  // counted exactly, matching the merged list; `COUNT_DISTINCT` would be approximate.
+  const rawGroupsColumn = quoteIdentifier(RAW_GROUPS_COLUMN);
+  // A single field maps groups to ids one to one, so the groups are counted directly and the two
+  // columns are equal. With several fields two groups can share an id (a ranking falls back to
+  // another field, a composition `CONCAT(a, "/", b)` joins `("a/b", "c")` and `("a", "b/c")`), so
+  // the groups are counted per id and the ids counted exactly, matching the merged list;
+  // `COUNT_DISTINCT` would be approximate. `SUM` over no rows is null, hence the `COALESCE`.
   const tail =
     groupingFields.length > 1
       ? [
           `| EVAL ${idEvaluation}`,
-          `| STATS BY ${quoteIdentifier(ENTITY_ID_COLUMN)}`,
-          `| STATS ${countColumn} = COUNT(*)`,
+          `| STATS ${ROWS} = COUNT(*) BY ${quoteIdentifier(ENTITY_ID_COLUMN)}`,
+          `| STATS ${countColumn} = COUNT(*), ${rawGroupsColumn} = COALESCE(SUM(${ROWS}), 0)`,
         ]
-      : [`| STATS ${countColumn} = COUNT(*)`];
+      : [`| STATS ${countColumn} = COUNT(*), ${rawGroupsColumn} = COUNT(*)`];
 
   const esql = [
     'SET unmapped_fields="nullify";',
@@ -94,7 +110,10 @@ export const buildCountQuery = ({
   ].join('\n');
 
   assertParses(esql);
-  return { esql, params: [{ from: window.from }, { to: window.to }] };
+  return {
+    esql,
+    params: [{ from: window.from }, { to: window.to }, ...indexParams(plans)],
+  };
 };
 
 /** Resolves the identity of a definition with `dynamic` and builds its count query over the plans. */

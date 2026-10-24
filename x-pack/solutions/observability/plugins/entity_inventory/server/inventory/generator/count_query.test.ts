@@ -8,7 +8,13 @@
 import { Parser } from '@elastic/esql';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { hostLikeFixture, k8sDeploymentFixture, k8sNodeFixture } from '../__fixtures__/definitions';
-import { buildCountQuery, generateCountQuery } from './count_query';
+import { backingIndexOf, resolveAllAs } from '../__fixtures__/resolved_sources';
+import {
+  COUNT_COLUMN,
+  RAW_GROUPS_COLUMN,
+  buildCountQuery,
+  generateCountQuery,
+} from './count_query';
 import { resolveIdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
 import { planSources } from './source_plans';
@@ -39,10 +45,7 @@ const sharedPatternDefinition: EntityDefinitionWithoutId = {
 };
 
 const countOf = (definition: EntityDefinitionWithoutId): GeneratedQuery => {
-  const plans = planSources(
-    definition,
-    (definition.dynamic?.sources ?? []).map(() => 'TS' as const)
-  );
+  const plans = planSources(definition, resolveAllAs(definition, 'time_series'));
   return generateCountQuery(definition, plans, window);
 };
 
@@ -74,13 +77,13 @@ describe('buildCountQuery', () => {
     expect(esql).not.toContain('_index');
     expect(esql).toContain('\n| WHERE `@timestamp` >= ?from AND `@timestamp` < ?to\n');
     expect(esql).not.toMatch(/^TS /m);
-    expect(esql).toMatch(/\| STATS `count` = COUNT\(\*\)$/);
+    expect(esql).toMatch(/\n\| STATS `count` = COUNT\(\*\), `raw_groups` = COUNT\(\*\)$/);
     expect(esql).not.toContain('COUNT_DISTINCT');
     expect(esql).not.toContain('| EVAL');
   });
 
   it('counts k8s.deployment across both plans, filtering only the state plan', () => {
-    const { esql } = countOf(k8sDeploymentFixture);
+    const { esql, params } = countOf(k8sDeploymentFixture);
     expect(esql).toMatchSnapshot();
     expectParses(esql);
     expectGuarded(esql);
@@ -88,18 +91,25 @@ describe('buildCountQuery', () => {
       '\nFROM metrics-kubeletstatsreceiver.otel-default, metrics-kubernetes.state_deployment-* METADATA _index\n'
     );
     expect(esql).toContain(
-      '\n    AND ((`_index` LIKE "metrics-kubeletstatsreceiver.otel-default" OR `_index` LIKE ".ds-metrics-kubeletstatsreceiver.otel-default-????.??.??-*")' +
-        ' OR ((`_index` LIKE "metrics-kubernetes.state_deployment-*" OR `_index` LIKE ".ds-metrics-kubernetes.state_deployment-*-????.??.??-*")' +
-        ' AND (metricset.name == "state_deployment")))\n'
+      '\n    AND ((`_index` IN (?i0_0)) OR (`_index` IN (?i1_0) AND (metricset.name == "state_deployment")))\n'
     );
+    expect(esql).not.toContain('LIKE');
+    expect(params).toEqual([
+      { from: window.from },
+      { to: window.to },
+      { i0_0: backingIndexOf('metrics-kubeletstatsreceiver.otel-default') },
+      { i1_0: backingIndexOf('metrics-kubernetes.state_deployment-*') },
+    ]);
     expect(esql.split('metricset.name').length - 1).toBe(1);
     expect(esql).toContain('| STATS BY `kubernetes.namespace`, `kubernetes.deployment.name`\n');
     expect(esql).toContain(
       `\n| EVAL ${
         resolveIdentityPlan(k8sDeploymentFixture).idEvaluation
-      }\n| STATS BY \`entity.id\`\n`
+      }\n| STATS \`rows\` = COUNT(*) BY \`entity.id\`\n`
     );
-    expect(esql).toMatch(/\n\| STATS `count` = COUNT\(\*\)$/);
+    expect(esql).toMatch(
+      /\n\| STATS `rows` = COUNT\(\*\) BY `entity\.id`\n\| STATS `count` = COUNT\(\*\), `raw_groups` = COALESCE\(SUM\(`rows`\), 0\)$/
+    );
     expect(esql).not.toContain('COUNT_DISTINCT');
   });
 
@@ -118,7 +128,9 @@ describe('buildCountQuery', () => {
     ]);
     expect(esql).toContain(`\n| EVAL ${resolveIdentityPlan(hostLikeFixture).idEvaluation}\n`);
     expect(esql).toContain('\n| STATS BY `host.id`, `host.name`\n| EVAL ');
-    expect(esql).toMatch(/\n\| STATS BY `entity\.id`\n\| STATS `count` = COUNT\(\*\)$/);
+    expect(esql).toMatch(
+      /\n\| STATS `rows` = COUNT\(\*\) BY `entity\.id`\n\| STATS `count` = COUNT\(\*\), `raw_groups` = COALESCE\(SUM\(`rows`\), 0\)$/
+    );
     expect(esql).not.toContain('COUNT_DISTINCT');
   });
 
@@ -128,16 +140,17 @@ describe('buildCountQuery', () => {
     expectParses(esql);
     expectGuarded(esql);
     expect(esql).toContain('\nFROM metrics-kubernetes.* METADATA _index\n');
-    const indexClause =
-      '(`_index` LIKE "metrics-kubernetes.*" OR `_index` LIKE ".ds-metrics-kubernetes.*-????.??.??-*")';
     expect(esql).toContain(
-      `((${indexClause} AND (metricset.name == "state_deployment")) OR (${indexClause} AND (metricset.name == "state_replicaset")))`
+      '((`_index` IN (?i0_0) AND (metricset.name == "state_deployment")) OR (`_index` IN (?i1_0) AND (metricset.name == "state_replicaset")))'
     );
   });
 
   it('ANDs the filter of a single filtered plan directly, without an _index clause', () => {
-    const [plan] = planSources(sharedPatternDefinition, ['FROM', 'FROM']);
-    const { esql } = buildCountQuery({
+    const [plan] = planSources(
+      sharedPatternDefinition,
+      resolveAllAs(sharedPatternDefinition, 'standard')
+    );
+    const { esql, params } = buildCountQuery({
       plans: [plan],
       identity: resolveIdentityPlan(sharedPatternDefinition),
       window,
@@ -145,10 +158,81 @@ describe('buildCountQuery', () => {
     expectParses(esql);
     expect(esql).not.toContain('_index');
     expect(esql).toContain('\n    AND (metricset.name == "state_deployment")\n');
+    expect(params).toEqual([{ from: window.from }, { to: window.to }]);
+  });
+
+  it('passes every index of every plan as its own parameter when a source is split', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: { sources: [{ indexPattern: 'metrics-*-*' }, { indexPattern: 'metrics-system.*' }] },
+    };
+    const plans = planSources(definition, [
+      {
+        indices: [
+          { name: 'metrics-b-ts', mode: 'time_series' },
+          { name: 'metrics-a-ts', mode: 'time_series' },
+          { name: 'metrics-c-std', mode: 'standard' },
+        ],
+      },
+      { indices: [{ name: 'metrics-system.cpu', mode: 'standard' }] },
+    ]);
+    const { esql, params } = generateCountQuery(definition, plans, window);
+    expectParses(esql);
+    expect(esql).toContain('\nFROM metrics-*-*, metrics-system.* METADATA _index\n');
+    expect(esql).toContain(
+      '\n    AND ((`_index` IN (?i0_0, ?i0_1)) OR (`_index` IN (?i1_0)) OR (`_index` IN (?i2_0)))\n'
+    );
+    expect(params).toEqual([
+      { from: window.from },
+      { to: window.to },
+      { i0_0: 'metrics-a-ts' },
+      { i0_1: 'metrics-b-ts' },
+      { i1_0: 'metrics-c-std' },
+      { i2_0: 'metrics-system.cpu' },
+    ]);
+    expect(esql).not.toContain('metrics-a-ts');
+  });
+
+  it('matches the indices of a single plan split from its source, which covers only part of the pattern', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: { sources: [{ indexPattern: 'metrics-*-*' }] },
+    };
+    const [tsPlan] = planSources(definition, [
+      {
+        indices: [
+          { name: 'metrics-a-ts', mode: 'time_series' },
+          { name: 'metrics-c-std', mode: 'standard' },
+        ],
+      },
+    ]);
+    const { esql, params } = buildCountQuery({
+      plans: [tsPlan],
+      identity: resolveIdentityPlan(definition),
+      window,
+    });
+    expectParses(esql);
+    expect(esql).toContain('\nFROM metrics-*-* METADATA _index\n');
+    expect(esql).toContain('\n    AND ((`_index` IN (?i0_0)))\n');
+    expect(params).toEqual([{ from: window.from }, { to: window.to }, { i0_0: 'metrics-a-ts' }]);
+  });
+
+  it.each([
+    [k8sNodeFixture.type, k8sNodeFixture],
+    [k8sDeploymentFixture.type, k8sDeploymentFixture],
+    [hostLikeFixture.type, hostLikeFixture],
+  ] as const)('returns the count and raw_groups columns for %s', (_type, definition) => {
+    const lines = countOf(definition).esql.split('\n');
+    expect(lines[lines.length - 1]).toMatch(
+      new RegExp(`^\\| STATS \`${COUNT_COLUMN}\` = COUNT\\(\\*\\), \`${RAW_GROUPS_COLUMN}\` = `)
+    );
   });
 
   it('always uses FROM, whatever the engines of the plans', () => {
-    const plans = planSources(k8sDeploymentFixture, ['TS', 'TS']);
+    const plans = planSources(
+      k8sDeploymentFixture,
+      resolveAllAs(k8sDeploymentFixture, 'time_series')
+    );
     const { esql } = generateCountQuery(k8sDeploymentFixture, plans, window);
     expect(commandsOf(esql)[1]).toMatch(/^FROM /);
     expect(esql).not.toMatch(/^TS /m);
@@ -169,7 +253,10 @@ describe('buildCountQuery', () => {
 
 describe('generateCountQuery', () => {
   it('equals buildCountQuery with the resolved identity for k8s.deployment', () => {
-    const plans = planSources(k8sDeploymentFixture, ['TS', 'FROM']);
+    const plans = planSources(k8sDeploymentFixture, [
+      { indices: [{ name: 'metrics-a', mode: 'time_series' }] },
+      { indices: [{ name: 'metrics-b', mode: 'standard' }] },
+    ]);
     expect(generateCountQuery(k8sDeploymentFixture, plans, window)).toEqual(
       buildCountQuery({ plans, identity: resolveIdentityPlan(k8sDeploymentFixture), window })
     );

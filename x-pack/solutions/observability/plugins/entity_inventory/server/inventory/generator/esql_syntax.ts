@@ -14,6 +14,17 @@ import { InventoryDefinitionError } from './errors';
  */
 export const quoteIdentifier = (name: string): string => `\`${name.replace(/`/g, '``')}\``;
 
+/**
+ * Double-quotes a concrete index name for `FROM` or `TS`. Elasticsearch forbids `"` and `\` in
+ * index names, so the name goes in verbatim; either character means a caller bug and throws.
+ */
+export const quoteIndexName = (name: string): string => {
+  if (name.length === 0 || /["\\]/.test(name)) {
+    throw new Error(`not a valid index name: ${JSON.stringify(name)}`);
+  }
+  return `"${name}"`;
+};
+
 const SAFE_INDEX_PATTERN = /^[A-Za-z0-9_.:*?-]+$/;
 
 /**

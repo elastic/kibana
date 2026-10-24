@@ -8,7 +8,12 @@
 import { Parser } from '@elastic/esql';
 import { INVENTORY_DEFINITION_FIXTURES } from '../__fixtures__/definitions';
 import { InventoryDefinitionError } from './errors';
-import { assertSafeIndexPattern, isSafeIndexPattern, quoteIdentifier } from './esql_syntax';
+import {
+  assertSafeIndexPattern,
+  isSafeIndexPattern,
+  quoteIdentifier,
+  quoteIndexName,
+} from './esql_syntax';
 
 describe('quoteIdentifier', () => {
   it('quotes a plain path', () => {
@@ -30,6 +35,25 @@ describe('quoteIdentifier', () => {
   it('doubles an embedded backtick', () => {
     expect(quoteIdentifier('a`b')).toBe('`a``b`');
     expect(Parser.parse(`FROM x | WHERE ${quoteIdentifier('a`b')} == 1`).errors).toEqual([]);
+  });
+});
+
+describe('quoteIndexName', () => {
+  it.each([
+    '.ds-metrics-a-default-2026.10.19-000001',
+    '.fs-logs-a-default-2026.10.19-000001',
+    'a+b@c!d=e~f',
+    "it's#a,b|c d",
+  ])('places %s verbatim in double quotes so that it parses', (name) => {
+    expect(quoteIndexName(name)).toBe(`"${name}"`);
+    expect(Parser.parse(`FROM ${quoteIndexName(name)}, ${quoteIndexName(name)}`).errors).toEqual(
+      []
+    );
+  });
+
+  it.each(['a"b', 'a\\b', ''])('throws on %j, which cannot be an index name', (name) => {
+    expect(() => quoteIndexName(name)).toThrow(Error);
+    expect(() => quoteIndexName(name)).not.toThrow(InventoryDefinitionError);
   });
 });
 

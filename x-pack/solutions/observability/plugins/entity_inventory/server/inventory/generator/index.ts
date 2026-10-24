@@ -13,6 +13,16 @@ export type { OutputColumn, OutputColumnKind } from './columns';
 export { resolveIdentityPlan, ENTITY_ID_COLUMN } from './identity';
 export type { IdentityPlan } from './identity';
 export { generateListQueries } from './list_query';
-export { generateCountQuery, COUNT_COLUMN } from './count_query';
+export { generateCountQuery, COUNT_COLUMN, RAW_GROUPS_COLUMN } from './count_query';
 export { MAX_QUERY_PLANS } from './types';
-export type { GeneratedQuery, NamedParams, QueryEngine, QueryPlan, TimeWindow } from './types';
+export type {
+  GeneratedQuery,
+  IndexMode,
+  NamedParams,
+  QueryEngine,
+  QueryPlan,
+  QueryTarget,
+  ResolvedIndex,
+  ResolvedSource,
+  TimeWindow,
+} from './types';
