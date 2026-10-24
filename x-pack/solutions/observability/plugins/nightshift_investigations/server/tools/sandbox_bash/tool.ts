@@ -15,6 +15,7 @@ import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/ser
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
 import {
+  TELEMETRY_CUTOFF_DIR,
   TELEMETRY_CUTOFF_PROXY_PATH,
   TELEMETRY_CUTOFF_PROXY_SOURCE,
   telemetryCutoffCommand,
@@ -258,22 +259,22 @@ export const createSandboxBashTool = ({
             }`
           );
         }
-        if (notAfter && !isTelemetryNotAfter(notAfter)) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: 'Telemetry cutoff is not a UTC timestamp, so the command was not run.',
-                },
-              },
-            ],
-          };
-        }
         if (notAfter) {
+          if (!isTelemetryNotAfter(notAfter)) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    message: 'Telemetry cutoff is not a UTC timestamp, so the command was not run.',
+                  },
+                },
+              ],
+            };
+          }
           let written = false;
           try {
-            await session.mkdirs(['/workspace/.nightshift']);
+            await session.mkdirs([TELEMETRY_CUTOFF_DIR]);
             const [result] = await session.writeFiles([
               {
                 path: TELEMETRY_CUTOFF_PROXY_PATH,

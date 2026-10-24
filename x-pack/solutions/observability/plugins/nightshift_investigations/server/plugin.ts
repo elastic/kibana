@@ -28,6 +28,7 @@ import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigati
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
+import { readTelemetryNotAfter } from './client/investigation_conversation';
 import { createIsNightshiftEnabled } from './is_nightshift_enabled';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
@@ -310,11 +311,7 @@ export class NightshiftInvestigationsPlugin
               const conversations = await agentBuilderStart.conversations.getScopedClient({
                 request,
               });
-              const metadata = (await conversations.bulkGet([conversationId])).get(
-                conversationId
-              )?.metadata;
-              const value = metadata?.telemetry_not_after;
-              return typeof value === 'string' ? value : undefined;
+              return readTelemetryNotAfter(conversations, conversationId);
             },
             logger: sandboxLogger,
           })

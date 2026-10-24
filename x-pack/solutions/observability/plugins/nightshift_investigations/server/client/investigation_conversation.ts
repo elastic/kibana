@@ -89,6 +89,16 @@ export const findInvestigationConversation = async (
   return conversation ? toInvestigationConversation(conversation, false) : undefined;
 };
 
+/** Latest inclusive telemetry timestamp stored on this conversation, when one is set. */
+export const readTelemetryNotAfter = async (
+  conversations: Pick<ConversationPublicClient, 'bulkGet'>,
+  conversationId: string
+): Promise<string | undefined> => {
+  const metadata = (await conversations.bulkGet([conversationId])).get(conversationId)?.metadata;
+  const value = metadata?.telemetry_not_after;
+  return typeof value === 'string' ? value : undefined;
+};
+
 /** Severity a new investigation starts at, until the investigating agent rates it. */
 export const INITIAL_INVESTIGATION_SEVERITY = 'medium' as const;
 
