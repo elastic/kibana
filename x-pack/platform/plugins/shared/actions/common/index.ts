@@ -81,6 +81,7 @@ export type {
   ConnectorSpecActionDetail,
   ConnectorSpecAvailability,
 } from './connector_spec';
+export type { GetConnectorSpecResponse } from './routes/connector/response';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';

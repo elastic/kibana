@@ -43,6 +43,13 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
         expect(secretsAuthTypes).to.have.length(1);
         expect(secretsAuthTypes[0].properties.authType.const).to.eql('api_key_header');
         expect(secretsAuthTypes[0].properties).to.have.property('X-OTX-API-KEY');
+
+        expect(response.body.auth_type_ids).to.contain('api_key_header');
+        expect(response.body).to.not.have.property('availability');
+        expect(response.body.actions[0].input_schema).to.be.an('object');
+        expect(response.body.actions[0].input_schema).to.have.property('type');
+        expect(response.body.is_inbound_only).to.eql(false);
+        expect(typeof response.body.has_inbound_events).to.eql('boolean');
       });
 
       it('returns spec for a connector type registered at runtime (test.single_file_connector)', async () => {
@@ -57,6 +64,11 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
 
         expect(response.body.metadata).to.have.property('id', 'test.single_file_connector');
         expect(response.body).to.have.property('is_testable', false);
+        expect(response.body.auth_type_ids).to.eql(['none', 'basic', 'api_key_header']);
+        expect(response.body.actions.length).to.be.greaterThan(0);
+        for (const action of response.body.actions) {
+          expect(action.input_schema).to.be.an('object');
+        }
       });
 
       it('returns 404 for non-spec connector (.server-log)', async () => {
