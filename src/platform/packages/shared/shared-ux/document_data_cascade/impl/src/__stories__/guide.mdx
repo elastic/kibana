@@ -55,25 +55,49 @@ such that the scroll of the entire component also controls the cell and it turns
 
 #### Nested virtualization at the cell level
 
-For a scenario where one might want to roll a cell that's also has it's content virtualized so all items in the cascade component are presented as a continuous list
-there’s some accommodation to support this, the data cascade component exposes the following props; 
-`getScrollMargin`, `getScrollOffset`, `getScrollElement` in the render prop of the child value it expects to facilitate this;
+A cell can render content that is itself virtualized (for example an `EuiDataGrid` with a custom body) and connect that
+virtualization to the cascade, so that the cascade's single scroll container also drives which items the cell renders and no
+nested scrollbar appears. The render prop of `DataCascadeRowCell` provides `virtualizerController`, `cellId` and `rowIndex` for
+this purpose, which are passed to the `useConnectedChildVirtualizer` hook:
 
 ```tsx
-import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '@kbn/shared-ux-document-data-cascade';
+import { useConnectedChildVirtualizer } from '@kbn/shared-ux-document-data-cascade';
 
-<DataCascade {...dataCascadeProps}>
-  <DataCascadeRow {...dataCascadeRowProps}>
-    <DataCascadeRowCell {...dataCascadeRowCellProps}>
-          {({ data, getScrollMargin, getScrollOffset, getScrollElement  }) => {
-            // getScrollElement - Provides the scroll element for the cascade component
-            // getScrollMargin - Provides the configured scroll margin of the scroll component
-            // getScrollOffset - Provides the scrollOffset at the cell level, this can be passed along to ensure rendering is smooth, and items are placed properly
-          }}
-    </DataCascadeRowCell>
-  </DataCascadeRow>
-</DataCascade>
+const { virtualizer, handle, isActive, isDetached } = useConnectedChildVirtualizer({
+  controller: virtualizerController,
+  cellId,
+  // the row's index in the cascade's root virtualizer, as provided by the render prop
+  rowIndex,
+  // the items to virtualize; only `rows.length` and each item's `id` are read
+  rows,
+  estimatedRowHeight: 34,
+  overscan: 10,
+  // an element the child scrolls on its own while detached, e.g. in full screen mode
+  privateScrollElement,
+});
 ```
+
+- `virtualizer` exposes `getVirtualItems()`, `getTotalSize()` and `measureElement` like a regular virtualizer. Item positions are
+  relative to the cascade scroll container, so render them translated by `items[0].start - virtualizer.measurementsCache[0].start`.
+- `isActive` is `false` until the controller activates the cell. Activation is staggered across cells to keep the main thread
+  responsive, and the hook provides no items while inactive.
+- `handle.detachScrollElement()` and `handle.reattachScrollElement()` switch the child to `privateScrollElement` and back, for
+  views that temporarily take over scrolling such as full screen mode.
+- A cell can hold several connections at the same time, each with its own `cellId`, for example when its content is swapped for an
+  alternate view. The row stays activated while any connection remains. Changing `cellId` reconnects and restarts scroll
+  restoration from the new connection's persisted anchor, while changing `rowIndex` (the cell moved to another row) reconnects
+  and keeps the scroll position. Anchors of connections that are currently swapped out are
+  kept in the cascade's restorable state, so they survive a remount of the cascade.
+- Once a connection has reported its state to the controller, its child virtualizer owns scroll compensation for the row: the
+  cascade's root virtualizer no longer adjusts the scroll position when that row changes size, since the child compensates for its
+  own content. A connection that replaces an owning one inherits the ownership until it reports (or disconnects) itself, which
+  keeps a child's scroll restoration intact when the cell content is swapped and avoids compensating the same change twice.
+- A row whose connection was just made or reattached stays rendered until the root virtualizer has measured its new size,
+  so that a scroll position restored deep inside the child's content does not virtualize the row away based on its
+  previous size.
+
+See the "Cascade with nested virtualization" story for a complete example, and the "Cascade with nested virtualization and
+alternate cell views" story for a cell that swaps between two connected views.
 
 ## Component Props
 

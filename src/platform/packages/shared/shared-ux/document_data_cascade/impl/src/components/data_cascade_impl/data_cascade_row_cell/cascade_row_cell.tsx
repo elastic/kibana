@@ -38,6 +38,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   onCascadeLeafNodeCollapsed,
   row,
   size,
+  virtualRowIndex,
 }: CascadeRowCellPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
   const { leafNodes, currentGroupByColumns } = useDataCascadeState<G, L>();
@@ -74,7 +75,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   // This is the coordination signal — the stagger decides when heavy content should mount.
   const isActivated = useSyncExternalStore(
     childController.subscribe,
-    () => childController.shouldActivate(row.index),
+    () => childController.shouldActivate(virtualRowIndex),
     () => false
   );
 
@@ -86,14 +87,14 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   useEffect(() => {
     if (!childController) return;
     const rafId = requestAnimationFrame(() => {
-      enqueueCleanupRef.current = childController.enqueue(leafCacheKey, row.index);
+      enqueueCleanupRef.current = childController.enqueue(leafCacheKey, virtualRowIndex);
     });
     return () => {
       cancelAnimationFrame(rafId);
       enqueueCleanupRef.current?.();
       enqueueCleanupRef.current = null;
     };
-  }, [childController, leafCacheKey, row.index]);
+  }, [childController, leafCacheKey, virtualRowIndex]);
 
   const fetchGroupLeafData = useCallback(() => {
     const dataFetchFn = async () => {
@@ -158,9 +159,9 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       nodePath,
       nodePathMap,
       virtualizerController: childController,
-      rowIndex: row.index,
+      rowIndex: virtualRowIndex,
     });
-  }, [children, leafData, leafCacheKey, nodePath, nodePathMap, childController, row.index]);
+  }, [children, leafData, leafCacheKey, nodePath, nodePathMap, childController, virtualRowIndex]);
 
   return (
     <EuiFlexGroup>

@@ -25,14 +25,14 @@ const renderComponent = ({
   getVirtualizer,
   onCascadeLeafNodeExpanded = jest.fn(),
   onCascadeLeafNodeCollapsed,
+  virtualRowIndex = 0,
 }: Pick<
   React.ComponentProps<typeof CascadeRowCellPrimitive>,
   'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed' | 'row' | 'children' | 'getVirtualizer'
 > &
-  Pick<
-    React.ComponentProps<typeof DataCascadeProvider>,
-    'cascadeGroups' | 'initialGroupColumn'
-  >) => {
+  Pick<React.ComponentProps<typeof DataCascadeProvider>, 'cascadeGroups' | 'initialGroupColumn'> & {
+    virtualRowIndex?: number;
+  }) => {
   return render(
     <DataCascadeProvider
       data={[]}
@@ -46,6 +46,7 @@ const renderComponent = ({
         onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
         row={row}
         getVirtualizer={getVirtualizer}
+        virtualRowIndex={virtualRowIndex}
       >
         {children}
       </CascadeRowCellPrimitive>
@@ -243,6 +244,57 @@ describe('CascadeRowCellPrimitive', () => {
       });
 
       expect(capturedVirtualizerController).toBe(mockChildController);
+    });
+
+    it('keys controller state by the virtual row index it is given, not by row.index', async () => {
+      const cascadeGroups = ['group1', 'group2'];
+      const childPropsSpy = jest.fn();
+      const mockChildController = {
+        subscribe: jest.fn(() => () => {}),
+        shouldActivate: jest.fn(() => true),
+        enqueue: jest.fn(() => jest.fn()),
+        isReturningCell: jest.fn(() => false),
+      };
+      const customMockVirtualizerGetter = jest.fn(
+        () =>
+          ({
+            ...mockVirtualizerGetter(),
+            childController: mockChildController,
+          } as unknown as CascadeRootVirtualizerReturnValue)
+      );
+
+      const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
+        id: '1',
+        randomField: 'randomValue',
+      });
+
+      renderComponent({
+        cascadeGroups,
+        initialGroupColumn: [cascadeGroups[0]],
+        virtualRowIndex: 7,
+        row: {
+          id: '1',
+          index: 0,
+          depth: 0,
+          original: rowData,
+          getToggleSelectedHandler: jest.fn(),
+          getToggleExpandedHandler: jest.fn(),
+        } as unknown as Row<any>,
+        children: (props) => {
+          childPropsSpy(props);
+          return <div>Test Child</div>;
+        },
+        onCascadeLeafNodeExpanded: jest.fn().mockResolvedValue(mockLeafData),
+        getVirtualizer: customMockVirtualizerGetter,
+      });
+
+      await waitFor(() => {
+        expect(mockChildController.enqueue).toHaveBeenCalledWith(expect.any(String), 7);
+      });
+      expect(mockChildController.shouldActivate).toHaveBeenCalledWith(7);
+      await waitFor(() => {
+        expect(childPropsSpy).toHaveBeenCalledWith(expect.objectContaining({ rowIndex: 7 }));
+      });
     });
   });
 });

@@ -68,6 +68,7 @@ describe('useExposePublicApi', () => {
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
         connectedChildren: {},
+        retainedAnchors: {},
         scrollAnchorItemIndex: null,
       });
     });
@@ -174,6 +175,7 @@ describe('useExposePublicApi', () => {
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
         connectedChildren: {},
+        retainedAnchors: {},
         scrollAnchorItemIndex: null,
       });
 
@@ -200,6 +202,7 @@ describe('useExposePublicApi', () => {
           rowSelection: {},
           scrollRect: { width: 0, height: 0 },
           connectedChildren: {},
+          retainedAnchors: {},
           scrollAnchorItemIndex: 10,
         });
       });
