@@ -1,0 +1,245 @@
+version: "1"
+name: Close attack and alerts
+description: >
+  Closes one Attack Discovery attack and the detection alerts it was built
+  from, with the reason the caller decided on. An alert that another open
+  attack also owns is left acknowledged, since closing it would decide that
+  other attack too. Reports what landed as output; the caller journals it.
+  Invoked by the Close Investigation action; carries no gate of its own.
+
+  Identity-neutral on purpose: the caller may be an action running as the
+  approving analyst, or a Worker chain running as a service account, so this
+  workflow starts no child of its own and never sets `run-as-mode`.
+enabled: true
+consts:
+  # Statuses an alert can still be closed from. A closed alert is left alone:
+  # the status script drops `workflow_reason`, so re-closing one would erase a
+  # reason the Rule Tuning Worker relies on.
+  closable_statuses:
+    - open
+    - acknowledged
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        attack_discovery_id:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: The Attack Discovery alert to close, by `_id` or `kibana.alert.uuid`.
+        reason:
+          type: string
+          enum:
+            - false_positive
+            - true_positive
+            - benign_positive
+            - duplicate
+            - other
+          description: Written as `kibana.alert.workflow_reason` on the attack and on each alert closed.
+      required:
+        - attack_discovery_id
+        - reason
+      additionalProperties: false
+outputs:
+  - name: attack_found
+    type: boolean
+  - name: attack_closed
+    type: boolean
+  - name: alerts_requested
+    type: number
+  # False when the alerts could not be read back, so the caller can say the
+  # counts are unknown rather than zero.
+  - name: alerts_read
+    type: boolean
+  - name: alerts_closed
+    type: number
+  - name: alerts_open
+    type: number
+  - name: alerts_kept
+    type: number
+steps:
+  # Loads the attack, which lists its alerts. Reads both the persisted and the
+  # ad-hoc index, like the Endpoint analysis run that led here. A read error fails
+  # the run: the action recording `failed` is better than silently closing nothing.
+  - name: load_attack
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+      ignore_unavailable: true
+      size: 1
+      _source:
+        - kibana.alert.attack_discovery.alert_ids
+        - kibana.alert.workflow_status
+      query:
+        bool:
+          should:
+            - ids:
+                values:
+                  - "{{ inputs.attack_discovery_id }}"
+            - term:
+                kibana.alert.uuid: "{{ inputs.attack_discovery_id }}"
+          minimum_should_match: 1
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+
+  - name: resolve_attack
+    type: data.set
+    with:
+      found: "${{ steps.load_attack.output.hits.hits[0]._id != blank }}"
+      attack_id: "{{ steps.load_attack.output.hits.hits[0]._id }}"
+      status: "{{ steps.load_attack.output.hits.hits[0]._source['kibana.alert.workflow_status'] }}"
+      has_alerts: "${{ steps.load_attack.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
+      alert_ids: "${{ steps.load_attack.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+
+  # The guardrail: finds which of this attack's alerts another still-open or
+  # acknowledged attack also lists. Closing those would close evidence under an
+  # attack nobody has decided on. A `terms` aggregation over the other attacks'
+  # `alert_ids`, limited to this attack's ids, returns exactly the shared ones.
+  #
+  # Runs before anything is written and does not continue on failure: if the
+  # shared alerts can't be determined, nothing is closed and the action fails
+  # where the analyst can see it.
+  - name: find_shared_alerts
+    type: elasticsearch.search
+    if: "${{ steps.resolve_attack.output.has_alerts == true }}"
+    with:
+      index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+      ignore_unavailable: true
+      size: 0
+      query:
+        bool:
+          filter:
+            - terms:
+                kibana.alert.attack_discovery.alert_ids: "${{ steps.resolve_attack.output.alert_ids }}"
+            - terms:
+                kibana.alert.workflow_status: "${{ consts.closable_statuses }}"
+          must_not:
+            - ids:
+                values:
+                  - "{{ steps.resolve_attack.output.attack_id }}"
+      aggregations:
+        shared:
+          terms:
+            field: kibana.alert.attack_discovery.alert_ids
+            include: "${{ steps.resolve_attack.output.alert_ids }}"
+            size: 1000
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+
+  # An empty list means the read found nothing shared. Skipped when the attack
+  # has no alerts; nothing below reads it then.
+  - name: resolve_shared_alerts
+    type: data.set
+    if: "${{ steps.resolve_attack.output.has_alerts == true }}"
+    with:
+      ids: "${{ steps.find_shared_alerts.output.aggregations.shared.buckets | map: 'key' }}"
+      count: "${{ steps.find_shared_alerts.output.aggregations.shared.buckets | size }}"
+
+  # Closes the attack only. Its alerts are closed below, minus the shared ones, so
+  # `update_related_alerts` stays false: when on, the route closes every related
+  # alert with no exceptions. Retried, then fails the run. Nothing else has been
+  # written yet, so the failure is clean.
+  - name: close_attack
+    type: security.setAttackStatus
+    if: "${{ steps.resolve_attack.output.found == true }}"
+    with:
+      ids:
+        - "{{ steps.resolve_attack.output.attack_id }}"
+      status: closed
+      reason: "{{ inputs.reason }}"
+      update_related_alerts: false
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+
+  # Closes by query, so the status check, the exclusion and the write are one
+  # update-by-query (see acknowledge_correlated_alerts in
+  # attack_discovery_review.yaml for why not a by-id write). `conflicts: proceed`
+  # skips an alert another writer changed mid-flight instead of failing the
+  # batch; the read-back below reports it.
+  - name: close_alerts
+    type: kibana.SetAlertsStatus
+    if: "${{ steps.resolve_attack.output.has_alerts == true }}"
+    timeout: "60s"
+    with:
+      status: closed
+      reason: "{{ inputs.reason }}"
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            - ids:
+                values: "${{ steps.resolve_attack.output.alert_ids }}"
+            - terms:
+                kibana.alert.workflow_status: "${{ consts.closable_statuses }}"
+          must_not:
+            - ids:
+                values: "${{ steps.resolve_shared_alerts.output.ids }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # Reads the alerts back. The write refreshes the index, so this sees it.
+  # Best-effort: the note below says when the read failed.
+  - name: verify_alerts
+    type: elasticsearch.search
+    if: "${{ steps.resolve_attack.output.has_alerts == true }}"
+    with:
+      index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+      size: 0
+      track_total_hits: true
+      query:
+        ids:
+          values: "${{ steps.resolve_attack.output.alert_ids }}"
+      aggregations:
+        open:
+          filter:
+            term:
+              kibana.alert.workflow_status: open
+        acknowledged:
+          filter:
+            term:
+              kibana.alert.workflow_status: acknowledged
+        closed:
+          filter:
+            term:
+              kibana.alert.workflow_status: closed
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # Resolves the counts once: Liquid can't compare the result of a filter chain.
+  - name: resolve_alerts_closed
+    type: data.set
+    with:
+      read: "${{ steps.verify_alerts.output.hits != null }}"
+      requested: "${{ steps.resolve_attack.output.alert_ids | size | default: 0 }}"
+      open: "${{ steps.verify_alerts.output.aggregations.open.doc_count | default: 0 }}"
+      acknowledged: "${{ steps.verify_alerts.output.aggregations.acknowledged.doc_count | default: 0 }}"
+      closed: "${{ steps.verify_alerts.output.aggregations.closed.doc_count | default: 0 }}"
+      shared: "${{ steps.resolve_shared_alerts.output.count | default: 0 }}"
+      attack_closed: "${{ steps.close_attack.output.success == true }}"
+
+  # What was read back, never a write's error message: the caller puts this in a
+  # journal a later agent round reads as user input. The execution history keeps
+  # the errors.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      attack_found: "${{ steps.resolve_attack.output.found == true }}"
+      attack_closed: "${{ steps.resolve_alerts_closed.output.attack_closed == true }}"
+      alerts_requested: "${{ steps.resolve_alerts_closed.output.requested }}"
+      alerts_read: "${{ steps.resolve_alerts_closed.output.read == true }}"
+      alerts_closed: "${{ steps.resolve_alerts_closed.output.closed }}"
+      alerts_open: "${{ steps.resolve_alerts_closed.output.open }}"
+      alerts_kept: "${{ steps.resolve_alerts_closed.output.shared }}"

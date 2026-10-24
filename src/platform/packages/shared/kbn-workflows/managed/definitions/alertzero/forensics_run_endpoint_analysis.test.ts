@@ -12,6 +12,7 @@ import {
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '.';
+import { ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW } from './forensics_close_investigation_gate';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
 import {
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
@@ -414,15 +415,17 @@ describe('Endpoint analysis run', () => {
       iocs: 'forensic-iocs-ki-1',
     };
     const outcome = (
-      field: 'attached' | 'settled',
+      field: 'attached' | 'settled' | 'analyzed',
       found: {
         ids?: string[];
         hostName?: string;
         telemetry?: { checked: boolean; present: boolean };
+        analyzed?: boolean;
       }
     ): unknown =>
       evaluate(String(stepByName('resolve_run_outcome')?.with?.[field]), {
         steps: {
+          ...(found.analyzed ? { forensic_analysis: { output: { structured_output: {} } } } : {}),
           finding_ids: { output: thisIndicator },
           resolve_written_findings: { output: { ids: found.ids } },
           resolve_host: { output: { host_name: found.hostName } },
@@ -436,8 +439,12 @@ describe('Endpoint analysis run', () => {
       expect(outcome('attached', { ids, hostName: 'host-a' })).toBe(true);
     });
 
-    it('does not settle a run that landed only some of this indicator findings', () => {
-      expect(outcome('settled', { ids: [thisIndicator.iocs], hostName: 'host-a' })).toBe(false);
+    // Without agent output in this run, one finding is an earlier run's work. It settles
+    // as an unrecorded outcome rather than reading as "no analysis": that run may have
+    // journaled its verdict and raised proposals with only the IoCs attached.
+    it('settles a partial write from an earlier run, without claiming it attached both', () => {
+      expect(outcome('settled', { ids: [thisIndicator.iocs], hostName: 'host-a' })).toBe(true);
+      expect(outcome('settled', { ids: [thisIndicator.timeline], hostName: 'host-a' })).toBe(true);
       expect(
         outcome('attached', {
           ids: [thisIndicator.timeline],
@@ -470,10 +477,22 @@ describe('Endpoint analysis run', () => {
       ).toBe(false);
     });
 
-    // The failure this whole gate exists for: a host was analyzed and nothing survived.
-    it('does not settle a run that analyzed a host and attached nothing', () => {
+    // The failure this whole gate exists for: a host to analyze, and no analysis finished.
+    it('does not settle a run that had a host but no analysis', () => {
       expect(outcome('settled', { ids: [], hostName: 'host-a' })).toBe(false);
       expect(outcome('attached', { ids: [], hostName: 'host-a' })).toBe(false);
+      expect(outcome('analyzed', { ids: [], hostName: 'host-a' })).toBe(false);
+    });
+
+    // The verdict, the assessment and the containment rest on the agent output, so a
+    // rejected attachment is journaled and the analysis still counts. `attached` stays
+    // false: it is the marker a later run uses to skip the agent.
+    it('settles a run whose agent finished even when an attachment was rejected', () => {
+      for (const ids of [[], [thisIndicator.iocs], [thisIndicator.timeline]]) {
+        expect(outcome('settled', { ids, hostName: 'host-a', analyzed: true })).toBe(true);
+        expect(outcome('analyzed', { ids, hostName: 'host-a', analyzed: true })).toBe(true);
+        expect(outcome('attached', { ids, hostName: 'host-a', analyzed: true })).toBe(false);
+      }
     });
 
     // Retired as processed, not failed. A missing read is a 404 here rather than a fault,
@@ -598,7 +617,10 @@ describe('Endpoint analysis run', () => {
       expect(journalSteps.map(({ name }) => name).sort()).toEqual([
         'journal_analysis_problem',
         'journal_analysis_started',
+        'journal_attack_alerts',
+        'journal_close_question',
         'journal_fetch_alert_problem',
+        'journal_findings_not_attached',
         'journal_invalid_request',
         'journal_iocs',
         'journal_no_host',
@@ -608,6 +630,7 @@ describe('Endpoint analysis run', () => {
         'journal_proposals_queued',
         'journal_rationale',
         'journal_timeline',
+        'journal_verdict_dropped_actions',
         'write_convergence_note',
       ]);
       expect(
@@ -663,11 +686,11 @@ describe('Endpoint analysis run', () => {
       const journal = stepByName('journal_rationale');
       const rationaleCap = schema?.properties?.rationale?.maxLength ?? 0;
       const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
-      const rendered = (propose: boolean) =>
+      const rendered = (verdict: string | undefined) =>
         liquid.parseAndRenderSync(message, {
           steps: {
             forensic_analysis: {
-              output: { structured_output: { propose, rationale: 'x'.repeat(rationaleCap) } },
+              output: { structured_output: { verdict, rationale: 'x'.repeat(rationaleCap) } },
             },
           },
         });
@@ -678,13 +701,40 @@ describe('Endpoint analysis run', () => {
         'system-alertzero-journal-note'
       );
       expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');
-      expect(message).toContain('Rationale for proposed actions');
-      expect(message).toContain('Rationale for ending investigation');
-      expect(message).toContain('steps.forensic_analysis.output.structured_output.propose == true');
-      expect(rendered(true).startsWith('# Rationale for proposed actions\n\n')).toBe(true);
-      expect(rendered(false).startsWith('# Rationale for ending investigation\n\n')).toBe(true);
-      expect(rendered(true).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
-      expect(rendered(false).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
+      for (const verdict of ['confirmed_incident', 'not_an_incident', 'unclear', undefined]) {
+        expect(rendered(verdict).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
+      }
+    });
+
+    // The journal has to show what Endpoint analysis concluded before it shows why:
+    // a false positive the analysis determined is read off the heading.
+    it('heads the assessment with the verdict', () => {
+      const message = String(
+        (stepByName('journal_rationale')?.with as { inputs?: { message?: string } })?.inputs
+          ?.message
+      );
+      const rendered = (verdict?: string) =>
+        liquid.parseAndRenderSync(message, {
+          steps: {
+            forensic_analysis: {
+              output: { structured_output: { verdict, rationale: 'Benign admin tooling.' } },
+            },
+          },
+        });
+
+      expect(rendered('not_an_incident')).toBe(
+        '# Endpoint analysis verdict: not an incident\n\nBenign admin tooling.'
+      );
+      expect(rendered('confirmed_incident')).toBe(
+        '# Endpoint analysis verdict: confirmed incident\n\nBenign admin tooling.'
+      );
+      expect(rendered('unclear')).toBe(
+        '# Endpoint analysis verdict: unclear\n\nBenign admin tooling.'
+      );
+      expect(rendered(undefined)).toBe(
+        '# Endpoint analysis verdict: unclear\n\nBenign admin tooling.'
+      );
+      expect(message).not.toContain('Rationale for');
     });
 
     // The three notes before the agent are the only record of why this run stopped.
@@ -724,13 +774,14 @@ describe('Endpoint analysis run', () => {
     });
 
     // The empty-state sentence on the attachment is the "found nothing" record. Each
-    // note introduces one finding, only when that finding has something in it, and it
-    // is written before that card. A rejected note must not skip the attachment.
-    it('journals each finding separately, and only when it is nonempty', () => {
+    // note follows its card, only when that finding has something in it and the card
+    // landed, so the journal never announces a finding the investigation does not have.
+    // A rejected note must not skip the attachment.
+    it('journals each finding separately, and only when it is nonempty and attached', () => {
       const names = allSteps.map(({ name }) => name);
-      expect(names.indexOf('journal_timeline')).toBeLessThan(names.indexOf('attach_timeline'));
-      expect(names.indexOf('attach_timeline')).toBeLessThan(names.indexOf('journal_iocs'));
-      expect(names.indexOf('journal_iocs')).toBeLessThan(names.indexOf('attach_iocs'));
+      expect(names.indexOf('attach_timeline')).toBeLessThan(names.indexOf('journal_timeline'));
+      expect(names.indexOf('journal_timeline')).toBeLessThan(names.indexOf('attach_iocs'));
+      expect(names.indexOf('attach_iocs')).toBeLessThan(names.indexOf('journal_iocs'));
       expect(stepByName('journal_timeline')?.['on-failure']).toEqual({ continue: true });
       expect(stepByName('journal_iocs')?.['on-failure']).toEqual({ continue: true });
       expect(stepByName('attach_timeline')?.if).not.toBe(stepByName('journal_timeline')?.if);
@@ -761,6 +812,16 @@ describe('Endpoint analysis run', () => {
       expect(evaluate(String(stepByName('journal_timeline')?.if), when(false, true))).toBe(false);
       expect(evaluate(String(stepByName('journal_iocs')?.if), when(false, true))).toBe(true);
       expect(evaluate(String(stepByName('journal_iocs')?.if), when(true, false))).toBe(false);
+      const rejected = (step: string) => ({
+        steps: { ...when(true, true).steps, [step]: { error: { message: 'rejected' } } },
+      });
+      expect(
+        evaluate(String(stepByName('journal_timeline')?.if), rejected('attach_timeline'))
+      ).toBe(false);
+      expect(evaluate(String(stepByName('journal_iocs')?.if), rejected('attach_iocs'))).toBe(false);
+      expect(evaluate(String(stepByName('journal_iocs')?.if), rejected('attach_timeline'))).toBe(
+        true
+      );
 
       const message = (name: string) =>
         (stepByName(name)?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
@@ -769,6 +830,51 @@ describe('Endpoint analysis run', () => {
       );
       expect(liquid.parseAndRenderSync(message('journal_iocs'), {})).toContain(
         'Extracted IoCs during forensic analysis'
+      );
+    });
+
+    // A rejected card would otherwise read as "found nothing". The note says which finding
+    // is missing, and that the analysis itself finished.
+    it('says which finding could not be attached', () => {
+      const step = stepByName('journal_findings_not_attached');
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('attach_iocs')).toBeLessThan(
+        names.indexOf('journal_findings_not_attached')
+      );
+      expect(names.indexOf('journal_findings_not_attached')).toBeLessThan(
+        names.indexOf('journal_rationale')
+      );
+      expect(step?.['on-failure']).toEqual({ continue: true });
+
+      const context = (timelineRejected: boolean, iocsRejected: boolean) => ({
+        execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
+        steps: {
+          resolve_host: { output: { host_name: 'host-a' } },
+          forensic_analysis: { output: { structured_output: {} } },
+          attach_timeline: timelineRejected ? { error: { message: 'rejected' } } : { output: {} },
+          attach_iocs: iocsRejected ? { error: { message: 'rejected' } } : { output: {} },
+        },
+      });
+      const condition = String(step?.if);
+      expect(evaluate(condition, context(false, false))).toBe(false);
+      expect(evaluate(condition, context(true, false))).toBe(true);
+      expect(evaluate(condition, context(false, true))).toBe(true);
+      // No agent output: `journal_analysis_problem` speaks for the run instead.
+      expect(
+        evaluate(condition, { steps: { attach_timeline: { error: { message: 'rejected' } } } })
+      ).toBe(false);
+
+      const message = String((step?.with?.inputs as { message?: string } | undefined)?.message);
+      const render = (timelineRejected: boolean, iocsRejected: boolean) =>
+        liquid
+          .parseAndRenderSync(message, context(timelineRejected, iocsRejected))
+          .replace(/\s+/g, ' ');
+      expect(render(true, false)).toBe(
+        'The forensic timeline for `host-a` could not be attached to this investigation. The analysis itself finished. [See execution](https://kibana/exec-1).'
+      );
+      expect(render(false, true)).toContain('The indicators of compromise for `host-a`');
+      expect(render(true, true)).toContain(
+        'The forensic timeline and the indicators of compromise for `host-a`'
       );
     });
 
@@ -948,12 +1054,19 @@ describe('Endpoint analysis run', () => {
         });
       const both = [thisIndicator.timeline, thisIndicator.iocs];
 
-      // Both attached, agent skipped this run: the retry case.
+      // Both attached, agent skipped this run: the retry case after a full analysis.
       expect(unrecordedWhen(both)).toBe(true);
       // Both attached by this run's agent: the normal case.
       expect(unrecordedWhen(both, { structured_output: { rationale: 'ok' } })).toBe(false);
-      // Partial or no attachments: `settled != true` already handles it.
-      expect(unrecordedWhen([thisIndicator.timeline])).toBe(false);
+      // One finding is enough: an earlier run that attached only the IoCs may still have
+      // journaled its verdict and raised proposals before its final write failed.
+      expect(unrecordedWhen([thisIndicator.timeline])).toBe(true);
+      expect(unrecordedWhen([thisIndicator.iocs])).toBe(true);
+      // Partial attachments from this run's own analysis are not an earlier run's.
+      expect(unrecordedWhen([thisIndicator.iocs], { structured_output: { rationale: 'ok' } })).toBe(
+        false
+      );
+      // Nothing attached: a recorded attempt with no findings is `journal_analysis_problem`'s.
       expect(unrecordedWhen([])).toBe(false);
 
       const terminal = (outcomeUnrecorded: boolean) => ({
@@ -1146,7 +1259,16 @@ describe('Endpoint analysis run', () => {
       );
       expect(noTelemetry).toContain('consts.telemetry_gate_lookback_hours');
       expect(noTelemetry).toContain('steps.resolve_incident_window.output.start');
-      expect(noTelemetry).toContain('steps.resolve_incident_window.output.end');
+      // The search has no upper bound, so the note names only the start it counts back from.
+      expect(noTelemetry).not.toContain('steps.resolve_incident_window.output.end');
+      expect(
+        liquid.parseAndRenderSync(noTelemetry, {
+          ...rendered,
+          steps: { ...rendered.steps, resolve_host: { output: { host_name: 'web-01' } } },
+        })
+      ).toBe(
+        'No Elastic Defend telemetry was found for `web-01` in `logs-endpoint.events.*` from 72h before the incident start (`2026-10-16T10:00:00.000Z`) until now, so endpoint analysis was not run.'
+      );
       // A read error is a gap, not "no telemetry": the run fails and the indicator stays
       // pending for a cheap retry, like the alert lookups.
       expect(check?.['on-failure']).toBeUndefined();
@@ -1232,8 +1354,8 @@ describe('Endpoint analysis run', () => {
       );
       expect(problemMessage).toContain('steps.forensic_analysis.error');
       expect(problemMessage).not.toContain('error.message');
-      expect(problemMessage).toContain('execution.id');
-      expect(problemMessage).toContain('execution.url');
+      // Linked rather than a bare id, so the analyst can open the run.
+      expect(problemMessage).toContain('[See execution]({{ execution.url }})');
       expect(stepByName('journal_rationale')?.if).toContain(
         'steps.forensic_analysis.error == null'
       );
@@ -1267,7 +1389,7 @@ describe('Endpoint analysis run', () => {
       expect(render(null, '2026-09-23T14:00:00.000Z')).toContain(
         'A previous attempt did not finish'
       );
-      expect(render(null, '')).toContain('none of its findings could be attached');
+      expect(render(null, '')).toContain('The analysis did not finish.');
       expect(render(null, '')).toContain('exec-1');
       expect(render(null, '')).toContain('https://kibana/exec-1');
     });
@@ -1519,6 +1641,206 @@ describe('Endpoint analysis run', () => {
   // schema is fixed. So the contract cannot live here, and a copy of it would pin
   // today's Defend actions onto every future one while drifting from bounds this
   // cannot express. `assertActionInputValid` rejects a bad input at proposal time.
+  // Once the analysis has run, the attack and its detection alerts have been looked
+  // at and the Investigation waits for the analyst's decisions, ending with whether
+  // to close it. They are acknowledged and tagged meanwhile; closing is that
+  // decision's, so nothing here is closed.
+  describe('acknowledges the attack and its alerts after the analysis', () => {
+    const resolve = stepByName('resolve_attack_alerts')?.with as Record<string, string>;
+    const attackStep = stepByName('acknowledge_attack');
+    const tagStep = stepByName('tag_attack_alerts');
+    const ackStep = stepByName('acknowledge_attack_alerts');
+    const verifyStep = stepByName('verify_attack_alerts');
+    const retired = stepByName('resolve_attack_alerts_retired')?.with as Record<string, string>;
+    const note = stepByName('journal_attack_alerts');
+
+    const attackHit = (status: string, alertIds?: string[]) => ({
+      _id: 'ad-1',
+      _source: {
+        'kibana.alert.workflow_status': status,
+        ...(alertIds === undefined ? {} : { 'kibana.alert.attack_discovery.alert_ids': alertIds }),
+      },
+    });
+    const when = (overrides: {
+      analyzed?: boolean;
+      status?: string;
+      currentStatus?: string;
+      alertIds?: string[];
+    }) => ({
+      steps: {
+        forensic_analysis:
+          overrides.analyzed === false ? {} : { output: { structured_output: {} } },
+        fetch_attack_discovery_alert: {
+          output: { hits: { hits: [attackHit(overrides.status ?? 'open', overrides.alertIds)] } },
+        },
+        // Read after the analysis, so it wins over the fetch before the agent ran.
+        reread_attack_status: {
+          output: {
+            hits: { hits: [attackHit(overrides.currentStatus ?? overrides.status ?? 'open')] },
+          },
+        },
+      },
+    });
+
+    it('reads the attack status it needs together with the alert ids', () => {
+      const source = stepByName('fetch_attack_discovery_alert')?.with?._source as string[];
+      expect(source).toContain('kibana.alert.workflow_status');
+      expect(source).toContain('kibana.alert.attack_discovery.alert_ids');
+    });
+
+    it('acts only when the agent ran in this execution', () => {
+      expect(evaluate(resolve.analyzed, when({}))).toBe(true);
+      expect(evaluate(resolve.analyzed, when({ analyzed: false }))).toBe(false);
+      for (const step of [attackStep, tagStep, ackStep, verifyStep, note]) {
+        expect(String(step?.if)).toContain('steps.resolve_attack_alerts.output.analyzed == true');
+      }
+    });
+
+    // An analyst can close the attack while the agent runs; the fetch before it is stale.
+    it('decides on the status read after the analysis, not the one fetched before it', () => {
+      const reread = stepByName('reread_attack_status');
+      expect(reread?.type).toBe('elasticsearch.search');
+      expect(String(reread?.if)).toContain('steps.forensic_analysis.output != null');
+      expect(reread?.['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '5s' },
+        continue: true,
+      });
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('reread_attack_status')).toBeGreaterThan(
+        names.indexOf('forensic_analysis')
+      );
+      expect(names.indexOf('reread_attack_status')).toBeLessThan(
+        names.indexOf('resolve_attack_alerts')
+      );
+
+      expect(
+        evaluate(resolve.attack_status, when({ status: 'open', currentStatus: 'closed' }))
+      ).toBe('closed');
+      expect(evaluate(resolve.attack_status, when({ status: 'open' }))).toBe('open');
+    });
+
+    // Acknowledging a closed attack would reopen it and drop its reason.
+    it('acknowledges the attack only while it is open, and leaves its alerts to the by-query write', () => {
+      expect(attackStep?.type).toBe('security.setAttackStatus');
+      expect(attackStep?.with).toEqual({
+        ids: ['{{ steps.resolve_attack_alerts.output.attack_id }}'],
+        status: 'acknowledged',
+        update_related_alerts: false,
+      });
+      expect(attackStep?.['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '5s' },
+        continue: true,
+      });
+
+      const fires = (analyzed: boolean, status: string) =>
+        evaluate(String(attackStep?.if), {
+          steps: { resolve_attack_alerts: { output: { analyzed, attack_status: status } } },
+        });
+      expect(fires(true, 'open')).toBe(true);
+      expect(fires(true, 'acknowledged')).toBe(false);
+      expect(fires(true, 'closed')).toBe(false);
+      expect(fires(false, 'open')).toBe(false);
+    });
+
+    // Same shape as the Attack Discovery review's retirement of correlated alerts:
+    // tagged first, acknowledged by query so only open alerts are touched, read back.
+    it('tags every alert and acknowledges only the open ones, by query', () => {
+      expect(tagStep?.type).toBe('security.setAlertTags');
+      expect(tagStep?.with).toEqual({
+        alert_ids: '${{ steps.resolve_attack_alerts.output.alert_ids }}',
+        tags_to_add: ['{{ consts.endpoint_analyzed_tag }}'],
+      });
+      expect(definition.consts?.endpoint_analyzed_tag).toBe('az:endpoint_analyzed');
+
+      expect(ackStep?.type).toBe('kibana.SetAlertsStatus');
+      expect(ackStep?.with).toEqual({
+        status: 'acknowledged',
+        conflicts: 'proceed',
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: '${{ steps.resolve_attack_alerts.output.alert_ids }}' } },
+              { term: { 'kibana.alert.workflow_status': 'open' } },
+            ],
+          },
+        },
+      });
+      for (const step of [tagStep, ackStep, verifyStep]) {
+        expect(step?.['on-failure']).toEqual({
+          retry: { 'max-attempts': 3, delay: '5s' },
+          continue: true,
+        });
+        expect(String(step?.if)).toContain('steps.resolve_attack_alerts.output.has_alerts == true');
+      }
+      expect(evaluate(resolve.has_alerts, when({ alertIds: ['a-1'] }))).toBe(true);
+      expect(evaluate(resolve.has_alerts, when({ alertIds: [] }))).toBe(false);
+      expect(evaluate(resolve.has_alerts, when({}))).toBe(false);
+    });
+
+    it('closes nothing', () => {
+      const names = allSteps.map(({ name }) => name);
+      const closers = allSteps.filter(
+        ({ type, with: withInputs }) =>
+          (type === 'security.setAttackStatus' || type === 'kibana.SetAlertsStatus') &&
+          withInputs?.status === 'closed'
+      );
+      expect(closers).toEqual([]);
+      expect(JSON.stringify(definition)).not.toContain('ai.conversation.metadata.patch');
+      expect(names.indexOf('resolve_attack_alerts')).toBeGreaterThan(
+        names.indexOf('journal_rationale')
+      );
+    });
+
+    it('reports what was read back, never a write error', () => {
+      const message = String((note?.with as { inputs?: { message?: string } })?.inputs?.message);
+      expect(message).not.toContain('error');
+      const render = (
+        counts: Partial<Record<string, number | boolean>>,
+        status = 'open',
+        hasAlerts = true
+      ) =>
+        liquid.parseAndRenderSync(message, {
+          consts: { endpoint_analyzed_tag: 'az:endpoint_analyzed' },
+          execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
+          steps: {
+            resolve_attack_alerts: { output: { attack_status: status, has_alerts: hasAlerts } },
+            resolve_attack_alerts_retired: {
+              output: {
+                read: true,
+                requested: 3,
+                tagged: 3,
+                open: 0,
+                acknowledged: 2,
+                closed: 1,
+                attack_acknowledged: true,
+                ...counts,
+              },
+            },
+          },
+        });
+
+      expect(render({})).toBe(
+        'Acknowledged the attack while this Investigation waits for a decision. Tagged 3 of its 3 detection alert(s) `az:endpoint_analyzed`. Acknowledged: 2; already closed and left as they were: 1.'
+      );
+      expect(render({ tagged: 2, open: 1, acknowledged: 1 })).toBe(
+        'Acknowledged the attack while this Investigation waits for a decision. Tagged 2 of its 3 detection alert(s) `az:endpoint_analyzed`. Acknowledged: 1; already closed and left as they were: 1; still open, because acknowledging them did not land: 1. [See execution](https://kibana/exec-1).'
+      );
+      expect(render({ attack_acknowledged: false }, 'acknowledged')).toContain(
+        'The attack was already `acknowledged` and was left as it was.'
+      );
+      expect(render({ attack_acknowledged: false }, 'open')).toContain(
+        'The attack could not be acknowledged and is still open. [See execution](https://kibana/exec-1).'
+      );
+      expect(render({ read: false })).toContain('Could not read its 3 detection alert(s) back');
+      expect(render({}, 'open', false)).toBe(
+        'Acknowledged the attack while this Investigation waits for a decision. It lists no detection alerts.'
+      );
+      expect(retired.attack_acknowledged).toBe(
+        '${{ steps.acknowledge_attack.output.success == true }}'
+      );
+    });
+  });
+
   describe('containment proposals', () => {
     const schema = stepByName('forensic_analysis')?.with?.schema as {
       required?: string[];
@@ -1699,11 +2021,10 @@ describe('Endpoint analysis run', () => {
       expect(evaluate(autoApprove, when('manual'))).toBe(false);
     });
 
-    // The add steps continue on failure, so "the agent proposed" is not "the
-    // findings are on the investigation". A card queued before that check is
-    // what an approver opens and finds empty. `settled` is also true when there
-    // was no host, which must not propose anything.
-    it('dispatches containment only after the findings are on the investigation', () => {
+    // Containment rests on this run's agent output, not on the attachments: a rejected
+    // timeline is journaled, and the recommendations still reach the queue. `settled` is
+    // also true when there was no host, which must not propose anything.
+    it('dispatches containment only after this run finished its analysis', () => {
       const names = allSteps.map(({ name }) => name);
       expect(names.indexOf('resolve_run_outcome')).toBeLessThan(
         names.indexOf('resolve_proposal_slots')
@@ -1722,7 +2043,8 @@ describe('Endpoint analysis run', () => {
 
       // The slot resolution carries the gate; the dispatch keys off what it returned.
       const gate = String(stepByName('resolve_proposal_slots')?.if);
-      expect(gate).toContain('steps.resolve_run_outcome.output.attached == true');
+      expect(gate).toContain('steps.resolve_run_outcome.output.analyzed == true');
+      expect(gate).not.toContain('steps.resolve_run_outcome.output.attached');
       expect(gate).toContain('recommendedActions.size > 0');
       expect(gate).not.toContain('settled');
       expect(stepByName('propose_actions')?.if).toBe(
@@ -1733,9 +2055,9 @@ describe('Endpoint analysis run', () => {
         '${{ steps.resolve_proposal_slots.output.proposals }}'
       );
 
-      const when = (attached: boolean, propose: boolean, recommended = 1) => ({
+      const when = (analyzed: boolean, propose: boolean, recommended = 1) => ({
         steps: {
-          resolve_run_outcome: { output: { attached } },
+          resolve_run_outcome: { output: { analyzed, attached: false } },
           forensic_analysis: {
             output: {
               structured_output: {
@@ -1752,12 +2074,13 @@ describe('Endpoint analysis run', () => {
       expect(evaluate(gate, when(true, false))).toBe(false);
     });
 
-    // The investigation used to stay open after the last containment decision. The
-    // gate closes it once every proposal on the investigation is settled, so each
-    // dispatch goes through the gate (still async: this run must not park on the
-    // approval window) and tells it which investigation to close and how many
-    // proposals to wait for.
-    describe('closes the investigation once every proposal is decided', () => {
+    // The investigation used to stay open after the last containment decision, and
+    // then briefly closed itself with no reason. The gate now asks the analyst once
+    // every proposal on the investigation is settled, so each dispatch goes through
+    // the gate (still async: this run must not park on the approval window) and
+    // tells it which investigation and attack the question is about, how many
+    // proposals to wait for, and what an approved close records.
+    describe('asks whether to close the investigation once every proposal is decided', () => {
       const gate = parse(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.yaml) as {
         triggers?: Array<{
           inputs?: {
@@ -1789,8 +2112,11 @@ describe('Endpoint analysis run', () => {
         expect(provided.filter((key) => !declared.includes(key))).toEqual([]);
       });
 
-      it('closes the investigation it proposed on', () => {
+      it('asks about the investigation it proposed on, and the attack it was opened for', () => {
         expect(inputs.investigationConversationId).toBe(inputs.conversationId);
+        expect(inputs.attackDiscoveryId).toBe(
+          '{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}'
+        );
         expect(inputs.closureSummary).toBeUndefined();
       });
 
@@ -1808,12 +2134,419 @@ describe('Endpoint analysis run', () => {
         expect(inputs.actionWorkflowId).toBe('{{ foreach.item.actionWorkflowId }}');
       });
 
-      it('tells the analyst the investigation will close on the last decision', () => {
+      it('hands the gate what an approved close records, from the verdict', () => {
+        expect(inputs.closeReason).toBe('{{ steps.resolve_verdict.output.close_reason }}');
+        expect(inputs.attackReason).toBe('{{ steps.resolve_verdict.output.attack_reason }}');
+        expect(inputs.assessment).toBe('{{ steps.resolve_verdict.output.assessment }}');
+        expect(inputs.attackAlertCount).toBe(
+          '${{ steps.resolve_verdict.output.attack_alert_count }}'
+        );
+      });
+
+      it('tells the analyst they will be asked, not that the investigation will close itself', () => {
         const message = String(
           (stepByName('journal_proposals_queued')?.with as { inputs?: { message?: string } })
             ?.inputs?.message
         );
-        expect(message).toContain('closes once every proposal');
+        expect(message).toContain('you are asked whether to close the investigation');
+        expect(message).not.toContain('closes once every proposal');
+        expect(message).not.toContain('stays open until an analyst closes it');
+      });
+    });
+
+    // The agent's verdict is the one structured call the run acts on: it decides what
+    // an approved close records, and `not_an_incident` keeps every containment card
+    // off the Investigation. The `resolved` / `true_positive` / `other` defaults for
+    // the other two verdicts are a Product decision still open.
+    describe('the verdict', () => {
+      const analysisSchema = stepByName('forensic_analysis')?.with?.schema as {
+        required?: string[];
+        properties?: { verdict?: { type?: string; enum?: string[] } };
+      };
+      const verdictStep = stepByName('resolve_verdict')?.with as Record<string, string>;
+      const analysis = (verdict: string | undefined, extra: Record<string, unknown> = {}) => ({
+        steps: {
+          forensic_analysis: { output: { structured_output: { verdict, ...extra } } },
+          ...extra,
+        },
+      });
+      const render = (key: string, verdict: string | undefined, rationale?: string) =>
+        liquid.parseAndRenderSync(verdictStep[key], analysis(verdict, { rationale }));
+
+      it('is required of the agent, with exactly three values', () => {
+        expect(analysisSchema.required).toContain('verdict');
+        expect(analysisSchema.properties?.verdict).toMatchObject({
+          type: 'string',
+          enum: ['confirmed_incident', 'not_an_incident', 'unclear'],
+        });
+        const prompt = String(
+          (stepByName('forensic_analysis')?.with as { message?: string })?.message
+        );
+        expect(prompt).toContain('Set `verdict` first');
+        expect(prompt).toContain('`not_an_incident` only when');
+        expect(prompt).toContain('Older activity outside the incident window is history');
+      });
+
+      it('maps each verdict to what an approved close records, and a missing one to other', () => {
+        expect(render('close_reason', 'not_an_incident')).toBe('false_positive');
+        expect(render('attack_reason', 'not_an_incident')).toBe('false_positive');
+        expect(render('close_reason', 'confirmed_incident')).toBe('resolved');
+        expect(render('attack_reason', 'confirmed_incident')).toBe('true_positive');
+        expect(render('close_reason', 'unclear')).toBe('other');
+        expect(render('attack_reason', 'unclear')).toBe('other');
+        expect(render('close_reason', undefined)).toBe('other');
+        expect(render('attack_reason', undefined)).toBe('other');
+
+        expect(evaluate(verdictStep.not_an_incident, analysis('not_an_incident'))).toBe(true);
+        expect(evaluate(verdictStep.not_an_incident, analysis('confirmed_incident'))).toBe(false);
+        expect(evaluate(verdictStep.not_an_incident, { steps: {} })).toBe(false);
+      });
+
+      // The indicator records the verdict only from a run in which the agent ran.
+      it('records the verdict only from an analysis that ran, defaulting a missing one to unclear', () => {
+        expect(render('value', 'not_an_incident')).toBe('not_an_incident');
+        expect(render('value', undefined)).toBe('unclear');
+        expect(liquid.parseAndRenderSync(verdictStep.value, { steps: {} })).toBe('');
+      });
+
+      // The card quotes the assessment, and the close gate caps it at 500.
+      it('quotes the opening paragraph of the rationale, cut to what the card carries', () => {
+        expect(
+          render(
+            'assessment',
+            'confirmed_incident',
+            'Ransomware staged on web-01. Containment is justified.\n\n## Affected hosts\n- web-01'
+          )
+        ).toBe('Ransomware staged on web-01. Containment is justified.');
+        expect(render('assessment', 'confirmed_incident', 'x'.repeat(900))).toHaveLength(500);
+        expect(render('assessment', 'confirmed_incident', undefined)).toBe('');
+      });
+
+      it('counts the attack alerts an approved close can reach, 0 when it lists none', () => {
+        const count = (alertIds?: string[]) =>
+          evaluate(verdictStep.attack_alert_count, {
+            steps: {
+              fetch_attack_discovery_alert: {
+                output: {
+                  hits: {
+                    hits: [
+                      {
+                        _source:
+                          alertIds === undefined
+                            ? {}
+                            : { 'kibana.alert.attack_discovery.alert_ids': alertIds },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          });
+        expect(count(['a', 'b', 'c'])).toBe(3);
+        expect(count([])).toBe(0);
+        expect(count(undefined)).toBe(0);
+      });
+
+      it('is resolved after the autonomy level and before any proposal is resolved', () => {
+        const names = allSteps.map(({ name }) => name);
+        expect(names.indexOf('resolve_verdict')).toBeGreaterThan(names.indexOf('resolve_autonomy'));
+        expect(names.indexOf('resolve_verdict')).toBeLessThan(
+          names.indexOf('resolve_proposal_slots')
+        );
+        expect(stepByName('resolve_close_reason')).toBeUndefined();
+      });
+
+      // No containment over activity the analysis explained as benign, whatever the
+      // agent put in `recommendedActions`. The counts then read `0` and the close
+      // question is asked right away, as a false-positive one.
+      it('proposes no containment on a not_an_incident verdict, and asks the close question instead', () => {
+        const slotsIf = String(stepByName('resolve_proposal_slots')?.if);
+        const queuedIf = String(stepByName('journal_proposals_queued')?.if);
+        const askIf = String(stepByName('resolve_close_question')?.with?.after_analysis);
+        const context = (verdict: string) => ({
+          steps: {
+            resolve_proposal_dispatch: { output: { failed: 0 } },
+            resolve_request: { output: { has_request: true } },
+            verify_investigation: { output: { metadata: {} } },
+            resolve_run_outcome: { output: { analyzed: true } },
+            resolve_verdict: { output: { not_an_incident: verdict === 'not_an_incident' } },
+            forensic_analysis: {
+              output: {
+                structured_output: {
+                  verdict,
+                  propose: true,
+                  recommendedActions: [{ actionWorkflowId: 'isolate' }],
+                },
+              },
+            },
+            resolve_proposal_counts: {
+              output: { new_count: 0, already_open_count: 0, check_failed: false },
+            },
+          },
+        });
+
+        expect(evaluate(slotsIf, context('confirmed_incident'))).toBe(true);
+        expect(evaluate(queuedIf, context('confirmed_incident'))).toBe(true);
+        expect(evaluate(slotsIf, context('not_an_incident'))).toBe(false);
+        expect(evaluate(queuedIf, context('not_an_incident'))).toBe(false);
+        expect(evaluate(askIf, context('not_an_incident'))).toBe(true);
+      });
+
+      it('says when it dropped the recommendations the agent listed anyway', () => {
+        const note = stepByName('journal_verdict_dropped_actions');
+        const condition = String(note?.if);
+        const context = (notAnIncident: boolean, actions: number) => ({
+          steps: {
+            resolve_run_outcome: { output: { analyzed: true } },
+            resolve_verdict: { output: { not_an_incident: notAnIncident } },
+            forensic_analysis: {
+              output: { structured_output: { recommendedActions: new Array(actions).fill({}) } },
+            },
+          },
+        });
+
+        expect(note?.type).toBe('workflow.execute');
+        expect(note?.['on-failure']).toEqual({ continue: true });
+        expect(evaluate(condition, context(true, 2))).toBe(true);
+        expect(evaluate(condition, context(true, 0))).toBe(false);
+        expect(evaluate(condition, context(false, 2))).toBe(false);
+
+        const message = String((note?.with as { inputs?: { message?: string } })?.inputs?.message);
+        expect(liquid.parseAndRenderSync(message, context(true, 2))).toBe(
+          'Verdict was not an incident; 2 recommended action(s) were not proposed.'
+        );
+
+        const names = allSteps.map(({ name }) => name);
+        expect(names.indexOf('journal_verdict_dropped_actions')).toBeLessThan(
+          names.indexOf('journal_close_question')
+        );
+      });
+
+      it('writes the verdict on the indicator with the processed status', () => {
+        const attributes = (stepByName('mark_processed')?.with?.ki as { attributes?: unknown })
+          ?.attributes;
+        expect(attributes).toEqual({
+          status: 'processed',
+          forensic_verdict: '{{ steps.resolve_verdict.output.value }}',
+        });
+      });
+    });
+
+    // No containment gate will ask when this run queued no proposal and none of its
+    // recommendations is already pending here, so the run asks right away through
+    // the same close gate. A pending proposal already on the investigation has a gate
+    // that will ask, and a failed check is journaled as lost instead.
+    describe('asks right away when nothing was proposed', () => {
+      const dispatch = stepByName('dispatch_close_gate');
+      const note = stepByName('journal_close_question');
+      const inputs = (dispatch?.with as { inputs?: Record<string, unknown> })?.inputs ?? {};
+      const closeGate = parse(ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW.yaml) as {
+        triggers?: Array<{
+          inputs?: {
+            required?: string[];
+            properties?: Record<string, unknown>;
+            additionalProperties?: boolean;
+          };
+        }>;
+      };
+
+      it('dispatches the close gate asynchronously by its registered id, and never fails over it', () => {
+        expect(dispatch?.type).toBe('workflow.executeAsync');
+        expect((dispatch?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
+          ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW.id
+        );
+        expect((dispatch?.with as { 'run-as-mode'?: string })?.['run-as-mode']).toBe('inherit');
+        expect(dispatch?.['on-failure']).toEqual({ continue: true });
+      });
+
+      it('satisfies the close gate trigger schema', () => {
+        const gateInputs = closeGate.triggers?.[0]?.inputs;
+        const provided = Object.keys(inputs);
+        const declared = Object.keys(gateInputs?.properties ?? {});
+
+        expect((gateInputs?.required ?? []).filter((key) => !provided.includes(key))).toEqual([]);
+        expect(gateInputs?.additionalProperties).toBe(false);
+        expect(provided.filter((key) => !declared.includes(key))).toEqual([]);
+        expect(inputs).toEqual({
+          investigationConversationId: '{{ steps.resolve_request.output.investigation_id }}',
+          attackDiscoveryId: '{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}',
+          closeReason: '{{ steps.resolve_verdict.output.close_reason }}',
+          attackReason: '{{ steps.resolve_verdict.output.attack_reason }}',
+          assessment: '{{ steps.resolve_verdict.output.assessment }}',
+          attackAlertCount: '${{ steps.resolve_verdict.output.attack_alert_count }}',
+          caveat: '{{ steps.resolve_close_question.output.caveat }}',
+        });
+      });
+
+      // Approving a close while containment never reached the queue would drop it silently,
+      // so the card leads with what went wrong and what to raise by hand.
+      it('hands the close card what went wrong before the question', () => {
+        const caveat = String(stepByName('resolve_close_question')?.with?.caveat);
+        const actions = [
+          { title: 'Isolate host web-01', actionWorkflowId: 'isolate' },
+          { title: 'Kill svc.exe (PID 1) on web-01', actionWorkflowId: 'kill' },
+        ];
+        const render = (steps: Record<string, unknown>) =>
+          liquid.parseAndRenderSync(caveat, { steps });
+
+        expect(
+          render({
+            resolve_proposal_counts: { output: { check_failed: true } },
+            forensic_analysis: { output: { structured_output: { recommendedActions: actions } } },
+          })
+        ).toBe(
+          [
+            'Containment was never proposed: endpoint analysis could not check whether these proposals already exist, so none was created. Raise them by hand if they are still needed:',
+            '',
+            '- Isolate host web-01 (`isolate`)',
+            '- Kill svc.exe (PID 1) on web-01 (`kill`)',
+          ].join('\n')
+        );
+        expect(
+          render({
+            resolve_proposal_counts: { output: { check_failed: false } },
+            resolve_proposal_dispatch: { output: { failed: 1 } },
+            propose_actions: {
+              output: {
+                results: [
+                  { status: 'completed', key: actions[0], output: { status: 'failed' } },
+                  { status: 'completed', key: actions[1], output: { status: 'running' } },
+                ],
+              },
+            },
+          })
+        ).toBe(
+          [
+            '1 containment proposal(s) did not reach the approval queue. Raise them by hand if they are still needed:',
+            '',
+            '- Isolate host web-01 (`isolate`)',
+          ].join('\n')
+        );
+        expect(
+          render({
+            resolve_proposal_dispatch: { output: { failed: 0 } },
+            resolve_run_outcome: { output: { outcome_unrecorded: true } },
+          })
+        ).toContain('An earlier endpoint analysis attached findings here but did not record');
+        // Nothing went wrong: the card reads as before.
+        expect(
+          render({
+            resolve_proposal_counts: { output: { check_failed: false } },
+            resolve_proposal_dispatch: { output: { failed: 0 } },
+            resolve_run_outcome: { output: { outcome_unrecorded: false } },
+          })
+        ).toBe('');
+      });
+
+      it("asks when none of this run's proposals reached the queue, or after an unrecorded outcome", () => {
+        expect(note?.if).toBe('${{ steps.resolve_close_question.output.after_analysis == true }}');
+        expect(dispatch?.if).toContain(
+          'steps.resolve_close_question.output.after_analysis == true'
+        );
+        expect(dispatch?.if).toContain(
+          'steps.resolve_close_question.output.after_unrecorded == true'
+        );
+        const names = allSteps.map(({ name }) => name);
+        for (const [before, after] of [
+          ['propose_actions', 'resolve_proposal_dispatch'],
+          ['resolve_proposal_dispatch', 'resolve_close_question'],
+          ['check_pending_proposals', 'resolve_close_question'],
+          ['resolve_close_question', 'journal_close_question'],
+          ['journal_close_question', 'dispatch_close_gate'],
+          ['dispatch_close_gate', 'resolve_proposals'],
+        ]) {
+          expect(names.indexOf(before)).toBeLessThan(names.indexOf(after));
+        }
+
+        const afterAnalysis = String(stepByName('resolve_close_question')?.with?.after_analysis);
+        const when = (overrides: {
+          analyzed?: boolean;
+          newCount?: number;
+          failed?: number;
+          alreadyOpen?: number;
+        }) => ({
+          steps: {
+            // A partial attach does not hold the close question back.
+            resolve_run_outcome: {
+              output: { analyzed: overrides.analyzed ?? true, attached: false },
+            },
+            forensic_analysis:
+              overrides.analyzed === false ? {} : { output: { structured_output: {} } },
+            resolve_proposal_counts: {
+              output: {
+                new_count: overrides.newCount ?? 0,
+                already_open_count: overrides.alreadyOpen ?? 0,
+              },
+            },
+            resolve_proposal_dispatch: { output: { failed: overrides.failed ?? 0 } },
+          },
+        });
+
+        // Proposed nothing, every recommendation converged elsewhere, or the dedup check
+        // failed (it creates nothing, so `new_count` is 0).
+        expect(evaluate(afterAnalysis, when({}))).toBe(true);
+        // Every new proposal was rejected: nothing reached the queue, so no gate will ask.
+        expect(evaluate(afterAnalysis, when({ newCount: 2, failed: 2 }))).toBe(true);
+        // A containment gate on this investigation will ask on settlement.
+        expect(evaluate(afterAnalysis, when({ newCount: 1 }))).toBe(false);
+        expect(evaluate(afterAnalysis, when({ newCount: 2, failed: 1 }))).toBe(false);
+        expect(evaluate(afterAnalysis, when({ alreadyOpen: 1 }))).toBe(false);
+        // Nothing to ask about when this run analyzed nothing.
+        expect(evaluate(afterAnalysis, when({ analyzed: false }))).toBe(false);
+
+        // An earlier run's outcome is unrecorded: ask only when nothing is pending. A failed
+        // read leaves no total, which does not read as "nothing pending".
+        const afterUnrecorded = String(
+          stepByName('resolve_close_question')?.with?.after_unrecorded
+        );
+        const unrecorded = (unrec: boolean, pending?: Record<string, unknown>) => ({
+          steps: {
+            resolve_run_outcome: { output: { outcome_unrecorded: unrec } },
+            check_pending_proposals: pending ?? {},
+          },
+        });
+        expect(evaluate(afterUnrecorded, unrecorded(true, { output: { total: 0 } }))).toBe(true);
+        expect(evaluate(afterUnrecorded, unrecorded(true, { output: { total: 1 } }))).toBe(false);
+        expect(evaluate(afterUnrecorded, unrecorded(true))).toBe(false);
+        expect(evaluate(afterUnrecorded, unrecorded(false, { output: { total: 0 } }))).toBe(false);
+        expect(stepByName('check_pending_proposals')?.if).toBe(
+          '${{ steps.resolve_run_outcome.output.outcome_unrecorded == true }}'
+        );
+        expect(stepByName('check_pending_proposals')?.['on-failure']).toEqual({ continue: true });
+      });
+
+      it('says so on the investigation first, and runs after the containment dispatch', () => {
+        expect(note?.type).toBe('workflow.execute');
+        expect(note?.['on-failure']).toEqual({ continue: true });
+        const message = String((note?.with as { inputs?: { message?: string } })?.inputs?.message);
+        const render = (notAnIncident: boolean) =>
+          liquid.parseAndRenderSync(message, {
+            steps: {
+              resolve_host: { output: { host_name: 'web-01' } },
+              resolve_verdict: { output: { not_an_incident: notAnIncident } },
+            },
+          });
+        // States what happened and leaves the question to the close card, which follows
+        // and says what an approved close records. A promise here would go unkept if the
+        // close gate rejected its dispatch.
+        expect(render(false)).toBe(
+          'Endpoint analysis of `web-01` is done and queued no containment proposal here.'
+        );
+        expect(render(true)).toBe(
+          'Endpoint analysis of `web-01` found no real incident, so no containment was proposed.'
+        );
+        expect(message).not.toContain('asked next');
+
+        const names = allSteps.map(({ name }) => name);
+        expect(names.indexOf('journal_close_question')).toBeGreaterThan(
+          names.indexOf('write_convergence_notes')
+        );
+        expect(names.indexOf('dispatch_close_gate')).toBeGreaterThan(
+          names.indexOf('journal_close_question')
+        );
+        expect(names.indexOf('dispatch_close_gate')).toBeLessThan(
+          names.indexOf('resolve_proposals')
+        );
       });
     });
 
@@ -1929,15 +2662,20 @@ describe('Endpoint analysis run', () => {
           });
 
         expect(render(2, 0, 0)).toBe(
-          'Endpoint analysis of `web-01` is submitting 2 containment proposal(s) for analyst approval. The investigation closes once every proposal on it has been decided.'
+          'Endpoint analysis of `web-01` is submitting 2 containment proposal(s) for analyst approval. Once every proposal on it has been decided, you are asked whether to close the investigation.'
         );
         expect(render(1, 0, 0, 'supervised')).toContain('for auto-approval.');
         expect(render(1, 2, 1)).toBe(
-          'Endpoint analysis of `web-01` is submitting 1 containment proposal(s) for analyst approval. 2 already raised by another Investigation. 1 already open on this investigation. The investigation closes once every proposal on it has been decided.'
+          'Endpoint analysis of `web-01` is submitting 1 containment proposal(s) for analyst approval. 2 already raised by another Investigation. 1 already open on this investigation. Once every proposal on it has been decided, you are asked whether to close the investigation.'
         );
-        // Nothing new: the gate never runs, so nothing closes the investigation.
+        // Nothing new and nothing pending here: the close note and card follow at once,
+        // so this note does not repeat the question.
         expect(render(0, 1, 0)).toBe(
-          'Endpoint analysis of `web-01` found containment worth proposing, but every proposal it would have raised already exists, so none was created. 1 already raised by another Investigation. The investigation stays open until an analyst closes it.'
+          'Endpoint analysis of `web-01` found containment worth proposing, but every proposal it would have raised already exists, so none was created. 1 already raised by another Investigation.'
+        );
+        // Nothing new, but a proposal already pending here has a gate that will ask.
+        expect(render(0, 0, 1)).toBe(
+          'Endpoint analysis of `web-01` found containment worth proposing, but every proposal it would have raised already exists, so none was created. 1 already open on this investigation. Once every proposal on it has been decided, you are asked whether to close the investigation.'
         );
       });
 
@@ -2012,6 +2750,17 @@ describe('Endpoint analysis run', () => {
           },
         })
       ).toBe(true);
+      // A close question that never reached its gate is lost too, whatever the agent proposed.
+      expect(
+        evaluate(lost, {
+          steps: {
+            forensic_analysis: { output: { structured_output: { propose: false } } },
+            resolve_proposal_dispatch: { output: { failed: 0 } },
+            resolve_close_question: { output: { after_analysis: true } },
+            dispatch_close_gate: { output: { status: 'failed' } },
+          },
+        })
+      ).toBe(true);
       const lostMessage = String(
         (stepByName('journal_proposals_lost')?.with as { inputs?: { message?: string } })?.inputs
           ?.message
@@ -2024,6 +2773,34 @@ describe('Endpoint analysis run', () => {
           },
         })
       ).toContain('could not check whether those proposals already exist');
+      // Nothing was created, so the agent's own list is what the analyst raises by hand.
+      expect(
+        liquid.parseAndRenderSync(lostMessage, {
+          steps: {
+            resolve_host: { output: { host_name: 'web-01' } },
+            resolve_proposal_counts: { output: { check_failed: true } },
+            forensic_analysis: {
+              output: {
+                structured_output: {
+                  recommendedActions: [
+                    { title: 'Isolate host web-01', actionWorkflowId: 'isolate' },
+                    { title: 'Kill svc.exe (PID 1) on web-01', actionWorkflowId: 'kill' },
+                  ],
+                },
+              },
+            },
+          },
+        })
+      ).toBe(
+        [
+          'Endpoint analysis of `web-01` finished and found containment worth proposing, but could not check whether those proposals already exist, so none was created:',
+          '',
+          '- Isolate host web-01 (`isolate`)',
+          '- Kill svc.exe (PID 1) on web-01 (`kill`)',
+          '',
+          'The indicator was retired and will not be retried.',
+        ].join('\n')
+      );
       expect(
         liquid.parseAndRenderSync(lostMessage, {
           steps: {
@@ -2033,6 +2810,100 @@ describe('Endpoint analysis run', () => {
           },
         })
       ).toContain('2 containment proposal(s) did not');
+      // Each lost dispatch is named, so the analyst knows what to raise by hand: a gate that
+      // started and failed is linked by its execution; a step that failed has none.
+      expect(
+        liquid.parseAndRenderSync(lostMessage, {
+          kibanaUrl: 'https://kibana',
+          workflow: { spaceId: 'default' },
+          steps: {
+            resolve_host: { output: { host_name: 'web-01' } },
+            resolve_proposal_counts: { output: { check_failed: false } },
+            resolve_proposal_dispatch: { output: { failed: 2 } },
+            propose_actions: {
+              output: {
+                results: [
+                  {
+                    status: 'completed',
+                    key: { title: 'Kill svc.exe (PID 1) on web-01', actionWorkflowId: 'kill' },
+                    output: { status: 'running', executionId: 'gate-ok' },
+                  },
+                  {
+                    status: 'completed',
+                    key: { title: 'Isolate host web-01', actionWorkflowId: 'isolate' },
+                    output: { status: 'failed', executionId: 'gate-1', workflowId: 'gate' },
+                  },
+                  {
+                    status: 'failed',
+                    key: {
+                      title: 'Suspend svc.exe (PID 1) on web-01',
+                      actionWorkflowId: 'suspend',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        })
+      ).toBe(
+        [
+          'Endpoint analysis of `web-01` finished, but 2 containment proposal(s) did not reach the approval queue:',
+          '',
+          '- Isolate host web-01 (`isolate`): its approval gate failed. [See the gate execution](https://kibana/app/workflows/gate?executionId=gate-1&tab=executions).',
+          '- Suspend svc.exe (PID 1) on web-01 (`suspend`).',
+          '',
+          'The indicator was retired and will not be retried.',
+        ].join('\n')
+      );
+      // Outside the default space the link carries the space, like `execution.url`.
+      expect(
+        liquid.parseAndRenderSync(lostMessage, {
+          kibanaUrl: 'https://kibana',
+          workflow: { spaceId: 'team-a' },
+          steps: {
+            resolve_host: { output: { host_name: 'web-01' } },
+            resolve_proposal_dispatch: { output: { failed: 1 } },
+            propose_actions: {
+              output: {
+                results: [
+                  {
+                    status: 'completed',
+                    key: { title: 'Isolate host web-01', actionWorkflowId: 'isolate' },
+                    output: { status: 'failed', executionId: 'gate-1', workflowId: 'gate' },
+                  },
+                ],
+              },
+            },
+          },
+        })
+      ).toContain('(https://kibana/s/team-a/app/workflows/gate?executionId=gate-1&tab=executions)');
+      expect(
+        liquid.parseAndRenderSync(lostMessage, {
+          steps: {
+            resolve_host: { output: { host_name: 'web-01' } },
+            resolve_proposal_counts: { output: { check_failed: false } },
+            resolve_proposal_dispatch: { output: { failed: 0 } },
+            resolve_proposals: { output: { close_gate_failed: true } },
+          },
+        })
+      ).toContain('the question whether to close this investigation could not be raised');
+      const reason = String(
+        (
+          stepByName('mark_proposals_failed')?.with as {
+            ki?: { attributes?: { failure_reason?: string } };
+          }
+        )?.ki?.attributes?.failure_reason
+      );
+      expect(
+        liquid
+          .parseAndRenderSync(reason, {
+            steps: {
+              resolve_request: { output: { investigation_id: 'inv-1' } },
+              resolve_proposals: { output: { close_gate_failed: true } },
+            },
+          })
+          .replace(/\s+/g, ' ')
+      ).toBe('Could not raise the close question on investigation inv-1');
 
       const processed = String(stepByName('mark_processed')?.if);
       const retired = String(stepByName('mark_proposals_failed')?.if);
@@ -2070,11 +2941,11 @@ describe('Endpoint analysis run', () => {
       expect(stepByName('journal_proposals_lost')?.['on-failure']).toEqual({ continue: true });
       expect(stepByName('journal_proposals_queued')?.['on-failure']).toEqual({ continue: true });
       const queued = String(stepByName('journal_proposals_queued')?.if);
-      const queuedWhen = (propose: boolean, recommended: number, attached: boolean) => ({
+      const queuedWhen = (propose: boolean, recommended: number, analyzed: boolean) => ({
         steps: {
           resolve_request: { output: { has_request: true } },
           verify_investigation: { output: { metadata: { id: 'inv-1' } } },
-          resolve_run_outcome: { output: { attached } },
+          resolve_run_outcome: { output: { analyzed } },
           forensic_analysis: {
             output: {
               structured_output: {
@@ -2101,6 +2972,45 @@ describe('Endpoint analysis run', () => {
       expect(stepByName('journal_proposals_lost')?.if).toBe(
         stepByName('mark_proposals_failed')?.if
       );
+    });
+
+    // `workflow.executeAsync` completes even when the gate rejects its inputs, and reports that
+    // gate as `failed` in its output. Counting only failed steps let a rejected proposal, or a
+    // rejected close question, retire the indicator as processed with nothing left to ask.
+    it('counts a dispatch whose gate failed to start as failed', () => {
+      const failed = String(stepByName('resolve_proposal_dispatch')?.with?.failed);
+      const results = (...entries: Array<Record<string, unknown>>) => ({
+        steps: { propose_actions: { output: { results: entries } } },
+      });
+      expect(
+        evaluate(
+          failed,
+          results(
+            { status: 'completed', output: { status: 'running' } },
+            { status: 'completed', output: { status: 'failed' } },
+            { status: 'failed' }
+          )
+        )
+      ).toBe(2);
+      expect(
+        evaluate(failed, results({ status: 'completed', output: { status: 'pending' } }))
+      ).toBe(0);
+      // Skipped: nothing was dispatched.
+      expect(evaluate(failed, { steps: {} })).toBe(0);
+
+      const closeGate = String(stepByName('resolve_proposals')?.with?.close_gate_failed);
+      const asked = (dispatch: Record<string, unknown>, afterAnalysis = true) => ({
+        steps: {
+          resolve_close_question: { output: { after_analysis: afterAnalysis } },
+          dispatch_close_gate: dispatch,
+        },
+      });
+      expect(evaluate(closeGate, asked({ output: { status: 'failed' } }))).toBe(true);
+      expect(evaluate(closeGate, asked({ error: { message: 'Workflow not found' } }))).toBe(true);
+      expect(evaluate(closeGate, asked({ output: { status: 'pending' } }))).toBe(false);
+      expect(evaluate(closeGate, asked({}))).toBe(false);
+      // After an unrecorded outcome the indicator is retired as failed anyway.
+      expect(evaluate(closeGate, asked({ output: { status: 'failed' } }, false))).toBe(false);
     });
 
     it('points the agent at each entry inputSchema rather than a fixed shape', () => {
