@@ -55,6 +55,7 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param numResponseActions
  * @param alertIds
  * @param logger_
+ * @param waitUntilTransformed
  */
 export const indexHostsAndAlerts = usageTracker.track(
   'indexHostsAndAlerts',
@@ -78,7 +79,8 @@ export const indexHostsAndAlerts = usageTracker.track(
     alertIds?: string[],
     isServerless: boolean = false,
     logger_?: ToolingLog,
-    responseState?: 'success'
+    responseState?: 'success',
+    waitUntilTransformed: boolean = true
   ): Promise<IndexedHostsAndAlertsResponse> => {
     const random = seedrandom(seed);
     const logger = logger_ ?? createToolingLogger();
@@ -114,7 +116,8 @@ export const indexHostsAndAlerts = usageTracker.track(
       // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
       const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
-      const shouldWaitForEndpointMetadataDocs = fleet;
+      // Callers opting out of transformed metadata never read it, so leave the transforms running.
+      const shouldWaitForEndpointMetadataDocs = fleet && waitUntilTransformed;
       if (shouldWaitForEndpointMetadataDocs) {
         await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
         await stopMetadataTransforms(client, epmEndpointPackage.version);
