@@ -256,6 +256,10 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
         ['web-qa-01.corp.example.com', 'notgithub.com', 'github.com.evil.example.com']
       );
     });
+
+    it('masks a private name that only starts with a public site', () => {
+      expectKept('builtin-host-name', 'secret.github.com.network', ['secret.github.com']);
+    });
   });
 
   describe('builtin-ipv6', () => {

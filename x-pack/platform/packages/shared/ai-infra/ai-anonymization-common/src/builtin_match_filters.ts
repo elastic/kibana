@@ -29,6 +29,7 @@ const isPublicDomain = (host: string): boolean => {
 };
 
 const WORD_CHAR = /\w/;
+const HOST_CONTINUES = /^(?:\.[A-Za-z0-9]|[A-Za-z0-9-])/;
 
 export interface MatchSpan {
   start: number;
@@ -56,8 +57,12 @@ const FILTERS: Record<string, (text: string, start: number, end: number) => Matc
       const separator = /^[A-Z][A-Z0-9-]*\\+/.exec(text.slice(start, end));
       return separator ? { start: start + separator[0].length, end } : undefined;
     },
+    // A match followed by more host characters (`secret.github.com.network`) is a prefix of a
+    // longer private name, not the public site itself, so it is masked.
     'builtin-host-name': (text, start, end) =>
-      isPublicDomain(text.slice(start, end)) ? undefined : { start, end },
+      !HOST_CONTINUES.test(text.slice(end, end + 2)) && isPublicDomain(text.slice(start, end))
+        ? undefined
+        : { start, end },
     // `std::string` and `a::int` are code, not addresses: a real address is not glued to a word.
     'builtin-ipv6': (text, start, end) => {
       const before = text[start - 1];
