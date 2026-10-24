@@ -128,6 +128,26 @@ describe('RuleCoverageSettings', () => {
     expectDefaultsShown();
   });
 
+  it('shows each range under its field', () => {
+    renderSettings();
+
+    const lookbackRange = screen.getByTestId('alertZeroLookbackDaysRange');
+    const gapsRange = screen.getByTestId('alertZeroMaxGapsPerRunRange');
+
+    expect(lookbackRange).toHaveTextContent('Between 8 and 90.');
+    expect(gapsRange).toHaveTextContent('Between 1 and 50.');
+    expect(screen.getByTestId('alertZeroLookbackDays')).toHaveAttribute(
+      'aria-describedby',
+      lookbackRange.id
+    );
+    expect(screen.getByTestId('alertZeroMaxGapsPerRun')).toHaveAttribute(
+      'aria-describedby',
+      gapsRange.id
+    );
+    expect(screen.getByText(/Older gaps are not reviewed/)).not.toHaveTextContent('Between');
+    expect(screen.getByText(/each run starts/)).not.toHaveTextContent('Between');
+  });
+
   it('falls back to the defaults when extras are missing', () => {
     // This is the case when the user has not yet saved the settings for this worker
     render(

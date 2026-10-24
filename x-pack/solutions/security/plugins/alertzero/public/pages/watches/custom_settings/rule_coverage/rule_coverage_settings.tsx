@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import {
   LOOKBACK_DAYS_MAX,
   LOOKBACK_DAYS_MIN,
@@ -30,6 +31,8 @@ export const RuleCoverageSettings: WorkerCustomSettingsComponent = ({
   isDisabled,
   onExtrasChange,
 }) => {
+  const lookbackRangeId = useGeneratedHtmlId({ prefix: 'alertZeroLookbackDaysRange' });
+  const maxGapsRangeId = useGeneratedHtmlId({ prefix: 'alertZeroMaxGapsPerRunRange' });
   const extras = readRuleCoverageExtras(settings);
 
   return (
@@ -44,10 +47,20 @@ export const RuleCoverageSettings: WorkerCustomSettingsComponent = ({
           min={LOOKBACK_DAYS_MIN}
           max={LOOKBACK_DAYS_MAX}
           ariaLabel={i18n.LOOKBACK_DAYS_ARIA_LABEL}
+          ariaDescribedBy={lookbackRangeId}
           testSubj="alertZeroLookbackDays"
           isDisabled={isDisabled}
           onChange={(lookbackDays) => onExtrasChange({ ...extras, lookbackDays })}
         />
+        <EuiSpacer size="xs" />
+        <EuiText
+          id={lookbackRangeId}
+          size="xs"
+          color="subdued"
+          data-test-subj="alertZeroLookbackDaysRange"
+        >
+          {i18n.LOOKBACK_DAYS_RANGE}
+        </EuiText>
       </SettingRow>
       <SettingRow
         label={i18n.MAX_GAPS_PER_RUN_LABEL}
@@ -59,10 +72,20 @@ export const RuleCoverageSettings: WorkerCustomSettingsComponent = ({
           min={MAX_GAPS_PER_RUN_MIN}
           max={MAX_GAPS_PER_RUN_MAX}
           ariaLabel={i18n.MAX_GAPS_PER_RUN_ARIA_LABEL}
+          ariaDescribedBy={maxGapsRangeId}
           testSubj="alertZeroMaxGapsPerRun"
           isDisabled={isDisabled}
           onChange={(maxGapsPerRun) => onExtrasChange({ ...extras, maxGapsPerRun })}
         />
+        <EuiSpacer size="xs" />
+        <EuiText
+          id={maxGapsRangeId}
+          size="xs"
+          color="subdued"
+          data-test-subj="alertZeroMaxGapsPerRunRange"
+        >
+          {i18n.MAX_GAPS_PER_RUN_RANGE}
+        </EuiText>
       </SettingRow>
     </>
   );

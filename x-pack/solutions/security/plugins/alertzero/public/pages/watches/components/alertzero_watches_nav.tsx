@@ -61,7 +61,6 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
         width: ${ALERTZERO_WATCHES_SUBNAV_WIDTH}px;
         flex-shrink: 0;
         height: 100%;
-        border-right: 1px solid ${euiTheme.border.color};
         background: ${euiTheme.colors.backgroundBaseSubdued};
       `}
     >

@@ -51,6 +51,7 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const thresholdsHelpId = useGeneratedHtmlId({ prefix: 'alertZeroQualifyingThresholdsHelp' });
+  const analysisWindowRangeId = useGeneratedHtmlId({ prefix: 'alertZeroAnalysisWindowRange' });
   const extras = readRuleTuningExtras(settings);
 
   return (
@@ -65,10 +66,20 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
           min={ANALYSIS_WINDOW_DAYS_MIN}
           max={ANALYSIS_WINDOW_DAYS_MAX}
           ariaLabel={i18n.ANALYSIS_WINDOW_DAYS_ARIA_LABEL}
+          ariaDescribedBy={analysisWindowRangeId}
           testSubj="alertZeroAnalysisWindowDays"
           isDisabled={isDisabled}
           onChange={(analysisWindowDays) => onExtrasChange({ ...extras, analysisWindowDays })}
         />
+        <EuiSpacer size="xs" />
+        <EuiText
+          id={analysisWindowRangeId}
+          size="xs"
+          color="subdued"
+          data-test-subj="alertZeroAnalysisWindowDaysRange"
+        >
+          {i18n.ANALYSIS_WINDOW_DAYS_RANGE}
+        </EuiText>
       </SettingRow>
       <SettingRow
         label={i18n.QUALIFYING_THRESHOLDS_LABEL}
