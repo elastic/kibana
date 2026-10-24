@@ -17,6 +17,7 @@ project:
   owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/nightshift_investigations
 dependsOn:
+  - '@kbn/dev-cli-runner'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-observability'
   - '@kbn/nightshift-decision-trees'
@@ -81,6 +82,7 @@ fileGroups:
     - server/**/*
     - public/**/*
     - integration_tests/**/*
+    - scripts/**/*
     - test/scout*/**/*
     - '!target/**/*'
 tasks: {}
