@@ -25,9 +25,11 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
       options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
     );
     await this.waitForDiscoverPage();
+    // Discover discards the seeded mode unless it matches the resolved `discover.isEsqlDefault`.
     if (options.queryMode === 'esql') {
-      // Discover discards the seeded mode unless it matches the resolved `discover.isEsqlDefault`.
       await this.selectTextBaseLang({ timeout: 30_000 });
+    } else if (options.queryMode === 'classic') {
+      await this.selectClassicMode({ timeout: 30_000 });
     }
   }
 
@@ -92,6 +94,14 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
     const classicQueryInput = this.page.testSubj.locator('queryInput');
     await expect(esqlEditor.or(classicQueryInput)).toBeVisible({ timeout });
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
+  }
+
+  async selectClassicMode(options: TimeoutOptions = {}) {
+    const currentMode = await this.getCurrentQueryMode(options);
+    if (currentMode !== 'classic') {
+      await this.page.testSubj.click('select-classic-mode-btn');
+    }
+    await expect(this.page.testSubj.locator('discover-dataView-switch-link')).toBeVisible(options);
   }
 
   async selectTextBaseLang(options: TimeoutOptions = {}) {
