@@ -14,6 +14,11 @@ import {
   ExecutionStatus,
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
+import {
+  getResumeContextRevert,
+  type RevertResumeContextParams,
+  type RevertResumeContextResult,
+} from '../../server/repositories/resume_context_revert';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
@@ -351,6 +356,25 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       status: ExecutionStatus.PENDING,
     });
     return true;
+  }
+
+  public async tryRevertResumeContext(
+    params: RevertResumeContextParams
+  ): Promise<RevertResumeContextResult> {
+    const existing = this.workflowExecutions.get(params.workflowExecutionId);
+    if (!existing) {
+      return 'not_found';
+    }
+    const revert = getResumeContextRevert(existing, params);
+    if ('skip' in revert) {
+      return revert.skip;
+    }
+    // Elasticsearch merges a partial `context`; this in-memory update replaces it, so merge here.
+    await this.updateWorkflowExecution({
+      id: existing.id,
+      context: { ...existing.context, ...revert.context },
+    });
+    return 'reverted';
   }
 
   public async bulkUpdateWorkflowExecutions(

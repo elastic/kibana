@@ -72,6 +72,11 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
+import {
+  isResumeNotPendingError,
+  releaseClaimAfterFailedResume,
+  unwrapResumeError,
+} from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
@@ -1399,6 +1404,7 @@ export class WorkflowsManagementApi {
   ): Promise<ResumeWorkflowExecutionResponseDto> {
     await this.assertExecutionAccess(executionId, spaceId, 'execute', request);
     const channel = options?.channel;
+    let claimReleased: boolean | undefined;
     try {
       const stepExecutionId =
         options?.stepExecutionId ??
@@ -1412,13 +1418,15 @@ export class WorkflowsManagementApi {
         );
       }
 
-      const claimed = await this.workflowsService.markStepAsResponded(
+      // Resolved before claiming so a lookup failure cannot strand the claim.
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      const claim = await this.workflowsService.markStepAsResponded(
         stepExecutionId,
         request,
         channel,
         spaceId
       );
-      if (!claimed) {
+      if (!claim) {
         throw new WorkflowExecutionInvalidStatusError(
           executionId,
           'already responded to or no longer waiting for input',
@@ -1426,13 +1434,28 @@ export class WorkflowsManagementApi {
         );
       }
 
-      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-      const result = await workflowsExecutionEngine.resumeWorkflowExecution(
-        executionId,
-        spaceId,
-        input,
-        request
-      );
+      let result: ResumeWorkflowExecutionResponseDto;
+      try {
+        result = await workflowsExecutionEngine.resumeWorkflowExecution(
+          executionId,
+          spaceId,
+          input,
+          request
+        );
+      } catch (error) {
+        // Only release when the engine left nothing pending; otherwise the claim must stay.
+        if (isResumeNotPendingError(error)) {
+          claimReleased = await releaseClaimAfterFailedResume({
+            workflowsService: this.workflowsService,
+            logger: this.logger,
+            executionId,
+            stepExecutionId,
+            claim,
+            spaceId,
+          });
+        }
+        throw unwrapResumeError(error);
+      }
       this.audit?.logExecutionResumed(request, {
         executionId,
         resumedBy: result.resumedBy,
@@ -1440,7 +1463,7 @@ export class WorkflowsManagementApi {
       });
       return result;
     } catch (error) {
-      this.audit?.logExecutionResumed(request, { executionId, channel, error });
+      this.audit?.logExecutionResumed(request, { executionId, channel, error, claimReleased });
       throw error;
     }
   }
