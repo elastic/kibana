@@ -11,9 +11,17 @@ import {
   AI_INDEX_INTERNAL_API_VERSION,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_LIST_PATH,
+  AI_INDEX_KI_RESTORE_PATH,
 } from '../../../common/constants';
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
-import type { GetKiResponse, ListKisResponse } from '../../../common/http_api/knowledge_indicators';
+import type {
+  DeleteKiResponse,
+  GetKiResponse,
+  ListKisResponse,
+  RestoreKiResponse,
+  UpdateKiBody,
+  UpdateKiResponse,
+} from '../../../common/http_api/knowledge_indicators';
 
 interface ListKisArgs {
   aiIndexId: string;
@@ -57,5 +65,58 @@ export const getKi = (
       index,
       ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
     },
+    ...(signal ? { signal } : {}),
+  });
+
+interface UpdateKiArgs {
+  aiIndexId: string;
+  kiId: string;
+  index: string;
+  content: string;
+  signal?: AbortSignal;
+}
+
+export const updateKi = (
+  http: HttpStart,
+  { aiIndexId, kiId, index, content, signal }: UpdateKiArgs
+): Promise<UpdateKiResponse> =>
+  http.patch<UpdateKiResponse>(buildPath(AI_INDEX_KI_BY_ID_PATH, { aiIndexId, kiId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
+    query: { index },
+    body: JSON.stringify({ ki: { content } } satisfies UpdateKiBody),
+    ...(signal ? { signal } : {}),
+  });
+
+interface DeleteKiArgs {
+  aiIndexId: string;
+  kiId: string;
+  index: string;
+  signal?: AbortSignal;
+}
+
+export const deleteKi = (
+  http: HttpStart,
+  { aiIndexId, kiId, index, signal }: DeleteKiArgs
+): Promise<DeleteKiResponse> =>
+  http.delete<DeleteKiResponse>(buildPath(AI_INDEX_KI_BY_ID_PATH, { aiIndexId, kiId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
+    query: { index },
+    ...(signal ? { signal } : {}),
+  });
+
+interface RestoreKiArgs {
+  aiIndexId: string;
+  kiId: string;
+  index: string;
+  signal?: AbortSignal;
+}
+
+export const restoreKi = (
+  http: HttpStart,
+  { aiIndexId, kiId, index, signal }: RestoreKiArgs
+): Promise<RestoreKiResponse> =>
+  http.post<RestoreKiResponse>(buildPath(AI_INDEX_KI_RESTORE_PATH, { aiIndexId, kiId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
+    query: { index },
     ...(signal ? { signal } : {}),
   });
