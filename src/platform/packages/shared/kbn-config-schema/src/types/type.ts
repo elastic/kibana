@@ -123,6 +123,20 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
+let lazyDisabled =
+  typeof process !== 'undefined' && process.env?.KBN_DISABLE_LAZY_CONFIG_SCHEMA === 'true';
+
+/**
+ * Turns off lazy Joi construction: new schemas are built in their constructor (so invalid
+ * definitions throw at definition time, as before) and built schemas are held strongly.
+ * Also enabled at load time by `KBN_DISABLE_LAZY_CONFIG_SCHEMA=true`.
+ */
+export const setLazyConfigSchemaDisabled = (value: boolean): void => {
+  lazyDisabled = value;
+};
+
+const strongSchemaCache = new WeakMap<Type<any>, Schema>();
+
 export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
   // fail if it wasn't initialized we use a "trick" to which basically just
@@ -132,15 +146,29 @@ export abstract class Type<V> {
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
 
-  /**
-   * Internal "schema" backed by Joi.
-   * @type {Schema}
-   */
-  protected readonly internalSchema: Schema;
+  private readonly schemaFactory: () => Schema;
+  private readonly baseTypeOptions: TypeOptions<any>;
   private readonly meta: TypeOptions<V>['meta'];
 
-  protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
+  protected constructor(schemaOrFactory: Schema | (() => Schema), options: TypeOptions<V> = {}) {
     this.meta = options.meta;
+    this.baseTypeOptions = { ...options };
+    this.schemaFactory =
+      typeof schemaOrFactory === 'function' ? schemaOrFactory : () => schemaOrFactory;
+
+    if (lazyDisabled) {
+      this.getSchema();
+    }
+  }
+
+  protected get internalSchema(): Schema {
+    const cached = strongSchemaCache.get(this);
+    if (cached) {
+      return cached;
+    }
+
+    let schema = this.schemaFactory();
+    const options = this.baseTypeOptions;
 
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
@@ -186,7 +214,8 @@ export abstract class Type<V> {
       schema = schema.error(([error]) => this.onError(error));
     }
 
-    this.internalSchema = schema;
+    strongSchemaCache.set(this, schema);
+    return schema;
   }
 
   public extendsDeep(newOptions: ExtendsDeepOptions): Type<V> {

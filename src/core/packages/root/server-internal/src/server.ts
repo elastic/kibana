@@ -71,6 +71,7 @@ import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { UserStorageService } from '@kbn/core-user-storage-server-internal';
+import { setLazyConfigSchemaDisabled } from '@kbn/config-schema';
 import { setLazySchemaDisabled } from '@kbn/zod';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
@@ -227,9 +228,9 @@ export class Server {
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
     this.nodeRoles = nodePreboot.roles;
 
-    // Apply the `disableLazyZodSchemas` static override for `@kbn/zod` before plugin
-    // discovery so that `lazySchema` calls evaluated at plugin-module-load time observe it.
-    await this.#applyLazyZodSchemaOverride();
+    // Apply the `disableLazyZodSchemas` / `disableLazyConfigSchemas` static overrides before plugin
+    // discovery so that schemas evaluated at plugin-module-load time observe them.
+    await this.#applyLazySchemaOverrides();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
@@ -733,14 +734,17 @@ export class Server {
     }
   }
 
-  async #applyLazyZodSchemaOverride() {
+  async #applyLazySchemaOverrides() {
     const featureFlagsCfg = await firstValueFrom(
       this.configService.atPath<{ overrides?: Record<string, unknown> }>('feature_flags')
     );
-    const override = featureFlagsCfg.overrides?.disableLazyZodSchemas;
+    const { disableLazyZodSchemas, disableLazyConfigSchemas } = featureFlagsCfg.overrides ?? {};
 
-    if (typeof override === 'boolean') {
-      setLazySchemaDisabled(override);
+    if (typeof disableLazyZodSchemas === 'boolean') {
+      setLazySchemaDisabled(disableLazyZodSchemas);
+    }
+    if (typeof disableLazyConfigSchemas === 'boolean') {
+      setLazyConfigSchemaDisabled(disableLazyConfigSchemas);
     }
   }
 
