@@ -16,6 +16,8 @@ import type { AgentUpdateRequest } from '../../../../common/agents';
 import {
   canChangeAgentAccessControl,
   canConfigureAgentApprovals,
+  canEditBoundAgent,
+  canConfigureAgentExecutionIdentity,
   canDeleteAgent,
   hasAgentReadAccess,
   hasAgentUseAccess,
@@ -58,6 +60,7 @@ export const hasReadAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
+    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasUseAccess = ({
@@ -71,6 +74,7 @@ export const hasUseAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
+    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasWriteAccess = ({
@@ -84,6 +88,7 @@ export const hasWriteAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
+    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasDeleteAccess = ({
@@ -97,6 +102,7 @@ export const hasDeleteAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
+    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasManageAccessControlAccess = ({
@@ -111,6 +117,7 @@ export const hasManageAccessControlAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
+    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasConfigureApprovalsAccess = ({
@@ -125,7 +132,33 @@ export const hasConfigureApprovalsAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
+    boundServiceAccountId: source.service_account_id,
   });
+
+export const hasConfigureExecutionIdentityAccess = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): boolean =>
+  canConfigureAgentExecutionIdentity({
+    agentId: source.id,
+    accessControl: normalizeAccessControl(source),
+    owner: sourceToOwner(source),
+    currentUser: user,
+    boundServiceAccountId: source.service_account_id,
+  });
+
+/** Whether the caller may edit the agent given its binding; see {@link canEditBoundAgent}. */
+export const hasEditBoundAgentAccess = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): boolean =>
+  canEditBoundAgent({ boundServiceAccountId: source.service_account_id, currentUser: user });
 
 export const getAgentPermissions = ({
   source,
@@ -133,11 +166,16 @@ export const getAgentPermissions = ({
 }: {
   source: AgentProperties;
   user: CurrentUser;
-}): AgentPermissions => ({
-  update_agent: hasWriteAccess({ source, user }),
-  update_access_control: hasManageAccessControlAccess({ source, user }),
-  update_approvals: hasConfigureApprovalsAccess({ source, user }),
-});
+}): AgentPermissions => {
+  // A bound agent is read-only for anyone who cannot bind it.
+  const editable = hasEditBoundAgentAccess({ source, user });
+  return {
+    update_agent: editable && hasWriteAccess({ source, user }),
+    update_access_control: editable && hasManageAccessControlAccess({ source, user }),
+    update_approvals: editable && hasConfigureApprovalsAccess({ source, user }),
+    update_execution_identity: hasConfigureExecutionIdentityAccess({ source, user }),
+  };
+};
 
 /**
  * Redacts `access_control.entries` from a returned agent definition when the caller is not allowed

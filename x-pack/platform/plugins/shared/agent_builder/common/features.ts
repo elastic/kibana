@@ -26,6 +26,8 @@ export const uiPrivileges = {
   manageAgents: 'manageAgents',
   manageTools: 'manageTools',
   manageSkills: 'manageSkills',
+  /** Chat with agents that run as a bound service account. */
+  invokeBoundAgents: 'invokeBoundAgents',
 };
 
 export const apiPrivileges = {
@@ -36,10 +38,12 @@ export const apiPrivileges = {
   manageAgents: `${AGENTBUILDER_FEATURE_ID}:manageAgents`,
   manageTools: `${AGENTBUILDER_FEATURE_ID}:manageTools`,
   manageSkills: `${AGENTBUILDER_FEATURE_ID}:manageSkills`,
+  invokeBoundAgents: `${AGENTBUILDER_FEATURE_ID}:invokeBoundAgents`,
 };
 
 export const subFeaturePrivilegeIds = {
   manageAgents: 'manage_agents',
   manageTools: 'manage_tools',
   manageSkills: 'manage_skills',
+  invokeBoundAgents: 'invoke_bound_agents',
 } as const;

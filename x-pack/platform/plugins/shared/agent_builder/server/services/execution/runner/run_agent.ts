@@ -71,7 +71,14 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
   const agentRegistry = await manager.deps.agentsService.getRegistry({ request });
-  const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
+  // Under a bound service account's credential the conversation still belongs to the caller.
+  const { owner } = manager.deps;
+  const conversationClient = owner
+    ? await manager.deps.conversationService.getScopedClientAsUser({
+        request,
+        user: { ...owner, isAdmin: false },
+      })
+    : await manager.deps.conversationService.getScopedClient({ request });
   const deployment = await resolveDeploymentContext({
     deploymentInfo,
     request,

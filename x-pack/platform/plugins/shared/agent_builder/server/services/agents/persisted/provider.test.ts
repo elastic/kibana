@@ -49,7 +49,12 @@ const makeDefinition = (
   configuration: { tools: [] },
   access_control: undefined,
   created_by: undefined,
-  permissions: { update_agent: true, update_access_control: true, update_approvals: false },
+  permissions: {
+    update_agent: true,
+    update_access_control: true,
+    update_approvals: false,
+    update_execution_identity: false,
+  },
   ...overrides,
 });
 

@@ -8,6 +8,7 @@
 import { connectable, from, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus, isRequestAbortedError } from '@kbn/agent-builder-common';
@@ -23,6 +24,8 @@ import { HeartbeatReporter } from './heartbeat_reporter';
 import type { SurfacesService } from '../../surfaces';
 import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';
 
+type TaskRunAsContext = NonNullable<RunContext['runAs']>;
+
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
@@ -33,9 +36,33 @@ export interface TaskHandlerDeps extends AgentExecutionDeps {
  * The task handler interface used by the task definition.
  */
 export interface TaskHandler {
-  run(params: { executionId: string; fakeRequest: KibanaRequest }): Promise<void>;
+  /**
+   * Runs the execution with `fakeRequest`, or inside `runAs` when the execution runs as a service
+   * account. Task Manager provides exactly one of them.
+   */
+  run(params: {
+    executionId: string;
+    fakeRequest?: KibanaRequest;
+    runAs?: TaskRunAsContext;
+  }): Promise<void>;
   cancel(params: { executionId: string }): Promise<void>;
 }
+
+/**
+ * A failure before the run entered its credential is a binding problem (unbound, re-bound, or a
+ * deleted account): name the agent and the account so followers of the execution see the cause.
+ */
+const describeCredentialError = (execution: AgentExecution, error: unknown): Error => {
+  const message = error instanceof Error ? error.message : String(error);
+  const serviceAccountId = execution.runAs?.serviceAccountId;
+  const described = new Error(
+    serviceAccountId
+      ? `Agent "${execution.agentId}" cannot run as service account "${serviceAccountId}": ${message}`
+      : message
+  );
+  described.cause = error;
+  return described;
+};
 
 export const createTaskHandler = (deps: TaskHandlerDeps): TaskHandler => {
   return new TaskHandlerImpl(deps);
@@ -53,9 +80,11 @@ class TaskHandlerImpl implements TaskHandler {
   async run({
     executionId,
     fakeRequest,
+    runAs,
   }: {
     executionId: string;
-    fakeRequest: KibanaRequest;
+    fakeRequest?: KibanaRequest;
+    runAs?: TaskRunAsContext;
   }): Promise<void> {
     const executionClient = this.createExecutionClient();
 
@@ -67,6 +96,27 @@ class TaskHandlerImpl implements TaskHandler {
 
     if (execution.status === ExecutionStatus.aborted) {
       this.logger.info(`Execution ${executionId} was aborted before it started; skipping`);
+      return;
+    }
+
+    // The record and the task's credential must agree: a bound execution never runs on a caller's
+    // key, and an unbound one never runs as a service account.
+    if (execution.runAs && !runAs) {
+      await this.handleExecutionFailure({
+        execution,
+        executionClient,
+        error: new Error(
+          `Execution ${executionId} runs as service account "${execution.runAs.serviceAccountId}" but its task carries no service account credential`
+        ),
+      });
+      return;
+    }
+    if (!execution.runAs && !fakeRequest) {
+      await this.handleExecutionFailure({
+        execution,
+        executionClient,
+        error: new Error(`Execution ${executionId} was scheduled without a request`),
+      });
       return;
     }
 
@@ -90,45 +140,67 @@ class TaskHandlerImpl implements TaskHandler {
 
     // 4. Build a single multicast event stream; wrapping the async setup makes setup
     // errors surface as stream errors too.
-    const events$ = connectable(
-      from(
-        handleAgentExecution({
-          deps: this.deps,
-          request: fakeRequest,
-          execution,
-          abortSignal: abortMonitor.getSignal(),
-        })
-      ).pipe(switchMap((agentEvents$) => agentEvents$))
-    );
+    const runWith = async (request: KibanaRequest) => {
+      const events$ = connectable(
+        from(
+          handleAgentExecution({
+            deps: this.deps,
+            request,
+            execution,
+            abortSignal: abortMonitor.getSignal(),
+          })
+        ).pipe(switchMap((agentEvents$) => agentEvents$))
+      );
 
-    // 5. Attach both consumers before connecting, so neither misses events.
-    const callbackDeliveryPromise = deliverCallbackEvents({
-      execution,
-      events$,
-      request: fakeRequest,
-      callbackDeliveryService: this.deps.callbackDeliveryService,
-      surfacesService: this.deps.surfacesService,
-      logger: this.logger,
-    });
+      // 5. Attach both consumers before connecting, so neither misses events.
+      const callbackDeliveryPromise = deliverCallbackEvents({
+        execution,
+        events$,
+        request,
+        callbackDeliveryService: this.deps.callbackDeliveryService,
+        surfacesService: this.deps.surfacesService,
+        logger: this.logger,
+      });
 
-    const persistencePromise = collectAndWriteEvents({
-      events$,
-      execution,
-      executionClient,
-      logger: this.logger,
-    });
+      const persistencePromise = collectAndWriteEvents({
+        events$,
+        execution,
+        executionClient,
+        logger: this.logger,
+      });
 
-    events$.connect();
+      events$.connect();
 
+      try {
+        await persistencePromise;
+      } finally {
+        // 6. Drain callback delivery whether or not persistence succeeded.
+        await callbackDeliveryPromise;
+      }
+    };
+
+    // The service account credential lives for the whole run and is retired once it settles.
+    let entered = false;
     try {
-      await persistencePromise;
-
-      // 6. Drain callback delivery, then mark as completed
-      await callbackDeliveryPromise;
+      if (execution.runAs && runAs) {
+        await runAs.withScopedRequest(
+          async (request) => {
+            entered = true;
+            await runWith(request);
+          },
+          { expectedServiceAccountId: execution.runAs.serviceAccountId }
+        );
+      } else if (fakeRequest) {
+        entered = true;
+        await runWith(fakeRequest);
+      }
       await executionClient.updateStatus(executionId, ExecutionStatus.completed);
     } catch (error) {
-      await callbackDeliveryPromise;
-      await this.handleExecutionFailure({ execution, executionClient, error });
+      await this.handleExecutionFailure({
+        execution,
+        executionClient,
+        error: entered ? error : describeCredentialError(execution, error),
+      });
     } finally {
       abortMonitor.stop();
       heartbeatReporter.stop();

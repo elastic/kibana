@@ -54,6 +54,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     created_at: document._source.created_at,
     updated_by: readOwner(document._source.updated_by_id, document._source.updated_by_name),
     updated_at: document._source.updated_at,
+    service_account_id: document._source.service_account_id,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
@@ -117,6 +118,7 @@ export const createRequestToEs = ({
     avatar_symbol: profile.avatar_symbol,
     created_by_id: user.id,
     created_by_name: user.username,
+    ...(profile.service_account_id ? { service_account_id: profile.service_account_id } : {}),
     access_control: profile.access_control
       ? { access_mode: profile.access_control.access_mode, entries: [] }
       : getDefaultAgentAccessControl(),
@@ -154,7 +156,7 @@ export const updateRequestToEs = ({
   user?: UserIdAndName;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
-  const { configuration, access_control, ...restUpdate } = update;
+  const { configuration, access_control, service_account_id, ...restUpdate } = update;
   const { approvals: nextApprovals, ...restConfiguration } = configuration ?? {};
   const currentAccessControl = normalizeAccessControl(currentProps);
 
@@ -182,6 +184,13 @@ export const updateRequestToEs = ({
     ...(user && { updated_by_id: user.id, updated_by_name: user.username }),
     updated_at: updateDate.toISOString(),
   };
+
+  // `null` removes the binding reference, a string replaces it, `undefined` keeps it.
+  if (service_account_id === null) {
+    delete updated.service_account_id;
+  } else if (service_account_id !== undefined) {
+    updated.service_account_id = service_account_id;
+  }
 
   if (
     currentProps.created_by_id === undefined &&

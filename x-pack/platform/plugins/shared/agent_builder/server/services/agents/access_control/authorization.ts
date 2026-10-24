@@ -11,6 +11,7 @@ import {
   AgentAccessControlRole,
   accessControlRoleMeets,
   maxAccessControlRole,
+  serviceAccountUserId,
   type AgentAccessControl,
   type AgentAccessControlEntry,
   type CurrentUser,
@@ -23,7 +24,21 @@ export interface AgentAuthzArgs {
   accessControl?: AgentAccessControl;
   owner?: UserIdAndName;
   currentUser?: CurrentUser | null;
+  /** Service account the agent runs as, when it is bound to one. */
+  boundServiceAccountId?: string;
 }
+
+/**
+ * A bound service account executes the agent under its own credentials, so the agent lookups a run
+ * performs after the credential swap must see at least User access for it.
+ */
+const isBoundServiceAccount = ({
+  boundServiceAccountId,
+  currentUser,
+}: Pick<AgentAuthzArgs, 'boundServiceAccountId' | 'currentUser'>): boolean =>
+  boundServiceAccountId !== undefined &&
+  currentUser?.type === 'service_account' &&
+  currentUser.id === serviceAccountUserId(boundServiceAccountId);
 
 /**
  * Checks whether the current user owns the agent.
@@ -127,6 +142,7 @@ export const getEffectiveAgentRole = ({
   accessControl,
   owner,
   currentUser,
+  boundServiceAccountId,
 }: AgentAuthzArgs): EffectiveAgentRole | undefined => {
   if (currentUser?.isAdmin) {
     return 'admin';
@@ -136,7 +152,10 @@ export const getEffectiveAgentRole = ({
   }
   const entryRole = accessControlRoleForUser(accessControl, currentUser);
   const baseline = accessControlModeRole(accessControl?.access_mode);
-  return maxAccessControlRole(entryRole, baseline);
+  const boundRole = isBoundServiceAccount({ boundServiceAccountId, currentUser })
+    ? AgentAccessControlRole.User
+    : undefined;
+  return maxAccessControlRole(maxAccessControlRole(entryRole, baseline), boundRole);
 };
 
 /**
@@ -186,6 +205,30 @@ export const canConfigureAgentApprovals = (
   }
   return role === 'admin' || role === 'owner' || role === AgentAccessControlRole.Manager;
 };
+
+/**
+ * Checks whether the caller can bind, replace or remove the agent's service account.
+ *
+ * Core refuses a binding without the `manage_security` cluster privilege, so the same bar applies
+ * here on top of agent write access. The default agent cannot be bound.
+ */
+export const canConfigureAgentExecutionIdentity = (
+  args: AgentAuthzArgs & { agentId?: string }
+): boolean =>
+  args.agentId !== agentBuilderDefaultAgentId &&
+  hasAgentWriteAccess(args) &&
+  args.currentUser?.canManageSecurity === true;
+
+/**
+ * Checks whether the agent's binding allows the caller to edit it at all.
+ *
+ * Every edit of a bound agent directs its service account, so editing one requires the same
+ * `manage_security` privilege as the binding. Unbound agents are unaffected.
+ */
+export const canEditBoundAgent = (
+  args: Pick<AgentAuthzArgs, 'boundServiceAccountId' | 'currentUser'>
+): boolean =>
+  args.boundServiceAccountId === undefined || args.currentUser?.canManageSecurity === true;
 
 /**
  * Checks whether the caller can read and list the agent.

@@ -307,6 +307,37 @@ describe('runSkillRefCleanup', () => {
     });
   });
 
+  it('refuses to rewrite an agent bound to a service account unless the caller may edit it', async () => {
+    const storage = createMockStorageSingleResponse({
+      hits: [
+        {
+          _id: '1',
+          _source: createAgentSource({
+            id: 'bound-agent',
+            service_account_id: 'kibana/sa-1',
+            config: { instructions: '', tools: [], skill_ids: ['skill-a'] },
+          }),
+        },
+      ],
+    });
+
+    await expect(
+      runSkillRefCleanup({ storage, spaceId: SPACE_ID, skillIds: ['skill-a'] })
+    ).rejects.toMatchObject({
+      meta: { statusCode: 403 },
+      message: expect.stringContaining('Removing skill references from agent "bound-agent"'),
+    });
+    expect(storage.getClient().bulk).not.toHaveBeenCalled();
+
+    await runSkillRefCleanup({
+      storage,
+      spaceId: SPACE_ID,
+      skillIds: ['skill-a'],
+      canEditBoundAgents: true,
+    });
+    expect(storage.getClient().bulk).toHaveBeenCalledTimes(1);
+  });
+
   it('logs error and rethrows when bulk fails', async () => {
     const logger = { warn: jest.fn(), error: jest.fn() };
     const storage = createMockStorageSingleResponse({

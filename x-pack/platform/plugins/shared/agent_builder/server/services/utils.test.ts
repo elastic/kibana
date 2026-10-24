@@ -13,6 +13,7 @@ import {
 import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import {
+  getCallerPrivileges,
   isAdminFromRequest,
   getAgentApiAccessFromRequest,
   getUserFromRequest,
@@ -21,6 +22,7 @@ import {
 import { apiPrivileges } from '../../common/features';
 
 const EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST = {
+  cluster: ['manage_security'],
   application: [
     {
       application: `${APPLICATION_PREFIX}.kibana`,
@@ -171,6 +173,7 @@ describe('getUserFromRequest', () => {
       id: 'profile-123',
       username: 'testuser',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
@@ -192,6 +195,7 @@ describe('getUserFromRequest', () => {
       id: 'realm:["file","file1","shareduser"]',
       username: 'shareduser',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
   });
@@ -219,6 +223,7 @@ describe('getUserFromRequest', () => {
       id: 'profile-from-api-key',
       username: 'shareduser',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
@@ -238,6 +243,7 @@ describe('getUserFromRequest', () => {
     security.authc.getCurrentUser.mockReturnValue({
       username: 'shareduser',
       isAdmin: false,
+      canManageSecurity: false,
       authentication_type: 'api_key',
       authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
     } as any);
@@ -251,6 +257,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'shareduser',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
@@ -288,6 +295,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'shareduser',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
   });
@@ -323,6 +331,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'shareduser',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
   });
@@ -369,6 +378,7 @@ describe('getUserFromRequest', () => {
       id: 'profile-123',
       username: 'shareduser',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
     expect(esClient.security.getApiKey).not.toHaveBeenCalled();
@@ -381,6 +391,7 @@ describe('getUserFromRequest', () => {
     esClient.security.authenticate.mockResolvedValue({
       username: 'api-key-user',
       isAdmin: false,
+      canManageSecurity: false,
       authentication_realm: { type: 'native', name: 'native1' },
     } as any);
 
@@ -392,6 +403,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'api-key-user',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
@@ -412,6 +424,7 @@ describe('getUserFromRequest', () => {
       id: 'profile-123',
       username: 'originating-user',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
@@ -432,6 +445,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'task-manager-user',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
@@ -463,6 +477,7 @@ describe('getUserFromRequest', () => {
         id: 'key-owner-profile',
         username: 'scheduling-user',
         isAdmin: false,
+        canManageSecurity: false,
         type: 'user',
       });
       expect(esClient.security.getApiKey).toHaveBeenCalledWith({
@@ -481,6 +496,7 @@ describe('getUserFromRequest', () => {
         id: undefined,
         username: 'scheduling-user',
         isAdmin: false,
+        canManageSecurity: false,
         type: 'user',
       });
     });
@@ -515,6 +531,7 @@ describe('getUserFromRequest', () => {
         id: 'key-owner-profile',
         username: 'key-owner',
         isAdmin: false,
+        canManageSecurity: false,
         type: 'user',
       });
       expect(esClient.security.getApiKey).toHaveBeenCalledWith({
@@ -534,6 +551,7 @@ describe('getUserFromRequest', () => {
         id: undefined,
         username: 'key-owner',
         isAdmin: false,
+        canManageSecurity: false,
         type: 'user',
       });
     });
@@ -555,6 +573,7 @@ describe('getUserFromRequest', () => {
       id: 'service_account:kibana/automation',
       username: 'kibana/automation',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'service_account',
     });
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
@@ -592,6 +611,7 @@ describe('getUserFromRequest', () => {
       id: 'service_account:kibana/automation',
       username: 'kibana/automation',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'service_account',
     });
   });
@@ -632,6 +652,7 @@ describe('getUserFromRequest', () => {
       id: 'profile-456',
       username: 'some-user',
       isAdmin: false,
+      canManageSecurity: false,
       type: 'user',
     });
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
@@ -647,7 +668,7 @@ describe('isAdminFromRequest', () => {
 
   it('returns true when privilege check authorizes admin privilege', async () => {
     esClient.security.hasPrivileges.mockResolvedValue({
-      application: {},
+      application: { [`${APPLICATION_PREFIX}.kibana`]: { '*': { 'agent_builder:admin': true } } },
       cluster: {},
       has_all_requested: true,
       index: {},
@@ -731,6 +752,42 @@ describe('getAgentApiAccessFromRequest', () => {
           privileges: [apiPrivileges.readAgentBuilder, apiPrivileges.manageAgents],
         },
       ],
+    });
+  });
+});
+
+describe('getCallerPrivileges', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  it('reports manage_security from the cluster privileges of the same check', async () => {
+    esClient.security.hasPrivileges.mockResolvedValue({
+      application: { [`${APPLICATION_PREFIX}.kibana`]: { '*': { 'agent_builder:admin': false } } },
+      cluster: { manage_security: true },
+      has_all_requested: false,
+      index: {},
+      username: 'testuser',
+    });
+
+    await expect(getCallerPrivileges({ esClient })).resolves.toEqual({
+      isAdmin: false,
+      canManageSecurity: true,
+    });
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
+      EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST
+    );
+  });
+
+  it('fails closed on both privileges when the check throws', async () => {
+    esClient.security.hasPrivileges.mockRejectedValue(new Error('boom'));
+
+    await expect(getCallerPrivileges({ esClient })).resolves.toEqual({
+      isAdmin: false,
+      canManageSecurity: false,
     });
   });
 });

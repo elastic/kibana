@@ -193,6 +193,30 @@ Agents can be either built-in or user-defined.
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
 
+### Running an agent as a service account
+
+Where service accounts are enabled, an agent can be bound to a service account through
+`service_account_id` on the create and update APIs. The agent editor shows the binding but does
+not manage it yet (interactive binding is tracked in
+[elastic/kibana#300118](https://github.com/elastic/kibana/issues/300118)). The agent then runs
+every conversation with that account's permissions, whoever started it; the conversation owner
+and round authors stay the caller.
+
+- Binding, replacing or removing the account needs write access to the agent and the
+  Elasticsearch `manage_security` cluster privilege. Every edit of a bound agent, including its
+  access control, needs the same privilege, so the agent is read-only for everyone else.
+  `permissions.update_execution_identity` reports who may bind; the other permissions are false
+  on a bound agent for callers without `manage_security`. The same applies to a forced delete of
+  a tool, skill or plugin a bound agent references: it is refused with a 403 instead of
+  rewriting the agent.
+- Chatting with a bound agent needs the `invoke_bound_agents` sub-feature privilege (included in
+  `all`). A caller without it is refused with a 403 and never falls back to their own identity.
+  Grant it to the service account the Slack relay or a workflow uses to call bound agents.
+- Bound runs execute through Task Manager with the account's short-lived token, minted by Core's
+  service account workload bindings; the agent only stores the account id. A request that already
+  runs as the bound account (a workflow step or a parent agent under the same account) runs the
+  agent inline instead of nesting a second task.
+
 ## Hooks
 
 The hooks API lets you register lifecycle callbacks around agent execution. Register hooks

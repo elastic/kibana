@@ -75,23 +75,24 @@ interface CommonAuditEventParams {
 export interface AgentAuditEventParams extends CommonAuditEventParams {
   agentId?: string;
   agentName?: string;
+  /** Service account the write binds the agent to, when the request carried one. */
+  serviceAccountId?: string;
 }
 
 export function agentAuditEvent({
   action,
   agentId,
   agentName,
+  serviceAccountId,
   outcome,
   error,
 }: AgentAuditEventParams): AuditEvent {
-  let doc = 'an agent';
-  if (agentId && agentName) {
-    doc = `agent [id=${agentId}, name="${agentName}"]`;
-  } else if (agentId) {
-    doc = `agent [id=${agentId}]`;
-  } else if (agentName) {
-    doc = `agent [name="${agentName}"]`;
-  }
+  const attributes = [
+    agentId ? `id=${agentId}` : undefined,
+    agentName ? `name="${agentName}"` : undefined,
+    serviceAccountId ? `service_account=${serviceAccountId}` : undefined,
+  ].filter((attribute): attribute is string => attribute !== undefined);
+  const doc = attributes.length > 0 ? `agent [${attributes.join(', ')}]` : 'an agent';
 
   const [present, progressive, past] = eventVerbs[action];
   const message = error

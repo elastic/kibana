@@ -294,6 +294,8 @@ const handleConversationExecution = async ({
       outputSchema,
       abortSignal,
       conversation,
+      // Only a bound run swaps credentials; an unbound run's request already is the owner.
+      ...(execution.runAs ? { owner } : {}),
       defaultConnectorId: selectedConnectorId,
       telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,

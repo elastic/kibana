@@ -9,6 +9,7 @@ import {
   agentBuilderDefaultAgentId,
   AgentAccessControlMode,
   AgentAccessControlRole,
+  serviceAccountUserId,
   type AgentAccessControlEntry,
   type CurrentUser,
   type UserIdAndName,
@@ -16,6 +17,8 @@ import {
 import {
   canChangeAgentAccessControl,
   canConfigureAgentApprovals,
+  canConfigureAgentExecutionIdentity,
+  canEditBoundAgent,
   canDeleteAgent,
   getEffectiveAgentRole,
   hasAgentReadAccess,
@@ -302,6 +305,98 @@ describe('agent access-control authorization', () => {
           currentUser,
         })
       ).toBe(expected);
+    });
+  });
+});
+
+describe('bound service accounts', () => {
+  const privateAccess = { access_mode: AgentAccessControlMode.Private, entries: [] };
+  const boundAccount: CurrentUser = {
+    id: serviceAccountUserId('kibana/sa-1'),
+    username: 'kibana/sa-1',
+    type: 'service_account',
+    isAdmin: false,
+  };
+
+  it('grants the bound service account User access to its own private agent', () => {
+    const args = {
+      accessControl: privateAccess,
+      owner,
+      currentUser: boundAccount,
+      boundServiceAccountId: 'kibana/sa-1',
+    };
+    expect(getEffectiveAgentRole(args)).toBe(AgentAccessControlRole.User);
+    expect(hasAgentUseAccess(args)).toBe(true);
+    expect(hasAgentWriteAccess(args)).toBe(false);
+  });
+
+  it('grants nothing to another service account or an unbound agent', () => {
+    expect(
+      getEffectiveAgentRole({
+        accessControl: privateAccess,
+        owner,
+        currentUser: boundAccount,
+        boundServiceAccountId: 'kibana/sa-2',
+      })
+    ).toBeUndefined();
+    expect(
+      getEffectiveAgentRole({ accessControl: privateAccess, owner, currentUser: boundAccount })
+    ).toBeUndefined();
+  });
+
+  it('does not treat a human whose id looks like the account as the bound account', () => {
+    expect(
+      getEffectiveAgentRole({
+        accessControl: privateAccess,
+        owner,
+        currentUser: { ...boundAccount, type: 'user' },
+        boundServiceAccountId: 'kibana/sa-1',
+      })
+    ).toBeUndefined();
+  });
+
+  describe('canConfigureAgentExecutionIdentity', () => {
+    it('requires write access and manage_security, and never the default agent', () => {
+      const securityOwner = { ...ownerUser, canManageSecurity: true };
+      expect(
+        canConfigureAgentExecutionIdentity({ owner, currentUser: securityOwner, agentId: 'a' })
+      ).toBe(true);
+      expect(
+        canConfigureAgentExecutionIdentity({ owner, currentUser: ownerUser, agentId: 'a' })
+      ).toBe(false);
+      expect(
+        canConfigureAgentExecutionIdentity({
+          accessControl: privateAccess,
+          owner,
+          currentUser: { ...bob, canManageSecurity: true },
+          agentId: 'a',
+        })
+      ).toBe(false);
+      expect(
+        canConfigureAgentExecutionIdentity({
+          owner,
+          currentUser: { ...adminUser, canManageSecurity: true },
+          agentId: agentBuilderDefaultAgentId,
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe('canEditBoundAgent', () => {
+    it('is unrestricted on an unbound agent', () => {
+      expect(canEditBoundAgent({ currentUser: ownerUser })).toBe(true);
+    });
+
+    it('needs manage_security on a bound agent, even for the owner', () => {
+      expect(
+        canEditBoundAgent({ currentUser: ownerUser, boundServiceAccountId: 'kibana/sa-1' })
+      ).toBe(false);
+      expect(
+        canEditBoundAgent({
+          currentUser: { ...ownerUser, canManageSecurity: true },
+          boundServiceAccountId: 'kibana/sa-1',
+        })
+      ).toBe(true);
     });
   });
 });

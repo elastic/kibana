@@ -33,6 +33,7 @@ export type AgentUpdateRequest = Partial<
 > & {
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
   configuration?: Partial<AgentConfigurationInput>;
+  service_account_id?: string | null;
 };
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;

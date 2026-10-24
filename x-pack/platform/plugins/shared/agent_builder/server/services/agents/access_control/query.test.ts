@@ -156,3 +156,28 @@ describe('buildReadAccessFilter', () => {
     expect(types).toEqual(['user', 'user']);
   });
 });
+
+describe('buildReadAccessFilter for service accounts', () => {
+  it('lets a service account list the agents bound to it', () => {
+    const filter = buildReadAccessFilter({
+      user: {
+        id: 'service_account:kibana/sa-1',
+        username: 'kibana/sa-1',
+        type: 'service_account',
+        isAdmin: false,
+      },
+    });
+
+    expect(filter.bool.should).toContainEqual({ term: { service_account_id: 'kibana/sa-1' } });
+  });
+
+  it('adds no binding clause for a human caller', () => {
+    const filter = buildReadAccessFilter({ user: ownerUser });
+
+    expect(filter.bool.should).not.toContainEqual(
+      expect.objectContaining({
+        term: expect.objectContaining({ service_account_id: expect.anything() }),
+      })
+    );
+  });
+});

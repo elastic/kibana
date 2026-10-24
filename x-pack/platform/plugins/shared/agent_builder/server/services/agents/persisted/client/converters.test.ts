@@ -335,6 +335,7 @@ describe('withPermissions', () => {
       update_agent: true,
       update_access_control: true,
       update_approvals: true,
+      update_execution_identity: false,
     });
     expect(definition.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
@@ -349,6 +350,7 @@ describe('withPermissions', () => {
       update_agent: false,
       update_access_control: false,
       update_approvals: false,
+      update_execution_identity: false,
     });
     expect(definition.access_control?.entries).toEqual([bobEntry]);
   });
@@ -1160,5 +1162,61 @@ describe('accessControlUpdateToEs', () => {
     expect(result.updated_at).toBe(aclUpdateDate.toISOString());
     expect(result.access_control).toEqual(nextAccessControl);
     expect(result.created_by_id).toBe('creator-id');
+  });
+});
+
+describe('service_account_id', () => {
+  const storedDoc = (serviceAccountId?: string): Document => ({
+    _id: 'agent-1',
+    _source: {
+      id: 'agent-1',
+      name: 'Agent 1',
+      type: AgentType.chat,
+      space: 'default',
+      description: 'description',
+      config: { tools: [] },
+      created_at: creationDate,
+      updated_at: updateDate,
+      ...(serviceAccountId ? { service_account_id: serviceAccountId } : {}),
+    },
+  });
+
+  it('reads the bound account from the document', () => {
+    expect(fromEs(storedDoc('kibana/sa-1')).service_account_id).toBe('kibana/sa-1');
+    expect(fromEs(storedDoc()).service_account_id).toBeUndefined();
+  });
+
+  it('writes the account on create only when the request names one', () => {
+    const request: AgentCreateRequest = {
+      id: 'agent-1',
+      name: 'Agent 1',
+      description: 'description',
+      configuration: { tools: [] },
+    };
+    const base = { user: testUser, space: 'default', creationDate: new Date(creationDate) };
+
+    expect(createRequestToEs({ ...base, profile: request })).not.toHaveProperty(
+      'service_account_id'
+    );
+    expect(
+      createRequestToEs({ ...base, profile: { ...request, service_account_id: 'kibana/sa-1' } })
+        .service_account_id
+    ).toBe('kibana/sa-1');
+  });
+
+  it('keeps, replaces or removes the account on update', () => {
+    const currentProps = storedDoc('kibana/sa-1')._source!;
+    const update = (patch: AgentUpdateRequest) =>
+      updateRequestToEs({
+        agentId: 'agent-1',
+        currentProps,
+        update: patch,
+        updateDate: new Date(updateDate),
+        user: testUser,
+      });
+
+    expect(update({ name: 'renamed' }).service_account_id).toBe('kibana/sa-1');
+    expect(update({ service_account_id: 'kibana/sa-2' }).service_account_id).toBe('kibana/sa-2');
+    expect(update({ service_account_id: null })).not.toHaveProperty('service_account_id');
   });
 });

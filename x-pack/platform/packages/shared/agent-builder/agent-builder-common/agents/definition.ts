@@ -109,6 +109,11 @@ export interface AgentDefinition {
    */
   avatar_symbol?: string;
   /**
+   * Service account the agent runs as for every conversation. A reference only: the binding
+   * itself is held by Core's service account workload bindings, never a credential.
+   */
+  service_account_id?: string;
+  /**
    * Configuration associated with this agent
    */
   configuration: AgentConfiguration;

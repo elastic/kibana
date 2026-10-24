@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
@@ -119,6 +120,11 @@ export interface CreateScopedRunnerDeps {
   // other deps
   logger: Logger;
   request: KibanaRequest;
+  /**
+   * The identity conversation writes are attributed to when it differs from the request's
+   * principal, as when the request carries a bound service account's credential.
+   */
+  owner?: UserIdAndName;
   defaultConnectorId?: string;
   /**
    * Optional CPS project routing expression scoping this run's search tools to a set of projects
@@ -283,6 +289,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   const createScopedRunnerWithDeps = async ({
     request,
+    owner,
     agentId,
     defaultConnectorId,
     projectRouting,
@@ -300,6 +307,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     workflowExecutionId,
   }: {
     request: KibanaRequest;
+    owner?: UserIdAndName;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
     agentId?: string;
     defaultConnectorId?: string;
@@ -397,6 +405,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       ...runnerDeps,
       modelProvider,
       request,
+      owner,
       defaultConnectorId,
       projectRouting,
       abortSignal,
@@ -451,6 +460,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runAgent: async (params) => {
       const {
         request,
+        owner,
         defaultConnectorId,
         projectRouting,
         telemetryMetadata,
@@ -469,6 +479,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,
+        owner,
         agentId,
         defaultConnectorId,
         projectRouting,

@@ -1074,3 +1074,180 @@ describe('validateAccessControlEntries', () => {
     expect(Date.parse(String(result[1].added_at))).not.toBeNaN();
   });
 });
+
+describe('AgentClient service account bindings', () => {
+  const securityUser = { ...mockUser, canManageSecurity: true };
+  const serviceAccounts = {
+    isEnabled: jest.fn().mockReturnValue(true),
+    bindWorkload: jest.fn(),
+    unbindWorkload: jest.fn().mockResolvedValue(true),
+    getWorkloadBinding: jest.fn().mockResolvedValue(null),
+  };
+  const toolsService = {
+    getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
+  };
+  const request = {} as never;
+
+  const buildClient = (user: typeof mockUser = mockUser): Promise<AgentClient> => {
+    getUserFromRequestMock.mockResolvedValue(user);
+    return createClient({
+      space: testSpace,
+      logger: loggerMock.create(),
+      request,
+      security: { serviceAccounts } as never,
+      toolsService: toolsService as never,
+      elasticsearch: {
+        client: {
+          asScoped: jest.fn(() => ({ asCurrentUser: {}, asInternalUser: {} })),
+        },
+      } as never,
+    });
+  };
+
+  const buildDoc = (serviceAccountId?: string) => ({
+    _id: 'agent-1',
+    _source: {
+      id: 'agent-1',
+      name: 'Agent 1',
+      type: 'chat',
+      space: testSpace,
+      description: 'desc',
+      created_by_id: mockUser.id,
+      created_by_name: mockUser.username,
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      config: { tools: [] },
+      created_at: '2020-01-01T00:00:00.000Z',
+      updated_at: '2020-01-01T00:00:00.000Z',
+      ...(serviceAccountId ? { service_account_id: serviceAccountId } : {}),
+    },
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    serviceAccounts.isEnabled.mockReturnValue(true);
+    serviceAccounts.getWorkloadBinding.mockResolvedValue(null);
+    serviceAccounts.bindWorkload.mockImplementation(async (_request: unknown, params: any) => ({
+      serviceAccountId: params.serviceAccountId,
+    }));
+    mockEsClient.index.mockResolvedValue({});
+    mockEsClient.delete.mockResolvedValue({ result: 'deleted' });
+  });
+
+  describe('update', () => {
+    it('refuses to bind without manage_security and writes nothing', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
+      const client = await buildClient(mockUser);
+
+      await expect(
+        client.update('agent-1', { service_account_id: 'kibana/sa-1' })
+      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
+
+      expect(serviceAccounts.bindWorkload).not.toHaveBeenCalled();
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('binds in Core, then stores the reference', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
+      const client = await buildClient(securityUser);
+
+      await client.update('agent-1', { service_account_id: 'kibana/sa-1' });
+
+      expect(serviceAccounts.bindWorkload).toHaveBeenCalledWith(request, {
+        workloadType: 'agent',
+        workloadId: 'agent-1',
+        serviceAccountId: 'kibana/sa-1',
+      });
+      expect(mockEsClient.index.mock.calls[0][0].document.service_account_id).toBe('kibana/sa-1');
+    });
+
+    it('keeps the binding on a metadata edit by a caller with manage_security', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+      const client = await buildClient(securityUser);
+
+      await client.update('agent-1', { name: 'renamed' });
+
+      expect(serviceAccounts.bindWorkload).not.toHaveBeenCalled();
+      expect(serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
+      expect(mockEsClient.index.mock.calls[0][0].document.service_account_id).toBe('kibana/sa-1');
+    });
+
+    it('refuses any edit of a bound agent without manage_security', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+      const client = await buildClient(mockUser);
+
+      await expect(client.update('agent-1', { name: 'renamed' })).rejects.toMatchObject({
+        meta: { statusCode: 403 },
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('reports a bound agent as read-only to a caller without manage_security', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+      const client = await buildClient(mockUser);
+
+      const agent = await client.get('agent-1');
+
+      expect(agent.permissions).toMatchObject({
+        update_agent: false,
+        update_access_control: false,
+        update_execution_identity: false,
+      });
+    });
+
+    it('unbinds in Core when the reference is removed', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+      serviceAccounts.getWorkloadBinding.mockResolvedValue({ serviceAccountId: 'kibana/sa-1' });
+      const client = await buildClient(securityUser);
+
+      await client.update('agent-1', { service_account_id: null });
+
+      expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(request, {
+        workloadType: 'agent',
+        workloadId: 'agent-1',
+      });
+      expect(mockEsClient.index.mock.calls[0][0].document).not.toHaveProperty('service_account_id');
+    });
+  });
+
+  describe('concurrent writes', () => {
+    it('writes conditionally and reports a concurrent change as a conflict', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [{ ...buildDoc(), _seq_no: 7, _primary_term: 2 }] },
+      });
+      mockEsClient.index.mockRejectedValueOnce({ statusCode: 409 });
+      const client = await buildClient(securityUser);
+
+      await expect(client.update('agent-1', { name: 'renamed' })).rejects.toMatchObject({
+        meta: { statusCode: 409 },
+      });
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 7, if_primary_term: 2 })
+      );
+    });
+  });
+
+  describe('delete', () => {
+    it('refuses to delete a bound agent without manage_security', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+      const client = await buildClient(mockUser);
+
+      await expect(client.delete({ id: 'agent-1' })).rejects.toMatchObject({
+        meta: { statusCode: 403 },
+      });
+      expect(mockEsClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('unbinds before deleting a bound agent', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+      const client = await buildClient(securityUser);
+
+      await expect(client.delete({ id: 'agent-1' })).resolves.toBe(true);
+
+      expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(request, {
+        workloadType: 'agent',
+        workloadId: 'agent-1',
+      });
+      expect(mockEsClient.delete).toHaveBeenCalled();
+    });
+  });
+});

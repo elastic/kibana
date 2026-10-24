@@ -234,6 +234,7 @@ describe('getAgentPermissions', () => {
       update_agent: true,
       update_access_control: false,
       update_approvals: false,
+      update_execution_identity: false,
     });
   });
 
@@ -249,6 +250,7 @@ describe('getAgentPermissions', () => {
       update_agent: true,
       update_access_control: true,
       update_approvals: true,
+      update_execution_identity: false,
     });
   });
 
@@ -265,6 +267,7 @@ describe('getAgentPermissions', () => {
       update_agent: true,
       update_access_control: false,
       update_approvals: false,
+      update_execution_identity: false,
     });
   });
 });
