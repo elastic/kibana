@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
@@ -382,6 +383,110 @@ describe('score_base_entities', () => {
       );
 
       expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with sampled page bounds', () => {
+    const sampledKeys = ['user:01', 'user:02', 'user:03', 'user:04', 'user:05', 'user:06'];
+    const searchResponse = (fields: Partial<SearchResponse>): SearchResponse => ({
+      took: 3,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: { hits: [] },
+      ...fields,
+    });
+    const range = (bounds: { gte?: string; gt?: string; lte: string }) => ({
+      bool: { filter: [{ range: { 'kibana.alert.entity.id': bounds } }] },
+    });
+
+    beforeEach(() => {
+      jest.mocked(esClient.count).mockResolvedValue({
+        count: 0,
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+      // 20 entities over 40 alerts; six sampled IDs stand for them, so every third closes a page.
+      jest.mocked(esClient.esql.query).mockResolvedValueOnce({
+        columns: [
+          { name: 'entities', type: 'long' },
+          { name: 'alerts', type: 'long' },
+        ],
+        values: [[20, 40]],
+      });
+      jest.mocked(esClient.search).mockResolvedValueOnce(
+        searchResponse({
+          aggregations: {
+            sample: {
+              doc_count: sampledKeys.length,
+              keys: {
+                buckets: sampledKeys.map((entityId) => ({
+                  key: { entity_id: entityId },
+                  doc_count: 1,
+                })),
+              },
+            },
+          },
+        })
+      );
+    });
+
+    const run = (pageSize = 100) =>
+      collectPages(
+        calculateBaseEntityScores({
+          esClient,
+          crudClient,
+          logger,
+          createMissingEntities: false,
+          ...baseParams,
+          pageSize,
+          sampledPages: { targetPageSize: 10, samplesPerPage: 3 },
+        })
+      );
+    // The first ES|QL request is the entity count; the rest score pages.
+    const scoringFilters = () =>
+      jest
+        .mocked(esClient.esql.query)
+        .mock.calls.slice(1)
+        .map(([request]) => request.filter);
+
+    it('scores every page between the sampled bounds, with no discovery query per page', async () => {
+      jest
+        .mocked(esClient.esql.query)
+        .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:02')] })
+        .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:05')] });
+
+      const pages = await run();
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(scoringFilters()).toEqual([
+        range({ gte: 'user:', lte: 'user:03' }),
+        range({ gt: 'user:03', lte: 'user;' }),
+      ]);
+      expect(pages.map((page) => page.scores.map((score) => score.id_value))).toEqual([
+        ['user:02'],
+        ['user:05'],
+      ]);
+    });
+
+    it('scores a page again in two halves, split at its middle sampled ID, when it reaches the row limit', async () => {
+      jest
+        .mocked(esClient.esql.query)
+        .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:01'), esqlRow('user:03')] })
+        .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:01')] })
+        .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:03')] })
+        .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:05')] });
+
+      const pages = await run(2);
+
+      expect(scoringFilters()).toEqual([
+        range({ gte: 'user:', lte: 'user:03' }),
+        range({ gte: 'user:', lte: 'user:01' }),
+        range({ gt: 'user:01', lte: 'user:03' }),
+        range({ gt: 'user:03', lte: 'user;' }),
+      ]);
+      expect(pages.map((page) => page.scores.map((score) => score.id_value))).toEqual([
+        ['user:01', 'user:03'],
+        ['user:05'],
+      ]);
     });
   });
 

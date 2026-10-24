@@ -41,6 +41,8 @@ import {
   isStoredScoreUnchanged,
   readBaseStoreLookup,
 } from './base_store_lookup';
+import type { SampledPagesConfig } from './sampled_page_bounds';
+import { sampleBasePageBounds, splitPoint, typeIdsEnd } from './sampled_page_bounds';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -59,6 +61,11 @@ interface ScoreBaseEntitiesParams {
   createMissingEntities: boolean;
   /** Collects each page's step times; pass one in to read them after the stage. */
   pageTimings?: PageStepTimings;
+  /**
+   * Find every page's bounds from one random sample of the alerts at the start of the stage, instead
+   * of a composite aggregation over every alert for each page. Needs every alert stamped.
+   */
+  sampledPages?: SampledPagesConfig;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
@@ -111,6 +118,8 @@ interface BasePageTask {
   pageNumber: number;
   bounds: EuidPageBounds;
   timer: PageTimer;
+  /** The stage's sampled entity IDs, in order: split points for a page that reaches the row limit. */
+  sampledKeys?: string[];
 }
 
 interface BaseScoringContext {
@@ -140,7 +149,69 @@ const prepareBaseScoring = async ({
  * Finds the base pages, one after another: each composite aggregation needs the previous one's
  * `after_key`. Page `n` covers the EUIDs in `(upper bound of page n - 1, upper bound of page n]`.
  */
-const discoverBasePages = async function* (
+const discoverBasePages = (
+  params: ScoreBaseEntitiesParams,
+  context: BaseScoringContext
+): AsyncGenerator<BasePageTask> =>
+  params.sampledPages && context.stamped
+    ? discoverSampledBasePages(params, params.sampledPages)
+    : discoverBasePagesByComposite(params, context);
+
+/**
+ * Samples the alerts once, then yields the pages between the sampled bounds. The sample's cost is
+ * recorded as page 1's discovery; later pages need none.
+ */
+const discoverSampledBasePages = async function* (
+  {
+    esClient,
+    logger,
+    entityType,
+    alertFilters,
+    alertsIndex,
+    abortSignal,
+    pageTimings = createPageStepTimings(),
+  }: ScoreBaseEntitiesParams,
+  config: SampledPagesConfig
+): AsyncGenerator<BasePageTask> {
+  const firstTimer = pageTimings.startPage();
+  const sample = await firstTimer.time(
+    'discovery',
+    () => sampleBasePageBounds({ esClient, entityType, alertFilters, alertsIndex, config }),
+    (result) => result.countTookMs + result.sampleTookMs
+  );
+  logger.info(
+    `[base] sampled page bounds: entities=${sample.entities}, alerts=${sample.alerts}, ` +
+      `probability=${sample.probability.toFixed(5)}, sampled_ids=${sample.sampledKeys.length}, ` +
+      `pages=${sample.uppers.length + 1}, count_took=${sample.countTookMs}ms, ` +
+      `sample_took=${sample.sampleTookMs}ms in ${sample.sampleRequests} requests`
+  );
+  if (sample.entities === 0) {
+    firstTimer.drop();
+    return;
+  }
+
+  const uppers = [...sample.uppers, typeIdsEnd(entityType)];
+  let lower: string | undefined;
+  for (const [index, upper] of uppers.entries()) {
+    if (abortSignal?.aborted) {
+      if (index === 0) {
+        firstTimer.drop();
+      }
+      logger.info('Base scoring aborted between pages');
+      return;
+    }
+    const bounds = { lower, upper };
+    lower = upper;
+    yield {
+      pageNumber: index + 1,
+      bounds,
+      timer: index === 0 ? firstTimer : pageTimings.startPage(),
+      sampledKeys: sample.sampledKeys,
+    };
+  }
+};
+
+const discoverBasePagesByComposite = async function* (
   {
     esClient,
     logger,
@@ -203,21 +274,55 @@ const scoreBasePage = async (
     calculationRunId,
   }: ScoreBaseEntitiesParams,
   { entityStoreIndex, stamped }: BaseScoringContext,
-  { pageNumber, bounds, timer }: BasePageTask
+  { pageNumber, bounds, timer, sampledKeys }: BasePageTask
 ): Promise<ScoredEntityPage | undefined> => {
-  const { scores, storeLookup, profileSummary } = await scorePageFromAlerts({
-    esClient,
-    entityType,
+  type ScoredRange = Awaited<ReturnType<typeof scorePageFromAlerts>>;
+  // The scoring query keeps at most `pageSize` rows, so a sampled page that reaches it may have lost
+  // its lowest scores: score it again in two halves, split at its middle sampled ID.
+  const scoreRange = async (range: EuidPageBounds, profile: boolean): Promise<ScoredRange> => {
+    const result = await scorePageFromAlerts({
+      esClient,
+      entityType,
+      bounds: range,
+      sampleSize,
+      pageSize,
+      alertsIndex,
+      entityStoreIndex,
+      alertFilters,
+      stamped,
+      profile,
+      timer,
+    });
+    if (result.scores.length < pageSize || !sampledKeys) {
+      return result;
+    }
+    const middle = splitPoint(sampledKeys, range);
+    if (middle === undefined) {
+      logger.warn(
+        `[base][page:${pageNumber}] reached ${pageSize} rows with no sampled ID to split on; ` +
+          'its lowest scores may be missing'
+      );
+      return result;
+    }
+    logger.info(`[base][page:${pageNumber}] reached ${pageSize} rows; scoring it in two halves`);
+    const left = await scoreRange({ lower: range.lower, upper: middle }, false);
+    const right = await scoreRange({ lower: middle, upper: range.upper }, false);
+    return {
+      scores: [...left.scores, ...right.scores],
+      storeLookup: {
+        entities: new Map([...left.storeLookup.entities, ...right.storeLookup.entities]),
+        storedScores: new Map([
+          ...left.storeLookup.storedScores,
+          ...right.storeLookup.storedScores,
+        ]),
+      },
+      profileSummary: left.profileSummary,
+    };
+  };
+  const { scores, storeLookup, profileSummary } = await scoreRange(
     bounds,
-    sampleSize,
-    pageSize,
-    alertsIndex,
-    entityStoreIndex,
-    alertFilters,
-    stamped,
-    profile: shouldProfilePage(pageNumber),
-    timer,
-  });
+    shouldProfilePage(pageNumber)
+  );
   if (profileSummary) {
     logger.info(`[base][page:${pageNumber}] esql profile ${JSON.stringify(profileSummary)}`);
   }

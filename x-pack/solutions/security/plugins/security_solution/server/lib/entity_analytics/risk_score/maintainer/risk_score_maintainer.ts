@@ -594,6 +594,9 @@ const executeEntityTypeRun = async ({
           skipUnchangedStoreWrites: true,
           entityStoreWriteChunks: 4,
           pagesInFlight: 2,
+          // Test setting: page bounds from one sample. A page that reaches the 10k row limit is only
+          // found after scoring, so pages aim at 8k, where that practically never happens.
+          sampledPages: { targetPageSize: 8000, samplesPerPage: 250 },
           pageTimings: basePageTimings,
         }),
     });
