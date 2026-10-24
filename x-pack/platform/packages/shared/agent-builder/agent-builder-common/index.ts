@@ -358,6 +358,7 @@ export {
   type RoundInterruptedEventData,
   type RoundInterruptedEvent,
   type SlackPayload,
+  type SlackPayloadAsset,
   type SurfacePayload,
   type ToolCallProgress,
   isToolCallEvent,

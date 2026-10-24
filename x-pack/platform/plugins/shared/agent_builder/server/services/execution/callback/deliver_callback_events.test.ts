@@ -415,9 +415,37 @@ describe('deliverCallbackEvents', () => {
 
     expect(renderPayload).toHaveBeenCalledWith(expect.anything(), {
       originType: ConversationOriginType.Slack,
+      assets: false,
       request,
       spaceId: 'space-1',
     });
+
+    renderPayload.mockRestore();
+  });
+
+  it('renders the surface payload with assets when the callback uploads them', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
+    const execution = createSlackExecution();
+
+    await deliverCallbackEvents({
+      execution: {
+        ...execution,
+        agentParams: {
+          ...execution.agentParams,
+          callback: { url: callbackUrl, surface_assets: true },
+        },
+      } as AgentExecution,
+      events$: of(createRoundCompleteEvent('Hello')),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    expect(renderPayload).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ assets: true })
+    );
 
     renderPayload.mockRestore();
   });
