@@ -114,9 +114,14 @@ describe('decisionTreeReinforceStepDefinition', () => {
 
     const output = await run({});
 
-    expect(JSON.parse(output.output.submissions_json)).toEqual([
-      { symptom_trees: [{ tree_id: 'symptom:eql-slo-burn-rate', merged_nodes: [merged] }] },
-    ]);
+    expect(output).toEqual({
+      output: {
+        message: 'Persisted 1 tree',
+        submissions_json: JSON.stringify([
+          { symptom_trees: [{ tree_id: 'symptom:eql-slo-burn-rate', merged_nodes: [merged] }] },
+        ]),
+      },
+    });
   });
 
   it('withholds the learning tools on an initial investigation', async () => {
