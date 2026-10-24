@@ -489,6 +489,16 @@ describe('ConversationInput', () => {
       expect(editorController.focus).not.toHaveBeenCalled();
       jest.useRealTimers();
     });
+
+    // https://github.com/elastic/kibana/issues/298539
+    it('does not take focus from the host page when autoFocus is disabled', () => {
+      jest.useFakeTimers();
+      renderInput(<ConversationInput autoFocus={false} />);
+
+      jest.advanceTimersByTime(200);
+      expect(editorController.focus).not.toHaveBeenCalled();
+      jest.useRealTimers();
+    });
   });
 
   describe('sending a message without the agent', () => {

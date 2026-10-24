@@ -29,12 +29,20 @@ jest.mock('../application/hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToAgentBuilderUrl: mockNavigateToAgentBuilderUrl }),
 }));
 
+const mockConversationInputProps = jest.fn();
+
 jest.mock('../application/components/conversations/conversation_input/conversation_input', () => ({
-  ConversationInput: ({ onSubmitOverride }: { onSubmitOverride: (message: string) => void }) => (
-    <button type="button" onClick={() => onSubmitOverride('Build a workflow')}>
-      {'Submit'}
-    </button>
-  ),
+  ConversationInput: (props: {
+    onSubmitOverride: (message: string) => void;
+    autoFocus?: boolean;
+  }) => {
+    mockConversationInputProps(props);
+    return (
+      <button type="button" onClick={() => props.onSubmitOverride('Build a workflow')}>
+        {'Submit'}
+      </button>
+    );
+  },
 }));
 
 const renderInput = (onSubmit?: (message: string, attachments: ConversationAttachment[]) => void) =>
@@ -70,5 +78,14 @@ describe('EmbeddableConversationInputInternal', () => {
       initialMessage: 'Build a workflow',
       attachments: mockAttachments,
     });
+  });
+
+  // https://github.com/elastic/kibana/issues/298539
+  it('does not auto-focus, so the embedded input cannot take focus from the host page', () => {
+    renderInput();
+
+    expect(mockConversationInputProps).toHaveBeenCalledWith(
+      expect.objectContaining({ autoFocus: false })
+    );
   });
 });
