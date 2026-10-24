@@ -16,25 +16,29 @@ import {
   type TimeoutOptions,
 } from './base';
 
+const APP_BOOT_TIMEOUT = 45_000;
+
 /** Navigation, query-mode switch, wait helpers, and chrome app-menu actions. */
 export abstract class DiscoverNavigation extends DiscoverAppBase {
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
     await this.page.gotoApp(
       'discover',
-      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined,
+      // Kibana's bootstrap defers `load` past app mount; let `dscPage` own the readiness budget.
+      { waitUntil: 'domcontentloaded' }
     );
-    await this.waitForDiscoverPage();
+    await this.waitForDiscoverPage({ timeout: APP_BOOT_TIMEOUT });
     if (options.queryMode === 'esql') {
       // Discover discards the seeded mode unless it matches the resolved `discover.isEsqlDefault`.
       await this.selectTextBaseLang({ timeout: 30_000 });
     }
   }
 
-  protected async waitForDiscoverPage() {
+  protected async waitForDiscoverPage({ timeout = 30_000 }: TimeoutOptions = {}) {
     // Discover initialization in serverless CI environments regularly exceeds the default 10s,
     // likely due to additional plugin overhead and root profile resolution.
-    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout });
   }
 
   protected async hideTabPreview() {
