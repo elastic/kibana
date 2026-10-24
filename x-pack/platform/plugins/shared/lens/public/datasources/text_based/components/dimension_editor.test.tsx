@@ -25,10 +25,12 @@ jest.mock('./fetch_fields_from_esql_expression', () => ({
 }));
 
 let capturedOnChoose: FieldSelectProps['onChoose'] | undefined;
+let capturedSelectedField: FieldSelectProps['selectedField'];
 
 jest.mock('./field_select', () => ({
   FieldSelect: (props: FieldSelectProps) => {
     capturedOnChoose = props.onChoose;
+    capturedSelectedField = props.selectedField;
     return <div data-test-subj="text-based-dimension-field" />;
   },
 }));
@@ -103,6 +105,7 @@ describe('TextBasedDimensionEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnChoose = undefined;
+    capturedSelectedField = undefined;
 
     fetchFieldsFromESQLExpression.mockResolvedValue({
       columns: [
@@ -110,6 +113,85 @@ describe('TextBasedDimensionEditor', () => {
         { id: 'field2', name: 'Field Two', meta: { type: 'number' } },
       ],
     });
+  });
+
+  const StatefulEditor = (props: TextBasedDimensionEditorProps) => {
+    const [state, setState] = React.useState(props.state);
+    return <TextBasedDimensionEditor {...props} state={state} setState={setState} />;
+  };
+
+  it('starts reference dimensions with query field selection and no method switch', async () => {
+    render(<StatefulEditor {...defaultProps} enableFormatSelector={false} supportStaticValue />);
+    await waitToLoad();
+    expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('lns-indexPattern-static_value-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
+  });
+
+  it('keeps an existing static column editable without a method switch', async () => {
+    const setState = jest.fn();
+    fetchFieldsFromESQLExpression.mockResolvedValue({
+      columns: [
+        { id: 'a', name: 'a', meta: { type: 'number' } },
+        { id: 'b', name: 'b', meta: { type: 'number' } },
+      ],
+    });
+    render(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        state={stateWithColumn({
+          fieldName: '42',
+          operationType: 'static_value',
+          params: { value: '42' },
+        })}
+        setState={setState}
+        supportStaticValue
+        enableFormatSelector={false}
+      />
+    );
+    await waitToLoad();
+    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
+    expect(screen.queryByTestId('text-based-dimension-field')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
+    expect(setState).not.toHaveBeenCalled();
+  });
+
+  it('preserves an existing static value when query fields finish loading', async () => {
+    render(
+      <StatefulEditor
+        {...defaultProps}
+        state={stateWithColumn({
+          fieldName: '42',
+          operationType: 'static_value',
+          params: { value: '42' },
+        })}
+        supportStaticValue
+        enableFormatSelector={false}
+      />
+    );
+    await waitToLoad();
+    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
+    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
+  });
+
+  it('keeps query dimensions field-based even when static values are supported', async () => {
+    const setState = jest.fn();
+    render(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        state={stateWithColumn()}
+        enableFormatSelector={false}
+        supportStaticValue
+        setState={setState}
+        activeData={{ layer1: { type: 'datatable', columns: [], rows: [{ dim1: 42 }] } }}
+      />
+    );
+    await waitToLoad();
+    expect(capturedSelectedField?.fieldName).toBe('bytes');
+    expect(screen.queryByTestId('lns-indexPattern-static_value-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
+    expect(setState).not.toHaveBeenCalled();
   });
 
   it('renders correctly and fetches columns on mount', async () => {

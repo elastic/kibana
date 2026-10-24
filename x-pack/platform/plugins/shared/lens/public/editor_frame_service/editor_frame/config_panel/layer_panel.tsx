@@ -356,11 +356,11 @@ export function LayerPanel(props: LayerPanelProps) {
         return;
       }
 
-      const reconciledColumns = reconcileQueryColumns(
-        layer.columns,
-        columns,
-        new Set(allAccessors)
-      );
+      const queryColumns = reconcileQueryColumns(layer.columns, columns, new Set(allAccessors));
+      const reconciledColumns =
+        layerType === LENS_LAYER_TYPES.REFERENCELINE
+          ? queryColumns.filter(({ columnId }) => allAccessors.includes(columnId))
+          : queryColumns;
       const reconciledColumnIds = new Set(reconciledColumns.map(({ columnId }) => columnId));
       const hasMissingDimension = allAccessors.some(
         (columnId) => !reconciledColumnIds.has(columnId)
@@ -409,7 +409,7 @@ export function LayerPanel(props: LayerPanelProps) {
         layers: updatedLayers,
       });
     },
-    [allAccessors, datasourceId, layerId, textBasedDatasourceState, updateDatasource]
+    [allAccessors, datasourceId, layerId, layerType, textBasedDatasourceState, updateDatasource]
   );
 
   const visualizationLayerSettings = useMemo(

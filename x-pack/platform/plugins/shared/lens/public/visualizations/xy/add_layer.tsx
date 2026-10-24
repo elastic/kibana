@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import type { AddLayerFunction, VisualizationLayerDescription } from '@kbn/lens-common';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -38,11 +39,13 @@ export interface AddLayerButtonProps {
   isInlineEditing?: boolean;
   /** Hides the annotation library option (ES|QL charts do not support data-view-based library groups) */
   hideAnnotationLibrary?: boolean;
+  isEsqlChart?: boolean;
 }
 
 export enum AddLayerPanelType {
   main = 'main',
   selectAnnotationMethod = 'selectAnnotationMethod',
+  selectReferenceSource = 'selectReferenceSource',
   compatibleVisualizationTypes = 'compatibleVisualizationTypes',
 }
 
@@ -53,6 +56,7 @@ export function AddLayerButton({
   eventAnnotationService,
   isInlineEditing,
   hideAnnotationLibrary,
+  isEsqlChart,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -180,6 +184,16 @@ export function AddLayerButton({
                   }
                   return dataPanel(props);
                 }
+                if (type === LayerTypes.REFERENCELINE && isEsqlChart) {
+                  return {
+                    panel: AddLayerPanelType.selectReferenceSource,
+                    toolTipContent,
+                    disabled,
+                    name: label,
+                    icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
+                    'data-test-subj': `lnsLayerAddButton-${type}`,
+                  };
+                }
                 return {
                   toolTipContent,
                   disabled,
@@ -192,6 +206,46 @@ export function AddLayerButton({
                   },
                 };
               }),
+            },
+            {
+              id: AddLayerPanelType.selectReferenceSource,
+              title: i18n.translate('xpack.lens.configPanel.selectReferenceSourceTitle', {
+                defaultMessage: 'Reference lines',
+              }),
+              items: [
+                {
+                  name: i18n.translate('xpack.lens.configPanel.staticReferenceLinesButtonLabel', {
+                    defaultMessage: 'Static values',
+                  }),
+                  'data-test-subj': 'lnsReferenceLineLayer_static',
+                  onClick: () => {
+                    addLayer(
+                      LayerTypes.REFERENCELINE,
+                      undefined,
+                      false,
+                      undefined,
+                      LENS_DATASOURCE_ID.FORM_BASED
+                    );
+                    toggleLayersChoice(false);
+                  },
+                },
+                {
+                  name: i18n.translate('xpack.lens.configPanel.esqlReferenceLinesButtonLabel', {
+                    defaultMessage: 'ES|QL query',
+                  }),
+                  'data-test-subj': 'lnsReferenceLineLayer_esql',
+                  onClick: () => {
+                    addLayer(
+                      LayerTypes.REFERENCELINE,
+                      undefined,
+                      true,
+                      undefined,
+                      LENS_DATASOURCE_ID.TEXT_BASED
+                    );
+                    toggleLayersChoice(false);
+                  },
+                },
+              ],
             },
             {
               id: AddLayerPanelType.selectAnnotationMethod,

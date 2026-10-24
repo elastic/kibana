@@ -604,8 +604,8 @@ describe('XY', () => {
           expect(result.success).toBe(false);
         });
 
-        it('should reject ES|QL column-based reference line layers on ES|QL charts', () => {
-          const result = xyConfigSchema.safeParse({
+        it('should round-trip ES|QL column-based reference line layers', () => {
+          validator.xy.fromApi({
             type: 'xy',
             title: 'ES|QL chart with ES|QL reference line',
             layers: [
@@ -613,6 +613,121 @@ describe('XY', () => {
               {
                 type: 'reference_lines',
                 data_source: { type: 'esql', query: 'FROM logs | STATS threshold = AVG(bytes)' },
+                ignore_global_filters: false,
+                sampling: 1,
+                thresholds: [{ column: 'threshold' }],
+              },
+            ],
+          });
+        });
+
+        it('should round-trip static and ES|QL reference lines in separate layers', () => {
+          validator.xy.fromApi({
+            type: 'xy',
+            title: 'Mixed reference lines',
+            layers: [
+              esqlDataLayer,
+              {
+                type: 'reference_lines',
+                data_source: { type: 'esql', query: 'FROM logs | STATS threshold = AVG(bytes)' },
+                ignore_global_filters: false,
+                sampling: 1,
+                thresholds: [{ column: 'threshold' }],
+              },
+              {
+                type: 'reference_lines',
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'logs-*' },
+                ignore_global_filters: false,
+                sampling: 1,
+                thresholds: [
+                  {
+                    operation: 'static_value',
+                    value: 42,
+                    format: { type: 'bytes', decimals: 1 },
+                  },
+                ],
+              },
+            ],
+          });
+        });
+      });
+
+      describe('reference line source boundaries', () => {
+        const esqlDataLayer = {
+          type: 'bar',
+          data_source: {
+            type: 'esql',
+            query: 'FROM logs | STATS count = COUNT(*) BY buckets = BUCKET(3 hours, @timestamp)',
+          },
+          ignore_global_filters: false,
+          sampling: 1,
+          x: { column: 'buckets' },
+          y: [{ column: 'count' }],
+        };
+
+        it.each([
+          { thresholds: [{ operation: 'static_value', value: 42 }] },
+          { thresholds: [{ column: 'threshold' }, { operation: 'static_value', value: 42 }] },
+        ])('rejects static thresholds in an ES|QL-backed layer: $thresholds', ({ thresholds }) => {
+          const result = xyConfigSchema.safeParse({
+            type: 'xy',
+            title: 'Invalid ES|QL reference line source',
+            layers: [
+              esqlDataLayer,
+              {
+                type: 'reference_lines',
+                data_source: { type: 'esql', query: 'FROM logs | STATS threshold = AVG(bytes)' },
+                ignore_global_filters: false,
+                sampling: 1,
+                thresholds,
+              },
+            ],
+          });
+          expect(result.success).toBe(false);
+        });
+
+        it('rejects exporting static values from a text-based reference line layer', () => {
+          const builder = new LensConfigBuilder(undefined, true);
+          const config = xyConfigSchema.parse({
+            type: 'xy',
+            title: 'Query reference line',
+            layers: [
+              esqlDataLayer,
+              {
+                type: 'reference_lines',
+                data_source: { type: 'esql', query: 'FROM logs | STATS threshold = AVG(bytes)' },
+                thresholds: [{ column: 'threshold' }],
+              },
+            ],
+          });
+          const lensState = builder.fromAPIFormat(config);
+          let staticColumns = 0;
+          for (const layer of Object.values(
+            lensState.state.datasourceStates.textBased?.layers ?? {}
+          )) {
+            layer.columns = layer.columns.map((column) => {
+              if (column.fieldName !== 'threshold') return column;
+              staticColumns++;
+              return { ...column, operationType: 'static_value', params: { value: '42' } };
+            });
+          }
+          expect(staticColumns).toBe(1);
+          expect(() => builder.toAPIFormat(lensState)).toThrow(
+            'ES|QL reference line layers only support query column thresholds'
+          );
+        });
+
+        it('rejects query columns in a static reference line layer', () => {
+          const result = xyConfigSchema.safeParse({
+            type: 'xy',
+            title: 'Invalid static reference line source',
+            layers: [
+              esqlDataLayer,
+              {
+                type: 'reference_lines',
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'logs-*' },
+                ignore_global_filters: false,
+                sampling: 1,
                 thresholds: [{ column: 'threshold' }],
               },
             ],

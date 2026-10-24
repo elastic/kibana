@@ -15,6 +15,7 @@ import {
   MOVING_AVERAGE_WINDOW_DEFAULT_VALUE,
 } from '@kbn/lens-formula-docs';
 import type { FormBasedLayer, MovingAverageIndexPatternColumn } from '@kbn/lens-common';
+import { isValidNumber } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
 import {
   buildLabelFunction,
@@ -26,7 +27,7 @@ import {
   getReferencedColumnLabel,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 import type { OperationDefinition, ParamEditorProps } from '..';
 
 const ofName = buildLabelFunction((name?: string) => {

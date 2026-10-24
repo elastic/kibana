@@ -7,16 +7,26 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSpacer, useEuiTheme, EuiText, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSpacer,
+  useEuiTheme,
+  EuiText,
+  EuiSwitch,
+  EuiFieldNumber,
+} from '@elastic/eui';
 import { type ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { NameInput } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { css } from '@emotion/react';
 import type {
   TextBasedPrivateState,
   TextBasedLayer,
+  TextBasedLayerColumn,
   DatasourceDimensionEditorProps,
   DataType,
 } from '@kbn/lens-common';
+import { DEFAULT_STATIC_VALUE, staticValueOperationName } from '@kbn/lens-common';
 import {
   mergeLayer,
   updateColumnFormat,
@@ -24,6 +34,9 @@ import {
   isNotNumeric,
   isNumeric,
   updateColumnDropPartials,
+  isStaticValueColumn,
+  isValidStaticValue,
+  removeStaticValue,
 } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
@@ -53,6 +66,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     enableFormatSelector,
     isMetricDimension,
     filterOperations,
+    supportStaticValue,
   } = props;
 
   // Extract the primitives the fetch effect actually depends on so that a
@@ -95,7 +109,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             meta: col?.meta ?? { type: 'number' },
             variable: col.variable,
             compatible:
-              isMetricDimension && hasNumberTypeColumns
+              supportStaticValue || (isMetricDimension && hasNumberTypeColumns)
                 ? filterOperations({
                     dataType: col?.meta?.type as DataType,
                     isBucketed: Boolean(isNotNumeric(col)),
@@ -130,6 +144,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     timeFieldName,
     isMetricDimension,
     filterOperations,
+    supportStaticValue,
   ]);
 
   const selectedField = useMemo(() => {
@@ -169,7 +184,62 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     [columnId, layerId, state.layers, updateLayer]
   );
 
+  const isStatic = Boolean(selectedField && isStaticValueColumn(selectedField));
+  const setStaticValue = useCallback(
+    (value: string | undefined) => {
+      // Same validation as the form-based static value editor.
+      if (!isValidStaticValue(value)) return;
+      if (
+        selectedField &&
+        isStaticValueColumn(selectedField) &&
+        selectedField.params?.value === value
+      )
+        return;
+      setState((previousState) => {
+        const layer = previousState.layers[layerId];
+        const previousColumn = layer.columns.find((column) => column.columnId === columnId);
+        const column: TextBasedLayerColumn = {
+          ...previousColumn,
+          columnId,
+          fieldName: value,
+          label: previousColumn?.customLabel ? previousColumn.label : value,
+          variable: undefined,
+          operationType: staticValueOperationName,
+          params: { ...previousColumn?.params, value },
+          meta: { type: 'number' as const },
+        };
+        return mergeLayer({
+          state: previousState,
+          layerId,
+          newLayer: {
+            ...layer,
+            columns: previousColumn
+              ? layer.columns.map((existing) =>
+                  existing.columnId === columnId ? column : existing
+                )
+              : [...layer.columns, column],
+          },
+        });
+      });
+    },
+    [columnId, layerId, selectedField, setState]
+  );
   const activeTable = props.activeData?.[layerId];
+  const activeValue = activeTable?.rows[0]?.[columnId];
+  const { inputValue: staticInputValue, handleInputChange: handleStaticInputChange } =
+    useDebouncedValue<string | undefined>(
+      {
+        value:
+          selectedField && isStaticValueColumn(selectedField)
+            ? selectedField.params?.value
+            : typeof activeValue === 'number'
+            ? String(activeValue)
+            : String(DEFAULT_STATIC_VALUE),
+        onChange: setStaticValue,
+      },
+      { allowFalsyValue: true }
+    );
+  const isStaticInputValid = isValidStaticValue(staticInputValue);
   const activeColumnMeta = activeTable?.columns.find((col) => col.id === columnId)?.meta;
   const isNumericColumn =
     activeColumnMeta != null
@@ -182,76 +252,113 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   return (
     <>
       <div className="lnsIndexPatternDimensionEditor--padded">
-        <EuiFormRow
-          data-test-subj="text-based-languages-field-selection-row"
-          label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
-            defaultMessage: 'Field',
-          })}
-          fullWidth
-        >
-          <FieldSelect
-            data-test-subj="text-based-dimension-field"
-            existingFields={allColumns ?? []}
-            selectedField={selectedField}
-            onChoose={(choice) => {
-              const column = allColumns?.find((f) => f.name === choice.field);
-              const newColumn = {
-                columnId: props.columnId,
-                fieldName: choice.field,
-                meta: column?.meta,
-                variable: column?.variable,
-                label: choice.field,
-                ...(isMetricDimension && { inMetricDimension: true }),
-              };
-              return props.setState(
-                !selectedField
-                  ? {
-                      ...props.state,
-                      layers: {
-                        ...props.state.layers,
-                        [props.layerId]: {
-                          ...props.state.layers[props.layerId],
-                          columns: [...props.state.layers[props.layerId].columns, newColumn],
-                        },
-                      },
-                    }
-                  : {
-                      ...props.state,
-                      layers: {
-                        ...props.state.layers,
-                        [props.layerId]: {
-                          ...props.state.layers[props.layerId],
-                          columns: props.state.layers[props.layerId].columns.map((col) => {
-                            if (col.columnId !== props.columnId) {
-                              return col;
-                            }
+        {isStatic ? (
+          <EuiFormRow
+            label={
+              props.paramEditorCustomProps?.labels?.[0] ??
+              i18n.translate('xpack.lens.textBasedLanguages.referenceValueLabel', {
+                defaultMessage: 'Reference line value',
+              })
+            }
+            fullWidth
+            isInvalid={!isStaticInputValid}
+            error={
+              !isStaticInputValid &&
+              i18n.translate('xpack.lens.textBasedLanguages.staticValueError', {
+                defaultMessage: 'The static value of {value} is not a valid number',
+                values: { value: staticInputValue ?? "''" },
+              })
+            }
+          >
+            <EuiFieldNumber
+              isInvalid={!isStaticInputValid}
+              value={staticInputValue ?? ''}
+              onChange={(event) => handleStaticInputChange(event.currentTarget.value)}
+              data-test-subj="lns-indexPattern-static_value-input"
+              compressed
+              fullWidth
+              step="any"
+            />
+          </EuiFormRow>
+        ) : (
+          <>
+            <EuiFormRow
+              data-test-subj="text-based-languages-field-selection-row"
+              label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
+                defaultMessage: 'Field',
+              })}
+              fullWidth
+            >
+              <FieldSelect
+                key={selectedField?.fieldName ?? columnId}
+                data-test-subj="text-based-dimension-field"
+                existingFields={allColumns ?? []}
+                selectedField={
+                  selectedField && isStaticValueColumn(selectedField) ? undefined : selectedField
+                }
+                onChoose={(choice) => {
+                  const column = allColumns?.find((f) => f.name === choice.field);
+                  const newColumn = {
+                    columnId: props.columnId,
+                    fieldName: choice.field,
+                    meta: column?.meta,
+                    variable: column?.variable,
+                    label: choice.field,
+                    ...(isMetricDimension && { inMetricDimension: true }),
+                  };
+                  return props.setState(
+                    !selectedField
+                      ? {
+                          ...props.state,
+                          layers: {
+                            ...props.state.layers,
+                            [props.layerId]: {
+                              ...props.state.layers[props.layerId],
+                              columns: [...props.state.layers[props.layerId].columns, newColumn],
+                            },
+                          },
+                        }
+                      : {
+                          ...props.state,
+                          layers: {
+                            ...props.state.layers,
+                            [props.layerId]: {
+                              ...props.state.layers[props.layerId],
+                              columns: props.state.layers[props.layerId].columns.map((col) => {
+                                if (col.columnId !== props.columnId) {
+                                  return col;
+                                }
 
-                            const isNewColumnNumeric = column?.meta?.type === 'number';
-                            const shouldKeepCustomLabel = Boolean(col.customLabel);
+                                const isNewColumnNumeric = column?.meta?.type === 'number';
+                                const shouldKeepCustomLabel = Boolean(col.customLabel);
 
-                            return {
-                              ...col,
-                              fieldName: choice.field,
-                              meta: column?.meta,
-                              variable: column?.variable,
-                              // If the new column is not numeric, remove the format selector params
-                              ...(!isNewColumnNumeric && col.params ? { params: undefined } : {}),
-                              // If the previous column has a custom label, keep it
-                              ...(shouldKeepCustomLabel
-                                ? {}
-                                : {
-                                    label: choice.field,
-                                    customLabel: false,
-                                  }),
-                            };
-                          }),
-                        },
-                      },
-                    }
-              );
-            }}
-          />
-        </EuiFormRow>
+                                return {
+                                  ...removeStaticValue(col),
+                                  fieldName: choice.field,
+                                  meta: column?.meta,
+                                  variable: column?.variable,
+                                  // If the new column is not numeric, remove the format selector params
+                                  ...(!isNewColumnNumeric && col.params
+                                    ? { params: undefined }
+                                    : {}),
+                                  // If the previous column has a custom label, keep it
+                                  ...(shouldKeepCustomLabel
+                                    ? {}
+                                    : {
+                                        label: choice.field,
+                                        customLabel: false,
+                                      }),
+                                };
+                              }),
+                            },
+                          },
+                        }
+                  );
+                }}
+              />
+            </EuiFormRow>
+          </>
+        )}
         {selectedField && isDateHistogramColumn && (
           <>
             <EuiSpacer size="s" />

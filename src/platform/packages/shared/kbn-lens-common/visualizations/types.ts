@@ -28,6 +28,7 @@ import type {
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { LENS_COLLAPSE_FUNCTIONS } from './constants';
+import type { LensDatasourceId } from '../embeddable/types';
 import {
   type LENS_CATEGORY_DISPLAY,
   type LENS_LEGEND_DISPLAY,
@@ -109,6 +110,7 @@ interface AddLayerButtonProps<T> {
   isInlineEditing?: boolean;
   /** Hides annotation library options (used for ES|QL charts where library groups are data-view-based) */
   hideAnnotationLibrary?: boolean;
+  isEsqlChart?: boolean;
 }
 
 interface VisualizationStateFromContextChangeProps<T = unknown> {
@@ -120,7 +122,8 @@ export type AddLayerFunction<T = unknown> = (
   layerType: LensLayerType,
   extraArg?: T,
   ignoreInitialValues?: boolean,
-  seriesType?: SeriesType
+  seriesType?: SeriesType,
+  datasourceId?: LensDatasourceId
 ) => void;
 
 export interface VisualizationLayerDescription {

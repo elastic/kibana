@@ -121,11 +121,14 @@ export interface FormBasedPrivateState {
 export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
+  /** Mirrors form-based static value columns; the value lives in `params.value`. */
+  operationType?: 'static_value';
   label?: string;
   customLabel?: boolean;
   params?: {
     format?: ValueFormatConfig;
     dropPartials?: boolean;
+    value?: string;
   };
   meta?: DatatableColumn['meta'];
   inMetricDimension?: boolean;

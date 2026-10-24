@@ -20,5 +20,9 @@ export function DimensionContainer({
   panelRef: (el: HTMLDivElement) => void;
   isInlineEditing?: boolean;
 }) {
-  return <FlyoutContainer {...props}>{panel}</FlyoutContainer>;
+  return (
+    <FlyoutContainer {...props} dataTestSubj="lnsDimensionContainer">
+      {panel}
+    </FlyoutContainer>
+  );
 }

@@ -10,7 +10,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
 import type { XYVisualizationState } from './types';
 import { Position } from '@elastic/charts';
-import { LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 
@@ -106,5 +106,54 @@ describe.skip('AddLayerButton', () => {
     await waitForSeriesOptions();
     clickSeriesOptionsButton('line');
     expect(addLayer).toHaveBeenCalledWith(LayerTypes.DATA, undefined, undefined, 'line');
+  });
+});
+
+describe('Reference layer source selection', () => {
+  const renderReferenceMenu = (isEsqlChart: boolean) => {
+    const addLayer = jest.fn();
+    render(
+      <AddLayerButton
+        state={{
+          legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'show',
+          preferredSeriesType: 'bar',
+          layers: [],
+        }}
+        supportedLayers={[{ type: LayerTypes.REFERENCELINE, label: 'Reference lines' }]}
+        addLayer={addLayer}
+        eventAnnotationService={eventAnnotationServiceMock}
+        isEsqlChart={isEsqlChart}
+      />
+    );
+    fireEvent.click(screen.getByLabelText('Add layer'));
+    fireEvent.click(screen.getByTestId('lnsLayerAddButton-referenceLine'));
+    return addLayer;
+  };
+
+  it.each([
+    ['static', LENS_DATASOURCE_ID.FORM_BASED, false],
+    ['esql', LENS_DATASOURCE_ID.TEXT_BASED, true],
+  ] as const)(
+    'creates a %s reference layer on ES|QL charts',
+    async (source, datasourceId, ignoreInitialValues) => {
+      const addLayer = renderReferenceMenu(true);
+      expect(addLayer).not.toHaveBeenCalled();
+      fireEvent.click(await screen.findByTestId(`lnsReferenceLineLayer_${source}`));
+      expect(addLayer).toHaveBeenCalledWith(
+        LayerTypes.REFERENCELINE,
+        undefined,
+        ignoreInitialValues,
+        undefined,
+        datasourceId
+      );
+    }
+  );
+
+  it('keeps direct reference-layer creation on form-based charts', () => {
+    const addLayer = renderReferenceMenu(false);
+    expect(addLayer).toHaveBeenCalledWith(LayerTypes.REFERENCELINE);
+    expect(screen.queryByTestId('lnsReferenceLineLayer_static')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lnsReferenceLineLayer_esql')).not.toBeInTheDocument();
   });
 });

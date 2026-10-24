@@ -751,9 +751,9 @@ const referenceLineLayerSchemaNoESQL = lazySchema(() =>
 );
 
 /**
- * Reference line layer for ES|QL queries with column-based thresholds
+ * Reference line layer with thresholds from ES|QL query columns.
  */
-const referenceLineLayerSchemaESQL = lazySchema(() =>
+const esqlReferenceLineLayerSchema = lazySchema(() =>
   z
     .object({
       ...layerSettingsSchema.shape,
@@ -768,8 +768,8 @@ const referenceLineLayerSchemaESQL = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyReferenceLineLayerESQL',
-      title: 'Reference Line Layer (ES|QL)',
-      description: 'Reference line layer for ES|QL queries',
+      title: 'ES|QL Reference Line Layer',
+      description: 'Reference lines defined by numeric columns from a layer-specific ES|QL query.',
     })
 );
 
@@ -997,12 +997,9 @@ const annotationLayerESQLSchema = lazySchema(() =>
 );
 
 /**
- * Reference line layer for ES|QL charts: static value thresholds only.
- * Field-based operations require a data view and are hidden in the ES|QL UI,
- * so the API surface matches. Relaxing this constraint later is an additive,
- * non-breaking change.
+ * Static-value reference line layer for ES|QL charts.
  */
-const referenceLineLayerESQLStaticSchema = lazySchema(() =>
+const staticReferenceLineLayerSchemaForESQLCharts = lazySchema(() =>
   z
     .object({
       ...layerSettingsSchema.shape,
@@ -1017,15 +1014,19 @@ const referenceLineLayerESQLStaticSchema = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyReferenceLineLayerESQLStatic',
-      title: 'Reference Line Layer (ES|QL, static values)',
-      description:
-        'Reference line layer with static value thresholds. Field-based threshold operations are not supported on ES|QL charts yet.',
+      title: 'Static Reference Line Layer for ES|QL Charts',
+      description: 'Reference lines defined by constant numeric values on ES|QL charts.',
     })
 );
 
 const xyLayerUnionESQL = lazySchema(() =>
   z
-    .union([xyDataLayerSchemaESQL, referenceLineLayerESQLStaticSchema, annotationLayerESQLSchema])
+    .union([
+      xyDataLayerSchemaESQL,
+      staticReferenceLineLayerSchemaForESQLCharts,
+      esqlReferenceLineLayerSchema,
+      annotationLayerESQLSchema,
+    ])
     .meta({
       id: 'visXyLayersESQL',
       description: 'XY chart layer types for ES|QL queries.',
@@ -1089,10 +1090,7 @@ export type XYConfigInput = z.input<typeof xyConfigSchema>;
 export type DataLayerTypeESQL = z.output<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = z.output<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
-/**
- * @deprecated ES|QL reference lines are not yet supported
- */
-export type ReferenceLineLayerTypeESQL = z.output<typeof referenceLineLayerSchemaESQL>;
+export type ReferenceLineLayerTypeESQL = z.output<typeof esqlReferenceLineLayerSchema>;
 export type ReferenceLineLayerTypeNoESQL = z.output<typeof referenceLineLayerSchemaNoESQL>;
 export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLineLayerTypeESQL;
 export type AnnotationLayerType = z.output<typeof annotationLayerSchema>;

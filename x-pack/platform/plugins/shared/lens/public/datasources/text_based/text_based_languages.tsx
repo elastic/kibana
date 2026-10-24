@@ -8,6 +8,7 @@
 import {
   LENS_DATASOURCE_ID,
   LENS_METRIC_GROUP_ID,
+  ofNameStaticValue,
   buildTrendlineBucketExpression,
   buildTrendlineQueryWithMetricFieldMap,
 } from '@kbn/lens-common';
@@ -54,6 +55,7 @@ import {
   hasNumericColumn,
   isNotNumeric,
   isNumeric,
+  isStaticValueColumn,
   MAX_NUM_OF_COLUMNS,
   operationFromDataType,
   resolveTextBasedColumnType,
@@ -771,8 +773,11 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
+          const defaultLabel = isStaticValueColumn(column)
+            ? ofNameStaticValue(column.params?.value)
+            : column.fieldName;
           columnLabelMap[column.columnId] = uniqueLabelGenerator(
-            column.customLabel ? column.label ?? column.fieldName : column.fieldName
+            column.customLabel ? column.label ?? defaultLabel : defaultLabel
           );
         });
       });
@@ -820,6 +825,7 @@ export function getTextBasedDatasource({
             inMetricDimension: column.inMetricDimension,
             hasTimeShift: false,
             hasReducedTimeRange: false,
+            ...(isStaticValueColumn(column) ? { isStaticValue: true } : {}),
             ...(column.customLabel ? { customLabel: true } : {}),
             scale,
           };

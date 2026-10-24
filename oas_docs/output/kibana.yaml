@@ -190066,6 +190066,7 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerESQL'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyReferenceLineLayerESQL'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationLayerESQL'
       description: XY chart layer types for ES|QL queries.
     Kibana_HTTP_APIs_visXyLayersNoESQL:
@@ -190433,9 +190434,168 @@ components:
         visible:
           description: When true, shows the legend table series header.
           type: boolean
+    Kibana_HTTP_APIs_visXyReferenceLineLayerESQL:
+      additionalProperties: false
+      description: Reference lines defined by numeric columns from a layer-specific ES|QL query.
+      properties:
+        data_source:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        thresholds:
+          description: Array of ES|QL-based reference line thresholds
+          items:
+            type: object
+            properties:
+              axis:
+                anyOf:
+                  - enum:
+                      - x
+                    type: string
+                  - enum:
+                      - 'y'
+                    type: string
+                  - enum:
+                      - y2
+                    type: string
+                default: 'y'
+                description: The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.
+              color:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                default:
+                  type: auto
+              column:
+                description: Column to use
+                type: string
+              fill:
+                anyOf:
+                  - enum:
+                      - above
+                    type: string
+                  - enum:
+                      - below
+                    type: string
+                description: Fill direction for reference line
+              format:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+              icon:
+                anyOf:
+                  - enum:
+                      - asterisk
+                    type: string
+                  - enum:
+                      - alert
+                    type: string
+                  - enum:
+                      - bell
+                    type: string
+                  - enum:
+                      - bolt
+                    type: string
+                  - enum:
+                      - bug
+                    type: string
+                  - enum:
+                      - circle
+                    type: string
+                  - enum:
+                      - editor_comment
+                    type: string
+                  - enum:
+                      - flag
+                    type: string
+                  - enum:
+                      - heart
+                    type: string
+                  - enum:
+                      - map_marker
+                    type: string
+                  - enum:
+                      - pin_filled
+                    type: string
+                  - enum:
+                      - star_empty
+                    type: string
+                  - enum:
+                      - star_filled
+                    type: string
+                  - enum:
+                      - tag
+                    type: string
+                  - enum:
+                      - triangle
+                    type: string
+                description: Icon to display on the reference line
+              label:
+                description: Label for the operation
+                type: string
+              position:
+                anyOf:
+                  - enum:
+                      - auto
+                    type: string
+                  - enum:
+                      - left
+                    type: string
+                  - enum:
+                      - right
+                    type: string
+                description: Position of the icon and label relative to the reference line
+              stroke_dash:
+                anyOf:
+                  - enum:
+                      - solid
+                    type: string
+                  - enum:
+                      - dashed
+                    type: string
+                  - enum:
+                      - dotted
+                    type: string
+                description: Line style
+              stroke_width:
+                description: Line width in pixels
+                maximum: 10
+                minimum: 1
+                type: number
+              text:
+                additionalProperties: false
+                description: Reference line text label configuration
+                type: object
+                properties:
+                  visible:
+                    description: Show text label on the reference line
+                    type: boolean
+                required:
+                  - visible
+            required:
+              - column
+          maxItems: 100
+          minItems: 1
+          type: array
+        type:
+          enum:
+            - reference_lines
+          type: string
+      required:
+        - data_source
+        - type
+        - thresholds
+      title: ES|QL Reference Line Layer
+      type: object
     Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic:
       additionalProperties: false
-      description: Reference line layer with static value thresholds. Field-based threshold operations are not supported on ES|QL charts yet.
+      description: Reference lines defined by constant numeric values on ES|QL charts.
       properties:
         data_source:
           discriminator:
@@ -190602,7 +190762,7 @@ components:
         - data_source
         - type
         - thresholds
-      title: Reference Line Layer (ES|QL, static values)
+      title: Static Reference Line Layer for ES|QL Charts
       type: object
     Kibana_HTTP_APIs_visXyReferenceLineLayerNoESQL:
       additionalProperties: false

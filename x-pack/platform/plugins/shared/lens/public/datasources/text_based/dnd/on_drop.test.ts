@@ -9,7 +9,11 @@ import type { DropType } from '@kbn/dom-drag-drop';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { onDrop } from './on_drop';
 import { column1, column2, column3, emptyDimensionTarget, defaultProps, fieldList } from './mocks';
-import type { DatasourceDimensionDropHandlerProps, TextBasedPrivateState } from '@kbn/lens-common';
+import type {
+  DatasourceDimensionDropHandlerProps,
+  TextBasedLayerColumn,
+  TextBasedPrivateState,
+} from '@kbn/lens-common';
 import { addColumnsToCache } from '../fieldlist_cache';
 
 describe('onDrop', () => {
@@ -26,6 +30,87 @@ describe('onDrop', () => {
       } as DatatableColumn;
     })
   );
+  describe.each<{ description: string; referenceColumn: TextBasedLayerColumn }>([
+    {
+      description: 'static',
+      referenceColumn: {
+        ...column1,
+        fieldName: '1000',
+        label: 'Threshold',
+        customLabel: true,
+        meta: { type: 'number' },
+        operationType: 'static_value',
+        params: { value: '1000' },
+      },
+    },
+    {
+      description: 'query',
+      referenceColumn: {
+        ...column1,
+        fieldName: 'threshold',
+        label: 'Threshold',
+        meta: { type: 'number' },
+      },
+    },
+  ])('reference column $description', ({ referenceColumn }) => {
+    it.each([
+      {
+        dropType: 'duplicate_compatible' as const,
+        target: emptyDimensionTarget,
+        expectedColumns: [
+          referenceColumn,
+          column2,
+          column3,
+          { ...referenceColumn, columnId: emptyDimensionTarget.columnId },
+        ],
+      },
+      {
+        dropType: 'replace_duplicate_compatible' as const,
+        target: {
+          ...emptyDimensionTarget,
+          columnId: column2.columnId,
+          id: column2.columnId,
+          isNewColumn: false,
+        },
+        expectedColumns: [
+          referenceColumn,
+          column3,
+          { ...referenceColumn, columnId: column2.columnId },
+        ],
+      },
+      {
+        dropType: 'move_compatible' as const,
+        target: emptyDimensionTarget,
+        expectedColumns: [
+          column2,
+          column3,
+          { ...referenceColumn, columnId: emptyDimensionTarget.columnId },
+        ],
+      },
+    ])(
+      'preserves the column configuration for $dropType',
+      ({ dropType, target, expectedColumns }) => {
+        const state = {
+          ...defaultProps.state,
+          layers: {
+            ...defaultProps.state.layers,
+            first: {
+              ...defaultProps.state.layers.first,
+              columns: [referenceColumn, column2, column3],
+            },
+          },
+        };
+        const result = onDrop({
+          ...defaultProps,
+          state,
+          target,
+          dropType,
+        });
+        expect(result?.layers.first.columns).toEqual(expectedColumns);
+      }
+    );
+  });
+
   it('should return false if dropType is not in the list', () => {
     const props = {
       ...defaultProps,
