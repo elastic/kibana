@@ -93,6 +93,24 @@ export type AttackDiscoveryAgentBuilderExample = Example<
 >;
 
 /**
+ * A dataset this suite registers evaluators for.
+ *
+ * `nonScoringEvaluators` names checks (by the evaluators' own `name`) that this
+ * cohort cannot feed at all. `evaluate_dataset.ts` leaves them out of the scored
+ * set instead of registering them to answer a deliberate `N/A` on every example
+ * — a cell that can never score adds no signal to a baseline, and the insight
+ * collector reads its `null` as a failure. The names are checked against the
+ * registered set by `evaluate_dataset.test.ts`; the weekly golden path declares
+ * `NoiseFalsePositive` here (its fixture seeds no noise population to score).
+ */
+export interface AttackDiscoveryAgentBuilderDataset {
+  name: string;
+  description: string;
+  examples: AttackDiscoveryAgentBuilderExample[];
+  nonScoringEvaluators?: string[];
+}
+
+/**
  * Which observable produced the `retrievedAlertCount` the WorkflowEvidence
  * evaluator scores. Recorded on every task output so a count is never read
  * without its provenance, and a future `N/A` is self-explaining.

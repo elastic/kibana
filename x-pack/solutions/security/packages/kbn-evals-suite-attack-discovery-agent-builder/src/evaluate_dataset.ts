@@ -18,6 +18,7 @@ import type { AttackDiscoveryAgentBuilderChatClient } from './chat_client';
 import { attackDiscoveryFixtureIndex } from './fixtures';
 import type {
   AttackDiscovery,
+  AttackDiscoveryAgentBuilderDataset,
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
   AttackDiscoveryRetrievalEvidence,
@@ -1486,6 +1487,89 @@ const buildTask =
     };
   };
 
+/**
+ * The evaluators this suite scores a dataset with.
+ *
+ * One list is shared by every cohort — each evaluator decides applicability from
+ * the example's own annotation — but a dataset can name the checks it cannot
+ * feed at all (`nonScoringEvaluators`). Those are left out here rather than
+ * registered to answer a deliberate `N/A` on every example: a cell that can
+ * never score adds no signal to a baseline, and the insight collector reads its
+ * `null` as a failure. Extracted from the run so the registration itself is
+ * unit-testable.
+ */
+export const buildScoredEvaluators = ({
+  dataset,
+  evaluators,
+}: {
+  dataset: AttackDiscoveryAgentBuilderDataset;
+  evaluators: DefaultEvaluators;
+}): Array<Evaluator<AttackDiscoveryAgentBuilderExample, AttackDiscoveryAgentBuilderTaskOutput>> => {
+  const trajectory = createStrictTrajectoryEvaluator({
+    extractToolCalls: (output) =>
+      getToolCallSteps(output)
+        .map((step) => step.tool_id)
+        .filter(Boolean) as string[],
+    goldenPathExtractor: (expected) =>
+      (expected as { expectedToolPath?: string[] })?.expectedToolPath ?? [],
+  });
+  const traceEvaluators = evaluators.traceBasedEvaluators;
+  const registered: Array<
+    Evaluator<AttackDiscoveryAgentBuilderExample, AttackDiscoveryAgentBuilderTaskOutput> | undefined
+  > = [
+    createAdToolResultEvaluator(),
+    createWorkflowEvidenceEvaluator(),
+    trajectory,
+    createForbiddenToolsEvaluator(),
+    createNoiseFalsePositiveEvaluator(),
+    createDiscoveryCountCapEvaluator(),
+    createMinValidatedDiscoveryEvaluator(),
+    createCostPerAlertEvaluator(),
+    createAttackDiscoveryBasicEvaluator(),
+    createAttackDiscoveryCriteriaEvaluator({ evaluators }) as Evaluator<
+      AttackDiscoveryAgentBuilderExample,
+      AttackDiscoveryAgentBuilderTaskOutput
+    >,
+    createAttackDiscoveryRubricEvaluator({ evaluators }) as Evaluator<
+      AttackDiscoveryAgentBuilderExample,
+      AttackDiscoveryAgentBuilderTaskOutput
+    >,
+    traceEvaluators.toolCalls as Evaluator<
+      AttackDiscoveryAgentBuilderExample,
+      AttackDiscoveryAgentBuilderTaskOutput
+    >,
+    traceEvaluators.latency as Evaluator<
+      AttackDiscoveryAgentBuilderExample,
+      AttackDiscoveryAgentBuilderTaskOutput
+    >,
+    traceEvaluators.inputTokens as Evaluator<
+      AttackDiscoveryAgentBuilderExample,
+      AttackDiscoveryAgentBuilderTaskOutput
+    >,
+    traceEvaluators.outputTokens as Evaluator<
+      AttackDiscoveryAgentBuilderExample,
+      AttackDiscoveryAgentBuilderTaskOutput
+    >,
+    createResponseSkillInvocationEvaluator() as Evaluator<
+      AttackDiscoveryAgentBuilderExample,
+      AttackDiscoveryAgentBuilderTaskOutput
+    >,
+  ];
+
+  const nonScoring = new Set(dataset.nonScoringEvaluators ?? []);
+  // A partially stubbed `evaluators` fixture may carry no trace evaluators at
+  // all; those entries are `undefined` and cannot be looked up by name, so they
+  // are dropped here instead of throwing.
+  return registered.filter(
+    (
+      evaluator
+    ): evaluator is Evaluator<
+      AttackDiscoveryAgentBuilderExample,
+      AttackDiscoveryAgentBuilderTaskOutput
+    > => evaluator != null && !nonScoring.has(evaluator.name)
+  );
+};
+
 export const createEvaluateAttackDiscoveryAgentBuilderDataset =
   ({
     chatClient,
@@ -1500,60 +1584,9 @@ export const createEvaluateAttackDiscoveryAgentBuilderDataset =
     executorClient: EvalsExecutorClient;
     traceEsClient: EsClient;
   }) =>
-  async ({
-    dataset,
-  }: {
-    dataset: { name: string; description: string; examples: AttackDiscoveryAgentBuilderExample[] };
-  }) => {
-    const trajectory = createStrictTrajectoryEvaluator({
-      extractToolCalls: (output) =>
-        getToolCallSteps(output)
-          .map((step) => step.tool_id)
-          .filter(Boolean) as string[],
-      goldenPathExtractor: (expected) =>
-        (expected as { expectedToolPath?: string[] })?.expectedToolPath ?? [],
-    });
-    const traceEvaluators = evaluators.traceBasedEvaluators;
+  async ({ dataset }: { dataset: AttackDiscoveryAgentBuilderDataset }) => {
     await executorClient.runExperiment(
       { datasets: [dataset], task: buildTask({ chatClient, fetch }) },
-      [
-        createAdToolResultEvaluator(),
-        createWorkflowEvidenceEvaluator(),
-        trajectory,
-        createForbiddenToolsEvaluator(),
-        createNoiseFalsePositiveEvaluator(),
-        createDiscoveryCountCapEvaluator(),
-        createMinValidatedDiscoveryEvaluator(),
-        createCostPerAlertEvaluator(),
-        createAttackDiscoveryBasicEvaluator(),
-        createAttackDiscoveryCriteriaEvaluator({ evaluators }) as Evaluator<
-          AttackDiscoveryAgentBuilderExample,
-          AttackDiscoveryAgentBuilderTaskOutput
-        >,
-        createAttackDiscoveryRubricEvaluator({ evaluators }) as Evaluator<
-          AttackDiscoveryAgentBuilderExample,
-          AttackDiscoveryAgentBuilderTaskOutput
-        >,
-        traceEvaluators.toolCalls as Evaluator<
-          AttackDiscoveryAgentBuilderExample,
-          AttackDiscoveryAgentBuilderTaskOutput
-        >,
-        traceEvaluators.latency as Evaluator<
-          AttackDiscoveryAgentBuilderExample,
-          AttackDiscoveryAgentBuilderTaskOutput
-        >,
-        traceEvaluators.inputTokens as Evaluator<
-          AttackDiscoveryAgentBuilderExample,
-          AttackDiscoveryAgentBuilderTaskOutput
-        >,
-        traceEvaluators.outputTokens as Evaluator<
-          AttackDiscoveryAgentBuilderExample,
-          AttackDiscoveryAgentBuilderTaskOutput
-        >,
-        createResponseSkillInvocationEvaluator() as Evaluator<
-          AttackDiscoveryAgentBuilderExample,
-          AttackDiscoveryAgentBuilderTaskOutput
-        >,
-      ]
+      buildScoredEvaluators({ dataset, evaluators })
     );
   };
