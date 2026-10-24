@@ -31,24 +31,18 @@ const existing = {
   updatedAt: '2026-10-01T00:00:00.000Z',
 };
 
-const getSlackChannelEligibility = jest.fn();
-const checkEligibility = jest.fn();
-
 const call = (body: Record<string, unknown>) =>
   handler({
     request: httpServerMock.createKibanaRequest(),
     params: params.parse({ path: { id: 'automation-1' }, body }),
     getAutomationsSoClient,
     getWorkflowsManagement,
-    getSlackChannelEligibility,
     context: createRouteContext(),
   } as never);
 
 beforeEach(() => {
   jest.clearAllMocks();
   soClient.get.mockResolvedValue({ attributes: existing });
-  getSlackChannelEligibility.mockReturnValue(checkEligibility);
-  checkEligibility.mockResolvedValue([]);
 });
 
 it('replaces tags and keeps the other attributes', async () => {
@@ -338,33 +332,3 @@ it.each([{ name: 'Changed' }, { isEnabled: false }])(
     expect(soClient.update).not.toHaveBeenCalled();
   }
 );
-
-describe('private Slack channels', () => {
-  const slackRow = { kind: 'slack', event: 'message', channels: ['G0123456789'] };
-
-  it.each([
-    ['selecting one in the trigger', { trigger: { rows: [slackRow] } }],
-    ['enabling an automation that holds one', { isEnabled: true }],
-  ])('rejects %s', async (_, body) => {
-    soClient.get.mockResolvedValue({
-      attributes: { ...existing, isEnabled: false, trigger: { rows: [slackRow] } },
-    });
-    checkEligibility.mockResolvedValue(['G0123456789']);
-
-    await expect(call(body)).rejects.toMatchObject({ output: { statusCode: 400 } });
-    expect(soClient.update).not.toHaveBeenCalled();
-  });
-
-  it('still lets an automation that holds a private channel be renamed or disabled', async () => {
-    soClient.get.mockResolvedValue({
-      attributes: { ...existing, trigger: { rows: [slackRow] } },
-    });
-    checkEligibility.mockResolvedValue(['G0123456789']);
-
-    await call({ name: 'Renamed' });
-    await call({ isEnabled: false });
-
-    expect(checkEligibility).not.toHaveBeenCalled();
-    expect(soClient.update).toHaveBeenCalledTimes(2);
-  });
-});

@@ -13,11 +13,7 @@ import {
 } from '../../../../../settings/components/apps_section/use_relay_app_bindings';
 import { actionLabels } from '../../actions/automation_actions_section';
 import type { SlackTriggerFormValues, TriggerFormValues } from '../../automation_form_values';
-import {
-  findPrivateChannels,
-  findUnconnectedChannels,
-  SlackChannelComboBox,
-} from '../../slack_channel_combo_box';
+import { findUnconnectedChannels, SlackChannelComboBox } from '../../slack_channel_combo_box';
 import { ListPill } from '../pills/list_pill';
 import { PillPopover } from '../pills/pill_popover';
 import { Sentence, SentenceIcon } from '../pills/sentence';
@@ -42,10 +38,7 @@ const ChannelPill = ({
     <PillPopover
       ariaLabel={triggerLabels.selectChannels}
       label={label}
-      isInvalid={
-        findUnconnectedChannels(channels, connected).length > 0 ||
-        findPrivateChannels(channels, connected).length > 0
-      }
+      isInvalid={findUnconnectedChannels(channels, connected).length > 0}
       testSubject="automationSlackTriggerChannels"
     >
       {() => (

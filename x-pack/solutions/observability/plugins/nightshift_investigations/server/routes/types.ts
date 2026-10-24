@@ -17,7 +17,7 @@ import type { CustomContextClient } from '../custom_context';
 import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
 import type { MemoryPageStore } from '../memory/page_store';
-import type { GetTriggerEmitter, SlackChannelEligibilityCallback } from '../types';
+import type { GetTriggerEmitter } from '../types';
 
 export type GetInvestigationsClient = (
   request: KibanaRequest,
@@ -47,7 +47,6 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getAlertsClient: GetAlertsClient;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
-  getSlackChannelEligibility?: () => SlackChannelEligibilityCallback | undefined;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
   sandboxSecretsClient: SandboxSecretsClient;

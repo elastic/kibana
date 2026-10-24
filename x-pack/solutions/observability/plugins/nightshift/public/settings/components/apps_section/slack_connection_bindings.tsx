@@ -209,8 +209,7 @@ export function SlackConnectionBindings({ canEdit, onReconnect }: SlackConnectio
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.nightshift.settings.apps.slackChannelsDescription', {
-              defaultMessage:
-                '@Elastic only answers in these channels. Private channels work for @Elastic questions, not automations yet.',
+              defaultMessage: '@Elastic only answers in these channels.',
             })}
           </EuiText>
         </EuiFlexItem>

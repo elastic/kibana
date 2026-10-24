@@ -19,7 +19,7 @@ jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', ()
   useAllRelayAppBindings: () => ({
     bindings: [
       { channel: 'C1', displayName: 'alerts', visibility: 'public', status: 'bound_to_self' },
-      { channel: 'G1', visibility: 'private', status: 'bound_to_self' },
+      { channel: 'G0123456789', visibility: 'private', status: 'bound_to_self' },
     ],
     isLoading: false,
     isError: false,
@@ -28,14 +28,17 @@ jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', ()
 }));
 
 describe('SlackChannelComboBox', () => {
-  it.each([false, true])(
-    'hides private channels but keeps a stored one removable (singleSelection: %s)',
-    (singleSelection) => {
+  it.each([
+    [false, ['C1', 'G0123456789']],
+    [true, ['G0123456789']],
+  ])(
+    'never suggests a private channel but accepts its link (singleSelection: %s)',
+    (singleSelection, expected) => {
       const onChange = jest.fn();
       render(
         <I18nProvider>
           <SlackChannelComboBox
-            values={['G1']}
+            values={['C1']}
             onChange={onChange}
             ariaLabel="Channels"
             placeholder="Pick"
@@ -45,17 +48,15 @@ describe('SlackChannelComboBox', () => {
         </I18nProvider>
       );
 
-      const picker = screen.getByTestId('picker');
-      expect(screen.getByTestId('pickerHelp')).toHaveTextContent(
-        'Private channels aren’t available for automations yet: Private · G1'
-      );
+      const input = within(screen.getByTestId('picker')).getByRole('combobox');
+      fireEvent.change(input, { target: { value: 'G0123' } });
+      expect(screen.queryByRole('option', { name: /G0123456789/ })).not.toBeInTheDocument();
 
-      fireEvent.click(within(picker).getByTestId('comboBoxToggleListButton'));
-      expect(screen.getByRole('option', { name: '#alerts' })).toBeInTheDocument();
-      expect(screen.queryByRole('option', { name: /G1/ })).not.toBeInTheDocument();
-
-      fireEvent.click(within(picker).getByTestId('comboBoxClearButton'));
-      expect(onChange).toHaveBeenLastCalledWith([]);
+      fireEvent.change(input, {
+        target: { value: 'https://acme.slack.com/archives/G0123456789' },
+      });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(onChange).toHaveBeenLastCalledWith(expected);
     }
   );
 });

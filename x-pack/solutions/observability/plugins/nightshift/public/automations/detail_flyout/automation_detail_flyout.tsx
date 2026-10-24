@@ -45,7 +45,6 @@ import {
   type AutomationFormValues,
 } from '../flyouts/form/automation_form_values';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../flyouts/form/validation';
-import { usePrivateChannelIds } from '../flyouts/form/use_private_channel_ids';
 import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
@@ -172,9 +171,8 @@ export const AutomationDetailFlyout = ({
   const toggleAutomation = useToggleAutomation();
   const isRunsTab = pathname.endsWith('/runs');
   const isDirty = JSON.stringify(values) !== JSON.stringify(originalValues);
-  const privateChannelIds = usePrivateChannelIds();
-  const blocker = getSaveBlocker(values, privateChannelIds);
-  const valid = canSaveAutomation(values, privateChannelIds);
+  const blocker = getSaveBlocker(values);
+  const valid = canSaveAutomation(values);
   const runsQuery = useAutomationRunsInRange(
     automation.id,
     runRange.startedAfter,

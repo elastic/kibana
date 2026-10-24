@@ -43,10 +43,6 @@ export const validationLabels = {
   channelRequired: i18n.translate('xpack.nightshift.automations.flyout.channelRequired', {
     defaultMessage: 'Choose a Slack channel to post to before saving',
   }),
-  privateChannels: i18n.translate('xpack.nightshift.automations.flyout.privateChannelsBlocker', {
-    defaultMessage:
-      'Private channels aren’t available for automations yet. Remove them from the trigger or action to save.',
-  }),
   personRequired: i18n.translate('xpack.nightshift.automations.flyout.personRequired', {
     defaultMessage: 'Choose who to message in Slack before saving',
   }),
@@ -65,20 +61,7 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
   return true;
 };
 
-const getSelectedChannels = ({ trigger, slackAction }: AutomationFormValues): string[] => [
-  ...(trigger && isSlackTrigger(trigger) ? trigger.channels : []),
-  ...(slackAction?.target === 'channel' && slackAction.destination
-    ? [slackAction.destination]
-    : []),
-];
-
-export const getSaveBlocker = (
-  values: AutomationFormValues,
-  privateChannels: ReadonlySet<string> = new Set()
-): string | undefined => {
-  if (getSelectedChannels(values).some((channel) => privateChannels.has(channel))) {
-    return validationLabels.privateChannels;
-  }
+export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
   if (!values.trigger) return validationLabels.triggerRequired;
   if (values.trigger.kind === 'every') {
     if (!values.instructions.trim()) return validationLabels.instructionsRequired;
@@ -101,10 +84,7 @@ export const getSaveBlocker = (
   return undefined;
 };
 
-export const canSaveAutomation = (
-  values: AutomationFormValues,
-  privateChannels?: ReadonlySet<string>
-): boolean =>
+export const canSaveAutomation = (values: AutomationFormValues): boolean =>
   isTriggerValid(values.trigger) &&
   isValidDailyLimit(values.dailyDispatchLimit) &&
-  !getSaveBlocker(values, privateChannels);
+  !getSaveBlocker(values);

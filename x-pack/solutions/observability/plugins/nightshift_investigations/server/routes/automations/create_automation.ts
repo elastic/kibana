@@ -12,7 +12,6 @@ import { createNightshiftInvestigationsServerRoute } from '../create_server_rout
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
-import { assertSlackChannelsEligible } from '../../lib/automations/assert_slack_channels_eligible';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
@@ -58,14 +57,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       runtime: runtimeSchema,
     }),
   }),
-  handler: async ({
-    request,
-    params,
-    getAutomationsSoClient,
-    getWorkflowsManagement,
-    getSlackChannelEligibility,
-    context,
-  }) => {
+  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -92,10 +84,6 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     };
 
     validateScheduledAutomation(attributes);
-    await assertSlackChannelsEligible({
-      automation: attributes,
-      checkEligibility: getSlackChannelEligibility?.(),
-    });
 
     const created = await soClient.create<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,

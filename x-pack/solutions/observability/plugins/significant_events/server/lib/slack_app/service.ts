@@ -134,9 +134,6 @@ export interface ListBindingsOptions {
   perPage?: number;
 }
 
-const PRIVATE_CHANNEL_LOOKUP_PAGE_SIZE = 200;
-const PRIVATE_CHANNEL_LOOKUP_MAX_PAGES = 10;
-
 export class SlackAppService {
   private readonly logger: Logger;
 
@@ -739,47 +736,6 @@ export class SlackAppService {
       throw new SlackAppUnavailableError('Connection is not in a connected state');
     }
     return { relayClient, tenantKey: connection.tenantKey };
-  }
-
-  /** Of `channelIds`, those this deployment bound as private; throws when the Relay can't answer so callers fail closed. */
-  async findPrivateChannels(
-    soClient: SavedObjectsClientContract,
-    channelIds: string[]
-  ): Promise<string[]> {
-    const wanted = new Set(channelIds);
-    const found = new Set<string>();
-    if (wanted.size === 0) {
-      return [];
-    }
-    const [relayClient, connection] = await Promise.all([
-      this.getRelayClient(),
-      this.readConnection(soClient),
-    ]);
-    if (!relayClient || connection?.status !== RELAY_APP_CONNECTION_STATUS.connected) {
-      return [];
-    }
-    const { tenantKey } = connection;
-    if (!tenantKey) {
-      return [];
-    }
-
-    let cursor: string | undefined;
-    for (let page = 0; page < PRIVATE_CHANNEL_LOOKUP_MAX_PAGES; page++) {
-      const result = await relayClient.listBindings(tenantKey, {
-        cursor,
-        limit: PRIVATE_CHANNEL_LOOKUP_PAGE_SIZE,
-      });
-      for (const { scope_id: scopeId, visibility } of result.bindings) {
-        if (scopeId != null && visibility === 'private' && wanted.has(scopeId)) {
-          found.add(scopeId);
-        }
-      }
-      cursor = result.nextCursor;
-      if (!cursor) {
-        return [...found];
-      }
-    }
-    throw new Error('Too many connected Slack channels to check for private channels');
   }
 
   async bindChannel(request: KibanaRequest, channelId: string): Promise<void> {
