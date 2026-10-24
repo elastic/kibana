@@ -32,6 +32,12 @@ const CLAIM_FACTUAL_SCORE_MAP: ClaimScoreMap = {
   },
 };
 
+// The agent's own procedural/meta sentences, which are not claims about the environment
+// (see ./system_prompt.text, step 1). They carry no groundedness weight, so they leave the
+// score product instead of being weighted inside it, and this verdict is deliberately
+// absent from CLAIM_FACTUAL_SCORE_MAP.
+const NON_FACTUAL_VERDICT = 'NON_FACTUAL';
+
 /**
  * Calculates the groundedness score using geometric mean of individual claim scores.
  *
@@ -40,9 +46,14 @@ const CLAIM_FACTUAL_SCORE_MAP: ClaimScoreMap = {
  * with a score of 0.0) will result in an overall groundedness score of 0.0.
  */
 export function calculateGroundednessScore(groundednessAnalysis: GroundednessAnalysis): number {
-  return geometricMeanClaimScore(
-    groundednessAnalysis?.analysis,
-    CLAIM_FACTUAL_SCORE_MAP,
-    'NOT_FOUND'
-  );
+  const analysis = groundednessAnalysis?.analysis;
+  const factualClaims = (analysis ?? []).filter((claim) => claim.verdict !== NON_FACTUAL_VERDICT);
+
+  if (analysis?.length && factualClaims.length === 0) {
+    // Every sentence was the agent's own procedural/meta text: no claim about the
+    // environment was made, so nothing about it can be ungrounded.
+    return 1.0;
+  }
+
+  return geometricMeanClaimScore(factualClaims, CLAIM_FACTUAL_SCORE_MAP, 'NOT_FOUND');
 }
