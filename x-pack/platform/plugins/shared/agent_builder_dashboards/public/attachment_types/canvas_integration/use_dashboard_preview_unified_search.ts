@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { isOfQueryType, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -51,7 +51,7 @@ export const useDashboardPreviewUnifiedSearch = ({
   );
   const [query, setQuery] = useState<Query>(normalizeQuery(toStoredQuery(dashboardState.query)));
   const [filters, setFilters] = useState<Filter[]>(toStoredFilters(dashboardState.filters) ?? []);
-  const [dataViews, setDataViews] = useState<DataView[]>([]);
+  const [sources, setSources] = useState<FilterableSource[]>([]);
   const [isApproximate, setIsApproximate] = useState(false);
   const hasEsqlPanel = useHasEsqlPanel(dashboardApi);
 
@@ -67,11 +67,11 @@ export const useDashboardPreviewUnifiedSearch = ({
 
   useEffect(() => {
     if (!dashboardApi) {
-      setDataViews([]);
+      setSources([]);
       return;
     }
 
-    setDataViews(dashboardApi.dataViews$.value ?? []);
+    setSources(dashboardApi.filterableSources$.value ?? []);
 
     const querySubscription = dashboardApi.query$.subscribe((nextQuery) => {
       const resolvedQuery = normalizeQuery(
@@ -81,10 +81,10 @@ export const useDashboardPreviewUnifiedSearch = ({
         isEqual(currentQuery, resolvedQuery) ? currentQuery : resolvedQuery
       );
     });
-    const dataViewsSubscription = dashboardApi.dataViews$.subscribe((nextDataViews) => {
-      const resolvedDataViews = nextDataViews ?? [];
-      setDataViews((currentDataViews) =>
-        isEqual(currentDataViews, resolvedDataViews) ? currentDataViews : resolvedDataViews
+    const sourcesSubscription = dashboardApi.filterableSources$.subscribe((nextSources) => {
+      const resolvedSources = nextSources ?? [];
+      setSources((currentSources) =>
+        isEqual(currentSources, resolvedSources) ? currentSources : resolvedSources
       );
     });
     const timeRangeSubscription = dashboardApi.timeRange$.subscribe((nextTimeRange) => {
@@ -99,7 +99,7 @@ export const useDashboardPreviewUnifiedSearch = ({
 
     return () => {
       querySubscription.unsubscribe();
-      dataViewsSubscription.unsubscribe();
+      sourcesSubscription.unsubscribe();
       timeRangeSubscription.unsubscribe();
     };
   }, [dashboardApi]);
@@ -168,7 +168,7 @@ export const useDashboardPreviewUnifiedSearch = ({
     () => ({
       query,
       filters,
-      indexPatterns: dataViews,
+      indexPatterns: sources,
       dateRangeFrom: timeRange.from,
       dateRangeTo: timeRange.to,
       onQuerySubmit,
@@ -205,7 +205,7 @@ export const useDashboardPreviewUnifiedSearch = ({
     [
       dashboardApi,
       dashboardState.title,
-      dataViews,
+      sources,
       filters,
       hasEsqlPanel,
       isApproximate,
@@ -219,7 +219,7 @@ export const useDashboardPreviewUnifiedSearch = ({
   );
 
   return {
-    dataViews,
+    sources,
     filters,
     query,
     searchBarProps,

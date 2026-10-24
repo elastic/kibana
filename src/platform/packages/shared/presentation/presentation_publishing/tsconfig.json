@@ -7,6 +7,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/data-source",
     "@kbn/es-query",
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",

@@ -137,6 +137,10 @@ export {
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
 export {
+  apiPublishesFilterableSources,
+  type PublishesFilterableSources,
+} from './interfaces/publishes_filterable_sources';
+export {
   apiPublishesDataViews,
   type PublishesDataViews,
   type PublishesWritableDataViews,

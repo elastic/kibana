@@ -11,6 +11,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
+import type { FilterableSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
@@ -183,7 +184,7 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([
         { isTimeBased: () => false } as DataView,
       ]),
     };
@@ -217,7 +218,7 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([
         { type: 'esql', timeFieldName: undefined, isTimeBased: () => false } as DataView,
       ]),
     };
@@ -251,9 +252,48 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([
         { type: 'esql', timeFieldName: '@timestamp', isTimeBased: () => false } as DataView,
       ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: false },
+      }),
+      {}
+    );
+  });
+
+  it('should keep the date picker enabled when the published source of an ES|QL dataset has a time field', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const esqlSource: FilterableSource = {
+      id: 'esql-dataset-id',
+      title: 'logs-*',
+      fields: [],
+      timeFieldName: '@timestamp',
+      isTimeBased: () => true,
+    };
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([esqlSource]),
     };
 
     renderWithChrome(
@@ -285,7 +325,7 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([
         { isTimeBased: () => false } as DataView,
         { isTimeBased: () => true } as DataView,
       ]),

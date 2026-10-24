@@ -130,9 +130,9 @@ describe('DashboardView', () => {
 
   test('passes published data views to the search bar', async () => {
     const libraryDataView = { id: 'library-data-view' };
-    const dataViews$ = new BehaviorSubject([libraryDataView]);
+    const filterableSources$ = new BehaviorSubject([libraryDataView]);
     const dashboardContainer = {
-      dataViews$,
+      filterableSources$,
       title$: new BehaviorSubject('Dashboard'),
       children$: new BehaviorSubject({ libraryPanel: {} }),
       getDashboardPanelFromId: () => ({
@@ -156,7 +156,7 @@ describe('DashboardView', () => {
     await waitFor(() => {
       expect(SiemSearchBar).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          additionalDataViews: [libraryDataView],
+          additionalSources: [libraryDataView],
         }),
         expect.anything()
       );
@@ -172,7 +172,7 @@ describe('DashboardView', () => {
 
     await waitFor(() => {
       expect(SiemSearchBar).toHaveBeenLastCalledWith(
-        expect.objectContaining({ additionalDataViews: undefined }),
+        expect.objectContaining({ additionalSources: undefined }),
         expect.anything()
       );
     });

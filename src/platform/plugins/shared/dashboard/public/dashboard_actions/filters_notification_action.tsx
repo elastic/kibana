@@ -16,7 +16,7 @@ import type {
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
-  PublishesDataViews,
+  PublishesFilterableSources,
   PublishesUnifiedSearch,
   CanLockHoverActions,
   CanAccessViewMode,
@@ -32,7 +32,7 @@ import { ACTION_FILTERS_NOTIFICATION } from './constants';
 
 export type FiltersNotificationActionApi = HasUniqueId &
   Partial<PublishesUnifiedSearch> &
-  Partial<HasParentApi<Partial<PublishesDataViews>>> &
+  Partial<HasParentApi<Partial<PublishesFilterableSources>>> &
   Partial<CanLockHoverActions> &
   Partial<CanAccessViewMode>;
 
