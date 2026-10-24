@@ -7,6 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -58,6 +59,7 @@ export interface ConstructorOptions {
   uiam?: UiamServicePublic;
   serviceAccountsEnabled?: boolean;
   getCurrentUser?: (request: KibanaRequest) => AuthenticatedUser | null;
+  refreshSessionAccessToken?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 type GrantAPIKeyParams = (
@@ -92,6 +94,7 @@ export class APIKeys implements NativeAPIKeysType {
   private readonly uiam?: UiamServicePublic;
   private readonly serviceAccountsEnabled: boolean;
   private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  private readonly refreshSessionAccessToken?: ConstructorOptions['refreshSessionAccessToken'];
 
   constructor({
     logger,
@@ -103,6 +106,7 @@ export class APIKeys implements NativeAPIKeysType {
     uiam,
     serviceAccountsEnabled = false,
     getCurrentUser = () => null,
+    refreshSessionAccessToken,
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
@@ -113,6 +117,7 @@ export class APIKeys implements NativeAPIKeysType {
     this.uiam = uiam;
     this.serviceAccountsEnabled = serviceAccountsEnabled;
     this.getCurrentUser = getCurrentUser;
+    this.refreshSessionAccessToken = refreshSessionAccessToken;
   }
 
   /**
@@ -354,6 +359,25 @@ export class APIKeys implements NativeAPIKeysType {
       result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');
     } catch (e) {
+      // The granting token lives in the body of an internal-user request, so the scoped
+      // client's expiry handler cannot renew it. Retry only a rejected, expired session grant.
+      if (
+        params.grant_type === 'access_token' &&
+        e instanceof errors.ResponseError &&
+        ((e.statusCode === 401 && e.body?.error?.reason === 'token expired') ||
+          (e.statusCode === 403 &&
+            e.body?.error?.reason === 'Failed to authenticate api key grant' &&
+            e.body?.error?.caused_by?.type === 'security_exception' &&
+            e.body?.error?.caused_by?.reason === 'token expired'))
+      ) {
+        const accessToken = await this.refreshSessionAccessToken?.(request);
+        if (accessToken) {
+          return await this.clusterClient.asInternalUser.security.grantApiKey({
+            ...params,
+            access_token: accessToken,
+          });
+        }
+      }
       const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request), {
         reason: this.getServiceAccountGrantRefusalReason(authorizationHeader),
       });
