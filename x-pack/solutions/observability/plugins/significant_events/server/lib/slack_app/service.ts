@@ -740,6 +740,9 @@ export class SlackAppService {
       if (entry.display_name != null) {
         binding.displayName = entry.display_name;
       }
+      if (entry.visibility != null) {
+        binding.visibility = entry.visibility;
+      }
       bindings.push(binding);
     }
 
