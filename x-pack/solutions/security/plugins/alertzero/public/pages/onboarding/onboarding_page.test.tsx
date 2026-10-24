@@ -268,7 +268,7 @@ describe('OnboardingPage', () => {
     });
 
     expect(screen.getByTestId('alertZeroOnboardingModifyForbidden')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+    expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled();
     expect(
       screen.getByTestId(
         `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
@@ -289,7 +289,7 @@ describe('OnboardingPage', () => {
       expect(action).toHaveAttribute('href', FEATURE_SETTINGS_URL);
       expect(action).toHaveAttribute('target', '_blank');
 
-      const enableButton = screen.getByRole('button', { name: 'Enable and run' });
+      const enableButton = screen.getByTestId('alertZeroOnboardingEnableButton');
       expect(enableButton).toBeDisabled();
       for (const toggle of screen.getAllByRole('switch')) {
         expect(toggle).toBeDisabled();
@@ -315,7 +315,7 @@ describe('OnboardingPage', () => {
 
       expect(screen.queryByTestId('alertZeroOnboardingNoModelCallout')).not.toBeInTheDocument();
       expect(screen.getByTestId('alertZeroOnboardingModifyForbidden')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled();
     });
   });
 
@@ -323,7 +323,7 @@ describe('OnboardingPage', () => {
     renderPage();
 
     expect(screen.queryByTestId('alertZeroOnboardingNoModelCallout')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Enable and run' })).toBeEnabled();
+    expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeEnabled();
     expect(
       screen.getByTestId(
         `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
@@ -369,7 +369,7 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() => expect(history.location.pathname).toBe('/'));
       expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledTimes(1);
@@ -393,7 +393,7 @@ describe('OnboardingPage', () => {
       };
       renderPage({ canWrite: true, httpPatch, serverWorkers });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() =>
         expect(httpPatch).toHaveBeenCalledWith(
@@ -421,10 +421,10 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history, toasts } = renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toBeDisabled()
       );
       expect(httpPatch).toHaveBeenCalledTimes(ALL_ONBOARDING_WORKER_IDS.length - 1);
       expect(httpPatch).not.toHaveBeenCalledWith(
@@ -437,7 +437,7 @@ describe('OnboardingPage', () => {
       );
       expect(history.location.pathname).toBe('/onboarding');
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() => expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledTimes(2));
       expect(mockEnsureWorkerServiceAccounts.mock.calls[1][2]).toContain(
@@ -504,7 +504,7 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() => expect(history.location.pathname).toBe('/'));
       expect(httpPatch).toHaveBeenCalledTimes(6);
@@ -521,24 +521,24 @@ describe('OnboardingPage', () => {
       );
       renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       // While all six PATCHes are pending, the button must be disabled.
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).toHaveAttribute('disabled')
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toHaveAttribute('disabled')
       );
 
       // The Watch settings link must not navigate away mid-save.
       expect(screen.getByTestId('alertZeroOnboardingWatchSettingsLink')).toBeDisabled();
 
       // A second click while in-flight must not trigger additional requests.
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
       expect(httpPatch).toHaveBeenCalledTimes(6);
 
       // Resolve all pending PATCHes and verify the button re-enables.
       resolvers.forEach((r) => r());
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toHaveAttribute(
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toHaveAttribute(
           'disabled'
         )
       );
@@ -548,13 +548,13 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockRejectedValue(new Error('server error'));
       const { history } = renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       // Wait for the entire save to settle (button stops loading) before asserting
       // that navigation did not occur — checking immediately after httpPatch fires
       // can race against the still-running allSettled fan-out.
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toHaveAttribute(
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toHaveAttribute(
           'disabled'
         )
       );
@@ -571,9 +571,9 @@ describe('OnboardingPage', () => {
       });
       const { reportEvent } = renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toBeDisabled()
       );
 
       expect(reportEvent.mock.calls).toEqual([
@@ -608,12 +608,12 @@ describe('OnboardingPage', () => {
           String(url).includes(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)
         );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toBeDisabled()
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
       await waitFor(() => expect(attackDiscoveryCalls()).toHaveLength(2));
       const retry = attackDiscoveryCalls()[1];
       if (!retry?.[1]?.body) {
@@ -648,7 +648,7 @@ describe('OnboardingPage', () => {
       );
       const { application } = renderPage({ canWrite: true, httpPatch });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       // While PATCHes are pending the Back button must be disabled.
       await waitFor(() =>
@@ -686,7 +686,7 @@ describe('OnboardingPage', () => {
       const toggles = screen.getAllByRole('switch');
       fireEvent.click(toggles[1]);
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() =>
         expect(httpPatch).toHaveBeenCalledWith(
@@ -734,7 +734,7 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch, serverWorkers });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingEnableButton'));
 
       await waitFor(() => expect(history.location.pathname).toBe('/'));
       // Only the 5 present workers should be PATCHed — not the skill-gated absent one.
@@ -751,7 +751,7 @@ describe('OnboardingPage', () => {
 
       expect(screen.getByTestId('alertZeroOnboardingNoWorkersAvailable')).toBeInTheDocument();
       expect(screen.queryByRole('switch')).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled();
     });
 
     it('does not count the absent worker toward the last-enabled guard', () => {
@@ -817,7 +817,7 @@ describe('OnboardingPage', () => {
       // Toggle Alert Triage (B) off — Attack Discovery (A) becomes the sole enabled worker.
       const toggles = screen.getAllByRole('switch');
       fireEvent.click(toggles[0]);
-      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingEnableButton')).not.toBeDisabled();
 
       // Simulate a background workers refetch that removes the sole checked worker (Attack Discovery).
       // Update the http mock so the next fetch returns only Alert Triage (B), then force a refetch.
@@ -833,7 +833,7 @@ describe('OnboardingPage', () => {
       // enabledCount is now 0: only Alert Triage (B) remains and the user had checked it off.
       // The Enable button must be disabled so no empty PATCH fan-out can be submitted.
       await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled()
+        expect(screen.getByTestId('alertZeroOnboardingEnableButton')).toBeDisabled()
       );
     });
   });
@@ -842,7 +842,7 @@ describe('OnboardingPage', () => {
     it('cannot reach the worker selection step', () => {
       renderPage({ canWrite: false });
       expect(screen.queryByTestId(/alertZeroOnboardingWorkerToggle/)).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Enable and run' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertZeroOnboardingEnableButton')).not.toBeInTheDocument();
     });
   });
 });
