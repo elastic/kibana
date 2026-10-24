@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState, useRef } from 'react';
-import type {
-  RulesSettingsFlappingProperties,
-  RulesSettingsProperties,
-  RulesSettingsQueryDelayProperties,
-} from '@kbn/alerting-plugin/common';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiFlyout,
   EuiFlyoutHeader,
@@ -25,71 +19,15 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiSpacer,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { css } from '@emotion/react';
 import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
-import { AlertDeleteDescriptiveFormGroup } from '@kbn/response-ops-alerts-delete/components/descriptive_form_group';
-import { useKibana } from '../../../common/lib/kibana';
-import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
-import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
-import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
-import { useUpdateRuleSettings } from '../../hooks/use_update_rules_settings';
-import { CenterJustifiedSpinner } from '../center_justified_spinner';
-import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-
-export const RulesSettingsErrorPrompt = memo(() => {
-  return (
-    <EuiEmptyPrompt
-      data-test-subj="rulesSettingsErrorPrompt"
-      color="danger"
-      iconType="warning"
-      title={
-        <h4>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.flyout.errorPromptTitle"
-            defaultMessage="Unable to load your rules settings"
-          />
-        </h4>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.flyout.errorPromptBody"
-            defaultMessage="There was an error loading your rules settings. Contact your administrator for help"
-          />
-        </p>
-      }
-    />
-  );
-});
-
-const useResettableState: <T>(
-  initialValue?: T
-) => [T | undefined, boolean, (next: T, shouldUpdateInitialValue?: boolean) => void, () => void] = (
-  initalValue
-) => {
-  const initialValueRef = useRef(initalValue);
-  const [value, setValue] = useState(initalValue);
-  const [hasChanged, setHasChanged] = useState(false);
-  const reset = () => {
-    setValue(initialValueRef.current);
-    setHasChanged(false);
-  };
-  const updateValue = (next: typeof value, shouldUpdateInitialValue = false) => {
-    setValue(next);
-    if (shouldUpdateInitialValue) {
-      initialValueRef.current = next;
-      setHasChanged(false);
-    } else {
-      setHasChanged(true);
-    }
-  };
-  return [value, hasChanged, updateValue, reset];
-};
+import { RulesSettingsCallout } from './rules_settings_callout';
+import { RulesSettingsForm } from './rules_settings_form';
+import { useRulesSettingsForm } from './use_rules_settings_form';
 
 export interface RulesSettingsFlyoutProps {
   isVisible: boolean;
@@ -100,186 +38,20 @@ export interface RulesSettingsFlyoutProps {
 }
 
 export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
-  const { isVisible, onClose, setUpdatingRulesSettings, onSave } = props;
+  const { isVisible, onClose, setUpdatingRulesSettings, onSave, alertDeleteCategoryIds } = props;
 
-  const {
-    application: { capabilities },
-    notifications,
-    isServerless,
-    http,
-  } = useKibana().services;
-  const {
-    rulesSettings: {
-      writeFlappingSettingsUI,
-      readFlappingSettingsUI,
-      writeQueryDelaySettingsUI,
-      readQueryDelaySettingsUI,
-      readAlertDeleteSettingsUI,
-      writeAlertDeleteSettingsUI,
-    },
-  } = capabilities;
-
-  const [flappingSettings, hasFlappingChanged, setFlappingSettings, resetFlappingSettings] =
-    useResettableState<RulesSettingsFlappingProperties>();
-
-  const [queryDelaySettings, hasQueryDelayChanged, setQueryDelaySettings, resetQueryDelaySettings] =
-    useResettableState<RulesSettingsQueryDelayProperties>();
-
-  const { isLoading: isFlappingLoading, isError: hasFlappingError } = useFetchFlappingSettings({
-    http,
+  const { euiTheme } = useEuiTheme();
+  const form = useRulesSettingsForm({
     enabled: isVisible,
-    onSuccess: (fetchedSettings) => {
-      if (!flappingSettings) {
-        setFlappingSettings(
-          {
-            enabled: fetchedSettings.enabled,
-            lookBackWindow: fetchedSettings.lookBackWindow,
-            statusChangeThreshold: fetchedSettings.statusChangeThreshold,
-          },
-          true // Update the initial value so we don't need to fetch it from the server again
-        );
-      }
-    },
-  });
-
-  const { isLoading: isQueryDelayLoading, isError: hasQueryDelayError } = useGetQueryDelaySettings({
-    enabled: isVisible,
-    onSuccess: (fetchedSettings) => {
-      if (!queryDelaySettings) {
-        setQueryDelaySettings(
-          {
-            delay: fetchedSettings.delay,
-          },
-          true
-        );
-      }
-    },
-  });
-
-  const onCloseFlyout = useCallback(() => {
-    resetFlappingSettings();
-    resetQueryDelaySettings();
-    onClose();
-  }, [onClose, resetFlappingSettings, resetQueryDelaySettings]);
-
-  const { mutate } = useUpdateRuleSettings({
-    onSave,
     onClose,
+    onSave,
     setUpdatingRulesSettings,
   });
-
-  // In the future when we have more settings sub-features, we should
-  // disassociate the rule settings capabilities (save, show) from the
-  // sub-feature capabilities (writeXSettingsUI).
-  const canWriteFlappingSettings = writeFlappingSettingsUI && !hasFlappingError;
-  const canShowFlappingSettings = readFlappingSettingsUI;
-  const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
-  const canShowQueryDelaySettings = readQueryDelaySettingsUI;
-  const canShowAlertDeleteSettings = readAlertDeleteSettingsUI;
-
-  const isChanged = hasFlappingChanged || hasQueryDelayChanged;
-  const hasMinimumWritePermissions = canWriteFlappingSettings || canWriteQueryDelaySettings;
-  const shouldDisableSaveButton = !isChanged || !hasMinimumWritePermissions;
-
-  const handleSettingsChange = (
-    setting: keyof RulesSettingsProperties,
-    key: keyof RulesSettingsFlappingProperties | keyof RulesSettingsQueryDelayProperties,
-    value: boolean | number
-  ) => {
-    if (setting === 'flapping') {
-      if (!flappingSettings) {
-        return;
-      }
-      const newSettings = {
-        ...flappingSettings,
-        [key]: value,
-      };
-      setFlappingSettings({
-        ...newSettings,
-        statusChangeThreshold: Math.min(
-          newSettings.lookBackWindow,
-          newSettings.statusChangeThreshold
-        ),
-      });
-    }
-
-    if (setting === 'queryDelay') {
-      if (!queryDelaySettings) {
-        return;
-      }
-      const newSettings = {
-        ...queryDelaySettings,
-        [key]: value,
-      };
-      setQueryDelaySettings(newSettings);
-    }
-  };
-
-  const handleSave = () => {
-    const updatedSettings: RulesSettingsProperties = {};
-    if (canWriteFlappingSettings && hasFlappingChanged) {
-      updatedSettings.flapping = flappingSettings;
-      setFlappingSettings(flappingSettings!, true);
-    }
-    if (canWriteQueryDelaySettings && hasQueryDelayChanged) {
-      updatedSettings.queryDelay = queryDelaySettings;
-      setQueryDelaySettings(queryDelaySettings!, true);
-    }
-    mutate(updatedSettings);
-  };
+  const { isSaveDisabled, onSave: handleSave, onCancel: onCloseFlyout } = form;
 
   if (!isVisible) {
     return null;
   }
-
-  const maybeRenderForm = () => {
-    if (!canShowFlappingSettings && !canShowQueryDelaySettings && !canShowAlertDeleteSettings) {
-      return <RulesSettingsErrorPrompt />;
-    }
-    if (isFlappingLoading || isQueryDelayLoading) {
-      return <CenterJustifiedSpinner />;
-    }
-    const isAlertDeletionSettingsEnabled = getIsExperimentalFeatureEnabled(
-      'alertDeletionSettingsEnabled'
-    );
-    return (
-      <>
-        {flappingSettings && (
-          <RulesSettingsFlappingSection
-            onChange={(key, value) => handleSettingsChange('flapping', key, value)}
-            settings={flappingSettings}
-            canWrite={canWriteFlappingSettings}
-            canShow={canShowFlappingSettings}
-            hasError={hasFlappingError}
-          />
-        )}
-        {isServerless && queryDelaySettings && (
-          <>
-            <EuiSpacer />
-            <RulesSettingsQueryDelaySection
-              onChange={(key, value) => handleSettingsChange('queryDelay', key, value)}
-              settings={queryDelaySettings}
-              canWrite={canWriteQueryDelaySettings}
-              canShow={canShowQueryDelaySettings}
-              hasError={hasQueryDelayError}
-            />
-          </>
-        )}
-        {isAlertDeletionSettingsEnabled &&
-          readAlertDeleteSettingsUI &&
-          props.alertDeleteCategoryIds && (
-            <>
-              <EuiSpacer />
-              <AlertDeleteDescriptiveFormGroup
-                services={{ http, notifications }}
-                categoryIds={props.alertDeleteCategoryIds}
-                isDisabled={!writeAlertDeleteSettingsUI}
-              />
-            </>
-          )}
-      </>
-    );
-  };
 
   return (
     <EuiFlyout
@@ -316,16 +88,16 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       </EuiFlyoutHeader>
       <EuiHorizontalRule margin="none" />
 
-      <EuiCallOut
-        size="m"
-        title={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.calloutMessage', {
-          defaultMessage: 'Apply to all classic rules within the current space.',
-        })}
+      <div
         css={css`
-          position: sticky;
+          padding: ${euiTheme.size.base} ${euiTheme.size.l};
         `}
-      />
-      <EuiFlyoutBody>{maybeRenderForm()}</EuiFlyoutBody>
+      >
+        <RulesSettingsCallout />
+      </div>
+      <EuiFlyoutBody>
+        <RulesSettingsForm form={form} alertDeleteCategoryIds={alertDeleteCategoryIds} />
+      </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -345,7 +117,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
               fill
               data-test-subj="rulesSettingsFlyoutSaveButton"
               onClick={handleSave}
-              disabled={shouldDisableSaveButton}
+              disabled={isSaveDisabled}
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.rulesSettings.flyout.saveButton"
