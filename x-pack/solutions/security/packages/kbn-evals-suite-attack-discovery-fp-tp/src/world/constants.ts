@@ -61,13 +61,14 @@ export const FP_TP_BOOTSTRAP_RULE_ID = 'fptp-seeder-bootstrap-nomatch';
  */
 export const FP_TP_REASONING_FEATURE_ID = 'alertzero_reasoning';
 
-/** Half-width of the raw-event window the analysis reads around the cited alerts' original time. */
+/** Half-width of the raw-event window each per-alert branch reads around its alert's original time. */
 export const FP_TP_RAW_EVENT_WINDOW_MS = 2 * 60 * 60 * 1000;
 
 /**
- * Raw events the analysis reads per run (`load_events` `size`). More hits than this
- * mark the page truncated, and `block_truncated_clear` turns a `false_positive` into
- * `inconclusive`.
+ * Legacy shared-page size, kept as the reference volume the truncation
+ * fixtures were authored against (`withTruncatingBenignEvents` adds
+ * PAGE_SIZE + 10 events). The workflow itself now reads
+ * `FP_TP_RAW_EVENT_BRANCH_SIZE` events per per-alert branch.
  */
 export const FP_TP_RAW_EVENT_PAGE_SIZE = 50;
 

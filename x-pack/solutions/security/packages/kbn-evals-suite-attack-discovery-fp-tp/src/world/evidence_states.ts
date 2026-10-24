@@ -83,8 +83,11 @@ export const withTruncatingBenignEvents = (
   const earliestMs = Math.min(...world.events.map(timestampOf));
   // `after` keeps the world's own events on the oldest-first page (only truncation is
   // reported); `before` packs the fill into the minutes before the earliest event, so
-  // the fill occupies the whole page and evicts the world's own events — the dilution a
-  // widened window causes while the page stays 50.
+  // with a single shared window the fill occupies the whole page and evicts the
+  // world's own events. Under the per-alert branch design the fill lands inside the
+  // first cited alert's window only (its window reaches back to the chain's start),
+  // so that branch's page is all fill and flips `branches_truncated` — the
+  // per-branch form of the same dilution.
   const offsetMs = (position: number): number =>
     placement === 'before'
       ? -(count - position) * BENIGN_EVENT_SPACING_MS

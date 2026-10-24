@@ -274,17 +274,22 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
     buildWorld: (runMarker) => withStageSpan(tpWorld(runMarker), 3),
   },
-  // The dilution measurement the #299995 review asked for. The 3-day span widens the
-  // raw-event window to three days while the page stays 50, oldest first. More than a
-  // page of benign service starts sit at the window's oldest end, so the page holds only
-  // benign fill: every alert-adjacent event, including the C2 beacons, is evicted, and
-  // the analysis can neither cite the deciding events nor clear the alerts — gold
-  // `inconclusive`, the same downgrade as `encoded-powershell.fp-events-truncated` but
-  // caused by dilution across the widened window rather than a dense chain hour. With no
-  // such early-window volume the deciding events always fit (`tp-multiday-span`): a
-  // multi-day span alone does not dilute; corpus volume inside the window does. No
-  // `checks`: the verdict rules do not model truncation or eviction, so the gold would
-  // not follow from them.
+  // The dilution measurement the #299995 review asked for, under the per-alert
+  // window the follow-up adopted: the 3-day span widens the union of branch
+  // windows to three days while each branch reads at most 10, oldest first.
+  // More than a branch page of benign service starts sit inside the FIRST
+  // cited alert's window (the fill lands just before the chain's first event,
+  // and only that first alert's window reaches back to it), so that branch's
+  // page holds only benign fill: its alert-adjacent events are truncated away
+  // and `branches_truncated` flips, which blocks the clear — gold
+  // `inconclusive`, the same downgrade as `encoded-powershell.fp-events-truncated`
+  // (per-branch truncation rather than eviction off a single shared page). The
+  // later stages' alerts carry their own windows, so the analysis can still
+  // see those events via their branches; what it loses is the first alert's
+  // deciding events. With no such early-window volume every deciding event
+  // fits (`tp-multiday-span`): a multi-day span alone does not dilute; corpus
+  // volume inside a branch window does. No `checks`: the verdict rules do not
+  // model truncation or eviction, so the gold would not follow from them.
   {
     id: 'mimicrat-clickfix.fp-multiday-span-truncated',
     situation: 'U1',

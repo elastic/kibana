@@ -133,9 +133,10 @@ describe('mimicrat-clickfix examples', () => {
     }
   });
 
-  // The dilution arithmetic the truncation example's gold stands on: under the workflow's
-  // page (50, oldest first) across the 3-day window, the benign fill evicts the deciding
-  // events of every stage after the first.
+  // The dilution arithmetic the truncation example's gold stands on: under the
+  // workflow's per-alert branches (10 each, oldest first) across the 3-day span,
+  // the benign fill inside the first alert's window evicts that branch's own
+  // deciding events and flips `branches_truncated`.
   it('returns fp-multiday-span-truncated whose oldest-first page holds only benign fill and the earliest stage', () => {
     const world = buildFpTpExampleWorld('mimicrat-clickfix.fp-multiday-span-truncated', 'run1');
     const pageSize = FP_TP_RAW_EVENT_PAGE_SIZE;
