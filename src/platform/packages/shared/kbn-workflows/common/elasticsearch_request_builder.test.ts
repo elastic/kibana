@@ -44,6 +44,104 @@ describe('buildElasticsearchRequest', () => {
     expect(result.bulkBody).toEqual([{ index: { _index: 'test-index' } }, { message: 'test' }]);
   });
 
+  it('should wrap bare documents with stable _id when id_field is provided', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      id_field: 'id',
+      operations: [
+        { id: 'a', message: 'a' },
+        { id: 'b', message: 'b' },
+        { id: 'c', message: 'c' },
+      ],
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_bulk');
+    expect(result.bulkBody).toEqual([
+      { index: { _id: 'a' } },
+      { id: 'a', message: 'a' },
+      { index: { _id: 'b' } },
+      { id: 'b', message: 'b' },
+      { index: { _id: 'c' } },
+      { id: 'c', message: 'c' },
+    ]);
+  });
+
+  it('should ignore id_field when operations are explicit bulk operation rows', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      id_field: 'id',
+      operations: [{ index: { _index: 'test-index' } }, { message: 'test' }],
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_bulk');
+    expect(result.bulkBody).toEqual([{ index: { _index: 'test-index' } }, { message: 'test' }]);
+  });
+
+  it('should throw when a document is missing the id_field', () => {
+    expect(() =>
+      buildElasticsearchRequest('elasticsearch.bulk', {
+        index: 'test-index',
+        id_field: 'id',
+        operations: [{ id: 'a' }, { message: 'missing' }],
+      })
+    ).toThrow('Missing id_field "id" at document 1');
+  });
+
+  it('should throw when id_field value is an object', () => {
+    expect(() =>
+      buildElasticsearchRequest('elasticsearch.bulk', {
+        index: 'test-index',
+        id_field: 'id',
+        operations: [
+          { id: { repo: 'kibana', num: 1 }, v: 1 },
+          { id: { repo: 'elasticsearch', num: 2 }, v: 2 },
+        ],
+      })
+    ).toThrow('id_field "id" at document 0 must be a string, number, or boolean');
+  });
+
+  it('should throw when id_field value is an array', () => {
+    expect(() =>
+      buildElasticsearchRequest('elasticsearch.bulk', {
+        index: 'test-index',
+        id_field: 'id',
+        operations: [
+          { id: ['a', 'b'], v: 1 },
+          { id: ['a,b'], v: 2 },
+        ],
+      })
+    ).toThrow('id_field "id" at document 0 must be a string, number, or boolean');
+  });
+
+  it('should throw when id_field parameter is not a string', () => {
+    expect(() =>
+      buildElasticsearchRequest('elasticsearch.bulk', {
+        index: 'test-index',
+        id_field: 7 as unknown as string,
+        operations: [{ id: 'a' }],
+      })
+    ).toThrow('id_field must be a string');
+  });
+
+  it('should coerce a non-string id_field value to a string', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      id_field: 'id',
+      operations: [{ id: 42, message: 'numeric' }],
+    });
+    expect(result.bulkBody).toEqual([{ index: { _id: '42' } }, { id: 42, message: 'numeric' }]);
+  });
+
+  it('should not leak id_field into request body or query', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      id_field: 'id',
+      operations: [{ id: '1' }],
+    });
+    expect(result.body).toBeUndefined();
+    expect(result.query).toBeUndefined();
+  });
+
   it('should support bulk operations in old format with just documents in operations', () => {
     const result = buildElasticsearchRequest('elasticsearch.bulk', {
       index: 'test-index',
