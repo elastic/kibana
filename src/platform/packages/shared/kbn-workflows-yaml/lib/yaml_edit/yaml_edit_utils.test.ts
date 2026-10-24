@@ -580,6 +580,107 @@ steps:
     });
   });
 
+  describe('edits on steps nested inside if blocks', () => {
+    const NESTED_WORKFLOW = `version: "1"
+name: Nested
+steps:
+  - name: setup
+    type: console
+    with:
+      message: init
+  # Outer gate
+  - name: outer_gate
+    type: if
+    condition: "inputs.enabled: true"
+    steps:
+      - name: inner_gate
+        type: if
+        condition: "inputs.level: high"
+        steps:
+          # Post the note
+          - name: post_note
+            type: console
+            with:
+              message: "old note"
+          - name: post_other
+            type: console
+            with:
+              message: other
+    else:
+      - name: skipped
+        type: console
+        with:
+          message: skipped
+  - name: cleanup
+    type: console
+    with:
+      message: done
+`;
+
+    const getInnerSteps = (yaml: string) =>
+      parseDocument(yaml).toJSON().steps[1].steps[0].steps as Array<Record<string, unknown>>;
+
+    it('modifyStep replaces a deeply nested step', () => {
+      const result = modifyStep(NESTED_WORKFLOW, 'post_note', {
+        name: 'post_note',
+        type: 'console',
+        with: { message: '{{ variables.note }}' },
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+      expect(getInnerSteps(result.yaml)[0].with).toEqual({ message: '{{ variables.note }}' });
+      expect(getInnerSteps(result.yaml)[1].name).toBe('post_other');
+      expect(result.yaml).toContain('# Outer gate');
+      expect(result.yaml).toContain('# Post the note');
+    });
+
+    it('modifyStepProperty updates a property of a deeply nested step', () => {
+      const result = modifyStepProperty(NESTED_WORKFLOW, 'post_note', 'with', {
+        message: '{{ variables.note }}',
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+      expect(getInnerSteps(result.yaml)[0].with).toEqual({ message: '{{ variables.note }}' });
+      expect(result.yaml).toContain('# Post the note');
+    });
+
+    it('modifyStepProperty updates a step in an else branch', () => {
+      const result = modifyStepProperty(NESTED_WORKFLOW, 'skipped', 'with', {
+        message: 'changed',
+      });
+
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().steps[1].else[0].with).toEqual({
+        message: 'changed',
+      });
+    });
+
+    it('deleteStep removes a deeply nested step', () => {
+      const result = deleteStep(NESTED_WORKFLOW, 'post_other');
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+      const innerSteps = getInnerSteps(result.yaml);
+      expect(innerSteps).toHaveLength(1);
+      expect(innerSteps[0].name).toBe('post_note');
+    });
+
+    it('leaves other root steps unchanged', () => {
+      const result = modifyStep(NESTED_WORKFLOW, 'post_note', {
+        name: 'post_note',
+        type: 'console',
+        with: { message: 'new' },
+      });
+
+      const before = parseDocument(NESTED_WORKFLOW).toJSON().steps;
+      const after = parseDocument(result.yaml).toJSON().steps;
+      expect(after[0]).toEqual(before[0]);
+      expect(after[2]).toEqual(before[2]);
+    });
+  });
+
   describe('modifyStep indentation', () => {
     it('computes correct indentation using full-string newline search', () => {
       const yamlWithManySteps = `version: "1"

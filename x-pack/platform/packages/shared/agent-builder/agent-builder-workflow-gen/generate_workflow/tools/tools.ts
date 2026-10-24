@@ -13,6 +13,7 @@ import {
   insertStep,
   modifyStep,
   modifyStepProperty,
+  modifyWorkflowProperty,
   deleteStep,
   type StepDefinition,
 } from '@kbn/workflows-yaml';
@@ -145,6 +146,43 @@ const modifyStepPropertyTool = defineTool({
   },
 });
 
+const modifyWorkflowPropertyTool = defineTool({
+  name: 'modify_workflow_property',
+  description:
+    'Replace the value of a top-level workflow property (e.g. "triggers", "name", "description", "consts", "settings"). Not for "steps".',
+  schema: z.object({
+    property: z.string().describe('Top-level property key'),
+    // A typed union: with `z.unknown()` the JSON schema has no type, and models send arrays as strings.
+    value: z
+      .union([
+        z.array(z.unknown()),
+        z.record(z.string(), z.unknown()),
+        z.string(),
+        z.number(),
+        z.boolean(),
+      ])
+      .describe(
+        'New value for the whole property (e.g. an array of trigger objects for "triggers")'
+      ),
+  }),
+  mutatesYaml: true,
+  execute: async ({ property, value }, { state }) => {
+    if (property === 'steps') {
+      return {
+        message: {
+          success: false,
+          error:
+            'Use insert_step / modify_step / modify_step_property / delete_step to change steps',
+        },
+      };
+    }
+    const result = modifyWorkflowProperty(state.yaml, property, value);
+    return result.success
+      ? { yaml: result.yaml, message: { success: true } }
+      : { message: { success: false, error: result.error } };
+  },
+});
+
 const deleteStepTool = defineTool({
   name: 'delete_step',
   description: 'Delete a step by name',
@@ -192,6 +230,7 @@ export const workflowGenTools: ReadonlyArray<WorkflowGenToolDefinition> = [
   insertStepTool,
   modifyStepTool,
   modifyStepPropertyTool,
+  modifyWorkflowPropertyTool,
   deleteStepTool,
   getStepDefinitionsTool,
   getTriggerDefinitionsTool,
