@@ -187,7 +187,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(task.hasMWsChanged).toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('No data has changed since last run')
+        expect.stringContaining('No data has changed since')
       );
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).not.toHaveBeenCalled();
       expect(result.error).toBeUndefined();
@@ -263,10 +263,13 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       });
     });
 
-    it('retries a failed run in 5m and keeps the previous lastStartedAt', async () => {
+    it('retries a failed run in 5m and keeps the previous MW watermark', async () => {
       const initialLastStartedAt = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const taskInstance = {
-        ...getMockTaskInstance({ lastStartedAt: initialLastStartedAt }),
+        ...getMockTaskInstance({
+          lastStartedAt: initialLastStartedAt,
+          lastSyncedMwUpdatedAt: '2024-01-01T00:00:00.000Z',
+        }),
         startedAt: new Date(),
       };
       jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
@@ -283,7 +286,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const before = Date.now();
       const result = await task.runTask({ taskInstance });
 
-      expect(result.state.lastStartedAt).toBe(initialLastStartedAt);
+      expect(result.state.lastSyncedMwUpdatedAt).toBe('2024-01-01T00:00:00.000Z');
       expect(result.state.failedRunCount).toBe(1);
       expect(scheduleOf(result)).toBeUndefined();
       expect(runAtOf(result)?.getTime()).toBeGreaterThanOrEqual(before + FAILED_RUN_RETRY_DELAY_MS);
@@ -295,6 +298,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...getMockTaskInstance({
           failedRunCount: MAX_FAILED_RUN_RETRIES,
           lastStartedAt: previousLastStartedAt,
+          lastSyncedMwUpdatedAt: '2024-01-01T00:00:00.000Z',
         }),
         startedAt: new Date(),
       };
@@ -315,16 +319,19 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(runAtOf(result)).toBeUndefined();
       expect(result.state.failedRunCount).toBeUndefined();
       // the safety-net run must still see the edits the failed runs missed
-      expect(result.state.lastStartedAt).toBe(previousLastStartedAt);
+      expect(result.state.lastSyncedMwUpdatedAt).toBe('2024-01-01T00:00:00.000Z');
     });
 
     describe('lookback window', () => {
+      const previousWatermark = '2024-01-01T00:00:00.000Z';
+
       const runWithLastStartedAt = async (lastStartedAt: string) => {
         const hasMWsChangedSpy = jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
           hasMWsChanged: false,
           updatedMWs: [],
           missingMWIds: [],
           maintenanceWindows: [],
+          latestMwUpdatedAt: undefined,
         });
         jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
         jest.spyOn(task, 'haveMWsUpdatedSince').mockResolvedValue(false);
@@ -337,15 +344,20 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           },
         ]);
 
-        await task.runTask({ taskInstance: getMockTaskInstance({ lastStartedAt }) });
+        await task.runTask({
+          taskInstance: getMockTaskInstance({
+            lastStartedAt,
+            lastSyncedMwUpdatedAt: previousWatermark,
+          }),
+        });
 
-        return hasMWsChangedSpy.mock.calls[0][0].lastStartedAt;
+        return hasMWsChangedSpy.mock.calls[0][0].changedSince;
       };
 
-      it('keeps the previous run start after an outage shorter than the lookback', async () => {
+      it('keeps the previous MW watermark after an outage shorter than the lookback', async () => {
         const previousRun = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-        expect(await runWithLastStartedAt(previousRun)).toBe(previousRun);
+        expect(await runWithLastStartedAt(previousRun)).toBe(previousWatermark);
       });
 
       it('falls back to a 10 minute lookback after a long outage', async () => {
@@ -356,6 +368,57 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
         expect(new Date(lookback).getTime()).toBeGreaterThanOrEqual(before - 10 * 60 * 1000);
       });
+    });
+
+    // A window's `updatedAt` is stamped before its document is written, so a run can
+    // read the pre-edit document. The watermark must stay behind that edit.
+    it('still deploys an edit the previous run read too early', async () => {
+      const privateLocation = {
+        id: 'pl-1',
+        label: 'Private Location 1',
+        isServiceManaged: false,
+        agentPolicyId: 'policy-1',
+      };
+      const beforeEdit = [{ id: 'mw-1', updatedAt: '2024-06-01T09:00:00.000Z' }];
+      const afterEdit = [{ id: 'mw-1', updatedAt: '2024-06-01T09:59:59.000Z' }];
+
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockResolvedValue([privateLocation]);
+      const syncSpy = jest
+        .spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws')
+        .mockResolvedValue(undefined);
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValueOnce(beforeEdit)
+        .mockResolvedValue(afterEdit);
+
+      const collidingRun = await task.runTask({
+        taskInstance: {
+          ...getMockTaskInstance({
+            lastStartedAt: new Date().toISOString(),
+            lastSyncedMwUpdatedAt: beforeEdit[0].updatedAt,
+          }),
+          startedAt: new Date(),
+        },
+      });
+
+      expect(syncSpy).not.toHaveBeenCalled();
+      expect(collidingRun.state.lastSyncedMwUpdatedAt).toBe(beforeEdit[0].updatedAt);
+      // the edit became readable while the run was finishing
+      expect(runAtOf(collidingRun)).toBeInstanceOf(Date);
+
+      const nextRun = await task.runTask({
+        taskInstance: {
+          ...getMockTaskInstance(collidingRun.state),
+          startedAt: new Date(),
+        },
+      });
+
+      expect(syncSpy).toHaveBeenCalledWith(expect.objectContaining({ updatedMWs: afterEdit }));
+      expect(nextRun.state.lastSyncedMwUpdatedAt).toBe(afterEdit[0].updatedAt);
+      expect(runAtOf(nextRun)).toBeUndefined();
     });
 
     describe('lastSuccessfulSyncAt', () => {
@@ -380,6 +443,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           updatedMWs: [],
           missingMWIds: [],
           maintenanceWindows: [],
+          latestMwUpdatedAt: undefined,
         });
         jest.spyOn(task, 'haveMWsUpdatedSince').mockResolvedValue(false);
         jest
@@ -773,7 +837,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasMWsChanged({
         taskState: { lastTotalMWs: 1 } as any,
         soClient: mockSoClient as any,
-        lastStartedAt: new Date().toISOString(),
+        changedSince: new Date().toISOString(),
         monitorMwsIds: ['mw-1'],
       });
 
@@ -790,7 +854,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const res = await task.hasMWsChanged({
         taskState: taskState as any,
         soClient: mockSoClient as any,
-        lastStartedAt: new Date().toISOString(),
+        changedSince: new Date().toISOString(),
         monitorMwsIds: ['mw-1'],
       });
 
@@ -807,7 +871,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
-        lastStartedAt: '2024-01-01T00:00:00.000Z',
+        changedSince: '2024-01-01T00:00:00.000Z',
         taskState: {
           lastTotalMWs: 5,
         } as any,
@@ -822,7 +886,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
-        lastStartedAt: '...',
+        changedSince: '...',
         taskState: {
           lastTotalMWs: 5,
         } as any,
@@ -840,7 +904,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
-        lastStartedAt: '2023-02-01T00:00:00.000Z',
+        changedSince: '2023-02-01T00:00:00.000Z',
         taskState: {
           lastTotalMWs: 5,
         } as any,

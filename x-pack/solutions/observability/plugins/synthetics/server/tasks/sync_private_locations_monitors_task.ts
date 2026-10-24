@@ -55,7 +55,20 @@ export interface SyncTaskState extends Record<string, unknown> {
   failedRunCount?: number;
   /** Start of the last run that completed without error; failed and skipped runs keep the previous value. */
   lastSuccessfulSyncAt?: string;
+  /**
+   * Highest maintenance-window `updatedAt` a run actually read. A window's `updatedAt`
+   * is stamped before its document is written, so a run can read the pre-edit document
+   * while a run-clock watermark moves past the edit, hiding it from every later run.
+   */
+  lastSyncedMwUpdatedAt?: string;
 }
+
+/** Latest of two ISO timestamps, tolerating either being absent. */
+const latestIsoTimestamp = (a?: string, b?: string): string | undefined => {
+  if (!a) return b;
+  if (!b) return a;
+  return moment(a).isAfter(b) ? a : b;
+};
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
   state: Partial<SyncTaskState>;
@@ -115,14 +128,16 @@ export class SyncPrivateLocationMonitorsTask {
       encryptedSavedObjects,
     } = this.serverSetup;
 
-    let lastStartedAt = taskInstance.state.lastStartedAt;
-    // On first run or after a long outage, avoid syncing everything: look back 10 minutes only.
-    if (
-      !lastStartedAt ||
-      moment(lastStartedAt).isBefore(moment().subtract(MAX_LOOKBACK_HOURS, 'hour'))
-    ) {
-      lastStartedAt = moment().subtract(10, 'minute').toISOString();
-    }
+    const { lastStartedAt, lastSyncedMwUpdatedAt } = taskInstance.state;
+    // On first run or after a long outage, avoid syncing everything: look back 10 minutes
+    // only. The gap is measured on the run clock, since a watermark that is simply old
+    // is the steady state when nobody edits a window.
+    const changedSince =
+      lastSyncedMwUpdatedAt &&
+      lastStartedAt &&
+      moment(lastStartedAt).isSameOrAfter(moment().subtract(MAX_LOOKBACK_HOURS, 'hour'))
+        ? lastSyncedMwUpdatedAt
+        : moment().subtract(10, 'minute').toISOString();
     const taskState = this.getNewTaskState({ taskInstance });
     const syncedState: SyncTaskState = {
       ...taskState,
@@ -202,13 +217,18 @@ export class SyncPrivateLocationMonitorsTask {
         return { state: syncedState, schedule };
       }
 
-      const { hasMWsChanged, updatedMWs, missingMWIds, maintenanceWindows } =
+      const { hasMWsChanged, updatedMWs, missingMWIds, maintenanceWindows, latestMwUpdatedAt } =
         await this.hasMWsChanged({
           soClient,
           taskState,
-          lastStartedAt,
+          changedSince,
           monitorMwsIds,
         });
+      // Advances only to what this run read, so an edit it read too early stays visible.
+      const mwSyncedState: SyncTaskState = {
+        ...syncedState,
+        lastSyncedMwUpdatedAt: latestIsoTimestamp(lastSyncedMwUpdatedAt, latestMwUpdatedAt),
+      };
 
       const dataChangeSync = hasMWsChanged && !taskState.disableAutoSync;
       if (dataChangeSync) {
@@ -229,19 +249,26 @@ export class SyncPrivateLocationMonitorsTask {
           this.debugLog(`Auto sync is disabled, skipping sync of private location monitors`);
         } else {
           this.debugLog(
-            `No data has changed since last run ${lastStartedAt}, skipping sync of private location monitors`
+            `No data has changed since ${changedSince}, skipping sync of private location monitors`
           );
         }
       }
 
-      // Only `updatedAt` after this run's start — missing IDs persist after a
+      // Only `updatedAt` after what this run read — missing IDs persist after a
       // sync and would schedule follow-ups forever.
-      if (await this.haveMWsUpdatedSince(taskState.lastStartedAt, monitorMwsIds)) {
+      if (
+        await this.haveMWsUpdatedSince(
+          mwSyncedState.lastSyncedMwUpdatedAt ?? taskState.lastStartedAt,
+          monitorMwsIds
+        )
+      ) {
         this.debugLog(
           `Maintenance windows changed during this run; scheduling an immediate follow-up`
         );
-        return { state: syncedState, runAt: new Date() };
+        return { state: mwSyncedState, runAt: new Date() };
       }
+
+      return { state: mwSyncedState, schedule };
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
       if (taskInstance.state.privateLocationId) {
@@ -253,18 +280,16 @@ export class SyncPrivateLocationMonitorsTask {
         logger.error(
           `Giving up retrying the sync of private location monitors after ${MAX_FAILED_RUN_RETRIES} retries`
         );
-        // Keep the window start: advancing it would hide the edits these runs failed to apply.
-        return { error, state: { ...taskState, lastStartedAt }, schedule };
+        // `taskState` carries the previous watermark forward, so the safety-net run
+        // still sees the edits these runs failed to apply.
+        return { error, state: taskState, schedule };
       }
-      // Keep the window start so the retry still sees the MW edits this run missed.
       return {
         error,
-        state: { ...taskState, lastStartedAt, failedRunCount },
+        state: { ...taskState, failedRunCount },
         runAt: new Date(Date.now() + FAILED_RUN_RETRY_DELAY_MS),
       };
     }
-
-    return { state: syncedState, schedule };
   }
 
   getNewTaskState({ taskInstance }: { taskInstance: CustomTaskInstance }): SyncTaskState {
@@ -274,6 +299,7 @@ export class SyncPrivateLocationMonitorsTask {
       lastStartedAt: startedAt.toISOString(),
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
       lastSuccessfulSyncAt: taskInstance.state.lastSuccessfulSyncAt,
+      lastSyncedMwUpdatedAt: taskInstance.state.lastSyncedMwUpdatedAt,
     };
   }
 
@@ -357,11 +383,11 @@ export class SyncPrivateLocationMonitorsTask {
   }
 
   async hasMWsChanged({
-    lastStartedAt,
+    changedSince,
     monitorMwsIds,
   }: {
     soClient: SavedObjectsClientContract;
-    lastStartedAt: string;
+    changedSince: string;
     taskState: SyncTaskState;
     monitorMwsIds: string[];
   }) {
@@ -370,7 +396,7 @@ export class SyncPrivateLocationMonitorsTask {
     // check if any of the MWs were updated since the last run
     const updatedMWs = maintenanceWindows.filter((mw) => {
       const updatedAt = mw.updatedAt;
-      return moment(updatedAt).isAfter(moment(lastStartedAt));
+      return moment(updatedAt).isAfter(moment(changedSince));
     });
 
     this.debugLog(`Updated MWs: ${updatedMWs.map((mw) => mw.id).join(', ')}`);
@@ -387,6 +413,10 @@ export class SyncPrivateLocationMonitorsTask {
       updatedMWs,
       missingMWIds,
       maintenanceWindows: maintenanceWindows.filter((mw) => monitorMwsIds.includes(mw.id)),
+      latestMwUpdatedAt: maintenanceWindows.reduce<string | undefined>(
+        (latest, mw) => latestIsoTimestamp(latest, mw.updatedAt),
+        undefined
+      ),
     };
   }
 
