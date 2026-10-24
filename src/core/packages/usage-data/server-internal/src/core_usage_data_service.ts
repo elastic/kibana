@@ -22,7 +22,11 @@ import type {
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
 import type { Logger } from '@kbn/logging';
-import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type {
+  HttpConfigType,
+  InternalHttpServiceSetup,
+  PermissionsPolicyConfigType,
+} from '@kbn/core-http-server-internal';
 import { createProvenanceTelemetryPostAuthHandler } from '@kbn/core-http-server-internal';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
@@ -86,6 +90,7 @@ export class CoreUsageDataService
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
   private httpConfig?: HttpConfigType;
+  private permissionsPolicyConfig?: PermissionsPolicyConfigType;
   private loggingConfig?: LoggingConfigType;
   private soConfig?: SavedObjectsConfigType;
   private stop$: Subject<void>;
@@ -314,9 +319,13 @@ export class CoreUsageDataService
             strictTransportSecurity: http.securityResponseHeaders.strictTransportSecurity ?? 'NULL',
             xContentTypeOptions: http.securityResponseHeaders.xContentTypeOptions ?? 'NULL',
             referrerPolicy: http.securityResponseHeaders.referrerPolicy ?? 'NULL',
-            permissionsPolicyConfigured: isConfigured.string(
-              http.securityResponseHeaders.permissionsPolicy ?? undefined
-            ),
+            // Counts `null` as well as a policy string, because `null` is how the header is
+            // disabled, and the setting that allows it is removed in 10.0.0.
+            permissionsPolicyConfigured:
+              http.securityResponseHeaders.permissionsPolicy !== undefined,
+            permissionsPolicyDisabled:
+              http.securityResponseHeaders.permissionsPolicy === null ||
+              this.permissionsPolicyConfig?.enabled === false,
             disableEmbedding: http.securityResponseHeaders.disableEmbedding,
             crossOriginOpenerPolicy: http.securityResponseHeaders.crossOriginOpenerPolicy ?? 'NULL',
           },
@@ -478,6 +487,13 @@ export class CoreUsageDataService
       .pipe(takeUntil(this.stop$))
       .subscribe((config) => {
         this.httpConfig = config;
+      });
+
+    this.configService
+      .atPath<PermissionsPolicyConfigType>('permissionsPolicy')
+      .pipe(takeUntil(this.stop$))
+      .subscribe((config) => {
+        this.permissionsPolicyConfig = config;
       });
 
     this.configService

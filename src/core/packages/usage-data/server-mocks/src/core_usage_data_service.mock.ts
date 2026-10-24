@@ -107,6 +107,7 @@ const createStartContractMock = () => {
               xContentTypeOptions: 'nosniff',
               referrerPolicy: 'no-referrer-when-downgrade',
               permissionsPolicyConfigured: false,
+              permissionsPolicyDisabled: false,
               disableEmbedding: false,
               crossOriginOpenerPolicy: 'same-origin',
             },

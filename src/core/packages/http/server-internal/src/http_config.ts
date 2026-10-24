@@ -391,6 +391,64 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
         });
       }
     },
+    (settings, fromPath, addDeprecation) => {
+      const cfg = get(settings, fromPath);
+      const permissionsPolicy = cfg?.securityResponseHeaders?.permissionsPolicy;
+      // Only fires when the setting is present. A deprecation that fires on default configuration
+      // would break the "one warning by default" assertion in config_deprecation.test.ts.
+      if (permissionsPolicy === null) {
+        // `null` switches the header off. The per-directive settings only add sources, so they
+        // cannot express that, and pointing the administrator at them would turn the header back
+        // on. `permissionsPolicy.enabled` is the replacement.
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.securityResponseHeaders.permissionsPolicy`,
+          title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicy" is deprecated`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" is set to null, which disables the Permissions-Policy header. The setting is deprecated and will be removed in 10.0.0. Use "permissionsPolicy.enabled: false" instead.`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "${fromPath}.securityResponseHeaders.permissionsPolicy" from your Kibana configuration file.`,
+              `Add "permissionsPolicy.enabled: false" to keep the Permissions-Policy header disabled.`,
+            ],
+          },
+        });
+      } else if (permissionsPolicy !== undefined) {
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.securityResponseHeaders.permissionsPolicy`,
+          title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicy" is deprecated`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" replaces Kibana's entire permissions policy, so later changes to the built-in policy are lost. It is deprecated and will be removed in 10.0.0.`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "${fromPath}.securityResponseHeaders.permissionsPolicy" from your Kibana configuration file.`,
+              `Add only the sources you need to the matching "permissionsPolicy.<directive>" setting, for example "permissionsPolicy.camera: ['self']". These are added to Kibana's built-in policy rather than replacing it.`,
+            ],
+          },
+        });
+      }
+      const permissionsPolicyReportOnly = cfg?.securityResponseHeaders?.permissionsPolicyReportOnly;
+      if (permissionsPolicyReportOnly !== undefined) {
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly`,
+          title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" is deprecated`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" is deprecated and will be removed in 10.0.0.`,
+          correctiveActions: {
+            // The report-only header is only sent when report-only directives are configured, so
+            // removing a `null` value is all it takes to keep it off.
+            manualSteps:
+              permissionsPolicyReportOnly === null
+                ? [
+                    `Remove "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" from your Kibana configuration file. The Permissions-Policy-Report-Only header is not sent unless "permissionsPolicy.report_only.<directive>" settings are configured.`,
+                  ]
+                : [
+                    `Remove "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" from your Kibana configuration file.`,
+                    `Add the sources you want to report on to the matching "permissionsPolicy.report_only.<directive>" setting, for example "permissionsPolicy.report_only.camera: ['self']".`,
+                  ],
+          },
+        });
+      }
+    },
   ],
 };
 

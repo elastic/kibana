@@ -266,7 +266,14 @@ export function getCoreUsageCollector(
               type: 'boolean',
               _meta: {
                 description:
-                  'Indicates if the permissionsPolicy response header has been configured.',
+                  'Indicates if the deprecated server.securityResponseHeaders.permissionsPolicy setting is set, either to a policy string or to null.',
+              },
+            },
+            permissionsPolicyDisabled: {
+              type: 'boolean',
+              _meta: {
+                description:
+                  'Indicates if the Permissions-Policy response header is disabled, either by setting the deprecated server.securityResponseHeaders.permissionsPolicy to null or by setting permissionsPolicy.enabled to false.',
               },
             },
             disableEmbedding: {

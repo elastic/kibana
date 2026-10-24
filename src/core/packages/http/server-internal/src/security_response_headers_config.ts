@@ -9,7 +9,17 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { PermissionsPolicyConfigType } from './permissions_policy';
+import { CriticalError } from '@kbn/core-base-server-internal';
+import type {
+  PermissionsPolicyConfigType,
+  PermissionsPolicyDirectiveSetting,
+} from './permissions_policy';
+import {
+  PermissionsPolicyDirectives,
+  permissionsPolicyDirectiveSettings,
+} from './permissions_policy';
+
+const INVALID_CONFIG_EXIT_CODE = 78;
 
 export const securityResponseHeadersSchema = schema.object({
   strictTransportSecurity: schema.oneOf([schema.string(), schema.literal(null)], {
@@ -35,12 +45,12 @@ export const securityResponseHeadersSchema = schema.object({
     ],
     { defaultValue: 'strict-origin-when-cross-origin' }
   ),
-  permissionsPolicy: schema.oneOf([schema.string(), schema.literal(null)], {
-    // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
-    // Note: this currently lists all non-experimental permissions, as of May 2023
-    defaultValue:
-      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()',
-  }),
+  // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
+  // Deprecated in favor of the per-directive `permissionsPolicy.*` settings. There is no default
+  // value, so that an explicit configuration can be told apart from an absent one: `undefined`
+  // means Kibana builds the policy itself, `null` disables the header, and a string replaces the
+  // policy wholesale.
+  permissionsPolicy: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   permissionsPolicyReportOnly: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   disableEmbedding: schema.boolean({ defaultValue: false }), // is used to control X-Frame-Options and CSP headers
   crossOriginOpenerPolicy: schema.oneOf(
@@ -55,6 +65,71 @@ export const securityResponseHeadersSchema = schema.object({
   ),
 });
 
+type SecurityResponseHeadersConfigType = TypeOf<typeof securityResponseHeadersSchema>;
+
+const hasDirectives = (
+  directives: Readonly<Record<PermissionsPolicyDirectiveSetting, string[]>> | undefined
+) => permissionsPolicyDirectiveSettings.some((setting) => directives?.[setting]?.length);
+
+// An explicitly empty report-only list is a configured directive, so it counts as set.
+const hasReportOnlyDirectives = (
+  directives: Readonly<Partial<Record<PermissionsPolicyDirectiveSetting, string[]>>> | undefined
+) => permissionsPolicyDirectiveSettings.some((setting) => directives?.[setting] !== undefined);
+
+/**
+ * Throws when a deprecated wholesale policy setting is combined with a `permissionsPolicy.*` setting
+ * that contradicts it. The two cannot be reconciled, so Kibana refuses to start rather than
+ * silently discarding one of them.
+ *
+ * @internal
+ */
+export function validatePermissionsPolicyConfig(
+  raw: SecurityResponseHeadersConfigType,
+  rawPermissionsPolicyConfig: PermissionsPolicyConfigType
+) {
+  const conflicts: string[] = [];
+  const legacy = 'server.securityResponseHeaders.permissionsPolicy';
+  const legacyReportOnly = 'server.securityResponseHeaders.permissionsPolicyReportOnly';
+
+  // `null` disables the header outright, so telling the administrator to configure the individual
+  // directives instead would turn it back on.
+  const describeConflict = (setting: string, value: string | null, replacement: string) =>
+    value === null
+      ? `"${setting}" is set to null, which disables the header, so it cannot be used together with "${replacement}", which adds to it. Remove one of them.`
+      : `"${setting}" cannot be used together with "${replacement}". Remove "${setting}" and configure the individual directives instead.`;
+
+  if (raw.permissionsPolicy !== undefined && hasDirectives(rawPermissionsPolicyConfig)) {
+    conflicts.push(
+      describeConflict(legacy, raw.permissionsPolicy, 'permissionsPolicy.<directive>')
+    );
+  }
+
+  // `null` and `enabled: false` both mean no header, so only a policy string contradicts it.
+  if (rawPermissionsPolicyConfig.enabled === false && typeof raw.permissionsPolicy === 'string') {
+    conflicts.push(
+      `"${legacy}" sets a policy, but "permissionsPolicy.enabled" is false, which disables the header. Remove "${legacy}".`
+    );
+  }
+
+  if (
+    raw.permissionsPolicyReportOnly !== undefined &&
+    hasReportOnlyDirectives(rawPermissionsPolicyConfig.report_only)
+  ) {
+    conflicts.push(
+      describeConflict(
+        legacyReportOnly,
+        raw.permissionsPolicyReportOnly,
+        'permissionsPolicy.report_only.<directive>'
+      )
+    );
+  }
+
+  if (conflicts.length) {
+    const message = conflicts.join(' ');
+    throw new CriticalError(message, 'InvalidConfig', INVALID_CONFIG_EXIT_CODE);
+  }
+}
+
 /**
  * Parses raw security header config info, returning an object with the appropriate header keys and values.
  *
@@ -62,7 +137,7 @@ export const securityResponseHeadersSchema = schema.object({
  * @internal
  */
 export function parseRawSecurityResponseHeadersConfig(
-  raw: TypeOf<typeof securityResponseHeadersSchema>,
+  raw: SecurityResponseHeadersConfigType,
   rawPermissionsPolicyConfig: PermissionsPolicyConfigType
 ) {
   const securityResponseHeaders: Record<string, string | string[]> = {};
@@ -78,18 +153,41 @@ export function parseRawSecurityResponseHeadersConfig(
     securityResponseHeaders['Referrer-Policy'] = raw.referrerPolicy;
   }
 
-  const reportTo = rawPermissionsPolicyConfig.report_to.length
-    ? `;report-to=${rawPermissionsPolicyConfig.report_to}`
-    : '';
+  const reportTo = rawPermissionsPolicyConfig.report_to?.[0];
+  const reportToParameter = reportTo ? `;report-to=${reportTo}` : '';
+  const { enforceHeader, reportOnlyHeader } = PermissionsPolicyDirectives.fromConfig(
+    rawPermissionsPolicyConfig
+  ).getPermissionsPolicyHeadersByDisposition(reportTo);
 
-  if (raw.permissionsPolicy) {
-    securityResponseHeaders['Permissions-Policy'] = `${raw.permissionsPolicy}${reportTo}`;
+  // `permissionsPolicy.enabled: false` switches off the enforced header only. The report-only
+  // header below has its own settings and is still sent when they are configured.
+  if (rawPermissionsPolicyConfig.enabled !== false) {
+    if (typeof raw.permissionsPolicy === 'string') {
+      // A wholesale policy is opaque to Kibana, so the report-to parameter is appended as-is
+      // rather than distributed across the directives it contains. An empty policy carries no
+      // directive to attach it to, and would serialize as a malformed `;report-to=...`, so it
+      // sends no header.
+      if (raw.permissionsPolicy.trim()) {
+        securityResponseHeaders[
+          'Permissions-Policy'
+        ] = `${raw.permissionsPolicy}${reportToParameter}`;
+      }
+    } else if (raw.permissionsPolicy === undefined) {
+      securityResponseHeaders['Permissions-Policy'] = enforceHeader;
+    }
   }
 
-  if (raw.permissionsPolicyReportOnly && reportTo) {
-    securityResponseHeaders[
-      'Permissions-Policy-Report-Only'
-    ] = `${raw.permissionsPolicyReportOnly}${reportTo}`;
+  // The report-only header is pointless without somewhere to send the reports, so it is omitted.
+  if (reportTo) {
+    if (typeof raw.permissionsPolicyReportOnly === 'string') {
+      if (raw.permissionsPolicyReportOnly.trim()) {
+        securityResponseHeaders[
+          'Permissions-Policy-Report-Only'
+        ] = `${raw.permissionsPolicyReportOnly}${reportToParameter}`;
+      }
+    } else if (reportOnlyHeader) {
+      securityResponseHeaders['Permissions-Policy-Report-Only'] = reportOnlyHeader;
+    }
   }
 
   if (raw.crossOriginOpenerPolicy) {
