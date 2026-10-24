@@ -14,6 +14,7 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-plugin/common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { extractAccessedDecisionTrees } from './decision_tree_evidence';
+import { orcaCurrentTimeMs } from './orca_dataset';
 import { extractToolCallTrajectory } from './tool_call_trajectory';
 import type {
   InvestigationExample,
@@ -161,9 +162,8 @@ const TELEMETRY_CUTOFF_GRACE_MS = 5 * 60 * 1000;
 
 /** UTC instant five minutes after a parseable current_time. */
 const telemetryNotAfter = (currentTime: unknown): string | undefined => {
-  if (typeof currentTime !== 'string') return undefined;
-  const parsed = Date.parse(currentTime);
-  if (Number.isNaN(parsed)) return undefined;
+  const parsed = orcaCurrentTimeMs(currentTime);
+  if (parsed === undefined) return undefined;
   return new Date(parsed + TELEMETRY_CUTOFF_GRACE_MS).toISOString();
 };
 

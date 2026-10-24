@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+/** Sandbox directory that holds this investigation's cutoff proxy. */
+export const TELEMETRY_CUTOFF_DIR = '/workspace/.nightshift';
+
 /** Where the sandbox command finds the proxy. One investigation writes it into its own session. */
-export const TELEMETRY_CUTOFF_PROXY_PATH = '/workspace/.nightshift/telemetry_cutoff_proxy.py';
+export const TELEMETRY_CUTOFF_PROXY_PATH = `${TELEMETRY_CUTOFF_DIR}/telemetry_cutoff_proxy.py`;
 
 /**
  * In-sandbox proxy. The cluster URL is given to this process only; the wrapper unsets it before

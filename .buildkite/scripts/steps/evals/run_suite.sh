@@ -263,7 +263,8 @@ EOF
 
         step_judge_connector="${EVAL_CONNECTOR_ID:-}"
         if [[ "$shard_id" == "orcabench" ]]; then
-          # ORCA's judge is GPT-5.4. The agent model stays EVAL_PROJECT. Customer-0 is unchanged.
+          # Same id as ORCA_JUDGE_CONNECTOR_ID in evals/investigation/orca_judge.ts.
+          # The agent model stays EVAL_PROJECT. Customer-0 is unchanged.
           step_judge_connector="eis-openai-gpt-5-4"
         fi
 

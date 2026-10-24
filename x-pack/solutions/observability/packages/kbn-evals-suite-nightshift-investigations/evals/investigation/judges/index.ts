@@ -347,7 +347,7 @@ const stringList = (value: unknown): string[] | undefined =>
 const isOrcaControl = (metadata: InvestigationExample['metadata']): boolean =>
   metadata.control === true || metadata.task_type === 'control';
 
-/** A default severity alone is not a report. ORCA creates every conversation at medium. */
+/** A default severity alone is not a report. */
 const reportHasFindings = (report: InvestigationTaskOutput['structured_report']): boolean =>
   Boolean(report?.conclusion || report?.summary || report?.hypotheses?.length);
 
@@ -356,6 +356,34 @@ const quietWindowText = (metadata: InvestigationExample['metadata']): string => 
   if (window === undefined || window === null) return '';
   const text = JSON.stringify(window);
   return text.length > 4_000 ? text.slice(0, 4_000) : text;
+};
+
+const extractReference = (expected: InvestigationExample['output']): string => {
+  const reference = expected?.reference_answer;
+  return typeof reference === 'string' ? reference : '';
+};
+
+const namedListFromFlagsJudge = async (
+  deps: JudgeDeps,
+  evaluatorName: string,
+  flags: string[],
+  expected: InvestigationExample['output'],
+  report: InvestigationTaskOutput['structured_report'],
+  field: 'named_flags' | 'named_causes',
+  missingList: string
+): Promise<{ named: string[]; reasoning: string }> => {
+  const result = await invokeJudge<{
+    named_flags: unknown;
+    named_causes: unknown;
+    reasoning: string;
+  }>(deps, evaluatorName, OrcaFlagsJudgePrompt, {
+    plausibleFlags: flags.join(', '),
+    reference: extractReference(expected),
+    answer: composeAnswerText(report),
+  });
+  const named = stringList(result[field]);
+  if (!named) throw new Error(missingList);
+  return { named, reasoning: result.reasoning };
 };
 
 /** ORCA set scores. `goal_pass` still scores the single best hypothesis. */
@@ -381,24 +409,20 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
           explanation: 'The report names none of the plausible flags.',
         };
       }
-      const answer = composeAnswerText(output.structured_report);
-      const result = await invokeJudge<{ named_flags: unknown; reasoning: string }>(
+      const { named, reasoning } = await namedListFromFlagsJudge(
         deps,
         ORCA_RCA_ACCURACY_EVALUATOR,
-        OrcaFlagsJudgePrompt,
-        {
-          plausibleFlags: flags.join(', '),
-          reference: extractReference(expected),
-          answer,
-        }
+        flags,
+        expected,
+        output.structured_report,
+        'named_flags',
+        'ORCA accuracy judge returned no flag list'
       );
-      const named = stringList(result.named_flags);
-      if (!named) throw new Error('ORCA accuracy judge returned no flag list');
       const score = scoreOrcaRcaAccuracy({ plausibleFlags: flags, namedFlags: named });
       return {
         score,
         label: score === 1 ? 'pass' : 'fail',
-        explanation: result.reasoning,
+        explanation: reasoning,
         metadata: { plausible_flags: flags, named_flags: named },
       };
     },
@@ -421,24 +445,20 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
       if (!reportHasFindings(output.structured_report)) {
         return { score: 0, label: 'pass', explanation: 'The report names no cause.' };
       }
-      const answer = composeAnswerText(output.structured_report);
-      const result = await invokeJudge<{ named_causes: unknown; reasoning: string }>(
+      const { named, reasoning } = await namedListFromFlagsJudge(
         deps,
         ORCA_HALLUCINATION_EVALUATOR,
-        OrcaFlagsJudgePrompt,
-        {
-          plausibleFlags: flags.join(', '),
-          reference: extractReference(expected),
-          answer,
-        }
+        flags,
+        expected,
+        output.structured_report,
+        'named_causes',
+        'ORCA hallucination judge returned no cause list'
       );
-      const named = stringList(result.named_causes);
-      if (!named) throw new Error('ORCA hallucination judge returned no cause list');
       const score = scoreOrcaHallucination({ plausibleFlags: flags, namedCauses: named });
       return {
         score,
         label: score === 1 ? 'hallucinated' : 'pass',
-        explanation: result.reasoning,
+        explanation: reasoning,
         metadata: { plausible_flags: flags, named_causes: named },
       };
     },
@@ -485,8 +505,3 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
     },
   },
 ];
-
-const extractReference = (expected: InvestigationExample['output']): string => {
-  const reference = expected?.reference_answer;
-  return typeof reference === 'string' ? reference : '';
-};
