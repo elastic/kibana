@@ -13,6 +13,7 @@ import {
   createPersonaMatrixTrajectoryEvaluator,
   createPersonaMatrixExpectedToolCalledEvaluator,
   createPersonaMatrixSkillInvokedEvaluator,
+  createPersonaMatrixQuantitativeEvaluators,
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
 import {
@@ -332,5 +333,53 @@ describe('task output shape', () => {
     const messages = (taskOutput as { messages?: Array<{ message?: string }> }).messages ?? [];
     const latestMessage = messages[messages.length - 1]?.message;
     expect(latestMessage).toBe('the real answer');
+  });
+});
+
+describe('createPersonaMatrixQuantitativeEvaluators', () => {
+  const emptyResponseOutput = {
+    messages: [{ message: '' }],
+    correctnessAnalysis: {
+      summary: {
+        factual_accuracy_summary: 'ACCURATE',
+        relevance_summary: 'RELEVANT',
+        sequence_accuracy_summary: 'NOT_APPLICABLE',
+      },
+      analysis: [
+        {
+          claim: 'the response is empty',
+          centrality: 'central',
+          centrality_reason: '',
+          verdict: 'FULLY_SUPPORTED',
+          sequence_match: 'NOT_APPLICABLE',
+          explanation: '',
+        },
+      ],
+    },
+  };
+
+  it('keeps the platform evaluator names, with a single Relevance', () => {
+    expect(createPersonaMatrixQuantitativeEvaluators().map((e) => e.name)).toEqual([
+      'Factuality',
+      'Relevance',
+      'Sequence Accuracy',
+    ]);
+  });
+
+  it('uses the security Relevance: an empty response scores 0 even with a central judge claim', async () => {
+    const relevance = createPersonaMatrixQuantitativeEvaluators().find(
+      (e) => e.name === 'Relevance'
+    )!;
+
+    const result = await relevance.evaluate({
+      input: {},
+      expected: {},
+      output: emptyResponseOutput,
+      metadata: {},
+    } as unknown as Parameters<typeof relevance.evaluate>[0]);
+
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('IRRELEVANT');
+    expect(result.metadata).toMatchObject({ relevanceLabelConsistent: false });
   });
 });
