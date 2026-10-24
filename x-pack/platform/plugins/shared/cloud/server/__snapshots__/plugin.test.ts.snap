@@ -30,6 +30,7 @@ Object {
   "organizationId": undefined,
   "projectsUrl": "https://cloud.elastic.co/projects/",
   "region": undefined,
+  "registerBillingAccessChecker": [Function],
   "serverless": Object {
     "orchestratorTarget": undefined,
     "organizationInTrial": undefined,

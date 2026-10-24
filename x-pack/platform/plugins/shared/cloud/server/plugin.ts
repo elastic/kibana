@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
@@ -35,6 +35,11 @@ import { persistTokenCloudData } from './cloud_data';
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
 }
+
+/**
+ * Tells whether the user behind the request may see Cloud billing for the organization.
+ */
+export type BillingAccessChecker = (request: KibanaRequest) => Promise<boolean>;
 
 /**
  * Setup contract
@@ -201,6 +206,11 @@ export interface CloudSetup {
    * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
    */
   trialDaysLeft: () => number | undefined;
+  /**
+   * Registers how Cloud learns whether a user may see billing. Without a checker, the billing
+   * access route reports that access cannot be checked.
+   */
+  registerBillingAccessChecker: (checker: BillingAccessChecker) => void;
 }
 
 /**
@@ -238,6 +248,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly logger: Logger;
   private readonly trialEndDate: Date | undefined;
+  private billingAccessChecker?: BillingAccessChecker;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
@@ -353,6 +364,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       logger: this.logger,
       router,
       elasticsearchUrl,
+      getBillingAccessChecker: () => this.billingAccessChecker,
     });
 
     setupSavedObjects(core.savedObjects, this.logger);
@@ -397,6 +409,12 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       },
       isInTrial: this.isInTrial.bind(this),
       trialDaysLeft: this.trialDaysLeft.bind(this),
+      registerBillingAccessChecker: (checker) => {
+        if (this.billingAccessChecker) {
+          throw new Error('A billing access checker is already registered.');
+        }
+        this.billingAccessChecker = checker;
+      },
     };
   }
 

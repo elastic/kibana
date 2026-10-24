@@ -50,10 +50,17 @@ export function buildMockIdpUiamRoleAssignments({
   organizationId,
   projectType,
   applicationRoles,
+  organizationRoleIds = [],
 }: {
   organizationId: string;
   projectType: string;
   applicationRoles: string[];
+  /**
+   * Built-in UIAM organization roles the user holds on top of plain membership, such as
+   * `organization-admin` or `billing-admin`. They grant organization-level actions only: the
+   * user's application roles still come from the project assignments.
+   */
+  organizationRoleIds?: string[];
 }): {
   organization: MockIdpUiamOrganizationRoleAssignment[];
   project: MockIdpUiamProjectRoleAssignment[];
@@ -67,6 +74,11 @@ export function buildMockIdpUiamRoleAssignments({
         // an organization role, and this assignment must not widen the user's roles.
         application_roles: [],
       },
+      ...organizationRoleIds.map((roleId) => ({
+        role_id: roleId,
+        organization_id: organizationId,
+        application_roles: [],
+      })),
     ],
     // One grant per project type, like an org admin with mixed projects. This lets the user
     // reach cross-project (CPS) linked projects of any type, not just the type of the Kibana

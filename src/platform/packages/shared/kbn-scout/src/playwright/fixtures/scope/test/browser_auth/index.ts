@@ -11,7 +11,15 @@ import type { KibanaRole } from '../../../../../common';
 import { getPrivilegedRoleName } from '../../../../../common';
 import { coreWorkerFixtures } from '../../worker';
 
-export type LoginFunction = (role: string) => Promise<void>;
+export interface LoginOptions {
+  /**
+   * Built-in UIAM organization roles the user holds on top of the role, such as `billing-admin`
+   * or `organization-admin`. Only supported on local UIAM-enabled serverless projects.
+   */
+  uiamOrganizationRoles?: string[];
+}
+
+export type LoginFunction = (role: string, options?: LoginOptions) => Promise<void>;
 
 export interface BrowserAuthFixture {
   /**
@@ -32,9 +40,10 @@ export interface BrowserAuthFixture {
   /**
    * Logs in as a user with a role.
    * @param role - A role object that defines the Kibana and ES previleges.
+   * @param options - Extra UIAM organization roles for the user, see {@link LoginOptions}.
    * @returns A Promise that resolves once the cookie in browser is set.
    */
-  loginAs: (role: string) => Promise<void>;
+  loginAs: LoginFunction;
   /**
    * Logs in as a user with a custom role.
    * @param role - A role object that defines the Kibana and ES previleges. Role will re-created if it doesn't exist.
@@ -84,8 +93,10 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       ]);
     };
 
-    const loginAs: LoginFunction = async (role: string) => {
-      const cookie = await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(role);
+    const loginAs: LoginFunction = async (role, options) => {
+      const cookie = await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(role, {
+        uiamOrganizationRoles: options?.uiamOrganizationRoles,
+      });
       await setSessionCookie(cookie);
     };
 

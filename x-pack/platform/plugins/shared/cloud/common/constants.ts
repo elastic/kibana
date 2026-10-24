@@ -19,6 +19,8 @@ export const ELASTICSEARCH_CONFIG_ROUTE = '/api/internal/cloud/elasticsearch_con
  */
 export const CLOUD_BILLING_ROLES: readonly string[] = ['superuser', 'admin'];
 
+export const CLOUD_BILLING_ACCESS_ROUTE = '/internal/cloud/billing_access';
+
 /**
  * Serverless project roles whose members are allowed to edit Search Power on Cloud.
  */
