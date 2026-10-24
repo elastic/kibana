@@ -13,7 +13,7 @@ import {
   withoutEventIds,
   withoutEvents,
   withProcessParent,
-  withStageSpan,
+  withStageEventSpan,
   withTruncatingBenignEvents,
 } from '../../world';
 import type { FpTpExample } from '../types';
@@ -269,10 +269,10 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     variant: {
       kind: 'perturbation',
       of: TP_ID,
-      description: 'cited-alert original_time spread across three days',
+      description: 'cited-alert original_time and each stage\'s events spread across three days',
     },
     checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
-    buildWorld: (runMarker) => withStageSpan(tpWorld(runMarker), 3),
+    buildWorld: (runMarker) => withStageEventSpan(tpWorld(runMarker), 3),
   },
   // The dilution measurement the #299995 review asked for, under the per-alert
   // window the follow-up adopted: the 3-day span widens the union of branch
@@ -298,10 +298,10 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     provenance: 'authored',
     buildWorld: (runMarker) =>
       withTruncatingBenignEvents(
-        withStageSpan(fpWorld(runMarker), 3),
+        withStageEventSpan(fpWorld(runMarker), 3),
         runMarker,
         undefined,
-        'before'
+        'afterFirstStage'
       ),
   },
   {

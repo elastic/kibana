@@ -146,6 +146,11 @@ export const withoutAlertHostId = (world: FpTpWorld): FpTpWorld => ({
  * after its cited events: a stage's alert is its latest cited event plus the delay. Events
  * keep their relative offsets within the chain hour, and the first stage keeps its time, so
  * the chain and the attack still start an hour before it.
+ *
+ * Retimes only the ALERTS: the raw events keep the chain-hour timestamps they were built
+ * with, so per-alert branch windows after the first alert are empty. A world whose events
+ * must follow their stages across the span needs `withStageEventSpan` as well, so each
+ * per-alert branch window actually contains its own stage's events.
  */
 export const withStageSpan = (world: FpTpWorld, days: number): FpTpWorld => {
   const alerts = [...world.alerts].sort(
@@ -186,6 +191,67 @@ export const withStageSpan = (world: FpTpWorld, days: number): FpTpWorld => {
     ...world,
     alerts: world.alerts.map((alert) => ({ ...alert, source: retime(alert.source) })),
   };
+};
+
+/**
+ * `withStageSpan`, but every raw event follows its stage. After the alerts are spread
+ * across the span, each event is retimed to its citing stage's alert: an event cited by
+ * exactly one stage moves to that alert's time minus the same alert-to-event delay, and an
+ * event cited by several stages is placed just before the EARLIEST of them, so it is inside
+ * every citing branch window (each window is ±2h). Events no alert cites keep their time —
+ * they are bystanders, not branch evidence. Stage-relative offsets inside a stage collapse
+ * to milliseconds so intra-stage order survives (alerts sort them; the search sorts
+ * oldest-first and dedups).
+ *
+ * Use on its own (it spreads the alerts itself) or after `withStageSpan`, which is
+ * idempotent here: re-anchoring on the already-spread alert times moves nothing.
+ */
+export const withStageEventSpan = (world: FpTpWorld, days: number): FpTpWorld => {
+  const spread = withStageSpan(world, days);
+  const alerts = [...spread.alerts].sort(
+    (left, right) =>
+      Date.parse(String(left.source['kibana.alert.original_time'])) -
+      Date.parse(String(right.source['kibana.alert.original_time']))
+  );
+  if (alerts.length === 0) {
+    return spread;
+  }
+  const alertById = new Map(alerts.map((alert) => [alert.id, alert]));
+  const alertTime = new Map(
+    alerts.map((alert) => [
+      alert.id,
+      Date.parse(String(alert.source['kibana.alert.original_time'])),
+    ])
+  );
+  // Earliest citing alert per event, by alert time.
+  const citingAlert = new Map<string, string>();
+  for (const alert of alerts) {
+    const ancestors = alert.source['kibana.alert.ancestors'];
+    if (!Array.isArray(ancestors)) continue;
+    for (const ancestor of ancestors) {
+      const eventId = String((ancestor as Record<string, unknown>).id);
+      if (!citingAlert.has(eventId)) {
+        citingAlert.set(eventId, alert.id);
+      }
+    }
+  }
+  const ALERT_DELAY_MS = 5_000;
+  const events = spread.events.map((event): Ad2IndexedRawEvent => {
+    const stageAlertId = citingAlert.get(event.id);
+    const anchor = stageAlertId === undefined ? undefined : alertById.get(stageAlertId);
+    if (anchor === undefined) {
+      return event;
+    }
+    const time = alertTime.get(stageAlertId)! - ALERT_DELAY_MS;
+    return {
+      ...event,
+      source: {
+        ...event.source,
+        '@timestamp': new Date(time).toISOString(),
+      },
+    };
+  });
+  return { ...spread, events };
 };
 
 /** Drops the raw events with the given ids. Alerts still cite them, as they would after data loss. */

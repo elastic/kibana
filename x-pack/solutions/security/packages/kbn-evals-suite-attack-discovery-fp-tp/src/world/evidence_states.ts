@@ -71,7 +71,7 @@ export const withTruncatingBenignEvents = (
   world: FpTpWorld,
   runMarker: string,
   count: number = FP_TP_TRUNCATING_BENIGN_EVENT_COUNT,
-  placement: 'after' | 'before' = 'after'
+  placement: 'after' | 'before' | 'afterFirstStage' = 'after'
 ): FpTpWorld => {
   const template = [...world.events]
     .filter(hasProcessCategory)
@@ -88,12 +88,23 @@ export const withTruncatingBenignEvents = (
   // first cited alert's window only (its window reaches back to the chain's start),
   // so that branch's page is all fill and flips `branches_truncated` — the
   // per-branch form of the same dilution.
+  // `afterFirstStage` anchors the fill after the EARLIEST raw event (the first
+  // stage's own first event) instead of after the whole world: under
+  // `withStageEventSpan` the stages are spread across days, so `after` would land
+  // the fill near the LAST stage and dilute the wrong branch. The fill then sits
+  // between the first stage's events and its alert — inside only that branch's
+  // ±2h window, exactly like `before` does for the single-hour chain.
+  const anchorMs =
+    placement === 'afterFirstStage'
+      ? earliestMs
+      : placement === 'before'
+      ? earliestMs
+      : latestMs;
   const offsetMs = (position: number): number =>
     placement === 'before'
       ? -(count - position) * BENIGN_EVENT_SPACING_MS
       : (position + 1) * BENIGN_EVENT_SPACING_MS;
-  const eventMs = (position: number): number =>
-    (placement === 'before' ? earliestMs : latestMs) + offsetMs(position);
+  const eventMs = (position: number): number => anchorMs + offsetMs(position);
 
   const benign = Array.from({ length: count }, (_, position): Ad2IndexedRawEvent => {
     const id = ad2SeedId(runMarker, 'process', 'benign-service', position);

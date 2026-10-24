@@ -52,6 +52,7 @@ export {
   withoutProcessParent,
   withProcessExecutable,
   withProcessParent,
+  withStageEventSpan,
   withStageSpan,
 } from './mutations';
 export {
