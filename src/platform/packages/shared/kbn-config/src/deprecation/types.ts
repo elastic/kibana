@@ -127,6 +127,15 @@ export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => C
 export type FactoryConfigDeprecationDetails = Pick<DeprecatedConfigDetails, 'level'> &
   Partial<Omit<DeprecatedConfigDetails, 'level'>>;
 
+/** @public */
+export type FactoryRenameConfigDeprecationDetails = FactoryConfigDeprecationDetails & {
+  /**
+   * When both the old and the new key hold an object, deep-merge the old one into the new one
+   * instead of ignoring the old key. Values under the new key win and arrays are replaced, not merged.
+   */
+  mergeObjects?: boolean;
+};
+
 /**
  * Provides helpers to generates the most commonly used {@link ConfigDeprecation}
  * when invoking a {@link ConfigDeprecationProvider}.
@@ -218,7 +227,7 @@ export interface ConfigDeprecationFactory {
   rename(
     oldKey: string,
     newKey: string,
-    details: FactoryConfigDeprecationDetails
+    details: FactoryRenameConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -233,6 +242,14 @@ export interface ConfigDeprecationFactory {
    * ```typescript
    * const provider: ConfigDeprecationProvider = ({ renameFromRoot }) => [
    *   renameFromRoot('oldplugin.key', 'newplugin.key', { level: 'critical' }),
+   * ]
+   * ```
+   *
+   * @example
+   * Move a whole namespace, keeping settings already set under the new one.
+   * ```typescript
+   * const provider: ConfigDeprecationProvider = ({ renameFromRoot }) => [
+   *   renameFromRoot('oldplugin', 'newplugin', { level: 'warning', mergeObjects: true }),
    * ]
    * ```
    *
@@ -258,7 +275,7 @@ export interface ConfigDeprecationFactory {
   renameFromRoot(
     oldKey: string,
     newKey: string,
-    details: FactoryConfigDeprecationDetails
+    details: FactoryRenameConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**

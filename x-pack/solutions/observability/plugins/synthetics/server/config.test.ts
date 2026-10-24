@@ -11,6 +11,9 @@ import { config } from './config';
 
 const CONFIG_PATH = 'xpack.synthetics';
 
+const BOTH_PRESENT_MESSAGE =
+  'Setting "xpack.uptime" has been replaced by "xpack.synthetics". However, both are present. Settings in "xpack.synthetics" take precedence over "xpack.uptime"';
+
 const deprecationContext = configDeprecationsMock.createContext();
 
 const applySyntheticsDeprecations = (rootConfig: Record<string, unknown>) => {
@@ -31,13 +34,17 @@ const applySyntheticsDeprecations = (rootConfig: Record<string, unknown>) => {
 };
 
 describe('synthetics config deprecations', () => {
-  it('renames xpack.uptime to xpack.synthetics', () => {
+  it('moves xpack.uptime settings to xpack.synthetics', () => {
     const { messages, migrated } = applySyntheticsDeprecations({
       xpack: {
         uptime: {
           enabled: false,
           index: 'heartbeat-*',
-          service: { username: 'user', tls: { certificate: 'crt', key: 'key' } },
+          service: {
+            username: 'user',
+            hosts: ['https://a', 'https://b'],
+            tls: { certificate: 'crt', key: 'key' },
+          },
         },
       },
     });
@@ -47,14 +54,62 @@ describe('synthetics config deprecations', () => {
         synthetics: {
           enabled: false,
           index: 'heartbeat-*',
-          service: { username: 'user', tls: { certificate: 'crt', key: 'key' } },
+          service: {
+            username: 'user',
+            hosts: ['https://a', 'https://b'],
+            tls: { certificate: 'crt', key: 'key' },
+          },
         },
       },
     });
     expect(messages).toEqual(['Setting "xpack.uptime" has been replaced by "xpack.synthetics"']);
   });
 
-  it('flags unused keys under the renamed namespace', () => {
+  it('keeps non-conflicting legacy settings when both namespaces are set', () => {
+    const { messages, migrated } = applySyntheticsDeprecations({
+      xpack: {
+        uptime: { service: { manifestUrl: 'https://manifest', tls: { key: 'legacy-key' } } },
+        synthetics: { service: { tls: { certificate: 'crt', key: 'key' } } },
+      },
+    });
+
+    expect(migrated).toEqual({
+      xpack: {
+        synthetics: {
+          service: {
+            manifestUrl: 'https://manifest',
+            tls: { certificate: 'crt', key: 'key' },
+          },
+        },
+      },
+    });
+    expect(messages).toEqual([BOTH_PRESENT_MESSAGE]);
+  });
+
+  it('prefers the xpack.synthetics value when a setting is in both namespaces', () => {
+    const { messages, migrated } = applySyntheticsDeprecations({
+      xpack: {
+        uptime: { service: { manifestUrl: 'legacy' } },
+        synthetics: { service: { manifestUrl: 'new' } },
+      },
+    });
+
+    expect(migrated).toEqual({ xpack: { synthetics: { service: { manifestUrl: 'new' } } } });
+    expect(messages).toEqual([BOTH_PRESENT_MESSAGE]);
+  });
+
+  it('replaces arrays instead of merging them by index', () => {
+    const { migrated } = applySyntheticsDeprecations({
+      xpack: {
+        uptime: { service: { hosts: ['https://a', 'https://b', 'https://c'] } },
+        synthetics: { service: { hosts: ['https://x'] } },
+      },
+    });
+
+    expect(migrated).toEqual({ xpack: { synthetics: { service: { hosts: ['https://x'] } } } });
+  });
+
+  it('flags unused keys under the migrated namespace', () => {
     const { messages } = applySyntheticsDeprecations({
       xpack: { uptime: { experimental: { ccs: { enabled: true } } } },
     });
@@ -64,7 +119,7 @@ describe('synthetics config deprecations', () => {
     );
   });
 
-  it('does not log anything when xpack.synthetics is used', () => {
+  it('does not log anything when only xpack.synthetics is used', () => {
     const { messages, migrated } = applySyntheticsDeprecations({
       xpack: { synthetics: { enabled: true } },
     });

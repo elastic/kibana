@@ -130,6 +130,12 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 };
 ```
 
+When renaming a whole namespace, the old settings are ignored if the new key is already set. Pass `mergeObjects: true` to `rename` or `renameFromRoot` to deep-merge them instead: values under the new key win and arrays are replaced.
+
+```typescript
+renameFromRoot('oldplugin', 'myplugin', { level: 'warning', mergeObjects: true }),
+```
+
 
 ## Validating your configuration based on context references [validating-your-configuration-based-on-context-references]
 
