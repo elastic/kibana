@@ -1,0 +1,9 @@
+description: >
+  The ID or IDs of the referenced entities, such as alert document IDs. Required for reference
+  attachment types, such as alerts and events.
+oneOf:
+  - type: string
+  - type: array
+    items:
+      type: string
+example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
