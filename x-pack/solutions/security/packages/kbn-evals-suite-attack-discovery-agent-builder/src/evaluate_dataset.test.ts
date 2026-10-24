@@ -16,6 +16,7 @@ import {
   extractRetrievalEvidence,
   extractUnscopedAlertRetrievalRowCounts,
   findAdToolResult,
+  hasScopedAgentAlertRetrievalWithoutIdentity,
   insightsForResponse,
   insightsFromValidatedDiscoveries,
   trackedStageKeys,
@@ -42,12 +43,17 @@ const recordedEsqlStep = ({
   ids,
   includeResultQuery = true,
   includeIdColumn = true,
+  identityColumn = '_id',
 }: {
   query: string;
   rows?: number;
   ids?: string[];
   includeResultQuery?: boolean;
   includeIdColumn?: boolean;
+  /** The column the rows carry their alert identity in. `kibana.alert.uuid`
+   *  models a retrieval that kept no `_id` metadata but still returned the
+   *  alert's own identity. */
+  identityColumn?: '_id' | 'kibana.alert.uuid';
 }): AttackDiscoveryAgentBuilderTaskOutput['steps'][number] => {
   const alertIds =
     ids ?? Array.from({ length: rows ?? 0 }, (_, index) => `ad-scenario-alert-${index}`);
@@ -61,7 +67,7 @@ const recordedEsqlStep = ({
         type: 'esql_results',
         data: {
           columns: includeIdColumn
-            ? [{ name: '_id', type: 'keyword' }]
+            ? [{ name: identityColumn, type: 'keyword' }]
             : [{ name: 'message', type: 'text' }],
           ...(includeResultQuery ? { query } : {}),
           source: 'esql',
@@ -897,9 +903,11 @@ describe("the AD tool call's own ES|QL query", () => {
 describe('supplied alerts can never be read as retrieved', () => {
   // `get_pipeline_data` Step 2.5 writes the SUPPLIED alert set into the
   // retrieval block (`extraction_strategy: 'provided'`,
-  // `alerts_context_count: providedAlerts.length`). That branch is unreachable
-  // at this revision; making it reachable without this exclusion would score the
-  // 7 provided-mode dense reps 16-vs-95 — a 0 that says nothing about retrieval.
+  // `alerts_context_count: providedAlerts.length`). That branch is the reading
+  // for a supplied-alerts run — no alert-retrieval workflow executes, so
+  // `alertRetrievalData` stays null. Taking it without this exclusion would score
+  // the 7 provided-mode dense reps 16-vs-95 — a 0 that says nothing about
+  // retrieval.
   it('reads a provided-mode reconstruction as supplied, and scores the agent retrieval', () => {
     const result = computeWorkflowAlertCounts({
       pipeline: {
@@ -1125,6 +1133,114 @@ describe('an unscoped retrieval scores 0 rather than going unscored', () => {
 
     expect(result.retrievedAlertCount).toBeNull();
     expect(result.retrievedAlertCountSource).toBe('none');
+  });
+});
+
+// The identity a row carries is not always `_id`. A scoped retrieval that keeps
+// alert fields without asking for the document metadata returns the alert's own
+// `kibana.alert.uuid`, which names exactly one alert per row — the same
+// distinct-alert semantics as `_id`, and equally not a row count. A result
+// carrying NEITHER identity still contributes nothing (see the id-less tests
+// above); this is only about which columns can supply the identity.
+describe('an alert identity carried without the _id metadata', () => {
+  it('counts the alert population from kibana.alert.uuid', () => {
+    const steps = [
+      recordedEsqlStep({
+        query: denseRetrievalQuery,
+        ids: denseAlertIds(95),
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalPopulation(steps)).toBe(95);
+  });
+
+  it('unions the _id and kibana.alert.uuid results of a split retrieval', () => {
+    const steps = [
+      recordedEsqlStep({ query: denseRetrievalQuery, ids: denseAlertIds(50) }),
+      recordedEsqlStep({
+        query: `${denseRetrievalQuery}\n  | WHERE host.name == "wks-karen-06"`,
+        ids: denseAlertIds(45, 50),
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalPopulation(steps)).toBe(95);
+  });
+});
+
+// A scoped retrieval that came back with rows but no identity column retrieves
+// and still cannot be counted. Reporting that as `none` ("the agent did not
+// retrieve") contradicts the row counts recorded beside it: the recorded
+// golden runs kept alert fields with a `KEEP` list that omitted `METADATA _id`,
+// so a correct 2-of-2 retrieval read as a missing one and the run scored 0
+// against a population it had in hand.
+describe('a scoped retrieval whose rows carry no identity is attributed', () => {
+  const scopedQuery = `FROM .alerts-security.alerts-default | WHERE tags == "${AD2_SCENARIO_SEED_LABEL}"`;
+
+  const workflowFor = (steps: AttackDiscoveryAgentBuilderTaskOutput['steps']) =>
+    buildWorkflow({
+      pipeline: null,
+      agentEsqlRowCounts: extractAgentEsqlRowCounts(steps),
+      agentAlertRetrievalPopulation: extractAgentAlertRetrievalPopulation(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+      scopedAgentRetrievalWithoutIdentity: hasScopedAgentAlertRetrievalWithoutIdentity(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+      retrievalScope: AD2_SCENARIO_SEED_LABEL,
+      unscopedAgentAlertRetrievalRowCounts: extractUnscopedAlertRetrievalRowCounts(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+    });
+
+  it('reports the retrieval as unidentified rather than as no retrieval', () => {
+    const steps = [recordedEsqlStep({ query: scopedQuery, rows: 2, includeIdColumn: false })];
+    const workflow = workflowFor(steps);
+
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('agent_esql_retrieval_unidentified');
+    // The rows stay on the record, so the 0 reads as "retrieved 2 rows and could
+    // not attribute them" instead of "retrieved nothing".
+    expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([2]);
+  });
+
+  // The other half of the fix, end to end: the same scoped retrieval WITH an
+  // identity is the fixture's population and is attributed as such.
+  it('attributes a scoped retrieval that returned the expected population', () => {
+    const steps = [
+      recordedEsqlStep({
+        query: scopedQuery,
+        ids: ['fixture-alert-1', 'fixture-alert-2'],
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+    const workflow = workflowFor(steps);
+
+    expect(workflow.retrievedAlertCount).toBe(2);
+    expect(workflow.retrievedAlertCountSource).toBe('agent_esql_retrieval');
+  });
+
+  // Guard: the new source must not absorb the unscoped case. A run whose only
+  // retrieval carried no scope is still `unscoped_retrieval` — it retrieved,
+  // just not this fixture's population — and a run that retrieved nothing at
+  // all is still `none`.
+  it('leaves an unscoped-only retrieval reporting unscoped_retrieval', () => {
+    const workflow = workflowFor([
+      recordedEsqlStep({ query: denseRetrievalQuery, rows: 97, includeIdColumn: false }),
+    ]);
+
+    expect(workflow.retrievedAlertCountSource).toBe('unscoped_retrieval');
+  });
+
+  it('leaves a run with no alerts retrieval reporting none', () => {
+    const workflow = workflowFor([]);
+
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('none');
   });
 });
 
