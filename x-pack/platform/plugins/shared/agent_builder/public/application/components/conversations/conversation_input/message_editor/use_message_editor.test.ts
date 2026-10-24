@@ -77,6 +77,40 @@ describe('useMessageEditor handleCommandSelect', () => {
   });
 });
 
+describe('useMessageEditor handleCommandReplaceText', () => {
+  let div: HTMLDivElement;
+
+  beforeEach(() => {
+    div = document.createElement('div');
+    div.contentEditable = 'true';
+    document.body.appendChild(div);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(div);
+  });
+
+  it('replaces the text after the trigger and keeps the menu active on it', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+
+    div.textContent = 'see #dash';
+    setCursorAtEnd(div);
+    act(() => {
+      result.current.messageEditor.onChange();
+    });
+    expect(result.current.messageEditor.commandMatch.activeCommand?.query).toBe('dash');
+
+    act(() => {
+      result.current.messageEditor.handleCommandReplaceText('dashboard/');
+    });
+
+    expect(stripZeroWidthSpaces(div.textContent ?? '')).toBe('see #dashboard/');
+    expect(div.querySelector('[data-command-badge]')).toBeNull();
+    expect(result.current.messageEditor.commandMatch.activeCommand?.query).toBe('dashboard/');
+  });
+});
+
 describe('useMessageEditor setContent', () => {
   let div: HTMLDivElement;
 

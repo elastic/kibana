@@ -11,17 +11,12 @@ import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { useAgentBuilderServices } from '../../../../../../../hooks/use_agent_builder_service';
-import { useExperimentalFeatures } from '../../../../../../../hooks/use_experimental_features';
 
 export const usePrefetchSml = (constraints?: SmlSearchConstraints, filters?: SmlSearchFilters) => {
   const queryClient = useQueryClient();
   const { smlService } = useAgentBuilderServices();
-  const smlEnabled = useExperimentalFeatures();
 
   return useCallback(() => {
-    if (!smlEnabled) {
-      return;
-    }
     queryClient.prefetchQuery({
       queryKey: queryKeys.sml.autocomplete('*', constraints, filters),
       queryFn: () =>
@@ -32,5 +27,5 @@ export const usePrefetchSml = (constraints?: SmlSearchConstraints, filters?: Sml
           filters,
         }),
     });
-  }, [smlEnabled, queryClient, smlService, constraints, filters]);
+  }, [queryClient, smlService, constraints, filters]);
 };

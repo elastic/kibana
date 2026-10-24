@@ -12,11 +12,15 @@ import {
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
   filterActionsBySelection,
   formatConnectorActionLine,
   getConnectorSpec,
+  isSpecificActionsSelection,
+  type SelectedActions,
 } from '@kbn/connector-specs';
 
 /**
@@ -28,15 +32,36 @@ import {
  * are listed so the agent knows how to call them via
  * `platform.core.execute_connector_sub_action` using the
  * `connectorId` + `subAction` + `params` JSON shape in the attachment text.
+ *
+ * `resolve` attaches a connector by reference, reading it as the requesting user.
  */
-export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.connector,
-  ConnectorAttachmentData
-> => {
+export const createConnectorAttachmentType = ({
+  getActionSavedObjectsClient,
+}: {
+  getActionSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+}): AttachmentTypeDefinition<AttachmentType.connector, ConnectorAttachmentData> => {
   return {
     id: AttachmentType.connector,
 
     isReadonly: true,
+
+    resolve: async (origin, { request }) => {
+      const soClient = await getActionSavedObjectsClient(request);
+      const { attributes } = await soClient.get<{
+        name?: string;
+        actionTypeId: string;
+        config?: Record<string, unknown>;
+      }>('action', origin);
+      const selectedActions = attributes.config?.selectedActions as SelectedActions;
+      return {
+        connector_id: origin,
+        connector_name: attributes.name ?? origin,
+        connector_type: attributes.actionTypeId,
+        ...(isSpecificActionsSelection(selectedActions)
+          ? { selected_actions: selectedActions }
+          : {}),
+      };
+    },
 
     validate: (input) => {
       const parseResult = connectorAttachmentDataSchema.safeParse(input);

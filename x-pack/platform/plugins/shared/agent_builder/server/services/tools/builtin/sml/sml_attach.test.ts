@@ -25,6 +25,7 @@ const buildAvailabilityContext = (flags: Record<string, boolean>) =>
 
 const mockResolveSmlAttachItems = jest.fn();
 const mockAttachmentsAdd = jest.fn();
+const mockAttachmentsGetActive = jest.fn();
 
 const getAgentBuilderSml = jest.fn(() => ({
   search: jest.fn(),
@@ -42,13 +43,14 @@ const mockContext = {
   esClient: { asCurrentUser: {}, asInternalUser: {} },
   request: {},
   savedObjectsClient: {},
-  attachments: { add: mockAttachmentsAdd },
+  attachments: { add: mockAttachmentsAdd, getActive: mockAttachmentsGetActive },
   logger: mockLogger,
 };
 
 describe('createSmlAttachTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAttachmentsGetActive.mockReturnValue([]);
   });
 
   it('has correct id and tags', () => {
@@ -147,6 +149,55 @@ describe('createSmlAttachTool', () => {
     expect(successData.success).toBe(true);
     expect(successData.attachment_id).toBe('att-123');
     expect(successData.attachment_type).toBe('visualization');
+  });
+
+  it('does not add an attachment that already exists with the same type and origin', async () => {
+    mockAttachmentsGetActive.mockReturnValue([
+      { id: 'att-existing', type: 'dashboard-type', origin: 'dash-1' },
+      { id: 'att-other-type', type: 'visualization', origin: 'dash-1' },
+    ]);
+    mockResolveSmlAttachItems.mockResolvedValue([
+      {
+        success: true,
+        entry_id: 'entry-1',
+        attachment: { type: 'dashboard-type', data: {}, origin: 'dash-1' },
+      },
+    ]);
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
+    const result = (await tool.handler(
+      { entry_ids: ['entry-1'] },
+      mockContext as unknown as ToolHandlerContext
+    )) as { results: unknown[] };
+
+    expect(mockAttachmentsAdd).not.toHaveBeenCalled();
+    const data = (
+      result.results[0] as OtherResult<{ success: boolean; attachment_id: string; message: string }>
+    ).data;
+    expect(data).toMatchObject({ success: true, attachment_id: 'att-existing' });
+    expect(data.message).toContain('already exists');
+  });
+
+  it('decodes the entry ids of links, and finds an attachment by the bare origin id', async () => {
+    mockAttachmentsGetActive.mockReturnValue([
+      { id: 'att-existing', type: 'workflow.yaml', origin: 'wf-1' },
+    ]);
+    mockResolveSmlAttachItems.mockResolvedValue([
+      {
+        success: true,
+        entry_id: 'workflow:wf-1',
+        attachment: { type: 'workflow.yaml', data: {}, origin: 'workflow://wf-1' },
+      },
+    ]);
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
+    await tool.handler(
+      { entry_ids: ['workflow%3Awf-1'] },
+      mockContext as unknown as ToolHandlerContext
+    );
+
+    expect(mockResolveSmlAttachItems).toHaveBeenCalledWith(
+      expect.objectContaining({ entryIds: ['workflow:wf-1'] })
+    );
+    expect(mockAttachmentsAdd).not.toHaveBeenCalled();
   });
 
   it('handles multiple items with mix of success and failure', async () => {

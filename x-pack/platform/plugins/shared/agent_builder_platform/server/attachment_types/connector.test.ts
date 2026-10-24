@@ -50,7 +50,10 @@ const formatContext = {
 };
 
 describe('connector attachment type', () => {
-  const connectorType = createConnectorAttachmentType();
+  const soClient = { get: jest.fn() };
+  const connectorType = createConnectorAttachmentType({
+    getActionSavedObjectsClient: async () => soClient as never,
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -515,6 +518,25 @@ describe('connector attachment type', () => {
       expect(description).toContain('connectorId');
       expect(description).toContain('subAction');
       expect(description).toContain('params');
+    });
+  });
+
+  describe('resolve', () => {
+    const mockConnector = (attributes: Record<string, unknown>) =>
+      soClient.get.mockResolvedValue({
+        id: 'connector-123',
+        type: 'action',
+        attributes,
+        references: [],
+      });
+
+    it('reads the connector by id as the requesting user', async () => {
+      mockConnector({ name: 'My Github Connector', actionTypeId: '.github', config: {} });
+
+      const result = await connectorType.resolve!('connector-123', formatContext as never);
+
+      expect(soClient.get).toHaveBeenCalledWith('action', 'connector-123');
+      expect(result).toEqual(validData);
     });
   });
 

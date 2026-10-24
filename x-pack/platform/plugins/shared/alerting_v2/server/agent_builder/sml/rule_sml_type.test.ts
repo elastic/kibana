@@ -331,4 +331,36 @@ describe('createRuleSmlType', () => {
       expect(getRule).not.toHaveBeenCalled();
     });
   });
+
+  describe('searchByTitle', () => {
+    const search = (title: string) =>
+      buildDefinition().searchByTitle!(
+        { title, size: 5 },
+        { ...buildToAttachmentContext(), hasApiPrivileges: jest.fn() }
+      );
+
+    let findRules: jest.Mock;
+
+    beforeEach(() => {
+      findRules = jest.fn().mockResolvedValue({
+        items: [{ id: 'rule-1', metadata: { name: 'High CPU' } }, { id: 'rule-2' }],
+      });
+      rulesClient = { findRules } as unknown as RulesClient;
+    });
+
+    it('searches rules by the title and maps the results', async () => {
+      expect(await search('cpu')).toEqual([
+        { originId: 'rule-1', title: 'High CPU' },
+        { originId: 'rule-2', title: 'rule-2' },
+      ]);
+      expect(findRules).toHaveBeenCalledWith({ search: 'cpu', perPage: 5 });
+    });
+
+    it('returns nothing when Alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      expect(await search('cpu')).toEqual([]);
+      expect(findRules).not.toHaveBeenCalled();
+    });
+  });
 });

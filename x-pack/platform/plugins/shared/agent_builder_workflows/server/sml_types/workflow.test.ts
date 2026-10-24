@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIndexName } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
@@ -511,6 +512,51 @@ describe('workflowSmlType', () => {
       });
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('searchByTitle', () => {
+    const buildContext = (hasApiPrivileges = jest.fn().mockResolvedValue(true)) =>
+      ({ request: {}, spaceId: 'default', savedObjectsClient: {}, hasApiPrivileges } as never);
+    const createApi = () =>
+      createMockApi({
+        getWorkflows: jest.fn().mockResolvedValue({
+          results: [
+            { id: 'wf-1', name: 'Triage' },
+            { id: 'wf-2', name: '' },
+          ],
+        }),
+      });
+
+    it('lists matching workflows through the management API', async () => {
+      const api = createApi();
+
+      const results = await createWorkflowSmlType(api).searchByTitle!(
+        { title: 'tri', size: 5 },
+        buildContext()
+      );
+
+      expect(api.getWorkflows).toHaveBeenCalledWith({ page: 1, size: 5, query: 'tri' }, 'default', {
+        request: {},
+      });
+      expect(results).toEqual([
+        { originId: 'wf-1', title: 'Triage' },
+        { originId: 'wf-2', title: 'wf-2' },
+      ]);
+    });
+
+    it('requires the workflows read privilege', async () => {
+      const api = createApi();
+      const hasApiPrivileges = jest.fn().mockResolvedValue(false);
+
+      const results = await createWorkflowSmlType(api).searchByTitle!(
+        { title: '', size: 5 },
+        buildContext(hasApiPrivileges)
+      );
+
+      expect(hasApiPrivileges).toHaveBeenCalledWith(WorkflowsManagementOperationPrivileges.read);
+      expect(results).toEqual([]);
+      expect(api.getWorkflows).not.toHaveBeenCalled();
     });
   });
 });

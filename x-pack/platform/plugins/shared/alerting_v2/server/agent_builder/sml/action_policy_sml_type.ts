@@ -35,6 +35,7 @@ export const createActionPolicySmlType = ({
   getIsAlertingV2Enabled,
 }: CreateActionPolicySmlTypeOptions): SmlTypeDefinition => ({
   id: ACTION_POLICY_KI_TYPE,
+  attachmentType: ACTION_POLICY_ATTACHMENT_TYPE,
   fetchFrequency: () => '1m',
 
   async *list(context) {
@@ -104,6 +105,17 @@ export const createActionPolicySmlType = ({
    * declaration.
    */
   getPermissions: () => kibanaPermissions({ kiType: ACTION_POLICY_KI_TYPE }),
+
+  searchByTitle: async ({ title, size }, { request }) => {
+    if (!(await getIsAlertingV2Enabled())) {
+      return [];
+    }
+    const { items } = await getScopedActionPolicyClient(request).findActionPolicies({
+      ...(title ? { search: title } : {}),
+      perPage: size,
+    });
+    return items.map(({ id, name }) => ({ originId: id, title: name }));
+  },
 
   toAttachment: async (item, context) => {
     if (!(await getIsAlertingV2Enabled())) {

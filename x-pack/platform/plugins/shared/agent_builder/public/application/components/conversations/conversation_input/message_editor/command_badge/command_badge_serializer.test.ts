@@ -364,3 +364,23 @@ describe('round-trip serialization', () => {
     expect(serializeEditorContent(div)).toBe(original);
   });
 });
+
+describe('badges with special characters', () => {
+  it('round-trips a label with brackets and an id with a colon, parenthesis and question mark', () => {
+    const data = {
+      commandId: CommandId.Sml,
+      label: 'dashboard/[Elastic Security] Rules \\ v2',
+      id: 'dashboard:a b)c?d',
+      metadata: {},
+    };
+    const div = document.createElement('div');
+    div.appendChild(createCommandBadgeElement(data));
+
+    const serialized = serializeEditorContent(div);
+
+    expect(serialized).toBe(
+      '[#dashboard/\\[Elastic Security\\] Rules \\\\ v2](sml://dashboard%3Aa%20b%29c%3Fd)'
+    );
+    expect(deserializeInputSegments(serialized)).toEqual([{ type: 'badge', data }]);
+  });
+});

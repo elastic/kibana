@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import type { PluggableList } from 'unified';
 import { sortedCommandDefinitions } from '../../conversation_input/message_editor/command_menu';
+import { unescapeLinkText } from '../../conversation_input/message_editor/command_badge/command_badge_serializer';
 import { IMAGE_ATTACHMENT_SCHEME } from '../../conversation_input/message_editor/image_placeholder';
 import {
   createConversationMarkdownComponents,
@@ -52,7 +53,7 @@ export const decodeBadgeName = (path: string): string => {
   }
 };
 
-const BADGE_LINK_PATTERN = /\[([^\]]+)\]\((\w+):\/\/([^)]*)\)/g;
+const BADGE_LINK_PATTERN = /\[((?:\\.|[^\]\\])+)\]\((\w+):\/\/([^)]*)\)/g;
 // Characters EUI's markdown parser (GFM mode) can backslash-escape.
 const ESCAPABLE_MARKDOWN_CHARACTERS = /[\\`*{}[\]()#+\-.!_>~|]/g;
 
@@ -60,7 +61,10 @@ const ESCAPABLE_MARKDOWN_CHARACTERS = /[\\`*{}[\]()#+\-.!_>~|]/g;
 export const escapeCommandBadgeLabels = (text: string): string =>
   text.replace(BADGE_LINK_PATTERN, (link, label: string, scheme: string, rest: string) =>
     COMMAND_SCHEMES.has(scheme)
-      ? `[${label.replace(ESCAPABLE_MARKDOWN_CHARACTERS, '\\$&')}](${scheme}://${rest})`
+      ? `[${unescapeLinkText(label).replace(
+          ESCAPABLE_MARKDOWN_CHARACTERS,
+          '\\$&'
+        )}](${scheme}://${rest})`
       : link
   );
 

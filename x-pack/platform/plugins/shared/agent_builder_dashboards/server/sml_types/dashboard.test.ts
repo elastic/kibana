@@ -348,4 +348,46 @@ describe('dashboardSmlType', () => {
       expect.objectContaining({ type: 'dashboard', title: 'System Overview' })
     );
   });
+
+  describe('searchByTitle', () => {
+    const search = async (title: string) => {
+      const find = jest.fn().mockResolvedValue({
+        saved_objects: [
+          { id: 'dash-1', attributes: { title: 'Sales overview' } },
+          { id: 'dash-2', attributes: {} },
+        ],
+      });
+      const dashboardSmlType = createDashboardSmlType({
+        getDashboardClient: async () => createDashboardClient(),
+      });
+      const results = await dashboardSmlType.searchByTitle!({ title, size: 5 }, {
+        savedObjectsClient: { find },
+      } as never);
+      return { find, results };
+    };
+
+    it('searches the title by prefix and maps the results', async () => {
+      const { find, results } = await search('sal');
+
+      expect(find).toHaveBeenCalledWith({
+        type: 'dashboard',
+        fields: ['title'],
+        perPage: 5,
+        sort: [{ field: 'updated_at', order: 'desc' }],
+        search: 'sal*',
+        searchFields: ['title'],
+        defaultSearchOperator: 'AND',
+      });
+      expect(results).toEqual([
+        { originId: 'dash-1', title: 'Sales overview' },
+        { originId: 'dash-2', title: 'dash-2' },
+      ]);
+    });
+
+    it('drops the operators of the saved objects search', async () => {
+      const { find } = await search('logs-* (prod)');
+
+      expect(find.mock.calls[0][0].search).toBe('logs prod*');
+    });
+  });
 });

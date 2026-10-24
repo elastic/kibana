@@ -60,6 +60,8 @@ interface CommandMenuListProps {
   readonly 'data-test-subj'?: string;
   /** When true, Space also selects the highlighted option, like Enter. */
   readonly spaceSelection?: boolean;
+  /** Handles Tab instead of selecting the highlighted option. Returns false to select it as usual. */
+  readonly onTab?: () => boolean;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -71,6 +73,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
       spaceSelection,
+      onTab,
     },
     ref
   ) => {
@@ -139,6 +142,8 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           handleSetActive((prev) => Math.min(prev + 1, options.length - 1));
         } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
           handleSetActive((prev) => Math.max(prev - 1, 0));
+        } else if (event.key === keys.TAB && onTab?.()) {
+          // Handled by the menu: it completed the typed text rather than selecting an option.
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
           handleSelectOption();
         } else if (event.key === keys.SPACE && spaceSelection) {

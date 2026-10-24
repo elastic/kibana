@@ -133,4 +133,5 @@ export interface ServicesStartDeps {
   isomer: IsomerPluginStart;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
+  getSmlTypeDefinition: (typeId: string) => { attachmentType?: string } | undefined;
 }

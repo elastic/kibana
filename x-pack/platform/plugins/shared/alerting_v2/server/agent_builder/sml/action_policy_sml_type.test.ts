@@ -360,4 +360,33 @@ describe('createActionPolicySmlType', () => {
       expect(getActionPolicy).not.toHaveBeenCalled();
     });
   });
+
+  describe('searchByTitle', () => {
+    const search = (title: string) =>
+      buildDefinition().searchByTitle!(
+        { title, size: 5 },
+        { ...buildToAttachmentContext(), hasApiPrivileges: jest.fn() }
+      );
+
+    let findActionPolicies: jest.Mock;
+
+    beforeEach(() => {
+      findActionPolicies = jest.fn().mockResolvedValue({
+        items: [{ id: 'policy-1', name: 'Critical alerts' }],
+      });
+      actionPolicyClient = { findActionPolicies } as unknown as ActionPolicyClient;
+    });
+
+    it('searches action policies by the title and maps the results', async () => {
+      expect(await search('crit')).toEqual([{ originId: 'policy-1', title: 'Critical alerts' }]);
+      expect(findActionPolicies).toHaveBeenCalledWith({ search: 'crit', perPage: 5 });
+    });
+
+    it('returns nothing when Alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      expect(await search('crit')).toEqual([]);
+      expect(findActionPolicies).not.toHaveBeenCalled();
+    });
+  });
 });

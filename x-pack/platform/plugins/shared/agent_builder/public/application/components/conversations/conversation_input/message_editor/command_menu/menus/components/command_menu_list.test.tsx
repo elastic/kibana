@@ -359,4 +359,24 @@ describe('CommandMenuList', () => {
       });
     });
   });
+
+  it('does not select the option when the menu handled Tab', () => {
+    const ref = createRef<CommandMenuHandle>();
+    const onSelect = jest.fn();
+    renderWithProvider(
+      <CommandMenuList
+        ref={ref}
+        options={mockOptions}
+        isLoading={false}
+        onSelect={onSelect}
+        onTab={() => true}
+      />
+    );
+
+    act(() => {
+      ref.current!.handleKeyDown({ key: 'Tab' } as React.KeyboardEvent);
+    });
+
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });

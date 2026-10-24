@@ -10,6 +10,7 @@ import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { VISUALIZATION_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import {
   withLensReferences,
   toLensApiConfig,
@@ -23,6 +24,7 @@ const getChartType = (attributes: LensAttributes): string => {
 
 export const visualizationSmlType: SmlTypeDefinition = {
   id: VISUALIZATION_KI_TYPE,
+  attachmentType: VISUALIZATION_ATTACHMENT_TYPE,
   fetchFrequency: () => '1h',
 
   async *list(context) {
@@ -71,6 +73,27 @@ export const visualizationSmlType: SmlTypeDefinition = {
   },
 
   getPermissions: () => kibanaPermissions({ kiType: VISUALIZATION_KI_TYPE }),
+
+  searchByTitle: async ({ title, size }, { savedObjectsClient }) => {
+    // Drop the operators of the `simple_query_string` search, so typed text is matched literally.
+    const term = title
+      .replace(/[+|\-"*()~\\]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const { saved_objects: visualizations } = await savedObjectsClient.find<{ title?: string }>({
+      type: 'lens',
+      fields: ['title'],
+      perPage: size,
+      sort: [{ field: 'updated_at', order: 'desc' }],
+      ...(term
+        ? { search: `${term}*`, searchFields: ['title'], defaultSearchOperator: 'AND' as const }
+        : {}),
+    });
+    return visualizations.map(({ id, attributes }) => ({
+      originId: id,
+      title: attributes.title ?? id,
+    }));
+  },
 
   toAttachment: async (item, context) => {
     const originId = getSmlOriginId(item);

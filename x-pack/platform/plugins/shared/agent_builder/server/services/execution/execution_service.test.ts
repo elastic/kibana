@@ -135,6 +135,10 @@ describe('AgentExecutionService', () => {
     mergeAttachmentInputs: jest.fn(),
   };
 
+  const getSmlTypeDefinition = jest.fn((typeId: string) =>
+    typeId === 'dashboard' ? { attachmentType: 'dashboard-attachment' } : undefined
+  );
+
   const conversationClient = createConversationClientMock();
   const conversationService = {
     getScopedClient: jest.fn().mockImplementation(async () => conversationClient),
@@ -173,6 +177,7 @@ describe('AgentExecutionService', () => {
     agentService,
     runAgent: jest.fn(),
     attachmentsService,
+    getSmlTypeDefinition,
     uiSettings,
     savedObjects,
     meteringService,
@@ -444,6 +449,68 @@ describe('AgentExecutionService', () => {
         request
       );
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    describe('items linked in the message', () => {
+      const execute = (message: string, attachments?: unknown[]) =>
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: { agentId: 'agent-1', nextInput: { message, attachments } as any },
+        });
+      const validated = () =>
+        (attachmentsService.validateAttachmentInputs as jest.Mock).mock.calls[0][0];
+
+      it('attaches them by reference', async () => {
+        await execute(
+          'See [#dashboard/Sales](sml://dashboard%3Adash-1) and [#x](sml://dashboard:dash-2)'
+        );
+
+        expect(validated()).toEqual([
+          { type: 'dashboard-attachment', origin: 'dash-1', description: 'dashboard/Sales' },
+          { type: 'dashboard-attachment', origin: 'dash-2', description: 'x' },
+        ]);
+      });
+
+      it('adds them after the attachments of the request, once each', async () => {
+        const attachment = { type: 'some_type', data: { foo: 'bar' } };
+
+        await execute('[a](sml://dashboard:dash-1) [b](sml://dashboard:dash-1)', [attachment]);
+
+        expect(validated()).toEqual([
+          attachment,
+          { type: 'dashboard-attachment', origin: 'dash-1', description: 'a' },
+        ]);
+      });
+
+      it('reads escaped labels after many brackets without slowing down', async () => {
+        await execute(
+          `${'['.repeat(200_000)} [#dashboard/\\[Elastic\\] Rules](sml://dashboard:dash-2)`
+        );
+
+        expect(validated()).toEqual([
+          {
+            type: 'dashboard-attachment',
+            origin: 'dash-2',
+            description: 'dashboard/[Elastic] Rules',
+          },
+        ]);
+      });
+
+      it('does not slow down on text with many brackets and no links', async () => {
+        const start = Date.now();
+
+        await execute('['.repeat(200_000));
+
+        expect(validated()).toBeUndefined();
+        expect(Date.now() - start).toBeLessThan(2000);
+      });
+
+      it('skips types that cannot be attached and ids that are not entry ids', async () => {
+        await execute('[a](sml://visualization:vis-1) [b](sml://dashboard) [c](sml://dashboard%)');
+
+        expect(validated()).toBeUndefined();
+      });
     });
 
     it('should return a live observable that emits events from the agent stream', async () => {
