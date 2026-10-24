@@ -209,13 +209,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createNCasesBeforeDeleteAllAfter(12, getPageObject, getService);
 
       it('paginates cases correctly', async () => {
-        await testSubjects.click('tablePaginationPopoverButton');
+        // bottomOffset scrolls the table's pagination row clear of the sticky timeline bottom bar
+        await testSubjects.click('tablePaginationPopoverButton', undefined, { bottomOffset: 100 });
         await testSubjects.click('tablePagination-25-rows');
         await testSubjects.missingOrFail('pagination-button-1');
-        await testSubjects.click('tablePaginationPopoverButton');
+        await testSubjects.click('tablePaginationPopoverButton', undefined, { bottomOffset: 100 });
         await testSubjects.click('tablePagination-10-rows');
         await testSubjects.isEnabled('pagination-button-1');
-        await testSubjects.click('pagination-button-1');
+        await testSubjects.click('pagination-button-1', undefined, { bottomOffset: 100 });
         await testSubjects.isEnabled('pagination-button-0');
       });
     });
