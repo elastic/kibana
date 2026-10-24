@@ -73,24 +73,37 @@ Use this skill when:
 - **Needs More Data** → Expand investigation: Widen time window, check additional data sources
 
 ### 6. Synthesize Findings
-- Compile a comprehensive analysis with supporting evidence
-- Provide clear threat assessment: severity, confidence level, affected scope
-- Recommend specific next steps based on disposition
+- Lead with the direct answer to the question that was asked — the count, ranking, or disposition — then the evidence that supports it
+- Keep supporting detail to what the question asks for: timestamps, alert IDs, and per-host counts belong in the answer only when they carry it
+- State the threat assessment (severity, confidence level, affected scope) as assessment, and mark interpretation as inference
+- Attribute each claim to the tool result or field it came from; leave out any claim that no tool result supports
+- Recommend next steps only when the disposition calls for them, and keep them to what the question's scope needs
 - Reference the entity-analytics skill for deeper entity profiling or asset criticality review
 
 ## Tool Selection Guardrails
+- Reuse data already in context: if the alert document or entity values appear in the user's message, an attachment, or a previous tool result, do NOT re-fetch them — call a tool only for information you do not already have.
 - For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
-- Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
+- Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, other platform.core index/exploration tools, or workflow tools for alert inventory, count, or related-alert correlation — no speculative index discovery or raw search. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
+- Bound corroboration: at most one 'security.alert-analysis.get-related-alerts' call at the default time window, plus at most one widened retry at 168h when the initial lookup returned insufficient evidence; one 'security.security_labs_search' call per indicator or technique, and one 'security.entity_risk_score' call per entity. Stop corroborating as soon as the evidence supports a disposition.
+- Once the final analysis and disposition are written, make no further tool calls.
+
+## Answer Shape
+Answer shape is part of the answer: what the first sentence leads with, how much supporting detail the answer carries, and how its claims are phrased decide what the reader treats as the answer.
+- Answer first: the first sentence gives the answer to the question that was asked, not the process used to get it.
+- Stay in scope: supporting detail — timestamps, alert IDs, per-host counts, tool names, alert-by-alert listings — belongs in the answer only when the question requires it. Summarize the rest in one line instead of dumping it.
+- Separate fact from interpretation. Values taken from tool results may be stated as facts; any assessment, hypothesis or inference must be phrased as one — 'could indicate', 'is consistent with', 'suggests' — never as 'is', 'proves', or 'confirms'.
+- Attribute every fact to the tool result or field it came from, and drop any claim that no tool result supports.
+- End with the answer and the disposition. Do not close with an offer to help further; when a closing line is genuinely useful, keep it to one short sentence.
 
 ## Best Practices
 - Always start with the alert details before expanding investigation scope
 - Use entity relationships to efficiently find related security data
 - Maintain chronological context when analyzing events and alerts
 - Prioritize high-severity alerts and entities with critical asset criticality
-- Document your analysis reasoning for future reference
+- Keep your internal reasoning internal: report the conclusions the question asked for, not the deliberation behind them
 - Cross-reference multiple data points before making disposition decisions`,
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
