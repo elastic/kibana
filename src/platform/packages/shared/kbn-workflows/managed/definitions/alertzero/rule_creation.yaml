@@ -1,4 +1,4 @@
-version: "1"
+version: '1'
 name: Detection Rule Creation Worker
 description: >
   Drafts an ES|QL detection rule for a reported gap, previews it, and records the
@@ -14,7 +14,7 @@ settings:
   # analyst. So this must stay above the gate's own ceiling of `168h` (a 72h
   # decision window, a second 72h for a proposal re-parked just before its
   # deadline, plus margin). A test pins the relationship.
-  timeout: "176h"
+  timeout: '176h'
 triggers:
   - type: manual
     inputs:
@@ -75,7 +75,7 @@ steps:
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
     plugin-id: alertzero_rule_creation
     aggregate-by: alertzero_parent
-    timeout: "10m"
+    timeout: '10m'
     create-conversation: true
     with:
       author_name: "{{ consts.author_name }}"
@@ -90,14 +90,34 @@ steps:
           - detection-rule-edit
           - find-security-rules
       message: |-
-        Use the [/detection-rule-edit](skill://detection-rule-edit) skill and call
-        security.create_detection_rule to create a new ES|QL rule draft now. The
-        supplied context is sufficient; do not ask a follow-up question.
+        Use the [/detection-rule-edit](skill://detection-rule-edit) skill to draft
+        a new ES|QL rule from the supplied context. The supplied context is
+        sufficient; do not ask a follow-up question.
 
         ATT&CK technique: {{ inputs.technique }}
         Detection gap: {{ inputs.gap_description }}
         Evidence: {{ inputs.evidence }}
         Confidence: {{ inputs.confidence }}
+
+        Quality gate — decline an unwinnable gap instead of drafting when ANY
+        holds:
+        - confidence is below 0.3;
+        - the gap is a catch-all with no concrete behavior, indicator, or data
+          source (e.g. "any command execution activity");
+        - the evidence cannot support a specific ES|QL query.
+        To decline: call no tools, set skipped to true, set reason to one
+        sentence naming what is missing, and leave rule empty. Never draft a
+        generic catch-all query to avoid declining — a decline is the correct
+        outcome for an unwinnable gap.
+
+        When the gap is winnable, call security.create_detection_rule exactly
+        once and set skipped to false. Tool discipline:
+        - No speculative tools: no rule search, no ES|QL validation, no rule
+          preview — later workflow steps preview and validate the draft.
+        - Corroboration is bounded: at most one threat-intel or documentation
+          lookup, and only when the evidence names no concrete behavior or
+          data source.
+        - After security.create_detection_rule returns, call no further tools.
 
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id. If the tool did not
@@ -115,6 +135,9 @@ steps:
         type: object
         additionalProperties: false
         properties:
+          skipped:
+            type: boolean
+            description: True when the quality gate declined the gap as unwinnable.
           rule:
             type: object
             additionalProperties: false
@@ -177,8 +200,7 @@ steps:
             description: >-
               Why the tool returned no rule, in one sentence. Empty when it returned one.
         required:
-          - rule
-          - attachment_id
+          - skipped
 
   # A draft missing its query, name, description or attachment is not reviewable, so
   # nothing below runs for it and `reviewed` stays false: the caller keeps the gap
@@ -203,26 +225,26 @@ steps:
 
   - name: preview_creation
     type: workflow.execute
-    if: "${{ steps.draft_ready.output.ok == true }}"
+    if: '${{ steps.draft_ready.output.ok == true }}'
     with:
       workflow-id: system-security-rule-preview
       run-as-mode: inherit
       inputs:
-        space_id: "{{ workflow.spaceId }}"
+        space_id: '{{ workflow.spaceId }}'
         preview_body:
-          name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
-          description: "{{ steps.draft_creation.output.structured_output.rule.description }}"
-          query: "{{ steps.draft_creation.output.structured_output.rule.query }}"
+          name: '{{ steps.draft_creation.output.structured_output.rule.name }}'
+          description: '{{ steps.draft_creation.output.structured_output.rule.description }}'
+          query: '{{ steps.draft_creation.output.structured_output.rule.query }}'
           language: esql
           type: esql
-          interval: "{{ steps.draft_creation.output.structured_output.rule.interval }}"
-          from: "{{ steps.draft_creation.output.structured_output.rule.from }}"
-          to: "{{ steps.draft_creation.output.structured_output.rule.to }}"
-          severity: "{{ steps.draft_creation.output.structured_output.rule.severity }}"
-          risk_score: "${{ steps.draft_creation.output.structured_output.rule.risk_score }}"
-          threat: "${{ steps.draft_creation.output.structured_output.rule.threat }}"
-          tags: "${{ steps.draft_creation.output.structured_output.rule.tags }}"
-          invocationCount: "${{ inputs.preview_invocation_count }}"
+          interval: '{{ steps.draft_creation.output.structured_output.rule.interval }}'
+          from: '{{ steps.draft_creation.output.structured_output.rule.from }}'
+          to: '{{ steps.draft_creation.output.structured_output.rule.to }}'
+          severity: '{{ steps.draft_creation.output.structured_output.rule.severity }}'
+          risk_score: '${{ steps.draft_creation.output.structured_output.rule.risk_score }}'
+          threat: '${{ steps.draft_creation.output.structured_output.rule.threat }}'
+          tags: '${{ steps.draft_creation.output.structured_output.rule.tags }}'
+          invocationCount: '${{ inputs.preview_invocation_count }}'
           timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
 
   # The draft lives as an attachment in the agent's own conversation, which stays
@@ -230,15 +252,15 @@ steps:
   # proposal asks about is right next to the decision.
   - name: attach_draft
     type: ai.attachment.add
-    if: "${{ steps.draft_ready.output.ok == true }}"
+    if: '${{ steps.draft_ready.output.ok == true }}'
     with:
-      conversation_id: "{{ inputs.investigation_id }}"
-      id: "rule-draft"
+      conversation_id: '{{ inputs.investigation_id }}'
+      id: 'rule-draft'
       type: security.rule
       data:
-        text: "{{ steps.draft_creation.output.structured_output.rule | json }}"
-        attachmentLabel: "{{ steps.draft_creation.output.structured_output.rule.name }}"
-      description: "Drafted rule for the detection gap: {{ steps.draft_creation.output.structured_output.rule.name }}"
+        text: '{{ steps.draft_creation.output.structured_output.rule | json }}'
+        attachmentLabel: '{{ steps.draft_creation.output.structured_output.rule.name }}'
+      description: 'Drafted rule for the detection gap: {{ steps.draft_creation.output.structured_output.rule.name }}'
       render_inline: true
     on-failure:
       continue: true
@@ -263,12 +285,12 @@ steps:
   # investigation, so it also decides when it closes.
   - name: propose_creation
     type: workflow.execute
-    if: "${{ steps.proposal_ready.output.ok == true }}"
+    if: '${{ steps.proposal_ready.output.ok == true }}'
     with:
       workflow-id: system-create-alertzero-proposal
       run-as-mode: inherit
       inputs:
-        conversationId: "{{ inputs.investigation_id }}"
+        conversationId: '{{ inputs.investigation_id }}'
         comment: |-
           **Create a new ES|QL detection rule for this gap**
 
@@ -292,7 +314,7 @@ steps:
           **On approval**
           If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
-        actionInput: "${{ steps.draft_creation.output.structured_output.rule }}"
+        actionInput: '${{ steps.draft_creation.output.structured_output.rule }}'
         impact: low
         confidence: medium
         # Creating a rule always waits for an analyst; matches the action's approvalPolicy.
@@ -313,8 +335,8 @@ steps:
       reviewed: >-
         ${{ steps.propose_creation.output.decision == 'approved'
           or steps.propose_creation.output.decision == 'dismissed' }}
-      decision: "{{ steps.propose_creation.output.decision }}"
-      rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
+      decision: '{{ steps.propose_creation.output.decision }}'
+      rule_name: '{{ steps.draft_creation.output.structured_output.rule.name }}'
       # Why nothing was proposed, so a gap that keeps coming back can be explained
       # without opening the agent conversation. Empty when the draft reached the gate.
       skip_reason: >-
