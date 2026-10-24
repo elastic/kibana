@@ -15,14 +15,17 @@ tags:
 settings:
   # Gather and the agent. Contract bound for this child.
   timeout: "10m"
-  # Retried here rather than at the review's call site, so a transient ES or
-  # conversation-read failure never reaches the review as a `failed` verdict.
-  # Workflow-level because every step is a required source or depends on one.
-  on-failure:
-    retry:
-      max-attempts: 3
-      delay: "30s"
-      strategy: exponential
+  # No workflow-level `on-failure.retry` on purpose. It would wrap EVERY step in
+  # `enter-retry` nodes, including the bodies of `load_events_per_alert`'s
+  # parallel branches, and a branch body cannot be retried (buildParallelBranchBody
+  # rejects any node with more than one out-edge), so the graph never builds and
+  # every run is rejected as invalid. Transient failures are handled per source
+  # instead: the raw-event fan-out runs `mode: settled`, where a failed branch is
+  # recorded in `results[].status/error` and feeds `events_failed` (branch bodies
+  # cannot carry `on-failure` -- parallel_step.md Limitation), the optional entity
+  # store carries `on-failure: continue: true` and feeds `entities_failed`, and a
+  # failed REQUIRED source fails the run, which the review records as `failed` --
+  # the review owns whether to run the analysis again.
   # No `concurrency` on purpose: the review already serializes per attack, and a
   # dropped run hands its caller an empty output that is indistinguishable from an
   # exhausted-retry failure.

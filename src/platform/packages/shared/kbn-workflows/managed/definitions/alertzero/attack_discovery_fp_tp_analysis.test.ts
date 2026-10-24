@@ -18,6 +18,8 @@ import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { buildFieldsZodValidator } from '../../../spec/lib/build_fields_zod_validator';
 import { normalizeFieldsToJsonSchema } from '../../../spec/lib/field_conversion';
 import { WorkflowSchema } from '../../../spec/schema';
+import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
+import type { WorkflowYaml } from '../../../spec/schema';
 
 /**
  * Classifications the analysis may return. `failed` is deliberately absent: it is
@@ -112,6 +114,19 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
   // `parallel` itself must survive strict parsing as a step type in a managed
   // definition, so a schema regression to "parallel only inside authored
   // definitions" fails here rather than at managed-install time.
+  // Schema-valid is not runnable: a workflow-level `on-failure.retry` wraps
+  // parallel branch bodies in `enter-retry` nodes and `convertToWorkflowGraph`
+  // throws (a branch body node may not have more than one out-edge), a class of
+  // error the strict schema above passes and only `POST /run` would surface as
+  // `Workflow is not valid.`. Build the real graph here so the gap fails jest.
+  it('builds an executable graph', () => {
+    expect(() =>
+      convertToWorkflowGraph(
+        parse(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.yaml) as unknown as WorkflowYaml
+      )
+    ).not.toThrow();
+  });
+
   it('accepts a parallel fan-out step in the managed definition', () => {
     const result = WorkflowSchema.safeParse(
       parse(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.yaml)
@@ -508,11 +523,15 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
   });
 
   describe('the failure contract', () => {
-    // The built-in retries #19214 expects to have run before the review records a
-    // failure. They live here rather than at the review's call site so a transient
-    // failure is retried without the review knowing this workflow's internals.
-    it('retries before giving up', () => {
-      expect(analysis.settings?.['on-failure']?.retry?.['max-attempts']).toBeGreaterThan(1);
+    // A workflow-level `on-failure.retry` wraps every step — including the bodies
+    // of `load_events_per_alert`'s parallel branches — in `enter-retry` nodes, and
+    // a parallel branch body cannot be retried (buildParallelBranchBody rejects
+    // any node with more than one out-edge), so the graph never builds and every
+    // run is rejected as invalid. Transient failures are handled per source: the
+    // fan-out settles failed branches, `load_entities` continues on failure, and a
+    // failed required source fails the run for the review to record.
+    it('does not set a workflow-level on-failure the parallel fan-out cannot carry', () => {
+      expect(analysis.settings?.['on-failure']).toBeUndefined();
     });
 
     it('bounds how long an analysis may run', () => {
