@@ -36,6 +36,27 @@ describe('AutoRefreshButton', () => {
     expect(wrapper.find('[data-test-subj="autoRefreshButton"]').at(0).text()).toEqual('On');
   });
 
+  it.each([
+    [true, 'Auto refresh: On'],
+    [false, 'Auto refresh: Off'],
+  ])(
+    'gives the button an accessible name with context when isRefreshOn=%s',
+    (isRefreshOn, name) => {
+      const { getByRole } = render(
+        <TestProviders>
+          <AutoRefreshButton
+            isDisabled={false}
+            isRefreshOn={isRefreshOn}
+            reFetchRules={reFetchRulesMock}
+            setIsRefreshOn={setIsRefreshOnMock}
+          />
+        </TestProviders>
+      );
+
+      expect(getByRole('button', { name })).toBeInTheDocument();
+    }
+  );
+
   it.skip('invokes refetch when enabling auto refresh', () => {
     const { container } = render(
       <AutoRefreshButton
