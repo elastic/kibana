@@ -9,7 +9,10 @@ import type { SupportedHostOsType } from '../../../../common/endpoint/constants'
 import type { BasicConsoleProps } from '../../hooks/use_with_show_responder';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type { CommandResponseActionApiState } from './hooks/use_console_action_submitter';
-import type { ManagedConsoleExtensionComponentProps } from '../console';
+import type {
+  ManagedConsoleExtensionComponentProps,
+  ManagedConsoleHeaderActionsComponentProps,
+} from '../console';
 import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
@@ -32,6 +35,9 @@ export interface EndpointCommandDefinitionMeta {
 
 export type EndpointResponderExtensionComponentProps =
   ManagedConsoleExtensionComponentProps<BasicConsoleProps>;
+
+export type EndpointResponderHeaderActionsComponentProps =
+  ManagedConsoleHeaderActionsComponentProps<BasicConsoleProps>;
 
 export type ActionRequestComponentProps<
   /** The console arguments defintion for the command */

@@ -59,7 +59,8 @@ export class ResponseConsolePage {
     this.overlay = page.testSubj.locator('consolePageOverlay');
     this.respondAction = page.testSubj.locator('endpointResponseActions-action-item');
     this.userMenu = page.testSubj.locator('userMenuButton');
-    this.backLink = page.testSubj.locator('consolePageOverlay-header-back-link');
+    // Scoped to the overlay: the page underneath can render its own app header back button
+    this.backLink = this.overlay.getByTestId('appHeaderBack');
     this.actionLogButton = page.testSubj.locator('responderShowActionLogButton');
     this.actionLogFlyout = page.testSubj.locator('responderActionLogFlyout');
     this.actionLogDateQuickMenuButton = this.actionLogFlyout.getByTestId(

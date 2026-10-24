@@ -23,6 +23,7 @@ import {
   isCloudSecurityPosturePath,
   isDashboardViewPath,
   isDetectionsPath,
+  isEndpointManagementPath,
   isRuleChangesHistoryPath,
   isRulesAddPath,
   isRulesManagementPath,
@@ -73,6 +74,9 @@ export const GlobalHeader = React.memo(() => {
   const onboardingPath = isOnboardingPath(pathname);
   // Cloud Security Posture pages own "Add integrations" in their own app header.
   const cloudSecurityPosturePath = isCloudSecurityPosturePath(pathname);
+  // Endpoint management pages (Endpoints, Policies, Response actions history, Script library,
+  // Artifacts, Policy details) own "Add integrations" in their own `SecurityAppHeader`.
+  const managementPath = isEndpointManagementPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -81,9 +85,9 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules, Add Elastic rules, Shared Exception Lists and Cloud Security Posture page app headers
-    // render their own actions (ML job settings, Add integrations), so clear the global header action
-    // menu there to avoid duplicating them.
+    // The Rules, Add Elastic rules, Shared Exception Lists, Cloud Security Posture and Endpoint
+    // management page app headers render their own actions (ML job settings, Add integrations), so
+    // clear the global header action menu there to avoid duplicating them.
     // Onboarding is a page without the global header action menu
     if (
       changesHistoryPath ||
@@ -91,7 +95,8 @@ export const GlobalHeader = React.memo(() => {
       rulesAddPath ||
       sharedExceptionListsPath ||
       onboardingPath ||
-      cloudSecurityPosturePath
+      cloudSecurityPosturePath ||
+      managementPath
     ) {
       setHeaderActionMenu(undefined);
       return;
@@ -125,6 +130,7 @@ export const GlobalHeader = React.memo(() => {
     sharedExceptionListsPath,
     onboardingPath,
     cloudSecurityPosturePath,
+    managementPath,
   ]);
 
   return (

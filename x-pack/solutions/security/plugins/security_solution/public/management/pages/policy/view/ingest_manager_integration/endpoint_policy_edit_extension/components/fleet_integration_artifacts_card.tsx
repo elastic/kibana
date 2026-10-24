@@ -85,10 +85,13 @@ export const FleetIntegrationArtifactsCard = memo<FleetIntegrationArtifactCardPr
 
       return {
         backLink: {
+          // Destination-only label (new id, since `...backButtonLabel`'s meaning changed from
+          // a full sentence to a destination name): the `AppHeader` back button renders its own
+          // "Back to {label}" prefix.
           label: i18n.translate(
-            'xpack.securitySolution.endpoint.fleetIntegrationCard.artifacts.backButtonLabel',
+            'xpack.securitySolution.endpoint.fleetIntegrationCard.artifacts.backButtonDestinationLabel',
             {
-              defaultMessage: `Back to Fleet integration policy`,
+              defaultMessage: `Fleet integration policy`,
             }
           ),
           navigateTo: [

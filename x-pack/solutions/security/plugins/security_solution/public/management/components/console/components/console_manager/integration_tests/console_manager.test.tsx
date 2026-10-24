@@ -7,6 +7,7 @@
 
 import { useConsoleManager } from '../console_manager';
 import React from 'react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type {
   ConsoleManagerClient,
   ConsoleRegistrationInterface,
@@ -261,7 +262,7 @@ describe('When using ConsoleManager', () => {
     it('should show the title', async () => {
       await render();
 
-      expect(renderResult.getByTestId('consolePageOverlay-layout-titleHolder').textContent).toMatch(
+      expect(renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.title).textContent).toMatch(
         /Test console/
       );
     });
@@ -272,21 +273,15 @@ describe('When using ConsoleManager', () => {
       expect(renderResult.getByTestId('testRunningConsole')).toBeTruthy();
     });
 
-    it('should not show `Done` button', async () => {
-      await render();
-
-      expect(renderResult.queryByTestId('consolePageOverlay-doneButton')).toBeFalsy();
-    });
-
     it('should show `Back` link', async () => {
       await render();
 
-      expect(renderResult.getByTestId('consolePageOverlay-header-back-link')).toBeTruthy();
+      expect(renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeTruthy();
     });
 
     it('should hide the console page overlay', async () => {
       await render();
-      await user.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
+      await user.click(renderResult.getByTestId(APP_HEADER_TEST_SUBJECTS.back));
 
       expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
     });

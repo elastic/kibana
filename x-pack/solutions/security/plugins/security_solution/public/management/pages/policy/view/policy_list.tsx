@@ -41,7 +41,7 @@ import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { getPoliciesPath } from '../../../common/routing';
-import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
+import { useAppUrl, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { PolicyEndpointCount } from './components/policy_endpoint_count';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
@@ -73,6 +73,7 @@ export const PolicyList = memo(() => {
   const { getAppUrl } = useAppUrl();
   const toasts = useToasts();
   const { euiTheme } = useEuiTheme();
+  const { docLinks } = useKibana().services;
 
   // load the list of policies
   const {
@@ -120,8 +121,8 @@ export const PolicyList = memo(() => {
           path: policyListPath,
         },
       ],
-      label: i18n.translate('xpack.securitySolution.policy.backToPolicyList', {
-        defaultMessage: 'Back to policy list',
+      label: i18n.translate('xpack.securitySolution.policy.list.appHeaderBackLabel', {
+        defaultMessage: 'Policies',
       }),
       href: getAppUrl({ path: policyListPath }),
     };
@@ -385,14 +386,10 @@ export const PolicyList = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="policyListPage"
-      hideHeader={shouldShowOnboarding}
       title={i18n.translate('xpack.securitySolution.policy.list.title', {
         defaultMessage: 'Policies',
       })}
-      subtitle={i18n.translate('xpack.securitySolution.policy.list.subtitle', {
-        defaultMessage:
-          'Use policies to customize endpoint and cloud workload protections and other configurations',
-      })}
+      docLink={docLinks.links.securitySolution.policies}
     >
       {!shouldShowOnboarding ? (
         <>

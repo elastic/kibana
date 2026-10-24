@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ComponentType } from 'react';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { ConsoleProps } from '../../types';
 
 export interface ConsoleRegistrationInterface<TMeta extends object = any> {
@@ -19,8 +20,11 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
    */
   meta?: TMeta;
 
-  /** An optional component used to render the Overlay page title where the console will be displayed */
-  PageTitleComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+  /**
+   * The title rendered in the console overlay's app header. Must be a plain string - the header
+   * is a declarative `AppHeaderView`, not an arbitrary render target.
+   */
+  pageTitle?: string;
 
   /**
    * An optional component that will be rendered in the Responder page overlay, above the Console area
@@ -28,16 +32,16 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   PageBodyComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
 
   /**
-   * An array of Action components (likely buttons) that will be rendered into the Responder page
-   * overlay header (next to the `Done` button).
+   * An optional component that contributes to the console overlay header's app menu (ex. the
+   * "Response actions history" action). The component does not render its own trigger button -
+   * the overlay's header renders that declaratively from the `AppMenuConfig` reported through
+   * `onMenuChange`. The component is only responsible for any UI it needs beyond the trigger
+   * itself (ex. a flyout opened by the action's `run` handler).
    *
-   * NOTE: this is an Array of `Component`'s - not `JSX`. These will be initialized/rendered when
-   * the Responder page overlay is shown.
+   * NOTE: this is a `Component` - not `JSX`. It will be initialized/rendered when the Responder
+   * page overlay is shown.
    */
-  ActionComponents?: Array<ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>>;
-
-  /** controls the visibility of the console close button */
-  showCloseButton?: boolean;
+  HeaderActionsComponent?: ComponentType<ManagedConsoleHeaderActionsComponentProps<TMeta>>;
 }
 
 /**
@@ -45,6 +49,15 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
  */
 export interface ManagedConsoleExtensionComponentProps<TMeta extends object = any> {
   meta: { [key in keyof TMeta]: TMeta[key] };
+}
+
+/**
+ * The Props provided to `ConsoleRegistrationInterface['HeaderActionsComponent']`
+ */
+export interface ManagedConsoleHeaderActionsComponentProps<TMeta extends object = any>
+  extends ManagedConsoleExtensionComponentProps<TMeta> {
+  /** Reports the app menu config the overlay header should render (`undefined` clears it) */
+  onMenuChange: (menu: AppMenuConfig | undefined) => void;
 }
 
 export interface RegisteredConsoleClient<TMeta extends object = any>

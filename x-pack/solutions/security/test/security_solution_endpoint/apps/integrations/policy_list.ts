@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const policyName = (await testSubjects.findAll('policyNameCellLink'))[0];
         await policyName.click();
         await pageObjects.policy.ensureIsOnDetailsPage();
-        const backButton = await testSubjects.find('policyDetailsBackLink');
+        const backButton = await testSubjects.find('appHeaderBack');
         await backButton.click();
         await pageObjects.policy.ensureIsOnListPage();
       });
@@ -104,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         it('returns back to the policy list page when the header back button is clicked', async () => {
           await pageObjects.endpoint.ensureIsOnEndpointListPage();
-          const backButton = await testSubjects.find('endpointListBackLink');
+          const backButton = await testSubjects.find('appHeaderBack');
           await backButton.click();
           await pageObjects.policy.ensureIsOnListPage();
         });

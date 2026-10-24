@@ -73,9 +73,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         this.timeout(timeout);
 
         await retry.waitForWithTimeout('policy title is not empty', 120_000, async () => {
-          return (await testSubjects.getVisibleText('header-page-title')) !== '';
+          return (await testSubjects.getVisibleText('appHeaderTitle')) !== '';
         });
-        expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
+        expect(await testSubjects.getVisibleText('appHeaderTitle')).to.equal(
           policyInfo.packagePolicy.name
         );
       });
@@ -389,7 +389,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
             await testSubjects.existOrFail('policyDetailsPage');
 
-            await (await testSubjects.find('policyDetailsBackLink')).click();
+            await (await testSubjects.find('appHeaderBack')).click();
             await testSubjects.existOrFail('endpointIntegrationPolicyForm');
           });
         }

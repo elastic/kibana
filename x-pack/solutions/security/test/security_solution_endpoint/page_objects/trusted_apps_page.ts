@@ -37,7 +37,7 @@ export function TrustedAppsPageProvider({ getService, getPageObjects }: FtrProvi
      */
     async findTrustedAppsListPageBackButton() {
       await this.ensureIsOnTrustedAppsListPage();
-      return testSubjects.find('backToOrigin');
+      return testSubjects.find('appHeaderBack');
     },
 
     /**

@@ -22,7 +22,8 @@ export function EndpointResponderPageObjects({ getService }: FtrProviderContext)
 
   const closeResponder = async () => {
     await ensureOnResponder();
-    await testSubjects.click('consolePageOverlay-header-back-link');
+    // Scoped to the overlay: the page underneath can render its own app header back button
+    await testSubjects.click(`${TEST_SUBJ.responderPage} > appHeaderBack`);
     await testSubjects.missingOrFail(TEST_SUBJ.responderPage);
   };
 

@@ -32,10 +32,14 @@ export const useGetLinkTo = (
 
   const policyArtifactRouteState = useMemo(() => {
     return {
+      // Destination-only label: the `AppHeader` back button renders its own "Back to {label}"
+      // prefix, so this must name the destination, not repeat "Back to" (new id because the
+      // meaning/format of the old `...backButtonLabel` id changed from a full sentence to a
+      // destination name).
       backButtonLabel: i18n.translate(
-        'xpack.securitySolution.endpoint.policy.artifacts.empty.unassigned.backButtonLabel',
+        'xpack.securitySolution.endpoint.policy.artifacts.empty.unassigned.backButtonDestinationLabel',
         {
-          defaultMessage: 'Back to {policyName} policy',
+          defaultMessage: '{policyName} policy',
           values: {
             policyName,
           },
