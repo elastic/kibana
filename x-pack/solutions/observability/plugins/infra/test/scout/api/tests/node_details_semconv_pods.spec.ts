@@ -18,6 +18,7 @@ import { apiTest, generatePodsData, generateSemconvPodsData, testData } from '..
 
 const POD_WITH_LIMITS = testData.SEMCONV_PODS[0];
 const POD_WITHOUT_LIMITS = testData.SEMCONV_PODS[1];
+const POD_MULTI_INTERFACE = testData.SEMCONV_PODS.find((pod) => (pod.interfaces?.length ?? 0) > 1);
 const SEMCONV_CPU_WITH_LIMIT = 0.46;
 const SEMCONV_CPU_WITHOUT_LIMIT = 0.32;
 const SEMCONV_MEMORY_WITH_LIMIT = 0.55;
@@ -142,6 +143,37 @@ apiTest.describe(
         ?.series.find((series) => series.id === 'rx');
       expect(overviewRx?.data.some((point) => (point.value ?? 0) > 0)).toBe(true);
     });
+
+    apiTest(
+      'sums pod network across interfaces to match the Inventory snapshot',
+      async ({ apiClient }) => {
+        // The multi-interface pod is the case the Inventory waffle (snapshot) sums
+        // per-interface rates for; the pod-detail TSVB series must report the same
+        // total rather than collapsing interfaces with a single `max`.
+        if (!POD_MULTI_INTERFACE) {
+          throw new Error('Expected a multi-interface SemConv pod fixture');
+        }
+
+        const interfaceCount = POD_MULTI_INTERFACE.interfaces?.length ?? 1;
+        const expectedNetworkRate = SEMCONV_NETWORK_BYTES_PER_SEC * interfaceCount;
+
+        const response = await fetchNodeDetails(
+          apiClient,
+          requestFor(POD_MULTI_INTERFACE.uid, ['podNetworkTraffic'], 'semconv')
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const { metrics } = response.body as NodeDetailsMetricDataResponse;
+        const network = metrics.find((metric) => metric.id === 'podNetworkTraffic');
+        const networkRx = lastNonZeroSeries(network, 'rx');
+        const networkTx = lastNonZeroSeries(network, 'tx');
+        expect(networkRx).toBeDefined();
+        expect(networkTx).toBeDefined();
+        // podNetworkTraffic RX ends with invert-posonly so the chart draws receive below zero.
+        expect(networkRx).toBeCloseTo(-expectedNetworkRate, 2);
+        expect(networkTx).toBeCloseTo(expectedNetworkRate, 2);
+      }
+    );
 
     apiTest('falls back to node utilization when a limit is absent', async ({ apiClient }) => {
       const response = await fetchNodeDetails(
