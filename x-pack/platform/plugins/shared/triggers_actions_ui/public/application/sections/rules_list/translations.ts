@@ -147,6 +147,13 @@ export const ALERT_ERROR_VALIDATE_REASON = i18n.translate(
   }
 );
 
+export const ALERT_ERROR_CONFIGURATION_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonConfiguration',
+  {
+    defaultMessage: 'An error occurred because of the rule configuration.',
+  }
+);
+
 export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxExecutableActions',
   {
@@ -186,6 +193,7 @@ export const rulesErrorReasonTranslationsMapping = {
   read: ALERT_ERROR_READING_REASON,
   decrypt: ALERT_ERROR_DECRYPTING_REASON,
   execute: ALERT_ERROR_EXECUTION_REASON,
+  configuration: ALERT_ERROR_CONFIGURATION_REASON,
   unknown: ALERT_ERROR_UNKNOWN_REASON,
   license: ALERT_ERROR_LICENSE_REASON,
   timeout: ALERT_ERROR_TIMEOUT_REASON,

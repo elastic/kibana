@@ -65,6 +65,7 @@ import type {
   RuleAlertData,
   Artifacts,
   GapReason,
+  RuleExecutionStatusErrorReasons,
 } from '../common';
 import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -538,7 +539,11 @@ export interface PublicRuleMonitoringService {
 }
 
 export interface PublicLastRunSetters {
-  addLastRunError: (message: string, userError?: boolean) => void;
+  addLastRunError: (
+    message: string,
+    userError?: boolean,
+    reason?: RuleExecutionStatusErrorReasons
+  ) => void;
   addLastRunWarning: (outcomeMsg: string) => void;
   setLastRunOutcomeMessage: (warning: string) => void;
 }
