@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
+import { createInferenceRequestError } from '@kbn/inference-common';
 
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
@@ -109,6 +110,32 @@ export class SearchInferenceEndpointsPlugin
       getForFeature,
       getConnectorList,
       getConnectorById,
+    });
+
+    plugins.inference.registerFeatureEndpointResolver(async (featureId, request) => {
+      const [, , { features, endpoints }] = await core.getStartServices();
+      const feature = features.get(featureId);
+      if (!feature) {
+        throw createInferenceRequestError(`Feature "${featureId}" is not registered`, 400);
+      }
+      if (feature.taskType !== 'chat_completion') {
+        throw createInferenceRequestError(
+          `Feature "${featureId}" is not a chat completion feature (task type "${feature.taskType}")`,
+          400
+        );
+      }
+
+      const {
+        endpoints: [topEndpoint],
+      } = await endpoints.getForFeature(featureId, request);
+      if (!topEndpoint) {
+        return undefined;
+      }
+      return {
+        connectorId: topEndpoint.connectorId,
+        temperature: topEndpoint.parameters?.temperature,
+        reasoning: topEndpoint.parameters?.reasoning,
+      };
     });
 
     plugins.features.registerKibanaFeature({

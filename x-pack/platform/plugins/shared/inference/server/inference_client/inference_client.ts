@@ -7,14 +7,18 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BoundOptions, InferenceClient, InferenceCallbacks } from '@kbn/inference-common';
+import type { BoundOptions, InferenceCallbacks } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   InferenceAnonymizationOptions,
   RegexWorkerService,
 } from '@kbn/ai-anonymization-server';
-import type { ActionsClientProvider } from '../types';
+import type {
+  ActionsClientProvider,
+  InferenceServerClient,
+  ScopedFeatureEndpointResolver,
+} from '../types';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { bindClient } from '../../common/inference_client/bind_client';
@@ -44,6 +48,7 @@ export function createInferenceClient({
   getDefaultConnectorId,
   resolveConnectorId,
   shouldStreamInferenceEndpoint,
+  resolveFeatureEndpoint,
 }: {
   request: KibanaRequest;
   namespace: string;
@@ -62,7 +67,8 @@ export function createInferenceClient({
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
   shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
-}): InferenceClient {
+  resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
+}): InferenceServerClient {
   const callbackManager = createCallbackManager(callbacks);
 
   const callbackApi = createChatCompleteCallbackApi({
@@ -88,6 +94,7 @@ export function createInferenceClient({
     getDefaultConnectorId,
     resolveConnectorId,
     shouldStreamInferenceEndpoint,
+    resolveFeatureEndpoint,
   });
 
   const chatComplete = createChatCompleteApi({
@@ -100,7 +107,7 @@ export function createInferenceClient({
 
   const eventEmitter = callbackManager.asEventEmitter();
 
-  const client: InferenceClient = {
+  const client: InferenceServerClient = {
     on: eventEmitter.on.bind(eventEmitter),
     chatComplete,
     output,

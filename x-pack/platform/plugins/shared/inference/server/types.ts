@@ -26,6 +26,8 @@ export interface ActionsClientProvider {
 import type {
   BoundInferenceClient,
   BoundOptions,
+  ChatCompleteOptions,
+  FeatureChatCompleteAPI,
   InferenceClient,
   InferenceConnector,
 } from '@kbn/inference-common';
@@ -52,9 +54,34 @@ export interface InferenceStartDependencies {
 }
 
 /**
+ * Resolves the options to call a feature's top endpoint with, scoped to the given request.
+ */
+export type FeatureEndpointResolver = (
+  featureId: string,
+  request: KibanaRequest
+) => Promise<Pick<ChatCompleteOptions, 'connectorId' | 'temperature' | 'reasoning'> | undefined>;
+
+/**
+ * A {@link FeatureEndpointResolver} already scoped to a request.
+ */
+export type ScopedFeatureEndpointResolver = (
+  featureId: string
+) => ReturnType<FeatureEndpointResolver>;
+
+/**
+ * An {@link InferenceClient} whose `chatComplete` also accepts a `featureId` instead of a `connectorId`.
+ */
+export type InferenceServerClient = InferenceClient & { chatComplete: FeatureChatCompleteAPI };
+
+/**
  * Setup contract of the inference plugin.
  */
-export interface InferenceServerSetup {}
+export interface InferenceServerSetup {
+  /**
+   * Registers the resolver used by `chatComplete({ featureId })`. Only one resolver can be registered.
+   */
+  registerFeatureEndpointResolver: (resolver: FeatureEndpointResolver) => void;
+}
 
 /**
  * Options to create an inference client using the {@link InferenceServerStart.getClient} API.
@@ -124,7 +151,7 @@ export interface InferenceServerStart {
    */
   getClient: <T extends InferenceClientCreateOptions>(
     options: T
-  ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+  ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceServerClient;
 
   /**
    * Creates a langchain {@link InferenceChatModel} that will be using the inference framework
