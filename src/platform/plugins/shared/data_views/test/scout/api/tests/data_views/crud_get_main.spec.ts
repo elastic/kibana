@@ -60,5 +60,43 @@ apiTest.describe(
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body[SERVICE_KEY].title).toBe(title);
     });
+
+    apiTest(
+      'can retrieve a data view with allowNoIndex targeting a non-existing remote cluster',
+      async ({ apiClient }) => {
+        const id = `test-id-${Date.now()}-${Math.random()}`;
+        const title = `non_existing_cluster:logs-${Date.now()}-*`;
+        createdIds.push(id);
+
+        const createResponse = await apiClient.post(DATA_VIEW_PATH, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [SERVICE_KEY]: {
+              id,
+              title,
+              allowNoIndex: true,
+            },
+          },
+        });
+
+        expect(createResponse).toHaveStatusCode(200);
+
+        const getResponse = await apiClient.get(`${DATA_VIEW_PATH}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body[SERVICE_KEY].title).toBe(title);
+        expect(getResponse.body[SERVICE_KEY].allowNoIndex).toBe(true);
+      }
+    );
   }
 );

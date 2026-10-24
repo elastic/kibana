@@ -8,6 +8,7 @@
  */
 
 import sinon from 'sinon';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { convertEsError } from './errors';
 import * as convertEsErrorNS from './errors';
@@ -109,6 +110,24 @@ describe('server/index_patterns/service/lib/es_api', () => {
     beforeEach(() => (sandbox = sinon.createSandbox()));
     afterEach(() => sandbox.restore());
 
+    const createNoSuchRemoteClusterError = (cluster) =>
+      new esErrors.ResponseError({
+        statusCode: 404,
+        body: {
+          error: {
+            root_cause: [
+              {
+                type: 'no_such_remote_cluster_exception',
+                reason: `no such remote cluster: [${cluster}]`,
+              },
+            ],
+            type: 'no_such_remote_cluster_exception',
+            reason: `no such remote cluster: [${cluster}]`,
+          },
+          status: 404,
+        },
+      });
+
     it('calls fieldCaps() via callCluster', async () => {
       const fieldCaps = sinon.stub();
       const callCluster = {
@@ -190,6 +209,66 @@ describe('server/index_patterns/service/lib/es_api', () => {
         expect(convertEsError.args[0][0]).toBe(indices);
         expect(convertEsError.args[0][1]).toBe(esError);
       }
+    });
+
+    it('retries without the patterns targeting a non-existing remote cluster', async () => {
+      const football = {};
+      const fieldCaps = sinon.stub();
+      fieldCaps.onFirstCall().rejects(createNoSuchRemoteClusterError('non_existing_cluster'));
+      fieldCaps.onSecondCall().resolves(football);
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
+
+      const resp = await callFieldCapsApi({
+        callCluster,
+        indices: 'basic_index,non_existing_cluster:logs-*,-non_existing_cluster:logs-excluded',
+      });
+
+      sinon.assert.calledTwice(fieldCaps);
+      expect(fieldCaps.secondCall.args[0].index).toEqual(['basic_index']);
+      expect(resp).toBe(football);
+    });
+
+    it('returns an empty response when only a non-existing remote cluster is targeted and allow_no_indices is true', async () => {
+      const fieldCaps = sinon
+        .stub()
+        .rejects(createNoSuchRemoteClusterError('non_existing_cluster'));
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
+
+      const resp = await callFieldCapsApi({
+        callCluster,
+        indices: ['non_existing_cluster:logs-*'],
+        fieldCapsOptions: { allow_no_indices: true },
+      });
+
+      sinon.assert.calledOnce(fieldCaps);
+      expect(resp).toEqual({ body: { indices: [], fields: {} } });
+    });
+
+    it('throws when only a non-existing remote cluster is targeted and allow_no_indices is false', async () => {
+      const fieldCaps = sinon
+        .stub()
+        .rejects(createNoSuchRemoteClusterError('non_existing_cluster'));
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
+
+      await expect(
+        callFieldCapsApi({ callCluster, indices: ['non_existing_cluster:logs-*'] })
+      ).rejects.toMatchObject({ isBoom: true, output: { statusCode: 404 } });
+      sinon.assert.calledOnce(fieldCaps);
     });
 
     it('passes projectRouting to es api when provided', async () => {
