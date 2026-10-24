@@ -262,6 +262,13 @@ export function registerFleetUsageCollector(
           version: { type: 'keyword' },
           enabled: { type: 'boolean' },
           agent_based: { type: 'boolean' },
+          logsdb_columnar: {
+            type: 'boolean',
+            _meta: {
+              description:
+                "The user's logsdb_columnar choice for the installation; absent when the user made none",
+            },
+          },
         },
       },
       agentless_agents: {

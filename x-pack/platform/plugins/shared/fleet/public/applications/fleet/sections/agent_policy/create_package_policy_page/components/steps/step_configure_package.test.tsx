@@ -189,7 +189,7 @@ describe('StepConfigurePackage', () => {
       ).toBeInTheDocument();
     });
     act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
+      fireEvent.click(renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch')[0]);
     });
     expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
   });
@@ -417,6 +417,167 @@ describe('StepConfigurePackage', () => {
       expect(
         await renderResult.findByText('Collect logs from Nginx instances')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('columnar index mode switch', () => {
+    const SWITCH = 'columnarIndexModeSwitch';
+    const onLogsdbColumnarChange = jest.fn();
+
+    const renderWithSwitch = (logsdbColumnar?: boolean) => {
+      renderResult = testRenderer.render(
+        <StepConfigurePackagePolicy
+          packageInfo={packageInfo}
+          packagePolicy={packagePolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validatePackagePolicy(packagePolicy, packageInfo, deps)}
+          submitAttempted={false}
+          logsdbColumnar={logsdbColumnar}
+          onLogsdbColumnarChange={onLogsdbColumnarChange}
+        />
+      );
+    };
+
+    // Package-level readiness plus a second logs data stream, which can opt out of it.
+    const declareReadiness = (
+      readiness: 'opt_in' | 'default' = 'opt_in',
+      { withUnsupported = false }: { withUnsupported?: boolean } = {}
+    ) => {
+      packageInfo.elasticsearch = { logsdb_columnar: readiness };
+      packageInfo.data_streams = [
+        ...(packageInfo.data_streams ?? []),
+        {
+          ...packageInfo.data_streams![0],
+          dataset: 'nginx.error',
+          title: 'Nginx error logs',
+          path: 'error',
+          streams: packageInfo.data_streams![0].streams!.map((stream) => ({
+            ...stream,
+            title: 'Nginx error logs',
+          })),
+          elasticsearch: withUnsupported ? { logsdb_columnar: 'unsupported' } : {},
+        },
+      ];
+    };
+
+    beforeEach(() => onLogsdbColumnarChange.mockClear());
+
+    it('is hidden when the page does not apply the choice', () => {
+      declareReadiness();
+      render();
+
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+
+    it('is shown off and greyed out, with an explanation, when no logs data stream declares readiness', () => {
+      renderWithSwitch();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
+        "This integration isn't columnar-ready yet."
+      );
+    });
+
+    it('is hidden when the integration has no logs data stream', () => {
+      packageInfo.data_streams = packageInfo.data_streams!.map((dataStream) => ({
+        ...dataStream,
+        type: 'metrics',
+      }));
+      renderWithSwitch();
+
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+
+    it('is hidden for input packages', () => {
+      declareReadiness();
+      packageInfo.type = 'input';
+      renderWithSwitch();
+
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+
+    it('is shown above the inputs, and off by default, when every logs data stream is ready', async () => {
+      declareReadiness();
+      renderWithSwitch();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).not.toBeDisabled();
+
+      await renderResult.findByText('Collect logs from Nginx instances');
+      const html = renderResult.container.innerHTML;
+      expect(html.indexOf(SWITCH)).toBeLessThan(html.indexOf('Collect logs from Nginx instances'));
+    });
+
+    it('is greyed out, naming the data streams that are not ready, unless every logs data stream is', () => {
+      declareReadiness('opt_in', { withUnsupported: true });
+      renderWithSwitch();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
+        'Nginx error logs'
+      );
+    });
+
+    it('stays on, and can be turned off, when the installation is on columnar but a data stream is no longer ready', () => {
+      declareReadiness('opt_in', { withUnsupported: true });
+      (packageInfo as any).installationInfo = { logsdb_columnar_enabled: true };
+      renderWithSwitch();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).toBeChecked();
+      expect(switchEl).not.toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
+        "isn't columnar-ready anymore: Nginx error logs"
+      );
+
+      fireEvent.click(switchEl);
+      expect(onLogsdbColumnarChange).toHaveBeenCalledWith(false);
+    });
+
+    it('starts on for a new installation of a package that defaults to it', () => {
+      declareReadiness('default');
+      renderWithSwitch();
+
+      expect(renderResult.getByTestId(SWITCH)).toBeChecked();
+    });
+
+    it('does not start on from the package default unless every logs data stream is ready', () => {
+      declareReadiness('default', { withUnsupported: true });
+      renderWithSwitch();
+
+      expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
+    });
+
+    it('starts from the choice stored on the installation', () => {
+      declareReadiness('default');
+      (packageInfo as any).installationInfo = { logsdb_columnar_enabled: false };
+      renderWithSwitch();
+
+      expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
+    });
+
+    it('reflects the choice picked on the page', () => {
+      declareReadiness();
+      renderWithSwitch(true);
+
+      expect(renderResult.getByTestId(SWITCH)).toBeChecked();
+    });
+
+    it('hands the new choice to the page without touching the policy', () => {
+      declareReadiness();
+      renderWithSwitch();
+
+      fireEvent.click(renderResult.getByTestId(SWITCH));
+
+      expect(onLogsdbColumnarChange).toHaveBeenCalledWith(true);
+      expect(mockUpdatePackagePolicy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ package: expect.anything() })
+      );
     });
   });
 });

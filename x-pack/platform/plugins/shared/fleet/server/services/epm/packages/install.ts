@@ -31,7 +31,11 @@ import type {
   PackageInstallContext,
   RegistryDataStream,
 } from '../../../../common/types';
-import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
+import {
+  isPackagePrerelease,
+  getNormalizedDataStreams,
+  isLogsdbColumnarDefault,
+} from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import type {
@@ -1411,6 +1415,9 @@ export async function createInstallation(options: {
     install_source: installSource,
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
+    // A package whose logs data streams all default to columnar starts the installation on it.
+    // Upgrades follow this stored choice, so an installation never changes mode on its own.
+    ...(isLogsdbColumnarDefault(packageInfo) ? { logsdb_columnar_enabled: true } : {}),
     verification_status: 'unknown',
     ...(dependencies ? { dependencies } : {}),
     ...(installedAsDependencyOf

@@ -171102,6 +171102,8 @@ components:
               - error
           maxItems: 10
           type: array
+        logsdb_columnar_enabled:
+          type: boolean
         name:
           type: string
         namespaces:
@@ -177153,6 +177155,9 @@ components:
       additionalProperties: false
       properties:
         keepPoliciesUpToDate:
+          type: boolean
+        logsdb_columnar:
+          description: Store the logs data streams of this integration in the logsdb_columnar index mode. Turning it on is only accepted when every logs data stream of the installed package declares columnar readiness; turning it off is always accepted. Takes effect on the next rollover.
           type: boolean
         namespace_customization_enabled_for:
           description: Namespaces for which namespace-level customization is enabled on this package.

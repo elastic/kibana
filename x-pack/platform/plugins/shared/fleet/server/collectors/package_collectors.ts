@@ -19,6 +19,8 @@ export interface PackageUsage {
   version: string;
   enabled: boolean;
   agent_based?: boolean;
+  /** The user's `logsdb_columnar` choice for the installation; absent when the user made none. */
+  logsdb_columnar?: boolean;
 }
 
 export interface AgentlessUsage {
@@ -73,6 +75,9 @@ export const getPackageUsage = async (
       enabled,
       ...(enabled && agentBased && { agent_based: true }), // Only include if true
       ...(enabled && agentless && { agentless: true }), // Only include if true
+      ...(p.attributes.logsdb_columnar_enabled !== undefined && {
+        logsdb_columnar: p.attributes.logsdb_columnar_enabled,
+      }),
     };
   });
 };

@@ -182,6 +182,7 @@ export const InstallationInfoSchema = schema.object(
     previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
     rolled_back: schema.maybe(schema.boolean()),
     is_rollback_ttl_expired: schema.maybe(schema.boolean()),
+    logsdb_columnar_enabled: schema.maybe(schema.boolean()),
   },
   { meta: { id: 'installation_info' } }
 );
@@ -895,6 +896,14 @@ export const UpdatePackageRequestSchema = {
         })
       ),
       namespace_customization_settings: schema.maybe(NamespaceCustomizationSettingsSchema),
+      logsdb_columnar: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'Store the logs data streams of this integration in the logsdb_columnar index mode. Turning it on is only accepted when every logs data stream of the installed package declares columnar readiness; turning it off is always accepted. Takes effect on the next rollover.',
+          },
+        })
+      ),
     },
     { meta: { id: 'update_package_request' } }
   ),

@@ -19,6 +19,7 @@ import type { EsAssetReference, Installation, RegistryDataStream } from '../../.
 
 import { prepareToInstallPipelines } from '../elasticsearch/ingest_pipeline';
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
+import { resolveColumnarIndexModes } from '../elasticsearch/template/columnar_index_mode';
 
 import { withPackageSpan } from './utils';
 import { optimisticallyAddEsAssetReferences, updateEsAssetReferences } from './es_assets_reference';
@@ -55,6 +56,12 @@ export async function installIndexTemplatesAndPipelines({
    */
   const experimentalDataStreamFeatures = installedPkg?.experimental_data_stream_features ?? [];
 
+  const columnarIndexModes = resolveColumnarIndexModes({
+    packageInfo: packageInstallContext.packageInfo,
+    dataStreams: onlyForDataStreams ?? packageInstallContext.packageInfo.data_streams ?? [],
+    installedPkg,
+  });
+
   const preparedIngestPipelines = prepareToInstallPipelines(
     packageInstallContext,
     onlyForDataStreams
@@ -63,7 +70,8 @@ export async function installIndexTemplatesAndPipelines({
     packageInstallContext,
     esReferences,
     experimentalDataStreamFeatures,
-    onlyForDataStreams
+    onlyForDataStreams,
+    columnarIndexModes
   );
 
   // Update the references for the templates and ingest pipelines together. Need to be done together to avoid race
