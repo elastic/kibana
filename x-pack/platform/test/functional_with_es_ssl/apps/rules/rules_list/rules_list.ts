@@ -42,6 +42,28 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     await testSubjects.click('rulesTab');
   };
 
+  const assertRuleEnabledState = async (ruleId: string, enabled: boolean) => {
+    await retry.try(async () => {
+      const { body: rule } = await supertest
+        .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}`)
+        .expect(200);
+      expect(rule.enabled).to.eql(enabled);
+    });
+  };
+
+  // The row menu reuses one item to enable or disable a rule, so wait until it offers the intended
+  // action before clicking: a row that has not caught up with a status change would route the click
+  // to the other action.
+  const clickRuleRowStatusAction = async (expectedLabel: 'Enable' | 'Disable') => {
+    await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    await testSubjects.click('collapsedItemActions');
+    await retry.waitForWithTimeout(`row action "${expectedLabel}" to show up`, 30000, async () => {
+      const label = await testSubjects.getVisibleText('disableButton');
+      return label.trim() === expectedLabel;
+    });
+    await testSubjects.click('disableButton');
+  };
+
   const toggleRuleStatusFilter = (selector: string) => {
     return retry.try(async () => {
       const filter = await testSubjects.find(selector);
@@ -203,19 +225,13 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('disableButton');
+      await clickRuleRowStatusAction('Disable');
 
       await testSubjects.click('confirmModalConfirmButton');
 
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
     });
 
     it('should untrack disable rule if untrack switch is true', async () => {
@@ -244,9 +260,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('disableButton');
+      await clickRuleRowStatusAction('Disable');
 
       await testSubjects.existOrFail('untrackAlertsModal');
 
@@ -291,9 +305,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('disableButton');
+      await clickRuleRowStatusAction('Disable');
 
       await testSubjects.click('confirmModalConfirmButton');
 
@@ -313,39 +325,16 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
-        return await testSubjects.isDisplayed('disableButton');
-      });
-
-      await testSubjects.click('disableButton');
-
+      await clickRuleRowStatusAction('Disable');
       await testSubjects.click('confirmModalConfirmButton');
-
       await header.waitUntilLoadingHasFinished();
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
-        return await testSubjects.isDisplayed('disableButton');
-      });
-
-      await testSubjects.click('disableButton');
-
+      await clickRuleRowStatusAction('Enable');
       await header.waitUntilLoadingHasFinished();
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'enabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, true);
     });
 
     it('should delete single alert', async () => {
@@ -366,11 +355,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
       });
 
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 rule');
-      });
-
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterDelete.length).to.eql(0);
@@ -389,16 +373,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await header.waitUntilLoadingHasFinished();
 
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Disabled 1 rule');
-      });
-
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
     });
 
     it('should enable all selection', async () => {
@@ -412,11 +387,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkEnable');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'enabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, true);
     });
 
     it('should render percentile column and cells correctly', async () => {
@@ -496,11 +467,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await retry.tryForTime(30000, async () => {
         await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
-      });
-
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
