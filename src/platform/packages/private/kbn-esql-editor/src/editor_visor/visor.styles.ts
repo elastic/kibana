@@ -23,6 +23,8 @@ export const visorStyles = (
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
+  const inlinePaddingTop = euiTheme.size.xs;
+  const inlineHeight = isVisible ? `calc(${euiTheme.size.xl} + ${inlinePaddingTop})` : '0';
   // Outlined AiButton hover fill. Selected keeps it; idle applies it only while hovering.
   const aiButtonHoverBackground = `linear-gradient(
     180deg,
@@ -39,15 +41,18 @@ export const visorStyles = (
       width: 100%;
       position: relative;
       z-index: ${euiTheme.levels.menu};
+      box-sizing: border-box;
       ${isInline
         ? `
-          min-height: ${isVisible ? euiTheme.size.xl : '0'};
-          height: ${isVisible ? euiTheme.size.xl : '0'};
-          max-height: ${isVisible ? euiTheme.size.xl : '0'};
+          padding-inline: ${euiTheme.size.xs};
+          padding-block-start: ${isVisible ? inlinePaddingTop : '0'};
+          min-height: ${inlineHeight};
+          height: ${inlineHeight};
+          max-height: ${inlineHeight};
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
           overflow: ${isVisible ? 'visible' : 'hidden'};
-          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)${
+          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), padding-block-start 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)${
             hasOutline ? ', margin-top 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)' : ''
           };
         `
