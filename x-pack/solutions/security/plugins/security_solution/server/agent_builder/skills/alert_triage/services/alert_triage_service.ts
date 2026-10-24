@@ -117,6 +117,12 @@ export interface TriageResult {
   groups: TriageGroupSummary[];
   totalAlertsFetched: number;
   timeWindowHours: number;
+  /**
+   * Set only when the scan matched nothing. Names the exact scope that returned zero
+   * (time window, workflow status, space) so the model cannot report a windowed zero as
+   * "the alert queue is clear".
+   */
+  emptyResultNotice?: string;
 }
 
 export interface AlertTriageParams {
@@ -422,9 +428,20 @@ export const prioritizeAlerts = async ({
 
   const groups = buildGroups(scoredAlerts, enrichment);
 
+  // A zero here is a windowed result, not evidence that the queue is empty: the queue-scan path
+  // only sees alerts inside `timeWindowHours`. Say exactly which scope returned zero so the
+  // answer cannot turn it into "your alert queue is clear".
+  const emptyResultNotice =
+    hits.length > 0
+      ? undefined
+      : explicitIds != null
+      ? `None of the ${explicitIds.length} requested alert id(s) were found in space "${spaceId}". Those ids are not in this space's alert index — this says nothing about the rest of the queue.`
+      : `No alerts matched workflow status "${workflowStatus}" in the last ${timeWindowHours}h in space "${spaceId}" (window: now-${timeWindowHours}h to now). This is a windowed result — alerts older than ${timeWindowHours}h are not included, so it does NOT mean the alert queue is empty. Widen timeWindowHours (up to 168) or answer from the alert list with 'security.alerts' before telling the user there are no alerts.`;
+
   return {
     groups,
     totalAlertsFetched: hits.length,
     timeWindowHours,
+    ...(emptyResultNotice != null ? { emptyResultNotice } : {}),
   };
 };

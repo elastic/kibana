@@ -58,7 +58,7 @@ const createAlertTriageTool = (): BuiltinSkillBoundedTool<typeof prioritizeAlert
     'Fetch the alert queue, score each alert using base risk score and MITRE tactic boost, ' +
     'cluster alerts by shared entity (host/user), enrich groups with Entity Analytics ' +
     '(entity risk level and asset criticality, when available), and return ranked groups with ' +
-    'score breakdowns. Use this as the first step for any alert queue prioritization request.',
+    'score breakdowns. Use when the alert queue must be scored, ranked, or grouped by weighted risk factors.',
   schema: prioritizeAlertsSchema,
   handler: async ({ timeWindowHours, maxAlerts, workflowStatus, alertIds }, context) => {
     try {
@@ -102,20 +102,23 @@ export const alertTriageSkill = defineSkillType({
   name: 'alert-triage',
   basePath: 'skills/security/alerts',
   description:
-    'Alert queue triage: prioritize and rank the alert queue by weighted risk factors — ' +
-    'base risk score, MITRE tactic boost, Entity Analytics entity risk, asset criticality, ' +
-    'and status — then cluster alerts into entity groups. ' +
-    'Use when a user asks "what should I focus on?", "which alerts are most urgent?", ' +
-    'or wants a ranked starting point across the queue without investigating individual alerts.',
+    'Scored alert-queue ranking: fetch the alert queue for a time window, score each alert by ' +
+    'weighted risk factors (base risk score, MITRE tactic boost, Entity Analytics entity risk, ' +
+    'asset criticality, status), then cluster alerts into entity groups with per-group score ' +
+    'breakdowns. Use only when the user explicitly asks for the queue scored, ranked, weighted, or ' +
+    'grouped (e.g. "rank my open alerts by risk score", "score and group the alert queue"). ' +
+    'For plain alert-list or queue-listing questions, use the alert-analysis skill and ' +
+    'security.alerts instead: this skill returns a weighted ranking, not a queue listing.',
   content: `# Alert Triage Guide
 
 ## When to Use This Skill
 
 Use this skill when:
-- A user asks "what should I focus on right now?" or "what alerts should I look at?"
-- A user wants to prioritize the alert queue for a time window (e.g. "last 8 hours")
+- A user asks for the alert queue scored, ranked, weighted, or grouped (e.g. "rank the open alert queue by risk score", "score and group the alert queue for the last 8 hours")
+- A user wants the alert queue scored for a specific time window with per-group score breakdowns
 - A user provides a set of alerts and asks "which of these are most important?"
-- A user is starting a shift and needs a ranked starting point before investigation begins
+- A user is starting a shift and needs a ranked, weighted starting point before investigation begins
+- Do NOT use for plain alert-list questions ("which alerts should I look at first?", "what should I focus on?", "what is most urgent?", "what hosts are affected?") — the alert-analysis skill answers those from the alert list with 'security.alerts'
 - Do NOT use for investigating a single, known alert — use the alert-analysis skill for that
 
 ## Triage Process
@@ -155,15 +158,15 @@ For each group returned, explain:
 
 ## Examples
 
-**Query**: "What should I focus on right now?"
+**Query**: "Score and rank the open alert queue for the last 24 hours, with the risk-score breakdown per group."
 - Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
 
-**Query**: "Prioritize alerts from the last 8 hours"
+**Query**: "Score and prioritize the alert queue from the last 8 hours"
 - Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 8, workflowStatus: "open" }\`
 
-**Query**: "Which alerts from the last 8 hours are most urgent? Give me a prioritized view."
+**Query**: "Give me the weighted ranking of the alerts from the last 8 hours."
 - Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 8, workflowStatus: "open" }\`
 
@@ -172,12 +175,12 @@ For each group returned, explain:
 - Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
 - Note: The tool already returns alert _ids in its output — do NOT call \`security.alerts\` to look them up separately
 
-**Query**: "Which of these alerts should I look at first?" (with alert attachment)
+**Query**: "Score these alerts and tell me which are most important." (with alert attachment)
 - Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ alertIds: ["<id1>", "<id2>", ...] }\`
 - Note: with \`alertIds\`, exactly those alerts are scored regardless of status or age
 
-**Query**: "What alerts should I look at? Prioritize by entity risk where available."
+**Query**: "Rank the open alert queue and prioritize by entity risk where available."
 - Tool: \`${ALERT_TRIAGE_TOOL_ID}\` (only)
 - Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
 - Response order for the top group: (1) entityName, (2) entityRiskLevel verbatim (e.g. Critical) and entityRiskBoost, (3) why it outranks peers with higher base scores, (4) top alert _id
@@ -198,7 +201,7 @@ For each group returned, explain:
 - Alerts already in a case are deprioritized (−5) but remain visible — they may group with new open alerts
 - Building-block alerts are excluded automatically (they are sub-components of parent alerts)
 - This skill does NOT require alerts to form a multi-rule chain — any actionable alert qualifies
-- If the tool returns 0 alerts, tell the user no open alerts match the criteria and suggest widening the window
+- If the tool returns 0 alerts, report it as a windowed result: name the time window and workflow status you queried (e.g. "no open alerts in the last 24 hours"), say the tool returned zero groups in that window, and offer to widen it (up to 168h). When the tool result carries an \`emptyResultNotice\`, quote the scope it names (window, workflow status, space) instead of paraphrasing it. NEVER turn a zero inside a window into "your queue is clear" or "there are no open alerts" — alerts older than the window are simply not in this result.
 - **ALWAYS call ONLY \`${ALERT_TRIAGE_TOOL_ID}\`** — never call \`security.alerts\`, \`security.entity_risk_score\`, or any other tool. The alert-triage tool handles all time-window filtering, severity filtering, scoring, and returns alert _ids in its output. There are no exceptions to this rule.
 
 ## Response Format
