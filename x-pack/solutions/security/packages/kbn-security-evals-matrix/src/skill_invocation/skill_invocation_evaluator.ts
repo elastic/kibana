@@ -11,7 +11,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
-export function createSecuritySkillInvocationEvaluator({
+/**
+ * Security-owned counterpart of the platform `createSkillInvocationEvaluator` (same evaluator
+ * name and 1 / 0 / null score shape). A skill counts as invoked when the agent
+ *  - calls `load_skill` with the skill id as a whole quoted token (`{"skill":"<id>"}`, also when
+ *    the argument is a `/<id>/SKILL.md` path), or
+ *  - calls `filestore.read` on a `/<id>/SKILL.md` path.
+ * The id is matched as a quoted token, so `alert-analysis-extra` does not satisfy `alert-analysis`.
+ */
+export function createSkillInvocationEvaluator({
   traceEsClient,
   log,
   skillName,
@@ -44,7 +52,10 @@ export function createSecuritySkillInvocationEvaluator({
       )
       OR (
         attributes.gen_ai.tool.name == "load_skill"
-          AND attributes.gen_ai.tool.call.arguments LIKE "*${skillName}*"
+          AND (
+            attributes.gen_ai.tool.call.arguments LIKE "*\\"${skillName}\\"*"
+            OR attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
+          )
       ),
       1,
       NULL
@@ -67,6 +78,8 @@ export function createSecuritySkillInvocationEvaluator({
         const totalSpans = row?.[totalSpansIndex] as number | undefined;
         const skillInvoked = row?.[skillInvokedIndex] as number | undefined;
 
+        // Retry only while the trace itself is not yet indexed (OTLP -> ES lag). Once any span is
+        // present, the skill-load span arrives in the same batch, so its absence is a real 0.
         if (!totalSpans) {
           return null;
         }

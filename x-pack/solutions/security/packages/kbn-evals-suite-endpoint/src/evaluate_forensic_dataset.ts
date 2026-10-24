@@ -18,10 +18,9 @@ import {
   type Example,
   type TaskOutput,
 } from '@kbn/evals';
+import { createSkillInvocationEvaluator } from '@kbn/security-evals-matrix';
 import { converseQuestionToTaskOutput } from './converse_task';
 import { createEndpointCriteriaEvaluator } from './evaluate_dataset';
-// Security-owned fork: also scores load_skill spans (platform createSkillInvocationEvaluator is filestore.read only).
-import { createSecuritySkillInvocationEvaluator } from './security_skill_invocation_evaluator';
 
 /** Must match defineSkillType({ name }) in endpoint_forensic_analysis_skill.ts */
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME = 'endpoint-forensic-analysis';
@@ -137,7 +136,7 @@ export const buildForensicEvaluators = ({
     outputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     wrapSkillInvocationForDistractors(
-      createSecuritySkillInvocationEvaluator({
+      createSkillInvocationEvaluator({
         traceEsClient,
         log,
         skillName: ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME,

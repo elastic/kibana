@@ -21,12 +21,12 @@ import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
 import {
   selectEvaluators,
-  createSkillInvocationEvaluator,
   type DefaultEvaluators,
   type EvaluationDataset,
   type EvalsExecutorClient,
   type Example,
 } from '@kbn/evals';
+import { createSkillInvocationEvaluator } from '@kbn/security-evals-matrix';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
