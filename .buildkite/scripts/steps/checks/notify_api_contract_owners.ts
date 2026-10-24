@@ -241,7 +241,7 @@ See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/m
 
   return `## API Contract Breaking Changes
 
-The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes fail the check and should be resolved; Experimental and reported-only changes are informational.
+The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes block merge until they're resolved. Experimental and reported-only changes are informational.
 
 ${sections}
 ${noteBlock}### What to do

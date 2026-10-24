@@ -12,7 +12,7 @@ This package runs in CI on every PR. It compares the current branch's OAS files 
 git show base OAS → oasdiff diff → parse → apply allowlist → classify by tier → report → notify
 ```
 
-By default the check is a soft gate: a BC detected in stable/tech_preview fails the check (non-zero exit) but Buildkite `soft_fail: true` keeps merge unblocked, so the failure is a visible warning. Removing `soft_fail` from `.buildkite/pipelines/pull_request/api_contracts.yml` turns it into a hard merge gate.
+The check is a hard gate: a BC detected in stable/tech_preview fails the check (non-zero exit), and the failed API Contracts step blocks merge. Adding `soft_fail` to `.buildkite/pipelines/pull_request/api_contracts.yml` would turn it back into a soft gate.
 
 **Key components:**
 
@@ -200,7 +200,7 @@ node scripts/check_api_contracts.js \
 - `--allowlistPath` - Override allowlist path
 - `--reportPath` - Write a JSON impact report to this path (used by CI for PR notifications)
 
-The check always diffs the full public OAS surface and gates on stable/tech_preview breaking changes. There are no per-tier enforcement flags: the soft-vs-hard merge gate is Buildkite `soft_fail` on the API Contracts step, and the per-change escape hatch is the [allowlist](#allowlist).
+The check always diffs the full public OAS surface and gates on stable/tech_preview breaking changes. There are no per-tier enforcement flags: the soft-vs-hard merge gate is Buildkite `soft_fail` on the API Contracts step (not set, so the step is a hard gate), and the per-change escape hatch is the [allowlist](#allowlist).
 
 **Prerequisites:** oasdiff must be installed and available in PATH (or set `OASDIFF_BIN`):
 
@@ -219,6 +219,7 @@ When the check detects changes, CI posts a PR comment listing the affected endpo
    - add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
    - add the `release_note:breaking` label to the PR (replacing any other `release_note:*` label).
    - add a `## Release note` section to the PR description, plus `## Impact` and `## Action` sections for a breaking change. See [Release note suggestions](#release-note-suggestions).
+4. **If it's a false positive** (clients aren't affected, for example a schema refactor that keeps the accepted shape): add a granular allowlist entry whose reason says so.
 
 Once the allowlist entry is added, the check passes, but the comment stays. It lists the change as approved and keeps the label and release note steps.
 

@@ -155,6 +155,14 @@ describe('buildCommentBody', () => {
     expect(body).toContain('**Fix the breaking change**');
   });
 
+  it('says stable and tech_preview changes block merge', () => {
+    const body = buildCommentBody([entry(), entry({ tier: 'tech_preview' })]);
+
+    expect(body).toContain(
+      "Stable and Technical Preview changes block merge until they're resolved."
+    );
+  });
+
   it('does not ask for a fix or an allowlist entry when nothing gates', () => {
     const body = buildCommentBody([
       entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
