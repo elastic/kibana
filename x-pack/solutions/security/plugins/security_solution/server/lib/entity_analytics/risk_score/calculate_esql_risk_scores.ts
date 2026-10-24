@@ -784,7 +784,16 @@ export const getResolutionScoreESQLByRange = (
   {
     entityStoreIndex,
     preAggregate = false,
-  }: { entityStoreIndex?: string; preAggregate?: boolean } = {}
+    targetStoreLookup,
+  }: {
+    entityStoreIndex?: string;
+    preAggregate?: boolean;
+    /**
+     * When given, each target's score row also carries these fields from the target's own store
+     * document, joined on `entity.id` after the LIMIT. The first five columns stay as they are.
+     */
+    targetStoreLookup?: { index: string; fields: string[] };
+  } = {}
 ): string => {
   assertEsqlInterpolatableIds(
     [bounds.lower, bounds.upper, calculationRunId].filter(
@@ -813,6 +822,7 @@ export const getResolutionScoreESQLByRange = (
     lookupIndex,
     entityStoreIndex,
     preAggregate,
+    targetStoreLookup,
   });
 };
 
@@ -825,6 +835,7 @@ const buildResolutionScoreESQL = ({
   lookupIndex,
   entityStoreIndex,
   preAggregate = false,
+  targetStoreLookup,
 }: {
   entityType: EntityType;
   /** Filters joined alert rows down to the page's resolution groups. */
@@ -837,6 +848,8 @@ const buildResolutionScoreESQL = ({
   entityStoreIndex?: string;
   /** Reduces alerts to one row per entity before the join; see `getResolutionScoreESQLByRange`. */
   preAggregate?: boolean;
+  /** Joins each scored target's own store fields; see `getResolutionScoreESQLByRange`. */
+  targetStoreLookup?: { index: string; fields: string[] };
 }): string => {
   const definition = getBuiltInEntityDefinition(entityType);
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
@@ -884,6 +897,12 @@ const buildResolutionScoreESQL = ({
     ${alertFieldsRename}`;
 
   const sample = sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE;
+  const targetJoinClause = targetStoreLookup
+    ? `| LOOKUP JOIN ${targetStoreLookup.index} ON resolution_target_id == entity.id
+    | KEEP alert_count, scores, risk_inputs, contributing_entities_raw, resolution_target_id, ${targetStoreLookup.fields.join(
+      ', '
+    )}`
+    : '';
   const alertsSource = `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
@@ -928,6 +947,7 @@ const buildResolutionScoreESQL = ({
         BY resolution_target_id
     | SORT scores DESC
     | LIMIT ${pageSize}
+    ${targetJoinClause}
   `;
   }
 
@@ -947,6 +967,7 @@ const buildResolutionScoreESQL = ({
         BY resolution_target_id
     | SORT scores DESC
     | LIMIT ${pageSize}
+    ${targetJoinClause}
   `;
 
   return query;

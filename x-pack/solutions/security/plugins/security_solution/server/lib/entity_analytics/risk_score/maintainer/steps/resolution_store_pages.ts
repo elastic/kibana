@@ -18,7 +18,6 @@ import type { PageStepTimings } from '../utils/page_step_timings';
 import { createPageStepTimings } from '../utils/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskScoreModifierEntity } from './pipeline_types';
-import type { StoredRiskScore } from './base_store_lookup';
 import type { ResolutionPageTask } from './score_resolution_entities';
 import type { SampledPagesConfig } from './sampled_page_bounds';
 import { DEFAULT_SAMPLE_SEED, pagesToRunIndices } from './sampled_page_bounds';
@@ -32,14 +31,6 @@ const MEMBER_FIELDS = [
   'asset.criticality',
   'entity.attributes.watchlists',
 ];
-
-/** The resolution score a target holds in the store, compared with a new one before writing it. */
-const STORED_RESOLUTION_FIELDS = {
-  level: 'entity.relationships.resolution.risk.calculated_level',
-  score: 'entity.relationships.resolution.risk.calculated_score',
-  scoreNorm: 'entity.relationships.resolution.risk.calculated_score_norm',
-};
-const TARGET_FIELDS = [...MEMBER_FIELDS, ...Object.values(STORED_RESOLUTION_FIELDS)];
 
 type StoreReader = Pick<EntityUpdateClient, 'listEntities'>;
 type StoreAggregator = Pick<EntityUpdateClient, 'aggregateEntities'>;
@@ -55,27 +46,6 @@ export interface StoreRead {
   /** Elasticsearch's time summed over the read's requests. */
   tookMs: number;
 }
-
-export interface TargetRead extends StoreRead {
-  /** Each target's stored resolution score, as single-precision values like the new scores'. */
-  storedScores: Map<string, StoredRiskScore>;
-}
-
-const asFloat = (value: unknown): number | undefined =>
-  typeof value === 'number' ? Math.fround(value) : undefined;
-
-/**
- * Doc values print a float with the fewest digits that identify it, so a value is rounded back to
- * single precision before it's compared with a new score rounded the same way.
- */
-const toStoredResolutionScore = (fields: Record<string, unknown>): StoredRiskScore => {
-  const level = firstValue(fields, STORED_RESOLUTION_FIELDS.level);
-  return {
-    level: typeof level === 'string' ? level : undefined,
-    score: asFloat(firstValue(fields, STORED_RESOLUTION_FIELDS.score)),
-    scoreNorm: asFloat(firstValue(fields, STORED_RESOLUTION_FIELDS.scoreNorm)),
-  };
-};
 
 const firstValue = (fields: Record<string, unknown>, field: string): unknown => {
   const values = fields[field];
@@ -124,13 +94,11 @@ const readOnePage = async (
     sort,
     size,
     searchAfter,
-    docValueFields = MEMBER_FIELDS,
   }: {
     filter: QueryDslQueryContainer[];
     sort: SortCombinations[];
     size: number;
     searchAfter?: Array<string | number>;
-    docValueFields?: string[];
   }
 ) => {
   const {
@@ -142,51 +110,42 @@ const readOnePage = async (
     sort,
     size,
     searchAfter,
-    docValueFields,
+    docValueFields: MEMBER_FIELDS,
   });
   return {
     entities: fields.flatMap((hit) => {
       const entity = toModifierEntity(hit);
       return entity ? [entity] : [];
     }),
-    fields,
     hits: fields.length,
     nextSearchAfter,
     tookMs: took,
   };
 };
 
-/** Pages through every match, stopping early once `expectedHits` documents have come back. */
+/** Pages through every match. */
 const readAll = async (
   crudClient: StoreReader,
   {
     filter,
     sort,
     size,
-    expectedHits = Infinity,
-    docValueFields,
   }: {
     filter: QueryDslQueryContainer[];
     sort: SortCombinations[];
     size: number;
-    expectedHits?: number;
-    docValueFields?: string[];
   }
-): Promise<StoreRead & { fields: Array<Record<string, unknown>> }> => {
+): Promise<StoreRead> => {
   const entities: RiskScoreModifierEntity[] = [];
-  const fields: Array<Record<string, unknown>> = [];
   let tookMs = 0;
-  let hits = 0;
   let searchAfter: Array<string | number> | undefined;
   do {
-    const page = await readOnePage(crudClient, { filter, sort, size, searchAfter, docValueFields });
+    const page = await readOnePage(crudClient, { filter, sort, size, searchAfter });
     entities.push(...page.entities);
-    fields.push(...page.fields.flatMap((hit) => (hit ? [hit] : [])));
     tookMs += page.tookMs;
-    hits += page.hits;
-    searchAfter = page.hits === size && hits < expectedHits ? page.nextSearchAfter : undefined;
+    searchAfter = page.hits === size ? page.nextSearchAfter : undefined;
   } while (searchAfter !== undefined);
-  return { entities, fields, tookMs };
+  return { entities, tookMs };
 };
 
 /**
@@ -649,36 +608,4 @@ export const discoverSampledResolutionPages = async function* ({
       profile: config.pagesToRun !== undefined || undefined,
     };
   }
-};
-
-/**
- * Reads a page's targets from doc values: the modifiers on their own documents, and the resolution
- * score each one holds, so an unchanged score can be left out of the store write.
- */
-export const readResolutionTargets = async ({
-  crudClient,
-  targetIds,
-}: {
-  crudClient: StoreReader;
-  targetIds: string[];
-}): Promise<TargetRead> => {
-  if (targetIds.length === 0) {
-    return { entities: [], storedScores: new Map(), tookMs: 0 };
-  }
-  const { entities, fields, tookMs } = await readAll(crudClient, {
-    filter: [{ terms: { 'entity.id': targetIds } }],
-    sort: [{ 'entity.id': 'asc' }],
-    size: Math.min(targetIds.length, MAX_RESOLUTION_TARGETS_PER_PAGE),
-    // Entity IDs are unique, so once every target is in there is nothing left to page.
-    expectedHits: targetIds.length,
-    docValueFields: TARGET_FIELDS,
-  });
-  const storedScores = new Map<string, StoredRiskScore>();
-  for (const hit of fields) {
-    const id = firstValue(hit, 'entity.id');
-    if (typeof id === 'string') {
-      storedScores.set(id, toStoredResolutionScore(hit));
-    }
-  }
-  return { entities, storedScores, tookMs };
 };

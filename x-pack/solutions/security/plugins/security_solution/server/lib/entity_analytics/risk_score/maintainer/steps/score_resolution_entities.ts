@@ -31,14 +31,17 @@ import {
 } from './resolution_member_filter';
 import type { ResolutionPageChunk } from './resolution_store_pages';
 import {
-  byEntityId,
   chunkResolutionPage,
   discoverResolutionPagesFromStore,
   discoverSampledResolutionPages,
   halveResolutionChunk,
-  readResolutionTargets,
   readSampledAliasPage,
 } from './resolution_store_pages';
+import type { ResolutionTargetLookup } from './resolution_store_lookup';
+import {
+  RESOLUTION_TARGET_LOOKUP_FIELDS,
+  readResolutionTargetLookup,
+} from './resolution_store_lookup';
 import type { SampledPagesConfig } from './sampled_page_bounds';
 import { parseEsqlResolutionScoreRow } from './parse_esql_row';
 import type { ParsedResolutionScore } from './parse_esql_row';
@@ -260,8 +263,9 @@ const scoreResolutionPageFromStore = async (
 };
 
 /**
- * The page's aliases are in hand. Reads the targets' own modifiers, scores the page's range with
- * the store joined, and merges each group's modifiers from both reads.
+ * The page's aliases are in hand, with their modifiers. Scores the page's range with the store
+ * joined, which also brings each scored target's own modifiers and stored resolution score, and
+ * merges each group's modifiers from both.
  */
 const scoreStoreGroups = async (
   {
@@ -288,16 +292,6 @@ const scoreStoreGroups = async (
     profile: profileThisPage,
   }: ResolutionPageTask
 ): Promise<ResolutionPageScores> => {
-  const targets = await timer.time(
-    'memberFetch',
-    () => readResolutionTargets({ crudClient, targetIds: resolutionTargetIds }),
-    (result) => result.tookMs
-  );
-  const memberEntities = new Map([...aliasEntities, ...byEntityId(targets.entities)]);
-  logger.debug(
-    `[resolution][page:${pageNumber}] store targets_requested=${resolutionTargetIds.length}, fetched=${targets.entities.length}, took=${targets.tookMs}ms`
-  );
-
   const pageMemberIds = [...new Set([...resolutionTargetIds, ...aliasEntities.keys()])];
   // The store join can't tell a target from an entity in no group, so only the member filter keeps
   // the latter's alerts out. Without one, the page would score entities that aren't targets.
@@ -309,12 +303,14 @@ const scoreStoreGroups = async (
     return NO_SCORES;
   }
 
-  const { parsedScores, esqlRows, profileSummary } = await runResolutionScoringQuery({
+  const entityStoreIndex = await crudClient.latestIndexName();
+  const { parsedScores, esqlRows, profileSummary, targetLookup } = await runResolutionScoringQuery({
     esClient,
     entityType,
     resolutionTargetIds,
     bounds,
-    entityStoreIndex: await crudClient.latestIndexName(),
+    entityStoreIndex,
+    targetStoreLookup: { index: entityStoreIndex, fields: RESOLUTION_TARGET_LOOKUP_FIELDS },
     preAggregate: preAggregateByEntity,
     calculationRunId,
     sampleSize,
@@ -341,6 +337,8 @@ const scoreStoreGroups = async (
     return NO_SCORES;
   }
 
+  const targets = targetLookup ?? { entities: new Map(), storedScores: new Map() };
+  const memberEntities = new Map([...aliasEntities, ...targets.entities]);
   const scores = timer.timeSync('modifiers', () =>
     applyResolutionModifiers({
       parsedScores,
@@ -690,6 +688,7 @@ const runResolutionScoringQuery = async ({
   resolutionTargetIds,
   bounds,
   entityStoreIndex,
+  targetStoreLookup,
   preAggregate,
   calculationRunId,
   sampleSize,
@@ -705,6 +704,8 @@ const runResolutionScoringQuery = async ({
   resolutionTargetIds: string[];
   bounds: { lower?: string; upper: string } | undefined;
   entityStoreIndex: string | undefined;
+  /** Joins each scored target's own store fields onto its row; range pages only. */
+  targetStoreLookup?: { index: string; fields: string[] };
   preAggregate: boolean;
   calculationRunId: string;
   sampleSize: number;
@@ -718,6 +719,7 @@ const runResolutionScoringQuery = async ({
   parsedScores: ParsedResolutionScore[];
   esqlRows: number;
   profileSummary?: EsqlPageProfileSummary;
+  targetLookup?: ResolutionTargetLookup;
 }> => {
   const query = bounds
     ? getResolutionScoreESQLByRange(
@@ -728,7 +730,7 @@ const runResolutionScoringQuery = async ({
         pageSize,
         alertsIndex,
         lookupIndex,
-        { entityStoreIndex, preAggregate }
+        { entityStoreIndex, preAggregate, targetStoreLookup }
       )
     : getResolutionScoreESQLByIds(
         entityType,
@@ -759,6 +761,10 @@ const runResolutionScoringQuery = async ({
     ),
     esqlRows: esqlResponse.values?.length ?? 0,
     profileSummary: profile ? summarizeEsqlPage(esqlResponse, wallMs) : undefined,
+    targetLookup:
+      targetStoreLookup && bounds
+        ? readResolutionTargetLookup(esqlResponse.columns ?? [], esqlResponse.values ?? [])
+        : undefined,
   };
 };
 

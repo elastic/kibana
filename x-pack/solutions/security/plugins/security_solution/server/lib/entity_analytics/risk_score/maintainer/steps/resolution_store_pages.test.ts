@@ -14,7 +14,6 @@ import {
   discoverResolutionPagesFromStore,
   halveResolutionChunk,
   discoverSampledResolutionPages,
-  readResolutionTargets,
   readSampledAliasPage,
   resolutionBoundsFromSample,
   sampleResolutionPageBounds,
@@ -225,86 +224,6 @@ describe('discoverResolutionPagesFromStore', () => {
     const crudClient = storeReturning([]);
 
     expect(await discover(crudClient, 10)).toEqual([]);
-  });
-});
-
-describe('readResolutionTargets', () => {
-  it("reads the targets' own documents from doc values", async () => {
-    const crudClient = storeReturning([hit('user:t1', { 'asset.criticality': ['low_impact'] })]);
-
-    const { entities, tookMs } = await readResolutionTargets({
-      crudClient,
-      targetIds: ['user:t1', 'user:t2'],
-    });
-
-    expect(crudClient.listEntities).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: [{ terms: { 'entity.id': ['user:t1', 'user:t2'] } }],
-        size: 2,
-      })
-    );
-    expect(entities).toEqual([
-      expect.objectContaining({
-        entity: expect.objectContaining({ id: 'user:t1' }),
-        asset: { criticality: 'low_impact' },
-      }),
-    ]);
-    expect(tookMs).toBe(5);
-  });
-
-  it("reads each target's stored resolution score, rounded to single precision", async () => {
-    const crudClient = storeReturning([
-      hit('user:t1', {
-        'entity.relationships.resolution.risk.calculated_level': ['High'],
-        'entity.relationships.resolution.risk.calculated_score': [12.34],
-        'entity.relationships.resolution.risk.calculated_score_norm': [78.9],
-      }),
-      hit('user:t2'),
-    ]);
-
-    const { storedScores } = await readResolutionTargets({
-      crudClient,
-      targetIds: ['user:t1', 'user:t2'],
-    });
-
-    expect(crudClient.listEntities).toHaveBeenCalledWith(
-      expect.objectContaining({
-        docValueFields: expect.arrayContaining([
-          'entity.relationships.resolution.risk.calculated_level',
-          'entity.relationships.resolution.risk.calculated_score',
-          'entity.relationships.resolution.risk.calculated_score_norm',
-        ]),
-      })
-    );
-    expect(storedScores.get('user:t1')).toEqual({
-      level: 'High',
-      score: Math.fround(12.34),
-      scoreNorm: Math.fround(78.9),
-    });
-    expect(storedScores.get('user:t2')).toEqual({
-      level: undefined,
-      score: undefined,
-      scoreNorm: undefined,
-    });
-  });
-
-  it('makes one request when every target is found', async () => {
-    const crudClient = storeReturning([hit('user:t1'), hit('user:t2')], []);
-
-    await readResolutionTargets({ crudClient, targetIds: ['user:t1', 'user:t2'] });
-
-    expect(crudClient.listEntities).toHaveBeenCalledTimes(1);
-  });
-
-  it('reads nothing for a page without targets', async () => {
-    const crudClient = storeReturning();
-
-    expect(await readResolutionTargets({ crudClient, targetIds: [] })).toEqual({
-      entities: [],
-      storedScores: new Map(),
-      tookMs: 0,
-    });
-    expect(crudClient.listEntities).not.toHaveBeenCalled();
   });
 });
 

@@ -416,25 +416,18 @@ describe('score_resolution_entities', () => {
       crudClient.latestIndexName = jest.fn<Promise<string>, []>().mockResolvedValue(STORE_INDEX);
     });
 
-    it('scores store pages with the store joined, filtered to the members, with modifiers from both reads', async () => {
-      jest
-        .mocked(crudClient.listEntities)
-        .mockResolvedValueOnce({
-          entities: [],
-          took: 3,
-          fields: [
-            {
-              'entity.id': ['user:alias-a1'],
-              [RESOLVED_TO]: ['user:target-a'],
-              'asset.criticality': ['high_impact'],
-            },
-          ],
-        })
-        .mockResolvedValueOnce({
-          entities: [],
-          took: 2,
-          fields: [{ 'entity.id': ['user:target-a'] }],
-        });
+    it('scores store pages with the store joined, filtered to the members, with modifiers from the alias read and the target join', async () => {
+      jest.mocked(crudClient.listEntities).mockResolvedValueOnce({
+        entities: [],
+        took: 3,
+        fields: [
+          {
+            'entity.id': ['user:alias-a1'],
+            [RESOLVED_TO]: ['user:target-a'],
+            'asset.criticality': ['high_impact'],
+          },
+        ],
+      });
       jest.mocked(esClient.esql.query).mockResolvedValue({
         columns: [],
         values: [
@@ -453,6 +446,9 @@ describe('score_resolution_entities', () => {
       expect(esClient.search).not.toHaveBeenCalled();
       const [[request]] = jest.mocked(esClient.esql.query).mock.calls;
       expect(request.query).toContain(`LOOKUP JOIN ${STORE_INDEX} ON entity_id == entity.id`);
+      expect(request.query).toContain(
+        `LOOKUP JOIN ${STORE_INDEX} ON resolution_target_id == entity.id`
+      );
       expect(request.query).toContain('resolution_target_id <= "user:target-a"');
       expect(request.filter).toEqual({
         bool: {
@@ -517,37 +513,43 @@ describe('score_resolution_entities', () => {
         timer: createPageStepTimings().startPage(),
         aliasEntities: new Map(),
       });
-      jest.mocked(esClient.esql.query).mockResolvedValue({
-        columns: [],
-        values: [
-          [
-            1,
-            20,
-            JSON.stringify({ risk_score: '50', id: 'alert-1', index: 'alerts', time: 'now' }),
-            'user:target-a|self',
-            'user:target-a',
-          ],
-        ],
-      });
-      jest.mocked(crudClient.listEntities).mockResolvedValueOnce({
-        entities: [],
-        took: 1,
-        fields: [{ 'entity.id': ['user:target-a'] }],
-      });
+      const columns = [
+        'alert_count',
+        'scores',
+        'risk_inputs',
+        'contributing_entities_raw',
+        'resolution_target_id',
+        'entity.EngineMetadata.Type',
+        'asset.criticality',
+        'entity.attributes.watchlists',
+        'entity.relationships.resolution.risk.calculated_level',
+        'entity.relationships.resolution.risk.calculated_score',
+        'entity.relationships.resolution.risk.calculated_score_norm',
+      ].map((name) => ({ name, type: 'keyword' }));
+      const scoreRow = [
+        1,
+        20,
+        JSON.stringify({ risk_score: '50', id: 'alert-1', index: 'alerts', time: 'now' }),
+        'user:target-a|self',
+        'user:target-a',
+        'user',
+        null,
+        null,
+      ];
+      jest
+        .mocked(esClient.esql.query)
+        .mockResolvedValueOnce({ columns, values: [[...scoreRow, null, null, null]] });
       const first = await scoreResolutionPage(params, task());
       const [score] = first.scores;
-      jest.mocked(crudClient.listEntities).mockResolvedValueOnce({
-        entities: [],
-        took: 1,
-        fields: [
-          {
-            'entity.id': ['user:target-a'],
-            'entity.relationships.resolution.risk.calculated_level': [score.calculated_level],
-            'entity.relationships.resolution.risk.calculated_score': [score.calculated_score],
-            'entity.relationships.resolution.risk.calculated_score_norm': [
-              score.calculated_score_norm,
-            ],
-          },
+      jest.mocked(esClient.esql.query).mockResolvedValueOnce({
+        columns,
+        values: [
+          [
+            ...scoreRow,
+            score.calculated_level,
+            Math.fround(score.calculated_score),
+            Math.fround(score.calculated_score_norm),
+          ],
         ],
       });
 
@@ -615,13 +617,11 @@ describe('score_resolution_entities', () => {
             took: 1,
             fields: [aliasHit('user:a1', 'user:t1')],
           })
-          .mockResolvedValueOnce({ entities: [], took: 1, fields: [{ 'entity.id': ['user:t1'] }] })
           .mockResolvedValueOnce({
             entities: [],
             took: 1,
             fields: [aliasHit('user:a2', 'user:t2')],
-          })
-          .mockResolvedValueOnce({ entities: [], took: 1, fields: [{ 'entity.id': ['user:t2'] }] });
+          });
         jest
           .mocked(esClient.esql.query)
           .mockResolvedValueOnce({ columns: [], values: [scoreRow('user:t1')] })
@@ -630,7 +630,7 @@ describe('score_resolution_entities', () => {
         const pages = await runSampled(10_000, 1);
 
         expect(rangeFilter(0)).toContainEqual({ range: { [RESOLVED_TO]: { lte: 'user:t1' } } });
-        expect(rangeFilter(2)).toContainEqual({ range: { [RESOLVED_TO]: { gt: 'user:t1' } } });
+        expect(rangeFilter(1)).toContainEqual({ range: { [RESOLVED_TO]: { gt: 'user:t1' } } });
         const [[first], [second]] = jest.mocked(esClient.esql.query).mock.calls;
         expect(first.query).toContain('resolution_target_id <= "user:t1"');
         expect(second.query).toContain('resolution_target_id > "user:t1"');
