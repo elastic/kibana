@@ -31,6 +31,7 @@ interface TransformOptions {
   convertNamespaceTypes?: boolean;
   allowDowngrade?: boolean;
   targetTypeVersion?: string;
+  allowSkipClone?: boolean;
 }
 
 interface DocumentMigratorOptions {
@@ -122,11 +123,16 @@ export class DocumentMigrator implements IDocumentMigrator {
    */
   public migrate(
     doc: SavedObjectUnsanitizedDoc,
-    { allowDowngrade = false, targetTypeVersion }: DocumentMigrateOptions = {}
+    {
+      allowDowngrade = false,
+      targetTypeVersion,
+      allowSkipClone = false,
+    }: DocumentMigrateOptions = {}
   ): SavedObjectUnsanitizedDoc {
     const { document } = this.transform(doc, {
       allowDowngrade,
       targetTypeVersion,
+      allowSkipClone,
     });
     return document;
   }
@@ -164,6 +170,7 @@ export class DocumentMigrator implements IDocumentMigrator {
       convertNamespaceTypes = false,
       allowDowngrade = false,
       targetTypeVersion,
+      allowSkipClone = false,
     }: TransformOptions = {}
   ) {
     if (!this.migrations) {
@@ -199,7 +206,11 @@ export class DocumentMigrator implements IDocumentMigrator {
       }
       return this.transformDown(effectiveDoc, { targetTypeVersion: latestVersion! });
     } else {
-      return this.transformUp(effectiveDoc, { convertNamespaceTypes, targetTypeVersion });
+      return this.transformUp(effectiveDoc, {
+        convertNamespaceTypes,
+        targetTypeVersion,
+        allowSkipClone,
+      });
     }
   }
 
@@ -208,7 +219,8 @@ export class DocumentMigrator implements IDocumentMigrator {
     {
       convertNamespaceTypes,
       targetTypeVersion,
-    }: { convertNamespaceTypes: boolean; targetTypeVersion?: string }
+      allowSkipClone,
+    }: { convertNamespaceTypes: boolean; targetTypeVersion?: string; allowSkipClone?: boolean }
   ) {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
@@ -220,6 +232,7 @@ export class DocumentMigrator implements IDocumentMigrator {
       migrations: this.migrations,
       kibanaVersion: this.options.kibanaVersion,
       convertNamespaceTypes,
+      allowSkipClone,
     });
     const { document, additionalDocs } = pipeline.run();
 

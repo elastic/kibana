@@ -80,6 +80,11 @@ export interface MigrateDocumentOptions {
    * Defaults to `false`.
    */
   allowDowngrade?: boolean;
+  /**
+   * Allow skipping the deep clone of the document when no migration is going to run, see {@link DocumentMigrateOptions.allowSkipClone}.
+   * Defaults to `false`.
+   */
+  allowSkipClone?: boolean;
 }
 
 /** @internal */

@@ -194,6 +194,67 @@ describe('DocumentMigrator', () => {
       expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
     });
 
+    describe('allowSkipClone', () => {
+      const createMigrator = () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'user',
+            migrations: {
+              '1.2.3': (doc) => {
+                set(doc, 'attributes.name', 'Mike');
+                return doc;
+              },
+            },
+          }),
+        });
+        migrator.prepareMigrations();
+        return migrator;
+      };
+      const upToDateDoc = () => ({
+        id: 'me',
+        type: 'user',
+        attributes: { name: 'Chris', nested: { value: 1 } },
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '1.2.3',
+      });
+
+      it('deep clones an up to date document by default', () => {
+        const migrator = createMigrator();
+        const originalDoc = upToDateDoc();
+
+        const migratedDoc = migrator.migrate(originalDoc);
+
+        expect(migratedDoc).toEqual(originalDoc);
+        expect(migratedDoc.attributes).not.toBe(originalDoc.attributes);
+        expect(_.get(migratedDoc, 'attributes.nested')).not.toBe(originalDoc.attributes.nested);
+      });
+
+      it('does not clone an up to date document when allowSkipClone is true', () => {
+        const migrator = createMigrator();
+        const originalDoc = upToDateDoc();
+
+        const migratedDoc = migrator.migrate(originalDoc, { allowSkipClone: true });
+
+        expect(migratedDoc).toEqual(upToDateDoc());
+        expect(migratedDoc.attributes).toBe(originalDoc.attributes);
+        // the top level object is never the provided one
+        expect(migratedDoc).not.toBe(originalDoc);
+        expect(originalDoc).toEqual(upToDateDoc());
+      });
+
+      it(`still doesn't mutate the original document when a migration runs with allowSkipClone`, () => {
+        const migrator = createMigrator();
+        const originalDoc = { ...upToDateDoc(), attributes: {}, typeMigrationVersion: '' };
+
+        const migratedDoc = migrator.migrate(originalDoc, { allowSkipClone: true });
+
+        expect(_.get(originalDoc, 'attributes.name')).toBeUndefined();
+        expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
+        expect(migratedDoc.attributes).not.toBe(originalDoc.attributes);
+      });
+    });
+
     it('does not apply migrations to unrelated docs', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),

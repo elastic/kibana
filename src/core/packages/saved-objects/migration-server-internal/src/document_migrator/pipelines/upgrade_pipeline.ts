@@ -33,6 +33,7 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
   private kibanaVersion: string;
   private convertNamespaceTypes: boolean;
   private targetTypeVersion: string;
+  private allowSkipClone: boolean;
 
   constructor({
     document,
@@ -40,15 +41,22 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
     kibanaVersion,
     convertNamespaceTypes,
     targetTypeVersion,
+    allowSkipClone = false,
   }: {
     document: SavedObjectUnsanitizedDoc;
     migrations: ActiveMigrations;
     kibanaVersion: string;
     convertNamespaceTypes: boolean;
     targetTypeVersion?: string;
+    /**
+     * Only clone the document when a transform is going to run. Otherwise the document is cloned upfront.
+     * See `DocumentMigrateOptions.allowSkipClone`.
+     */
+    allowSkipClone?: boolean;
   }) {
     this.originalDoc = document;
-    this.document = cloneDeep(document);
+    this.allowSkipClone = allowSkipClone;
+    this.document = allowSkipClone ? document : cloneDeep(document);
     this.migrations = migrations;
     this.kibanaVersion = kibanaVersion;
     this.convertNamespaceTypes = convertNamespaceTypes;
@@ -184,6 +192,11 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
 
   run(): MigrationPipelineResult {
     assertValidCoreVersion({ document: this.document, kibanaVersion: this.kibanaVersion });
+
+    if (this.allowSkipClone && this.hasPendingTransforms()) {
+      // transforms may mutate the document, do not let them touch the caller's one
+      this.document = cloneDeep(this.document);
+    }
 
     for (const transform of this.getPipeline()) {
       const { typeMigrationVersion: previousVersion } = this.document;
