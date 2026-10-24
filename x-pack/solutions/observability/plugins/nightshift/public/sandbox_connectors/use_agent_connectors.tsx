@@ -16,7 +16,7 @@ import { useKibana } from '../hooks/use_kibana';
 import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { ConnectorLibraryFlyout } from './connector_library_flyout';
 
-const INVESTIGATION_AGENT_QUERY_KEY = ['nightshift.investigationAgent'] as const;
+export const INVESTIGATION_AGENT_QUERY_KEY = ['nightshift.investigationAgent'] as const;
 
 export const noAgentPermissionReason = i18n.translate(
   'xpack.nightshift.agentConnectors.noPermission',

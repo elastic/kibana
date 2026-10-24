@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
+import { useAgentConnectors } from '../sandbox_connectors/use_agent_connectors';
 import { useFetchSandboxConnectors } from '../sandbox_connectors/use_fetch_sandbox_connectors';
 
 interface SuggestedAutomation {
@@ -31,8 +32,7 @@ interface SuggestedAutomation {
   icon: string;
   title: string;
   description: string;
-  /** Only suggested when the space has this sandbox secret. */
-  /** Only suggested once the agent can reach a tool beyond the cluster's telemetry. */
+  /** Only suggested once a connector is assigned to the agent. */
   requiresConnector?: boolean;
 }
 
@@ -94,7 +94,9 @@ export function OnboardingAutomationStep({
   automationsHref?: string;
   onInvestigationClick: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
-  const hasConnector = (useFetchSandboxConnectors().data?.connectors.length ?? 0) > 0;
+  const { assignedIds } = useAgentConnectors();
+  const listed = useFetchSandboxConnectors().data?.connectors ?? [];
+  const hasConnector = listed.some(({ id }) => assignedIds.includes(id));
   const automations = SUGGESTED_AUTOMATIONS.filter(
     ({ requiresConnector }) => !requiresConnector || hasConnector
   );

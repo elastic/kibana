@@ -20,7 +20,10 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { isHttpNotFoundError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { noAgentPermissionReason, useAgentConnectors } from './use_agent_connectors';
@@ -172,6 +175,27 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
   }, [canDelete, canEdit, canEditAgent, isUpdating, openEdit, registry, requestDelete, unassign]);
 
   if (isLoading || agent.isLoading) return <EuiLoadingSpinner size="m" />;
+  if (agent.error && isHttpNotFoundError(agent.error)) {
+    return (
+      <KbnInfoCallout
+        announceOnMount
+        size="s"
+        title={i18n.translate('xpack.nightshift.sandboxConnectors.notEnabledTitle', {
+          defaultMessage: 'Elastic Nightshift is not enabled in this space yet.',
+        })}
+        data-test-subj="nightshiftSandboxConnectorsNotEnabled"
+      >
+        <EuiLink
+          href={application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/?onboarding=1' })}
+          data-test-subj="nightshiftSandboxConnectorsEnableLink"
+        >
+          {i18n.translate('xpack.nightshift.sandboxConnectors.notEnabledLink', {
+            defaultMessage: 'Enable it from the Nightshift onboarding to connect tools.',
+          })}
+        </EuiLink>
+      </KbnInfoCallout>
+    );
+  }
   if (error || agent.error) {
     return (
       <SandboxConnectorsError

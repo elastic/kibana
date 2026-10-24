@@ -9,14 +9,18 @@ import React, { useCallback, useState } from 'react';
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { useQueryClient } from '@kbn/react-query';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
+import { INVESTIGATION_AGENT_QUERY_KEY } from './use_agent_connectors';
 
 export function useDeleteConnector(): {
   requestDelete: (connector: SandboxConnector) => void;
   confirmModal: React.ReactElement | null;
 } {
-  const { http, notifications } = useKibana().services;
+  const { agentBuilder, http, notifications } = useKibana().services;
+  const queryClient = useQueryClient();
   const refresh = useRefreshSandboxConnectors();
   const [pending, setPending] = useState<SandboxConnector | undefined>();
   const confirmTitleId = useGeneratedHtmlId({ prefix: 'nightshiftDeleteConnector' });
@@ -25,8 +29,11 @@ export function useDeleteConnector(): {
     if (!pending) return;
     setPending(undefined);
     try {
+      await agentBuilder?.agents.removeConnectorFromAgent({
+        agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+        connectorId: pending.id,
+      });
       await http.delete(`/api/actions/connector/${encodeURIComponent(pending.id)}`);
-      refresh();
     } catch (err) {
       notifications.toasts.addError(err as Error, {
         title: i18n.translate('xpack.nightshift.sandboxConnectors.deleteError', {
@@ -34,8 +41,11 @@ export function useDeleteConnector(): {
           values: { name: pending.name },
         }),
       });
+    } finally {
+      refresh();
+      void queryClient.invalidateQueries({ queryKey: INVESTIGATION_AGENT_QUERY_KEY });
     }
-  }, [http, notifications.toasts, pending, refresh]);
+  }, [agentBuilder, http, notifications.toasts, pending, queryClient, refresh]);
 
   const confirmModal = pending ? (
     <EuiConfirmModal

@@ -71,13 +71,7 @@ export function OnboardingConnectStep(): React.ReactElement {
   );
 }
 
-function SectionTitle({
-  title,
-  isRequired = false,
-}: {
-  title: string;
-  isRequired?: boolean;
-}): React.ReactElement {
+function SectionTitle({ title }: { title: string }): React.ReactElement {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -87,13 +81,9 @@ function SectionTitle({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBadge color="hollow">
-          {isRequired
-            ? i18n.translate('xpack.nightshift.onboarding.requiredBadge', {
-                defaultMessage: 'Required',
-              })
-            : i18n.translate('xpack.nightshift.onboarding.optionalBadge', {
-                defaultMessage: 'Optional',
-              })}
+          {i18n.translate('xpack.nightshift.onboarding.optionalBadge', {
+            defaultMessage: 'Optional',
+          })}
         </EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>

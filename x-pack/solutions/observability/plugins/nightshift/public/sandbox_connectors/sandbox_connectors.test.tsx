@@ -36,6 +36,13 @@ const forbiddenError = (): Error =>
     response: { status: 403 },
   });
 
+const notFoundError = (): Error =>
+  Object.assign(new Error('Not Found'), {
+    name: 'HttpFetchError',
+    request: {},
+    response: { status: 404 },
+  });
+
 const setup = ({
   connectors,
   assigned = connectors.map(({ id }) => id),
@@ -204,13 +211,34 @@ describe('SandboxConnectorsTable', () => {
     );
   });
 
-  it('deletes a connector after confirmation and refreshes the list', async () => {
-    const { http, fetch } = setup({ connectors: [connector('github')] });
+  it('takes a connector off the agent, deletes it after confirmation and refreshes the list', async () => {
+    const { http, fetch, agents } = setup({ connectors: [connector('github')] });
 
     fireEvent.click(await screen.findByTestId('nightshiftConnectorDelete-github'));
     fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
+    await expectRemoved(agents, 'github');
     await waitFor(() => expect(http.delete).toHaveBeenCalledWith('/api/actions/connector/github'));
+    expect(agents.removeConnectorFromAgent.mock.invocationCallOrder[0]).toBeLessThan(
+      http.delete.mock.invocationCallOrder[0]
+    );
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    // The agent is read again, so the row cannot come back from a stale assignment.
+    await waitFor(() => expect(agents.get).toHaveBeenCalledTimes(2));
+  });
+
+  it('reports a failed delete and still refreshes', async () => {
+    const { http, addError, fetch } = setup({ connectors: [connector('github')] });
+    http.delete.mockRejectedValueOnce(forbiddenError());
+
+    fireEvent.click(await screen.findByTestId('nightshiftConnectorDelete-github'));
+    fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() =>
+      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Could not delete connector Connector github',
+      })
+    );
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
   });
 
@@ -241,6 +269,19 @@ describe('SandboxConnectorsTable', () => {
 
     expect(await screen.findByText('Connector github')).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('points to onboarding when Nightshift is not enabled in the space', async () => {
+    setup({ connectors: [connector('github')], agentError: notFoundError() });
+
+    expect(await screen.findByTestId('nightshiftSandboxConnectorsNotEnabled')).toHaveTextContent(
+      'Elastic Nightshift is not enabled in this space yet.'
+    );
+    expect(screen.getByTestId('nightshiftSandboxConnectorsEnableLink')).toHaveAttribute(
+      'href',
+      '/app/nightshift/?onboarding=1'
+    );
+    expect(screen.queryByTestId('nightshiftSandboxConnectorsError')).not.toBeInTheDocument();
   });
 
   it('shows an error with a retry when the agent cannot be loaded', async () => {

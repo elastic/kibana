@@ -34,7 +34,6 @@ export const useOnboarding = () => {
   });
 };
 
-/** Starts the investigation agent's exploration run that suggests first investigations. */
 /** The first onboarding step: installs the investigation agent in the space. */
 export const useEnableNightshift = () => {
   const { nightshiftInvestigations, notifications } = useKibana().services;
