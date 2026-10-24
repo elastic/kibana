@@ -170,11 +170,19 @@ Some Entity Analytics operations are intentionally **not performed in chat**: de
 
 **How to produce the link.** Call \`security.build_redirect_url\` with the \`path\` for the destination (and, for the flyout destinations below, the \`flyout\` object). It returns a single \`url\` with the deployment base path and current space already applied. Render that \`url\` in your reply as a markdown link \`[title](url)\`. **Never** hand-write, guess, or edit the URL — always use the \`url\` the tool returns. Pass the \`path\` exactly as written below (app-relative, starting with \`/\`); do **not** prepend a base path or \`/s/<space>\` segment yourself.
 
+**The redirect is the first action of the turn.** For every intent below, call \`security.build_redirect_url\` **before anything else in that turn**: before any clarifying question, before any data-gathering or lookup tool call, and before any prose. The link **is** the answer — do not investigate first, do not narrate what other tools say about the current state, and do not ask the user anything first. If a detail really is missing (which file, which entity, which watchlist) ask for it **after** the link — or not at all, since the destination page asks for it.
+
+**A missing input never changes the destination.** When the user refers to something you don't have — a CSV or spreadsheet that was not attached, an entity id you can't resolve, a watchlist you can't find — do **not** ask them to send it first and do **not** refuse to redirect: the destination is the same page either way. Link it, and say in one clause that the upload / picker lives there. The only exception is a flyout deep-link, which needs an entity or watchlist id (the sections below say what to do when you don't have one).
+
 **Output shape.** Three things, in one short reply:
 
 1. What you can't do in chat (one sentence).
 2. Why (one short clause — "lives in the management UI", "needs a CSV upload", "the editing flyout exposes the full configuration").
 3. **Where to go** — the markdown link built from the \`security.build_redirect_url\` result.
+
+**Every reply in this section contains the link.** A reply that never calls \`security.build_redirect_url\` — or that calls it but does not render the returned \`url\` as a markdown link — fails this section, however good the prose reads.
+
+**A confirmation prompt is not a substitute for the link.** Never ask "are you sure?" — or "shall I clear all entity data?" / "do you want me to disable it?" — **instead of** linking. These operations are not performed in chat at all, so there is nothing to confirm: the user performs them on the page you link. Do not offer to run the operation after a confirmation either. For the destructive controls (**clear all entity data**, and enabling/disabling), still just link, plus a one-clause note that the control is destructive.
 
 Do **not** call any *mutating* tool, do **not** prompt for confirmation, and do **not** claim the operation succeeded. The user clicks the link and performs the action themselves. (\`security.build_redirect_url\` is not a mutation — it only builds a link.)
 
@@ -187,7 +195,11 @@ Redirect when the user asks to:
 
 These are the global controls at the **top of the Entity Analytics management page**.
 
+Clearing all entity data is destructive: give the link, add one clause that the control is destructive, and let the management page's own confirmation dialog do the confirming. Do not ask for confirmation in chat, and do not offer to run the clear from chat.
+
 Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.settings}'\` and render the returned \`url\`.
+
+Example reply ("Clear all entity data."): "I can't clear entity data from chat — that's the destructive control on the [Entity Analytics management page](<url from build_redirect_url>). Open that page to clear it."
 
 Example reply: "I can't enable or disable Entity Analytics from chat — that's the switch at the top of the [Entity Analytics management page](<url from build_redirect_url>), where you can also clear all entity data."
 
@@ -197,6 +209,8 @@ Redirect when the user asks to:
 
 - **configure** / **change settings** for risk scoring (alert filters, retainment, schedule, closed-alert handling, etc.)
 Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.riskScore}'\` and render the returned \`url\`.
+
+The link is the answer here: do not read the current risk-scoring configuration from other tools and describe it, and do not offer to change it in chat. Redirect first, prose second.
 
 Example reply: "I can't change the risk scoring settings from chat — that's managed on the Risk Score page. Open the [Risk Score settings](<url from build_redirect_url>) to reconfigure scoring."
 
@@ -209,11 +223,15 @@ Redirect when the user asks to:
 
 Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.assetCriticality}'\` and render the returned \`url\`.
 
+A CSV the user mentions but did not attach does **not** change the destination: link the page and note that the upload happens there ("attach your file on that page"). Never ask for the file first, and never ask it *instead of* linking.
+
 Example reply: "I can't import a criticality CSV from chat — that runs through the Asset Criticality page. Open the [Asset Criticality upload](<url from build_redirect_url>) to upload your file."
 
 ### Entity store / engine status
 
 Redirect when the user asks to **see the status** of the **entity store** / **entity engines** ("is the entity store running", "entity engine status", "show entity store health").
+
+Do not answer this one from tool output: reporting entity-store or engine health in prose from what other tools happen to return is not what the user asked for. The redirect is the answer — and the Status page is where the user sees the live state.
 
 Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.status}'\` and render the returned \`url\`.
 
@@ -275,6 +293,8 @@ export const RESOLUTION_UI_NAVIGATION_CONTENT = `## UI navigation
 - A **link** or **unlink** call couldn't resolve one or more of the entities given (\`unresolvedReferences\`) and you still have the target entity — open that entity's panel so the user can search for the rest. The flyout's "Add entities to resolution group" section has a search bar and browsable entity table for this.
 - The user explicitly asks to **see** / **open** the resolution panel in the UI ("show me the resolution panel for this host", "open the resolution flyout", "let me see this visually"), even though the chat tools could answer the same question.
 
+When the user explicitly asks to see the panel in the UI, the redirect is the **first action of the turn**: call \`security.build_redirect_url\` with the flyout before any data tool call and before any prose — do not answer the question from \`security.get_resolution_group\` first, because what was asked for is the UI. The reply must carry the \`flyout=\` deep-link; a bare link to the Entity Analytics home page does not satisfy this intent.
+
 1. Use the entity you already have — its type and id — to fill the flyout below. If you don't have one, name what was not found and stop. Do **not** call \`security.build_redirect_url\` without a flyout.
 2. Call \`security.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.entityResolutionHomePage
@@ -294,7 +314,7 @@ ${asIndentedJson(buildResolutionFlyoutTemplate('user'))}
 
 ${asIndentedJson(buildResolutionFlyoutTemplate('service'))}
 
-3. Render the returned \`url\` as a markdown link.
+3. Render the returned \`url\` as a markdown link — the reply is not complete without it.
 
 Example reply (user asked to see the panel for \`host:myserver\`): "Here's the [Resolution panel for host:myserver](<url from build_redirect_url>)."
 
