@@ -7,21 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import { type UseEuiTheme, euiCanAnimate } from '@elastic/eui';
 
 export const overflowYAuto = css({ overflowY: 'auto' });
 
-export const relativePosition = css({ position: 'relative' });
+// Data attribute set on the sticky header render slot that reflects whether the sticky header is displayed.
+export const stickyHeaderVisibleAttribute = 'data-sticky-header-visible';
 
-const slideIn = keyframes({
-  '0%': {
-    transform: 'translateY(-100%)',
-  },
-  '100%': {
-    transform: 'translateY(0)',
-  },
-});
+export const relativePosition = css({ position: 'relative' });
 
 export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
   container: css({
@@ -50,30 +44,32 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
       scrollbarGutter: 'auto',
       scrollbarWidth: 'thin',
       border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-      borderRadius: euiTheme.border.radius.small,
+      borderRadius: euiTheme.border.radius.inline,
     },
   ]),
+  /**
+   * Always rendered so the portal target exists ahead of time. The slot itself has no height (its content is
+   * absolutely positioned), visibility is conveyed to the content through the `data-sticky-header-visible`
+   * attribute so that the content can transition between the shown and hidden states.
+   */
   cascadeTreeGridHeaderStickyRenderSlot: css({
     position: 'sticky',
     top: 0,
     left: 0,
     right: 0,
     zIndex: euiTheme.levels.header,
+    transform: 'translateY(0)',
+    visibility: 'visible',
+
     [euiCanAnimate]: {
-      animation: `${slideIn} ${euiTheme.animation.slow} ${euiTheme.animation.resistance}`,
+      transition: `visibility ${euiTheme.animation.normal} ${euiTheme.animation.resistance}, transform ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
     },
-  }),
-  // Hidden variant - keeps the element in DOM so ref is always available,
-  // but visually hidden and non-interactive
-  cascadeTreeGridHeaderStickyRenderSlotHidden: css({
-    position: 'sticky',
-    top: 0,
-    left: 0,
-    right: 0,
-    visibility: 'hidden',
-    pointerEvents: 'none',
-    height: 0,
-    overflow: 'hidden',
+
+    [`&[${stickyHeaderVisibleAttribute}="false"]`]: {
+      pointerEvents: 'none',
+      transform: 'translateY(-100%)',
+      visibility: 'hidden',
+    },
   }),
   cascadeTreeGridWrapper: css({
     background: euiTheme.colors.backgroundBaseSubdued,

@@ -11,5 +11,6 @@ export {
   useDataGridInTableSearch,
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,
+  type InTableSearchScrollToCell,
 } from './use_data_grid_in_table_search';
 export { InTableSearchCellContext } from './in_table_search_cell_context';

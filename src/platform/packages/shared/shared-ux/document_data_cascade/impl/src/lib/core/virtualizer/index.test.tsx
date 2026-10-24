@@ -8,12 +8,14 @@
  */
 
 import React from 'react';
-import { renderHook, render } from '@testing-library/react';
+import { act, renderHook, render } from '@testing-library/react';
+import * as ReactVirtual from '@tanstack/react-virtual';
 import type { Row } from '@tanstack/react-table';
 import { defaultRangeExtractor, type Range, type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
 import {
   useCascadeVirtualizer,
+  calculateActiveStickyIndex,
   useCascadeVirtualizerRangeExtractor,
   useAnchorVirtualizerToItemIndex,
   VirtualizedCascadeRowList,
@@ -43,8 +45,74 @@ const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
   );
 };
 
+jest.mock('@tanstack/react-virtual', () => {
+  const actual = jest.requireActual('@tanstack/react-virtual');
+  return { ...actual, useVirtualizer: jest.fn(actual.useVirtualizer) };
+});
+
 describe('virtualizer', () => {
+  describe('calculateActiveStickyIndex', () => {
+    it('uses flattened indices for expanded rows after earlier expanded siblings', () => {
+      const rows = rowsToRender(6);
+      rows[4].index = 1;
+      jest.spyOn(rows[4], 'getIsExpanded').mockReturnValue(true);
+      expect(calculateActiveStickyIndex(rows, 4, true)).toBe(4);
+    });
+
+    it('selects the nearest parent by identity through multiple nesting levels', () => {
+      const rows = rowsToRender(8);
+      rows[5].index = 0;
+      jest.spyOn(rows[6], 'getParentRows').mockReturnValue([rows[2], rows[5]]);
+      expect(calculateActiveStickyIndex(rows, 6, true)).toBe(5);
+    });
+
+    it('selects an expanded leaf itself and restores its parent for a collapsed sibling', () => {
+      const rows = rowsToRender(8);
+      rows[5].index = 0;
+      jest.spyOn(rows[5], 'getParentRows').mockReturnValue([rows[2], rows[4]]);
+      jest.spyOn(rows[5], 'getIsExpanded').mockReturnValue(true);
+      jest.spyOn(rows[6], 'getParentRows').mockReturnValue([rows[2], rows[4]]);
+      expect(calculateActiveStickyIndex(rows, 5, true)).toBe(5);
+      expect(calculateActiveStickyIndex(rows, 6, true)).toBe(4);
+    });
+
+    it('has no candidate for disabled stickiness, collapsed roots or an empty range', () => {
+      const rows = rowsToRender(1);
+      expect(calculateActiveStickyIndex(rows, 0, false)).toBeNull();
+      expect(calculateActiveStickyIndex(rows, 0, true)).toBeNull();
+      expect(calculateActiveStickyIndex([], 0, true)).toBeNull();
+    });
+  });
+
   describe('useCascadeVirtualizer', () => {
+    it('retains the root row size while its child is in fullscreen', () => {
+      const spy = jest.mocked(ReactVirtual.useVirtualizer);
+      const rows = rowsToRender(1);
+      const { result } = renderHook(() =>
+        useCascadeVirtualizer({
+          rows,
+          enableStickyGroupHeader: true,
+          getScrollElement: () => document.body,
+        })
+      );
+      const instance = spy.mock.results.at(-1)?.value as UseVirtualizerReturnType;
+      const element = document.createElement('div');
+      element.dataset.index = '0';
+      Object.defineProperty(element, 'offsetHeight', { value: 40 });
+      act(() => {
+        instance.resizeItem(0, 2000);
+        instance.getTotalSize();
+      });
+      const handle = result.current.childController?.connect('fullscreen-cell', 0);
+      handle?.detachScrollElement();
+
+      expect(instance.options.measureElement(element, undefined, instance)).toBe(2000);
+
+      handle?.reattachScrollElement();
+      expect(instance.options.measureElement(element, undefined, instance)).toBe(40);
+      handle?.disconnect();
+    });
+
     it('should render correctly', () => {
       const { result } = renderHook(() =>
         useCascadeVirtualizer({
@@ -59,7 +127,6 @@ describe('virtualizer', () => {
       expect(result.current).toHaveProperty('getTotalSize');
       expect(result.current).toHaveProperty('range');
       expect(result.current).toHaveProperty('virtualizedRowsSizeCache');
-      expect(result.current).toHaveProperty('virtualizedRowComputedTranslateValue');
       expect(result.current).toHaveProperty('scrollToVirtualizedIndex');
       expect(result.current).toHaveProperty('scrollToLastVirtualizedRow');
       expect(result.current).toHaveProperty('scrollOffset');
@@ -526,17 +593,21 @@ describe('virtualizer', () => {
       const rowRenderer = jest.fn(() => null);
       const mockRows = rowsToRender(50);
       const mockVirtualItems = [
-        { index: 0, start: 0, end: 50 },
-        { index: 1, start: 51, end: 100 },
+        { index: 0, start: 0, end: 50, size: 50, key: 'row-0', lane: 0 },
+        { index: 1, start: 51, end: 100, size: 49, key: 'row-1', lane: 0 },
       ];
-      const getVirtualItems = jest.fn(() => mockVirtualItems);
+      const getVirtualItems = Object.assign(
+        jest.fn(() => mockVirtualItems),
+        {
+          updateDeps: jest.fn(),
+        }
+      );
 
       render(
         <VirtualizedCascadeRowList
           rows={mockRows}
-          virtualizedRowComputedTranslateValue={new Map()}
           activeStickyIndex={null}
-          // @ts-expect-error -- we're only interested in testing the rowRenderer prop here
+          virtualizedRowComputedTranslateValue={new Map()}
           getVirtualItems={getVirtualItems}
           listItemRenderer={rowRenderer}
         />
@@ -547,10 +618,6 @@ describe('virtualizer', () => {
         expect.objectContaining({
           row: expect.any(Object), // because we passed an empty array as rows
           virtualItem: expect.any(Object),
-          virtualRowStyle: expect.objectContaining({
-            transform: expect.stringMatching(/translateY\(\d+px\)/),
-            zIndex: expect.any(Number),
-          }),
           isActiveSticky: expect.any(Boolean),
         })
       );

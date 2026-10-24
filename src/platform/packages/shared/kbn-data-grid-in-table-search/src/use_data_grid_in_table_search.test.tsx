@@ -139,6 +139,50 @@ describe('useDataGridInTableSearch', () => {
     });
   });
 
+  it('should use the provided scrollToCell override when navigating matches', async () => {
+    const scrollToCell = jest.fn();
+
+    render(
+      <DataGridWithInTableSearchExample
+        rowsCount={100}
+        columnsCount={2}
+        pageSize={null}
+        scrollToCell={scrollToCell}
+      />
+    );
+
+    screen.getByTestId(BUTTON_TEST_SUBJ).click();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(INPUT_TEST_SUBJ)).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId(INPUT_TEST_SUBJ), { target: { value: 'row-1' } });
+
+    await waitFor(() => {
+      expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/22');
+    });
+
+    await waitFor(() => {
+      expect(scrollToCell).toHaveBeenCalledWith(
+        expect.objectContaining({ rowIndex: expect.any(Number), align: 'center' })
+      );
+    });
+
+    scrollToCell.mockClear();
+    screen.getByTestId(BUTTON_PREV_TEST_SUBJ).click();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('22/22');
+    });
+
+    await waitFor(() => {
+      expect(scrollToCell).toHaveBeenCalledWith(
+        expect.objectContaining({ rowIndex: expect.any(Number), align: 'center' })
+      );
+    });
+  });
+
   it('should handle parent contexts correctly', async () => {
     render(
       <MockContext.Provider value={{ mockContextValue: 'test access to any parent context' }}>

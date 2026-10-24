@@ -12,18 +12,23 @@ import type { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
 import { EuiDataGrid } from '@elastic/eui';
 import { generateMockData } from './data';
 import { getRenderCellValueMock } from './render_cell_value_mock';
-import { useDataGridInTableSearch } from '../use_data_grid_in_table_search';
+import {
+  useDataGridInTableSearch,
+  type UseDataGridInTableSearchProps,
+} from '../use_data_grid_in_table_search';
 
 export interface DataGridWithInTableSearchExampleProps {
   rowsCount: number;
   columnsCount: number;
   pageSize: number | null;
+  scrollToCell?: UseDataGridInTableSearchProps['scrollToCell'];
 }
 
 export const DataGridWithInTableSearchExample: React.FC<DataGridWithInTableSearchExampleProps> = ({
   rowsCount,
   columnsCount,
   pageSize,
+  scrollToCell,
 }) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [dataGridWrapper, setDataGridWrapper] = useState<HTMLElement | null>(null);
@@ -62,6 +67,7 @@ export const DataGridWithInTableSearchExample: React.FC<DataGridWithInTableSearc
   } = useDataGridInTableSearch({
     dataGridWrapper,
     dataGridRef,
+    scrollToCell,
     visibleColumns,
     rows: sampleData,
     cellContext: undefined,
