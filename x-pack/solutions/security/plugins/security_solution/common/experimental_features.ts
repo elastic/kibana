@@ -98,13 +98,23 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
-   * Release: TBD
    *
-   * Ships disabled: this skill dispatches destructive endpoint response actions,
-   * so it must not be enabled by default on any branch. Enable it explicitly via
-   * config (or a Scout evals config) for local/CI testing.
+   * Release: 9.6.0
+   *
+   * Enabled by default now that the guards the "ships disabled" note was waiting
+   * on are in place:
+   * - every tool re-asserts the caller's endpoint privilege via
+   *   `getEndpointAuthz(request)` before dispatching, mirroring the HTTP routes'
+   *   `withEndpointAuthz(...)` gate, and refuses with `insufficientPrivilegesResult`
+   *   when it is absent;
+   * - write tools build the response-actions client with `isAutomated: false`, so
+   *   actions run as the requesting user rather than through the unsecured
+   *   automated path;
+   * - write tools dispatch only behind Agent Builder's confirmation card (HITL);
+   * - the irreversible commands (execute, kill-process, get-file, upload,
+   *   runscript, memory-dump) are not exposed by this skill.
    */
-  endpointResponseActionsSkill: false,
+  endpointResponseActionsSkill: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.

@@ -11,9 +11,11 @@ import type { RunContext } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { HostInfo, ActionDetails } from '../../../../../common/endpoint/types';
+import type { LicenseService } from '../../../../../common/license/license';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { getActionDetailsById } from '../../../../endpoint/services/actions';
 
@@ -145,6 +147,9 @@ export const RUNNING_PROCESSES_MAX_RESULT_TOKENS = 30_000;
 export type ResponseActionErrorType =
   | 'insufficient_privileges'
   | 'invalid_argument'
+  | 'license_tier_required'
+  | 'license_unavailable'
+  | 'product_feature_disabled'
   | 'unknown_error';
 
 /**
@@ -189,6 +194,155 @@ export function insufficientPrivilegesResult(privilege: string) {
     `Insufficient privileges: this action requires the '${privilege}' endpoint privilege. Ask an administrator to grant it, or perform the action from the Security UI.`,
     { privilege }
   );
+}
+
+/**
+ * Standard tool result returned when the license tier, not the caller's role,
+ * is what withholds the privilege. In `calculateEndpointAuthz` several
+ * response-action privileges are conjunctioned with a license check
+ * (`canIsolateHost: ... && isPlatinumPlusLicense`, `canWriteScanOperations` /
+ * `canGetRunningProcesses`: `... && isEnterpriseLicense`), so below that tier
+ * the flag is false even for a superuser. Reporting that as
+ * `insufficient_privileges` sends the analyst to an administrator for a grant
+ * that cannot exist — only a license upgrade changes the answer, and the
+ * Security UI enforces the same gate, so neither half of the usual
+ * "ask an administrator / use the Security UI" advice applies.
+ */
+export function licenseTierRequiredResult(privilege: string, tier: 'platinum' | 'enterprise') {
+  const tierName = tier === 'platinum' ? 'Platinum' : 'Enterprise';
+  return responseActionErrorResult(
+    'license_tier_required',
+    `License limit: the '${privilege}' capability requires a ${tierName} license or higher, and this deployment's license tier does not include it. No role grant can supply it — an administrator would need to upgrade the Elastic license. Nothing was dispatched.`,
+    { privilege, requiredLicenseTier: tier }
+  );
+}
+
+/**
+ * Standard tool result returned when the license itself — not its tier, not
+ * the caller's role — is what withholds the privilege: it has expired, or it
+ * could not be read at all. `LicenseService.isPlatinumPlus()` /
+ * `isEnterprise()` fold `isAvailable && isActive` into the tier comparison
+ * (see `isAtLeast` in `common/license/license.ts`), so an expired Enterprise
+ * license fails `isEnterprise()` exactly like a Gold one and would otherwise
+ * be told to upgrade to Enterprise — when what restores the capability is
+ * renewing the license it already has.
+ */
+export function licenseUnavailableResult(privilege: string, expired: boolean) {
+  return responseActionErrorResult(
+    'license_unavailable',
+    expired
+      ? `License limit: this deployment's Elastic license has expired, so the '${privilege}' capability is disabled regardless of role. Renewing the license is what restores it — a role grant will not, and while it is expired a tier upgrade is not the issue. Nothing was dispatched.`
+      : `License limit: this deployment's Elastic license could not be read, so the '${privilege}' capability is disabled regardless of role. An administrator needs to restore license availability; a role grant will not help. Nothing was dispatched.`,
+    { privilege, licenseState: expired ? 'expired' : 'unavailable' }
+  );
+}
+
+/**
+ * The product feature(s) a gated privilege registers under, mirroring how
+ * `hasAuth` gates on action registration. Not uniform: the shared
+ * `hostIsolation` sub-feature — which registers `writeHostIsolationRelease` —
+ * is contributed by both `endpointHostIsolation` and
+ * `endpointResponseActions`, while isolate, scan, running-processes, and the
+ * actions log register only under `endpointResponseActions`. Serverless
+ * Security Essentials enables `endpointHostIsolation` but not
+ * `endpointResponseActions`, so there a missing release privilege is a role
+ * gap (grantable), not a product-tier limit.
+ */
+const PRIVILEGE_PRODUCT_FEATURES: Record<string, readonly ProductFeatureSecurityKey[]> = {
+  canIsolateHost: [ProductFeatureSecurityKey.endpointResponseActions],
+  canUnIsolateHost: [
+    ProductFeatureSecurityKey.endpointHostIsolation,
+    ProductFeatureSecurityKey.endpointResponseActions,
+  ],
+  canWriteScanOperations: [ProductFeatureSecurityKey.endpointResponseActions],
+  canGetRunningProcesses: [ProductFeatureSecurityKey.endpointResponseActions],
+  canAccessEndpointActionsLogManagement: [ProductFeatureSecurityKey.endpointResponseActions],
+};
+
+/**
+ * Standard tool result returned when the deployment's product configuration —
+ * not the caller's role, not the license tier — is what withholds the
+ * privilege: no product feature that registers the privilege's action is
+ * enabled (see `PRIVILEGE_PRODUCT_FEATURES`), so `calculateEndpointAuthz.hasAuth`
+ * returns false for every role while the serverless license is always
+ * Enterprise. Reporting that as `insufficient_privileges` or
+ * `license_tier_required` would both be wrong: no grant and no license change
+ * can enable it — only the deployment's product tier can.
+ */
+export function productFeatureDisabledResult(privilege: string) {
+  return responseActionErrorResult(
+    'product_feature_disabled',
+    `Not available on this deployment: response actions are part of the Endpoint Complete product tier, and this deployment's product configuration does not include them, so the '${privilege}' capability is disabled regardless of role or license. An administrator would need to upgrade this project to a product tier that includes response actions. Nothing was dispatched.`,
+    { privilege, productFeature: ProductFeatureSecurityKey.endpointResponseActions }
+  );
+}
+
+/**
+ * Whether any product feature that registers this privilege's action is
+ * enabled (see `PRIVILEGE_PRODUCT_FEATURES`). `false` means no enabled feature
+ * can grant the privilege, so the product configuration — not the role — is
+ * the honest explanation when `authz[privilege]` is false and the license
+ * raises no objection.
+ *
+ * `undefined` when the check cannot be answered (the product-features service
+ * has not been configured, e.g. some test contexts): callers treat that as
+ * "not the explanation" rather than picking a feature.
+ */
+export function responseActionsProductFeatureEnabled(
+  productFeaturesService: {
+    isEnabled(key: string): boolean;
+  },
+  privilege: string
+): boolean | undefined {
+  const features = PRIVILEGE_PRODUCT_FEATURES[privilege] ?? [
+    ProductFeatureSecurityKey.endpointResponseActions,
+  ];
+  try {
+    return features.some((feature) => productFeaturesService.isEnabled(feature));
+  } catch {
+    // `isEnabled` throws before `setProductFeaturesConfigurator` has run;
+    // an unconfigured service says nothing about the feature.
+    return undefined;
+  }
+}
+
+/**
+ * What the license — as opposed to the caller's role — says about a privilege
+ * gated on a license tier: either the active license is genuinely below the
+ * required tier, or the license itself is expired/unreadable and no tier
+ * comparison is meaningful yet. `undefined` when the license raises no
+ * objection.
+ */
+export type LicenseLimit =
+  | { kind: 'tier'; tier: 'platinum' | 'enterprise' }
+  | { kind: 'state'; expired: boolean };
+
+/**
+ * Splits a failed `isPlatinumPlus()` / `isEnterprise()` check into its two
+ * causes. Both fold `isAvailable && isActive` into the tier comparison, so
+ * the license information is inspected before attributing the failure to the
+ * tier: a license that is present and active is honestly below the tier,
+ * anything else (missing, unreadable, expired, invalid) is a license-state
+ * problem that renewal or restoration — not a tier upgrade — addresses.
+ */
+export function licenseLimitOf(
+  licenseService: Pick<LicenseService, 'isPlatinumPlus' | 'isEnterprise' | 'getLicenseInformation'>,
+  requiredTier: 'platinum' | 'enterprise'
+): LicenseLimit | undefined {
+  const atTier =
+    requiredTier === 'platinum' ? licenseService.isPlatinumPlus() : licenseService.isEnterprise();
+  if (atTier) {
+    return undefined;
+  }
+
+  const license = licenseService.getLicenseInformation();
+
+  if (license?.isAvailable && license.isActive) {
+    return { kind: 'tier', tier: requiredTier };
+  }
+  // `expired` only when the license exists but is not active; a missing or
+  // unreadable one is reported as unavailable.
+  return { kind: 'state', expired: Boolean(license?.isAvailable) };
 }
 
 /**

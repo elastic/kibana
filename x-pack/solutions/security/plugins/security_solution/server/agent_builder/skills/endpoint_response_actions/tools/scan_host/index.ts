@@ -129,6 +129,10 @@ export const scanHostTool = (
               hostName: toolParams.hostName as string | undefined,
               agentId: toolParams.agentId as string | undefined,
             },
+            args: {
+              path: toolParams.path as string | undefined,
+              comment: toolParams.comment as string | undefined,
+            },
             context,
             endpointAppContextService,
             requiredPrivilege: 'canWriteScanOperations',
@@ -165,6 +169,7 @@ export const scanHostTool = (
         const prepared = await prepareDispatch({
           action: 'scan',
           params: { hostName: requestedHostName, agentId: requestedAgentId },
+          args: { path, comment },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canWriteScanOperations',
