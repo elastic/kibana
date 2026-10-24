@@ -82,8 +82,7 @@ export interface AgenticInvestigationsPluginStart {
    */
   getSubjectsClient: (request: KibanaRequest) => SubjectsClient;
   /**
-   * Request-scoped investigation reads (get, list, severity counts, open investigations by
-   * subject) and the maintenance delete. Reads check the investigations read or manage
+   * Request-scoped investigation reads (get, list, open investigations by subject) and the maintenance delete. Reads check the investigations read or manage
    * privilege; space comes from the request.
    */
   getInvestigationsClient: (request: KibanaRequest) => InvestigationsClient;

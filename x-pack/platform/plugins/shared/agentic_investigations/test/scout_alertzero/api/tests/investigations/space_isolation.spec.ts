@@ -14,9 +14,12 @@ import {
   INVESTIGATIONS_PATH,
   cleanupSubjects,
   deleteConversations,
+  getSectionCounts,
+  sectionCountsOf,
   seedInvestigation,
   seedSubject,
   spaceUrl,
+  type SectionCountsBody,
 } from '../../fixtures';
 
 const RUN = `scout-space-${Date.now()}`;
@@ -85,6 +88,30 @@ apiTest.describe(
         }
       }
     );
+
+    apiTest('counts only the investigations of the requested Space', async ({ apiClient }) => {
+      const inSpace = await getSectionCounts(apiClient, cookieHeader, { spaceId: SPACE_ID });
+      expect(inSpace).toHaveStatusCode(200);
+      expect(sectionCountsOf(inSpace.body as SectionCountsBody, 'total')).toStrictEqual({
+        critical: 0,
+        high: 1,
+        medium: 0,
+        low: 0,
+        none: 0,
+        closed: 0,
+      });
+
+      const inDefault = await getSectionCounts(apiClient, cookieHeader, { query: RUN });
+      expect(inDefault).toHaveStatusCode(200);
+      expect(sectionCountsOf(inDefault.body as SectionCountsBody, 'matching')).toStrictEqual({
+        critical: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+        none: 0,
+        closed: 0,
+      });
+    });
 
     apiTest('returns 404 for its id in the default Space', async ({ apiClient }) => {
       const response = await apiClient.get(INVESTIGATION_BY_ID_PATH(spaceInvestigationId), {

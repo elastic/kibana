@@ -11,6 +11,7 @@ import {
   AB_CONVERSATION_BY_ID_PATH,
   IMPACT_PATH,
   INTERNAL_HEADERS,
+  INVESTIGATIONS_SECTION_COUNTS_PATH,
   PUBLIC_HEADERS,
 } from './constants';
 
@@ -129,3 +130,37 @@ export const seedInvestigation = async (
 
   return id;
 };
+
+interface SectionCount {
+  total: number;
+  matching: number;
+}
+
+/** The `_section_counts` response; spelled out because the Scout project cannot import plugin code. */
+export interface SectionCountsBody {
+  open: Record<'critical' | 'high' | 'medium' | 'low' | 'none', SectionCount>;
+  closed: SectionCount;
+}
+
+/** Reads `_section_counts`, optionally with a text query and in a Space. */
+export const getSectionCounts = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  { query, spaceId }: { query?: string; spaceId?: string } = {}
+) => {
+  const search = query ? `?query=${encodeURIComponent(query)}` : '';
+  return apiClient.get(spaceUrl(`${INVESTIGATIONS_SECTION_COUNTS_PATH}${search}`, spaceId), {
+    headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+    responseType: 'json',
+  });
+};
+
+/** One number per group (`closed` for the closed ones), to compare a whole response at once. */
+export const sectionCountsOf = (body: SectionCountsBody, field: keyof SectionCount) => ({
+  critical: body.open.critical[field],
+  high: body.open.high[field],
+  medium: body.open.medium[field],
+  low: body.open.low[field],
+  none: body.open.none[field],
+  closed: body.closed[field],
+});

@@ -33,7 +33,6 @@ import type {
   InvestigationMetadata,
   InvestigationProposalSummary,
   InvestigationSeverity,
-  InvestigationSeverityCounts,
   InvestigationSubjectResponse,
   InvestigationSummary,
   ListInvestigationsQuery,
@@ -167,32 +166,6 @@ export class InvestigationsQueryService {
       inProgressIds,
     });
     return { results, pagination: { total: candidates.length, page, per_page: perPage } };
-  }
-
-  async severityCounts(
-    request: KibanaRequest,
-    filters: InvestigationFilters
-  ): Promise<InvestigationSeverityCounts> {
-    const spaceId = this.deps.getSpaceId(request);
-    const client = await this.deps.getConversationClient(request);
-
-    const { candidates } = await this.findCandidates({
-      request,
-      client,
-      spaceId,
-      filters,
-      searchSort: { field: 'updated_at', order: 'desc' },
-      compare: compareConversations('updated_at', 'desc'),
-    });
-
-    const counts: InvestigationSeverityCounts = { low: 0, medium: 0, high: 0, critical: 0 };
-    for (const conversation of candidates) {
-      const { severity } = toMetadata(conversation.metadata);
-      if (severity) {
-        counts[severity] += 1;
-      }
-    }
-    return counts;
   }
 
   /**

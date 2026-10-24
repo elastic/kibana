@@ -9,12 +9,12 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import type {
-  InvestigationSeverityCounts,
+  InvestigationSectionCounts,
   InvestigationSummary,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
   SHARED_INVESTIGATIONS_API_VERSION,
-  SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL,
+  SHARED_INVESTIGATIONS_SECTION_COUNTS_URL,
 } from '../common/shared_investigations_api';
 import { useKibana } from './use_kibana';
 import {
@@ -32,13 +32,24 @@ import {
 const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 
 /**
- * `not-rated` holds the investigations nothing works on that have no severity: the agent did not
- * record one, for example because its run ended early. There is no failed state.
+ * `not-rated` holds the open investigations nothing works on that have no severity: the agent did
+ * not record one, for example because its run ended early. There is no failed state. `closed`
+ * holds every closed investigation, whatever its severity.
  */
-export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated';
+export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated' | 'closed';
+
+/** Sections that start collapsed; the rest start expanded. */
+export const COLLAPSED_BY_DEFAULT_SECTION_IDS: ReadonlySet<InvestigationSectionId> = new Set([
+  'closed',
+]);
 
 export interface InvestigationSectionState extends FetchInvestigationsResult {
   id: InvestigationSectionId;
+  /**
+   * The search matches none of this section's investigations, but it has some: the section shows
+   * a zero count, collapsed, instead of disappearing like a section with none at all.
+   */
+  isFilteredOut: boolean;
 }
 
 export interface InvestigationSectionsResult {
@@ -55,27 +66,59 @@ export interface InvestigationSectionsResult {
 const toInvestigationIds = (investigations: InvestigationSummary[]): Set<string> =>
   new Set(investigations.map(({ id }) => id));
 
+// Closed investigations have their own section, so the severity tiers only list open ones.
 const tierSection = (severity: Severity) => ({
   inProgress: false,
+  status: 'open' as const,
   severities: [severity],
 });
 
-const toSeverityCounts = (counts: InvestigationSeverityCounts | undefined): SeverityCounts => ({
-  critical: counts?.critical ?? 0,
-  high: counts?.high ?? 0,
-  medium: counts?.medium ?? 0,
-  low: counts?.low ?? 0,
+const toSeverityCounts = (counts: InvestigationSectionCounts | undefined): SeverityCounts => ({
+  critical: counts?.open.critical.matching ?? 0,
+  high: counts?.open.high.matching ?? 0,
+  medium: counts?.open.medium.matching ?? 0,
+  low: counts?.open.low.matching ?? 0,
 });
+
+/** How many investigations the section's group holds without the search. */
+const getUnsearchedTotal = (
+  id: InvestigationSectionId,
+  counts: InvestigationSectionCounts | undefined,
+  unsearchedInProgressTotal: number
+): number => {
+  switch (id) {
+    case 'in-progress':
+      return unsearchedInProgressTotal;
+    case 'not-rated':
+      return counts?.open.none.total ?? 0;
+    case 'closed':
+      return counts?.closed.total ?? 0;
+    default:
+      return counts?.open[id].total ?? 0;
+  }
+};
 
 const toSectionState = ({
   id,
   queryResult,
+  query,
+  counts,
+  unsearchedInProgressTotal,
 }: {
   id: InvestigationSectionId;
   queryResult: FetchInvestigationsResult;
+  query: string | undefined;
+  counts: InvestigationSectionCounts | undefined;
+  unsearchedInProgressTotal: number;
 }): InvestigationSectionState => ({
   id,
   ...queryResult,
+  isFilteredOut:
+    Boolean(query) &&
+    !queryResult.isInitialLoading &&
+    queryResult.error == null &&
+    queryResult.investigations.length === 0 &&
+    getUnsearchedTotal(id, counts, unsearchedInProgressTotal) > 0,
 });
 
 export const useInvestigationSections = ({
@@ -98,27 +141,44 @@ export const useInvestigationSections = ({
   const high = useFetchInvestigations({ ...tierSection('high'), query });
   const medium = useFetchInvestigations({ ...tierSection('medium'), query });
   const low = useFetchInvestigations({ ...tierSection('low'), query });
-  const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
+  const notRated = useFetchInvestigations({
+    inProgress: false,
+    status: 'open',
+    severities: ['none'],
+    query,
+  });
+  const closed = useFetchInvestigations({ inProgress: false, status: 'closed', query });
 
-  // The shared counts cannot leave out running investigations, so the tiles include them.
-  const severityCountsQuery = useQuery({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
+  // Running is not stored, so the shared counts cannot hold it; the section's list without the
+  // search tells whether a search emptied it. Without a search this is the same query as above.
+  const unsearchedInProgress = useFetchInvestigations({
+    inProgress: true,
+    refetchInterval: IN_PROGRESS_REFETCH_INTERVAL_MS,
+  });
+
+  // The shared counts cannot leave out running investigations, so the tiles include them. The
+  // tiles use the open ones, like the tier sections they scroll to. The totals without the search
+  // tell a section the search emptied from one that has nothing at all.
+  const sectionCountsQuery = useQuery({
+    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'sectionCounts', query],
     enabled: agenticInvestigations != null,
     queryFn: ({ signal }) =>
-      http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
+      http.get<InvestigationSectionCounts>(SHARED_INVESTIGATIONS_SECTION_COUNTS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
         query: query ? { query } : {},
         signal,
       }),
     keepPreviousData: true,
   });
+  const sectionCounts = sectionCountsQuery.data;
 
   const { refetch: refetchCritical } = critical;
   const { refetch: refetchHigh } = high;
   const { refetch: refetchMedium } = medium;
   const { refetch: refetchLow } = low;
   const { refetch: refetchNotRated } = notRated;
-  const { refetch: refetchSeverityCounts } = severityCountsQuery;
+  const { refetch: refetchClosed } = closed;
+  const { refetch: refetchSectionCounts } = sectionCountsQuery;
 
   // An investigation leaving the in-progress section landed in one of the others, so the rest are
   // stale the moment one finishes. Two signals are needed to see that: a loaded id disappearing
@@ -156,7 +216,8 @@ export const useInvestigationSections = ({
     refetchMedium();
     refetchLow();
     refetchNotRated();
-    void refetchSeverityCounts();
+    refetchClosed();
+    void refetchSectionCounts();
   }, [
     query,
     inProgress.total,
@@ -167,32 +228,53 @@ export const useInvestigationSections = ({
     refetchMedium,
     refetchLow,
     refetchNotRated,
-    refetchSeverityCounts,
+    refetchClosed,
+    refetchSectionCounts,
   ]);
 
   const sections = useMemo(
-    () => [
-      toSectionState({ id: 'in-progress', queryResult: inProgress }),
-      toSectionState({ id: 'critical', queryResult: critical }),
-      toSectionState({ id: 'high', queryResult: high }),
-      toSectionState({ id: 'medium', queryResult: medium }),
-      toSectionState({ id: 'low', queryResult: low }),
-      toSectionState({ id: 'not-rated', queryResult: notRated }),
-    ],
-    [inProgress, critical, high, medium, low, notRated]
+    () =>
+      (
+        [
+          ['in-progress', inProgress],
+          ['critical', critical],
+          ['high', high],
+          ['medium', medium],
+          ['low', low],
+          ['not-rated', notRated],
+          ['closed', closed],
+        ] as const
+      ).map(([id, queryResult]) =>
+        toSectionState({
+          id,
+          queryResult,
+          query,
+          counts: sectionCounts,
+          unsearchedInProgressTotal: unsearchedInProgress.total,
+        })
+      ),
+    [
+      inProgress,
+      critical,
+      high,
+      medium,
+      low,
+      notRated,
+      closed,
+      query,
+      sectionCounts,
+      unsearchedInProgress.total,
+    ]
   );
 
-  const severityCounts = useMemo(
-    () => toSeverityCounts(severityCountsQuery.data),
-    [severityCountsQuery.data]
-  );
+  const severityCounts = useMemo(() => toSeverityCounts(sectionCounts), [sectionCounts]);
 
   const refetchAll = useCallback(() => {
     for (const section of sections) {
       section.refetch();
     }
-    void refetchSeverityCounts();
-  }, [sections, refetchSeverityCounts]);
+    void refetchSectionCounts();
+  }, [sections, refetchSectionCounts]);
 
   return {
     sections,

@@ -20,13 +20,20 @@ export {
   AB_CONVERSATION_BY_ID_PATH,
   INVESTIGATIONS_PATH,
   INVESTIGATION_BY_ID_PATH,
-  INVESTIGATIONS_SEVERITY_COUNTS_PATH,
+  INVESTIGATIONS_SECTION_COUNTS_PATH,
   IMPACT_PATH,
   INVESTIGATIONS_PRIVILEGES_PATH,
   NO_INVESTIGATIONS_ROLE,
   INVESTIGATIONS_READ_ROLE,
 } from './constants';
-export { expectCreated, deleteConversations, spaceUrl, seedInvestigation } from './helpers';
-export type { SeedInvestigationOptions } from './helpers';
+export {
+  expectCreated,
+  deleteConversations,
+  spaceUrl,
+  seedInvestigation,
+  getSectionCounts,
+  sectionCountsOf,
+} from './helpers';
+export type { SeedInvestigationOptions, SectionCountsBody } from './helpers';
 export { seedSubject, cleanupSubjects } from './subject_index';
 export type { SeedSubjectOptions } from './subject_index';

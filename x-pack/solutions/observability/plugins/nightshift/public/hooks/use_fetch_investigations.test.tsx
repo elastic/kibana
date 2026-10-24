@@ -90,6 +90,27 @@ describe('useFetchInvestigations', () => {
     );
   });
 
+  it('filters a section by status, so closed investigations get their own section', async () => {
+    renderHook(() => useFetchInvestigations({ inProgress: false, status: 'closed' }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() =>
+      expect(httpGet).toHaveBeenCalledWith(
+        '/internal/investigations/investigations',
+        expect.objectContaining({
+          query: {
+            sort_field: 'created_at',
+            sort_order: 'desc',
+            page: 1,
+            per_page: 10,
+            status: 'closed',
+          },
+        })
+      )
+    );
+  });
+
   it('keeps running investigations in the other sections, so none becomes unreachable', async () => {
     const { result } = renderHook(
       () => useFetchInvestigations({ inProgress: false, severities: ['high'] }),

@@ -52,6 +52,7 @@ import { deleteInvestigationDataAcrossSpaces } from './investigations/services/d
 import { countPendingProposals } from './investigations/services/count_pending_proposals';
 import { InProgressResolver } from './investigations/services/in_progress';
 import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
+import { InvestigationSectionCountsService } from './investigations/services/section_counts_service';
 import { createInvestigationsClient } from './investigations/services/investigations_client';
 import { createConversationReadCheck } from './investigation_attachments';
 import { createUserResolver } from './services/resolve_user';
@@ -82,6 +83,7 @@ export class AgenticInvestigationsPlugin
   private assignmentsService?: AssignmentsService;
   private investigationStatusService?: InvestigationStatusService;
   private investigationsQueryService?: InvestigationsQueryService;
+  private sectionCountsService?: InvestigationSectionCountsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveUser;
   private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
@@ -202,6 +204,7 @@ export class AgenticInvestigationsPlugin
       getAssignmentsService: () => this.requireAssignmentsService(),
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
       getInvestigationsQueryService: () => this.requireInvestigationsQueryService(),
+      getSectionCountsService: () => this.requireSectionCountsService(),
       privileges: createInvestigationsPrivilegesReader({
         getSecurity: async () => (await coreSetup.getStartServices())[1].security,
         escalationsEnabled: this.escalationsEnabled,
@@ -274,6 +277,20 @@ export class AgenticInvestigationsPlugin
         getProposals: () => plugins.proposals,
         logger: this.logger,
       }),
+      logger: this.logger,
+    });
+
+    this.sectionCountsService = new InvestigationSectionCountsService({
+      getInternalEsClient: () => esClient,
+      getScopedEsClient: (request) =>
+        coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+      getSecurity: () => coreStart.security,
+      getAccessibleAgentIds: async (request) => {
+        const registry = await plugins.agentBuilder.agents.getRegistry({ request });
+        const agents = await registry.list({ includeHidden: true });
+        return agents.map(({ id }) => id);
+      },
+      getSpaceId: (request) => this.getSpaceId(request),
       logger: this.logger,
     });
 
@@ -416,6 +433,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.investigationsQueryService;
+  }
+
+  private requireSectionCountsService(): InvestigationSectionCountsService {
+    if (!this.sectionCountsService) {
+      throw new Error(
+        'Section counts service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.sectionCountsService;
   }
 
   private requireEscalationsService(): EscalationsService {

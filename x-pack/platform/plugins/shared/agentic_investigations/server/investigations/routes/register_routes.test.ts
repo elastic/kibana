@@ -14,7 +14,7 @@ import {
   INVESTIGATION_SEVERITY_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
-  INVESTIGATIONS_SEVERITY_COUNTS_URL,
+  INVESTIGATIONS_SECTION_COUNTS_URL,
 } from '../../../common/investigations/constants';
 import { WrongTemplateError } from '../../assignments/assignments_service';
 import type { AssignmentsService } from '../../assignments/assignments_service';
@@ -24,6 +24,7 @@ import {
   INVESTIGATIONS_API_PRIVILEGE_READ,
 } from '../constants';
 import type { InvestigationsQueryService } from '../services/investigations_query_service';
+import type { InvestigationSectionCountsService } from '../services/section_counts_service';
 import type { InvestigationRouteDependencies } from '../types';
 import { registerInvestigationRoutes } from './register_routes';
 
@@ -241,8 +242,10 @@ const READ_AUTHZ = [
 
 const register = ({
   queryService = {},
+  sectionCountsService = {},
 }: {
   queryService?: Partial<Record<keyof InvestigationsQueryService, jest.Mock>>;
+  sectionCountsService?: Partial<Record<keyof InvestigationSectionCountsService, jest.Mock>>;
 } = {}) => {
   const router = httpServiceMock.createRouter();
   const routes: QueryRoute[] = [];
@@ -257,6 +260,8 @@ const register = ({
     getAssignmentsService: jest.fn(),
     getInvestigationStatusService: jest.fn(),
     getInvestigationsQueryService: () => queryService as unknown as InvestigationsQueryService,
+    getSectionCountsService: () =>
+      sectionCountsService as unknown as InvestigationSectionCountsService,
     privileges: { getPrivileges: jest.fn() },
   } as InvestigationRouteDependencies);
 
@@ -281,17 +286,32 @@ describe('investigation query routes', () => {
       find('get', INVESTIGATIONS_INTERNAL_URL).config.security?.authz?.requiredPrivileges
     ).toEqual(READ_AUTHZ);
     expect(
-      find('get', INVESTIGATIONS_SEVERITY_COUNTS_URL).config.security?.authz?.requiredPrivileges
+      find('get', INVESTIGATIONS_SECTION_COUNTS_URL).config.security?.authz?.requiredPrivileges
     ).toEqual(READ_AUTHZ);
   });
 
-  it('registers the severity counts before the by-id route', () => {
+  it('registers the section counts before the by-id route', () => {
     const { routes } = register();
     const paths = routes.map(({ config }) => config.path);
 
-    expect(paths.indexOf(INVESTIGATIONS_SEVERITY_COUNTS_URL)).toBeLessThan(
+    expect(paths.indexOf(INVESTIGATIONS_SECTION_COUNTS_URL)).toBeLessThan(
       paths.indexOf(INVESTIGATION_BY_ID_URL)
     );
+  });
+
+  it('passes the section counts query to the service', async () => {
+    const count = jest.fn().mockResolvedValue({});
+    const { find } = register({ sectionCountsService: { count } });
+    const response = httpServerMock.createResponseFactory();
+
+    await find('get', INVESTIGATIONS_SECTION_COUNTS_URL).handler(
+      {},
+      httpServerMock.createKibanaRequest({ query: { query: 'gold token' } }),
+      response
+    );
+
+    expect(count).toHaveBeenCalledWith(expect.anything(), { query: 'gold token' });
+    expect(response.ok).toHaveBeenCalledWith({ body: {} });
   });
 
   it('returns the investigation', async () => {
@@ -328,10 +348,9 @@ describe('investigation query routes', () => {
     }
   });
 
-  it('passes the validated list query and the severity count filters to the service', async () => {
+  it('passes the validated list query to the service', async () => {
     const list = jest.fn().mockResolvedValue({ results: [] });
-    const severityCounts = jest.fn().mockResolvedValue({});
-    const { find } = register({ queryService: { list, severityCounts } });
+    const { find } = register({ queryService: { list } });
     const query = { status: ['open'], page: 1, per_page: 20 };
 
     await find('get', INVESTIGATIONS_INTERNAL_URL).handler(
@@ -339,14 +358,8 @@ describe('investigation query routes', () => {
       httpServerMock.createKibanaRequest({ query }),
       httpServerMock.createResponseFactory()
     );
-    await find('get', INVESTIGATIONS_SEVERITY_COUNTS_URL).handler(
-      {},
-      httpServerMock.createKibanaRequest({ query: { severity: ['high'] } }),
-      httpServerMock.createResponseFactory()
-    );
 
     expect(list).toHaveBeenCalledWith(expect.anything(), query);
-    expect(severityCounts).toHaveBeenCalledWith(expect.anything(), { severity: ['high'] });
   });
 
   it('maps an invalid read to a 400', async () => {

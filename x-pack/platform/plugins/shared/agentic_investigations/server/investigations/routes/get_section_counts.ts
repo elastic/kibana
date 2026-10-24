@@ -7,34 +7,36 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common/constants';
-import { INVESTIGATIONS_SEVERITY_COUNTS_URL } from '../../../common/investigations/constants';
-import { investigationFiltersSchema } from '../../../common/investigations/investigation';
+import { INVESTIGATIONS_SECTION_COUNTS_URL } from '../../../common/investigations/constants';
+import { investigationSectionCountsQuerySchema } from '../../../common/investigations/investigation';
 import type { InvestigationRouteDependencies } from '../types';
 import { handleInvestigationRouteError } from './handle_route_error';
 import { INVESTIGATIONS_READ_AUTHZ } from './read_privileges';
 
-export const registerGetSeverityCountsRoute = ({
+export const registerGetSectionCountsRoute = ({
   router,
   logger,
-  getInvestigationsQueryService,
+  getSectionCountsService,
 }: InvestigationRouteDependencies) => {
   router.versioned
     .get({
-      path: INVESTIGATIONS_SEVERITY_COUNTS_URL,
+      path: INVESTIGATIONS_SECTION_COUNTS_URL,
       access: 'internal',
       security: INVESTIGATIONS_READ_AUTHZ,
-      summary: 'Count investigations per severity',
+      summary: 'Count investigations per status and severity, with and without a text query',
     })
     .addVersion(
       {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         validate: {
-          request: { query: buildRouteValidationWithZod(investigationFiltersSchema) },
+          request: {
+            query: buildRouteValidationWithZod(investigationSectionCountsQuerySchema),
+          },
         },
       },
       async (_context, request, response) => {
         try {
-          const body = await getInvestigationsQueryService().severityCounts(request, request.query);
+          const body = await getSectionCountsService().count(request, request.query);
           return response.ok({ body });
         } catch (error) {
           return handleInvestigationRouteError(error, response, logger);

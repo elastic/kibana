@@ -7,11 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import {
-  investigationFiltersSchema,
   listInvestigationsQuerySchema,
   type Investigation,
-  type InvestigationFiltersInput,
-  type InvestigationSeverityCounts,
   type InvestigationSummary,
   type ListInvestigationsQueryInput,
   type ListInvestigationsResponse,
@@ -41,7 +38,6 @@ export interface DeleteInvestigationDataResult {
 export interface InvestigationsClient {
   get: (id: string) => Promise<Investigation>;
   list: (query?: ListInvestigationsQueryInput) => Promise<ListInvestigationsResponse>;
-  severityCounts: (filters?: InvestigationFiltersInput) => Promise<InvestigationSeverityCounts>;
   /** Open investigations holding any of the subjects, most recently updated first. */
   findOpenBySubjects: (subjects: InvestigationSubjectKey[]) => Promise<InvestigationSummary[]>;
   /**
@@ -82,13 +78,6 @@ export const createInvestigationsClient =
       return getQueryService().list(
         request,
         parseOrThrow(listInvestigationsQuerySchema.safeParse(query))
-      );
-    },
-    severityCounts: async (filters = {}) => {
-      await privileges.assertCanRead(request);
-      return getQueryService().severityCounts(
-        request,
-        parseOrThrow(investigationFiltersSchema.safeParse(filters))
       );
     },
     findOpenBySubjects: async (subjects) => {

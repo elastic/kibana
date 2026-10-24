@@ -789,44 +789,6 @@ describe('InvestigationsQueryService', () => {
     });
   });
 
-  describe('severityCounts', () => {
-    it('counts the filtered investigations per severity, zero-filled', async () => {
-      const { service, inProgress } = setup({
-        searchResults: [
-          conversation('a', { metadata: { severity: 'high' } }),
-          conversation('b', { metadata: { severity: 'high' } }),
-          conversation('c', { metadata: { severity: 'low' } }),
-          conversation('d'),
-        ],
-      });
-
-      await expect(service.severityCounts(request, {})).resolves.toEqual({
-        low: 1,
-        medium: 0,
-        high: 2,
-        critical: 0,
-      });
-      expect(inProgress.findInProgressIds).not.toHaveBeenCalled();
-    });
-
-    it('leaves the investigations in progress out of the counts for in_progress=false', async () => {
-      const { service } = setup({
-        searchResults: [
-          conversation('busy', { metadata: { severity: 'high' } }),
-          conversation('idle', { metadata: { severity: 'high' } }),
-        ],
-        inProgressIds: ['busy'],
-      });
-
-      await expect(service.severityCounts(request, { in_progress: false })).resolves.toEqual({
-        low: 0,
-        medium: 0,
-        high: 1,
-        critical: 0,
-      });
-    });
-  });
-
   describe('findOpenBySubjects', () => {
     it('returns open investigations holding a visible matching subject, most recently updated first', async () => {
       const { service, subjectsService } = setup({

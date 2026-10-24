@@ -39,7 +39,7 @@ export const AB_CONVERSATION_BY_ID_PATH = (id: string) => `api/agent_builder/con
 /** Investigations query API, and the impact route that seeds side-index documents. */
 export const INVESTIGATIONS_PATH = 'internal/investigations/investigations';
 export const INVESTIGATION_BY_ID_PATH = (id: string) => `${INVESTIGATIONS_PATH}/${id}`;
-export const INVESTIGATIONS_SEVERITY_COUNTS_PATH = `${INVESTIGATIONS_PATH}/_severity_counts`;
+export const INVESTIGATIONS_SECTION_COUNTS_PATH = `${INVESTIGATIONS_PATH}/_section_counts`;
 export const IMPACT_PATH = 'internal/investigations/impact';
 /** The caller's investigation API privileges. */
 export const INVESTIGATIONS_PRIVILEGES_PATH = 'internal/investigations/_privileges';
