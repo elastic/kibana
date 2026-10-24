@@ -23,8 +23,17 @@ const buildAnalysis = (
 });
 
 describe('calculateGroundednessScore', () => {
-  it('returns 0 when analysis is empty', () => {
-    expect(calculateGroundednessScore({ summary_verdict: 'GROUNDED', analysis: [] })).toBe(0);
+  it('returns null (not 0) when the judge returned an empty claim analysis', () => {
+    // Regression: 102 GROUNDED cells scored 0.0 in one eval run because the judge
+    // answered without a per-claim analysis and the "no claims" fallback was
+    // reported as a real judgement. An empty analysis is unscoreable, not bad.
+    expect(calculateGroundednessScore({ summary_verdict: 'GROUNDED', analysis: [] })).toBeNull();
+  });
+
+  it('returns null when the analysis is absent', () => {
+    expect(
+      calculateGroundednessScore({ summary_verdict: 'GROUNDED' } as GroundednessAnalysis)
+    ).toBeNull();
   });
 
   it('returns 1 when all claims are FULLY_SUPPORTED', () => {
@@ -78,7 +87,7 @@ describe('calculateGroundednessScore', () => {
     const notFound = calculateGroundednessScore(
       buildAnalysis([{ verdict: 'NOT_FOUND', centrality: 'central' }])
     );
-    expect(ungrounded).toBeGreaterThan(notFound);
+    expect(ungrounded).toBeGreaterThan(notFound as number);
   });
 
   it('computes geometric mean across mixed verdicts', () => {

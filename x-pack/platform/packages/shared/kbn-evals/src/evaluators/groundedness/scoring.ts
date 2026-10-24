@@ -35,11 +35,18 @@ const CLAIM_FACTUAL_SCORE_MAP = {
  * This function computes the geometric mean of the scores assigned to each claim,
  * ensuring that a single critically incorrect claim (such as a contradicted central claim
  * with a score of 0.0) will result in an overall groundedness score of 0.0.
+ *
+ * An absent or empty claim analysis returns `null`, not `0.0`: the judge produced no
+ * per-claim evidence, so there is nothing to score. Reporting that as 0.0 records an
+ * unjudged cell as a maximally ungrounded answer, which is indistinguishable from a
+ * real 0.0 judgement and corrupts suite means. Callers treat `null` as "unavailable".
  */
-export function calculateGroundednessScore(groundednessAnalysis: GroundednessAnalysis): number {
+export function calculateGroundednessScore(
+  groundednessAnalysis: GroundednessAnalysis
+): number | null {
   const analysis = groundednessAnalysis?.analysis;
   if (!analysis || !Array.isArray(analysis) || analysis.length === 0) {
-    return 0.0;
+    return null;
   }
 
   let productOfScores = 1.0;
