@@ -6,9 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiDescriptionList, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiDescriptionList,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import type { NarrowDateRange, Anomaly } from '../types';
 import { Score } from './score';
 import { createDescriptionList } from './create_description_list';
@@ -23,13 +28,6 @@ interface Args {
   jobName: string;
 }
 
-const Icon = styled(EuiIcon)`
-  vertical-align: text-bottom;
-  cursor: pointer;
-`;
-
-Icon.displayName = 'Icon';
-
 export const AnomalyScoreComponent = ({
   startDate,
   endDate,
@@ -40,6 +38,13 @@ export const AnomalyScoreComponent = ({
   jobName,
 }: Args): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
+  const buttonAriaLabel = i18n.translate(
+    'xpack.securitySolution.anomalyScore.popoverButton.ariaLabel',
+    {
+      defaultMessage: 'View anomaly score details for {jobName}',
+      values: { jobName },
+    }
+  );
   return (
     <>
       <EuiFlexItem grow={false} data-test-subj="anomaly-score">
@@ -51,11 +56,20 @@ export const AnomalyScoreComponent = ({
             defaultMessage: 'Anomaly score details',
           })}
           data-test-subj="anomaly-score-popover"
-          id="anomaly-score-popover"
           isOpen={isOpen}
-          onClick={() => setIsOpen(!isOpen)}
-          closePopover={() => setIsOpen(!isOpen)}
-          button={<Icon type="info" />}
+          closePopover={() => setIsOpen(false)}
+          button={
+            <EuiToolTip content={buttonAriaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="anomaly-score-popover-button"
+                iconType="info"
+                color="text"
+                size="xs"
+                aria-label={buttonAriaLabel}
+                onClick={() => setIsOpen((prevIsOpen) => !prevIsOpen)}
+              />
+            </EuiToolTip>
+          }
           repositionOnScroll
         >
           <EuiDescriptionList
