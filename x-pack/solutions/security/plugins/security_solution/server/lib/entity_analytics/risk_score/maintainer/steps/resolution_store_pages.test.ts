@@ -372,7 +372,7 @@ describe('sampleResolutionPageBounds', () => {
       uppers: ['user:t2'],
       aliases: 4,
       probability: 0.49,
-      sampledAliases: 3,
+      estimatedAliases: 3,
       sampledTargets: 3,
       countTookMs: 4,
       sampleTookMs: 6,

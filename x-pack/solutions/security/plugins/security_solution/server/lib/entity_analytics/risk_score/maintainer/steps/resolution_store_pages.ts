@@ -311,8 +311,8 @@ export interface SampledResolutionBounds {
   uppers: string[];
   aliases: number;
   probability: number;
-  /** Aliases the sample picked, and the targets they belong to. */
-  sampledAliases: number;
+  /** The alias count the sample implies (random_sampler scales doc counts by 1/p), and the targets it picked. */
+  estimatedAliases: number;
   sampledTargets: number;
   countTookMs: number;
   sampleTookMs: number;
@@ -335,8 +335,8 @@ interface ResolutionSampleAggregations {
 }
 
 /**
- * Page upper bounds from the targets the sample picked, in order, each weighted by how many of its
- * aliases were picked. A bound falls wherever the running weight passes the next 1/pages of the
+ * Page upper bounds from the targets the sample picked, in order, each weighted by its sampled
+ * aliases (random_sampler reports them scaled by 1/p). A bound falls wherever the running weight passes the next 1/pages of the
  * total, so pages hold about the same number of aliases however large the groups are; only the
  * weights' proportions matter. A bound is always a target, so a group never spans two pages.
  */
@@ -422,7 +422,7 @@ export const sampleResolutionPageBounds = async ({
     uppers: resolutionBoundsFromSample(sample, aliases, config.targetPageSize),
     aliases,
     probability,
-    sampledAliases: sample.reduce((sum, { aliases: weight }) => sum + weight, 0),
+    estimatedAliases: sample.reduce((sum, { aliases: weight }) => sum + weight, 0),
     sampledTargets: sample.length,
     countTookMs: count.took,
     sampleTookMs,
@@ -524,7 +524,9 @@ export const discoverSampledResolutionPages = async function* ({
   );
   logger.info(
     `[resolution] sampled page bounds: aliases=${sample.aliases}, ` +
-      `probability=${sample.probability.toFixed(5)}, sampled_aliases=${sample.sampledAliases}, ` +
+      `probability=${sample.probability.toFixed(5)}, estimated_aliases=${
+        sample.estimatedAliases
+      }, ` +
       `sampled_targets=${sample.sampledTargets}, pages=${sample.uppers.length + 1}, ` +
       `count_took=${sample.countTookMs}ms, sample_took=${sample.sampleTookMs}ms in ${sample.sampleRequests} requests`
   );
