@@ -92,6 +92,7 @@ import {
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
+import { ResultsErrorCallout } from './results_error_callout';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 // export needs for testing
@@ -591,10 +592,22 @@ function DiscoverDocumentsComponent({
     renderViewModeToggle,
   ]);
 
+  if (documentState.fetchStatus === FetchStatus.ERROR && documentState.error) {
+    return (
+      <div css={styles.dscDocumentsError} data-test-subj="discoverDocumentsError">
+        <ResultsErrorCallout error={documentState.error} />
+      </div>
+    );
+  }
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
-      <div className="dscDocuments__loading" css={styles.dscDocumentsLoading}>
+      <div
+        className="dscDocuments__loading"
+        css={styles.dscDocumentsLoading}
+        data-test-subj="discoverDocumentsLoading"
+      >
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />
@@ -714,6 +727,14 @@ const componentStyles = {
     textAlign: 'center',
     height: '100%',
     width: '100%',
+  }),
+  dscDocumentsError: css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    height: '100%',
+    width: '100%',
+    overflow: 'auto',
   }),
   dataTable: css({
     width: '100%',
