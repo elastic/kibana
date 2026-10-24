@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-gen-ai-product-docs
-  description: Runs the GenAI product docs pipeline every Friday night. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
+  description: Builds and publishes serverless (latest) GenAI product docs artifacts for Jina and ELSER on EIS every Friday night. The current stack version is built every two weeks by gen-ai-stack-version-docs. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
   links:
     - url: 'https://buildkite.com/elastic/kibana-gen-ai-product-docs'
       title: Pipeline link
@@ -15,7 +15,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / gen-ai-product-docs
-      description: Runs the GenAI product docs pipeline every Friday night. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
+      description: Builds and publishes serverless (latest) GenAI product docs artifacts for Jina and ELSER on EIS every Friday night. The current stack version is built every two weeks by gen-ai-stack-version-docs. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#search-ml-ux-alerts'
@@ -52,7 +52,7 @@ spec:
       schedules:
         Friday night build:
           cronline: 0 23 * * 5 America/New_York
-          message: Friday night GenAI product docs build
+          message: Friday night serverless GenAI product docs build
           branch: main
       tags:
         - kibana

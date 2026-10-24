@@ -1,0 +1,114 @@
+env:
+  FTR_GEN_AI: '1'
+  FTR_EIS_CCM: '1'
+  # The FTR suite reads this Kibana's version from GET /api/status (9.6.0 -> 9.6).
+  # Kibana itself is the recent kibana-on-merge distributable, not a fresh compile.
+  STACK_DOCS_VERSION: 'current'
+steps:
+  - label: '👨‍🔧 Pre-Build'
+    command: .buildkite/scripts/lifecycle/pre_build.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+
+  - wait
+
+  # Reuse a recent kibana-on-merge distributable (≤36h). build_kibana.sh
+  # short-circuits when one is found. Shared with gen_ai_product_docs.yml.
+  # Force a rebuild with KIBANA_REUSE_BUILD=false, or pin KIBANA_BUILD_ID.
+  - label: '🧑‍🏭 Build Kibana Distribution'
+    command: |
+      set -euo pipefail
+      source .buildkite/scripts/steps/gen_ai/resolve_reusable_kibana_build.sh
+      .buildkite/scripts/steps/build_kibana.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+    key: build
+
+  - wait
+
+  # Current stack version artifacts (Jina + ELSER on EIS) and the ES|QL docs
+  # sync. Distinct config paths so ftr_configs.sh does not skip the second model.
+  - label: AppEx AI-Infra stack version product docs artifacts (Jina)
+    key: ai-infra-stack-version-docs-jina
+    command: bash .buildkite/scripts/steps/gen_ai/run_ai_infra_inference_api_ftr.sh
+    env:
+      FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/generate_jina_artifacts.config.ts'
+      FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'
+      FTR_GEN_AI: '1'
+      FTR_EIS_CCM: '1'
+      INFERENCE_ID: '.jina-embeddings-v5-text-small'
+      OPENAPI_INFERENCE_ID: '.jina-embeddings-v5-text-small'
+      FTR_EXTRA_ARGS: '--writeLogsToPath=data/ftr_servers_logs'
+    timeout_in_minutes: 180
+    parallelism: 1
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      diskSizeGb: 180
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
+          limit: 1
+
+  - label: AppEx AI-Infra stack version product docs artifacts (ELSER on EIS)
+    key: ai-infra-stack-version-docs-elser-eis
+    command: bash .buildkite/scripts/steps/gen_ai/run_ai_infra_inference_api_ftr.sh
+    env:
+      FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/generate_elser_eis_artifacts.config.ts'
+      FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'
+      FTR_GEN_AI: '1'
+      FTR_EIS_CCM: '1'
+      INFERENCE_ID: '.elser-2-elastic'
+      OPENAPI_INFERENCE_ID: '.elser-2-elastic'
+      FTR_EXTRA_ARGS: '--writeLogsToPath=data/ftr_servers_logs'
+    timeout_in_minutes: 180
+    parallelism: 1
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      diskSizeGb: 180
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
+          limit: 1
+
+  - label: GenAI ES|QL docs sync
+    key: ai-infra-gen-ai-esql-docs
+    command: bash .buildkite/scripts/steps/gen_ai/run_esql_docs_sync_ftr.sh
+    env:
+      FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/generate_esql_docs.config.ts'
+      FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-esql-docs'
+      FTR_GEN_AI: '1'
+      FTR_EIS_CCM: '1'
+      ESQL_DOCS_INFERENCE_ID: '.openai-gpt-5.5-chat_completion'
+      FTR_EXTRA_ARGS: '--writeLogsToPath=data/ftr_servers_logs'
+    timeout_in_minutes: 180
+    parallelism: 1
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
+          limit: 1
