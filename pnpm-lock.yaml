@@ -2639,6 +2639,9 @@ importers:
       '@kbn/logging':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-logging
+      '@kbn/logging-ecs':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-logging-ecs
       '@kbn/logging-mocks':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-logging-mocks
@@ -7703,6 +7706,8 @@ importers:
   src/platform/packages/private/kbn-language-documentation: {}
 
   src/platform/packages/private/kbn-lens-formula-docs: {}
+
+  src/platform/packages/private/kbn-logging-ecs: {}
 
   src/platform/packages/private/kbn-managed-content-badge: {}
 
