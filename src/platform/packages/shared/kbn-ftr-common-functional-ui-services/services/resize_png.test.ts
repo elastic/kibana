@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mkdtempSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
 import { PNG } from 'pngjs';
-import { ToolingLog } from '@kbn/tooling-log';
-import { comparePngs, resizePng } from './compare_pngs';
+import { resizePng } from './resize_png';
 
 type Rgba = [number, number, number, number];
 
@@ -71,26 +67,5 @@ describe('resizePng', () => {
     expect(out.height).toBe(5);
     expect(pixelAt(out, 0, 0)).toEqual(RED);
     expect(pixelAt(out, 6, 4)).toEqual(BLUE);
-  });
-});
-
-describe('comparePngs', () => {
-  const log = new ToolingLog();
-  const sessionDirectory = mkdtempSync(join(tmpdir(), 'compare-pngs-'));
-  const diffPath = join(sessionDirectory, 'diff.png');
-
-  it('returns 0 for identical images of different sizes', async () => {
-    const session = { path: 'session.png', buffer: PNG.sync.write(makePng(4, 4, () => RED)) };
-    const baseline = { path: 'baseline.png', buffer: PNG.sync.write(makePng(8, 8, () => RED)) };
-    expect(await comparePngs(session, baseline, diffPath, sessionDirectory, log)).toBe(0);
-  });
-
-  it('returns the mismatched pixel ratio', async () => {
-    const session = { path: 'session.png', buffer: PNG.sync.write(makePng(4, 4, () => RED)) };
-    const baseline = {
-      path: 'baseline.png',
-      buffer: PNG.sync.write(makePng(4, 4, (x, y) => (x === 0 && y === 0 ? BLUE : RED))),
-    };
-    expect(await comparePngs(session, baseline, diffPath, sessionDirectory, log)).toBe(1 / 16);
   });
 });
