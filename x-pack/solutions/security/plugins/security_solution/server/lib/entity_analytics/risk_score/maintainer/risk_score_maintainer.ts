@@ -599,6 +599,7 @@ const executeEntityTypeRun = async ({
           entityStoreRefresh: false,
           skipUnchangedStoreWrites: true,
           entityStoreWriteChunks: 4,
+          riskIndexWriteChunks: 4,
           pagesInFlight: 2,
           // Test setting: page bounds from one sample. A page that reaches the 10k row limit is only
           // found after scoring, so pages aim at 8k, where that practically never happens.
@@ -684,6 +685,7 @@ const executeEntityTypeRun = async ({
             alertFilters,
             entityStoreRefresh: false,
             entityStoreWriteChunks: 4,
+            riskIndexWriteChunks: 4,
             pagesInFlight: 2,
             joinEntityStore: true,
             preAggregateByEntity: true,

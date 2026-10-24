@@ -84,6 +84,8 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   skipUnchangedStoreWrites?: boolean;
   /** Splits each page's entity store write into this many bulk requests, sent at the same time. */
   entityStoreWriteChunks?: number;
+  /** Splits each page's risk index write into this many bulk requests, sent at the same time. */
+  riskIndexWriteChunks?: number;
   /** How many pages are scored and written at the same time. */
   pagesInFlight?: number;
   /** When true, populate `scores` in the summary. Omit for full-population runs. */
@@ -393,6 +395,7 @@ export const scoreBaseEntities = async ({
   entityStoreRefresh,
   skipUnchangedStoreWrites = false,
   entityStoreWriteChunks,
+  riskIndexWriteChunks,
   pagesInFlight = 1,
   collectScores,
   ...params
@@ -483,6 +486,7 @@ export const scoreBaseEntities = async ({
       logger: params.logger,
       refresh,
       timer,
+      parallelChunks: riskIndexWriteChunks,
     });
     scoresWrittenRiskIndex += riskIndexDocsWritten;
     const { docsWritten, errorsCount } = await timer.time(

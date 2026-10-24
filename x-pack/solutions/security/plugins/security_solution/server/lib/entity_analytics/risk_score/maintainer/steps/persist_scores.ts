@@ -20,16 +20,36 @@ export const persistScoresToRiskIndex = async ({
   logger,
   refresh,
   timer,
+  parallelChunks = 1,
 }: {
-  writer: RiskEngineDataWriter;
+  writer: Pick<RiskEngineDataWriter, 'bulk'>;
   entityType: EntityType;
   scores: EntityRiskScoreRecord[];
   logger: ScopedLogger;
   refresh?: Parameters<RiskEngineDataWriter['bulk']>[0]['refresh'];
-  /** Records the write as the page's `riskWrite` step, with the bulk response's `took`. */
+  /** Records the write as the page's `riskWrite` step, with the bulk responses' `took`. */
   timer?: PageStepRecorder;
+  /** Splits the write into this many bulk requests, sent at the same time. */
+  parallelChunks?: number;
 }): Promise<number> => {
-  const write = () => writer.bulk({ [entityType]: scores, refresh });
+  const chunkSize = Math.max(1, Math.ceil(scores.length / Math.max(1, parallelChunks)));
+  const chunks =
+    scores.length <= chunkSize
+      ? [scores]
+      : Array.from({ length: Math.ceil(scores.length / chunkSize) }, (_, index) =>
+          scores.slice(index * chunkSize, (index + 1) * chunkSize)
+        );
+  // Elasticsearch's own time, summed over the chunks.
+  const write = async () => {
+    const responses = await Promise.all(
+      chunks.map((chunk) => writer.bulk({ [entityType]: chunk, refresh }))
+    );
+    return {
+      errors: responses.flatMap((response) => response.errors),
+      docs_written: responses.reduce((sum, response) => sum + response.docs_written, 0),
+      took: responses.reduce((sum, response) => sum + response.took, 0),
+    };
+  };
   const bulkResponse = timer
     ? await timer.time('riskWrite', write, (response) => response.took)
     : await write();
