@@ -137,6 +137,29 @@ describe('getAgentsRoute', () => {
     });
   });
 
+  it('includes osquery package policies past the first page', async () => {
+    mockPackagePolicyService.list
+      .mockResolvedValueOnce({
+        items: [{ package: { version: '1.0.0' }, policy_ids: ['policy-1'] }],
+        total: 2,
+      })
+      .mockResolvedValueOnce({
+        items: [{ package: { version: '1.0.0' }, policy_ids: ['policy-2'] }],
+        total: 2,
+      });
+    mockAgentPolicyService.getByIds.mockResolvedValue([
+      { id: 'policy-1', name: 'One' },
+      { id: 'policy-2', name: 'Two' },
+    ]);
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler({} as never, createMockRequest('') as never, mockResponse);
+
+    const esQuery = receivedEsQuery();
+    expect(mockPackagePolicyService.list).toHaveBeenCalledTimes(2);
+    expect(esQuery).toContain('policy-1');
+    expect(esQuery).toContain('policy-2');
+  });
+
   it('excludes pre-0.6.0 package versions from the policy scope', async () => {
     mockPackagePolicyService.list.mockResolvedValue({
       items: [

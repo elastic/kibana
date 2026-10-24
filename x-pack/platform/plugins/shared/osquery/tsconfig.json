@@ -12,6 +12,7 @@
     "scripts/**/*.json",
     "server/**/*",
     "test/scout/**/*",
+    "test/scout_osquery_workflows/**/*",
     "../../../../../typings/**/*",
     // ECS and Osquery schema files (JSON not matched by **/* globs)
     "common/schemas/*/*.json"
@@ -77,6 +78,10 @@
     "@kbn/openapi-bundler",
     "@kbn/repo-info",
     "@kbn/zod",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/crypto",
+    "@kbn/test-es-server",
     "@kbn/core-lifecycle-server",
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",

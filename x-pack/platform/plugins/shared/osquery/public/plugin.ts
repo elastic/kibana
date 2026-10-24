@@ -16,6 +16,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { registerOsqueryWorkflowSteps } from './workflows/register';
 import { useAllLiveQueries } from './actions/use_all_live_queries';
 import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
 import { useFetchStatus } from './fleet_integration/use_fetch_status';
@@ -112,6 +113,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           }),
         });
       });
+
+    registerOsqueryWorkflowSteps({
+      experimentalFeatures: this.experimentalFeatures,
+      workflowsExtensions: plugins.workflowsExtensions,
+      http: core.http,
+    });
 
     // Return methods that should be available to other plugins
     return {};

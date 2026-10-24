@@ -32,7 +32,11 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       path: '/internal/osquery/fleet_wrapper/agents',
       security: {
         authz: {
-          requiredPrivileges: [`${PLUGIN_ID}-read`],
+          // The agent picker uses Osquery Read. Workflow steps that target by policy or
+          // platform run as `run_saved_queries`, which does not include that privilege.
+          requiredPrivileges: [
+            { anyRequired: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-runSavedQueries`] },
+          ],
         },
       },
     })
@@ -67,11 +71,28 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] as PackagePolicy[] };
+        // Page through every osquery package policy. One page of 1000 is smaller than the
+        // set `parseAgentSelection` dispatches, so the workflow step's agent ceiling would
+        // pass and the live query would still fan out past it.
+        const packagePolicies: PackagePolicy[] = [];
+        const packagePolicyKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`;
+        let packagePolicyPage = 1;
+        let packagePolicyTotal = Number.POSITIVE_INFINITY;
+        while (packagePolicies.length < packagePolicyTotal) {
+          const listed = await packagePolicyService?.list(spaceScopedClient, {
+            kuery: packagePolicyKuery,
+            perPage: 1000,
+            page: packagePolicyPage,
+          });
+          const items = listed?.items ?? [];
+          packagePolicyTotal = listed?.total ?? packagePolicies.length + items.length;
+          packagePolicies.push(...items);
+          packagePolicyPage += 1;
+          if (items.length === 0) {
+            break;
+          }
+        }
+
         const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
           satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
         );

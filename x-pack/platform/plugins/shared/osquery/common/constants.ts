@@ -27,6 +27,13 @@ export type PlatformId = (typeof PLATFORM_IDS)[number];
 
 export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
 
+/**
+ * Workflow steps send this on `POST /api/osquery/live_queries`. The route rejects the request
+ * when the agents it actually selects exceed the value, which is the set the fleet-wrapper
+ * preflight can undercount.
+ */
+export const OSQUERY_MAX_AGENTS_HEADER = 'x-osquery-max-agents';
+
 export const API_VERSIONS = {
   public: {
     v1: '2023-10-31',

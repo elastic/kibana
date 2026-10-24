@@ -52,6 +52,8 @@ interface CreateActionHandlerOptions {
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
   dispatch: DispatchEntryPoint;
+  /** When set, reject before any Fleet action is written if the selection is larger. */
+  maxAgents?: number;
 }
 
 export const createActionHandler = async (
@@ -91,6 +93,13 @@ export const createActionHandler = async (
 
   if (!selectedAgents.length) {
     throw new CustomHttpRequestError('No agents found for selection', 400);
+  }
+
+  if (options.maxAgents !== undefined && selectedAgents.length > options.maxAgents) {
+    throw new CustomHttpRequestError(
+      `The selection matches ${selectedAgents.length} agents, above the limit of ${options.maxAgents}. Narrow it down.`,
+      400
+    );
   }
 
   // Resolve the dispatch source once per entry point.
