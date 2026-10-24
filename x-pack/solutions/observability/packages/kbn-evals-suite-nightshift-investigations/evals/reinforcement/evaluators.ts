@@ -13,13 +13,18 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import pRetry from 'p-retry';
 import type { EvalConnector, Evaluator } from '@kbn/evals';
 import { buildModelFromConnector } from '@kbn/evals';
-import { gradeSubmissions, parseTreeMarkdown } from './arguments';
-import type { ReinforcementExample, ReinforcementTaskOutput } from './types';
+import { gradeSubmissions, parseTreeMarkdown, submissionsForTree } from './arguments';
+import type { ReinforcementTaskOutput } from './types';
 
 export const SUBMIT_ARGUMENTS_EVALUATOR = 'submit_arguments_consistent';
 export const MERGED_NODES_EVALUATOR = 'merged_nodes_and_paths';
 
-type ReinforcementEvaluator = Evaluator<ReinforcementExample, ReinforcementTaskOutput>;
+interface ReinforcementEvalExample {
+  input: { question: string; response?: string };
+  metadata?: { case_id?: string };
+}
+
+type ReinforcementEvaluator = Evaluator<ReinforcementEvalExample, ReinforcementTaskOutput>;
 
 const scoreTool = { function: 'score' } as ToolChoice;
 
@@ -96,21 +101,36 @@ export const submitArgumentsEvaluator: ReinforcementEvaluator = {
   name: SUBMIT_ARGUMENTS_EVALUATOR,
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: async ({ input, output }) => {
+  evaluate: async ({ input, output, metadata }) => {
     if (output.execution_error) {
       return { score: 0, explanation: output.execution_error };
     }
-    const prior = parseTreeMarkdown(output.prior_mermaid, output.tree_id);
-    const submitted = parseTreeMarkdown(output.submitted_mermaid, output.tree_id);
-    const graded = gradeSubmissions({
-      submissions: output.submissions,
-      prior,
-      submitted,
-    });
+    const response = output.response || input.response || '';
+    const trees = output.trees?.length
+      ? output.trees
+      : [
+          {
+            tree_id: output.tree_id,
+            prior_mermaid: output.prior_mermaid,
+            submitted_mermaid: output.submitted_mermaid,
+          },
+        ];
+    const graded = trees.map((tree) =>
+      gradeSubmissions({
+        submissions: submissionsForTree(output.submissions, tree.tree_id),
+        prior: parseTreeMarkdown(tree.prior_mermaid, tree.tree_id),
+        submitted: parseTreeMarkdown(tree.submitted_mermaid, tree.tree_id),
+        response,
+      })
+    );
+    const failed = graded.filter((result) => result.score !== 1);
     return {
-      ...graded,
+      score: failed.length === 0 ? 1 : 0,
+      explanation: (failed.length > 0 ? failed : graded)
+        .map((result) => result.explanation)
+        .join('\n\n'),
       metadata: {
-        case_id: input.metadata?.case_id,
+        case_id: metadata?.case_id,
         submission_count: output.submissions.length,
       },
     };
@@ -161,7 +181,7 @@ export const createMergedNodesEvaluator = ({
               prompt: judgePrompt,
               input: {
                 question: input.question,
-                response: input.response,
+                response: output.response || input.response || '',
                 prior_tree: output.prior_mermaid,
                 submitted_tree: output.submitted_mermaid ?? '',
                 arguments: JSON.stringify(last),
