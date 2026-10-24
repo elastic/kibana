@@ -117,12 +117,14 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
       this.threadId = worker.threadId;
       // The `error` event precedes `exit`; it only records why, so each failure restarts once.
       let failure: Exclude<ManagedWorkerExitReason, 'ready_timeout'> = 'exit';
+      let failureError: Error | undefined;
       worker.on('error', (error: NodeJS.ErrnoException) => {
         failure = error.code === 'ERR_WORKER_OUT_OF_MEMORY' ? 'oom' : 'error';
+        failureError = error;
       });
       worker.on('exit', (exitCode) => {
         if (!this.running || this.worker !== worker) return;
-        this.handleExit(exitCode, failure);
+        this.handleExit(exitCode, failure, failureError);
       });
       worker.on('message', (message: unknown) => {
         if (this.worker === worker && isControlMessage(message)) this.handleMessage(message);
@@ -162,9 +164,11 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
 
   private handleExit(
     exitCode: number,
-    reason: Exclude<ManagedWorkerExitReason, 'ready_timeout'>
+    reason: Exclude<ManagedWorkerExitReason, 'ready_timeout'>,
+    error?: Error
   ): void {
-    const { stableUptimeMs = DEFAULT_STABLE_UPTIME_MS } = this.options.restart ?? {};
+    const { name, logger, restart } = this.options;
+    const { stableUptimeMs = DEFAULT_STABLE_UPTIME_MS } = restart ?? {};
     clearTimeout(this.readyTimer);
     this.readyTimer = undefined;
     this.worker = undefined;
@@ -172,7 +176,13 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     if (this.readyAt !== undefined && Date.now() - this.readyAt >= stableUptimeMs) {
       this.restarts = 0;
     }
-    this.scheduleRestart(`exited unexpectedly (${reason}, code ${exitCode})`, { exitCode, reason });
+    // The `error` listener stops Node from printing the worker's error, so it is logged here.
+    if (error?.stack) logger.debug(`Worker ${name} error: ${error.stack}`);
+    const cause = error ? `: ${error.message}` : '';
+    this.scheduleRestart(`exited unexpectedly (${reason}, code ${exitCode})${cause}`, {
+      exitCode,
+      reason,
+    });
   }
 
   private scheduleRestart(failure: string, exit?: ManagedWorkerExitInfo): void {

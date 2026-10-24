@@ -117,9 +117,24 @@ describe('createManagedWorker', () => {
     expect(opts.onExit).toHaveBeenCalledWith({ exitCode: 1, reason: 'oom' });
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
-      'Worker diagnostic exited unexpectedly (oom, code 1); restart 1/2 in 100ms'
+      'Worker diagnostic exited unexpectedly (oom, code 1): out of memory; restart 1/2 in 100ms'
     );
     expect(jest.getTimerCount()).toBe(1);
+    await handle.stop();
+  });
+
+  it('logs the worker error message on the failure line and its stack at debug', async () => {
+    const handle = createManagedWorker(options());
+    handle.start();
+    const [worker] = MockWorker.instances;
+    const error = new Error('entry failed to load');
+    worker.emit('error', error);
+    worker.emit('exit', 1);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Worker diagnostic exited unexpectedly (error, code 1): entry failed to load; restart 1/2 in 100ms'
+    );
+    expect(logger.debug).toHaveBeenCalledWith(`Worker diagnostic error: ${error.stack}`);
     await handle.stop();
   });
 

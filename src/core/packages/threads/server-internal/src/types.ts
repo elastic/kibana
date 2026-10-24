@@ -43,7 +43,8 @@ export interface ManagedWorkerOptions<TData = unknown> {
    */
   readonly entry: string;
   readonly workerData?: TData;
-  readonly resourceLimits: ResourceLimits;
+  /** Every field of Node's `ResourceLimits` is optional, so the heap cap is required here. */
+  readonly resourceLimits: ResourceLimits & { readonly maxOldGenerationSizeMb: number };
   readonly logger: Logger;
   /** Whether the worker and its timers let the process exit. Defaults to true. */
   readonly unref?: boolean;

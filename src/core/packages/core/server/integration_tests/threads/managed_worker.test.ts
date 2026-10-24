@@ -89,7 +89,9 @@ describe('ManagedWorker with a real worker thread', () => {
     expect(managed.status()).toMatchObject({ state: 'exhausted', restarts: 1, lastExitCode: 1 });
     expect(managed.status().startedAt).toBeUndefined();
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('(error, code 1)'));
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('(error, code 1): entry failed to load')
+    );
     expect(logger.error).toHaveBeenCalledTimes(1);
   }, 60_000);
 
