@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-detection-engineering'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
 dependsOn:
+  - '@kbn/agent-builder-plugin'
   - '@kbn/evals'
   - '@kbn/inference-common'
   - '@kbn/scout'

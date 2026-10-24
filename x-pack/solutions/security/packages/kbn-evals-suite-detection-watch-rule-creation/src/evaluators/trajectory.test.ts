@@ -14,6 +14,7 @@ import {
   createTrajectoryFetcher,
   scoreCallCount,
   scoreCallOrder,
+  skillArgument,
 } from './trajectory';
 
 const log = {
@@ -289,6 +290,15 @@ describe('scoreCallOrder', () => {
     ]);
   });
 
+  it('labels a superseding skill name (contains the expected id) in the diagnostic', () => {
+    const r = scoreCallOrder(settled([SKILL, CREATE], 'detection-rule-edit-v2'));
+    expect(r.score).toBe(0);
+    expect(r.metadata.violations).toEqual([
+      `loaded skill "detection-rule-edit-v2" instead of ${RULE_CREATION_SKILL_ID}` +
+        ' (unexpected skill: name contains the expected id)',
+    ]);
+  });
+
   it('fails, and says why, when the loaded skill is not recorded on the span', () => {
     const r = scoreCallOrder(settled([SKILL, CREATE], null));
     expect(r.score).toBe(0);
@@ -359,5 +369,27 @@ describe('scoreCallOrder', () => {
     const r = scoreCallOrder(settled([SKILL, LABS]));
     expect(r.score).toBe(0);
     expect(r.metadata.violations).toEqual(['never drafted a rule']);
+  });
+});
+
+describe('skillArgument', () => {
+  it('reads the bare skill name from the compact JSON argument', () => {
+    expect(skillArgument('{"skill":"detection-rule-edit"}')).toBe('detection-rule-edit');
+  });
+
+  it('normalizes the folder/SKILL.md path form to the skill name', () => {
+    expect(skillArgument('{"skill":"/skills/security/detection-rule-edit/SKILL.md"}')).toBe(
+      'detection-rule-edit'
+    );
+  });
+
+  it('does not match a different skill whose name merely contains the expected one', () => {
+    expect(skillArgument('{"skill":"detection-rule-edit-v2"}')).toBe('detection-rule-edit-v2');
+  });
+
+  it('returns undefined for null, non-JSON, or argument strings without a skill field', () => {
+    expect(skillArgument(null)).toBeUndefined();
+    expect(skillArgument('not json')).toBeUndefined();
+    expect(skillArgument('{"other":"detection-rule-edit"}')).toBeUndefined();
   });
 });
