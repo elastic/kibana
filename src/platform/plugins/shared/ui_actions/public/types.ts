@@ -24,6 +24,11 @@ export interface VisualizeFieldContext {
   textBasedColumns?: DatatableColumn[];
   originatingApp?: string;
   query?: AggregateQuery;
+  /**
+   * Set when the user requested opening the visualization in a new browser tab
+   * (e.g. via cmd/ctrl + click), so actions can navigate accordingly.
+   */
+  openInNewTab?: boolean;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
