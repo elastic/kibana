@@ -294,6 +294,17 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the SIEM Readiness Agent Builder skill, its four readiness tools
+   * (`security.siem_readiness.get_coverage|get_quality|get_continuity|get_retention`) and the
+   * readiness attachment. Gates all three registration sites so the capability can ship dark
+   * (default off, and deliberately not exposed as an Advanced Setting) and be enabled per
+   * environment — the weekly evals stack turns it on through the `evals_siem_readiness` Scout
+   * server config set, which is what makes the SIEM Readiness eval suite score a registered
+   * capability instead of an absent one.
+   */
+  siemReadinessAgentBuilder: false,
+
+  /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
    */
   endpointForensicAnalysisSkill: true,
