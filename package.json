@@ -1703,7 +1703,6 @@
   "devDependencies": {
     "@ampproject/remapping": "2.3.0",
     "@apidevtools/swagger-parser": "13.0.0",
-    "@axe-core/playwright": "4.13.0",
     "@babel/core": "7.29.7",
     "@babel/eslint-parser": "7.29.7",
     "@babel/generator": "7.29.8",

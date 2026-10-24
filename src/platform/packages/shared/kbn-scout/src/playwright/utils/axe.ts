@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Page } from '@playwright/test';
-import type { Result } from 'axe-core';
-import AxeBuilder from '@axe-core/playwright';
+import type { Frame, Page } from '@playwright/test';
+import type { AxeResults, Result, RunOptions } from 'axe-core';
+import axe from 'axe-core';
 import { AXE_OPTIONS, AXE_IMPACT_LEVELS } from '@kbn/axe-config';
 import { withTimeout } from '@kbn/std';
 
@@ -21,6 +21,36 @@ export interface RunA11yScanOptions {
   /** Timeout in ms for the scan (defaults 10000) */
   timeoutMs?: number;
 }
+
+type AxeWindow = Window & { axe?: typeof axe };
+
+interface SelectorContext {
+  include: string[];
+  exclude: string[];
+}
+
+const injectAxe = async (frame: Frame) => {
+  const hasAxe = await frame.evaluate(() => (window as AxeWindow).axe !== undefined);
+  if (!hasAxe) {
+    await frame.evaluate(axe.source);
+  }
+};
+
+/**
+ * Injects axe-core into every frame and runs it from the main frame so same-origin iframes are
+ * included in the results.
+ */
+const analyze = async (
+  page: Page,
+  context: SelectorContext,
+  options: RunOptions
+): Promise<AxeResults> => {
+  await Promise.all(page.frames().map(injectAxe));
+  return page.evaluate<AxeResults, [SelectorContext, RunOptions]>(
+    ([ctx, opts]) => (window as AxeWindow).axe!.run(ctx, opts),
+    [context, options]
+  );
+};
 
 /**
  * Runs an Axe accessibility scan
@@ -34,18 +64,9 @@ const runA11yScan = async (
   page: Page,
   { include = [], exclude = [], timeoutMs = 10000 }: RunA11yScanOptions = {}
 ) => {
-  const builder = new AxeBuilder({ page });
-  builder.options(AXE_OPTIONS);
+  const context: SelectorContext = { include, exclude };
 
-  for (const selector of include) {
-    builder.include(selector);
-  }
-
-  for (const selector of exclude) {
-    builder.exclude(selector);
-  }
-
-  const outcome = await withTimeout({ promise: builder.analyze(), timeoutMs });
+  const outcome = await withTimeout({ promise: analyze(page, context, AXE_OPTIONS), timeoutMs });
   if (outcome.timedout) {
     throw new Error(`Axe accessibility scan timed out after ${timeoutMs}ms`);
   }
