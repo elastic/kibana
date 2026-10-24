@@ -101,9 +101,13 @@ export {
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
   HistogramPercentileValue,
+  HistogramVisualizationValue,
   METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
   METRICS_GRID_SETTINGS_DEFAULTS,
+  isHistogramHeatmapVisualization,
+  isHistogramVisualization,
   METRICS_GRID_SORT_DEFAULTS,
 } from './src';
 
@@ -116,6 +120,7 @@ export type {
   ErrorCalloutProps,
   DiscoverSessionFinderAttributes,
   HistogramPercentile,
+  HistogramVisualization,
   MetricsGridSettings,
   MetricsGridSort,
   MetricsGridSortDirection,
