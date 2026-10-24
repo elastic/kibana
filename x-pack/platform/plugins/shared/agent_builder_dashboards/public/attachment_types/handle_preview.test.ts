@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   type DashboardAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import { handlePreview } from './handle_preview';
+import { createAppliedAttachmentsStore } from './dashboard_integration/applied_attachments_store';
 
 const buildAttachment = (origin?: string): DashboardAttachment => ({
   id: 'attachment-1',
@@ -29,6 +31,9 @@ const buildLocator = () => ({ navigate: jest.fn(), getRedirectUrl: jest.fn() });
 const buildDashboardApi = (savedObjectId: string | undefined) => ({
   savedObjectId$: { getValue: () => savedObjectId },
   setState: jest.fn(),
+  getSerializedState: () => ({ attributes: { title: '', panels: [] } }),
+  layout$: new BehaviorSubject({ panels: {}, pinnedPanels: {} }),
+  getChildApi: jest.fn(),
   locator: buildLocator(),
 });
 
@@ -45,6 +50,7 @@ describe('handlePreview with a published dashboard', () => {
       await handlePreview({
         attachment: buildAttachment(origin),
         dashboardApi: dashboardApi as unknown as DashboardApi,
+        appliedAttachments: createAppliedAttachmentsStore(),
         canWriteDashboards: true,
         isSidebar: true,
         dashboardLocator,
@@ -72,6 +78,7 @@ describe('handlePreview with a published dashboard', () => {
     await handlePreview({
       attachment: buildAttachment('dashboard-1'),
       dashboardApi: dashboardApi as unknown as DashboardApi,
+      appliedAttachments: createAppliedAttachmentsStore(),
       canWriteDashboards: true,
       isSidebar: true,
       dashboardLocator,
@@ -95,6 +102,7 @@ describe('handlePreview with a published dashboard', () => {
     await handlePreview({
       attachment: buildAttachment('deleted-dashboard'),
       dashboardApi: dashboardApi as unknown as DashboardApi,
+      appliedAttachments: createAppliedAttachmentsStore(),
       canWriteDashboards: true,
       isSidebar: true,
       dashboardLocator,

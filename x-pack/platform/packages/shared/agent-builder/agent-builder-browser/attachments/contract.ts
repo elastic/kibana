@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
+import type { Observable } from 'rxjs';
 import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
@@ -21,7 +22,15 @@ export enum ActionButtonType {
   OVERFLOW = 'overflow',
 }
 
-export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing';
+/**
+ * Preview state of an attachment card.
+ * - none: regular action buttons
+ * - preview_available: "Read-only preview" badge
+ * - previewing: shown in canvas, with a "Close preview" button instead of the action buttons
+ * - shown_in_app: the app the user is on shows the attachment, with a "You're previewing this"
+ *   badge instead of the action buttons
+ */
+export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing' | 'shown_in_app';
 /**
  * Props passed to custom attachment content renderers.
  */
@@ -249,6 +258,12 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  /**
+   * Optional preview state of an inline-rendered attachment that depends on state outside the
+   * conversation, e.g. `shown_in_app` while the current app shows the attachment. Applies
+   * while the attachment is not previewed in canvas.
+   */
+  getPreviewState$?: (attachment: TAttachment) => Observable<AttachmentPreviewState>;
   /**
    * Optional max-width (in px) for the inline attachment panel.
    * When provided, the outer panel will not exceed this width.

@@ -15,6 +15,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
+import { createAppliedAttachmentsStore } from './applied_attachments_store';
 
 const buildAttachment = (origin?: string): DashboardAttachment => ({
   id: 'attachment-1',
@@ -39,13 +40,22 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
   const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
   const setState = jest.fn();
   const upsertAttachment = jest.fn();
+  const onOtherDashboardUpdated = jest.fn();
 
   const subscription = createAgentLiveUpdatesSubscription({
     agentBuilder: {
       events: { ui: { activeConversation$ }, getChatEvents$ },
     } as unknown as AgentBuilderPluginStart,
-    api: { savedObjectId$: { getValue: () => savedObjectId }, setState } as unknown as DashboardApi,
+    api: {
+      savedObjectId$: { getValue: () => savedObjectId },
+      setState,
+      getSerializedState: () => ({ attributes: { title: '', panels: [] } }),
+      layout$: new BehaviorSubject({ panels: {}, pinnedPanels: {} }),
+      getChildApi: jest.fn(),
+    } as unknown as DashboardApi,
+    appliedAttachments: createAppliedAttachmentsStore(),
     upsertAttachment,
+    onOtherDashboardUpdated,
   });
 
   return {
@@ -54,6 +64,7 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     getChatEvents$,
     setState,
     upsertAttachment,
+    onOtherDashboardUpdated,
     subscription,
   };
 };
@@ -61,12 +72,12 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
 describe('createAgentLiveUpdatesSubscription', () => {
   it.each([
     ['the linked saved dashboard', 'dashboard-1', 'dashboard-1', 1],
-    ['an unsaved dashboard', undefined, undefined, 1],
+    ['an empty unsaved dashboard', undefined, undefined, 1],
     ['a different saved dashboard', 'dashboard-1', 'other-dashboard', 0],
   ])(
     'upserts the attachment and applies the state only for its own dashboard: %s',
     (_, savedObjectId, origin, calls) => {
-      const { chatEvents$, setState, upsertAttachment, subscription } =
+      const { chatEvents$, setState, upsertAttachment, onOtherDashboardUpdated, subscription } =
         createHarness(savedObjectId);
       const attachment = buildAttachment(origin);
 
@@ -74,6 +85,7 @@ describe('createAgentLiveUpdatesSubscription', () => {
 
       expect(upsertAttachment).toHaveBeenCalledWith(attachment);
       expect(setState).toHaveBeenCalledTimes(calls);
+      expect(onOtherDashboardUpdated).toHaveBeenCalledTimes(1 - calls);
       subscription.unsubscribe();
     }
   );

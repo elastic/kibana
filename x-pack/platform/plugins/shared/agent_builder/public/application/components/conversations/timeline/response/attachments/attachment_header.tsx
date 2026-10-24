@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiSplitPanel,
   EuiText,
   EuiToolTip,
@@ -21,7 +22,11 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ActionButton, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
+import type {
+  ActionButton,
+  AttachmentPreviewState,
+  HeaderBadge,
+} from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
@@ -35,6 +40,10 @@ const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.p
 
 const CLOSE_PREVIEW_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.closePreview', {
   defaultMessage: 'Close preview',
+});
+
+const SHOWN_IN_APP_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.shownInApp', {
+  defaultMessage: "You're previewing this",
 });
 
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.close', {
@@ -58,8 +67,9 @@ interface AttachmentHeaderProps {
    * - none: show regular action buttons
    * - preview_available: show "Preview Only" badge
    * - previewing: show "Close preview" button and hide action buttons
+   * - shown_in_app: show "You're previewing this" badge and hide action buttons
    */
-  previewBadgeState?: 'none' | 'preview_available' | 'previewing';
+  previewBadgeState?: AttachmentPreviewState;
   /** When true, uses canvas flyout corner radius (top-right only). */
   isCanvas?: boolean;
   /** When true, rounds all corners and omits the bottom border (no body content). */
@@ -130,7 +140,9 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const hasCloseButton = Boolean(onClose);
   const hasActionButtons = actionButtons && actionButtons.length > 0;
 
-  if (!hasCloseButton && !hasActionButtons) {
+  const isShownInApp = previewBadgeState === 'shown_in_app';
+
+  if (!hasCloseButton && !hasActionButtons && !isShownInApp) {
     return null;
   }
 
@@ -214,7 +226,24 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
           {/* End: action buttons + close button */}
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              {previewBadgeState !== 'previewing' && hasActionButtons && (
+              {isShownInApp && (
+                <EuiFlexItem grow={false}>
+                  {isCompact ? (
+                    <EuiIconTip
+                      type="eye"
+                      color="primary"
+                      size="m"
+                      content={SHOWN_IN_APP_LABEL}
+                      aria-label={SHOWN_IN_APP_LABEL}
+                    />
+                  ) : (
+                    <EuiBadge color="primary" iconType="eye">
+                      {SHOWN_IN_APP_LABEL}
+                    </EuiBadge>
+                  )}
+                </EuiFlexItem>
+              )}
+              {previewBadgeState !== 'previewing' && !isShownInApp && hasActionButtons && (
                 <EuiFlexItem grow={false}>
                   <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
                 </EuiFlexItem>

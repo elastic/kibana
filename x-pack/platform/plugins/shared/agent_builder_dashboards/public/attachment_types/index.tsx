@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { combineLatest, EMPTY, from, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, EMPTY, from, map, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import type { ChromeStart } from '@kbn/core/public';
+import type { ChromeStart, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
@@ -23,6 +23,10 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardCanvasAttachmentProps } from './async_services';
+import {
+  createAppliedAttachmentsStore,
+  toShownVersionKey,
+} from './dashboard_integration/applied_attachments_store';
 
 export interface IdGenerator {
   readonly current: string;
@@ -53,6 +57,7 @@ const LazyDashboardCanvasAttachment = React.lazy(async () => {
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder,
   chrome,
+  toasts,
   dashboardLocator,
   unifiedSearch,
   data,
@@ -62,6 +67,7 @@ export const registerDashboardAttachmentUiDefinition = ({
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
+  toasts: CoreStart['notifications']['toasts'];
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   data: DataPublicPluginStart;
@@ -70,6 +76,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   draftAttachmentId: IdGenerator;
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
+  const appliedAttachments = createAppliedAttachmentsStore();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
   const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
@@ -100,14 +107,30 @@ export const registerDashboardAttachmentUiDefinition = ({
         const isAgentOpen = appId === 'agentBuilder';
         return api && isAgentOpen
           ? from(import('./async_services')).pipe(
-              switchMap(({ createDashboardAppIntegration$ }) =>
-                createDashboardAppIntegration$({
-                  agentBuilder,
-                  api,
-                  draftAttachmentId,
-                  checkSavedDashboardExist,
-                  getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
-                })
+              switchMap(
+                ({
+                  createDashboardAppIntegration$,
+                  createOtherDashboardUpdateNotifier,
+                  previewAttachmentInDashboard,
+                }) =>
+                  createDashboardAppIntegration$({
+                    agentBuilder,
+                    api,
+                    draftAttachmentId,
+                    appliedAttachments,
+                    getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
+                    notifyOtherDashboardUpdated: createOtherDashboardUpdateNotifier({
+                      toasts,
+                      openAttachment: (attachment) =>
+                        void previewAttachmentInDashboard({
+                          attachment,
+                          dashboardApi: api,
+                          appliedAttachments,
+                          dashboardLocator,
+                          checkSavedDashboardExist,
+                        }),
+                    }),
+                  })
               )
             )
           : EMPTY;
@@ -137,6 +160,15 @@ export const registerDashboardAttachmentUiDefinition = ({
         />
       </React.Suspense>
     ),
+    getPreviewState$: ({ id, versionData }) =>
+      appliedAttachments.shownVersions$.pipe(
+        map((shownVersions) =>
+          versionData && shownVersions.has(toShownVersionKey(id, versionData.version))
+            ? 'shown_in_app'
+            : 'none'
+        ),
+        distinctUntilChanged()
+      ),
     getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
       // Capture the framework-provided updater keyed by attachment id so that
       // dashboard-save origin sync (outside the React tree) can reuse it.
@@ -160,6 +192,7 @@ export const registerDashboardAttachmentUiDefinition = ({
             return handlePreview({
               attachment,
               dashboardApi,
+              appliedAttachments,
               canWriteDashboards,
               isSidebar,
               dashboardLocator,
@@ -175,6 +208,8 @@ export const registerDashboardAttachmentUiDefinition = ({
   return () => {
     dashboardAppApiSubscription.unsubscribe();
     dashboardApi = undefined;
+    appliedAttachments.baselines.clear();
+    appliedAttachments.shownVersions$.next(new Set());
     updateOriginByAttachmentId.clear();
   };
 };

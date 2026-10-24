@@ -14,10 +14,9 @@ import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
-import {
-  MANUAL_CHANGES_DEBOUNCE_MS,
-  registerDashboardAppIntegration,
-} from './dashboard_app_integration';
+import { registerDashboardAppIntegration } from './dashboard_app_integration';
+import { MANUAL_CHANGES_DEBOUNCE_MS } from './apply_attachment';
+import { createAppliedAttachmentsStore } from './applied_attachments_store';
 import type { IdGenerator } from '..';
 
 const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
@@ -123,7 +122,6 @@ describe('registerDashboardAppIntegration', () => {
   let addAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
   let getUpdateOrigin: jest.Mock;
-  let checkSavedDashboardExist: jest.Mock;
   let draftAttachmentId: IdGenerator;
   let emitConversationChange: (change: {
     id?: string;
@@ -131,22 +129,30 @@ describe('registerDashboardAppIntegration', () => {
   }) => void;
   let cleanup: () => void;
   let simulateDashboardStateChange: () => void;
+  let removeAttachment: jest.Mock;
 
   beforeEach(() => {
     const mockAnyStateChange$ = new BehaviorSubject(undefined);
     simulateDashboardStateChange = () => {
+      mockApi.getSerializedState.mockReturnValue({
+        attributes: {
+          title: 'Edited Dashboard',
+          description: 'Test Description',
+          panels: [],
+        },
+      });
       mockAnyStateChange$.next(undefined);
     };
     jest.useFakeTimers();
     mockApi = createMockDashboardApi(mockAnyStateChange$.pipe(skip(1)));
     chatEventsByConversationId = new Map();
     addAttachment = jest.fn();
+    removeAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
     getUpdateOrigin = jest.fn(
       (attachmentId: string) => async (origin: string) =>
         updateAttachmentOrigin('conversation-1', attachmentId, origin)
     );
-    checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
     let currentDraftAttachmentId = 'draft-attachment-id-1';
     draftAttachmentId = {
       get current() {
@@ -168,6 +174,7 @@ describe('registerDashboardAppIntegration', () => {
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const agentBuilder = {
       addAttachment,
+      removeAttachment,
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) => {
@@ -192,8 +199,9 @@ describe('registerDashboardAppIntegration', () => {
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
       draftAttachmentId,
-      checkSavedDashboardExist,
+      appliedAttachments: createAppliedAttachmentsStore(),
       getUpdateOrigin,
+      notifyOtherDashboardUpdated: jest.fn(),
     });
   };
 
@@ -272,10 +280,7 @@ describe('registerDashboardAppIntegration', () => {
     );
   });
 
-  it('updates the first attachment whose saved origin no longer exists on save', async () => {
-    checkSavedDashboardExist.mockImplementation(
-      async (dashboardId: string) => dashboardId === 'dashboard-1'
-    );
+  it('updates the linked attachment when an unsaved dashboard is saved', async () => {
     register();
     emitConversationChange({
       id: 'conversation-1',
@@ -289,14 +294,14 @@ describe('registerDashboardAppIntegration', () => {
         createVersionedAttachment(
           createDashboardAttachment({
             id: 'dashboard-attachment-2',
-            origin: 'dashboard-2',
           })
         ),
       ],
     });
+    jest.runOnlyPendingTimers();
 
     mockApi.onSave$.next({
-      previousDashboardId: 'dashboard-3',
+      previousDashboardId: undefined,
       dashboardId: 'dashboard-4',
       dashboardState: createDashboardSaveState(),
     });
@@ -308,6 +313,7 @@ describe('registerDashboardAppIntegration', () => {
       'dashboard-attachment-2',
       'dashboard-4'
     );
+    expect(updateAttachmentOrigin).toHaveBeenCalledTimes(1);
   });
 
   it('creates a new attachment from the current dashboard state when switching away from a conversation', () => {
@@ -373,20 +379,26 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('does not create an unsaved attachment from manual changes in an existing conversation', () => {
+  it('stages the open dashboard in an existing conversation that does not have it', () => {
+    mockApi.savedObjectId$.next('dashboard-2');
     register();
-    emitConversationChange({ id: 'conversation-1', attachments: [] });
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [
+        createVersionedAttachment(
+          createDashboardAttachment({ id: 'dashboard-attachment-1', origin: 'dashboard-1' })
+        ),
+      ],
+    });
+    jest.runOnlyPendingTimers();
 
-    addAttachment.mockClear();
-    simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    expect(addAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'draft-attachment-id-1', origin: 'dashboard-2' })
+    );
 
-    expect(addAttachment).not.toHaveBeenCalled();
+    cleanup();
 
-    addAttachment.mockClear();
-    emitConversationChange({ id: 'conversation-2', attachments: [] });
-
-    expect(addAttachment).not.toHaveBeenCalled();
+    expect(removeAttachment).toHaveBeenCalledWith('draft-attachment-id-1');
   });
 
   it('regenerates the pending attachment id once the draft attachment is in the conversation', () => {

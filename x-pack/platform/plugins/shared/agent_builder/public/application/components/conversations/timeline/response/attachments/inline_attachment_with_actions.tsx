@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { EMPTY } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
@@ -93,6 +95,11 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     attachment.id,
     attachment.versionData?.version
   );
+  const appPreviewState$ = useMemo(
+    () => uiDefinition?.getPreviewState$?.(attachment) ?? EMPTY,
+    [uiDefinition, attachment]
+  );
+  const appPreviewState = useObservable(appPreviewState$, 'none');
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -145,7 +152,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
   const resolvedPreviewBadgeState: AttachmentPreviewState =
-    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
+    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : appPreviewState);
 
   if (!uiDefinition) {
     return null;

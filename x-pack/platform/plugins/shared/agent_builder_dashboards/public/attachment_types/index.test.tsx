@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import type { ChromeStart } from '@kbn/core/public';
+import type { ChromeStart, CoreStart } from '@kbn/core/public';
 import type {
   DashboardApi,
   DashboardRendererProps,
@@ -106,6 +106,8 @@ const createMockDashboardApi = (
     timeRange$,
     setState,
     getSerializedState,
+    layout$: new BehaviorSubject({ panels: {}, pinnedPanels: {} }),
+    getChildApi: jest.fn(),
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     emitSave: (event: DashboardSaveEvent) => onSave$.next(event),
   } as unknown as DashboardApi & {
@@ -148,6 +150,12 @@ const flushAsyncServices = async () => {
   await Promise.resolve();
 };
 
+const createMockToasts = () =>
+  ({
+    addInfo: jest.fn(() => ({ id: 'toast' })),
+    remove: jest.fn(),
+  } as unknown as jest.Mocked<CoreStart['notifications']['toasts']>);
+
 describe('registerDashboardAttachmentUiDefinition', () => {
   let deps: ReturnType<typeof createMockDeps>;
   let uiDefinition: AttachmentUIDefinition<DashboardAttachment>;
@@ -182,6 +190,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
+      removeAttachment: jest.fn(),
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) =>
@@ -211,6 +220,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     return {
       agentBuilder,
       chrome,
+      toasts: createMockToasts(),
       addAttachment: mockAddAttachment,
       canWriteDashboards: true,
       data,
@@ -315,6 +325,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
           getCurrentAppId$: () => new BehaviorSubject<string | null>('agentBuilder').asObservable(),
         },
       } as unknown as ChromeStart,
+      toasts: createMockToasts(),
       canWriteDashboards: true,
       dashboardLocator: undefined,
       dashboardPlugin: {
@@ -344,6 +355,8 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         getAttachment,
         api: mockApi as unknown as DashboardApi,
       });
+      // the dashboard links to the attachment once the conversation change has propagated
+      await new Promise((resolve) => setTimeout(resolve));
 
       // First save triggers update
       mockApi.emitSave({
@@ -390,7 +403,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       cleanup?.();
     });
 
-    it('relinks to the current dashboard when the attachment origin points to a deleted dashboard', async () => {
+    it('does not relink an attachment whose saved dashboard was deleted', async () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'deleted-dashboard-id');
       const mockApi = createMockDashboardApi('current-dashboard-id');
 
@@ -415,11 +428,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       await Promise.resolve();
       await Promise.resolve();
 
-      expect(deps.updateAttachmentOrigin).toHaveBeenCalledWith(
-        'conversation-1',
-        'attachment-1',
-        'current-dashboard-id'
-      );
+      expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
       cleanup?.();
     });
 
@@ -447,7 +456,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       jest.useRealTimers();
     });
 
-    it('does not attach the dashboard when navigating to a dashboard with an existing conversation already open', async () => {
+    it('attaches the dashboard when navigating to a dashboard with an existing conversation already open', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.emitConversationChange({
@@ -458,7 +467,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
-      expect(deps.addAttachment).not.toHaveBeenCalled();
+      expect(deps.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ type: DASHBOARD_ATTACHMENT_TYPE })
+      );
     });
 
     it('attaches the dashboard when navigating to a dashboard with a new conversation already open', async () => {
@@ -477,7 +488,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       );
     });
 
-    it('does not attach the dashboard when opening an existing conversation from a dashboard', async () => {
+    it('attaches the dashboard when opening an existing conversation from a dashboard', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
@@ -488,7 +499,9 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
-      expect(deps.addAttachment).not.toHaveBeenCalled();
+      expect(deps.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ type: DASHBOARD_ATTACHMENT_TYPE })
+      );
     });
 
     it('attaches the dashboard when opening a new conversation from a dashboard', async () => {
@@ -614,6 +627,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         createMockDashboardUpdatedEvent('attachment-1', 'original-dashboard-id')
       );
       expect(mockApi1.setState).not.toHaveBeenCalled();
+      expect(deps.toasts.addInfo).toHaveBeenCalledTimes(1);
       cleanup1?.();
 
       // Same dashboard - updates
