@@ -11,6 +11,8 @@ import { setTlsConfigMock } from './http_server.test.mocks';
 import type { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
+import type { Request } from '@hapi/hapi';
+import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { join } from 'path';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
@@ -1942,6 +1944,40 @@ describe('setup contract', () => {
           },
         })
       );
+    });
+
+    test('serves only allowlisted plugin assets from shared routes', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup({ config$ });
+      const pluginAssets = new Map([
+        ['known', assetFolder],
+        ['other', tempDir],
+      ]);
+      const resolveDir = (request: Request) =>
+        pluginAssets.get(request.params.pluginName) ?? Boom.notFound();
+
+      registerStaticDir('/sha/plugins/{pluginName}/assets/{path*}', resolveDir);
+      registerStaticDir('/plugins/{pluginName}/assets/{path*}', resolveDir);
+      registerStaticDir('/plugins/known/assets/special/{path*}', assetFolder);
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/sha/plugins/known/assets/some_json.json')
+        .expect(200);
+      await supertest(innerServer.listener).get('/plugins/known/assets/some_json.json').expect(200);
+      await supertest(innerServer.listener)
+        .get('/plugins/known/assets/special/some_json.json')
+        .expect(200);
+      await supertest(innerServer.listener).get('/plugins/other/assets/some_json.json').expect(404);
+      await supertest(innerServer.listener)
+        .get('/plugins/unknown/assets/some_json.json')
+        .expect(404);
+      await supertest(innerServer.listener)
+        .get('/sha/plugins/unknown/assets/some_json.json')
+        .expect(404);
+      await supertest(innerServer.listener)
+        .get('/plugins/known/assets/%2e%2e/some_json.json')
+        .expect(404);
     });
 
     test('does not throw if called after stop', async () => {

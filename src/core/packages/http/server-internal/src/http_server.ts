@@ -175,7 +175,10 @@ export interface HttpServerSetup {
    * Register a static directory to be served by the Kibana server
    * @note Static assets may be served over CDN
    */
-  registerStaticDir: (path: string, dirPath: string) => void;
+  registerStaticDir: (
+    path: string,
+    dirPath: string | ((request: Request) => string | Error)
+  ) => void;
   staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
@@ -1026,7 +1029,10 @@ export class HttpServer {
     return routers;
   }
 
-  private registerStaticDir(path: string, dirPath: string) {
+  private registerStaticDir(
+    path: string,
+    dirPath: string | ((request: Request) => string | Error)
+  ) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
