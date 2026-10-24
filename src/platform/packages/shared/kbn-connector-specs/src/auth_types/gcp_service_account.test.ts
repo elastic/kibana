@@ -61,9 +61,12 @@ describe('GcpServiceAccountAuth', () => {
         defaults: { headers: { common: {} } },
       } as unknown as AxiosInstance;
 
-      await GcpServiceAccountAuth.configure({} as AuthContext, mockAxiosInstance, {
-        serviceAccountJson: VALID_SERVICE_ACCOUNT_JSON,
-      });
+      const contextFetch = jest.fn();
+      await GcpServiceAccountAuth.configure(
+        { fetch: contextFetch } as unknown as AuthContext,
+        mockAxiosInstance,
+        { serviceAccountJson: VALID_SERVICE_ACCOUNT_JSON }
+      );
 
       expect(mockAxiosInstance.defaults.headers.common.Authorization).toBe(
         'Bearer ya29.mock-access-token'
@@ -72,7 +75,8 @@ describe('GcpServiceAccountAuth', () => {
       expect(mockGetGcpAccessToken).toHaveBeenCalledWith(
         'test-sa@my-project.iam.gserviceaccount.com',
         expect.stringContaining('BEGIN PRIVATE KEY'),
-        'https://www.googleapis.com/auth/cloud-platform'
+        'https://www.googleapis.com/auth/cloud-platform',
+        contextFetch
       );
     });
 
@@ -110,7 +114,8 @@ describe('GcpServiceAccountAuth', () => {
       expect(mockGetGcpAccessToken).toHaveBeenCalledWith(
         expect.any(String),
         expect.any(String),
-        'https://www.googleapis.com/auth/cloudfunctions'
+        'https://www.googleapis.com/auth/cloudfunctions',
+        undefined
       );
     });
 
