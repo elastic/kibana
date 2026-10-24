@@ -3,12 +3,15 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import math
 import os
-from dataclasses import dataclass
+import re
+import urllib.request
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 
 TOKEN_FIELDS = (
@@ -17,6 +20,15 @@ TOKEN_FIELDS = (
     "cache_creation_input_tokens",
     "cache_read_input_tokens",
 )
+SYNTHETIC_MODEL = "<synthetic>"
+MODEL_PRICES_PATH = Path(__file__).resolve().parent / "model_prices.json"
+MODEL_PRICES_URL = (
+    "https://raw.githubusercontent.com/github/gh-aw/main/actions/setup/js/models.json"
+)
+FETCH_TIMEOUT_SECONDS = 2
+MAX_REMOTE_CATALOG_BYTES = 1_000_000
+CACHE_WRITE_1H_INPUT_MULTIPLIER = 2
+MAX_MODEL_LESS_COST_SHARE = 0.01
 ALLOWED_SCOPES = frozenset(("orchestrator", "worker"))
 ALLOWED_ARTIFACT_KINDS = frozenset(
     (
@@ -73,6 +85,20 @@ class TokenTotals:
 
 
 @dataclass(frozen=True)
+class ModelUsage:
+    totals: TokenTotals = TokenTotals()
+    cache_write_1h_tokens: int = 0
+
+    def __add__(self, other: "ModelUsage") -> "ModelUsage":
+        return ModelUsage(
+            totals=self.totals + other.totals,
+            cache_write_1h_tokens=(
+                self.cache_write_1h_tokens + other.cache_write_1h_tokens
+            ),
+        )
+
+
+@dataclass(frozen=True)
 class TranscriptResult:
     source: str
     scope: str
@@ -80,6 +106,29 @@ class TranscriptResult:
     totals: TokenTotals | None
     usage_blocks: int
     name: str | None = None
+    usage_by_model: Mapping[str | None, ModelUsage] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ModelPrice:
+    input: float
+    output: float
+    cache_read: float
+    cache_write: float
+
+
+@dataclass(frozen=True)
+class PriceCatalog:
+    source: str
+    checked: str
+    models: Mapping[str, ModelPrice | None]
+
+
+@dataclass(frozen=True)
+class SessionCost:
+    usd: float | None
+    unavailable_reason: str | None = None
+    model_less_tokens_left_out: int = 0
 
 
 @dataclass(frozen=True)
@@ -132,18 +181,56 @@ def _extract_usage(obj: Any) -> dict[str, Any] | None:
     return usage if isinstance(usage, dict) else None
 
 
+def _message_field(obj: dict[str, Any], key: str) -> str | None:
+    message = obj.get("message")
+    if not isinstance(message, dict):
+        return None
+    value = message.get(key)
+    return value if isinstance(value, str) and value else None
+
+
+def _usage_block(usage: dict[str, Any]) -> ModelUsage | None:
+    values = {
+        token_field: _as_non_negative_integer(usage.get(token_field))
+        for token_field in TOKEN_FIELDS
+    }
+    if not any(value is not None for value in values.values()):
+        return None
+
+    totals = TokenTotals(
+        input_tokens=values["input_tokens"] or 0,
+        output_tokens=values["output_tokens"] or 0,
+        cache_creation_input_tokens=values["cache_creation_input_tokens"] or 0,
+        cache_read_input_tokens=values["cache_read_input_tokens"] or 0,
+    )
+    cache_creation = usage.get("cache_creation")
+    cache_write_1h = (
+        _as_non_negative_integer(cache_creation.get("ephemeral_1h_input_tokens"))
+        if isinstance(cache_creation, dict)
+        else None
+    )
+    return ModelUsage(
+        totals=totals,
+        cache_write_1h_tokens=min(
+            cache_write_1h or 0, totals.cache_creation_input_tokens
+        ),
+    )
+
+
 def parse_transcript(
     path: Path,
     scope: str = "orchestrator",
     name: str | None = None,
 ) -> TranscriptResult:
-    """Parse supported JSONL usage blocks from one transcript."""
+    """Parse JSONL usage blocks from one transcript, counting each API response once."""
     source = str(path)
     if not path.is_file():
         return TranscriptResult(source, scope, "missing", None, 0, name)
 
-    totals = TokenTotals()
-    usage_blocks = 0
+    # Claude Code writes one line per content block of a response and repeats the
+    # response usage on each of them; the last line carries the final counts.
+    blocks_by_message: dict[str, tuple[str | None, ModelUsage]] = {}
+    blocks_without_id: list[tuple[str | None, ModelUsage]] = []
 
     try:
         with path.open(encoding="utf-8") as transcript:
@@ -159,29 +246,243 @@ def parse_transcript(
                 usage = _extract_usage(obj)
                 if usage is None:
                     continue
-
-                values = {
-                    field: _as_non_negative_integer(usage.get(field))
-                    for field in TOKEN_FIELDS
-                }
-                if not any(value is not None for value in values.values()):
+                model = _message_field(obj, "model")
+                if model == SYNTHETIC_MODEL:
+                    continue
+                block = _usage_block(usage)
+                if block is None:
                     continue
 
-                usage_blocks += 1
-                totals += TokenTotals(
-                    input_tokens=values["input_tokens"] or 0,
-                    output_tokens=values["output_tokens"] or 0,
-                    cache_creation_input_tokens=(
-                        values["cache_creation_input_tokens"] or 0
-                    ),
-                    cache_read_input_tokens=values["cache_read_input_tokens"] or 0,
-                )
+                message_id = _message_field(obj, "id")
+                if message_id is None:
+                    blocks_without_id.append((model, block))
+                else:
+                    blocks_by_message[message_id] = (model, block)
     except OSError:
         return TranscriptResult(source, scope, "unreadable", None, 0, name)
 
-    if usage_blocks == 0:
+    blocks = [*blocks_by_message.values(), *blocks_without_id]
+    if not blocks:
         return TranscriptResult(source, scope, "empty", None, 0, name)
-    return TranscriptResult(source, scope, "available", totals, usage_blocks, name)
+
+    totals = TokenTotals()
+    usage_by_model: dict[str | None, ModelUsage] = {}
+    for model, block in blocks:
+        totals += block.totals
+        usage_by_model[model] = usage_by_model.get(model, ModelUsage()) + block
+    return TranscriptResult(
+        source, scope, "available", totals, len(blocks), name, usage_by_model
+    )
+
+
+def load_price_catalog(path: Path = MODEL_PRICES_PATH) -> PriceCatalog:
+    """Load the local copy of the per-token USD price catalog."""
+    try:
+        with path.open(encoding="utf-8") as catalog_file:
+            raw = json.load(catalog_file)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Unable to read price catalog: {path}") from exc
+
+    if not isinstance(raw, dict) or not isinstance(raw.get("models"), dict):
+        raise ValueError("Price catalog must be an object with a models map")
+    source = raw.get("source")
+    checked = raw.get("checked")
+    if not isinstance(source, str) or not isinstance(checked, str):
+        raise ValueError("Price catalog source and checked must be strings")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", checked):
+        raise ValueError("Price catalog checked must be a YYYY-MM-DD date")
+    return PriceCatalog(
+        source=source, checked=checked, models=_parse_model_prices(raw["models"])
+    )
+
+
+def fetch_price_catalog(url: str, checked: str) -> PriceCatalog:
+    """Fetch gh-aw's models.json and keep its Anthropic prices."""
+    try:
+        with urllib.request.urlopen(url, timeout=FETCH_TIMEOUT_SECONDS) as response:
+            body = response.read(MAX_REMOTE_CATALOG_BYTES + 1)
+    except (OSError, ValueError, http.client.HTTPException) as exc:
+        raise ValueError(f"Unable to fetch price catalog: {url}") from exc
+    if len(body) > MAX_REMOTE_CATALOG_BYTES:
+        raise ValueError(f"Price catalog is too large: {url}")
+    try:
+        raw = json.loads(body)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise ValueError(f"Price catalog is not valid JSON: {url}") from exc
+
+    providers = raw.get("providers") if isinstance(raw, dict) else None
+    anthropic = providers.get("anthropic") if isinstance(providers, dict) else None
+    models = anthropic.get("models") if isinstance(anthropic, dict) else None
+    if not isinstance(models, dict) or not models:
+        raise ValueError(f"Price catalog has no Anthropic models: {url}")
+    costs = {
+        model: entry.get("cost") if isinstance(entry, dict) else None
+        for model, entry in models.items()
+    }
+    # A remote entry without a valid price stays as unpriced, so its id cannot fall
+    # through to a shorter id's prices in find_model_price.
+    prices = _parse_model_prices(costs, keep_unpriced=True)
+    if not any(price is not None for price in prices.values()):
+        raise ValueError(f"Price catalog has no valid Anthropic prices: {url}")
+    return PriceCatalog(source=url, checked=checked, models=prices)
+
+
+def _parse_model_prices(
+    raw_models: Mapping[str, Any], keep_unpriced: bool = False
+) -> dict[str, ModelPrice | None]:
+    models: dict[str, ModelPrice | None] = {}
+    for model, prices in raw_models.items():
+        price = _model_price(prices)
+        if price is None and not keep_unpriced:
+            raise ValueError(f"Price catalog entry needs valid input and output prices: {model}")
+        models[model] = price
+    return models
+
+
+def _model_price(prices: Any) -> ModelPrice | None:
+    if not isinstance(prices, dict):
+        return None
+    input_price = _as_price(prices.get("input"))
+    output_price = _as_price(prices.get("output"))
+    if input_price is None or output_price is None:
+        return None
+    return ModelPrice(
+        input=input_price,
+        output=output_price,
+        cache_read=_price_or(prices.get("cache_read"), input_price),
+        cache_write=_price_or(prices.get("cache_write"), input_price),
+    )
+
+
+def _as_price(value: Any) -> float | None:
+    # gh-aw's models.json writes prices as decimal strings.
+    if isinstance(value, str):
+        try:
+            value = float(value)
+        except ValueError:
+            return None
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    if not math.isfinite(value) or value < 0:
+        return None
+    return float(value)
+
+
+def _price_or(value: Any, fallback: float) -> float:
+    price = _as_price(value)
+    return fallback if price is None or price == 0 else price
+
+
+def _comparable_model_id(model: str) -> str:
+    return re.sub(r"[._]+", "-", model.strip().lower())
+
+
+def find_model_price(catalog: PriceCatalog, model: str) -> ModelPrice | None:
+    """Match a model by exact id, then by the longest catalog id it starts with."""
+    comparable = _comparable_model_id(model)
+    if not comparable:
+        return None
+
+    best: ModelPrice | None = None
+    best_length = -1
+    for catalog_model, price in catalog.models.items():
+        comparable_catalog_model = _comparable_model_id(catalog_model)
+        if comparable_catalog_model == comparable:
+            return price
+        if (
+            comparable.startswith(comparable_catalog_model)
+            and len(comparable_catalog_model) > best_length
+        ):
+            best = price
+            best_length = len(comparable_catalog_model)
+    return best
+
+
+def estimate_session_cost(
+    usage_by_model: Mapping[str | None, ModelUsage],
+    catalog: PriceCatalog,
+) -> SessionCost:
+    """Return the session cost, leaving out usage with no model id when it is at most 1% of it."""
+    named = {model: usage for model, usage in usage_by_model.items() if model is not None}
+    prices = _resolve_prices(named, catalog)
+    if prices is None:
+        reason = "No price for every model in the session" if named else "No usage with a model id"
+        return SessionCost(usd=None, unavailable_reason=reason)
+    cost = _priced_cost(named, prices)
+    model_less = usage_by_model.get(None)
+    if model_less is None:
+        return SessionCost(usd=cost)
+    # Priced at the session's highest prices, the left-out share is an upper bound.
+    # When the named models cost $0 (e.g. aborted responses), any model-less usage is over 1%.
+    highest = _highest_prices(list(prices.values()))
+    if _usage_cost(model_less, highest) > cost * MAX_MODEL_LESS_COST_SHARE:
+        return SessionCost(
+            usd=None,
+            unavailable_reason="Usage with no model id is over 1% of the session cost",
+        )
+    return SessionCost(usd=cost, model_less_tokens_left_out=model_less.totals.total)
+
+
+def _highest_prices(prices: Sequence[ModelPrice]) -> ModelPrice:
+    return ModelPrice(
+        input=max(price.input for price in prices),
+        output=max(price.output for price in prices),
+        cache_read=max(price.cache_read for price in prices),
+        cache_write=max(price.cache_write for price in prices),
+    )
+
+
+def estimate_cost_usd(
+    usage_by_model: Mapping[str | None, ModelUsage],
+    catalog: PriceCatalog,
+) -> float | None:
+    """Return the list-price cost in USD, or None when any model has no price."""
+    prices = _resolve_prices(usage_by_model, catalog)
+    if prices is None:
+        return None
+    return _priced_cost(usage_by_model, prices)
+
+
+def _resolve_prices(
+    usage_by_model: Mapping[str | None, ModelUsage],
+    catalog: PriceCatalog,
+) -> dict[str | None, ModelPrice] | None:
+    if not usage_by_model:
+        return None
+    prices: dict[str | None, ModelPrice] = {}
+    for model in usage_by_model:
+        price = find_model_price(catalog, model) if model else None
+        if price is None:
+            return None
+        prices[model] = price
+    return prices
+
+
+def _priced_cost(
+    usage_by_model: Mapping[str | None, ModelUsage],
+    prices: Mapping[str | None, ModelPrice],
+) -> float:
+    return sum(_usage_cost(usage_by_model[model], price) for model, price in prices.items())
+
+
+def _usage_cost(usage: ModelUsage, price: ModelPrice) -> float:
+    totals = usage.totals
+    cache_write_5m = totals.cache_creation_input_tokens - usage.cache_write_1h_tokens
+    return (
+        totals.input_tokens * price.input
+        + totals.output_tokens * price.output
+        + totals.cache_read_input_tokens * price.cache_read
+        + cache_write_5m * price.cache_write
+        + usage.cache_write_1h_tokens * price.input * CACHE_WRITE_1H_INPUT_MULTIPLIER
+    )
+
+
+def format_cost(cost_usd: float, catalog: PriceCatalog) -> str | None:
+    """Render the test plan cost marker value, or None when the cost rounds to zero."""
+    usd = f"{cost_usd:.4f}"
+    if float(usd) == 0:
+        return None
+    return f"usd={usd} pricing={catalog.checked}"
 
 
 def format_legacy_usage(totals: TokenTotals) -> str:
