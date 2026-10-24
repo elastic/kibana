@@ -21,7 +21,7 @@ import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { IacKeyCheck } from '../components/iac_key_check';
-import { INVALID_STACK_ARN_MESSAGE } from '../utils';
+import { INVALID_ROLE_ARN_MESSAGE, INVALID_STACK_ARN_MESSAGE } from '../utils';
 
 import { AwsIdentityFederationSetup } from './aws_identity_federation_setup';
 
@@ -395,6 +395,44 @@ describe('AwsIdentityFederationSetup', () => {
 
       expect(screen.getByText(INVALID_STACK_ARN_MESSAGE)).toBeInTheDocument();
       expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeDisabled();
+    });
+
+    it('flags an invalid role ARN and disables Create even with the other fields filled', async () => {
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
+        'my-identity'
+      );
+      await user.type(screen.getByTestId('awsIdentityFederationSetup-roleArn'), '123456');
+
+      expect(screen.getByText(INVALID_ROLE_ARN_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toBeInvalid();
+      expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeDisabled();
+    });
+
+    it('posts the trimmed role ARN on Create', async () => {
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
+        'my-identity'
+      );
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-roleArn'),
+        ' arn:aws:iam::123456789012:role/NewRole '
+      );
+
+      expect(screen.queryByText(INVALID_ROLE_ARN_MESSAGE)).not.toBeInTheDocument();
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          vars: { role_arn: { value: 'arn:aws:iam::123456789012:role/NewRole', type: 'text' } },
+        })
+      );
     });
 
     it('clears the form, the stack ARN and the rendered template details on create success and hands the new identity to IacKeyCheck', async () => {

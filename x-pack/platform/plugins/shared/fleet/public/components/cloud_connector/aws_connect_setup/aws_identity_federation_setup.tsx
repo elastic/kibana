@@ -42,7 +42,12 @@ import {
 } from '../components/iac_key_check';
 import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
 import { StackArnField } from '../components/stack_arn_field';
-import { getCloudConnectorNameError, isStackArnInvalid } from '../utils';
+import {
+  INVALID_ROLE_ARN_MESSAGE,
+  getCloudConnectorNameError,
+  isRoleArnInvalid,
+  isStackArnInvalid,
+} from '../utils';
 import { TABS } from '../constants';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 
@@ -130,6 +135,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // Validate what Create will post: a pasted ARN often carries surrounding whitespace.
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid = isStackArnInvalid(stackArn);
+  const trimmedRoleArn = roleArn.trim();
+  const roleArnFormatInvalid = isRoleArnInvalid(roleArn);
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
@@ -207,7 +214,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       cloudProvider: 'aws',
       accountType,
       vars: {
-        role_arn: { value: roleArn, type: 'text' },
+        role_arn: { value: trimmedRoleArn, type: 'text' },
       },
       ...(hasPendingIacConfirm(iacConfirm) ? iacConfirm : {}),
       ...(trimmedStackArn && !stackArnInvalid ? { iac_deployment_id: trimmedStackArn } : {}),
@@ -216,19 +223,21 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     createConnector,
     connectorName,
     accountType,
-    roleArn,
+    trimmedRoleArn,
     iacConfirm,
     trimmedStackArn,
     stackArnInvalid,
   ]);
 
-  const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
+  const roleArnRequiredInvalid = hasInvalidRequiredVars && !trimmedRoleArn;
+  const roleArnInvalid = roleArnRequiredInvalid || roleArnFormatInvalid;
   // While a live render is in flight `iacConfirm` is still unset, so a Create pressed then would
   // store a keyless identity and the late render's template details would land after the tab
   // switch, on nothing. Wait for it to settle; a failed render fails open once it does.
   const isCreateDisabled =
     isGeneratingTemplate ||
-    !roleArn ||
+    !trimmedRoleArn ||
+    roleArnFormatInvalid ||
     !!getCloudConnectorNameError(connectorName) ||
     stackArnInvalid;
 
@@ -301,10 +310,12 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             })}
             isInvalid={roleArnInvalid}
             error={
-              roleArnInvalid
+              roleArnRequiredInvalid
                 ? i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnRequired', {
                     defaultMessage: 'Role ARN is required',
                   })
+                : roleArnFormatInvalid
+                ? INVALID_ROLE_ARN_MESSAGE
                 : undefined
             }
             fullWidth

@@ -63,3 +63,5 @@ export {
   parseAwsRegionFromArn,
   isCloudFormationStackArn,
 } from './iac_deployment';
+
+export { isIamRoleArn } from './aws_role_arn';

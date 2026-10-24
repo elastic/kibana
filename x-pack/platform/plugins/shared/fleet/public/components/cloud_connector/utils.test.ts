@@ -34,6 +34,7 @@ import {
   getStaticTemplate,
   getAwsStackConsoleUrl,
   isStackArnInvalid,
+  isRoleArnInvalid,
   getUnresolvedTemplateUrlTokens,
   getWorkloadIdentityFederationStackParams,
 } from './utils';
@@ -1748,6 +1749,47 @@ describe('isStackArnInvalid', () => {
 
   it('ignores leading and trailing whitespace around a valid ARN', () => {
     expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
+  });
+});
+
+describe('isRoleArnInvalid', () => {
+  const ROLE_ARN = 'arn:aws:iam::123456789012:role/MyRole';
+
+  it('returns false for an empty or undefined value', () => {
+    expect(isRoleArnInvalid(undefined)).toBe(false);
+    expect(isRoleArnInvalid('')).toBe(false);
+  });
+
+  it('returns true for a whitespace-only value, which would be saved as empty', () => {
+    expect(isRoleArnInvalid('   ')).toBe(true);
+  });
+
+  it.each([
+    ROLE_ARN,
+    'arn:aws:iam::123456789012:role/service-role/My.Role+=,@_-1',
+    'arn:aws:iam::123456789012:role/a/b/c/MyRole',
+    'arn:aws-us-gov:iam::123456789012:role/MyRole',
+    'arn:aws-cn:iam::123456789012:role/MyRole',
+  ])('returns false for the role ARN %s', (arn) => {
+    expect(isRoleArnInvalid(arn)).toBe(false);
+  });
+
+  it('ignores leading and trailing whitespace around a valid ARN', () => {
+    expect(isRoleArnInvalid(`  ${ROLE_ARN}\n`)).toBe(false);
+  });
+
+  it.each([
+    ['123456', 'not an ARN'],
+    ['arn:aws:iam::12345:role/MyRole', 'a short account id'],
+    ['arn:aws:iam:us-east-1:123456789012:role/MyRole', 'a region'],
+    ['arn:aws:iam::123456789012:user/MyUser', 'an IAM user'],
+    ['arn:aws:iam::123456789012:role/', 'no role name'],
+    ['arn:aws:iam::123456789012:role/My Role', 'a space in the name'],
+    [`arn:aws:iam::123456789012:role/${'a'.repeat(65)}`, 'a name longer than 64 characters'],
+    ['arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid', 'a stack ARN'],
+    ['arn:gcp:iam::123456789012:role/MyRole', 'a non-AWS partition'],
+  ])('returns true for %s (%s)', (value) => {
+    expect(isRoleArnInvalid(value)).toBe(true);
   });
 });
 

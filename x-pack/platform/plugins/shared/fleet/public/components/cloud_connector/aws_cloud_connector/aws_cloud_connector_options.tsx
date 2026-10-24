@@ -8,6 +8,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicyConfigRecord } from '../../../../common';
 import { AWS_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
+import type { CloudConnectorField } from '../types';
+import { INVALID_ROLE_ARN_MESSAGE, isRoleArnInvalid } from '../utils';
+
+const validateRoleArn = (value: string | undefined): string | undefined =>
+  isRoleArnInvalid(value) ? INVALID_ROLE_ARN_MESSAGE : undefined;
 
 // Cloud Connector field labels
 const AWS_CLOUD_CONNECTOR_FIELD_LABELS = {
@@ -27,6 +32,7 @@ export interface AwsCloudConnectorOptions {
   dataTestSubj: string;
   isSecret?: boolean;
   value: string;
+  validate?: CloudConnectorField['validate'];
 }
 
 // Define field sequence order
@@ -44,16 +50,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (
     return;
   }
 
-  const fields: ({
-    label: string;
-    type?: 'text' | 'password' | undefined;
-    isSecret?: boolean | undefined;
-    dataTestSubj: string;
-  } & {
-    value: string;
-    id: string;
-    dataTestSubj: string;
-  })[] = [];
+  const fields: AwsCloudConnectorOptions[] = [];
 
   // Create a map of all available fields
   const availableFields = new Map<string, AwsCloudConnectorOptions>();
@@ -65,6 +62,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (
       type: 'text' as const,
       dataTestSubj: 'awsRoleArnInput',
       value: inputVars.role_arn.value,
+      validate: validateRoleArn,
     });
   }
 
@@ -75,6 +73,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (
       type: 'text' as const,
       dataTestSubj: 'awsRoleArnInput',
       value: inputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value,
+      validate: validateRoleArn,
     });
   }
 
