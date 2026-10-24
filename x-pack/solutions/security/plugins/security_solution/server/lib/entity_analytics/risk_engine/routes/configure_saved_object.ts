@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -18,12 +19,55 @@ import {
 } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { EntityAnalyticsRoutesDeps, RiskEngineConfiguration } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import {
+  getConfiguration,
+  initSavedObjects,
+  updateSavedObjectAttribute,
+} from '../utils/saved_object_configuration';
+
+const updateRiskEngineSavedObject = async ({
+  savedObjectsClient,
+  logger,
+  namespace,
+  attributes,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  namespace: string;
+  attributes: Partial<RiskEngineConfiguration>;
+}) => {
+  try {
+    const configuration = await getConfiguration({
+      savedObjectsClient,
+      logger,
+      namespace,
+    });
+    if (!configuration) {
+      await initSavedObjects({
+        savedObjectsClient,
+        logger,
+        namespace,
+      });
+    }
+    return await updateSavedObjectAttribute({
+      logger,
+      savedObjectsClient,
+      namespace,
+      attributes,
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    logger.error(`Error updating risk score engine saved object attributes: ${message}`);
+    throw e;
+  }
+};
 
 export const riskEngineConfigureSavedObjectRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
@@ -64,7 +108,6 @@ export const riskEngineConfigureSavedObjectRoute = (
 
           const siemResponse = buildSiemResponse(response);
           const [_, { taskManager }] = await getStartServices();
-          const riskEngineClient = securitySolution.getRiskEngineDataClient();
 
           if (!taskManager) {
             securitySolution.getAuditLogger()?.log({
@@ -88,14 +131,22 @@ export const riskEngineConfigureSavedObjectRoute = (
             });
           }
 
+          const coreContext = await context.core;
+
           try {
-            await riskEngineClient.updateRiskEngineSavedObject({
+            const attributes: Partial<RiskEngineConfiguration> = {
               excludeAlertStatuses: request.body.exclude_alert_statuses,
-              range: request.body.range,
+              range: request.body.range as RiskEngineConfiguration['range'],
               excludeAlertTags: request.body.exclude_alert_tags,
               enableResetToZero: request.body.enable_reset_to_zero,
               filters: request.body.filters,
               ...(request.body.page_size != null ? { pageSize: request.body.page_size } : {}),
+            };
+            await updateRiskEngineSavedObject({
+              savedObjectsClient: coreContext.savedObjects.client,
+              logger,
+              namespace: securitySolution.getSpaceId(),
+              attributes,
             });
             return response.ok({ body: { risk_engine_saved_object_configured: true } });
           } catch (e) {

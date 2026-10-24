@@ -10,8 +10,8 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
+import { EntityRiskLevelsEnum } from '../../../../../../common/api/entity_analytics/common';
 import { RiskEngineDataWriter } from '../../risk_engine_data_writer';
-import { riskScoreServiceMock } from '../../risk_score_service.mock';
 import { runResolutionScoringStep } from './run_resolution_scoring_step';
 import {
   buildZeroResolutionScores,
@@ -21,6 +21,26 @@ import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_
 
 jest.mock('./score_resolution_entities');
 jest.mock('./persist_scores');
+
+const createRiskScore = (
+  overrides: Partial<EntityRiskScoreRecord> = {}
+): EntityRiskScoreRecord => ({
+  '@timestamp': '2023-02-15T00:15:19.231Z',
+  id_field: 'host.name',
+  id_value: 'hostname',
+  calculated_level: EntityRiskLevelsEnum.High,
+  calculated_score: 149,
+  calculated_score_norm: 85.332,
+  category_1_score: 85,
+  category_1_count: 12,
+  category_2_count: 0,
+  category_2_score: 0,
+  criticality_level: 'high_impact',
+  criticality_modifier: 2,
+  notes: [],
+  inputs: [],
+  ...overrides,
+});
 
 async function* toAsyncGenerator<T>(pages: T[]) {
   for (const page of pages) {
@@ -128,7 +148,7 @@ describe('runResolutionScoringStep', () => {
   describe('zero resolution scores', () => {
     const TARGET_ID = 'host:target-1';
     const OTHER_TARGET_ID = 'host:target-2';
-    const zeroScore = riskScoreServiceMock.createRiskScore({
+    const zeroScore = createRiskScore({
       id_value: TARGET_ID,
       calculated_score: 0,
       calculated_score_norm: 0,
@@ -190,9 +210,7 @@ describe('runResolutionScoringStep', () => {
     it('asks for zeros only for the targets that got no score', async () => {
       jest
         .mocked(calculateResolutionEntityScores)
-        .mockReturnValue(
-          scorePages([[riskScoreServiceMock.createRiskScore({ id_value: TARGET_ID })]])
-        );
+        .mockReturnValue(scorePages([[createRiskScore({ id_value: TARGET_ID })]]));
 
       await run({ targetEntityIds: [TARGET_ID, OTHER_TARGET_ID] });
 
@@ -205,9 +223,7 @@ describe('runResolutionScoringStep', () => {
       // Zeroing here would drop the score of a group that does have alerts.
       jest
         .mocked(calculateResolutionEntityScores)
-        .mockReturnValue(
-          scorePages([[riskScoreServiceMock.createRiskScore({ id_value: TARGET_ID })]])
-        );
+        .mockReturnValue(scorePages([[createRiskScore({ id_value: TARGET_ID })]]));
       jest.mocked(persistScoresToRiskIndex).mockResolvedValue(0);
 
       await run();
