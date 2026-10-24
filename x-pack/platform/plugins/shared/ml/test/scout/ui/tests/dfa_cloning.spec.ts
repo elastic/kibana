@@ -146,7 +146,11 @@ const assertValidationCalloutCount = async (
   page: ScoutPage,
   expectedCount: number
 ): Promise<void> => {
-  const validationCallouts = page.locator('.euiCallOut[data-test-subj~="mlValidationCallout"]');
+  // The subj is compound (`mlValidationCallout <status>`), so match the token and exclude
+  // the `…__message`, `…__content` and `…__actions` children EUI derives from it.
+  const validationCallouts = page.locator(
+    '[data-test-subj~="mlValidationCallout"]:not([data-test-subj$="__message"]):not([data-test-subj$="__content"]):not([data-test-subj$="__actions"])'
+  );
   await expect(validationCallouts).not.toHaveCount(0);
   await expect(validationCallouts).toHaveCount(expectedCount);
 };
