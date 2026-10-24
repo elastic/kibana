@@ -8,6 +8,12 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/data-service",
+    "@kbn/unified-search-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-query",
+    "@kbn/datemath",
+    "@kbn/data-views-plugin"
   ]
 }

@@ -20,15 +20,24 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/i18n'
+  - '@kbn/data-service'
+  - '@kbn/unified-search-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/es-query'
+  - '@kbn/datemath'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod
   - group-observability
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}
