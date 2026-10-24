@@ -302,8 +302,17 @@ function getCustomHostSettings(
   return customHostSettings.find((settings) => settings.url === canonicalUrl);
 }
 
+function getRecipientAllowlist(config: ActionsConfig, isTrial: () => boolean): string[] | null {
+  if (isTrial()) {
+    return config.email?.recipient_allowlist_in_trial || [];
+  } else {
+    return config.email?.recipient_allowlist ?? null;
+  }
+}
+
 function validateEmails(
   config: ActionsConfig,
+  isTrial: () => boolean,
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
@@ -311,18 +320,24 @@ function validateEmails(
     config.email?.domain_allowlist ?? null,
     addresses,
     options,
-    config.email?.recipient_allowlist ?? null
+    getRecipientAllowlist(config, isTrial)
   );
   return invalidEmailsAsMessage(validated);
 }
 
+export interface ActionsConfigurationUtilitiesOptions {
+  /** Evaluated on each email validation; when true, `email.recipient_allowlist_in_trial` applies. */
+  isTrial?: () => boolean;
+}
+
 export function getActionsConfigurationUtilities(
-  config: ActionsConfig
+  config: ActionsConfig,
+  { isTrial = () => false }: ActionsConfigurationUtilitiesOptions = {}
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
-  const validatedEmailCurried = curry(validateEmails)(config);
+  const validatedEmailCurried = curry(validateEmails)(config, isTrial);
   const getEARSSSLSettings = createCachedSSLSettings(() =>
     resolveFileBasedSSLSettings({
       ssl: config.auth.ears?.ssl,

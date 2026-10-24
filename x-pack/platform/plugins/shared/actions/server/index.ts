@@ -77,8 +77,13 @@ export type { ServiceParams } from './sub_action_framework/types';
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   exposeToBrowser: {
-    // recipient_allowlist is not exposed because it may contain sensitive information
-    email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
+    // recipient allowlists are not exposed because they may contain sensitive information
+    email: {
+      domain_allowlist: true,
+      recipient_allowlist: false,
+      recipient_allowlist_in_trial: false,
+      services: { enabled: true },
+    },
     webhook: { ssl: { pfx: { enabled: true } } },
     auth: { ears: { enabled: true, enableExperimental: true } },
     inboundEvents: { enabled: true },

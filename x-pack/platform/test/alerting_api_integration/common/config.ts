@@ -31,6 +31,8 @@ interface CreateTestConfigOptions {
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
   emailRecipientAllowlist?: string[];
+  emailRecipientAllowlistInTrial?: string[];
+  licensingApiPollingFrequency?: string;
   testFiles?: string[];
   reportName?: string;
   useDedicatedTaskRunner: boolean;
@@ -228,6 +230,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     customizeLocalHostSsl = false,
     emailDomainsAllowed = undefined,
     emailRecipientAllowlist = undefined,
+    emailRecipientAllowlistInTrial = undefined,
+    licensingApiPollingFrequency = undefined,
     testFiles = undefined,
     reportName = undefined,
     useDedicatedTaskRunner,
@@ -312,6 +316,19 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ]
       : emailSettings;
 
+    emailSettings = emailRecipientAllowlistInTrial
+      ? [
+          ...emailSettings,
+          `--xpack.actions.email.recipient_allowlist_in_trial=${JSON.stringify(
+            emailRecipientAllowlistInTrial
+          )}`,
+        ]
+      : emailSettings;
+
+    const licensingSettings = licensingApiPollingFrequency
+      ? [`--xpack.licensing.api_polling_frequency=${licensingApiPollingFrequency}`]
+      : [];
+
     const maxScheduledPerMinuteSettings =
       typeof maxScheduledPerMinute === 'number'
         ? [`--xpack.alerting.rules.maxScheduledPerMinute=${maxScheduledPerMinute}`]
@@ -391,6 +408,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...actionsProxyUrl,
           ...customHostSettings,
           ...emailSettings,
+          ...licensingSettings,
           ...maxScheduledPerMinuteSettings,
           ...disabledRuleTypesSetting,
           ...enabledRuleTypesSetting,

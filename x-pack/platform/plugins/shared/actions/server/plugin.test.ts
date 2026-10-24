@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
+import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -441,6 +442,66 @@ describe('Actions Plugin', () => {
 
         expect(pluginSetup.isPreconfiguredConnector('preconfiguredServerLog')).toEqual(true);
         expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
+      });
+    });
+
+    describe('email.recipient_allowlist_in_trial', () => {
+      const email = {
+        recipient_allowlist: ['*@company.co'],
+        recipient_allowlist_in_trial: ['trial-user@company.co'],
+      };
+
+      async function setup(cloud: ReturnType<typeof cloudMock.createSetup>) {
+        const license$ = new BehaviorSubject(
+          licensingMock.createLicense({ license: { type: 'enterprise' } })
+        );
+        plugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>(getConfig({ email }))
+        );
+        const pluginSetup = await plugin.setup(coreMock.createSetup() as any, {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: { ...licensingMock.createSetup(), license$ },
+          eventLog: eventLogMock.createSetup(),
+          features: featuresPluginMock.createSetup(),
+          cloud,
+        });
+        return { configUtils: pluginSetup.getActionsConfigurationUtilities(), license$ };
+      }
+
+      it('uses the trial allowlist only while the license is a trial', async () => {
+        const { configUtils, license$ } = await setup(cloudMock.createSetup());
+
+        expect(configUtils.validateEmailAddresses(['other@company.co'])).toBe(undefined);
+
+        license$.next(licensingMock.createLicense({ license: { type: 'trial' } }));
+        expect(configUtils.validateEmailAddresses(['other@company.co'])).toBe(
+          'not allowed emails: other@company.co'
+        );
+        expect(configUtils.validateEmailAddresses(['trial-user@company.co'])).toBe(undefined);
+
+        license$.next(licensingMock.createLicense({ license: { type: 'enterprise' } }));
+        expect(configUtils.validateEmailAddresses(['other@company.co'])).toBe(undefined);
+      });
+
+      it('uses the trial allowlist on serverless when the organization is in trial', async () => {
+        const cloud = cloudMock.createSetup();
+        cloud.isServerlessEnabled = true;
+        cloud.serverless.organizationInTrial = true;
+        const { configUtils } = await setup(cloud);
+
+        expect(configUtils.validateEmailAddresses(['other@company.co'])).toBe(
+          'not allowed emails: other@company.co'
+        );
+      });
+
+      it('ignores the trial allowlist on serverless when the organization is not in trial', async () => {
+        const cloud = cloudMock.createSetup();
+        cloud.isServerlessEnabled = true;
+        cloud.serverless.organizationInTrial = false;
+        const { configUtils } = await setup(cloud);
+
+        expect(configUtils.validateEmailAddresses(['other@company.co'])).toBe(undefined);
       });
     });
 

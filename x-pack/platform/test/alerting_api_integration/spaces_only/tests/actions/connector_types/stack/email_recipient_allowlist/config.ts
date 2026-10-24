@@ -8,6 +8,7 @@
 import { createTestConfig } from '../../../../../../common/config';
 
 export const recipientAllowList = ['*.bar@example.org', '*@test.com'];
+export const nonTrialRecipientAllowList = ['*@non-trial.example.org'];
 
 export default createTestConfig('spaces_only-recipient_allowlist', {
   disabledPlugins: ['security'],
@@ -16,7 +17,9 @@ export default createTestConfig('spaces_only-recipient_allowlist', {
   verificationMode: 'none',
   customizeLocalHostSsl: true,
   preconfiguredAlertHistoryEsIndex: true,
-  emailRecipientAllowlist: recipientAllowList,
+  emailRecipientAllowlist: nonTrialRecipientAllowList,
+  emailRecipientAllowlistInTrial: recipientAllowList,
+  licensingApiPollingFrequency: '1s',
   useDedicatedTaskRunner: true,
   testFiles: [require.resolve('.')],
   reportName: 'X-Pack Alerting API Integration Tests - Email Recipient Allowlist',

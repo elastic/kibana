@@ -395,6 +395,37 @@ describe('config validation', () => {
     });
   });
 
+  describe('email.recipient_allowlist_in_trial', () => {
+    test('validates email config with only recipient_allowlist_in_trial', () => {
+      const result = configSchema.validate({
+        email: { recipient_allowlist_in_trial: ['user@a.com'] },
+      });
+      expect(result.email?.recipient_allowlist_in_trial).toEqual(['user@a.com']);
+    });
+
+    test('can be used with recipient_allowlist', () => {
+      const result = configSchema.validate({
+        email: {
+          recipient_allowlist: ['*@a.com'],
+          recipient_allowlist_in_trial: ['user@a.com'],
+        },
+      });
+      expect(result.email?.recipient_allowlist).toEqual(['*@a.com']);
+      expect(result.email?.recipient_allowlist_in_trial).toEqual(['user@a.com']);
+    });
+
+    test('can be used with domain_allowlist', () => {
+      const result = configSchema.validate({
+        email: {
+          domain_allowlist: ['a.com'],
+          recipient_allowlist_in_trial: ['user@a.com'],
+        },
+      });
+      expect(result.email?.domain_allowlist).toEqual(['a.com']);
+      expect(result.email?.recipient_allowlist_in_trial).toEqual(['user@a.com']);
+    });
+  });
+
   describe('email.maximum_body_length', () => {
     // note, this just tests the current behavior, but if we change so the
     // default was ALWAYS the defined default, it's fine to change it.
