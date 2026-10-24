@@ -6,9 +6,20 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { ConnectorSpecActionSummary } from '../../../../common/connector_spec';
 import type { connectorTypeSchema } from '../schemas';
 
 type ConnectorTypeSchemaType = TypeOf<typeof connectorTypeSchema>;
+
+export interface ConnectorTypeSpecFields {
+  icon?: string;
+  docsUrl?: string;
+  authTypeIds: string[];
+  hasInboundEvents: boolean;
+  isInboundOnly: boolean;
+  isEarsExperimental: boolean;
+  actions: ConnectorSpecActionSummary[];
+}
 
 export interface ConnectorType {
   id: ConnectorTypeSchemaType['id'];
@@ -26,4 +37,5 @@ export interface ConnectorType {
   description?: ConnectorTypeSchemaType['description'];
   isExperimental?: ConnectorTypeSchemaType['isExperimental'];
   isTestable: ConnectorTypeSchemaType['isTestable'];
+  spec?: ConnectorTypeSpecFields;
 }

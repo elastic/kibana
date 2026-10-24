@@ -6,10 +6,38 @@
  */
 
 import Boom from '@hapi/boom';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { ActionType as CommonActionType } from '../../../../../common';
+import type { ConnectorSpecSummary } from '../../../../../common/connector_spec';
 import type { ActionsClientContext } from '../../../../actions_client';
-import type { ConnectorType } from '../../types';
+import { serializeSpecSummary } from '../../../../specs_client/lib/serialize_spec_summary';
+import type { ConnectorType, ConnectorTypeSpecFields } from '../../types';
 import { listTypesParamsSchema } from './schemas';
 import type { ListTypesParams } from './types';
+
+const toSpecFields = (summary: ConnectorSpecSummary): ConnectorTypeSpecFields => ({
+  ...(summary.icon !== undefined ? { icon: summary.icon } : {}),
+  ...(summary.docsUrl !== undefined ? { docsUrl: summary.docsUrl } : {}),
+  authTypeIds: summary.authTypeIds,
+  hasInboundEvents: summary.hasInboundEvents,
+  isInboundOnly: summary.isInboundOnly,
+  isEarsExperimental: summary.isEarsExperimental,
+  actions: summary.actions,
+});
+
+const withSpecFields = (
+  context: ActionsClientContext,
+  type: CommonActionType
+): CommonActionType & { spec?: ConnectorTypeSpecFields } => {
+  if (type.source !== ACTION_TYPE_SOURCES.spec) {
+    return type;
+  }
+  const spec = context.actionTypeRegistry.getSpec(type.id);
+  if (!spec) {
+    return type;
+  }
+  return { ...type, spec: toSpecFields(serializeSpecSummary({ spec, type })) };
+};
 
 export async function listTypes(
   context: ActionsClientContext,
@@ -29,5 +57,5 @@ export async function listTypes(
     ? connectorTypes
     : connectorTypes.filter((type) => !type.isSystemActionType);
 
-  return filteredConnectorTypes as ConnectorType[];
+  return filteredConnectorTypes.map((type) => withSpecFields(context, type)) as ConnectorType[];
 }

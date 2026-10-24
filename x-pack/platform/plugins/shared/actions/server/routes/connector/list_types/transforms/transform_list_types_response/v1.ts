@@ -5,11 +5,31 @@
  * 2.0.
  */
 
-import type { ConnectorType } from '../../../../../application/connector/types';
+import type {
+  ConnectorType,
+  ConnectorTypeSpecFields,
+} from '../../../../../application/connector/types';
 import type { GetAllConnectorTypesResponseV1 } from '../../../../../../common/routes/connector/response';
+import { transformConnectorSpecActionSummaryResponseV1 } from '../../../transforms';
+
+const transformSpecFieldsV1 = (spec: ConnectorTypeSpecFields | undefined) => {
+  if (spec === undefined) {
+    return {};
+  }
+  return {
+    ...(spec.icon !== undefined ? { icon: spec.icon } : {}),
+    ...(spec.docsUrl !== undefined ? { docs_url: spec.docsUrl } : {}),
+    auth_type_ids: spec.authTypeIds,
+    has_inbound_events: spec.hasInboundEvents,
+    is_inbound_only: spec.isInboundOnly,
+    is_ears_experimental: spec.isEarsExperimental,
+    actions: spec.actions.map(transformConnectorSpecActionSummaryResponseV1),
+  };
+};
 
 export const transformListTypesResponse = (
-  results: ConnectorType[]
+  results: ConnectorType[],
+  options: { includeSpecFields?: boolean } = {}
 ): GetAllConnectorTypesResponseV1 => {
   return results.map(
     ({
@@ -28,6 +48,7 @@ export const transformListTypesResponse = (
       description,
       isExperimental,
       isTestable,
+      spec,
     }) => ({
       id,
       name,
@@ -44,6 +65,7 @@ export const transformListTypesResponse = (
       description,
       is_experimental: isExperimental,
       is_testable: Boolean(isTestable),
+      ...(options.includeSpecFields === true ? transformSpecFieldsV1(spec) : {}),
     })
   );
 };
