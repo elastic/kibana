@@ -8,9 +8,9 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { TableSearch } from './search';
-import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('TableSearch', () => {
   const onFilterOptionsChange = jest.fn();
@@ -19,50 +19,48 @@ describe('TableSearch', () => {
     jest.clearAllMocks();
   });
 
-  it('renders with empty value correctly', async () => {
-    renderWithTestingProviders(
+  it('renders with empty value correctly', () => {
+    renderWithKibanaRenderContext(
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
-    await screen.findByDisplayValue('');
+    expect(screen.getByTestId('search-cases')).toHaveValue('');
   });
 
-  it('renders with initial value correctly', async () => {
-    renderWithTestingProviders(
+  it('renders with initial value correctly', () => {
+    renderWithKibanaRenderContext(
       <TableSearch filterOptionsSearch="My search" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
-    await screen.findByDisplayValue('My search');
+    expect(screen.getByTestId('search-cases')).toHaveValue('My search');
   });
 
   it('calls onFilterOptionsChange correctly', async () => {
-    renderWithTestingProviders(
+    renderWithKibanaRenderContext(
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
-    await userEvent.type(await screen.findByTestId('search-cases'), 'My search{enter}');
+    await userEvent.type(screen.getByTestId('search-cases'), 'My search{enter}');
 
     expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: 'My search' });
   });
 
   it('calls onFilterOptionsChange if the search term is empty', async () => {
-    renderWithTestingProviders(
+    renderWithKibanaRenderContext(
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
-    await userEvent.type(await screen.findByTestId('search-cases'), '      {enter}');
+    await userEvent.type(screen.getByTestId('search-cases'), '      {enter}');
 
     expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: '' });
   });
 
   it('calls onFilterOptionsChange when clearing the search bar', async () => {
-    renderWithTestingProviders(
+    renderWithKibanaRenderContext(
       <TableSearch filterOptionsSearch="My search" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
-    await screen.findByDisplayValue('My search');
-
-    await userEvent.click(await screen.findByTestId('clearSearchButton'));
+    await userEvent.click(screen.getByTestId('clearSearchButton'));
 
     expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: '' });
   });
