@@ -5544,6 +5544,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-fp-tp':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
+      '@kbn/evals-suite-automatic-import':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-evals-suite-automatic-import
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -9095,6 +9098,8 @@ importers:
   x-pack/platform/packages/shared/kbn-evals-runner: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2: {}
+
+  x-pack/platform/packages/shared/kbn-evals-suite-automatic-import: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests: {}
 

@@ -1311,6 +1311,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-evals-extensions'
   - 'x-pack/platform/packages/shared/kbn-evals-runner'
   - 'x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2'
+  - 'x-pack/platform/packages/shared/kbn-evals-suite-automatic-import'
   - 'x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests'
   - 'x-pack/platform/packages/shared/kbn-evals-suite-streams'
   - 'x-pack/platform/packages/shared/kbn-event-stacktrace'
