@@ -11,38 +11,39 @@ import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
+export interface GetAnnotationsOptions {
+  jobIds: string[];
+  earliestMs: number | null;
+  latestMs: number | null;
+  maxAnnotations: number;
+  detectorIndex?: number;
+  entities?: any[];
+  /** Aborts the HTTP request. Not sent in the body. */
+  signal?: AbortSignal;
+}
+
+function annotationsRequestBody({ signal: _signal, ...body }: GetAnnotationsOptions): string {
+  return JSON.stringify(body);
+}
+
 export const annotationsApiProvider = (httpService: HttpService) => ({
-  getAnnotations$(obj: {
-    jobIds: string[];
-    earliestMs: number;
-    latestMs: number;
-    maxAnnotations: number;
-    detectorIndex?: number;
-    entities?: any[];
-  }) {
-    const body = JSON.stringify(obj);
+  getAnnotations$(obj: GetAnnotationsOptions) {
     return httpService.http$<GetAnnotationsResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/annotations`,
       method: 'POST',
-      body,
+      body: annotationsRequestBody(obj),
       version: '1',
+      signal: obj.signal,
     });
   },
 
-  getAnnotations(obj: {
-    jobIds: string[];
-    earliestMs: number | null;
-    latestMs: number | null;
-    maxAnnotations: number;
-    detectorIndex?: number;
-    entities?: any[];
-  }) {
-    const body = JSON.stringify(obj);
+  getAnnotations(obj: GetAnnotationsOptions) {
     return httpService.http<GetAnnotationsResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/annotations`,
       method: 'POST',
-      body,
+      body: annotationsRequestBody(obj),
       version: '1',
+      signal: obj.signal,
     });
   },
 

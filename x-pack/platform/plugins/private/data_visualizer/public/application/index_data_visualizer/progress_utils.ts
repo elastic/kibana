@@ -11,6 +11,7 @@ export const getInitialProgress = (): DataStatsFetchProgress => ({
   isRunning: false,
   loaded: 0,
   total: 100,
+  cancelled: false,
 });
 
 export const getReducer =

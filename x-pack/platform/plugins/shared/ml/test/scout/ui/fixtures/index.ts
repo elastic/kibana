@@ -12,7 +12,7 @@ import type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
 } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import { spaceTest as baseSpaceTest, test as baseTest, createLazyPageObject } from '@kbn/scout';
 import type { MlUiPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 import { DataFrameAnalyticsPage } from './page_objects/data_frame_analytics_page';
@@ -26,24 +26,30 @@ export interface MlUiTestFixtures extends ScoutTestFixtures {
   };
 }
 
-export const test = baseTest.extend<MlUiTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-      kbnUrl,
-    }: {
-      pageObjects: PageObjects;
-      page: ScoutPage;
-      kbnUrl: KibanaUrl;
-    },
-    use: (pageObjects: MlUiTestFixtures['pageObjects']) => Promise<void>
-  ) => {
-    await use({
-      ...extendPageObjects(pageObjects, page),
-      dataFrameAnalytics: createLazyPageObject(DataFrameAnalyticsPage, page, kbnUrl),
-    });
+const pageObjectsFixture = async (
+  {
+    pageObjects,
+    page,
+    kbnUrl,
+  }: {
+    pageObjects: PageObjects;
+    page: ScoutPage;
+    kbnUrl: KibanaUrl;
   },
+  use: (pageObjects: MlUiTestFixtures['pageObjects']) => Promise<void>
+) => {
+  await use({
+    ...extendPageObjects(pageObjects, page),
+    dataFrameAnalytics: createLazyPageObject(DataFrameAnalyticsPage, page, kbnUrl),
+  });
+};
+
+export const test = baseTest.extend<MlUiTestFixtures, ScoutWorkerFixtures>({
+  pageObjects: pageObjectsFixture,
+});
+
+export const spaceTest = baseSpaceTest.extend<MlUiTestFixtures>({
+  pageObjects: pageObjectsFixture,
 });
 
 export * as testData from './constants';

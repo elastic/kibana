@@ -7,6 +7,7 @@
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   PublishesDataViews,
   PublishesTimeRange,
@@ -26,6 +27,7 @@ export interface PatternAnalysisComponentApi {
 }
 
 export type PatternAnalysisEmbeddableApi = DefaultEmbeddableApi<PatternAnalysisEmbeddableState> &
+  CanCancelRequests &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesTimeRange &

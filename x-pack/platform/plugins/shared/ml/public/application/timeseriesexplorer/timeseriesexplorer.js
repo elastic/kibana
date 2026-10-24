@@ -50,11 +50,7 @@ import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_n
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
-import {
-  APP_STATE_ACTION,
-  CHARTS_POINT_TARGET,
-  TIME_FIELD_NAME,
-} from './timeseriesexplorer_constants';
+import { APP_STATE_ACTION, CHARTS_POINT_TARGET } from './timeseriesexplorer_constants';
 import { timeSeriesSearchServiceFactory } from './timeseriesexplorer_utils/time_series_search_service';
 import { getTimeseriesexplorerDefaultState } from './timeseriesexplorer_utils';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
@@ -276,8 +272,7 @@ export class TimeSeriesExplorer extends React.Component {
       entityControls.filter((entity) => entity.fieldValue !== null),
       searchBounds,
       selectedJob,
-      functionDescription,
-      TIME_FIELD_NAME
+      functionDescription
     );
   }
 

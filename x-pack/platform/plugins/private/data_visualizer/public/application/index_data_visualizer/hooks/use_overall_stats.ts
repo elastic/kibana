@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
+import { useCallback, useEffect, useRef, useMemo, useReducer, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 import { chunk } from 'lodash';
@@ -69,7 +70,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   esql = false,
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
-  probability?: number | null
+  probability?: number | null,
+  requestCancellationManager?: RequestCancellationManager
 ): {
   progress: DataStatsFetchProgress;
   overallStats: OverallStats;
@@ -114,6 +116,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       const fetchPopulatedFields = async () => {
         populatedFieldsAbortCtrl.current.abort();
         populatedFieldsAbortCtrl.current = new AbortController();
+        const signal = requestCancellationManager
+          ? AbortSignal.any([
+              populatedFieldsAbortCtrl.current.signal,
+              requestCancellationManager.signal,
+            ])
+          : populatedFieldsAbortCtrl.current.signal;
 
         // Trick to avoid duplicate getFieldsForWildcard requests
         // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
@@ -135,11 +143,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             },
             includeEmptyFields: false,
             projectRouting,
+            abortSignal: signal,
           }),
           populatedFieldsAbortCtrl.current
         );
 
-        if (!unmounted) {
+        // A cancelled request isn't a timeout: leave the state untouched so a later load retries.
+        if (!unmounted && !signal.aborted) {
           if (Array.isArray(nonEmptyFields)) {
             setPopulatedFieldsInIndex(new Set([...nonEmptyFields.map((field) => field.name)]));
           } else {
@@ -171,6 +181,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
       abortCtrl.current = new AbortController();
+
+      // The panel was cancelled and no new load has started yet, don't start requests.
+      // Note this must not mark the fetch as loaded, that would report the panel as rendered.
+      if (requestCancellationManager?.signal.aborted) {
+        setFetchState({ isRunning: false, cancelled: true });
+        return;
+      }
 
       if (
         !searchStrategyParams ||
@@ -207,7 +224,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       } = searchStrategyParams;
 
       const searchOptions: ISearchOptions = {
-        abortSignal: abortCtrl.current.signal,
+        abortSignal: requestCancellationManager
+          ? AbortSignal.any([abortCtrl.current.signal, requestCancellationManager.signal])
+          : abortCtrl.current.signal,
         sessionId,
         ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };
@@ -386,9 +405,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           });
         },
         error: (error) => {
-          if (error.name !== 'AbortError') {
-            displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
+          if (error.name === 'AbortError') {
+            setFetchState({ isRunning: false, cancelled: true });
+            return;
           }
+
+          displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
 
           setFetchState({
             isRunning: false,
@@ -415,6 +437,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     lastRefresh,
     probability,
     populatedFieldsInIndexWithoutRuntimeFields,
+    requestCancellationManager,
   ]);
 
   const cancelFetch = useCallback(() => {

@@ -20,7 +20,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
     });
 
-    loadTestFile(require.resolve('./anomaly_charts_dashboard_embeddables'));
     loadTestFile(require.resolve('./single_metric_viewer_dashboard_embeddables'));
     loadTestFile(require.resolve('./anomaly_embeddables_migration'));
     loadTestFile(require.resolve('./lens_to_ml'));
