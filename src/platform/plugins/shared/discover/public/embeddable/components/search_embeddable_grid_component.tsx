@@ -466,6 +466,7 @@ export function SearchEmbeddableGridComponent({
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
+      isKbnDataGridEnabled={discoverServices.discoverFeatureFlags.getKbnDataGridEnabled()}
       showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
       documentsDisplayModeState={savedSearch.documentsDisplayMode}
