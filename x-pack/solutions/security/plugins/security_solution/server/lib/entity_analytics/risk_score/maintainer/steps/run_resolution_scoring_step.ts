@@ -57,6 +57,12 @@ interface RunResolutionScoringParams {
   membershipFromStore?: boolean;
   /** With `membershipFromStore`: place every page's range from one sample of the aliases. */
   sampledPages?: SampledPagesConfig;
+  /**
+   * Leave out of the entity store write the resolution scores a target's store document already
+   * holds. The risk index still gets every score. Store pages only: they read each target's stored
+   * resolution score with its modifiers.
+   */
+  skipUnchangedStoreWrites?: boolean;
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
   /** Collects each page's step times; pass one in to read them after the stage. */
@@ -88,6 +94,7 @@ export const runResolutionScoringStep = async ({
   preAggregateByEntity,
   membershipFromStore,
   sampledPages,
+  skipUnchangedStoreWrites = false,
   collectScores,
   pageTimings = createPageStepTimings(),
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
@@ -98,12 +105,21 @@ export const runResolutionScoringStep = async ({
   let scoresWrittenRiskIndex = 0;
   let scoresWrittenEntityStore = 0;
   let scoresFailed = 0;
+  let scoresUnchangedInStore = 0;
   let abortedBetweenPages = false;
   const newScores: Record<string, number> = {};
   const scoredTargetIds = new Set<string>();
 
   // Pages run concurrently, so every counter is updated after its page's awaits, never across one.
-  const writeScores = async (scores: EntityRiskScoreRecord[], timer?: PageStepRecorder) => {
+  const writeScores = async (
+    scores: EntityRiskScoreRecord[],
+    timer?: PageStepRecorder,
+    unchangedInStore?: Set<string>
+  ) => {
+    const storeScores =
+      unchangedInStore && unchangedInStore.size > 0
+        ? scores.filter((score) => !unchangedInStore.has(score.id_value))
+        : scores;
     const docsWrittenRiskIndex = await persistScoresToRiskIndex({
       writer,
       entityType,
@@ -117,7 +133,7 @@ export const runResolutionScoringStep = async ({
         crudClient,
         logger: runLogger,
         entityType,
-        scores,
+        scores: storeScores,
         enabled: idBasedRiskScoringEnabled,
         refresh: entityStoreRefresh,
         parallelChunks: entityStoreWriteChunks,
@@ -128,6 +144,7 @@ export const runResolutionScoringStep = async ({
     scoresWrittenRiskIndex += docsWrittenRiskIndex;
     scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
+    scoresUnchangedInStore += scores.length - storeScores.length;
 
     if (collectScores) {
       for (const score of scores) {
@@ -161,7 +178,7 @@ export const runResolutionScoringStep = async ({
   };
 
   await forEachConcurrently(discoverResolutionPages(scoringParams), pagesInFlight, async (task) => {
-    const pageScores = await scoreResolutionPage(scoringParams, task);
+    const { scores: pageScores, unchangedInStore } = await scoreResolutionPage(scoringParams, task);
     if (abortSignal?.aborted) {
       runLogger.info('Resolution scoring aborted between pages');
       abortedBetweenPages = true;
@@ -175,7 +192,11 @@ export const runResolutionScoringStep = async ({
       for (const score of pageScores) {
         scoredTargetIds.add(score.id_value);
       }
-      await writeScores(pageScores, task.timer);
+      await writeScores(
+        pageScores,
+        task.timer,
+        skipUnchangedStoreWrites ? unchangedInStore : undefined
+      );
     }
     task.timer.end();
   });
@@ -226,6 +247,7 @@ export const runResolutionScoringStep = async ({
       pagesProcessed,
       skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
       scores: newScores,
+      scoresUnchangedInStore,
     };
   }
 
@@ -238,6 +260,7 @@ export const runResolutionScoringStep = async ({
     scoresWrittenEntityStore,
     scoresFailed,
     pagesProcessed,
+    scoresUnchangedInStore,
     scores: newScores,
   };
 };

@@ -37,9 +37,10 @@ const mockPages = (pages: EntityRiskScoreRecord[][]) => {
       };
     }
   });
-  jest
-    .mocked(scoreResolutionPage)
-    .mockImplementation(async (_params, { pageNumber }) => pages[pageNumber - 1]);
+  jest.mocked(scoreResolutionPage).mockImplementation(async (_params, { pageNumber }) => ({
+    scores: pages[pageNumber - 1],
+    unchangedInStore: new Set(),
+  }));
 };
 
 describe('runResolutionScoringStep', () => {
@@ -97,6 +98,7 @@ describe('runResolutionScoringStep', () => {
       pagesProcessed: 0,
       skippedReason: undefined,
       scores: {},
+      scoresUnchangedInStore: 0,
     });
   });
 
@@ -127,6 +129,72 @@ describe('runResolutionScoringStep', () => {
       pagesProcessed: 0,
       skippedReason: 'lookup_empty',
       scores: {},
+      scoresUnchangedInStore: 0,
+    });
+  });
+
+  describe('unchanged resolution scores', () => {
+    const changed = riskScoreServiceMock.createRiskScore({ id_value: 'host:changed' });
+    const unchanged = riskScoreServiceMock.createRiskScore({ id_value: 'host:unchanged' });
+
+    const runFullPage = (skipUnchangedStoreWrites: boolean) => {
+      const timings = createPageStepTimings();
+      jest.mocked(discoverResolutionPages).mockImplementation(async function* () {
+        yield {
+          pageNumber: 1,
+          resolutionTargetIds: [],
+          bounds: undefined,
+          timer: timings.startPage(),
+        };
+      });
+      jest.mocked(scoreResolutionPage).mockResolvedValue({
+        scores: [changed, unchanged],
+        unchangedInStore: new Set(['host:unchanged']),
+      });
+      jest.mocked(persistScoresToRiskIndex).mockResolvedValue(2);
+      return runResolutionScoringStep({
+        esClient,
+        crudClient,
+        logger,
+        entityType: EntityType.host,
+        alertsIndex: '.alerts-security.alerts-default',
+        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        pageSize: 1000,
+        sampleSize: 1000,
+        now: '2026-01-01T00:00:00.000Z',
+        calculationRunId: 'run-1',
+        watchlistConfigs: new Map(),
+        idBasedRiskScoringEnabled: true,
+        writer: new RiskEngineDataWriter({
+          esClient,
+          index: 'risk-score.risk-score-default',
+          namespace: 'default',
+          logger,
+        }),
+        alertFilters: [],
+        skipUnchangedStoreWrites,
+      });
+    };
+
+    it('leaves scores the store already holds out of the store write, not the risk index', async () => {
+      const result = await runFullPage(true);
+
+      expect(jest.mocked(persistScoresToRiskIndex).mock.calls[0][0].scores).toEqual([
+        changed,
+        unchanged,
+      ]);
+      expect(jest.mocked(persistScoresToEntityStore).mock.calls[0][0].scores).toEqual([changed]);
+      expect(result.scoresUnchangedInStore).toBe(1);
+    });
+
+    it('writes every score to the store when the setting is off', async () => {
+      const result = await runFullPage(false);
+
+      expect(jest.mocked(persistScoresToEntityStore).mock.calls[0][0].scores).toEqual([
+        changed,
+        unchanged,
+      ]);
+      expect(result.scoresUnchangedInStore).toBe(0);
     });
   });
 

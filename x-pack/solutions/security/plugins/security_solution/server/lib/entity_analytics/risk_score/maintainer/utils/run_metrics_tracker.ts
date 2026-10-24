@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StepResult } from '../steps/pipeline_types';
+import type { ResolutionStepResult, StepResult } from '../steps/pipeline_types';
 
 export interface RunMetrics {
   scoresWrittenRiskIndexBase: number;
@@ -34,6 +34,8 @@ export interface RunMetrics {
   entitiesCreateFailed: number;
   /** Base scores left out of the entity store write because the store already held them. */
   scoresUnchangedInStoreBase: number;
+  /** Resolution scores left out of the entity store write because the store already held them. */
+  scoresUnchangedInStoreResolution: number;
 }
 
 const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
@@ -55,6 +57,7 @@ const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
   'entitiesCreateSkipped',
   'entitiesCreateFailed',
   'scoresUnchangedInStoreBase',
+  'scoresUnchangedInStoreResolution',
 ];
 
 const emptyMetrics = (): RunMetrics => ({
@@ -76,6 +79,7 @@ const emptyMetrics = (): RunMetrics => ({
   entitiesCreateSkipped: 0,
   entitiesCreateFailed: 0,
   scoresUnchangedInStoreBase: 0,
+  scoresUnchangedInStoreResolution: 0,
 });
 
 const scoresWrittenRiskIndexTotal = (metrics: RunMetrics): number =>
@@ -144,10 +148,11 @@ export const createRunMetricsTracker = () => {
       target.scoresUnchangedInStoreBase = summary.scoresUnchangedInStore;
     },
 
-    recordResolution: (target: RunMetrics, result: StepResult) => {
+    recordResolution: (target: RunMetrics, result: ResolutionStepResult) => {
       target.scoresWrittenRiskIndexResolution = result.scoresWrittenRiskIndex;
       target.scoresWrittenEntityStoreResolution = result.scoresWrittenEntityStore;
       target.scoresFailedResolution = result.scoresFailed;
+      target.scoresUnchangedInStoreResolution = result.scoresUnchangedInStore ?? 0;
     },
 
     recordResetToZero: (target: RunMetrics, result: StepResult) => {

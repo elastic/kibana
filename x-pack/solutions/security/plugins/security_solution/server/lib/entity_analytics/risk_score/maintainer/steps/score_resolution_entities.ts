@@ -44,6 +44,7 @@ import { parseEsqlResolutionScoreRow } from './parse_esql_row';
 import type { ParsedResolutionScore } from './parse_esql_row';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskScoreModifierEntity } from './pipeline_types';
+import { isStoredScoreUnchanged } from './base_store_lookup';
 
 interface ScoreResolutionEntitiesParams {
   esClient: ElasticsearchClient;
@@ -175,11 +176,24 @@ const discoverResolutionPagesFromLookup = async function* ({
   } while (afterKey !== undefined);
 };
 
+/** A page's resolution scores, and the targets whose store document already holds theirs. */
+export interface ResolutionPageScores {
+  scores: EntityRiskScoreRecord[];
+  unchangedInStore: Set<string>;
+}
+
+const NO_SCORES: ResolutionPageScores = { scores: [], unchangedInStore: new Set() };
+
+const mergePageScores = (parts: ResolutionPageScores[]): ResolutionPageScores => ({
+  scores: parts.flatMap(({ scores }) => scores),
+  unchangedInStore: new Set(parts.flatMap(({ unchangedInStore }) => [...unchangedInStore])),
+});
+
 /** Scores one resolution page: fetches its groups, scores them, then applies merged group modifiers. */
 export const scoreResolutionPage = (
   params: ScoreResolutionEntitiesParams,
   task: ResolutionPageTask
-): Promise<EntityRiskScoreRecord[]> =>
+): Promise<ResolutionPageScores> =>
   readsMembershipFromStore(params)
     ? scoreResolutionPageFromStore(params, task)
     : scoreResolutionPageFromLookup(params, task);
@@ -193,7 +207,7 @@ export const scoreResolutionPage = (
 const scoreResolutionPageFromStore = async (
   params: ScoreResolutionEntitiesParams,
   task: ResolutionPageTask
-): Promise<EntityRiskScoreRecord[]> => {
+): Promise<ResolutionPageScores> => {
   if (!task.sampledRange) {
     return scoreStoreGroups(params, task);
   }
@@ -220,29 +234,29 @@ const scoreResolutionPageFromStore = async (
     );
   }
   const rowLimit = Math.min(params.pageSize, MAX_RESOLUTION_TARGETS_PER_PAGE);
-  const scoreChunk = async (chunk: ResolutionPageChunk): Promise<EntityRiskScoreRecord[]> => {
-    const scores = await scoreStoreGroups(params, {
+  const scoreChunk = async (chunk: ResolutionPageChunk): Promise<ResolutionPageScores> => {
+    const scored = await scoreStoreGroups(params, {
       ...task,
       resolutionTargetIds: chunk.targetIds,
       bounds: chunk.bounds,
       aliasEntities: chunk.aliasEntities,
     });
-    const halves = scores.length >= rowLimit ? halveResolutionChunk(chunk) : undefined;
+    const halves = scored.scores.length >= rowLimit ? halveResolutionChunk(chunk) : undefined;
     if (!halves) {
-      return scores;
+      return scored;
     }
     params.logger.info(
       `[resolution][page:${pageNumber}] a part of ${chunk.targetIds.length} targets reached ${rowLimit} rows; scoring it in two halves`
     );
     const left = await scoreChunk(halves[0]);
     const right = await scoreChunk(halves[1]);
-    return [...left, ...right];
+    return mergePageScores([left, right]);
   };
-  const scores: EntityRiskScoreRecord[] = [];
+  const parts: ResolutionPageScores[] = [];
   for (const chunk of chunks) {
-    scores.push(...(await scoreChunk(chunk)));
+    parts.push(await scoreChunk(chunk));
   }
-  return scores;
+  return mergePageScores(parts);
 };
 
 /**
@@ -273,7 +287,7 @@ const scoreStoreGroups = async (
     aliasEntities = new Map(),
     profile: profileThisPage,
   }: ResolutionPageTask
-): Promise<EntityRiskScoreRecord[]> => {
+): Promise<ResolutionPageScores> => {
   const targets = await timer.time(
     'memberFetch',
     () => readResolutionTargets({ crudClient, targetIds: resolutionTargetIds }),
@@ -292,7 +306,7 @@ const scoreStoreGroups = async (
     logger.warn(
       `[resolution][page:${pageNumber}] skipped: members=${pageMemberIds.length} exceed a terms query`
     );
-    return [];
+    return NO_SCORES;
   }
 
   const { parsedScores, esqlRows, profileSummary } = await runResolutionScoringQuery({
@@ -324,10 +338,10 @@ const scoreStoreGroups = async (
     `[resolution][page:${pageNumber}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
   );
   if (parsedScores.length === 0) {
-    return [];
+    return NO_SCORES;
   }
 
-  return timer.timeSync('modifiers', () =>
+  const scores = timer.timeSync('modifiers', () =>
     applyResolutionModifiers({
       parsedScores,
       memberEntities,
@@ -337,6 +351,12 @@ const scoreStoreGroups = async (
       watchlistConfigs,
     })
   );
+  const unchangedInStore = new Set(
+    scores
+      .filter((score) => isStoredScoreUnchanged(score, targets.storedScores.get(score.id_value)))
+      .map((score) => score.id_value)
+  );
+  return { scores, unchangedInStore };
 };
 
 const scoreResolutionPageFromLookup = async (
@@ -357,7 +377,7 @@ const scoreResolutionPageFromLookup = async (
     preAggregateByEntity = false,
   }: ScoreResolutionEntitiesParams,
   { pageNumber, resolutionTargetIds, bounds, timer }: ResolutionPageTask
-): Promise<EntityRiskScoreRecord[]> => {
+): Promise<ResolutionPageScores> => {
   // Fetched before scoring so the query can skip alerts outside the page's groups, and reused
   // for the group modifiers below.
   const lookupMemberIds = await timer.time('memberFetch', () =>
@@ -412,7 +432,7 @@ const scoreResolutionPageFromLookup = async (
   );
 
   if (parsedScores.length === 0) {
-    return [];
+    return NO_SCORES;
   }
 
   const allMemberIds = collectMemberEntityIds(parsedScores);
@@ -444,7 +464,7 @@ const scoreResolutionPageFromLookup = async (
     })
   );
   logger.debug(`[resolution][page:${pageNumber}] modified_scores=${modifiedScores.length}`);
-  return modifiedScores;
+  return { scores: modifiedScores, unchangedInStore: new Set() };
 };
 
 /** Streams resolution scores for one entity type, one page per yield. */
@@ -454,7 +474,7 @@ export const calculateResolutionEntityScores = async function* (
   let pagesProcessed = 0;
   for await (const task of discoverResolutionPages(params)) {
     pagesProcessed += 1;
-    yield await scoreResolutionPage(params, task);
+    yield (await scoreResolutionPage(params, task)).scores;
     task.timer.end();
   }
   return pagesProcessed;

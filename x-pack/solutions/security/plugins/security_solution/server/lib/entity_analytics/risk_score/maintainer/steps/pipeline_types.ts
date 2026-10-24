@@ -71,4 +71,6 @@ export interface StepResult {
 export interface ResolutionStepResult extends StepResult {
   skippedReason?: 'lookup_empty';
   scores: Record<string, number>;
+  /** Resolution scores left out of the entity store write because the store already held them. */
+  scoresUnchangedInStore?: number;
 }

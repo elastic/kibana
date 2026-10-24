@@ -15,7 +15,9 @@ import {
   buildZeroResolutionScores,
   calculateResolutionEntityScores,
   fetchResolutionGroupMemberIds,
+  scoreResolutionPage,
 } from './score_resolution_entities';
+import { createPageStepTimings } from '../utils/page_step_timings';
 import {
   getResolutionPageMemberFilter,
   MAX_RESOLUTION_PAGE_MEMBERS,
@@ -490,6 +492,69 @@ describe('score_resolution_entities', () => {
       expect(pages).toEqual([[]]);
       expect(esClient.esql.query).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('skipped'));
+    });
+
+    it('marks the targets whose store document already holds the new resolution score', async () => {
+      const params = {
+        esClient,
+        crudClient,
+        logger,
+        entityType: EntityType.user,
+        alertsIndex: '.alerts-security.alerts-default',
+        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        pageSize: 10_000,
+        sampleSize: 1000,
+        now: '2026-01-01T00:00:00.000Z',
+        calculationRunId: 'run-1',
+        watchlistConfigs: new Map(),
+        alertFilters: [],
+        membershipFromStore: true,
+      };
+      const task = () => ({
+        pageNumber: 2,
+        resolutionTargetIds: ['user:target-a'],
+        bounds: { upper: 'user:target-a' },
+        timer: createPageStepTimings().startPage(),
+        aliasEntities: new Map(),
+      });
+      jest.mocked(esClient.esql.query).mockResolvedValue({
+        columns: [],
+        values: [
+          [
+            1,
+            20,
+            JSON.stringify({ risk_score: '50', id: 'alert-1', index: 'alerts', time: 'now' }),
+            'user:target-a|self',
+            'user:target-a',
+          ],
+        ],
+      });
+      jest.mocked(crudClient.listEntities).mockResolvedValueOnce({
+        entities: [],
+        took: 1,
+        fields: [{ 'entity.id': ['user:target-a'] }],
+      });
+      const first = await scoreResolutionPage(params, task());
+      const [score] = first.scores;
+      jest.mocked(crudClient.listEntities).mockResolvedValueOnce({
+        entities: [],
+        took: 1,
+        fields: [
+          {
+            'entity.id': ['user:target-a'],
+            'entity.relationships.resolution.risk.calculated_level': [score.calculated_level],
+            'entity.relationships.resolution.risk.calculated_score': [score.calculated_score],
+            'entity.relationships.resolution.risk.calculated_score_norm': [
+              score.calculated_score_norm,
+            ],
+          },
+        ],
+      });
+
+      const second = await scoreResolutionPage(params, task());
+
+      expect(first.unchangedInStore).toEqual(new Set());
+      expect(second.unchangedInStore).toEqual(new Set(['user:target-a']));
     });
 
     describe('with sampled pages', () => {

@@ -688,6 +688,7 @@ const executeEntityTypeRun = async ({
             joinEntityStore: true,
             preAggregateByEntity: true,
             membershipFromStore: RESOLVE_FROM_ENTITY_STORE,
+            skipUnchangedStoreWrites: true,
             // Test setting: page ranges from one sample of the aliases. Only targets with alerts
             // produce rows, so pages aim at 30k aliases, near the member filter's terms limit;
             // splits keep each part's members and rows within their limits.
