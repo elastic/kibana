@@ -86,8 +86,8 @@ export const withTruncatingBenignEvents = (
   // `after` keeps the world's own events on the oldest-first page (only truncation is
   // reported); `before` packs the fill into the minutes before the earliest event, so
   // with a single shared window the fill occupies the whole page and evicts the
-  // world's own events. Under the per-alert branch design both arms anchor at the
-  // earliest raw event, so the fill lands inside the FIRST cited alert's window only
+  // world's own events. Under the per-alert branch design `before` and `afterFirstStage`
+  // both anchor at the earliest raw event, so the fill lands inside the FIRST cited alert's window only
   // (its window reaches back to the chain's start) and that branch's own total flips
   // `branches_truncated` — the per-branch form of the same dilution.
   // `afterFirstStage` differs from `before` only in direction: under

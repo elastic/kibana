@@ -116,7 +116,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
   // definitions" fails here rather than at managed-install time.
   // Schema-valid is not runnable: a workflow-level `on-failure.retry` wraps
   // parallel branch bodies in `enter-retry` nodes and `convertToWorkflowGraph`
-  // throws (a branch body node may not have more than one out-edge), a class of
+  // throws (buildParallelBranchBody rejects `enter-*`/`exit-*` wrapper nodes in
+  // a branch body as unsupported flow-control, e.g. "enter-retry"), a class of
   // error the strict schema above passes and only `POST /run` would surface as
   // `Workflow is not valid.`. Build the real graph here so the gap fails jest.
   it('builds an executable graph', () => {
@@ -526,7 +527,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     // A workflow-level `on-failure.retry` wraps every step — including the bodies
     // of `load_events_per_alert`'s parallel branches — in `enter-retry` nodes, and
     // a parallel branch body cannot be retried (buildParallelBranchBody rejects
-    // any node with more than one out-edge), so the graph never builds and every
+    // any `enter-*`/`exit-*` wrapper node in a branch body as unsupported
+    // flow-control, e.g. "enter-retry"), so the graph never builds and every
     // run is rejected as invalid. Transient failures are handled per source: the
     // fan-out settles failed branches, `load_entities` continues on failure, and a
     // failed required source fails the run for the review to record.
@@ -539,8 +541,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     // A dropped run hands its synchronous caller an empty output, which the review
-    // cannot tell apart from an exhausted-retry failure and would record as
-    // `failed`. The review's own per-attack `drop max 1` already serializes this.
+    // cannot tell apart from a failed run and would record as `failed`. The
+    // review's own per-attack `drop max 1` already serializes this.
     it('leaves serialization to the review rather than dropping runs', () => {
       expect(analysis.settings?.concurrency).toBeUndefined();
     });

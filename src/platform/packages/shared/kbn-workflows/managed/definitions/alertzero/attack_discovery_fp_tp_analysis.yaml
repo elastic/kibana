@@ -18,8 +18,9 @@ settings:
   # No workflow-level `on-failure.retry` on purpose. It would wrap EVERY step in
   # `enter-retry` nodes, including the bodies of `load_events_per_alert`'s
   # parallel branches, and a branch body cannot be retried (buildParallelBranchBody
-  # rejects any node with more than one out-edge), so the graph never builds and
-  # every run is rejected as invalid. Transient failures are handled per source
+  # rejects any `enter-*`/`exit-*` wrapper node in a branch body as unsupported
+  # flow-control, e.g. "enter-retry" inside a parallel branch), so the graph never
+  # builds and every run is rejected as invalid. Transient failures are handled per source
   # instead: the raw-event fan-out runs `mode: settled`, where a failed branch is
   # recorded in `results[].status/error` and feeds `events_failed` (branch bodies
   # cannot carry `on-failure` -- parallel_step.md Limitation), the optional entity
@@ -27,8 +28,8 @@ settings:
   # failed REQUIRED source fails the run, which the review records as `failed` --
   # the review owns whether to run the analysis again.
   # No `concurrency` on purpose: the review already serializes per attack, and a
-  # dropped run hands its caller an empty output that is indistinguishable from an
-  # exhausted-retry failure.
+  # dropped run hands its caller an empty output that is indistinguishable from a
+  # failed run.
 triggers:
   # Launched by the review via `workflow.execute`. Owns no schedule.
   - type: manual
