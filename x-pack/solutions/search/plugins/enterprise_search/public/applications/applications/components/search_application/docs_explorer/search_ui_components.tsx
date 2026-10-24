@@ -14,6 +14,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiComboBox,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -107,10 +108,14 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   ];
 
   return (
-    <button type="button" onClick={() => setSelectedDocument(result)}>
-      <EuiPanel paddingSize="m">
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiPanel paddingSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiButtonEmpty
+            data-test-subj="enterpriseSearchResultViewOpenDocumentButton"
+            flush="left"
+            onClick={() => setSelectedDocument(result)}
+          >
             <code>
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.id"
@@ -118,43 +123,43 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
                 values={{ id }}
               />
             </code>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <code>
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.fromIndex"
-                    defaultMessage="from"
-                  />
-                </code>
-                <EuiBadge color={badgeColor}>{index}</EuiBadge>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiBasicTable
-            items={truncatedFields}
-            columns={columns}
-            tableCaption={i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.fieldsTableCaption',
-              { defaultMessage: 'Document fields' }
-            )}
-          />
-          {hiddenFields > 0 && (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiIcon aria-hidden type="chevronSingleRight" color="subdued" />
-              <EuiTextColor color="subdued">
-                <code>
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.moreFieldsButton"
-                    defaultMessage="{count} {count, plural, one {More Field} other {More Fields}}"
-                    values={{ count: hiddenFields }}
-                  />
-                </code>
-              </EuiTextColor>
+          </EuiButtonEmpty>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <code>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.fromIndex"
+                  defaultMessage="from"
+                />
+              </code>
+              <EuiBadge color={badgeColor}>{index}</EuiBadge>
             </EuiFlexGroup>
-          )}
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
-    </button>
+        <EuiBasicTable
+          items={truncatedFields}
+          columns={columns}
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.fieldsTableCaption',
+            { defaultMessage: 'Document fields' }
+          )}
+        />
+        {hiddenFields > 0 && (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiIcon aria-hidden type="chevronSingleRight" color="subdued" />
+            <EuiTextColor color="subdued">
+              <code>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.moreFieldsButton"
+                  defaultMessage="{count} {count, plural, one {More Field} other {More Fields}}"
+                  values={{ count: hiddenFields }}
+                />
+              </code>
+            </EuiTextColor>
+          </EuiFlexGroup>
+        )}
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
