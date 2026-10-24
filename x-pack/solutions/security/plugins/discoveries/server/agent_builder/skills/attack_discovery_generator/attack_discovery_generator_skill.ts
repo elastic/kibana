@@ -97,7 +97,21 @@ Before invoking \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\`, do all evidence-gathering w
 
 4. **Time budget.** Cap the upfront work — alert retrieval plus corroboration — at roughly the same budget AD itself uses (~90 seconds). The total turn (upfront + AD's sync soft deadline) should comfortably fit within the Agent Builder request timeout. If a corroborating tool is slow, skip it rather than starve AD.
 
-This is the **preferred** pattern. The fallback retrieval modes on \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` (\`esql\`, \`custom_only\`, \`custom_query\`) remain valid when upstream retrieval was not possible — they let the pipeline do its own retrieval inside the Anonymization Boundary — but they sacrifice the corroboration loop, so prefer the upfront pattern whenever possible.`;
+This is the **preferred** pattern. The fallback retrieval modes on \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` (\`esql\`, \`custom_only\`, \`custom_query\`) remain valid when upstream retrieval was not possible — they let the pipeline do its own retrieval inside the Anonymization Boundary — but they sacrifice the corroboration loop, so prefer the upfront pattern whenever possible.
+
+### Provided-alerts short-circuit (no retrieval work)
+
+When the conversation already hands you the alerts to analyze (an explicit \`alertIds\` list, an analyst-selected alert set, or an evaluation harness passing curated alerts), **skip the retrieval and corroboration stages entirely**. The alert set is the task input, not something to re-derive: re-querying or corroborating it multiplies tool calls and input tokens without changing the answer, because the audited pipeline re-validates every alert regardless. Go directly to formatting the provided alerts for \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` \`provided\` mode, pass any user-supplied context via \`additional_context\`, and render the report. Only fall back to the Upfront Pipeline Pattern when the provided set is empty or the user asks you to widen it.
+
+### Tool discipline (no speculative calls)
+
+Every tool call costs a turn, latency, and input tokens that are re-read on every subsequent step. Unmanaged runs spend most of their budget on calls that never influence the final report. Follow these rules:
+
+- **Call a tool only when its result can change your next action.** If the alerts you hold already answer the question, do not query for more. If a document or query result was already returned this conversation, never fetch it again — refer to the earlier result.
+- **Do not call \`platform.core.get_document_by_id\`** on alert documents you already hold in the conversation. Its output is a strict subset of what you were given — re-reading it adds cost and cannot add information.
+- **Do not call \`platform.core.generate_esql\` to invent new queries during analysis.** Ad-hoc LLM-generated ES|QL is the dominant source of failed and speculative calls. Use \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` for the space-aware baseline and adapt it by editing the query text yourself; call \`generate_esql\` only when you need a query for an index family you have no starting point for.
+- **One corroboration pass, bounded.** The Upfront Pipeline Pattern's time budget (step 4) is also a call-count budget: past that bound, stop corroborating and hand off — an honest, partially corroborated report beats an exhaustive one that times out.
+- **No post-run calls.** Once \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` returns (either status), the pipeline result is the source of truth; do not issue further retrieval or corroboration calls before rendering the report.`;
 
 const KEY_PRINCIPLES = `## Key Principles
 
