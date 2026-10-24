@@ -13,7 +13,8 @@ import {
   unregisterFromDataViewsCache,
 } from '@kbn/data-source';
 import { cloneDeep } from 'lodash';
-import { getRepresentativeQuery } from '@kbn/lens-common';
+import { getRepresentativeQuery, withLegacyAggregateQuerySlot } from '@kbn/lens-common';
+import type { XYPersistedState } from '@kbn/lens-common';
 import {
   isLensLegacyAttributes,
   LensConfigBuilder,
@@ -883,7 +884,7 @@ describe('LensVisService attributes', () => {
       }
       const savedVisContext = cloneDeep(visContext);
       if (queryFormat === 'legacy dual-written query') {
-        savedVisContext.attributes.state.query = getRepresentativeQuery(visContext.attributes);
+        savedVisContext.attributes = withLegacyAggregateQuerySlot(savedVisContext.attributes);
       }
       const onVisContextChanged = jest.fn();
       lensService.update({
@@ -956,7 +957,12 @@ describe('LensVisService attributes', () => {
     },
   ])(
     '$name',
-    async ({ requestData, shouldApply = false, currentQuery = queryEsql, nextQuery = currentQuery }) => {
+    async ({
+      requestData,
+      shouldApply = false,
+      currentQuery = queryEsql,
+      nextQuery = currentQuery,
+    }) => {
       const params = {
         filters: [],
         query: currentQuery,
@@ -1206,7 +1212,13 @@ describe('LensVisService attributes', () => {
       );
       const restored = lensService.state$.getValue().visContext;
       if (shouldApply) {
-        expect(restored).toStrictEqual(savedVisContext);
+        const expectedVisContext = cloneDeep(savedVisContext);
+        for (const layer of Object.values(
+          expectedVisContext.attributes.state.datasourceStates.textBased?.layers ?? {}
+        )) {
+          layer.timeField = currentTimeField;
+        }
+        expect(restored).toStrictEqual(expectedVisContext);
       } else {
         expect(
           Object.values(restored?.attributes.state.datasourceStates.textBased?.layers ?? {}).map(
@@ -1240,12 +1252,10 @@ describe('LensVisService attributes', () => {
     if (savedAttributes.visualizationType !== 'lnsXY') {
       throw new Error('Expected an XY histogram');
     }
-    savedAttributes.state.visualization.preferredSeriesType = 'line';
-    savedAttributes.state.visualization.layers = savedAttributes.state.visualization.layers.map(
-      (layer) =>
-        layer.layerType === 'data'
-          ? { ...layer, seriesType: 'line', xAccessor: 'timestamp' }
-          : layer
+    const visualization = savedAttributes.state.visualization as XYPersistedState;
+    visualization.preferredSeriesType = 'line';
+    visualization.layers = visualization.layers.map((layer) =>
+      layer.layerType === 'data' ? { ...layer, seriesType: 'line', xAccessor: 'timestamp' } : layer
     );
     const builder = new LensConfigBuilder(undefined, true);
     const apiConfig = builder.toAPIFormat(savedAttributes);
@@ -1286,8 +1296,14 @@ describe('LensVisService attributes', () => {
       externalVisContext: restoredVisContext,
       onVisContextChanged,
     });
+    const expectedVisContext = cloneDeep(restoredVisContext);
+    for (const layer of Object.values(
+      expectedVisContext.attributes.state.datasourceStates.textBased?.layers ?? {}
+    )) {
+      layer.timeField = '@timestamp';
+    }
     expect(onVisContextChanged).toHaveBeenCalledWith(
-      restoredVisContext,
+      expectedVisContext,
       UnifiedHistogramExternalVisContextStatus.applied
     );
   });
@@ -1429,8 +1445,14 @@ describe('LensVisService attributes', () => {
         externalVisContext,
         onVisContextChanged,
       });
+      const expectedVisContext = cloneDeep(externalVisContext);
+      for (const layer of Object.values(
+        expectedVisContext.attributes.state.datasourceStates.textBased?.layers ?? {}
+      )) {
+        layer.timeField = '@timestamp';
+      }
       expect(onVisContextChanged).toHaveBeenCalledWith(
-        externalVisContext,
+        expectedVisContext,
         UnifiedHistogramExternalVisContextStatus.applied
       );
     }

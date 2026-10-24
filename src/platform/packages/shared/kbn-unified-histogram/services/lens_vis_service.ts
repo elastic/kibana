@@ -42,6 +42,7 @@ import type { LegendSize } from '@kbn/chart-expressions-common';
 import { getRepresentativeQuery } from '@kbn/lens-common';
 import type {
   DefaultVisualizationOverrides,
+  TextBasedLayer,
   TextBasedPrivateState,
   XYVisualizationState as XYConfiguration,
 } from '@kbn/lens-common';
@@ -899,8 +900,8 @@ export class LensVisService {
 }
 
 /**
- * Points ES|QL layers and index pattern refs at the data view stored in `adHocDataViews`, since a
- * suggestion derived from saved attributes keeps the layer index of the routing it was saved with.
+ * Aligns rebuilt ES|QL layers and refs with the current data view, since suggestions can retain
+ * the saved index and time field even after the source changes.
  */
 const withEsqlLayersOnDataView = (
   attributes: TypedLensByValueInput['attributes'],
@@ -909,34 +910,41 @@ const withEsqlLayersOnDataView = (
   const { state } = attributes;
   const textBased = state.datasourceStates.textBased as TextBasedPrivateState | undefined;
   const { id: dataViewId } = dataView;
+  const timeField = dataView.timeFieldName || undefined;
   const adHocDataViews = state.adHocDataViews ?? {};
 
   if (!dataViewId || !adHocDataViews[dataViewId] || !textBased?.layers) {
     return attributes;
   }
 
-  const layerEntries = Object.entries(textBased.layers);
-  const staleIndices = new Set(
-    layerEntries.map(([, layer]) => layer.index).filter((index) => index && !adHocDataViews[index])
-  );
+  // Lens can keep the old chart's data view ID and time field after the source changes,
+  // so we align them with the current data view.
+  const needsDataViewAlignment = (layer: TextBasedLayer): boolean => {
+    const hasStaleIndex = Boolean(layer.index && !adHocDataViews[layer.index]);
+    const hasStaleTimeField = layer.index === dataViewId && layer.timeField !== timeField;
 
-  if (!staleIndices.size) {
+    return hasStaleIndex || hasStaleTimeField;
+  };
+
+  const layersToAlign = Object.values(textBased.layers).filter(needsDataViewAlignment);
+  const layerIndices = layersToAlign.map((layer) => layer.index);
+  const indicesToAlign = new Set(layerIndices);
+
+  if (!indicesToAlign.size) {
     return attributes;
   }
 
   const alignedTextBased: TextBasedPrivateState = {
     ...textBased,
     layers: Object.fromEntries(
-      layerEntries.map(([layerId, layer]) => [
+      Object.entries(textBased.layers).map(([layerId, layer]) => [
         layerId,
-        staleIndices.has(layer.index) ? { ...layer, index: dataViewId } : layer,
+        indicesToAlign.has(layer.index) ? { ...layer, index: dataViewId, timeField } : layer,
       ])
     ),
     ...(textBased.indexPatternRefs && {
       indexPatternRefs: textBased.indexPatternRefs.map((ref) =>
-        staleIndices.has(ref.id)
-          ? { ...ref, id: dataViewId, timeField: dataView.timeFieldName }
-          : ref
+        indicesToAlign.has(ref.id) ? { ...ref, id: dataViewId, timeField } : ref
       ),
     }),
   };
