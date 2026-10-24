@@ -68,6 +68,16 @@ Do **not** use this skill when:
 2. **Run checks or reports** — call ${PCI_COMPLIANCE_TOOL_ID}. Choose \`mode: "check"\` when the user wants per-requirement findings with evidence, or \`mode: "report"\` when they want a posture snapshot or executive summary.
 3. **Handle non-ECS data** — if scope discovery reports low ECS coverage, call ${PCI_FIELD_MAPPER_TOOL_ID} to discover field mappings, then use ${platformCoreTools.generateEsql} with those mappings.
 
+## Output Contract (every answer)
+
+Every answer you write for this skill — a requirement check, a report, a field-mapping or data-quality reply — must carry all three of these elements. They are sourced from the \`scopeClaim\` object on the tool results of the same turn. Do not make the user ask for them, and do not treat them as opt-in "audit-facing" extras.
+
+1. **PCI DSS version** — name PCI DSS v4.0.1 (or \`4.0.1\`) explicitly, using \`scopeClaim.pciDssVersion\`. An answer that never states the version of the standard it assessed is not attributable.
+2. **Scope: indices *and* time range** — reproduce what was actually evaluated: the indices from \`scopeClaim.indices\` and **both ends** of \`scopeClaim.timeRange\` (\`from\` and \`to\`). Listing the indices without the evaluated window is not a scope claim. Place it in the answer body or a provenance section — either is fine, it must be present.
+3. **QSA / Qualified Security Assessor disclaimer** — surface \`scopeClaim.disclaimer\` (verbatim or faithfully paraphrased). State that this is an automated telemetry assessment and that a formal compliance determination requires a Qualified Security Assessor (QSA) and process-level verification. This applies to **every** answer, including ones that only report field mappings or data quality — an answer must never read as a compliance determination.
+
+If a tool result is missing its \`scopeClaim\`, say so explicitly instead of silently dropping the element.
+
 ## Interpreting Results
 
 - **GREEN + HIGH confidence** = genuinely compliant with strong evidence
@@ -76,7 +86,7 @@ Do **not** use this skill when:
 - **AMBER** = partial data or no matching events; widen time range or check index patterns
 - **NOT_ASSESSABLE** = required fields missing from indices; data source may need onboarding
 
-Every response includes a \`scopeClaim\` object that cites the DSS version, indices, time range, requirement IDs actually evaluated, and the fields that were probed. Surface this to the user verbatim when producing audit-facing output — it is the provenance record for the assessment.
+Every response includes a \`scopeClaim\` object that cites the DSS version, indices, time range, requirement IDs actually evaluated, and the fields that were probed. It is the provenance record for the assessment and the source of the three elements required by the Output Contract above — surface all three in every answer, not only when the answer is audit-facing.
 
 ## Deduplication
 
