@@ -92,6 +92,46 @@ describe('OpenAI Schema', () => {
       ).not.toThrow();
     });
 
+    describe('extraBody', () => {
+      const otherConfig = {
+        apiProvider: 'Other',
+        apiUrl: 'https://custom-api.example.com',
+        defaultModel: 'custom-model',
+      };
+
+      it('accepts a nested provider-specific object for Other provider', () => {
+        const extraBody = { chat_template_kwargs: { enable_thinking: false }, top_k: 20 };
+        expect(ConfigSchema.parse({ ...otherConfig, extraBody })).toEqual({
+          ...otherConfig,
+          extraBody,
+        });
+      });
+
+      it.each(['model', 'messages', 'stream', 'tools', 'tool_choice'])(
+        'rejects extraBody that sets protected key %s',
+        (key) => {
+          expect(() =>
+            ConfigSchema.parse({ ...otherConfig, extraBody: { [key]: 'x', top_k: 20 } })
+          ).toThrow(`extraBody must not set ${key}`);
+        }
+      );
+
+      it('rejects a non-object extraBody', () => {
+        expect(() => ConfigSchema.parse({ ...otherConfig, extraBody: ['a'] })).toThrow();
+        expect(() => ConfigSchema.parse({ ...otherConfig, extraBody: 'a' })).toThrow();
+      });
+
+      it.each(['OpenAI', 'Azure OpenAI'])('rejects extraBody for %s provider', (apiProvider) => {
+        expect(() =>
+          ConfigSchema.parse({
+            apiProvider,
+            apiUrl: 'https://api.example.com',
+            extraBody: { top_k: 20 },
+          })
+        ).toThrow();
+      });
+    });
+
     it('validates Other provider with verificationMode', () => {
       expect(() =>
         ConfigSchema.parse({

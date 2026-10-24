@@ -70,6 +70,30 @@ When using the `Other` provider (for example, to [connect a local LLM](#connect-
 - If PKI is not used, `apiKey` is required for the `Other` provider.
 - For `OpenAI` and `Azure OpenAI`, only `apiKey` is supported for authentication.
 
+#### Additional request body (Other provider only) [openai-connector-extra-body]
+
+Self-hosted OpenAI-compatible servers such as vLLM and SGLang accept provider-specific request parameters that {{kib}} doesn't set. With the `Other` provider, you can add them to every chat completion request the connector sends by setting **Additional request body** (`extraBody`) to a JSON object.
+
+For example, to turn off thinking for Qwen3 models served by vLLM or SGLang:
+
+```json
+{
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  }
+}
+```
+
+Because the setting belongs to the connector, you can create two connectors for the same endpoint with different settings, for example one with thinking on and one with thinking off.
+
+Merge semantics:
+
+- `extraBody` is deep-merged into the request body. Nested objects are merged key by key.
+- Values that {{kib}} or the calling feature sets on the request win over `extraBody`. A value that is not set on the request (`undefined`) doesn't override `extraBody`. An explicit `null` does.
+- Arrays and other non-object values are replaced, not merged.
+- The following keys are reserved and are rejected when you save the connector: `model`, `messages`, `stream`, `tools`, and `tool_choice`.
+- `extraBody` applies to every request the connector sends, including streaming requests.
+
 ## Test connectors [gen-ai-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}. For example:

@@ -213140,6 +213140,14 @@ components:
           description: Custom headers to include in requests.
           additionalProperties:
             type: string
+        extraBody:
+          type: object
+          description: |
+            Additional JSON fields that are deep-merged into every chat completion request the connector sends to the model server, for example `chat_template_kwargs` for vLLM or SGLang. Values that Kibana sets on the request win over `extraBody`, and an explicit `null` in the request also wins. The keys `model`, `messages`, `stream`, `tools`, and `tool_choice` are reserved and are rejected.
+          additionalProperties: true
+          example:
+            chat_template_kwargs:
+              enable_thinking: false
     defender_secrets:
       title: Connector secrets properties for a Microsoft Defender for Endpoint connector
       required:
