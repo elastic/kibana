@@ -33,8 +33,10 @@ function escapeAndOr(str: string) {
   return str.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
 }
 
+// Only a standalone "not" is treated as an operator. A plain `\not` would be read as the `\n` newline
+// escape followed by "ot", so a lowercase "n" is escaped as a unicode sequence instead.
 function escapeNot(str: string) {
-  return str.replace(/not(\s+)/gi, '\\$&');
+  return str.replace(/(?<=^|\s)n(?=ot\s)/gi, (n) => (n === 'n' ? '\\u006e' : '\\N'));
 }
 
 // See the Space rule in kuery.peg
