@@ -50,9 +50,6 @@ export const CONFIGURE_ONLY_REQUESTS = [
 
 const FENCE_TIMEOUT_MS = 120_000;
 const POLL_INTERVAL_MS = 1_000;
-const WRITE_LEASE_TIMEOUT_MS = 30_000;
-const WRITE_LEASE_CONFLICT_MESSAGE = 'Source knowledge is being updated';
-
 export const POLL_OPTIONS = { timeout: 30_000, intervals: [1_000] };
 
 export const TOOL_API_HEADERS = PUBLIC_API_HEADERS;
@@ -162,63 +159,6 @@ export const deleteDetections = async (esClient: EsClient, ruleUuid: string): Pr
   });
 };
 
-const isConflictResponse = ({ statusCode }: { statusCode: number }): boolean => statusCode === 409;
-
-/**
- * Resends a source knowledge write while another writer (reconcile, onboarding, a sweep) holds the
- * source's write lease, which the write answers with a 409 instead of waiting.
- *
- * Temporary: remove once https://github.com/elastic/kibana/pull/298878 is merged, which makes the
- * server wait for the lease itself.
- */
-export const retryOnWriteLease = async <TResponse extends { statusCode: number }>({
-  send,
-  isLeaseConflict = isConflictResponse,
-}: {
-  send: () => Promise<TResponse>;
-  isLeaseConflict?: (response: TResponse) => boolean;
-}): Promise<TResponse> => {
-  const deadline = Date.now() + WRITE_LEASE_TIMEOUT_MS;
-  let response = await send();
-  while (isLeaseConflict(response) && Date.now() < deadline) {
-    await delay(POLL_INTERVAL_MS);
-    response = await send();
-  }
-  return response;
-};
-
-/** Agent Builder tools answer 200 and report the lease conflict as an error result. */
-export const isToolWriteLeaseConflict = ({
-  body,
-}: {
-  body: { results?: Array<{ type: string; data?: { message?: string } }> };
-}): boolean =>
-  (body.results ?? []).some(
-    ({ type, data }) =>
-      type === 'error' && Boolean(data?.message?.includes(WRITE_LEASE_CONFLICT_MESSAGE))
-  );
-
-const requestRetryingWriteLease = async ({
-  kbnClient,
-  request,
-}: {
-  kbnClient: KbnClient;
-  request: Parameters<KbnClient['request']>[0];
-}): Promise<void> => {
-  const { statusCode } = await retryOnWriteLease({
-    send: async () => {
-      const { status } = await kbnClient.request({
-        ...request,
-        ignoreErrors: [...(request.ignoreErrors ?? []), 409],
-      });
-      return { statusCode: status };
-    },
-  });
-  if (statusCode === 409) {
-    throw new Error(`${request.method} ${request.path} still hit the source write lease`);
-  }
-};
-
 export const seedFeature = async ({
   kbnClient,
   sourceId,
@@ -228,14 +168,11 @@ export const seedFeature = async ({
   sourceId: string;
   featureId: string;
 }): Promise<void> => {
-  await requestRetryingWriteLease({
-    kbnClient,
-    request: {
-      method: 'POST',
-      path: `/${getFeaturesEndpoint(sourceId)}`,
-      headers: COMMON_API_HEADERS,
-      body: buildFeature(featureId),
-    },
+  await kbnClient.request({
+    method: 'POST',
+    path: `/${getFeaturesEndpoint(sourceId)}`,
+    headers: COMMON_API_HEADERS,
+    body: buildFeature(featureId),
   });
 };
 
@@ -248,14 +185,11 @@ export const deleteFeature = async ({
   sourceId: string;
   featureId: string;
 }): Promise<void> => {
-  await requestRetryingWriteLease({
-    kbnClient,
-    request: {
-      method: 'DELETE',
-      path: `/${getFeaturesEndpoint(sourceId)}/${featureId}`,
-      headers: COMMON_API_HEADERS,
-      ignoreErrors: [404],
-    },
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `/${getFeaturesEndpoint(sourceId)}/${featureId}`,
+    headers: COMMON_API_HEADERS,
+    ignoreErrors: [404],
   });
 };
 
@@ -270,14 +204,11 @@ export const seedRuleBackedQuery = async ({
   sourceId: string;
   viewName: string;
 }): Promise<void> => {
-  await requestRetryingWriteLease({
-    kbnClient,
-    request: {
-      method: 'PUT',
-      path: `/${QUERIES_ENDPOINT}/${queryId}`,
-      headers: COMMON_API_HEADERS,
-      body: buildRuleBackedQuery({ sourceId, viewName }),
-    },
+  await kbnClient.request({
+    method: 'PUT',
+    path: `/${QUERIES_ENDPOINT}/${queryId}`,
+    headers: COMMON_API_HEADERS,
+    body: buildRuleBackedQuery({ sourceId, viewName }),
   });
 };
 
