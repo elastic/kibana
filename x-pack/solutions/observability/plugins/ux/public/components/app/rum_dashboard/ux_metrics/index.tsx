@@ -53,8 +53,7 @@ export function UXMetrics() {
         loading,
         displayTrafficMetric: true,
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [loading, inpLoading]
+    [data, inpData, totalPageViews, loading]
   );
 
   return (

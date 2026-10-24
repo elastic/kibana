@@ -32,10 +32,12 @@ export default {
   ],
 };
 
+const thresholds = { good: '0.1', bad: '0.25', goodValue: 0.1, badValue: 0.25 };
+
 export function NoDataAvailable() {
   return (
     <CoreVitalItem
-      thresholds={{ good: '0.1', bad: '0.25' }}
+      thresholds={thresholds}
       title={LCP_LABEL}
       value={null}
       loading={false}
@@ -47,7 +49,7 @@ export function NoDataAvailable() {
 export function OneHundredPercentGood() {
   return (
     <CoreVitalItem
-      thresholds={{ good: '0.1', bad: '0.25' }}
+      thresholds={thresholds}
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
@@ -60,7 +62,7 @@ export function OneHundredPercentGood() {
 export function FiftyPercentGood() {
   return (
     <CoreVitalItem
-      thresholds={{ good: '0.1', bad: '0.25' }}
+      thresholds={thresholds}
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
@@ -73,7 +75,7 @@ export function FiftyPercentGood() {
 export function OneHundredPercentBad() {
   return (
     <CoreVitalItem
-      thresholds={{ good: '0.1', bad: '0.25' }}
+      thresholds={thresholds}
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
@@ -86,7 +88,7 @@ export function OneHundredPercentBad() {
 export function OneHundredPercentAverage() {
   return (
     <CoreVitalItem
-      thresholds={{ good: '0.1', bad: '0.25' }}
+      thresholds={thresholds}
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
