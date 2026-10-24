@@ -57,7 +57,8 @@
     "@kbn/app-header",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/ui-callout",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-test-helpers-model-versions"
   ],
   "exclude": ["target/**/*"]
 }

@@ -6,9 +6,32 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 import { INFERENCE_SETTINGS_SO_TYPE } from '../../common/constants';
 import type { InferenceSettingsAttributes } from '../../common/types';
-import { parseInferenceSettingsSO, validateInferenceSettings } from './inference_settings';
+import {
+  parseInferenceSettingsSO,
+  validateEndpointParameters,
+  validateInferenceSettings,
+} from './inference_settings';
+
+const createEisConnector = (id: string, supportedEffortLevels: string[]): InferenceConnector => ({
+  type: InferenceConnectorType.Inference,
+  name: id,
+  connectorId: id,
+  config: {},
+  capabilities: {},
+  isPreconfigured: true,
+  isInferenceEndpoint: true,
+  isEis: true,
+  metadata: { capabilities: { reasoning: { supported_effort_levels: supportedEffortLevels } } },
+});
+
+const withEffort = (id: string, effort: 'low' | 'high'): InferenceSettingsAttributes => ({
+  features: [
+    { feature_id: 'agent_builder', endpoints: [{ id, parameters: { reasoning: { effort } } }] },
+  ],
+});
 
 describe('Inference Settings utils', () => {
   describe('parseInferenceSettingsSO', () => {
@@ -117,6 +140,80 @@ describe('Inference Settings utils', () => {
 
       const errors = validateInferenceSettings(attrs);
       expect(errors).toHaveLength(2);
+    });
+  });
+
+  describe('validateEndpointParameters', () => {
+    it('returns no errors when the endpoint supports the stored reasoning effort', async () => {
+      const getConnectorById = jest
+        .fn()
+        .mockResolvedValue(createEisConnector('openai-gpt-5.4', ['low', 'high']));
+
+      await expect(
+        validateEndpointParameters(withEffort('openai-gpt-5.4', 'high'), getConnectorById)
+      ).resolves.toEqual([]);
+      expect(getConnectorById).toHaveBeenCalledWith('openai-gpt-5.4');
+    });
+
+    it('returns an error when the endpoint does not support the stored reasoning effort', async () => {
+      const getConnectorById = jest
+        .fn()
+        .mockResolvedValue(createEisConnector('openai-gpt-5.4', ['low']));
+
+      const errors = await validateEndpointParameters(
+        withEffort('openai-gpt-5.4', 'high'),
+        getConnectorById
+      );
+
+      expect(errors).toEqual([expect.stringContaining('Reasoning level "high" is not supported')]);
+    });
+
+    it('loads each endpoint once when several features store a reasoning effort for it', async () => {
+      const getConnectorById = jest
+        .fn()
+        .mockResolvedValue(createEisConnector('openai-gpt-5.4', ['low', 'high']));
+      const endpoints = [
+        { id: 'openai-gpt-5.4', parameters: { reasoning: { effort: 'low' as const } } },
+      ];
+
+      await validateEndpointParameters(
+        {
+          features: [
+            { feature_id: 'agent_builder', endpoints },
+            { feature_id: 'attack_discovery', endpoints },
+          ],
+        },
+        getConnectorById
+      );
+
+      expect(getConnectorById).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips endpoints that cannot be loaded', async () => {
+      const getConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
+
+      await expect(
+        validateEndpointParameters(withEffort('missing', 'high'), getConnectorById)
+      ).resolves.toEqual([]);
+    });
+
+    it('does not load endpoints without a stored reasoning effort', async () => {
+      const getConnectorById = jest.fn();
+
+      await expect(
+        validateEndpointParameters(
+          {
+            features: [
+              {
+                feature_id: 'agent_builder',
+                endpoints: [{ id: 'a' }, { id: 'b', parameters: { temperature: 0.2 } }],
+              },
+            ],
+          },
+          getConnectorById
+        )
+      ).resolves.toEqual([]);
+      expect(getConnectorById).not.toHaveBeenCalled();
     });
   });
 });

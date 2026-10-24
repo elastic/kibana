@@ -63,6 +63,23 @@ apiTest.describe('Inference settings validation', { tag: [...INFERENCE_LOCAL_TAG
     expect(response.body.message).toContain('feature_id');
   });
 
+  apiTest('rejects an unknown reasoning effort', async ({ apiClient }) => {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      body: JSON.stringify({
+        features: [
+          {
+            feature_id: 'agent_builder',
+            endpoints: [{ id: '.endpoint-a', parameters: { reasoning: { effort: 'max' } } }],
+          },
+        ],
+      }),
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('effort');
+  });
+
   apiTest('rejects a missing features field', async ({ apiClient }) => {
     const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },

@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { type InferenceConnector, validateReasoningEffort } from '@kbn/inference-common';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 
 export const parseInferenceSettingsSO = (
@@ -57,4 +58,44 @@ export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): s
   }
 
   return errors;
+};
+
+/**
+ * Returns an error for each endpoint whose stored reasoning effort its model does not support.
+ */
+export const validateEndpointParameters = async (
+  attrs: InferenceSettingsAttributes,
+  getConnectorById: (id: string) => Promise<InferenceConnector>
+): Promise<string[]> => {
+  const connectors = new Map<string, Promise<InferenceConnector | undefined>>();
+  const loadConnector = (id: string) => {
+    const cached = connectors.get(id);
+    if (cached) {
+      return cached;
+    }
+    const connector = getConnectorById(id).catch(() => undefined);
+    connectors.set(id, connector);
+    return connector;
+  };
+  const errors = new Set<string>();
+
+  for (const { endpoints } of attrs.features) {
+    for (const { id, parameters } of endpoints) {
+      const effort = parameters?.reasoning?.effort;
+      if (!effort) {
+        continue;
+      }
+      const connector = await loadConnector(id);
+      if (!connector) {
+        continue;
+      }
+      try {
+        validateReasoningEffort(connector, effort);
+      } catch (e) {
+        errors.add(e.message);
+      }
+    }
+  }
+
+  return [...errors];
 };
