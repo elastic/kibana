@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiPageHeader } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { useRouteBreadcrumb } from '../breadcrumbs/use_route_breadcrumb';
-import { useKibanaServices } from '../hooks/use_kibana_services';
-import { isValidTimeRange, useTimeRange } from '../hooks/use_time_range';
+import { APPLICATION_SOURCE } from '../../../common/application_source';
+import type { ApplicationSource } from '../../../common/types/applications';
+import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
+import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { useEnvironment } from '../../hooks/use_environment';
+import { useTimeRange } from '../../hooks/use_time_range';
 
 /** Tabs of the Application view, in display order. */
 const APPLICATION_TAB_IDS = ['overview'] as const;
@@ -45,9 +48,52 @@ const overviewUnavailablePrompt = (
   />
 );
 
-export function ApplicationPage({ serviceName }: { serviceName: string }) {
+// The loading state of Observability's pages, as APM shows while it loads an embedded dashboard.
+const overviewLoadingPrompt = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceOverviewLoading"
+    icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.application.overview.loading', {
+          defaultMessage: 'Loading the Overview',
+        })}
+      </h2>
+    }
+  />
+);
+
+const otelOverviewPlaceholder = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceOtelOverviewPlaceholder"
+    iconType="package"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.application.overview.otel.title', {
+          defaultMessage: 'Overview coming soon',
+        })}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.digitalExperience.application.overview.otel.body', {
+          defaultMessage: 'The Overview for EDOT Browser applications is not available yet.',
+        })}
+      </p>
+    }
+  />
+);
+
+export function ApplicationPage({
+  serviceName,
+  source,
+}: {
+  serviceName: string;
+  source: ApplicationSource;
+}) {
   const { ux } = useKibanaServices();
   const { timeRange, setTimeRange } = useTimeRange();
+  const { environment } = useEnvironment();
 
   const selectedTab: ApplicationTabId = 'overview';
 
@@ -55,19 +101,22 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
 
   // Wrapped in an object: a component is a function, which React state would call as an updater.
   const { value: dashboard, error } = useAbortableAsync(async () => {
-    if (!ux) {
+    if (source !== APPLICATION_SOURCE.classic || !ux) {
       return undefined;
     }
     return { Component: await ux.getClassicRumDashboard() };
-  }, [ux]);
+  }, [ux, source]);
 
   const renderOverview = () => {
+    if (source === APPLICATION_SOURCE.otel) {
+      return otelOverviewPlaceholder;
+    }
     if (dashboard) {
       return (
         <dashboard.Component
           serviceName={serviceName}
-          // An invalid range is left out, so the dashboard falls back to the global timefilter.
-          timeRange={isValidTimeRange(timeRange) ? timeRange : undefined}
+          environment={environment}
+          timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
         />
       );
@@ -76,7 +125,7 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
     if (error || !ux) {
       return overviewUnavailablePrompt;
     }
-    return <EuiLoadingSpinner size="xl" />;
+    return overviewLoadingPrompt;
   };
 
   return (
