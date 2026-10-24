@@ -38,6 +38,7 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
 type ContextManager = StepHandlerContext<any>['contextManager'];
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
@@ -299,6 +300,7 @@ describe('aiPromptStepDefinition', () => {
                 },
               },
             },
+            required: ['response'],
           },
           {
             name: 'extract_structured_response',
@@ -403,6 +405,7 @@ describe('aiPromptStepDefinition', () => {
                 items: { type: 'string' },
               },
             },
+            required: ['response'],
           },
           {
             name: 'extract_structured_response',
@@ -416,6 +419,60 @@ describe('aiPromptStepDefinition', () => {
             content: ['item1', 'item2', 'item3'],
           }),
         });
+      });
+
+      describe('model drops the { response } wrapper', () => {
+        const objectSchema = {
+          type: 'object',
+          properties: { summary: { type: 'string' }, sentiment: { type: 'string' } },
+          required: ['summary', 'sentiment'],
+        };
+        const run = async (parsed: unknown) => {
+          mockRunnable.invoke.mockResolvedValue({
+            parsed,
+            raw: { response_metadata: { tokens_used: 1 } },
+          });
+          return handler({
+            ...mockContext,
+            input: { ...mockContext.input, schema: objectSchema },
+          });
+        };
+
+        it('accepts wrapped arguments', async () => {
+          const result = await run({ response: { summary: 's', sentiment: 'good' } });
+          expect(result.output.content).toEqual({ summary: 's', sentiment: 'good' });
+        });
+
+        it('accepts unwrapped arguments that validate against the schema', async () => {
+          const result = await run({ summary: 's', sentiment: 'good' });
+          expect(result.output.content).toEqual({ summary: 's', sentiment: 'good' });
+        });
+
+        it('fails the step, naming the expected shape, when the arguments match neither', async () => {
+          const error = await run({ unrelated: 1 }).catch((e) => e);
+          expect(error).toBeInstanceOf(ExecutionError);
+          expect(error.type).toBe('InvalidModelResponse');
+          expect(error.message).toContain('"response"');
+          expect(error.details).toEqual(
+            expect.objectContaining({
+              receivedKeys: ['unrelated'],
+              metadata: { tokens_used: 1 },
+            })
+          );
+        });
+
+        it('returns a wrapped value that breaks the schema and logs a warning through the step logger', async () => {
+          const result = await run({ response: { summary: 5, sentiment: 'good' } });
+          expect(result.output.content).toEqual({ summary: 5, sentiment: 'good' });
+          expect(mockContext.logger.warn).toHaveBeenCalledWith(expect.stringContaining('summary'));
+        });
+
+        it.each([[undefined], [null], [{}], [{ response: null }], [{ response: undefined }]])(
+          'a completed step with no content is impossible: parsed=%j fails the step',
+          async (parsed) => {
+            await expect(run(parsed)).rejects.toBeInstanceOf(ExecutionError);
+          }
+        );
       });
     });
 
