@@ -109,6 +109,7 @@ const defaultTypesPrivilegesResponse = {
       canManageFailureStore: true,
     },
   },
+  accessibleDatasetTypes: ['logs', 'metrics', 'traces', 'synthetics'],
 };
 
 const noPrivilegesResponse = {
@@ -138,6 +139,7 @@ const noPrivilegesResponse = {
       canManageFailureStore: false,
     },
   },
+  accessibleDatasetTypes: [],
 };
 
 const defaultDataStreamStatsResponse: DataStreamStatServiceResponse = {
@@ -226,18 +228,45 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should transition to emptyState when no types are authorized', async () => {
+    it('should continue to concrete data stream discovery when broad privileges are false', async () => {
+      const dataStreamStatsClient = createMockDataStreamStatsClient({
+        getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(noPrivilegesResponse),
+      });
       const { machine } = buildStateMachine({
-        dataStreamStatsClient: createMockDataStreamStatsClient({
-          getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(noPrivilegesResponse),
-        }),
+        dataStreamStatsClient,
       });
       const actor = createActor(machine);
       actor.start();
 
-      await waitForPredicate(actor, (state) => state.value === 'emptyState');
+      await waitForPredicate(
+        actor,
+        (state) => typeof state.value === 'object' && 'main' in state.value
+      );
 
-      expect(actor.getSnapshot().value).toBe('emptyState');
+      expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenCalled();
+
+      actor.stop();
+    });
+
+    it('uses concretely accessible types when broad privileges are false', async () => {
+      const dataStreamStatsClient = createMockDataStreamStatsClient({
+        getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(noPrivilegesResponse),
+      });
+      dataStreamStatsClient.getDataStreamsTypesPrivileges.mockResolvedValue({
+        ...noPrivilegesResponse,
+        accessibleDatasetTypes: ['logs'],
+      });
+      const { machine } = buildStateMachine({ dataStreamStatsClient });
+      const actor = createActor(machine);
+      actor.start();
+
+      await waitForPredicate(
+        actor,
+        (state) => typeof state.value === 'object' && 'main' in state.value
+      );
+
+      expect(actor.getSnapshot().context.authorizedDatasetTypes).toEqual(['logs']);
+      expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenCalledWith({ types: ['logs'] });
 
       actor.stop();
     });

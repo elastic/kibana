@@ -75,13 +75,13 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         );
       });
 
-    const { datasetTypesPrivileges } = decodeOrThrow(
+    const { datasetTypesPrivileges, accessibleDatasetTypes } = decodeOrThrow(
       getDataStreamsTypesPrivilegesResponseRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode data streams types privileges: ${message}`)
     )(response);
 
-    return { datasetTypesPrivileges };
+    return { datasetTypesPrivileges, accessibleDatasetTypes };
   }
 
   public async getDataStreamsStats(
