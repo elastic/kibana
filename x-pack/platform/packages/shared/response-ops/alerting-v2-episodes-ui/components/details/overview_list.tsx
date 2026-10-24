@@ -19,6 +19,7 @@ import {
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildSnoozeSummary } from '@kbn/response-ops-alert-snooze';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
@@ -208,7 +209,13 @@ export const AlertEpisodeOverviewList = ({
               },
               {
                 title: i18n.ACTIONS_OVERVIEW_SNOOZED_UNTIL,
-                description: groupAction?.snoozedUntil
+                description: groupAction?.snoozeConditions?.length
+                  ? buildSnoozeSummary({
+                      expiresAt: groupAction.snoozedUntil,
+                      conditions: groupAction.snoozeConditions,
+                      conditionOperator: groupAction.snoozeConditionOperator,
+                    })
+                  : groupAction?.snoozedUntil
                   ? formatDateTime(groupAction.snoozedUntil, dateFormat)
                   : EMPTY_VALUE,
               },

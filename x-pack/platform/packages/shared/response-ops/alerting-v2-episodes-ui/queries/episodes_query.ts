@@ -13,6 +13,7 @@ import {
   type EpisodesFilterState,
 } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode as BaseAlertEpisode } from '@kbn/alerting-v2-schemas';
+import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 
 export type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
@@ -66,6 +67,13 @@ export interface AlertEpisode extends BaseAlertEpisode {
    * Only set for source alert rows; native episodes never use this.
    */
   is_flapping?: boolean;
+  /**
+   * Conditions that lift the current snooze before its expiry, and how they are
+   * combined. Only set for source alert rows; native episodes cannot evaluate
+   * snooze conditions yet.
+   */
+  snooze_conditions?: SnoozeCondition[];
+  snooze_condition_operator?: 'any' | 'all';
   /**
    * Flattened grouping object (e.g. `{ 'host.name': 'web-01' }`).
    * Used to render grouping tags on source alert rows. Native episodes never set this.

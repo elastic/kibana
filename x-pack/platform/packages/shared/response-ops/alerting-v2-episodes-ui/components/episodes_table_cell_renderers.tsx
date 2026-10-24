@@ -30,6 +30,7 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
+import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 import { isNativeV2Rule, isSourceEpisode, type AlertEpisode } from '../queries/episodes_query';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
@@ -136,6 +137,8 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const groupAction: EpisodeStatusGroupAction = {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
     snoozedUntil: (row.flattened.snoozed_until as string | undefined) ?? null,
+    snoozeConditions: row.flattened.snooze_conditions as SnoozeCondition[] | undefined,
+    snoozeConditionOperator: row.flattened.snooze_condition_operator as 'any' | 'all' | undefined,
   };
 
   return (

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
+
 export interface EpisodeActionState {
   episodeId: string;
   ruleId: string | null;
@@ -25,9 +27,14 @@ export interface AlertEpisodeGroupAction {
   snoozedUntil: string | null;
   lastSnoozeActor: string | null;
   lastDeactivateActor: string | null;
+  snoozeConditions?: SnoozeCondition[];
+  snoozeConditionOperator?: 'any' | 'all';
 }
 
 export interface EpisodeStatusGroupAction {
   lastSnoozeAction: string | null;
   snoozedUntil: string | null;
+  /** Conditions that lift the snooze before its expiry, when it has any. */
+  snoozeConditions?: SnoozeCondition[];
+  snoozeConditionOperator?: 'any' | 'all';
 }

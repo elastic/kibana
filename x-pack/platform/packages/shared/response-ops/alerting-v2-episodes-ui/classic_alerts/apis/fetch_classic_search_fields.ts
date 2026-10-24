@@ -19,6 +19,11 @@ export interface FetchClassicSearchFieldsOptions extends BaseRacOptions {
   abortSignal?: AbortSignal;
 }
 
+/**
+ * Fetches the searchable alert fields for the given classic rule types. Pass a
+ * narrower `ruleTypeIds` to scope the fields to specific rules rather than every
+ * rule type the table covers.
+ */
 export const fetchClassicSearchFields = async ({
   ruleTypeIds,
   services,

@@ -22,6 +22,8 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
+import { buildSnoozeSummary } from '@kbn/response-ops-alert-snooze';
+import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
 import { EDIT_EPISODE_ASSIGNEE_ACTION_ID } from '../../actions/edit_assignee';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
 import { useEpisodeDetailsHeaderData } from '../../hooks/use_episode_details_header_data';
@@ -128,15 +130,21 @@ const FlappingBadgeLabel = () => (
 
 const SnoozedBadgeLabel = ({
   expiry,
+  conditions,
+  conditionOperator,
   dateFormat,
 }: {
   expiry: string | null | undefined;
+  conditions: SnoozeCondition[] | undefined;
+  conditionOperator: 'any' | 'all' | undefined;
   dateFormat: string | undefined;
 }) => (
   <EuiToolTip
     anchorProps={{ css: { display: 'flex' } }}
     content={
-      expiry
+      conditions?.length
+        ? buildSnoozeSummary({ expiresAt: expiry, conditions, conditionOperator })
+        : expiry
         ? i18n.getFlyoutSnoozedUntilTooltip(formatDateTime(expiry, dateFormat))
         : i18n.FLYOUT_SNOOZED_TOOLTIP_UNKNOWN_EXPIRY
     }
@@ -341,7 +349,12 @@ export const AlertEpisodeDetailsFlyout = ({
           {/* Snoozed badge */}
           {isSnoozed && (
             <FlyoutTemplate.Header.Badge iconType="bellSlash">
-              <SnoozedBadgeLabel expiry={groupAction?.snoozedUntil} dateFormat={dateFormat} />
+              <SnoozedBadgeLabel
+                expiry={groupAction?.snoozedUntil}
+                conditions={groupAction?.snoozeConditions}
+                conditionOperator={groupAction?.snoozeConditionOperator}
+                dateFormat={dateFormat}
+              />
             </FlyoutTemplate.Header.Badge>
           )}
 

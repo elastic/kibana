@@ -28,6 +28,11 @@ export interface SnoozeFormBodyProps {
   /** Leaf-level scalar alert field names for the `field_change` condition dropdown. */
   fieldOptions?: string[];
   isLoadingFields?: boolean;
+  /**
+   * Why the condition-based tab cannot be used, which renders it disabled with
+   * the reason as its tooltip. Omit when conditions are available.
+   */
+  conditionalTabDisabledReason?: string;
 }
 
 /**
@@ -42,11 +47,23 @@ export const SnoozeFormBody = ({
   onConditionalScheduleChange,
   fieldOptions,
   isLoadingFields,
+  conditionalTabDisabledReason,
 }: SnoozeFormBodyProps) => (
   <div style={{ width: SNOOZE_PANEL_WIDTH, padding: '12px 16px 0' }}>
     <EuiButtonGroup
       legend={i18n.SNOOZE_TYPE_LEGEND}
-      options={TAB_OPTIONS.map(({ id, label }) => ({ id, label }))}
+      options={TAB_OPTIONS.map(({ id, label }) => ({
+        id,
+        label,
+        ...(id === 'conditional' && conditionalTabDisabledReason
+          ? {
+              isDisabled: true,
+              toolTipContent: conditionalTabDisabledReason,
+              // Prevents the native html tooltip from doubling up on EuiToolTip
+              title: '',
+            }
+          : {}),
+      }))}
       idSelected={activeTab}
       onChange={(id) => onTabChange(id as SnoozePanelTab)}
       isFullWidth

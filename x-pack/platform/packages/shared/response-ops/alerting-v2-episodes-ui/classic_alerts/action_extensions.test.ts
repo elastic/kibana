@@ -330,6 +330,51 @@ describe('classicActionExtensions', () => {
 
       expect(result).toEqual({ succeeded: 1, failed: 1, errors: ['snooze failed'] });
     });
+
+    it('execute with an expiry forwards it alongside the conditions', async () => {
+      const episodes = [makeClassicEpisode('c1', 'open')];
+      await snoozeExtension.execute(episodes, http, {
+        snoozedUntil: '2099-01-01T00:00:00.000Z',
+        conditions: [{ type: 'severity_equals', value: 'critical' }],
+        conditionOperator: 'all',
+      });
+
+      expect(mockedSnooze).toHaveBeenCalledWith({
+        http,
+        id: 'r1',
+        instanceId: 'inst-1',
+        expiresAt: '2099-01-01T00:00:00.000Z',
+        conditions: [{ type: 'severity_equals', value: 'critical' }],
+        conditionOperator: 'all',
+      });
+    });
+
+    it('execute with conditions and no expiry snoozes without expires_at instead of muting', async () => {
+      const episodes = [makeClassicEpisode('c1', 'open')];
+      const result = await snoozeExtension.execute(episodes, http, {
+        snoozedUntil: null,
+        conditions: [{ type: 'field_change', field: 'host.name' }],
+        conditionOperator: 'any',
+      });
+
+      expect(mockedBulkMute).not.toHaveBeenCalled();
+      expect(mockedSnooze).toHaveBeenCalledWith({
+        http,
+        id: 'r1',
+        instanceId: 'inst-1',
+        conditions: [{ type: 'field_change', field: 'host.name' }],
+        conditionOperator: 'any',
+      });
+      expect(result).toEqual({ succeeded: 1, failed: 0, errors: [] });
+    });
+
+    it('execute with an empty conditions list still mutes an indefinite snooze', async () => {
+      const episodes = [makeClassicEpisode('c1', 'open')];
+      await snoozeExtension.execute(episodes, http, { snoozedUntil: null, conditions: [] });
+
+      expect(mockedBulkMute).toHaveBeenCalled();
+      expect(mockedSnooze).not.toHaveBeenCalled();
+    });
   });
 
   describe('unsnooze extension', () => {
