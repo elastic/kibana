@@ -21,7 +21,7 @@ export const MERGED_NODES_EVALUATOR = 'merged_nodes_and_paths';
 
 interface ReinforcementEvalExample {
   input: { question: string; response?: string };
-  metadata?: { case_id?: string };
+  metadata?: { case_id?: string; require_merge?: boolean };
 }
 
 type ReinforcementEvaluator = Evaluator<ReinforcementEvalExample, ReinforcementTaskOutput>;
@@ -121,6 +121,7 @@ export const submitArgumentsEvaluator: ReinforcementEvaluator = {
         prior: parseTreeMarkdown(tree.prior_mermaid, tree.tree_id),
         submitted: parseTreeMarkdown(tree.submitted_mermaid, tree.tree_id),
         response,
+        requireMerge: metadata?.require_merge === true,
       })
     );
     const failed = graded.filter((result) => result.score !== 1);

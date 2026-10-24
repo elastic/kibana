@@ -332,22 +332,22 @@ provisioning are separate follow-ups.
 
 ## Reinforcement micro-eval
 
-`NIGHTSHIFT_DATASETS=reinforcement` runs the first few examples of `nightshift/customer0-manual-v2`
-(override the dataset with `NIGHTSHIFT_REINFORCEMENT_DATASET`, and the count up to 5 with
-`NIGHTSHIFT_REINFORCEMENT_LIMIT`) through the real investigation agent. That agent already starts
-`system-nightshift-agent-optimize` when the round finishes and waits for it, so the eval grades
-that reinforcement submit. It does not start a second optimize run. The questions stay on the
-golden cluster; this suite does not commit them.
+`NIGHTSHIFT_DATASETS=reinforcement` replays three reduced Customer-0 rounds through the reinforcement
+agent (`system-nightshift-agent-optimize`). Each round seeds its prior tree and includes the
+investigator's view of that file, so the agent merges into an existing tree instead of creating one.
+The first prior tree has both "Pod restarted" and "Pod deleted" for one pod-loss event, and that
+round's `metadata.require_merge` makes an empty `merged_nodes` list score 0. The other two rounds
+may submit an empty list. These rounds are reduced from the published
+`customer0-eql-slo-burn-rate-2026-09-14` smoke incident. They are not raw cluster transcripts.
 
 A code evaluator checks that the submit includes a traversal for each tree it names, that the visit
 path is non-empty and resolves on the submitted tree, that a causal path is present only when the
 investigator response confirms a cause and those edges carry ✅, and that declared `merged_nodes`
-agree with the tree before the run and the tree after it. A new tree may omit merges. An LLM judge
-scores whether those merges and paths match the investigation. The spec fails when that reinforce
-step does not finish or when the code score is below 1. It is not part of an unset or `all` run:
-selecting it exports `NIGHTSHIFT_DECISION_TREES`, which turns Cortex on so decision trees are
-enabled. Restart Scout when switching to or from it. The run needs the golden cluster
-(`--profile dev-vault`) and Customer-0 telemetry.
+agree with the tree before the run and the tree after it. An LLM judge scores whether those merges
+and paths match the investigation. The spec fails when that reinforce step does not finish or when
+the code score is below 1. It is not part of an unset or `all` run: selecting it exports
+`NIGHTSHIFT_DECISION_TREES`, which turns Cortex on so decision trees are enabled. Restart Scout
+when switching to or from it.
 
 ```bash
 NIGHTSHIFT_DATASETS=reinforcement \
@@ -356,12 +356,17 @@ NIGHTSHIFT_DATASETS=reinforcement \
   --judge eis-anthropic-claude-4-6-sonnet
 ```
 
+A first investigation of `nightshift/customer0-manual-v2` creates a new tree. `merged_nodes` is
+rejected on a new tree, so that path cannot show a merge. Set `NIGHTSHIFT_REINFORCEMENT_DATASET`
+to run the first few examples of a golden dataset anyway (`NIGHTSHIFT_REINFORCEMENT_LIMIT`, 1 to 5,
+defaults to 3). That grades the optimize submit the investigation already produced.
+
 To replay a private export of full rounds instead, set `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` to a
 JSON file `{"examples":[...]}` whose examples carry `input.question`, `input.response`,
-`input.tool_calls`, `input.tool_results`, `input.prior_tree`, and `metadata.case_id`. A missing
-traversal, an empty visit path, a causal path that disagrees with the response, or a merge that
-does not match the two trees scores 0. The judge's explanation is what shows whether the arguments
-and merged nodes look right.
+`input.tool_calls`, `input.tool_results`, `input.prior_tree`, and `metadata.case_id`. Set
+`metadata.require_merge` when that round must fold nodes. A missing traversal, an empty visit path,
+a causal path that disagrees with the response, or a merge that does not match the two trees scores
+0. The judge's explanation is what shows whether the arguments and merged nodes look right.
 
 ## Connector probes
 
@@ -565,9 +570,9 @@ against.
 | `NIGHTSHIFT_DATASETS`                  | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all`, `trace-only`, or `reinforcement` fails before any test runs, even when Scout is reused. `reinforcement` selects the Customer-0 reinforcement micro-eval and turns Cortex on; unset and `all` never include it. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE`       | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S`       | Seconds a probe may take before `within_time_budget` scores 0 (default 30). |
-| `NIGHTSHIFT_REINFORCEMENT_DATASET`     | Customer-0 investigation dataset the reinforcement micro-eval samples. Defaults to `nightshift/customer0-manual-v2`. |
-| `NIGHTSHIFT_REINFORCEMENT_LIMIT`       | How many of that dataset's examples to run, from 1 to 5. Defaults to 3. |
-| `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` | JSON file of full investigation rounds. When set, the micro-eval replays those rounds instead of running Customer-0 investigations. |
+| `NIGHTSHIFT_REINFORCEMENT_DATASET`     | When set, the micro-eval runs the first examples of this Customer-0 investigation dataset instead of replaying the committed rounds. A new tree from that path cannot declare merges. |
+| `NIGHTSHIFT_REINFORCEMENT_LIMIT`       | How many of that dataset's examples to run, from 1 to 5. Defaults to 3. Used only with `NIGHTSHIFT_REINFORCEMENT_DATASET`. |
+| `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` | JSON file of full investigation rounds. When set, the micro-eval replays those rounds instead of the committed ones. |
 | `SELECTED_EVALUATORS`                  | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`). |
 | `GCS_CREDENTIALS`                      | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite. |
 

@@ -74,6 +74,8 @@ export interface ReinforcementExample {
     case_id: string;
     /** Where the round came from, so a reduced fixture is not mistaken for a raw export. */
     source: string;
+    /** The prior tree contains nodes this round must fold. An empty `merged_nodes` scores 0. */
+    require_merge?: boolean;
   };
 }
 

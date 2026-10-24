@@ -10,7 +10,6 @@ import { tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
 import { getDatasetCustomContext, replaceCustomContext } from '../investigation/custom_context';
 import {
-  CUSTOMER0_REINFORCEMENT_DATASET,
   loadCustomer0ReinforcementDataset,
   loadReinforcementExamples,
   reinforcementDataset,
@@ -26,6 +25,7 @@ import {
   runCustomer0Reinforcement,
   runReinforcementExample,
 } from './task';
+import { reinforcementExamples } from './traces';
 import type { ReinforcementTaskOutput } from './types';
 
 const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
@@ -126,8 +126,13 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
         }),
       ];
       const tracesFile = process.env.NIGHTSHIFT_REINFORCEMENT_TRACES_FILE;
-      if (tracesFile) {
-        const dataset = reinforcementDataset(loadReinforcementExamples(tracesFile));
+      const liveDataset = process.env.NIGHTSHIFT_REINFORCEMENT_DATASET;
+      // A first Customer-0 investigation creates a new tree, and merged_nodes is rejected on a
+      // new tree. The default replays rounds that already have a prior tree, including one merge.
+      if (!liveDataset || tracesFile) {
+        const dataset = reinforcementDataset(
+          tracesFile ? loadReinforcementExamples(tracesFile) : reinforcementExamples
+        );
         evaluate.setTimeout(dataset.examples.length * 22 * 60_000 + 5 * 60_000);
         const [experiment] = await executorClient.runExperiment(
           {
@@ -154,10 +159,8 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
         return;
       }
 
-      const datasetName =
-        process.env.NIGHTSHIFT_REINFORCEMENT_DATASET ?? CUSTOMER0_REINFORCEMENT_DATASET;
-      const dataset = await loadCustomer0ReinforcementDataset(evalsClient, datasetName);
-      await replaceCustomContext(fetch, getDatasetCustomContext(datasetName));
+      const dataset = await loadCustomer0ReinforcementDataset(evalsClient, liveDataset);
+      await replaceCustomContext(fetch, getDatasetCustomContext(liveDataset));
       // The investigation stays in progress until its post-execution reinforcement run finishes.
       evaluate.setTimeout(
         dataset.examples.length * (CUSTOMER0_REINFORCEMENT_TIMEOUT_MS + 5 * 60_000)
