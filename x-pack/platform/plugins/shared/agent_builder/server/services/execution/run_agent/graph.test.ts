@@ -6,6 +6,7 @@
  */
 
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { OutputParserException } from '@langchain/core/output_parsers';
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
@@ -359,6 +360,31 @@ describe('createAgentGraph', () => {
     });
     expect(researchInvoke).toHaveBeenCalledTimes(1);
     expect(structuredInvoke).toHaveBeenCalledTimes(3);
+  });
+
+  it('retries via retry_error when the structured answer has no tool call (auto-mode fallback)', async () => {
+    const { graph, researchInvoke, structuredInvoke } = createTestGraph({
+      structuredOutput: true,
+    });
+    researchInvoke.mockResolvedValue(new AIMessage({ content: 'research complete' }));
+    structuredInvoke
+      .mockRejectedValueOnce(
+        new OutputParserException('No tool calls found in the response.', '""')
+      )
+      .mockResolvedValueOnce({ response: 'structured answer' });
+
+    const result = await graph.invoke({ cycleLimit: 10 });
+
+    expect(structuredInvoke).toHaveBeenCalledTimes(2);
+    expect(result.finalAnswer).toEqual({ response: 'structured answer' });
+    expect(result.retryNotices).toEqual([
+      expect.objectContaining({
+        phase: 'answer',
+        error: expect.objectContaining({
+          meta: expect.objectContaining({ errCode: AgentExecutionErrorCode.toolValidationError }),
+        }),
+      }),
+    ]);
   });
 
   it('resets the consecutive error counter after a valid structured answer', async () => {

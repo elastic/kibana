@@ -93,7 +93,7 @@ export function createInferenceClient({
   const chatComplete = createChatCompleteApi({
     callbackApi,
   });
-  const output = createOutputApi(chatComplete);
+  const output = createOutputApi(chatComplete, logger);
   const prompt = createPromptApi({
     callbackApi,
   });

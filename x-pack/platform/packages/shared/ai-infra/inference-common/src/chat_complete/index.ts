@@ -48,6 +48,17 @@ export {
 } from './messages';
 export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './tool_schema';
 export {
+  isForcedToolChoice,
+  hasForcedToolChoice,
+  isUnsupportedToolChoiceError,
+  shouldForceToolChoice,
+  recordToolChoiceRejection,
+  resetToolChoiceRejections,
+  createForcedToolChoiceUnsupportedError,
+  toAutoToolChoiceRequest,
+  getToolChoiceFallbackInstruction,
+} from './tool_choice_fallback';
+export {
   ToolChoiceType,
   type ToolCallback,
   type ToolOptions,
