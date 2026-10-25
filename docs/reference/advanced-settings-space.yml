@@ -617,7 +617,7 @@ groups:
       - setting: "ai:anonymizationSettings"
         id: ai-anonymization-settings
         description: |
-          Configuration for anonymizing LLM requests sent through the {{product.kibana}} Inference chat completion API. Requests that bypass that API, such as connectors called directly, are not anonymized. `maskingEnabled` turns anonymization on or off, `onFailure` sets what happens when a rule cannot run (`block` fails the request, `allow_unsafe` skips a pattern that does not compile, falls back to the built-in patterns when the patterns fail to run, and sends the request unmasked only if those fail too), and `rules` lists the regular expression patterns, including built-in ones, and Named Entity Recognition (NER) models used to identify and anonymize sensitive data.
+          Configuration for anonymizing LLM requests sent through the {{product.kibana}} Inference chat completion API. Requests that bypass that API, such as connectors called directly, are not anonymized. `maskingEnabled` turns anonymization on or off, `onFailure` sets what happens when a rule cannot run (`block` fails the request, `allow_unsafe` skips a pattern that does not compile, and sends the request unmasked if the patterns fail to run), and `rules` lists the regular expression patterns, including built-in ones, and Named Entity Recognition (NER) models used to identify and anonymize sensitive data.
 
           :::{dropdown} Default configuration
           ```json

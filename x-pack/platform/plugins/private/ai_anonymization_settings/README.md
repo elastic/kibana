@@ -52,10 +52,10 @@ disables its controls for users who cannot save. The difference is intentional.
   not, on purpose: Core also validates the stored value on read and discards the whole setting
   (masking off) if one rule is invalid, so a rule written through the API that RE2 cannot compile
   fails at run time instead, and `onFailure` decides what happens.
-- **`onFailure: 'allow_unsafe'` is graded, not all-or-nothing.** A custom rule that does not
-  compile is skipped on its own. If the regex stage fails to run (timeout, crashed worker), the
-  request is retried with the built-in rules only; it is sent unmasked only if that fails too. With
-  `block` (default) any of these fails the request.
+- **`onFailure: 'allow_unsafe'` skips what cannot run.** A custom rule that does not compile is
+  skipped on its own and the other rules still apply. If the regex stage fails while running
+  (timeout, crashed worker) none of the rules is applied and the request is sent unmasked. With
+  `block` (default) either case fails the request.
 - **Built-in patterns are written to run the same on native `RegExp` and on RE2.** Do not add
   lookahead, lookbehind, backreferences or unbounded quantifiers to them;
   `default_builtin_regex_rules.test.ts` in `@kbn/ai-anonymization-common` fails if a rule behaves differently on the two engines or is

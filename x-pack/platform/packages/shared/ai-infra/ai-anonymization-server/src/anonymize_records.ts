@@ -173,10 +173,10 @@ export async function anonymizeRecords({
         })
       : declaredRegexRules;
 
-  const maskWithRegexRules = async (rules: RegexAnonymizationRule[]): Promise<void> => {
+  try {
     const detectedRegexEntities = await executeRegexRules({
       records: state.records,
-      rules,
+      rules: regexRules,
       regexWorker,
     });
 
@@ -184,34 +184,20 @@ export async function anonymizeRecords({
     state = resolveOverlapsAndMask({
       detectedMatches: detectedRegexEntities,
       state,
-      rules,
+      rules: regexRules,
       salt,
     });
-  };
-
-  try {
-    await maskWithRegexRules(regexRules);
   } catch (error) {
     if (onFailure !== 'allow_unsafe') {
       throw error;
     }
+    // allow_unsafe: proceed without masking the entities regex detection would have found,
+    // rather than failing the chatComplete call.
     logger?.warn(
-      `Regex anonymization failed; retrying with the built-in rules only because onFailure is "allow_unsafe": ${
+      `Regex anonymization failed; proceeding unmasked because onFailure is "allow_unsafe": ${
         error instanceof Error ? error.message : String(error)
       }`
     );
-    // A slow or failing custom rule must not also switch off the vetted built-in ones.
-    try {
-      await maskWithRegexRules(regexRules.filter((rule) => rule.builtIn));
-    } catch (retryError) {
-      // allow_unsafe: proceed without masking the entities regex detection would have found,
-      // rather than failing the chatComplete call.
-      logger?.warn(
-        `Built-in regex anonymization failed too; proceeding unmasked because onFailure is "allow_unsafe": ${
-          retryError instanceof Error ? retryError.message : String(retryError)
-        }`
-      );
-    }
   }
 
   if (!nerRules.length) {

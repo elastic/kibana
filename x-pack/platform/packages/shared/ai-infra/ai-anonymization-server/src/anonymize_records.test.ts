@@ -464,52 +464,6 @@ describe('anonymizeRecords', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('regex worker crashed'));
   });
 
-  describe('when the regex stage fails under onFailure "allow_unsafe"', () => {
-    const builtInEmailRule: RegexAnonymizationRule = {
-      ...regexRule,
-      id: 'builtin-email',
-      builtIn: true,
-    };
-    const slowCustomRule: RegexAnonymizationRule = {
-      type: 'RegExp',
-      enabled: true,
-      id: 'custom-slow',
-      entityClass: 'MISC',
-      pattern: 'x+',
-    };
-    const run = () =>
-      anonymizeRecords({
-        input: [{ content: 'mail jorge21@gmail.com' }],
-        anonymizationRules: [slowCustomRule, builtInEmailRule],
-        regexWorker,
-        esClient: mockEsClient,
-        onFailure: 'allow_unsafe',
-        logger,
-      });
-
-    // A request-controlled string that makes one custom rule time out must not also disable the
-    // vetted built-in rules for that request.
-    it('still masks with the built-in rules when a custom rule makes the stage fail', async () => {
-      jest
-        .spyOn(regexWorker, 'run')
-        .mockRejectedValueOnce(new Error('Anonymization patterns timed out after 15s'));
-
-      const result = await run();
-
-      expect(result.records[0].content).toMatch(/^mail EMAIL_/);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('built-in rules only'));
-    });
-
-    it('proceeds unmasked, and says so, only when the built-in rules fail too', async () => {
-      jest.spyOn(regexWorker, 'run').mockRejectedValue(new Error('worker crashed'));
-
-      const result = await run();
-
-      expect(result.records[0].content).toBe('mail jorge21@gmail.com');
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('proceeding unmasked'));
-    });
-  });
-
   describe('a custom rule whose pattern does not compile', () => {
     const brokenRule: RegexAnonymizationRule = {
       type: 'RegExp',
