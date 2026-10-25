@@ -9,10 +9,13 @@
 
 import { workerData } from 'node:worker_threads';
 
-// Wakes a blocked main thread right before the bootstrap posts ready.
-const loaded = new Int32Array(workerData.data.loaded);
-Atomics.store(loaded, 0, 1);
-Atomics.notify(loaded, 0);
+// Wakes a blocked main thread once ready is queued: the bootstrap posts ready synchronously
+// after this entry loads, before the worker's event loop runs this callback.
+setImmediate(() => {
+  const loaded = new Int32Array(workerData.data.loaded);
+  Atomics.store(loaded, 0, 1);
+  Atomics.notify(loaded, 0);
+});
 
 const keepAlive: NodeJS.Timeout = setInterval(() => {}, 1_000);
 
