@@ -29,5 +29,5 @@ export const createStaleUpdateSubscription = ({
       return;
     }
 
-    api.setState(attachmentDataToDashboardState(data), { changedBy: ['agent'] });
+    api.setState(attachmentDataToDashboardState(data));
   });
