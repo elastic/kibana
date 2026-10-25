@@ -132,7 +132,12 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                       : i18n.translate('workflows.execution.runAsLabel', {
                           defaultMessage: 'Run as',
                         }),
-                    description: <ServiceAccountName id={executionData.effectiveIdentity.id} />,
+                    description: (
+                      <ServiceAccountName
+                        id={executionData.effectiveIdentity.id}
+                        workload={executionId ? { executionId } : undefined}
+                      />
+                    ),
                   },
                 ]}
               />
