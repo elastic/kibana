@@ -182,6 +182,7 @@ export const SIEM_MIGRATIONS_MANAGE_PATH = `${SIEM_MIGRATIONS_PATH}/manage` as c
 export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
+export const SIEM_MIGRATIONS_WORKFLOWS_PATH = `${SIEM_MIGRATIONS_PATH}/workflows` as const;
 
 /**
  * Detection engine Health UI paths

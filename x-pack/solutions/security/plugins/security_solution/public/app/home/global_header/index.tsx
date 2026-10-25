@@ -49,8 +49,9 @@ export const GlobalHeader = React.memo(() => {
   } = useKibana().services;
   const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
   const canReadFleet = capabilities.fleet.read === true;
-  const canAddData = canReadFleet && !hasSearchAILakeConfigurations;
   const { pathname } = useLocation();
+  const isWorkflowsTranslatedPath = pathname.includes('/siem_migrations/workflows');
+  const canAddData = canReadFleet && !hasSearchAILakeConfigurations && !isWorkflowsTranslatedPath;
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const showTimeline = useShallowEqualSelector(
