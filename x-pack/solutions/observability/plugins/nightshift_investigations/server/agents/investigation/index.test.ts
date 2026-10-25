@@ -209,6 +209,9 @@ describe('Nightshift investigation agent type', () => {
       text.indexOf('\n<reporting>\n')
     );
     expect(text.trimEnd().endsWith('</before_you_reply>\n</reporting>')).toBe(true);
+    // A short table goes in the reply; a long one in an attachment shown inline.
+    expect(instructions).toContain('**When a table says it better, use one**');
+    expect(instructions).toContain('`<render_attachment id="<attachment_id>"/>`');
     // Plain writing: keep component names, explain the mechanics.
     expect(instructions).toContain('**Keep the names, explain the mechanics.**');
     expect(instructions).toContain('**One idea per sentence.**');
