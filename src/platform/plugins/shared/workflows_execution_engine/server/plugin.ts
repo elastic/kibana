@@ -58,6 +58,7 @@ import {
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
+import { isSpaceDeleted } from './lib/is_space_deleted';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
   bulkScheduleRunTasksOrMarkFailed,
@@ -888,6 +889,25 @@ export class WorkflowsExecutionEnginePlugin
 
               let workflowExecutionId: string | undefined;
               try {
+                // Space deletion removes namespaced saved objects only; this space-agnostic
+                // task and the workflow documents in the system index outlive the space.
+                if (
+                  pluginsStart.spaces &&
+                  (await isSpaceDeleted(coreStart.savedObjects, spaceId, logger))
+                ) {
+                  logger.warn(
+                    `Space ${spaceId} no longer exists; removing orphaned scheduled task for workflow ${workflowId}`
+                  );
+                  stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                    workflow_id: workflowId,
+                    space_id: spaceId,
+                    outcome: 'queued_deleted',
+                  });
+                  return {
+                    state: taskInstance.state,
+                    shouldDeleteTask: true,
+                  };
+                }
                 const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
                   includeGlobal: true,
                 });
