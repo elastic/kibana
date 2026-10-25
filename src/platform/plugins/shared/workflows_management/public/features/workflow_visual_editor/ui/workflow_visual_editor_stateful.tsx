@@ -34,7 +34,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
-import { getTriggerLabel } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 function toColorMode(euiColorMode: string): ColorMode {
   switch (euiColorMode) {
@@ -109,24 +109,13 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const workflow = definition ?? lastValidRef.current;
 
-  const transformed = useMemo(() => {
-    const result = transformWorkflowToGraph(workflow);
-    return {
-      ...result,
-      nodes: result.nodes.map((node) => {
-        if (node.type !== 'trigger') {
-          return node;
-        }
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            label: getTriggerLabel(node.data.stepType),
-          },
-        };
-      }),
-    };
-  }, [workflow]);
+  const transformed = useMemo(
+    () =>
+      transformWorkflowToGraph(workflow, (triggerType) =>
+        triggerSchemas.getTriggerName(triggerType)
+      ),
+    [workflow]
+  );
 
   const flyoutTarget = useMemo<FlyoutTarget | null>(() => {
     if (!selectedStepId) return null;
@@ -147,7 +136,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       return {
         kind: 'trigger',
         triggerType: trigger.type,
-        triggerLabel: getTriggerLabel(trigger.type),
+        triggerLabel: triggerSchemas.getTriggerName(trigger.type),
         yamlSnippet,
       };
     }

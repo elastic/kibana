@@ -8,9 +8,11 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import React from 'react';
 import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowLayout } from './use_workflow_layout';
+import { type WorkflowsUiServices, WorkflowsUiServicesProvider } from '../../context';
 
 const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
   ({
@@ -230,6 +232,25 @@ describe('useWorkflowLayout', () => {
 
     const edgeIds = result.current.edges.map((e) => e.id);
     expect(edgeIds).toEqual(expect.arrayContaining(['inner-a:inner-b']));
+  });
+
+  it('labels trigger nodes with the registered title when it transforms the workflow', () => {
+    const workflow = minimal({
+      triggers: [{ type: 'slack2.message', enabled: true }] as unknown as WorkflowYaml['triggers'],
+    });
+    const services = {
+      workflowsExtensions: {
+        getTriggerDefinition: (id: string) =>
+          id === 'slack2.message' ? { title: 'Slack - Message' } : undefined,
+      },
+      triggersActionsUi: {},
+    } as unknown as WorkflowsUiServices;
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(WorkflowsUiServicesProvider, { services, children });
+    const { result } = renderHook(() => useWorkflowLayout({ workflow }), { wrapper });
+
+    const trigger = result.current.nodes.find((node) => node.type === 'trigger');
+    expect(trigger?.data).toEqual(expect.objectContaining({ label: 'Slack - Message' }));
   });
 
   describe('branch-aware execution highlighting', () => {
