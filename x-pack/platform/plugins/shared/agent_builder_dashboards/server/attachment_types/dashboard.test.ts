@@ -72,17 +72,21 @@ const createSavedObjectsClient = (): SavedObjectsClientContract =>
   ({} as SavedObjectsClientContract);
 
 const createAttachment = (
-  data: DashboardAttachmentData
+  data: DashboardAttachmentData,
+  {
+    createdAt = '2025-01-01T00:00:00.000Z',
+    originSnapshotAt = '2025-01-01T00:00:00.000Z',
+  }: { createdAt?: string; originSnapshotAt?: string } = {}
 ): VersionedAttachmentWithOrigin<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData> => ({
   id: 'att-1',
   type: DASHBOARD_ATTACHMENT_TYPE,
   origin: 'dashboard-1',
-  origin_snapshot_at: '2025-01-01T00:00:00.000Z',
+  origin_snapshot_at: originSnapshotAt,
   versions: [
     {
       version: 1,
       data,
-      created_at: '2025-01-01T00:00:00.000Z',
+      created_at: createdAt,
       content_hash: hashContent(data),
     },
   ],
@@ -137,6 +141,50 @@ describe('createDashboardAttachmentType', () => {
     );
 
     expect(isStale).toBe(true);
+  });
+
+  it('isStale should return true when the origin was re-linked after the dashboard was saved', async () => {
+    const dashboardClient = createDashboardClient({ updatedAt: '2025-01-02T00:00:00.000Z' });
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => dashboardClient,
+    });
+
+    const isStale = await definition.isStale?.(
+      createAttachment(
+        { ...dashboardAttachmentData, title: 'Old title' },
+        { createdAt: '2025-01-01T00:00:00.000Z', originSnapshotAt: '2025-01-03T00:00:00.000Z' }
+      ),
+      {
+        request: {} as never,
+        spaceId: 'default',
+        savedObjectsClient: createSavedObjectsClient(),
+      }
+    );
+
+    expect(isStale).toBe(true);
+  });
+
+  it('isStale should return false when the latest attachment version is newer than the dashboard', async () => {
+    const dashboardClient = createDashboardClient({ updatedAt: '2025-01-02T00:00:00.000Z' });
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => dashboardClient,
+    });
+
+    const isStale = await definition.isStale?.(
+      createAttachment(
+        { ...dashboardAttachmentData, title: 'Edited in chat' },
+        { createdAt: '2025-01-03T00:00:00.000Z' }
+      ),
+      {
+        request: {} as never,
+        spaceId: 'default',
+        savedObjectsClient: createSavedObjectsClient(),
+      }
+    );
+
+    expect(isStale).toBe(false);
   });
 
   it('isStale should return false when the dashboard has not changed', async () => {
