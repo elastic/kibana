@@ -1136,7 +1136,7 @@ function createQueryDoc(
     description: 'desc',
     query: {
       esql: 'FROM logs-app | WHERE error == true',
-      query_type: 'match',
+      query_type: 'match' as const,
       rule_backed: false,
       rule_id: 'rule-abc',
     },
