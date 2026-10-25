@@ -186,7 +186,6 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test_service',
     name: 'Test Service',
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: ['test_service'],
     packageName: 'aws',
@@ -1937,7 +1936,6 @@ describe('toSOServiceVars', () => {
     return {
       id: 'svc',
       name: 'Svc',
-      category: 'compute',
       signalTypes: ['logs'],
       dataStreams: ['svc'],
       packageName: 'aws',

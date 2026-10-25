@@ -11,7 +11,6 @@ import { executeFeatureIdentificationAgent } from './identify_features_via_agent
 import {
   buildKnownFeatureIds,
   buildTelemetry,
-  findSimilarFeatures,
   identifyInferredFeatures,
   selectPreviouslyIdentifiedFeatures,
 } from './identify_inferred_features';
@@ -114,95 +113,6 @@ describe('buildKnownFeatureIds', () => {
     const result = buildKnownFeatureIds(features, 36);
     expect(result.text).toBe('technology: fresh-tech, newer-tech');
     expect(result.droppedCount).toBe(1);
-  });
-});
-
-describe('findSimilarFeatures', () => {
-  it('uses semantic search and returns only hits with the candidate type', async () => {
-    const findFeatures = jest.fn().mockResolvedValue({
-      hits: [
-        createFeature({ id: 'okta', type: 'technology', title: undefined }),
-        createFeature({ id: 'okta-service', type: 'entity' }),
-      ],
-    });
-    const kiClient = {
-      findFeatures,
-    } as Parameters<typeof findSimilarFeatures>[0]['kiClient'];
-
-    const result = await findSimilarFeatures({
-      kiClient,
-      sourceId: 'logs.test',
-      args: {
-        candidate_id: 'okta-sdk',
-        title: 'Okta SDK',
-        description: 'Okta client technology',
-        type: 'technology',
-      },
-    });
-
-    expect(findFeatures).toHaveBeenCalledWith(
-      'logs.test',
-      'okta-sdk Okta SDK Okta client technology',
-      {
-        searchMode: 'semantic',
-        limit: 20,
-      }
-    );
-    expect(result).toEqual([
-      {
-        id: 'okta',
-        title: 'okta',
-        description: 'okta description',
-        confidence: 80,
-      },
-    ]);
-  });
-
-  it('caps same-type hits at 5 after over-fetching across types', async () => {
-    const findFeatures = jest.fn().mockResolvedValue({
-      hits: [
-        createFeature({ id: 'other-service', type: 'entity' }),
-        ...Array.from({ length: 7 }, (_, i) =>
-          createFeature({ id: `tech-${i}`, type: 'technology' })
-        ),
-      ],
-    });
-    const kiClient = {
-      findFeatures,
-    } as Parameters<typeof findSimilarFeatures>[0]['kiClient'];
-
-    const result = await findSimilarFeatures({
-      kiClient,
-      sourceId: 'logs.test',
-      args: {
-        candidate_id: 'tech-x',
-        title: 'Tech X',
-        description: 'some technology',
-        type: 'technology',
-      },
-    });
-
-    expect(result).toHaveLength(5);
-    expect(result.map((hit) => hit.id)).toEqual(['tech-0', 'tech-1', 'tech-2', 'tech-3', 'tech-4']);
-  });
-
-  it('propagates semantic search errors for the reasoning-agent boundary to handle', async () => {
-    const kiClient = {
-      findFeatures: jest.fn().mockRejectedValue(new Error('semantic unavailable')),
-    } as Parameters<typeof findSimilarFeatures>[0]['kiClient'];
-
-    await expect(
-      findSimilarFeatures({
-        kiClient,
-        sourceId: 'logs.test',
-        args: {
-          candidate_id: 'okta',
-          title: 'Okta',
-          description: 'Okta identity provider',
-          type: 'technology',
-        },
-      })
-    ).rejects.toThrow('semantic unavailable');
   });
 });
 

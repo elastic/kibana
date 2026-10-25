@@ -117,4 +117,25 @@ describe('useObservedHost', () => {
     expect(result.current.lastSeen.date).toBe('2024-01-25T00:00:00.000Z');
     expect(mockUseFirstLastSeen).toHaveBeenCalledWith(expect.objectContaining({ skip: true }));
   });
+
+  it('queries over the global time range when the scope does not pin one', () => {
+    renderHook(() => useObservedHost('target', '', buildStoreResult([])));
+
+    expect(mockUseHostDetails).toHaveBeenCalledWith(
+      expect.objectContaining({
+        startDate: '2024-01-01T00:00:00.000Z',
+        endDate: '2024-02-01T00:00:00.000Z',
+      })
+    );
+  });
+
+  it('queries over the pinned time range when opened from the new Entity Analytics home', () => {
+    renderHook(() =>
+      useObservedHost('target', 'entity-analytics-new-entities-table-7d', buildStoreResult([]))
+    );
+
+    expect(mockUseHostDetails).toHaveBeenCalledWith(
+      expect.objectContaining({ startDate: 'now-7d', endDate: 'now' })
+    );
+  });
 });

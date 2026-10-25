@@ -11,8 +11,7 @@ import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
-import { deleteCaseAttachments } from './delete_utils';
-import { deleteRelatedAttachments } from './bulk_delete';
+import { deleteCaseAttachments, deleteRelatedAttachments } from './delete_utils';
 
 /**
  * Delete all comments for a case.
