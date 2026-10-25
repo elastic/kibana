@@ -7,8 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import { performance } from 'perf_hooks';
-import type { DiagnosticResult } from '@elastic/transport';
-import type { DiagnosticListenerFull } from '@elastic/transport/lib/Diagnostic';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { PageStepEvent } from './page_step_timings';
@@ -39,6 +38,8 @@ export interface RiskWriterProfile {
   finish: () => void;
 }
 
+type BulkDiagnosticListener = (error: Error | null, result: DiagnosticResult | null) => void;
+
 const round = (ms: number) => Math.round(ms * 100) / 100;
 
 /** Records matching bulk requests and page steps for exploratory writer comparisons. */
@@ -48,7 +49,7 @@ export const createRiskWriterProfile = ({
   stage,
   mode,
 }: {
-  esClient: Pick<ElasticsearchClient, 'diagnostic'>;
+  esClient: Pick<ElasticsearchClient, 'transport'>;
   logger: ScopedLogger;
   stage: 'base' | 'resolution';
   mode: 'pages' | 'stream';
@@ -69,7 +70,7 @@ export const createRiskWriterProfile = ({
       value.riskWriterProfileId === context.riskWriterProfileId
     );
   };
-  const onSerialization: DiagnosticListenerFull = (_error, result) => {
+  const onSerialization: BulkDiagnosticListener = (_error, result) => {
     if (result && matches(result)) {
       const startMs = now();
       pending.set(String(result.meta.request.id), {
@@ -85,7 +86,7 @@ export const createRiskWriterProfile = ({
       });
     }
   };
-  const onRequest: DiagnosticListenerFull = (_error, result) => {
+  const onRequest: BulkDiagnosticListener = (_error, result) => {
     if (result && matches(result)) {
       const span = pending.get(String(result.meta.request.id));
       if (span && result.meta.attempts === 0) {
@@ -94,7 +95,7 @@ export const createRiskWriterProfile = ({
       }
     }
   };
-  const onResponse: DiagnosticListenerFull = (error, result) => {
+  const onResponse: BulkDiagnosticListener = (error, result) => {
     if (result && matches(result)) {
       const key = String(result.meta.request.id);
       const span = pending.get(key);
@@ -114,7 +115,7 @@ export const createRiskWriterProfile = ({
       }
     }
   };
-  const { diagnostic } = esClient;
+  const { diagnostic } = esClient.transport;
   diagnostic.on('serialization', onSerialization);
   diagnostic.on('request', onRequest);
   diagnostic.on('response', onResponse);

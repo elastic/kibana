@@ -7,6 +7,7 @@
 
 import { performance } from 'perf_hooks';
 import { Client } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createRiskWriterProfile } from './risk_writer_profile';
 
@@ -14,7 +15,7 @@ describe('risk writer profile', () => {
   it('separates summed request time from overlapping busy time and isolates stages', () => {
     let now = 0;
     const clock = jest.spyOn(performance, 'now').mockImplementation(() => now);
-    const esClient = new Client({ node: 'http://localhost:9220' });
+    const esClient: ElasticsearchClient = new Client({ node: 'http://localhost:9220' });
     const logger = loggingSystemMock.createLogger();
     const profile = createRiskWriterProfile({ esClient, logger, stage: 'base', mode: 'stream' });
     const diagnosticResult = (id: string, context = profile.context) => ({
@@ -28,19 +29,19 @@ describe('risk writer profile', () => {
     const first = diagnosticResult('first');
     const second = diagnosticResult('second');
     const unrelated = diagnosticResult('other', { riskWriterProfileId: 'another-stage' });
-    esClient.diagnostic.emit('serialization', null, unrelated);
-    esClient.diagnostic.emit('serialization', null, first);
+    esClient.transport.diagnostic.emit('serialization', null, unrelated);
+    esClient.transport.diagnostic.emit('serialization', null, first);
     now = 10;
-    esClient.diagnostic.emit('request', null, first);
+    esClient.transport.diagnostic.emit('request', null, first);
     now = 20;
-    esClient.diagnostic.emit('serialization', null, second);
+    esClient.transport.diagnostic.emit('serialization', null, second);
     now = 30;
-    esClient.diagnostic.emit('request', null, second);
+    esClient.transport.diagnostic.emit('request', null, second);
     now = 50;
-    esClient.diagnostic.emit('response', null, first);
+    esClient.transport.diagnostic.emit('response', null, first);
     now = 80;
-    esClient.diagnostic.emit('response', null, second);
-    esClient.diagnostic.emit('response', null, unrelated);
+    esClient.transport.diagnostic.emit('response', null, second);
+    esClient.transport.diagnostic.emit('response', null, unrelated);
     profile.recordDocuments('produced', 2);
     profile.finish();
     const message = logger.info.mock.calls[0][0] as string;
@@ -56,9 +57,9 @@ describe('risk writer profile', () => {
       successful: 2,
       production: [{ kind: 'produced', docs: 2, atMs: 80 }],
     });
-    expect(esClient.diagnostic.listenerCount('serialization')).toBe(0);
-    expect(esClient.diagnostic.listenerCount('request')).toBe(0);
-    expect(esClient.diagnostic.listenerCount('response')).toBe(0);
+    expect(esClient.transport.diagnostic.listenerCount('serialization')).toBe(0);
+    expect(esClient.transport.diagnostic.listenerCount('request')).toBe(0);
+    expect(esClient.transport.diagnostic.listenerCount('response')).toBe(0);
     clock.mockRestore();
   });
 });
