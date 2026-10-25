@@ -9,7 +9,6 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
-import type { z } from '@kbn/zod/v4';
 import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
@@ -32,6 +31,11 @@ import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
 import { scopedEsqlProbeClient } from './scoped_esql_probe_client';
 import { assertEsqlGroundedInReport, isEvidenceQuoteGrounded } from './report_grounding';
+import { invokeHuntStructured } from '../common/invoke_hunt_structured';
+import {
+  HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+  HUNT_PROMPT_TEMPLATE_VERSION,
+} from '../common/hunt_prompt_templates';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
@@ -725,13 +729,20 @@ export const huntBehavior = async (
     };
   }
 
-  const structured = models.extraction.chatModel.withStructuredOutput(
-    huntBehaviorLlmExtractionSchema
-  );
   const contextBlock = renderArticleContext(articleContext);
-  const result = (await structured.invoke(
-    `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
-  )) as z.infer<typeof huntBehaviorLlmExtractionSchema>;
+  const result = await invokeHuntStructured({
+    model: models.extraction,
+    schema: huntBehaviorLlmExtractionSchema,
+    prompt: `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`,
+    template: {
+      id: HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+      version: HUNT_PROMPT_TEMPLATE_VERSION,
+      variables: {
+        environment_context: contextBlock,
+        report_text: text,
+      },
+    },
+  });
   const candidates = (result.candidates ?? [])
     .map((c) => ({
       technique_id: c.technique_id.toUpperCase().trim(),

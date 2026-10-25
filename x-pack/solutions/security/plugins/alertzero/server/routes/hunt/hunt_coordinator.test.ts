@@ -32,7 +32,10 @@ import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import type { HuntCoordinatorResult } from '../../services/watches/hunt/hunt_coordinator';
 import { emptyHuntForThreatResult } from '../../services/watches/hunt/tier1/hunt_for_threat';
 
-jest.mock('./lib/scoped_model', () => ({ resolveScopedModel: jest.fn() }));
+jest.mock('./lib/scoped_model', () => ({
+  resolveScopedModel: jest.fn(),
+  resolveConfiguredScopedModel: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('../../services/watches/hunt/hunt_coordinator', () => ({ huntCoordinator: jest.fn() }));
 
 const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;

@@ -25,6 +25,7 @@ import { resolveHuntScope } from './common/resolve_index_scope';
 import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
+import { selectHuntCallModel } from './common/select_hunt_call_model';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
 import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { isTier1SearchableIoc } from './tier1/attribute_hits';
@@ -781,17 +782,29 @@ const huntCoordinatorCore = async (
   // The model is a fallback inside it and spends tokens, so a run that Tier 2 will not
   // reach gets the deterministic targets only; they still describe the run.
   // The one place a hunt workload is mapped to a tier (see `HuntModels` for the reasoning).
-  // Both Tier 2 jobs run on Frontier, so Tier 2 is unreachable without it.
-  const tier2Models: HuntBehaviorModels | undefined = models.frontier
-    ? { extraction: models.frontier, esql: models.frontier }
-    : undefined;
+  // A saved Cyber domain model replaces the tier for extraction and dataset matching.
+  // ES|QL generation keeps Frontier when that model requires a prompt template.
+  const extractionModel = selectHuntCallModel({
+    tierModel: models.frontier,
+    cyberModel: models.cyber,
+  });
+  const esqlModel = selectHuntCallModel({
+    tierModel: models.frontier,
+    cyberModel: models.cyber,
+    messagesOnly: true,
+  });
+  const tier2Models: HuntBehaviorModels | undefined =
+    extractionModel && esqlModel ? { extraction: extractionModel, esql: esqlModel } : undefined;
   const tier2Reachable = gatedSkipReason === null && tier2Models !== undefined && Boolean(text);
   const targets = await resolveTier2Targets({
     scope,
     tier1: tier1Raw,
     report: scopeReport,
-    // Dataset matching: a selection task from a list, so the efficient tier.
-    model: tier2Reachable ? models.efficient : undefined,
+    // Dataset matching: a selection task from a list, so the efficient tier unless a
+    // cyber-domain model is saved.
+    model: tier2Reachable
+      ? selectHuntCallModel({ tierModel: models.efficient, cyberModel: models.cyber })
+      : undefined,
     logger,
   });
 
@@ -1061,8 +1074,9 @@ const huntCoordinatorCore = async (
     .join('\n');
 
   const recommendations = await generateRecommendations({
-    // A few short grounded lines with a template floor, so the efficient tier.
-    model: models.efficient,
+    // A few short grounded lines with a deterministic floor, so the efficient tier
+    // unless a cyber-domain model is saved.
+    model: selectHuntCallModel({ tierModel: models.efficient, cyberModel: models.cyber }),
     logger,
     result: coreResult,
     context: recommendationContext,
