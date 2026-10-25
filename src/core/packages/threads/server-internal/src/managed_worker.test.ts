@@ -169,12 +169,11 @@ describe('createManagedWorker', () => {
 
   describe('when a ready-timeout worker terminates slower than the backoff', () => {
     const deferTermination = (worker: MockWorker) => {
-      const termination = { resolve: () => {}, reject: (error: Error) => {} };
+      const termination = { resolve: () => {} };
       worker.terminate.mockImplementationOnce(
         () =>
-          new Promise<number>((resolve, reject) => {
+          new Promise<number>((resolve) => {
             termination.resolve = () => resolve(1);
-            termination.reject = reject;
           })
       );
       return termination;
@@ -244,19 +243,6 @@ describe('createManagedWorker', () => {
       await flushImmediate();
       expect(MockWorker.instances).toHaveLength(2);
       await handle.stop();
-    });
-
-    it('spawns the replacement when termination fails', async () => {
-      const handle = createManagedWorker(options());
-      handle.start();
-      const settle = deferTermination(MockWorker.instances[0]);
-      await timeOut();
-
-      settle.reject(new Error('termination failed'));
-      await flushImmediate();
-      expect(MockWorker.instances).toHaveLength(2);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('termination failed'));
-      await expect(handle.stop()).rejects.toThrow('termination failed');
     });
 
     it('drops the waiting replacement when stopped, even if started again right away', async () => {
@@ -421,26 +407,5 @@ describe('createManagedWorker', () => {
     expect(logger.error).toHaveBeenCalledWith('Worker diagnostic onExit failed: consumer failed');
     expect(handle.status().state).toBe('restarting');
     await handle.stop();
-  });
-
-  it('carries a termination failure from a ready timeout into the next stop', async () => {
-    const handle = createManagedWorker(options());
-    handle.start();
-    MockWorker.instances[0].terminate.mockRejectedValueOnce(new Error('termination failed'));
-    jest.advanceTimersByTime(500);
-    await flushImmediate();
-    await expect(handle.stop()).rejects.toThrow('termination failed');
-  });
-
-  it('reports termination failures to the stop caller once', async () => {
-    const handle = createManagedWorker(options());
-    handle.start();
-    MockWorker.instances[0].terminate.mockRejectedValueOnce(new Error('termination failed'));
-    await expect(handle.stop()).rejects.toThrow('termination failed');
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('termination failed'));
-
-    handle.start();
-    await expect(handle.stop()).resolves.toBeUndefined();
   });
 });

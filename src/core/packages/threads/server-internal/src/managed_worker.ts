@@ -55,8 +55,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
   private heapUsed?: number;
   private heapSizeLimit?: number;
   private stopping?: Promise<void>;
-  private termination: Promise<void> = Promise.resolve();
-  private pendingTerminations = 0;
+  private termination?: Promise<void>;
 
   constructor(private readonly options: ManagedWorkerOptions<TData>) {}
 
@@ -76,9 +75,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     clearTimeout(this.restartTimer);
     this.restartTimer = undefined;
     this.discardWorker();
-    const { termination } = this;
-    this.termination = Promise.resolve();
-    this.stopping = termination.finally(() => {
+    this.stopping = (this.termination ?? Promise.resolve()).finally(() => {
       this.stopping = undefined;
     });
     return this.stopping;
@@ -231,23 +228,21 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
   }
 
   // A worker discarded after a ready timeout may still be terminating; never run two at once.
-  // A failed termination is logged and carried into stop(), so the replacement still starts.
-  // start() throws until a stop() settles, and that waits on the same termination, so checking
-  // `running` is enough to drop a replacement after stop(). No worker exists while waiting, so
-  // no ready timeout can fire in the meantime. A termination that never settles blocks this,
-  // like it blocks stop().
-  private spawnAfterTermination(waiting = false): void {
+  // A worker only spawns once no termination is pending, and none can start while no worker
+  // exists, so at most one is ever pending. start() throws until a stop() settles, and that
+  // waits on the same termination, so checking `running` is enough to drop a replacement after
+  // stop(). A termination that never settles blocks this, like it blocks stop().
+  private spawnAfterTermination(): void {
     if (!this.running) return;
-    if (this.pendingTerminations === 0) {
+    const { termination } = this;
+    if (!termination) {
       this.spawn();
       return;
     }
-    if (!waiting) {
-      this.options.logger.debug(
-        `Worker ${this.options.name} waiting for the previous worker to terminate`
-      );
-    }
-    void this.termination.catch(noop).then(() => this.spawnAfterTermination(true));
+    this.options.logger.debug(
+      `Worker ${this.options.name} waiting for the previous worker to terminate`
+    );
+    void termination.then(() => this.spawnAfterTermination());
   }
 
   // A throwing consumer callback must not become an uncaught exception on the main thread.
@@ -270,17 +265,11 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     worker.removeAllListeners('error');
     // An error emitted during termination must not become an unhandled main-thread exception.
     worker.on('error', noop);
-    this.pendingTerminations++;
-    const terminated = worker.terminate().then(noop, (error: Error) => {
-      this.options.logger.warn(`Worker ${this.options.name} termination failed: ${error.message}`);
-      throw error;
-    });
-    void terminated.catch(noop).then(() => {
-      this.pendingTerminations--;
-    });
-    // A failure from a restart-path discard is carried into the next stop() as well.
-    this.termination = Promise.all([this.termination, terminated]).then(noop);
-    // stop() surfaces the failure; until then it must not count as an unhandled rejection.
-    void this.termination.catch(noop);
+    // terminate() resolves on `exit` and never rejects (Node's lib/internal/worker.js). Clearing on
+    // rejection too keeps a future change from blocking every later spawn.
+    const clear = () => {
+      this.termination = undefined;
+    };
+    this.termination = worker.terminate().then(clear, clear);
   }
 }
