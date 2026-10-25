@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import { riskScoreServiceMock } from './risk_score_service.mock';
 
@@ -342,4 +343,44 @@ describe('RiskEngineDataWriter', () => {
       });
     });
   });
+});
+
+describe('RiskEngineDataWriter stream', () => {
+  it.each([EntityType.host, EntityType.user, EntityType.service])(
+    'writes the same %s document as the page writer',
+    async (entityType) => {
+      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      const writer = new RiskEngineDataWriter({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        index: 'risk-score.risk-score-default',
+        namespace: 'default',
+      });
+      const score = riskScoreServiceMock.createRiskScore();
+      await writer.bulk({ [entityType]: [score] });
+      const [{ operations }] = esClient.bulk.mock.calls[0];
+      const stream = jest.spyOn(esClient.helpers, 'bulk').mockResolvedValue({
+        total: 1,
+        successful: 1,
+        failed: 0,
+        retry: 0,
+        noop: 0,
+        time: 1,
+        bytes: 100,
+        aborted: false,
+      });
+      const scores = async function* () {
+        yield score;
+      };
+      await writer.stream({
+        scores: scores(),
+        entityType,
+        flushBytes: 5000,
+        flushInterval: 1000,
+        concurrency: 2,
+      });
+      const [{ onDocument }] = stream.mock.calls[0];
+      expect(onDocument(score)).toEqual(operations);
+    }
+  );
 });

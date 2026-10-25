@@ -102,6 +102,57 @@ describe('runResolutionScoringStep', () => {
     });
   });
 
+  it('counts acknowledged streaming writes and failed documents', async () => {
+    const scores = ['first', 'second'].map((id_value) =>
+      riskScoreServiceMock.createRiskScore({ id_value })
+    );
+    mockPages(scores.map((score) => [score]));
+    const writer = new RiskEngineDataWriter({
+      esClient,
+      logger,
+      index: 'risk',
+      namespace: 'default',
+    });
+    const received: EntityRiskScoreRecord[] = [];
+    jest.spyOn(writer, 'stream').mockImplementation(async ({ scores: source }) => {
+      for await (const score of source) {
+        received.push(score);
+      }
+      return {
+        total: received.length,
+        successful: 1,
+        failed: 1,
+        retry: 0,
+        noop: 0,
+        time: 1,
+        bytes: 100,
+        aborted: false,
+      };
+    });
+    const result = await runResolutionScoringStep({
+      esClient,
+      crudClient,
+      logger,
+      writer,
+      entityType: EntityType.host,
+      alertsIndex: 'alerts',
+      lookupIndex: 'lookup',
+      pageSize: 1000,
+      sampleSize: 1000,
+      now: '2026-01-01T00:00:00.000Z',
+      calculationRunId: 'run-1',
+      watchlistConfigs: new Map(),
+      idBasedRiskScoringEnabled: true,
+      alertFilters: [],
+      pagesInFlight: 2,
+      riskIndexStream: { flushBytes: 5000, flushInterval: 1000, concurrency: 2 },
+    });
+    expect(received).toEqual(scores);
+    expect(result.scoresWrittenRiskIndex).toBe(1);
+    expect(result.scoresFailed).toBe(1);
+    expect(result.pagesProcessed).toBe(2);
+  });
+
   it('reports lookup_empty when no lookup pages are returned', async () => {
     mockPages([]);
 

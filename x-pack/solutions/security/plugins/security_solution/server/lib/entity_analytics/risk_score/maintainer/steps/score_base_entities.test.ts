@@ -121,6 +121,50 @@ describe('score_base_entities', () => {
     (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
   });
 
+  it('counts acknowledged streaming writes across concurrent pages', async () => {
+    mockCompositeAggPage(esClient, ['user:001@okta'], { entity_id: 'user:001@okta' });
+    mockCompositeAggPage(esClient, ['user:002@okta']);
+    (esClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(esqlPageWithStore([['user:001@okta', {}]]))
+      .mockResolvedValueOnce(esqlPageWithStore([['user:002@okta', {}]]));
+    const writer = new RiskEngineDataWriter({
+      esClient,
+      logger: loggingSystemMock.createLogger(),
+      index: 'risk',
+      namespace: 'default',
+    });
+    const ids: string[] = [];
+    jest.spyOn(writer, 'stream').mockImplementation(async ({ scores }) => {
+      for await (const score of scores) {
+        ids.push(score.id_value);
+      }
+      return {
+        total: ids.length,
+        successful: ids.length,
+        failed: 0,
+        retry: 0,
+        noop: 0,
+        time: 1,
+        bytes: 100,
+        aborted: false,
+      };
+    });
+    const result = await scoreBaseEntities({
+      ...baseParams,
+      esClient,
+      crudClient,
+      logger,
+      writer,
+      createMissingEntities: false,
+      idBasedRiskScoringEnabled: false,
+      pagesInFlight: 2,
+      riskIndexStream: { flushBytes: 5000, flushInterval: 1000, concurrency: 2 },
+    });
+    expect(ids.sort()).toEqual(['user:001@okta', 'user:002@okta']);
+    expect(result.scoresWrittenRiskIndex).toBe(2);
+    expect(result.pagesProcessed).toBe(2);
+  });
+
   it('terminates after a single page when the composite agg has no after_key', async () => {
     mockCompositeAggPage(esClient, ['user:a@okta']);
     (esClient.esql.query as jest.Mock).mockResolvedValueOnce({

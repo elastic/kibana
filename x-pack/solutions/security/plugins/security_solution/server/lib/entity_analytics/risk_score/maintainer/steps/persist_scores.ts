@@ -6,6 +6,7 @@
  */
 
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import type { RiskWriterProfile } from '../utils/risk_writer_profile';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
@@ -20,6 +21,7 @@ export const persistScoresToRiskIndex = async ({
   logger,
   refresh,
   timer,
+  profile,
   parallelChunks = 1,
 }: {
   writer: Pick<RiskEngineDataWriter, 'bulk'>;
@@ -29,9 +31,11 @@ export const persistScoresToRiskIndex = async ({
   refresh?: Parameters<RiskEngineDataWriter['bulk']>[0]['refresh'];
   /** Records the write as the page's `riskWrite` step, with the bulk responses' `took`. */
   timer?: PageStepRecorder;
+  profile?: RiskWriterProfile;
   /** Splits the write into this many bulk requests, sent at the same time. */
   parallelChunks?: number;
 }): Promise<number> => {
+  profile?.recordDocuments('produced', scores.length);
   const chunkSize = Math.max(1, Math.ceil(scores.length / Math.max(1, parallelChunks)));
   const chunks =
     scores.length <= chunkSize
@@ -42,7 +46,9 @@ export const persistScoresToRiskIndex = async ({
   // Elasticsearch's own time, summed over the chunks.
   const write = async () => {
     const responses = await Promise.all(
-      chunks.map((chunk) => writer.bulk({ [entityType]: chunk, refresh }))
+      chunks.map((chunk) =>
+        writer.bulk({ [entityType]: chunk, refresh, ...(profile ? { profile } : {}) })
+      )
     );
     return {
       errors: responses.flatMap((response) => response.errors),

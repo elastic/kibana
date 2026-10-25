@@ -8,9 +8,12 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import type { RiskWriterProfile } from '../utils/risk_writer_profile';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
+import type { RiskScoreStreamOptions } from '../../risk_engine_data_writer';
+import { createRiskScoreStream } from '../utils/risk_score_stream';
 import type { RiskScoreDataClient } from '../../risk_score_data_client';
 import {
   buildZeroResolutionScores,
@@ -53,6 +56,8 @@ interface RunResolutionScoringParams {
   entityStoreWriteChunks?: number;
   /** Splits each page's risk index write into this many bulk requests, sent at the same time. */
   riskIndexWriteChunks?: number;
+  riskIndexStream?: RiskScoreStreamOptions;
+  riskWriterProfile?: RiskWriterProfile;
   /** How many pages are scored and written at the same time. */
   pagesInFlight?: number;
   /** Find each alert's resolution target by joining the entity store rather than the lookup index. */
@@ -105,6 +110,8 @@ export const runResolutionScoringStep = async ({
   entityStoreRefresh,
   entityStoreWriteChunks,
   riskIndexWriteChunks,
+  riskIndexStream,
+  riskWriterProfile,
   pagesInFlight = 1,
   joinEntityStore,
   preAggregateByEntity,
@@ -128,6 +135,17 @@ export const runResolutionScoringStep = async ({
   let abortedBetweenPages = false;
   const newScores: Record<string, number> = {};
   const scoredTargetIds = new Set<string>();
+  const stream = riskIndexStream
+    ? createRiskScoreStream({
+        writer,
+        entityType,
+        options: riskIndexStream,
+        profile: riskWriterProfile,
+        refresh,
+        logger: runLogger,
+        stage: 'resolution',
+      })
+    : undefined;
 
   // Pages run concurrently, so every counter is updated after its page's awaits, never across one.
   const writeScores = async (
@@ -139,15 +157,25 @@ export const runResolutionScoringStep = async ({
       unchangedInStore && unchangedInStore.size > 0
         ? scores.filter((score) => !unchangedInStore.has(score.id_value))
         : scores;
-    const docsWrittenRiskIndex = await persistScoresToRiskIndex({
-      writer,
-      entityType,
-      scores,
-      logger: runLogger,
-      refresh,
-      timer,
-      parallelChunks: riskIndexWriteChunks,
-    });
+    if (stream) {
+      if (timer) {
+        await timer.time('riskEnqueue', () => stream.write(scores));
+      } else {
+        await stream.write(scores);
+      }
+    } else {
+      const docsWrittenRiskIndex = await persistScoresToRiskIndex({
+        writer,
+        entityType,
+        scores,
+        logger: runLogger,
+        refresh,
+        timer,
+        parallelChunks: riskIndexWriteChunks,
+        profile: riskWriterProfile,
+      });
+      scoresWrittenRiskIndex += docsWrittenRiskIndex;
+    }
     const writeToStore = () =>
       persistScoresToEntityStore({
         crudClient,
@@ -161,7 +189,6 @@ export const runResolutionScoringStep = async ({
     const { docsWritten, errorsCount } = timer
       ? await timer.time('storeWrite', writeToStore, (result) => result.tookMs)
       : await writeToStore();
-    scoresWrittenRiskIndex += docsWrittenRiskIndex;
     scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
     scoresUnchangedInStore += scores.length - storeScores.length;
@@ -205,57 +232,72 @@ export const runResolutionScoringStep = async ({
       : {}),
   };
 
-  await forEachConcurrently(discoverResolutionPages(scoringParams), pagesInFlight, async (task) => {
-    const { scores: pageScores, unchangedInStore } = await scoreResolutionPage(scoringParams, task);
-    if (abortSignal?.aborted) {
-      runLogger.info('Resolution scoring aborted between pages');
-      abortedBetweenPages = true;
-      task.timer.end();
-      return;
-    }
-    pagesProcessed += 1;
-    if (pageScores.length > 0) {
-      // Tracked before the write, so a failed write doesn't look like a group with nothing to
-      // score and get its score zeroed below.
-      for (const score of pageScores) {
-        scoredTargetIds.add(score.id_value);
-      }
-      await writeScores(
-        pageScores,
-        task.timer,
-        skipUnchangedStoreWrites ? unchangedInStore : undefined
-      );
-    }
-    task.timer.end();
-  });
-
-  // A targeted run clears the stale score of a target whose group has no alert left, instead of
-  // leaving it on screen until the next full run's `resetToZero`. A processed page means the lookup
-  // holds the targets' groups, which is exact for the single target recalculation passes.
-  if (targetEntityIds && pagesProcessed > 0 && !abortedBetweenPages) {
-    const unscoredTargetIds = targetEntityIds.filter((id) => !scoredTargetIds.has(id));
-    if (unscoredTargetIds.length > 0) {
-      let zeroScores: EntityRiskScoreRecord[] = [];
-      try {
-        zeroScores = await buildZeroResolutionScores({
-          esClient,
-          crudClient,
-          logger: runLogger,
-          entityType,
-          lookupIndex,
-          now,
-          calculationRunId,
-          watchlistConfigs,
-          resolutionTargetIds: unscoredTargetIds,
-        });
-      } catch (error) {
-        runLogger.warn(
-          `Error building zero resolution scores, keeping the previous scores in place: ${error}`
+  try {
+    await forEachConcurrently(
+      discoverResolutionPages(scoringParams),
+      pagesInFlight,
+      async (task) => {
+        const { scores: pageScores, unchangedInStore } = await scoreResolutionPage(
+          scoringParams,
+          task
         );
+        if (abortSignal?.aborted) {
+          runLogger.info('Resolution scoring aborted between pages');
+          abortedBetweenPages = true;
+          task.timer.end();
+          return;
+        }
+        pagesProcessed += 1;
+        if (pageScores.length > 0) {
+          // Tracked before the write, so a failed write doesn't look like a group with nothing to
+          // score and get its score zeroed below.
+          for (const score of pageScores) {
+            scoredTargetIds.add(score.id_value);
+          }
+          await writeScores(
+            pageScores,
+            task.timer,
+            skipUnchangedStoreWrites ? unchangedInStore : undefined
+          );
+        }
+        task.timer.end();
       }
-      if (zeroScores.length > 0) {
-        await writeScores(zeroScores);
+    );
+
+    // A targeted run clears the stale score of a target whose group has no alert left, instead of
+    // leaving it on screen until the next full run's `resetToZero`. A processed page means the lookup
+    // holds the targets' groups, which is exact for the single target recalculation passes.
+    if (targetEntityIds && pagesProcessed > 0 && !abortedBetweenPages) {
+      const unscoredTargetIds = targetEntityIds.filter((id) => !scoredTargetIds.has(id));
+      if (unscoredTargetIds.length > 0) {
+        let zeroScores: EntityRiskScoreRecord[] = [];
+        try {
+          zeroScores = await buildZeroResolutionScores({
+            esClient,
+            crudClient,
+            logger: runLogger,
+            entityType,
+            lookupIndex,
+            now,
+            calculationRunId,
+            watchlistConfigs,
+            resolutionTargetIds: unscoredTargetIds,
+          });
+        } catch (error) {
+          runLogger.warn(
+            `Error building zero resolution scores, keeping the previous scores in place: ${error}`
+          );
+        }
+        if (zeroScores.length > 0) {
+          await writeScores(zeroScores);
+        }
       }
+    }
+  } finally {
+    if (stream) {
+      const { successful, failed } = await stream.finish();
+      scoresWrittenRiskIndex += successful;
+      scoresFailed += failed;
     }
   }
 

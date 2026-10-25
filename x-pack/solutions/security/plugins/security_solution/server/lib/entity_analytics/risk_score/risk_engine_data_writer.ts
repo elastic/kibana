@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { BulkStats } from '@elastic/elasticsearch/lib/helpers';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { RiskWriterProfile } from './maintainer/utils/risk_writer_profile';
 import { EntityType } from '../../../../common/search_strategy';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 
@@ -17,6 +19,7 @@ interface WriterBulkResponse {
 }
 
 interface BulkParams {
+  profile?: RiskWriterProfile;
   host?: EntityRiskScoreRecord[];
   user?: EntityRiskScoreRecord[];
   service?: EntityRiskScoreRecord[];
@@ -25,6 +28,12 @@ interface BulkParams {
 
 export interface RiskEngineDataWriter {
   bulk: (params: BulkParams) => Promise<WriterBulkResponse>;
+}
+
+export interface RiskScoreStreamOptions {
+  flushBytes: number;
+  flushInterval: number;
+  concurrency: number;
 }
 
 interface RiskEngineDataWriterOptions {
@@ -43,10 +52,12 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
         return { errors: [], docs_written: 0, took: 0 };
       }
 
-      const { errors, items, took } = await this.options.esClient.bulk({
-        operations: this.buildBulkOperations(params),
-        refresh: params.refresh ?? false,
-      });
+      const operations = this.buildBulkOperations(params);
+      params.profile?.recordDocuments('consumed', operations.length / 2);
+      const { errors, items, took } = await this.options.esClient.bulk(
+        { operations, refresh: params.refresh ?? false },
+        params.profile ? { context: params.profile.context } : undefined
+      );
 
       return {
         errors: errors
@@ -67,6 +78,41 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
         took: 0,
       };
     }
+  };
+
+  public stream = ({
+    scores,
+    profile,
+    entityType,
+    refresh,
+    ...options
+  }: RiskScoreStreamOptions & {
+    scores: AsyncGenerator<EntityRiskScoreRecord>;
+    profile?: RiskWriterProfile;
+    entityType: EntityType;
+    refresh?: 'wait_for';
+  }): Promise<BulkStats> => {
+    let dropped = 0;
+    return this.options.esClient.helpers.bulk(
+      {
+        ...options,
+        datasource: scores,
+        refresh: refresh ?? false,
+        onDocument: (score) => [
+          { create: { _index: this.options.index } },
+          this.scoreToEcs(score, entityType),
+        ],
+        onDrop: ({ status, error }) => {
+          dropped += 1;
+          if (dropped <= 5) {
+            this.options.logger.warn(
+              `Risk score stream dropped a document: ${status} ${error?.reason}`
+            );
+          }
+        },
+      },
+      profile ? { context: profile.context } : undefined
+    );
   };
 
   private buildBulkOperations = (params: BulkParams): BulkOperationContainer[] => {

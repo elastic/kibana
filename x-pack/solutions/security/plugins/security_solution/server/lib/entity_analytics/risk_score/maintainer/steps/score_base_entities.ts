@@ -8,9 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import type { RiskWriterProfile } from '../utils/risk_writer_profile';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
-import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
+import type { RiskEngineDataWriter, RiskScoreStreamOptions } from '../../risk_engine_data_writer';
+import { createRiskScoreStream } from '../utils/risk_score_stream';
 import {
   getEuidCompositeQuery,
   getBaseScoreESQL,
@@ -87,6 +89,8 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   entityStoreWriteChunks?: number;
   /** Splits each page's risk index write into this many bulk requests, sent at the same time. */
   riskIndexWriteChunks?: number;
+  riskIndexStream?: RiskScoreStreamOptions;
+  riskWriterProfile?: RiskWriterProfile;
   /** How many pages are scored and written at the same time. */
   pagesInFlight?: number;
   /** When true, populate `scores` in the summary. Omit for full-population runs. */
@@ -413,6 +417,7 @@ export const scoreBaseEntities = async ({
   skipUnchangedStoreWrites = false,
   entityStoreWriteChunks,
   riskIndexWriteChunks,
+  riskIndexStream,
   pagesInFlight = 1,
   collectScores,
   ...params
@@ -432,6 +437,17 @@ export const scoreBaseEntities = async ({
 
   const scoringParams = { ...params, createMissingEntities: createMissingEntitiesEnabled };
   const context = await prepareBaseScoring(scoringParams);
+  const stream = riskIndexStream
+    ? createRiskScoreStream({
+        writer,
+        entityType: params.entityType,
+        options: riskIndexStream,
+        profile: params.riskWriterProfile,
+        refresh,
+        logger: params.logger,
+        stage: 'base',
+      })
+    : undefined;
 
   // Pages run concurrently, so every counter is updated after its page's awaits, never across one.
   const persistPage = async (page: ScoredEntityPage, timer: PageTimer) => {
@@ -499,16 +515,21 @@ export const scoreBaseEntities = async ({
       entityStoreScores = changedScores;
     }
 
-    const riskIndexDocsWritten = await persistScoresToRiskIndex({
-      writer,
-      entityType: params.entityType,
-      scores: riskIndexScores,
-      logger: params.logger,
-      refresh,
-      timer,
-      parallelChunks: riskIndexWriteChunks,
-    });
-    scoresWrittenRiskIndex += riskIndexDocsWritten;
+    if (stream) {
+      await timer.time('riskEnqueue', () => stream.write(riskIndexScores));
+    } else {
+      const docsWrittenRiskIndex = await persistScoresToRiskIndex({
+        writer,
+        entityType: params.entityType,
+        scores: riskIndexScores,
+        logger: params.logger,
+        refresh,
+        timer,
+        parallelChunks: riskIndexWriteChunks,
+        profile: params.riskWriterProfile,
+      });
+      scoresWrittenRiskIndex += docsWrittenRiskIndex;
+    }
     const { docsWritten, errorsCount } = await timer.time(
       'storeWrite',
       () =>
@@ -533,17 +554,25 @@ export const scoreBaseEntities = async ({
     }
   };
 
-  await forEachConcurrently(
-    discoverBasePages(scoringParams, context),
-    pagesInFlight,
-    async (task) => {
-      const page = await scoreBasePage(scoringParams, context, task);
-      if (page) {
-        await persistPage(page, task.timer);
+  try {
+    await forEachConcurrently(
+      discoverBasePages(scoringParams, context),
+      pagesInFlight,
+      async (task) => {
+        const page = await scoreBasePage(scoringParams, context, task);
+        if (page) {
+          await persistPage(page, task.timer);
+        }
+        task.timer.end();
       }
-      task.timer.end();
+    );
+  } finally {
+    if (stream) {
+      const { successful, failed } = await stream.finish();
+      scoresWrittenRiskIndex += successful;
+      scoresFailed += failed;
     }
-  );
+  }
   if (context.entitiesWithAlerts) {
     params.logger.info(
       `[base] entities with alerts: ${context.entitiesWithAlerts.count} in a ` +

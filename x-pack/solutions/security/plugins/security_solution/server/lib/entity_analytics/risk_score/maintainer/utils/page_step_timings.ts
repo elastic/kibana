@@ -22,7 +22,16 @@ export type PageStep =
   | 'modifiers'
   | 'entityCreation'
   | 'riskWrite'
+  | 'riskEnqueue'
   | 'storeWrite';
+
+export interface PageStepEvent {
+  page: number;
+  step: PageStep;
+  startMs: number;
+  endMs: number;
+  esTookMs?: number;
+}
 
 export interface PageStepTotal {
   ms: number;
@@ -107,7 +116,7 @@ const toGroupTimings = ({ pages, wallMs, steps }: PageGroup): PageGroupTimings |
  * went with one line. A page runs its steps one after another, so its steps and its untimed
  * remainder add up to its wall time; pages themselves may overlap.
  */
-export const createPageStepTimings = (): PageStepTimings => {
+export const createPageStepTimings = (onStep?: (event: PageStepEvent) => void): PageStepTimings => {
   const firstPage: PageGroup = { pages: 0, wallMs: 0, steps: {} };
   const laterPages: PageGroup = { pages: 0, wallMs: 0, steps: {} };
   const openPages = new Set<() => void>();
@@ -117,6 +126,7 @@ export const createPageStepTimings = (): PageStepTimings => {
 
   const startPage = (): PageTimer => {
     pagesStarted += 1;
+    const page = pagesStarted;
     const group = pagesStarted === 1 ? firstPage : laterPages;
     group.pages += 1;
     const startedAt = performance.now();
@@ -131,6 +141,8 @@ export const createPageStepTimings = (): PageStepTimings => {
     maxPagesInFlight = Math.max(maxPagesInFlight, openPages.size);
 
     const record = (step: PageStep, ms: number, esTookMs: number | undefined) => {
+      const endMs = performance.now();
+      onStep?.({ page, step, startMs: endMs - ms, endMs, esTookMs });
       const total = group.steps[step] ?? { ms: 0, calls: 0 };
       group.steps[step] = {
         ms: total.ms + ms,

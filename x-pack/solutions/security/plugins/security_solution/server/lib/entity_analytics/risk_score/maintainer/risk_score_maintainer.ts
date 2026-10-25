@@ -53,6 +53,7 @@ import type { EntityIdBloomFilter } from './utils/entity_id_bloom_filter';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
 import { createRunHealthTracker } from './utils/run_health';
 import type { PageStepTimings } from './utils/page_step_timings';
+import { createRiskWriterProfile } from './utils/risk_writer_profile';
 import { createPageStepTimings } from './utils/page_step_timings';
 import { buildLookupIndex } from './steps/build_lookup_index';
 import { DEFAULT_ALERT_SAMPLE_SIZE } from '../constants';
@@ -88,6 +89,13 @@ const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
  * the lookup prune. Assumes every alert carries its stamped entity ID.
  */
 const RESOLVE_FROM_ENTITY_STORE = true;
+
+// Test setting: set to undefined for the page-based writer baseline.
+const RISK_INDEX_STREAM = {
+  flushBytes: 2_000_000,
+  flushInterval: 1_000,
+  concurrency: 2,
+};
 
 /**
  * Test setting: score only this many sampled pages per stage, spread evenly over the IDs and each
@@ -573,7 +581,13 @@ const executeEntityTypeRun = async ({
   const alertFilters = buildAlertFilters(runConfig.configuration, entityType, runLogger);
   const baseStage = runTelemetry.startBaseStage();
   const baseStartedAtMs = Date.now();
-  const basePageTimings = createPageStepTimings();
+  const baseWriterProfile = createRiskWriterProfile({
+    esClient: runContext.esClient,
+    logger: runLogger,
+    stage: 'base',
+    mode: RISK_INDEX_STREAM ? 'stream' : 'pages',
+  });
+  const basePageTimings = createPageStepTimings(baseWriterProfile.recordStep);
   let allAlertsStamped = false;
   let entitiesWithAlerts: EntityIdBloomFilter | undefined;
 
@@ -603,6 +617,7 @@ const executeEntityTypeRun = async ({
           skipUnchangedStoreWrites: true,
           entityStoreWriteChunks: 4,
           riskIndexWriteChunks: 4,
+          riskIndexStream: RISK_INDEX_STREAM,
           pagesInFlight: 2,
           // Test setting: page bounds from one sample. A page that reaches the 10k row limit is only
           // found after scoring, so pages aim at 8k, where that practically never happens.
@@ -612,6 +627,7 @@ const executeEntityTypeRun = async ({
             pagesToRun: TEST_PAGES_TO_RUN,
           },
           pageTimings: basePageTimings,
+          riskWriterProfile: baseWriterProfile,
         }),
     });
     runLogger.debug('completed base scoring pass');
@@ -657,6 +673,7 @@ const executeEntityTypeRun = async ({
     throw error;
   } finally {
     logPageTimings('base', basePageTimings);
+    baseWriterProfile.finish();
   }
 
   checkAbortBetweenStages();
@@ -665,7 +682,13 @@ const executeEntityTypeRun = async ({
     // Stage 2: score resolution targets (group scores).
     const resolutionStage = runTelemetry.startResolutionStage();
     const resolutionStartedAtMs = Date.now();
-    const resolutionPageTimings = createPageStepTimings();
+    const resolutionWriterProfile = createRiskWriterProfile({
+      esClient: runContext.esClient,
+      logger: runLogger,
+      stage: 'resolution',
+      mode: RISK_INDEX_STREAM ? 'stream' : 'pages',
+    });
+    const resolutionPageTimings = createPageStepTimings(resolutionWriterProfile.recordStep);
     try {
       const resolutionResult = await runWithSpan({
         name: ENTITY_ANALYTICS_SPAN_NAMES.stageResolution,
@@ -691,6 +714,7 @@ const executeEntityTypeRun = async ({
             entityStoreRefresh: false,
             entityStoreWriteChunks: 4,
             riskIndexWriteChunks: 4,
+            riskIndexStream: RISK_INDEX_STREAM,
             pagesInFlight: 2,
             joinEntityStore: true,
             preAggregateByEntity: true,
@@ -709,6 +733,7 @@ const executeEntityTypeRun = async ({
               pagesToRun: TEST_PAGES_TO_RUN,
             },
             pageTimings: resolutionPageTimings,
+            riskWriterProfile: resolutionWriterProfile,
           }),
       });
       metricsTracker.recordResolution(runMetrics, resolutionResult);
@@ -747,6 +772,7 @@ const executeEntityTypeRun = async ({
       });
     } finally {
       logPageTimings('resolution', resolutionPageTimings);
+      resolutionWriterProfile.finish();
     }
   } else {
     frameworkTelemetryStages.push({
