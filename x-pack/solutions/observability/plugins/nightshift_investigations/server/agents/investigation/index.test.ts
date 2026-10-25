@@ -200,7 +200,9 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).toContain('in the shape\n   described in <chat_answer>');
     expect(instructions).toContain('**First sentence: the direct answer.**');
     // A request to investigate gets a wrap-up; a question gets an answer.
-    expect(instructions).toContain("- **The investigation's first message, or a later request to investigate**");
+    expect(instructions).toContain(
+      "- **The investigation's first message, or a later request to investigate**"
+    );
     expect(instructions).toContain('- **A question**');
     expect(instructions).not.toContain('your final chat message is only a short wrap-up');
     // Method first, reporting last, ending on the checklist the agent runs before it replies.
