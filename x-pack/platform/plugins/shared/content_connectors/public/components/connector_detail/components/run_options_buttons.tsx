@@ -70,7 +70,7 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
               id="xpack.contentConnectors.content.connector_detail.configurationConnector.steps.runConnectorService.source"
               checked={selectedDeploymentMethod === 'source'}
               aria-label={i18n.translate(
-                'xpack.contentConnectorsconnectorConfiguration.sourceTextLabel.ariaLabel',
+                'xpack.contentConnectors.connectorConfiguration.sourceTextLabel.ariaLabel',
                 { defaultMessage: 'Run from source' }
               )}
               name="deployment-method-run-connector"
@@ -82,7 +82,7 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {i18n.translate(
-                        'xpack.contentConnectorsconnectorConfiguration.sourceTextLabel',
+                        'xpack.contentConnectors.connectorConfiguration.sourceTextLabel',
                         { defaultMessage: 'Run from source' }
                       )}
                     </EuiText>
