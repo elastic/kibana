@@ -18,6 +18,7 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * Each namespace under `test/scout_alerting_v2_custom_config` shares this server:
  *   - `engine`  — `alert_actions_cleanup.spec.ts`
  *   - `rules`   — `ebt_telemetry.spec.ts` (api + ui)
+ *   - `alerts`  — `ebt_telemetry.spec.ts` (api)
  *
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alerting_v2_custom_config
  */
@@ -28,9 +29,9 @@ const DISPATCHER_CLEANUP_ENABLED =
   '--xpack.alerting_v2.retention.alertActions.dispatcher.enabled=true';
 
 // Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so the
-// rules tests can assert on rule-lifecycle EBT (`alerting_v2_rule_created` and the other
-// `alerting_v2_rule_*` event types). Loaded as a server arg, so those assertions are
-// local-only: Cloud attaches to an existing deployment.
+// rules and alerts tests can assert on `alerting_v2_rule_*` and `alerting_v2_alert_*`
+// events. Loaded as a server arg, so those assertions are local-only: Cloud attaches
+// to an existing deployment.
 const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
   'src/platform/test/analytics/plugins/analytics_ftr_helpers'

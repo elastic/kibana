@@ -8,6 +8,10 @@
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type {
+  AlertActionAppliedEbtData,
+  AlertActionEbtEventType,
+} from '../../../../server/lib/telemetry/alert_action_ebt_schema';
+import type {
   RuleChangedEbtData,
   RuleEbtEventType,
 } from '../../../../server/lib/telemetry/rule_ebt_schema';
@@ -31,6 +35,21 @@ export interface WaitForRuleChangedEventsParams {
   timeoutMs?: number;
 }
 
+/** An alert-action EBT event as buffered by the `analytics_ftr_helpers` server shipper. */
+export interface AlertActionAppliedEbtEvent {
+  event_type: string;
+  timestamp: string;
+  properties: AlertActionAppliedEbtData;
+}
+
+export interface WaitForAlertActionEventsParams {
+  ruleId: string;
+  eventType: AlertActionEbtEventType;
+  /** Number of matching events to wait for. Defaults to 1. */
+  count?: number;
+  timeoutMs?: number;
+}
+
 /**
  * Test-time accessor for server-side EBT events. Requires the `analytics_ftr_helpers`
  * plugin, which the `alerting_v2` Scout server config set loads.
@@ -47,6 +66,13 @@ export interface EbtService {
   waitForRuleChangedEvents: (
     params: WaitForRuleChangedEventsParams
   ) => Promise<RuleChangedEbtEvent[]>;
+  /**
+   * Resolves with the alert-action events of `eventType` reported for the rule.
+   * Returns as soon as `count` events arrived and throws if they do not within the timeout.
+   */
+  waitForAlertActionEvents: (
+    params: WaitForAlertActionEventsParams
+  ) => Promise<AlertActionAppliedEbtEvent[]>;
 }
 
 export const getEbtService = ({
@@ -66,37 +92,61 @@ export const getEbtService = ({
       });
     });
 
+  const waitForEvents = <TEvent>({
+    metricName,
+    eventType,
+    ruleId,
+    count = 1,
+    timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
+  }: {
+    metricName: string;
+    eventType: string;
+    ruleId: string;
+    count?: number;
+    timeoutMs?: number;
+  }) =>
+    measurePerformanceAsync(log, metricName, async () => {
+      const response = await kbnClient.request<TEvent[]>({
+        method: 'GET',
+        path: `${EBT_HELPERS_PATH}/events`,
+        headers: COMMON_HEADERS,
+        query: {
+          takeNumberOfEvents: count,
+          eventTypes: JSON.stringify([eventType]),
+          withTimeoutMs: timeoutMs,
+          filters: JSON.stringify({
+            'properties.rule_id': { eq: ruleId },
+          }),
+        },
+      });
+
+      const events = response.data;
+      if (events.length < count) {
+        throw new Error(
+          `Expected ${count} '${eventType}' event(s) for rule '${ruleId}' within ${timeoutMs}ms, received ${events.length}`
+        );
+      }
+      return events;
+    });
+
   return {
     optIn: () => setConsent(true),
     optOut: () => setConsent(false),
-    waitForRuleChangedEvents: ({
-      ruleId,
-      eventType,
-      count = 1,
-      timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
-    }) =>
-      measurePerformanceAsync(log, `ebt.waitForRuleChangedEvents[${eventType}]`, async () => {
-        const response = await kbnClient.request<RuleChangedEbtEvent[]>({
-          method: 'GET',
-          path: `${EBT_HELPERS_PATH}/events`,
-          headers: COMMON_HEADERS,
-          query: {
-            takeNumberOfEvents: count,
-            eventTypes: JSON.stringify([eventType]),
-            withTimeoutMs: timeoutMs,
-            filters: JSON.stringify({
-              'properties.rule_id': { eq: ruleId },
-            }),
-          },
-        });
-
-        const events = response.data;
-        if (events.length < count) {
-          throw new Error(
-            `Expected ${count} '${eventType}' event(s) for rule '${ruleId}' within ${timeoutMs}ms, received ${events.length}`
-          );
-        }
-        return events;
+    waitForRuleChangedEvents: ({ ruleId, eventType, count, timeoutMs }) =>
+      waitForEvents<RuleChangedEbtEvent>({
+        metricName: `ebt.waitForRuleChangedEvents[${eventType}]`,
+        eventType,
+        ruleId,
+        count,
+        timeoutMs,
+      }),
+    waitForAlertActionEvents: ({ ruleId, eventType, count, timeoutMs }) =>
+      waitForEvents<AlertActionAppliedEbtEvent>({
+        metricName: `ebt.waitForAlertActionEvents[${eventType}]`,
+        eventType,
+        ruleId,
+        count,
+        timeoutMs,
       }),
   };
 };

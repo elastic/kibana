@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Asserts the EBT events produced when an alert action is applied. The ack
+ * requests go through `apiClient`; alert events are seeded through `apiServices`.
+ */
+
+import { expect } from '@kbn/scout/api';
+import type { RoleApiCredentials } from '@kbn/scout';
+import { ALERT_ACK_ACTION_APPLIED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/alert_action_ebt_schema';
+import {
+  ALERTING_V2_ALERTS_ALL_ROLE,
+  apiTest,
+  buildAlertEvent,
+  BULK_ACK_EPISODE_ACTION_URL,
+  getAckEpisodeActionUrl,
+  testData,
+} from '../fixtures';
+
+// The API key request is not a browser request, so it is reported on the `api` channel with no app.
+const API_ORIGIN = { actor: 'user', channel: 'api' } as const;
+
+apiTest.describe(
+  'Alert action EBT telemetry',
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  () => {
+    let writerHeaders: Record<string, string>;
+
+    apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
+      const writerCredentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ALERTS_ALL_ROLE
+      );
+      writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
+      await apiServices.alertingV2.ebt.optIn();
+    });
+
+    apiTest.beforeEach(async ({ apiServices }) => {
+      await apiServices.alertingV2.ruleEvents.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
+    });
+
+    apiTest.afterAll(async ({ apiServices }) => {
+      try {
+        await apiServices.alertingV2.ruleEvents.cleanUp();
+        await apiServices.alertingV2.alertActionsEvents.cleanUp();
+      } finally {
+        await apiServices.alertingV2.ebt.optOut();
+      }
+    });
+
+    apiTest('reports a single ack', async ({ apiClient, apiServices }) => {
+      const ruleId = 'ebt-ack-rule';
+      const episodeId = 'ebt-ack-episode';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: 'ebt-ack-group',
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(response).toHaveStatusCode(204);
+
+      const [event] = await apiServices.alertingV2.ebt.waitForAlertActionEvents({
+        ruleId,
+        eventType: ALERT_ACK_ACTION_APPLIED_EBT_EVENT_TYPE,
+      });
+      expect(event.event_type).toBe(ALERT_ACK_ACTION_APPLIED_EBT_EVENT_TYPE);
+      expect(event.properties).toMatchObject({
+        space_id: 'default',
+        rule_id: ruleId,
+        origin: API_ORIGIN,
+        alert_count: 1,
+      });
+      expect(event.properties.origin.app).toBeUndefined();
+    });
+
+    apiTest('reports a bulk ack as one event for the rule', async ({ apiClient, apiServices }) => {
+      const ruleId = 'ebt-bulk-ack-rule';
+      const episodeIdOne = 'ebt-bulk-ack-episode-one';
+      const episodeIdTwo = 'ebt-bulk-ack-episode-two';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: 'ebt-bulk-ack-group-one',
+          alert: { id: episodeIdOne, status: 'active' },
+        }),
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: 'ebt-bulk-ack-group-two',
+          alert: { id: episodeIdTwo, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ alert_id: episodeIdOne }, { alert_id: episodeIdTwo }] },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
+
+      const events = await apiServices.alertingV2.ebt.waitForAlertActionEvents({
+        ruleId,
+        eventType: ALERT_ACK_ACTION_APPLIED_EBT_EVENT_TYPE,
+      });
+      expect(events).toHaveLength(1);
+      expect(events[0]?.properties).toMatchObject({
+        space_id: 'default',
+        rule_id: ruleId,
+        origin: API_ORIGIN,
+        alert_count: 2,
+      });
+      expect(events[0]?.properties.origin.app).toBeUndefined();
+    });
+  }
+);

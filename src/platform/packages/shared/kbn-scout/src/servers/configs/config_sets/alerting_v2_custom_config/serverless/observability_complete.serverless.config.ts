@@ -13,13 +13,13 @@ import { servers as defaultConfig } from '../../default/serverless/observability
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
- * Serverless variant of the alerting_v2 escape-hatch config set. Only the `rules`
- * EBT telemetry suite runs here (`@local-serverless-observability_complete`); the
- * cleanup suite is stateful-classic only, so this variant omits the dispatcher arg.
+ * Serverless variant of the alerting_v2 escape-hatch config set. The `rules` and
+ * `alerts` EBT telemetry suites run here (`@local-serverless-observability_complete`);
+ * the cleanup suite is stateful-classic only, so this variant omits the dispatcher arg.
  */
 
 // Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so the
-// rules tests can assert on rule-lifecycle EBT. Loaded as a server arg, so those
+// rules and alerts tests can assert on EBT. Loaded as a server arg, so those
 // assertions are local-only: Cloud attaches to an existing deployment.
 const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
