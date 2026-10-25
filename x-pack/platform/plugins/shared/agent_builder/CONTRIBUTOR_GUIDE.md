@@ -857,18 +857,17 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
    */
   isStale: async (attachment, context) => {
     const savedObject = await context.savedObjectsClient?.get('my_type', attachment.origin);
-    if (!savedObject) return false;
-    // Compare the saved object's last-modified time against when the attachment was snapshotted
-    return (
-      Boolean(savedObject.updated_at) &&
-      Boolean(attachment.origin_snapshot_at) &&
-      new Date(savedObject.updated_at) > new Date(attachment.origin_snapshot_at)
-    );
+    const latestVersion = getLatestVersion(attachment);
+    if (!savedObject?.updated_at || !latestVersion) return false;
+    // Compare the saved object's last-modified time against when the content we hold was written
+    return new Date(savedObject.updated_at) > new Date(latestVersion.created_at);
   },
 };
 ```
 
-- `attachment.origin_snapshot_at` — ISO timestamp of when `resolve` last ran; use it to compare against the origin's current version
+- `getLatestVersion(attachment).created_at` (from `@kbn/agent-builder-common/attachments`) — when the content the attachment holds was last written, whether by `resolve`, the agent or the user. Compare it against the origin's last-modified time
+- `attachment.origin_snapshot_at` — when the origin was last linked. Don't use it as the staleness baseline: `updateOrigin` also resets it without copying any content, so a save followed by a re-link (as the dashboard integration does on every save) would never show as stale
+- If the origin's timestamp can move without its content changing, also compare the content before returning `true` (see the dashboard type in `agent_builder_dashboards`)
 - `context` — same `AttachmentResolveContext` as `resolve` (includes `savedObjectsClient`, `request`, `spaceId`)
 - Return `true` if the stored data is outdated; the framework will call `resolve` again to fetch fresh content and surface a resync prompt in the UI
 - Staleness checking is **only triggered for attachments with a populated `origin`**; inline-only types that never set `origin` will never have `isStale` called
