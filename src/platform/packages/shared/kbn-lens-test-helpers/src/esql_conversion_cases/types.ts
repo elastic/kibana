@@ -40,6 +40,8 @@ export interface EsqlConversionSuccess {
   readonly expectedDropPartials?: Readonly<Record<string, boolean>>;
   /** EVAL-only queries preserve source columns in addition to generated columns. */
   readonly allowAdditionalColumns?: true;
+  /** Column values the last result row must have when the query runs against Elasticsearch. */
+  readonly expectedLastRow?: Readonly<Record<string, unknown>>;
 }
 
 export interface EsqlConversionFailure {

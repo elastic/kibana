@@ -71,6 +71,7 @@ const EXECUTABLE_CASES = Object.entries(buildEsqlConversionCasesByGroup()).flatM
               group,
               conversionCase,
               expectedEsql: conversionCase.expected.esql,
+              expectedLastRow: conversionCase.expected.expectedLastRow ?? {},
               columnNamesMatcher: conversionCase.expected.allowAdditionalColumns
                 ? expect.arrayContaining([...conversionCase.expected.columnNames])
                 : [...conversionCase.expected.columnNames],
@@ -148,7 +149,7 @@ apiTest.describe(
         async ({ apiClient }) => {
           // Keep the exact query assertion close to execution so this layer verifies
           // the converter output that it sends to Elasticsearch.
-          const { conversionCase, expectedEsql, columnNamesMatcher } = queryCase;
+          const { conversionCase, expectedEsql, expectedLastRow, columnNamesMatcher } = queryCase;
           const { timeField } = conversionCase.dataset;
           const esql = generateQueryForCase(conversionCase);
           expect(esql).toBe(expectedEsql);
@@ -190,7 +191,13 @@ apiTest.describe(
             ({ name }: { name: string }) => name
           );
           expect(responseColumnNames).toStrictEqual(columnNamesMatcher);
-          expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
+          const { values } = response.body.rawResponse;
+          expect(values.length).toBeGreaterThan(0);
+
+          const lastRow = Object.fromEntries(
+            responseColumnNames.map((name: string, index: number) => [name, values.at(-1)[index]])
+          );
+          expect(lastRow).toMatchObject(expectedLastRow);
         }
       );
     }
