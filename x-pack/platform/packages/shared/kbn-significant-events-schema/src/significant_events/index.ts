@@ -22,6 +22,7 @@ export {
   CHANGE_POINT_TYPES,
   type Detection,
   type DetectionSkip,
+  describeSkip,
   type ChangePointType,
 } from './detections';
 export {

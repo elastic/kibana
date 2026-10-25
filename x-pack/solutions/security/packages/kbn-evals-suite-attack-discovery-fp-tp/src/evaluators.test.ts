@@ -587,6 +587,21 @@ describe('PayloadConformance contract checks', () => {
     ).toBe(1);
   });
 
+  it('returns 1 for an ungrounded-claim downgrade with no checks and no truncation', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          outcome: 'inconclusive',
+          payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+          raw: { coverage: coverage(2, 5), claims: undefined, checks: undefined },
+        },
+        'inconclusive'
+      )
+    ).toBe(1);
+  });
+
   it('returns 1 for a downgraded inconclusive with no checks and truncated events', async () => {
     expect(
       await score(

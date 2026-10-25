@@ -12,7 +12,7 @@ import { SAMPLE_OTHER_SERIES_ID, SAMPLE_SERIES_ID } from '../alert_oas_shared_ex
 
 export const BULK_SNOOZE_SERIES_ACTION_REQUEST: BulkSnoozeSeriesActionBody = {
   items: [
-    { series_id: SAMPLE_SERIES_ID, snoozed_until: '2026-01-16T12:00:00.000Z' },
+    { series_id: SAMPLE_SERIES_ID, snoozed_until: '2099-01-16T12:00:00.000Z' },
     { series_id: SAMPLE_OTHER_SERIES_ID },
   ],
 };
