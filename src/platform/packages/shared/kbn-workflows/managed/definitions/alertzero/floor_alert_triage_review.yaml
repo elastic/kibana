@@ -75,6 +75,22 @@ triggers:
           description: >-
             Worker autonomy level. `manual` waits for an analyst, `supervised` approves the
             closure automatically. Defaults to `manual`.
+        pattern_key:
+          type: string
+          maxLength: 512
+          description: Deterministic FP pattern key used for KI grouping.
+        subject_key:
+          type: string
+          maxLength: 128
+          description: Proposal subject key for this pattern (uuidv5 material).
+        proposal_id:
+          type: string
+          maxLength: 128
+          description: Deterministic proposal id to create under (generation 0).
+        ki_id:
+          type: string
+          maxLength: 128
+          description: Deterministic pattern KI id in security-investigations.
       required:
         - conversation_id
         - rule_id
@@ -170,6 +186,39 @@ steps:
         confidence: high
         # Autonomy → autoApprove mapping. One site: update here if semantics change.
         autoApprove: "${{ inputs.autonomy == 'supervised' }}"
+        proposalId: "${{ inputs.proposal_id }}"
+
+  # Pattern KI pointer so later batches join this open proposal/investigation.
+  - name: write_fp_pattern_ki
+    type: elasticsearch.index
+    if: "${{ inputs.ki_id != blank }}"
+    on-failure:
+      continue: true
+    with:
+      index: ai-index-idx-security-investigations
+      id: "{{ inputs.ki_id }}"
+      document:
+        "@timestamp": "{{ execution.startedAt }}"
+        id: "{{ inputs.ki_id }}"
+        updated_at: "{{ execution.startedAt }}"
+        type: security.triage_fp_pattern
+        title: "Alert Triage FP pattern for {{ inputs.rule_id }}"
+        description: "Open false-positive closure grouping for pattern {{ inputs.pattern_key }}"
+        content: "{{ inputs.pattern_key }}"
+        tags:
+          - consumer:alert_triage
+          - status:open
+          - watch:floor
+        attributes:
+          status: open
+          rule_id: "{{ inputs.rule_id }}"
+          pattern_key: "{{ inputs.pattern_key }}"
+          proposal_id: "{{ steps.create_fp_proposal.output.proposalId }}"
+          conversation_id: "{{ inputs.conversation_id }}"
+          subject_key: "{{ inputs.subject_key }}"
+          producer: alertzero.triage.fp_pattern.v1
+          space_id: "{{ workflow.spaceId }}"
+          watch_id: floor
 
   # Fetch proposal details for outcome comment attribution (decision, decidedBy,
   # dismissReason, rationale). handle_dismissed below must not derive the retag from a

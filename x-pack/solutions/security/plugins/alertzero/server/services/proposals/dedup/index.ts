@@ -40,6 +40,10 @@ export {
   type ConvergeOutcome,
 } from './converge_on_live_proposal';
 export {
+  createFpClosureConverger,
+  type FpConvergeOutcome,
+} from './converge_fp_closure';
+export {
   createExistingProposalsCounter,
   type CountExistingProposals,
 } from './check_existing_proposals';

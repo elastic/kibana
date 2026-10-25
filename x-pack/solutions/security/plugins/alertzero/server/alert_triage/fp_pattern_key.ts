@@ -1,0 +1,259 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createHash } from 'crypto';
+import { get } from 'lodash';
+
+/** Caps how many alerts one converged FP-closure proposal may hold. */
+export const TRIAGE_FP_MAX_ALERT_IDS = 1000;
+
+/** Caps automatic revisions when growing a live FP-closure proposal. */
+export const TRIAGE_FP_MAX_AUTOMATIC_REVISION = 20;
+
+/** Must stay aligned with `system-alertzero-action-close-alerts-fp`. */
+const FP_CLOSE_ACTION_WORKFLOW_ID = 'system-alertzero-action-close-alerts-fp';
+
+const GUID_RE = /\{?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}?/gi;
+const USER_PROFILE_RE = /([/\\])(?:users|home)\1[^/\\]+/gi;
+
+/**
+ * Normalises a path-like value so the same binary under different users / GUID folders
+ * lands on one pattern. Does not equalise distinct host names, user names, or hashes.
+ */
+export const normalizePatternValue = (value: string): string => {
+  let next = value.trim().toLowerCase();
+  next = next.replace(USER_PROFILE_RE, '$1users$1<user>');
+  next = next.replace(GUID_RE, '<guid>');
+  return next;
+};
+
+const asString = (value: unknown): string | undefined => {
+  if (typeof value === 'string' && value.trim() !== '') {
+    return value;
+  }
+  if (Array.isArray(value) && typeof value[0] === 'string' && value[0].trim() !== '') {
+    return value[0];
+  }
+  return undefined;
+};
+
+const readField = (alert: Record<string, unknown>, path: string): string | undefined => {
+  const raw = asString(get(alert, path));
+  return raw !== undefined ? normalizePatternValue(raw) : undefined;
+};
+
+type FieldSet = readonly string[];
+
+const PROCESS_FIELDS: FieldSet = [
+  'process.executable',
+  'process.code_signature.subject_name',
+  'process.parent.executable',
+];
+const FILE_FIELDS: FieldSet = ['file.path', 'process.executable'];
+const DLL_FIELDS: FieldSet = ['dll.path', 'dll.code_signature.subject_name'];
+const REGISTRY_FIELDS: FieldSet = ['registry.path', 'process.executable'];
+const HASH_FIELDS: FieldSet = [
+  'process.hash.sha256',
+  'file.hash.sha256',
+  'dll.hash.sha256',
+  'process.hash.sha1',
+  'file.hash.sha1',
+];
+
+const IDENTIFYING_PATHS = new Set([
+  'process.executable',
+  'process.parent.executable',
+  'file.path',
+  'dll.path',
+  'registry.path',
+  'process.code_signature.subject_name',
+  'dll.code_signature.subject_name',
+  ...HASH_FIELDS,
+]);
+
+const pickFieldSet = (alert: Record<string, unknown>): FieldSet => {
+  if (readField(alert, 'registry.path')) {
+    return REGISTRY_FIELDS;
+  }
+  if (readField(alert, 'dll.path')) {
+    return DLL_FIELDS;
+  }
+  if (readField(alert, 'file.path')) {
+    return FILE_FIELDS;
+  }
+  return PROCESS_FIELDS;
+};
+
+const isSigned = (alert: Record<string, unknown>, fields: FieldSet): boolean =>
+  fields.some(
+    (path) => path.endsWith('code_signature.subject_name') && readField(alert, path) !== undefined
+  );
+
+/**
+ * Deterministic pattern material for one alert. `undefined` when no usable condition can be
+ * built (caller pools those as one-offs under the rule alone).
+ */
+export const buildFpPatternMaterial = (alert: Record<string, unknown>): string | undefined => {
+  const fields = pickFieldSet(alert);
+  const parts: string[] = [];
+  for (const path of fields) {
+    const value = readField(alert, path);
+    if (value !== undefined) {
+      parts.push(`${path}=${value}`);
+    }
+  }
+  if (!isSigned(alert, fields)) {
+    for (const path of HASH_FIELDS) {
+      const value = readField(alert, path);
+      if (value !== undefined) {
+        parts.push(`${path}=${value}`);
+        break;
+      }
+    }
+  }
+  const hasIdentifier = parts.some((part) => IDENTIFYING_PATHS.has(part.split('=')[0] ?? ''));
+  if (!hasIdentifier || parts.length === 0) {
+    return undefined;
+  }
+  return parts.sort().join('|');
+};
+
+export const buildFpPatternKey = ({
+  ruleId,
+  alert,
+}: {
+  ruleId: string;
+  alert: Record<string, unknown>;
+}): string => {
+  const material = buildFpPatternMaterial(alert);
+  if (material === undefined) {
+    return `rule:${ruleId}`;
+  }
+  const digest = createHash('sha256').update(material).digest('hex').slice(0, 32);
+  return `rule:${ruleId}|pattern:${digest}`;
+};
+
+export const readRuleRevision = (alert: Record<string, unknown>): string | undefined => {
+  const version =
+    asString(get(alert, 'kibana.alert.rule.version')) ??
+    asString(get(alert, 'kibana.alert.rule.revision')) ??
+    asString(get(alert, 'kibana.alert.rule.rule_id'));
+  return version;
+};
+
+/**
+ * Subject key for FP-closure proposals: same rule + pattern (+ optional rule revision) always
+ * lands on the same Proposals slot, independent of Investigation.
+ */
+export const buildFpClosureSubjectKey = ({
+  ruleId,
+  ruleRevision,
+  patternKey,
+}: {
+  ruleId: string;
+  ruleRevision?: string;
+  patternKey: string;
+}): string => {
+  const material = ruleRevision
+    ? `${ruleId}|${ruleRevision}|${patternKey}|${FP_CLOSE_ACTION_WORKFLOW_ID}`
+    : `${ruleId}|${patternKey}|${FP_CLOSE_ACTION_WORKFLOW_ID}`;
+  // Stable string subject for buildProposalId; need not be a UUID itself.
+  return createHash('sha256').update(material).digest('hex');
+};
+
+export interface FpPatternGroup {
+  patternKey: string;
+  subjectKey: string;
+  alertIds: string[];
+  /** Hosts/users for proposal title copy; may be empty. */
+  entitySummary: string;
+}
+
+const entityName = (alert: Record<string, unknown>, path: string): string | undefined => {
+  const raw = asString(get(alert, path));
+  return raw && raw !== '__missing__' ? raw : undefined;
+};
+
+const buildEntitySummary = (alerts: Record<string, unknown>[]): string => {
+  const hosts = new Set<string>();
+  const users = new Set<string>();
+  for (const alert of alerts) {
+    const host =
+      entityName(alert, 'host.name') ??
+      entityName(alert, 'host.hostname') ??
+      entityName(alert, 'agent.hostname');
+    const user =
+      entityName(alert, 'user.name') ??
+      entityName(alert, 'user.id') ??
+      entityName(alert, 'source.user.name');
+    if (host) hosts.add(host);
+    if (user) users.add(user);
+  }
+  const hostList = [...hosts].slice(0, 2);
+  const userList = [...users].slice(0, 2);
+  if (hostList.length === 0 && userList.length === 0) {
+    return '';
+  }
+  const hostPart =
+    hostList.length === 0
+      ? ''
+      : hosts.size > 2
+      ? `on ${hostList.join(', ')} +${hosts.size - 2}`
+      : `on ${hostList.join(', ')}`;
+  const userPart =
+    userList.length === 0
+      ? ''
+      : users.size > 2
+      ? `(${userList.join(', ')} +${users.size - 2})`
+      : `(${userList.join(', ')})`;
+  return [hostPart, userPart].filter(Boolean).join(' ');
+};
+
+/**
+ * Groups confident-FP alert ids by pattern key. Alerts missing from `alertsById` are pooled
+ * under the rule-only key so they still close together.
+ */
+export const groupFpAlertsByPattern = ({
+  ruleId,
+  alertIds,
+  alertsById,
+}: {
+  ruleId: string;
+  alertIds: readonly string[];
+  alertsById: ReadonlyMap<string, Record<string, unknown>>;
+}): FpPatternGroup[] => {
+  const buckets = new Map<string, { patternKey: string; subjectKey: string; alerts: Record<string, unknown>[]; alertIds: string[] }>();
+
+  for (const alertId of alertIds) {
+    const alert = alertsById.get(alertId) ?? {};
+    const patternKey = buildFpPatternKey({ ruleId, alert });
+    const subjectKey = buildFpClosureSubjectKey({
+      ruleId,
+      ruleRevision: readRuleRevision(alert),
+      patternKey,
+    });
+    const existing = buckets.get(subjectKey);
+    if (existing) {
+      existing.alertIds.push(alertId);
+      existing.alerts.push(alert);
+    } else {
+      buckets.set(subjectKey, {
+        patternKey,
+        subjectKey,
+        alertIds: [alertId],
+        alerts: [alert],
+      });
+    }
+  }
+
+  return [...buckets.values()].map(({ patternKey, subjectKey, alertIds: ids, alerts }) => ({
+    patternKey,
+    subjectKey,
+    alertIds: ids,
+    entitySummary: buildEntitySummary(alerts),
+  }));
+};

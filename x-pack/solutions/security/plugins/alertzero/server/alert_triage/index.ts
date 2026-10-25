@@ -29,3 +29,11 @@ export { readHeadroom } from './headroom';
 export { getExecutionIds, planBatches } from './plan_batches';
 export { planSweep, tagInChunks, type SweepConfig, type SweepPorts } from './plan_sweep';
 export { selectPendingAlerts } from './select_pending_alerts';
+export {
+  buildFpPatternKey,
+  groupFpAlertsByPattern,
+  TRIAGE_FP_MAX_ALERT_IDS,
+  TRIAGE_FP_MAX_AUTOMATIC_REVISION,
+} from './fp_pattern_key';
+export { buildFpPatternKiId, TRIAGE_FP_PATTERN_KI_TYPE } from './fp_pattern_ki';
+export { resolveFpClosure } from './resolve_fp_closure';

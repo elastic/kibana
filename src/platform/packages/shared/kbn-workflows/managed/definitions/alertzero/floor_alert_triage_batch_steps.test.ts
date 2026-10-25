@@ -313,7 +313,7 @@ describe('floor_alert_triage_batch — attach_impact', () => {
     const step = stepByName('attach_impact');
     expect(step?.type).toBe('investigations.attachImpact');
     expect(step?.with).toEqual({
-      conversationId: '{{ steps.create_investigation.output.conversation_id }}',
+      conversationId: '{{ variables.conversation_id }}',
       entities: '${{ steps.classify_alerts.output.impacted_entities }}',
     });
     expect(JSON.stringify(parsed)).not.toContain('security.impact');
@@ -380,12 +380,12 @@ describe('floor_alert_triage_batch — attach_alerts', () => {
 describe('floor_alert_triage_batch — require_analysis_enabled', () => {
   const topLevelNames = parsed.steps.map((step) => step.name);
 
-  it('runs before create_investigation so a disabled-analysis run opens no Investigation', () => {
+  it('runs before Investigation create-or-reuse so a disabled-analysis run opens no Investigation', () => {
     expect(topLevelNames.indexOf('fetch_analysis_runtime_config')).toBeLessThan(
-      topLevelNames.indexOf('create_investigation')
+      topLevelNames.indexOf('reuse_or_create_investigation')
     );
     expect(topLevelNames.indexOf('require_analysis_enabled')).toBeLessThan(
-      topLevelNames.indexOf('create_investigation')
+      topLevelNames.indexOf('reuse_or_create_investigation')
     );
   });
 
@@ -782,7 +782,7 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
     renderString(noteTemplate, {
       workflow: { spaceId: 'default' },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      variables: { conversation_id: 'conv-1' },
       foreach: {
         item: {
           classification: 'false_positive',
@@ -1041,10 +1041,10 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(gate).toBeGreaterThan(stepIndex('add_verdict_notes'));
   });
 
-  it('only starts a review when there is something to close', () => {
-    expect(stepByName('gate_fp_close')?.condition).toBe('${{ variables.fp_candidate_count > 0 }}');
+  it('only starts a review when mint groups need a new proposal', () => {
+    expect(stepByName('gate_fp_close')?.condition).toBe('${{ variables.mint_count > 0 }}');
     expect(stepByName('gate_fp_close')?.steps?.map((step) => step.name)).toContain(
-      'start_fp_review'
+      'start_fp_reviews'
     );
   });
 
@@ -1059,8 +1059,12 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         'confidence_floor',
         'entity_summary',
         'fp_candidate_ids',
+        'ki_id',
+        'pattern_key',
+        'proposal_id',
         'rule_id',
         'rule_name',
+        'subject_key',
       ].sort()
     );
 
@@ -1071,8 +1075,17 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         autonomy: 'supervised',
         confidence_floor: 0.9,
       },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
-      variables: { fp_candidate_ids: ['a', 'b'], fp_entity_summary: 'on host-1' },
+      variables: { conversation_id: 'conv-1' },
+      foreach: {
+        item: {
+          alert_ids: ['a', 'b'],
+          entity_summary: 'on host-1',
+          pattern_key: 'rule:rule-1',
+          subject_key: 'subj',
+          proposal_id: '11111111-1111-4111-8111-111111111111',
+          ki_id: 'ki-triage-fp-abc',
+        },
+      },
     };
     expect(renderString(inputs.rule_id, context)).toBe('rule-1');
     expect(renderString(inputs.conversation_id, context)).toBe('conv-1');
@@ -1172,7 +1185,7 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         .message;
       return renderString(template, {
         steps: { start_fp_review: { output: { status: 'failed' } } },
-        variables: { fp_candidate_count: count },
+        foreach: { item: { alert_ids: Array.from({ length: count }, (_, i) => `a${i}`) } },
         inputs: { autonomy },
       });
     };

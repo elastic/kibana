@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -12,9 +15,11 @@ import {
   triageHeadroomStepCommonDefinition,
   triageLoadAlertsStepCommonDefinition,
   triagePlanSweepStepCommonDefinition,
+  triageResolveFpClosureStepCommonDefinition,
 } from '../../../common/step_types/alert_triage';
 import { readHeadroom } from '../../alert_triage/headroom';
 import { planSweep } from '../../alert_triage/plan_sweep';
+import { resolveFpClosure } from '../../alert_triage/resolve_fp_closure';
 import type { HeadroomResult } from '../../alert_triage/types';
 import {
   countAgedOutAlerts,
@@ -27,6 +32,14 @@ import {
 
 export interface AlertTriageStepDependencies {
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
+}
+
+export interface ResolveFpClosureStepDependencies {
+  getProposalsService: ProposalsPluginStart['getProposalsService'];
+  getProposalPrivileges: ProposalsPluginStart['getProposalPrivileges'];
+  getConversations: () => AgentBuilderPluginStart['conversations'];
+  getInternalEsClient?: () => ElasticsearchClient;
+  logger?: Logger;
 }
 
 const toApiError = (error: unknown, action: string): ExecutionError =>
@@ -154,6 +167,76 @@ export const getTriageLoadAlertsStepDefinition = () =>
         return { output: { alerts, missing_alert_ids: missingAlertIds } };
       } catch (error) {
         throw toApiError(error, 'load triage batch alerts');
+      }
+    },
+  });
+
+export const getTriageResolveFpClosureStepDefinition = ({
+  getProposalsService,
+  getProposalPrivileges,
+  getConversations,
+  getInternalEsClient,
+  logger,
+}: ResolveFpClosureStepDependencies) =>
+  createServerStepDefinition({
+    ...triageResolveFpClosureStepCommonDefinition,
+    handler: async (context) => {
+      try {
+        const input = triageResolveFpClosureStepCommonDefinition.inputSchema.parse(context.input);
+        const spaceId = context.contextManager.getContext().workflow.spaceId;
+        const request = context.contextManager.getFakeRequest();
+        if (!request) {
+          throw new ExecutionError({
+            type: 'ApiError',
+            message: 'No request available in workflow context',
+          });
+        }
+
+        const conversationClient = await getConversations().getScopedClient({ request });
+        const result = await resolveFpClosure({
+          spaceId,
+          ruleId: input.rule_id,
+          alertIds: input.alert_ids,
+          alerts: input.alerts,
+          proposalsService: getProposalsService(),
+          privileges: getProposalPrivileges(),
+          conversationClient,
+          request,
+          esClient: getInternalEsClient?.(),
+          logger,
+        });
+
+        return {
+          output: {
+            mint: result.mint.map((group) => ({
+              kind: 'mint' as const,
+              pattern_key: group.patternKey,
+              subject_key: group.subjectKey,
+              alert_ids: group.alertIds,
+              entity_summary: group.entitySummary,
+              proposal_id: group.proposalId,
+              ki_id: group.kiId,
+            })),
+            converged: result.converged.map((group) => ({
+              kind: 'converged' as const,
+              pattern_key: group.patternKey,
+              subject_key: group.subjectKey,
+              alert_ids: group.alertIds,
+              entity_summary: group.entitySummary,
+              proposal_id: group.proposalId,
+              conversation_id: group.conversationId,
+              outcome: group.outcome,
+              alert_count: group.alertCount,
+            })),
+            ...(result.primaryConversationId
+              ? { primary_conversation_id: result.primaryConversationId }
+              : {}),
+            mint_count: result.mint.length,
+            converged_count: result.converged.length,
+          },
+        };
+      } catch (error) {
+        throw toApiError(error, 'resolve FP closure groups');
       }
     },
   });
