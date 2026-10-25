@@ -164,6 +164,71 @@ steps:
             None of the {{ inputs.alert_ids.size }} alerts of this batch could be loaded; they may
             have been deleted since the sweep planned it.
 
+
+  # ---------------------------------------------------------------------------
+  # 1c. Apply prior FP decisions before spending the Alert Analysis budget.
+  # ---------------------------------------------------------------------------
+  - name: apply_fp_decisions
+    type: alertzero.triage.applyFpDecisions
+    with:
+      rule_id: "{{ inputs.rule_id }}"
+      alerts: "${{ steps.load_alerts.output.alerts }}"
+
+  - name: close_alerts_matched_by_decision
+    type: if
+    condition: "${{ steps.apply_fp_decisions.output.closed_count > 0 }}"
+    steps:
+      - name: close_decision_alerts
+        type: kibana.SetAlertsStatus
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          status: closed
+          reason: false_positive
+          conflicts: proceed
+          query:
+            bool:
+              filter:
+                terms:
+                  _id: "${{ steps.apply_fp_decisions.output.close_alert_ids }}"
+      - name: tag_decision_closed_alerts
+        type: kibana.SetAlertTags
+        on-failure:
+          continue: true
+        with:
+          ids: "${{ steps.apply_fp_decisions.output.close_alert_ids }}"
+          tags:
+            tags_to_add:
+              - "az:false_positive"
+            tags_to_remove:
+              - "az:triage_pending"
+              - "az:triage_exec:{{ execution.id }}"
+
+  - name: finish_if_all_closed_by_decision
+    type: if
+    condition: "${{ steps.apply_fp_decisions.output.remaining_count == 0 }}"
+    steps:
+      - name: report_closed_by_decision
+        type: alertzero.reportWorkerOutcome
+        on-failure:
+          continue: true
+        with:
+          event: worker_run_completed
+          candidates_found: "${{ steps.load_alerts.output.alerts.size }}"
+          items_dispatched: "${{ steps.apply_fp_decisions.output.closed_count }}"
+          items_failed: 0
+          items_in_flight: 0
+          degraded_reason: none
+          run_outcome: produced
+      - name: complete_closed_by_decision
+        type: workflow.output
+        status: completed
+        with:
+          closed_by_fp_decision: "${{ steps.apply_fp_decisions.output.closed_count }}"
+
   # ---------------------------------------------------------------------------
   # 2. Investigation is deferred until after FP pattern resolve (step 8b): converge
   #    reuses the live open conversation; mint / no-FP create one then.
@@ -193,6 +258,7 @@ steps:
   # ---------------------------------------------------------------------------
   - name: classify_alerts
     type: workflow.execute
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     on-failure:
       # Bounded: one more attempt, then the fallback marks the alerts failed (A8).
       retry:
@@ -214,7 +280,7 @@ steps:
           on-failure:
             continue: true
           with:
-            ids: "${{ inputs.alert_ids }}"
+            ids: "${{ steps.apply_fp_decisions.output.remaining_alert_ids }}"
             tags:
               tags_to_add:
                 - "az:triage_failed"
@@ -238,7 +304,7 @@ steps:
         authorName: "{{ consts.author_name }}"
         # A child run has no trigger event of its own, so the batch must be passed
         # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
-        alerts: "${{ steps.load_alerts.output.alerts }}"
+        alerts: "${{ steps.apply_fp_decisions.output.remaining_alerts }}"
         autoCloseEnabled: false
         autoCloseConfidenceScoreMinThreshold: "${{ inputs.confidence_floor }}"
         connectorIdByFeature: alertzero_efficient
@@ -253,11 +319,13 @@ steps:
   # R6's threshold too. Built as a string first because the expression filters take a
   # pre-rendered predicate, matching `reject_exp` usage in alert_analysis_workflow.yaml.
   - name: build_fp_threshold_expr
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       fp_threshold_expr: "v.confidence_score >= {{ inputs.confidence_floor }}"
 
   - name: compute_fp_candidates
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       fp_candidate_ids: >-
@@ -270,6 +338,7 @@ steps:
   # dispatch and the no-FP branch both gate on this value, so leaving it unset makes every run a
   # silent no-op: no review is started and the Investigation is never closed.
   - name: count_fp_candidates
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
@@ -278,6 +347,7 @@ steps:
   # `compute_fp_candidates`, so the title never names an entity whose alerts are not being closed.
   # `__missing__` marks an alert with no host or user field and is not a name.
   - name: compute_fp_entities
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       fp_hosts: >-
@@ -297,6 +367,7 @@ steps:
   # the first 2 plus `+N`, more than 5 collapse to a count. Hosts lead and users follow in
   # parentheses; a list that is empty drops out (`for` users when there are no hosts).
   - name: build_fp_entity_summary
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       fp_entity_summary: >-
@@ -325,6 +396,7 @@ steps:
   # 8a. Group confident FPs by pattern; join live open proposals (KI + Hunt fallback).
   # ---------------------------------------------------------------------------
   - name: init_fp_resolve_defaults
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       mint_count: 0
@@ -332,15 +404,15 @@ steps:
 
   - name: resolve_fp_closure
     type: alertzero.triage.resolveFpClosure
-    if: "${{ variables.fp_candidate_count > 0 }}"
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 and variables.fp_candidate_count > 0 }}"
     with:
       rule_id: "{{ inputs.rule_id }}"
       alert_ids: "${{ variables.fp_candidate_ids }}"
-      alerts: "${{ steps.load_alerts.output.alerts }}"
+      alerts: "${{ steps.apply_fp_decisions.output.remaining_alerts }}"
 
   - name: capture_fp_resolve_counts
     type: data.set
-    if: "${{ variables.fp_candidate_count > 0 }}"
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 and variables.fp_candidate_count > 0 }}"
     with:
       mint_count: "${{ steps.resolve_fp_closure.output.mint_count }}"
       converged_count: "${{ steps.resolve_fp_closure.output.converged_count }}"
@@ -350,6 +422,7 @@ steps:
   #     conversation; otherwise create a new Investigation for mint / no-FP / mixed.
   # ---------------------------------------------------------------------------
   - name: reuse_or_create_investigation
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: if
     condition: "${{ variables.fp_candidate_count > 0 and steps.resolve_fp_closure.output.primary_conversation_id != blank }}"
     steps:
@@ -379,14 +452,16 @@ steps:
           investigation_reused: false
 
   - name: init_attach_chunk_tracking
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       failed_attach_chunk_count: 0
-      total_attach_chunk_count: "${{ steps.load_alerts.output.alerts | map: '_id' | chunk: 20 | size }}"
+      total_attach_chunk_count: "${{ steps.apply_fp_decisions.output.remaining_alerts | map: '_id' | chunk: 20 | size }}"
 
   - name: attach_alerts
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: foreach
-    foreach: "${{ steps.load_alerts.output.alerts | map: '_id' | chunk: 20 | json }}"
+    foreach: "${{ steps.apply_fp_decisions.output.remaining_alerts | map: '_id' | chunk: 20 | json }}"
     steps:
       - name: attach_alert_chunk
         type: ai.attachment.add
@@ -409,6 +484,7 @@ steps:
           failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
 
   - name: post_comment_triage_started
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: ai.conversation.add_user_message
     on-failure:
       continue: true
@@ -433,6 +509,7 @@ steps:
   # `and`/`or` do work, but Liquid gives them no grouping or precedence, so the two
   # comparisons stay nested rather than combined.
   - name: compute_classification_guard_counts
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       alert_count: "${{ steps.load_alerts.output.alerts | size }}"
@@ -440,6 +517,7 @@ steps:
       missing_alert_count: "${{ steps.classify_alerts.output.missing_alert_ids | size }}"
 
   - name: guard_classification_nonempty
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: if
     condition: "${{ variables.alert_count > 0 }}"
     steps:
@@ -492,6 +570,7 @@ steps:
   # Each branch holds one typed expression. A `{% if %}` around `${{ }}` renders to text, and the
   # foreach below rejects text.
   - name: compute_unverdicted_ids
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: if
     condition: "${{ variables.verdict_count == 0 }}"
     steps:
@@ -506,6 +585,7 @@ steps:
           unverdicted_ids: "${{ steps.classify_alerts.output.missing_alert_ids }}"
 
   - name: release_unverdicted_claims
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: foreach
     foreach: "${{ variables.unverdicted_ids | chunk: 500 | json }}"
     steps:
@@ -525,6 +605,7 @@ steps:
               - "az:triage_exec:{{ execution.id }}"
 
   - name: post_comment_classification_results
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: ai.conversation.add_user_message
     on-failure:
       continue: true
@@ -540,6 +621,7 @@ steps:
 
   # Telemetry: how the batch was classified.
   - name: report_batch_classified
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: alertzero.reportWorkerOutcome
     on-failure:
       continue: true
@@ -561,6 +643,7 @@ steps:
   #    and needs manage_investigations; a failure is not worth failing the run for.
   # ---------------------------------------------------------------------------
   - name: attach_impact_gate
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: if
     condition: "${{ steps.classify_alerts.output.impacted_entities.size > 0 }}"
     steps:
@@ -591,6 +674,7 @@ steps:
   # thousand alerts is thousands of step records on the same event loop as the UI.
   # The ids are partitioned by classification here.
   - name: compute_az_tag_ids
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       az_true_positive_ids: >-
@@ -614,6 +698,7 @@ steps:
   # sub-workflow) chunks to an empty list, so each loop below runs zero times and `ids` is never
   # sent empty.
   - name: set_az_true_positive_tags
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: foreach
     foreach: "${{ variables.az_true_positive_ids | chunk: 500 | json }}"
     steps:
@@ -635,6 +720,7 @@ steps:
               - "az:true_positive"
 
   - name: set_az_false_positive_tags
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: foreach
     foreach: "${{ variables.az_false_positive_ids | chunk: 500 | json }}"
     steps:
@@ -656,6 +742,7 @@ steps:
               - "az:false_positive"
 
   - name: set_az_inconclusive_tags
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: foreach
     foreach: "${{ variables.az_inconclusive_ids | chunk: 500 | json }}"
     steps:
@@ -694,11 +781,13 @@ steps:
   #    fails fails the run, as it always did.
   # ---------------------------------------------------------------------------
   - name: init_failed_verdict_notes
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: data.set
     with:
       failed_note_verdicts: []
 
   - name: add_verdict_notes
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: foreach
     foreach: "${{ steps.classify_alerts.output.verdicts | chunk: 20 | json }}"
     steps:
@@ -773,6 +862,7 @@ steps:
   # Empty on a clean run, so this loop does nothing. The note is the same one as above: keep the
   # two in step.
   - name: retry_failed_verdict_notes
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: foreach
     foreach: "${{ variables.failed_note_verdicts | json }}"
     steps:
@@ -810,6 +900,7 @@ steps:
   # HTTP 200, so a call whose `updated` is below the chunk size (ids matching no alert) passes
   # unchecked. Notes are confirmed, since a failed note retries and then fails the run.
   - name: post_comment_alert_updates
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: ai.conversation.add_user_message
     on-failure:
       continue: true
@@ -825,7 +916,7 @@ steps:
   # ---------------------------------------------------------------------------
   - name: post_converged_comments
     type: foreach
-    if: "${{ variables.converged_count > 0 }}"
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 and variables.converged_count > 0 }}"
     foreach: "${{ steps.resolve_fp_closure.output.converged | json }}"
     steps:
       - name: post_comment_converged
@@ -842,6 +933,7 @@ steps:
 
   - name: gate_fp_close
     type: if
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     condition: "${{ variables.mint_count > 0 }}"
     steps:
       - name: start_fp_reviews
@@ -937,6 +1029,7 @@ steps:
   #     complete" as if a real zero-FP analysis had run; it stays open instead.
   # ---------------------------------------------------------------------------
   - name: close_investigation_no_fp
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: if
     condition: "${{ variables.fp_candidate_count == 0 }}"
     steps:
@@ -989,6 +1082,7 @@ steps:
 
   # Telemetry: the run's outcome, last so it sees whether the closure review started.
   - name: report_worker_run_completed
+    if: "${{ steps.apply_fp_decisions.output.remaining_count > 0 }}"
     type: alertzero.reportWorkerOutcome
     on-failure:
       continue: true

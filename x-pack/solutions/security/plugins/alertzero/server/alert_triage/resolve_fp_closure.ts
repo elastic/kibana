@@ -18,6 +18,7 @@ import {
   type LiveProposal,
 } from '../services/proposals/dedup';
 import { groupFpAlertsByPattern } from './fp_pattern_key';
+import { readFpDecisionKi } from './fp_decision';
 import {
   buildFpPatternKiId,
   readFpPatternKi,
@@ -200,61 +201,68 @@ export const resolveFpClosure = async ({
       logger,
     });
 
-    if (live) {
-      const { outcome, alertIds: merged } = await converge({
-        live,
-        alertIds: group.alertIds,
-      });
-      if (outcome === 'revised' || outcome === 'too_long' || outcome === 'failed') {
-        // too_long / failed still treat as converged for queue purposes when the live proposal
-        // covers the subject; alerts may need a later mint generation if revise did not land.
-      }
-      if (outcome === 'revision_limit' || outcome === 'alert_cap' || outcome === 'not_revisable') {
-        mint.push({
-          kind: 'mint',
+    const shouldMint =
+      !live ||
+      (await converge({ live, alertIds: group.alertIds }).then(async ({ outcome, alertIds: merged }) => {
+        if (outcome === 'revision_limit' || outcome === 'alert_cap' || outcome === 'not_revisable') {
+          return true;
+        }
+        if (esClient && outcome === 'revised') {
+          try {
+            await writeFpPatternKi({
+              esClient,
+              spaceId,
+              subjectKey: group.subjectKey,
+              patternKey: group.patternKey,
+              ruleId,
+              proposalId: live.proposalId,
+              conversationId: live.conversationId,
+              status: 'open',
+            });
+          } catch (error) {
+            logger?.warn(
+              `triage_fp_resolve: could not refresh KI for ${group.subjectKey}: ${
+                (error as Error).message
+              }`
+            );
+          }
+        }
+        converged.push({
+          kind: 'converged',
           patternKey: group.patternKey,
           subjectKey: group.subjectKey,
           alertIds: group.alertIds,
           entitySummary: group.entitySummary,
-          proposalId: buildProposalId({ spaceId, subjectKey: group.subjectKey, generation: 0 }),
-          kiId: buildFpPatternKiId({ spaceId, subjectKey: group.subjectKey }),
+          conversationId: live.conversationId,
+          proposalId: live.proposalId,
+          outcome,
+          alertCount: merged.length,
         });
-        continue;
-      }
+        return false;
+      }));
 
-      if (esClient && outcome === 'revised') {
-        try {
-          await writeFpPatternKi({
-            esClient,
-            spaceId,
-            subjectKey: group.subjectKey,
-            patternKey: group.patternKey,
-            ruleId,
-            proposalId: live.proposalId,
-            conversationId: live.conversationId,
-            status: 'open',
-          });
-        } catch (error) {
-          logger?.warn(
-            `triage_fp_resolve: could not refresh KI for ${group.subjectKey}: ${
-              (error as Error).message
-            }`
-          );
-        }
-      }
-
-      converged.push({
-        kind: 'converged',
-        patternKey: group.patternKey,
-        subjectKey: group.subjectKey,
-        alertIds: group.alertIds,
-        entitySummary: group.entitySummary,
-        conversationId: live.conversationId,
-        proposalId: live.proposalId,
-        outcome,
-        alertCount: merged.length,
-      });
+    if (!shouldMint) {
       continue;
+    }
+
+    if (esClient) {
+      try {
+        const decision = await readFpDecisionKi({
+          esClient,
+          spaceId,
+          subjectKey: group.subjectKey,
+        });
+        if (decision?.kind === 'dismissed') {
+          // Analyst recently dismissed this pattern: analyse/tag only, do not re-raise.
+          continue;
+        }
+      } catch (error) {
+        logger?.warn(
+          `triage_fp_resolve: decision lookup failed for ${group.subjectKey}: ${
+            (error as Error).message
+          }`
+        );
+      }
     }
 
     mint.push({

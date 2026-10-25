@@ -36,4 +36,10 @@ export {
   TRIAGE_FP_MAX_AUTOMATIC_REVISION,
 } from './fp_pattern_key';
 export { buildFpPatternKiId, TRIAGE_FP_PATTERN_KI_TYPE } from './fp_pattern_ki';
+export {
+  applyFpDecisions,
+  buildFpDecisionKiId,
+  TRIAGE_FP_DECISION_KI_TYPE,
+  writeFpDecisionKi,
+} from './fp_decision';
 export { resolveFpClosure } from './resolve_fp_closure';

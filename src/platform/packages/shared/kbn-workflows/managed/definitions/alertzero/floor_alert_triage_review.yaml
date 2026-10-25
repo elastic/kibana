@@ -282,6 +282,17 @@ steps:
           investigation_id: "{{ inputs.conversation_id }}"
           close_reason: false_positive
 
+      - name: record_fp_decision_approved
+        type: alertzero.triage.recordFpDecision
+        if: "${{ inputs.subject_key != blank and inputs.pattern_key != blank }}"
+        on-failure:
+          continue: true
+        with:
+          rule_id: "{{ inputs.rule_id }}"
+          pattern_key: "{{ inputs.pattern_key }}"
+          subject_key: "{{ inputs.subject_key }}"
+          decision: approved
+
       - name: post_comment_outcome_approved
         type: ai.conversation.add_user_message
         on-failure:
@@ -290,12 +301,23 @@ steps:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.
+            Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.{% if steps.record_fp_decision_approved.output.ki_id != blank %} Pattern stored as an FP decision ({{ steps.record_fp_decision_approved.output.ki_id }}) for ~30 days.{% endif %}
 
   - name: handle_dismissed
     type: if
     condition: "${{ variables.proposal_outcome == 'dismissed' }}"
     steps:
+      - name: record_fp_decision_dismissed
+        type: alertzero.triage.recordFpDecision
+        if: "${{ inputs.subject_key != blank and inputs.pattern_key != blank }}"
+        on-failure:
+          continue: true
+        with:
+          rule_id: "{{ inputs.rule_id }}"
+          pattern_key: "{{ inputs.pattern_key }}"
+          subject_key: "{{ inputs.subject_key }}"
+          decision: dismissed
+
       # get_proposal is allowed to fail-and-continue (retried above first). The retag does
       # not depend on its content, but the outcome comment and the decision itself do:
       # without a successful read there is no decider or reason to report, and closing the
