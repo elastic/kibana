@@ -7,20 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { isHitlExternalResumeEnabled } from '@kbn/workflows';
 import type {
   ManagedWorkflowsSystemApiProvider,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
 import { REQUIRED_LICENSE_TYPE } from '../api/constants';
-import { resumeWorkflowExecutionExternallyWithInput } from '../api/external_resume/external_resume_service';
+import type { ExternalResumeWorkflowExecutionWithInputParams } from '../api/external_resume/external_resume_service';
 import type { WorkflowsService } from '../api/workflows_management_service';
 import type { WorkflowsManagementConfig } from '../config';
+
+interface AuditedExternalHitlResume {
+  resumeWorkflowExecutionExternallyWithInput: (
+    params: ExternalResumeWorkflowExecutionWithInputParams & { request: KibanaRequest }
+  ) => Promise<unknown>;
+}
 
 export const createWorkflowsClientProvider = (
   workflowsService: WorkflowsService,
   config: WorkflowsManagementConfig,
-  logger: Logger
+  logger: Logger,
+  api: AuditedExternalHitlResume
 ): WorkflowsClientProvider => {
   return async (request) => {
     const { isWorkflowsAvailable, workflowsExecutionEngine } =
@@ -38,11 +46,15 @@ export const createWorkflowsClientProvider = (
       resumeExternalHitl: async (params) => {
         if (!isWorkflowsAvailable) {
           logger.debug(
-            'Workflows is not available in this environment. External HITL resume ignored.'
+            'Workflows is not available in this environment. External HITL resume rejected.'
           );
-          return;
+          throw new Error('Workflows is not available in this environment');
         }
-        await resumeWorkflowExecutionExternallyWithInput(workflowsService, params);
+        if (!isHitlExternalResumeEnabled(config.hitlExternalResume?.enabled)) {
+          logger.debug('External HITL resume is disabled. External HITL resume rejected.');
+          throw new Error('External HITL resume is disabled');
+        }
+        await api.resumeWorkflowExecutionExternallyWithInput({ ...params, request });
       },
       managedWorkflows: {
         install: async (pluginId, id, options) => {

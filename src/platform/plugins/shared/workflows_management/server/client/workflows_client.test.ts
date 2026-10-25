@@ -67,13 +67,16 @@ const createMockWorkflowsService = (
 describe('createWorkflowsClientProvider', () => {
   const logger = loggingSystemMock.createLogger();
   const mockRequest = {} as KibanaRequest;
+  const resumeApi = {
+    resumeWorkflowExecutionExternallyWithInput: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeEach(() => jest.clearAllMocks());
 
   it('should return isWorkflowsAvailable true when license is sufficient and config.available is true', async () => {
     const service = createMockWorkflowsService({ hasAtLeast: true });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createWorkflowsClientProvider(service, config, logger);
+    const provider = createWorkflowsClientProvider(service, config, logger, resumeApi);
 
     const client = await provider(mockRequest);
 
@@ -83,7 +86,7 @@ describe('createWorkflowsClientProvider', () => {
   it('should return isWorkflowsAvailable false when license is insufficient', async () => {
     const service = createMockWorkflowsService({ hasAtLeast: false });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createWorkflowsClientProvider(service, config, logger);
+    const provider = createWorkflowsClientProvider(service, config, logger, resumeApi);
 
     const client = await provider(mockRequest);
 
@@ -93,7 +96,7 @@ describe('createWorkflowsClientProvider', () => {
   it('should return isWorkflowsAvailable false when config.available is false', async () => {
     const service = createMockWorkflowsService({ hasAtLeast: true });
     const config = { available: false } as WorkflowsManagementConfig;
-    const provider = createWorkflowsClientProvider(service, config, logger);
+    const provider = createWorkflowsClientProvider(service, config, logger, resumeApi);
 
     const client = await provider(mockRequest);
 
@@ -105,7 +108,8 @@ describe('createWorkflowsClientProvider', () => {
     const provider = createWorkflowsClientProvider(
       service,
       { available: true } as WorkflowsManagementConfig,
-      logger
+      logger,
+      resumeApi
     );
     const client = await provider(mockRequest);
     const options = { spaceId: 'default', values: { recipient: 'World' } };
@@ -131,7 +135,7 @@ describe('createWorkflowsClientProvider', () => {
     const emitEvent = jest.fn().mockResolvedValue(undefined);
     const service = createMockWorkflowsService({ emitEvent });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createWorkflowsClientProvider(service, config, logger);
+    const provider = createWorkflowsClientProvider(service, config, logger, resumeApi);
 
     const client = await provider(mockRequest);
     await client.emitEvent('cases.updated', { caseId: '123' });
@@ -147,7 +151,7 @@ describe('createWorkflowsClientProvider', () => {
     const emitEvent = jest.fn();
     const service = createMockWorkflowsService({ hasAtLeast: false, emitEvent });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createWorkflowsClientProvider(service, config, logger);
+    const provider = createWorkflowsClientProvider(service, config, logger, resumeApi);
 
     const client = await provider(mockRequest);
     await client.emitEvent('cases.updated', { caseId: '123' });
@@ -162,7 +166,7 @@ describe('createWorkflowsClientProvider', () => {
     const getManagedWorkflowStatus = jest.fn().mockResolvedValue({ status: 'intact' });
     const service = createMockWorkflowsService({ getManagedWorkflowStatus });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createWorkflowsClientProvider(service, config, logger);
+    const provider = createWorkflowsClientProvider(service, config, logger, resumeApi);
 
     const client = await provider(mockRequest);
     await client.managedWorkflows.getWorkflowStatus('testPlugin', EXAMPLE_MANAGED_WORKFLOW_ID, {
@@ -180,7 +184,7 @@ describe('createWorkflowsClientProvider', () => {
     const getManagedWorkflowStatus = jest.fn();
     const service = createMockWorkflowsService({ hasAtLeast: false, getManagedWorkflowStatus });
     const config = { available: true } as WorkflowsManagementConfig;
-    const provider = createWorkflowsClientProvider(service, config, logger);
+    const provider = createWorkflowsClientProvider(service, config, logger, resumeApi);
 
     const client = await provider(mockRequest);
 
@@ -190,6 +194,81 @@ describe('createWorkflowsClientProvider', () => {
       })
     ).rejects.toThrow('Workflows is not available in this environment');
     expect(getManagedWorkflowStatus).not.toHaveBeenCalled();
+  });
+
+  it('resumes external HITL through the audited management API', async () => {
+    const service = createMockWorkflowsService();
+    const provider = createWorkflowsClientProvider(
+      service,
+      { available: true } as WorkflowsManagementConfig,
+      logger,
+      resumeApi
+    );
+    const client = await provider(mockRequest);
+    const params = {
+      token: 'token',
+      executionId: 'exec-1',
+      stepId: 'step-1',
+      spaceId: 'default',
+      input: { approved: true },
+    };
+
+    await client.resumeExternalHitl(params);
+
+    expect(resumeApi.resumeWorkflowExecutionExternallyWithInput).toHaveBeenCalledWith({
+      ...params,
+      request: mockRequest,
+    });
+  });
+
+  it('rejects external HITL resume when workflows are unavailable', async () => {
+    const service = createMockWorkflowsService({ hasAtLeast: false });
+    const provider = createWorkflowsClientProvider(
+      service,
+      { available: true } as WorkflowsManagementConfig,
+      logger,
+      resumeApi
+    );
+    const client = await provider(mockRequest);
+
+    await expect(
+      client.resumeExternalHitl({
+        token: 'token',
+        executionId: 'exec-1',
+        stepId: 'step-1',
+        spaceId: 'default',
+        input: { approved: true },
+      })
+    ).rejects.toThrow('Workflows is not available in this environment');
+    expect(resumeApi.resumeWorkflowExecutionExternallyWithInput).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Workflows is not available in this environment. External HITL resume rejected.'
+    );
+  });
+
+  it('rejects external HITL resume when the kill switch is off', async () => {
+    const service = createMockWorkflowsService();
+    const provider = createWorkflowsClientProvider(
+      service,
+      {
+        available: true,
+        hitlExternalResume: { enabled: false },
+      } as WorkflowsManagementConfig,
+      logger,
+      resumeApi
+    );
+    const client = await provider(mockRequest);
+
+    await expect(
+      client.resumeExternalHitl({
+        token: 'token',
+        executionId: 'exec-1',
+        stepId: 'step-1',
+        spaceId: 'default',
+        input: { approved: true },
+      })
+    ).rejects.toThrow('External HITL resume is disabled');
+    expect(resumeApi.resumeWorkflowExecutionExternallyWithInput).not.toHaveBeenCalled();
   });
 });
 
