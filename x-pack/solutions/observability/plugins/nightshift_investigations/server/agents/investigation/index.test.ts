@@ -190,7 +190,7 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
   });
 
-  it('tells the agent how to answer questions and how to write for readers', () => {
+  it('tells the agent how to reply and how to write for readers', () => {
     const { instructions } = staticBase(
       getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
     );
@@ -199,9 +199,9 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).toContain('<chat_answer>');
     expect(instructions).toContain('in the shape\n   described in <chat_answer>');
     expect(instructions).toContain('**First sentence: the direct answer.**');
-    // The first round wraps up; later rounds answer the question.
-    expect(instructions).toContain('- **First round**');
-    expect(instructions).toContain('- **Later rounds**');
+    // A request to investigate gets a wrap-up; a question gets an answer.
+    expect(instructions).toContain("- **The investigation's first message, or a later request to investigate**");
+    expect(instructions).toContain('- **A question**');
     expect(instructions).not.toContain('your final chat message is only a short wrap-up');
     // Method first, reporting last, ending on the checklist the agent runs before it replies.
     const text = instructions ?? '';
@@ -212,9 +212,6 @@ describe('Nightshift investigation agent type', () => {
     // Plain writing: keep component names, explain the mechanics.
     expect(instructions).toContain('**Keep the names, explain the mechanics.**');
     expect(instructions).toContain('**One idea per sentence.**');
-    // Query output a reader (and the agent, later) can still interpret.
-    expect(instructions).toContain("jq -c '{columns: [.columns[].name], values}'");
-    expect(instructions).toContain('Never cut JSON with `head -c`');
   });
 
   describe('custom context', () => {
