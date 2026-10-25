@@ -15,18 +15,18 @@ describe('resolveErrorSource', () => {
     expect(resolveErrorSource(error)).toBe('user');
   });
 
-  it('returns platform for an error tagged as a framework error', () => {
+  it('returns framework for an error tagged as a framework error', () => {
     const error = createTaskRunError(new Error('boom'), TaskErrorSource.FRAMEWORK);
 
-    expect(resolveErrorSource(error)).toBe('platform');
+    expect(resolveErrorSource(error)).toBe('framework');
   });
 
-  it('returns platform for an error with no source', () => {
-    expect(resolveErrorSource(new Error('boom'))).toBe('platform');
+  it('returns framework for an error with no source', () => {
+    expect(resolveErrorSource(new Error('boom'))).toBe('framework');
   });
 
-  it('returns platform for a value that is not an Error', () => {
-    expect(resolveErrorSource('boom')).toBe('platform');
-    expect(resolveErrorSource(undefined)).toBe('platform');
+  it('returns framework for a value that is not an Error', () => {
+    expect(resolveErrorSource('boom')).toBe('framework');
+    expect(resolveErrorSource(undefined)).toBe('framework');
   });
 });

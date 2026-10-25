@@ -9,10 +9,10 @@ import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server
 
 /**
  * Who a failure is attributed to. `user` is a failure caused by the rule's own
- * configuration or query (for example an invalid ES|QL query), `platform` is
- * everything else.
+ * configuration or query (for example an invalid ES|QL query), `framework` is
+ * everything else, matching the Task Manager error source.
  */
-export type ErrorSource = 'user' | 'platform';
+export type ErrorSource = 'user' | 'framework';
 
 /**
  * Resolves the source from the error source Task Manager already holds for the
@@ -21,4 +21,4 @@ export type ErrorSource = 'user' | 'platform';
  * it tagged it as a user error with `createTaskRunError`.
  */
 export const resolveErrorSource = (error: unknown): ErrorSource =>
-  error instanceof Error && getErrorSource(error) === TaskErrorSource.USER ? 'user' : 'platform';
+  error instanceof Error && getErrorSource(error) === TaskErrorSource.USER ? 'user' : 'framework';

@@ -63,7 +63,7 @@ describe('ErrorHandlingMiddleware', () => {
         labels: {
           code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           step: 'fetch_rule',
-          error_source: 'platform',
+          error_source: 'framework',
         },
       })
     );
@@ -110,7 +110,7 @@ describe('ErrorHandlingMiddleware', () => {
     expect(loggedMessage).not.toContain('secret_field');
   });
 
-  it('labels a failure as platform when no step tagged it as a user error', async () => {
+  it('labels a failure as framework when no step tagged it as a user error', async () => {
     const error = new errors.ResponseError({
       statusCode: 400,
       body: { error: { type: 'verification_exception', reason: 'Unknown column [x]' } },
@@ -132,7 +132,7 @@ describe('ErrorHandlingMiddleware', () => {
         labels: {
           code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           step: 'director',
-          error_source: 'platform',
+          error_source: 'framework',
         },
       })
     );

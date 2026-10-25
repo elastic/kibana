@@ -32,7 +32,7 @@ export type AlertingLabels = Partial<{
   event_type: string;
   step: string;
   /**
-   * Who a failure is attributed to (`user` or `platform`), as Task Manager counts
+   * Who a failure is attributed to (`user` or `framework`), as Task Manager counts
    * it. Set on `RULE_EXECUTION_STEP_FAILED`.
    */
   error_source: ErrorSource;
