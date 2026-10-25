@@ -68,6 +68,9 @@ disables its controls for users who cannot save. The difference is intentional.
   round-trip: the matched text carries the escaping of the layer it was found in, and restoring it
   into a different layer (structured model output, tool arguments, JSON in JSON) changed the
   number of backslashes. The rule is off by default.
+  Because only `DOMAIN\name` is matched, the same name written **bare** (for example a model
+  repeating it in its own output, which a later request such as a migration fix loop then sends
+  back) is not masked again: no built-in rule matches a bare user name.
 - **Well-known public sites are not masked as host names** (`github.com`, `mitre.org`, `nist.gov`,
   `cisa.gov`, `owasp.org`, `virustotal.com`, `microsoft.com`, `ss64.com`, ... and their
   subdomains). The list is `PUBLIC_DOMAINS` in `@kbn/ai-anonymization-common`
