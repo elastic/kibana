@@ -89,16 +89,16 @@ export const Conversation: React.FC<{}> = () => {
   }, [staleAttachments, stagedAttachmentIds]);
 
   const handleStageStaleAttachments = useCallback(() => {
-    if (staleAttachmentInputs.length > 0) {
-      upsertAttachments?.(staleAttachmentInputs);
+    if (upsertAttachments && staleAttachmentInputs.length > 0) {
+      upsertAttachments(staleAttachmentInputs);
+      staleAttachmentInputs.forEach(({ id, type, data }) => {
+        if (id) {
+          attachmentsService
+            .getAttachmentUiDefinition(type)
+            ?.onStaleUpdateStaged?.({ id, type, data });
+        }
+      });
     }
-    staleAttachmentInputs.forEach(({ id, type, data }) => {
-      if (id) {
-        attachmentsService
-          .getAttachmentUiDefinition(type)
-          ?.onStaleUpdateStaged?.({ id, type, data });
-      }
-    });
     setDismissStaleAttachments(true);
   }, [staleAttachmentInputs, upsertAttachments, attachmentsService]);
 
