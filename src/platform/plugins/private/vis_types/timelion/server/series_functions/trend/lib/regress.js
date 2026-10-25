@@ -8,9 +8,9 @@
  */
 
 /* @notice
- * This product includes regression algorithms from
- * copyright(c) 2013 Tom Alexander
- * Licensed under the MIT license.
+ * This product includes code that is based on regression-js, which is available
+ * under a "MIT" license.
+ * Copyright (c) 2013 Tom Alexander
  */
 
 import _ from 'lodash';

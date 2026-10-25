@@ -8,8 +8,10 @@
  */
 
 /* @notice
- * This product includes code adapted from: https://github.com/microsoft/monaco-languages/blob/master/src/handlebars/handlebars.ts
- * License: https://github.com/microsoft/monaco-languages/blob/master/LICENSE.md
+ * This product includes code that is adapted from monaco-languages, which is available
+ * under a "MIT" license.
+ * Copyright (c) Microsoft Corporation
+ * https://github.com/microsoft/monaco-languages/blob/master/src/handlebars/handlebars.ts
  */
 
 import type { monaco } from '../../../monaco_imports';
