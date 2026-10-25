@@ -244,9 +244,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: failedDataStreamName,
         });
 
-        const { failedDocs } = await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-
-        expect(parseInt(failedDocs, 10)).to.be(4);
+        await retry.try(async () => {
+          const { failedDocs } = await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
+          expect(parseInt(failedDocs, 10)).to.be(4);
+        });
       });
 
       it('reflects the qualityIssuesChart field state in url', async () => {
