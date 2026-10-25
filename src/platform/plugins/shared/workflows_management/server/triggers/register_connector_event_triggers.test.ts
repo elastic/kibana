@@ -120,12 +120,18 @@ describe('registerConnectorEventTriggers', () => {
       ([definition]: [ServerTriggerDefinition]) => definition.id
     );
     expect(registered).toContain('inboundWebhook.received');
+    expect(registered).not.toContain('slack2.hitl_action');
     expect(registered).toHaveLength(
       Object.values(connectorsSpecs).reduce((count, spec) => {
         if (!connectorSpecHasEvents(spec) || spec.events === undefined) {
           return count;
         }
-        return count + Object.keys(spec.events.definitions).length;
+        return (
+          count +
+          Object.values(spec.events.definitions).filter(
+            (eventDefinition) => eventDefinition.eventId !== 'slack2.hitl_action'
+          ).length
+        );
       }, 0)
     );
   });
