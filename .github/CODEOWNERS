@@ -1136,6 +1136,7 @@ x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/n
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/nightshift
+x-pack/platform/packages/shared/kbn-slo-constants @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/streams-ui
@@ -2636,7 +2637,7 @@ x-pack/platform/plugins/shared/actions/server/inbound/ @elastic/workflows-eng @e
 x-pack/platform/plugins/shared/connector_events_bridge/ @elastic/workflows-eng
 
 ## Relay
-x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift
 
 
 ## Bearer with TLS / Kubernetes auth
@@ -2792,7 +2793,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
-/x-pack/platform/test/stack_functional_integration/apps/management @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_lifecycle_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
@@ -2818,8 +2818,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/platform/test/accessibility/apps/group1/ingest_node_pipelines.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/search_profiler.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
-
-#CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
 ## Kibana Cases
 

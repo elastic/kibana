@@ -238,6 +238,8 @@ export {
   type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
+  INVALID_STREAM_NAME_PREFIXES,
+  RESERVED_STREAM_NAMES,
 } from './src/helpers/stream_name_validation';
 
 export {

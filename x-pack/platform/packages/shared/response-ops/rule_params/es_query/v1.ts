@@ -227,7 +227,7 @@ export function validateParams(anyParams: unknown): string | undefined {
   }
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
-    return i18n.translate('responseOps.ruleParams.esQuery.invalidThreshold2ErrorMessage', {
+    return i18n.translate('xpack.responseOps.ruleParams.esQuery.invalidThreshold2ErrorMessage', {
       defaultMessage:
         '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
       values: {
@@ -237,7 +237,7 @@ export function validateParams(anyParams: unknown): string | undefined {
   }
 
   if (aggType !== 'count' && !aggField) {
-    return i18n.translate('responseOps.ruleParams.esQuery.aggTypeRequiredErrorMessage', {
+    return i18n.translate('xpack.responseOps.ruleParams.esQuery.aggTypeRequiredErrorMessage', {
       defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',
       values: {
         aggType,

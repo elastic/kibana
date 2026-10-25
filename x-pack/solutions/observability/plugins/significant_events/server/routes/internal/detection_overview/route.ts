@@ -38,7 +38,7 @@ const detectionOverviewRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{
-    sources: number;
+    entities: number;
     knowledge_indicators: number;
     active_rules: number;
     detections: number;
@@ -59,7 +59,7 @@ const detectionOverviewRoute = createServerRoute({
         scopedClients.getEventSearchClient(),
       ]);
 
-    const [features, unbackedQueries, activeRules, detections, significantEvents] =
+    const [features, unbackedQueries, activeRules, detections, significantEvents, entities] =
       await Promise.all([
         knowledgeIndicatorClient.countFeatures(readableSourceIds),
         knowledgeIndicatorClient.countUnbackedQueries(readableSourceIds),
@@ -70,10 +70,12 @@ const detectionOverviewRoute = createServerRoute({
         eventClient
           .findLatestByCurrentStatePaginated({ ...params.query, page: 1, perPage: 1 })
           .then(({ total }) => total),
+        // Counted on its own: the panel's entity list stops at 1,000 records.
+        knowledgeIndicatorClient.countEntities(readableSourceIds),
       ]);
 
     return {
-      sources: sources.length,
+      entities,
       knowledge_indicators: features + unbackedQueries,
       active_rules: activeRules,
       detections,

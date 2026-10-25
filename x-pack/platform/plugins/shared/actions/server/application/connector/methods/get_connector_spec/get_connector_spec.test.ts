@@ -213,6 +213,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
       expect(typeof action.name).toBe('string');
       expect(action).toHaveProperty('isTool');
       expect(typeof action.isTool).toBe('boolean');
+      expect(typeof action.scope).toBe('string');
       expect(action).not.toHaveProperty('inputSchema');
     }
   });
@@ -256,6 +257,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result).toHaveProperty('isTestable', true);
     expect(result.actions).toHaveLength(1);
     expect(actionTypeRegistry.getSpec).toHaveBeenCalledWith('.catalog-only');
+    expect(actionTypeRegistry.getSpec).toHaveBeenCalledTimes(1);
   });
 
   it('rejects with 404 for a classic connector type without a spec', async () => {
