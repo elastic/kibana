@@ -71,6 +71,22 @@ describe('EventsService', () => {
     });
   });
 
+  describe('getConversationUpdated$', () => {
+    it('only fires for the matching conversation id', () => {
+      const service = new EventsService();
+      let updatedA = 0;
+      let updatedB = 0;
+
+      service.getConversationUpdated$('A').subscribe(() => updatedA++);
+      service.getConversationUpdated$('B').subscribe(() => updatedB++);
+
+      service.notifyConversationUpdated('A');
+
+      expect(updatedA).toBe(1);
+      expect(updatedB).toBe(0);
+    });
+  });
+
   describe('obs$ (deprecated)', () => {
     it('still emits every event regardless of conversation id', () => {
       const service = new EventsService();

@@ -139,11 +139,6 @@ export const registerDashboardAppIntegration = ({
         return;
       }
       await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, origin);
-      // The conversation is not refetched, so keep the local origin in sync for later
-      // manual changes to find the attachment by the new dashboard id.
-      state.attachments = state.attachments?.map((attachment) =>
-        attachment.id === attachmentId ? { ...attachment, origin } : attachment
-      );
     },
   });
 

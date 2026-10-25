@@ -32,6 +32,7 @@ export class EventsService {
 
   private readonly streamEnded$ = new Subject<string>();
   private readonly streamStarted$ = new Subject<string>();
+  private readonly conversationUpdated$ = new Subject<string>();
 
   private readonly activeConversationState$ = new BehaviorSubject<ActiveConversation | null>(null);
   public readonly activeConversation$ = this.activeConversationState$.asObservable();
@@ -82,6 +83,22 @@ export class EventsService {
   /** Fires each time any conversation's stream begins, carrying the conversation id. */
   getStreamStarted$(): Observable<string> {
     return this.streamStarted$.asObservable();
+  }
+
+  /**
+   * Signals that the conversation changed on the server outside a chat run (for example an
+   * attachment origin update through the start contract), so mounted views refetch it.
+   */
+  notifyConversationUpdated(conversationId: string) {
+    this.conversationUpdated$.next(conversationId);
+  }
+
+  /** Fires each time this conversation is updated on the server outside a chat run. */
+  getConversationUpdated$(conversationId: string): Observable<void> {
+    return this.conversationUpdated$.pipe(
+      filter((id) => id === conversationId),
+      map(() => undefined)
+    );
   }
 
   setActiveConversation(activeConversation: ActiveConversation | null) {
