@@ -93,7 +93,7 @@ const RESOLVE_FROM_ENTITY_STORE = true;
  * Test setting: score only this many sampled pages per stage, spread evenly over the IDs and each
  * profiled, and skip reset to zero. Undefined scores every page.
  */
-const TEST_PAGES_TO_RUN: number | undefined = 16;
+const TEST_PAGES_TO_RUN: number | undefined = undefined;
 
 type LookupIndexReadinessStatus = 'ready' | 'mapping_upgrade_failed';
 
