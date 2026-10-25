@@ -14,14 +14,25 @@ export const INVESTIGATION_DATASET_ID = 'trace-only';
  * remote telemetry connector, so unset and `all` never select it.
  */
 export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
+/**
+ * `NIGHTSHIFT_DATASETS` id for the writeup eval, which rewrites the agent's final reply from a
+ * recorded investigation under a given prompt and scores how it's written up. Opt-in
+ * only, so unset and `all` never select it. It runs no investigation, so it needs no sandbox.
+ */
+export const WRITEUP_DATASET_ID = 'writeup';
 
-const EVAL_IDS: readonly string[] = [INVESTIGATION_DATASET_ID, CONNECTOR_PROBE_DATASET_ID];
+const EVAL_IDS: readonly string[] = [
+  INVESTIGATION_DATASET_ID,
+  CONNECTOR_PROBE_DATASET_ID,
+  WRITEUP_DATASET_ID,
+];
 
 export interface EvalSelection {
   runSmoke: boolean;
   runInvestigations: boolean;
   runOrca: boolean;
   runConnectorProbes: boolean;
+  runWriteup: boolean;
   /** Smoke dataset ids for `selectDatasets`; `undefined` runs them all. Unused when `runSmoke` is false. */
   smokeDatasetsRequest: string | undefined;
   /** True when an unset selection fell back to smoke because no sandbox credentials were found. */
@@ -45,6 +56,7 @@ export const resolveEvalSelection = (
       runInvestigations: false,
       runOrca: true,
       runConnectorProbes: false,
+      runWriteup: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     };
@@ -77,6 +89,7 @@ export const resolveEvalSelection = (
       runSmoke: true,
       runInvestigations: hasSandbox,
       runConnectorProbes: false,
+      runWriteup: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: !hasSandbox,
     };
@@ -87,12 +100,14 @@ export const resolveEvalSelection = (
   if (runInvestigations) requiresSandbox(INVESTIGATION_DATASET_ID);
   const runConnectorProbes = ids.includes(CONNECTOR_PROBE_DATASET_ID);
   if (runConnectorProbes) requiresSandbox(CONNECTOR_PROBE_DATASET_ID);
+  const runWriteup = ids.includes(WRITEUP_DATASET_ID);
 
   return {
     runOrca: false,
     runSmoke: smokeIds.length > 0,
     runInvestigations,
     runConnectorProbes,
+    runWriteup,
     smokeDatasetsRequest: smokeIds.length > 0 ? smokeIds.join(',') : undefined,
     fellBackToSmoke: false,
   };
