@@ -49,7 +49,7 @@ export const buildConstantsDefinitions = (
       kind: 'Constant',
       detail:
         detail ??
-        i18n.translate('kbn-esql-language.esql.autocomplete.constantDefinition', {
+        i18n.translate('esqlLanguage.esql.autocomplete.constantDefinition', {
           defaultMessage: `Constant`,
         }),
       ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
@@ -63,29 +63,29 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
   return [
     ...buildConstantsDefinitions(
       TIME_SYSTEM_PARAMS,
-      i18n.translate('kbn-esql-language.esql.autocomplete.namedParamDefinition', {
+      i18n.translate('esqlLanguage.esql.autocomplete.namedParamTimeFilterDefinition', {
         defaultMessage: 'Bind to time filter',
       }),
       options,
       // appears when the user opens the second level popover
-      i18n.translate('kbn-esql-language.esql.autocomplete.timeNamedParamDoc', {
+      i18n.translate('esqlLanguage.esql.autocomplete.timeNamedParamDoc', {
         defaultMessage: `Use the \`?_tstart\` and \`?_tend\` parameters to bind a custom timestamp field to Kibana's time filter.`,
       }),
       SuggestionCategory.TIME_PARAM
     ),
     {
-      label: i18n.translate('kbn-esql-language.esql.autocomplete.chooseFromTimePickerLabel', {
+      label: i18n.translate('esqlLanguage.esql.autocomplete.chooseFromTimePickerLabel', {
         defaultMessage: 'Choose from the time picker',
       }),
       text: '',
       kind: 'Issue',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.chooseFromTimePicker', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.chooseFromTimePicker', {
         defaultMessage: 'Click to choose',
       }),
       category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: 'esql.timepicker.choose',
-        title: i18n.translate('kbn-esql-language.esql.autocomplete.chooseFromTimePicker', {
+        title: i18n.translate('esqlLanguage.esql.autocomplete.chooseFromTimePicker', {
           defaultMessage: 'Click to choose',
         }),
       },

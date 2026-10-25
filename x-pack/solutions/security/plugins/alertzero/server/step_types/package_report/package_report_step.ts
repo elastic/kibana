@@ -12,12 +12,14 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
 import type { HuntServices } from '../../services/watches/hunt/types';
-import { createAlsoRaisedByAppender } from '../../services/watches/hunt/packaging/converge_on_live_proposal';
-import { createInvestigationOpenChecker } from '../../services/watches/hunt/packaging/check_investigation_open';
+import {
+  createAlsoRaisedByAppender,
+  createExistingProposalsCounter,
+  createInvestigationOpenChecker,
+  createProposalSlotResolver,
+} from '../../services/proposals/dedup';
 import { createOpenProposalChecker } from '../../services/watches/hunt/packaging/check_open_proposals';
-import { createExistingProposalsCounter } from '../../services/watches/hunt/packaging/check_existing_proposals';
 import { makeRehydrateProcessSelectors } from '../../services/watches/hunt/packaging/rehydrate_process_selectors';
-import { createProposalSlotResolver } from '../../services/watches/hunt/packaging/resolve_proposal_slot';
 import {
   PackageReportIdentityError,
   runPackageReport,

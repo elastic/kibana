@@ -424,10 +424,10 @@ describe('<Host />', () => {
         );
       };
 
-      it('passes the panel mode to the anomaly insights tool', () => {
+      it('passes the panel mode and scope to the anomaly insights tool', () => {
         fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
         expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
-          expect.objectContaining({ value: 'test', mode: 'resolved' })
+          expect.objectContaining({ value: 'test', mode: 'resolved', scopeId: 'test-scope-id' })
         );
       });
 
