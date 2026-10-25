@@ -78,4 +78,37 @@ describe('test useInspector', () => {
     ]);
     expect(toolkit.getCurrentTab().expandedDoc).toBe(undefined);
   });
+
+  test('opens the requested inspector view for a request', async () => {
+    const services = createDiscoverServicesMock();
+    jest.spyOn(services.inspector, 'open').mockImplementation(() => {
+      return { close: jest.fn() } as unknown as OverlayRef;
+    });
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+    const { result } = renderHook(
+      () => {
+        return useInspector({ inspector: services.inspector });
+      },
+      {
+        wrapper: ({ children }) => (
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+        ),
+      }
+    );
+    await act(async () => {
+      result.current({ initialViewId: 'esqlQueryProfile', initialRequestId: 'request-1' });
+    });
+
+    expect(services.inspector.open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        initialViewId: 'esqlQueryProfile',
+        options: { initialRequestId: 'request-1' },
+      })
+    );
+  });
 });

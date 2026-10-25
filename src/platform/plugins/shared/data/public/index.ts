@@ -241,6 +241,8 @@ export type { AggsStart } from './search/aggs';
 
 export { getTime } from '../common';
 
+export { ESQL_QUERY_PROFILE_VIEW_ID } from './utils/esql_query_profile/view_id';
+
 export type { SavedObject } from '../common';
 
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';

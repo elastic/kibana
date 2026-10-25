@@ -98,6 +98,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
               adapters={adapters}
               title={options.title}
               options={options.options}
+              initialViewId={options.initialViewId}
               dependencies={{
                 application: core.application,
                 http: core.http,

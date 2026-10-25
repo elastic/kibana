@@ -39,8 +39,22 @@ interface InspectorPanelProps {
   adapters: Adapters;
   title?: string;
   options?: unknown;
+  initialViewId?: string;
   views: InspectorViewDescription[];
   dependencies: InspectorKibanaServices;
+}
+
+function selectInitialView(
+  views: InspectorViewDescription[],
+  initialViewId?: string
+): InspectorViewDescription {
+  if (initialViewId) {
+    const match = views.find((view) => view.id === initialViewId);
+    if (match) {
+      return match;
+    }
+  }
+  return views[0];
 }
 
 interface InspectorPanelState {
@@ -55,7 +69,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
   };
 
   state: InspectorPanelState = {
-    selectedView: this.props.views[0],
+    selectedView: selectInitialView(this.props.views, this.props.initialViewId),
     views: this.props.views,
     // Clone adapters array so we can validate that this prop never change
     adapters: { ...this.props.adapters },
@@ -69,7 +83,9 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
       nextProps.views !== prevState.views && !nextProps.views.includes(prevState.selectedView);
     return {
       views: nextProps.views,
-      selectedView: selectedViewMustChange ? nextProps.views[0] : prevState.selectedView,
+      selectedView: selectedViewMustChange
+        ? selectInitialView(nextProps.views, nextProps.initialViewId)
+        : prevState.selectedView,
     };
   }
 

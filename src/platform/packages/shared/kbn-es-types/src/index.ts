@@ -17,6 +17,11 @@ import type {
   ESQLRow,
   ESQLSearchResponse,
   ESQLSearchParams,
+  EsqlQueryProfile,
+  EsqlProfileDriver,
+  EsqlProfileOperator,
+  EsqlProfilePlan,
+  EsqlProfileTimeSpan,
   ChangePointType,
 } from './search';
 
@@ -54,5 +59,10 @@ export type {
   ESQLRow,
   ESQLSearchResponse,
   ESQLSearchParams,
+  EsqlQueryProfile,
+  EsqlProfileDriver,
+  EsqlProfileOperator,
+  EsqlProfilePlan,
+  EsqlProfileTimeSpan,
   ChangePointType,
 };

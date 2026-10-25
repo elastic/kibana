@@ -98,6 +98,8 @@ export interface ESQLEditorProps {
   enableCreateView?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
+  /** Called when the duration in the editor footer is clicked. */
+  onQueryDurationClick?: () => void;
   /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   /**

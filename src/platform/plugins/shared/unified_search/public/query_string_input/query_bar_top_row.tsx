@@ -300,6 +300,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Optional ES|QL prop - Request statistics to be displayed in the ES|QL editor UI
    */
   esqlQueryStats?: ESQLQueryStats;
+  /** Called when the ES|QL editor duration is clicked. */
+  onQueryDurationClick?: ESQLEditorProps['onQueryDurationClick'];
   /**
    * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
    */
@@ -1460,6 +1462,7 @@ export const QueryBarTopRow = React.memo(
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
+            onQueryDurationClick={props.onQueryDurationClick}
             enableResourceBrowser={props.enableResourceBrowser}
             enableCreateView={props.enableCreateView}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
