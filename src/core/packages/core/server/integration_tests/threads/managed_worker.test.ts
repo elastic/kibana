@@ -139,4 +139,39 @@ describe('ManagedWorker with a real worker thread', () => {
     expect(onExit).toHaveBeenCalledTimes(1);
     expect(onExhausted).not.toHaveBeenCalled();
   }, 60_000);
+
+  it('keeps a worker whose ready arrives while the main thread is blocked past the timeout', async () => {
+    const logger = loggerMock.create();
+    const loaded = new SharedArrayBuffer(4);
+    const onExit = jest.fn();
+    const readyTimeoutMs = 1_000;
+    const managed = createManagedWorker({
+      name: 'integration-test',
+      entry: require.resolve('./fixtures/signal_loaded_entry'),
+      workerData: { loaded },
+      resourceLimits: RESOURCE_LIMITS,
+      logger,
+      readyTimeoutMs,
+      onExit,
+    });
+    worker = managed;
+
+    // Block the main thread from start until ready is queued and the ready timer has expired,
+    // as a long event loop block would. Atomics.wait keeps timers and messages from running.
+    const startedAt = Date.now();
+    managed.start();
+    const { threadId } = managed.status();
+    const signal = Atomics.wait(new Int32Array(loaded), 0, 0, 30_000);
+    const remainingMs = startedAt + readyTimeoutMs + 500 - Date.now();
+    if (remainingMs > 0) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, remainingMs);
+    expect(signal).not.toBe('timed-out');
+    expect(Date.now() - startedAt).toBeGreaterThan(readyTimeoutMs);
+
+    await waitFor(() => managed.status().state === 'running', 5_000);
+    // The deferred ready-timeout check runs in the same loop turn; give it room to misfire.
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(managed.status()).toMatchObject({ state: 'running', restarts: 0, threadId });
+    expect(onExit).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  }, 60_000);
 });
