@@ -330,6 +330,12 @@ describe('SearchMethodsService', () => {
         mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
       });
 
+      it('defaults the time zone from advanced settings even with no context fields', async () => {
+        await service.esql({ query: 'FROM logs' });
+
+        expect(getRequestParams().time_zone).toBe('America/New_York');
+      });
+
       it('combines kibanaFilters, kqlQuery, and timeRange into the request filter', async () => {
         await service.esql({
           query: 'FROM logs',
@@ -410,16 +416,10 @@ describe('SearchMethodsService', () => {
         expect(getRequestParams().filter).toBeUndefined();
       });
 
-      it('passes the timeZone from the caller', async () => {
+      it('prefers the timeZone from the caller', async () => {
         await service.esql({ query: 'FROM logs', timeZone: 'Europe/Paris' });
 
         expect(getRequestParams().time_zone).toBe('Europe/Paris');
-      });
-
-      it('leaves time_zone undefined when the caller does not pass a timeZone', async () => {
-        await service.esql({ query: 'FROM logs' });
-
-        expect(getRequestParams().time_zone).toBeUndefined();
       });
     });
   });

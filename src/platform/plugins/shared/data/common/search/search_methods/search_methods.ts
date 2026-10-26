@@ -9,7 +9,12 @@
 
 import { lastValueFrom, takeWhile } from 'rxjs';
 import { castArray } from 'lodash';
-import { buildEsQuery, isOfQueryType, type EsQueryConfig } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  getTimeZoneFromSettings,
+  isOfQueryType,
+  type EsQueryConfig,
+} from '@kbn/es-query';
 import { fixESQLQueryWithVariables, getEsqlInspectorStats, getNamedParams } from '@kbn/esql-utils';
 import type {
   ISearchMethods,
@@ -453,6 +458,9 @@ export class SearchMethodsService implements ISearchMethods {
       query: esqlQuery,
       params: namedParams.length ? namedParams : undefined,
       filter: this.mergeEsqlFilters(contextFilter, params.filter),
+      timeZone:
+        params.timeZone ??
+        (esQueryConfig.dateFormatTZ ? getTimeZoneFromSettings(esQueryConfig.dateFormatTZ) : 'UTC'),
     };
   }
 
