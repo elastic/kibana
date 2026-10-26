@@ -40,10 +40,11 @@ import type { AlertingV2HostApp } from '../locators';
 import type { AlertsKibanaServices } from '../alerts_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { ManageRulesHrefProvider } from './manage_rules_href_context';
+import type { EpisodeDetailsPageProps } from '../pages/episode_details_page/episode_details_page';
 
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
 
-export interface AlertingV2PageProps {
+export interface AlertingV2PageProps extends EpisodeDetailsPageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   hostApp: AlertingV2HostApp;
@@ -170,6 +171,7 @@ export const AlertingV2EpisodesPage = ({
   hostApp,
   privilegeCheck,
   createActions,
+  useEpisodeDetailsHeaderMenuItems,
   manageRulesHref,
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -217,7 +219,10 @@ export const AlertingV2EpisodesPage = ({
               <PrivilegeCheckProvider value={privilegeCheck}>
                 <ManageRulesHrefProvider value={manageRulesHref}>
                   <I18nProvider>
-                    <EpisodesApp dataSource={dataSource} />
+                    <EpisodesApp
+                      dataSource={dataSource}
+                      useEpisodeDetailsHeaderMenuItems={useEpisodeDetailsHeaderMenuItems}
+                    />
                   </I18nProvider>
                 </ManageRulesHrefProvider>
               </PrivilegeCheckProvider>
