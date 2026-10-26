@@ -841,9 +841,13 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       path: EPM_API_ROUTES.INSTALL_WORKFLOW_ASSETS_PATTERN,
       security: INSTALL_PACKAGES_SECURITY,
       summary: `Install Kibana workflow assets for a package`,
-      description: `Install or retry Kibana workflow assets for a specific package version.`,
+      description: `Install or retry managed workflows for an already-installed package version. Workflows are created disabled. Fails if the \`fleet.enableWorkflowAssets\` feature flag is off or the workflows plugins are unavailable.`,
       options: {
         tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        availability: {
+          stability: 'experimental',
+          since: '9.7.0',
+        },
       },
     })
     .addVersion(
