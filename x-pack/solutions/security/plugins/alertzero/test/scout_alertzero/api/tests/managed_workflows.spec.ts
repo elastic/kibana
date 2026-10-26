@@ -118,10 +118,18 @@ const cancelNewExecutions = async (
       .filter((run) => !TERMINAL_EXECUTION_STATUSES.includes(run.status));
   };
   for (const run of await inFlightNew()) {
-    await apiClient.post(`api/workflows/executions/${encodeURIComponent(run.id)}/cancel`, {
-      headers,
-      responseType: 'json',
-    });
+    const cancel = await apiClient.post(
+      `api/workflows/executions/${encodeURIComponent(run.id)}/cancel`,
+      {
+        // The XSRF gate wants kbn-version/kbn-xsrf; PUBLIC_API_HEADERS carries
+        // neither, so an unadorned cancel 400s before reaching the route.
+        headers: { ...headers, 'kbn-xsrf': 'scout' },
+        responseType: 'json',
+      }
+    );
+    // The run may reach a terminal state between the list and the cancel; the
+    // cancel then 404s and the poll below confirms nothing is left in flight.
+    expect([200, 404], JSON.stringify(cancel.body)).toContain(cancel.statusCode);
   }
   await expect
     .poll(async () => (await inFlightNew()).length, {
