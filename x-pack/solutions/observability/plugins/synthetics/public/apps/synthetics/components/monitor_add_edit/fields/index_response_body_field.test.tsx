@@ -44,7 +44,7 @@ describe('<ResponseBodyIndexField/>', () => {
     await waitFor(() => {
       expect(select.value).toBe(newPolicy);
       expect(getByText('Always')).toBeInTheDocument();
-      expect(onChange).toBeCalledWith(newPolicy);
+      expect(onChange).toHaveBeenCalledWith(newPolicy);
     });
   });
 
@@ -71,7 +71,7 @@ describe('<ResponseBodyIndexField/>', () => {
     await waitFor(() => {
       expect(checkbox.checked).toBe(false);
       expect(select).not.toBeInTheDocument();
-      expect(onChange).toBeCalledWith(newPolicy);
+      expect(onChange).toHaveBeenCalledWith(newPolicy);
     });
 
     fireEvent.click(checkbox);
@@ -79,7 +79,7 @@ describe('<ResponseBodyIndexField/>', () => {
     await waitFor(() => {
       expect(checkbox.checked).toBe(true);
       expect(select).not.toBeInTheDocument();
-      expect(onChange).toBeCalledWith(defaultDefaultValue);
+      expect(onChange).toHaveBeenCalledWith(defaultDefaultValue);
     });
   });
 
@@ -101,7 +101,7 @@ describe('<ResponseBodyIndexField/>', () => {
       expect(select).toBeInTheDocument();
       expect(select.value).toEqual(ResponseBodyIndexPolicy.ON_ERROR);
       // switches back to on error policy when checkbox is checked
-      expect(onChange).toBeCalledWith(ResponseBodyIndexPolicy.ON_ERROR);
+      expect(onChange).toHaveBeenCalledWith(ResponseBodyIndexPolicy.ON_ERROR);
     });
 
     const newPolicy = ResponseBodyIndexPolicy.ALWAYS;
@@ -109,7 +109,7 @@ describe('<ResponseBodyIndexField/>', () => {
 
     await waitFor(() => {
       expect(select.value).toEqual(newPolicy);
-      expect(onChange).toBeCalledWith(newPolicy);
+      expect(onChange).toHaveBeenCalledWith(newPolicy);
     });
   });
 });

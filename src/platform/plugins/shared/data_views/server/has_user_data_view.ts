@@ -31,8 +31,10 @@ export const getDataViews = async ({
   });
 
 /**
- * Checks if user has access to any data view,
- * excluding those that are automatically created by ese (hardcoded)
+ * This function currently returns true if there are any data views
+ * It was created to filter out hard coded data views that were not created by the user.
+ * Given we find a case where we need to distinguish between user-created and managed data views,
+ * This function may need to be updated accordingly, or removed since hasDataView should be used instead.
  * @param esClient
  * @param soClient
  * @param dataViews
@@ -44,13 +46,5 @@ export const hasUserDataView = async (
   if (!dataViews) {
     dataViews = await getDataViews({ esClient, soClient });
   }
-
-  if (dataViews.total === 0) {
-    return false;
-  } else {
-    // filter here data views that we know are not created by user during on-boarding for smoother on-boarding experience
-    // currently there is no such data views,
-
-    return true;
-  }
+  return dataViews.total > 0;
 };

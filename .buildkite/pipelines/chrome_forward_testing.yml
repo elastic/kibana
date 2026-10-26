@@ -12,6 +12,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     retry:
       automatic:
@@ -24,7 +25,6 @@ steps:
     soft_fail: true
     agents:
       machineType: n2-highcpu-8
-      diskSizeGb: 95
 
   - wait
 
@@ -45,6 +45,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     timeout_in_minutes: 10
     depends_on:
@@ -65,6 +66,7 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      FTR_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -77,9 +79,9 @@ steps:
     key: build_scout_tests
     timeout_in_minutes: 15
     env:
-      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -117,7 +119,6 @@ steps:
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
-      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -132,7 +133,6 @@ steps:
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
-      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -197,6 +197,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -385,7 +387,6 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
-      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -400,7 +401,6 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       machineType: n2-highmem-4
-      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -415,7 +415,6 @@ steps:
     label: 'Osquery Cypress Tests on Serverless'
     agents:
       machineType: n2-highmem-4
-      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -431,7 +430,6 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 120
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -446,7 +444,6 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 120
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -463,4 +460,5 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2

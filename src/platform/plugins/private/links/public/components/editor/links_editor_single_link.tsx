@@ -11,22 +11,22 @@ import React, { useMemo } from 'react';
 
 import type { DraggableProvidedDragHandleProps, UseEuiTheme } from '@elastic/eui';
 import {
-  EuiText,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiText,
   EuiToolTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonIcon,
   transparentize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { LinkInfo } from './constants';
-import { LinksStrings } from '../links_strings';
-import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
-import { DASHBOARD_LINK_TYPE } from '../../../common/content_management';
+import { DASHBOARD_LINK_TYPE } from '../../../common/constants';
 import type { ResolvedLink } from '../../types';
+import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
+import { LinksStrings } from '../links_strings';
+import { LinkInfo } from './constants';
 
 export const LinksEditorSingleLink = ({
   link,
@@ -93,6 +93,7 @@ export const LinksEditorSingleLink = ({
           <EuiPanel
             color="transparent"
             paddingSize="none"
+            hasBorder={false}
             {...dragHandleProps}
             aria-label={LinksStrings.editor.panelEditor.getDragHandleAriaLabel()}
             data-test-subj="panelEditorLink--dragHandle"

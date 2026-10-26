@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -128,7 +129,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
   const addNoteButton = useMemo(
     () => (
       <EuiButtonEmpty
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onShowNotes}
         size="s"
         disabled={cannotAddNotes}
@@ -143,16 +144,18 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
 
   const addNoteButtonIcon = useMemo(
     () => (
-      <EuiButtonIcon
-        onClick={onShowNotes}
-        iconType="plusInCircle"
-        disabled={cannotAddNotes}
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-        aria-label={ADD_NOTE_BUTTON}
-        data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
-      />
+      <EuiToolTip content={ADD_NOTE_BUTTON} disableScreenReaderOutput>
+        <EuiButtonIcon
+          onClick={onShowNotes}
+          iconType="plusCircle"
+          disabled={cannotAddNotes}
+          css={css`
+            margin-left: ${euiTheme.size.xs};
+          `}
+          aria-label={ADD_NOTE_BUTTON}
+          data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
+        />
+      </EuiToolTip>
     ),
     [euiTheme.size.xs, cannotAddNotes, onShowNotes]
   );

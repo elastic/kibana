@@ -34,11 +34,13 @@ import {
   MOCK_IDP_ROLE_MAPPING_NAME,
   MOCK_IDP_SP_BASE_URL,
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
+  MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
 import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
+import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -98,6 +100,11 @@ export async function createSAMLResponse(options: {
   authnRequestId?: string;
   /** SP entity ID for AudienceRestriction (required by UIAM, optional for ES) */
   spEntityId?: string;
+  /**
+   * AssertionConsumerService URL used for the assertion `Recipient` and response `Destination`.
+   * Defaults to Kibana's SAML callback. Pass an explicit value for external SPs (e.g. UIAM).
+   */
+  acsUrl?: string;
   username: string;
   full_name?: string;
   email?: string;
@@ -112,6 +119,8 @@ export async function createSAMLResponse(options: {
         refreshTokenLifetimeSec?: number;
       };
 }) {
+  const acsUrl = options.acsUrl ?? `${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`;
+
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
 
@@ -145,7 +154,7 @@ export async function createSAMLResponse(options: {
         <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
           <saml:SubjectConfirmationData NotOnOrAfter="${notOnOrAfter}" ${
     options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-  } Recipient="${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback" />
+  } Recipient="${acsUrl}" />
         </saml:SubjectConfirmation>
       </saml:Subject>${conditionsXml}
       <saml:AuthnStatement AuthnInstant="${issueInstant}" SessionIndex="4464894646681600">
@@ -229,7 +238,7 @@ export async function createSAMLResponse(options: {
     `
     <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="_bdf1d51245ed0f71aa23" Version="2.0" IssueInstant="${issueInstant}" ${
       options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-    } Destination="${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback">
+    } Destination="${acsUrl}">
       <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">${MOCK_IDP_ENTITY_ID}</saml:Issuer>
       <samlp:Status>
         <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
@@ -268,7 +277,7 @@ export async function ensureSAMLRoleMapping(client: Client) {
 }
 
 export function generateCosmosDBApiRequestHeaders(
-  httpVerb: 'POST' | 'PUT',
+  httpVerb: 'POST' | 'PUT' | 'DELETE',
   resourceType: 'dbs' | 'colls' | 'docs',
   resourceId: string
 ) {
@@ -300,7 +309,6 @@ export const projectTypeToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  ['workplaceai', 'workplaceai'],
   ['vectordb', 'vectordb'],
 ]);
 
@@ -352,7 +360,6 @@ export async function createUiamSessionTokens({
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
-    roleId: 'cloud-role-id',
     projectType,
     applicationRoles: roles,
     email,
@@ -383,17 +390,12 @@ export async function createUiamSessionTokens({
 
       ras: {
         platform: [],
-        organization: [],
         user: [],
-        project: [
-          {
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: projectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          },
-        ],
+        ...buildMockIdpUiamRoleAssignments({
+          organizationId,
+          projectType,
+          applicationRoles: roles,
+        }),
       },
 
       nbf: iat,
@@ -435,6 +437,9 @@ export async function createUiamSessionTokens({
   };
 }
 
+// The `kid` header UIAM stamps on the OAuth access and refresh tokens it issues.
+const UIAM_OAUTH_TOKEN_KID = 'ot';
+
 /**
  * Creates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.
  *
@@ -444,7 +449,7 @@ export async function createUiamSessionTokens({
 export async function createUiamOAuthAccessToken({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   audience,
   fullName,
@@ -460,6 +465,7 @@ export async function createUiamOAuthAccessToken({
   email?: string;
   accessTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
@@ -468,7 +474,6 @@ export async function createUiamOAuthAccessToken({
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
-    roleId: 'cloud-role-id',
     projectType,
     applicationRoles: roles,
     email,
@@ -499,17 +504,12 @@ export async function createUiamOAuthAccessToken({
 
       ras: {
         platform: [],
-        organization: [],
         user: [],
-        project: [
-          {
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: projectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          },
-        ],
+        ...buildMockIdpUiamRoleAssignments({
+          organizationId,
+          projectType,
+          applicationRoles: roles,
+        }),
       },
 
       nbf: iat,
@@ -519,20 +519,24 @@ export async function createUiamOAuthAccessToken({
     })
   ).toString('base64url');
 
-  const tokenHeader = Buffer.from(JSON.stringify({ typ: 'JWT', alg: 'HS256' })).toString(
-    'base64url'
-  );
+  // UIAM verifies OAuth tokens with its OAuth key set, picked by the `kid` header.
+  const tokenHeader = Buffer.from(
+    JSON.stringify({ typ: 'JWT', alg: 'HS256', kid: UIAM_OAUTH_TOKEN_KID })
+  ).toString('base64url');
 
-  return prepareJwtForUiam(`${tokenHeader}.${accessTokenBody}`);
+  return prepareJwtForUiam(`${tokenHeader}.${accessTokenBody}`, MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET);
 }
 
-function prepareJwtForUiam(unsignedJwt: string): string {
-  const signedAccessToken = signJwt(unsignedJwt);
+function prepareJwtForUiam(
+  unsignedJwt: string,
+  signingSecret: string = MOCK_IDP_UIAM_SIGNING_SECRET
+): string {
+  const signedAccessToken = signJwt(unsignedJwt, signingSecret);
   return wrapSignedJwt(signedAccessToken);
 }
 
-function signJwt(unsignedJwt: string): string {
-  return `${unsignedJwt}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+function signJwt(unsignedJwt: string, signingSecret: string): string {
+  return `${unsignedJwt}.${createHmac('sha256', signingSecret)
     .update(unsignedJwt)
     .digest('base64url')}`;
 }

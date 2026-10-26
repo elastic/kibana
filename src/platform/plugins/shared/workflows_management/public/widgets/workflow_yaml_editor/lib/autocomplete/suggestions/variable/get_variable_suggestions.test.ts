@@ -68,8 +68,12 @@ describe('getVariableSuggestions', () => {
     isInStepsContext: false,
     isInTriggersContext: false,
     isInWorkflowInputsContext: false,
+    isInEsqlQueryField: false,
+    esqlRegion: null,
+    esqlOffsetInQuery: null,
     workflowDefinition: null,
     currentWorkflowId: null,
+    isCurrentWorkflowManaged: false,
     ...overrides,
   });
 
@@ -339,6 +343,24 @@ describe('getVariableSuggestions', () => {
       // we're typing the next valid segment, so suggestions should be filtered
       expect(suggestions).toHaveLength(2);
       expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey']);
+    });
+
+    it('should allow suggestions when Liquid key contains dots (e.g. ep.a.b)', () => {
+      const context = createMockAutocompleteContext({
+        lineParseResult: createMockVariableLineParseResult({
+          fullKey: 'rules[ep.a.b].name',
+          pathSegments: ['rules', '__liquid_dynamic_key__', 'name'],
+          lastPathSegment: null,
+        }),
+        contextSchema: z.object({
+          value: z.string().describe('The value'),
+        }),
+        contextScopedToPath: 'rules.__liquid_dynamic_key__.name',
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions.map((s) => s.label)).toEqual(['value']);
     });
   });
 

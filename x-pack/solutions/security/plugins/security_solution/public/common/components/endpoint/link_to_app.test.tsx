@@ -110,7 +110,7 @@ describe('LinkToApp component', () => {
           {'link'}
         </LinkToApp>
       );
-      expect(() => renderResult.find('EuiLink').simulate('click')).toThrowError();
+      expect(() => renderResult.find('EuiLink').simulate('click')).toThrow();
       const clickEventArg = spyOnClickHandler.mock.calls[0][0];
       expect(clickEventArg.isDefaultPrevented()).toBe(true);
     }

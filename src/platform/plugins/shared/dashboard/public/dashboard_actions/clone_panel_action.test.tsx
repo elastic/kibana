@@ -24,6 +24,7 @@ describe('Clone panel action', () => {
         uuid: 'superId',
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
         anyStateChange$: of(),
+        latestState$: of({}),
         serializeState: () => ({}),
         applySerializedState: () => undefined,
         parentApi: {

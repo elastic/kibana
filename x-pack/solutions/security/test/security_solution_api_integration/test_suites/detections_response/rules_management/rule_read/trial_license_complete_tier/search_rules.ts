@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const { body } = await searchRules({
-        filter: 'alert.attributes.tags: match',
+        filter: { term: 'alert.attributes.tags: match', mode: 'KQL' },
         search: { term: 'Simple', mode: 'legacy' },
       }).expect(200);
 
@@ -80,19 +80,18 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.counts).to.be.an('object');
       expect(body.counts.enabled).to.be.an('object');
       const enabledBuckets = body.counts.enabled as Record<string, number>;
-      const bucketValues = Object.values(enabledBuckets);
-      expect(bucketValues).to.have.length(2);
-      expect(bucketValues['0']).to.be(1);
-      expect(bucketValues['1']).to.be(2);
+      expect(Object.keys(enabledBuckets)).to.have.length(2);
+      expect(enabledBuckets.false).to.be(1);
+      expect(enabledBuckets.true).to.be(2);
 
       const { body: filteredBody } = await searchRules({
-        filter: 'alert.attributes.enabled: true',
+        filter: { term: 'alert.attributes.enabled: true', mode: 'KQL' },
         aggregations: { counts: ['enabled'] },
       }).expect(200);
       expect(filteredBody.counts.enabled).to.be.an('object');
       const filteredEnabledBuckets = filteredBody.counts.enabled as Record<string, number>;
-      expect(filteredEnabledBuckets['1']).to.be(2);
-      expect(filteredEnabledBuckets['0']).to.be(undefined);
+      expect(filteredEnabledBuckets.true).to.be(2);
+      expect(filteredEnabledBuckets.false).to.be(undefined);
     });
 
     it('returns only requested fields when fields parameter is provided', async () => {
@@ -134,7 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('returns 400 for invalid KQL filter', async () => {
       const { body } = await searchRules({
-        filter: 'alert.attributes.name: (',
+        filter: { term: 'alert.attributes.name: (', mode: 'KQL' },
       }).expect(400);
       expect(body.status_code).to.be(400);
       expect(body.message).to.be.an('array');

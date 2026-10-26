@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { registerWorkflowAccessControlRoutes } from './access_control';
 import { registerBulkCreateWorkflowsRoute } from './bulk_create_workflows';
 import { registerBulkDeleteWorkflowsRoute } from './bulk_delete_workflows';
 import { registerCloneWorkflowRoute } from './clone_workflow';
@@ -25,6 +26,7 @@ import { registerValidateWorkflowRoute } from './validate_workflow';
 import type { RouteDependencies } from '../types';
 
 export function registerWorkflowRoutes(deps: RouteDependencies) {
+  registerWorkflowAccessControlRoutes(deps);
   registerGetWorkflowsRoute(deps);
   registerBulkCreateWorkflowsRoute(deps);
   registerBulkDeleteWorkflowsRoute(deps);

@@ -13,7 +13,6 @@ import { z } from '@kbn/zod/v4';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 import { useMonacoMarkersChangedInterceptor } from './use_monaco_markers_changed_interceptor';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import { BATCHED_CUSTOM_MARKER_OWNER } from '../model/types';
 
 jest.mock('./filter_monaco_yaml_markers', () => ({
   filterMonacoYamlMarkers: jest.fn((markers: any[]) => markers),
@@ -57,7 +56,7 @@ describe('useMonacoMarkersChangedInterceptor', () => {
     formatMonacoYamlMarkerMock.mockClear();
   });
 
-  it('should produce unique ids for markers from different sources on the same range', () => {
+  it('assigns semantic rule IDs to schema and syntax markers', () => {
     const { result } = renderHook(() =>
       useMonacoMarkersChangedInterceptor({
         yamlDocumentRef: { current: null },
@@ -74,21 +73,17 @@ describe('useMonacoMarkersChangedInterceptor', () => {
     };
 
     const markers = [
-      { ...sharedRange, message: 'Unknown variable', source: 'variable-validation' },
-      { ...sharedRange, message: 'Invalid Liquid syntax', source: 'liquid-template-validation' },
+      { ...sharedRange, message: 'Missing property', source: 'yaml-schema:workflow' },
+      { ...sharedRange, message: 'Invalid YAML', source: 'YAML' },
     ];
 
     act(() => {
-      result.current.handleMarkersChanged(mockModel, BATCHED_CUSTOM_MARKER_OWNER, markers as any);
+      result.current.handleMarkersChanged(mockModel, 'yaml', markers as any);
     });
 
     const errors = result.current.validationErrors;
     expect(errors).toHaveLength(2);
-
-    const [varError, liquidError] = errors;
-    expect(varError.id).not.toEqual(liquidError.id);
-    expect(varError.id).toContain('variable-validation');
-    expect(liquidError.id).toContain('liquid-template-validation');
+    expect(errors.map(({ ruleId }) => ruleId)).toEqual(['schemaViolation', 'yamlSyntaxError']);
   });
 
   describe('transformMonacoMarkers caching', () => {

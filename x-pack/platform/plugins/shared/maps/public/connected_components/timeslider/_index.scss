@@ -3,10 +3,9 @@
   left: calc(50% - 400px);
   bottom: $euiSize;
   z-index: 99999;
-
-  .controlFrame__formControlLayout {
-    @include euiBottomShadowLarge;
-  }
+  // The control frame's box-shadow is applied reactively via Emotion
+  // (euiShadow) in timeslider.tsx so it matches the medium shadow EUI panels
+  // use and renders correctly in light/dark mode.
 }
 
 .mapTimeslider--animation {

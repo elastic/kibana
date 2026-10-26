@@ -42,9 +42,9 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const localIndexName = isNonLocalIndexName(metricItem.dataStream)
+  const localIndexName = isNonLocalIndexName(metricItem.indexName)
     ? undefined
-    : metricItem.dataStream;
+    : metricItem.indexName;
 
   const { kind: sourceKind } = useMetricSourceKind({
     name: localIndexName,
@@ -52,22 +52,22 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   });
   const renderStreamField = useStreamsFieldRenderer();
 
-  const dataStreamLink = useMemo(() => {
-    if (!metricItem.dataStream) {
+  const sourceLink = useMemo(() => {
+    if (!metricItem.indexName) {
       return undefined;
     }
 
     const streamLink =
-      localIndexName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamField
-        ? renderStreamField({ streamName: localIndexName })
+      renderStreamField && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM
+        ? renderStreamField({ streamName: metricItem.indexName })
         : null;
 
     return {
-      indexName: metricItem.dataStream,
+      indexName: metricItem.indexName,
       kind: sourceKind,
       streamLink,
     };
-  }, [metricItem.dataStream, localIndexName, sourceKind, renderStreamField]);
+  }, [metricItem.indexName, sourceKind, renderStreamField]);
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -111,7 +111,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      <OverviewTabMetadata metricItem={metricItem} indexRow={dataStreamLink} />
+      <OverviewTabMetadata metricItem={metricItem} indexRow={sourceLink} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>

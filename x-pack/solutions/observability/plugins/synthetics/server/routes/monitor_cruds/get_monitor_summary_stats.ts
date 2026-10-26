@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { routeId, MAX_DATE_RANGE_LENGTH, MAX_ROUTE_ID_LENGTH } from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../common/constants/client_defaults';
+import { getHeartbeatLocationFilter } from '../../../common/lib';
+import { getSyntheticsScopedIndex } from '../../../common/get_synthetics_indices';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
 export interface MonitorSummaryStats {
@@ -27,12 +30,12 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
   writeAccess: false,
   path: SYNTHETICS_API_URLS.MONITOR_SUMMARY_STATS,
   validate: {
-    query: schema.object({
-      monitorId: schema.string(),
-      locationLabel: schema.string(),
-      from: schema.string({ defaultValue: 'now-30d' }),
-      to: schema.string({ defaultValue: 'now' }),
-      remoteName: schema.maybe(schema.string()),
+    query: z.strictObject({
+      monitorId: routeId,
+      locationLabel: z.string().max(MAX_ROUTE_ID_LENGTH),
+      from: z.string().max(MAX_DATE_RANGE_LENGTH).default('now-30d'),
+      to: z.string().max(MAX_DATE_RANGE_LENGTH).default('now'),
+      remoteName: z.string().max(256).optional(),
     }),
   },
   handler: async ({ syntheticsEsClient, request }): Promise<MonitorSummaryStats> => {
@@ -44,10 +47,8 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
       remoteName?: string;
     };
 
-    const index = remoteName ? `${remoteName}:${syntheticsEsClient.heartbeatIndices}` : undefined;
-
     const { body: result } = await syntheticsEsClient.search({
-      ...(index ? { index } : {}),
+      index: getSyntheticsScopedIndex(remoteName, syntheticsEsClient.heartbeatIndices),
       size: 0,
       query: {
         bool: {
@@ -55,7 +56,7 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
             FINAL_SUMMARY_FILTER,
             EXCLUDE_RUN_ONCE_FILTER,
             { term: { 'monitor.id': monitorId } },
-            { term: { 'observer.geo.name': locationLabel } },
+            ...getHeartbeatLocationFilter({ field: 'observer.geo.name', value: locationLabel }),
             { range: { '@timestamp': { gte: from, lte: to } } },
           ],
         },

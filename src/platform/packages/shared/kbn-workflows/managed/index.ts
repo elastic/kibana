@@ -11,10 +11,49 @@ import { managedWorkflowDefinitions } from './definitions';
 import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowManagement,
+  ManagedWorkflowSelector,
+  ManagedWorkflowSelectorVisibilityContext,
+  ManagedWorkflowSolution,
+  ManagedWorkflowSolutionVisibilityContext,
   ManagedWorkflowTemplateValues,
+  ManagedWorkflowVisibility,
+  ManagedWorkflowVisibilityContext,
 } from './types';
 
-export type { ManagedWorkflowDefinition, ManagedWorkflowManagement, ManagedWorkflowTemplateValues };
+export type {
+  ManagedWorkflowDefinition,
+  ManagedWorkflowManagement,
+  ManagedWorkflowSelector,
+  ManagedWorkflowSelectorVisibilityContext,
+  ManagedWorkflowSolution,
+  ManagedWorkflowSolutionVisibilityContext,
+  ManagedWorkflowTemplateValues,
+  ManagedWorkflowVisibility,
+  ManagedWorkflowVisibilityContext,
+};
+export {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+  getManagedWorkflowVisibilityContexts,
+  MANAGED_WORKFLOW_SELECTORS,
+  MANAGED_WORKFLOW_SOLUTIONS,
+} from './types';
+export {
+  ACTION_WORKFLOW_INPUT,
+  ACTION_WORKFLOW_TAG,
+  actionApprovalPolicySchema,
+  actionCategorySchema,
+  actionImpactSchema,
+  actionMetadataSchema,
+  actionSubjectKindSchema,
+} from './action_workflow';
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionImpact,
+  ActionMetadata,
+  ActionSubjectKind,
+} from './action_workflow';
 export * from './definitions';
 
 type ManagedWorkflowDefinitionById = {
@@ -44,8 +83,8 @@ export type ManagedWorkflowTemplateValuesById = {
   >;
 };
 
-export type ManagedWorkflowTemplateValuesForId<TId extends TemplatedManagedWorkflowId> =
-  ManagedWorkflowTemplateValuesById[TId];
+export type ManagedWorkflowTemplateValuesForId<TId extends ManagedWorkflowId> =
+  TId extends TemplatedManagedWorkflowId ? ManagedWorkflowTemplateValuesById[TId] : never;
 
 export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinition | undefined => {
   return managedWorkflowDefinitions.find(

@@ -203,8 +203,11 @@ export const buildEntityAlertsQuery = ({
 };
 
 /**
- * Gets the entities latest index name (v2) for a specific space.
- * Used for LOOKUP JOIN queries.
+ * Gets the solution-neutral entities latest index name (v2) for a specific space.
+ * Test-seeding helper only: un-migrated deployments still use the legacy
+ * `.entities.v2.latest.security_{space}` name, so production code must resolve
+ * the live name via `resolveEntitiesIndexName` (server) or
+ * `useResolvedLatestEntitiesIndexName` (browser) instead of calling this.
  */
 export const getEntitiesLatestIndexName = (spaceId: string = 'default'): string => {
   return getLatestEntitiesIndexName(spaceId);

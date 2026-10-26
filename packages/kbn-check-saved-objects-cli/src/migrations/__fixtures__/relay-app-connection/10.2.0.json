@@ -1,0 +1,84 @@
+{
+  "10.1.0": [
+    {
+      "status": "connected",
+      "apiKeyId": "sample-api-key-id",
+      "surface": "slack",
+      "tenantKey": "T0123ABC",
+      "createdBy": "elastic",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "updatedAt": "2026-10-01T10:05:00.000Z"
+    },
+    {
+      "status": "oauth_in_progress",
+      "apiKeyId": "sample-api-key-id",
+      "claimId": "sample-claim-id",
+      "surface": "slack",
+      "tenantKey": null,
+      "createdBy": "elastic",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "updatedAt": "2026-10-01T10:00:00.000Z"
+    },
+    {
+      "status": "oauth_in_progress",
+      "apiKeyId": "sample-api-key-id",
+      "surface": "slack",
+      "tenantKey": "T0123ABC",
+      "createdBy": "elastic",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "updatedAt": "2026-10-01T10:02:00.000Z"
+    },
+    {
+      "status": "error",
+      "apiKeyId": null,
+      "claimId": "sample-claim-id",
+      "surface": "slack",
+      "tenantKey": null,
+      "error": "claim expired",
+      "createdBy": "elastic",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "updatedAt": "2026-10-01T10:10:00.000Z"
+    }
+  ],
+  "10.2.0": [
+    {
+      "status": "connected",
+      "apiKeyId": "sample-api-key-id",
+      "surface": "slack",
+      "tenantKey": "T0123ABC",
+      "createdBy": "elastic",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "updatedAt": "2026-10-01T10:05:00.000Z"
+    },
+    {
+      "status": "oauth_in_progress",
+      "apiKeyId": "sample-api-key-id",
+      "claimId": "sample-claim-id",
+      "surface": "slack",
+      "tenantKey": null,
+      "createdBy": "elastic",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "updatedAt": "2026-10-01T10:00:00.000Z"
+    },
+    {
+      "status": "oauth_in_progress",
+      "apiKeyId": "sample-api-key-id",
+      "surface": "slack",
+      "tenantKey": "T0123ABC",
+      "createdBy": "elastic",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "updatedAt": "2026-10-01T10:02:00.000Z"
+    },
+    {
+      "status": "error",
+      "apiKeyId": null,
+      "claimId": "sample-claim-id",
+      "surface": "slack",
+      "tenantKey": null,
+      "error": "claim expired",
+      "createdBy": "elastic",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "updatedAt": "2026-10-01T10:10:00.000Z"
+    }
+  ]
+}

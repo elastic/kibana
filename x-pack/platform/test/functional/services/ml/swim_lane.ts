@@ -228,7 +228,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       // for some time, before the loading indicator is displayed
 
       // wait for loading indicator to be displayed, but don't fail in case it's already gone
-      if (await testSubjects.exists('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 })) {
+      if (await testSubjects.waitForExists('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 })) {
         // only wait for loading indicator to disappear if it was actually displayed
         await testSubjects.missingOrFail('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 });
       }

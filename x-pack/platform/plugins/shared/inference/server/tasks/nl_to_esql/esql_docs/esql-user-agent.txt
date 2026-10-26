@@ -1,0 +1,81 @@
+# USER-AGENT
+
+The `USER_AGENT` processing command parses a user-agent string and extracts components such as name, version, operating system, and device into new columns. The new columns are prefixed with the specified `prefix` followed by a dot (`.`).
+
+The following columns may be created, depending on `properties` and `extract_device_type`: `prefix.name`, `prefix.version`, `prefix.os.name`, `prefix.os.version`, `prefix.os.full`, `prefix.device.name`, and `prefix.device.type`.
+
+If a component is missing or the input is not a valid user-agent string, the corresponding column contains `null`. If the expression evaluates to `null` or blank, all output columns are `null`.
+
+## Syntax
+
+`USER_AGENT prefix = expression [WITH { option = value [, ...] }]`
+
+### Parameters
+
+#### prefix
+
+The prefix for the output columns. The extracted components are available as `prefix.component`.
+
+#### expression
+
+The string expression containing the user-agent string to parse.
+
+#### regex_file
+
+Optional. The name of the parser configuration to use. Default: `_default_`, which uses the built-in regexes from uap-core.
+
+To use a custom regex file, place a `.yml` file in the `config/user-agent` directory on each node before starting Elasticsearch. The file must be present at node startup; changes or new files added while the node is running have no effect. Pass the filename, including the `.yml` extension, as the value.
+
+Before version 9.4, this directory was named `config/ingest-user-agent`. The old directory name is still supported as a fallback but is deprecated.
+
+#### extract_device_type
+
+Optional. When `true`, extracts device type, such as Desktop, Phone, or Tablet, on a best-effort basis and includes `prefix.device.type` in the output. Default: `false`.
+
+#### properties
+
+Optional. List of property groups to include in the output. Each value expands to one or more columns: `name` to `prefix.name`; `version` to `prefix.version`; `os` to `prefix.os.name`, `prefix.os.version`, `prefix.os.full`; `device` to `prefix.device.name`, and `prefix.device.type` when `extract_device_type` is `true`.
+
+Default: `["name", "version", "os", "device"]`. You can pass a subset to reduce output columns.
+
+## Examples
+
+Parse a user-agent string and extract browser, operating system, and device fields:
+
+```esql
+ROW input = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.149 Safari/537.36"
+| USER_AGENT ua = input WITH { "extract_device_type": true }
+| KEEP ua.*
+```
+
+ua.name:keyword | ua.version:keyword | ua.os.name:keyword | ua.os.version:keyword | ua.os.full:keyword | ua.device.name:keyword | ua.device.type:keyword
+Chrome | 33.0.1750.149 | Mac OS X | 10.9.2 | Mac OS X 10.9.2 | Mac | Desktop
+
+Limit output to selected user-agent properties and include device type:
+
+```esql
+ROW ua_str = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15"
+| USER_AGENT ua = ua_str WITH { "properties": ["name", "version", "device"], "extract_device_type": true }
+| KEEP ua.*
+```
+
+Parse user-agent strings from web logs using a custom regex file and return only the browser name and version:
+
+```esql
+FROM web_logs
+| USER_AGENT ua = user_agent WITH { "regex_file": "my-regexes.yml" }
+| KEEP ua.name, ua.version
+```
+
+Filter parsed web logs by browser name and count Firefox versions:
+
+```esql
+FROM web_logs
+| USER_AGENT ua = user_agent
+| WHERE ua.name == "Firefox"
+| STATS COUNT(*) BY ua.version
+```
+
+## Limitations
+
+This command doesn't support multi-value inputs.

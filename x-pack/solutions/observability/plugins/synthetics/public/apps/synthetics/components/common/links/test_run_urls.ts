@@ -10,15 +10,18 @@ export const getTestRunDetailRelativeLink = ({
   checkGroup,
   locationId,
   spaceId,
+  remoteName,
 }: {
   monitorId: string;
   checkGroup: string;
   locationId?: string;
   spaceId?: string;
+  remoteName?: string;
 }) => {
   const params = new URLSearchParams();
   if (locationId) params.set('locationId', locationId);
   if (spaceId) params.set('spaceId', spaceId);
+  if (remoteName) params.set('remoteName', remoteName);
   const search = params.toString();
   return `/monitor/${monitorId}/test-run/${checkGroup}${search ? `?${search}` : ''}`;
 };
@@ -29,17 +32,20 @@ export const getTestRunDetailLink = ({
   checkGroup,
   locationId,
   spaceId,
+  remoteName,
 }: {
   monitorId: string;
   checkGroup: string;
   basePath: string;
   locationId?: string;
   spaceId?: string;
+  remoteName?: string;
 }) => {
   return `${basePath}/app/synthetics${getTestRunDetailRelativeLink({
     monitorId,
     checkGroup,
     locationId,
     spaceId,
+    remoteName,
   })}`;
 };

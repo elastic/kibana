@@ -16,9 +16,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { DatasetTags, SpaceIds, DatasetMaturity, RedactedSpaceIds } from '../common_attributes.gen';
+
 export const UpdateEvaluationDatasetRequestParams = lazySchema(() =>
   z.object({
-    datasetId: z.string(),
+    datasetId: z.string().max(1024),
   })
 );
 export type UpdateEvaluationDatasetRequestParams = z.infer<
@@ -28,9 +30,15 @@ export type UpdateEvaluationDatasetRequestParamsInput = z.input<
   typeof UpdateEvaluationDatasetRequestParams
 >;
 
+/**
+ * Only the supplied fields are changed; omitted fields keep their current value. Send an empty `tags` array or a null `maturity` to clear them.
+ */
 export const UpdateEvaluationDatasetRequestBody = lazySchema(() =>
   z.object({
-    description: z.string(),
+    description: z.string().max(2048).optional(),
+    tags: DatasetTags.optional(),
+    maturity: z.enum(['raw', 'cleaned', 'golden']).nullable().optional(),
+    space_ids: SpaceIds.optional(),
   })
 );
 export type UpdateEvaluationDatasetRequestBody = z.infer<typeof UpdateEvaluationDatasetRequestBody>;
@@ -43,6 +51,9 @@ export const UpdateEvaluationDatasetResponse = lazySchema(() =>
     id: z.string(),
     name: z.string(),
     description: z.string(),
+    tags: DatasetTags.optional(),
+    maturity: DatasetMaturity.optional(),
+    space_ids: RedactedSpaceIds.optional(),
     created_at: z.string(),
     updated_at: z.string(),
   })

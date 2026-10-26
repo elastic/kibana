@@ -117,7 +117,7 @@ describe('Mappings editor: edit field', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseAppContext.mockReturnValue({
-      canUseSyntheticSource: true,
+      hasAtLeastEnterpriseLicense: true,
       config: {
         enableMappingsSourceFieldSection: false,
       },

@@ -78,7 +78,6 @@ function extractDescribeTitles(content) {
  * @returns {{ pos: number; kw: string; kwLen: number } | null}
  */
 function findNextTestKeyword(content, start, usePlaywrightTestAlias) {
-  const len = content.length;
   /** @type {{ pos: number; kw: string; kwLen: number } | null} */
   let best = null;
   /** @type {string[]} */
@@ -178,7 +177,7 @@ function extractTcTitles(content) {
 }
 
 const defaultRel =
-  '../x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/';
+  '../x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/';
 let REL = defaultRel;
 if (process.argv[3]) {
   REL = process.argv[3];

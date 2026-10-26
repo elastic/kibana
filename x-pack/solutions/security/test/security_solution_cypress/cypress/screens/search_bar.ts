@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export const GLOBAL_KQL_WRAPPER = '[data-test-subj="filters-global-container"]';
+export const GLOBAL_KQL_WRAPPER = '[data-test-subj="globalDatePicker"]';
+
+export const GLOBAL_SEARCH_BAR = '[data-test-subj="globalDatePicker"]';
+
+export const GLOBAL_SEARCH_BAR_QUERY_INPUT = `${GLOBAL_SEARCH_BAR} [data-test-subj="queryInput"]`;
 
 export const GLOBAL_SEARCH_BAR_ADD_FILTER =
   '[data-test-subj="globalDatePicker"] [data-test-subj="addFilter"]';
@@ -37,11 +41,7 @@ export const GLOBAL_SEARCH_BAR_EDIT_FILTER_MENU_ITEM = '[data-test-subj="editFil
 
 export const LOCAL_KQL_INPUT = `[data-test-subj="unifiedQueryInput"] textarea`;
 
-export const GLOBAL_KQL_INPUT = `[data-test-subj="filters-global-container"] ${LOCAL_KQL_INPUT}`;
-
-export const AUTO_SUGGEST_AGENT_NAME = `[data-test-subj="autocompleteSuggestion-field-agent.name-"]`;
-
-export const AUTO_SUGGEST_HOST_NAME_VALUE = `[data-test-subj='autocompleteSuggestion-value-"siem-kibana"-']`;
+export const GLOBAL_KQL_INPUT = `${GLOBAL_KQL_WRAPPER} ${LOCAL_KQL_INPUT}`;
 
 export const NAV_SEARCH_INPUT = '[data-test-subj="nav-search-input"]';
 

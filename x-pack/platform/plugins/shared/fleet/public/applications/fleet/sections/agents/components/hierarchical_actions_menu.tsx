@@ -6,7 +6,14 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { EuiPopover, EuiContextMenu, EuiButtonIcon, EuiButton, EuiIcon } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiIcon,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelDescriptor, IconType, EuiIconProps } from '@elastic/eui';
 
@@ -172,6 +179,9 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
     return result;
   }, [items, closeMenu]);
 
+  // Nothing to show (for example no action is available for the item): disable the button
+  const isEmpty = items.length === 0;
+
   // Render the button
   const buttonElement = button ? (
     <EuiButton
@@ -180,24 +190,36 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
       color={button.props?.color}
       fill={button.props?.fill}
       isLoading={button.props?.isLoading}
+      isDisabled={isEmpty}
       onClick={toggleMenu}
       data-test-subj={dataTestSubj}
     >
       {button.children}
     </EuiButton>
   ) : (
-    <EuiButtonIcon
-      iconType="boxesVertical"
-      onClick={toggleMenu}
-      aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
         defaultMessage: 'Open menu',
       })}
-      data-test-subj={dataTestSubj || 'hierarchicalMenuButton'}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        isDisabled={isEmpty}
+        onClick={toggleMenu}
+        aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
+          defaultMessage: 'Open menu',
+        })}
+        data-test-subj={dataTestSubj || 'hierarchicalMenuButton'}
+      />
+    </EuiToolTip>
   );
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.popoverAriaLabel', {
+        defaultMessage: 'Menu',
+      })}
       anchorPosition={anchorPosition}
       panelPaddingSize="none"
       button={buttonElement}

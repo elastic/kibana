@@ -57,3 +57,20 @@ export const NULL_GROUP = (selectedGroup: string, unit: string) =>
     defaultMessage:
       'The selected group by field, {selectedGroup}, is missing a value for this group of {unit}.',
   });
+
+export const LOAD_MORE_PAGES = i18n.translate('grouping.pagination.loadMorePages', {
+  defaultMessage: 'Load more',
+});
+
+export const SHOWING_GROUPS_OF_TOTAL = (shownCount: number, totalCount: number) =>
+  i18n.translate('grouping.pagination.showingGroupsOfTotal', {
+    values: { shownCount: shownCount.toLocaleString(), totalCount: totalCount.toLocaleString() },
+    defaultMessage: 'Showing {shownCount} of {totalCount} groups.',
+  });
+
+export const GROUPS_LIMITED_TO_MAX = (maxCount: number) =>
+  i18n.translate('grouping.pagination.groupsLimitedToMax', {
+    values: { maxCount: maxCount.toLocaleString() },
+    defaultMessage:
+      'Search results are limited to {maxCount} groups. Add filters to narrow your search.',
+  });

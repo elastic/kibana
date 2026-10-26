@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { durationToDisplayShortText, MS_PER } from './format_duration';
+import { durationToDisplayShortText, durationToDisplayFullText, MS_PER } from './format_duration';
 
 const seconds = (num: number) => new Date(num * MS_PER.second);
 const minutes = (num: number) => new Date(num * MS_PER.minute);
@@ -50,5 +50,30 @@ describe('durationToDisplayShortText', () => {
     expect(durationToDisplayShortText(start, days(25))).toBe('~4w');
     expect(durationToDisplayShortText(start, days(105))).toBe('~3mo');
     expect(durationToDisplayShortText(start, days(360))).toBe('~1y');
+  });
+});
+
+describe('durationToDisplayFullText', () => {
+  it('formats basic durations, singular or plural', () => {
+    const start = new Date(0);
+
+    expect(durationToDisplayFullText(start, new Date(500))).toBe('500 milliseconds');
+    expect(durationToDisplayFullText(start, seconds(1))).toBe('1 second');
+    expect(durationToDisplayFullText(start, seconds(5))).toBe('5 seconds');
+    expect(durationToDisplayFullText(start, minutes(1))).toBe('1 minute');
+    expect(durationToDisplayFullText(start, minutes(15))).toBe('15 minutes');
+    expect(durationToDisplayFullText(start, hours(12))).toBe('12 hours');
+    expect(durationToDisplayFullText(start, days(3))).toBe('3 days');
+    expect(durationToDisplayFullText(start, weeks(2))).toBe('2 weeks');
+    expect(durationToDisplayFullText(start, months(4))).toBe('4 months');
+    expect(durationToDisplayFullText(start, years(1))).toBe('1 year');
+    expect(durationToDisplayFullText(start, years(1.5))).toBe('1.5 years');
+  });
+
+  it('adds approximation tilde according to deviation thresholds', () => {
+    const start = new Date(0);
+
+    expect(durationToDisplayFullText(start, minutes(61))).toBe('~1 hour');
+    expect(durationToDisplayFullText(start, hours(25))).toBe('~1 day');
   });
 });

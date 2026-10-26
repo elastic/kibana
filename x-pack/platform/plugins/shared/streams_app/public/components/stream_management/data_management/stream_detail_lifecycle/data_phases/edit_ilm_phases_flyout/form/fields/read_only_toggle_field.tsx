@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useController, useFormContext, type FieldPath } from 'react-hook-form';
@@ -20,9 +21,14 @@ import type { IlmPhasesFlyoutFormInternal, ReadonlyAllowedPhase } from '../types
 export interface ReadOnlyToggleFieldProps {
   phaseName: ReadonlyAllowedPhase;
   dataTestSubj: string;
+  isDownsampleEnabled?: boolean;
 }
 
-export const ReadOnlyToggleField = ({ phaseName, dataTestSubj }: ReadOnlyToggleFieldProps) => {
+export const ReadOnlyToggleField = ({
+  phaseName,
+  dataTestSubj,
+  isDownsampleEnabled = false,
+}: ReadOnlyToggleFieldProps) => {
   const checkboxId = useGeneratedHtmlId({
     prefix: `${dataTestSubj}ReadOnlyCheckbox-${phaseName}`,
   });
@@ -32,6 +38,7 @@ export const ReadOnlyToggleField = ({ phaseName, dataTestSubj }: ReadOnlyToggleF
       checkboxId={checkboxId}
       path={`_meta.${phaseName}.readonlyEnabled`}
       dataTestSubj={dataTestSubj}
+      isDownsampleEnabled={isDownsampleEnabled}
     />
   );
 };
@@ -40,29 +47,49 @@ const ReadOnlyToggleControl = ({
   checkboxId,
   path,
   dataTestSubj,
+  isDownsampleEnabled,
 }: {
   checkboxId: string;
   path: FieldPath<IlmPhasesFlyoutFormInternal>;
   dataTestSubj: string;
+  isDownsampleEnabled: boolean;
 }) => {
   const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
   const { field } = useController({ control, name: path });
   const readonlyValue = Boolean(field.value);
 
+  const checkbox = (
+    <EuiCheckbox
+      id={checkboxId}
+      checked={isDownsampleEnabled || readonlyValue}
+      disabled={isDownsampleEnabled}
+      label={i18n.translate('xpack.streams.editIlmPhasesFlyout.readOnlyLabel', {
+        defaultMessage: 'Enable read-only access',
+      })}
+      data-test-subj={`${dataTestSubj}ReadOnlyCheckbox`}
+      onChange={(e) => {
+        field.onChange(e.target.checked);
+      }}
+    />
+  );
+
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiCheckbox
-          id={checkboxId}
-          checked={readonlyValue}
-          label={i18n.translate('xpack.streams.editIlmPhasesFlyout.readOnlyLabel', {
-            defaultMessage: 'Enable read-only access',
-          })}
-          data-test-subj={`${dataTestSubj}ReadOnlyCheckbox`}
-          onChange={(e) => {
-            field.onChange(e.target.checked);
-          }}
-        />
+        {isDownsampleEnabled ? (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.streams.editIlmPhasesFlyout.readOnlyRequiredForDownsamplingHelp',
+              {
+                defaultMessage: 'Downsampling requires the index to be read-only.',
+              }
+            )}
+          >
+            {checkbox}
+          </EuiToolTip>
+        ) : (
+          checkbox
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiIconTip

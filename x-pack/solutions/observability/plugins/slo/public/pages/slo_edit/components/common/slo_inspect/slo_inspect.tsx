@@ -125,15 +125,23 @@ export function SLOInspect({ slo, disabled }: Props) {
                 )}
                 json={inspectSloData.rollUpTransform}
                 extraAction={
-                  <EuiButtonIcon
-                    iconType="link"
-                    data-test-subj="o11ySLOInspectDetailsButton"
-                    href={http?.basePath.prepend('/app/management/data/transform')}
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.slo.sLOInspect.viewRollupTransformButtonAriaLabel',
                       { defaultMessage: 'View rollup transform' }
                     )}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="link"
+                      data-test-subj="o11ySLOInspectDetailsButton"
+                      href={http?.basePath.prepend('/app/management/data/transform')}
+                      aria-label={i18n.translate(
+                        'xpack.slo.sLOInspect.viewRollupTransformButtonAriaLabel',
+                        { defaultMessage: 'View rollup transform' }
+                      )}
+                    />
+                  </EuiToolTip>
                 }
               />
               <EuiSpacer size="s" />
@@ -146,15 +154,23 @@ export function SLOInspect({ slo, disabled }: Props) {
                 )}
                 json={inspectSloData.summaryTransform}
                 extraAction={
-                  <EuiButtonIcon
-                    iconType="link"
-                    data-test-subj="o11ySLOInspectDetailsButton"
-                    href={http?.basePath.prepend('/app/management/data/transform')}
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.slo.sLOInspect.viewSummaryTransformButtonAriaLabel',
                       { defaultMessage: 'View summary transform' }
                     )}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="link"
+                      data-test-subj="o11ySLOInspectDetailsButton"
+                      href={http?.basePath.prepend('/app/management/data/transform')}
+                      aria-label={i18n.translate(
+                        'xpack.slo.sLOInspect.viewSummaryTransformButtonAriaLabel',
+                        { defaultMessage: 'View summary transform' }
+                      )}
+                    />
+                  </EuiToolTip>
                 }
               />
               <EuiSpacer size="s" />
@@ -166,15 +182,23 @@ export function SLOInspect({ slo, disabled }: Props) {
                   { defaultMessage: 'Rollup ingest pipeline' }
                 )}
                 extraAction={
-                  <EuiButtonIcon
-                    iconType="link"
-                    data-test-subj="o11ySLOInspectDetailsButton"
-                    href={rollUpPipelineUrl}
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.slo.sLOInspect.viewRollupPipelineButtonAriaLabel',
                       { defaultMessage: 'View rollup ingest pipeline' }
                     )}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="link"
+                      data-test-subj="o11ySLOInspectDetailsButton"
+                      href={rollUpPipelineUrl}
+                      aria-label={i18n.translate(
+                        'xpack.slo.sLOInspect.viewRollupPipelineButtonAriaLabel',
+                        { defaultMessage: 'View rollup ingest pipeline' }
+                      )}
+                    />
+                  </EuiToolTip>
                 }
                 json={inspectSloData.rollUpPipeline}
               />
@@ -187,15 +211,23 @@ export function SLOInspect({ slo, disabled }: Props) {
                   { defaultMessage: 'Summary ingest pipeline' }
                 )}
                 extraAction={
-                  <EuiButtonIcon
-                    iconType="link"
-                    data-test-subj="o11ySLOInspectDetailsButton"
-                    href={summaryPipelineUrl}
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.slo.sLOInspect.viewSummaryPipelineButtonAriaLabel',
                       { defaultMessage: 'View summary ingest pipeline' }
                     )}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="link"
+                      data-test-subj="o11ySLOInspectDetailsButton"
+                      href={summaryPipelineUrl}
+                      aria-label={i18n.translate(
+                        'xpack.slo.sLOInspect.viewSummaryPipelineButtonAriaLabel',
+                        { defaultMessage: 'View summary ingest pipeline' }
+                      )}
+                    />
+                  </EuiToolTip>
                 }
                 json={inspectSloData.summaryPipeline}
               />

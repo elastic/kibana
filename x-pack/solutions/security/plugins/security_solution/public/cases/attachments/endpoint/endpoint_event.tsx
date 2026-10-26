@@ -14,7 +14,7 @@ import { ISOLATED_HOST, RELEASED_HOST, OTHER_ENDPOINTS } from '../../pages/trans
 import type { EndpointMetadata, EndpointTarget } from './types';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
 
-type Props = Pick<UnifiedReferenceAttachmentViewProps, 'metadata'>;
+type Props = Pick<UnifiedReferenceAttachmentViewProps<EndpointMetadata>, 'metadata'>;
 
 interface EndpointEventLinkProps {
   target: EndpointTarget;
@@ -50,7 +50,6 @@ const EndpointEventLink = ({ target, actionText, remainingTargets }: EndpointEve
   return (
     <>
       {actionText}
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
       <EuiLink
         onClick={onLinkClick}
         href={linkHref}
@@ -64,9 +63,8 @@ const EndpointEventLink = ({ target, actionText, remainingTargets }: EndpointEve
 };
 
 const AttachmentContentEvent = ({ metadata }: Props) => {
-  const endpointMetadata = metadata as EndpointMetadata | undefined;
-  const targets = endpointMetadata?.targets ?? [];
-  const command = endpointMetadata?.command ?? '';
+  const targets = metadata?.targets ?? [];
+  const command = metadata?.command ?? '';
 
   if (!targets.length) {
     return null;

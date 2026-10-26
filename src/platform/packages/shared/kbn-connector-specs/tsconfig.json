@@ -24,5 +24,8 @@
     "@kbn/actions-utils",
     "@kbn/i18n",
     "@kbn/mcp-client",
+    "@kbn/std",
+    "@kbn/logging-mocks",
+    "@kbn/repo-info",
   ]
 }

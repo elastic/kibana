@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
+import { chunk, uniqBy } from 'lodash';
+import pMap from 'p-map';
 import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   AttachmentAttributes,
   AttachmentTotals,
@@ -26,36 +30,90 @@ import type {
   GetRelatedCasesByAlertResponse,
 } from '../../../common/types/api';
 import {
-  AllCategoriesFindRequestRt,
-  AllReportersFindRequestRt,
-  AllTagsFindRequestRt,
-  CaseResolveResponseRt,
-  CasesByAlertIDRequestRt,
-  GetCategoriesResponseRt,
-  GetRelatedCasesByAlertResponseRt,
-  GetReportersResponseRt,
-  GetTagsResponseRt,
+  AllCategoriesFindRequestSchema,
+  AllReportersFindRequestSchema,
+  AllTagsFindRequestSchema,
+  CaseResolveResponseSchema,
+  CasesByAlertIDRequestSchema,
+  GetCategoriesResponseSchema,
+  GetRelatedCasesByAlertResponseSchema,
+  GetReportersResponseSchema,
+  GetTagsResponseSchema,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
-import { createCaseError } from '../../common/error';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
+import { createCaseError, isSOError } from '../../common/error';
 import {
+  asArray,
   countAlertsForID,
   flattenCaseSavedObject,
   countUserAttachments,
   countEventsForID,
 } from '../../common/utils';
+import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
+import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { getOwnersFilter } from '../../authorization/utils';
-import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+  MAX_ATTACHMENT_TYPE_LENGTH,
+  MAX_BULK_GET_CASES,
+  MAX_CONCURRENT_SEARCHES,
+  MAX_OWNER_LENGTH,
+} from '../../../common/constants';
+import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
+import type { CasesWithOwnerOfAttachment } from '../../services/attachments/types';
 import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import { CaseRt } from '../../../common/types/domain';
-import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
+import { CaseSchema, CaseStatusSchema } from '../../../common/types/domain';
+
+export const CasesByAttachmentIDsRequestSchema = z.object({
+  /**
+   * Only the cases of this owner. One owner per call, as a user may read one solution's cases
+   * and not another's.
+   */
+  owner: limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH }),
+  /**
+   * The attachment type, e.g. `security.entity`.
+   */
+  type: limitedStringSchema({ fieldName: 'type', min: 1, max: MAX_ATTACHMENT_TYPE_LENGTH }),
+  /**
+   * The ids the attachments point at (their `attachmentId`), not the attachment saved object ids.
+   */
+  attachmentIds: limitedArraySchema({
+    codec: limitedStringSchema({
+      fieldName: 'attachmentIds',
+      min: 1,
+      max: MAX_ATTACHMENT_ID_LENGTH,
+    }),
+    min: 1,
+    max: MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+    fieldName: 'attachmentIds',
+  }),
+  /**
+   * Only the cases with one of these statuses.
+   */
+  status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
+});
+
+export const GetCaseIDsByAttachmentIDsResponseSchema = z.array(
+  z.object({
+    attachmentId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+    caseIds: z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)),
+  })
+);
+
+export type CasesByAttachmentIDsRequest = z.infer<typeof CasesByAttachmentIDsRequestSchema>;
+export type GetCaseIDsByAttachmentIDsResponse = z.infer<
+  typeof GetCaseIDsByAttachmentIDsResponseSchema
+>;
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -88,7 +146,7 @@ export const getCasesByAlertID = async (
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(CasesByAlertIDRequestRt)(options);
+    const queryParams = decodeWithExcessOrThrowZod(CasesByAlertIDRequestSchema)(options);
 
     const {
       filter: authorizationFilter,
@@ -104,9 +162,8 @@ export const getCasesByAlertID = async (
 
     /**
      * The authorization filter above is scoped to `cases-comments` (the operation's saved object
-     * type). When the unified attachments feature flag is on we also need to query
-     * `cases-attachments`, so build an equivalent owner-scoped filter for that type using the
-     * same authorized owners.
+     * type). We also query `cases-attachments`, so build an equivalent owner-scoped filter for
+     * that type using the same authorized owners.
      */
     const unifiedAuthorizationFilter =
       authorizedOwners && authorizedOwners.length > 0
@@ -152,7 +209,7 @@ export const getCasesByAlertID = async (
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
     // just ignore it
     const validCasesInfo = casesInfo.saved_objects.filter(
-      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => caseInfo.error === undefined
+      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => !isSOError(caseInfo)
     );
 
     ensureSavedObjectsAreAuthorized(
@@ -171,7 +228,7 @@ export const getCasesByAlertID = async (
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
 
-    return decodeOrThrow(GetRelatedCasesByAlertResponseRt)(res);
+    return decodeOrThrowZod(GetRelatedCasesByAlertResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(
@@ -181,6 +238,106 @@ export const getCasesByAlertID = async (
       logger,
     });
   }
+};
+
+/**
+ * Case Client wrapper function for retrieving, per attachment ID (the ID an attachment points at,
+ * e.g. an entity ID), the IDs of the cases it is attached to that the user can read. This handles RBAC
+ * before calling the saved object API.
+ *
+ * @ignore
+ */
+export const getCasesByAttachmentIDs = async (
+  params: CasesByAttachmentIDsRequest,
+  clientArgs: CasesClientArgs
+): Promise<GetCaseIDsByAttachmentIDsResponse> => {
+  const {
+    services: { caseService, attachmentService },
+    logger,
+    authorization,
+  } = clientArgs;
+
+  try {
+    const { type, owner, attachmentIds, status } = decodeWithExcessOrThrowZod(
+      CasesByAttachmentIDsRequestSchema
+    )(params);
+
+    const { authorizedOwners, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.getCaseIDsByAttachmentIDs);
+
+    // The operation is scoped to cases, so the attachments read get their own owner filter.
+    const getAttachmentsFilter = (
+      soType: typeof CASE_ATTACHMENT_SAVED_OBJECT | typeof CASE_COMMENT_SAVED_OBJECT
+    ) =>
+      combineAuthorizedAndOwnerFilter(
+        owner,
+        authorizedOwners && authorizedOwners.length > 0
+          ? getOwnersFilter(soType, authorizedOwners)
+          : undefined,
+        soType
+      );
+
+    const casesOfAttachments = await attachmentService.getter.getCaseIdsByAttachmentIds({
+      type,
+      attachmentIds,
+      unifiedFilter: getAttachmentsFilter(CASE_ATTACHMENT_SAVED_OBJECT),
+      legacyFilter: getAttachmentsFilter(CASE_COMMENT_SAVED_OBJECT),
+    });
+
+    const casesInStatus = await filterByCaseStatus(caseService, casesOfAttachments, status);
+
+    // After the status filter, so only the cases returned are audited.
+    ensureSavedObjectsAreAuthorized(
+      uniqBy(
+        casesInStatus.flatMap(({ cases }) => cases),
+        'id'
+      )
+    );
+
+    const res = casesInStatus.map(({ attachmentId, cases }) => ({
+      attachmentId,
+      caseIds: cases.map(({ id }) => id),
+    }));
+
+    return decodeOrThrowZod(GetCaseIDsByAttachmentIDsResponseSchema)(res);
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to get case IDs using attachment IDs: ${JSON.stringify(params)}: ${error}`,
+      error,
+      logger,
+    });
+  }
+};
+
+/**
+ * Only the cases with one of the statuses, or every case without a status; attachment ids left in no
+ * case are dropped. Cases whose attachment outlived them are not found, so they are left out.
+ */
+const filterByCaseStatus = async (
+  caseService: CasesService,
+  casesOfAttachments: CasesWithOwnerOfAttachment[],
+  status: CasesByAttachmentIDsRequest['status']
+): Promise<CasesWithOwnerOfAttachment[]> => {
+  if (status === undefined) return casesOfAttachments;
+  const statuses = asArray(status);
+  const caseIds = [
+    ...new Set(casesOfAttachments.flatMap(({ cases }) => cases.map(({ id }) => id))),
+  ];
+  const statusesById = await pMap(
+    chunk(caseIds, MAX_BULK_GET_CASES),
+    (ids) => caseService.getCaseStatuses({ caseIds: ids }),
+    { concurrency: MAX_CONCURRENT_SEARCHES }
+  );
+  const caseIdsWithStatus = new Set(
+    statusesById.flatMap((statusById) =>
+      [...statusById].flatMap(([id, caseStatus]) => (statuses.includes(caseStatus) ? [id] : []))
+    )
+  );
+
+  return casesOfAttachments.flatMap(({ attachmentId, cases }) => {
+    const casesInStatus = cases.filter(({ id }) => caseIdsWithStatus.has(id));
+    return casesInStatus.length > 0 ? [{ attachmentId, cases: casesInStatus }] : [];
+  });
 };
 
 const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) => {
@@ -196,6 +353,49 @@ const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentT
 };
 
 /**
+ * Populates `extended_fields_labels` on a single case, mirroring the enrichment the search/find
+ * path performs (see search.ts). Without this, the case-view activity feed (which loads the case
+ * via GET, not search) has no labels and falls back to startCase(name).
+ */
+const enrichCaseWithFieldLabels = async (
+  theCase: Case,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const {
+    services: { templatesService, fieldDefinitionsService },
+    config,
+    logger,
+  } = clientArgs;
+
+  if (!config.templates.enabled || theCase.extended_fields == null) {
+    return theCase;
+  }
+
+  try {
+    const owner = theCase.owner ? [theCase.owner] : undefined;
+    // Only the case's own template version is needed to label template-authored fields; global
+    // fields cover the rest. Fetching just that one version avoids the search-path scan of every
+    // owner template version, which is unnecessary when enriching a single case.
+    const [templateSO, globalFieldDefs] = await Promise.all([
+      theCase.template?.id != null
+        ? templatesService.getTemplate(theCase.template.id, String(theCase.template.version))
+        : undefined,
+      fieldDefinitionsService.getGlobalFieldDefinitionsForSearch({ owner }),
+    ]);
+
+    return enrichCasesWithFieldLabels(
+      [theCase],
+      templateSO != null ? [templateSO] : [],
+      parseFieldDefinitionsToInlineFields(globalFieldDefs)
+    )[0];
+  } catch (error) {
+    // Label enrichment is cosmetic; never fail the case GET/resolve because of it.
+    logger.warn(`Failed to enrich case id: ${theCase.id} with extended field labels: ${error}`);
+    return theCase;
+  }
+};
+
+/**
  * The parameters for retrieving a case
  */
 export interface GetParams {
@@ -207,11 +407,6 @@ export interface GetParams {
    * Whether to include the attachments for a case in the response
    */
   includeComments?: boolean;
-  /**
-   * Attachment format: 'legacy' (eventId/index) or 'unified' (attachmentId/metadata).
-   * Use 'unified' when consuming from the attachment registry (e.g. EventTabContent).
-   */
-  mode?: AttachmentMode;
 }
 
 /**
@@ -220,7 +415,7 @@ export interface GetParams {
  * @ignore
  */
 export const get = async (
-  { id, includeComments, mode = 'legacy' }: GetParams,
+  { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
@@ -243,17 +438,18 @@ export const get = async (
       const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
         caseIds: [theCase.id],
       });
-      return decodeOrThrow(CaseRt)(
-        flattenCaseSavedObject({
-          savedObject: theCase,
-          ...(commentStats.has(theCase.id)
-            ? {
-                totalAlerts: commentStats.get(theCase.id)?.alerts,
-                totalComment: commentStats.get(theCase.id)?.userComments,
-                totalEvents: commentStats.get(theCase.id)?.events,
-              }
-            : {}),
-        })
+      const flattenedCase = flattenCaseSavedObject({
+        savedObject: theCase,
+        ...(commentStats.has(theCase.id)
+          ? {
+              totalAlerts: commentStats.get(theCase.id)?.alerts,
+              totalComment: commentStats.get(theCase.id)?.userComments,
+              totalEvents: commentStats.get(theCase.id)?.events,
+            }
+          : {}),
+      });
+      return decodeOrThrowZod(CaseSchema)(
+        await enrichCaseWithFieldLabels(flattenedCase, clientArgs)
       );
     }
 
@@ -263,7 +459,6 @@ export const get = async (
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      mode,
     })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = flattenCaseSavedObject({
@@ -274,7 +469,7 @@ export const get = async (
       totalEvents: countEventsForID({ comments: theComments }),
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrowZod(CaseSchema)(await enrichCaseWithFieldLabels(res, clientArgs));
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -286,7 +481,7 @@ export const get = async (
  * @experimental
  */
 export const resolve = async (
-  { id, includeComments, mode = 'legacy' }: GetParams,
+  { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const {
@@ -303,6 +498,10 @@ export const resolve = async (
       id,
     });
 
+    if (isSavedObjectErrorResult(resolvedSavedObject)) {
+      throw new Error(resolvedSavedObject.error.message);
+    }
+
     await authorization.ensureAuthorized({
       operation: Operations.resolveCase,
       entities: [
@@ -314,11 +513,10 @@ export const resolve = async (
     });
 
     if (!includeComments) {
-      return decodeOrThrow(CaseResolveResponseRt)({
+      const flattenedCase = flattenCaseSavedObject({ savedObject: resolvedSavedObject });
+      return decodeOrThrowZod(CaseResolveResponseSchema)({
         ...resolveData,
-        case: flattenCaseSavedObject({
-          savedObject: resolvedSavedObject,
-        }),
+        case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
       });
     }
 
@@ -328,21 +526,22 @@ export const resolve = async (
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      mode,
     })) as SavedObjectsFindResponse<AttachmentAttributes>;
+
+    const flattenedCase = flattenCaseSavedObject({
+      savedObject: resolvedSavedObject,
+      comments: theComments.saved_objects,
+      totalComment: theComments.total,
+      totalEvents: countEventsForID({ comments: theComments }),
+      totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
+    });
 
     const res = {
       ...resolveData,
-      case: flattenCaseSavedObject({
-        savedObject: resolvedSavedObject,
-        comments: theComments.saved_objects,
-        totalComment: theComments.total,
-        totalEvents: countEventsForID({ comments: theComments }),
-        totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
-      }),
+      case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
     };
 
-    return decodeOrThrow(CaseResolveResponseRt)(res);
+    return decodeOrThrowZod(CaseResolveResponseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to resolve case id: ${id}: ${error}`, error, logger });
   }
@@ -364,7 +563,7 @@ export async function getTags(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(AllTagsFindRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(AllTagsFindRequestSchema)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getTags
@@ -377,7 +576,7 @@ export async function getTags(
       filter,
     });
 
-    return decodeOrThrow(GetTagsResponseRt)(tags);
+    return decodeOrThrowZod(GetTagsResponseSchema)(tags);
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
   }
@@ -398,7 +597,7 @@ export async function getReporters(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(AllReportersFindRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(AllReportersFindRequestSchema)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getReporters
@@ -411,7 +610,7 @@ export async function getReporters(
       filter,
     });
 
-    return decodeOrThrow(GetReportersResponseRt)(reporters);
+    return decodeOrThrowZod(GetReportersResponseSchema)(reporters);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
   }
@@ -432,7 +631,7 @@ export async function getCategories(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(AllCategoriesFindRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(AllCategoriesFindRequestSchema)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getCategories
@@ -445,7 +644,7 @@ export async function getCategories(
       filter,
     });
 
-    return decodeOrThrow(GetCategoriesResponseRt)(categories);
+    return decodeOrThrowZod(GetCategoriesResponseSchema)(categories);
   } catch (error) {
     throw createCaseError({ message: `Failed to get categories: ${error}`, error, logger });
   }

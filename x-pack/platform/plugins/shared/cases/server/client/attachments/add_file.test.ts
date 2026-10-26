@@ -46,7 +46,7 @@ describe('addFile', () => {
         clientArgs,
         casesClient
       )
-    ).rejects.toThrow(`Invalid value "undefined" supplied to "filename"`);
+    ).rejects.toThrow(`filename: Invalid input: expected string, received undefined`);
   });
 
   it('throws an error if the mimeType is not part of the allowed mime types', async () => {
@@ -89,7 +89,7 @@ describe('addFile', () => {
         clientArgs,
         casesClient
       )
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     expect(clientArgs.fileService.delete).toHaveBeenCalledWith({ id });
   });
 
@@ -123,7 +123,7 @@ describe('addFile', () => {
         clientArgs,
         casesClient
       )
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     expect(buildAttachmentRequestFromFileJSONMock).toHaveBeenCalledWith({ owner, fileMetadata });
   });
 });

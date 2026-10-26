@@ -15,6 +15,7 @@ import {
 } from '../../../constants';
 
 import { sendGetAgents, sendGetPackagePolicies } from '../../../hooks';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../common/services/version_specific_policies_utils';
 
 const POLLING_INTERVAL_MS = 10 * 1000; // 10 secs
 
@@ -37,11 +38,11 @@ export const useLatestFleetServers = (opts?: any) => {
       return;
     }
 
-    const kuery = `(${agentPolicyIds
-      .map((policyId) => `${AGENTS_PREFIX}.policy_id:"${policyId}"`)
-      .join(
-        ' or '
-      )}) and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") and ${AGENTS_PREFIX}.enrolled_at >= now-10m`;
+    const kuery = `${buildPolicyBaseIdsWithFallbackKuery(
+      agentPolicyIds,
+      `${AGENTS_PREFIX}.policy_base_id`,
+      `${AGENTS_PREFIX}.policy_id`
+    )} and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") and ${AGENTS_PREFIX}.enrolled_at >= now-10m`;
 
     const request = await sendGetAgents({
       kuery,

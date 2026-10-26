@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import '@emotion/jest';
+import { EuiProvider, useEuiTheme } from '@elastic/eui';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 
 import { formatValueAsElement } from './format_value';
+
+const renderValue = (value: unknown) =>
+  render(<EuiProvider>{formatValueAsElement(value)}</EuiProvider>);
 
 describe('formatValueAsElement', () => {
   describe('null and undefined', () => {
@@ -65,10 +70,9 @@ describe('formatValueAsElement', () => {
 
   describe('arrays', () => {
     it('renders an array with bracket highlights and comma separators', () => {
-      const result = formatValueAsElement(['a', 'b', 'c']);
-      const { container } = render(<>{result}</>);
+      const { container } = renderValue(['a', 'b', 'c']);
 
-      const highlights = container.querySelectorAll('.ffArray__highlight');
+      const highlights = container.querySelectorAll('span');
       // Opening bracket, two commas, closing bracket = 4 highlighted spans
       expect(highlights).toHaveLength(4);
       expect(highlights[0].textContent).toBe('[');
@@ -79,11 +83,20 @@ describe('formatValueAsElement', () => {
       expect(container.textContent).toBe('[a, b, c]');
     });
 
-    it('renders an empty array with only brackets', () => {
-      const result = formatValueAsElement([]);
-      const { container } = render(<>{result}</>);
+    it('styles array punctuation with the EUI theme', () => {
+      const { result } = renderHook(() => useEuiTheme(), { wrapper: EuiProvider });
+      const { container } = renderValue(['a', 'b']);
 
-      const highlights = container.querySelectorAll('.ffArray__highlight');
+      expect(container.querySelector('span')).toHaveStyleRule(
+        'color',
+        result.current.euiTheme.colors.mediumShade
+      );
+    });
+
+    it('renders an empty array with only brackets', () => {
+      const { container } = renderValue([]);
+
+      const highlights = container.querySelectorAll('span');
       expect(highlights).toHaveLength(2);
       expect(highlights[0].textContent).toBe('[');
       expect(highlights[1].textContent).toBe(']');
@@ -91,32 +104,28 @@ describe('formatValueAsElement', () => {
     });
 
     it('renders a single-element array without commas', () => {
-      const result = formatValueAsElement([42]);
-      const { container } = render(<>{result}</>);
+      const { container } = renderValue([42]);
 
-      const highlights = container.querySelectorAll('.ffArray__highlight');
+      const highlights = container.querySelectorAll('span');
       // Opening bracket and closing bracket only
       expect(highlights).toHaveLength(2);
       expect(container.textContent).toBe('[42]');
     });
 
     it('renders nested arrays recursively', () => {
-      const result = formatValueAsElement([['inner']]);
-      const { container } = render(<>{result}</>);
+      const { container } = renderValue([['inner']]);
 
       expect(container.textContent).toBe('[[inner]]');
     });
 
     it('renders objects inside arrays as JSON strings', () => {
-      const result = formatValueAsElement([{ key: 'val' }]);
-      const { container } = render(<>{result}</>);
+      const { container } = renderValue([{ key: 'val' }]);
 
       expect(container.textContent).toBe('[{"key":"val"}]');
     });
 
     it('renders null items inside arrays as "-"', () => {
-      const result = formatValueAsElement([null, 'ok']);
-      const { container } = render(<>{result}</>);
+      const { container } = renderValue([null, 'ok']);
 
       expect(container.textContent).toBe('[-, ok]');
     });

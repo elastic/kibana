@@ -26,6 +26,9 @@ dependsOn:
   - '@kbn/config-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/std'
+  - '@kbn/core-http-server-internal'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-http-router-server-mocks'
 tags:
   - shared-server
   - package
@@ -37,6 +40,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

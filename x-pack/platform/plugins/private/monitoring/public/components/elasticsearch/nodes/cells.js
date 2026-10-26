@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -97,14 +98,15 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   });
 
   const button = (
-    <EuiButtonIcon
-      color="text"
-      onClick={onButtonClick}
-      iconType={getIcon(slope)}
-      data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
-      title={iconLabel}
-      aria-label={iconLabel}
-    />
+    <EuiToolTip content={iconLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="text"
+        onClick={onButtonClick}
+        iconType={getIcon(slope)}
+        data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
+        aria-label={iconLabel}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -113,7 +115,13 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup data-test-subj={props['data-test-subj']} gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiPopover ownFocus button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+            <EuiPopover
+              aria-label={iconLabel}
+              ownFocus
+              button={button}
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+            >
               <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
                 <EuiDescriptionList
                   type="column"

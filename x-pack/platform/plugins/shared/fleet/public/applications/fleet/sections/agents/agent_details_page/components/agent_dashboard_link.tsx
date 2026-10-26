@@ -96,11 +96,13 @@ export const AgentDashboardLink: React.FunctionComponent<{
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
   const { getHref } = useLink();
 
-  const isLogAndMetricsEnabled =
-    (agentPolicy?.monitoring_enabled?.length ?? 0) > 0 || agent.type === 'OPAMP';
+  // agent metrics are not supported for agentless agents, even if the policy has metrics monitoring on
+  const isMetricsEnabled =
+    !agentPolicy?.supports_agentless &&
+    (agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP');
 
   const buttonArgs =
-    !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
+    !isInstalled || isLoading || !isMetricsEnabled ? { disabled: true } : { href: link };
 
   const button = (
     <EuiButtonCompressed
@@ -117,26 +119,33 @@ export const AgentDashboardLink: React.FunctionComponent<{
     </EuiButtonCompressed>
   );
 
-  if (!isLoading && !isLogAndMetricsEnabled && agentPolicy) {
+  if (!isLoading && !isMetricsEnabled && agentPolicy) {
     return (
       <EuiToolTip
         content={
-          <FormattedMessage
-            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoLogsAndMetricsTooltip"
-            defaultMessage="Logs and metrics for agent are not enabled in the agent policy."
-          />
+          agentPolicy.supports_agentless ? (
+            <FormattedMessage
+              id="xpack.fleet.agentDetails.viewDashboardButton.disabledAgentlessMetricsTooltip"
+              defaultMessage="Agent metrics are not supported for managed agents."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoMetricsTooltip"
+              defaultMessage="Metrics for agent are not enabled in the agent policy."
+            />
+          )
         }
       >
         <EuiButtonCompressed
-          data-test-subj="agentDetails.enableLogsAndMetricsButton"
+          data-test-subj="agentDetails.enableMetricsButton"
           isLoading={isLoading}
           color="primary"
           href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
-          disabled={agentPolicy?.is_managed}
+          isDisabled={!!agentPolicy?.is_managed || !!agentPolicy?.supports_agentless}
         >
           <FormattedMessage
-            id="xpack.fleet.agentDetails.enableLogsAndMetricsLabel"
-            defaultMessage="Enable logs and metrics"
+            id="xpack.fleet.agentDetails.enableMetricsLabel"
+            defaultMessage="Enable agent metrics"
           />
         </EuiButtonCompressed>
       </EuiToolTip>

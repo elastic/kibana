@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { Duration, Timestamp, ColdStartBadge } from '@kbn/apm-ui-shared';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from '.';
@@ -14,7 +14,6 @@ import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
 import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
-import { ColdStartBadge } from '../trace_waterfall/badges/cold_start_badge';
 import { buildUrl } from '../../../utils/build_url';
 
 interface Props {
@@ -24,11 +23,14 @@ interface Props {
   coldStartBadge?: boolean;
 }
 
+export function getTransactionUrl(transaction: Transaction) {
+  const urlFull = transaction.url?.full || transaction.transaction?.page?.url;
+  return urlFull ?? buildUrl(transaction);
+}
+
 function getTransactionResultSummaryItem(transaction: Transaction) {
   const result = transaction.transaction.result;
-  const urlFull = transaction.url?.full || transaction.transaction?.page?.url;
-
-  const url = urlFull ?? buildUrl(transaction);
+  const url = getTransactionUrl(transaction);
 
   if (url) {
     const method = transaction.http?.request?.method;

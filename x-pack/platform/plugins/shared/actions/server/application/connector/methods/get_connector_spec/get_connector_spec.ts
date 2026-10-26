@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { connectorsSpecs } from '@kbn/connector-specs';
-import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import { getRegisteredSpec } from '../../../../specs_client/lib/get_registered_spec';
+import { serializeSpecDetail } from '../../../../specs_client/lib/serialize_spec_detail';
 import type { GetConnectorSpecParams } from './types';
-
-const specsByIdMap = new Map(
-  Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec])
-);
 
 export async function getConnectorSpecAsJsonSchema({
   context,
@@ -32,26 +27,18 @@ export async function getConnectorSpecAsJsonSchema({
     throw error;
   }
 
-  const spec = specsByIdMap.get(id);
+  const registered = getRegisteredSpec(context.actionTypeRegistry, id);
+  const detail = serializeSpecDetail(registered, configurationUtilities);
 
-  if (!spec) {
-    throw Boom.notFound(`Spec for connector type "${id}" not found.`);
-  }
-
-  try {
-    const webhookSettings = configurationUtilities.getWebhookSettings();
-    const isPfxEnabled = webhookSettings.ssl.pfx.enabled;
-    const isEarsEnabled = configurationUtilities.isEarsEnabled();
-    const serialized = serializeConnectorSpec(spec, { isPfxEnabled, isEarsEnabled });
-    return {
-      metadata: serialized.metadata,
-      schema: serialized.schema,
-    };
-  } catch (error) {
-    throw new Error(
-      `Failed to serialize connector spec: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
+  return {
+    metadata: registered.spec.metadata,
+    schema: detail.formSchema,
+    isTestable: detail.isTestable,
+    actions: detail.actions.map(({ name, isTool, description, scope }) => ({
+      name,
+      isTool,
+      ...(description !== undefined ? { description } : {}),
+      scope,
+    })),
+  };
 }

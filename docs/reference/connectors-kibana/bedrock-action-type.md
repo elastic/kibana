@@ -3,12 +3,19 @@ navigation_title: "{{bedrock}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/bedrock-action-type.html
 applies_to:
-  stack: all
-  serverless: all
+  stack: deprecated 9.5
+  serverless: deprecated
 ---
 # {{bedrock}} connector and action [bedrock-action-type]
 
 The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{bedrock}}.
+
+::::{important}
+:applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
+This connector is deprecated and is being progressively removed from the create connector UI. Existing connectors and their rule actions continue to work.
+
+For new AI integrations, use {{es}} {{infer}} endpoints. Migrate existing LLM connectors and related rule actions before the future removal.
+::::
 
 ## Create connectors in {{kib}} [define-bedrock-ui]
 

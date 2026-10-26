@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Markdown } from '@kbn/shared-ux-markdown';
+import { useCallback, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -40,7 +37,7 @@ export interface ContextAppFetchProps {
 export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppFetchProps) {
   const { scopedProfilesManager } = useScopedServices();
   const services = useDiscoverServices();
-  const { uiSettings: config, data, toastNotifications, filterManager } = services;
+  const { uiSettings: config, data, filterManager } = services;
 
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
@@ -59,18 +56,8 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
   }, []);
 
   const fetchAnchorRow = useCallback(async () => {
-    const errorTitle = i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
-      defaultMessage: 'Unable to load the anchor document',
-    });
-
     if (!tieBreakerFieldName) {
       setState(createError('anchorStatus', FailureReason.INVALID_TIEBREAKER));
-      toastNotifications.addDanger({
-        title: errorTitle,
-        text: i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
-          defaultMessage: 'Invalid tie breaker field setting',
-        }),
-      });
       return;
     }
 
@@ -98,15 +85,10 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
       return result.anchorRow;
     } catch (error) {
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
-      toastNotifications.addDanger({
-        title: errorTitle,
-        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services),
-      });
     }
   }, [
     tieBreakerFieldName,
     setState,
-    toastNotifications,
     dataView,
     anchorId,
     searchSource,
@@ -123,9 +105,6 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
       const anchor = fetchedAnchor || fetchedState.anchor;
       const statusKey = `${type}Status`;
       const warningsKey = `${type}InterceptedWarnings`;
-      const errorTitle = i18n.translate('discover.context.unableToLoadDocumentDescription', {
-        defaultMessage: 'Unable to load documents',
-      });
 
       try {
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
@@ -149,10 +128,10 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
           [statusKey]: { value: LoadingStatus.LOADED },
         });
       } catch (error) {
-        setState(createError(statusKey, FailureReason.UNKNOWN, error));
-        toastNotifications.addDanger({
-          title: errorTitle,
-          text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services),
+        setState({
+          [type]: [],
+          [warningsKey]: undefined,
+          ...createError(statusKey, FailureReason.UNKNOWN, error),
         });
       }
     },
@@ -167,7 +146,6 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
       data,
       services,
       scopedProfilesManager,
-      toastNotifications,
     ]
   );
 

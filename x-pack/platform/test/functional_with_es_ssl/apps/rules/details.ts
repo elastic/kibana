@@ -47,6 +47,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdConnector;
   }
 
+  async function readRuleEnabledBadge() {
+    if (await testSubjects.exists('ruleEnabledBadge')) {
+      return await testSubjects.getVisibleText('ruleEnabledBadge');
+    }
+    await testSubjects.click('appHeaderBadgesOverflow');
+    // the overflow popover fades in, and getVisibleText() reads '' until it is displayed
+    await testSubjects.existOrFail('ruleEnabledBadge');
+    const text = await testSubjects.getVisibleText('ruleEnabledBadge');
+    await testSubjects.click('appHeaderBadgesOverflow');
+    return text;
+  }
+
   async function createAlwaysFiringRule(overwrites: Record<string, any> = {}, spaceId?: string) {
     const spaceIdSegment = spaceId ? `s/${spaceId}/` : '';
     const { body: createdRule } = await supertest
@@ -147,7 +159,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Header', function () {
       const testRunUuid = uuidv4();
       before(async () => {
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         const rule = await createRuleWithSmallInterval(testRunUuid);
 
         // refresh to see rule
@@ -174,7 +188,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(ruleType).to.be(`Always Firing`);
 
         const owner = await pageObjects.ruleDetailsUI.getAPIKeyOwner();
-        expect(owner).to.be('elastic');
+        expect(owner).to.be('API key owner elastic');
       });
 
       it('renders toast when schedule is less than configured minimum', async () => {
@@ -187,28 +201,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should disable the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        expect(await readRuleEnabledBadge()).to.eql('Enabled');
 
-        expect(await actionsDropdown.getVisibleText()).to.eql('Enabled');
-
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(1)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await testSubjects.click('confirmModalConfirmButton');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+          expect(await readRuleEnabledBadge()).to.eql('Disabled');
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
-
-        expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+        expect(await readRuleEnabledBadge()).to.eql('Disabled');
 
         let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
@@ -229,18 +235,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        expect(await readRuleEnabledBadge()).to.eql('Disabled');
 
-        expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
-
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(0)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).to.eql('Enabled');
+          expect(await readRuleEnabledBadge()).to.eql('Enabled');
         });
       });
 
@@ -354,7 +354,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should open edit rule flyout', async () => {
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
 
         // refresh to see rule
         await browser.refresh();
@@ -367,7 +369,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -389,7 +391,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reset rule when canceling an edit', async () => {
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
 
         // refresh to see rule
         await browser.refresh();
@@ -402,7 +406,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedRuleName);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -417,7 +421,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
         await actionsButton.click();
-        await editButton.click();
+        await testSubjects.click('openEditRuleFlyoutButton');
 
         const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
@@ -437,7 +441,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           name: `slack-${testRunUuid}-${0}`,
         });
 
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         const rule = await createAlwaysFiringRule({
           name: testRunUuid,
           actions: [
@@ -476,10 +482,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.tableFinishedLoading();
 
         // click on first alert
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -512,7 +520,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should convert rule-level params to action-level params and save the alert successfully', async () => {
         const connectors = await createConnectors(testRunUuid);
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         const rule = await createAlwaysFiringRule({
           name: `test-rule-${testRunUuid}`,
           schedule: {
@@ -539,10 +549,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // click on first alert
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -569,7 +581,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let rule: any;
 
       before(async () => {
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
 
         const alerts = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
         rule = await createRuleWithActionsAndParams(testRunUuid, {
@@ -674,7 +688,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let rule: any;
 
       before(async () => {
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
 
         const alerts = flatten(
           range(10).map((index) => [
@@ -761,7 +777,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the event log list and can filter/sort', async () => {
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         await testSubjects.click('rulesTab');
 
         const alerts = [{ id: 'us-central' }];
@@ -782,7 +800,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             .expect(204);
         });
 
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         await testSubjects.click('rulesTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -866,16 +886,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Saved Objects Management Navigation', function () {
       const testRunUuid = uuidv4();
-      const getRuleObjectDisplayName = (title: string) => `Rule: [${title}]`;
       const spacesService = getService('spaces');
       const spaceId = 'test-space-' + testRunUuid;
       const testRuleName = `so-nav-test-rule-${testRunUuid}`;
       const testSpaceRuleName = `so-nav-test-rule-space-${testRunUuid}`;
+      let testRuleId: string;
+      let testSpaceRuleId: string;
 
       before(async () => {
-        await createAlwaysFiringRule({
+        const testRule = await createAlwaysFiringRule({
           name: testRuleName,
         });
+        testRuleId = testRule.id;
 
         await spacesService.create({
           id: spaceId,
@@ -883,12 +905,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           description: 'Test space for saved objects navigation',
         });
 
-        await createAlwaysFiringRule(
+        const testSpaceRule = await createAlwaysFiringRule(
           {
             name: testSpaceRuleName,
           },
           spaceId
         );
+        testSpaceRuleId = testSpaceRule.id;
       });
 
       after(async () => {
@@ -904,9 +927,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.savedObjects.waitTableIsLoaded();
 
-        await pageObjects.savedObjects.clickObjectLinkByTitle(
-          getRuleObjectDisplayName(testRuleName)
-        );
+        await testSubjects.click(`~row-${testRuleId} > savedObjectsTableRowTitle`);
 
         // Assert we've navigated to the rule details page
         await retry.tryForTime(10000, async () => {
@@ -915,9 +936,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('statusDropdown');
-        const actionsButton = await testSubjects.find('ruleActionsButton');
-        await actionsButton.click();
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
       });
 
@@ -931,9 +949,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for the saved objects table to load
         await pageObjects.savedObjects.waitTableIsLoaded();
 
-        await pageObjects.savedObjects.clickObjectLinkByTitle(
-          getRuleObjectDisplayName(testSpaceRuleName)
-        );
+        await testSubjects.click(`~row-${testSpaceRuleId} > savedObjectsTableRowTitle`);
 
         // Assert we've navigated to the rule details page
         await retry.tryForTime(10000, async () => {
@@ -942,9 +958,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('statusDropdown');
-        const actionsButton = await testSubjects.find('ruleActionsButton');
-        await actionsButton.click();
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
 
         // Assert that we're still within the correct space by checking the URL

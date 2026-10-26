@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/plugins/shared/content_management
 dependsOn:
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/core-http-request-handler-context-server'
@@ -30,6 +32,7 @@ dependsOn:
   - '@kbn/object-versioning-utils'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/react-query'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -41,7 +44,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

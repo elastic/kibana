@@ -10,6 +10,7 @@ import { EarsStrategy } from './ears_strategy';
 import { OAuthAuthCodeStrategy } from './oauth_auth_code_strategy';
 import { OAuthClientCredentialsStrategy } from './oauth_client_credentials_strategy';
 import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_credentials_private_key_jwt_strategy';
+import { OAuthPasswordStrategy } from './oauth_password_strategy';
 
 /**
  * Returns the AxiosAuthStrategy for the given auth type.
@@ -18,6 +19,8 @@ import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_cred
  */
 export const getAxiosAuthStrategy = (authTypeId: string): AxiosAuthStrategy => {
   switch (authTypeId) {
+    case 'oauth_password':
+      return new OAuthPasswordStrategy();
     case 'ears':
       return new EarsStrategy();
     case 'oauth_authorization_code':

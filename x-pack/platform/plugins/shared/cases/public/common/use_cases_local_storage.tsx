@@ -5,14 +5,29 @@
  * 2.0.
  */
 
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useApplication } from './lib/kibana/use_application';
+
+type SetLocalStorageItem<T> = (newItem: T | ((prev: T) => T)) => void;
+
+// Module-level registry so multiple hook instances sharing the same localStorage key
+// stay in sync within the same session without requiring a page reload.
+type SyncListener = (value: unknown) => void;
+const syncListeners = new Map<string, Set<SyncListener>>();
+
+const notifySyncListeners = (key: string, value: unknown, self: SyncListener | null) => {
+  const listeners = syncListeners.get(key);
+  if (!listeners) return;
+  for (const listener of listeners) {
+    if (listener !== self) listener(value);
+  }
+};
 
 export const useCasesLocalStorage = <T,>(
   key: string,
   initialValue: T
-): [T, (newItem: T) => void] => {
+): [T, SetLocalStorageItem<T>] => {
   const isStorageInitialized = useRef(false);
   const { appId } = useApplication();
   const { owner } = useCasesContext();
@@ -22,10 +37,50 @@ export const useCasesLocalStorage = <T,>(
 
   const [value, setValue] = useState<T>(() => getStorageItem(lsKey, initialValue));
 
-  const setItem = useCallback(
-    (newValue: T) => {
-      setValue(newValue);
-      saveItemToStorage(lsKey, newValue);
+  // Track the latest value in a ref so functional updates compose when several
+  // setters run in the same render (e.g. distinct filter fields on one key)
+  // without moving the localStorage write into the (impure) state updater.
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  // Ref to this instance's listener so setItem can exclude it from notifications.
+  const selfListenerRef = useRef<SyncListener | null>(null);
+
+  // Register a listener so writes from other hook instances sharing the same key
+  // propagate back to this instance's React state.
+  useEffect(() => {
+    const listener: SyncListener = (newValue) => {
+      setValue(newValue as T);
+      valueRef.current = newValue as T;
+    };
+    selfListenerRef.current = listener;
+
+    let keyListeners = syncListeners.get(lsKey);
+    if (!keyListeners) {
+      keyListeners = new Set();
+      syncListeners.set(lsKey, keyListeners);
+    }
+    keyListeners.add(listener);
+
+    return () => {
+      syncListeners.get(lsKey)?.delete(listener);
+      if (syncListeners.get(lsKey)?.size === 0) {
+        syncListeners.delete(lsKey);
+      }
+      selfListenerRef.current = null;
+    };
+  }, [lsKey]);
+
+  const setItem = useCallback<SetLocalStorageItem<T>>(
+    (newValue) => {
+      const resolved =
+        typeof newValue === 'function'
+          ? (newValue as (previous: T) => T)(valueRef.current)
+          : newValue;
+      valueRef.current = resolved;
+      setValue(resolved);
+      saveItemToStorage(lsKey, resolved);
+      notifySyncListeners(lsKey, resolved, selfListenerRef.current);
     },
     [lsKey]
   );
@@ -36,7 +91,14 @@ export const useCasesLocalStorage = <T,>(
 
   if (lsKeyPrefix != null && !isStorageInitialized.current) {
     isStorageInitialized.current = true;
-    setItem(getStorageItem(lsKey, initialValue));
+    // Inline the write so we can skip notifySyncListeners: this runs during
+    // render, and siblings already read the same value from storage at their
+    // own init time. Calling setValue on a sibling during render would trigger
+    // the "Cannot update a component while rendering a different component" warning.
+    const stored = getStorageItem(lsKey, initialValue);
+    valueRef.current = stored;
+    setValue(stored);
+    saveItemToStorage(lsKey, stored);
   }
 
   return [value, setItem];

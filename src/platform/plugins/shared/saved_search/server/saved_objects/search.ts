@@ -10,8 +10,8 @@
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { SavedSearchTypeDisplayName } from '@kbn/discover-session-constants';
 import { getAllMigrations } from './search_migrations';
-import { SavedSearchTypeDisplayName } from '../../common/constants';
 import { SCHEMA_SEARCH_V8_8_0 } from './schema_legacy';
 import { MODEL_VERSIONS, typeVersionGuesser } from './model_versions';
 
@@ -24,7 +24,7 @@ export const getSavedSearchObjectType = (
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
-    icon: 'discoverApp',
+    icon: 'productDiscover',
     defaultSearchField: 'title',
     displayName: SavedSearchTypeDisplayName,
     importableAndExportable: true,

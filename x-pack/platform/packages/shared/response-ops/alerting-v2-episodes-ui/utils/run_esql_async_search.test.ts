@@ -35,6 +35,24 @@ describe('runEsqlAsyncSearch', () => {
     );
   });
 
+  it('returns rawResponse from the last emission when search requires multiple requests', async () => {
+    const intermediateResponse: ESQLSearchResponse = { columns: [], values: [] };
+    const finalResponse: ESQLSearchResponse = {
+      columns: [{ name: 'count', type: 'long' }],
+      values: [[99]],
+    };
+    const search = jest
+      .fn()
+      .mockReturnValue(
+        of({ rawResponse: intermediateResponse, isRunning: true }, { rawResponse: finalResponse })
+      );
+    const data = { search: { search } } as unknown as DataPublicPluginStart;
+
+    const result = await runEsqlAsyncSearch({ data, params: { query: 'FROM foo' } });
+
+    expect(result).toEqual(finalResponse);
+  });
+
   it('forwards abortSignal to search', async () => {
     const rawResponse: ESQLSearchResponse = { columns: [], values: [] };
     const search = jest.fn().mockReturnValue(of({ rawResponse }));

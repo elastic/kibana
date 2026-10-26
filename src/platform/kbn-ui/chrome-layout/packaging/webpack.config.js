@@ -57,16 +57,6 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-
-    // Redirect @kbn/* imports to local stubs so the source files can be
-    // bundled without any Kibana-specific packages installed at runtime.
-    alias: {
-      '@kbn/core-chrome-layout-constants': path.resolve(
-        __dirname,
-        'react/services/layout_constants.ts'
-      ),
-      '@kbn/core-chrome-layout-utils': path.resolve(__dirname, 'react/services/layout_utils.ts'),
-    },
   },
 
   optimization: {

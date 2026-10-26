@@ -71,6 +71,24 @@ jest.mock('../../components/create_shared_exception_list', () => ({
   ),
 }));
 
+// The app header has its own suite; stub it so this suite stays focused on the page content.
+const mockReturnFocus = jest.fn();
+jest.mock('../../components/shared_lists_app_header/shared_lists_app_header', () => ({
+  SharedListsAppHeader: ({
+    onCreateSharedList,
+  }: {
+    onCreateSharedList: (returnFocus?: () => void) => void;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="mockCreateSharedListButton"
+      onClick={() => onCreateSharedList(mockReturnFocus)}
+    >
+      {'Create shared list'}
+    </button>
+  ),
+}));
+
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
@@ -455,6 +473,34 @@ describe('SharedLists', () => {
     });
   });
 
+  it('calls refreshExceptions via Refresh button when no stale filter is present', async () => {
+    const mockRefreshExceptions = jest.fn();
+
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      false,
+      [exceptionList1, exceptionList2],
+      { page: 1, perPage: 20, total: 2 },
+      jest.fn(),
+      mockRefreshExceptions,
+      { field: 'created_at', order: 'desc' },
+      jest.fn(),
+    ]);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('refreshRulesAction-linkIcon')).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByTestId('refreshRulesAction-linkIcon'));
+
+    expect(mockRefreshExceptions).toHaveBeenCalledTimes(1);
+  });
+
   it('returns focus to the create button when the create shared list flyout is closed', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
@@ -470,12 +516,7 @@ describe('SharedLists', () => {
       </TestProviders>
     );
 
-    const createButtonText = wrapper.getByText('Create shared exception list');
-    const createButton = createButtonText.closest('button')!;
-    fireEvent.click(createButton);
-
-    const createListOption = wrapper.getByTestId('manageExceptionListCreateExceptionListButton');
-    fireEvent.click(createListOption);
+    fireEvent.click(wrapper.getByTestId('mockCreateSharedListButton'));
 
     await waitFor(() => {
       expect(wrapper.getByTestId('createSharedExceptionListFlyout')).toBeInTheDocument();
@@ -485,7 +526,7 @@ describe('SharedLists', () => {
     fireEvent.click(closeFlyoutButton);
 
     await waitFor(() => {
-      expect(createButton).toHaveFocus();
+      expect(mockReturnFocus).toHaveBeenCalled();
     });
   });
 });

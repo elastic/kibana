@@ -5,21 +5,13 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useEntitiesOverview } from './use_entities_overview';
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...actual,
-    useUiSetting: jest.fn(),
-  };
-});
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
@@ -31,7 +23,6 @@ jest.mock('@kbn/entity-store/public', () => {
 
 jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store');
 
-const mockUseUiSetting = useUiSetting as jest.Mock;
 const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
 const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
 
@@ -47,18 +38,19 @@ const getDefaultEntityFromStoreResult = () => ({
   firstSeen: null,
   lastSeen: null,
   isLoading: false,
+  isInitialLoading: false,
   error: null,
   refetch: jest.fn(),
 });
 
 describe('useEntitiesOverview', () => {
   beforeEach(() => {
-    mockUseUiSetting.mockReturnValue(false);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: {
         getEntityIdentifiersFromDocument: mockGetEntityIdentifiersFromDocument,
         getEuidFromObject: mockGetEuidFromObject,
       },
+      getBuiltInEntityDefinition,
     });
     mockGetEntityIdentifiersFromDocument.mockReturnValue(undefined);
     mockGetEuidFromObject.mockReturnValue(undefined);
@@ -69,7 +61,7 @@ describe('useEntitiesOverview', () => {
     jest.clearAllMocks();
   });
 
-  it('returns document host and user in legacy mode without entity store records', () => {
+  it('queries entity store when document has identity fields', () => {
     const hit = buildHit({ host: { name: 'host-1' }, user: { name: 'user-1' } });
 
     const { result } = renderHook(() => useEntitiesOverview({ hit }));
@@ -78,12 +70,12 @@ describe('useEntitiesOverview', () => {
       user: {
         name: 'user-1',
         identityFields: undefined,
-        entityRecord: undefined,
+        entityRecord: null,
       },
       host: {
         name: 'host-1',
         identityFields: undefined,
-        entityRecord: undefined,
+        entityRecord: null,
       },
       hasAnyEntity: true,
     });
@@ -91,14 +83,14 @@ describe('useEntitiesOverview', () => {
       expect.objectContaining({
         identityFields: { 'user.name': 'user-1' },
         entityType: 'user',
-        skip: true,
+        skip: false,
       })
     );
     expect(mockUseEntityFromStore).toHaveBeenCalledWith(
       expect.objectContaining({
         identityFields: { 'host.name': 'host-1' },
         entityType: 'host',
-        skip: true,
+        skip: false,
       })
     );
   });
@@ -110,12 +102,11 @@ describe('useEntitiesOverview', () => {
     const hostEntityRecord = {
       entity: { id: 'host:store-id', name: 'store-host' },
     };
-    mockUseUiSetting.mockReturnValue(true);
-    mockGetEntityIdentifiersFromDocument.mockImplementation((entityType: 'host' | 'user') => {
-      return entityType === 'user' ? { 'user.id': 'user-id' } : { 'host.id': 'host-id' };
+    mockGetEntityIdentifiersFromDocument.mockImplementation(({ type }: { type: string }) => {
+      return type === 'user' ? { 'user.id': 'user-id' } : { 'host.id': 'host-id' };
     });
-    mockGetEuidFromObject.mockImplementation((entityType: 'host' | 'user') => {
-      return `${entityType}:store-id`;
+    mockGetEuidFromObject.mockImplementation(({ type }: { type: string }) => {
+      return `${type}:store-id`;
     });
     mockUseEntityFromStore.mockImplementation(({ entityType }) => ({
       ...getDefaultEntityFromStoreResult(),
@@ -149,7 +140,6 @@ describe('useEntitiesOverview', () => {
   });
 
   it('falls back to document names for store queries when EUID identifiers are unavailable', () => {
-    mockUseUiSetting.mockReturnValue(true);
     const hit = buildHit({ user: { name: 'user-1' } });
 
     const { result } = renderHook(() => useEntitiesOverview({ hit }));
@@ -173,14 +163,25 @@ describe('useEntitiesOverview', () => {
   });
 
   it('uses hit flattened data as the EUID identity source', () => {
-    mockUseUiSetting.mockReturnValue(true);
     const hit = buildHit({ host: { name: 'host-1' }, user: { name: 'user-1' } });
 
     renderHook(() => useEntitiesOverview({ hit }));
 
-    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith('host', hit.flattened);
-    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith('user', hit.flattened);
-    expect(mockGetEuidFromObject).toHaveBeenCalledWith('host', hit.flattened);
-    expect(mockGetEuidFromObject).toHaveBeenCalledWith('user', hit.flattened);
+    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      hit.flattened
+    );
+    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('user'),
+      hit.flattened
+    );
+    expect(mockGetEuidFromObject).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      hit.flattened
+    );
+    expect(mockGetEuidFromObject).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('user'),
+      hit.flattened
+    );
   });
 });

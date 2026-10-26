@@ -1,0 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import type { EuiPageSectionProps, EuiThemeComputed } from '@elastic/eui';
+import { EuiPageSection, useEuiTheme } from '@elastic/eui';
+
+export type AlertZeroPageSectionProps = Omit<EuiPageSectionProps, 'paddingSize' | 'grow'>;
+
+const getContentPaddingCss = (euiTheme: EuiThemeComputed) => ({
+  padding: `${euiTheme.size.l} 0`,
+});
+
+/**
+ * Shared page body for AlertZero routes. Keeps title/content snug under chrome
+ * without clobbering EuiPageSection base flex styles — padding is applied
+ * via `contentProps` on the inner wrapper. Always grows so pinned footers sit at the bottom of
+ * the viewport on tall screens.
+ */
+export const AlertZeroPageSection: React.FC<AlertZeroPageSectionProps> = ({
+  children,
+  contentProps,
+  ...rest
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const paddingCss = getContentPaddingCss(euiTheme);
+  const { css: contentCss, ...restContentProps } = contentProps ?? {};
+
+  return (
+    <EuiPageSection
+      paddingSize="none"
+      grow
+      contentProps={{
+        ...restContentProps,
+        css: contentCss ? [paddingCss, contentCss] : paddingCss,
+      }}
+      {...rest}
+    >
+      {children}
+    </EuiPageSection>
+  );
+};

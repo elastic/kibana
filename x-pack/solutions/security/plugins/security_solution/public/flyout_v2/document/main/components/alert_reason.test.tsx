@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { TestProviders } from '../../../../common/mock';
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
 import {
@@ -53,11 +52,9 @@ const documentHit = createMockHit({
 
 const renderAlertReason = (props: Partial<Parameters<typeof AlertReason>[0]> = {}) =>
   render(
-    <TestProviders>
-      <IntlProvider locale="en">
-        <AlertReason hit={alertHit} {...props} />
-      </IntlProvider>
-    </TestProviders>
+    <IntlProvider locale="en">
+      <AlertReason hit={alertHit} {...props} />
+    </IntlProvider>
   );
 
 const NO_DATA_MESSAGE = "There's no source event information for this alert.";
@@ -126,7 +123,7 @@ describe('<AlertReason />', () => {
     fireEvent.click(getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID));
 
     expect(await findByTestId(REASON_DETAILS_POPOVER_TEST_ID)).toBeInTheDocument();
-    expect(await findByTestId('full-reason-renderer')).toHaveTextContent('Full reason renderer');
+    expect(getByTestId('full-reason-renderer')).toHaveTextContent('Full reason renderer');
     expect(mockUseEventDetails).toHaveBeenCalledWith({
       eventId: 'test-id',
       indexName: 'test-index',
@@ -138,17 +135,15 @@ describe('<AlertReason />', () => {
 
     fireEvent.click(getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID));
 
-    await waitFor(() => {
-      expect(mockUseEventDetails).toHaveBeenCalledWith({
-        eventId: 'test-id',
-        indexName: 'test-index',
-      });
+    expect(await findByTestId('full-reason-renderer')).toBeInTheDocument();
+    expect(mockUseEventDetails).toHaveBeenCalledWith({
+      eventId: 'test-id',
+      indexName: 'test-index',
     });
     expect(mockRenderRow).toHaveBeenCalledWith({
       data: mockDataAsNestedObject,
       scopeId: 'document-details-flyout',
     });
-    expect(await findByTestId('full-reason-renderer')).toBeInTheDocument();
   });
 
   it('should show a loading state while fetching full event details', async () => {

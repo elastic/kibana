@@ -74,10 +74,52 @@ export interface BaseWorkflowExecutionTelemetryParams {
    */
   parentWorkflowInvocation?: 'sync' | 'async';
   /**
+   * Every ancestor of a sub-workflow execution, root first and direct parent last, each with how it
+   * invoked the next run down. The last hop matches parentWorkflowId and parentWorkflowInvocation.
+   * Omitted for a top-level execution, and for a sub-workflow execution whose chain started before
+   * the chain was recorded.
+   */
+  executionChain?: Array<{
+    executionId: string;
+    invocation: 'sync' | 'async';
+    workflowId: string;
+  }>;
+  /**
    * Event-chain depth for runs scheduled via event-driven emits.
    * Not sub-workflow composition; omitted when absent.
    */
   eventChainDepth?: number;
+  /**
+   * Total LLM input (prompt) tokens used by token-reporting steps in this execution.
+   */
+  inputTokensUsed?: number;
+  /**
+   * Total LLM output (completion) tokens used by token-reporting steps in this execution.
+   */
+  outputTokensUsed?: number;
+  /**
+   * Total cached input tokens reused by token-reporting steps in this execution.
+   * This is a subset of inputTokensUsed.
+   */
+  cachedTokensUsed?: number;
+  /**
+   * Total LLM tokens used by token-reporting steps in this execution.
+   * This is inputTokensUsed + outputTokensUsed.
+   */
+  totalTokensUsed?: number;
+  /**
+   * Per-step counterpart to the `*TokensUsed` totals above: one entry per
+   * token-reporting step, carrying its resolved connector. Omitted when no step
+   * reported usage.
+   */
+  aiStepsUsage?: Array<{
+    stepId: string;
+    connectorId?: string;
+    inputTokens: number;
+    outputTokens: number;
+    cachedTokens: number;
+    totalTokens: number;
+  }>;
 }
 
 /** Output size statistics derived from WorkflowExecutionState. */
@@ -129,13 +171,14 @@ export enum WorkflowExecutionTelemetryEventTypes {
 /**
  * Event-driven execution was skipped in runWorkflow after a task was already scheduled (operator kill switch flipped).
  *
- * Omits composition fields (`compositionDepth`, `parentWorkflowId`, `parentWorkflowInvocation`): suppression is for
- * event-driven executions, not sub-workflow composition. Includes optional `eventChainDepth` when persisted on the execution.
+ * Omits composition fields (`compositionDepth`, `parentWorkflowId`, `parentWorkflowInvocation`, `executionChain`):
+ * suppression is for event-driven executions, not sub-workflow composition. Includes optional `eventChainDepth` when
+ * persisted on the execution.
  */
 export interface EventDrivenExecutionSuppressedParams
   extends Omit<
     BaseWorkflowExecutionTelemetryParams,
-    'compositionDepth' | 'parentWorkflowId' | 'parentWorkflowInvocation'
+    'compositionDepth' | 'parentWorkflowId' | 'parentWorkflowInvocation' | 'executionChain'
   > {
   eventName: string;
   logTriggerEventsEnabled: boolean;
@@ -561,6 +604,7 @@ export interface TriggerEventDispatchedParams {
   subscriberResolutionMs?: number;
   subscribedCount: number;
   disabledCount: number;
+  connectorIdMismatchCount: number;
   kqlFalseCount: number;
   kqlErrorCount: number;
   matchedCount: number;

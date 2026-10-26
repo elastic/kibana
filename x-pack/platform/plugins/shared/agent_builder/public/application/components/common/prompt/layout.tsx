@@ -55,7 +55,7 @@ export const PromptLayout: React.FC<PromptLayoutProps> = ({
   if (imageSrc) {
     iconContent = <EuiImage src={imageSrc} alt="" size="s" />;
   } else if (iconType) {
-    iconContent = <EuiIcon type={iconType} size="xxl" />;
+    iconContent = <EuiIcon type={iconType} size="xxl" aria-hidden={true} />;
   }
 
   return (

@@ -10,6 +10,10 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { chain } from 'lodash';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+} from '@kbn/core-saved-objects-server';
 import { findRelationships } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
 import type { v1 } from '../../common';
@@ -30,14 +34,16 @@ export const registerRelationshipsRoute = (
       },
       validate: {
         params: schema.object({
-          type: schema.string(),
-          id: schema.string(),
+          type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+          id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
         }),
         query: schema.object({
           size: schema.number({ defaultValue: 10000 }),
           savedObjectTypes: schema.oneOf([
-            schema.string(),
-            schema.arrayOf(schema.string(), { maxSize: SAVED_OBJECT_TYPES_MAX_SIZE }),
+            schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+            schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }), {
+              maxSize: SAVED_OBJECT_TYPES_MAX_SIZE,
+            }),
           ]),
         }),
       },

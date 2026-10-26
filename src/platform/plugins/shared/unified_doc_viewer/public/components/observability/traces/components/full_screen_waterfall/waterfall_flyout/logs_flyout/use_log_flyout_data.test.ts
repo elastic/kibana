@@ -212,6 +212,27 @@ describe('useLogFlyoutData', () => {
     expect(result.current.error).toBe(errorMessage);
   });
 
+  it('should surface fetch error message and prefer it over data view error', async () => {
+    mockUseFetchLog.mockReturnValue({
+      loading: false,
+      log: undefined,
+      index: undefined,
+      error: new Error('Network down'),
+    });
+    mockUseAdhocDataView.mockReturnValue({
+      dataView: null,
+      error: 'Data view failure',
+      loading: false,
+    });
+
+    const { result } = renderHook(() => useLogFlyoutData({ id }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.error).toBe('Network down');
+    expect(result.current.hit).toBeNull();
+  });
+
   it('should return logDataView from adhoc data view', async () => {
     mockUseFetchLog.mockReturnValue({
       loading: false,

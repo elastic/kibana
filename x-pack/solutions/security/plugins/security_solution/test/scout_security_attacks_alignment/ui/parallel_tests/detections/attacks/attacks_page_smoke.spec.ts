@@ -8,26 +8,21 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
-  'securitySolution:enableAlertsAndAttacksAlignment';
-
 spaceTest.describe(
   'Attacks page smoke',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
       await apiServices.attackDiscovery.seedAttackData();
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, scoutSpace }) => {
-      await scoutSpace.uiSettings.set({
-        [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
-      });
-      await browserAuth.loginAsAdmin();
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest('renders critical attacks page components', async ({ pageObjects }) => {
@@ -37,7 +32,8 @@ spaceTest.describe(
 
       await expect(detectionsAttackDiscoveryPage.attacksPageContent).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.attacksPageSearchBar).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.attacksPageActions).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.attacksPageHeader).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.scheduleButton).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.assigneesFilterButton).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.connectorFilterButton).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.attacksPageStandardFilters).toBeVisible();
@@ -50,8 +46,12 @@ spaceTest.describe(
       await detectionsAttackDiscoveryPage.attacksTableSection.scrollIntoViewIfNeeded();
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.attacksListTable).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(1);
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(2);
+      await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toHaveCount(1);
+      await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toHaveCount(1);
+      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.attackRunByAvatar).toBeVisible();
     });
   }
 );

@@ -8,23 +8,24 @@ import type { FormEvent } from 'react';
 import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiCheckboxProps } from '@elastic/eui';
 import {
-  EuiBadge,
-  EuiIconTip,
   EuiAccordion,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiComboBox,
+  EuiBadge,
   EuiButtonEmpty,
-  EuiSpacer,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiComboBox,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIconTip,
+  EuiPopover,
+  EuiSpacer,
   EuiText,
-  EuiCheckbox,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import type { ControlGeneralViewSelectorDeps, ControlFormErrorMap } from '../../types';
@@ -81,12 +82,14 @@ const BooleanCondition = ({
           <EuiCheckbox id={prop} label={label} checked={value} onChange={onChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            onClick={() => onRemoveCondition(prop)}
-            aria-label="Remove condition"
-            data-test-subj={'cloud-defend-btnremovecondition-' + prop}
-          />
+          <EuiToolTip content="Remove condition" disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              onClick={() => onRemoveCondition(prop)}
+              aria-label="Remove condition"
+              data-test-subj={'cloud-defend-btnremovecondition-' + prop}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
@@ -105,12 +108,14 @@ const FlagCondition = ({ label, prop, onRemoveCondition }: ConditionProps) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            onClick={() => onRemoveCondition(prop)}
-            aria-label="Remove condition"
-            data-test-subj={'cloud-defend-btnremovecondition-' + prop}
-          />
+          <EuiToolTip content="Remove condition" disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              onClick={() => onRemoveCondition(prop)}
+              aria-label="Remove condition"
+              data-test-subj={'cloud-defend-btnremovecondition-' + prop}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
@@ -160,12 +165,14 @@ const StringArrayCondition = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            onClick={() => onRemoveCondition(prop)}
-            aria-label="Remove condition"
-            data-test-subj={'cloud-defend-btnremovecondition-' + prop}
-          />
+          <EuiToolTip content="Remove condition" disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              onClick={() => onRemoveCondition(prop)}
+              aria-label="Remove condition"
+              data-test-subj={'cloud-defend-btnremovecondition-' + prop}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
@@ -412,14 +419,17 @@ export const ControlGeneralViewSelector = ({
           </div>
           <EuiFlexItem>
             <EuiPopover
+              aria-label={i18n.selectorOptions}
               id={selector.name}
               button={
-                <EuiButtonIcon
-                  iconType="boxesHorizontal"
-                  onClick={onTogglePopover}
-                  aria-label="Selector options"
-                  data-test-subj="cloud-defend-btnselectorpopover"
-                />
+                <EuiToolTip content="Selector options" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesVertical"
+                    onClick={onTogglePopover}
+                    aria-label="Selector options"
+                    data-test-subj="cloud-defend-btnselectorpopover"
+                  />
+                </EuiToolTip>
               }
               isOpen={isPopoverOpen}
               closePopover={closePopover}
@@ -506,12 +516,13 @@ export const ControlGeneralViewSelector = ({
       </EuiForm>
       <EuiSpacer size="m" />
       <EuiPopover
+        aria-label={i18n.addSelectorCondition}
         id="cloudDefendControlAddCondition"
         data-test-subj="cloud-defend-addconditionpopover"
         button={
           <EuiButtonEmpty
             onClick={onToggleAddCondition}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="cloud-defend-btnaddselectorcondition"
           >
             {i18n.addSelectorCondition}

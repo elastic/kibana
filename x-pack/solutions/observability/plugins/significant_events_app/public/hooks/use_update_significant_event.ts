@@ -1,0 +1,118 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type {
+  SignificantEventManualStatus,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
+import { useKibana } from './use_kibana';
+
+interface UpdateSignificantEventArgs {
+  eventId: string;
+  /** A person sets active or inactive; recovering belongs to the status workflow. */
+  status: SignificantEventManualStatus;
+  assessmentNote?: string;
+}
+
+interface UpdateSignificantEventResult {
+  updated: number;
+  ignored: number;
+  status: SignificantEventStatus;
+  reason?: string;
+}
+
+const UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.successToastTitle',
+  {
+    defaultMessage: 'Significant event updated',
+  }
+);
+
+const UPDATE_NO_CHANGE_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.noChangeToastTitle',
+  {
+    defaultMessage:
+      'No change made: the significant event already has that status or no longer exists',
+  }
+);
+
+const UPDATE_SUPERSEDED_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.supersededToastTitle',
+  {
+    defaultMessage:
+      'The significant event changed while you were updating it. Review it and try again.',
+  }
+);
+
+const UPDATE_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.errorToastTitle',
+  {
+    defaultMessage: 'Failed to update significant event',
+  }
+);
+
+export const useUpdateSignificantEvent = ({
+  onUpdateSuccess,
+}: { onUpdateSuccess?: () => void } = {}) => {
+  const {
+    core: {
+      notifications: { toasts },
+    },
+    dependencies: {
+      start: {
+        significantEvents: { significantEventsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<UpdateSignificantEventResult, Error, UpdateSignificantEventArgs>({
+    mutationFn: ({ eventId, status, assessmentNote }: UpdateSignificantEventArgs) =>
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/events/{id}/update',
+        {
+          params: {
+            path: { id: eventId },
+            body: {
+              status,
+              ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
+            },
+          },
+          signal: null,
+        }
+      ),
+    onSuccess: ({ updated, reason }) => {
+      if (reason === 'superseded') {
+        // Keep the caller's UI (and any entered rationale) so the operator can retry.
+        toasts.addWarning({ title: UPDATE_SUPERSEDED_TOAST_TITLE });
+        return;
+      }
+      if (updated === 0) {
+        toasts.addInfo({ title: UPDATE_NO_CHANGE_TOAST_TITLE });
+      } else {
+        toasts.addSuccess({ title: UPDATE_SUCCESS_TOAST_TITLE });
+      }
+      onUpdateSuccess?.();
+    },
+    onError: (error) => {
+      toasts.addError(error, { title: UPDATE_ERROR_TOAST_TITLE });
+    },
+    onSettled: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['significantEvents'], exact: false }),
+        queryClient.invalidateQueries({ queryKey: ['significantEventLifecycle'], exact: false }),
+      ]);
+    },
+  });
+
+  return {
+    updateEventStatus: (args: UpdateSignificantEventArgs) => mutation.mutate(args),
+    isUpdating: mutation.isLoading,
+  };
+};

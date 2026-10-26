@@ -13,18 +13,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiBasicTable,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { AddMigrationRuleToChatButton } from '../rule_details_flyout/add_to_chat_button';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
 import { useInstallMigrationRule } from '../../logic/use_install_migration_rule';
@@ -45,7 +47,7 @@ import type { RulesFilterOptions, RuleMigrationStats, RuleMigrationSettings } fr
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { UpdateIndexPatternForm } from './update_index_pattern';
-import { EmptyMigration, SearchField } from '../../../common/components';
+import { EmptyMigration, MemoizedBasicTable, SearchField } from '../../../common/components';
 import {
   UtilityBar,
   UtilityBarGroup,
@@ -54,6 +56,8 @@ import {
 } from '../../../../common/components/utility_bar';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { useOnMigrationRuleUpdatedToolEvent } from '../../hooks/use_on_migration_rule_updated_tool_event';
+import type { SiemMigrationRuleUpdatedToolEventData } from '../../../../../common/siem_migrations/rules/events';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -88,6 +92,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
   ({ refetchData, integrations, isIntegrationsLoading, migrationStats }) => {
     const migrationId = migrationStats.id;
     const { addError } = useAppToasts();
+    const isSiemMigrationAgentBuilderEnabled = useIsExperimentalFeatureEnabled(
+      'siemRuleMigrationsAgentBuilderEnabled'
+    );
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -294,6 +301,11 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           migrationRule.translation_result === MigrationTranslationResult.FULL;
         return (
           <EuiFlexGroup>
+            {isSiemMigrationAgentBuilderEnabled && !migrationRule.elastic_rule?.id && (
+              <EuiFlexItem grow={false}>
+                <AddMigrationRuleToChatButton rule={migrationRule} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiButton
                 disabled={!canMigrationRuleBeInstalled}
@@ -324,7 +336,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           </EuiFlexGroup>
         );
       },
-      [installSingleRule, isRulesLoading]
+      [installSingleRule, isSiemMigrationAgentBuilderEnabled, isRulesLoading]
     );
 
     const getMigrationRuleData = useCallback(
@@ -360,11 +372,44 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const {
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
+      openedMigrationRuleId,
     } = useMigrationRuleDetailsFlyout({
       isLoading: isRulesLoading,
+      migrationRules,
       getMigrationRuleData,
       ruleActionsFactory,
     });
+
+    const onRuleUpdatedByAgent = useCallback(
+      ({ migrationId: updatedMigrationId }: SiemMigrationRuleUpdatedToolEventData) => {
+        if (updatedMigrationId !== migrationId) {
+          return;
+        }
+        // invalidateGetMigrationRules uses refetchType:'active', so cached data is kept and
+        // isLoading stays false — the open flyout will not remount or lose draft edits.
+        refetchData?.();
+      },
+      [migrationId, refetchData]
+    );
+    useOnMigrationRuleUpdatedToolEvent(onRuleUpdatedByAgent);
+
+    const { euiTheme } = useEuiTheme();
+    // Stable identity: never changes with selection, so EuiBasicTable rows are not
+    // re-rendered when the opened rule changes. Each row is tagged with its id; the
+    // highlight is applied purely via CSS on the wrapper below.
+    const rowProps = useCallback((rule: RuleMigrationRule) => ({ 'data-rule-id': rule.id }), []);
+    // Only this wrapper re-renders when the opened rule changes; the table body stays put.
+    const highlightCss = useMemo(
+      () =>
+        openedMigrationRuleId
+          ? {
+              [`.euiTableRow[data-rule-id="${openedMigrationRuleId}"]`]: {
+                backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+              },
+            }
+          : undefined,
+      [openedMigrationRuleId, euiTheme.colors.backgroundBaseInteractiveSelect]
+    );
 
     const rulesColumns = useMigrationRulesTableColumns({
       disableActions: isTableLoading,
@@ -409,6 +454,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   <EuiFlexItem grow={false}>
                     <BulkActions
                       isTableLoading={isRulesLoading}
+                      migrationStats={migrationStats}
                       translationStats={translationStats}
                       selectedRules={selectedMigrationRules}
                       setMissingIndexPatternFlyoutOpen={openMissingIndexPatternFlyout}
@@ -442,18 +488,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                     </UtilityBar>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiBasicTable<RuleMigrationRule>
-                  loading={isTableLoading}
-                  items={migrationRules}
-                  pagination={pagination}
-                  sorting={sorting}
-                  onChange={onTableChange}
-                  selection={tableSelection}
-                  itemId={'id'}
-                  data-test-subj={'rules-translation-table'}
-                  columns={rulesColumns}
-                  tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
-                />
+                <div css={highlightCss}>
+                  <MemoizedBasicTable<RuleMigrationRule>
+                    loading={isTableLoading}
+                    items={migrationRules}
+                    pagination={pagination}
+                    sorting={sorting}
+                    onChange={onTableChange}
+                    selection={tableSelection}
+                    itemId={'id'}
+                    rowProps={rowProps}
+                    data-test-subj={'rules-translation-table'}
+                    columns={rulesColumns}
+                    tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
+                  />
+                </div>
               </>
             )
           }

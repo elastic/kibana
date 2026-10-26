@@ -1,0 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export const EXTERNAL_RESUME_API_PATH =
+  '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external' as const;
+
+export const EXTERNAL_RESUME_FORM_API_PATH =
+  '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form' as const;
+
+export { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
+export {
+  DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
+  DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
+  DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
+} from '../../common/hitl';

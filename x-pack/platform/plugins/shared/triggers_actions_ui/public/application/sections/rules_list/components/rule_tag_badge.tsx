@@ -61,7 +61,6 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
         color="hollow"
         iconType="tag"
         iconSide="left"
-        tabIndex={-1}
         onClick={onClick}
         onClickAriaLabel="Tags"
       >

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/packages/shared/kbn-evals-suite-workflows
 dependsOn:
+  - '@kbn/evals-common'
   - '@kbn/evals'
   - '@kbn/scout'
   - '@kbn/agent-builder-common'
@@ -35,6 +36,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

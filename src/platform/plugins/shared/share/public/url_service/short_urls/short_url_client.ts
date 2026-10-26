@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
@@ -76,39 +77,22 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
     const getUpdatedParams = (inputParams: ShortUrlCreateParams<P>) => {
-      if (!isAbsoluteTime) return inputParams;
+      if (!isAbsoluteTime || !inputParams.locator.getTimeRange || !inputParams.locator.setTimeRange)
+        return inputParams;
 
-      const timeRange = inputParams.params?.timeRange as SerializableRecord;
-      const timeRangeSnakeCase = inputParams.params?.time_range as SerializableRecord;
+      const timeRange = inputParams.locator.getTimeRange(inputParams.params);
 
-      const timeRanges: {
-        timeRange?: { from: string | undefined; to: string | undefined };
-        time_range?: { from: string | undefined; to: string | undefined };
-      } = {};
-
-      if (timeRange?.from && timeRange?.to) {
-        timeRanges.timeRange = {
-          from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
-          to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string, {
-            roundUp: true,
-          }),
-        };
-      }
-      if (timeRangeSnakeCase?.from && timeRangeSnakeCase?.to) {
-        timeRanges.time_range = {
-          from: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.from as string),
-          to: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.to as string, {
-            roundUp: true,
-          }),
-        };
-      }
-      return {
-        ...inputParams,
-        params: {
-          ...inputParams.params,
-          ...timeRanges,
-        },
-      };
+      return timeRange
+        ? {
+            ...inputParams,
+            params: inputParams.locator.setTimeRange(inputParams.params, {
+              from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from),
+              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to, {
+                roundUp: true,
+              }),
+            }),
+          }
+        : inputParams;
     };
 
     const result = await this.create(getUpdatedParams(params));
@@ -167,7 +151,7 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 
   public async get(id: string): Promise<ShortUrl> {
     const { http } = this.dependencies;
-    const data = await http.fetch<ShortUrlData>('/api/short_url/' + id, {
+    const data = await http.fetch<ShortUrlData>(buildPath('/api/short_url/{id}', { id }), {
       method: 'GET',
     });
 
@@ -176,16 +160,19 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 
   public async resolve(slug: string): Promise<ShortUrl> {
     const { http } = this.dependencies;
-    const data = await http.fetch<ShortUrlData>('/api/short_url/_slug/' + slug, {
-      method: 'GET',
-    });
+    const data = await http.fetch<ShortUrlData>(
+      buildPath('/api/short_url/_slug/{slug}', { slug }),
+      {
+        method: 'GET',
+      }
+    );
 
     return { data };
   }
 
   public async delete(id: string): Promise<void> {
     const { http } = this.dependencies;
-    await http.fetch('/api/short_url/' + id, {
+    await http.fetch(buildPath('/api/short_url/{id}', { id }), {
       method: 'DELETE',
     });
   }

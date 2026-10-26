@@ -44,6 +44,12 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: FactoryQueryTypes;
   componentTemplateExists?: boolean;
   ccsEnabled?: boolean;
+  /**
+   * When false, default-space reads match only documents with an explicit
+   * `space_id: default` stamp. Used for URL-supplied agent-index reads under CPS
+   * that lack a Kibana-metadata gate.
+   */
+  matchMissingSpaceId?: boolean;
 }
 
 /** A mapping of semantic fields to their document counterparts */

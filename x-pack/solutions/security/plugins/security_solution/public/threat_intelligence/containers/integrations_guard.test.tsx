@@ -23,7 +23,11 @@ jest.mock('../hooks/use_integrations_page_link');
 jest.mock('../hooks/use_documentation_link');
 jest.mock('../hooks/use_integrations');
 jest.mock('../../app/home/template_wrapper', () => ({
-  SecuritySolutionTemplateWrapper: () => <div />,
+  SecuritySolutionTemplateWrapper: ({
+    'data-test-subj': dataTestSubj,
+  }: {
+    'data-test-subj'?: string;
+  }) => <div data-test-subj={dataTestSubj} />,
 }));
 
 describe('IntegrationsGuard', () => {

@@ -11,8 +11,10 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionType as CommonActionType } from '../common';
-import { areValidFeatures } from '../common';
+import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
@@ -177,6 +179,19 @@ export class ActionTypeRegistry {
       );
     }
 
+    if (actionType.supportedFeatureIds.some((id) => id.length > MAX_FEATURE_ID_LENGTH)) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.featureIdTooLong', {
+          defaultMessage:
+            'Feature IDs for connector type "{connectorTypeId}" must not exceed {maxLength} characters.',
+          values: {
+            connectorTypeId: actionType.id,
+            maxLength: MAX_FEATURE_ID_LENGTH,
+          },
+        })
+      );
+    }
+
     if (!areValidFeatures(actionType.supportedFeatureIds)) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
@@ -216,6 +231,7 @@ export class ActionTypeRegistry {
           title: actionType.name,
           maxAttempts,
           cost: TaskCost.Tiny,
+          taskTypeGroup: TaskTypeGroup.Actions,
           createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
         },
       });
@@ -283,6 +299,7 @@ export class ActionTypeRegistry {
         allowMultipleSystemActions: actionType.allowMultipleSystemActions,
         description: actionType.description,
         isExperimental: actionType.isExperimental,
+        isTestable: Boolean(actionType.isTestable),
       }));
   }
 
@@ -299,5 +316,12 @@ export class ActionTypeRegistry {
 
   isDeprecated(actionTypeId: string): boolean {
     return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
+  }
+
+  /**
+   * Returns the connector spec stored for a spec-backed type, or undefined.
+   */
+  public getSpec(id: string): ConnectorSpec | undefined {
+    return this.actionTypes.get(id)?.spec;
   }
 }

@@ -110,6 +110,12 @@ export const EventSchema = schema.maybe(
             type: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
+            execution: schema.maybe(
+              schema.object({
+                uuid: ecsString(),
+              })
+            ),
+            data: ecsFlattened(),
           })
         ),
         alerting: schema.maybe(
@@ -234,6 +240,7 @@ export const EventSchema = schema.maybe(
           })
         ),
         saved_objects: schema.maybe(
+          // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
           schema.arrayOf(
             schema.object({
               rel: ecsString(),
@@ -304,6 +311,7 @@ export const EventSchema = schema.maybe(
                   })
                 ),
                 results: schema.maybe(
+                  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
                   schema.arrayOf(
                     schema.object({
                       rule_id: ecsString(),
@@ -322,8 +330,9 @@ export const EventSchema = schema.maybe(
           schema.object({
             dispatcher: schema.maybe(
               schema.object({
-                episode_count: ecsStringOrNumber(),
-                episode_ids: ecsStringMulti(),
+                failure_reason: ecsString(),
+                alert_count: ecsStringOrNumber(),
+                alert_ids: ecsStringMulti(),
                 rule_count: ecsStringOrNumber(),
                 rule_ids: ecsStringMulti(),
                 action_group_count: ecsStringOrNumber(),
@@ -345,6 +354,7 @@ export const EventSchema = schema.maybe(
 );
 
 function ecsStringMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(schema.string()));
 }
 
@@ -377,6 +387,7 @@ function ecsDateRange() {
 }
 
 function ecsDateRangeMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
 }
 

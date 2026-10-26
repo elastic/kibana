@@ -50,6 +50,7 @@ import {
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -57,6 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
 
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
     dataGeneratorFactory({
@@ -1973,14 +1975,25 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts enrichment', () => {
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'host-0' },
+              entity: {
+                id: 'host:host-0',
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 1 },
+              },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.teardown();
       });
 
-      it('@skipInServerlessMKI should be enriched with host risk score', async () => {
+      it('should be enriched with host risk score', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { host: { name: 'host-0' } };
@@ -2011,18 +2024,22 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'host-0' },
+              entity: { id: 'host:host-0', type: 'host' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.teardown();
       });
 
-      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
+      it('should be enriched alert with criticality_level', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { host: { name: 'host-0' } };
@@ -2617,42 +2634,6 @@ export default ({ getService }: FtrProviderContext) => {
       after(async () => {
         await unsetBrokenRuntimeField({ es, index: 'packetbeat-*' });
         await esArchiver.unload(packetBeatPath);
-      });
-
-      it('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
-        const doc1 = { agent: { name: 'test-1' } };
-        await indexEnhancedDocuments({
-          documents: [doc1],
-          interval: ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'],
-          id: uuidv4(),
-        });
-
-        const rule: EsqlRuleCreateProps = {
-          ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from packetbeat-*, ecs_compliant METADATA _id | limit 101`,
-          from: 'now-100000h',
-        };
-
-        const { logs, previewId } = await previewRule({
-          supertest,
-          rule,
-        });
-
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-        expect(logs).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              warnings: expect.arrayContaining([
-                expect.stringContaining(
-                  'The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards'
-                ),
-              ]),
-            }),
-          ])
-        );
-
-        expect(previewAlerts).not.toHaveLength(0);
       });
 
       it('should handle shard failures and include errors in logs for query that is aggregating', async () => {

@@ -75,7 +75,7 @@ describe('useFleetProxyForm', () => {
 
       await testRenderer.waitFor(() => {
         expect(result.current.inputs.certificateInput.errors).toBeDefined();
-        expect(onSuccess).not.toBeCalled();
+        expect(onSuccess).not.toHaveBeenCalled();
         expect(result.current.isDisabled).toBeTruthy();
       });
     });
@@ -95,7 +95,7 @@ describe('useFleetProxyForm', () => {
 
       await testRenderer.waitFor(() => {
         expect(result.current.inputs.certificateKeyInput.errors).toBeDefined();
-        expect(onSuccess).not.toBeCalled();
+        expect(onSuccess).not.toHaveBeenCalled();
         expect(result.current.isDisabled).toBeTruthy();
       });
     });

@@ -28,6 +28,7 @@ import { getBackfillTelemetryPerDay } from './lib/get_backfill_telemetry';
 import { getGapAutoFillSchedulerTelemetryPerDay } from './lib/get_gap_auto_fill_scheduler_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { AlertingPluginsStart } from '../plugin';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -36,7 +37,7 @@ export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeAlertingTelemetry(
   logger: Logger,
-  core: CoreSetup,
+  core: CoreSetup<AlertingPluginsStart>,
   taskManager: TaskManagerSetupContract,
   eventLogIndex: string
 ) {
@@ -45,7 +46,7 @@ export function initializeAlertingTelemetry(
 
 function registerAlertingTelemetryTask(
   logger: Logger,
-  core: CoreSetup,
+  core: CoreSetup<AlertingPluginsStart>,
   taskManager: TaskManagerSetupContract,
   eventLogIndex: string
 ) {
@@ -81,7 +82,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 
 export function telemetryTaskRunner(
   logger: Logger,
-  core: CoreSetup,
+  core: CoreSetup<AlertingPluginsStart>,
   eventLogIndex: string,
   taskManagerIndex: string
 ) {
@@ -101,17 +102,23 @@ export function telemetryTaskRunner(
         .then(([coreStart]) => coreStart.savedObjects.getIndexForType(RULE_SAVED_OBJECT_TYPE));
 
     const getSavedObjectClient = () =>
-      core
-        .getStartServices()
-        .then(([coreStart]) =>
-          coreStart.savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE])
-        );
+      core.getStartServices().then(([coreStart, { maintenanceWindows }]) =>
+        // Requesting the `maintenance-window` type throws when its optional owning plugin is
+        // disabled and the type is unregistered, so only include it when enabled.
+        coreStart.savedObjects.createInternalRepository(
+          maintenanceWindows ? [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE] : []
+        )
+      );
+
+    const getMaintenanceWindowsEnabled = () =>
+      core.getStartServices().then(([, { maintenanceWindows }]) => Boolean(maintenanceWindows));
 
     return {
       async run() {
         const esClient = await getEsClient();
         const alertIndex = await getAlertIndex();
         const savedObjectsClient = await getSavedObjectClient();
+        const maintenanceWindowsEnabled = await getMaintenanceWindowsEnabled();
 
         return Promise.all([
           getTotalCountAggregations({ esClient, alertIndex, logger }),
@@ -119,7 +126,7 @@ export function telemetryTaskRunner(
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
-          getMWTelemetry({ logger, savedObjectsClient }),
+          getMWTelemetry({ logger, savedObjectsClient, maintenanceWindowsEnabled }),
           getTotalAlertsCountAggregations({ esClient, logger }),
           getBackfillTelemetryPerDay({ esClient, eventLogIndex, logger }),
           getGapAutoFillSchedulerTelemetryPerDay({ esClient, eventLogIndex, logger }),

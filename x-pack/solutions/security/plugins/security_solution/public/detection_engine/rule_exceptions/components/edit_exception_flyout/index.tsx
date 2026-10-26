@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
 import {
   EuiHorizontalRule,
   EuiFlyoutBody,
@@ -48,6 +48,7 @@ import {
   isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
+import type { AlertClosingReason } from '../../../../../common/types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import type { Rule } from '../../../rule_management/logic/types';
@@ -55,6 +56,8 @@ import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { ExceptionsLinkedToLists } from '../flyout_components/linked_to_list';
 import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
+import { useRuntimeFieldsForBulkClose } from '../flyout_components/alerts_actions/use_runtime_fields_for_bulk_close';
+import { useSignalIndexPatterns } from '../flyout_components/alerts_actions/use_signal_index_patterns';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
@@ -88,17 +91,13 @@ interface EditExceptionFlyoutProps {
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
-  ${() => css`
-    &.builder-section {
-      overflow-y: scroll;
-    }
-  `}
+  &.builder-section {
+    overflow-y: scroll;
+  }
 `;
 
 const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
 `;
 
 const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
@@ -132,6 +131,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       bulkCloseAlerts,
       disableBulkClose,
       bulkCloseIndex,
+      closeAlertsReason,
       entryErrorExists,
       expireTime,
       expireErrorExists,
@@ -149,6 +149,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseAlerts: false,
     disableBulkClose: true,
     bulkCloseIndex: undefined,
+    closeAlertsReason: undefined,
     entryErrorExists: false,
     expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
     expireErrorExists: false,
@@ -156,6 +157,23 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     partialCodeSignatureWarningExists: false,
     malformedMatchesValueExists: false,
     malformedMatchesFields: [],
+  });
+
+  const {
+    isSignalIndexLoading,
+    signalIndexNames,
+    isSignalIndexPatternLoading,
+    signalIndexPatterns,
+    areSignalIndexPatternsReady,
+  } = useSignalIndexPatterns();
+
+  const runtimeFieldsResolution = useRuntimeFieldsForBulkClose({
+    exceptionListItems: exceptionItems,
+    shouldBulkCloseAlert: bulkCloseAlerts,
+    sourceIndexPatterns: indexPatterns,
+    isSourceIndexPatternsLoading: isLoading,
+    alertsIndexPatterns: signalIndexPatterns,
+    areAlertsIndexPatternsReady: areSignalIndexPatternsReady,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -270,6 +288,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     [dispatch]
   );
 
+  const setCloseAlertsReason = useCallback(
+    (reason?: AlertClosingReason): void => {
+      dispatch({
+        type: 'setCloseAlertsReason',
+        reason,
+      });
+    },
+    [dispatch]
+  );
+
   const setConditionsValidationError = useCallback(
     (errorExists: boolean): void => {
       dispatch({
@@ -338,7 +366,13 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           listType === ExceptionListTypeEnum.RULE_DEFAULT ? ruleDefaultRule : referencedRules;
 
         if (closeAlerts != null && !isEmpty(ruleIdsForBulkClose) && bulkCloseAlerts) {
-          await closeAlerts(ruleIdsForBulkClose, items, undefined, bulkCloseIndex);
+          await closeAlerts({
+            ruleStaticIds: ruleIdsForBulkClose,
+            exceptionItems: items,
+            bulkCloseIndex,
+            runtimeFields: runtimeFieldsResolution.runtimeFields,
+            reason: closeAlertsReason,
+          });
         }
 
         onConfirm(true);
@@ -361,6 +395,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
+    closeAlertsReason,
+    runtimeFieldsResolution.runtimeFields,
     onCancel,
     expireTime,
   ]);
@@ -381,7 +417,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       isLoading ||
       entryErrorExists ||
       expireErrorExists ||
-      commentErrorExists,
+      commentErrorExists ||
+      // Bulk close sends the runtime-field map with the close-by-query
+      // request; hold submit until the map is resolved so alerts on runtime
+      // fields aren't silently skipped.
+      (bulkCloseAlerts && runtimeFieldsResolution.isResolving),
     [
       isLoading,
       entryErrorExists,
@@ -390,6 +430,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       isClosingAlerts,
       expireErrorExists,
       commentErrorExists,
+      bulkCloseAlerts,
+      runtimeFieldsResolution.isResolving,
     ]
   );
 
@@ -514,9 +556,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
               shouldBulkCloseAlert={bulkCloseAlerts}
               disableBulkClose={disableBulkClose}
               exceptionListItems={exceptionItems}
+              isSignalIndexLoading={isSignalIndexLoading}
+              signalIndexNames={signalIndexNames}
+              isSignalIndexPatternLoading={isSignalIndexPatternLoading}
+              signalIndexPatterns={signalIndexPatterns}
+              hasUntypedRuntimeFields={runtimeFieldsResolution.hasUntypedFields}
+              closeAlertsReason={closeAlertsReason}
               onDisableBulkClose={setDisableBulkCloseAlerts}
               onUpdateBulkCloseIndex={setBulkCloseIndex}
               onBulkCloseCheckboxChange={setBulkCloseAlerts}
+              onCloseAlertsReasonChange={setCloseAlertsReason}
             />
           </>
         )}

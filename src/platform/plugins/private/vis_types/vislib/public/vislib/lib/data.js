@@ -82,8 +82,8 @@ export class Data {
                 }
                 return newVal;
               }),
-              yAxisFormatter: (val) => converter.convert(val),
-              zAxisFormatter: (val) => zConverter.convert(val),
+              yAxisFormatter: (val) => converter.convertToText(val),
+              zAxisFormatter: (val) => zConverter.convertToText(val),
             };
           });
         } else {
@@ -94,9 +94,9 @@ export class Data {
       const xConverter = getFormatService().deserialize(newData.xAxisFormat);
       const yConverter = getFormatService().deserialize(newData.yAxisFormat);
       const zConverter = getFormatService().deserialize(newData.zAxisFormat);
-      newData.xAxisFormatter = (val) => xConverter.convert(val);
-      newData.yAxisFormatter = (val) => yConverter.convert(val);
-      newData.zAxisFormatter = (val) => zConverter.convert(val);
+      newData.xAxisFormatter = (val) => xConverter.convertToText(val);
+      newData.yAxisFormatter = (val) => yConverter.convertToText(val);
+      newData.zAxisFormatter = (val) => zConverter.convertToText(val);
 
       return newData;
     };

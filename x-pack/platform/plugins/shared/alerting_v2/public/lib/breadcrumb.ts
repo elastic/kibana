@@ -11,6 +11,7 @@ export type AlertingV2BreadcrumbPage =
   | 'root'
   | 'rules_list'
   | 'rule_details'
+  | 'rule_library_list'
   | 'action_policies_list'
   | 'action_policy_create'
   | 'action_policy_edit'
@@ -26,13 +27,19 @@ export const getAlertingV2Breadcrumb = (
     case 'root':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.rootTitle', {
-          defaultMessage: 'Alerting V2',
+          defaultMessage: 'Universal Alerting',
         }),
       };
     case 'rules_list':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.rulesListTitle', {
           defaultMessage: 'Rules',
+        }),
+      };
+    case 'rule_library_list':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleLibraryListTitle', {
+          defaultMessage: 'Rule library',
         }),
       };
     case 'rule_details':
@@ -60,7 +67,7 @@ export const getAlertingV2Breadcrumb = (
     case 'episodes_list':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.episodesListTitle', {
-          defaultMessage: 'Alert episodes',
+          defaultMessage: 'Alerts',
         }),
       };
     case 'episode_details':

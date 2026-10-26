@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiLink, EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import * as i18n from '../translations';
 
@@ -21,36 +21,28 @@ const emptyBody = <p>{i18n.EMPTY_PROMPT_DESCRIPTION}</p>;
 
 export const EmptyPrompt = React.memo<EmptyPromptProps>(
   ({ onClickCreate, showCreateButton = true, docLinks }) => {
-    const renderActions = useMemo(() => {
-      if (showCreateButton) {
-        return [
-          <EuiButton
-            data-test-subj="mw-create-button"
-            key="create-action"
-            fill
-            onClick={onClickCreate}
-          >
-            {i18n.EMPTY_PROMPT_BUTTON}
-          </EuiButton>,
-          <EuiButtonEmpty
-            key="documentation-button"
-            target="_blank"
-            href={docLinks.alerting.maintenanceWindows}
-            iconType="question"
-          >
-            {i18n.EMPTY_PROMPT_DOCUMENTATION}
-          </EuiButtonEmpty>,
-        ];
-      }
-      return null;
-    }, [showCreateButton, onClickCreate, docLinks]);
-
     return (
       <EuiPageTemplate.EmptyPrompt
         data-test-subj="mw-empty-prompt"
         title={emptyTitle}
         body={emptyBody}
-        actions={renderActions}
+        actions={
+          showCreateButton ? (
+            <EuiButton data-test-subj="mw-create-button" fill onClick={onClickCreate}>
+              {i18n.EMPTY_PROMPT_BUTTON}
+            </EuiButton>
+          ) : undefined
+        }
+        footer={
+          <>
+            <EuiTitle size="xxs">
+              <span>{i18n.EMPTY_PROMPT_LEARN_MORE}</span>
+            </EuiTitle>{' '}
+            <EuiLink href={docLinks.alerting.maintenanceWindows} target="_blank">
+              {i18n.EMPTY_PROMPT_READ_THE_DOCS}
+            </EuiLink>
+          </>
+        }
       />
     );
   }

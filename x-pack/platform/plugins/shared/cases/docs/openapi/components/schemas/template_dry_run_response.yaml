@@ -1,0 +1,10 @@
+title: Template write dry run response
+description: Returned instead of the template when the request was sent with `dry_run=true`.
+type: object
+required:
+  - valid
+properties:
+  valid:
+    type: boolean
+    description: Always `true` — validation failures return a 4xx error instead.
+    enum: [true]

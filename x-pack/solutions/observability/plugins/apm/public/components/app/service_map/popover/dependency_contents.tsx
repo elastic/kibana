@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
@@ -19,7 +20,7 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { usePopoverFetchOptions } from './popover_fetch_options_context';
 
 type DependencyReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -31,10 +32,13 @@ const INITIAL_STATE: Partial<DependencyReturn> = {
 export function DependencyContents({ selection, environment, start, end }: ContentsProps) {
   const { query } = useAnyOfApmParams(
     '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
   const { offset, comparisonEnabled } = query;
+  const { showToastOnError } = usePopoverFetchOptions();
   const apmRouter = useApmRouter();
 
   const isNode = !isEdge(selection);
@@ -56,7 +60,8 @@ export function DependencyContents({ selection, environment, start, end }: Conte
         });
       }
     },
-    [environment, dependencyName, start, end, offset, comparisonEnabled]
+    [environment, dependencyName, start, end, offset, comparisonEnabled],
+    { showToastOnError }
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
@@ -78,7 +83,11 @@ export function DependencyContents({ selection, environment, start, end }: Conte
   return (
     <>
       <EuiFlexItem>
-        <StatsList data={data} isLoading={isLoading} />
+        <StatsList
+          data={data}
+          isLoading={isLoading}
+          hasFailed={!showToastOnError && status === FETCH_STATUS.FAILURE}
+        />
       </EuiFlexItem>
       <EuiSpacer size="s" />
       <EuiFlexItem>

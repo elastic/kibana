@@ -5,31 +5,19 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import type { Environment } from '../../../common/environment_rt';
+import { routeDefinitions, type EnvironmentsResponse } from '@kbn/apm-api-shared';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getEnvironments } from './get_environments';
-import { rangeRt } from '../default_api_types';
+import { getUnifiedEnvironments } from './get_unified_environments';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const environmentsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/environments',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-      }),
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.environments.environments.endpoint,
+  params: routeDefinitions.environments.environments.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    environments: Environment[];
-  }> => {
+  handler: async (resources): Promise<EnvironmentsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { context, params, config } = resources;
     const { serviceName, start, end } = params.query;
@@ -55,4 +43,35 @@ const environmentsRoute = createApmServerRoute({
   },
 });
 
-export const environmentsRouteRepository = environmentsRoute;
+const unifiedEnvironmentsRoute = createApmServerRoute({
+  endpoint: routeDefinitions.environments.unifiedEnvironments.endpoint,
+  params: routeDefinitions.environments.unifiedEnvironments.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<EnvironmentsResponse> => {
+    const { context, params, getApmIndices } = resources;
+    const {
+      path: { serviceName },
+      query: { start, end },
+    } = params;
+
+    const [core, indices] = await Promise.all([context.core, getApmIndices()]);
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const size = await core.uiSettings.client.get<number>(maxSuggestions);
+
+    const environments = await getUnifiedEnvironments({
+      esClient,
+      indices,
+      serviceName,
+      start,
+      end,
+      size,
+    });
+
+    return { environments };
+  },
+});
+
+export const environmentsRouteRepository = {
+  ...environmentsRoute,
+  ...unifiedEnvironmentsRoute,
+};

@@ -93,6 +93,13 @@ const feedbackSubmittedEventSchema: RootSchema<FeedbackSubmittedEventData> = {
       optional: false,
     },
   },
+  context: {
+    type: 'pass_through',
+    _meta: {
+      description: 'App-specific context',
+      optional: true,
+    },
+  },
 };
 
 export const feedbackSubmittedEventType: EventTypeOpts<FeedbackSubmittedEventData> = {

@@ -10,7 +10,6 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { useKibana } from './use_kibana';
 
 const CLOUD_USER_ADMIN_ROLE = 'admin';
-const CLOUD_USER_BILLING_ADMIN_ROLE = '_ec_billing_admin';
 
 export const useAuthenticatedUser = () => {
   const {
@@ -35,6 +34,5 @@ export const useAuthenticatedUser = () => {
   return {
     user,
     isAdmin: user?.roles.includes(CLOUD_USER_ADMIN_ROLE) ?? false,
-    isBillingAdmin: user?.roles.includes(CLOUD_USER_BILLING_ADMIN_ROLE) ?? false,
   };
 };

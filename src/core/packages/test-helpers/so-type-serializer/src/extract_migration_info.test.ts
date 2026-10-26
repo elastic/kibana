@@ -158,6 +158,25 @@ describe('extractMigrationInfo', () => {
         'properties.hits.type': 'integer',
       });
     });
+
+    it('preserves empty-object fields instead of dropping them', () => {
+      const type = createType({
+        mappings: {
+          dynamic: false,
+          properties: {
+            title: { type: 'text' },
+            meta: { dynamic: false, properties: {} },
+          },
+        },
+      });
+      const output = extractMigrationInfo(type);
+      expect(output.mappings).toEqual({
+        dynamic: false,
+        'properties.title.type': 'text',
+        'properties.meta.dynamic': false,
+        'properties.meta.properties': {},
+      });
+    });
   });
 
   describe('modelVersions', () => {
@@ -345,6 +364,22 @@ describe('extractMigrationInfo', () => {
         forwardCompatibility: false,
         create: false,
       });
+    });
+
+    it('stores the update schema only when the model version defines one', () => {
+      const typeSchema = schema.object({ title: schema.string() });
+      const type = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: typeSchema } },
+          2: { changes: [], schemas: { create: typeSchema, update: typeSchema } },
+        },
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.modelVersions[0].schemas).not.toHaveProperty('update');
+      expect(output.modelVersions[1].schemas.update).toEqual(
+        output.modelVersions[1].schemas.create
+      );
     });
 
     it('returns the same serialized schema for two structurally identical config-schema objects', () => {

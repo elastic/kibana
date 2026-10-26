@@ -6,7 +6,8 @@
   "include": ["**/*"],
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/core-deprecations-common"
   ],
   "exclude": ["target/**/*"]
 }

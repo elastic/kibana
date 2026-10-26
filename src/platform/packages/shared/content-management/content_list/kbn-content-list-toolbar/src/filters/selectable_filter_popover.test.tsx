@@ -37,6 +37,31 @@ describe('SelectableFilterPopover', () => {
     expect(screen.queryByText('2')).not.toBeInTheDocument();
   });
 
+  it('treats option keys as active query aliases', async () => {
+    const onChange = jest.fn();
+
+    render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        query={Query.parse('').addOrFieldValue('tag', 'prod', true, 'eq')}
+        onChange={onChange}
+        options={options}
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    expect(screen.getByText('1')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Tags'));
+    fireEvent.click(await screen.findByText('Production'));
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+    });
+    expect(onChange.mock.calls[0][0].text).not.toContain('prod');
+  });
+
   it('shows the raw active-clause count before options load (URL hydration)', () => {
     // Facets are typically fetched lazily on first popover open, so `options`
     // can be empty when the page hydrates from a URL with filter clauses. The
@@ -111,6 +136,38 @@ describe('SelectableFilterPopover', () => {
       expect(screen.queryByText(/\+ click exclude/)).not.toBeInTheDocument();
     });
     expect(screen.queryByText('1')).not.toBeInTheDocument();
+  });
+
+  it('hides the search box when hideSearch is set', async () => {
+    render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        options={options}
+        hideSearch
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Tags'));
+
+    await screen.findByText('Production');
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+  });
+
+  it('shows the search box by default', async () => {
+    render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        options={options}
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Tags'));
+
+    expect(await screen.findByRole('searchbox')).toBeInTheDocument();
   });
 
   it('uses the captured modifier key to add an exclude filter', async () => {

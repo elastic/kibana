@@ -5,11 +5,48 @@
  * 2.0.
  */
 
+import { ToolType } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import {
   classifySkill,
+  getModelsForTelemetry,
   normalizePluginIdForTelemetry,
   normalizeSkillIdForTelemetry,
+  normalizeToolIdForTelemetry,
 } from './utils';
+
+describe('normalizeToolIdForTelemetry', () => {
+  it('returns the original id for tools typed as builtin, regardless of allow-list', () => {
+    // A built-in tool registered by another plugin and NOT present in the
+    // AGENT_BUILDER_BUILTIN_TOOLS allow-list still keeps its real id.
+    expect(
+      normalizeToolIdForTelemetry('platform.dashboard.manage_dashboard', ToolType.builtin)
+    ).toBe('platform.dashboard.manage_dashboard');
+  });
+
+  it('returns the original id for allow-listed built-in tools when no type is provided', () => {
+    expect(normalizeToolIdForTelemetry(platformCoreTools.search)).toBe(platformCoreTools.search);
+  });
+
+  it('returns the original id for internal framework tools', () => {
+    expect(normalizeToolIdForTelemetry('load_skill')).toBe('load_skill');
+  });
+
+  it('hashes user-created tools as `custom-<hash>`', () => {
+    expect(normalizeToolIdForTelemetry('my-esql-tool', ToolType.esql)).toBe(
+      normalizeToolIdForTelemetry('my-esql-tool')
+    );
+    expect(normalizeToolIdForTelemetry('my-esql-tool', ToolType.esql)).toMatch(
+      /^custom-[0-9a-f]+$/
+    );
+  });
+
+  it('hashes unknown tool ids when no type is provided and not allow-listed', () => {
+    expect(normalizeToolIdForTelemetry('platform.dashboard.manage_dashboard')).toMatch(
+      /^custom-[0-9a-f]+$/
+    );
+  });
+});
 
 describe('normalizePluginIdForTelemetry', () => {
   it('returns undefined when no plugin id is provided', () => {
@@ -86,6 +123,10 @@ describe('classifySkill', () => {
       origin: 'builtin',
       solution_area: 'observability',
     });
+    expect(classifySkill({ readonly: true, basePath: 'skills/ml/anomaly_detection' })).toEqual({
+      origin: 'builtin',
+      solution_area: 'ml',
+    });
     expect(classifySkill({ readonly: true, basePath: 'skills/search/baz' })).toEqual({
       origin: 'builtin',
       solution_area: 'search',
@@ -116,5 +157,36 @@ describe('classifySkill', () => {
       origin: 'builtin',
       solution_area: 'unknown',
     });
+  });
+});
+
+describe('getModelsForTelemetry', () => {
+  const usage = { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 };
+  const connector = (connectorId: string, model?: string) => ({
+    connector_id: connectorId,
+    model,
+    llm_calls: 1,
+    input_tokens: 1,
+    output_tokens: 1,
+  });
+
+  it('returns the distinct models in order of appearance', () => {
+    expect(
+      getModelsForTelemetry({
+        ...usage,
+        connectors: [connector('a', 'm1'), connector('b', 'm2'), connector('c', 'm1')],
+      })
+    ).toEqual({ models: ['m1', 'm2'], models_count: 2 });
+  });
+
+  it('ignores connectors that report no model', () => {
+    expect(
+      getModelsForTelemetry({ ...usage, connectors: [connector('a'), connector('b', 'm1')] })
+    ).toEqual({ models: ['m1'], models_count: 1 });
+  });
+
+  it('returns nothing without a breakdown or without any model', () => {
+    expect(getModelsForTelemetry(usage)).toEqual({});
+    expect(getModelsForTelemetry({ ...usage, connectors: [connector('a')] })).toEqual({});
   });
 });

@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
-
-export const filtersBuilderMaxHeightCss = (euiTheme: EuiThemeComputed) => css`
-  max-height: ${euiTheme.size.base} * 10;
-`;
 
 /** @todo: should be removed, no hardcoded sizes **/
 export const filterBadgeStyle = css`

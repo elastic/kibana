@@ -15,6 +15,7 @@ type BuilderArgs = Pick<
   UserActionBuilderArgs,
   | 'userAction'
   | 'unifiedAttachmentTypeRegistry'
+  | 'permissions'
   | 'caseData'
   | 'handleDeleteComment'
   | 'userProfiles'
@@ -26,6 +27,7 @@ type BuilderArgs = Pick<
 > & {
   attachment: SnakeToCamelCase<UnifiedAttachment>;
   isLoading: boolean;
+  isDeleted?: boolean;
 };
 
 export const createUnifiedAttachmentUserActionBuilder = ({
@@ -33,8 +35,10 @@ export const createUnifiedAttachmentUserActionBuilder = ({
   userProfiles,
   attachment,
   unifiedAttachmentTypeRegistry,
+  permissions,
   caseData,
   isLoading,
+  isDeleted,
   handleDeleteComment,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -47,9 +51,11 @@ export const createUnifiedAttachmentUserActionBuilder = ({
     userProfiles,
     attachment,
     registry: unifiedAttachmentTypeRegistry,
+    permissions,
     caseData,
     handleDeleteComment,
     isLoading,
+    isDeleted,
     getId: () =>
       toUnifiedAttachmentType(
         attachment.type,
@@ -63,6 +69,7 @@ export const createUnifiedAttachmentUserActionBuilder = ({
         metadata: attachment.metadata,
         createdBy: attachment.createdBy,
         version: attachment.version,
+        isDeleted: isDeleted ?? false,
         caseData: { id: caseData.id, title: caseData.title },
         rowContext: {
           manageMarkdownEditIds,

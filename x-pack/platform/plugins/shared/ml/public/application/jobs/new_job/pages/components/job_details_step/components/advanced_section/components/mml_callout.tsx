@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { JobCreatorContext } from '../../../../job_creator_context';
 
 export const MMLCallout: FC = () => {
@@ -22,7 +22,7 @@ export const MMLCallout: FC = () => {
   }, [jobValidatorUpdated]);
 
   return jobCreator.modelPlot && highCardinality !== null ? (
-    <EuiCallOut
+    <KbnWarningCallout
       announceOnMount
       title={
         <FormattedMessage
@@ -30,10 +30,7 @@ export const MMLCallout: FC = () => {
           defaultMessage="Proceed with caution!"
         />
       }
-      color="warning"
-      iconType="question"
-    >
-      <EuiText>
+      text={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.mmlWarning.message"
           defaultMessage="Creating model plots is resource intensive and not recommended
@@ -42,7 +39,7 @@ export const MMLCallout: FC = () => {
                 If you enable model plot with this configuration we recommend you use a dedicated results index."
           values={{ highCardinality }}
         />
-      </EuiText>
-    </EuiCallOut>
+      }
+    />
   ) : null;
 };

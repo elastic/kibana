@@ -10,7 +10,7 @@ import { AttachmentType } from '../../../../common/types/domain';
 import type { AttachmentRequestV2 } from '../../../../common/types/api';
 import { MAX_FILES_PER_CASE } from '../../../../common/constants';
 import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
-import { isFileAttachmentRequest } from '../../utils';
+import { isFileAttachmentRequest, isUnifiedFileAttachmentRequest } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 
 export class FileLimiter extends BaseLimiter {
@@ -36,11 +36,12 @@ export class FileLimiter extends BaseLimiter {
 
   public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
     let fileRequests = 0;
-    const legacyRequests = requests.filter(isLegacyAttachmentRequest);
 
-    for (const request of legacyRequests) {
-      if (isFileAttachmentRequest(request)) {
+    for (const request of requests) {
+      if (isLegacyAttachmentRequest(request) && isFileAttachmentRequest(request)) {
         fileRequests += request.externalReferenceMetadata.files.length;
+      } else if (isUnifiedFileAttachmentRequest(request)) {
+        fileRequests += request.metadata.files.length;
       }
     }
 

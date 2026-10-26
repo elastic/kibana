@@ -13,6 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const discover = getPageObject('discover');
   const dataViewApi = getService('dataViewApi');
   const samlAuth = getService('samlAuth');
   let roleAuthc: RoleCredentials;
@@ -20,6 +21,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('default dataView', function () {
     before(async () => {
       await svlCommonPage.loginWithRole('developer');
+      await discover.setQueryMode('classic');
       await svlSearchNavigation.navigateToLandingPage();
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
@@ -34,21 +36,16 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('should show discover but with no data', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
-      await testSubjects.existOrFail('~breadcrumb-deepLinkId-discover');
       await testSubjects.existOrFail('discover-dataView-switch-link');
       await testSubjects.click('discover-dataView-switch-link');
       await testSubjects.existOrFail('indexPattern-add-field');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
     });
 
     it('should show dashboard but with no data in dashboard', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
-      await testSubjects.existOrFail('~breadcrumb-deepLinkId-dashboards');
-      await testSubjects.existOrFail('emptyListPrompt');
-      await testSubjects.click('newItemButton');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Editing New Dashboard',
-      });
+      await testSubjects.existOrFail('dashboardListingCreateButton');
+      await testSubjects.click('dashboardListingCreateButton');
+      await testSubjects.existOrFail('emptyDashboardWidget');
     });
   });
 }

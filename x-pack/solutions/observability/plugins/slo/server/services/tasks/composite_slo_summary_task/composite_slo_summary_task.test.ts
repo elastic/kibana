@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreSetup, LoggerFactory } from '@kbn/core/server';
 import {
@@ -79,11 +80,10 @@ describe('CompositeSloSummaryTask', () => {
     enabled: true,
     experimental: {
       ruleFormV2: { enabled: false },
-      compositeSlo: { enabled: true },
     },
   } satisfies SLOConfig;
 
-  function createTask(): CompositeSloSummaryTask {
+  function createTask(options?: { compositeSloEnabled?: boolean }): CompositeSloSummaryTask {
     coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([
       {
@@ -94,6 +94,9 @@ describe('CompositeSloSummaryTask', () => {
         },
         savedObjects: {
           createInternalRepository: jest.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
+        },
+        featureFlags: {
+          getBooleanValue$: jest.fn().mockReturnValue(of(options?.compositeSloEnabled ?? true)),
         },
       } as never,
       {} as never,
@@ -119,7 +122,7 @@ describe('CompositeSloSummaryTask', () => {
       await task.runTask(
         createConcreteTaskInstanceStub(getCompositeSloSummaryTaskId()),
         coreSetup as CoreSetup,
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(addTransactionLabelsMock).toHaveBeenCalledWith({
@@ -136,7 +139,7 @@ describe('CompositeSloSummaryTask', () => {
       await task.runTask(
         createConcreteTaskInstanceStub('stale-task-instance-id'),
         coreSetup as CoreSetup,
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(addTransactionLabelsMock).toHaveBeenCalledWith({
@@ -154,10 +157,23 @@ describe('CompositeSloSummaryTask', () => {
       await task.runTask(
         createConcreteTaskInstanceStub(getCompositeSloSummaryTaskId()),
         coreSetup as CoreSetup,
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(mockPersist).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips computeAndPersistCompositeSummaries when composite SLO feature flag is disabled', async () => {
+      task = createTask({ compositeSloEnabled: false });
+      await task.start(createStartPlugins());
+
+      await task.runTask(
+        createConcreteTaskInstanceStub(getCompositeSloSummaryTaskId()),
+        coreSetup as CoreSetup,
+        new AbortController().signal
+      );
+
+      expect(mockPersist).not.toHaveBeenCalled();
     });
   });
 });

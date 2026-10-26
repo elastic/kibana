@@ -22,9 +22,10 @@ import { css } from '@emotion/react';
 import { isPlainObject } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { omitRequiredWithDefaults } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
@@ -189,13 +190,18 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       setSelectedExecutionId(id);
     }, []);
 
+    const editorInputsSchema = useMemo(
+      () => (inputs ? omitRequiredWithDefaults(inputs) : undefined),
+      [inputs]
+    );
+
     const handleMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
-        if (!inputs) return;
+        if (!editorInputsSchema) return;
 
         try {
           const currentModel = editor.getModel();
-          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             allowComments: false,
             enableSchemaRequest: false,
@@ -203,7 +209,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
               {
                 uri: SCHEMA_URI,
                 fileMatch: [currentModel?.uri.toString() ?? ''],
-                schema: inputs,
+                schema: editorInputsSchema,
               },
             ],
           });
@@ -211,7 +217,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
           // Monaco setup failed — fall back to basic JSON editing
         }
       },
-      [inputs]
+      [editorInputsSchema]
     );
 
     return (
@@ -219,7 +225,9 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         direction="column"
         gutterSize="m"
         css={css`
+          flex: 1;
           min-height: 0;
+          align-self: stretch;
         `}
       >
         <EuiFlexItem grow={false}>
@@ -266,14 +274,20 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         )}
         {selectedExecution && selectedExecution.id === selectedExecutionId && (
           <EuiFlexItem
+            grow
             css={css`
+              flex: 1;
+              min-height: 0;
               overflow: hidden;
+              display: flex;
+              flex-direction: column;
             `}
           >
             <EuiFlexGroup
               direction="column"
               gutterSize="s"
               css={css`
+                flex: 1;
                 min-height: 0;
               `}
             >
@@ -284,7 +298,10 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
               )}
 
               <EuiFlexItem
+                grow
                 css={css`
+                  flex: 1;
+                  min-height: 0;
                   overflow: hidden;
                 `}
               >
@@ -334,7 +351,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                       formatOnType: true,
                       quickSuggestions: false,
                       suggestOnTriggerCharacters: false,
-                      wordBasedSuggestions: false,
+                      wordBasedSuggestions: 'off',
                       parameterHints: {
                         enabled: false,
                       },

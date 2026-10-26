@@ -45,14 +45,14 @@ describe('accessKnownApmEventFields', () => {
 
     expect(() =>
       accessKnownApmEventFields({}).requireFields(['@timestamp', 'service.name'])
-    ).toThrowError('Missing required fields (@timestamp, service.name) in event');
+    ).toThrow('Missing required fields (@timestamp, service.name) in event');
 
     expect(() =>
       accessKnownApmEventFields({ ...input, 'service.name': [] }).requireFields([
         '@timestamp',
         'service.name',
       ])
-    ).toThrowError('Missing required fields (service.name) in event');
+    ).toThrow('Missing required fields (service.name) in event');
   });
 
   it('exposes an `unflatten` method', () => {
@@ -95,7 +95,7 @@ describe('accessKnownApmEventFields', () => {
 
     expect(requiredEvent?.['service.name']).toBe('node-svc');
 
-    expect(() => requiredEvent?.requireFields(['agent.name'])).toThrowError(
+    expect(() => requiredEvent?.requireFields(['agent.name'])).toThrow(
       'Missing required fields (agent.name) in event'
     );
   });
@@ -110,7 +110,7 @@ describe('accessKnownApmEventFields', () => {
       // error at compile time.
       // @ts-expect-error
       event['agent.name'] = 'nodejs';
-    }).toThrowError("'set' on proxy: trap returned falsish for property 'agent.name'");
+    }).toThrow("'set' on proxy: trap returned falsish for property 'agent.name'");
   });
 
   it('checks for the existence of any fields with values that partially match a key string', () => {

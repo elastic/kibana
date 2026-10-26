@@ -63,7 +63,7 @@ interface RowClickActionContext {
   esqlVariables: ESQLControlVariable[] | undefined;
   rowContext: RowContext;
   closeActionMenu: () => void;
-  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
+  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => Promise<void>;
   updateESQLQuery: UpdateESQLQueryFn;
 }
 
@@ -148,7 +148,7 @@ const contextRowActions: Array<
     name: i18n.translate('discover.dataCascade.row.action.viewDocs', {
       defaultMessage: 'Open in new tab',
     }),
-    icon: 'discoverApp',
+    icon: 'productDiscover',
     'data-test-subj': 'dscCascadeRowContextActionOpenInNewTab',
     onClick(this: RowClickActionContext, e) {
       e.preventDefault();

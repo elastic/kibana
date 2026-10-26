@@ -13,9 +13,13 @@ import { useHistory, useParams } from 'react-router-dom';
 import type { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
-import { getTestRunDetailRelativeLink } from '../../common/links/test_details_link';
+import {
+  getTestRunDetailLink,
+  getTestRunDetailRelativeLink,
+} from '../../common/links/test_details_link';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
+import { useGetUrlParams } from '../../../hooks';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const FailedTestsList = ({
@@ -39,6 +43,7 @@ export const FailedTestsList = ({
   const history = useHistory();
   const selectedLocation = useSelectedLocation();
   const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
 
   const formatter = useDateFormat();
 
@@ -50,11 +55,17 @@ export const FailedTestsList = ({
       name: TIMESTAMP_LABEL,
       sortable: true,
       render: (value: string, item: Ping) => {
-        const spaceIdQuery = spaceId ? `?spaceId=${spaceId}` : '';
         return (
           <EuiLink
             data-test-subj="failed-test-link"
-            href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}${spaceIdQuery}`}
+            href={getTestRunDetailLink({
+              basePath,
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+              spaceId,
+              remoteName,
+            })}
           >
             {formatter(value)}
           </EuiLink>
@@ -88,6 +99,7 @@ export const FailedTestsList = ({
               checkGroup: item.monitor.check_group,
               locationId: selectedLocation?.id,
               spaceId,
+              remoteName,
             })
           );
         },

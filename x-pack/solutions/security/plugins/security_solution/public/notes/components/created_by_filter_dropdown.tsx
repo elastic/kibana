@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiComboBox, EuiToolTip } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
@@ -15,7 +15,7 @@ import { useLicense } from '../../common/hooks/use_license';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { CREATED_BY_SELECT_TEST_ID } from './test_ids';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
-import { userFilterCreatedBy } from '..';
+import { userFilterCreatedBy, selectNotesTableCreatedByFilter } from '..';
 
 export const CREATED_BY = i18n.translate('xpack.securitySolution.notes.createdByDropdownLabel', {
   defaultMessage: 'Created by',
@@ -51,10 +51,16 @@ export const CreatedByFilterDropdown = React.memo(() => {
     [data]
   );
 
-  const [selectedUser, setSelectedUser] = useState<Array<EuiComboBoxOptionOption<User>>>();
+  const createdByFilter = useSelector(selectNotesTableCreatedByFilter);
+
+  const selectedUser = useMemo<Array<EuiComboBoxOptionOption<User>>>(() => {
+    if (!createdByFilter || !users.length) return [];
+    const match = users.find((u) => u.id === createdByFilter);
+    return match ? [match] : [];
+  }, [createdByFilter, users]);
+
   const onChange = useCallback(
     (user: Array<EuiComboBoxOptionOption<User>>) => {
-      setSelectedUser(user);
       dispatch(userFilterCreatedBy(user.length > 0 ? (user[0].id as string) : ''));
     },
     [dispatch]

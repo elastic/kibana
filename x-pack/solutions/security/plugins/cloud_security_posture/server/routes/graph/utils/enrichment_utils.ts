@@ -5,43 +5,285 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { resolveLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import type { EntityEnrichmentFields } from '../fetch_entity_enrichment';
+import type { AssetCriticalityCount, RiskScoreRange } from '../types';
+import {
+  ASSET_CRITICALITY_SEVERITY_ORDER,
+  isKnownAssetCriticalityLevel,
+} from '../asset_criticality_levels';
 
 /**
- * Checks if the entities latest index exists and is configured in lookup mode.
+ * SHA-256 hash of a sorted, comma-joined id list. Used to derive a stable node id when
+ * multiple entity ids collapse into a single graph node (group node, label node).
+ * Input is sorted internally so callers don't need to remember.
  */
-export const checkIfEntitiesIndexLookupMode = async (
+export const hashIds = (ids: string[]): string =>
+  createHash('sha256')
+    .update([...ids].sort().join(','))
+    .digest('hex');
+
+/**
+ * Unions an ES|QL multi-value column (scalar | array | null | undefined) into a target Set.
+ * Used by the regroup* functions to merge the VALUES(...) aggregates of pre-aggregated rows.
+ * `dropEmpty` additionally excludes the empty-string sentinel ES|QL emits for missing values —
+ * set it for doc id / doc-data columns to match the original `if (record.x)` falsy guards.
+ */
+export const addValuesToSet = (
+  set: Set<string>,
+  value: string | string[] | null | undefined,
+  { dropEmpty }: { dropEmpty: boolean }
+): void => {
+  for (const v of castArray(value ?? [])) {
+    if (v == null) continue;
+    if (dropEmpty && v === '') continue;
+    set.add(v);
+  }
+};
+
+/**
+ * Filters a multi-value doc-data column (JSON strings built by the ES|QL CONCAT expression)
+ * to only the entries whose embedded "id" field is in the allowed set. Used to attribute a
+ * shared STATS row's doc-data to a specific entity-type group without leaking across groups.
+ * Each entry has the shape: {"id":"<entityId>","type":"entity",...}
+ */
+export const filterDocDataToIds = (
+  docData: string | string[],
+  allowedIds: Set<string>
+): string[] => {
+  const entries = castArray(docData ?? []);
+  return entries.filter((entry) => {
+    if (!entry) return false;
+    try {
+      const parsed = JSON.parse(entry) as { id?: string };
+      return parsed.id != null && allowedIds.has(parsed.id);
+    } catch {
+      return false;
+    }
+  });
+};
+
+/**
+ * Resolves the concrete entities latest index name to query, or null when no
+ * live index exists for the space. Legacy-aware: un-migrated deployments still
+ * hold `.entities.v2.latest.security_{space}` while the
+ * `entityStore.migrateLegacySecurityAssets` feature flag is off, and LOOKUP JOIN
+ * consumers need whichever concrete name is live.
+ */
+export const resolveEntitiesIndexName = async (
   esClient: IScopedClusterClient,
   logger: Logger,
   spaceId: string
-): Promise<boolean> => {
-  const indexName = getEntitiesLatestIndexName(spaceId);
+): Promise<string | null> => {
   try {
-    const response = await esClient.asInternalUser.indices.getSettings({
-      index: indexName,
-    });
-    const indexSettings = response[indexName];
-    if (!indexSettings) {
-      logger.debug(`Entities index ${indexName} not found`);
-      return false;
-    }
-
-    // Check if index is in lookup mode
-    const mode = indexSettings.settings?.index?.mode;
-    const isLookupMode = mode === 'lookup';
-
-    if (!isLookupMode) {
-      logger.debug(`Entities index ${indexName} exists but is not in lookup mode (mode: ${mode})`);
-    }
-
-    return isLookupMode;
-  } catch (error) {
-    if (error.statusCode === 404) {
+    const indexName = await resolveLatestEntitiesIndexName(esClient.asInternalUser, spaceId);
+    const exists = await esClient.asInternalUser.indices.exists({ index: indexName });
+    if (!exists) {
       logger.debug(`Entities index ${indexName} does not exist`);
-      return false;
+      return null;
     }
-    logger.error(`Error checking entities index ${indexName}: ${error.message}`);
-    return false;
+    return indexName;
+  } catch (error) {
+    logger.error(`Error resolving entities index for space ${spaceId}: ${error.message}`);
+    return null;
   }
+};
+
+type SourceFieldsRecord = Record<string, string | string[]>;
+
+/** Reads a doc's sourceFields, which may sit at the top level (events docData) or inside `entity`. */
+const readSourceFields = (doc: Record<string, unknown>): SourceFieldsRecord | undefined => {
+  const topLevel = doc.sourceFields;
+  if (topLevel != null) return topLevel as SourceFieldsRecord;
+  const entity = doc.entity as Record<string, unknown> | undefined;
+  return entity?.sourceFields as SourceFieldsRecord | undefined;
+};
+
+/**
+ * Unions the per-field values of several sourceFields records into one.
+ * Fields that resolve to a single value stay scalars so only genuinely multi-value
+ * fields become arrays. Insertion order of both fields and values is preserved.
+ */
+const unionSourceFields = (records: Array<SourceFieldsRecord | undefined>): SourceFieldsRecord => {
+  const valuesByField = new Map<string, Set<string>>();
+  for (const record of records) {
+    for (const [field, value] of Object.entries(record ?? {})) {
+      let values = valuesByField.get(field);
+      if (!values) {
+        values = new Set<string>();
+        valuesByField.set(field, values);
+      }
+      addValuesToSet(values, value, { dropEmpty: true });
+    }
+  }
+  const merged: SourceFieldsRecord = {};
+  for (const [field, values] of valuesByField) {
+    if (values.size === 0) continue;
+    merged[field] = values.size === 1 ? [...values][0] : [...values];
+  }
+  return merged;
+};
+
+/**
+ * Computes the risk score range across the entities behind a node.
+ *
+ * A node can represent several entities (merged by type/sub-type), each with its own score,
+ * so the spread is reported rather than a single value; for a single-entity node min === max.
+ * Returns undefined when no entity has a score — absent must stay distinguishable from zero.
+ */
+export const aggregateRiskScore = (
+  entityIds: string[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): RiskScoreRange | undefined => {
+  let min: number | undefined;
+  let max: number | undefined;
+
+  for (const entityId of entityIds) {
+    const score = enrichmentMap.get(entityId)?.riskScore;
+    if (score == null) continue;
+    if (min === undefined || score < min) min = score;
+    if (max === undefined || score > max) max = score;
+  }
+
+  return min === undefined || max === undefined ? undefined : { min, max };
+};
+
+/**
+ * Computes the asset criticality distribution across the entities behind a node: how many
+ * of them carry each criticality level.
+ *
+ * Levels the graph does not model are skipped. Returns undefined when no entity has a
+ * criticality. Entries are ordered most to least severe so consumers that render only the
+ * first entry show the most severe level. Levels stay raw — the consumer translates them.
+ */
+export const aggregateAssetCriticality = (
+  entityIds: string[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): AssetCriticalityCount[] | undefined => {
+  const countsByLevel = new Map<string, number>();
+
+  for (const entityId of entityIds) {
+    const level = enrichmentMap.get(entityId)?.assetCriticality;
+    if (level == null) continue;
+    if (!isKnownAssetCriticalityLevel(level)) continue;
+    countsByLevel.set(level, (countsByLevel.get(level) ?? 0) + 1);
+  }
+
+  if (countsByLevel.size === 0) return undefined;
+
+  return ASSET_CRITICALITY_SEVERITY_ORDER.filter((level) => countsByLevel.has(level)).map(
+    (level) => ({
+      level,
+      count: countsByLevel.get(level) as number,
+    })
+  );
+};
+
+/**
+ * Rebuilds doc data JSON strings with enrichment data from the entity store, emitting exactly
+ * one entry per entity id.
+ *
+ * MV_EXPAND expands each multi-value identity field independently, so a single event yields a
+ * Cartesian product of rows: one entity id appears many times, each carrying a different
+ * combination of sourceField values. Keeping any single row would attribute another entity's
+ * values to this id, so the rows for an id are grouped and their sourceFields unioned per field.
+ * The union drops the bogus pairings while keeping every real value, since every individual value
+ * did occur in the source event.
+ *
+ * sourceFields always describe the *event* fields that pointed at the entity, never the entity
+ * store's own identity fields — consumers use them to query `logs-*`, so a field the events do
+ * not carry (or an entity-store-normalized value) would not match anything. Enrichment therefore
+ * contributes only entity metadata (name/type/sub_type/engine_type/host.ip) and is used as the
+ * sourceFields source solely when the doc carries none of its own (relationship target docData).
+ *
+ * Narrowing this union to the single EUID-composing field per the entity type's ranking is
+ * tracked separately in https://github.com/elastic/kibana/issues/262882 — all identifier fields
+ * are returned here so that selection can happen there.
+ *
+ * Docs that fail to parse or carry no id are returned unchanged.
+ */
+export const rebuildDocData = (
+  docDataItems: (string | null)[] | string | undefined,
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): string[] => {
+  const items = castArray(docDataItems ?? []).filter((d): d is string => d != null);
+
+  // Group by entity id, preserving first-seen order. Unparseable / id-less entries are passed
+  // through verbatim in place.
+  const passthrough = new Map<number, string>();
+  const docsById = new Map<string, Array<Record<string, unknown>>>();
+  const orderedKeys: Array<{ index: number } | { entityId: string }> = [];
+
+  items.forEach((item, index) => {
+    let doc: Record<string, unknown>;
+    try {
+      doc = JSON.parse(item);
+    } catch {
+      passthrough.set(index, item);
+      orderedKeys.push({ index });
+      return;
+    }
+    const entityId = doc.id as string | undefined;
+    if (!entityId) {
+      passthrough.set(index, item);
+      orderedKeys.push({ index });
+      return;
+    }
+    const existing = docsById.get(entityId);
+    if (existing) {
+      existing.push(doc);
+      return;
+    }
+    docsById.set(entityId, [doc]);
+    orderedKeys.push({ entityId });
+  });
+
+  return orderedKeys.map((key) => {
+    if ('index' in key) return passthrough.get(key.index) as string;
+
+    const { entityId } = key;
+    const docs = docsById.get(entityId) as Array<Record<string, unknown>>;
+    // The first row carries the doc-level fields (id, type, index); later rows differ only in
+    // their sourceField combination.
+    const doc = docs[0];
+    const enrichment = enrichmentMap.get(entityId);
+
+    // Event-derived fields win: they are what `logs-*` documents actually contain. Enrichment
+    // sourceFields are only a fallback for docs that carry none (relationship target docData).
+    const unionedSourceFields = unionSourceFields(docs.map(readSourceFields));
+    const sourceFields =
+      Object.keys(unionedSourceFields).length > 0 ? unionedSourceFields : enrichment?.sourceFields;
+
+    const entityData: Record<string, unknown> = {
+      availableInEntityStore: enrichment != null,
+      ...(sourceFields ? { sourceFields } : {}),
+    };
+
+    if (enrichment?.name != null) entityData.name = enrichment.name;
+    if (enrichment?.type != null) entityData.type = enrichment.type;
+    if (enrichment?.subType != null) entityData.sub_type = enrichment.subType;
+    if (enrichment?.engineType != null) entityData.engine_type = enrichment.engineType;
+    if (enrichment?.hostIps?.length) entityData.host = { ip: enrichment.hostIps };
+    // Omitted entirely when absent: an unscored / uncategorized entity carries no key,
+    // rather than a null the client would have to distinguish from a real value.
+    if (enrichment?.riskScore != null) entityData.riskScore = enrichment.riskScore;
+    // Levels the graph does not model are dropped rather than passed through, so a future or
+    // invalid value can never reach a consumer whose label map has no entry for it. Enforced
+    // here as well as at the enrichment source, since this is the single point every entity
+    // document flows through.
+    if (
+      enrichment?.assetCriticality != null &&
+      isKnownAssetCriticalityLevel(enrichment.assetCriticality)
+    ) {
+      entityData.assetCriticality = enrichment.assetCriticality;
+    }
+    if (enrichment?.sources?.length) entityData.sources = enrichment.sources;
+
+    delete doc.sourceFields;
+    doc.entity = entityData;
+    return JSON.stringify(doc);
+  });
 };

@@ -14,11 +14,13 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {
   spaces?: SpacesPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  dashboard?: DashboardStart;
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBasePluginStart;
 }
@@ -54,7 +56,7 @@ export class GenAiSettingsPlugin
     // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
     this.registeredApp = management.sections.section.ai.registerApp({
       id: 'genAiSettings',
-      title: i18n.translate('genAiSettings.managementSectionLabel', {
+      title: i18n.translate('xpack.genAiSettings.managementSectionLabel', {
         defaultMessage: 'GenAI Settings',
       }),
       order: 1,

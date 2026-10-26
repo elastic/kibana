@@ -14,7 +14,6 @@ import { SvlRuleDetailsPageProvider } from './svl_rule_details_ui_page';
 import { SvlManagementPageProvider } from './svl_management_page';
 import { SvlIngestPipelines } from './svl_ingest_pipelines';
 import { SvlApiKeysProvider } from './svl_api_keys';
-import { SvlDataUsagePageProvider } from './svl_data_usage';
 import { SvlCustomRolesPageProvider } from './svl_custom_roles_page';
 
 export const pageObjects = {
@@ -26,6 +25,5 @@ export const pageObjects = {
   svlManagementPage: SvlManagementPageProvider,
   svlIngestPipelines: SvlIngestPipelines,
   svlApiKeys: SvlApiKeysProvider,
-  svlDataUsagePage: SvlDataUsagePageProvider,
   svlCustomRolesPage: SvlCustomRolesPageProvider,
 };

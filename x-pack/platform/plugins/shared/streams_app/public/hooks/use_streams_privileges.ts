@@ -7,13 +7,11 @@
 
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_CANVAS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
@@ -24,7 +22,6 @@ export type StreamsFeatures = StreamsPrivileges['features'];
 export function useStreamsPrivileges() {
   const {
     core: {
-      pricing,
       application: {
         capabilities: { streams },
       },
@@ -35,22 +32,10 @@ export function useStreamsPrivileges() {
     },
   } = useKibana();
 
+  // undefined while the license$ has not emitted yet (loading).
   const license = useObservable(licensing.license$);
 
   const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
-
-  const significantEventsEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-    false // Default to false if the setting is not defined or not available
-  );
-  const significantEventsDiscoveryEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-    false
-  );
-
-  const significantEventsAvailableForTier = pricing.isFeatureAvailable(
-    STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
-  );
 
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
 
@@ -60,6 +45,7 @@ export function useStreamsPrivileges() {
   );
 
   const draftStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS, false);
+  const canvasEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CANVAS, false);
 
   return {
     ui: streams as {
@@ -69,14 +55,6 @@ export function useStreamsPrivileges() {
     features: {
       ui: {
         enabled: true,
-      },
-      significantEvents: license && {
-        enabled: significantEventsEnabled,
-        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
-      },
-      significantEventsDiscovery: license && {
-        enabled: significantEventsDiscoveryEnabled,
-        available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
       },
       queryStreams: {
         enabled: queryStreamsEnabled,
@@ -89,6 +67,9 @@ export function useStreamsPrivileges() {
       },
       draftStreams: {
         enabled: draftStreamsEnabled,
+      },
+      canvas: {
+        enabled: canvasEnabled,
       },
     },
     isLoading: !license,

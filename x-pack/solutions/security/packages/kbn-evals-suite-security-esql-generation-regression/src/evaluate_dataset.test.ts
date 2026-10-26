@@ -16,6 +16,7 @@ function buildEvaluator(name: string): Evaluator {
   return {
     name,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: jest.fn().mockResolvedValue({ score: 0 }),
   };
 }
@@ -107,7 +108,12 @@ describe('createEvaluateEsqlGenerationDataset', () => {
 
     await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ task, dataset }] = deps.runExperiment.mock.calls[0];
+    const [
+      {
+        task,
+        datasets: [dataset],
+      },
+    ] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(1);
 
     const result = await task({ input: { question: 'show me top 10 hosts' } });
@@ -150,7 +156,11 @@ describe('createEvaluateEsqlGenerationDataset', () => {
 
     await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ dataset }] = deps.runExperiment.mock.calls[0];
+    const [
+      {
+        datasets: [dataset],
+      },
+    ] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(31);
     expect(dataset.description).toContain('31 examples');
   });
@@ -162,7 +172,11 @@ describe('createEvaluateEsqlGenerationDataset', () => {
 
     await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ dataset }] = deps.runExperiment.mock.calls[0];
+    const [
+      {
+        datasets: [dataset],
+      },
+    ] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(1);
     expect(dataset.description).toContain('1 examples');
   });
@@ -174,7 +188,11 @@ describe('createEvaluateEsqlGenerationDataset', () => {
 
     await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ dataset }] = deps.runExperiment.mock.calls[0];
+    const [
+      {
+        datasets: [dataset],
+      },
+    ] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(2);
   });
 
@@ -185,7 +203,11 @@ describe('createEvaluateEsqlGenerationDataset', () => {
 
     await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ dataset }] = deps.runExperiment.mock.calls[0];
+    const [
+      {
+        datasets: [dataset],
+      },
+    ] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(31);
   });
 });

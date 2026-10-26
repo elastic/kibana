@@ -12,13 +12,15 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type {
   AlertsTableImperativeApi,
   AlertsTableOnLoadedProps,
+  BulkActionsConfig,
 } from '@kbn/response-ops-alerts-table/types';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
+import { useBulkAddToChatConfig } from '../../../agent_builder/hooks/use_bulk_add_to_chat_config';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
 import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { PageScope } from '../../../data_view_manager/constants';
 import type { AdditionalTableContext } from '../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
@@ -54,15 +56,26 @@ export interface TableProps {
    * Query that contains the id of the alerts to display in the table
    */
   query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
+  /**
+   * Appended to the table's own bulk actions
+   */
+  additionalBulkActionItems?: BulkActionsConfig[];
+  /**
+   * Adds a "Remove from case" item to each row's actions menu
+   */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 /**
  * Component used in the Cases page under Alerts tab, only in the EASE tier.
  * It leverages a lot of configurations and constants from the Alert summary page alerts table, and renders the ResponseOps AlertsTable.
  */
-export const Table = memo(({ dataView, id, onLoaded, packages, query }: TableProps) => {
+export const Table = memo((props: TableProps) => {
+  const { dataView, id, onLoaded, packages, query, additionalBulkActionItems, onRemoveFromCase } =
+    props;
   const {
     services: {
+      agentBuilder,
       application,
       cases,
       data,
@@ -76,29 +89,51 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
   } = useKibana();
   const services = useMemo(
     () => ({
+      agentBuilder,
+      application,
       cases,
       data,
       http,
       notifications,
       rendering,
       fieldFormats,
-      application,
       licensing,
       settings,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, rendering, settings]
+    [
+      agentBuilder,
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    ]
   );
 
-  const browserFields = useBrowserFields(PageScope.alerts, dataView);
+  const browserFields = useBrowserFields(dataView);
 
-  const additionalContext: AdditionalTableContext = useMemo(() => ({ packages }), [packages]);
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_cases');
+  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
+
+  const additionalContext: AdditionalTableContext = useMemo(
+    () => ({ packages, onRemoveFromCase }),
+    [packages, onRemoveFromCase]
+  );
 
   const refetchRef = useRef<AlertsTableImperativeApi>(null);
   const refetch = useCallback(() => {
     refetchRef.current?.refresh();
   }, []);
 
-  const bulkActions = useAdditionalBulkActions({ refetch });
+  const bulkActions = useAdditionalBulkActions({
+    refetch,
+    additionalItems: additionalBulkActionItems,
+  });
 
   const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 
@@ -125,6 +160,7 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
         runtimeMappings={runtimeMappings}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
+        bulkAddToChatConfig={maybeBulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );

@@ -14,7 +14,6 @@ export interface FindRuleTemplatesParams {
   page: number;
   perPage: number;
   search?: string;
-  defaultSearchOperator?: string;
   sortField?: string;
   sortOrder?: string;
   ruleTypeId?: string;
@@ -60,7 +59,6 @@ export async function findRuleTemplates({
   page,
   perPage,
   search,
-  defaultSearchOperator,
   sortField,
   sortOrder,
   ruleTypeId,
@@ -73,7 +71,6 @@ export async function findRuleTemplates({
         page,
         per_page: perPage,
         search,
-        default_search_operator: defaultSearchOperator,
         sort_field: sortField,
         sort_order: sortOrder,
         rule_type_id: ruleTypeId,

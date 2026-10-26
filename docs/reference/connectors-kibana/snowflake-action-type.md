@@ -11,6 +11,8 @@ applies_to:
 
 The Snowflake connector wraps the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/reference), the [Snowflake REST API v2](https://docs.snowflake.com/en/developer-guide/snowflake-rest-api/reference), and [Cortex Search](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/query-cortex-search-service). Use it to run read-only SQL queries, discover databases, schemas, tables, and views, describe their structure, and run semantic searches through Cortex Search. Workflow authors can also run write and DDL statements through a separate action that is not exposed to AI agents.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-snowflake-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

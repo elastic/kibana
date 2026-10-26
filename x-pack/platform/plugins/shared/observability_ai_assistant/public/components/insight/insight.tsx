@@ -5,16 +5,17 @@
  * 2.0.
  */
 import {
-  EuiHorizontalRule,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTextArea,
-  EuiCallOut,
-  EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
@@ -58,13 +59,6 @@ function ChatContent({
   initialMessages: Message[];
   connectorId: string;
 }) {
-  const {
-    services: {
-      plugins: {
-        start: { evals },
-      },
-    },
-  } = useKibana();
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
   const scopes = chatService.getScopes();
@@ -88,25 +82,6 @@ function ChatContent({
     messages.slice(initialMessagesRef.current.length + 1),
     MessageRole.Assistant
   );
-  const addToDatasetAction =
-    evals?.getAddToDatasetAction && lastAssistantResponse
-      ? evals.getAddToDatasetAction({
-          initialExample: {
-            input: {
-              initialMessages,
-              connectorId,
-              scopes,
-            },
-            output: {
-              content: lastAssistantResponse.message.content,
-            },
-            metadata: {
-              source: 'observability_ai_assistant',
-              timestamp: lastAssistantResponse['@timestamp'],
-            },
-          },
-        })
-      : null;
 
   useEffect(() => {
     next(initialMessagesRef.current);
@@ -161,17 +136,6 @@ function ChatContent({
                   }
                 }}
               />
-              {addToDatasetAction ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType={addToDatasetAction.iconType}
-                    onClick={addToDatasetAction.onClick}
-                  >
-                    {addToDatasetAction.label}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ) : null}
               <EuiFlexItem grow={false}>
                 <RegenerateResponseButton
                   onClick={() => {
@@ -210,6 +174,13 @@ function PromptEdit({
 }) {
   const [prompt, setPrompt] = useState(initialPrompt);
 
+  const cancelLabel = i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
+    defaultMessage: 'Cancel',
+  });
+  const sendPromptLabel = i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
+    defaultMessage: 'Send prompt',
+  });
+
   return (
     <EuiFlexGroup alignItems={'center'}>
       <EuiFlexItem grow={true}>
@@ -228,29 +199,29 @@ function PromptEdit({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
-            defaultMessage: 'Cancel',
-          })}
-          data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
-          iconType="cross"
-          display="base"
-          color="danger"
-          size="m"
-          onClick={onCancel}
-        />
+        <EuiToolTip content={cancelLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={cancelLabel}
+            data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
+            iconType="cross"
+            display="base"
+            color="danger"
+            size="m"
+            onClick={onCancel}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
-            defaultMessage: 'Send prompt',
-          })}
-          data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
-          iconType="kqlFunction"
-          display="fill"
-          size="m"
-          onClick={() => onSend(prompt)}
-        />
+        <EuiToolTip content={sendPromptLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={sendPromptLabel}
+            data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
+            iconType="kqlFunction"
+            display="fill"
+            size="m"
+            onClick={() => onSend(prompt)}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

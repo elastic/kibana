@@ -23,6 +23,17 @@ import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
+
+jest.mock('../../../common/components/user_privileges/user_privileges_context', () => ({
+  ...jest.requireActual('../../../common/components/user_privileges/user_privileges_context'),
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../../detection_engine/rule_management/logic/use_rule', () => ({
+  useRule: jest.fn().mockReturnValue({ data: undefined }),
+}));
 
 const baseRule = {
   name: 'Test Rule',
@@ -37,7 +48,10 @@ const baseRule = {
 
 const makeApplication = () =>
   ({
-    capabilities: { [RULES_FEATURE_LATEST]: { edit_rules: true } },
+    capabilities: {
+      [SECURITY_FEATURE_ID]: { crud: true, show: true },
+      [RULES_FEATURE_LATEST]: { edit_rules: true },
+    },
     navigateToApp: jest.fn(),
   } as unknown as ApplicationStart);
 
@@ -730,6 +744,29 @@ describe('RuleInlineContent integration', () => {
     (window as { location: unknown }).location = originalLocation;
   });
 
+  it('groups threat entries by framework in a single display', () => {
+    const entry = (framework: string, id: string) => ({
+      framework,
+      tactic: { id, name: `Tactic ${id}`, reference: `https://example.com/${id}` },
+      technique: [],
+    });
+    renderInlineContent({
+      ...baseRule,
+      type: 'query',
+      query: 'host.name: *',
+      threat: [
+        entry('MITRE ATLAS', 'AML.TA0000'),
+        entry('MITRE ATT&CK', 'TA0001'),
+        entry('MITRE ATLAS', 'AML.TA0001'),
+      ],
+    });
+
+    expect(screen.getAllByTestId('mitreFrameworkGroupTitle').map((el) => el.textContent)).toEqual([
+      'MITRE ATT&CK',
+      'MITRE ATLAS',
+    ]);
+  });
+
   it('shows "Rule type: Indicator Match" for threat_match rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,
@@ -968,13 +1005,13 @@ describe('RuleInlineContent integration', () => {
     expect(screen.getByText('test-tag')).toBeInTheDocument();
   });
 
-  it('shows "New Rule" callout when attachment data is not valid JSON', () => {
+  it('renders nothing when attachment data is not valid JSON', () => {
     const aiRuleCreation = new AiRuleCreationService();
     const application = makeApplication();
     const uiSettings = makeUiSettings();
     const definition = createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings });
     const Renderer = definition.renderInlineContent!;
-    render(
+    const { container } = render(
       <Renderer
         attachment={{
           id: 'test',
@@ -985,7 +1022,7 @@ describe('RuleInlineContent integration', () => {
       />
     );
 
-    expect(screen.getByText('New Rule')).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('still renders description, query, and other fields when name is missing', () => {
@@ -1003,7 +1040,7 @@ describe('RuleInlineContent integration', () => {
     expect(allText).toContain('*:*');
   });
 
-  it('shows "New Rule" callout when attachment data is a JSON array', () => {
+  it('renders nothing when attachment data is a JSON array', () => {
     const aiRuleCreation = new AiRuleCreationService();
     const application = makeApplication();
     const definition = createRuleAttachmentDefinition({
@@ -1012,7 +1049,7 @@ describe('RuleInlineContent integration', () => {
       uiSettings: makeUiSettings(),
     });
     const Renderer = definition.renderInlineContent!;
-    render(
+    const { container } = render(
       <Renderer
         attachment={{
           id: 'test',
@@ -1023,7 +1060,7 @@ describe('RuleInlineContent integration', () => {
       />
     );
 
-    expect(screen.getByText('New Rule')).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('places filters between index patterns and threshold details in DOM order', () => {
@@ -1101,5 +1138,63 @@ describe('RuleInlineContent integration', () => {
 
     expect(screen.getByText('Filters')).toBeInTheDocument();
     expect(screen.getByText('event.category: network')).toBeInTheDocument();
+  });
+
+  it('does not show diff accordion when attachment has no origin', () => {
+    renderInlineContent({ ...baseRule, type: 'query', query: 'host.name: *' });
+
+    expect(screen.queryByText('Changes from saved rule')).not.toBeInTheDocument();
+  });
+
+  describe('diff accordion', () => {
+    const mockUseRule = useRule as jest.Mock;
+
+    afterEach(() => {
+      mockUseRule.mockReturnValue({ data: undefined });
+    });
+
+    const renderWithOrigin = (savedRuleData?: Record<string, unknown>) => {
+      if (savedRuleData) {
+        mockUseRule.mockReturnValue({ data: savedRuleData });
+      }
+      const aiRuleCreation = new AiRuleCreationService();
+      const application = makeApplication();
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
+      const Renderer = definition.renderInlineContent!;
+      return render(
+        <Renderer
+          attachment={{
+            id: 'test',
+            type: 'security.rule',
+            origin: 'saved-rule-id',
+            data: {
+              text: JSON.stringify({
+                ...baseRule,
+                type: 'query',
+                query: 'host.name: *',
+                threat: [],
+              }),
+            },
+          }}
+          isSidebar={false}
+        />
+      );
+    };
+
+    it('shows accordion when origin is set and saved rule is available', () => {
+      renderWithOrigin({ ...baseRule, type: 'query', query: 'old.query: *', threat: [] });
+
+      expect(screen.getByText('Changes from saved rule')).toBeInTheDocument();
+    });
+
+    it('does not show accordion when origin is set but saved rule has not loaded', () => {
+      renderWithOrigin();
+
+      expect(screen.queryByText('Changes from saved rule')).not.toBeInTheDocument();
+    });
   });
 });

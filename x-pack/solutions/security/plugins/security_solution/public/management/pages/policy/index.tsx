@@ -15,6 +15,7 @@ import { PolicyDetails, PolicyList } from './view';
 import {
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
@@ -32,6 +33,9 @@ export const PolicyContainer = memo(() => {
   const isEndpointExceptionsMovedUnderManagementFeatureEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
+  const isCustomYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
+    'customYaraSignaturesEnabled'
+  );
   const isEnterprise = useLicense().isEnterprise();
 
   return (
@@ -48,6 +52,9 @@ export const PolicyContainer = memo(() => {
           MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
           ...(isEndpointExceptionsMovedUnderManagementFeatureEnabled
             ? [MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH]
+            : []),
+          ...(isCustomYaraSignaturesEnabled
+            ? [MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH]
             : []),
           ...(isEnterprise ? [MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH] : []),
         ]}

@@ -14,7 +14,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public/contex
 import { formatId } from './constants';
 import { NumberFormatEditor } from './number';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   context: jest.requireActual('@kbn/kibana-react-plugin/public/context').context,
@@ -26,7 +26,7 @@ const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: '0,0.[000]' };
   }),
-  reactConvert: jest.fn().mockImplementation((input: number) => input * 2),
+  convertToReact: jest.fn().mockImplementation((input: number) => input * 2),
 });
 
 const formatParams = {
@@ -79,5 +79,15 @@ describe('NumberFormatEditor', () => {
     );
     expect(screen.getByText('10000')).toBeVisible();
     expect(screen.getByText('20000')).toBeVisible();
+  });
+
+  it('should fire change with the new pattern when the pattern input changes', () => {
+    renderNumberFormatEditor();
+
+    fireEvent.change(screen.getByTestId('numberEditorFormatPattern'), {
+      target: { value: '+0,0' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ pattern: '+0,0' });
   });
 });

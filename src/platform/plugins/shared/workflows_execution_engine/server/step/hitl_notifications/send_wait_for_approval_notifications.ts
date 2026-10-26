@@ -1,0 +1,347 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { WaitForApprovalStep } from '@kbn/workflows';
+import { buildExternalResumeUrl } from '@kbn/workflows/server';
+import {
+  assertRenderedHitlEmailRecipients,
+  buildDefaultHitlApprovalEmailMessage,
+  buildHitlEmailConnectorInput,
+  buildHitlExecutionFooterPath,
+  renderHitlEmailAddresses,
+  resolveHitlEmailSubject,
+} from './build_hitl_email_notification';
+import {
+  assertConnectorSucceeded,
+  buildServiceNowAddCommentInput,
+  buildSlack2SendMessageInput,
+  buildTeamsSendChannelMessageInput,
+  escapeServiceNowCommentText,
+  escapeTeamsHtml,
+  executeHitlHttpChannel,
+  fitHitlTextPreservingSuffix,
+  renderServiceNowField,
+  renderTeamsField,
+  SERVICENOW_COMMENT_MAX_LENGTH,
+  serviceNowCommentLink,
+  slackApiChannelTarget,
+  TEAMS_CONTENT_MAX_LENGTH,
+  teamsHtmlLink,
+} from './hitl_connector_helpers';
+import type { ConnectorExecutor } from '../../connector_executor';
+
+type WaitForApprovalChannels = NonNullable<NonNullable<WaitForApprovalStep['with']>['channels']>;
+
+export interface WaitForApprovalResumeLinks {
+  approveUrl: string;
+  rejectUrl: string;
+}
+
+export function buildWaitForApprovalResumeLinks({
+  kibanaUrl,
+  spaceId,
+  executionId,
+  stepId,
+  token,
+}: {
+  kibanaUrl: string;
+  spaceId: string;
+  executionId: string;
+  stepId: string;
+  token: string;
+}): WaitForApprovalResumeLinks {
+  const baseParams = { kibanaUrl, spaceId, executionId, stepId, token };
+
+  return {
+    approveUrl: buildExternalResumeUrl({ ...baseParams, approved: true }),
+    rejectUrl: buildExternalResumeUrl({ ...baseParams, approved: false }),
+  };
+}
+
+function escapeSlackMrkdwnUrl(url: string): string {
+  return url.replace(/&/g, '&amp;');
+}
+
+function buildServiceNowApprovalComment({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    escapeServiceNowCommentText(message),
+    `${serviceNowCommentLink(approveLabel, approveUrl)}\n${serviceNowCommentLink(
+      rejectLabel,
+      rejectUrl
+    )}`,
+    SERVICENOW_COMMENT_MAX_LENGTH
+  );
+}
+
+function buildTeamsApprovalMessage({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    escapeTeamsHtml(message),
+    `<br>${teamsHtmlLink(approveLabel, approveUrl)} ${teamsHtmlLink(rejectLabel, rejectUrl)}`,
+    TEAMS_CONTENT_MAX_LENGTH
+  );
+}
+
+function buildSlackMessage({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}): string {
+  const prompt = message.length > 0 ? `${message}\n\n` : '';
+  return `${prompt}<${escapeSlackMrkdwnUrl(approveUrl)}|${approveLabel}>  <${escapeSlackMrkdwnUrl(
+    rejectUrl
+  )}|${rejectLabel}>`;
+}
+
+function buildSlackApiBlocks({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}) {
+  const blocks: Array<Record<string, unknown>> = [];
+
+  if (message.length > 0) {
+    blocks.push({
+      type: 'section',
+      text: { type: 'mrkdwn', text: message },
+    });
+  }
+
+  blocks.push({
+    type: 'actions',
+    elements: [
+      {
+        type: 'button',
+        text: { type: 'plain_text', text: approveLabel, emoji: true },
+        url: approveUrl,
+        style: 'primary',
+      },
+      {
+        type: 'button',
+        text: { type: 'plain_text', text: rejectLabel, emoji: true },
+        url: rejectUrl,
+        style: 'danger',
+      },
+    ],
+  });
+
+  return blocks;
+}
+
+function buildSlackApiBlockkitInput(
+  linkParams: {
+    message: string;
+    approveLabel: string;
+    rejectLabel: string;
+    approveUrl: string;
+    rejectUrl: string;
+  },
+  target: { channelNames?: string[]; channelIds?: string[] }
+) {
+  return {
+    subAction: 'postBlockkit' as const,
+    subActionParams: {
+      ...target,
+      text: JSON.stringify({ blocks: buildSlackApiBlocks(linkParams) }),
+    },
+  };
+}
+
+export async function sendWaitForApprovalNotifications({
+  channels,
+  message,
+  approveLabel,
+  rejectLabel,
+  resumeLinks,
+  spaceId,
+  workflowId,
+  executionId,
+  renderTemplate,
+  connectorExecutor,
+  abortController,
+}: {
+  channels: WaitForApprovalChannels;
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  resumeLinks: WaitForApprovalResumeLinks;
+  spaceId: string;
+  workflowId: string;
+  executionId: string;
+  renderTemplate: (template: string) => string;
+  connectorExecutor: ConnectorExecutor;
+  abortController: AbortController;
+}): Promise<void> {
+  const linkParams = {
+    message,
+    approveLabel,
+    rejectLabel,
+    approveUrl: resumeLinks.approveUrl,
+    rejectUrl: resumeLinks.rejectUrl,
+  };
+
+  const slackConfig = channels.slack;
+  if (slackConfig?.['connector-id']) {
+    const result = await connectorExecutor.execute({
+      connectorType: 'slack',
+      connectorNameOrId: slackConfig['connector-id'],
+      input: {
+        message: buildSlackMessage(linkParams),
+      },
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const slackApiConfig = channels.slack_api;
+  const slackApiConnectorId = slackApiConfig?.['connector-id'];
+  const slackApiChannels = slackApiConfig?.channels;
+  if (slackApiConnectorId && slackApiChannels?.length) {
+    for (const channel of slackApiChannels) {
+      const result = await connectorExecutor.execute({
+        connectorType: 'slack_api',
+        connectorNameOrId: slackApiConnectorId,
+        input: buildSlackApiBlockkitInput(linkParams, slackApiChannelTarget(channel)),
+        abortController,
+      });
+      assertConnectorSucceeded(result);
+    }
+  }
+
+  const emailConfig = channels.email;
+  if (emailConfig?.['connector-id']) {
+    const emailTo = renderHitlEmailAddresses(emailConfig.to, renderTemplate);
+    assertRenderedHitlEmailRecipients(emailTo);
+    const result = await connectorExecutor.execute({
+      connectorType: 'email',
+      connectorNameOrId: emailConfig['connector-id'],
+      input: buildHitlEmailConnectorInput({
+        emailConfig: {
+          ...emailConfig,
+          to: emailTo,
+          cc: renderHitlEmailAddresses(emailConfig.cc, renderTemplate),
+          bcc: renderHitlEmailAddresses(emailConfig.bcc, renderTemplate),
+        },
+        subject: resolveHitlEmailSubject(
+          emailConfig.subject != null ? renderTemplate(emailConfig.subject) : undefined,
+          'approval'
+        ),
+        message: buildDefaultHitlApprovalEmailMessage(linkParams),
+        footerLinkPath: buildHitlExecutionFooterPath({ spaceId, workflowId, executionId }),
+      }),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const slack2Config = channels.slack2;
+  const slack2ConnectorId = slack2Config?.['connector-id'];
+  const slack2Channels = slack2Config?.channels;
+  if (slack2ConnectorId && slack2Channels?.length) {
+    const text = buildSlackMessage(linkParams);
+    for (const channel of slack2Channels) {
+      const result = await connectorExecutor.execute({
+        connectorType: 'slack2',
+        connectorNameOrId: slack2ConnectorId,
+        input: buildSlack2SendMessageInput(channel, text),
+        abortController,
+      });
+      assertConnectorSucceeded(result);
+    }
+  }
+
+  const serviceNowConfig = channels.servicenow;
+  const serviceNowConnectorId = serviceNowConfig?.['connector-id'];
+  const serviceNowTable = serviceNowConfig?.table;
+  const serviceNowSysId = serviceNowConfig?.['sys-id'];
+  if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
+    const table = renderServiceNowField(serviceNowTable, renderTemplate, 'table');
+    const sysId = renderServiceNowField(serviceNowSysId, renderTemplate, 'sys-id');
+    const result = await connectorExecutor.execute({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: serviceNowConnectorId,
+      input: buildServiceNowAddCommentInput(
+        table,
+        sysId,
+        buildServiceNowApprovalComment(linkParams)
+      ),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const teamsConfig = channels.teams;
+  const teamsConnectorId = teamsConfig?.['connector-id'];
+  const teamId = teamsConfig?.['team-id'];
+  const channelId = teamsConfig?.['channel-id'];
+  if (teamsConnectorId && teamId && channelId) {
+    const renderedTeamId = renderTeamsField(teamId, renderTemplate, 'team-id');
+    const renderedChannelId = renderTeamsField(channelId, renderTemplate, 'channel-id');
+    const result = await connectorExecutor.execute({
+      connectorType: 'microsoft-teams',
+      connectorNameOrId: teamsConnectorId,
+      input: buildTeamsSendChannelMessageInput(
+        renderedTeamId,
+        renderedChannelId,
+        buildTeamsApprovalMessage(linkParams)
+      ),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const httpConfig = channels.http;
+  if (httpConfig && (httpConfig['connector-id'] || httpConfig.url)) {
+    await executeHitlHttpChannel({
+      channel: httpConfig,
+      renderTemplate,
+      connectorExecutor,
+      abortController,
+    });
+  }
+}

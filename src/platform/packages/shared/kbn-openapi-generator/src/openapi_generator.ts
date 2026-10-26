@@ -12,7 +12,7 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 import chalk from 'chalk';
 import fs from 'fs/promises';
-import globby from 'globby';
+import { globby } from 'globby';
 import { resolve } from 'path';
 import { fixEslint } from './lib/fix_eslint';
 import { formatOutput } from './lib/format_output';

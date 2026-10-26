@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { AgentClient } from './client';
-export { createClient } from './client';
+export type { AgentClient, SystemAgentClient } from './client';
+export { createClient, createSystemClient } from './client';

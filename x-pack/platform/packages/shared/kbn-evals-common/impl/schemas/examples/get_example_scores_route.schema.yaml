@@ -8,7 +8,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: GetExampleScores
-      description: Get score documents for a specific example across runs
+      description: Get score documents for a specific example across experiments
       summary: Get example scores
       tags:
         - Evals API
@@ -18,6 +18,15 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
+        - name: dataset_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1024
+          description: Filter scores to a specific dataset. When omitted, scores from all datasets matching the example ID are returned.
       responses:
         "200":
           description: Successful response

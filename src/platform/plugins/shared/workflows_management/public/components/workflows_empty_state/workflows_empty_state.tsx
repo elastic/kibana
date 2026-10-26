@@ -7,44 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIllustration } from '@elastic/eui';
+import { relevanceHandTouch } from '@elastic/eui-illustrations';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
-import { useKibana } from '../../hooks/use_kibana';
-interface WorkflowsEmptyStateProps {
-  onCreateWorkflow?: () => void;
-  canCreateWorkflow?: boolean;
-}
-
-export function WorkflowsEmptyState({
-  onCreateWorkflow,
-  canCreateWorkflow = false,
-}: WorkflowsEmptyStateProps) {
-  const { http } = useKibana().services;
+import { PrivilegesFooter } from '../workflows_required_priveleges_footer';
+export function WorkflowsEmptyStateReadOnly() {
   return (
     <EuiEmptyPrompt
       icon={
-        <EuiImage
-          size="fullWidth"
-          src={http?.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
+        <EuiIllustration
+          type={relevanceHandTouch}
           alt=""
+          style={{ maxInlineSize: 240, marginInline: 'auto' }}
         />
       }
       title={
         <h2 style={{ whiteSpace: 'nowrap' }}>
           <FormattedMessage
-            id="workflows.emptyState.title"
-            defaultMessage="Get Started with Workflows"
+            id="workflows.emptyStateReadOnly.title"
+            defaultMessage="Workflows list will be here"
           />
         </h2>
       }
@@ -54,57 +36,21 @@ export function WorkflowsEmptyState({
         <>
           <p>
             <FormattedMessage
-              id="workflows.emptyState.body.firstParagraph"
-              defaultMessage="Workflows let you automate repetitive tasks and streamline processes across your environment. Create workflows to connect actions, reduce manual effort, and improve operational efficiency."
+              id="workflows.emptyStateReadOnly.body.firstParagraph"
+              defaultMessage="Workflows let you automate repetitive tasks and streamline processes across your environment."
             />
           </p>
         </>
       }
-      actions={
-        canCreateWorkflow && onCreateWorkflow ? (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusCircle">
-                <FormattedMessage
-                  id="workflows.emptyState.createButton"
-                  defaultMessage="Create a new workflow"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href="https://github.com/elastic/workflows"
-                target="_blank"
-                iconType="external"
-                iconSide="right"
-                aria-label="Example workflows"
-              >
-                <FormattedMessage
-                  id="workflows.emptyState.exampleWorkflowsButton"
-                  defaultMessage="Example workflows"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null
-      }
       footer={
-        <>
-          <EuiTitle size="xxs">
-            <span>
-              <FormattedMessage
-                id="workflows.emptyState.footer.title"
-                defaultMessage="Need help?"
-              />
-            </span>
-          </EuiTitle>{' '}
-          <EuiLink href={WORKFLOWS_DOCUMENTATION_URL} target="_blank">
-            <FormattedMessage
-              id="workflows.emptyState.footer.link"
-              defaultMessage="Read documentation"
-            />
-          </EuiLink>
-        </>
+        <PrivilegesFooter
+          permissions={[
+            {
+              id: 'workflows.writeWorkflowPermissionText',
+              default: 'Workflows: Write',
+            },
+          ]}
+        />
       }
     />
   );

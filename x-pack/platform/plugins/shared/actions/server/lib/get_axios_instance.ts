@@ -13,7 +13,13 @@ import type {
 } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
+import type {
+  AuthMode,
+  AuthContext,
+  CredentialAccessor,
+  GetTokenOpts,
+  NormalizedAuthType,
+} from '@kbn/connector-specs';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
@@ -22,6 +28,8 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getAxiosAuthStrategy } from './axios_auth_strategies';
+import { recordConnectorAuth } from './connector_metrics';
+import type { AuthStrategyDeps, AxiosAuthStrategy } from './axios_auth_strategies';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
@@ -47,6 +55,92 @@ interface GetAxiosInstanceOpts {
 }
 
 type ValidatedSecrets = Record<string, unknown>;
+
+/** Auth resolution deliberately excludes `cloud`: it has no bearing on how a connector authenticates. */
+type ConnectorAuthDeps = Pick<
+  GetAxiosInstanceOpts,
+  'authTypeRegistry' | 'configurationUtilities' | 'logger'
+>;
+
+interface ConnectorAuthOpts {
+  connectorId: string;
+  connectorTypeId?: string;
+  connectorTokenClient?: ConnectorTokenClientContract;
+  secrets: ValidatedSecrets;
+  authMode?: AuthMode;
+  profileUid?: string;
+}
+
+interface ResolvedConnectorAuth {
+  authTypeId: string;
+  authType: NormalizedAuthType;
+  strategy: AxiosAuthStrategy;
+  strategyDeps: AuthStrategyDeps;
+  authCtx: AuthContext;
+}
+
+const getAuthTypeId = (secrets: ValidatedSecrets): string =>
+  (secrets as { authType?: string }).authType || 'none';
+
+/**
+ * The single place a connector's auth is resolved. Both transports consume this, so token
+ * acquisition and refresh cannot diverge between the axios path and a native client.
+ */
+const resolveConnectorAuth = (
+  { authTypeRegistry, configurationUtilities, logger }: ConnectorAuthDeps,
+  {
+    connectorId,
+    connectorTypeId,
+    secrets,
+    connectorTokenClient,
+    authMode,
+    profileUid,
+  }: ConnectorAuthOpts
+): ResolvedConnectorAuth => {
+  const authTypeId = getAuthTypeId(secrets);
+  // throws if auth type is not found
+  const authType = authTypeRegistry.get(authTypeId);
+  const strategy = getAxiosAuthStrategy(authTypeId);
+  const strategyDeps = {
+    connectorId,
+    connectorTypeId,
+    secrets,
+    connectorTokenClient,
+    logger,
+    configurationUtilities,
+    authMode,
+    profileUid,
+  };
+  const authCtx: AuthContext = {
+    getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
+    getToken: async (opts: GetTokenOpts) => {
+      try {
+        const token = await strategy.getToken(opts, strategyDeps);
+        // A null token means none could be obtained (missing credentials or a failed refresh), so it is a failure.
+        recordConnectorAuth({
+          phase: 'token',
+          authType: authTypeId,
+          connectorType: connectorTypeId,
+          ...(token === null ? { errorType: 'token_request_failed' as const } : {}),
+        });
+        return token;
+      } catch (error) {
+        recordConnectorAuth({
+          phase: 'token',
+          authType: authTypeId,
+          connectorType: connectorTypeId,
+          errorType: 'token_request_failed',
+        });
+        throw error;
+      }
+    },
+    logger,
+    proxySettings: configurationUtilities.getProxySettings(),
+    sslSettings: configurationUtilities.getSSLSettings(),
+  };
+
+  return { authTypeId, authType, strategy, strategyDeps, authCtx };
+};
 
 const MAX_CONTENT_LENGTH_ERROR_MESSAGE = 'maxContentLength';
 
@@ -113,6 +207,8 @@ const logMaxContentLengthError = ({
 export interface GetAxiosInstanceWithAuthFnOpts {
   additionalHeaders?: Record<string, AxiosHeaderValue>;
   connectorId: string;
+  /** Only used to label auth metrics. */
+  connectorTypeId?: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
   signal?: AbortSignal;
@@ -123,6 +219,57 @@ export interface GetAxiosInstanceWithAuthFnOpts {
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
 ) => Promise<AxiosInstance>;
+
+export class UnsupportedAuthProducerError extends Error {
+  constructor(authTypeId: string) {
+    super(
+      `[Action][ExternalService] Auth type "${authTypeId}" does not support getAuthHeaders for native HTTP clients.`
+    );
+    this.name = 'UnsupportedAuthProducerError';
+  }
+}
+
+export interface GetCredentialFnOpts {
+  connectorId: string;
+  /** Only used to label auth metrics. */
+  connectorTypeId?: string;
+  connectorTokenClient?: ConnectorTokenClientContract;
+  secrets: ValidatedSecrets;
+  authMode?: AuthMode;
+  profileUid?: string;
+}
+
+export type GetCredentialFn = (opts: GetCredentialFnOpts) => CredentialAccessor;
+
+export const getCredentialWithAuth = ({
+  authTypeRegistry,
+  configurationUtilities,
+  logger,
+}: GetAxiosInstanceOpts): GetCredentialFn => {
+  return ({
+    connectorId,
+    connectorTypeId,
+    secrets,
+    connectorTokenClient,
+    authMode,
+    profileUid,
+  }: GetCredentialFnOpts): CredentialAccessor => {
+    const { authType, authTypeId, authCtx } = resolveConnectorAuth(
+      { authTypeRegistry, configurationUtilities, logger },
+      { connectorId, connectorTypeId, secrets, connectorTokenClient, authMode, profileUid }
+    );
+
+    return {
+      getAuthHeaders: async () => {
+        if (!authType.getAuthHeaders) {
+          throw new UnsupportedAuthProducerError(authTypeId);
+        }
+        return authType.getAuthHeaders(authCtx, secrets);
+      },
+    };
+  };
+};
+
 export const getAxiosInstanceWithAuth = ({
   authTypeRegistry,
   cloud,
@@ -132,6 +279,7 @@ export const getAxiosInstanceWithAuth = ({
   return async ({
     additionalHeaders,
     connectorId,
+    connectorTypeId,
     secrets,
     connectorTokenClient,
     signal,
@@ -141,10 +289,14 @@ export const getAxiosInstanceWithAuth = ({
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
-      authTypeId = (secrets as { authType?: string }).authType || 'none';
+      // Assigned before resolution so the catch below can name the auth type even when the
+      // registry lookup is what failed.
+      authTypeId = getAuthTypeId(secrets);
 
-      // throws if auth type is not found
-      const authType = authTypeRegistry.get(authTypeId);
+      const { authType, strategy, strategyDeps, authCtx } = resolveConnectorAuth(
+        { authTypeRegistry, configurationUtilities, logger },
+        { connectorId, connectorTypeId, secrets, connectorTokenClient, authMode, profileUid }
+      );
 
       const { maxContentLength, timeout: settingsTimeout } =
         configurationUtilities.getResponseSettings();
@@ -184,35 +336,12 @@ export const getAxiosInstanceWithAuth = ({
         return config;
       });
 
-      const strategy = getAxiosAuthStrategy(authTypeId);
-      const strategyDeps = {
-        connectorId,
-        secrets,
-        connectorTokenClient,
-        logger,
-        configurationUtilities,
-        authMode,
-        profileUid,
-      };
-
       if (connectorTokenClient) {
         strategy.installResponseInterceptor(axiosInstance, strategyDeps);
       }
 
-      const configureCtx = {
-        getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
-        getToken: (opts: GetTokenOpts) => strategy.getToken(opts, strategyDeps),
-        logger,
-        proxySettings: configurationUtilities.getProxySettings(),
-        sslSettings: configurationUtilities.getSSLSettings(),
-      };
-
       // use the registered auth type to configure authentication for the axios instance
-      const configuredAxiosInstance = await authType.configure(
-        configureCtx,
-        axiosInstance,
-        secrets
-      );
+      const configuredAxiosInstance = await authType.configure(authCtx, axiosInstance, secrets);
       configuredAxiosInstance.interceptors.response.use(undefined, (error: unknown) => {
         logMaxContentLengthError({
           connectorId,
@@ -221,6 +350,15 @@ export const getAxiosInstanceWithAuth = ({
           maxContentLength: configuredMaxContentLength,
         });
         return Promise.reject(error);
+      });
+
+      // Registered after authType.configure so it survives SSL/PFX interceptor clearing.
+      // Validates every initial request target (including relative URLs resolved against baseURL)
+      // against the Actions allowedHosts policy before any network dispatch.
+      configuredAxiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+        const resolvedUrl = configuredAxiosInstance.getUri(config);
+        configurationUtilities.ensureUriAllowed(resolvedUrl);
+        return config;
       });
 
       return configuredAxiosInstance;

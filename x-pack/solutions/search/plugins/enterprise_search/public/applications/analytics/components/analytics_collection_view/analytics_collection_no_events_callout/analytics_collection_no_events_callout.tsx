@@ -9,9 +9,8 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
@@ -38,42 +37,38 @@ export const AnalyticsCollectionNoEventsCallout: React.FC<
   }, []);
 
   return hasEvents || isLoading ? null : (
-    <EuiCallOut
+    <KbnInfoCallout
       announceOnMount
-      color="primary"
-      iconType="download"
       title={i18n.translate(
         'xpack.enterpriseSearch.analytics.collectionsView.noEventsCallout.title',
         {
           defaultMessage: 'Install our tracker',
         }
       )}
-    >
-      <EuiText>
-        {i18n.translate(
-          'xpack.enterpriseSearch.analytics.collectionsView.noEventsCallout.description',
-          {
-            defaultMessage:
-              'Start receiving metric data in this Collection by installing our tracker in your search application.',
-          }
-        )}
-      </EuiText>
-      <EuiSpacer />
-      <EuiButton
-        fill
-        type="submit"
-        onClick={() =>
-          navigateToUrl(
-            generateEncodedPath(COLLECTION_INTEGRATE_PATH, {
-              name: analyticsCollection.name,
-            })
-          )
+      text={i18n.translate(
+        'xpack.enterpriseSearch.analytics.collectionsView.noEventsCallout.description',
+        {
+          defaultMessage:
+            'Start receiving metric data in this Collection by installing our tracker in your search application.',
         }
-      >
-        {i18n.translate('xpack.enterpriseSearch.analytics.collectionsView.noEventsCallout.button', {
-          defaultMessage: 'Learn how',
-        })}
-      </EuiButton>
-    </EuiCallOut>
+      )}
+      actionProps={{
+        primary: {
+          type: 'submit',
+          onClick: () =>
+            navigateToUrl(
+              generateEncodedPath(COLLECTION_INTEGRATE_PATH, {
+                name: analyticsCollection.name,
+              })
+            ),
+          children: i18n.translate(
+            'xpack.enterpriseSearch.analytics.collectionsView.noEventsCallout.button',
+            {
+              defaultMessage: 'Learn how',
+            }
+          ),
+        },
+      }}
+    />
   );
 };

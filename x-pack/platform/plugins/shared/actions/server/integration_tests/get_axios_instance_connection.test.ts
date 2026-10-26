@@ -20,6 +20,7 @@ import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
 import type { ActionsConfig } from '../config';
+import { defaultInboundEventsLimitConfigs } from '../config';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
@@ -803,6 +804,13 @@ const BaseActionsConfig: ActionsConfig = {
       },
     },
   },
+  inboundEvents: {
+    enabled: false,
+    maxBodyBytes: new ByteSizeValue(1024 * 1024),
+    maxEmitted: 25,
+    ...defaultInboundEventsLimitConfigs,
+  },
+  connectorSigningKeys: { enabled: false },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

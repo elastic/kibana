@@ -98,6 +98,14 @@ export class CiStatsClient {
   };
 
   addGitInfo = async (buildId: string) => {
+    // merge-queue builds validate the exact commits that land on the target branch,
+    // so they report the target branch as their branch, the merge group's commits as
+    // coveredCommits, and can then serve as the metrics baseline for any of them
+    const coveredCommits = (process.env.MERGE_QUEUE_COVERED_COMMITS || '')
+      .split(',')
+      .map((sha) => sha.trim())
+      .filter(Boolean);
+
     await this.request({
       method: 'POST',
       path: '/v1/git_info',
@@ -105,13 +113,19 @@ export class CiStatsClient {
         buildId,
       },
       body: {
-        branch: (process.env.BUILDKITE_BRANCH || '').replace(/^(refs\/heads\/|origin\/)/, ''),
+        branch: (
+          process.env.BUILDKITE_BRANCH_MERGE_QUEUE ||
+          process.env.BUILDKITE_BRANCH ||
+          ''
+        ).replace(/^(refs\/heads\/|origin\/)/, ''),
         commit: process.env.BUILDKITE_COMMIT,
         targetBranch:
           process.env.GITHUB_PR_TARGET_BRANCH ||
+          process.env.MERGE_QUEUE_TARGET_BRANCH ||
           process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH ||
           null,
-        mergeBase: process.env.GITHUB_PR_MERGE_BASE || null,
+        mergeBase: process.env.GITHUB_PR_MERGE_BASE || process.env.MERGE_QUEUE_MERGE_BASE || null,
+        coveredCommits: coveredCommits.length ? coveredCommits : undefined,
       },
     });
   };

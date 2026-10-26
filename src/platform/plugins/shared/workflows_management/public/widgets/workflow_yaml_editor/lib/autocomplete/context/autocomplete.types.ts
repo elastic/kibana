@@ -13,6 +13,7 @@ import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import type { LineParseResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import type { EsqlStepRegion } from '../../../../../../common/lib/esql_validation/extract_esql_region';
 import type { WorkflowsResponse } from '../../../../../entities/workflows/model/types';
 import type {
   StepInfo,
@@ -57,11 +58,30 @@ export interface AutocompleteContext {
   isInScheduledTriggerWithBlock: boolean;
   isInStepsContext: boolean;
   isInWorkflowInputsContext: boolean;
+  /**
+   * True iff the cursor is inside the `with.query` scalar of an
+   * `elasticsearch.esql.query` step. Implies `esqlRegion !== null` and
+   * `esqlOffsetInQuery !== null`.
+   */
+  isInEsqlQueryField: boolean;
+  /**
+   * The ES|QL region the cursor is in, or `null` when outside any. Same
+   * shape the validator uses, so the cursor offset and ranges round-trip
+   * cleanly between the two pipelines.
+   */
+  esqlRegion: EsqlStepRegion | null;
+  /**
+   * Cursor offset relative to the start of the ES|QL content
+   * (`absoluteOffset - esqlRegion.contentStartInFile`), or `null`. This is
+   * what `@kbn/esql-language` `suggest()` expects.
+   */
+  esqlOffsetInQuery: number | null;
 
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
   workflows: WorkflowsResponse;
   currentWorkflowId: string | null;
+  isCurrentWorkflowManaged: boolean;
   workflowDefinition: WorkflowYaml | null;
 }
 

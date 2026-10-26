@@ -42,7 +42,9 @@ const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) =>
       border: ${euiTheme.border.thin};
       border-radius: ${euiTheme.border.radius.medium};
       border-top: none;
+      width: 100%;
       height: 100%;
+      overflow: hidden;
     `,
     header: css`
       height: ${heightHeader};
@@ -75,7 +77,9 @@ const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) =>
       }
     `,
     listWrapper: css`
+      width: 100%;
       height: calc(100% - ${heightHeader});
+      overflow-y: auto;
 
       ${isSearchResultEmpty &&
       css`
@@ -237,7 +241,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      <div css={[styles.listWrapper]} className="eui-yScrollWithShadows">
+      <div css={styles.listWrapper} className="eui-yScrollWithShadows">
         {isSearchResultEmpty ? (
           renderEmptyResult()
         ) : (

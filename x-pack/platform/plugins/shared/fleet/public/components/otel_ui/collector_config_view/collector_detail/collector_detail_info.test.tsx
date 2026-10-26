@@ -32,6 +32,7 @@ const makeAgent = (overrides?: Partial<Agent>): Agent =>
       'elastic.display.name': 'prod-west-gateway',
       'host.arch': 'x86_64',
       'os.type': 'linux',
+      'os.description': 'Ubuntu 22.04.4 LTS',
       'elastic.collector.group': 'production-west',
     },
     capabilities: ['logs', 'metrics', 'traces'],
@@ -65,6 +66,7 @@ describe('CollectorDetailInfo', () => {
     expect(panel.textContent).toContain('collector-prod-west-1');
     expect(panel.textContent).toContain('x86_64');
     expect(panel.textContent).toContain('linux');
+    expect(panel.textContent).toContain('Ubuntu 22.04.4 LTS');
     expect(panel.textContent).toContain('production-west');
     expect(panel.textContent).toContain('logs, metrics, traces');
   });
@@ -73,6 +75,34 @@ describe('CollectorDetailInfo', () => {
     const result = testRenderer.render(<CollectorDetailInfo agent={makeAgent()} config={config} />);
     const panel = result.getByTestId('collectorDetailInfo');
     expect(panel.textContent).toContain('2');
+  });
+
+  it('falls back to hostname when elastic.display.name is absent', () => {
+    const agent = makeAgent({
+      non_identifying_attributes: {
+        'host.arch': 'x86_64',
+        'os.type': 'windows',
+      },
+    });
+    const result = testRenderer.render(<CollectorDetailInfo agent={agent} />);
+    const terms = result.getAllByRole('term');
+    const definitions = result.getAllByRole('definition');
+    const nameIndex = terms.findIndex((t) => t.textContent === 'Name');
+    expect(definitions[nameIndex].textContent).toBe('collector-prod-west-1');
+  });
+
+  it('falls back to agent id when both elastic.display.name and hostname are absent', () => {
+    const agent = makeAgent({
+      local_metadata: { host: {} },
+      non_identifying_attributes: {
+        'host.arch': 'x86_64',
+      },
+    });
+    const result = testRenderer.render(<CollectorDetailInfo agent={agent} />);
+    const terms = result.getAllByRole('term');
+    const definitions = result.getAllByRole('definition');
+    const nameIndex = terms.findIndex((t) => t.textContent === 'Name');
+    expect(definitions[nameIndex].textContent).toBe('opamp-collector-001');
   });
 
   it('renders dashes for missing optional fields', () => {

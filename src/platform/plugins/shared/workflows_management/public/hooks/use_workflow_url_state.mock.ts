@@ -7,9 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useCallback, useState } from 'react';
+
+type MockActiveTab = 'workflow' | 'executions';
+
 export const useWorkflowUrlState = () => {
+  const [activeTab, setActiveTabState] = useState<MockActiveTab>('workflow');
+  const setActiveTab = useCallback((tab: MockActiveTab) => {
+    setActiveTabState(tab);
+  }, []);
   return {
-    tab: 'workflow',
-    executionId: undefined,
+    activeTab,
+    editorView: 'yaml' as const,
+    graphDirection: 'TB' as const,
+    selectedExecutionId: undefined,
+    lastViewedExecutionId: undefined,
+    executionListFilters: {
+      statuses: [],
+      executionTypes: [],
+      executedBy: [],
+    },
+    selectedStepExecutionId: undefined,
+    selectedStepId: undefined,
+    shouldAutoResume: false,
+    setActiveTab,
+    setEditorView: () => {},
+    setGraphDirection: () => {},
+    setSelectedExecution: () => {},
+    setSelectedStepExecution: () => {},
+    setSelectedStep: () => {},
+    updateUrlState: () => {},
+    clearResumeParam: () => {},
   };
 };

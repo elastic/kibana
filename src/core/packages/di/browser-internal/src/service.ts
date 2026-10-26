@@ -16,7 +16,7 @@ export class CoreInjectionService extends BaseService {
     const contract = super.setup();
     const container = contract.getContainer();
 
-    container.loadSync(core);
+    container.load(core);
 
     return contract;
   }

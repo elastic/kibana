@@ -53,7 +53,7 @@ describe('Bulk upgrade task', () => {
   describe('_runBulkUpgradeTask', () => {
     it('should work for successfull upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
@@ -62,14 +62,14 @@ describe('Bulk upgrade task', () => {
         request: {} as KibanaRequest,
       });
 
-      expect(installPackage).toBeCalled();
+      expect(installPackage).toHaveBeenCalled();
 
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
     });
 
     it('should return error for non successful upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
@@ -83,7 +83,7 @@ describe('Bulk upgrade task', () => {
         request: {} as KibanaRequest,
       });
 
-      expect(installPackage).toBeCalledTimes(4);
+      expect(installPackage).toHaveBeenCalledTimes(4);
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
         {
@@ -102,7 +102,7 @@ describe('Bulk upgrade task', () => {
 
     it('should work for successful upgrade with package policies upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
@@ -114,8 +114,8 @@ describe('Bulk upgrade task', () => {
 
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
 
-      expect(installPackage).toBeCalled();
-      expect(packagePolicyService.bulkUpgrade).toBeCalled();
+      expect(installPackage).toHaveBeenCalled();
+      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalled();
     });
 
     it('should not continue to upgrade packages when task is cancelled', async () => {
@@ -123,7 +123,7 @@ describe('Bulk upgrade task', () => {
       abortController.abort();
       await expect(() =>
         _runBulkUpgradeTask({
-          abortController,
+          signal: abortController.signal,
           logger: loggingSystemMock.createLogger(),
           taskParams: {
             type: 'bulk_upgrade',
@@ -138,7 +138,7 @@ describe('Bulk upgrade task', () => {
         })
       ).rejects.toThrow(/Task was aborted/);
 
-      expect(installPackage).toBeCalledTimes(0);
+      expect(installPackage).toHaveBeenCalledTimes(0);
     });
   });
 });

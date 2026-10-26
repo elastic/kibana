@@ -46,7 +46,11 @@ export const GetNotesResult = lazySchema(() =>
     /**
      * Number of notes returned (may be adjusted after the query when `associatedFilter` applies post-filtering).
      */
-    totalCount: z.number(),
+    totalCount: z
+      .number()
+      .describe(
+        'Number of notes returned (may be adjusted after the query when `associatedFilter` applies post-filtering).'
+      ),
     notes: z.array(Note),
   })
 );
@@ -58,49 +62,91 @@ export const GetNotesRequestQuery = lazySchema(() =>
       * Event document `_id` values to match against each note's `eventId`. When this parameter is present, the response is all matching notes (up to the server's hard limit), not a paged list using `page`/`perPage`.
 
       */
-    documentIds: DocumentIds.optional(),
+    documentIds: DocumentIds.optional().describe(
+      "Event document `_id` values to match against each note's `eventId`. When this parameter is present, the response is all matching notes (up to the server's hard limit), not a paged list using `page`/`perPage`.\n"
+    ),
     /**
       * Timeline `savedObjectId` value(s). Returns notes that reference those timelines. When present, list-mode pagination parameters are not used; up to the server's hard limit of notes may be returned.
 
       */
-    savedObjectIds: SavedObjectIds.optional(),
+    savedObjectIds: SavedObjectIds.optional().describe(
+      "Timeline `savedObjectId` value(s). Returns notes that reference those timelines. When present, list-mode pagination parameters are not used; up to the server's hard limit of notes may be returned.\n"
+    ),
     /**
       * Page number for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 1.
 
       */
-    page: z.string().nullable().optional(),
+    page: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'Page number for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 1.\n'
+      ),
     /**
       * Page size for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 10.
 
       */
-    perPage: z.string().nullable().optional(),
+    perPage: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'Page size for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 10.\n'
+      ),
     /**
      * Search string for saved-objects find (list mode only).
      */
-    search: z.string().nullable().optional(),
+    search: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('Search string for saved-objects find (list mode only).'),
     /**
      * Field to sort by for saved-objects find (list mode only).
      */
-    sortField: z.string().nullable().optional(),
+    sortField: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('Field to sort by for saved-objects find (list mode only).'),
     /**
      * Sort order (`asc` or `desc`) for saved-objects find (list mode only).
      */
-    sortOrder: z.string().nullable().optional(),
+    sortOrder: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('Sort order (`asc` or `desc`) for saved-objects find (list mode only).'),
     /**
       * Kuery filter string combined with other list-mode filters (for example `createdByFilter` or `associatedFilter`). Typed as a string for API compatibility; interpreted by the saved-objects layer (list mode only).
 
       */
-    filter: z.string().nullable().optional(),
+    filter: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'Kuery filter string combined with other list-mode filters (for example `createdByFilter` or `associatedFilter`). Typed as a string for API compatibility; interpreted by the saved-objects layer (list mode only).\n'
+      ),
     /**
       * Kibana user profile **UID** (UUID). The server resolves the user's display identifiers and returns notes whose `createdBy` matches any of them (list mode only).
 
       */
-    createdByFilter: z.string().nullable().optional(),
+    createdByFilter: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        "Kibana user profile **UID** (UUID). The server resolves the user's display identifiers and returns notes whose `createdBy` matches any of them (list mode only).\n"
+      ),
     /**
       * Restricts notes by how they relate to a Timeline and/or an event document (list mode only). Some values apply extra filtering after the query. Ignored when `documentIds` or `savedObjectIds` is used.
 
       */
-    associatedFilter: AssociatedFilterType.optional(),
+    associatedFilter: AssociatedFilterType.optional().describe(
+      'Restricts notes by how they relate to a Timeline and/or an event document (list mode only). Some values apply extra filtering after the query. Ignored when `documentIds` or `savedObjectIds` is used.\n'
+    ),
   })
 );
 export type GetNotesRequestQuery = z.infer<typeof GetNotesRequestQuery>;

@@ -64,6 +64,28 @@ export const HttpRequestBodySchema = lazySchema(() =>
   z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())])
 );
 
+export const HttpFormDataFieldSchema = lazySchema(() =>
+  z.record(
+    z.string(),
+    z.object({
+      content: z.string(),
+      filename: z.string().optional(),
+      content_type: z.string().optional(),
+      encoding: z.enum(['utf8', 'base64']).optional(),
+    })
+  )
+);
+
+export const QueryParamScalarSchema = z.union([z.string(), z.number(), z.boolean()]);
+
+type QueryParamScalar = z.infer<typeof QueryParamScalarSchema>;
+export type QueryParamValue = QueryParamScalar | QueryParamScalar[];
+
+export const QueryParamValueSchema = z.union([
+  QueryParamScalarSchema,
+  z.array(QueryParamScalarSchema),
+]);
+
 export const ParamsSchema = lazySchema(() =>
   z
     .object({
@@ -71,7 +93,8 @@ export const ParamsSchema = lazySchema(() =>
       path: z.string().optional(),
       method: HttpMethodSchema,
       body: HttpRequestBodySchema.optional(),
-      query: z.record(z.string(), z.string()).optional(),
+      form_data: HttpFormDataFieldSchema.optional(),
+      query: z.record(z.string(), QueryParamValueSchema).optional(),
       headers: z.record(z.string(), z.string()).optional(),
       fetcher: z
         .object({

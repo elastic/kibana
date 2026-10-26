@@ -13,6 +13,7 @@ describe('generateParamsSchema', () => {
   const mockActions: ConnectorSpec['actions'] = {
     action1: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         message: z.string(),
         foobar: z.number(),
@@ -21,6 +22,7 @@ describe('generateParamsSchema', () => {
     },
     action2: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         bool: z.boolean(),
       }),
@@ -28,6 +30,7 @@ describe('generateParamsSchema', () => {
     },
     action3: {
       isTool: true,
+      scope: 'read',
       input: z.object({}),
       handler: async (ctx, input) => null,
     },
@@ -84,7 +87,7 @@ describe('generateParamsSchema', () => {
   });
 
   it('throws if actions has no keys', () => {
-    expect(() => generateParamsSchema({})).toThrowError('No actions defined');
+    expect(() => generateParamsSchema({})).toThrow('No actions defined');
   });
 
   describe('runtime parse behavior', () => {

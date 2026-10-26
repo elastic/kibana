@@ -37,10 +37,30 @@ export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common
 export type ServiceNowExecutorResultData =
   | PushToServiceResponse
   | GetCommonFieldsResponse
-  | GetChoicesResponse;
+  | GetChoicesResponse
+  | ServiceNowIncident;
+
+export type ServiceNowEndpoint = 'table' | 'import_set' | 'oauth' | 'jwt' | 'event' | 'other';
 
 export interface CreateCommentRequest {
   [key: string]: string;
+}
+
+export interface RequestContext {
+  endpoint: string;
+  method?: 'get' | 'post' | 'patch';
+}
+
+export class ServiceNowApiError extends Error {
+  readonly status: number;
+  readonly body?: unknown;
+
+  constructor(message: string, options: { status: number; body?: unknown }) {
+    super(message);
+    this.name = 'ServiceNowApiError';
+    this.status = options.status;
+    this.body = options.body;
+  }
 }
 
 export type ExecutorParams =

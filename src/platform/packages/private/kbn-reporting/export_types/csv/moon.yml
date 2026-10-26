@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/field-formats-plugin'
   - '@kbn/licensing-plugin'
+  - '@kbn/esql-types'
 tags:
   - shared-server
   - package
@@ -40,6 +41,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

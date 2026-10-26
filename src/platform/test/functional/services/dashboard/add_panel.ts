@@ -47,24 +47,9 @@ export class DashboardAddPanelService extends FtrService {
     await this.savedObjectsFinder.waitForListLoading();
   }
 
-  async clickCreateNewLink() {
-    this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
-    await this.openAddPanelFlyout();
-    await this.testSubjects.click('create-action-Lens');
-    await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('lnsApp', {
-      timeout: 5000,
-    });
-  }
-
   async clickAddVega() {
     await this.openAddPanelFlyout();
     await this.clickAddNewPanelFromUIActionLink('Vega');
-  }
-  async clickAddMarkdownPanel() {
-    this.log.debug('DashboardAddPanel.clickAddMarkdownPanel');
-    await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('Markdown text');
   }
 
   async clickAddMapPanel() {
@@ -76,7 +61,11 @@ export class DashboardAddPanelService extends FtrService {
   async clickAddLensPanel() {
     this.log.debug('DashboardAddPanel.clickAddLensPanel');
     await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('Lens');
+    await this.clickAddNewPanelFromUIActionLink('Create visualization');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.existOrFail('lnsApp', {
+      timeout: 5000,
+    });
   }
 
   async clickAddControlPanel() {
@@ -94,7 +83,7 @@ export class DashboardAddPanelService extends FtrService {
   async clickAddEsqlPanel() {
     this.log.debug('DashboardAddPanel.clickAddEsqlPanel');
     await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('ES|QL');
+    await this.clickAddNewPanelFromUIActionLink('Create visualization (query)');
   }
 
   async clickAddDiscoverPanel() {
@@ -192,7 +181,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async isAddPanelOpen() {
     this.log.debug('DashboardAddPanel.isAddPanelOpen');
-    return await this.testSubjects.exists('dashboardAddPanel', { timeout: 500 });
+    return await this.testSubjects.exists('dashboardAddPanel');
   }
 
   async ensureAddPanelIsShowing() {

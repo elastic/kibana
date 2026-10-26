@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isUiamCredential } from './utils';
+import { isUiamBearerCredential, isUiamCredential } from './utils';
 import { HTTPAuthorizationHeader } from '../authentication';
 
 describe('#isUiamCredential()', () => {
@@ -28,5 +28,27 @@ describe('#isUiamCredential()', () => {
       expect(isUiamCredential(new HTTPAuthorizationHeader('ApiKey', credential))).toBe(false);
       expect(isUiamCredential(credential)).toBe(false);
     }
+  });
+});
+
+describe('#isUiamBearerCredential()', () => {
+  it('returns `true` for a UIAM credential with the `Bearer` scheme, regardless of casing', () => {
+    for (const scheme of ['Bearer', 'bearer', 'BEARER']) {
+      expect(isUiamBearerCredential(new HTTPAuthorizationHeader(scheme, 'essu_token_123'))).toBe(
+        true
+      );
+    }
+  });
+
+  it('returns `false` for a UIAM credential with a non-`Bearer` scheme', () => {
+    expect(isUiamBearerCredential(new HTTPAuthorizationHeader('ApiKey', 'essu_key_123'))).toBe(
+      false
+    );
+  });
+
+  it('returns `false` for a non-UIAM credential with the `Bearer` scheme', () => {
+    expect(isUiamBearerCredential(new HTTPAuthorizationHeader('Bearer', 'regular_token'))).toBe(
+      false
+    );
   });
 });

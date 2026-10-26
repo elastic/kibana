@@ -81,7 +81,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('cases list screenshot', async () => {
-      await cases.navigation.navigateToApp('observability/cases', 'cases-all-title');
+      await cases.navigation.navigateToApp('observability/cases');
       await commonScreenshots.takeScreenshot('cases', screenshotDirectories, 1700, 1024);
     });
 
@@ -89,8 +89,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await common.navigateToUrlWithBrowserHistory('observability', `/cases/${caseIdMonitoring}`);
       const attachmentsTab = await testSubjects.find('case-view-tab-title-attachments');
       await attachmentsTab.click();
-      const filesTab = await testSubjects.find('case-view-tab-title-files');
-      await filesTab.click();
+      await testSubjects.existOrFail('case-view-attachment-accordion-file');
       await commonScreenshots.takeScreenshot(
         'observabiity-case-files',
         screenshotDirectories,

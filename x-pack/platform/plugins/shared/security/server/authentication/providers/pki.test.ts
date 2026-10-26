@@ -131,6 +131,24 @@ describe('PKIAuthenticationProvider', () => {
       );
     });
 
+    it('does not handle requests when socket authorization state is unknown due to HTTP/2 stream destruction.', async () => {
+      // Simulates the HTTP/2 degraded socket: when a stream is destroyed (RST_STREAM / AbortController
+      // cancel), Node's Http2ServerRequest.socket proxy's getPrototypeOf trap falls back to the
+      // Http2Stream prototype, causing instanceof TLSSocket to return false in KibanaSocket. This
+      // makes authorized === undefined and getPeerCertificate === null. A plain net.Socket (not a
+      // TLSSocket) produces the same KibanaSocket behaviour and is used here to simulate that state.
+      const request = httpServerMock.createKibanaRequest({ socket: new Socket() });
+
+      await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+      expectDebugLogs(
+        'Peer certificate chain: []',
+        'Authentication is not possible since socket authorization state is unknown (the HTTP/2 stream may have been cancelled before authentication completed).'
+      );
+    });
+
     it('does not handle requests with a missing certificate chain.', async () => {
       const { socket } = getMockSocket({ authorized: true, peerCertificate: null });
       const request = httpServerMock.createKibanaRequest({ socket });
@@ -462,6 +480,36 @@ describe('PKIAuthenticationProvider', () => {
         AuthenticationResult.failed(new Error('Peer certificate is not available'))
       );
 
+      expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('does not invalidate token or destroy session when socket state is unknown due to HTTP/2 stream destruction.', async () => {
+      // Regression test for kibana#258232. When a stream is destroyed (RST_STREAM from an
+      // AbortController or browser navigation cancel), Node's Http2ServerRequest.socket proxy's
+      // getPrototypeOf trap falls back to Http2Stream prototype. instanceof TLSSocket returns false
+      // in KibanaSocket, making authorized === undefined and getPeerCertificate === null.
+      //
+      // The old guard `peerCertificate === null && request.socket.authorized` evaluated
+      // `true && undefined` as falsy and missed. The code then entered the token-invalidation
+      // block, revoked the ES access token, and returned notHandled() — which authenticate()
+      // converted to Boom.unauthorized(), causing updateSessionValue() to delete the session.
+      //
+      // The fix changes the guard to `authorized !== false`, treating undefined (unknown TLS state)
+      // the same as true (known-authorized state). Only false (definitively unauthorized) should
+      // trigger token invalidation. A plain net.Socket (not TLSSocket) produces the same
+      // KibanaSocket behaviour as the destroyed-stream proxy and is used here as a test double.
+      const request = httpServerMock.createKibanaRequest({ socket: new Socket() });
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
+
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
+        AuthenticationResult.failed(new Error('Peer certificate is not available'))
+      );
+
+      // Token MUST NOT be invalidated: socket state is unknown, not definitively unauthorized.
+      // Invalidating the token here revokes the ES access token shared by all concurrent requests
+      // on this Kibana session and triggers session destruction via updateSessionValue() on 401.
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
 

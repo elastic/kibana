@@ -9,45 +9,73 @@ import {
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 import { registerCaseAttachments } from './register';
 import { EndpointAttachmentPayloadSchema } from '../../../common/cases/attachments/endpoint';
+import { TimelineAttachmentPayloadSchema } from '../../../common/cases/attachments/timeline';
+import { SecurityEventAttachmentPayloadSchema } from '../../../common/cases/attachments/event';
+import { EntityAttachmentPayloadSchema } from '../../../common/cases/attachments/entity';
+import { AttackAttachmentPayloadSchema } from '../../../common/cases/attachments/attack';
+import { EntityType } from '@kbn/entity-store/common';
+import { validateEventWorkflowTargets } from './workflow_validation';
+
+// Reproduces the path:message summary that `parseUnifiedAttachmentWithSchema`
+// in `@kbn/cases-plugin` builds at the write boundary. Keeping this assertion
+// here proves the security.* schemas surface structured (badRequest-ready)
+// errors instead of leaking raw ZodErrors as 500s.
+const formatZodIssues = (issues: Array<{ path: PropertyKey[]; message: string }>) =>
+  issues
+    .map(({ path, message }) => `${path.length > 0 ? path.join('.') : '(root)'}: ${message}`)
+    .join('; ');
 
 describe('registerCaseAttachments', () => {
+  const experimentalFeatures: ExperimentalFeatures = {
+    entityAttachmentsEnabled: false,
+    attackAttachments: false,
+  } as ExperimentalFeatures;
+
+  const deps = { getStartServices: jest.fn(), logger: loggerMock.create() };
+
   const buildFramework = () => ({
-    registerExternalReference: jest.fn(),
-    registerPersistableState: jest.fn(),
-    registerUnified: jest.fn(),
+    registerAttachment: jest.fn(),
   });
 
   it('registers the unified security.endpoint attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith({
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
       schema: EndpointAttachmentPayloadSchema,
     });
   });
 
-  it('registers the unified security.event attachment type', () => {
+  it('registers the unified security.event attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith(
-      expect.objectContaining({ id: SECURITY_EVENT_ATTACHMENT_TYPE })
-    );
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
+      id: SECURITY_EVENT_ATTACHMENT_TYPE,
+      schema: SecurityEventAttachmentPayloadSchema,
+      workflow: { validateTargets: validateEventWorkflowTargets },
+    });
   });
 
-  it('registers the unified indicator attachment type with the zod schema', () => {
+  it('registers the unified security.indicator attachment type with the zod schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
-    expect(framework.registerUnified).toHaveBeenCalledWith(
+    expect(framework.registerAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
         id: INDICATOR_ATTACHMENT_TYPE,
         schema: expect.anything(),
@@ -55,31 +83,267 @@ describe('registerCaseAttachments', () => {
     );
   });
 
-  // The cases-plugin routes inbound `externalReferenceAttachmentTypeId: 'endpoint'`
-  // payloads through `EXTERNAL_REFERENCE_TYPE_MAP` -> 'security.endpoint' at the
-  // validator boundary, so the unified registration above is sufficient for
-  // back-compat. No external-reference registration is required.
-  it('does not register any external-reference attachment types', () => {
+  it('registers the unified security.timeline attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
-    expect(framework.registerExternalReference).not.toHaveBeenCalled();
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
+      id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
+      schema: TimelineAttachmentPayloadSchema,
+    });
   });
 
-  it('does not register any persistable-state attachment types', () => {
+  it('registers the unified security.entity attachment with the zod payload schema when enabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(
+      framework,
+      {
+        ...experimentalFeatures,
+        entityAttachmentsEnabled: true,
+      } as ExperimentalFeatures,
+      deps
+    );
 
-    expect(framework.registerPersistableState).not.toHaveBeenCalled();
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
+      id: SECURITY_ENTITY_ATTACHMENT_TYPE,
+      schema: EntityAttachmentPayloadSchema,
+    });
   });
 
-  it('registers exactly the three expected unified attachment types', () => {
+  it('does not register the unified security.entity attachment when disabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
-    expect(framework.registerUnified).toHaveBeenCalledTimes(3);
+    expect(framework.registerAttachment).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: SECURITY_ENTITY_ATTACHMENT_TYPE,
+      })
+    );
+  });
+
+  it('registers the unified security.attack attachment with the zod payload schema when enabled', () => {
+    const framework = buildFramework();
+
+    registerCaseAttachments(
+      framework,
+      {
+        ...experimentalFeatures,
+        attackAttachments: true,
+      } as ExperimentalFeatures,
+      deps
+    );
+
+    expect(framework.registerAttachment).toHaveBeenCalledWith({
+      id: SECURITY_ATTACK_ATTACHMENT_TYPE,
+      schema: AttackAttachmentPayloadSchema,
+      relatedAttachments: {
+        readTypes: [SECURITY_ATTACK_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE],
+        get: expect.any(Function),
+      },
+      workflow: { validateTargets: expect.any(Function) },
+    });
+  });
+
+  it('registers the unified security.attack attachment but refuses new attachments when disabled', () => {
+    const framework = buildFramework();
+
+    registerCaseAttachments(framework, experimentalFeatures, deps);
+
+    const registered = framework.registerAttachment.mock.calls
+      .map(([attachmentType]) => attachmentType)
+      .find(({ id }) => id === SECURITY_ATTACK_ATTACHMENT_TYPE);
+
+    expect(registered).toBeDefined();
+    expect(registered!.relatedAttachments?.get).toEqual(expect.any(Function));
+    expect(registered!.schema).not.toBe(AttackAttachmentPayloadSchema);
+
+    const result = registered!.schema.safeParse({
+      type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+      owner: 'securitySolution',
+      attachmentId: 'attack-1',
+      metadata: {
+        title: 'Credential access on host-1',
+        alertCount: 3,
+        index: '.alerts-security.attack.discovery.alerts-default',
+      },
+    });
+
+    expect(result.success).toBe(false);
+
+    if (!result.success) {
+      // The FTR flag-off suite asserts this reaches the API response, so the message has to
+      // name the flag rather than read as a generic type mismatch.
+      expect(
+        result.error.issues.map((issue: { message: string }) => issue.message).join('; ')
+      ).toContain('attackAttachments');
+    }
+  });
+
+  describe('invalid payload surfacing', () => {
+    it('reports `path: message` zod issues for an invalid security.event payload', () => {
+      const result = SecurityEventAttachmentPayloadSchema.safeParse({
+        type: SECURITY_EVENT_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'event-1',
+        metadata: { index: 123 },
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(formatZodIssues(result.error.issues)).toContain('metadata.index');
+      }
+    });
+
+    it('reports `path: message` zod issues for an invalid security.endpoint payload', () => {
+      const result = EndpointAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(formatZodIssues(result.error.issues)).not.toHaveLength(0);
+      }
+    });
+
+    it('accepts a valid security.entity payload', () => {
+      const result = EntityAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'entity-1',
+        metadata: {
+          entityName: 'alice',
+          entityType: 'user',
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it.each(EntityType.options)(
+      'accepts each entityType enum value for security.entity payload: %s',
+      (entityType) => {
+        const result = EntityAttachmentPayloadSchema.safeParse({
+          type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+          owner: 'securitySolution',
+          attachmentId: 'entity-1',
+          metadata: {
+            entityName: 'test-entity',
+            entityType,
+          },
+        });
+
+        expect(result.success).toBe(true);
+      }
+    );
+
+    it('reports `path: message` zod issues for invalid security.entity enum value', () => {
+      const result = EntityAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'entity-1',
+        metadata: {
+          entityName: 'alice',
+          entityType: 'team',
+        },
+      });
+
+      expect(result.success).toBe(false);
+
+      if (!result.success) {
+        expect(formatZodIssues(result.error.issues)).toContain('metadata.entityType');
+      }
+    });
+
+    it('accepts a valid security.attack payload', () => {
+      const result = AttackAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'attack-1',
+        metadata: {
+          title: 'Credential access on host-1',
+          summaryMarkdown: 'A summary of the attack',
+          riskScore: 73,
+          alertCount: 3,
+          entityCount: 2,
+          index: '.alerts-security.attack.discovery.alerts-default',
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a security.attack payload without the optional metadata fields', () => {
+      const result = AttackAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'attack-1',
+        metadata: {
+          title: 'Credential access on host-1',
+          alertCount: 0,
+          index: '.adhoc.alerts-security.attack.discovery.alerts-default',
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('reports `path: message` zod issues for a security.attack payload missing the index', () => {
+      const result = AttackAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'attack-1',
+        metadata: {
+          title: 'Credential access on host-1',
+          alertCount: 3,
+        },
+      });
+
+      expect(result.success).toBe(false);
+
+      if (!result.success) {
+        expect(formatZodIssues(result.error.issues)).toContain('metadata.index');
+      }
+    });
+
+    it('reports `path: message` zod issues for security.attack payloads with extra fields', () => {
+      const result = AttackAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'attack-1',
+        metadata: {
+          title: 'Credential access on host-1',
+          alertCount: 3,
+          index: '.alerts-security.attack.discovery.alerts-default',
+          extraField: 'not-allowed',
+        },
+      });
+
+      expect(result.success).toBe(false);
+
+      if (!result.success) {
+        expect(formatZodIssues(result.error.issues)).toContain('metadata');
+      }
+    });
+
+    it('reports `path: message` zod issues for security.entity payloads with extra fields', () => {
+      const result = EntityAttachmentPayloadSchema.safeParse({
+        type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+        owner: 'securitySolution',
+        attachmentId: 'entity-1',
+        metadata: {
+          entityName: 'alice',
+          entityType: 'user',
+          extraField: 'not-allowed',
+        },
+      });
+
+      expect(result.success).toBe(false);
+
+      if (!result.success) {
+        expect(formatZodIssues(result.error.issues)).toContain('metadata');
+      }
+    });
   });
 });

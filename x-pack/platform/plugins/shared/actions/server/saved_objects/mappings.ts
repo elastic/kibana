@@ -43,6 +43,10 @@ export const actionTaskParamsMappings: SavedObjectsTypeMappingDefinition = {
     apiKeyId: {
       type: 'keyword',
     },
+    uiamApiKeyId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
     // NO NEED TO BE INDEXED
     // actionId: {
     //   type: 'keyword',
@@ -67,6 +71,26 @@ export const actionTaskParamsMappings: SavedObjectsTypeMappingDefinition = {
     // source: {
     //   type: 'keyword'
     // }
+  },
+};
+
+export const connectorIngressCredentialMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    connectorId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+  },
+};
+
+export const connectorSigningKeyMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    connectorId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
   },
 };
 
@@ -106,6 +130,10 @@ export const userConnectorTokenMappings: SavedObjectsTypeMappingDefinition = {
   properties: {
     profileUid: {
       type: 'keyword',
+    },
+    userCloudId: {
+      type: 'keyword',
+      ignore_above: 1024,
     },
     connectorId: {
       type: 'keyword',

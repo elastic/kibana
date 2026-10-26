@@ -7,7 +7,7 @@
 
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { render, screen } from '@testing-library/react';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
@@ -18,8 +18,6 @@ import type { SortColumnTimeline as Sort } from '../../../../../../common/types/
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
@@ -28,6 +26,13 @@ import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -39,7 +44,11 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../common/components/user_privileges');
+
+jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -84,25 +93,48 @@ describe('PinnedTabContent', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
+    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+      return {
+        width: 1000,
+        height: 1000,
+        x: 0,
+        y: 0,
+      } as DOMRect;
+    });
+
     (useTimelineEvents as jest.Mock).mockReturnValue([
       false,
       {
         events: mockTimelineData.slice(0, 1),
+        rawEvents: [],
         pageInfo: {
           activePage: 0,
           totalPages: 1,
         },
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
       },
     ]);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
-
-    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
         return allowedExperimentalValues[feature];
       }
     );
+
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      notesPrivileges: { read: true },
+      timelinePrivileges: { crud: true, read: true },
+    });
+
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
+    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     useKibanaMock.mockReturnValue(kibanaMockResult);
 

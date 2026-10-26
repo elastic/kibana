@@ -60,6 +60,11 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import {
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
@@ -430,7 +435,9 @@ export class Server {
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
-    const featureFlagsSetup = this.featureFlags.setup();
+    const featureFlagsSetup = this.featureFlags.setup({
+      http: httpSetup,
+    });
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -552,7 +559,6 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
-    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
@@ -583,6 +589,10 @@ export class Server {
       }
     );
 
+    const userActivityStart = this.userActivity.start({
+      typeRegistry: savedObjectsStart.getTypeRegistry(),
+    });
+
     if (this.nodeRoles?.migrator === true) {
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
@@ -604,6 +614,27 @@ export class Server {
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
     );
+    const uiam = securityStart.authc.apiKeys.uiam;
+    if (uiam) {
+      httpStart.setSelfClientUiamAttestationGetter((request, outboundAuthorization) => {
+        const credential = outboundAuthorization
+          ? HTTPAuthorizationHeader.parseFromValue(outboundAuthorization)
+          : null;
+        if (!credential || !isUiamCredential(credential)) {
+          return undefined;
+        }
+        if (uiam.isExternalApiKey(request)) {
+          return undefined;
+        }
+
+        return uiam.getInternalCallerAttestationHeaders(credential)[
+          UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+        ];
+      });
+      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
+        uiam.isOwnClientAuthentication(value)
+      );
+    }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,

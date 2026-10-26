@@ -37,3 +37,5 @@ export const ROW_HEIGHT_LINES_KEYS = {
   rowHeightLines: 'rowHeightLines',
   headerRowHeightLines: 'headerRowHeightLines',
 } as const;
+
+export const LENS_DATATABLE_DEFAULT_COLOR_STEPS = 5;

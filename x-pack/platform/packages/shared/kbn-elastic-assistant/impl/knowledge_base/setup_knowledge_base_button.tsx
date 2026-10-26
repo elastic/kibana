@@ -51,25 +51,28 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display, 
     : undefined;
 
   if (display === 'refresh') {
+    const setupKnowledgeBaseLabel = i18n.translate(
+      'xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton',
+      {
+        defaultMessage: 'Setup Knowledge Base',
+      }
+    );
     return (
-      <EuiButtonIcon
-        color="primary"
-        data-test-subj="setup-knowledge-base-button"
-        disabled={!kbStatus?.is_setup_available}
-        isLoading={isSetupInProgress}
-        iconType="refresh"
-        onClick={onInstallKnowledgeBase}
-        size="xs"
-        aria-label={i18n.translate(
-          'xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton',
-          {
-            defaultMessage: 'Setup Knowledge Base',
-          }
-        )}
-        css={css`
-          margin-left: 8px;
-        `}
-      />
+      <EuiToolTip content={setupKnowledgeBaseLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          color="primary"
+          data-test-subj="setup-knowledge-base-button"
+          disabled={!kbStatus?.is_setup_available}
+          isLoading={isSetupInProgress}
+          iconType="refresh"
+          onClick={onInstallKnowledgeBase}
+          size="xs"
+          aria-label={setupKnowledgeBaseLabel}
+          css={css`
+            margin-left: 8px;
+          `}
+        />
+      </EuiToolTip>
     );
   }
 

@@ -11,15 +11,28 @@ import { buildGranularRulesKql } from './build_granular_rules_kql';
 describe('buildGranularRulesKql', () => {
   it('returns undefined when filter and search are empty', () => {
     expect(buildGranularRulesKql({ filter: undefined, search: undefined })).toBeUndefined();
-    expect(buildGranularRulesKql({ filter: '  ', search: undefined })).toBeUndefined();
+    expect(
+      buildGranularRulesKql({ filter: { term: '  ', mode: 'KQL' }, search: undefined })
+    ).toBeUndefined();
     expect(buildGranularRulesKql({ filter: undefined, search: { term: '' } })).toBeUndefined();
-    expect(buildGranularRulesKql({ filter: '  ', search: { term: '  ' } })).toBeUndefined();
+    expect(
+      buildGranularRulesKql({ filter: { term: '  ' }, search: { term: '  ' } })
+    ).toBeUndefined();
   });
 
   it('returns only filter when search is absent', () => {
     expect(
       buildGranularRulesKql({
-        filter: 'alert.attributes.enabled: true',
+        filter: { term: 'alert.attributes.enabled: true', mode: 'KQL' },
+        search: undefined,
+      })
+    ).toBe('(alert.attributes.enabled: true)');
+  });
+
+  it('treats filter.mode as KQL when omitted', () => {
+    expect(
+      buildGranularRulesKql({
+        filter: { term: 'alert.attributes.enabled: true' },
         search: undefined,
       })
     ).toBe('(alert.attributes.enabled: true)');
@@ -27,7 +40,7 @@ describe('buildGranularRulesKql', () => {
 
   it('ANDs filter with legacy search term', () => {
     const kql = buildGranularRulesKql({
-      filter: 'alert.attributes.enabled: true',
+      filter: { term: 'alert.attributes.enabled: true', mode: 'KQL' },
       search: { term: 'sql', mode: 'legacy' },
     });
     expect(kql).toBe(`(alert.attributes.enabled: true) AND (${convertRuleSearchTermToKQL('sql')})`);

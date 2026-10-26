@@ -9,15 +9,27 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
-import { errorResponseSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
-
-import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_client';
+import {
+  errorResponseSchema,
+  ruleResponseSchema,
+  updateRuleDataSchema,
+  type UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_PATCH_SEMANTICS_DESCRIPTION,
+} from '../route_descriptions';
+import {
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_VERSION_CONFLICT_DESCRIPTION,
+} from './rule_response_descriptions';
+import { updateRuleOasExamples } from './update_rule_oas_example';
 
 @injectable()
 export class UpdateRuleRoute extends BaseAlertingRoute {
@@ -29,7 +41,11 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Update a rule',
+    description: RULE_PATCH_SEMANTICS_DESCRIPTION,
+    oasOperationObject: updateRuleOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -39,19 +55,19 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => ruleResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the updated rule.',
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates a rule with the given ID does not exist.',
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description: 'Indicates the rule was concurrently updated by another caller.',
+        description: RULE_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };

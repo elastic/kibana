@@ -38,6 +38,6 @@ export function getActionGroupWindow(alert: BurnRateAlert) {
       : alertActionGroup;
   const actionGroupWindow = (
     (alert.fields[ALERT_RULE_PARAMETERS]?.windows ?? []) as WindowSchema[]
-  ).find((window: WindowSchema) => window.actionGroup === actionGroup)!;
+  ).find((window: WindowSchema) => window.actionGroup === actionGroup);
   return actionGroupWindow;
 }

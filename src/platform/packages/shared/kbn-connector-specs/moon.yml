@@ -9,6 +9,8 @@ owners:
   defaultOwner: '@elastic/response-ops'
 toolchains:
   default: node
+  javascript:
+    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/connector-specs'
@@ -23,6 +25,9 @@ dependsOn:
   - '@kbn/actions-utils'
   - '@kbn/i18n'
   - '@kbn/mcp-client'
+  - '@kbn/std'
+  - '@kbn/logging-mocks'
+  - '@kbn/repo-info'
 tags:
   - shared-common
   - package
@@ -35,6 +40,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

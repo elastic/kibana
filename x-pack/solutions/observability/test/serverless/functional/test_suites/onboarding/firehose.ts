@@ -18,10 +18,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const supertest = getService('supertest');
   const synthtrace = getService('svlLogsSynthtraceClient');
 
   describe('Onboarding Firehose Quickstart Flow', () => {
     before(async () => {
+      // Pre-install the `awsfirehose` Fleet package so POST /firehose/flow — which awaits its
+      // registry install — returns promptly instead of racing the beforeEach find timeout on a
+      // cold stack. See #253833.
+      await supertest
+        .post('/api/fleet/epm/packages/awsfirehose')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
       await PageObjects.svlCommonPage.loginAsAdmin(); // Onboarding requires admin role
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'observabilityOnboarding',
@@ -81,7 +90,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       // Checking that an AWS service item is visible after data is detected
-      await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);
+      await testSubjects.existOrFail(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`, {
+        timeout: 30_000,
+      });
     });
 
     it('shows the existing data callout and detected AWS services when data was ingested previously', async () => {
@@ -112,10 +123,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await browser.refresh();
 
       // Checking that the existing data callout is visible after data is detected
-      await testSubjects.isDisplayed('observabilityOnboardingFirehosePanelExistingDataCallout');
+      await testSubjects.existOrFail('observabilityOnboardingFirehosePanelExistingDataCallout', {
+        timeout: 30_000,
+      });
 
       // Checking that an AWS service item is visible after data is detected
-      await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);
+      await testSubjects.existOrFail(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`, {
+        timeout: 30_000,
+      });
     });
   });
 }

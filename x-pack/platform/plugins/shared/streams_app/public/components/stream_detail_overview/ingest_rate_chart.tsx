@@ -65,10 +65,43 @@ export function IngestRateChart() {
     return null;
   }
 
-  return <IngestRateChartContent definition={definition} />;
+  const streamName = definition.stream.name;
+  const isQueryStream = Streams.QueryStream.GetResponse.is(definition);
+  const isDraft = isDraftGetResponse(definition);
+  const canReadFailureStore = Streams.ingest.all.GetResponse.is(definition)
+    ? definition.privileges.read_failure_store &&
+      isEnabledFailureStore(definition.effective_failure_store)
+    : false;
+  const esqlSource = isQueryStream
+    ? definition.stream.query.view
+    : isDraft
+    ? getEsqlViewName(streamName)
+    : streamName;
+
+  return (
+    <IngestRateChartContent
+      streamName={streamName}
+      esqlSource={esqlSource}
+      canReadFailureStore={canReadFailureStore}
+      isQueryStream={isQueryStream}
+      isDraft={isDraft}
+    />
+  );
 }
 
-function IngestRateChartContent({ definition }: { definition: Streams.all.GetResponse }) {
+export function IngestRateChartContent({
+  streamName,
+  esqlSource,
+  canReadFailureStore,
+  isQueryStream,
+  isDraft,
+}: {
+  streamName: string;
+  esqlSource: string;
+  canReadFailureStore: boolean;
+  isQueryStream: boolean;
+  isDraft: boolean;
+}) {
   const {
     core: { uiSettings },
   } = useKibana();
@@ -77,20 +110,6 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
   const chartBaseTheme = useElasticChartsTheme();
 
   const barSeriesTimeZone = useMemo(() => getChartTimeZone(uiSettings), [uiSettings]);
-
-  const canReadFailureStore = Streams.ingest.all.GetResponse.is(definition)
-    ? definition.privileges.read_failure_store &&
-      isEnabledFailureStore(definition.effective_failure_store)
-    : false;
-  const streamName = definition.stream.name;
-  const isQueryStream = Streams.QueryStream.GetResponse.is(definition);
-  const isDraft = isDraftGetResponse(definition);
-
-  const esqlSource = isQueryStream
-    ? definition.stream.query.view
-    : isDraft
-    ? getEsqlViewName(streamName)
-    : streamName;
 
   const { timeState } = useTimefilter();
   const minInterval = getMeaningfulBucketMs(
@@ -103,6 +122,8 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
     groupTotalCountByTimestamp: true,
     getCanReadFailureStore: () => (isDraft ? false : canReadFailureStore),
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+    // This chart only reads the histogram, never the Ingestion column, so skip the ingestion request.
+    fetchIngestionDocCounts: false,
   });
 
   const histogramFetch = getStreamHistogram(esqlSource);
@@ -285,6 +306,7 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
         esqlSource={esqlSource}
         streamName={streamName}
         isQueryStream={isQueryStream}
+        isDraft={isDraft}
       />
     </EuiPanel>
   );

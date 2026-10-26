@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { NoIndices } from './no_indices';
 
-export const NoRemoteCluster = () => {
+export const NoRemoteCluster = ({ header }: { header?: React.ReactNode }) => {
   const settingLinkProps = useLinkProps({ app: 'metrics', pathname: '/settings' });
 
   const goToSettings = (
@@ -24,6 +24,7 @@ export const NoRemoteCluster = () => {
 
   return (
     <NoIndices
+      header={header}
       color="danger"
       iconType="error"
       titleSize="m"

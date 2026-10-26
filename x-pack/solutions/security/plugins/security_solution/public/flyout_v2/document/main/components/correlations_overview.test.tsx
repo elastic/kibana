@@ -24,6 +24,7 @@ import {
 import { useShowRelatedAlertsByAncestry } from '../../tools/correlations/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../tools/correlations/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../tools/correlations/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedAttacks } from '../../tools/correlations/hooks/use_show_related_attacks';
 import { useShowRelatedCases } from '../../tools/correlations/hooks/use_show_related_cases';
 import { useShowSuppressedAlerts } from '../../tools/correlations/hooks/use_show_suppressed_alerts';
 import { useFetchRelatedAlertsByAncestry } from '../hooks/use_fetch_related_alerts_by_ancestry';
@@ -37,12 +38,12 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('../../tools/correlations/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../tools/correlations/hooks/use_show_related_alerts_by_same_source_event');
 jest.mock('../../tools/correlations/hooks/use_show_related_alerts_by_session');
+jest.mock('../../tools/correlations/hooks/use_show_related_attacks');
 jest.mock('../../tools/correlations/hooks/use_show_related_cases');
 jest.mock('../../tools/correlations/hooks/use_show_suppressed_alerts');
 jest.mock('../hooks/use_fetch_related_alerts_by_session');
@@ -93,7 +94,6 @@ const mockHit: DataTableRecord = {
 const defaultProps: CorrelationsOverviewProps = {
   hit: mockHit,
   scopeId: 'scopeId',
-  isRulePreview: false,
   showIcon: true,
   onShowCorrelationsDetails: jest.fn(),
 };
@@ -107,7 +107,6 @@ const renderCorrelationsOverview = (props: Partial<CorrelationsOverviewProps> = 
 const NO_DATA_MESSAGE = 'No correlations data available.';
 
 jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('../../../../common/hooks/use_experimental_features');
 
 const originalEventId = 'originalEventId';
 const mockNavigateToLeftPanel = jest.fn();
@@ -121,9 +120,9 @@ describe('<CorrelationsOverview />', () => {
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: false, originalEventId });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
+    jest.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
@@ -202,6 +201,7 @@ describe('<CorrelationsOverview />', () => {
     jest
       .mocked(useShowRelatedAlertsBySession)
       .mockReturnValue({ show: false, entityId: 'entityId' });
+    jest.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
@@ -227,7 +227,6 @@ describe('<CorrelationsOverview />', () => {
         <CorrelationsOverview
           hit={mockHit}
           scopeId="scopeId"
-          isRulePreview={false}
           showIcon={true}
           onShowCorrelationsDetails={mockNavigateToLeftPanel}
         />

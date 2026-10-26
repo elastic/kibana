@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { routeId } from '../zod_query';
 import { getJourneyScreenshotBlocks } from '../../queries/get_journey_screenshot_blocks';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../types';
@@ -14,17 +15,19 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
   method: 'POST',
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
   validate: {
-    body: schema.object({
-      hashes: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+    body: z.strictObject({
+      hashes: z.array(routeId).max(1000),
+      remoteName: z.string().max(256).optional(),
     }),
   },
   writeAccess: false,
   handler: async ({ request, syntheticsEsClient }) => {
-    const { hashes: blockIds } = request.body;
+    const { hashes: blockIds, remoteName } = request.body;
 
     const result = await getJourneyScreenshotBlocks({
       blockIds,
       syntheticsEsClient,
+      remoteName,
     });
 
     return {

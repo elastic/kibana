@@ -441,7 +441,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
             id={`data-drift-histogram-bottom-axis-${id}`}
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={(value) => xAxisFormatter.convert(value)}
+            tickFormat={(value) => xAxisFormatter.convertToText(value)}
             labelFormat={() => ''}
           />
           {adjustedChartPoints?.length && (

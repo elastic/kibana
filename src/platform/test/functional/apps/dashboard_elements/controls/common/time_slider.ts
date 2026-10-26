@@ -28,6 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
+  /**
+   * Purpose: Time slider control smoke test
+   *
+   * Migration: Migrate to scout
+   */
   describe('Time Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([
@@ -120,6 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(valueBefore).to.not.equal(valueAfter);
 
         await dashboard.clickDiscardChanges();
+        await retry.waitForWithTimeout(
+          'discarded dashboard changes to clear',
+          5000,
+          async () => !(await testSubjects.exists('split-button-notification-indicator'))
+        );
 
         // valueNow maybe grabbed before timeslider has reset
         await retry.try(async () => {

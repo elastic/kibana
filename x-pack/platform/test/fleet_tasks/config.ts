@@ -31,8 +31,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.autoUpgrades.taskInterval=30s`,
         `--xpack.fleet.autoUpgrades.retryDelays=${JSON.stringify(['1m'])}`,
         `--xpack.fleet.versionSpecificPolicyAssignment.taskInterval=30s`,
+        // sweep the orphans on every run, the tests create orphans after the first run
+        `--xpack.fleet.versionSpecificPolicyAssignment.orphanSweepIntervalMs=0`,
         `--xpack.fleet.enableExperimental=${JSON.stringify(['enableVersionSpecificPolicies'])}`,
         `--xpack.fleet.unenrollInactiveAgents.taskInterval=10s`,
+        `--xpack.fleet.unenrollInactiveAgents.gracePeriodMs=1000`,
+        `--xpack.fleet.agentStatusChange.taskInterval=10s`,
       ],
     },
   };

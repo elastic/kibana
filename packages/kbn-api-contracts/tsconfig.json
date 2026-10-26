@@ -5,11 +5,14 @@
   },
   "include": [
     "**/*.ts",
+    "src/report/release_note.json",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
     "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/router-to-openapispec",
   ]
 }

@@ -25,6 +25,17 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
 jest.mock('../../../common/hooks/use_app_toasts');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn(), closeFlyout: jest.fn() }),
+}));
+jest.mock('../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+jest.mock('../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openEntityFlyout: jest.fn(),
+  }),
+}));
 
 const mockUseResolutionGroup = useResolutionGroup as jest.Mock;
 const mockUseLinkEntities = useLinkEntities as jest.Mock;
@@ -72,6 +83,52 @@ describe('ResolutionGroupTab', () => {
     // 'alice' appears in entity row + summary row
     expect(getAllByText('alice').length).toBeGreaterThanOrEqual(1);
     expect(getByText('bob')).toBeInTheDocument();
+  });
+
+  it('disables opening the current entity in single mode', () => {
+    mockUseResolutionGroup.mockReturnValue({ data: existingGroup, isLoading: false });
+    const onShowEntity = jest.fn();
+
+    const { getAllByLabelText } = render(
+      <TestProviders>
+        <ResolutionGroupTab
+          entityId="alice-id"
+          entityType="user"
+          scopeId="test-scope"
+          onShowEntity={onShowEntity}
+        />
+      </TestProviders>
+    );
+
+    const [targetExpandButton] = getAllByLabelText(/open entity details/i);
+    expect(targetExpandButton).toBeDisabled();
+  });
+
+  it('lets the target entity be opened as a single entity in resolved mode', () => {
+    mockUseResolutionGroup.mockReturnValue({ data: existingGroup, isLoading: false });
+    const onShowEntity = jest.fn();
+
+    const { getAllByLabelText } = render(
+      <TestProviders>
+        <ResolutionGroupTab
+          entityId="alice-id"
+          entityType="user"
+          scopeId="test-scope"
+          mode="resolved"
+          onShowEntity={onShowEntity}
+        />
+      </TestProviders>
+    );
+
+    const [targetExpandButton] = getAllByLabelText(/open entity details/i);
+    expect(targetExpandButton).toBeEnabled();
+    fireEvent.click(targetExpandButton);
+
+    expect(onShowEntity).toHaveBeenCalledWith({
+      engineType: 'user',
+      entityId: 'alice-id',
+      entityName: 'alice',
+    });
   });
 
   it('adds entity to existing group — calls linkEntities directly', async () => {

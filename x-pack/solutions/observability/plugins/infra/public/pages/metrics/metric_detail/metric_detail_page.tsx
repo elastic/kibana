@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -20,6 +19,8 @@ import { InfraLoadingPanel } from '../../../components/loading';
 import type { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
+import { MetricsDetailAppHeader } from '../header/metrics_detail_app_header';
+import { useDetailSchema } from './lib/detail_schema_context';
 
 export const MetricDetailPage = () => {
   const {
@@ -39,6 +40,9 @@ export const MetricDetailPage = () => {
     setAutoReload,
     triggerRefresh,
   } = useMetricsTimeContext();
+  const { schema, pending: schemaPending } = useDetailSchema();
+  // Gate metadata until schema detection finishes so charts do not paint ECS then swap.
+  const isSchemaReady = !schemaPending;
   const {
     name,
     filteredRequiredMetrics,
@@ -51,18 +55,24 @@ export const MetricDetailPage = () => {
     requiredTsvb: inventoryModel.metrics.requiredTsvb,
     sourceId,
     timeRange: parsedTimeRange,
+    schema,
+    enabled: isSchemaReady,
   });
 
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
-  useMetricsBreadcrumbs([
-    {
-      ...breadcrumbOptions.link,
-      text: breadcrumbOptions.text,
-    },
-    {
-      text: name,
-    },
-  ]);
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions();
+  const title = name || nodeId;
+  useMetricsBreadcrumbs(
+    [
+      {
+        ...breadcrumbOptions.link,
+        text: breadcrumbOptions.text,
+      },
+      {
+        text: title,
+      },
+    ],
+    { parent: 'app' }
+  );
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 
@@ -75,9 +85,11 @@ export const MetricDetailPage = () => {
     [sideNav]
   );
 
-  if (metadataLoading && !filteredRequiredMetrics.length) {
+  const header = <MetricsDetailAppHeader title={title} />;
+
+  if ((metadataLoading || schemaPending) && !filteredRequiredMetrics.length) {
     return (
-      <InfraPageTemplate onboardingFlow={OnboardingFlow.Infra}>
+      <InfraPageTemplate header={header} hasDataOverride={true}>
         <InfraLoadingPanel
           height="100vh"
           width="100%"
@@ -90,7 +102,7 @@ export const MetricDetailPage = () => {
   }
 
   return (
-    <>
+    <InfraPageTemplate header={header} hasDataOverride={true}>
       {metadata ? (
         <NodeDetailsPage
           name={name}
@@ -100,6 +112,7 @@ export const MetricDetailPage = () => {
           nodeType={nodeType}
           nodeId={nodeId}
           cloudId={cloudId}
+          schema={schema}
           metadataLoading={metadataLoading}
           isAutoReloading={isAutoReloading}
           refreshInterval={refreshInterval}
@@ -112,6 +125,6 @@ export const MetricDetailPage = () => {
           setTimeRange={setTimeRange}
         />
       ) : null}
-    </>
+    </InfraPageTemplate>
   );
 };

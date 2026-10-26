@@ -710,7 +710,7 @@ describe('getLayers', () => {
         },
       ].map(expect.objectContaining)
     );
-    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(3);
+    expect(mockExtractOrGenerateDatasourceInfo).toHaveBeenCalledTimes(3);
   });
 
   test('should return annotation layer gets correct dataView when none is defined', async () => {
@@ -771,6 +771,6 @@ describe('getLayers', () => {
         },
       ].map(expect.objectContaining)
     );
-    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(1);
+    expect(mockExtractOrGenerateDatasourceInfo).toHaveBeenCalledTimes(1);
   });
 });

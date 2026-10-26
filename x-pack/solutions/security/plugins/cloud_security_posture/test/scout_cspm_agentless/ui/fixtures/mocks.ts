@@ -75,26 +75,15 @@ export async function mockPackagePoliciesEmptyWithCapture(
 
 /**
  * Creates a mock agentless policy response for testing.
- * The response format should match what the UI expects after successful creation.
+ * The response format matches the AgentlessPolicy shape returned by the API.
  */
 export function createMockAgentlessPolicyResponse(
   requestBody: AgentlessPolicyRequestBody,
   connectorId?: string
 ) {
   const mockPolicyId = `mock-policy-${Date.now()}`;
-  const mockAgentPolicyId = `mock-agent-policy-${Date.now()}`;
   const mockConnectorId = connectorId || `mock-connector-${Date.now()}`;
-
-  // Convert legacy inputs format to array format for the response
-  const inputsArray = Object.entries(requestBody.inputs ?? {}).map(([type, input]) => ({
-    type,
-    enabled: input.enabled,
-    streams: Object.entries(input.streams ?? {}).map(([streamKey, stream]) => ({
-      enabled: stream.enabled,
-      data_stream: { type: 'logs', dataset: streamKey },
-      vars: stream.vars,
-    })),
-  }));
+  const now = new Date().toISOString();
 
   return {
     item: {
@@ -102,25 +91,31 @@ export function createMockAgentlessPolicyResponse(
       name: requestBody.name,
       namespace: requestBody.namespace || 'default',
       package: requestBody.package,
-      inputs: inputsArray,
-      policy_id: mockAgentPolicyId,
-      policy_ids: [mockAgentPolicyId],
-      supports_agentless: true,
-      supports_cloud_connector: !!requestBody.cloud_connector?.enabled,
-      cloud_connector_id: requestBody.cloud_connector?.enabled ? mockConnectorId : undefined,
+      inputs: requestBody.inputs ?? {},
+      vars: requestBody.vars,
+      global_data_tags: requestBody.global_data_tags,
+      cloud_connector: requestBody.cloud_connector?.enabled
+        ? { enabled: true, cloud_connector_id: mockConnectorId }
+        : null,
+      created_at: now,
+      created_by: 'test_user',
+      updated_at: now,
+      updated_by: 'test_user',
     },
   };
 }
 
 /**
- * Mocks the agentless policies API route, capturing POST requests and returning mock responses.
+ * Mocks the managed integrations API route, capturing POST requests and returning mock responses.
+ * The UI only calls `managed_integrations`; the deprecated `agentless_policies` alias is never hit
+ * from our code, so it does not need to be intercepted.
  */
 export async function mockAgentlessPoliciesWithCapture(
   page: ScoutPage,
   onPostCapture: (body: AgentlessPolicyRequestBody) => void,
   connectorId?: string
 ) {
-  await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+  await page.route(/\/api\/fleet\/managed_integrations/, async (route, request) => {
     if (request.method() === 'POST') {
       const capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
       onPostCapture(capturedRequestBody);

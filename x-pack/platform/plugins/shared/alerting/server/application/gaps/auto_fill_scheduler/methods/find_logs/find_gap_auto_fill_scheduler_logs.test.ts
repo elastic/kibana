@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
@@ -27,8 +28,6 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../auth
 import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
 import { GapAutoFillSchedulerAuditAction } from '../../../../../rules_client/common/audit_events';
 import type { FindGapAutoFillSchedulerLogsParams } from './types';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
-
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -100,6 +99,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
     jest.resetAllMocks();
 
     rulesClient = new RulesClient({
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -108,6 +108,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       spaceId: 'default',
       namespace: 'default',
       getUserName: jest.fn(),
+      getProfileUid: jest.fn(),
       createAPIKey: jest.fn(),
       cloneAPIKey: jest.fn(),
       logger: loggingSystemMock.create().get(),
@@ -127,7 +128,6 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
-      featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
     });
 
@@ -252,7 +252,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           sortField: '@timestamp',
           sortDirection: 'desc',
         })
-      ).rejects.toThrowError(/error getting SO!/);
+      ).rejects.toThrow(/error getting SO!/);
     });
 
     test('should audit and throw when authorization fails', async () => {
@@ -270,7 +270,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           sortField: '@timestamp',
           sortDirection: 'desc',
         })
-      ).rejects.toThrowError(/Failed to get gap fill auto scheduler logs by id: gap-1/);
+      ).rejects.toThrow(/Failed to get gap fill auto scheduler logs by id: gap-1/);
 
       // Audit contains the error
       expect(auditLogger.log).toHaveBeenCalledWith(
@@ -289,7 +289,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
           page: 1,
           perPage: 10,
         } as unknown as FindGapAutoFillSchedulerLogsParams)
-      ).rejects.toThrowError(/Error validating gap auto fill scheduler logs parameters/);
+      ).rejects.toThrow(/Error validating gap auto fill scheduler logs parameters/);
     });
   });
 });

@@ -19,6 +19,7 @@ export type * from './sentinel_one';
 export type * from './microsoft_defender_endpoint';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 export type * from './scripts_library';
+export * from './libyara';
 
 /**
  * Supported React-Router state for the Policy Details page
@@ -397,6 +398,12 @@ export type AlertEvent = Partial<{
   rule: Partial<{
     id: ECSField<string>;
     description: ECSField<string>;
+    name: ECSField<string>;
+    custom_yara_signature: Partial<{
+      entry_name: ECSField<string>;
+      rule_identifier: ECSField<string>;
+      entry_id: ECSField<string>;
+    }>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -1010,7 +1017,7 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     device_control?: DeviceControlFields;
@@ -1047,7 +1054,12 @@ export interface PolicyConfig {
       credential_hardening: {
         enabled: boolean;
       };
+      /** Absent means never configured and is treated as disabled. */
+      registry_credential_hardening?: {
+        enabled: boolean;
+      };
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
   mac: {
     advanced?: {};
@@ -1061,7 +1073,7 @@ export interface PolicyConfig {
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     ransomware: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     device_control?: DeviceControlFields;
     popup: {
       malware: {
@@ -1088,6 +1100,7 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
   linux: {
     advanced?: {};
@@ -1101,7 +1114,12 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
+    /**
+     * Absent on policies created before Linux ransomware existed and wherever
+     * `linuxRansomwareProtection` is off; absent means off.
+     */
+    ransomware?: ProtectionFields & SupportedFields;
     popup: {
       malware: {
         message: string;
@@ -1115,10 +1133,16 @@ export interface PolicyConfig {
         message: string;
         enabled: boolean;
       };
+      /** Present alongside `ransomware`; absent wherever that is absent. */
+      ransomware?: {
+        message: string;
+        enabled: boolean;
+      };
     };
     logging: {
       file: string;
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
 }
 
@@ -1141,6 +1165,7 @@ export interface UIPolicyConfig {
     | 'behavior_protection'
     | 'attack_surface_reduction'
     | 'device_control'
+    | 'ai_data_collection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
@@ -1155,13 +1180,21 @@ export interface UIPolicyConfig {
     | 'behavior_protection'
     | 'memory_protection'
     | 'device_control'
+    | 'ai_data_collection'
   >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
   linux: Pick<
     PolicyConfig['linux'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
+    | 'malware'
+    | 'ransomware'
+    | 'events'
+    | 'popup'
+    | 'advanced'
+    | 'behavior_protection'
+    | 'memory_protection'
+    | 'ai_data_collection'
   >;
 }
 
@@ -1185,6 +1218,11 @@ export interface BlocklistFields {
 
 export interface OnWriteScanFields {
   on_write_scan: boolean;
+}
+
+export interface CustomYaraSignaturesFields {
+  /** Absent means never configured and is treated as disabled. */
+  custom_yara_signatures?: boolean;
 }
 
 /** Policy protection mode options */
@@ -1213,6 +1251,11 @@ export type DeviceControlAccessLevel =
 export interface DeviceControlFields {
   enabled: boolean;
   usb_storage: DeviceControlAccessLevel;
+}
+
+/** Endpoint AI event enrichment. An absent block means never configured and is treated as disabled. */
+export interface AiDataCollectionFields {
+  enabled: boolean;
 }
 
 /**

@@ -255,14 +255,26 @@ interface AttackDiscoverySuccessTelemetryEvent {
   alertsContextCount: number;
   alertsCount: number;
   configuredAlertsCount: number;
+  custom_retrieval_workflow_count?: number;
   dateRangeDuration: number;
+  alert_retrieval_mode?: string;
+  default_alert_retrieval_mode?: string;
   discoveriesGenerated: number;
+  duplicatesDroppedCount?: number;
   durationMs: number;
+  execution_mode?: string;
+  hallucinations_filtered_count?: number;
   hasFilter: boolean;
   isDefaultDateRange: boolean;
   model?: string;
+  prebuilt_step_types_used?: string[];
   provider?: string;
+  retrieval_workflow_count?: number;
   scheduleInfo?: AttackDiscoveryScheduleInfo;
+  trigger?: string;
+  uses_default_retrieval?: boolean;
+  uses_default_validation?: boolean;
+  validation_discoveries_count?: number;
 }
 
 export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySuccessTelemetryEvent> = {
@@ -296,11 +308,32 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
         optional: false,
       },
     },
+    custom_retrieval_workflow_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of user-selected custom alert retrieval workflows',
+        optional: true,
+      },
+    },
     dateRangeDuration: {
       type: 'integer',
       _meta: {
         description: 'Duration of time range of request in hours',
         optional: false,
+      },
+    },
+    alert_retrieval_mode: {
+      type: 'keyword',
+      _meta: {
+        description: 'The alert retrieval mode (custom_query/esql/custom_only/provided)',
+        optional: true,
+      },
+    },
+    default_alert_retrieval_mode: {
+      type: 'keyword',
+      _meta: {
+        description: 'The alert retrieval mode (custom_query/esql/custom_only/provided)',
+        optional: true,
       },
     },
     discoveriesGenerated: {
@@ -310,11 +343,32 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
         optional: false,
       },
     },
+    duplicatesDroppedCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of discoveries dropped because they were duplicates of existing ones',
+        optional: true,
+      },
+    },
     durationMs: {
       type: 'integer',
       _meta: {
         description: 'Duration of request in ms',
         optional: false,
+      },
+    },
+    execution_mode: {
+      type: 'keyword',
+      _meta: {
+        description: 'Execution mode (workflow/legacy)',
+        optional: true,
+      },
+    },
+    hallucinations_filtered_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of discoveries filtered out as hallucinations by the validation step',
+        optional: true,
       },
     },
     hasFilter: {
@@ -338,6 +392,19 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
         optional: true,
       },
     },
+    prebuilt_step_types_used: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Prebuilt step type ID used in execution',
+        },
+      },
+      _meta: {
+        description: 'Which prebuilt step type IDs appeared in the execution',
+        optional: true,
+      },
+    },
     provider: {
       type: 'keyword',
       _meta: {
@@ -345,16 +412,55 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
         optional: true,
       },
     },
+    retrieval_workflow_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of retrieval workflows executed',
+        optional: true,
+      },
+    },
     scheduleInfo: scheduleInfoSchema,
+    trigger: {
+      type: 'keyword',
+      _meta: {
+        description: 'What triggered the generation (manual/schedule/workflow/unknown)',
+        optional: true,
+      },
+    },
+    uses_default_retrieval: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the default retrieval workflow was run',
+        optional: true,
+      },
+    },
+    uses_default_validation: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the default validation workflow was used',
+        optional: true,
+      },
+    },
+    validation_discoveries_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Post-validation count of valid discoveries',
+        optional: true,
+      },
+    },
   },
 };
 
 interface AttackDiscoveryErrorTelemetryEvent {
   actionTypeId: string;
   errorMessage: string;
+  execution_mode?: string;
+  failed_step?: string;
+  misconfiguration_detected?: boolean;
   model?: string;
   provider?: string;
   scheduleInfo?: AttackDiscoveryScheduleInfo;
+  trigger?: string;
 }
 
 export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTelemetryEvent> = {
@@ -373,7 +479,28 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTel
         description: 'Error message from Elasticsearch',
       },
     },
-
+    execution_mode: {
+      type: 'keyword',
+      _meta: {
+        description: 'Execution mode (workflow/legacy)',
+        optional: true,
+      },
+    },
+    failed_step: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Which pipeline step failed (alert_retrieval/generation/validation), if applicable',
+        optional: true,
+      },
+    },
+    misconfiguration_detected: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a misconfiguration was detected as the root cause of the failure',
+        optional: true,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -389,6 +516,13 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTel
       },
     },
     scheduleInfo: scheduleInfoSchema,
+    trigger: {
+      type: 'keyword',
+      _meta: {
+        description: 'What triggered the generation (manual/schedule/workflow/unknown)',
+        optional: true,
+      },
+    },
   },
 };
 

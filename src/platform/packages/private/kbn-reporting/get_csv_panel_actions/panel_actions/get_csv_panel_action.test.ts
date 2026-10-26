@@ -174,6 +174,109 @@ describe('GetCsvReportPanelAction', () => {
     });
   });
 
+  it('includes esqlVariables from parent api in ES|QL CSV job params', async () => {
+    const esqlMockSearchSource = {
+      createCopy: () => esqlMockSearchSource,
+      removeField: jest.fn(),
+      setField: jest.fn(),
+      getField: jest.fn((name: string) => {
+        if (name === 'query') return { esql: 'FROM test | WHERE crew.id == ?crew_id' };
+        return undefined;
+      }),
+      getSerializedFields: jest.fn().mockReturnValue({
+        query: { esql: 'FROM test | WHERE crew.id == ?crew_id' },
+        parent: { filter: [] },
+      }),
+    } as unknown as SearchSource;
+
+    context = {
+      embeddable: {
+        ...(context.embeddable as object),
+        savedSearch$: new BehaviorSubject({
+          searchSource: esqlMockSearchSource,
+          columns: [],
+        } as unknown as SavedSearch),
+        parentApi: {
+          viewMode$: new BehaviorSubject('view'),
+          esqlVariables$: new BehaviorSubject([{ key: 'crew_id', value: '123', type: 'values' }]),
+        },
+      },
+    } as EmbeddableApiContext;
+
+    const panel = new ReportingCsvPanelAction({
+      core,
+      apiClient,
+      startServices$: mockStartServices$,
+      csvConfig,
+    });
+
+    await Rx.firstValueFrom(mockStartServices$);
+    await panel.execute(context);
+
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith(
+      'csv_v2',
+      expect.objectContaining({
+        locatorParams: expect.arrayContaining([
+          expect.objectContaining({
+            params: expect.objectContaining({
+              esqlVariables: [{ key: 'crew_id', value: '123', type: 'values' }],
+            }),
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('uses a fallback title for by-value ES|QL panels without a title', async () => {
+    const esqlMockSearchSource = {
+      createCopy: () => esqlMockSearchSource,
+      removeField: jest.fn(),
+      setField: jest.fn(),
+      getField: jest.fn((name: string) => {
+        if (name === 'query') return { esql: 'FROM test' };
+        return undefined;
+      }),
+      getSerializedFields: jest.fn().mockReturnValue({
+        query: { esql: 'FROM test' },
+        parent: { filter: [] },
+      }),
+    } as unknown as SearchSource;
+
+    context = {
+      embeddable: {
+        ...(context.embeddable as object),
+        savedSearch$: new BehaviorSubject({
+          searchSource: esqlMockSearchSource,
+          columns: [],
+        } as unknown as SavedSearch),
+        savedObjectId$: new BehaviorSubject(undefined),
+        title$: new BehaviorSubject(''),
+      },
+    } as EmbeddableApiContext;
+
+    const panel = new ReportingCsvPanelAction({
+      core,
+      apiClient,
+      startServices$: mockStartServices$,
+      csvConfig,
+    });
+
+    await Rx.firstValueFrom(mockStartServices$);
+    await panel.execute(context);
+
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith(
+      'csv_v2',
+      expect.objectContaining({
+        title: 'Untitled Discover session',
+        locatorParams: [
+          expect.objectContaining({
+            params: expect.not.objectContaining({ savedSearchId: expect.anything() }),
+          }),
+        ],
+      })
+    );
+  });
+
   it('allows csv generation for valid licenses', async () => {
     const panel = new ReportingCsvPanelAction({
       core,

@@ -57,6 +57,34 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: TEST_PACKAGE=docker KIBANA_DOCKER_IMAGE_VARIANT=cloud KBN_ENABLE_POINTER_COMPRESSION=false .buildkite/scripts/steps/package_testing/test.sh
+    label: 'Artifact Testing - Cloud'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-standard-4
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: TEST_PACKAGE=docker KIBANA_DOCKER_IMAGE_VARIANT=cloud KBN_ENABLE_POINTER_COMPRESSION=true .buildkite/scripts/steps/package_testing/test.sh
+    label: 'Artifact Testing - Cloud Pointer Compression'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-standard-4
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: KIBANA_DOCKER_CONTEXT=default .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
@@ -150,12 +178,11 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/artifacts/publish.sh
-    label: 'Publish Kibana Artifacts'
+  - command: .buildkite/scripts/steps/artifacts/upload_dra_pipeline.sh
+    label: 'Upload DRA Pipeline'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 180
-    timeout_in_minutes: 30
+    timeout_in_minutes: 10

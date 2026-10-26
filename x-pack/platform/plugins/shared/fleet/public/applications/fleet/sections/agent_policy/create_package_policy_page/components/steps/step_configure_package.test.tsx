@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { parse } from 'yaml';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -18,6 +19,8 @@ import { allowedExperimentalValues } from '../../../../../../../../common/experi
 import { validatePackagePolicy, isInputCompatibleWithVarGroupSelections } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
+
+const deps = { safeLoadYaml: parse, conditionValidator: validateAgentConditionExpression };
 
 describe('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;
@@ -32,7 +35,7 @@ describe('StepConfigurePackage', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = (isAgentlessSelected = false) => {
-    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, parse);
+    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, deps);
 
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -298,7 +301,7 @@ describe('StepConfigurePackage', () => {
     });
 
     const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
-    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, parse);
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -398,7 +401,7 @@ describe('StepConfigurePackage', () => {
     ];
 
     const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
-    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, parse);
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -565,7 +568,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
   });
 
   it('should render both input panels with their respective titles', async () => {
-    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, parse);
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={otelPackageInfo}
@@ -587,7 +590,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
   });
 
   it('should render two separate input panels with independent stream toggles, not mixed', async () => {
-    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, parse);
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={otelPackageInfo}
@@ -720,7 +723,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       singleInputPackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -748,7 +751,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       singleInputPackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -889,7 +892,7 @@ describe('isSingleInputAndStreams behavior', () => {
       ],
     };
 
-    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, parse);
+    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={multiInputPackageInfo}
@@ -1011,7 +1014,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       multiTemplatePolicy,
       multiTemplatePackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -1060,7 +1063,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       deprecatedTemplatePackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -1076,6 +1079,185 @@ describe('isSingleInputAndStreams behavior', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('deprecatedPolicyTemplateCallout')).toBeInTheDocument();
     });
+  });
+});
+
+describe('condition field behavior', () => {
+  // A dummy second template forces isSinglePolicyTemplate=false
+  const supportsAgentlessPackageInfo: PackageInfo = {
+    name: 'supports_agentless',
+    title: 'Supports Agentless',
+    version: '1.0.0',
+    release: 'ga',
+    description: 'Package supporting both deployment modes',
+    format_version: '',
+    owner: { github: '' },
+    assets: {} as any,
+    policy_templates: [
+      {
+        name: 'supports_agentless',
+        title: 'Supports agentless template',
+        description: 'Template that supports both default and agentless',
+        deployment_modes: {
+          default: { enabled: true },
+          agentless: { enabled: true },
+        },
+        inputs: [
+          {
+            type: 'httpjson',
+            title: 'Collect via HTTP',
+            description: 'Collect data via HTTP JSON',
+          },
+        ],
+        multiple: true,
+      },
+      {
+        name: 'unused',
+        title: 'Unused template',
+        description: 'Never shown',
+        deployment_modes: { default: { enabled: false }, agentless: { enabled: false } },
+        inputs: [],
+        multiple: false,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'supports_agentless.events',
+        title: 'Supports agentless events',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'httpjson',
+            vars: [],
+            template_path: 'stream.yml.hbs',
+            title: 'Events',
+            description: 'Collect events',
+            enabled: true,
+          },
+        ],
+        package: 'supports_agentless',
+        path: 'events',
+      },
+    ],
+    latestVersion: '1.0.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+
+  const supportsAgentlessPolicy: NewPackagePolicy = {
+    name: 'supports-agentless-1',
+    description: '',
+    namespace: 'default',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    supports_agentless: true,
+    inputs: [
+      {
+        type: 'httpjson',
+        policy_template: 'supports_agentless',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'supports_agentless.events' },
+            vars: {},
+          },
+        ],
+      },
+    ],
+  };
+
+  let testRenderer: TestRenderer;
+  let renderResult: ReturnType<typeof testRenderer.render>;
+  const mockUpdatePackagePolicy = jest.fn();
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockUpdatePackagePolicy.mockClear();
+  });
+
+  const renderSupportsAgentless = (isAgentlessSelected = false) => {
+    const validationResults = validatePackagePolicy(
+      supportsAgentlessPolicy,
+      supportsAgentlessPackageInfo,
+      deps
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={supportsAgentlessPackageInfo}
+        packagePolicy={supportsAgentlessPolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isAgentlessSelected={isAgentlessSelected}
+      />
+    );
+  };
+
+  it('shows condition field in Advanced options when not agentless', async () => {
+    renderSupportsAgentless(false);
+
+    // Expand the input panel body via the "Change defaults" button
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Advanced options')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Advanced options'));
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('packagePolicyInputConditionInput')).toBeInTheDocument();
+    });
+  });
+
+  it('hides condition field when agentless is selected', async () => {
+    renderSupportsAgentless(true);
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.queryByText('Advanced options')).not.toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('packagePolicyStreamConditionInput')).not.toBeInTheDocument();
+  });
+
+  it('hides condition field on edit page of an agentless policy', async () => {
+    const validationResults = validatePackagePolicy(
+      supportsAgentlessPolicy,
+      supportsAgentlessPackageInfo,
+      deps
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={supportsAgentlessPackageInfo}
+        packagePolicy={supportsAgentlessPolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isEditPage={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.queryByText('Advanced options')).not.toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('packagePolicyStreamConditionInput')).not.toBeInTheDocument();
   });
 });
 

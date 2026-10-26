@@ -15,21 +15,37 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { TableId } from '@kbn/securitysolution-data-table';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createEntityFlyoutApiMock } from '../../../../../flyout_v2/entity/use_entity_flyout_api.mock';
 
 const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout');
 
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
+jest.mock('../../../../../flyout_v2/use_flyout_api');
+
 describe('HostName', () => {
+  let flyoutApi: ReturnType<typeof createEntityFlyoutApiMock>;
+
   beforeEach(() => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
+    flyoutApi = createEntityFlyoutApiMock();
+    jest
+      .mocked(useFlyoutApi)
+      .mockReturnValue(flyoutApi as unknown as ReturnType<typeof useFlyoutApi>);
   });
 
   afterEach(() => {
@@ -174,5 +190,32 @@ describe('HostName', () => {
         },
       });
     });
+  });
+
+  test('should open the v2 system flyout when the new flyout advanced setting is enabled', async () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    const context = {
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+      timelineID: TimelineId.active,
+      tabType: TimelineTabs.query,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventContext.Provider value={context}>
+          <HostName {...props} />
+        </StatefulEventContext.Provider>
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await waitFor(() => {
+      expect(flyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
+    });
+    expect(flyoutApi.openHostFlyout).toHaveBeenCalledWith({
+      hostName: props.value,
+      entityId: undefined,
+    });
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });

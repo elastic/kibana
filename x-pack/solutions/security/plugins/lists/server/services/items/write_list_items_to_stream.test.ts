@@ -196,7 +196,7 @@ describe('write_list_items_to_stream', () => {
         size: 100,
         sort: [{ tie_breaker_id: 'asc' }],
       };
-      expect(options.esClient.search).toBeCalledWith(expected);
+      expect(options.esClient.search).toHaveBeenCalledWith(expected);
     });
 
     test('It returns a simple response with expected values and size changed', async () => {
@@ -212,7 +212,7 @@ describe('write_list_items_to_stream', () => {
         size: 33,
         sort: [{ tie_breaker_id: 'asc' }],
       };
-      expect(options.esClient.search).toBeCalledWith(expected);
+      expect(options.esClient.search).toHaveBeenCalledWith(expected);
     });
   });
 

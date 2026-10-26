@@ -18,6 +18,10 @@ import { ReportingCore } from '.';
 import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
+import {
+  getScreenshotting,
+  registerScreenshottingCapabilitiesSwitcher,
+} from './lib/screenshotting_availability';
 import { registerRoutes } from './routes';
 import type {
   ReportingSetup,
@@ -80,7 +84,6 @@ export class ReportingPlugin
     reportingCore.pluginSetup({
       logger: this.logger,
       status,
-      basePath: http.basePath,
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
       docLinks: core.docLinks,
@@ -89,6 +92,7 @@ export class ReportingPlugin
 
     registerUiSettings(core);
     registerDeprecations({ core });
+    registerScreenshottingCapabilitiesSwitcher(core);
 
     if (plugins.usageCollection) {
       registerReportingUsageCollector(
@@ -139,12 +143,14 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        featureFlags: core.featureFlags,
         analytics: core.analytics,
         savedObjects,
         uiSettings,
         store,
         securityService: core.security,
         ...plugins,
+        screenshotting: getScreenshotting(plugins),
       });
 
       // Note: this must be called after ReportingCore.pluginStart

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '@kbn/test-suites-src/functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -19,8 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load from shareable lazy loader', async () => {
-      const exists = await testSubjects.exists('rulesSettingsLink');
-      expect(exists).to.be(true);
+      await testSubjects.existOrFail('rulesSettingsLink');
     });
 
     it('should be able to open the modal', async () => {

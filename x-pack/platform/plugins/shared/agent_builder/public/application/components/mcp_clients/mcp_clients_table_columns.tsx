@@ -15,11 +15,13 @@ import {
   type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import type { OAuthClient } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
+import { McpClientLogo } from '@kbn/agent-builder-browser';
 import { useMcpClientsActions } from '../../context/mcp_clients_provider';
 import { labels } from '../../utils/i18n';
-import { McpClientLogo } from './mcp_client_logo';
 import { McpClientStatusIndicator } from './mcp_client_status_indicator';
 import { McpClientActionsMenu } from './mcp_client_actions_button';
 
@@ -51,6 +53,11 @@ export const useMcpClientsTableColumns = (): Array<EuiBasicTableColumn<OAuthClie
             <EuiLink
               onClick={() => viewClientDetails(client, 'flyout')}
               data-test-subj={`mcpClientsListNameLink-${client.id}`}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_VIEW_DETAILS,
+                detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+              })}
             >
               {name}
             </EuiLink>
@@ -87,7 +94,7 @@ export const useMcpClientsTableColumns = (): Array<EuiBasicTableColumn<OAuthClie
         <McpClientActionsMenu
           clientId={id}
           clientName={client_name ?? id}
-          connectionCount={connections?.active?.length ?? 0}
+          connectionCount={(connections?.active?.length ?? 0) + (connections?.expired?.length ?? 0)}
           revoked={revoked ?? false}
         />
       ),

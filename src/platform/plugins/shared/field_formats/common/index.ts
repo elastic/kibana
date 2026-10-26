@@ -34,7 +34,7 @@ export {
   HistogramFormat,
 } from './converters';
 
-export { getHighlightRequest, geoUtils } from './utils';
+export { getHighlightRequest, geoUtils, highlightTags } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FORMATS_UI_SETTINGS } from './constants/ui_settings';
@@ -43,13 +43,13 @@ export {
   DEFAULT_DURATION_OUTPUT_FORMAT,
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
+  getDurationUnitFromOutputFormat,
+  getDurationUnitInSeconds,
 } from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
-export { TEXT_CONTEXT_TYPE } from './content_types';
 
 export type {
   FieldFormatsGetConfigFn,
-  FieldFormatsContentType,
   FieldFormatConfig,
   FieldFormatId,
   SerializedFieldFormat,
@@ -59,10 +59,8 @@ export type {
   FieldFormatsStartCommon,
   FieldFormatParams,
   FieldFormatMetaParams,
-  FieldFormatConvert,
-  FieldFormatConvertFunction,
   ReactContextTypeConvert,
-  ReactContextTypeSingleConvert,
+  ReactConvertFunction,
   ReactContextTypeOptions,
   TextContextTypeConvert,
   TextContextTypeOptions,

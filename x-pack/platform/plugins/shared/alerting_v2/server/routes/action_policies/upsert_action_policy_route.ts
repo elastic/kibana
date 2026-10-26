@@ -8,22 +8,25 @@
 import { inject, injectable } from 'inversify';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import {
-  createActionPolicyDataSchema,
+  putActionPolicyDataSchema,
   actionPolicyResponseSchema,
   errorResponseSchema,
-  type CreateActionPolicyData,
+  type PutActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { upsertActionPolicyOasExamples } from './upsert_action_policy_oas_example';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
-
-const actionPolicyIdParamsSchema = z.object({
-  id: z.string().describe('The identifier for the action policy.'),
-});
+import {
+  ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
+  ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
+} from './action_policy_route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { actionPolicyIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class UpsertActionPolicyRoute extends BaseAlertingRoute {
@@ -31,18 +34,24 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.write],
+      requiredPrivileges: [
+        ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+        ALERTING_V2_API_PRIVILEGES.rules.read,
+      ],
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create or replace an action policy',
     description:
       'Creates an action policy with the given identifier, or fully replaces it if one already exists.',
+    oasOperationObject: upsertActionPolicyOasExamples,
   } as const;
 
   static schemas = {
     request: {
-      body: createActionPolicyDataSchema,
+      body: putActionPolicyDataSchema,
       params: actionPolicyIdParamsSchema,
     },
     response: {
@@ -56,16 +65,15 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid request parameters or body.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
-      404: {
+      403: {
         body: () => errorResponseSchema,
-        description: 'Indicates the action policy with the given ID does not exist.',
+        description: ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description:
-          'Indicates the action policy was created or updated concurrently by another caller.',
+        description: ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
       },
     },
   };
@@ -78,7 +86,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof actionPolicyIdParamsSchema>,
       unknown,
-      CreateActionPolicyData
+      PutActionPolicyData
     >,
     @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient
   ) {

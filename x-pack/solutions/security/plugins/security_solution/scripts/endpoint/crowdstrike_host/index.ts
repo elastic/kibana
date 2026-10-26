@@ -8,7 +8,7 @@
 import { run, type RunFn } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
 import { existsSync as fileExistsSync } from 'fs';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { DEFAULT_API_URL } from './services/constants';
 import { createDetectionEngineCrowdStrikeRuleIfNeeded } from './services/create_detection_engine_rule';
 import { onboardVmHostWithCrowdStrike } from './services/install_crowdstrike_agent';

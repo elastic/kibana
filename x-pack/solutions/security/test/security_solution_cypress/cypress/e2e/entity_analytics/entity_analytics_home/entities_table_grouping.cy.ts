@@ -7,6 +7,7 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   setGrouping,
   waitForGroupingTable,
@@ -43,12 +44,7 @@ describe(
     tags: ['@ess'],
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
-          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
-        ],
+        kbnServerArgs: ['--uiSettings.overrides.securitySolution:entityStoreEnableV2=true'],
       },
     },
   },
@@ -64,6 +60,7 @@ describe(
     describe('Group by Resolution', () => {
       beforeEach(() => {
         login();
+        disableNewFlyout();
         interceptEntityStoreStatus('running');
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);

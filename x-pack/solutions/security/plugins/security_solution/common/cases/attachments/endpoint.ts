@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../endpoint/service/response_actions/constants';
 
@@ -14,38 +14,55 @@ import { RESPONSE_ACTION_AGENT_TYPE } from '../../endpoint/service/response_acti
  * values are rejected at attachment registration time rather than silently
  * persisted.
  */
-const AgentTypeSchema = z.enum(RESPONSE_ACTION_AGENT_TYPE);
+const AgentTypeSchema = lazySchema(() => z.enum(RESPONSE_ACTION_AGENT_TYPE));
 
-const EndpointTargetSchema = z
-  .object({
-    endpointId: z.string(),
-    hostname: z.string(),
-    agentType: AgentTypeSchema,
-  })
-  .strict();
+const EndpointTargetSchema = lazySchema(() =>
+  z
+    .object({
+      endpointId: z.string(),
+      hostname: z.string(),
+      agentType: AgentTypeSchema,
+    })
+    .strict()
+);
 
-const EndpointAttachmentMetadataSchema = z
-  .object({
-    command: z.string(),
-    comment: z.string(),
-    targets: z.array(EndpointTargetSchema).min(1, 'targets must contain at least one entry'),
-  })
-  .strict();
+const EndpointAttachmentMetadataSchema = lazySchema(() =>
+  z
+    .object({
+      command: z.string(),
+      targets: z.array(EndpointTargetSchema).min(1, 'targets must contain at least one entry'),
+    })
+    .strict()
+);
+
+const EndpointAttachmentDataSchema = lazySchema(() => z.object({ content: z.string() }).strict());
 
 /**
  * Full unified-payload schema for `security.endpoint`. Registered on the unified
  * registry via `schema:` so the cases plugin validates the entire payload (not
  * just the metadata slice). Strict objects reject unknown keys.
+ *
+ * `attachmentId` semantics: for new `security.endpoint` writes this is the
+ * response-action id and is safe to use to deep-link / fetch action details.
+ * For rows projected from the retired legacy `actions` type, `attachmentId` is
+ * a synthetic sentinel (`'legacy-actions'`, see `LEGACY_ACTIONS_SYNTHETIC_ATTACHMENT_ID`
+ * in cases/server/common/attachments/actions.ts) — the legacy shape carried no
+ * foreign-reference id, so any feature that keys off `attachmentId` to fetch
+ * action details must guard for the sentinel or those rows will dead-link.
  */
-export const EndpointAttachmentPayloadSchema = z
-  .object({
-    type: z.literal(SECURITY_ENDPOINT_ATTACHMENT_TYPE),
-    owner: z.string(),
-    attachmentId: z.string(),
-    metadata: EndpointAttachmentMetadataSchema,
-  })
-  .strict();
+export const EndpointAttachmentPayloadSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(SECURITY_ENDPOINT_ATTACHMENT_TYPE),
+      owner: z.string(),
+      attachmentId: z.string(),
+      data: EndpointAttachmentDataSchema,
+      metadata: EndpointAttachmentMetadataSchema,
+    })
+    .strict()
+);
 
 export type EndpointAttachmentPayload = z.infer<typeof EndpointAttachmentPayloadSchema>;
 export type EndpointAttachmentMetadata = EndpointAttachmentPayload['metadata'];
 export type EndpointAttachmentTarget = EndpointAttachmentMetadata['targets'][number];
+export type EndpointAttachmentData = EndpointAttachmentPayload['data'];

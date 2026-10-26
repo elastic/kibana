@@ -10,10 +10,43 @@
 import fs from 'fs';
 import { escape } from 'he';
 import Path from 'path';
-import { getScoutFailures, type ScoutTestFailureExtended } from './get_scout_failures';
+import {
+  getScoutFailures,
+  type ScoutInfraFailureReason,
+  type ScoutTestFailureExtended,
+} from './get_scout_failures';
 import type { ProcessReportsParams } from './process_reports_types';
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import { createFailureIssue, updateFailureIssue, updateSuiteIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
+
+// Sidecar file written next to the Scout HTML reports so `generateScoutTestFailureArtifacts`
+// can pick up the GitHub issue link, failure count and infra reason without re-parsing the HTML report.
+export const SCOUT_GITHUB_ISSUES_FILENAME = 'github-issues.json';
+
+export interface ScoutGithubIssueDetails {
+  githubIssue?: string;
+  failureCount?: number;
+  infraReason?: ScoutInfraFailureReason;
+}
+
+const getTrackedBranchesStatus = (failure: ScoutTestFailureExtended): string | undefined => {
+  const { infraReason, githubIssue, failureCount = 0 } = failure;
+
+  if (infraReason) {
+    return `<div class="section alert alert-warning" id="tracked-branches-status"><strong>Likely infrastructure issue (${
+      infraReason.category
+    }), no GitHub issue created</strong>: ${escape(infraReason.message)}</div>`;
+  }
+
+  if (githubIssue) {
+    const issueUrl = escape(githubIssue);
+    const badgeHtml = `<span class="badge rounded-pill bg-danger" id="failure-count">${failureCount}</span>`;
+    const issueLinkHtml = `<a id="github-issue-link" href="${issueUrl}" target="_blank">${issueUrl}</a>`;
+    return `<div class="section" id="tracked-branches-status"><strong>Failures in tracked branches</strong>: ${badgeHtml} ${issueLinkHtml}</div>`;
+  }
+
+  return undefined;
+};
 
 export const updateScoutHtmlReport = ({
   log,
@@ -32,21 +65,16 @@ export const updateScoutHtmlReport = ({
     return;
   }
 
-  const fileContent = fs.readFileSync(htmlReportPath, 'utf-8');
-  const failureCount = failure.failureCount ?? 0;
-  const githubIssue = failure.githubIssue ? escape(failure.githubIssue) : undefined;
-
-  let updatedContent = fileContent;
-  if (githubIssue) {
-    const badgeHtml = `<span class="badge rounded-pill bg-danger" id="failure-count">${failureCount}</span>`;
-    const issueLinkHtml = `<a id="github-issue-link" href="${githubIssue}" target="_blank">${githubIssue}</a>`;
-    const trackedBranchesLine = `<strong>Failures in tracked branches</strong>: ${badgeHtml} ${issueLinkHtml}`;
-
-    updatedContent = updatedContent.replace(
-      /<div[^>]*id="tracked-branches-status"[^>]*>[\s\S]*?<\/div>/,
-      `<div class="section" id="tracked-branches-status">${trackedBranchesLine}</div>`
-    );
+  const trackedBranchesStatus = getTrackedBranchesStatus(failure);
+  if (!trackedBranchesStatus) {
+    return;
   }
+
+  const fileContent = fs.readFileSync(htmlReportPath, 'utf-8');
+  const updatedContent = fileContent.replace(
+    /<div[^>]*id="tracked-branches-status"[^>]*>[\s\S]*?<\/div>/,
+    trackedBranchesStatus
+  );
 
   if (updatedContent === fileContent) {
     return;
@@ -60,10 +88,12 @@ export const updateScoutHtmlReport = ({
   fs.writeFileSync(htmlReportPath, updatedContent, 'utf-8');
 };
 
+/** Returns the failures considered for an issue: those not attributed to infrastructure. */
 export async function processScoutReports(
   reportPaths: string[],
   params: ProcessReportsParams
-): Promise<void> {
+): Promise<ScoutTestFailureExtended[]> {
+  const considered: ScoutTestFailureExtended[] = [];
   const {
     log,
     existingIssues,
@@ -95,10 +125,51 @@ export async function processScoutReports(
     }
 
     const reportDir = Path.dirname(reportPath);
+    const githubIssues: Record<string, ScoutGithubIssueDetails> = {};
+
+    const recordGithubIssue = (failure: ScoutTestFailureExtended) => {
+      if (failure.githubIssue) {
+        githubIssues[failure.id] = {
+          githubIssue: failure.githubIssue,
+          failureCount: failure.failureCount ?? 0,
+        };
+      }
+    };
 
     for (const failure of failures) {
-      if (failure.likelyIrrelevant) {
-        log.info(`Scout failure is likely irrelevant: ${failure.classname} - ${failure.name}`);
+      if (failure.infraReason) {
+        log.info(
+          `Scout failure is likely an infrastructure issue (${failure.infraReason.category}): ${failure.classname} - ${failure.name}`
+        );
+        githubIssues[failure.id] = { infraReason: failure.infraReason };
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
+        continue;
+      }
+      considered.push(failure);
+
+      // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
+      const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
+      if (suiteIssue) {
+        const { newBody, newCount } = await updateSuiteIssue(
+          buildUrl,
+          suiteIssue,
+          githubApi,
+          branch,
+          pipeline,
+          failure
+        );
+        const url = suiteIssue.github.htmlUrl;
+        // in dry-run nothing was written, so the next failure of the suite counts from the same body
+        if (updateGithub) {
+          suiteIssue.github.body = newBody;
+        }
+        failure.githubIssue = url;
+        failure.failureCount = updateGithub ? newCount : newCount - 1;
+        if (updateGithub) {
+          log.info(`Updated flaky suite issue: ${url} (fail count: ${newCount})`);
+        }
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
+        recordGithubIssue(failure);
         continue;
       }
 
@@ -113,13 +184,16 @@ export async function processScoutReports(
           failure
         );
         const url = existingIssue.github.htmlUrl;
-        existingIssue.github.body = newBody;
+        if (updateGithub) {
+          existingIssue.github.body = newBody;
+        }
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
         if (updateGithub) {
           log.info(`Updated existing Scout issue: ${url} (fail count: ${newCount})`);
         }
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
+        recordGithubIssue(failure);
         continue;
       }
 
@@ -138,6 +212,17 @@ export async function processScoutReports(
       }
       failure.failureCount = updateGithub ? 1 : 0;
       updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
+      recordGithubIssue(failure);
+    }
+
+    if (Object.keys(githubIssues).length > 0) {
+      fs.writeFileSync(
+        Path.join(reportDir, SCOUT_GITHUB_ISSUES_FILENAME),
+        JSON.stringify(githubIssues, null, 2),
+        'utf-8'
+      );
     }
   }
+
+  return considered;
 }

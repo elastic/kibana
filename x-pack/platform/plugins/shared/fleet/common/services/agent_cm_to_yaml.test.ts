@@ -82,6 +82,34 @@ describe('fullAgentConfigMapToYaml', () => {
     expect(result).toContain('sub_assessment_api_version: 2019-01-01-preview');
   });
 
+  it('preserves multi-line strings as YAML literal block scalars (program: |)', () => {
+    const program =
+      '//   It also says that "The data pipeline ingests data at least every 2\n' +
+      '//   minutes." If a package is created every minute on average\n';
+    const cm = makeConfigMap({
+      data: {
+        'agent.yml': {
+          inputs: [
+            {
+              id: 'input-1',
+              type: 'cel',
+              streams: [{ id: 'stream-1', program }],
+            },
+          ],
+        } as any,
+      },
+    });
+
+    const result = fullAgentConfigMapToYaml(cm, yaml);
+
+    // Must use literal block style, not folded (>) or double-quoted
+    expect(result).toContain('program: |');
+    // Lines must be preserved verbatim — no newline-to-space collapse
+    expect(result).toContain('every 2\n');
+    expect(result).toContain('minutes."');
+    expect(result).not.toContain('every 2  //');
+  });
+
   it('preserves nested agent policy data unchanged', () => {
     const cm = makeConfigMap({
       data: {

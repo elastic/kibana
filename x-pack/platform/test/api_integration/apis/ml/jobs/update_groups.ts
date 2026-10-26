@@ -57,8 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
     { id: 'new_group', jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id], calendarIds: [] },
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/161324
-  describe.skip('update groups', function () {
+  describe('update groups', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();

@@ -201,10 +201,14 @@ export default async () => {
         `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
         `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
         '--xpack.security.uiam.ssl.verificationMode=none',
+        '--xpack.fleet.experimentalFeatures.installIntegrationsKnowledge=false',
       ],
     },
 
-    security: { disableTestUser: true },
+    security: {
+      disableTestUser: true,
+      cookieLogin: false, // serverless uses SAML-based auth, not basic-auth cookie login
+    },
 
     // Used by FTR to recognize serverless project and change its behavior accordingly
     serverless: true,

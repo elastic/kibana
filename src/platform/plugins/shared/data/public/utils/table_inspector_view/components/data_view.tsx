@@ -145,6 +145,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
               uiSettings={this.props.uiSettings}
               datatables={datatables}
               fieldFormats={this.props.fieldFormats}
+              missingValueDisplay={this.state.adapters.tables.missingValueDisplay}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -156,6 +157,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
           fieldFormats={this.props.fieldFormats}
           uiActions={this.props.uiActions}
           isFilterable={this.props.isFilterable}
+          missingValueDisplay={this.state.adapters.tables.missingValueDisplay}
         />
       </>
     );

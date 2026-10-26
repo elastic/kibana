@@ -13,7 +13,7 @@ import { addBasePath } from '..';
 const bodySchema = schema.any();
 
 const paramsSchema = schema.object({
-  indexName: schema.string(),
+  indexName: schema.string({ maxLength: 1000 }),
 });
 
 export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDependencies) {

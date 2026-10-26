@@ -8,6 +8,7 @@
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import type { AttachmentAction } from '../../../client/attachment_framework/types';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { PropertyActions } from '../../property_actions';
 
 interface Props {
@@ -17,13 +18,16 @@ interface Props {
   buttonRef?: React.Ref<HTMLAnchorElement>;
 }
 
+const isVisibleAction = (action: AttachmentAction): boolean =>
+  action.type !== AttachmentActionType.CUSTOM || action.render() != null;
+
 const UserActionPropertyActionsComponent: React.FC<Props> = ({
   isLoading,
   propertyActions,
   customDataTestSubj = 'user-action',
   buttonRef,
 }) => {
-  if (propertyActions.length === 0) {
+  if (!propertyActions.some(isVisibleAction)) {
     return null;
   }
 

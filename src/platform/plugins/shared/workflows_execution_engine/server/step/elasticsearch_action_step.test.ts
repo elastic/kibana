@@ -19,8 +19,10 @@ import type { WorkflowContextManager } from '../workflow_context_manager/workflo
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
-// Mock buildElasticsearchRequest
+// Only `buildElasticsearchRequest` is stubbed — `getElasticsearchConnectors` stays real so the
+// output normalization is driven by the actual connector contracts.
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   buildElasticsearchRequest: jest.fn(),
 }));
 
@@ -61,6 +63,8 @@ describe('ElasticsearchActionStepImpl', () => {
       setInput: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       node: {},
+      abortController: new AbortController(),
+      getStepTimeoutMs: jest.fn(),
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
@@ -307,6 +311,128 @@ describe('ElasticsearchActionStepImpl', () => {
           headers: { 'X-Custom-Header': 'value' },
         })
       );
+    });
+  });
+
+  describe('transport options', () => {
+    const stepWith = {
+      method: 'GET',
+      path: '/my-index/_search',
+      headers: { 'X-Custom-Header': 'value' },
+    };
+
+    const runRawStep = async (stepTimeoutMs?: number) => {
+      mockStepExecutionRuntime.getStepTimeoutMs.mockReturnValue(stepTimeoutMs);
+      const step = {
+        id: 'raw_step',
+        type: 'elasticsearch.request',
+        stepId: 'raw_step',
+        stepType: 'elasticsearch.request',
+        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (esStep as any)._run(stepWith);
+      return (mockEsClient.transport.request as jest.Mock).mock.calls[0][1];
+    };
+
+    it('should use the step timeout as the request timeout, with the abort signal and headers', async () => {
+      const options = await runRawStep(600_000);
+
+      expect(options).toEqual(
+        expect.objectContaining({
+          requestTimeout: 600_000,
+          signal: mockStepExecutionRuntime.abortController.signal,
+          headers: { 'X-Custom-Header': 'value' },
+        })
+      );
+    });
+
+    it('should keep the client request timeout when the step has no timeout', async () => {
+      const options = await runRawStep();
+
+      expect(options).not.toHaveProperty('requestTimeout');
+      expect(options.signal).toBe(mockStepExecutionRuntime.abortController.signal);
+    });
+  });
+
+  describe('output normalization', () => {
+    const buildStep = (stepType: string, stepWith: Record<string, unknown>) => {
+      const step = {
+        id: 'check_index',
+        type: stepType,
+        stepId: 'check_index',
+        stepType,
+        configuration: { name: 'check_index', type: stepType, with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      return new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+    };
+
+    it('should wrap the scalar HEAD response of a HEAD connector in an object', async () => {
+      mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue(true);
+
+      const stepWith = { index: 'my-index' };
+      const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
+        stepWith
+      );
+
+      expect(result.output).toEqual({ result: true });
+    });
+
+    it('should leave an object response of indices.exists untouched', async () => {
+      mockedBuildRequest.mockReturnValue({ method: 'GET', path: '/my-index' });
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue({ 'my-index': {} });
+
+      const stepWith = { index: 'my-index', method: 'GET' };
+      const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
+        stepWith
+      );
+
+      expect(result.output).toEqual({ 'my-index': {} });
+    });
+
+    it('should leave a null response of indices.exists untouched', async () => {
+      mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue(null);
+
+      const stepWith = { index: 'my-index' };
+      const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
+        stepWith
+      );
+
+      expect(result.output).toBeNull();
+    });
+
+    it('should NOT wrap scalar responses of connectors that do not default to HEAD', async () => {
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue('green open my-index');
+
+      const stepWith = { method: 'GET', path: '/_cat/indices' };
+      const result = await (buildStep('elasticsearch.request', stepWith) as any)._run(stepWith);
+
+      expect(result.output).toBe('green open my-index');
+    });
+
+    it('should NOT wrap scalar responses of a non-HEAD connector', async () => {
+      mockedBuildRequest.mockReturnValue({ method: 'GET', path: '/my-index/_search' });
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue('raw text');
+
+      const stepWith = { index: 'my-index' };
+      const result = await (buildStep('elasticsearch.search', stepWith) as any)._run(stepWith);
+
+      expect(result.output).toBe('raw text');
     });
   });
 

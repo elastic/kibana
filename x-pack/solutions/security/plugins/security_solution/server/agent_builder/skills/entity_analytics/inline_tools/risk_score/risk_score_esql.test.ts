@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { createToolHandlerContext, createToolTestMocks } from '../../../../__mocks__/test_helpers';
 import { riskScoreDynamicInlineToolHandler } from './risk_score_esql';
@@ -92,6 +92,7 @@ describe('riskScoreInlineToolHandler', () => {
       expect.objectContaining({
         index: RISK_SCORE_LATEST_INDEX,
         nlQuery: 'What is the risk score?',
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
@@ -135,8 +136,9 @@ describe('riskScoreInlineToolHandler', () => {
         index: RISK_SCORE_LATEST_INDEX,
         nlQuery: 'What is the risk score?',
         additionalContext: expect.stringContaining(
-          `${euid.esql.getEuidDocumentsContainsIdFilter('host')}`
+          `${euid.esql.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))}`
         ),
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
@@ -175,6 +177,7 @@ describe('riskScoreInlineToolHandler', () => {
       expect.objectContaining({
         index: RISK_SCORE_LATEST_INDEX,
         nlQuery: 'What is the risk score?',
+        execute: 'data',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({

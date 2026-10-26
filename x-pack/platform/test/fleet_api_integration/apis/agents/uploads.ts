@@ -6,7 +6,11 @@
  */
 import Moment from 'moment';
 import expect from '@kbn/expect';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
+  AGENTS_INDEX,
+} from '@kbn/fleet-plugin/common';
 import {
   FILE_STORAGE_DATA_AGENT_INDEX,
   FILE_STORAGE_METADATA_AGENT_INDEX,
@@ -22,6 +26,25 @@ export default function (providerContext: FtrProviderContext) {
   const fleetAndAgents = getService('fleetAndAgents');
 
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+
+  const TEST_AGENT_IDS = ['agent1', 'agent2', 'agent3', 'agent4', 'agent6', 'agent7'];
+
+  const createTestAgent = async (agentId: string) => {
+    await esClient.index(
+      {
+        index: AGENTS_INDEX,
+        id: agentId,
+        refresh: true,
+        document: {
+          active: true,
+          enrolled_at: Moment().toISOString(),
+          local_metadata: {},
+          user_provided_metadata: {},
+        },
+      },
+      ES_INDEX_OPTIONS
+    );
+  };
 
   const cleanupFiles = async () => {
     await esClient.deleteByQuery(
@@ -45,6 +68,18 @@ export default function (providerContext: FtrProviderContext) {
         ignore_unavailable: true,
         query: {
           match_all: {},
+        },
+      },
+      ES_INDEX_OPTIONS
+    );
+
+    await esClient.deleteByQuery(
+      {
+        index: AGENTS_INDEX,
+        refresh: true,
+        ignore_unavailable: true,
+        query: {
+          ids: { values: TEST_AGENT_IDS },
         },
       },
       ES_INDEX_OPTIONS
@@ -161,6 +196,9 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
       await cleanupFiles();
+      for (const agentId of TEST_AGENT_IDS) {
+        await createTestAgent(agentId);
+      }
     });
     after(async () => {
       await Promise.all([
@@ -299,7 +337,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/agents/files/${fileName}`)
         .set('kbn-xsrf', 'xxx')
-        .expect(400);
+        .expect(404);
     });
   });
 }

@@ -7,61 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { Subject, switchMap, takeUntil, timer } from 'rxjs';
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector, useStore } from 'react-redux-v7';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
-import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../common';
+import {
+  LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+  WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+} from '../../../hooks/polling_constants';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
+import type { AppDispatch } from '../store/store';
+import type { RootState } from '../store/types';
+import { selectExecution, selectExecutionError } from '../store/workflow_detail/selectors';
+import { cancelExecutionLoading } from '../store/workflow_detail/slice';
 import { loadExecutionThunk } from '../store/workflow_detail/thunks/load_execution_thunk';
 
-export const PollingIntervalMs = 1000 as const;
-
-interface PollingState {
+export interface PollingState {
   workflowExecution: WorkflowExecutionDto | undefined;
   isLoading: boolean;
   error: Error | null;
 }
 
-/**
- * This hook uses RxJS operators for a more declarative approach.
- * It uses RxJS's built-in operators for polling and cleanup.
- */
+/** Polls the selected execution through the same Redux loader used by Show more. */
 export const useWorkflowExecutionPolling = (workflowExecutionId: string): PollingState => {
-  const [loadExecution, { result: workflowExecution, error }] =
-    useAsyncThunkState(loadExecutionThunk);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const stopSubjectRef = useRef<Subject<void>>(new Subject<void>());
+  const dispatch = useDispatch<AppDispatch>();
+  const store = useStore<RootState>();
+  const execution = useSelector(selectExecution);
+  const executionError = useSelector(selectExecutionError);
+  const workflowExecution = execution?.id === workflowExecutionId ? execution : undefined;
+  const error = useMemo(
+    () => (executionError?.id === workflowExecutionId ? new Error(executionError.message) : null),
+    [executionError, workflowExecutionId]
+  );
 
   useEffect(() => {
-    // Create a new stop subject for this polling cycle
-    const stop$ = new Subject<void>();
-    stopSubjectRef.current = stop$;
-    setIsLoading(true);
-
-    // Create an observable that polls at intervals, starting immediately
-    // timer(0, PollingIntervalMs) emits immediately (0ms) then every PollingIntervalMs
-    const polling$ = timer(0, PollingIntervalMs).pipe(
-      switchMap(() => loadExecution({ id: workflowExecutionId })),
-      takeUntil(stop$)
-    );
-
-    const subscription = polling$.subscribe();
-
     return () => {
-      subscription.unsubscribe();
-      stop$.next();
-      setIsLoading(false);
+      dispatch(cancelExecutionLoading(workflowExecutionId));
     };
-  }, [workflowExecutionId, loadExecution]);
+  }, [dispatch, workflowExecutionId]);
 
-  // Stop polling when execution reaches terminal state
-  useEffect(() => {
-    if (workflowExecution && isTerminalStatus(workflowExecution.status)) {
-      stopSubjectRef.current.next();
-      setIsLoading(false);
-    }
-  }, [workflowExecution]);
+  useSerialPolling({
+    poll: async () => {
+      await dispatch(loadExecutionThunk({ id: workflowExecutionId }));
+    },
+    pollKey: workflowExecutionId,
+    intervalMs: () => {
+      const { execution: currentExecution, stepExecutionsTotal } = store.getState().detail;
+      return currentExecution?.id === workflowExecutionId &&
+        stepExecutionsTotal > WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE
+        ? LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS
+        : WORKFLOW_EXECUTION_POLL_INTERVAL_MS;
+    },
+    shouldStop: () => {
+      const { execution: currentExecution, executionRequest } = store.getState().detail;
+      return (
+        !executionRequest &&
+        currentExecution?.id === workflowExecutionId &&
+        isTerminalStatus(currentExecution.status)
+      );
+    },
+  });
 
-  return { workflowExecution, isLoading, error };
+  return { workflowExecution, isLoading: !workflowExecution && !error, error };
 };

@@ -29,6 +29,7 @@ import type {
   MaintenanceWindowsServerStart,
 } from './types';
 import { defineRoutes } from './routes';
+import { MaintenanceWindowSyncTasks } from './sync_tasks';
 
 export class MaintenanceWindowsPlugin
   implements
@@ -42,10 +43,12 @@ export class MaintenanceWindowsPlugin
   private readonly logger: Logger;
   private licenseState: ILicenseState | null = null;
   private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
+  private readonly syncTasks: MaintenanceWindowSyncTasks;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
+    this.syncTasks = new MaintenanceWindowSyncTasks(this.logger);
   }
 
   public setup(
@@ -94,11 +97,14 @@ export class MaintenanceWindowsPlugin
   ): MaintenanceWindowsServerStart {
     const { maintenanceWindowClientFactory } = this;
 
+    this.syncTasks.setTaskManager(plugins.taskManager);
+
     maintenanceWindowClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityService: core.security,
       uiSettings: core.uiSettings,
+      notifyChange: this.syncTasks.runSoon,
     });
 
     const getMaintenanceWindowClientWithAuth = (
@@ -125,6 +131,7 @@ export class MaintenanceWindowsPlugin
       getMaintenanceWindowClientWithAuth,
       getMaintenanceWindowClientWithoutAuth,
       getMaintenanceWindowClientInternal,
+      registerSyncTask: this.syncTasks.register,
     };
   }
 

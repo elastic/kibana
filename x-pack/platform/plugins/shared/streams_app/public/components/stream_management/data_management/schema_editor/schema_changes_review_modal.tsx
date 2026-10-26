@@ -478,7 +478,14 @@ export function SchemaChangesReviewModal({
             <EuiSpacer size="m" />
           </>
         )}
-        <EuiBasicTable items={changes} columns={fieldColumns} />
+        <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.streams.schemaEditor.confirmChangesModal.tableCaption',
+            { defaultMessage: 'Schema changes' }
+          )}
+          items={changes}
+          columns={fieldColumns}
+        />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty

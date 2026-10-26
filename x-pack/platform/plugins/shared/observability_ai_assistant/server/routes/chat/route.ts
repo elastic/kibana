@@ -203,16 +203,10 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
 
     const { request, plugins } = resources;
 
-    const actionsClient = await (
-      await plugins.actions.start()
-    ).getActionsClientWithRequest(request);
-
     const { connectorId, screenDescription, messages, scopes } = resources.params.body;
 
-    const connector = await actionsClient.get({
-      id: connectorId,
-      throwIfSystemAction: true,
-    });
+    const inferenceStart = await plugins.inference.start();
+    const connector = await inferenceStart.getConnectorById(connectorId, request);
     const response$ = from(
       recallAndScore({
         analytics: (await resources.plugins.core.start()).analytics,

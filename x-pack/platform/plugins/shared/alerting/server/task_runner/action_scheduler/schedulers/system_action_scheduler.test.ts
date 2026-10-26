@@ -155,6 +155,28 @@ describe('System Action Scheduler', () => {
       alerts = { ...newAlert1, ...newAlert2 };
     });
 
+    test('should include snoozed alert IDs in excludedAlertInstanceIds when querying summarized alerts', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const scheduler = new SystemActionScheduler({
+        ...getSchedulerContext(),
+        activeSnoozedIds: new Set(['alert-snoozed-1']),
+      });
+      await scheduler.getActionsToSchedule({});
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excludedAlertInstanceIds: expect.arrayContaining(['alert-snoozed-1']),
+        })
+      );
+    });
+
     test('should create actions to schedule for each system action', async () => {
       alertsClient.getProcessedAlerts.mockReturnValue(alerts);
 
@@ -201,7 +223,7 @@ describe('System Action Scheduler', () => {
 
       const scheduler = new SystemActionScheduler({
         ...getSchedulerContext(),
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       });
       const results = await scheduler.getActionsToSchedule({});
 
@@ -406,7 +428,16 @@ describe('System Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "system-action-1" because the maximum number of allowed actions has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "system-action-1" because the maximum number of allowed actions has been reached.`,
+        {
+          labels: {
+            actionId: 'system-action-1',
+            actionTypeId: '.test-system-action',
+            ruleId: 'rule-id-1',
+            ruleType: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(results).toHaveLength(1);
@@ -468,7 +499,16 @@ describe('System Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "system-action-1" because the maximum number of allowed actions for connector type .test-system-action has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "system-action-1" because the maximum number of allowed actions for connector type .test-system-action has been reached.`,
+        {
+          labels: {
+            actionId: 'system-action-1',
+            actionTypeId: '.test-system-action',
+            ruleId: 'rule-id-1',
+            ruleType: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(results).toHaveLength(1);
@@ -512,7 +552,17 @@ describe('System Action Scheduler', () => {
       expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(0);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling system action "different-action-1" because no connector adapter is configured`
+        `Rule "rule-id-1" skipped scheduling system action "different-action-1" because no connector adapter is configured`,
+        {
+          labels: {
+            actionTypeId: '.test-bad-system-action',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            actionId: 'different-action-1',
+            ruleId: 'rule-id-1',
+            ruleType: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(results).toHaveLength(0);

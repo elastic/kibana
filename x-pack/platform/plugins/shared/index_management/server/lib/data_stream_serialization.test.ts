@@ -7,7 +7,13 @@
 
 import type { EnhancedDataStreamFromEs } from '../../common';
 import { deserializeDataStream } from './data_stream_serialization';
-import { LOGSDB_INDEX_MODE, STANDARD_INDEX_MODE } from '../../common/constants';
+import {
+  LOGSDB_INDEX_MODE,
+  LOOKUP_INDEX_MODE,
+  STANDARD_INDEX_MODE,
+  TIME_SERIES_MODE,
+  VECTOR_DB_INDEX_MODE,
+} from '../../common/constants';
 
 describe('deserializeDataStream', () => {
   const mockDataStreamFromEs: EnhancedDataStreamFromEs = {
@@ -27,6 +33,8 @@ describe('deserializeDataStream', () => {
         index_uuid: 'uuid-2',
         prefer_ilm: false,
         managed_by: 'Index Lifecycle Management',
+        ilm_policy: 'historical-policy',
+        index_mode: 'standard',
       },
     ],
     generation: 2,
@@ -43,6 +51,7 @@ describe('deserializeDataStream', () => {
       delete_index: true,
       manage_data_stream_lifecycle: true,
       read_failure_store: true,
+      manage: true,
     },
     hidden: false,
     lifecycle: {
@@ -54,6 +63,11 @@ describe('deserializeDataStream', () => {
     index_mode: 'standard' as const,
     failure_store: {
       enabled: true,
+      lifecycle: {
+        enabled: true,
+        data_retention: '7d',
+        retention_determined_by: 'data_stream_configuration',
+      },
       indices: [],
       rollover_on_write: false,
     } as any,
@@ -64,7 +78,12 @@ describe('deserializeDataStream', () => {
 
   describe('basic deserialization', () => {
     it('should deserialize data stream with all fields', () => {
-      const result = deserializeDataStream(mockDataStreamFromEs, false);
+      const result = deserializeDataStream(mockDataStreamFromEs, false, undefined, {
+        failureStore: {
+          enabled: true,
+          lifecycle: { enabled: true, data_retention: '7d' },
+        },
+      });
 
       expect(result).toEqual({
         name: 'test-data-stream',
@@ -81,6 +100,8 @@ describe('deserializeDataStream', () => {
             uuid: 'uuid-2',
             preferILM: false,
             managedBy: 'Index Lifecycle Management',
+            ilmPolicyName: 'historical-policy',
+            indexMode: 'standard',
           },
         ],
         generation: 2,
@@ -98,6 +119,7 @@ describe('deserializeDataStream', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
         hidden: false,
         lifecycle: {
@@ -106,11 +128,20 @@ describe('deserializeDataStream', () => {
           globalMaxRetention: '30d',
         },
         nextGenerationManagedBy: 'Data stream lifecycle',
+        matchesFailureStoreClusterPattern: false,
+        failureStoreSettings: {
+          enabled: true,
+          lifecycle: {
+            enabled: true,
+            dataRetention: '7d',
+          },
+        },
         failureStoreEnabled: true,
         failureStoreRetention: {
-          customRetentionPeriod: undefined,
+          customRetentionPeriod: '7d',
           defaultRetentionPeriod: undefined,
           retentionDisabled: false,
+          retentionDeterminedBy: 'data_stream_configuration',
         },
         indexMode: 'standard',
       });
@@ -135,6 +166,7 @@ describe('deserializeDataStream', () => {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
         prefer_ilm: true,
         rollover_on_write: true,
@@ -166,6 +198,60 @@ describe('deserializeDataStream', () => {
         },
         indexMode: 'standard',
       });
+    });
+
+    it('should preserve an explicitly empty backing-index ILM policy setting', () => {
+      const result = deserializeDataStream(
+        {
+          ...mockDataStreamFromEs,
+          indices: [
+            {
+              index_name: '.ds-test-data-stream-000001',
+              index_uuid: 'uuid-1',
+              prefer_ilm: true,
+              managed_by: 'Unmanaged',
+              ilm_policy: '',
+              index_mode: 'standard',
+            },
+          ],
+        },
+        false
+      );
+
+      expect(result.indices[0]).toMatchObject({
+        preferILM: true,
+        managedBy: 'Unmanaged',
+        ilmPolicyName: '',
+        indexMode: 'standard',
+      });
+    });
+
+    it('should preserve a backing-index mode unsupported by the Kibana UI', () => {
+      const result = deserializeDataStream(
+        {
+          ...mockDataStreamFromEs,
+          indices: [
+            {
+              index_name: '.ds-test-data-stream-000001',
+              index_uuid: 'uuid-1',
+              prefer_ilm: false,
+              managed_by: 'Unmanaged',
+              index_mode: 'columnar' as EnhancedDataStreamFromEs['indices'][number]['index_mode'],
+            },
+          ],
+        },
+        false
+      );
+
+      expect(result.indices[0].indexMode).toBe('columnar');
+    });
+
+    it('populates lifecycleSettings only from explicit options', () => {
+      const result = deserializeDataStream(mockDataStreamFromEs, false, undefined, {
+        lifecycleSettings: { preferIlm: false },
+      });
+
+      expect(result.lifecycleSettings).toEqual({ preferIlm: false });
     });
   });
 
@@ -238,6 +324,21 @@ describe('deserializeDataStream', () => {
       expect(result.failureStoreEnabled).toBe(true);
     });
 
+    it('treats enabled="true" as match-all', () => {
+      const failureStoreSettings = {
+        enabled: 'true',
+      };
+
+      const result = deserializeDataStream(
+        { ...mockDataStreamFromEs, name: 'any-data-stream', failure_store: undefined },
+        false,
+        failureStoreSettings
+      );
+
+      expect(result.failureStoreEnabled).toBe(true);
+      expect(result.matchesFailureStoreClusterPattern).toBe(true);
+    });
+
     it('should disable failure store when matches pattern but explicitly disabled', () => {
       const dataStream = {
         ...mockDataStreamFromEs,
@@ -306,6 +407,69 @@ describe('deserializeDataStream', () => {
       const result = deserializeDataStream(dataStream, false);
 
       expect(result.indexMode).toBe('logsdb');
+    });
+
+    it.each([TIME_SERIES_MODE, LOOKUP_INDEX_MODE, VECTOR_DB_INDEX_MODE])(
+      'should use provided %s index mode instead of falling back to standard',
+      (indexMode) => {
+        const dataStream = {
+          ...mockDataStreamFromEs,
+          index_mode: indexMode,
+        } as EnhancedDataStreamFromEs;
+
+        const result = deserializeDataStream(dataStream, false);
+
+        expect(result.indexMode).toBe(indexMode);
+      }
+    );
+
+    it('should keep provided time_series index mode when logsdb is enabled and name matches logs pattern', () => {
+      const dataStream: EnhancedDataStreamFromEs = {
+        ...mockDataStreamFromEs,
+        name: 'logs-nginx-production',
+        index_mode: TIME_SERIES_MODE,
+      };
+
+      const result = deserializeDataStream(dataStream, true);
+
+      expect(result.indexMode).toBe(TIME_SERIES_MODE);
+    });
+
+    it('should keep provided standard index mode when logsdb is enabled and name matches logs pattern', () => {
+      const dataStream: EnhancedDataStreamFromEs = {
+        ...mockDataStreamFromEs,
+        name: 'logs-nginx-production',
+        index_mode: STANDARD_INDEX_MODE,
+      };
+
+      const result = deserializeDataStream(dataStream, true);
+
+      expect(result.indexMode).toBe(STANDARD_INDEX_MODE);
+    });
+
+    it('should default to standard mode when the provided index mode is unknown', () => {
+      const unknownIndexMode: string = 'unknown_mode';
+      const dataStream = {
+        ...mockDataStreamFromEs,
+        index_mode: unknownIndexMode,
+      } as EnhancedDataStreamFromEs;
+
+      const result = deserializeDataStream(dataStream, false);
+
+      expect(result.indexMode).toBe(STANDARD_INDEX_MODE);
+    });
+
+    it('should default to logsdb mode for logs pattern when logsdb is enabled and the provided index mode is unknown', () => {
+      const unknownIndexMode: string = 'unknown_mode';
+      const dataStream = {
+        ...mockDataStreamFromEs,
+        name: 'logs-nginx-production',
+        index_mode: unknownIndexMode,
+      } as EnhancedDataStreamFromEs;
+
+      const result = deserializeDataStream(dataStream, true);
+
+      expect(result.indexMode).toBe(LOGSDB_INDEX_MODE);
     });
 
     it('should default to logsdb mode for logs pattern when logsdb is enabled and no index mode provided', () => {

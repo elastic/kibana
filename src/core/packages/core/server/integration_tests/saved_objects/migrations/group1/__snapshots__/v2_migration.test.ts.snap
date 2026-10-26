@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`v2 migration to a newer stack version with transform errors collects corrupt saved object documents across batches 1`] = `
+"Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>
+Error: Cannot convert 'complex' objects with values that are multiple of 100 <uuid>"
+`;

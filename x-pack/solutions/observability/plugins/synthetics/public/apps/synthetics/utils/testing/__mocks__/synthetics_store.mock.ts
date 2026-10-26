@@ -94,6 +94,7 @@ export const mockState: SyntheticsAppState = {
   },
   overview: {
     pageState: {
+      page: 1,
       perPage: 10,
       sortOrder: 'asc',
       sortField: 'name.keyword',
@@ -105,12 +106,18 @@ export const mockState: SyntheticsAppState = {
       order: 'asc',
     },
     view: 'cardView',
+    showLastRun: false,
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
   agentPolicies: {
+    loading: false,
+    error: null,
+    data: null,
+  },
+  agentStats: {
     loading: false,
     error: null,
     data: null,
@@ -142,6 +149,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
+    settled: false,
     isInitialLoad: true,
   },
   globalParams: {
@@ -163,7 +171,6 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     error: null,
   },
-  maintenanceWindows: {},
   monitorHealth: {
     data: null,
     loading: false,
@@ -476,6 +483,7 @@ function getMonitorDetailsMockSlice() {
       'filter_journeys.match': '',
       'filter_journeys.tags': [],
       ignore_https_errors: false,
+      certificate_error_spki_allowlist: [],
       throttling: {
         value: {
           download: '5',

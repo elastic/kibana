@@ -36,7 +36,7 @@ describe('moveFile', () => {
   it('throws error if `rename` throws a non-EXDEV error', async () => {
     renameMock.mockRejectedValue(createError('something'));
 
-    await expect(moveFile('from', 'to')).rejects.toThrowError('something');
+    await expect(moveFile('from', 'to')).rejects.toThrow('something');
 
     expect(renameMock).toHaveBeenCalledTimes(1);
     expect(copyFileMock).not.toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe('moveFile', () => {
     renameMock.mockRejectedValue(createError('EXDEV'));
     copyFileMock.mockRejectedValue(createError('anything'));
 
-    await expect(moveFile('from', 'to')).rejects.toThrowError('anything');
+    await expect(moveFile('from', 'to')).rejects.toThrow('anything');
 
     expect(renameMock).toHaveBeenCalledTimes(1);
 
@@ -75,7 +75,7 @@ describe('moveFile', () => {
     renameMock.mockRejectedValue(createError('EXDEV'));
     unlinkMock.mockRejectedValue(createError('something-else'));
 
-    await expect(moveFile('from', 'to')).rejects.toThrowError('something-else');
+    await expect(moveFile('from', 'to')).rejects.toThrow('something-else');
 
     expect(renameMock).toHaveBeenCalledTimes(1);
 

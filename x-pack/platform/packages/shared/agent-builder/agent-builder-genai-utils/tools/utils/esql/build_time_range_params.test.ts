@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildTimeRangeParams } from './build_time_range_params';
+import { buildTimeRangeParams, buildTimeSeriesTimeRangeFilter } from './build_time_range_params';
 
 describe('buildTimeRangeParams', () => {
   it('returns undefined when no time range is provided', () => {
@@ -42,5 +42,46 @@ describe('buildTimeRangeParams', () => {
     const tstart = new Date(result![0]._tstart as string).getTime();
     const tend = new Date(result![1]._tend as string).getTime();
     expect(tend).toBeGreaterThan(tstart);
+  });
+});
+
+describe('buildTimeSeriesTimeRangeFilter', () => {
+  const timeRange = { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' };
+
+  it.each([
+    'TS metrics-tsds | STATS SUM(RATE(requests))',
+    'PROMQL index=metrics-tsds rate=(sum(rate(requests)))',
+  ])('filters %s on @timestamp', (query) => {
+    expect(buildTimeSeriesTimeRangeFilter(query, timeRange)).toEqual({
+      range: {
+        '@timestamp': {
+          gte: timeRange.from,
+          lte: timeRange.to,
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  });
+
+  it('resolves datemath expressions', () => {
+    const filter = buildTimeSeriesTimeRangeFilter('TS metrics-tsds | STATS SUM(RATE(requests))', {
+      from: 'now-24h',
+      to: 'now',
+    });
+    const { gte, lte } = (filter?.range?.['@timestamp'] ?? {}) as { gte: string; lte: string };
+    expect(new Date(gte).toISOString()).toBe(gte);
+    expect(new Date(lte).toISOString()).toBe(lte);
+  });
+
+  it('returns undefined for FROM queries, whose time field may not be @timestamp', () => {
+    expect(
+      buildTimeSeriesTimeRangeFilter('FROM logs-* | STATS COUNT(*)', timeRange)
+    ).toBeUndefined();
+  });
+
+  it('returns undefined without a time range', () => {
+    expect(
+      buildTimeSeriesTimeRangeFilter('TS metrics-tsds | STATS SUM(RATE(requests))', undefined)
+    ).toBeUndefined();
   });
 });
