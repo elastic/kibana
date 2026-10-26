@@ -208,7 +208,9 @@ const alertTriageBatchClassifiedInputSchema = lazySchema(() =>
     alerts_without_verdict: count('Alerts the analysis returned no verdict for'),
     fp_below_floor: count('False positives below the confidence floor, which are not proposed'),
     fp_candidates: count('False positives at or above the confidence floor'),
-    investigation_id: investigationId('Investigation the Worker opened for the batch'),
+    investigation_id: optionalInvestigationId(
+      'Investigation of the batch, absent because a batch has none'
+    ),
     verdicts_false_positive: count('Alerts classified as false positives'),
     verdicts_inconclusive: count('Alerts classified as inconclusive'),
     verdicts_true_positive: count('Alerts classified as true positives'),

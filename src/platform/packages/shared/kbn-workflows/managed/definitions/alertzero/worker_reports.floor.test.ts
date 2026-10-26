@@ -30,18 +30,6 @@ describe('Alert Triage close reports', () => {
   describeCloseReports({
     closeReports: [
       {
-        closeReason: 'other',
-        closeStep: 'close_no_fp',
-        definition: ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW,
-        reportStep: 'report_investigation_closed_no_fp',
-      },
-      {
-        closeReason: 'other',
-        closeStep: 'close_batch_investigation',
-        definition: ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW,
-        reportStep: 'report_batch_investigation_closed',
-      },
-      {
         closeReason: 'false_positive',
         closeStep: 'close_investigation_after_approval',
         definition: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
@@ -84,7 +72,7 @@ describe('Alert Triage outcome reports', () => {
       steps,
       'report_batch_classified',
       'alert_triage_batch_classified',
-      'attach_impact_gate'
+      'compute_below_floor_fp_ids'
     );
 
     it('reports the batch once its counts and false-positive candidates are known', () => {
@@ -124,7 +112,6 @@ describe('Alert Triage outcome reports', () => {
             true_positive_count: verdicts.tp,
           },
         },
-        create_investigation: { output: { conversation_id: INVESTIGATION_ID } },
       },
       variables: {
         alert_count: alerts,
@@ -134,7 +121,7 @@ describe('Alert Triage outcome reports', () => {
       },
     });
 
-    it('renders a classified batch', () => {
+    it('renders a classified batch without an Investigation id, since a batch has none', () => {
       expect(
         renderReport(
           batchReport,
@@ -149,7 +136,6 @@ describe('Alert Triage outcome reports', () => {
         alerts_without_verdict: 2,
         fp_below_floor: 3,
         fp_candidates: 20,
-        investigation_id: INVESTIGATION_ID,
         verdicts_false_positive: 23,
         verdicts_inconclusive: 5,
         verdicts_true_positive: 10,

@@ -181,6 +181,7 @@ describe('triage group false positives step', () => {
             revision: 2,
             conversation_id: 'conv-owner',
             alert_ids: ['a1', 'a2'],
+            alerts_page_query: expect.stringContaining('filters='),
           },
         ],
       })

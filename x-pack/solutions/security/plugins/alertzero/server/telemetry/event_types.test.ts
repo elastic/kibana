@@ -500,7 +500,6 @@ describe('AlertZero telemetry event types', () => {
       [ALERTZERO_TELEMETRY_EVENTS.AdWorkerReviewStarted, 'is_rereview'],
       [ALERTZERO_TELEMETRY_EVENTS.AdWorkerHandoffResolved, 'auto_approve_requested'],
       [ALERTZERO_TELEMETRY_EVENTS.AdWorkerHandoffResolved, 'verdict'],
-      [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified, 'investigation_id'],
       [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved, 'investigation_id'],
       [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted, 'approved_not_applied'],
       [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted, 'entry_gate'],
@@ -642,6 +641,18 @@ describe('AlertZero telemetry event types', () => {
       [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted, 'check_failed'],
       [ALERTZERO_TELEMETRY_EVENTS.HuntReportCompleted, 'run_incomplete'],
     ] as const;
+
+    // A batch has no Investigation of its own: only a new proposal or a failure creates one.
+    it('alertzero_alert_triage_batch_classified accepts a payload without an Investigation id', () => {
+      const analytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+      registerAlertZeroTelemetryEvents(analytics);
+      const { investigation_id: _omitted, ...payload } =
+        FIXTURES[ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified];
+
+      expect(() =>
+        analytics.reportEvent(ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified, payload)
+      ).not.toThrow();
+    });
 
     it.each(CONDITIONAL_INVESTIGATION_IDS)(
       '%s accepts a payload without its Investigation id',

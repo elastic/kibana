@@ -11,11 +11,7 @@ import {
 } from '@kbn/workflows/managed';
 import { SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID } from '@kbn/alertzero-common';
 import type { WorkerWorkflowContract } from './shipped_yaml_contract.test_helpers';
-import {
-  CHANGED_STATUS,
-  INVESTIGATION_ID,
-  OPENED_INVESTIGATION,
-} from './shipped_yaml_contract.test_helpers';
+import { CHANGED_STATUS, INVESTIGATION_ID } from './shipped_yaml_contract.test_helpers';
 
 /**
  * The Alert Triage Worker's workflows with report steps, and runs where every report step's guard
@@ -29,7 +25,6 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           classify_alerts: {
             output: { false_positive_count: 3, inconclusive_count: 1, true_positive_count: 2 },
           },
-          create_investigation: OPENED_INVESTIGATION,
           tag_pattern_keys: {
             output: {
               alerts_with_strict_key: 5,
@@ -53,23 +48,11 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           classify_alerts: {
             output: { false_positive_count: 0, inconclusive_count: 0, true_positive_count: 4 },
           },
-          close_no_fp: { output: CHANGED_STATUS },
-          create_investigation: OPENED_INVESTIGATION,
         },
         variables: { alert_count: 5, fp_candidate_count: 0, verdict_count: 4 },
       },
       {
-        steps: {
-          classify_alerts: {
-            output: { false_positive_count: 3, inconclusive_count: 0, true_positive_count: 0 },
-          },
-          close_batch_investigation: { output: CHANGED_STATUS },
-          create_investigation: OPENED_INVESTIGATION,
-        },
-        variables: { alert_count: 3, fp_candidate_count: 3, verdict_count: 3 },
-      },
-      {
-        steps: { create_investigation: OPENED_INVESTIGATION },
+        steps: {},
         variables: { alert_count: 3, fp_candidate_count: 0, verdict_count: 0 },
       },
     ],

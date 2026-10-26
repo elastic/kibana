@@ -127,7 +127,7 @@ export interface AlertZeroAlertTriageBatchClassifiedPayload extends AlertZeroEnv
   alerts_without_verdict: number;
   fp_below_floor: number;
   fp_candidates: number;
-  investigation_id: string;
+  investigation_id?: string;
   verdicts_false_positive: number;
   verdicts_inconclusive: number;
   verdicts_true_positive: number;
@@ -552,8 +552,8 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_CLASSIFIED_EVENT: EventTypeOpts<AlertZ
       fp_candidates: countField(
         'False positives at or above the confidence floor, which the closure proposal covers'
       ),
-      investigation_id: investigationIdField(
-        'The Investigation the Worker opened for the batch; joins to its close'
+      investigation_id: optionalInvestigationIdField(
+        'The Investigation of the batch, absent because a batch has none: only a new proposal or a failure creates one'
       ),
       verdicts_false_positive: countField('Alerts classified as false positives'),
       verdicts_inconclusive: countField('Alerts classified as inconclusive'),
@@ -576,7 +576,7 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZero
         'Classified alerts with a strict pattern key, whatever their verdict'
       ),
       conversation_created: flagField(
-        'Whether the batch created a conversation of its own; always true until the conversation is created only for a new proposal or a failure'
+        'Whether the batch created a conversation: one for each new proposal, and one for a failure that does not end the run (no verdicts, or some alerts without one). A batch that only joins proposals, or has no false positive to propose, creates none'
       ),
       fp_candidates_on_fallback: countField(
         'False positives at or above the confidence floor that have no strict key, so they group by rule and detection only'

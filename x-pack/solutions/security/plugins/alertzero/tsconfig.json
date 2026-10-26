@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/securitysolution-alerts-page-url",
     "@kbn/security-plugin-types-server",
     "@kbn/security-plugin",
     "@kbn/agentic-investigations-common",

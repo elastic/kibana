@@ -209,7 +209,7 @@ Emitted by the Alert Triage Worker once a batch of alerts is classified, before 
 | `alerts_without_verdict` | long | yes | Alerts the analysis returned no verdict for. They are not tagged, noted or proposed |
 | `fp_candidates` | long | yes | False positives at or above the confidence floor, which the closure proposal covers |
 | `fp_below_floor` | long | yes | False positives below the floor, which are tagged and noted but not proposed |
-| `investigation_id` | keyword | yes | The Investigation the Worker opened for the batch. It joins to the batch's close |
+| `investigation_id` | keyword | no | Absent: a batch has no Investigation of its own. Only a new proposal or a failure creates one |
 
 ### `alertzero_alert_triage_batch_grouped`
 
@@ -227,7 +227,7 @@ Emitted by the Alert Triage Worker once for each classified batch, after it tagg
 | `alerts_joined` | long | yes | Alerts that joined a proposal an earlier batch opened. `0` when grouping is off |
 | `proposals_created` | long | yes | New closure proposals the batch raised. `0` when grouping is off |
 | `alerts_pooled` | long | yes | Alerts pooled into one shared proposal. `0` when grouping is off |
-| `conversation_created` | boolean | yes | Whether the batch created a conversation of its own. Always `true` until the conversation is created only for a new proposal or a failure |
+| `conversation_created` | boolean | yes | Whether the batch created a conversation: one for each new proposal, and one for a failure that does not end the run (no verdicts, or some alerts without one). A batch that only joins proposals or has no false positive to propose creates none |
 
 ### `alertzero_alert_triage_closure_resolved`
 
@@ -242,7 +242,7 @@ Emitted by the Alert Triage closure review once its proposal has settled and the
 | `revisions` | long | yes | Revisions the proposal reached when it settled, counting the first as `1`. More than `1` means alerts joined it |
 | `auto_approve_requested` | boolean | yes | Whether the review asked the gate to auto-approve (supervised autonomy) |
 | `proposal_read_failed` | boolean | yes | Whether the decided proposal could not be read back. A dismissal then leaves the tags and the Investigation untouched |
-| `investigation_id` | keyword | yes | The batch's Investigation. It joins to `alertzero_alert_triage_batch_classified` and to the close |
+| `investigation_id` | keyword | yes | The Investigation of the proposal the review settled. Each new proposal has its own, and it joins to the close. It does not join to `alertzero_alert_triage_batch_classified`, which carries none |
 
 ### `alertzero_rule_tuning_review_completed`
 
