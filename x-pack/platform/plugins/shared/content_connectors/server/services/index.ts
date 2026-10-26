@@ -18,7 +18,7 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
+import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors/server';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
 
 export interface ConnectorMetadata {

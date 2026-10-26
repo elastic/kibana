@@ -7,8 +7,8 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { ConnectorConfiguration } from '@kbn/search-connectors';
-import { SyncJobType, startConnectorSync, fetchConnectorById } from '@kbn/search-connectors';
+import type { ConnectorConfiguration } from '@kbn/search-connectors/server';
+import { SyncJobType, startConnectorSync, fetchConnectorById } from '@kbn/search-connectors/server';
 
 import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 

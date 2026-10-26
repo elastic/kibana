@@ -8,7 +8,7 @@
 import { takeUntil, of, map } from 'rxjs';
 
 import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
-import type { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import type { ConnectorServerSideDefinition } from '@kbn/search-connectors/server';
 
 import type { ConfigType } from '..';
 import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';

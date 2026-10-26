@@ -7,7 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors';
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors/server';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const deleteAccessControlIndex = async (client: IScopedClusterClient, indexName: string) => {

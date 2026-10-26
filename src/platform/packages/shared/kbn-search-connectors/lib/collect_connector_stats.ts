@@ -20,15 +20,11 @@ import type {
   SyncJobStatsByState,
   SyncJobStatsByType,
   SyncJobStatsDetails,
-} from '..';
-import {
-  CRAWLER_SERVICE_TYPE,
-  fetchConnectors,
-  fetchSyncJobs,
-  SyncJobType,
-  SyncStatus,
-  TriggerMethod,
-} from '..';
+} from '../types';
+import { CRAWLER_SERVICE_TYPE } from '../connector_constants';
+import { fetchConnectors } from './fetch_connectors';
+import { fetchSyncJobs } from './fetch_sync_jobs';
+import { SyncJobType, SyncStatus, TriggerMethod } from '../types/connectors';
 
 export const collectConnectorStats = async (
   client: ElasticsearchClient

@@ -10,7 +10,8 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { asyncForEach } from '@kbn/std';
 
-import { fetchSyncJobs, cancelSync } from '..';
+import { cancelSync } from './cancel_sync';
+import { fetchSyncJobs } from './fetch_sync_jobs';
 import { SyncStatus } from '../types/connectors';
 
 export const cancelSyncs = async (

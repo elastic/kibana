@@ -8,8 +8,9 @@
  */
 
 import type { ConnectorSyncJob, Paginate } from '../types';
-import { fetchConnectors, fetchSyncJobs } from '..';
 import { collectConnectorStats } from './collect_connector_stats';
+import { fetchConnectors } from './fetch_connectors';
+import { fetchSyncJobs } from './fetch_sync_jobs';
 import {
   expectedDeletedConnectorStats,
   expectedMysqlConnectorStats,
@@ -23,10 +24,8 @@ import {
   spoIncrementalSyncJob,
 } from './collect_connector_stats_test_data';
 
-jest.mock('.', () => ({
-  fetchConnectors: jest.fn(),
-  fetchSyncJobs: jest.fn(),
-}));
+jest.mock('./fetch_connectors', () => ({ fetchConnectors: jest.fn() }));
+jest.mock('./fetch_sync_jobs', () => ({ fetchSyncJobs: jest.fn() }));
 
 describe('collect connector stats', () => {
   const mockClient = {

@@ -7,13 +7,13 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { ConnectorDocument } from '@kbn/search-connectors';
+import type { ConnectorDocument } from '@kbn/search-connectors/server';
 import {
   CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
   CONNECTORS_INDEX,
   createConnectorSecret,
   updateConnectorSecret,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 
 import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 

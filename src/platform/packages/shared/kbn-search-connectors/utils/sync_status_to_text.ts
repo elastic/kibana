@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncJobType, SyncStatus } from '..';
+import { SyncJobType, SyncStatus } from '../types/connectors';
 
 export function syncStatusToText(status: SyncStatus): string {
   switch (status) {

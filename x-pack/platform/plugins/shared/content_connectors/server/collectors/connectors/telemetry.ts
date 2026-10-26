@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { collectConnectorStats } from '@kbn/search-connectors';
+import { collectConnectorStats } from '@kbn/search-connectors/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConnectorStats } from '../../../common/types/connector_stats';
 
