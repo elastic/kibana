@@ -220,15 +220,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           // failed before scheduling the task.
           const existing = await executionClient.peek(executionId);
 
-          // The record pins the identity resolved when it was created; a replay after the agent
-          // was bound or unbound must not run it under the other identity.
-          if (existing && existing.runAs?.serviceAccountId !== runAs?.serviceAccountId) {
-            throw createInternalError(
-              `Execution ${executionId} was recorded with a different service account binding than agent "${agentId}" has now; retry with a new execution id.`,
-              { statusCode: 409 }
-            );
-          }
-
           if (existing?.status === ExecutionStatus.scheduled) {
             const replayed = {
               executionId,

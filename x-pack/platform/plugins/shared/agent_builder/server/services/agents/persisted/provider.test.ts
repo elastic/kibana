@@ -53,7 +53,6 @@ const makeDefinition = (
     update_agent: true,
     update_access_control: true,
     update_approvals: false,
-    update_execution_identity: false,
   },
   ...overrides,
 });

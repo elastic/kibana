@@ -173,7 +173,6 @@ export const getAgentPermissions = ({
     update_agent: editable && hasWriteAccess({ source, user }),
     update_access_control: editable && hasManageAccessControlAccess({ source, user }),
     update_approvals: editable && hasConfigureApprovalsAccess({ source, user }),
-    update_execution_identity: hasConfigureExecutionIdentityAccess({ source, user }),
   };
 };
 

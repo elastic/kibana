@@ -1190,7 +1190,6 @@ describe('AgentClient service account bindings', () => {
       expect(agent.permissions).toMatchObject({
         update_agent: false,
         update_access_control: false,
-        update_execution_identity: false,
       });
     });
 

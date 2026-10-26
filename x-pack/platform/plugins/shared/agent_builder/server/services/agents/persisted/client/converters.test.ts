@@ -335,7 +335,6 @@ describe('withPermissions', () => {
       update_agent: true,
       update_access_control: true,
       update_approvals: true,
-      update_execution_identity: false,
     });
     expect(definition.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
@@ -350,7 +349,6 @@ describe('withPermissions', () => {
       update_agent: false,
       update_access_control: false,
       update_approvals: false,
-      update_execution_identity: false,
     });
     expect(definition.access_control?.entries).toEqual([bobEntry]);
   });
@@ -1198,10 +1196,6 @@ describe('service_account_id', () => {
     expect(createRequestToEs({ ...base, profile: request })).not.toHaveProperty(
       'service_account_id'
     );
-    expect(
-      createRequestToEs({ ...base, profile: { ...request, service_account_id: 'kibana/sa-1' } })
-        .service_account_id
-    ).toBe('kibana/sa-1');
   });
 
   it('keeps, replaces or removes the account on update', () => {

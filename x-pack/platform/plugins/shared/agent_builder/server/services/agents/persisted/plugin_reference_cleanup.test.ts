@@ -122,31 +122,6 @@ describe('runPluginRefCleanup', () => {
     expect(doc.config.plugin_ids).toEqual(['plugin-b', 'plugin-c']);
   });
 
-  it('refuses to rewrite an agent bound to a service account unless the caller may edit it', async () => {
-    const source = createAgentSource({
-      id: 'bound-agent',
-      service_account_id: 'kibana/sa-1',
-      config: { instructions: '', tools: [], plugin_ids: ['plugin-a'] },
-    });
-    const storage = createMockStorage({ hits: [{ _id: 'doc-1', _source: source }] });
-
-    await expect(
-      runPluginRefCleanup({ storage, spaceId: SPACE_ID, pluginIds: ['plugin-a'] })
-    ).rejects.toMatchObject({
-      meta: { statusCode: 403 },
-      message: expect.stringContaining('Removing plugin references from agent "bound-agent"'),
-    });
-    expect(storage.getClient().bulk).not.toHaveBeenCalled();
-
-    await runPluginRefCleanup({
-      storage,
-      spaceId: SPACE_ID,
-      pluginIds: ['plugin-a'],
-      canEditBoundAgents: true,
-    });
-    expect(storage.getClient().bulk).toHaveBeenCalledTimes(1);
-  });
-
   it('updates multiple agents that reference the deleted plugin', async () => {
     const source1 = createAgentSource({
       id: 'agent-1',

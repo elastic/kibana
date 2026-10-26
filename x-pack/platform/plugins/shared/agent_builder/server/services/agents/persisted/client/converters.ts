@@ -118,7 +118,6 @@ export const createRequestToEs = ({
     avatar_symbol: profile.avatar_symbol,
     created_by_id: user.id,
     created_by_name: user.username,
-    ...(profile.service_account_id ? { service_account_id: profile.service_account_id } : {}),
     access_control: profile.access_control
       ? { access_mode: profile.access_control.access_mode, entries: [] }
       : getDefaultAgentAccessControl(),

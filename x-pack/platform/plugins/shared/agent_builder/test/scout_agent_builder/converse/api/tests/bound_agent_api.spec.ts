@@ -273,22 +273,18 @@ apiTest.describe(
       expect(unbind).toHaveStatusCode(403);
     });
 
-    apiTest(
-      'reports the binding and the binder permission on read',
-      async ({ apiClient, kbnClient }) => {
-        const res = await apiClient.get(AGENT_PATH(agentId), {
-          headers: { ...COMMON_HEADERS, ...asBinder },
-          responseType: 'json',
-        });
+    apiTest('reports the binding on read', async ({ apiClient, kbnClient }) => {
+      const res = await apiClient.get(AGENT_PATH(agentId), {
+        headers: { ...COMMON_HEADERS, ...asBinder },
+        responseType: 'json',
+      });
 
-        expect(res).toHaveStatusCode(200);
-        const agent = res.body as AgentDefinitionWithPermissions;
-        expect(agent.service_account_id).toBe(serviceAccount.id);
-        expect(agent.permissions.update_execution_identity).toBe(true);
-        expect(agent.permissions.update_agent).toBe(true);
-        expect(await boundWorkloads(kbnClient)).toContain(agentId);
-      }
-    );
+      expect(res).toHaveStatusCode(200);
+      const agent = res.body as AgentDefinitionWithPermissions;
+      expect(agent.service_account_id).toBe(serviceAccount.id);
+      expect(agent.permissions.update_agent).toBe(true);
+      expect(await boundWorkloads(kbnClient)).toContain(agentId);
+    });
 
     apiTest(
       'runs the conversation as the service account for a caller with the invoke privilege',

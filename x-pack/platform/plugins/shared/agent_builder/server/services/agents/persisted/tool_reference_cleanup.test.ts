@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { AgentType } from '@kbn/agent-builder-common';
 import type { AgentProperties } from './client/storage';
 import type { AgentProfileStorage } from './client/storage';
@@ -293,44 +292,5 @@ describe('runToolRefCleanup', () => {
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Tool ref cleanup: bulk update failed')
     );
-  });
-
-  it('refuses to rewrite an agent bound to a service account unless the caller may edit it', async () => {
-    const bound = createAgentSource({ id: 'bound-agent', service_account_id: 'kibana/sa-1' });
-    const unbound = createAgentSource({ id: 'plain-agent' });
-    const storage = createMockStorage({
-      hits: [
-        { _id: 'doc-1', _source: bound },
-        { _id: 'doc-2', _source: unbound },
-      ],
-    });
-    const logger = { warn: jest.fn() } as unknown as Logger;
-
-    await expect(
-      runToolRefCleanup({ storage, spaceId: SPACE_ID, toolIds: ['tool-a'], logger })
-    ).rejects.toMatchObject({
-      meta: { statusCode: 403 },
-      message: expect.stringContaining('"bound-agent" (runs as service account "kibana/sa-1")'),
-    });
-    // Nothing is written, not even the unbound agent, so a partial cleanup never happens.
-    expect(storage.getClient().bulk).not.toHaveBeenCalled();
-
-    const checked = await runToolRefCleanup({
-      storage,
-      spaceId: SPACE_ID,
-      toolIds: ['tool-a'],
-      checkOnly: true,
-    });
-    expect(checked.agents.map(({ id }) => id)).toEqual(['bound-agent', 'plain-agent']);
-
-    await runToolRefCleanup({
-      storage,
-      spaceId: SPACE_ID,
-      toolIds: ['tool-a'],
-      logger,
-      canEditBoundAgents: true,
-    });
-    expect(storage.getClient().bulk).toHaveBeenCalledTimes(1);
-    expect((storage.getClient().bulk as jest.Mock).mock.calls[0][0].operations).toHaveLength(2);
   });
 });

@@ -11,7 +11,6 @@ import type { AgentRef } from '../../../../common/http_api/skills';
 import type { AgentsUsingSkillsResult } from './types';
 import { updateRequestToEs } from './client/converters';
 import { createSpaceDslFilter } from '../../../utils/spaces';
-import { assertCanEditBoundAgentsInBulk } from '../service_account_binding';
 
 const SEARCH_SIZE = 1000;
 
@@ -21,8 +20,6 @@ export interface SkillRefCleanupParams {
   skillIds: string[];
   logger?: Logger;
   checkOnly?: boolean;
-  /** Bound agents are read-only without manage_security; the cleanup is refused unless set. */
-  canEditBoundAgents?: boolean;
 }
 
 export type SkillRefCleanupRunResult = AgentsUsingSkillsResult;
@@ -48,14 +45,12 @@ export async function runSkillRefCleanup({
   skillIds,
   logger,
   checkOnly = false,
-  canEditBoundAgents = false,
 }: SkillRefCleanupParams): Promise<SkillRefCleanupRunResult> {
   if (skillIds.length === 0) {
     return { agents: [] };
   }
 
   const agents: AgentRef[] = [];
-  const matchedSources: AgentProperties[] = [];
   const bulkOperations: Array<{ index: { _id: string; document: AgentProperties } }> = [];
   const now = new Date();
 
@@ -80,7 +75,6 @@ export async function runSkillRefCleanup({
     const currentSkillIds = getSkillIdsFromSource(source);
 
     agents.push(toAgentRef(source, String(hit._id)));
-    matchedSources.push(source);
 
     if (!checkOnly) {
       const newSkillIds = stripSkillIds(currentSkillIds, skillIds);
@@ -99,12 +93,6 @@ export async function runSkillRefCleanup({
   if (checkOnly) {
     return { agents };
   }
-
-  assertCanEditBoundAgentsInBulk({
-    sources: matchedSources,
-    canEditBoundAgents,
-    action: 'Removing skill references',
-  });
 
   if (bulkOperations.length > 0) {
     try {

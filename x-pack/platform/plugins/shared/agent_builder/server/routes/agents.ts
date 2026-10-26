@@ -392,16 +392,6 @@ export function registerAgentRoutes({
                   meta: { description: 'Optional symbol/initials for the agent avatar.' },
                 })
               ),
-              service_account_id: schema.maybe(
-                schema.string({
-                  minLength: 1,
-                  maxLength: 1024,
-                  meta: {
-                    description:
-                      'Service account the agent runs as for every conversation. Requires the manage_security privilege.',
-                  },
-                })
-              ),
               labels: schema.maybe(
                 schema.arrayOf(
                   schema.string({
@@ -492,7 +482,6 @@ export function registerAgentRoutes({
           auditLogService.logAgentCreated(request, {
             agentId: createdProfile.id,
             agentName: createdProfile.name,
-            serviceAccountId: request.body.service_account_id,
           });
           return response.ok<CreateAgentResponse>({
             body: withAiIndices(createdProfile, contextEngineEnabled),
@@ -501,7 +490,6 @@ export function registerAgentRoutes({
           auditLogService.logAgentCreated(request, {
             agentId: request.body.id,
             agentName: request.body.name,
-            serviceAccountId: request.body.service_account_id,
             error: asError(error),
           });
           throw error;
@@ -659,7 +647,6 @@ export function registerAgentRoutes({
           auditLogService.logAgentUpdated(request, {
             agentId: profile.id,
             agentName: profile.name,
-            serviceAccountId: request.body.service_account_id ?? undefined,
           });
           return response.ok<UpdateAgentResponse>({
             body: withAiIndices(profile, contextEngineEnabled),
@@ -667,7 +654,6 @@ export function registerAgentRoutes({
         } catch (error) {
           auditLogService.logAgentUpdated(request, {
             agentId: request.params.id,
-            serviceAccountId: request.body.service_account_id ?? undefined,
             error: asError(error),
           });
           throw error;

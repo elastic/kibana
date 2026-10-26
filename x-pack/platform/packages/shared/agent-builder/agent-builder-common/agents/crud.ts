@@ -18,7 +18,13 @@ export interface AgentListOptions {
 
 export type AgentCreateRequest = Omit<
   AgentDefinition,
-  'type' | 'readonly' | 'created_by' | 'access_control' | 'configuration' | 'hidden'
+  | 'type'
+  | 'readonly'
+  | 'created_by'
+  | 'access_control'
+  | 'configuration'
+  | 'hidden'
+  | 'service_account_id'
 > & {
   /**
    * Id of a registered agent type. Defaults to the chat type (empty base).

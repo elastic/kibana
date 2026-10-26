@@ -33,7 +33,7 @@ export interface ServiceAccountBindingDeps {
 /**
  * Guards a change of the service account an agent runs as.
  *
- * @param source - The stored agent on update, or the agent being created.
+ * @param source - The stored agent.
  * @param currentId - The account bound before the write, or `undefined` when unbound.
  * @param nextId - The account requested by the write: a string binds, `null` unbinds, `undefined`
  * keeps the current one.
@@ -83,38 +83,6 @@ export const assertCanEditBoundAgent = ({
   }
   throw createForbiddenError(
     `Editing agent "${source.id}", which runs as service account "${source.service_account_id}", requires the manage_security privilege.`
-  );
-};
-
-/**
- * Reference cleanups rewrite every agent that references a deleted tool, skill or plugin at once;
- * a bound agent among them needs the same privilege as any other edit of it, so the whole cleanup
- * is refused before anything is written.
- */
-export const assertCanEditBoundAgentsInBulk = ({
-  sources,
-  canEditBoundAgents,
-  action,
-}: {
-  sources: AgentProperties[];
-  canEditBoundAgents: boolean;
-  /** What the cleanup does, for the error message, e.g. "Removing tool references". */
-  action: string;
-}): void => {
-  if (canEditBoundAgents) {
-    return;
-  }
-  const bound = sources.filter((source) => source.service_account_id);
-  if (bound.length === 0) {
-    return;
-  }
-  const described = bound
-    .map((source) => `"${source.id}" (runs as service account "${source.service_account_id}")`)
-    .join(', ');
-  throw createForbiddenError(
-    `${action} from ${
-      bound.length === 1 ? 'agent' : 'agents'
-    } ${described} requires the manage_security privilege.`
   );
 };
 

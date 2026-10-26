@@ -15,7 +15,6 @@ export interface AgentPermissions {
   update_agent: boolean;
   update_access_control: boolean;
   update_approvals: boolean;
-  update_execution_identity: boolean;
 }
 
 export type AgentDefinitionWithPermissions = AgentDefinition & {

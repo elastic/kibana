@@ -439,28 +439,6 @@ describe('AgentExecutionService', () => {
       });
     });
 
-    it('refuses an idempotent replay recorded under a different identity', async () => {
-      mockExecutionClient.peek.mockResolvedValue({
-        status: ExecutionStatus.scheduled,
-        eventCount: 0,
-        agentId: 'agent-1',
-      });
-      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
-
-      await expect(
-        createBoundService().executeAgent({
-          mode: AgentExecutionMode.conversation,
-          request: httpServerMock.createKibanaRequest(),
-          executionId: 'exec-1',
-          metadata: { execution_idempotency_key: 'Ev123' },
-          params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
-          useTaskManager: true,
-        })
-      ).rejects.toMatchObject({ meta: { statusCode: 409 } });
-
-      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
-    });
-
     it('leaves an unbound agent on the caller credentials', async () => {
       agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'agent-1' }));
       const request = httpServerMock.createKibanaRequest();

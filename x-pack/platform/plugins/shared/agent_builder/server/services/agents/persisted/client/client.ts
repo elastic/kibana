@@ -274,9 +274,8 @@ const ensureSystemAgent = async ({
   }
 
   const creationDate = new Date();
-  // A system-ensured agent never binds implicitly: binding is an explicit, authorized action.
   const document = createRequestToEs({
-    profile: { ...profile, service_account_id: undefined },
+    profile,
     space,
     creationDate,
     user: { username: SYSTEM_USER_ID },
@@ -436,7 +435,6 @@ class AgentClientImpl implements AgentClient {
       spaceId: this.space,
       toolIds: params.toolIds,
       logger: this.logger,
-      canEditBoundAgents: this.user.canManageSecurity === true,
     });
   }
 
@@ -458,7 +456,6 @@ class AgentClientImpl implements AgentClient {
       spaceId: this.space,
       pluginIds: params.pluginIds,
       logger: this.logger,
-      canEditBoundAgents: this.user.canManageSecurity === true,
     });
   }
 
@@ -480,7 +477,6 @@ class AgentClientImpl implements AgentClient {
       spaceId: this.space,
       skillIds: params.skillIds,
       logger: this.logger,
-      canEditBoundAgents: this.user.canManageSecurity === true,
     });
   }
 
@@ -598,20 +594,7 @@ class AgentClientImpl implements AgentClient {
       nextApprovals: profile.configuration.approvals,
       user: this.user,
     });
-    assertCanConfigureExecutionIdentity({
-      source: attributes,
-      currentId: undefined,
-      nextId: profile.service_account_id,
-      user: this.user,
-      bindings: this.bindings,
-    });
-
-    await this.writeWithBinding({
-      agentId: profile.id,
-      previousId: undefined,
-      nextId: profile.service_account_id,
-      write: () => this.storage.getClient().index({ document: attributes }),
-    });
+    await this.storage.getClient().index({ document: attributes });
 
     return this.get(profile.id);
   }

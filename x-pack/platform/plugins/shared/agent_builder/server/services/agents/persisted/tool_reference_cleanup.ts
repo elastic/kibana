@@ -13,7 +13,6 @@ import type { AgentsUsingToolsResult } from './types';
 import { updateRequestToEs } from './client/converters';
 import { removeToolIdsFromToolSelection } from './client/utils/tools';
 import { createSpaceDslFilter } from '../../../utils/spaces';
-import { assertCanEditBoundAgentsInBulk } from '../service_account_binding';
 
 const SEARCH_SIZE = 1000;
 
@@ -23,8 +22,6 @@ export interface ToolRefCleanupParams {
   toolIds: string[];
   logger?: Logger;
   checkOnly?: boolean;
-  /** Bound agents are read-only without manage_security; the cleanup is refused unless set. */
-  canEditBoundAgents?: boolean;
 }
 
 export type ToolRefCleanupRunResult = AgentsUsingToolsResult;
@@ -49,7 +46,6 @@ export async function runToolRefCleanup({
   toolIds,
   logger,
   checkOnly = false,
-  canEditBoundAgents = false,
 }: ToolRefCleanupParams): Promise<ToolRefCleanupRunResult> {
   const toolIdSet = new Set(toolIds);
   const response = await storage.getClient().search({
@@ -69,7 +65,6 @@ export async function runToolRefCleanup({
   }
 
   const agents: AgentRef[] = [];
-  const matchedSources: AgentProperties[] = [];
   const bulkOperations: Array<{ index: { _id: string; document: AgentProperties } }> = [];
   const now = new Date();
 
@@ -81,7 +76,6 @@ export async function runToolRefCleanup({
     if (!referencesToolIds(currentTools, toolIdSet)) continue;
 
     agents.push(toAgentRef(source, String(hit._id)));
-    matchedSources.push(source);
 
     if (!checkOnly) {
       const newTools = removeToolIdsFromToolSelection(currentTools, toolIds);
@@ -100,12 +94,6 @@ export async function runToolRefCleanup({
   if (checkOnly) {
     return { agents };
   }
-
-  assertCanEditBoundAgentsInBulk({
-    sources: matchedSources,
-    canEditBoundAgents,
-    action: 'Removing tool references',
-  });
 
   if (bulkOperations.length > 0) {
     try {

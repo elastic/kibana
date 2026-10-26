@@ -63,7 +63,6 @@ export const createMockedInternalAgent = (
       update_agent: true,
       update_access_control: true,
       update_approvals: true,
-      update_execution_identity: false,
     },
     isAvailable: jest.fn(async () => ({ status: 'available' as const })) as any,
     ...parts,
