@@ -37,7 +37,12 @@ import { mutationKeys, queryKeys } from '../query_keys';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 import { useProposalDecisionSignal } from './use_proposal_decision_signal';
 
-/** How long to wait for the retry of a failed action. After that, the failed action is final. */
+/**
+ * How long to wait for the retry of a failed action. After that, the failed action is final.
+ * The 30 seconds is a guess. It is long enough for a normal retry.
+ * A state saved on the failed action is the better fix.
+ * FIXME: https://github.com/elastic/security-team/issues/2050
+ */
 export const RETRY_WAIT_MS = 30_000;
 
 const awaitingRetrySince = new Map<string, number>();
