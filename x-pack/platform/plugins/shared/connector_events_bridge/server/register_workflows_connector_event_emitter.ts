@@ -37,6 +37,27 @@ function isAlreadyClaimedResumeError(error: unknown): boolean {
   return candidate.name === 'ExternalResumeError' && candidate.statusCode === 409;
 }
 
+function exposedValidationMessage(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null) {
+    return undefined;
+  }
+  const candidate = error as {
+    name?: unknown;
+    statusCode?: unknown;
+    expose?: unknown;
+    message?: unknown;
+  };
+  if (
+    candidate.name !== 'ExternalResumeError' ||
+    candidate.statusCode !== 400 ||
+    candidate.expose !== true ||
+    typeof candidate.message !== 'string'
+  ) {
+    return undefined;
+  }
+  return candidate.message;
+}
+
 async function resumeHitlFromSlackAction(
   client: {
     resumeExternalHitl: (params: {
@@ -115,6 +136,14 @@ async function resumeHitlFromSlackAction(
     if (isAlreadyClaimedResumeError(error)) {
       await confirmAndReplace(true);
       return;
+    }
+    const validationMessage = exposedValidationMessage(error);
+    if (validationMessage !== undefined && responseUrl) {
+      await replaceSlackHitlMessage({
+        responseUrl,
+        text: validationMessage,
+        ephemeral: true,
+      });
     }
     throw error;
   }

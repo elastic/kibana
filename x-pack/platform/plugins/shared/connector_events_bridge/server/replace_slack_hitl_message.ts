@@ -44,19 +44,22 @@ export function buildHitlSlackConfirmationText(params: {
 export async function replaceSlackHitlMessage(params: {
   responseUrl: string;
   text: string;
+  /** Visible only to the clicker. Leaves the original controls in place. */
+  ephemeral?: boolean;
 }): Promise<void> {
   if (!isSlackResponseUrl(params.responseUrl)) {
     return;
   }
 
+  const body = params.ephemeral
+    ? { response_type: 'ephemeral', replace_original: false, text: params.text }
+    : { replace_original: true, text: params.text };
+
   try {
     await fetch(params.responseUrl, {
       method: 'POST',
       headers: { 'content-type': 'application/json; charset=utf-8' },
-      body: JSON.stringify({
-        replace_original: true,
-        text: params.text,
-      }),
+      body: JSON.stringify(body),
     });
   } catch {
     // Best-effort UX only.

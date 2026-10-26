@@ -622,6 +622,15 @@ describe('Slack inbound events', () => {
               hitl_field_count: {
                 count: { type: 'number_input', value: '3' },
               },
+              hitl_field_tags: {
+                tags: {
+                  type: 'multi_static_select',
+                  selected_options: [{ value: 'red' }, { value: 'blue' }, { value: 1 }],
+                },
+              },
+              hitl_field_empty: {
+                empty: { type: 'multi_static_select', selected_options: [] },
+              },
             },
           },
         })
@@ -632,6 +641,7 @@ describe('Slack inbound events', () => {
       reason: 'looks good',
       approved: true,
       count: 3,
+      tags: ['red', 'blue'],
     });
   });
 

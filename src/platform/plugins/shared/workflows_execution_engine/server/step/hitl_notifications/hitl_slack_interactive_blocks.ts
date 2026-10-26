@@ -116,6 +116,7 @@ interface JsonSchemaNode {
   properties?: Record<string, unknown>;
   required?: string[];
   enum?: unknown[];
+  items?: { enum?: unknown[] };
   format?: string;
   description?: string;
   title?: string;
@@ -139,8 +140,35 @@ function fieldLabel(key: string, node: JsonSchemaNode): string {
   return truncatePlainText(key, SLACK_PLAIN_TEXT_MAX);
 }
 
+function arrayOfStringEnum(node: JsonSchemaNode): string[] | undefined {
+  if (primaryType(node) !== 'array') {
+    return undefined;
+  }
+  const choices = node.items?.enum;
+  if (
+    !Array.isArray(choices) ||
+    choices.length === 0 ||
+    !choices.every((entry) => typeof entry === 'string')
+  ) {
+    return undefined;
+  }
+  return choices;
+}
+
 function buildInputElement(key: string, node: JsonSchemaNode): Record<string, unknown> {
   const type = primaryType(node);
+  const arrayEnum = arrayOfStringEnum(node);
+
+  if (arrayEnum) {
+    return {
+      type: 'multi_static_select',
+      action_id: key,
+      options: arrayEnum.slice(0, 100).map((entry) => ({
+        text: { type: 'plain_text', text: truncatePlainText(entry, SLACK_PLAIN_TEXT_MAX) },
+        value: entry,
+      })),
+    };
+  }
 
   if (Array.isArray(node.enum) && node.enum.every((entry) => typeof entry === 'string')) {
     return {
@@ -215,7 +243,7 @@ function buildInputElement(key: string, node: JsonSchemaNode): Record<string, un
 
 /**
  * Flattens a waitForInput JSON Schema into Slack input blocks.
- * Nested object/array properties become multiline text boxes.
+ * An array of string enums becomes a multi-select. Other arrays and objects become multiline text boxes.
  */
 export function buildHitlSlackInputBlocksFromSchema({
   message,

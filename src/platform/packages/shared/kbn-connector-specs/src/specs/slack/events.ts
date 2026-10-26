@@ -581,7 +581,7 @@ const mapSlackStateValuesToInputJson = (stateValues: unknown): string | undefine
   if (!isPlainObject(stateValues)) {
     return undefined;
   }
-  const input: Record<string, string | number | boolean> = {};
+  const input: Record<string, string | number | boolean | string[]> = {};
   for (const block of Object.values(stateValues)) {
     if (!isPlainObject(block)) {
       continue;
@@ -600,6 +600,18 @@ const mapSlackStateValuesToInputJson = (stateValues: unknown): string | undefine
       if (type === 'number_input' && typeof rawField.value === 'string' && rawField.value.length) {
         const asNumber = Number(rawField.value);
         input[actionId] = Number.isFinite(asNumber) ? asNumber : rawField.value;
+        continue;
+      }
+      if (type === 'multi_static_select' && Array.isArray(rawField.selected_options)) {
+        const values = rawField.selected_options.flatMap((option) => {
+          if (!isPlainObject(option) || typeof option.value !== 'string') {
+            return [];
+          }
+          return [option.value];
+        });
+        if (values.length > 0) {
+          input[actionId] = values;
+        }
         continue;
       }
       if (type === 'static_select' || type === 'radio_buttons') {

@@ -59,6 +59,27 @@ describe('replace_slack_hitl_message', () => {
       });
     });
 
+    it('POSTs an ephemeral validation message without replacing the controls', async () => {
+      const fetchMock = jest.fn().mockResolvedValue({ ok: true });
+      globalThis.fetch = fetchMock as typeof fetch;
+
+      await replaceSlackHitlMessage({
+        responseUrl: 'https://hooks.slack.com/actions/T/B/xxx',
+        text: 'Number must be greater than or equal to 1',
+        ephemeral: true,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('https://hooks.slack.com/actions/T/B/xxx', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        body: JSON.stringify({
+          response_type: 'ephemeral',
+          replace_original: false,
+          text: 'Number must be greater than or equal to 1',
+        }),
+      });
+    });
+
     it('skips non-Slack URLs and swallows fetch errors', async () => {
       const fetchMock = jest.fn().mockRejectedValue(new Error('network'));
       globalThis.fetch = fetchMock as typeof fetch;

@@ -57,4 +57,28 @@ describe('hitl_slack_interactive_blocks', () => {
     };
     expect(actions.elements[0]?.action_id).toBe(HITL_SLACK_ACTION_SUBMIT);
   });
+
+  it('renders an array of string enums as a multi-select and other arrays as text', () => {
+    const blocks = buildHitlSlackInputBlocksFromSchema({
+      message: '',
+      schema: {
+        type: 'object',
+        properties: {
+          tags: { type: 'array', items: { type: 'string', enum: ['red', 'blue'] } },
+          notes: { type: 'array', items: { type: 'string' } },
+        },
+      },
+      resume,
+    });
+    const inputs = blocks.filter((block) => block.type === 'input') as Array<{
+      element: { type: string; options?: Array<{ value: string }> };
+    }>;
+
+    expect(inputs[0]?.element).toMatchObject({
+      type: 'multi_static_select',
+      action_id: 'tags',
+      options: [{ value: 'red' }, { value: 'blue' }],
+    });
+    expect(inputs[1]?.element.type).toBe('plain_text_input');
+  });
 });

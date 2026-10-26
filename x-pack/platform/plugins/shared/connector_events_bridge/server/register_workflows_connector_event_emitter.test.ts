@@ -284,4 +284,81 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
       })
     );
   });
+
+  it('sends an exposed validation failure back to the clicker and still fails the emit', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({ ok: true });
+    globalThis.fetch = fetchMock as typeof fetch;
+    const validationError = Object.assign(new Error('Number must be greater than or equal to 1'), {
+      name: 'ExternalResumeError',
+      statusCode: 400,
+      expose: true,
+    });
+    const resumeExternalHitl = jest.fn().mockRejectedValue(validationError);
+    const getClient = jest.fn().mockResolvedValue({ emitEvent: jest.fn(), resumeExternalHitl });
+    const { emitter } = registerAndGetEmitter({ getClient });
+
+    await expect(
+      emitter.emit(
+        createEmitParams({
+          eventId: 'slack2.hitl_action',
+          connectorTypeId: '.slack2',
+          payload: {
+            executionId: 'exec-1',
+            stepId: 'step-1',
+            token: 'token-1',
+            spaceId: 'default',
+            kind: 'input',
+            inputJson: JSON.stringify({ count: 0 }),
+            responseUrl: 'https://hooks.slack.com/actions/T/B/xxx',
+          },
+        })
+      )
+    ).rejects.toBe(validationError);
+
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://hooks.slack.com/actions/T/B/xxx',
+      expect.objectContaining({
+        body: JSON.stringify({
+          response_type: 'ephemeral',
+          replace_original: false,
+          text: 'Number must be greater than or equal to 1',
+        }),
+      })
+    );
+  });
+
+  it('does not post a Slack message for a validation error that is not exposed', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({ ok: true });
+    globalThis.fetch = fetchMock as typeof fetch;
+    const hiddenError = Object.assign(new Error('internal'), {
+      name: 'ExternalResumeError',
+      statusCode: 400,
+      expose: false,
+    });
+    const resumeExternalHitl = jest.fn().mockRejectedValue(hiddenError);
+    const getClient = jest.fn().mockResolvedValue({ emitEvent: jest.fn(), resumeExternalHitl });
+    const { emitter } = registerAndGetEmitter({ getClient });
+
+    await expect(
+      emitter.emit(
+        createEmitParams({
+          eventId: 'slack2.hitl_action',
+          connectorTypeId: '.slack2',
+          payload: {
+            executionId: 'exec-1',
+            stepId: 'step-1',
+            token: 'token-1',
+            spaceId: 'default',
+            kind: 'input',
+            inputJson: '{}',
+            responseUrl: 'https://hooks.slack.com/actions/T/B/xxx',
+          },
+        })
+      )
+    ).rejects.toBe(hiddenError);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+  });
 });
