@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractOperation, OperationServer } from './types';
+import { getAtPointer, refToPointer } from './json_pointer';
+import { isRecord } from './schema_walk';
+import type { ContractOperation, OperationParameter, OperationServer } from './types';
 
 export interface OperationMatch {
   readonly operation: ContractOperation;
@@ -85,7 +87,9 @@ const compileRoute = (operation: ContractOperation): Route => {
       .filter((parameter) => parameter.in === 'path' && parameter.multiSegment)
       .map(({ name }) => name)
   );
-  const source = compileTemplate(operation.path, (name) => {
+  // `x-ms-paths` keys end in the operation's fixed query parameters.
+  const [template] = operation.path.split('?');
+  const source = compileTemplate(template, (name) => {
     parameterNames.push(name);
     return multiSegment.has(name) ? '(.+?)' : '([^/]+)';
   });
@@ -94,8 +98,109 @@ const compileRoute = (operation: ContractOperation): Route => {
     servers: operation.servers.map(compileServer),
     path: new RegExp(`^${source}$`),
     parameterNames,
-    literalLength: operation.path.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
+    literalLength: template.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
   };
+};
+
+const hasFixedQuery = ({ operation: { fixedQuery = [] } }: Route, url: URL): boolean =>
+  fixedQuery.every(({ name, value }) => url.searchParams.getAll(name).includes(value));
+
+const fixedQueryCount = ({ operation: { fixedQuery = [] } }: Route): number => fixedQuery.length;
+
+/** The query string and lowercase headers a request sends, for telling operations apart. */
+export interface RequestDiscriminators {
+  readonly url: URL;
+  readonly headers?: Readonly<Record<string, string>>;
+}
+
+// The one value a required parameter allows, such as `comp: ['list']` or
+// `x-ms-lease-action: ['acquire']` in Azure specs, which tells operations on a path apart.
+const singleValue = (
+  { required, schema }: OperationParameter,
+  operation: ContractOperation
+): string | undefined => {
+  if (!required || !schema || !isRecord(schema.schema)) {
+    return undefined;
+  }
+  const {
+    spec: { document, dialect },
+  } = operation;
+  // The values every `enum` and `const` along the `$ref` chain allow, as specs alias shared
+  // enums. OpenAPI 3.1 applies the keywords next to a `$ref` too; 3.0 ignores them.
+  let allowed: unknown[] | undefined;
+  const visited = new Set<string>();
+  let node: unknown = schema.schema;
+  while (isRecord(node)) {
+    const { $ref } = node;
+    const isRef = typeof $ref === 'string';
+    if (!isRef || dialect === 'draft-2020-12') {
+      const own = Array.isArray(node.enum) ? node.enum : 'const' in node ? [node.const] : undefined;
+      if (own) {
+        allowed = allowed === undefined ? own : allowed.filter((value) => own.includes(value));
+      }
+    }
+    if (!isRef) {
+      break;
+    }
+    if (visited.has($ref)) {
+      return undefined;
+    }
+    visited.add($ref);
+    try {
+      node = getAtPointer(document, refToPointer($ref));
+    } catch {
+      return undefined;
+    }
+    if (!isRecord(node)) {
+      return undefined;
+    }
+  }
+  return allowed?.length === 1 && ['string', 'number', 'boolean'].includes(typeof allowed[0])
+    ? String(allowed[0])
+    : undefined;
+};
+
+const sentValues = (
+  { name, in: location }: OperationParameter,
+  { url, headers = {} }: RequestDiscriminators
+): string[] | undefined => {
+  if (location === 'query') {
+    return url.searchParams.has(name) ? url.searchParams.getAll(name) : undefined;
+  }
+  const header = location === 'header' ? headers[name.toLowerCase()] : undefined;
+  return header === undefined ? undefined : [header];
+};
+
+interface Discrimination {
+  /** A discriminator the request sends with another value. */
+  readonly conflicts: boolean;
+  /** The fixed query parameters, and the declared ones the request sends without a conflict. */
+  readonly matched: number;
+  /** The required query and header parameters the request doesn't send. */
+  readonly missing: number;
+}
+
+const discriminate = ({ operation }: Route, request: RequestDiscriminators): Discrimination => {
+  const matched = new Set((operation.fixedQuery ?? []).map(({ name }) => name));
+  let conflicts = false;
+  let missing = 0;
+  for (const parameter of operation.parameters) {
+    if (parameter.in !== 'query' && parameter.in !== 'header') {
+      continue;
+    }
+    const sent = sentValues(parameter, request);
+    if (sent === undefined) {
+      missing += parameter.required ? 1 : 0;
+      continue;
+    }
+    const value = singleValue(parameter, operation);
+    if (value === undefined || sent.includes(value)) {
+      matched.add(parameter.name);
+    } else {
+      conflicts = true;
+    }
+  }
+  return { conflicts, matched: matched.size, missing };
 };
 
 // Strips the longest matching server URL, e.g. `https://api.trello.com/1` from a Trello URL.
@@ -126,33 +231,66 @@ const decodePathSegment = (segment: string): string => {
  * Creates a router that finds the operation for a request. When several path templates match,
  * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`,
  * then the one with the most literal text, so `/items/{id}:archive` takes precedence over
- * `/items/{id}`.
+ * `/items/{id}`. Operations on that template, as `x-ms-paths` declares them, are told apart by
+ * the query parameters their keys fix and their required parameters with one allowed value:
+ * those the request sends with another value are left out, unless every operation is, then the
+ * one with the most fixed query parameters wins, then the one that declares the most of the query
+ * and header parameters the request sends, then the one with the fewest required parameters
+ * missing. So `/?restype=service&comp=properties` takes precedence over `/?comp=properties`, and
+ * a lease request goes to the operation whose `x-ms-lease-action` it sends.
  */
 export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
   const routes = operations.map(compileRoute);
 
-  return (method: string, url: URL): OperationMatch | OperationMismatch => {
-    const candidates = routes.flatMap((route) => {
+  return (
+    method: string,
+    url: URL,
+    headers?: Readonly<Record<string, string>>
+  ): OperationMatch | OperationMismatch => {
+    const pathMatches = routes.flatMap((route) => {
       const path = getOperationPath(route, url);
       const match = path === undefined ? null : route.path.exec(path);
       return match ? [{ route, values: match.slice(1) }] : [];
     });
-    if (candidates.length === 0) {
+    if (pathMatches.length === 0) {
       return { status: 404, message: 'No operation matches the path' };
     }
-    // The most specific template wins before the method is considered, so a method that
-    // `/items/new` doesn't declare gets 405 rather than falling through to `/items/{id}`.
-    const [mostSpecific] = [...candidates].sort(
+    const candidates = pathMatches.filter(({ route }) => hasFixedQuery(route, url));
+    if (candidates.length === 0) {
+      const expected = [...new Set(pathMatches.map(({ route }) => route.operation.path))];
+      return {
+        status: 404,
+        message: `No operation matches the query; operations on the path expect ${expected.join(
+          ', or '
+        )}`,
+      };
+    }
+    // The most specific path template wins before the method is considered, so `/items/new`
+    // takes precedence over `/items/{id}` whatever the request's parameters, and a method it
+    // doesn't declare gets 405 rather than falling through. Templates are compared by shape, so
+    // `/items/{id}` and `/items/{itemId}` from different specs are the same template.
+    // Discriminators only tell apart operations on that template, as `x-ms-paths` declares them.
+    const specificity = ({ route }: (typeof candidates)[number]) =>
+      [route.parameterNames.length, -route.literalLength] as const;
+    const [mostSpecific] = candidates.map(specificity).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const onTemplate = candidates.filter((candidate) => {
+      const [parameters, literal] = specificity(candidate);
+      return parameters === mostSpecific[0] && literal === mostSpecific[1];
+    });
+    const forMethod = onTemplate
+      .filter(({ route }) => route.operation.method === method.toLowerCase())
+      .map((candidate) => ({ ...candidate, ...discriminate(candidate.route, { url, headers }) }));
+    // A conflicting discriminator rules an operation out only when another is left, so a request
+    // to a single operation still reaches validation, which names the wrong value.
+    const consistent = forMethod.filter(({ conflicts }) => !conflicts);
+    const [best] = (consistent.length > 0 ? consistent : forMethod).sort(
       (a, b) =>
-        a.route.parameterNames.length - b.route.parameterNames.length ||
-        b.route.literalLength - a.route.literalLength
+        fixedQueryCount(b.route) - fixedQueryCount(a.route) ||
+        b.matched - a.matched ||
+        a.missing - b.missing
     );
-    const sameTemplate = candidates.filter(
-      ({ route }) => route.operation.path === mostSpecific.route.operation.path
-    );
-    const best = sameTemplate.find(({ route }) => route.operation.method === method.toLowerCase());
     if (!best) {
-      const allowed = [...new Set(sameTemplate.map(({ route }) => route.operation.method))];
+      const allowed = [...new Set(onTemplate.map(({ route }) => route.operation.method))];
       return {
         status: 405,
         message: `The path only allows ${allowed.map((name) => name.toUpperCase()).join(', ')}`,

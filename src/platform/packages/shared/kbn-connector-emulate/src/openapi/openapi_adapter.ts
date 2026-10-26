@@ -23,7 +23,7 @@ export const createOpenApiAdapter = (
 ): ContractAdapter => {
   const match = createOperationMatcher(operations);
   return {
-    route: ({ method, url }) => match(method, url),
+    route: ({ method, url, headers }) => match(method, url, headers),
     authenticate: ({ operation }, { query, headers }) =>
       validateSecurity(operation, { query, headers }, securityOptions),
     validateRequest: ({ operation, pathParameters }, { query, headers, body, bodyError }) =>

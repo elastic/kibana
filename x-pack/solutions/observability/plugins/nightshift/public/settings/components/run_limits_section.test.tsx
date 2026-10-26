@@ -13,12 +13,18 @@ import type {
   RunQuotaSettingsUpdate,
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
+import { useKibana } from '../../hooks/use_kibana';
 import { useRunQuotas, useUpdateRunQuotas } from '../hooks/use_significant_events_run_quotas';
 import { RunLimitsSection } from './run_limits_section';
 import { SettingsSaveBar } from './settings_save_bar';
 import { useRunLimitsForm } from './use_run_limits_form';
 
 jest.mock('../hooks/use_significant_events_run_quotas');
+jest.mock('../../hooks/use_kibana');
+
+const navigateToUrl = jest.fn();
+let automationsAvailable = true;
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
 const mockUseUpdateRunQuotas = useUpdateRunQuotas as jest.MockedFunction<typeof useUpdateRunQuotas>;
@@ -98,6 +104,17 @@ describe('RunLimitsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     updateIsSaving = false;
+    automationsAvailable = true;
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: { useBooleanValue: () => automationsAvailable },
+        nightshiftInvestigations: { investigationsClient: {} },
+        application: {
+          getUrlForApp: (_appId: string, { path }: { path: string }) => `/app/nightshift${path}`,
+          navigateToUrl,
+        },
+      },
+    } as never);
   });
 
   it('shows legacy globally disabled settings as unlimited per category', () => {
@@ -295,6 +312,38 @@ describe('RunLimitsSection', () => {
     });
 
     expect(screen.getByTestId('nightshiftRunLimitsBanner')).toBeInTheDocument();
+  });
+
+  it('opens the automations page from the exhaustion callout', () => {
+    setup(
+      response({
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      })
+    );
+
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsOpenAutomations'));
+
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/automations');
+  });
+
+  it('hides the automations button when automations are unavailable', () => {
+    automationsAvailable = false;
+    setup(
+      response({
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      })
+    );
+
+    expect(screen.getByTestId('nightshiftRunLimitsBanner')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftRunLimitsOpenAutomations')).not.toBeInTheDocument();
   });
 
   it('shows the UTC reset value supplied by the API window', () => {

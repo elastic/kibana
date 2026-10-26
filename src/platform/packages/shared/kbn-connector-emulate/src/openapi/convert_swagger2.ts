@@ -233,8 +233,8 @@ export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
   const rootSchemes = asStrings(document.schemes) ?? ['https'];
   const servers = toServers(rootSchemes);
 
-  const paths = Object.fromEntries(
-    Object.entries(isRecord(document.paths) ? document.paths : {}).map(([path, itemNode]) => {
+  const convertPaths = (items: unknown) =>
+    Object.entries(isRecord(items) ? items : {}).map(([path, itemNode]) => {
       const item = resolve(itemNode);
       const itemParameters = asArray(item.parameters).map(resolve);
       const operations = HTTP_METHODS.flatMap((method) => {
@@ -286,14 +286,17 @@ export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
         ];
       });
       return [path, Object.fromEntries(operations)];
-    })
-  );
+    });
+  const paths = Object.fromEntries(convertPaths(document.paths));
+  // AutoRest's `x-ms-paths` hold operations that only differ in fixed query parameters.
+  const msPaths = Object.fromEntries(convertPaths(document['x-ms-paths']));
 
   const converted: OpenApiDocument = {
     openapi: '3.0.3',
     info: document.info,
     servers,
     paths,
+    ...(Object.keys(msPaths).length > 0 ? { 'x-ms-paths': msPaths } : {}),
     components: {
       schemas: isRecord(document.definitions) ? document.definitions : {},
       securitySchemes: toSecuritySchemes(document.securityDefinitions),

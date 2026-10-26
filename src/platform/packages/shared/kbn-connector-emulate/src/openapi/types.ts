@@ -119,12 +119,23 @@ export interface SecurityScheme {
 /** Schemes that must all be satisfied; an empty list allows anonymous requests. */
 export type SecurityRequirement = readonly SecurityScheme[];
 
+export interface FixedQueryParameter {
+  readonly name: string;
+  readonly value: string;
+}
+
 export interface ContractOperation {
   /** The `operationId`, or `METHOD /path` when the spec declares none. */
   readonly id: string;
   /** Lowercase HTTP method. */
   readonly method: string;
+  /** The key in `paths`, or in `x-ms-paths` including its query part, such as `/?comp=list`. */
   readonly path: string;
+  /**
+   * The query parameters an `x-ms-paths` key fixes (its `name=value` pairs), which tell
+   * operations on the same path apart.
+   */
+  readonly fixedQuery?: readonly FixedQueryParameter[];
   readonly servers: readonly OperationServer[];
   readonly parameters: readonly OperationParameter[];
   readonly requestBody?: OperationRequestBody;
