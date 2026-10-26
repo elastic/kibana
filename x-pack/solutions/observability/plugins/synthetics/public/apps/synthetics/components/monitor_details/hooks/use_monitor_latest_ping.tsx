@@ -14,6 +14,7 @@ import {
   isExternalSyntheticsMonitor,
   type Ping,
 } from '../../../../../../common/runtime_types';
+import { isUnmappedHeartbeatLocation } from '../../../../../../common/lib';
 import { useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { getMonitorLastRunAction, selectLastRunMetadata } from '../../../state';
@@ -60,7 +61,12 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
       : undefined;
   const isIdSame = latestPingId === monitorId || latestPingId === customHeartbeatId;
 
-  const isLocationSame = latestPing?.observer?.geo?.name === locationLabel;
+  // "Heartbeat" is the placeholder for autodiscovery pings that have no
+  // observer.geo.name. Comparing the label as a string drops those pings and
+  // leaves the details page on "Initial test run pending".
+  const isLocationSame = isUnmappedHeartbeatLocation(locationLabel)
+    ? !latestPing?.observer?.geo?.name
+    : latestPing?.observer?.geo?.name === locationLabel;
 
   const isUpToDate = isIdSame && isLocationSame;
 

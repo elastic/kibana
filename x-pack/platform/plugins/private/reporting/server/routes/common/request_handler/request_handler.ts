@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { BaseParams } from '@kbn/reporting-common/types';
+import type { ScheduleType } from '@kbn/reporting-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
@@ -177,6 +178,19 @@ export abstract class RequestHandler<
 
     if (!licenseResults.enableLinks) {
       return res.forbidden({ body: licenseResults.message });
+    }
+
+    return null;
+  }
+
+  protected async checkExportTypeEnabled(
+    exportTypeId: string,
+    scheduleType: ScheduleType
+  ): Promise<IKibanaResponse | null> {
+    const { reporting, res } = this.opts;
+
+    if (!(await reporting.isExportTypeEnabled(exportTypeId, scheduleType))) {
+      return res.badRequest({ body: `Invalid export-type of ${exportTypeId}` });
     }
 
     return null;

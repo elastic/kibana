@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/292535
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Add the flyout options gear icon to all main flyouts in Security"

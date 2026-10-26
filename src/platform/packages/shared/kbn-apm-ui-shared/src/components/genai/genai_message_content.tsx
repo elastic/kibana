@@ -10,10 +10,11 @@
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { GenAiMessage } from './get_genai_fields';
+import type { GenAiMessage } from '@kbn/genai-common';
 import type { GenAiMessageBlock } from './get_message_blocks';
 import { getMessageBlocks } from './get_message_blocks';
 import { GenAiFieldValue } from './genai_field_value';
+import { GenAiReasoning } from './genai_reasoning';
 import { GenAiToolCard } from './genai_tool_card';
 import { GenAiToolValue } from './genai_tool_value';
 
@@ -49,6 +50,8 @@ function GenAiMessageBlockContent({ block, role, toolNamesById }: BlockProps) {
           <GenAiFieldValue value={block.content} />
         </EuiText>
       );
+    case 'reasoning':
+      return <GenAiReasoning content={block.content} />;
     case 'tool_call':
       return (
         <GenAiToolCard

@@ -953,6 +953,34 @@ describe('actionTypeRegistry', () => {
     });
   });
 
+  describe('getSpec()', () => {
+    it('returns the source spec for a spec-backed type', () => {
+      const spec = { metadata: { id: 'spec-backed' } };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'spec-backed',
+          spec,
+        })
+      );
+
+      expect(actionTypeRegistry.getSpec('spec-backed')).toBe(spec);
+    });
+
+    it('returns undefined for a classic type without a spec', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+
+      expect(actionTypeRegistry.getSpec('my-connector-type')).toBeUndefined();
+    });
+
+    it('returns undefined for an unknown id without throwing', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(actionTypeRegistry.getSpec('unknown')).toBeUndefined();
+    });
+  });
+
   describe('register() - optional executor and params', () => {
     const defaultValidateNoParams = {
       config: { schema: z.object({}) },

@@ -275,4 +275,37 @@ describe('SubjectClaimsService', () => {
     await expect(service.deleteAllInSpace(SPACE_ID)).resolves.toBe(2);
     expect(storage.entries.size).toBe(1);
   });
+
+  it('deletes every claim in every space for maintenance', async () => {
+    const { service, storage } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+    await service.claim({
+      spaceId: 'other',
+      conversationId: 'conv-2',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+
+    await expect(service.deleteAllAcrossSpaces()).resolves.toBe(2);
+    expect(storage.entries.size).toBe(0);
+  });
+
+  it('finds the holder of a subject in its space only', async () => {
+    const { service } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+
+    await expect(service.findHolder(SPACE_ID, ALERT)).resolves.toBe('conv-1');
+    await expect(service.findHolder('other', ALERT)).resolves.toBeUndefined();
+    await expect(service.findHolder(SPACE_ID, EVENT)).resolves.toBeUndefined();
+  });
 });

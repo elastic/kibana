@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/294411
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-areas:
-- Search and data
-title: Fix managed package policy upgrades timing out with many package policies

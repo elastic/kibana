@@ -1,5 +1,5 @@
 {
-  "sha1": "c932ad1e626cb33ba3b8cd8bf1cd392b30e0c56e",
+  "sha1": "5dbf2b2234c74ed687e292b6aa35b290de2fa10b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -42,6 +42,26 @@
       }
     },
     {
+      "id": "fa5789ca8f73c09-835aee764bc0b68",
+      "title": "Discover ES|QL query hover functionality user is able to interact with the hover content of an erroneous query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_esql_query_hover.spec.ts",
+        "line": 28,
+        "column": 25
+      }
+    },
+    {
       "id": "f0aa70d045832f5-cefaa0e86801e0f",
       "title": "ES|QL Discover session dashboard editing saves a linked session edit and returns to the dashboard",
       "expectedStatus": "passed",
@@ -70,33 +90,33 @@
     {
       "id": "1c089c23a3a34ee-c086c6dd3ca9c78",
       "title": "Discover session API — visualization persistence preserves a saved Line histogram through a session API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
         "line": 199,
-        "column": 25
+        "column": 71
       }
     },
     {
       "id": "1c089c23a3a34ee-81bc50dd8256a34",
       "title": "Discover session API — visualization persistence preserves a histogram breakdown and its legend through a session API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 244,
-        "column": 39
+        "line": 245,
+        "column": 37
       }
     },
     {
       "id": "1c089c23a3a34ee-b267b371abd83b2",
       "title": "Discover session API — visualization persistence preserves a Treemap Lens suggestion through a session API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
@@ -109,26 +129,26 @@
     {
       "id": "1c089c23a3a34ee-0276bd7bb738e93",
       "title": "Discover session API — visualization persistence preserves a legacy single-field breakdown through UI save and an API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 337,
-        "column": 19
+        "line": 336,
+        "column": 26
       }
     },
     {
       "id": "1c089c23a3a34ee-9dd6fd97c2e1ecd",
       "title": "Discover session API — visualization persistence preserves legacy legend values through UI save and an API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 382,
+        "line": 379,
         "column": 24
       }
     },
@@ -415,6 +435,19 @@
       }
     },
     {
+      "id": "aee80964b1af3d9-2ec0d7705571eaa",
+      "title": "Discover ES|QL editor autocomplete drives the suggestion widget from the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts",
+        "line": 27,
+        "column": 64
+      }
+    },
+    {
       "id": "4b89e8e1b84f7b8-2215118da8ac58f",
       "title": "Discover ES|QL editor shows an error callout for a malformed query and clears it",
       "expectedStatus": "passed",
@@ -452,6 +485,66 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
         "line": 29,
         "column": 5
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-aac83d98d59bcd8",
+      "title": "Discover ES|QL editor prettifies the query when clicking the format button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 36,
+        "column": 22
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-489ac5c3585c009",
+      "title": "Discover ES|QL editor submits the query with the Ctrl+Enter keyboard shortcut",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 46,
+        "column": 18
+      }
+    },
+    {
+      "id": "4b89e8e1b84f7b8-272ab5ac1f9f0ca",
+      "title": "Discover ES|QL editor shows and updates validation errors in the footer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts",
+        "line": 57,
+        "column": 20
       }
     },
     {
@@ -994,8 +1087,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 27,
-        "column": 66
+        "line": 35,
+        "column": 48
       }
     },
     {
@@ -1007,8 +1100,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 43,
-        "column": 22
+        "line": 50,
+        "column": 24
       }
     },
     {
@@ -1020,8 +1113,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 81,
-        "column": 24
+        "line": 88,
+        "column": 21
       }
     },
     {
@@ -1033,8 +1126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 101,
-        "column": 24
+        "line": 108,
+        "column": 28
       }
     },
     {
@@ -1046,7 +1139,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 121,
+        "line": 128,
         "column": 24
       }
     },
@@ -1059,8 +1152,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 144,
-        "column": 22
+        "line": 151,
+        "column": 24
       }
     },
     {
@@ -1072,8 +1165,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 167,
-        "column": 24
+        "line": 176,
+        "column": 27
       }
     },
     {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
 const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
@@ -17,6 +17,7 @@ const mockRulesNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
 
 jest.mock('../../application/bind_locators_to_host', () => ({
+  bindLocatorsToHost: (locators: unknown, _host: unknown) => locators,
   getAlertingV2Locators: () => ({
     rulesLocators: { navigateSync: (...args: unknown[]) => mockRulesNavigateSync(...args) },
   }),
@@ -84,11 +85,11 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns watchesApp', () => {
+    it('returns if', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
 
-      expect(definition.getIcon!()).toBe('watchesApp');
+      expect(definition.getIcon!()).toBe('if');
     });
   });
 

@@ -30,13 +30,16 @@ export const Elasticsearch: ConnectorSpec = {
   metadata: {
     id: '.elasticsearch',
     displayName: 'External Elasticsearch',
-    description: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.metadata.description', {
+    description: i18n.translate('connectorSpecs.elasticsearch.metadata.description', {
       defaultMessage:
         'Search and explore data on a remote Elasticsearch cluster, retrieve mappings and aliases, and run ES|QL queries. Use this when cross-cluster search (CCS) or cross-project search (CPS) is not available',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder', 'workflows'],
+    // A new connector type must reach Production-NonCanary before it can declare
+    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
+    // and others in a follow-up PR.
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -46,22 +49,19 @@ export const Elasticsearch: ConnectorSpec = {
         isRecommended: true,
         defaults: { headerField: 'Authorization' },
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.auth.apiKeyHeader.label', {
+          label: i18n.translate('connectorSpecs.elasticsearch.auth.apiKeyHeader.label', {
             defaultMessage: 'Elasticsearch API key',
           }),
           meta: {
             headerField: { hidden: true },
             apiKey: {
-              label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.auth.apiKey.label', {
+              label: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.label', {
                 defaultMessage: 'API Key',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.elasticsearch.auth.apiKey.helpText',
-                {
-                  defaultMessage:
-                    'Enter "ApiKey encoded" where encoded is the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.helpText', {
+                defaultMessage:
+                  'Enter "ApiKey encoded" where encoded is the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
+              }),
             },
           },
         },
@@ -70,13 +70,13 @@ export const Elasticsearch: ConnectorSpec = {
         type: 'basic',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.elasticsearch.auth.basic.label', {
             defaultMessage: 'Username and password',
           }),
           meta: {
             password: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.elasticsearch.auth.basic.password.helpText',
+                'connectorSpecs.elasticsearch.auth.basic.password.helpText',
                 {
                   defaultMessage:
                     'The user must have at minimum: read privilege on the indices you search.',
@@ -96,7 +96,7 @@ export const Elasticsearch: ConnectorSpec = {
           'The Elasticsearch cluster endpoint URL. For Elastic Cloud, use the Elasticsearch endpoint shown in your deployment (e.g. https://my-deployment.es.us-east-1.aws.elastic.cloud). For self-managed clusters, use the full URL including port, e.g. https://elasticsearch.example.com:9200.'
         )
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.config.url.label', {
+          label: i18n.translate('connectorSpecs.elasticsearch.config.url.label', {
             defaultMessage: 'Elasticsearch URL',
           }),
         }),
@@ -228,7 +228,7 @@ export const Elasticsearch: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.test.description', {
+    description: i18n.translate('connectorSpecs.elasticsearch.test.description', {
       defaultMessage: 'Verifies the connection by fetching cluster information',
     }),
     handler: async (ctx) => {

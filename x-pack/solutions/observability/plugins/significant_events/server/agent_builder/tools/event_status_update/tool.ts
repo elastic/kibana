@@ -10,7 +10,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
+import { lazySchema } from '@kbn/zod/v4';
+import {
+  significantEventManualStatusSchema,
+  significantEventSchema,
+} from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -23,20 +27,22 @@ import { updateEventStatusToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
-const eventStatusUpdateSchema = significantEventSchema
-  .pick({
-    status: true,
-    event_id: true,
-    assessment_note: true,
-  })
-  .extend({
-    event_id: significantEventSchema.shape.event_id.describe(
-      'The event_id of the existing significant event to update.'
-    ),
-    assessment_note: significantEventSchema.shape.assessment_note.describe(
-      'Optional short reason for the change, for example why the event recovered or was a false alarm.'
-    ),
-  });
+export const eventStatusUpdateSchema = lazySchema(() =>
+  significantEventSchema
+    .pick({
+      event_id: true,
+      assessment_note: true,
+    })
+    .extend({
+      status: significantEventManualStatusSchema,
+      event_id: significantEventSchema.shape.event_id.describe(
+        'The event_id of the existing significant event to update.'
+      ),
+      assessment_note: significantEventSchema.shape.assessment_note.describe(
+        'Optional short reason for the change, for example why the event recovered or was a false alarm.'
+      ),
+    })
+);
 
 export function createEventStatusUpdateTool({
   getScopedClients,
@@ -71,10 +77,7 @@ export function createEventStatusUpdateTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
-          await getScopedClients({
-            request,
-          });
+        const { getEventSearchClient, licensing } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
 
@@ -83,8 +86,6 @@ export function createEventStatusUpdateTool({
           eventId: toolParams.event_id,
           status: toolParams.status,
           assessmentNote: toolParams.assessment_note,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
         });
 
         telemetry.trackAgentToolEventStatusUpdate({

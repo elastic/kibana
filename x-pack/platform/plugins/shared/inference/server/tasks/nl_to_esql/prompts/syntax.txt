@@ -16,10 +16,10 @@
         Source commands select a data source.
 
         - FROM: selects one or multiple indices, data streams or aliases to use as source.
+        - PROMQL: queries time series indices using PromQL syntax instead of ES|QL. Options include index (default metrics-*), step, buckets, start, end, and scrape_interval.
         - ROW: produces a row with one or more columns with values that you specify.
         - SHOW: returns information about the deployment.
         - TS: selects one or multiple data streams with support for time series semantics and time series aggregation functions
-        - PROMQL: queries time series indices using Prometheus Query Language (PromQL)
     </source-commands>
 
     <processing-commands>

@@ -90,6 +90,7 @@ const setup = () => {
     {
       getSubjectsService: () => service,
       privileges: { assertCanManage: jest.fn(), assertCanRead: jest.fn() },
+      assertCanReadConversation: jest.fn().mockResolvedValue(undefined),
       logger: loggerMock.create(),
     }
   );
@@ -177,9 +178,13 @@ describe('SubjectsService', () => {
     expect(client.update).toHaveBeenCalled();
   });
 
-  it('does not write when the caller does not own the conversation', async () => {
+  it('does not write when the caller cannot converse with the conversation', async () => {
     const { storage, conversations, upsert } = setup();
-    conversations.get.mockResolvedValue({ permissions: { update_access_control: false } });
+    // `conversations.get` itself enforces `converse` access and fails closed as not-found;
+    // the write path relies on that instead of a separate permission check.
+    conversations.get.mockRejectedValue(
+      createConversationNotFoundError({ conversationId: CONVERSATION_ID })
+    );
 
     await expect(upsert([alertSubject])).rejects.toEqual(
       createConversationNotFoundError({ conversationId: CONVERSATION_ID })
@@ -266,6 +271,25 @@ describe('SubjectsService', () => {
         isHolderOpen: jest.fn(),
       })
     ).rejects.toBeInstanceOf(InvestigationAttachmentInvalidRequestError);
+  });
+
+  it('finds the claim holder of a subject, and none for a key no claim can hold', async () => {
+    const { service } = setup();
+    const thread = { type: 'slack_thread' as const, id: 'slack:T1:C1:1700000000.000100' };
+    await service.claimSubjects({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [thread],
+      isHolderOpen: jest.fn(),
+    });
+
+    await expect(service.findClaimHolder(thread, SPACE_ID)).resolves.toBe('conv-1');
+    await expect(
+      service.findClaimHolder({ type: 'slack_thread', id: 'x'.repeat(10_000) }, SPACE_ID)
+    ).resolves.toBeUndefined();
+    await expect(
+      service.findClaimHolder({ type: 'slack_thread', id: '' }, SPACE_ID)
+    ).resolves.toBeUndefined();
   });
 
   it('lists the subjects of investigations', async () => {

@@ -30,8 +30,9 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import type { RulesClient } from './lib/rules_client';
+import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
@@ -65,10 +66,14 @@ export interface AlertingServerSetup {
 }
 
 export interface AlertingServerStart {
-  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientWithRequest(
+    request: KibanaRequest,
+    options?: CreateRulesClientOptions
+  ): Promise<RulesClientApi>;
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: SpaceId
+    spaceId: SpaceId,
+    options?: CreateRulesClientOptions
   ): Promise<RulesClientApi>;
 
   /**
@@ -105,6 +110,7 @@ export interface AlertingServerSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface AlertingServerStartDependencies {

@@ -40,7 +40,11 @@ export class WorkflowEditorPage {
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
     this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
-    this.runButton = this.page.testSubj.locator('workflowBottomBarRunButton');
+    // The bottom bar swaps in an icon-only Run button when the editor is narrower than 800px,
+    // e.g. when the AI Agent sidebar auto-opens on deployments with an AI connector.
+    this.runButton = this.page.testSubj
+      .locator('workflowBottomBarRunButton')
+      .or(this.page.testSubj.locator('workflowBottomBarRunButtonCompact'));
     this.validationErrorsAccordion = this.page.testSubj.locator(
       'workflowYamlEditorValidationErrorsList'
     );
@@ -102,11 +106,13 @@ export class WorkflowEditorPage {
   }
 
   /**
-   * Navigate to the workflow editor for a new workflow
+   * Navigate to the workflow editor for a new workflow. "Create workflow" opens the
+   * agentic-first landing; "Start manually" opens the blank editor.
    */
   async gotoNewWorkflow() {
     await this.page.gotoApp(PLUGIN_ID);
     await this.page.testSubj.click('createWorkflowButton');
+    await this.page.testSubj.click('agenticFirstStartManuallyButton');
     await this.waitForEditorToLoad();
   }
 
@@ -125,7 +131,14 @@ export class WorkflowEditorPage {
     await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, {
       params: { tab: 'executions' },
     });
-    await this.page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+    const list = this.page.testSubj.locator('workflowExecutionList');
+    const openList = this.page.testSubj.locator('workflowDetailExecutionsButton');
+    // The executions tab still shows the list inline. The flyout opens from the header button.
+    await list.or(openList).waitFor({ state: 'visible' });
+    if (!(await list.isVisible())) {
+      await openList.click();
+      await list.waitFor({ state: 'visible' });
+    }
   }
 
   /**
@@ -395,22 +408,26 @@ export class WorkflowEditorPage {
   }
 
   async openServiceAccountRoles(): Promise<void> {
-    await this.page.testSubj.locator('serviceAccountRolesSelector').click();
+    await this.page.getByRole('combobox', { name: 'Set privileges' }).click();
+    await this.page
+      .getByRole('listbox', { name: 'Choose from the following options' })
+      .waitFor({ state: 'visible' });
   }
 
   async closeServiceAccountRoles(): Promise<void> {
-    await this.page.getByRole('listbox', { name: 'Select roles' }).press('Escape');
-    await this.page.getByRole('listbox', { name: 'Select roles' }).waitFor({ state: 'hidden' });
+    await this.page.getByRole('combobox', { name: 'Set privileges' }).press('Escape');
+    await this.page
+      .getByRole('listbox', { name: 'Choose from the following options' })
+      .waitFor({ state: 'hidden' });
   }
 
   async fillServiceAccount(name: string, description: string): Promise<void> {
     const flyout = this.page.testSubj.locator('createServiceAccountFlyout');
     await this.page.testSubj.locator('serviceAccountNameInput').fill(name);
     await this.page.testSubj.locator('createServiceAccountDescription').fill(description);
-    await flyout.getByRole('button', { name: 'Set privileges' }).click();
-    await this.page.getByRole('listbox', { name: 'Select roles' }).press('End');
-    await this.page.testSubj.locator('roleOption-viewer').click();
-    await this.closeServiceAccountRoles();
+    await this.page.components
+      .comboBox('serviceAccountRolesSelector', flyout)
+      .setSelectedOptions(['viewer']);
   }
 
   async submitServiceAccount(): Promise<void> {
@@ -597,7 +614,7 @@ export class WorkflowEditorPage {
   }
 
   async executeWorkflowFromBottomBar(inputs: Record<string, unknown>): Promise<void> {
-    await this.page.testSubj.click('workflowBottomBarRunButton');
+    await this.runButton.click();
     await this.setExecuteModalInputs(inputs);
     await this.page.testSubj.click('executeWorkflowButton');
   }

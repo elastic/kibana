@@ -15,6 +15,7 @@ import {
   furtherShrinkOverflowArticleContext,
   selectOverflowRetryArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Keeps only values from the closed set and caps the array length. A filter
@@ -106,9 +107,6 @@ export const enrichTaxonomy = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so the categories/regions closed
-  // sets actually run instead of letting unbounded model output through.
   const invokeTaxonomy = async (
     promptText: string
   ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: TaxonomyOutput }> => {
@@ -116,9 +114,9 @@ export const enrichTaxonomy = async (
       buildTaxonomyPrompt({ ...params, text: promptText })
     )) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
+      parsed: TaxonomyOutput | null;
     };
-    return { raw: invoked.raw, parsed: taxonomyOutputSchema.parse(invoked.parsed) };
+    return requireParsedStructuredOutput(invoked, 'enrich_taxonomy');
   };
 
   let text = params.text;

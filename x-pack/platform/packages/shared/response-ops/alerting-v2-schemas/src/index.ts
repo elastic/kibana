@@ -15,6 +15,7 @@ export {
   entityIdSchema,
   ENTITY_ID_NOTE,
   groupHashSchema,
+  seriesIdSchema,
   tagsResponseSchema,
   tagsSchema,
 } from './common';
@@ -35,6 +36,7 @@ export * from './action_policy_attachment_schema';
 export * from './alert_attachment_schema';
 export * from './alert_episode_schema';
 export * from './alert_action_schema';
+export * from './alert_action_error_codes';
 export * from './bulk_operation_schema';
 export * from './policy_execution_history_schema';
 export * from './rule_execution_history_schema';

@@ -12,26 +12,6 @@
 // "areas" entries must each be one of @kbn/code-owners CODE_OWNER_AREAS.
 [
   {
-    "id": "actionable-obs",
-    "name": "Obs UX: Actionable Obs",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/actionable-obs-team",
-      "label": "Team:actionable-obs"
-    },
-    "responsibilities": [
-      "Observability Alerts",
-      "SLOs",
-      "Observability Cases",
-      "Exploratory view",
-      "Synthetics",
-      "Uptime",
-      "User Experience Dashboard"
-    ]
-  },
-  {
     "id": "apm-ui",
     "name": "Apm Ui",
     "github": {
@@ -101,6 +81,16 @@
     ],
     "github": {
       "team": "elastic/context-eng"
+    }
+  },
+  {
+    "id": "alertzero-common-layer",
+    "name": "AlertZero Common Layer",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/alertzero-common-layer"
     }
   },
   {
@@ -356,6 +346,16 @@
       "Optimizer",
       "developer experience",
       "CI / Buildkite"
+    ]
+  },
+  {
+    "id": "apps-dx",
+    "name": "Apps DX",
+    "github": {
+      "team": "elastic/apps-dx"
+    },
+    "responsibilities": [
+      "GitHub workflow scripts"
     ]
   },
   {
@@ -630,6 +630,20 @@
     ]
   },
   {
+    "id": "obs-signals-rum",
+    "name": "Obs UX: Signals & RUM",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/obs-signals-rum-team",
+      "label": "Team:obs-signals-rum"
+    },
+    "responsibilities": [
+      "User Experience / Digital Experience app",
+      "Real User Monitoring (RUM, EDOT Browser, EDOT React Native)",
+      "Sessions and Session Replay"
+    ]
+  },
+  {
     "id": "obs-signals-logs",
     "name": "Obs UX: Signals & Logs",
     "areas": [
@@ -665,39 +679,13 @@
     ]
   },
   {
-    "id": "obs-signals-ai-o11y",
-    "name": "Obs Signals AI O11y",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-signals-ai-o11y",
-      "label": "Team:obs-signals-ai-o11y"
-    },
-    "responsibilities": [
-      "GenAI tab",
-      "AI observability"
-    ]
-  },
-  {
-    "id": "obs-ux-management-team",
-    "name": "Obs Ux Management Team",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-ux-management-team",
-      "label": "Team:obs-ux-management"
-    }
-  },
-  {
     "id": "observability-bi",
     "name": "Observability Bi",
     "areas": [
       "observability"
     ],
     "github": {
-      "team": "elastic/observability-bi"
+      "team": "elastic/obs-bi-team"
     }
   },
   {
@@ -796,7 +784,6 @@
     "name": "Search & ML UX",
     "areas": [
       "search",
-      "workplaceai",
       "vectordb",
       "platform"
     ],
@@ -861,16 +848,6 @@
     "github": {
       "team": "elastic/security-detection-engineering",
       "label": "Team:Detection Engineering"
-    }
-  },
-  {
-    "id": "security-detection-platform",
-    "name": "Security Detection Platform",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-platform"
     }
   },
   {
@@ -1029,7 +1006,7 @@
     "id": "workchat-eng",
     "name": "Agent Builder",
     "areas": [
-      "workplaceai"
+      "platform"
     ],
     "github": {
       "team": "elastic/workchat-eng",

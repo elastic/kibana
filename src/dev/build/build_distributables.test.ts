@@ -11,6 +11,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import type { BuildOptions } from './build_distributables';
 import { buildDistributables } from './build_distributables';
+import { readCliArgs } from './args';
+import type { GlobalTask, Task } from './lib';
+import * as BuildRunner from './lib/runner';
 import * as Tasks from './tasks';
 
 jest.mock('./lib/version_info', () => ({
@@ -24,7 +27,6 @@ jest.mock('./lib/version_info', () => ({
 
 jest.mock('./tasks', () => {
   const actual = jest.requireActual('./tasks') as Record<string, unknown>;
-  const noopTaskRun = jest.fn().mockResolvedValue(undefined);
   const mockBundleTaskRun = jest.fn().mockResolvedValue(undefined);
 
   const result: Record<string, unknown> = {};
@@ -39,7 +41,7 @@ jest.mock('./tasks', () => {
     ) {
       result[key] = {
         ...(value as object),
-        run: key === 'BuildBundles' ? mockBundleTaskRun : noopTaskRun,
+        run: key === 'BuildBundles' ? mockBundleTaskRun : jest.fn().mockResolvedValue(undefined),
       };
     } else {
       result[key] = value;
@@ -82,6 +84,8 @@ const minimalGenericFoldersOptions: BuildOptions = {
   versionQualifier: undefined,
   targetAllPlatforms: false,
   targetServerlessPlatforms: false,
+  targetCloudPlatforms: false,
+  skipFipsProvider: false,
   skipServerless: false,
   tarZstd: false,
   withExamplePlugins: false,
@@ -91,12 +95,73 @@ const minimalGenericFoldersOptions: BuildOptions = {
 
 describe('buildDistributables', () => {
   beforeEach(() => {
-    mockBundleTaskRun.mockClear();
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('runs BuildBundles once when creating generic folders', async () => {
     await buildDistributables(log, minimalGenericFoldersOptions);
 
     expect(mockBundleTaskRun).toHaveBeenCalledTimes(1);
+    expect(Tasks.BundleFipsProvider.run).not.toHaveBeenCalled();
   });
+
+  it('bundles the provider when creating platform folders', async () => {
+    await buildDistributables(log, {
+      ...minimalGenericFoldersOptions,
+      createGenericFolders: false,
+      createPlatformFolders: true,
+      targetAllPlatforms: true,
+    });
+
+    expect(Tasks.BundleFipsProvider.run).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the FIPS provider while still preparing platforms and creating archives', async () => {
+    await buildDistributables(log, {
+      ...minimalGenericFoldersOptions,
+      createGenericFolders: false,
+      createPlatformFolders: true,
+      createArchives: true,
+      targetAllPlatforms: true,
+      skipFipsProvider: true,
+    });
+
+    expect(Tasks.BundleFipsProvider.run).not.toHaveBeenCalled();
+    expect(Tasks.CreateArchivesSources.run).toHaveBeenCalledTimes(1);
+    expect(Tasks.CreateArchives.run).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([false, true])(
+    'schedules only cloud artifact tasks with --cloud --all-platforms and cross-compilation = %s',
+    async (dockerCrossCompile) => {
+      const globalRun = jest.fn<Promise<void>, [GlobalTask | Task]>().mockResolvedValue(undefined);
+      const artifactRun = jest
+        .fn<Promise<void>, [GlobalTask | Task]>()
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(BuildRunner, 'createRunner')
+        .mockImplementation(({ bufferLogs }) => (bufferLogs ? artifactRun : globalRun));
+      const { buildOptions } = readCliArgs([
+        'node',
+        'scripts/build',
+        '--cloud',
+        '--all-platforms',
+        ...(dockerCrossCompile ? ['--docker-cross-compile'] : []),
+      ]);
+      if (!buildOptions) {
+        throw new Error('Expected cloud build options');
+      }
+
+      await buildDistributables(log, buildOptions);
+
+      expect(artifactRun.mock.calls.map(([task]) => task)).toEqual([
+        Tasks.CreateDockerCloudX64,
+        Tasks.CreateDockerCloudARM64,
+      ]);
+    }
+  );
 });

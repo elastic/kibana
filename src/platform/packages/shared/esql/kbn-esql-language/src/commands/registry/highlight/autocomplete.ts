@@ -29,18 +29,37 @@ import {
   buildMapValueCompleteItem,
   newLineAndPipeCompleteItems,
 } from '../complete_items';
+import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { suggestForExpression } from '../../definitions/utils';
 
+/** Matches an ON list made of a lone `*`, which can only be followed by WITH or the end. */
+const LONE_WILDCARD_ON_REGEX = /\bon\s+\*\s*$/i;
+
+/** Matches the first entry of the ON list, still empty or being typed. */
+const FIRST_ON_ENTRY_REGEX = /\bon\s*[^\s,]*$/i;
+
 export const getQueryText = () =>
-  i18n.translate('kbn-esql-language.commands.highlight.autocomplete.queryTextPlaceholder', {
+  i18n.translate('esqlLanguage.commands.highlight.autocomplete.queryTextPlaceholder', {
     defaultMessage: 'The text to highlight',
   });
 
 export const getQueryTextSnippet = () => `"$\{0:${getQueryText()}}"`;
+
+const getWildcardFieldsSuggestion = (): ISuggestionItem =>
+  withAutoSuggest({
+    label: '*',
+    text: '*',
+    kind: 'Value',
+    detail: i18n.translate('esqlLanguage.commands.highlight.autocomplete.allFieldsDetail', {
+      defaultMessage: 'All text and keyword fields',
+    }),
+    // Listed before the fields, which are sorted alphabetically within their own category.
+    category: SuggestionCategory.RECOMMENDED_FIELD,
+  });
 
 const PREFIX_VALUE_SNIPPET = `"$\{0:${HIGHLIGHT_DEFAULT_PREFIX}}"`;
 const PREFIX_MODIFIER_SNIPPET = `${HIGHLIGHT_PREFIX_KEYWORD} = ${PREFIX_VALUE_SNIPPET}`;
@@ -53,7 +72,7 @@ const getHighlightMapParameters = (): MapParameters => ({
   analyzer: {
     type: 'string',
     description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.analyzerDescription',
+      'esqlLanguage.commands.highlight.autocomplete.analyzerDescription',
       {
         defaultMessage: 'Analyzer used to re-analyze the ON fields before highlighting',
       }
@@ -62,19 +81,16 @@ const getHighlightMapParameters = (): MapParameters => ({
   },
   pre_tags: {
     type: 'string',
-    description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.preTagsDescription',
-      {
-        defaultMessage: 'HTML tag to insert before highlighted text (default: <em>)',
-        ignoreTag: true,
-      }
-    ),
+    description: i18n.translate('esqlLanguage.commands.highlight.autocomplete.preTagsDescription', {
+      defaultMessage: 'HTML tag to insert before highlighted text (default: <em>)',
+      ignoreTag: true,
+    }),
     suggestions: [buildMapValueCompleteItem('<em>')],
   },
   post_tags: {
     type: 'string',
     description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.postTagsDescription',
+      'esqlLanguage.commands.highlight.autocomplete.postTagsDescription',
       {
         defaultMessage: 'HTML tag to insert after highlighted text (default: </em>)',
         ignoreTag: true,
@@ -85,7 +101,7 @@ const getHighlightMapParameters = (): MapParameters => ({
   number_of_fragments: {
     type: 'number',
     description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.numberOfFragmentsDescription',
+      'esqlLanguage.commands.highlight.autocomplete.numberOfFragmentsDescription',
       { defaultMessage: 'Maximum number of fragments to return (default: 5)' }
     ),
     suggestions: [buildMapValueCompleteItem('5')],
@@ -93,23 +109,22 @@ const getHighlightMapParameters = (): MapParameters => ({
   fragment_size: {
     type: 'number',
     description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.fragmentSizeDescription',
+      'esqlLanguage.commands.highlight.autocomplete.fragmentSizeDescription',
       { defaultMessage: 'Size of each fragment in characters (default: 100)' }
     ),
     suggestions: [buildMapValueCompleteItem('100')],
   },
   encoder: {
     type: 'string',
-    description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.encoderDescription',
-      { defaultMessage: 'Encoding for highlighted text: default or html (default: default)' }
-    ),
+    description: i18n.translate('esqlLanguage.commands.highlight.autocomplete.encoderDescription', {
+      defaultMessage: 'Encoding for highlighted text: default or html (default: default)',
+    }),
     suggestions: [buildMapValueCompleteItem('default'), buildMapValueCompleteItem('html')],
   },
   boundary_scanner: {
     type: 'string',
     description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.boundaryScannerDescription',
+      'esqlLanguage.commands.highlight.autocomplete.boundaryScannerDescription',
       { defaultMessage: 'How to split fragments: sentence or word (default: sentence)' }
     ),
     suggestions: [buildMapValueCompleteItem('sentence'), buildMapValueCompleteItem('word')],
@@ -117,34 +132,36 @@ const getHighlightMapParameters = (): MapParameters => ({
   boundary_scanner_locale: {
     type: 'string',
     description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.boundaryScannerLocaleDescription',
+      'esqlLanguage.commands.highlight.autocomplete.boundaryScannerLocaleDescription',
       { defaultMessage: 'Locale for boundary scanning (default: Locale.ROOT)' }
     ),
     suggestions: [],
   },
   order: {
     type: 'string',
-    description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.orderDescription',
-      { defaultMessage: 'Order of fragments: none or score (default: none)' }
-    ),
+    description: i18n.translate('esqlLanguage.commands.highlight.autocomplete.orderDescription', {
+      defaultMessage: 'Order of fragments: none or score (default: none)',
+    }),
     suggestions: [buildMapValueCompleteItem('none'), buildMapValueCompleteItem('score')],
   },
   no_match_size: {
     type: 'number',
     description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.noMatchSizeDescription',
-      { defaultMessage: 'Characters to return when there is no match (default: 0)' }
+      'esqlLanguage.commands.highlight.autocomplete.noMatchSizeDescription',
+      {
+        defaultMessage:
+          'Minimum characters to return when there is no match, extended to the next boundary (default: 0)',
+      }
     ),
     suggestions: [buildMapValueCompleteItem('0')],
   },
   max_analyzed_offset: {
     type: 'number',
     description: i18n.translate(
-      'kbn-esql-language.commands.highlight.autocomplete.maxAnalyzedOffsetDescription',
-      { defaultMessage: 'Maximum character offset to analyze (default: index setting)' }
+      'esqlLanguage.commands.highlight.autocomplete.maxAnalyzedOffsetDescription',
+      { defaultMessage: 'Maximum character offset to analyze, or -1 to unset (default: -1)' }
     ),
-    suggestions: [],
+    suggestions: [buildMapValueCompleteItem('-1')],
   },
 });
 
@@ -176,10 +193,9 @@ export async function autocomplete(
             undefined,
             SuggestionCategory.CONSTANT_VALUE
           )[0],
-          label: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.customPrefixLabel',
-            { defaultMessage: 'Custom prefix' }
-          ),
+          label: i18n.translate('esqlLanguage.commands.highlight.autocomplete.customPrefixLabel', {
+            defaultMessage: 'Custom prefix',
+          }),
           asSnippet: true,
         },
       ];
@@ -212,12 +228,18 @@ export async function autocomplete(
           text: PREFIX_MODIFIER_SNIPPET,
           kind: 'Keyword',
           detail: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.prefixModifierDetail',
+            'esqlLanguage.commands.highlight.autocomplete.prefixModifierDetail',
             { defaultMessage: 'Custom column name prefix (default: highlight_)' }
           ),
           asSnippet: true,
-          category: SuggestionCategory.LANGUAGE_KEYWORD,
+          category: SuggestionCategory.COMMAND_MODIFIER,
         });
+      }
+
+      // Neither the query nor ON is mandatory, so with nothing typed yet the command can already
+      // continue with ON or WITH, or end.
+      if (computed.position === 'empty_expression') {
+        suggestions.push(onCompleteItem, withCompleteItem, ...newLineAndPipeCompleteItems);
       }
 
       // The snippet stands for a whole query expression, so it makes no sense as a function
@@ -243,11 +265,16 @@ export async function autocomplete(
     }
 
     case CaretPosition.ON_KEYWORD: {
-      return [onCompleteItem];
+      return [onCompleteItem, withCompleteItem, ...newLineAndPipeCompleteItems];
     }
 
     case CaretPosition.ON_EXPRESSION: {
-      return suggestFieldsList(
+      // `*` is only valid on its own, so nothing but WITH or the end can follow it.
+      if (LONE_WILDCARD_ON_REGEX.test(innerText)) {
+        return [withCompleteItem, ...newLineAndPipeCompleteItems];
+      }
+
+      const fieldSuggestions = await suggestFieldsList(
         query,
         command,
         highlightCommand.highlightFields ?? [],
@@ -258,9 +285,15 @@ export async function autocomplete(
         {
           afterCompleteSuggestions: [withCompleteItem],
           allowSingleColumnFields: true,
+          // The ON list takes plain fields: no `col0 = ...` assignments.
+          disableNewColumnSuggestion: true,
           preferredExpressionType: ['text', 'keyword'],
         }
       );
+
+      return FIRST_ON_ENTRY_REGEX.test(innerText)
+        ? [getWildcardFieldsSuggestion(), ...fieldSuggestions]
+        : fieldSuggestions;
     }
 
     case CaretPosition.AFTER_WITH_KEYWORD: {

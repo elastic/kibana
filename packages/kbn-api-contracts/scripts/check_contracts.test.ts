@@ -205,6 +205,36 @@ describe('check_contracts', () => {
     expect(mockLog.success).toHaveBeenCalledWith('No breaking changes detected');
   });
 
+  it('writes an empty report when no breaking changes are found', async () => {
+    mockRunOasdiff.mockReturnValue([]);
+    mockParseOasdiff.mockReturnValue([]);
+
+    await runCallback({
+      flags: { ...defaultFlags, reportPath: 'target/reports/stack-impact.json' },
+      log: mockLog,
+    });
+
+    const reportCall = mockWriteFileSync.mock.calls.find(([path]) =>
+      String(path).endsWith('stack-impact.json')
+    );
+    expect(JSON.parse(reportCall![1] as string)).toEqual({ distribution: 'stack', entries: [] });
+  });
+
+  it('writes no report when the check is skipped', async () => {
+    mockRunOasdiff.mockImplementation(() => {
+      throw new Error('bad data in "#/components/schemas/Foo" (expecting ref to example object)');
+    });
+
+    await runCallback({
+      flags: { ...defaultFlags, reportPath: 'target/reports/stack-impact.json' },
+      log: mockLog,
+    });
+
+    expect(
+      mockWriteFileSync.mock.calls.some(([path]) => String(path).endsWith('stack-impact.json'))
+    ).toBe(false);
+  });
+
   it('always diffs the whole surface (never scopes oasdiff to a matchPath)', async () => {
     mockRunOasdiff.mockReturnValue([]);
     mockParseOasdiff.mockReturnValue([]);
@@ -510,7 +540,7 @@ describe('check_contracts', () => {
 
           await runCallback({ flags: reportFlags, log: mockLog });
 
-          expect(readReport()).toBeUndefined();
+          expect(readReport()).toEqual({ distribution: 'stack', entries: [] });
           expect(mockFormatFailure).not.toHaveBeenCalled();
           expect(mockLog.success).toHaveBeenCalledWith('All breaking changes are allowlisted');
         }

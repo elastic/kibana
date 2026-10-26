@@ -19,6 +19,7 @@ import { SUBJECT_ATTACHMENT_TYPE } from '../common/subjects/constants';
 import { HYPOTHESES_ATTACHMENT_TYPE, SET_HYPOTHESES_TOOL_ID } from '../common/hypotheses/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
 import { ReopenInvestigationStepId } from '../common/investigations/step_types';
+import { AppendWorkflowExecutionIdStepId } from '../common/workflow_execution/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
@@ -60,6 +61,8 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
+    callbacks: { registerConversationResolver: jest.fn() },
+    conversationEvents: { register: jest.fn() },
     tools: { register: jest.fn() },
   };
 
@@ -218,6 +221,7 @@ describe('AgenticInvestigationsPlugin', () => {
         AttachImpactStepId,
         GetImpactStepId,
         ReopenInvestigationStepId,
+        AppendWorkflowExecutionIdStepId,
       ]);
     });
 
@@ -230,6 +234,15 @@ describe('AgenticInvestigationsPlugin', () => {
       );
       expect(agentBuilder.tools.register).toHaveBeenCalledWith(
         expect.objectContaining({ id: SET_HYPOTHESES_TOOL_ID })
+      );
+    });
+
+    it('registers the Slack thread conversation resolver during setup', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.callbacks.registerConversationResolver).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.callbacks.registerConversationResolver).toHaveBeenCalledWith(
+        expect.any(Function)
       );
     });
 
@@ -246,6 +259,27 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(
         JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
       ).not.toMatch(/proposals/i);
+    });
+
+    it('registers the investigation and escalation timeline event types', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(
+        agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
+      ).toEqual([
+        'investigation_severity_changed',
+        'escalation_created_from_investigation',
+        'escalation_investigation_linked',
+        'escalation_attachments_synced',
+      ]);
+    });
+
+    it('registers only the investigation timeline event types when escalations are disabled', () => {
+      const { agentBuilder } = setupPlugin({ escalationsEnabled: false });
+
+      expect(
+        agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
+      ).toEqual(['investigation_severity_changed']);
     });
 
     it('registers the HTTP routes for every entity', () => {
@@ -265,6 +299,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(contract.getImpactClient).toEqual(expect.any(Function));
       expect(contract.getSubjectsClient).toEqual(expect.any(Function));
+      expect(contract.getInvestigationsClient).toEqual(expect.any(Function));
       expect(contract.getEscalationsService()).toBeDefined();
     });
 

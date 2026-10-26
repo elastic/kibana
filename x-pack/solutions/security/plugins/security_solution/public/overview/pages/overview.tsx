@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiScreenReaderOnly,
-  EuiShowFor,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiShowFor, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { OVERVIEW } from '../../app/translations';
-import { InputsModelId } from '../../common/store/inputs/constants';
-import { FiltersGlobal } from '../../common/components/filters_global';
-import { SiemSearchBar } from '../../common/components/search_bar';
+import { DASHBOARDS, OVERVIEW } from '../../app/translations';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useFetchIndex } from '../../common/containers/source';
@@ -45,6 +36,11 @@ import {
   filterAlertsFromIndexPatterns,
   getAlertsIndexPatterns,
 } from '../../common/components/visualization_actions/utils';
+import { SecurityAppHeader } from '../../common/components/app_header';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { useKibana } from '../../common/lib/kibana';
+import { SearchWithDataView } from '../../common/components/search_with_data_view';
+import { PageScope } from '../../data_view_manager/constants';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -99,23 +95,41 @@ const OverviewComponent = () => {
   const { hasAlertsRead } = useAlertsPrivileges();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
+  const { docLinks } = useKibana().services;
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const back = useMemo(
+    () => ({
+      href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.dashboards }),
+      label: DASHBOARDS,
+    }),
+    [getSecuritySolutionUrl]
+  );
+
   if (status === 'pristine') {
     return <PageLoader />;
   }
 
   return (
     <>
-      <EuiScreenReaderOnly>
-        <h1>{OVERVIEW}</h1>
-      </EuiScreenReaderOnly>
-
-      {indicesExist ? (
-        <>
-          <FiltersGlobal>
-            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-          </FiltersGlobal>
-
-          <SecuritySolutionPageWrapper>
+      <SecuritySolutionPageWrapper>
+        {/* The header must be a direct child of the wrapper, otherwise it does not stay sticky. */}
+        <SecurityAppHeader
+          title={OVERVIEW}
+          spacing="largeBleed"
+          back={back}
+          docLink={docLinks.links.siem.guide}
+          // Empty items still count as a menu, so the legacy data view picker is not remounted.
+          menu={{ items: [] }}
+        />
+        {!indicesExist && (
+          <>
+            <EuiSpacer size="m" />
+            <EmptyPrompt />
+          </>
+        )}
+        {indicesExist && (
+          <>
+            <SearchWithDataView dataView={dataView} scope={PageScope.default} />
             {!dismissMessage && !metadataIndexExists && canAccessFleet && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
@@ -180,12 +194,9 @@ const OverviewComponent = () => {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </SecuritySolutionPageWrapper>
-        </>
-      ) : (
-        <EmptyPrompt />
-      )}
-
+          </>
+        )}
+      </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.overview} />
     </>
   );

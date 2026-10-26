@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaCodeEditorWrapper, type Locator, type ScoutPage } from '@kbn/scout';
+import { AppMenu, KibanaCodeEditorWrapper, type Locator, type ScoutPage } from '@kbn/scout';
+
+const TAB_COUNT_PATTERN = /(\d+)\)/;
 
 export class DataViewDetailPage {
   readonly container;
@@ -30,11 +32,20 @@ export class DataViewDetailPage {
   readonly fieldPreviewItem;
   readonly changeWarning;
   readonly formatSelect;
+  readonly sourceFiltersTab;
+  readonly relationshipsTab;
+  readonly managedTag;
+  readonly deleteButton;
+  readonly fieldEditorTitle;
+  readonly fieldEditorNameInput;
+  readonly fieldEditorTypeInput;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
+    this.appMenu = new AppMenu(page);
     this.container = page.testSubj.locator('editIndexPattern');
     this.editButton = page.testSubj.locator('editIndexPatternButton');
     this.fieldsTab = page.testSubj.locator('tab-indexedFields');
@@ -55,6 +66,15 @@ export class DataViewDetailPage {
     this.fieldPreviewItem = page.testSubj.locator('fieldPreviewItem');
     this.changeWarning = page.testSubj.locator('changeWarning');
     this.formatSelect = page.testSubj.locator('editorSelectedFormatId');
+    this.sourceFiltersTab = page.testSubj.locator('tab-sourceFilters');
+    this.relationshipsTab = page.testSubj.locator('tab-relationships');
+    this.managedTag = page.testSubj.locator('managed-tag');
+    this.deleteButton = page.testSubj.locator('deleteIndexPatternButton');
+    this.fieldEditorTitle = page.testSubj.locator('flyoutTitle');
+    this.fieldEditorNameInput = page.testSubj.locator('nameField').locator('input');
+    this.fieldEditorTypeInput = page.testSubj
+      .locator('typeField')
+      .locator('input[data-test-subj="comboBoxSearchInput"]');
   }
 
   async goto(dataViewId: string): Promise<void> {
@@ -64,17 +84,13 @@ export class DataViewDetailPage {
 
   /** Returns the number in the "Fields (N)" tab title; while filtering it reads "Fields (0 / N)". */
   async getFieldsTabCount(): Promise<number> {
-    const text = await this.fieldsTab.innerText();
-    const match = text.match(/(\d+)\)/);
-    return match ? parseInt(match[1], 10) : 0;
+    return this.readTabCount(this.fieldsTab);
   }
 
   /** The scripted fields tab only renders once the data view has scripted fields. */
   async getScriptedFieldsTabCount(): Promise<number> {
     if ((await this.scriptedFieldsTab.count()) === 0) return 0;
-    const text = await this.scriptedFieldsTab.innerText();
-    const match = text.match(/(\d+)\)/);
-    return match ? parseInt(match[1], 10) : 0;
+    return this.readTabCount(this.scriptedFieldsTab);
   }
 
   async openScriptedFieldsTab(): Promise<void> {
@@ -83,6 +99,59 @@ export class DataViewDetailPage {
     await this.scriptedFieldsTab
       .and(this.page.locator('[aria-selected="true"]'))
       .waitFor({ state: 'visible' });
+  }
+
+  /** Returns the number in the "Field filters (N)" tab title. */
+  async getSourceFiltersTabCount(): Promise<number> {
+    return this.readTabCount(this.sourceFiltersTab);
+  }
+
+  async openSourceFiltersTab(): Promise<void> {
+    await this.sourceFiltersTab.click();
+    await this.page.testSubj.locator('fieldFilterInput').waitFor({ state: 'visible' });
+  }
+
+  /** Row of the field filters table for exactly this filter value. */
+  sourceFilterRow(value: string): Locator {
+    return this.page
+      .locator('tr')
+      .filter({ has: this.page.testSubj.locator(`edit_filter-${value}`) });
+  }
+
+  async addSourceFilter(value: string): Promise<void> {
+    await this.page.testSubj.fill('fieldFilterInput', value);
+    await this.page.testSubj.click('addFieldFilterButton');
+    await this.sourceFilterRow(value).waitFor({ state: 'visible' });
+  }
+
+  async editSourceFilter(value: string, newValue: string): Promise<void> {
+    await this.page.testSubj.click(`edit_filter-${value}`);
+    await this.page.testSubj.fill(`filter_input_${value}`, newValue);
+    await this.page.testSubj.click(`save_filter-${value}`);
+    await this.sourceFilterRow(newValue).waitFor({ state: 'visible' });
+  }
+
+  /** Returns the number in the "Relationships (N)" tab title. */
+  async getRelationshipsTabCount(): Promise<number> {
+    return this.readTabCount(this.relationshipsTab);
+  }
+
+  async openRelationshipsTab(): Promise<void> {
+    await this.relationshipsTab.click();
+    await this.relationshipsTab
+      .and(this.page.locator('[aria-selected="true"]'))
+      .waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Shows every header action: waits for the app menu to load and opens its overflow popover
+   * when the header is too narrow to render all actions inline.
+   */
+  async revealAllHeaderActions(): Promise<void> {
+    await this.appMenu.revealItem(this.editButton);
+    if (await this.appMenu.overflowButton.isVisible()) {
+      await this.appMenu.openOverflow();
+    }
   }
 
   async getFieldNames(): Promise<string[]> {
@@ -303,6 +372,17 @@ export class DataViewDetailPage {
     await deleteBtn.click();
     await this.page.testSubj.locator('deleteDataViewFlyoutHeader').waitFor({ state: 'visible' });
     await this.page.testSubj.click('confirmFlyoutConfirmButton');
+  }
+
+  /** Reads the last number in a tab title such as "Fields (12)" or "Fields (0 / 12)". */
+  private async readTabCount(tab: Locator): Promise<number> {
+    await tab.filter({ hasText: TAB_COUNT_PATTERN }).waitFor({ state: 'visible' });
+    const text = await tab.innerText();
+    const match = text.match(TAB_COUNT_PATTERN);
+    if (!match) {
+      throw new Error(`Could not read a count from tab title "${text}"`);
+    }
+    return parseInt(match[1], 10);
   }
 
   private async toggleFlyoutRow(rowTestSubj: string): Promise<void> {

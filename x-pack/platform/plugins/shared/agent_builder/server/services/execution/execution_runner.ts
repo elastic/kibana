@@ -27,8 +27,11 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
+import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
@@ -74,8 +77,9 @@ import {
   type ConversationWithOperation,
 } from './utils';
 import { reportRoundTelemetry } from './utils/report_round_telemetry';
+import { buildExecutionTelemetryMetadata } from './utils/build_execution_telemetry_metadata';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
+import { getCurrentTraceId, loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -95,6 +99,8 @@ export interface AgentExecutionDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   spaces?: SpacesPluginStart;
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
@@ -181,10 +187,12 @@ const handleConversationExecution = async ({
     accessControl,
     readOnly,
     origin,
+    author: requestAuthor,
     nextInput,
     browserApiTools,
     configurationOverrides,
     telemetryMetadata,
+    workflowExecutionId,
     maxContentLength,
     reasoningLevel,
     subagentCreation,
@@ -209,24 +217,30 @@ const handleConversationExecution = async ({
     user: { ...owner, isAdmin: false },
   });
 
-  const author = conversationClient.getAuthor(origin?.author);
+  const author = conversationClient.getAuthor(origin?.author, requestAuthor);
 
   // The execution service resolved the conversation, created it when it was new and wrote the
   // opening user message before this run was dispatched: the run reads the stored document and is
-  // told how the request resolved it, since its own read only ever sees an update. A run that does
-  // not store its conversation wrote nothing to read, so it resolves the placeholder here.
-  const conversation: ConversationWithOperation = storeConversation
-    ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
-    : await getConversation({
-        agentId,
-        conversationId,
-        autoCreateConversationWithId: true,
-        conversationClient,
-        accessControl,
-        readOnly,
-        origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-        subagentCreation,
-      });
+  // told how the request resolved it, since its own read only ever sees an update. An existing
+  // conversation is read even when the run stores nothing, so a deleted one fails the run instead of
+  // being replaced by an empty placeholder; only a non-storing new conversation resolves the
+  // placeholder here, as nothing was written for it.
+  const conversation: ConversationWithOperation =
+    storeConversation || conversationOperation === 'UPDATE'
+      ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
+      : await getConversation({
+          agentId,
+          conversationId,
+          autoCreateConversationWithId: true,
+          conversationClient,
+          accessControl,
+          readOnly,
+          origin: origin
+            ? { external_conversation_id: origin.external_conversation_id }
+            : undefined,
+          subagentCreation,
+        });
+  const conversationAccess = toConversationAccess({ storeConversation, conversationOperation });
 
   // Matches the receipt-time write's timestamp, so a rebuilt interruption event lands with the
   // same created_at rather than moving to when this run picked the record up.
@@ -241,10 +255,29 @@ const handleConversationExecution = async ({
   // resolution moved inside this guard too, so a run that fails to resolve one still gets a
   // terminal recorded next to the message that was already persisted.
   try {
-    const { modelProvider, selectedConnectorId } = await resolveServices({
+    // Captured once, before the first model call, so every EIS call in this round (including
+    // the title-generation and default-connector lookups below, which run ahead of the
+    // `invoke_agent` span) reports the same trace id rather than whichever span happened to be
+    // active when the model-provider's (memoized) telemetry metadata was first resolved.
+    // `workflowExecutionId` is the single source of the workflow run: the same id goes on the
+    // round events and, as `interactionId`, on every EIS call of this round, unless this round
+    // belongs to a sub-agent (only the main agent's loop sends it to EIS).
+    const roundTelemetryMetadata = buildExecutionTelemetryMetadata({
+      parentExecutionId: execution.parentExecutionId,
+      telemetryMetadata,
+      traceId: getCurrentTraceId(),
+      workflowExecutionId,
+    });
+
+    const {
+      modelProvider,
+      selectedConnectorId,
+      reasoningLevel: resolvedReasoningLevel,
+    } = await resolveServices({
       agentId,
       connectorId,
-      telemetryMetadata,
+      reasoningLevel,
+      telemetryMetadata: roundTelemetryMetadata,
       request,
       ...deps,
     });
@@ -262,21 +295,24 @@ const handleConversationExecution = async ({
       abortSignal,
       conversation,
       defaultConnectorId: selectedConnectorId,
-      telemetryMetadata,
+      telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
-      reasoningLevel,
+      reasoningLevel: resolvedReasoningLevel,
       runAgent,
       browserApiTools,
       configurationOverrides,
       interactivity,
       parentExecutionId: execution.parentExecutionId,
       projectRouting,
+      workflowExecutionId,
       roundId,
+      conversationAccess,
     });
 
     // Generate title when creating a new conversation
     // OR when the conversation still carries the default placeholder title
-    const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
+    const needsTitle =
+      storeConversation && conversationNeedsTitle(conversation) && !subagentCreation;
     const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
     const [titleChatModel, { chatModel }, { name: agentName }, privacySettings] = await Promise.all(
       [
@@ -392,6 +428,7 @@ const handleConversationExecution = async ({
                 trackingService,
                 analyticsService,
                 logger,
+                workflowExecutionId,
               });
             }
           }),
@@ -407,6 +444,7 @@ const handleConversationExecution = async ({
             conversationId: conversation.id,
             executionId: execution.executionId,
             roundOrigin: telemetryOrigin,
+            workflowExecutionId,
           })
         );
       }
@@ -611,13 +649,31 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
-    execution.agentParams;
+  const {
+    telemetryMetadata,
+    maxContentLength,
+    reasoningLevel,
+    projectRouting,
+    structuredOutput,
+    outputSchema,
+    workflowExecutionId,
+  } = execution.agentParams;
 
-  const { selectedConnectorId } = await resolveServices({
+  // See the matching comment in handleConversationExecution: captured once, ahead of the first
+  // model call, so every EIS call in this execution reports the same trace id. A standalone
+  // sub-agent has a parent execution, so its EIS calls don't carry the workflow run.
+  const roundTelemetryMetadata = buildExecutionTelemetryMetadata({
+    parentExecutionId: execution.parentExecutionId,
+    telemetryMetadata,
+    traceId: getCurrentTraceId(),
+    workflowExecutionId,
+  });
+
+  const { selectedConnectorId, reasoningLevel: resolvedReasoningLevel } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
-    telemetryMetadata,
+    reasoningLevel,
+    telemetryMetadata: roundTelemetryMetadata,
     request,
     ...deps,
   });
@@ -627,16 +683,19 @@ const handleStandaloneExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput: execution.agentParams.nextInput,
+    structuredOutput,
+    outputSchema,
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
-    telemetryMetadata,
+    telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
-    reasoningLevel,
+    reasoningLevel: resolvedReasoningLevel,
     runAgent,
     projectRouting,
     executionMode: AgentExecutionMode.standalone,
     interactivity,
+    workflowExecutionId,
     parentExecutionId: execution.parentExecutionId,
   });
 
@@ -655,4 +714,17 @@ const handleStandaloneExecution = async ({
       });
     })
   );
+};
+
+const toConversationAccess = ({
+  storeConversation,
+  conversationOperation,
+}: {
+  storeConversation: boolean;
+  conversationOperation: ConversationOperation;
+}): ExecutionConversationAccess => {
+  if (storeConversation) {
+    return 'readWrite';
+  }
+  return conversationOperation === 'UPDATE' ? 'readOnly' : 'none';
 };

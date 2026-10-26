@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { MAX_AI_INDEX_ID_LENGTH } from '../constants';
 
 export const MAX_KI_ID_LENGTH = 512;
@@ -25,7 +25,7 @@ export const MAX_KI_REFERENCE_URI_LENGTH = 2048;
 export const MAX_KI_REFERENCE_DESCRIPTION_LENGTH = 2048;
 
 export const KI_REFERENCE_RELATIONS = ['derived_from', 'relates_to', 'supersedes'] as const;
-export const KI_LIFECYCLE_STATUSES = ['active', 'deleted'] as const;
+export const KI_LIFECYCLE_STATUSES = ['active', 'deleted', 'verification_failed'] as const;
 
 export const aiIndexIdSchema = z
   .string()
@@ -152,8 +152,7 @@ export const kiFieldsSchema = z.object({
     .max(MAX_KI_REFERENCES)
     .optional()
     .describe('URIs this KI relates to'),
-  expires_at: z.iso
-    .datetime({ offset: true })
+  expires_at: isoDateTime({ offset: true })
     .optional()
     .describe('Expiry date in ISO 8601. Leave unset and the KI never expires'),
 });

@@ -109,6 +109,7 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 import { registerEmbeddables } from './embeddable/register_embeddables';
+import type { EmbeddableDeps } from './embeddable/types';
 import {
   registerServiceMapAttachment,
   registerServiceMapContextAttachment,
@@ -266,6 +267,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
   private cpsEnabledSubscription?: Subscription;
+  /** Setup-time half of EmbeddableDeps, completed with core/plugins in start(). Set in setup(). */
+  private embeddableDepsPartial!: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>;
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
@@ -539,14 +542,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       observabilityRuleTypeRegistry,
       telemetry,
     });
-    registerEmbeddables({
+    this.embeddableDepsPartial = {
       coreSetup: core,
       pluginsSetup: plugins,
       config,
       kibanaEnvironment,
       observabilityRuleTypeRegistry,
       telemetry,
-    });
+    };
+    registerEmbeddables(this.embeddableDepsPartial);
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
 
@@ -592,7 +596,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       });
 
     if (plugins.agentBuilder) {
-      registerServiceMapAttachment(plugins.agentBuilder.attachments);
+      registerServiceMapAttachment(plugins.agentBuilder.attachments, {
+        ...this.embeddableDepsPartial,
+        coreStart: core,
+        pluginsStart: plugins,
+      });
       registerServiceMapContextAttachment(plugins.agentBuilder.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {

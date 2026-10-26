@@ -25,10 +25,12 @@ export async function generateData({
   apmSynthtraceEsClient,
   start,
   end,
+  containerFields = { 'kubernetes.pod.uid': 'test' },
 }: {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;
   start: number;
   end: number;
+  containerFields?: Record<string, string>;
 }) {
   const { serviceName, agentName, rate, cloud, transaction } = dataConfig;
   const { provider, serviceName: cloudServiceName } = cloud;
@@ -44,7 +46,7 @@ export async function generateData({
       instance
         .transaction({ transactionName: transaction.name })
         .defaults({
-          'kubernetes.pod.uid': 'test',
+          ...containerFields,
           'cloud.provider': provider,
           'cloud.service.name': cloudServiceName,
         })

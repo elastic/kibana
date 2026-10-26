@@ -11,18 +11,18 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
 import {
   EMPTY_TOKENS,
+  buildFeatureIdentificationUserMessage,
+  parseFinalizedFeatures,
+  type RawFinalizeFeaturesParams,
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type PreviouslyIdentifiedFeature,
 } from '@kbn/nightshift-ai';
 import { createAgentBuilderClient, type ConverseStep } from '@kbn/evals';
 import {
-  buildFeatureIdentificationUserMessage,
   FEATURE_IDENTIFICATION_AGENT_ID,
   FINALIZE_FEATURES_TOOL_ID,
-  parseFinalizedFeatures,
-  type RawFinalizeFeaturesParams,
-} from '@kbn/significant-events-plugin/server';
+} from '@kbn/significant-events-plugin/common';
 
 export interface RunFeatureIdentificationAgentParams {
   fetch: HttpHandler;
@@ -85,7 +85,7 @@ export async function runFeatureIdentificationAgent({
     title: `Feature identification: ${streamName}`,
   });
   const userMessage = buildFeatureIdentificationUserMessage({
-    streamName,
+    sourceId: streamName,
     sampleDocuments: JSON.stringify(sampleDocuments),
     previouslyIdentifiedFeatures: previouslyIdentifiedFeatures?.length
       ? JSON.stringify(previouslyIdentifiedFeatures)
@@ -100,7 +100,7 @@ export async function runFeatureIdentificationAgent({
   });
   const rawParams = getSuccessfulFinalizeFeaturesParams(result.steps);
 
-  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, streamName);
+  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams);
 
   return {
     features,

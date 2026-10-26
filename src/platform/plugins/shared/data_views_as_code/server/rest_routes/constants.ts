@@ -8,4 +8,4 @@
  */
 
 export const BASE_PATH = '/api/data_views/v2';
-export const INITIAL_REST_VERSION = '1';
+export const INITIAL_REST_VERSION = '2023-10-31';

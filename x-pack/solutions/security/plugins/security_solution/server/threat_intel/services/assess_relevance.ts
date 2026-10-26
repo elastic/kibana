@@ -17,6 +17,7 @@ import {
   selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -108,7 +109,7 @@ has_original_commentary (boolean):
 reason (string):
   One sentence (max 120 characters) explaining the classification. Be specific — name the signal
   that drove the decision (e.g. "Vendor blog announcing product feature, no IOCs or TTPs",
-  "Weekly newsletter linking CrowdStrike, Mandiant reports", "Needs render: navigation only, JS gate").
+  "Weekly newsletter linking third-party reports", "Needs render: navigation only, JS gate").
 
 ${urlLine}${titleLine}Article text:
 ${text}`;
@@ -132,17 +133,14 @@ export const assessRelevance = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so boundedText/link truncation
-  // actually runs instead of letting unbounded model output through.
   const invokeRelevance = async (
     text: string
   ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: RelevanceOutput }> => {
     const invoked = (await structured.invoke(buildRelevancePrompt(params, text))) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
+      parsed: RelevanceOutput | null;
     };
-    return { raw: invoked.raw, parsed: relevanceOutputSchema.parse(invoked.parsed) };
+    return requireParsedStructuredOutput(invoked, 'assess_relevance');
   };
 
   let context = fullArticleContext(params.text);

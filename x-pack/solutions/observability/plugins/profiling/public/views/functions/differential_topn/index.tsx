@@ -12,12 +12,14 @@ import { useProfilingDependencies } from '../../../components/contexts/profiling
 import { FramesSummary } from '../../../components/frames_summary';
 import type { OnChangeSortParams } from '../../../components/differential_topn_functions_grid';
 import { DifferentialTopNFunctionsGrid } from '../../../components/differential_topn_functions_grid';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { NormalizationMode } from '../../../components/normalization_menu';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 
 export function DifferentialTopNFunctionsView() {
   const { onPageReady } = usePerformanceContext();
@@ -58,9 +60,13 @@ export function DifferentialTopNFunctionsView() {
   const {
     services: { fetchTopNFunctions },
   } = useProfilingDependencies();
+  const { selectedSchema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
+      if (!selectedSchema) {
+        return undefined;
+      }
       return fetchTopNFunctions({
         http,
         timeFrom: new Date(timeRange.start).getTime(),
@@ -68,14 +74,15 @@ export function DifferentialTopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery,
+        schema: selectedSchema,
       });
     },
-    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery, selectedSchema]
   );
 
   const comparisonState = useTimeRangeAsync(
     ({ http }) => {
-      if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
+      if (!comparisonTimeRange.start || !comparisonTimeRange.end || !selectedSchema) {
         return undefined;
       }
       return fetchTopNFunctions({
@@ -85,9 +92,16 @@ export function DifferentialTopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery: comparisonKuery,
+        schema: selectedSchema,
       });
     },
-    [comparisonTimeRange.start, comparisonTimeRange.end, fetchTopNFunctions, comparisonKuery]
+    [
+      comparisonTimeRange.start,
+      comparisonTimeRange.end,
+      fetchTopNFunctions,
+      comparisonKuery,
+      selectedSchema,
+    ]
   );
 
   const profilingRouter = useProfilingRouter();
@@ -183,24 +197,26 @@ export function DifferentialTopNFunctionsView() {
             size="xl"
             alignTop
           >
-            <DifferentialTopNFunctionsGrid
-              base={state.data}
-              baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
-              comparison={comparisonState.data}
-              comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
-              comparisonSortDirection={comparisonSortDirection}
-              comparisonSortField={comparisonSortField}
-              comparisonTotalSeconds={totalComparisonSeconds}
-              onChangePage={handlePageChange}
-              onChangeSort={handleOnSort}
-              onFrameClick={handleOnFrameClick}
-              pageIndex={pageIndex}
-              sortDirection={sortDirection}
-              sortField={sortField}
-              totalSeconds={totalSeconds}
-              searchFunctionName={searchFunctionName}
-              onSearchFunctionNameChange={handleSearchFunctionNameChange}
-            />
+            <NoProfilingDataPrompt variant="baseline" hasData={state.data?.TopN.length !== 0}>
+              <DifferentialTopNFunctionsGrid
+                base={state.data}
+                baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+                comparison={comparisonState.data}
+                comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                comparisonSortDirection={comparisonSortDirection}
+                comparisonSortField={comparisonSortField}
+                comparisonTotalSeconds={totalComparisonSeconds}
+                onChangePage={handlePageChange}
+                onChangeSort={handleOnSort}
+                onFrameClick={handleOnFrameClick}
+                pageIndex={pageIndex}
+                sortDirection={sortDirection}
+                sortField={sortField}
+                totalSeconds={totalSeconds}
+                searchFunctionName={searchFunctionName}
+                onSearchFunctionNameChange={handleSearchFunctionNameChange}
+              />
+            </NoProfilingDataPrompt>
           </AsyncComponent>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -15,6 +15,8 @@ export interface SkillRegistryListOptions {
   type?: 'built-in' | 'persisted';
   /** When false (default), skills that belong to a plugin are excluded from results. */
   includePlugins?: boolean;
+  /** When false (default), skills marked `hidden` are excluded from results. */
+  includeHidden?: boolean;
 }
 
 /**

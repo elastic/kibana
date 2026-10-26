@@ -138,6 +138,7 @@ interface MinimapStepRowProps {
   lineStart: number;
   index: number;
   isFocused: boolean;
+  isTabStop: boolean;
   severityInfo: StepSeverityInfo | null;
   isNested: boolean;
   colors: MinimapColors;
@@ -150,6 +151,7 @@ const MinimapStepRow = React.memo(
     lineStart,
     index,
     isFocused,
+    isTabStop,
     severityInfo,
     isNested,
     colors,
@@ -162,6 +164,9 @@ const MinimapStepRow = React.memo(
       <button
         type="button"
         title={stepId}
+        // Roving tabindex: the minimap is a single tab stop, arrow keys move between pills.
+        tabIndex={isTabStop ? 0 : -1}
+        aria-current={isFocused ? 'step' : undefined}
         // `style` for the dynamic top position avoids creating a new Emotion css
         // object on every render; the stable stepButtonBaseCss covers everything else.
         style={{ top: index * MINIMAP_ITEM_HEIGHT }}
@@ -193,12 +198,20 @@ const MinimapStepRow = React.memo(
             />
             <EuiScreenReaderOnly>
               <span>
-                {severityInfo.isOwn
-                  ? i18n.translate('workflows.stepMinimap.stepHasErrors', {
-                      defaultMessage: 'has errors',
+                {severityInfo.severity === 'error'
+                  ? severityInfo.isOwn
+                    ? i18n.translate('workflows.stepMinimap.stepHasErrors', {
+                        defaultMessage: 'has errors',
+                      })
+                    : i18n.translate('workflows.stepMinimap.stepContainsErrors', {
+                        defaultMessage: 'contains steps with errors',
+                      })
+                  : severityInfo.isOwn
+                  ? i18n.translate('workflows.stepMinimap.stepHasWarnings', {
+                      defaultMessage: 'has warnings',
                     })
-                  : i18n.translate('workflows.stepMinimap.stepContainsErrors', {
-                      defaultMessage: 'contains steps with errors',
+                  : i18n.translate('workflows.stepMinimap.stepContainsWarnings', {
+                      defaultMessage: 'contains steps with warnings',
                     })}
               </span>
             </EuiScreenReaderOnly>
@@ -452,6 +465,53 @@ export const WorkflowStepMinimap = ({
   // Pre-compute step IDs once for buildOuterRailSegments (which only needs ids, not full StepInfo).
   const stepIds = useMemo(() => stepEntries.map(([id]) => id), [stepEntries]);
 
+  // Roving tabindex: the whole minimap is a single tab stop. It rests on the step under the
+  // editor cursor (or the first step); arrow keys move it while the minimap has focus.
+  const [rovingStepId, setRovingStepId] = useState<string | null>(null);
+  const tabStopStepId =
+    [rovingStepId, focusedStepInfo?.stepId].find((id) => id != null && stepIds.includes(id)) ??
+    stepIds[0];
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const { key, currentTarget, target } = e;
+      const buttons = Array.from(currentTarget.querySelectorAll('button'));
+      const currentIndex = buttons.findIndex((button) => button === target);
+      if (currentIndex === -1) return;
+
+      const last = buttons.length - 1;
+      let next: number;
+      switch (key) {
+        case 'ArrowDown':
+          next = Math.min(currentIndex + 1, last);
+          break;
+        case 'ArrowUp':
+          next = Math.max(currentIndex - 1, 0);
+          break;
+        case 'Home':
+          next = 0;
+          break;
+        case 'End':
+          next = last;
+          break;
+        default:
+          return;
+      }
+      // Keep the minimap's scroll container from scrolling on its own.
+      e.preventDefault();
+      buttons[next].focus();
+      setRovingStepId(stepIds[next]);
+    },
+    [stepIds]
+  );
+
+  // Once focus leaves the minimap, the tab stop goes back to following the current step.
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
+    const { relatedTarget, currentTarget } = e;
+    if (relatedTarget instanceof Node && currentTarget.contains(relatedTarget)) return;
+    setRovingStepId(null);
+  }, []);
+
   const outerRailSegments = useMemo(
     () =>
       nestingInfo.hasNesting
@@ -569,89 +629,104 @@ export const WorkflowStepMinimap = ({
         paddingRight: MINIMAP_PADDING_RIGHT_PX,
       })}
     >
+      {/* A toolbar makes screen readers switch to focus mode, so the arrow/Home/End keys
+        reach `handleKeyDown` instead of being consumed by browse-mode navigation. The key
+        handlers live on the inner div because a toolbar that owns handlers must itself be
+        focusable, which would add a second tab stop. */}
       <div
-        css={css({
-          position: 'relative',
-          width: MINIMAP_MAX_LABEL_W + MINIMAP_TRACK_W,
-          height: totalHeight,
+        role="toolbar"
+        aria-orientation="vertical"
+        aria-label={i18n.translate('workflows.stepMinimap.stepsToolbarLabel', {
+          defaultMessage: 'Workflow steps',
         })}
       >
-        {/* Viewport indicator — shows which steps are currently visible in the editor.
+        <div
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          css={css({
+            position: 'relative',
+            width: MINIMAP_MAX_LABEL_W + MINIMAP_TRACK_W,
+            height: totalHeight,
+          })}
+        >
+          {/* Viewport indicator — shows which steps are currently visible in the editor.
           Negative left/right offsets extend the border into the outer padding zones so
           severity dots (left) and SVG track circles (right) sit inside the border. */}
-        {viewportSteps &&
-          visibleLineRange &&
-          stepEntries.length > 0 &&
-          (visibleLineRange.start > stepEntries[0][1].lineStart ||
-            visibleLineRange.end < stepEntries[stepEntries.length - 1][1].lineEnd) && (
-            <div
-              aria-hidden="true"
-              css={css({
-                position: 'absolute',
-                top: viewportSteps.first * MINIMAP_ITEM_HEIGHT,
-                left: -MINIMAP_PADDING_LEFT_PX,
-                right: -(
-                  MINIMAP_OUTER_TRACK_X +
-                  MINIMAP_DOT_R -
-                  MINIMAP_TRACK_W +
-                  MINIMAP_VIEWPORT_BORDER_RIGHT_EXTRA_PX
-                ),
-                height: (viewportSteps.last - viewportSteps.first + 1) * MINIMAP_ITEM_HEIGHT,
-                border: `1px solid ${transparentize(euiTheme.colors.primary, 0.65)}`,
-                borderRadius: 6,
-                pointerEvents: 'none',
-                zIndex: 0,
-              })}
-            />
-          )}
-        {/* ── SVG track ── */}
-        <svg
-          css={css({ position: 'absolute', right: 0, top: 0, zIndex: 1 })}
-          width={MINIMAP_TRACK_W}
-          height={totalHeight}
-          style={{ pointerEvents: 'none' }}
-          aria-hidden="true"
-        >
-          {railLines}
-          {stepEntries.map(([stepId], index) => {
+          {viewportSteps &&
+            visibleLineRange &&
+            stepEntries.length > 0 &&
+            (visibleLineRange.start > stepEntries[0][1].lineStart ||
+              visibleLineRange.end < stepEntries[stepEntries.length - 1][1].lineEnd) && (
+              <div
+                aria-hidden="true"
+                css={css({
+                  position: 'absolute',
+                  top: viewportSteps.first * MINIMAP_ITEM_HEIGHT,
+                  left: -MINIMAP_PADDING_LEFT_PX,
+                  right: -(
+                    MINIMAP_OUTER_TRACK_X +
+                    MINIMAP_DOT_R -
+                    MINIMAP_TRACK_W +
+                    MINIMAP_VIEWPORT_BORDER_RIGHT_EXTRA_PX
+                  ),
+                  height: (viewportSteps.last - viewportSteps.first + 1) * MINIMAP_ITEM_HEIGHT,
+                  border: `1px solid ${transparentize(euiTheme.colors.primary, 0.65)}`,
+                  borderRadius: 6,
+                  pointerEvents: 'none',
+                  zIndex: 0,
+                })}
+              />
+            )}
+          {/* ── SVG track ── */}
+          <svg
+            css={css({ position: 'absolute', right: 0, top: 0, zIndex: 1 })}
+            width={MINIMAP_TRACK_W}
+            height={totalHeight}
+            style={{ pointerEvents: 'none' }}
+            aria-hidden="true"
+          >
+            {railLines}
+            {stepEntries.map(([stepId], index) => {
+              const isNested = nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
+              const cx = nestingInfo.hasNesting
+                ? isNested
+                  ? MINIMAP_INNER_TRACK_X
+                  : MINIMAP_OUTER_TRACK_X
+                : MINIMAP_TRACK_X;
+              const cy = index * MINIMAP_ITEM_HEIGHT + MINIMAP_ITEM_HEIGHT / 2;
+              return (
+                <MinimapDot
+                  key={stepId}
+                  cx={cx}
+                  cy={cy}
+                  isFocused={stepId === focusedStepInfo?.stepId}
+                  activeColor={dotColors.activeColor}
+                  dotBgColor={dotColors.dotBgColor}
+                  railColor={dotColors.railColor}
+                />
+              );
+            })}
+          </svg>
+
+          {/* ── Step pill buttons ── */}
+          {stepEntries.map(([stepId, step], index) => {
             const isNested = nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
-            const cx = nestingInfo.hasNesting
-              ? isNested
-                ? MINIMAP_INNER_TRACK_X
-                : MINIMAP_OUTER_TRACK_X
-              : MINIMAP_TRACK_X;
-            const cy = index * MINIMAP_ITEM_HEIGHT + MINIMAP_ITEM_HEIGHT / 2;
             return (
-              <MinimapDot
+              <MinimapStepRow
                 key={stepId}
-                cx={cx}
-                cy={cy}
+                stepId={stepId}
+                lineStart={step.lineStart}
+                index={index}
                 isFocused={stepId === focusedStepInfo?.stepId}
-                activeColor={dotColors.activeColor}
-                dotBgColor={dotColors.dotBgColor}
-                railColor={dotColors.railColor}
+                isTabStop={stepId === tabStopStepId}
+                severityInfo={severityMap.get(stepId) ?? null}
+                isNested={isNested}
+                colors={rowColors}
+                onStepClick={handleStepClick}
               />
             );
           })}
-        </svg>
-
-        {/* ── Step pill buttons ── */}
-        {stepEntries.map(([stepId, step], index) => {
-          const isNested = nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
-          return (
-            <MinimapStepRow
-              key={stepId}
-              stepId={stepId}
-              lineStart={step.lineStart}
-              index={index}
-              isFocused={stepId === focusedStepInfo?.stepId}
-              severityInfo={severityMap.get(stepId) ?? null}
-              isNested={isNested}
-              colors={rowColors}
-              onStepClick={handleStepClick}
-            />
-          );
-        })}
+        </div>
       </div>
     </nav>
   );

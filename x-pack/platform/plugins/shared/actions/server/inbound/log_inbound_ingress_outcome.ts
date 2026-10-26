@@ -7,8 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import { recordInboundEventsRequest } from './inbound_events_metrics';
+
 /**
- * Request-level ingress outcomes for logging (and later metrics).
+ * Request-level ingress outcomes for logging and the request counter.
  * One outcome per HTTP response path from the inbound hub.
  */
 export const INBOUND_INGRESS_OUTCOMES = [
@@ -23,6 +25,7 @@ export const INBOUND_INGRESS_OUTCOMES = [
   'http_ack',
   'accepted',
   'rate_limited',
+  'payload_too_large',
 ] as const;
 
 export type InboundIngressOutcome = (typeof INBOUND_INGRESS_OUTCOMES)[number];
@@ -59,6 +62,7 @@ const OUTCOME_LOG_LEVEL: Record<Exclude<InboundIngressOutcome, 'rate_limited'>, 
   identity_missing: 'warn',
   http_ack: 'info',
   accepted: 'info',
+  payload_too_large: 'info',
 };
 
 const ingressLogLevel = (fields: InboundIngressLogFields): IngressLogLevel => {
@@ -76,7 +80,7 @@ export const truncateInboundIngressDetail = (detail: string): string => {
 };
 
 /**
- * Logs a single inbound ingress outcome with stable fields for grep and future metrics.
+ * Logs one inbound ingress outcome and counts it on `kibana.actions.inbound_events.request.count`.
  */
 export const logInboundIngressOutcome = (logger: Logger, fields: InboundIngressLogFields): void => {
   const {
@@ -111,4 +115,5 @@ export const logInboundIngressOutcome = (logger: Logger, fields: InboundIngressL
       },
     }
   );
+  recordInboundEventsRequest(outcome);
 };

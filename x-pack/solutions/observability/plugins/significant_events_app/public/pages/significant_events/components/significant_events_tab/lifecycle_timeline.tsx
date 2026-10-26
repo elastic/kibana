@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getSeverityLabel, type EventLifecycleResponse } from '@kbn/significant-events-schema';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { formatTimestamp } from '../../../../util/formatters';
 import { changeTypeLabel } from '../shared/translations';
 import { getLifecycleStatusColor, getLifecycleStatusLabel } from '../shared/status_display';
@@ -39,7 +40,10 @@ const FLOW_ICONS = {
   event: 'pencil',
 } as const;
 
-function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
+function buildEntries(
+  data: EventLifecycleResponse,
+  getSourceTitle: (sourceId: string) => string
+): TimelineEntry[] {
   const detections: TimelineEntry[] = data.detections.map((detection) => ({
     icon: FLOW_ICONS.detection,
     // Change-point observation only — never a lifecycle state.
@@ -47,7 +51,10 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
     color: 'hollow',
     timestamp: detection['@timestamp'],
     title: detection.rule_name ?? '-',
-    description: [detection.stream_name, changeTypeLabel(detection.change_point_type)]
+    description: [
+      detection.source_id && getSourceTitle(detection.source_id),
+      changeTypeLabel(detection.change_point_type),
+    ]
       .filter(Boolean)
       .join(' · '),
   }));
@@ -91,7 +98,8 @@ const SubduedLine: React.FC<{ children: React.ReactNode; 'data-test-subj'?: stri
 );
 
 export const LifecycleTimeline = ({ data }: { data: EventLifecycleResponse | undefined }) => {
-  const entries = data ? buildEntries(data) : [];
+  const { getSourceTitle } = useSourcesById();
+  const entries = data ? buildEntries(data, getSourceTitle) : [];
 
   if (entries.length === 0) {
     return (

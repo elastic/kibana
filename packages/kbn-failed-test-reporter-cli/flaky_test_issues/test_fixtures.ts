@@ -29,7 +29,7 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   configPath:
     'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts',
   configCategory: 'ui-test',
-  owners: ['elastic/obs-ux-management-team'],
+  owners: ['elastic/obs-signals-logs-team'],
   areas: [],
   runs: 509,
   fails: 49,

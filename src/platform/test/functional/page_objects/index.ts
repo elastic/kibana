@@ -42,7 +42,6 @@ import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 import { SolutionNavigationProvider } from './solution_navigation';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { SpaceSettingsPageObject } from './space_settings';
-import { MarkdownVisPageObject } from './markdown_vis';
 import { IndexEditorObject } from './index_editor';
 
 export const pageObjects = {
@@ -81,7 +80,6 @@ export const pageObjects = {
   unifiedFieldList: UnifiedFieldListPageObject,
   unifiedTabs: UnifiedTabsPageObject,
   spaceSettings: SpaceSettingsPageObject,
-  markdownVis: MarkdownVisPageObject,
   indexEditor: IndexEditorObject,
 };
 

@@ -17,7 +17,8 @@ import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_
 import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
-import { getOnboardingSessionKey } from './onboarding_session_storage';
+import { getOnboardingSessionKey } from './core/onboarding_session_storage';
+import type { ExistingSecretRefs } from './step_components/authenticate_and_deploy_step/secret_refs';
 import { useIsSelfManaged } from './use_is_self_managed';
 
 /**
@@ -48,6 +49,12 @@ export interface AuthenticateAndDeployStepState {
   staticKeys?: AwsStaticKeyCredentials;
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   pendingIacTemplate?: PendingIacTemplate;
+  /**
+   * Secret refs already stored on deployed policies, for credentials the user chose to keep.
+   * Never held in the provider: Deploy reads them fresh from Fleet just before it builds a policy
+   * body, so a ref replaced by an earlier deploy is never reused.
+   */
+  existingSecretRefs?: ExistingSecretRefs;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
@@ -61,7 +68,12 @@ export interface DetectAndReviewStepState {
   /** SO id of the cloud-onboarding-deployment record created at Deploy time. Used to update the record after allSettled and on retry. */
   onboardingDeploymentId?: string;
   /** ECF stacks last written to the SO. Used to skip redundant PUT calls on Back→Next. */
-  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  ecfStacks?: Array<{
+    family: string;
+    stackName: string;
+    templateVersion: string;
+    stackArn?: string;
+  }>;
   /**
    * instanceId → policyId for instances removed from Step 1 whose deployed policy has not yet
    * been cleaned up. Populated by removeDeployInstance; consumed and cleared by handleDeploy.
@@ -134,7 +146,12 @@ interface PersistedDetectAndReviewStep {
   failedInstances: string[];
   deployErrors: Record<string, string>;
   onboardingDeploymentId?: string;
-  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  ecfStacks?: Array<{
+    family: string;
+    stackName: string;
+    templateVersion: string;
+    stackArn?: string;
+  }>;
   pendingCleanupPolicyIds?: Record<string, string>;
   isDirty?: boolean;
   isAuthDirty?: boolean;
@@ -185,6 +202,8 @@ interface OnboardingFlowState {
   refetchAwsServiceMatrix: () => void;
   /** False while the default data format is being resolved (async spaces lookup). */
   isDataFormatResolved: boolean;
+  /** The data format derived from the solution (OTel for Observability, ECS otherwise), the recommended one. */
+  defaultDataFormat: DataFormat;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -245,7 +264,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const clearStagedStaticKeys = useCallback(() => {
     setStaticKeysState(undefined);
-  }, []);
+    // The persisted access key id would seed the keys again after a reload.
+    const next = { ...persistedAuthStepRef.current, accessKeyId: undefined };
+    persistedAuthStepRef.current = next;
+    setPersistedAuthenticateAndDeployStep(next);
+  }, [setPersistedAuthenticateAndDeployStep]);
 
   const setAuthMethod = useCallback(
     (method: CloudOnboardingDeploymentAuthMethod) => {
@@ -493,8 +516,14 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   // agent-based needs the package's own vars. Every step reads the matrix through the context, so
   // applying the method view here keeps Step 2, the Step 3 gates and the deploy builders consistent.
   const awsServiceMatrix = useMemo(
-    () => rawAwsServiceMatrix?.map((s) => applyDeploymentMethodView(s, deploymentMethod)),
-    [rawAwsServiceMatrix, deploymentMethod]
+    () =>
+      rawAwsServiceMatrix?.map((s) => {
+        const view = applyDeploymentMethodView(s, deploymentMethod);
+        // ECF-only services have no agent-based route and ECF needs cloud, so self-managed has no
+        // way to deploy them: they are not offered at all.
+        return isSelfManaged && s.ecfOnly ? { ...view, showInUI: false } : view;
+      }),
+    [rawAwsServiceMatrix, deploymentMethod, isSelfManaged]
   );
   const awsServicesMap = useMemo(
     () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
@@ -634,6 +663,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         awsServiceMatrixError,
         refetchAwsServiceMatrix,
         isDataFormatResolved,
+        defaultDataFormat: defaultFormat,
       }}
     >
       {children}

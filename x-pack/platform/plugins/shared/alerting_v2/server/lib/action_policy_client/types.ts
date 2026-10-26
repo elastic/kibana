@@ -18,7 +18,7 @@ export interface UpdateActionPolicyParams {
 
 export interface CreateActionPolicyParams {
   data: CreateActionPolicyDataInput;
-  options?: { id?: string; enabled?: boolean };
+  options?: { id?: string };
 }
 
 export interface SnoozeActionPolicyParams {

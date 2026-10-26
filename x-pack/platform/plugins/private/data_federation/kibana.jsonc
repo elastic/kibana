@@ -23,7 +23,8 @@
     ],
     "optionalPlugins": [
       "cloud",
-      "share"
+      "share",
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact"

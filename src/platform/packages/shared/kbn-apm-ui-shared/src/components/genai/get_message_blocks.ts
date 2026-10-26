@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GenAiMessage } from './get_genai_fields';
+import type { GenAiMessage } from '@kbn/genai-common';
 import { isRecord, parseNestedJson, unwrapToolResponse } from './parse_genai_value';
 
 export interface GenAiTextBlock {
   type: 'text';
+  content: string;
+}
+
+export interface GenAiReasoningBlock {
+  type: 'reasoning';
   content: string;
 }
 
@@ -35,6 +40,7 @@ export interface GenAiUnknownBlock {
 
 export type GenAiMessageBlock =
   | GenAiTextBlock
+  | GenAiReasoningBlock
   | GenAiToolCallBlock
   | GenAiToolResponseBlock
   | GenAiUnknownBlock;
@@ -48,6 +54,9 @@ const toPartBlock = (part: unknown): GenAiMessageBlock => {
   const { type } = part;
   if (type === 'text') {
     return { type: 'text', content: typeof part.content === 'string' ? part.content : '' };
+  }
+  if (type === 'reasoning' && typeof part.content === 'string') {
+    return { type: 'reasoning', content: part.content };
   }
   if (type === 'tool_call') {
     return {

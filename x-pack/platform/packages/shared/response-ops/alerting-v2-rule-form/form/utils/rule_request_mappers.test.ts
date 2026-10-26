@@ -217,8 +217,8 @@ describe('rule_request_mappers', () => {
       };
 
       expect(mapFormValuesToUpdateRequest(formValues).state_transition).toEqual({
-        pending: { count: 0 },
-        recovering: { count: 3 },
+        pending: { count: 0, timeframe: null, operator: null },
+        recovering: { count: 3, timeframe: null, operator: null },
       });
     });
 
@@ -765,6 +765,17 @@ describe('rule_request_mappers', () => {
       expect(result.metadata.description).toBe('Create rule description');
     });
 
+    it('omits a description the user never typed rather than sending an empty string', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: '' },
+      };
+
+      const result = mapFormValuesToCreateRequest(formValues);
+
+      expect(result.metadata).not.toHaveProperty('description');
+    });
+
     it('produces a superset of mapFormValuesToRuleRequest', () => {
       const common = mapFormValuesToRuleRequest(baseFormValues);
       const create = mapFormValuesToCreateRequest(baseFormValues);
@@ -822,8 +833,8 @@ describe('rule_request_mappers', () => {
       expect(result.recovery).toEqual({ strategy: 'no_breach' });
       expect(result.no_data).toEqual({ strategy: 'resolve' });
       expect(result.state_transition).toEqual({
-        pending: { count: 2, timeframe: '5m' },
-        recovering: { count: 0 },
+        pending: { count: 2, timeframe: '5m', operator: null },
+        recovering: { count: 0, timeframe: null, operator: null },
       });
     });
 
@@ -868,11 +879,13 @@ describe('rule_request_mappers', () => {
 
       expect(result.metadata).toEqual({
         name: 'Test Rule',
+        description: null,
         tags: ['tag1', 'tag2'],
+        routing_tags: null,
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
-      expect(result.query).toEqual({ base: 'FROM logs-* | LIMIT 10' });
+      expect(result.query).toEqual({ base: 'FROM logs-* | LIMIT 10', breach: null });
     });
 
     it('coerces empty artifacts array to null for explicit removal', () => {
@@ -926,6 +939,134 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToUpdateRequest(formValues);
 
       expect(result.recovery).toBeUndefined();
+    });
+
+    it('nullifies tags the user emptied rather than omitting them', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: 'kept', tags: [] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata).toEqual({
+        name: 'Test Rule',
+        description: 'kept',
+        tags: null,
+        routing_tags: null,
+      });
+    });
+
+    it('nullifies routing tags the user emptied rather than omitting them', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, routingTags: [] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.routing_tags).toBeNull();
+    });
+
+    it('passes through routing tags the user kept', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.routing_tags).toEqual(['sre']);
+    });
+
+    it('nullifies a description the user emptied rather than sending an empty string', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: '' },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.description).toBeNull();
+    });
+
+    it('passes through a description and tags the user kept', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: 'still here', tags: ['keep'] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata).toEqual({
+        name: 'Test Rule',
+        description: 'still here',
+        tags: ['keep'],
+        routing_tags: null,
+      });
+    });
+
+    it('passes through a breach segment the user authored', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.query).toEqual({
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 100' },
+      });
+    });
+
+    it.each([
+      [
+        'cleared',
+        {
+          ...baseFormValues,
+          metadata: { name: 'Test Rule', enabled: true },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
+        } satisfies FormValues,
+        { name: 'Test Rule', description: null, tags: null, routing_tags: null },
+        { base: 'FROM logs-*', breach: null },
+      ],
+      [
+        'populated',
+        {
+          ...baseFormValues,
+          metadata: { ...baseFormValues.metadata, description: 'desc', tags: ['a'] },
+          query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 1' } },
+        } satisfies FormValues,
+        { name: 'Test Rule', description: 'desc', tags: ['a'], routing_tags: null },
+        { base: 'FROM logs-*', breach: { segment: 'WHERE count > 1' } },
+      ],
+    ])(
+      'spells out every leaf of the merged objects when they are %s',
+      (_, formValues, expectedMetadata, expectedQuery) => {
+        const result = mapFormValuesToUpdateRequest(formValues);
+
+        expect(result.metadata).toStrictEqual(expectedMetadata);
+        expect(result.query).toStrictEqual(expectedQuery);
+      }
+    );
+
+    it.each([
+      ['an immediate', 'immediate' as const, { count: 0, timeframe: null, operator: null }],
+      ['a breach-count', 'breaches' as const, { count: 2, timeframe: null, operator: null }],
+    ])('clears the pending leaves %s delay does not own', (_, mode, expectedPending) => {
+      const result = mapFormValuesToUpdateRequest({
+        ...baseFormValues,
+        kind: 'alert',
+        recovery: { strategy: recoveryStrategy.manual },
+        stateTransitionAlertDelayMode: mode,
+        stateTransition: { pendingCount: 2, pendingTimeframe: '5m', pendingOperator: 'or' },
+      });
+
+      expect(result.state_transition).toStrictEqual({
+        pending: expectedPending,
+        recovering: null,
+      });
     });
   });
 

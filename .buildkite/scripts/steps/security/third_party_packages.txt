@@ -41,10 +41,10 @@ react-element-to-jsx-string
 @babel/plugin-transform-class-static-block
 @swc/core
 lightningcss
-tar-fs
 browserslist
 react-day-picker
 mysql2
+mssql
 jszip
 @rsdoctor/rspack-plugin
 @rspack/core
@@ -73,4 +73,5 @@ graphql
 oxlint-tsgolint
 bump-cli
 @oxlint/plugins
+@types/mssql
 monaco-marker-data-provider

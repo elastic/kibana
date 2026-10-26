@@ -8,6 +8,7 @@
 import type { ToolMessage } from '@langchain/core/messages';
 
 import {
+  createToolCallMessage,
   createToolResultMessage,
   createUserMessage,
   extractToolReturn,
@@ -141,6 +142,17 @@ describe('createUserMessage with images', () => {
       { type: 'image_url', image_url: { url: 'data:image/png;base64,AAA' } },
       { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,BBB' } },
     ]);
+  });
+});
+
+describe('createToolCallMessage', () => {
+  it('sanitizes the tool name', () => {
+    const message = createToolCallMessage({
+      toolCallId: 'call-1',
+      toolName: 'platform.core.search',
+      args: {},
+    });
+    expect(message.tool_calls?.[0].name).toBe('platform_core_search');
   });
 });
 

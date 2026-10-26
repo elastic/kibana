@@ -22,7 +22,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     description: 'A test policy',
     destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
     matcher: { tags: ['production', 'sre'], expression: 'alert_status: "active"' },
-    grouping_mode: 'per_alert' as const,
+    grouping: { mode: 'per_alert' as const },
     throttle: { strategy: 'on_status_change' as const },
     enabled: overrides.enabled,
   } as any,

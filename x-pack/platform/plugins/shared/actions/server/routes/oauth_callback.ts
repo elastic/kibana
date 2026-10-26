@@ -33,6 +33,7 @@ import type { EarsLogEvent } from '../lib/ears/log_ears_event';
 import { getEarsErrorLogFields, logEarsEvent } from '../lib/ears/log_ears_event';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
+import { getConnectorAuthType, recordConnectorAuth } from '../lib/connector_metrics';
 
 const querySchema = schema.object(
   {
@@ -479,6 +480,7 @@ export const oauthCallbackRoute = (
         const { profile_uid: profileUid } = currentUser;
 
         if (!profileUid) {
+          recordConnectorAuth({ phase: 'authorize', authType: 'unknown', errorType: 'other' });
           return respondWithError(res, {
             statusCode: 500,
             details: i18n.translate('xpack.actions.oauthCallback.error.missingProfileUid', {
@@ -490,6 +492,11 @@ export const oauthCallbackRoute = (
         oauthRateLimiter.log(profileUid, 'callback');
         if (oauthRateLimiter.isRateLimited(profileUid, 'callback')) {
           routeLogger.warn(`OAuth callback rate limit exceeded for user: ${profileUid}`);
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: 'unknown',
+            errorType: 'rate_limited',
+          });
           return respondWithError(res, {
             statusCode: 429,
             details: i18n.translate('xpack.actions.oauthCallback.error.rateLimited', {
@@ -501,6 +508,7 @@ export const oauthCallbackRoute = (
         const { code, state: stateParam, error, error_description: errorDescription } = req.query;
 
         if (!stateParam) {
+          recordConnectorAuth({ phase: 'authorize', authType: 'unknown', errorType: 'invalid' });
           return respondWithError(res, {
             statusCode: 400,
             details: i18n.translate('xpack.actions.oauthCallback.error.missingState', {
@@ -522,6 +530,7 @@ export const oauthCallbackRoute = (
         });
         const oauthState = await oauthStateClient.get(stateParam);
         if (!oauthState) {
+          recordConnectorAuth({ phase: 'authorize', authType: 'unknown', errorType: 'invalid' });
           return respondWithError(res, {
             statusCode: 400,
             details: i18n.translate('xpack.actions.oauthCallback.error.invalidState', {
@@ -539,6 +548,11 @@ export const oauthCallbackRoute = (
               oauthState.createdBy ?? 'none'
             }, got ${profileUid}`
           );
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: 'unknown',
+            errorType: 'user_mismatch',
+          });
           return respondWithError(res, {
             statusCode: 403,
             details: i18n.translate('xpack.actions.oauthCallback.error.userMismatch', {
@@ -560,6 +574,11 @@ export const oauthCallbackRoute = (
             ? `${providerError}\n\n${errorDescription}`
             : providerError;
           routeLogger.error(`OAuth provider error for connector ${stateConnectorId}: ${details}`);
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: 'unknown',
+            errorType: 'provider_error',
+          });
           return respondWithError(res, {
             statusCode: 400,
             details,
@@ -586,6 +605,8 @@ export const oauthCallbackRoute = (
           });
         };
 
+        let connectorTypeId: string | undefined;
+        let connectorAuthType = 'unknown';
         try {
           const connectorEncryptedClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -604,6 +625,8 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType || config?.authType;
+          connectorTypeId = rawAction.attributes.actionTypeId;
+          connectorAuthType = getConnectorAuthType({ config, secrets });
           const provider = secrets.provider;
 
           let tokenResult;
@@ -702,6 +725,11 @@ export const oauthCallbackRoute = (
 
           await oauthStateClient.delete(oauthState.id);
 
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: connectorAuthType,
+            connectorType: connectorTypeId,
+          });
           return respondWithSuccess(res, {
             connectorId: stateConnectorId,
             returnUrl: kibanaReturnUrl,
@@ -719,6 +747,12 @@ export const oauthCallbackRoute = (
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
 
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: connectorAuthType,
+            connectorType: connectorTypeId,
+            errorType: 'other',
+          });
           return respondWithError(res, {
             details: GENERIC_OAUTH_ERROR,
             statusCode: getErrorStatusCode(err),
@@ -776,9 +810,13 @@ export const oauthCallbackScriptRoute = (router: IRouter<ActionsRequestHandlerCo
         availability: {
           since: '9.4.0',
         },
+        summary: i18n.translate('xpack.actions.oauthCallbackScript.routeSummary', {
+          defaultMessage: 'Get OAuth callback script',
+        }),
         description: i18n.translate('xpack.actions.oauthCallbackScript.routeDescription', {
           defaultMessage: 'Returns the OAuth callback script',
         }),
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         request: {},

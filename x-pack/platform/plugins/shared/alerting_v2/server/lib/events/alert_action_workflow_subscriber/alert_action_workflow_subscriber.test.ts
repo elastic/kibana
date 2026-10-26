@@ -71,7 +71,7 @@ describe('AlertActionWorkflowSubscriber', () => {
 
       await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
@@ -95,7 +95,7 @@ describe('AlertActionWorkflowSubscriber', () => {
       await expect(
         handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
           request,
-          origin: 'user',
+          origin: { actor: 'user', channel: 'api' },
         })
       ).resolves.toBeUndefined();
 
@@ -104,7 +104,7 @@ describe('AlertActionWorkflowSubscriber', () => {
         labels: {
           event_type: EPISODE_ASSIGNED_EVENT_TYPE,
           space_id: episodeAssignedEvent.spaceId,
-          episode_id: episodeAssignedEvent.episodeId,
+          alert_id: episodeAssignedEvent.episodeId,
           rule_id: episodeAssignedEvent.ruleId,
           code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
         },

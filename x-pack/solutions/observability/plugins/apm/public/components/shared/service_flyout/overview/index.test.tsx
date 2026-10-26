@@ -11,6 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutOverview } from '.';
+import type { ApmIndicesSource } from '../../../../hooks/use_apm_indices';
 
 const mockUseServiceHasSystemMetrics = jest.fn<
   { hasSystemMetrics: boolean | undefined; isLoading: boolean },
@@ -58,7 +59,7 @@ jest.mock('../../transaction_detail_flyout', () => ({
     onClose: () => void;
     preferDocumentBasedCharts?: boolean;
     schema?: string;
-    indices?: unknown;
+    indicesSource?: ApmIndicesSource;
     deps: { lens?: unknown; dataViews?: unknown };
   }) => {
     mockTransactionDetailFlyoutProps(props);
@@ -458,7 +459,7 @@ describe('ServiceFlyoutOverview transactions section props', () => {
       expect.objectContaining({
         preferDocumentBasedCharts: true,
         schema: 'ecs',
-        indices: null,
+        indicesSource: { indices: null },
         deps: expect.objectContaining({
           lens: undefined,
           dataViews: undefined,

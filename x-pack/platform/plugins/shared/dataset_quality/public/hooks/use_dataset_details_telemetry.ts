@@ -82,6 +82,8 @@ export function useDatasetDetailsTelemetry() {
   const trackDetailsNavigated = useCallback(
     (target: NavigationTarget, source: NavigationSource, isDegraded = false) => {
       const datasetDetailsTrackingState = telemetryClient.getDatasetDetailsTrackingState();
+      // The navigation controls render before the data stream details resolve, so the event is
+      // skipped while its props are unavailable rather than aborting the navigation that fired it.
       if (
         (datasetDetailsTrackingState === 'opened' || datasetDetailsTrackingState === 'navigated') &&
         ebtProps
@@ -94,10 +96,6 @@ export function useDatasetDetailsTelemetry() {
           target,
           source,
         });
-      } else {
-        throw new Error(
-          'Cannot report dataset details navigation telemetry without required data and state'
-        );
       }
     },
     [ebtProps, telemetryClient]
