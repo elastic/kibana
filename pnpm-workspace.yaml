@@ -87,7 +87,7 @@ overrides:
   'baseline-browser-mapping': '2.9.14'
   'cheerio': '1.0.0-rc.12'
   'chokidar': '3.5.3'
-  'dompurify': '3.4.14'
+  'dompurify': '3.4.17'
   'esbuild': '0.28.1'
   'fast-xml-parser': '5.5.7'
   'flatted': '3.4.2'
