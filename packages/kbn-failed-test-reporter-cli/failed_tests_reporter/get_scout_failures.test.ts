@@ -160,6 +160,25 @@ describe('getScoutFailures', () => {
     expect(failure.likelyIrrelevant).toBe(false);
   });
 
+  it.each([
+    ['[2026-10-19T00:22:18.599Z] Failed to load resource: net::ERR_QUIC_PROTOCOL_ERROR', 'network'],
+    [
+      '[2026-10-12T05:40:58.623Z] Failed to load resource: net::ERR_INTERNET_DISCONNECTED',
+      'network',
+    ],
+    [
+      '[2026-10-18T21:26:19.751Z] [@kbn/rspack-optimizer] Failed to load plugins: ReferenceError: __kbnSharedDeps__ is not defined\n    at 275008 (https://kibana.estccdn.com/4135878c7aa5/bundles/kibana.bundle.js:1:43727)',
+      'cdn',
+    ],
+  ])(
+    'attributes the Cloud console error "%s" to infrastructure (%s)',
+    async (consoleErrors, category) => {
+      const [failure] = await getScoutFailures(writeReport([createEntry({ consoleErrors })]));
+      expect(failure.likelyIrrelevant).toBe(true);
+      expect(failure.infraReason?.category).toBe(category);
+    }
+  );
+
   it('keeps local failures with connection-level browser console errors relevant', async () => {
     const [failure] = await getScoutFailures(
       writeReport([
