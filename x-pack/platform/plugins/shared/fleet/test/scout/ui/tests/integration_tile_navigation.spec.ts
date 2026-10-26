@@ -13,8 +13,9 @@ import { test } from '../fixtures';
 import { getFleetAllIntegrationsReadRole } from '../fixtures/services/privileges';
 
 test.describe('Integration tile navigation', { tag: tags.stateful.classic }, () => {
-  // Not part of an integration collection, so it renders as its own tile.
-  const pkgName = 'postgresql';
+  // Renders as its own tile everywhere the suite runs: not part of an integration collection, and
+  // no `fips_compatible: false` policy template, so FIPS mode keeps it in the catalog.
+  const pkgName = 'activemq';
   let pkgkey: string;
 
   test.beforeAll(async ({ apiServices }) => {

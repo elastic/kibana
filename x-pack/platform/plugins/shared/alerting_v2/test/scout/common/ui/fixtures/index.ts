@@ -32,6 +32,7 @@ import {
   RULES_READ_AND_V1_READ_ROLE,
   RULE_FORM_ROLE,
 } from '../roles';
+import { provideLlmProxy, type LlmProxyWorkerFixtures } from './llm_proxy';
 
 /**
  * Logins scoped to what a surface actually needs, so a test only fails on a privilege it is
@@ -134,6 +135,14 @@ export const test = mergeTests(baseTest, defaultRolesFixture, requestAuthFixture
   ],
 });
 
+/**
+ * `test` plus a worker-scoped LLM proxy for specs that drive the Agent Builder chat. Kept separate
+ * so the other alerting specs never start a proxy or create a connector.
+ */
+export const agentChatTest = test.extend<{}, LlmProxyWorkerFixtures>({
+  llmProxy: [provideLlmProxy, { scope: 'worker', auto: true }],
+});
+
 export {
   buildAlertEvent,
   buildCreateRuleData,
@@ -143,3 +152,9 @@ export {
 export * as testData from '../../constants';
 export type { AlertingPageObjects } from './page_objects';
 export type { AlertingApp } from './page_objects/alerting_navigation';
+export {
+  mockFinalAnswerRenderingAttachment,
+  mockLoadSkill,
+  mockTitleGeneration,
+  mockToolResultCall,
+} from './llm_mocks';

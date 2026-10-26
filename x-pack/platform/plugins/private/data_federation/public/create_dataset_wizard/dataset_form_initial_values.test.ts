@@ -23,6 +23,7 @@ describe('dataset_form_initial_values', () => {
       formatWasAutoDetected: false,
       additionalCommonSettingsIsOpen: true,
       additionalAdvancedSettingsIsOpen: false,
+      createdDataSourceNames: [],
       modeIsValid: true,
       headerRowIsValid: true,
       trimSpacesIsValid: true,
