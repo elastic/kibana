@@ -345,8 +345,13 @@ describe('SubActionConnector', () => {
       expect(error.response?.data).toEqual({ errorMessage: 'rate limited', errorCode: 429 });
     });
 
-    it('does not throw an unhandled error event when a streaming error response is truncated', async () => {
+    it('attaches an error listener before destroying a truncated streaming error response', async () => {
       // https://github.com/elastic/kibana/issues/299804
+      // The reader consumes the stream with `for await`, which attaches an
+      // 'error' listener to the source stream *before* it is destroyed in
+      // read(); the old pipe()-based reader did not, so destroy() emitted an
+      // unhandled 'error' event that crashed the process.
+      let listenerCountAtDestroy = -1;
       const error = createAxiosError();
       error.config = {
         ...error.config,
@@ -358,6 +363,7 @@ describe('SubActionConnector', () => {
         data: new Readable({
           read() {
             this.push('<html>');
+            listenerCountAtDestroy = this.listenerCount('error');
             this.destroy(new Error('aborted'));
           },
         }),
@@ -366,20 +372,11 @@ describe('SubActionConnector', () => {
         throw error;
       });
 
-      const unhandledErrors: Error[] = [];
-      const onUnhandled = (err: Error) => unhandledErrors.push(err);
-      process.on('uncaughtException', onUnhandled);
-      process.on('unhandledRejection', onUnhandled);
-
       await expect(async () =>
         service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
       ).rejects.toThrow('Status code: 403');
 
-      // give a potential unhandled error a chance to surface, then assert none did
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      process.removeListener('uncaughtException', onUnhandled);
-      process.removeListener('unhandledRejection', onUnhandled);
-      expect(unhandledErrors).toEqual([]);
+      expect(listenerCountAtDestroy).toBeGreaterThan(0);
     });
 
     it('converts auth axios property to a basic auth header if provided', async () => {
