@@ -20,11 +20,11 @@ import { getProjectRoutingComparators } from './project_routing_manager';
 import { diffDashboardSettings } from './settings_manager';
 import { getUnifiedSearchComparators } from './unified_search_manager';
 
-// time restore and project routing restore are settings, diffed on their own by the settings diff
+// The current state only has time_range / project_routing while its restore flag is on, the
+// flag unsaved changes reads. Flag changes themselves are reported by the settings diff.
 const diffOtherState = (baseline: DashboardState, current: DashboardState) => {
-  const timeRestore = Boolean(baseline.time_range) || Boolean(current.time_range);
-  const projectRoutingRestore =
-    Boolean(baseline.project_routing) || Boolean(current.project_routing);
+  const timeRestore = Boolean(current.time_range);
+  const projectRoutingRestore = Boolean(current.project_routing);
   return diffComparators<
     Pick<
       DashboardState,
