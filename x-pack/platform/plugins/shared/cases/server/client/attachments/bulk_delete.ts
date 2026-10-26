@@ -8,11 +8,11 @@
 import Boom from '@hapi/boom';
 
 import {
-  BulkDeleteAttachmentsByAttachmentIdRequestRt,
-  BulkDeleteAttachmentsBySavedObjectIdRequestRt,
-  BulkDeleteFileAttachmentsRequestRt,
+  BulkDeleteAttachmentsByAttachmentIdRequestSchema,
+  BulkDeleteAttachmentsBySavedObjectIdRequestSchema,
+  BulkDeleteFileAttachmentsRequestSchema,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
@@ -41,15 +41,17 @@ export const bulkDeleteAttachments = async (
 
   try {
     if ('savedObjectIds' in args) {
-      const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsBySavedObjectIdRequestRt)({
-        ids: args.savedObjectIds,
-      });
+      const request = decodeWithExcessOrThrowZod(BulkDeleteAttachmentsBySavedObjectIdRequestSchema)(
+        {
+          ids: args.savedObjectIds,
+        }
+      );
       await deleteBySavedObjectIds(
         { caseId, savedObjectIds: request.ids, includeRelated },
         clientArgs
       );
     } else {
-      const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsByAttachmentIdRequestRt)({
+      const request = decodeWithExcessOrThrowZod(BulkDeleteAttachmentsByAttachmentIdRequestSchema)({
         type: args.type,
         attachmentIds: args.attachmentIds,
       });
@@ -108,7 +110,9 @@ export const bulkDeleteFileAttachments = async (
   const { logger } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkDeleteFileAttachmentsRequestRt)({ ids: fileIds });
+    const request = decodeWithExcessOrThrowZod(BulkDeleteFileAttachmentsRequestSchema)({
+      ids: fileIds,
+    });
 
     await casesClient.cases.resolve({ id: caseId, includeComments: false });
 
