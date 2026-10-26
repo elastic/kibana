@@ -11,6 +11,8 @@ import {
   MCPConnectorConfigSchema,
   MCPConnectorSecretsSchema,
   MCPAuthType,
+  MCP_OAUTH_FIELD_MAX_LENGTH,
+  MCP_OAUTH_CLIENT_SECRET_MAX_LENGTH,
   TestConnectorRequestSchema,
   ListToolsRequestSchema,
   CallToolRequestSchema,
@@ -23,6 +25,7 @@ describe('MCP Schema', () => {
       expect(MCPAuthType.Bearer).toBe('bearer');
       expect(MCPAuthType.ApiKey).toBe('apiKey');
       expect(MCPAuthType.Basic).toBe('basic');
+      expect(MCPAuthType.OAuthAuthorizationCode).toBe('oauth_authorization_code');
     });
   });
 
@@ -55,8 +58,58 @@ describe('MCP Schema', () => {
       ).not.toThrow();
     });
 
+    it('validates oauth authorization code fields', () => {
+      const result = MCPConnectorConfigSchema.parse({
+        serverUrl: 'https://mcp.example.com',
+        authType: 'oauth_authorization_code',
+        authorizationUrl: 'https://idp.example.com/authorize',
+        tokenUrl: 'https://idp.example.com/token',
+        clientId: 'client-id',
+        scope: 'tools',
+      });
+
+      expect(result).toEqual({
+        serverUrl: 'https://mcp.example.com',
+        hasAuth: true,
+        authType: 'oauth_authorization_code',
+        authorizationUrl: 'https://idp.example.com/authorize',
+        tokenUrl: 'https://idp.example.com/token',
+        clientId: 'client-id',
+        scope: 'tools',
+      });
+    });
+
+    it('rejects oauth fields longer than the bound', () => {
+      const tooLong = 'a'.repeat(MCP_OAUTH_FIELD_MAX_LENGTH + 1);
+
+      expect(() =>
+        MCPConnectorConfigSchema.parse({
+          serverUrl: 'https://mcp.example.com',
+          authorizationUrl: tooLong,
+        })
+      ).toThrow();
+      expect(() =>
+        MCPConnectorConfigSchema.parse({
+          serverUrl: 'https://mcp.example.com',
+          tokenUrl: tooLong,
+        })
+      ).toThrow();
+      expect(() =>
+        MCPConnectorConfigSchema.parse({
+          serverUrl: 'https://mcp.example.com',
+          clientId: tooLong,
+        })
+      ).toThrow();
+      expect(() =>
+        MCPConnectorConfigSchema.parse({
+          serverUrl: 'https://mcp.example.com',
+          scope: tooLong,
+        })
+      ).toThrow();
+    });
+
     it('validates all auth types', () => {
-      const authTypes = ['none', 'bearer', 'apiKey', 'basic'];
+      const authTypes = ['none', 'bearer', 'apiKey', 'basic', 'oauth_authorization_code'];
       authTypes.forEach((authType) => {
         expect(() =>
           MCPConnectorConfigSchema.parse({
@@ -129,6 +182,22 @@ describe('MCP Schema', () => {
           password: 'password',
         })
       ).not.toThrow();
+    });
+
+    it('validates with clientSecret', () => {
+      expect(() =>
+        MCPConnectorSecretsSchema.parse({
+          clientSecret: 'client-secret',
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects clientSecret longer than the bound', () => {
+      expect(() =>
+        MCPConnectorSecretsSchema.parse({
+          clientSecret: 'a'.repeat(MCP_OAUTH_CLIENT_SECRET_MAX_LENGTH + 1),
+        })
+      ).toThrow();
     });
 
     it('validates with secret headers', () => {

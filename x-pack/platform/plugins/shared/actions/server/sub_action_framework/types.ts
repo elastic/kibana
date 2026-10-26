@@ -22,6 +22,7 @@ import type {
 import type { SubFeature } from '../../common';
 import type { SubActionConnector } from './sub_action_connector';
 import type { HookServices } from '../types';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionExecutionSourceType } from '../lib';
 
 export interface ServiceParams<Config, Secrets> {
@@ -38,6 +39,10 @@ export interface ServiceParams<Config, Secrets> {
   request?: KibanaRequest;
   /** Saved-object version of the connector, or IN_MEMORY_CONNECTOR_REVISION for preconfigured connectors. */
   connectorVersion?: string;
+  /** Persisted connector auth mode. Forwarded so per-user connectors can guard execution. */
+  authMode?: AuthMode;
+  /** Current user profile uid. Required to resolve per-user OAuth tokens. */
+  profileUid?: string;
 }
 
 export type SubActionRequestParams<R> = {

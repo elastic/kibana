@@ -21,6 +21,7 @@ import {
 import {
   CONNECTOR_ID,
   CONNECTOR_NAME,
+  MCPAuthType,
   MCPConnectorConfigSchema,
   MCPConnectorSecretsSchema,
   type MCPConnectorConfig,
@@ -58,6 +59,11 @@ export const getMcpConnectorType = ({
 const configValidator = (config: MCPConnectorConfig, validatorServices: ValidatorServices) => {
   // Validate that the URL is allowed
   urlAllowListValidator('serverUrl')(config, validatorServices);
+
+  if (config.authType === MCPAuthType.OAuthAuthorizationCode) {
+    urlAllowListValidator('authorizationUrl')(config, validatorServices);
+    urlAllowListValidator('tokenUrl')(config, validatorServices);
+  }
 };
 
 const secretsValidator = (_secrets: MCPConnectorSecrets) => {
