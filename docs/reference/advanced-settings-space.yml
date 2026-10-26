@@ -405,7 +405,7 @@ groups:
         description: |
           When date histograms use the `auto` interval, {{product.kibana}} attempts to generate this number of bars.
         datatype: int
-        default: 100
+        default: 50
         applies_to:
           stack: ga
           ech: ga
@@ -617,9 +617,10 @@ groups:
       - setting: "ai:anonymizationSettings"
         id: ai-anonymization-settings
         description: |
-          Configuration for anonymizing LLM requests sent through the {{product.kibana}} Inference chat completion API. Requests that bypass that API, such as connectors called directly, are not anonymized. `maskingEnabled` turns anonymization on or off, `onFailure` sets what happens when a rule cannot run (`block` fails the request, `allow_unsafe` sends it unmasked), and `rules` lists the regular expression patterns, including built-in ones, and Named Entity Recognition (NER) models used to identify and anonymize sensitive data.
+          Configuration for anonymizing LLM requests sent through the {{product.kibana}} Inference chat completion API. Requests that bypass that API, such as connectors called directly, are not anonymized. `maskingEnabled` turns anonymization on or off, `onFailure` sets what happens when a rule cannot run (`block` fails the request, `allow_unsafe` skips a pattern that does not compile, and sends the request unmasked if the patterns fail to run), and `rules` lists the regular expression patterns, including built-in ones, and Named Entity Recognition (NER) models used to identify and anonymize sensitive data.
 
           :::{dropdown} Default configuration
+          :applies_to: stack: preview 9.6+
           ```json
           {
             "maskingEnabled": false,
@@ -644,6 +645,15 @@ groups:
                 "builtIn": true
               },
               {
+                "id": "builtin-ipv6",
+                "name": "IPv6 addresses",
+                "entityClass": "IP",
+                "type": "RegExp",
+                "pattern": "(?:::(?:[0-9A-Fa-f]{1,4}:){0,5}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){1,6}:(?:[0-9A-Fa-f]{1,4}:){0,5}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){6}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(?:[0-9A-Fa-f]{1,4}:(?::[0-9A-Fa-f]{1,4}){1,6})|(?:(?:[0-9A-Fa-f]{1,4}:){1,2}(?::[0-9A-Fa-f]{1,4}){1,5})|(?:(?:[0-9A-Fa-f]{1,4}:){1,3}(?::[0-9A-Fa-f]{1,4}){1,4})|(?:(?:[0-9A-Fa-f]{1,4}:){1,4}(?::[0-9A-Fa-f]{1,4}){1,3})|(?:(?:[0-9A-Fa-f]{1,4}:){1,5}(?::[0-9A-Fa-f]{1,4}){1,2})|(?:(?:[0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4})|(?:(?:[0-9A-Fa-f]{1,4}:){1,7}:)|(?::(?::[0-9A-Fa-f]{1,4}){1,7})",
+                "enabled": true,
+                "builtIn": true
+              },
+              {
                 "id": "builtin-host-name",
                 "name": "Host and machine names",
                 "entityClass": "HOST_NAME",
@@ -657,7 +667,7 @@ groups:
                 "name": "Account and login names",
                 "entityClass": "USER_NAME",
                 "type": "RegExp",
-                "pattern": "\\b[A-Z][A-Z0-9-]{1,14}\\\\[A-Za-z0-9][A-Za-z0-9._$-]{0,63}",
+                "pattern": "\\b[A-Z][A-Z0-9-]{1,14}\\\\{1,16}(?:[A-Zac-eg-mo-qsw-z1-9][A-Za-z0-9._$-]{0,63}|[nrtbfuv0][a-z0-9][A-Za-z0-9._$-]{0,62})",
                 "enabled": false,
                 "builtIn": true
               },
@@ -676,19 +686,46 @@ groups:
           }
           ```
           :::
+
+          :::{dropdown} Default configuration
+          :applies_to: stack: preview 9.2-9.5
+          ```json
+          {
+            "rules": [
+              {
+                "entityClass": "EMAIL",
+                "type": "RegExp",
+                "pattern": "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
+                "enabled": false
+              },
+              {
+                "type": "NER",
+                "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english",
+                "enabled": false,
+                "allowedEntityClasses": [
+                  "PER",
+                  "ORG",
+                  "LOC"
+                ],
+                "timeoutSeconds": 30
+              }
+            ]
+          }
+          ```
+          :::
         datatype: string
         applies_to:
-          stack: preview 9.2-9.5, removed 9.6+
+          stack: preview 9.2+
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          observability: removed
-          elasticsearch: removed
-          security: removed
+          observability: preview
+          elasticsearch: preview
+          security: preview
         note: |
           :applies_to: {stack: preview 9.6+, serverless: preview}
-          The `ai:anonymizationSettings` setting has been replaced by the **Anonymization** management page.
+          The `ai:anonymizationSettings` setting is no longer listed in Advanced Settings. Configure it on the **Anonymization** management page. The setting itself still exists and can be set through the Advanced Settings API or `uiSettings.overrides` in `kibana.yml`.
 
   - group: Presentation Labs
     id: presentation-labs

@@ -202,6 +202,7 @@ describe('nightshift agent optimize workflow', () => {
     expect(reinforce?.with).toEqual({
       prompt: '{{ inputs.prompt }}',
       response: '{{ inputs.response }}',
+      conversation_id: '{{ inputs.conversation_id }}',
       round_id: '{{ inputs.round_id }}',
       message: '{{ steps.prepare_turn.output.message }}',
       turn_kind: '{{ steps.prepare_turn.output.turn_kind }}',

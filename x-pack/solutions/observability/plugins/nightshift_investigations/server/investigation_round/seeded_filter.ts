@@ -18,6 +18,7 @@ import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
+import { TIME_CONVERTER_TOOL_ID } from '../tools/time_converter/tool';
 import type { InvestigationTranscriptStep } from './round_loader';
 
 export const SEEDED_WORKSPACE_KINDS = ['cortex', 'memories', 'decision_trees', 'env_docs'] as const;
@@ -48,6 +49,7 @@ export const NON_EVIDENCE_TOOL_IDS = new Set<string>([
   ...INVESTIGATION_TOOL_IDS,
   'platform.streams.investigation_progress_report',
   PROPOSALS_CREATE_TOOL_ID,
+  TIME_CONVERTER_TOOL_ID,
   internalTools.writeTodos,
   internalTools.listFiles,
   internalTools.loadSkill,

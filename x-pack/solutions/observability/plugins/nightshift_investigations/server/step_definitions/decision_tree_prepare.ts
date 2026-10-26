@@ -16,10 +16,11 @@ import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { checkCausalConfirmation } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { deriveCausalConfirmed } from '../decision_trees/turn';
+import { withToolResults } from '../investigation_round';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
 import { renderMemoryTranscript } from '../memory/transcript';
-import { toolCallsSchema } from './tool_calls_schema';
+import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
 
@@ -97,6 +98,9 @@ export const decisionTreePrepareStepDefinition = ({
       tool_calls: toolCallsSchema.describe(
         'Investigator tool calls from this round. Used to see which decision-tree files were read.'
       ),
+      tool_results: toolResultsSchema.describe(
+        'Results of the investigator tool calls, keyed by tool_call_id.'
+      ),
     }),
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
@@ -114,6 +118,7 @@ export const decisionTreePrepareStepDefinition = ({
         conversation_id: conversationId,
         round_id: roundId,
         tool_calls: toolCalls,
+        tool_results: toolResults,
       } = context.input;
       const skippedOutput = {
         output: {
@@ -195,7 +200,7 @@ export const decisionTreePrepareStepDefinition = ({
         esClient: context.contextManager.getScopedEsClient(),
         logger,
         spaceId,
-        toolCalls: investigatorToolCalls,
+        toolCalls: withToolResults(investigatorToolCalls, toolResults ?? []),
       });
 
       return {
