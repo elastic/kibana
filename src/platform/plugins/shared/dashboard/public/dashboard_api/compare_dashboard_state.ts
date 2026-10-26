@@ -52,23 +52,42 @@ const diffOtherState = (baseline: DashboardState, current: DashboardState) => {
 };
 
 // ids are optional, so panels without one are matched by position instead of a random id
-const deserializeComparableLayout = ({ panels, pinned_panels: pinnedPanels }: DashboardState) =>
-  deserializeLayout(
+const deserializeComparableLayout = ({ panels, pinned_panels: pinnedPanels }: DashboardState) => {
+  const takenIds = new Set(
+    [
+      ...(panels ?? []).flatMap((widget) =>
+        isDashboardSection(widget) ? [widget, ...widget.panels] : [widget]
+      ),
+      ...(pinnedPanels ?? []),
+    ].flatMap(({ id }) => (id ? [id] : []))
+  );
+  const positionId = (base: string) => {
+    let id = base;
+    while (takenIds.has(id)) id = `_${id}`;
+    takenIds.add(id);
+    return id;
+  };
+
+  return deserializeLayout(
     panels?.map((widget, index) => {
-      const id = widget.id ?? `__position_${index}`;
+      const id = widget.id ?? positionId(`__position_${index}`);
       return isDashboardSection(widget)
         ? {
             ...widget,
             id,
             panels: widget.panels.map((panel, panelIndex) => ({
               ...panel,
-              id: panel.id ?? `${id}_${panelIndex}`,
+              id: panel.id ?? positionId(`${id}_${panelIndex}`),
             })),
           }
         : { ...widget, id };
     }),
-    pinnedPanels?.map((panel, index) => ({ ...panel, id: panel.id ?? `__pinned_${index}` }))
+    pinnedPanels?.map((panel, index) => ({
+      ...panel,
+      id: panel.id ?? positionId(`__pinned_${index}`),
+    }))
   );
+};
 
 const getRefId = (config?: object) => (config && 'ref_id' in config ? config.ref_id : undefined);
 

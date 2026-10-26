@@ -196,6 +196,21 @@ describe('diffDashboardStates', () => {
       expect(diffDashboardStates(panelsState(lensPanel()), panelsState(lensPanel()))).toEqual({});
     });
 
+    it('does not let a panel without an id collide with an explicit id', () => {
+      const withFirstPanel = (title: string) =>
+        state({
+          panels: [
+            lensPanel({ config: { title } }),
+            lensPanel({ id: '__position_0', grid: { x: 12, y: 0, w: 12, h: 8 } }),
+          ],
+        });
+      const current = withFirstPanel('Errors');
+
+      expect(diffDashboardStates(withFirstPanel('Count'), current)).toEqual({
+        panels: current.panels,
+      });
+    });
+
     it('returns the panels when a panel type changes', () => {
       const current = state({ panels: [lensPanel({ id: 'panel-1', type: 'visualization' })] });
 
