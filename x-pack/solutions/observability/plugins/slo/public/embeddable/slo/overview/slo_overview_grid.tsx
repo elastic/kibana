@@ -70,7 +70,13 @@ const getSloChartData = ({
 const ROW_HEIGHT = 220;
 const ITEMS_PER_ROW = 4;
 
-export function SloCardChartList({ sloId }: { sloId: string }) {
+export function SloCardChartList({
+  sloId,
+  isInteractive = true,
+}: {
+  sloId: string;
+  isInteractive?: boolean;
+}) {
   const {
     http: { basePath },
     uiSettings,
@@ -135,6 +141,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
         rules={rules}
         activeAlerts={activeAlerts}
         handleCreateRule={() => {}}
+        isInteractive={isInteractive}
       />
     );
     chartsData[chartsData.length - 1].push(data);
@@ -164,13 +171,17 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
         >
           <Settings
             baseTheme={baseTheme}
-            onElementClick={([d]) => {
-              if (isMetricElementEvent(d)) {
-                const { columnIndex, rowIndex } = d;
-                const slo = sloList?.results[rowIndex * ITEMS_PER_ROW + columnIndex];
-                setSelectedSlo(slo ?? null);
-              }
-            }}
+            onElementClick={
+              isInteractive
+                ? ([d]) => {
+                    if (isMetricElementEvent(d)) {
+                      const { columnIndex, rowIndex } = d;
+                      const slo = sloList?.results[rowIndex * ITEMS_PER_ROW + columnIndex];
+                      setSelectedSlo(slo ?? null);
+                    }
+                  }
+                : undefined
+            }
             locale={i18n.getLocale()}
           />
           <Metric id={`slo-id-instances`} data={chartsData} />

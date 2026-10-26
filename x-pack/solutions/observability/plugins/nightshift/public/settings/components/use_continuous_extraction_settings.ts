@@ -8,8 +8,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/significant-events-plugin/common';
 import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
@@ -19,32 +19,33 @@ export interface ContinuousExtractionState {
   intervalHours: number;
 }
 
-const readSettingsFromClient = (globalClient: IUiSettingsClient): ContinuousExtractionState => ({
-  enabled: globalClient.get<boolean>(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false),
-  intervalHours: globalClient.get<number>(
-    OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+const readSettingsFromClient = (client: IUiSettingsClient): ContinuousExtractionState => ({
+  enabled: client.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, false),
+  intervalHours: client.get<number>(
+    OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
     DEFAULT_EXTRACTION_INTERVAL_HOURS
   ),
 });
 
 export const useContinuousExtractionSettings = ({
-  globalClient,
+  client,
   http,
   /** Live enabled flag from maintenance status (keeps UI in sync after pause/resume). */
   enabledFromStatus,
 }: {
-  globalClient: IUiSettingsClient;
+  /** Space-scoped settings client: continuous onboarding is configured per Kibana space. */
+  client: IUiSettingsClient;
   http: HttpSetup;
   enabledFromStatus?: boolean;
 }) => {
   const [saved, setSaved] = useState<ContinuousExtractionState>(() =>
-    readSettingsFromClient(globalClient)
+    readSettingsFromClient(client)
   );
   const [draft, setDraft] = useState<ContinuousExtractionState>(saved);
 
   useSyncEnabledFromStatus({
-    client: globalClient,
-    settingId: OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+    client,
+    settingId: OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
     enabledFromStatus,
     setSaved,
     setDraft,
@@ -65,15 +66,15 @@ export const useContinuousExtractionSettings = ({
     });
 
     await Promise.all([
-      globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, draft.enabled),
-      globalClient.set(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+      client.set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, draft.enabled),
+      client.set(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
         draft.intervalHours
       ),
     ]);
 
     setSaved(draft);
-  }, [globalClient, http, draft]);
+  }, [client, http, draft]);
 
   return useMemo(
     () => ({ saved, draft, setDraft, hasChanged, reset, save }),

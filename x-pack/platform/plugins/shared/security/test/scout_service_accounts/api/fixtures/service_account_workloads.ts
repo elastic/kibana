@@ -7,18 +7,28 @@
 
 import type { KbnClient } from '@kbn/scout';
 
-/** The service accounts test plugin's route for one of its workloads. */
-export const workloadPath = (workloadId: string) => `internal/service_accounts_test/${workloadId}`;
+/** One of the test plugin's workloads, in the default space unless `spaceId` says otherwise. */
+export interface TestWorkload {
+  workloadId: string;
+  spaceId?: string;
+}
+
+/** The service accounts test plugin's route for one of its workloads, in the workload's space. */
+export const workloadPath = (workloadId: string, spaceId?: string) =>
+  `${
+    spaceId && spaceId !== 'default' ? `s/${spaceId}/` : ''
+  }internal/service_accounts_test/${workloadId}`;
 
 /** Binds one of the test plugin's workloads to a service account, as the `elastic` user. */
 export const bindWorkload = async (
   kbnClient: KbnClient,
   workloadId: string,
-  serviceAccountId: string
+  serviceAccountId: string,
+  spaceId?: string
 ): Promise<void> => {
   await kbnClient.request({
     method: 'POST',
-    path: workloadPath(workloadId),
+    path: workloadPath(workloadId, spaceId),
     body: { operation: 'bind', serviceAccountId },
     retries: 0,
   });
@@ -30,14 +40,14 @@ export const bindWorkload = async (
  */
 export const unbindWorkloads = async (
   kbnClient: KbnClient,
-  workloadIds: string[]
+  workloads: TestWorkload[]
 ): Promise<void> => {
   const failures: Error[] = [];
-  for (const workloadId of workloadIds) {
+  for (const { workloadId, spaceId } of workloads) {
     try {
       await kbnClient.request({
         method: 'POST',
-        path: workloadPath(workloadId),
+        path: workloadPath(workloadId, spaceId),
         body: { operation: 'unbind' },
       });
     } catch (error) {

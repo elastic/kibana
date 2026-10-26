@@ -12,6 +12,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiPanel,
   EuiSkeletonText,
   EuiText,
@@ -25,6 +26,8 @@ export interface LinkedInvestigationItem {
   id: string;
   title: string;
   status: 'open' | 'closed';
+  /** Proposals awaiting a decision; the row shows "Action required" when above 0. */
+  pending_proposal_count?: number;
 }
 
 export interface LinkedInvestigationsListProps {
@@ -95,8 +98,8 @@ export const LinkedInvestigationsList = memo<LinkedInvestigationsListProps>(
                   css={css({
                     display: 'flex',
                     alignItems: 'center',
-                    gap: euiTheme.size.s,
-                    padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+                    gap: euiTheme.size.m,
+                    padding: euiTheme.size.m,
                     width: '100%',
                     background: 'none',
                     border: 'none',
@@ -116,19 +119,40 @@ export const LinkedInvestigationsList = memo<LinkedInvestigationsListProps>(
                     {LINKED_INVESTIGATIONS_LABELS.typeBadge}
                   </EuiBadge>
 
-                  <EuiFlexItem css={css({ minWidth: 0 })}>
+                  <EuiFlexItem
+                    css={css({
+                      minWidth: 0,
+                      color: euiTheme.colors.text,
+                      fontWeight: euiTheme.font.weight.medium,
+                    })}
+                  >
                     <EuiTextTruncate text={item.title} />
                   </EuiFlexItem>
 
-                  <EuiBadge
-                    color={item.status === 'open' ? 'primary' : 'default'}
-                    css={css({ flexShrink: 0 })}
-                    data-test-subj={`linkedInvestigationStatus-${item.id}`}
-                  >
-                    {item.status === 'open'
-                      ? LINKED_INVESTIGATIONS_LABELS.statusOpen
-                      : LINKED_INVESTIGATIONS_LABELS.statusClosed}
-                  </EuiBadge>
+                  {item.status === 'open' && (item.pending_proposal_count ?? 0) > 0 ? (
+                    <EuiHealth
+                      // The dot takes the bright warning color; the text the darker amber that stays legible.
+                      color={euiTheme.colors.warning}
+                      css={css({
+                        flexShrink: 0,
+                        color: euiTheme.colors.textWarning,
+                        fontWeight: euiTheme.font.weight.semiBold,
+                      })}
+                      data-test-subj={`linkedInvestigationActionRequired-${item.id}`}
+                    >
+                      {LINKED_INVESTIGATIONS_LABELS.actionRequired}
+                    </EuiHealth>
+                  ) : (
+                    <EuiBadge
+                      color={item.status === 'open' ? 'primary' : 'default'}
+                      css={css({ flexShrink: 0 })}
+                      data-test-subj={`linkedInvestigationStatus-${item.id}`}
+                    >
+                      {item.status === 'open'
+                        ? LINKED_INVESTIGATIONS_LABELS.statusOpen
+                        : LINKED_INVESTIGATIONS_LABELS.statusClosed}
+                    </EuiBadge>
+                  )}
                 </button>
               </EuiFlexItem>
             ))}

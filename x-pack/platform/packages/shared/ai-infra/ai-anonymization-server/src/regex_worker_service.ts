@@ -48,6 +48,11 @@ export class RegexWorkerService {
     });
   }
 
+  /** Whether tasks run in isolated worker threads (as opposed to synchronously in-process). */
+  isEnabled(): boolean {
+    return this.enabled;
+  }
+
   /**
    * Execute a task in a worker.  Falls back to synchronous execution when the
    * worker is disabled
@@ -60,18 +65,18 @@ export class RegexWorkerService {
       throw new Error('Regex worker pool was not initialized');
     }
 
+    const timeoutMs = this.config.taskTimeout.asMilliseconds();
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.config.taskTimeout.asMilliseconds());
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       return await this.worker.run(payload, { signal: controller.signal });
     } catch (err) {
       if (err?.name === 'AbortError') {
-        // Destroy the tainted pool and replace it with a fresh one so
-        // subsequent tasks don't run on a degraded pool.
-        await this.worker.destroy().catch(() => {});
-        this.worker = this.createWorkerPool();
-        throw new Error('Regex anonymization task timed out');
+        // Piscina runs an abortable task on its own thread and terminates only that thread, so the
+        // pool stays usable. Destroying it would reject every other request in flight with
+        // "Terminating worker thread".
+        throw new Error(`Anonymization patterns timed out after ${Math.round(timeoutMs / 1000)}s`);
       }
       throw err;
     } finally {

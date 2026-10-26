@@ -90,7 +90,6 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-shared",
     "@kbn/deeplinks-vectordb",
-    "@kbn/deeplinks-workplace-ai",
     "@kbn/core-user-profile-server",
     "@kbn/core-http-browser",
     "@kbn/ui-callout",

@@ -286,7 +286,7 @@ describe('CostEstimate', () => {
       'Token tracking is enabled in 1 of 2 spaces'
     );
     expect(screen.getByTestId('nightshiftTrackingCoverageCallout')).toHaveTextContent(
-      'This deployment-wide estimate includes all Significant Events calls recorded during the selected period.'
+      'This deployment-wide estimate includes all significant events calls recorded during the selected period.'
     );
   });
 

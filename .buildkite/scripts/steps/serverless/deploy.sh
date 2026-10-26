@@ -11,7 +11,7 @@ else
   PR_NUMBER="$BUILDKITE_PULL_REQUEST"
 fi
 
-KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:pr-$PR_NUMBER-${BUILDKITE_COMMIT:0:12}"
+KIBANA_IMAGE="$(kibana_ci_image_repository kibana-serverless):pr-$PR_NUMBER-${BUILDKITE_COMMIT:0:12}"
 
 deploy() {
   PROJECT_TYPE=$1
@@ -26,9 +26,6 @@ deploy() {
     ;;
     security)
       PROJECT_TYPE_LABEL='Security'
-    ;;
-    workplaceai)
-      PROJECT_TYPE_LABEL='Workplace AI'
     ;;
     vectordb)
       PROJECT_TYPE_LABEL='Vector DB'
@@ -193,7 +190,6 @@ is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
 is_pr_with_label "ci:project-deploy-ai4soc" && deploy "security" "ai_soc"
 is_pr_with_label "ci:project-deploy-log_essentials" && deploy "observability" "logs_essentials"
-is_pr_with_label "ci:project-deploy-workplace_ai" && deploy "workplaceai"
 is_pr_with_label "ci:project-deploy-vectordb" && deploy "vectordb"
 if is_pr_with_label "ci:project-deploy-observability" ; then
   # Only deploy observability if the PR is targeting main

@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293810
-issues:
-- https://github.com/elastic/kibana/issues/272441
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Keep a pack query's schedule override in the pack's schedule mode

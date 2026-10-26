@@ -25,6 +25,7 @@ export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasAggregatingCommand,
   hasTransformationalCommand,
   parseTimeFieldFromESQLQuery,
   prettifyQuery,
@@ -58,7 +59,6 @@ export {
 export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
-  splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
   getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
@@ -85,12 +85,14 @@ export {
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
+  getEsqlSearchParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
+export { getEsqlInspectorStats } from './utils/get_esql_inspector_stats';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
 export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
@@ -116,12 +118,10 @@ export {
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
   MAX_ESQL_VIEW_NAME_LENGTH,
   MAX_ESQL_VIEW_QUERY_LENGTH,
-  resolveViewColumnToIndexField,
   validateEsqlViewName,
   type EsqlViewNameValidationError,
   type EsqlViewsClient,
 } from './utils/views';
-export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,
   type ESQLColumnsWithHighlights,

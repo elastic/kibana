@@ -33,6 +33,11 @@ export interface ChangePointRuleBucket {
   rule_name: {
     top: Array<{ metrics: Record<string, string> }>;
   };
+  source_id: string;
+  /**
+   * Shape read by the version 7 detection workflow. A stored v7 definition keeps running until the
+   * managed install replaces it, so both shapes are returned until v8 is the only installed version.
+   */
   stream: {
     buckets: Array<{ key: string }>;
   };
@@ -43,7 +48,7 @@ export interface ChangePointRuleBucket {
 
 export interface RuleMetadata {
   ruleName: string;
-  streamName: string;
+  sourceId: string;
   severityScore: number;
 }
 
@@ -91,7 +96,7 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
   for (const link of queryLinks) {
     map.set(link.rule_id, {
       ruleName: link.query.title,
-      streamName: link.stream_name,
+      sourceId: link.source_id,
       severityScore: link.query.severity_score ?? 0,
     });
   }

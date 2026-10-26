@@ -36,7 +36,7 @@ test.describe('Settings page', { tag: tags.stateful.classic }, () => {
     await expect(profilingSettingsPage.page.getByText('Azure discount rate (%)')).toBeVisible();
     await expect(
       profilingSettingsPage.page.getByRole('heading', {
-        name: 'Show error frames in the Universal Profiling views',
+        name: 'Show error frames in Profiling views',
       })
     ).toBeVisible();
   });

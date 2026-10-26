@@ -15,7 +15,7 @@ import {
 } from '../utils/test_helpers';
 import { createSignificantEventFeatureAttachmentType } from './feature_attachment_type';
 
-const feature = { id: 'feature-1', stream_name: 'logs.test', type: 'entity' };
+const feature = { id: 'feature-1', source_id: 'logs.test', type: 'entity' };
 
 const setup = ({ featurePrivilege }: { featurePrivilege: NightshiftFeaturePrivilege }) => {
   const getFeature = jest.fn().mockResolvedValue(feature);

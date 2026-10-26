@@ -7,10 +7,11 @@
 
 import { Parser } from '@elastic/esql';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { z, inlineRootJsonSchemaRef } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
+  putRuleDataSchema,
   isLifecycleConfigAllowedForKind,
   isAbsenceDistinguishableFromBreach,
   isRecoveryConditionUsableWithBreach,
@@ -28,6 +29,7 @@ import {
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   ruleTagsParamsSchema,
+  ruleResponseSchema,
   findRulesRequestSchema,
 } from './rule_data_schema';
 import { tagsResponseSchema } from './common';
@@ -367,6 +369,17 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: { name: 'test rule', routing_tags: ['a'.repeat(129)] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('metadata.template', () => {
+    it('is not accepted in a request body', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', template: { id: 'template-1' } },
       });
 
       expect(result.success).toBe(false);
@@ -1316,6 +1329,33 @@ describe('createRuleDataSchema', () => {
   });
 });
 
+describe('putRuleDataSchema', () => {
+  it('leaves enabled undefined when omitted', () => {
+    const result = putRuleDataSchema.parse(validCreateData);
+    expect(result.enabled).toBeUndefined();
+  });
+
+  it('accepts an explicit enabled: true', () => {
+    const result = putRuleDataSchema.parse({ ...validCreateData, enabled: true });
+    expect(result.enabled).toBe(true);
+  });
+
+  it('accepts an explicit enabled: false', () => {
+    const result = putRuleDataSchema.parse({ ...validCreateData, enabled: false });
+    expect(result.enabled).toBe(false);
+  });
+
+  it('rejects a non-boolean enabled', () => {
+    const result = putRuleDataSchema.safeParse({ ...validCreateData, enabled: 'true' });
+    expect(result.success).toBe(false);
+  });
+
+  it('does not add enabled to createRuleDataSchema', () => {
+    const result = createRuleDataSchema.safeParse({ ...validCreateData, enabled: true });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe('updateRuleDataSchema', () => {
   it('accepts an empty payload', () => {
     const result = updateRuleDataSchema.parse({});
@@ -1365,6 +1405,11 @@ describe('updateRuleDataSchema', () => {
 
   it('rejects metadata.routing_tags as an empty array (use null to clear)', () => {
     const result = updateRuleDataSchema.safeParse({ metadata: { routing_tags: [] } });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects metadata.template', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { template: { id: 'template-1' } } });
     expect(result.success).toBe(false);
   });
 
@@ -1689,6 +1734,21 @@ describe('updateRuleDataSchema', () => {
   });
 });
 
+describe('ruleResponseSchema metadata', () => {
+  it('does not carry metadata.template: the strict response block omits it', () => {
+    const result = ruleResponseSchema.shape.metadata.safeParse({
+      name: 'test rule',
+      template: { id: 'template-1' },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts metadata without a template', () => {
+    expect(ruleResponseSchema.shape.metadata.safeParse({ name: 'test rule' }).success).toBe(true);
+  });
+});
+
 describe('getBreachEsqlQuery', () => {
   it('returns base verbatim when the breach block is omitted', () => {
     expect(getBreachEsqlQuery({ base: 'FROM metrics-*' })).toBe('FROM metrics-*');
@@ -1795,10 +1855,9 @@ describe('getRootEsqlQuery', () => {
 
 describe('updateRuleDataSchema OpenAPI descriptions', () => {
   it('documents PATCH omission for time_field and the recovery/no_data contracts', () => {
-    const json = z.toJSONSchema(updateRuleDataSchema, {
-      target: 'draft-7',
-      unrepresentable: 'any',
-    }) as {
+    const json = inlineRootJsonSchemaRef(
+      z.toJSONSchema(updateRuleDataSchema, { target: 'draft-7', unrepresentable: 'any' })
+    ) as {
       properties?: Record<string, { description?: string }>;
       definitions?: Record<string, { description?: string }>;
     };
@@ -2013,19 +2072,41 @@ describe('bulkGetRulesResponseSchema', () => {
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
-  it('accepts an empty items array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ items: [] });
-    expect(result).toEqual({ items: [] });
+  it('accepts empty items and errors arrays', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [], errors: [] });
+    expect(result).toEqual({ items: [], errors: [] });
   });
 
   it('accepts a populated items array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule] });
+    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule], errors: [] });
     expect(result.items).toHaveLength(1);
     expect(result.items[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
   });
 
+  it('accepts a per-item RULE_NOT_FOUND error beside found rules', () => {
+    const result = bulkGetRulesResponseSchema.parse({
+      items: [sampleRule],
+      errors: [
+        {
+          id: 'rule-missing',
+          error: {
+            code: 'RULE_NOT_FOUND',
+            message: 'Rule with id "rule-missing" not found',
+            details: { rule_id: 'rule-missing' },
+          },
+        },
+      ],
+    });
+
+    expect(result.errors).toEqual([expect.objectContaining({ id: 'rule-missing' })]);
+  });
+
   it('rejects a missing items field', () => {
-    expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+    expect(() => bulkGetRulesResponseSchema.parse({ errors: [] })).toThrow();
+  });
+
+  it('rejects a missing errors field', () => {
+    expect(() => bulkGetRulesResponseSchema.parse({ items: [] })).toThrow();
   });
 });
 
@@ -2122,6 +2203,7 @@ describe('bulkCreateRulesResponseSchema', () => {
       items: [],
       errors: [
         {
+          index: 0,
           id: 'rule-1',
           error: { code: 'RULE_ALREADY_EXISTS', message: 'already exists' },
         },
@@ -2129,6 +2211,26 @@ describe('bulkCreateRulesResponseSchema', () => {
     });
     expect(result.items).toEqual([]);
     expect(result.errors).toHaveLength(1);
+  });
+
+  it('accepts an error for an item that had no id, addressed by index only', () => {
+    const result = bulkCreateRulesResponseSchema.parse({
+      items: [],
+      errors: [{ index: 2, error: { code: 'INVALID_RULE_DATA', message: 'bad schedule' } }],
+    });
+    expect(result.errors[0]).toEqual({
+      index: 2,
+      error: { code: 'INVALID_RULE_DATA', message: 'bad schedule' },
+    });
+  });
+
+  it('rejects an error without an index', () => {
+    expect(() =>
+      bulkCreateRulesResponseSchema.parse({
+        items: [],
+        errors: [{ id: 'rule-1', error: { code: 'RULE_ALREADY_EXISTS', message: 'x' } }],
+      })
+    ).toThrow();
   });
 
   it('rejects a missing items field', () => {
@@ -2394,5 +2496,16 @@ describe('isRecoveryTransitionConsistentWithStrategy', () => {
         state_transition: { recovering: { timeframe: '5m' } },
       })
     ).toBe(false);
+  });
+});
+
+describe('findRulesRequestSchema filter', () => {
+  it('trims the filter', () => {
+    expect(findRulesRequestSchema.parse({ filter: ' kind: alert ' }).filter).toBe('kind: alert');
+  });
+
+  it('rejects a blank filter', () => {
+    expect(findRulesRequestSchema.safeParse({ filter: '' }).success).toBe(false);
+    expect(findRulesRequestSchema.safeParse({ filter: '   ' }).success).toBe(false);
   });
 });

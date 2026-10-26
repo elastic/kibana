@@ -7,19 +7,30 @@
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import {
-  buildProposalSubjectKey,
-  canFillRespondAction,
-  decidePackageReport,
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { buildProposalSubjectKey } from '../../../proposals/dedup';
+import {
+  buildActionInput,
   buildProposalSummaryBullets,
+  canFillRespondAction,
+  collectSubjects,
+  decidePackageReport,
 } from './decide_package_report';
 import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
 } from '../../../../../common/step_types/package_report';
-import type { CurrentRunState } from './types';
+import type { CurrentRunHost, CurrentRunState, ProcessSelector, Subject } from './types';
 
+// Fake ids: these exercise the generic fan-out, which governs any fillable action the
+// selection table does not name.
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   impact: 'high',
@@ -34,6 +45,7 @@ const isolateHost: ActionCatalogEntry = {
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   impact: 'high',
@@ -49,6 +61,7 @@ const killProcess: ActionCatalogEntry = {
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   impact: 'high',
@@ -65,6 +78,7 @@ const suspendProcess: ActionCatalogEntry = {
 /** Required field `buildActionInput` has no way to supply — neither endpoint_ids nor parameters. */
 const quarantineFileWithJustification: ActionCatalogEntry = {
   workflowId: 'system-security-action-quarantine-file',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Quarantine file',
   category: 'respond',
   impact: 'medium',
@@ -80,6 +94,7 @@ const quarantineFileWithJustification: ActionCatalogEntry = {
 
 const configureAction: ActionCatalogEntry = {
   workflowId: 'system-security-action-configure-something',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Configure',
   category: 'configure',
   inputSchema: {
@@ -91,11 +106,98 @@ const configureAction: ActionCatalogEntry = {
   },
 };
 
+// An installed catalog can still carry the retired "Set asset criticality" action from before it
+// was removed. Packaging must never fill it: criticality is the customer's to set.
+const staleSetAssetCriticality: ActionCatalogEntry = {
+  workflowId: 'system-alertzero-action-set-asset-criticality',
+  approvalPolicy: 'autonomy-dependent',
+  name: 'Set asset criticality',
+  category: 'respond',
+  impact: 'low',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      id_field: { type: 'string', enum: ['user.name', 'service.name'] },
+      id_value: { type: 'string' },
+      criticality_level: { type: 'string' },
+    },
+    required: ['id_field', 'id_value'],
+  },
+};
+
+// Real ids: these go through the selection table.
+const hostSchema = isolateHost.inputSchema;
+const processSchema = killProcess.inputSchema;
+const defendIsolate: ActionCatalogEntry = {
+  workflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
+  name: 'Isolate host',
+  category: 'respond',
+  impact: 'high',
+  inputSchema: hostSchema,
+};
+const defendKill: ActionCatalogEntry = {
+  workflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
+  name: 'Kill process',
+  category: 'respond',
+  impact: 'high',
+  inputSchema: processSchema,
+};
+const defendSuspend: ActionCatalogEntry = {
+  workflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
+  name: 'Suspend process',
+  category: 'respond',
+  impact: 'medium',
+  inputSchema: processSchema,
+};
+const defendMemoryDump: ActionCatalogEntry = {
+  workflowId: ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
+  name: 'Dump memory of process',
+  category: 'investigate',
+  impact: 'low',
+  inputSchema: processSchema,
+};
+const defendCatalog = [defendIsolate, defendKill, defendSuspend, defendMemoryDump];
+
+/** The forensics handoff: `investigate`, no `endpoint_ids`, required ids of its own. */
+const forensicsHandoff: ActionCatalogEntry = {
+  workflowId: 'system-alertzero-action-handoff-to-forensics',
+  approvalPolicy: 'autonomy-dependent',
+  name: 'Run a deep forensics investigation',
+  category: 'investigate',
+  impact: 'medium',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      ai_index_id: { type: 'string' },
+      attack_discovery_id: { type: 'string' },
+      investigation_id: { type: 'string' },
+    },
+    required: ['attack_discovery_id', 'investigation_id'],
+  },
+};
+
+const enrolledHost = (
+  name: string,
+  agentId: string,
+  capabilities: string[] = ['isolation'],
+  capabilitiesSource: CurrentRunHost['capabilitiesSource'] = 'reported'
+): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities, capabilitiesSource });
+
+const selector = (
+  overrides: Partial<ProcessSelector> & Pick<ProcessSelector, 'processKey' | 'processName'>
+): ProcessSelector => ({ hostName: 'host-a', iocMatched: false, ...overrides });
+
 const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   runId: 'run-1',
   reportId: 'rpt-1',
   sseCount: 1,
   hasConfirmedHit: true,
+  severity: 'high',
+  confidence: 0.7,
   titles: ['Shadow admin AssumeRole'],
   evidenceLines: ['Tier 1 hits in cloudtrail'],
   techniques: ['T1078.004'],
@@ -103,11 +205,12 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   techniqueNames: {},
   users: [],
   corroboratedTechniques: ['T1078.004'],
-  hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
+  hosts: [enrolledHost('host-a', 'agent-a')],
   processSelectors: [],
   // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
-  hasNonHostEntity: false,
+  services: [],
   hasIocIndicator: false,
+  hasUnnamedIdentityEntity: false,
   allEventsActionable: true,
   hasProcessBearingEvent: false,
   manualRemediation: [],
@@ -133,10 +236,7 @@ describe('decidePackageReport', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
-        hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'host-b', enrolled: true, agentId: 'agent-b' },
-        ],
+        hosts: [enrolledHost('host-a', 'agent-a'), enrolledHost('host-b', 'agent-b')],
       }),
       catalog: { ok: true, actions: [isolateHost, configureAction] },
     });
@@ -156,9 +256,7 @@ describe('decidePackageReport', () => {
 
   it('does not drop or duplicate subject keys when catalog order changes', () => {
     const state = baseHitState({
-      processSelectors: [
-        { pid: 4242, processKey: 'pid:4242', hostName: 'host-a', processName: 'proc.exe' },
-      ],
+      processSelectors: [selector({ pid: 4242, processKey: 'pid:4242', processName: 'proc.exe' })],
     });
     const a = decidePackageReport({
       conversationId,
@@ -194,7 +292,7 @@ describe('decidePackageReport', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
-        hosts: [{ name: 'ghost', enrolled: false }],
+        hosts: [{ name: 'ghost', enrolled: false, capabilities: [] }],
       }),
       catalog: { ok: true, actions: [isolateHost] },
     });
@@ -208,8 +306,8 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({
         hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'ghost', enrolled: false },
+          enrolledHost('host-a', 'agent-a'),
+          { name: 'ghost', enrolled: false, capabilities: [] },
         ],
       }),
       catalog: { ok: true, actions: [isolateHost] },
@@ -256,7 +354,23 @@ describe('decidePackageReport', () => {
   it('treats a required field the builder cannot supply as unfillable', () => {
     // `canFillRespondAction` only checked `parameters`; a schema requiring anything else
     // (here `justification`) used to mint as executable anyway and fail after approval.
-    expect(canFillRespondAction({ entry: quarantineFileWithJustification })).toBe(false);
+    expect(
+      canFillRespondAction({
+        entry: quarantineFileWithJustification,
+        subject: {
+          kind: 'host',
+          value: 'host-a',
+          reachable: true,
+          host: {
+            name: 'host-a',
+            enrolled: true,
+            agentId: 'agent-a',
+            capabilities: [],
+            capabilitiesSource: 'reported',
+          },
+        },
+      })
+    ).toBe(false);
   });
 
   it('mints a recommendation instead of an executable proposal when a required field cannot be filled (trigger: no executable proposal at all)', () => {
@@ -281,7 +395,7 @@ describe('decidePackageReport', () => {
     expect(recommendation?.comment).toContain('could not be resolved to a live process');
   });
 
-  it('mints executable plus a recommendation when evidence fell outside the actionable indices', () => {
+  it('mints executable plus a recommendation when evidence fell outside the actionable indices (trigger: not host-scoped)', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({ allEventsActionable: false }),
@@ -293,17 +407,77 @@ describe('decidePackageReport', () => {
     // classifier leaves behind, so the line must not conclude the finding is not host-scoped.
     expect(recommendation?.comment).toContain('not known to carry a process identity');
     expect(recommendation?.comment).not.toContain('is not host-scoped');
+    expect(recommendation?.comment).not.toContain('implicated');
   });
 
-  it('mints executable plus a recommendation when evidence really is not host-scoped', () => {
+  it('mints executable plus a recommendation when evidence really is not host-scoped (trigger: ioc indicator)', () => {
     const result = decidePackageReport({
       conversationId,
-      state: baseHitState({ hasNonHostEntity: true }),
+      state: baseHitState({ hasIocIndicator: true }),
       catalog: { ok: true, actions: [isolateHost] },
     });
     expect(result.proposals).toHaveLength(2);
     const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
     expect(recommendation?.comment).toContain('not host-scoped');
+  });
+
+  it('mints executable plus a recommendation when an identity is named by a field this run cannot resolve (trigger: unnamed identity entity)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ hasUnnamedIdentityEntity: true }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(2);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain('not host-scoped');
+  });
+
+  it('names a single implicated user in the recommendation (trigger: identity)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ users: ['dev-user'] }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(2);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain(
+      'Identity dev-user (user) is implicated; a host action does not reach it.'
+    );
+    expect(recommendation?.comment).not.toContain('outside the indices');
+  });
+
+  it('names users and services together in the recommendation (trigger: identity)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ users: ['dev-user'], services: ['escalated-role'] }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain(
+      'Identities dev-user (user) and escalated-role (service) are implicated; a host action does not reach them.'
+    );
+  });
+
+  it('names users and services in the closure summary after hosts', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ users: ['dev-user'], services: ['escalated-role'] }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.closureSummary).toContain(
+      'Confirmed hit. Hosts: host-a. Users: dev-user. Services: escalated-role.'
+    );
+  });
+
+  it('omits the Users and Services parts of the closure summary when there are none', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState(),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.closureSummary).toContain('Confirmed hit. Hosts: host-a. Evidence:');
+    expect(result.closureSummary).not.toContain('Users:');
+    expect(result.closureSummary).not.toContain('Services:');
   });
 
   it('mints no recommendation when every host is enrolled, covered, and host-scoped', () => {
@@ -340,16 +514,33 @@ describe('decidePackageReport', () => {
     expect(a.proposals[0].subjectKey).toBe(b.proposals[0].subjectKey);
   });
 
+  const processSubject = (
+    processSelector: CurrentRunState['processSelectors'][number]
+  ): Subject => ({
+    kind: 'process',
+    value: processSelector.processName,
+    reachable: true,
+    host: {
+      name: 'host-a',
+      enrolled: true,
+      agentId: 'agent-a',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
+    processSelector,
+  });
+
   it('treats a bare pid, without entity_id, as unfillable for a process-scoped action', () => {
     expect(
       canFillRespondAction({
         entry: killProcess,
-        processSelector: {
+        subject: processSubject({
           pid: 100,
           processKey: 'pid:100',
           hostName: 'host-a',
           processName: 'a.exe',
-        },
+          iocMatched: false,
+        }),
       })
     ).toBe(false);
   });
@@ -358,12 +549,13 @@ describe('decidePackageReport', () => {
     expect(
       canFillRespondAction({
         entry: killProcess,
-        processSelector: {
+        subject: processSubject({
           entityId: 'ent-9',
           processKey: 'entity:ent-9',
           hostName: 'host-a',
           processName: 'b.exe',
-        },
+          iocMatched: false,
+        }),
       })
     ).toBe(true);
   });
@@ -376,13 +568,8 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
-          {
-            entityId: 'ent-9',
-            processKey: 'entity:ent-9',
-            hostName: 'host-a',
-            processName: 'b.exe',
-          },
+          selector({ pid: 100, processKey: 'pid:100', processName: 'a.exe' }),
+          selector({ entityId: 'ent-9', processKey: 'entity:ent-9', processName: 'b.exe' }),
         ],
       }),
       catalog: { ok: true, actions: [killProcess] },
@@ -402,7 +589,13 @@ describe('decidePackageReport', () => {
       state: baseHitState({
         hasProcessBearingEvent: true,
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+          {
+            pid: 100,
+            processKey: 'pid:100',
+            hostName: 'host-a',
+            processName: 'a.exe',
+            iocMatched: false,
+          },
         ],
       }),
       catalog: { ok: true, actions: [isolateHost] },
@@ -420,17 +613,9 @@ describe('decidePackageReport', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
-        hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'host-b', enrolled: true, agentId: 'agent-b' },
-        ],
+        hosts: [enrolledHost('host-a', 'agent-a'), enrolledHost('host-b', 'agent-b')],
         processSelectors: [
-          {
-            entityId: 'ent-1',
-            processKey: 'entity:ent-1',
-            hostName: 'host-a',
-            processName: 'a.exe',
-          },
+          selector({ entityId: 'ent-1', processKey: 'entity:ent-1', processName: 'a.exe' }),
         ],
       }),
       catalog: { ok: true, actions: [killProcess] },
@@ -442,22 +627,578 @@ describe('decidePackageReport', () => {
     expect(result.proposals[0].actionInput?.parameters).toEqual({ entity_id: 'ent-1' });
   });
 
-  it('builds stable subject keys for the same host × action × process', () => {
-    expect(
-      buildProposalSubjectKey({
-        conversationId: 'c',
-        endpointId: 'e',
-        actionWorkflowId: 'a',
-        processKey: 'p',
-      })
-    ).toBe(
-      buildProposalSubjectKey({
-        conversationId: 'c',
-        endpointId: 'e',
-        actionWorkflowId: 'a',
-        processKey: 'p',
-      })
-    );
+  it('mints pinned host and process subject keys (frozen: a change renames every live proposal)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        processSelectors: [
+          {
+            entityId: 'ent-4242',
+            processKey: 'entity:ent-4242',
+            hostName: 'host-a',
+            processName: 'proc.exe',
+            iocMatched: false,
+          },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost, killProcess] },
+    });
+    const byWorkflow = new Map(result.proposals.map((p) => [p.actionWorkflowId, p.subjectKey]));
+    // uuidv5(`agent-a|system-security-action-isolate-host`) under the fixed namespace. No
+    // Investigation in the material: that is what lets two of them share a Proposal.
+    expect(byWorkflow.get(isolateHost.workflowId)).toBe('6f30494e-d19c-51d9-94b3-da6a6e4a17fd');
+    // uuidv5(`agent-a|system-security-action-kill-process|entity:ent-4242`).
+    expect(byWorkflow.get(killProcess.workflowId)).toBe('e7f4d23d-c0a4-57a8-804e-a1cbca13bc1c');
+  });
+
+  describe('which Investigation raised a proposal', () => {
+    const decideIn = (
+      investigationId: string,
+      catalog: Parameters<typeof decidePackageReport>[0]['catalog']
+    ) =>
+      decidePackageReport({
+        conversationId: investigationId,
+        state: baseHitState(),
+        catalog,
+      });
+
+    it('does not change the subject key of a host action: two Investigations on one host share it, so their proposals converge', () => {
+      const catalog = { ok: true as const, actions: [isolateHost] };
+
+      const first = decideIn('conv-1', catalog).proposals.map((p) => p.subjectKey);
+      const second = decideIn('conv-2', catalog).proposals.map((p) => p.subjectKey);
+
+      expect(first.length).toBeGreaterThan(0);
+      expect(second).toEqual(first);
+    });
+
+    it('does change the key of the analyst recommendation, which has no host or action to share', () => {
+      const catalog = { ok: false as const, reason: 'catalog_error' as const };
+
+      const keyIn = (id: string) => decideIn(id, catalog).proposals.map((p) => p.subjectKey);
+
+      expect(keyIn('conv-1')).toEqual(keyIn('conv-1'));
+      expect(keyIn('conv-1')).not.toEqual(keyIn('conv-2'));
+    });
+  });
+
+  it('carries subject and hostName on host and process mints', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        processSelectors: [
+          {
+            entityId: 'ent-100',
+            processKey: 'entity:ent-100',
+            hostName: 'host-a',
+            processName: 'a.exe',
+            iocMatched: false,
+          },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost, killProcess] },
+    });
+    const isolate = result.proposals.find((p) => p.actionWorkflowId === isolateHost.workflowId);
+    const kill = result.proposals.find((p) => p.actionWorkflowId === killProcess.workflowId);
+    expect(isolate).toMatchObject({
+      hostName: 'host-a',
+      subject: { kind: 'host', value: 'host-a' },
+    });
+    expect(kill).toMatchObject({
+      hostName: 'host-a',
+      subject: { kind: 'process', value: 'a.exe' },
+    });
+  });
+
+  describe('subject inference for catalog entries without `subjects`', () => {
+    it('treats an entry whose schema has `parameters` as process-scoped and the rest as host-scoped', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          processSelectors: [
+            {
+              entityId: 'ent-100',
+              processKey: 'entity:ent-100',
+              hostName: 'host-a',
+              processName: 'a.exe',
+              iocMatched: false,
+            },
+          ],
+        }),
+        catalog: { ok: true, actions: [isolateHost, killProcess] },
+      });
+      expect(isolateHost.subjects).toBeUndefined();
+      expect(killProcess.subjects).toBeUndefined();
+      expect(result.proposals.map((p) => p.subject?.kind).sort()).toEqual(['host', 'process']);
+    });
+
+    it('never fills a host-inferred action from a user or service', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ hosts: [], users: ['dev-user'], services: ['escalated-role'] }),
+        catalog: { ok: true, actions: [isolateHost, killProcess] },
+      });
+      expect(result.proposals.map((p) => p.title)).toEqual(['Analyst recommendation']);
+    });
+  });
+
+  describe('identities', () => {
+    it('never mints a proposal for an implicated user or service, even from a stale catalog entry', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          users: ['dev-user'],
+          services: ['escalated-role'],
+          severity: 'critical',
+        }),
+        catalog: { ok: true, actions: [isolateHost, staleSetAssetCriticality] },
+      });
+      expect(
+        result.proposals.some((p) => p.actionWorkflowId === staleSetAssetCriticality.workflowId)
+      ).toBe(false);
+      expect(result.proposals.every((p) => p.actionInput?.criticality_level === undefined)).toBe(
+        true
+      );
+    });
+
+    it('leaves a run with only identities to the analyst recommendation', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ hosts: [], users: ['dev-user'] }),
+        catalog: { ok: true, actions: [isolateHost, staleSetAssetCriticality] },
+      });
+      expect(result.proposals.map((p) => p.title)).toEqual(['Analyst recommendation']);
+    });
+
+    it('names the implicated identities in the recommendation without proposing to change them', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ users: ['dev-user'], services: ['escalated-role'] }),
+        catalog: { ok: true, actions: [isolateHost, staleSetAssetCriticality] },
+      });
+      const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+      expect(recommendation?.comment).toContain(
+        'Identities dev-user (user) and escalated-role (service) are implicated; a host action does not reach them.'
+      );
+      expect(recommendation?.comment).not.toContain('Asset criticality is proposed');
+    });
+  });
+
+  describe('collectSubjects', () => {
+    it('yields each host, then its processes, with reachability', () => {
+      const subjects = collectSubjects(
+        baseHitState({
+          hosts: [
+            {
+              name: 'host-a',
+              enrolled: true,
+              agentId: 'agent-a',
+              capabilities: [],
+              capabilitiesSource: 'reported',
+            },
+            { name: 'ghost', enrolled: false, capabilities: [] },
+          ],
+          processSelectors: [
+            {
+              pid: 7,
+              processKey: 'pid:7',
+              hostName: 'ghost',
+              processName: 'g.exe',
+              iocMatched: false,
+            },
+            {
+              pid: 100,
+              processKey: 'pid:100',
+              hostName: 'host-a',
+              processName: 'a.exe',
+              iocMatched: false,
+            },
+          ],
+        })
+      );
+      expect(subjects.map((s) => [s.kind, s.value, s.reachable])).toEqual([
+        ['host', 'host-a', true],
+        ['process', 'a.exe', true],
+        ['host', 'ghost', false],
+        ['process', 'g.exe', false],
+      ]);
+    });
+  });
+
+  describe('Defend selection table', () => {
+    const ps1 = selector({
+      entityId: 'ent-1',
+      processKey: 'entity:ent-1',
+      processName: 'powershell.exe',
+    });
+    const rundll = selector({
+      entityId: 'ent-2',
+      processKey: 'entity:ent-2',
+      processName: 'rundll32.exe',
+    });
+    const withMemdump = enrolledHost('host-a', 'agent-a', ['isolation', 'memdump_process']);
+    const kinds = (proposals: Array<{ actionWorkflowId?: string }>) =>
+      proposals.map((p) => p.actionWorkflowId).sort();
+
+    it('holds back a selected action by name when the process only has a pid', () => {
+      const pidOnly = selector({ pid: 4242, processKey: 'pid:4242', processName: 'proc.exe' });
+      const result = decidePackageReport({
+        conversationId,
+        // `ps1` has an entity_id, so `processUncovered` stays quiet: only the held-back line
+        // tells the analyst the pid-only process was skipped.
+        state: baseHitState({ hosts: [withMemdump], processSelectors: [ps1, pidOnly] }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('`proc.exe` (PID 4242)');
+      expect(recommendation?.comment).toContain('the process has no entity_id');
+      expect(
+        result.proposals.filter((p) => p.actionWorkflowId).every((p) => !p.title?.includes('4242'))
+      ).toBe(true);
+    });
+
+    it('holds back kill by name when the kill action is not installed', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [ps1Attributed('T1486')],
+          evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1486', rowCount: 1 }] },
+        }),
+        catalog: {
+          ok: true,
+          actions: defendCatalog.filter(
+            (a) => a.workflowId !== ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID
+          ),
+        },
+      });
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('Kill was selected for');
+      expect(recommendation?.comment).toContain('that action is not installed');
+    });
+
+    it('holds a warranted isolate back when the host does not report isolation', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          severity: 'critical',
+          hosts: [enrolledHost('host-a', 'agent-a', [])],
+          processSelectors: [ps1],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).not.toContain(
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
+      );
+      expect(result.proposals.find((p) => !p.actionWorkflowId)?.comment).toContain(
+        'does not report isolation'
+      );
+    });
+
+    it('says the capabilities could not be read, not that the endpoint lacks them, when the metadata was unavailable', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [enrolledHost('host-a', 'agent-a', [], 'unavailable')],
+          processSelectors: [ps1, rundll],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+      ]);
+      expect(
+        executable.every((p) =>
+          p.comment.includes(
+            "the endpoint's capabilities could not be read (memdump_process is not assumed)"
+          )
+        )
+      ).toBe(true);
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('**Held back**');
+      expect(recommendation?.comment).toContain(
+        "the endpoint's capabilities could not be read (isolation is not assumed)"
+      );
+    });
+
+    it('mints suspend+dump per process and isolate for two processes on a memdump-capable host, never kill', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ hosts: [withMemdump], processSelectors: [ps1, rundll] }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(result.proposals).toHaveLength(5);
+      expect(kinds(result.proposals)).toEqual([
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+        ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+        ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+      ]);
+      expect(result.proposals.every((p) => p.comment.includes('Rule:'))).toBe(true);
+    });
+
+    it('mints suspend only and holds back isolate for one process on a host without memdump_process', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ processSelectors: [ps1] }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID]);
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('**Held back**');
+      expect(recommendation?.comment).toContain('Isolate host host-a was not proposed');
+      expect(recommendation?.comment).toContain('see Held back');
+    });
+
+    const ps1Attributed = (id: string) => selector({ ...ps1, techniqueId: id, techniqueIds: [id] });
+
+    it('mints kill (not suspend/dump) on a confirmed destructive technique', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [ps1Attributed('T1486')],
+          evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1486', rowCount: 1 }] },
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID]);
+    });
+
+    it('does not kill an unattributed process on a run that confirmed a destructive technique', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [ps1],
+          evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1486', rowCount: 1 }] },
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).not.toContain(
+        ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID
+      );
+    });
+
+    it('does not count stale protected processes toward the isolate threshold', () => {
+      const stale = '2026-09-01T00:00:00.000Z';
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          severity: 'high',
+          hosts: [withMemdump],
+          huntWindow: { from: '2026-09-25T00:00:00.000Z', to: '2026-09-28T00:00:00.000Z' },
+          processSelectors: [
+            selector({
+              entityId: 'ent-a',
+              processKey: 'entity:ent-a',
+              processName: 'lsass.exe',
+              observedAt: stale,
+            }),
+            selector({
+              entityId: 'ent-b',
+              processKey: 'entity:ent-b',
+              processName: 'csrss.exe',
+              observedAt: stale,
+            }),
+          ],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).not.toContain(
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
+      );
+    });
+
+    it('mints kill on a critical finding whose process matched an IOC', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          severity: 'critical',
+          processSelectors: [selector({ ...ps1, iocMatched: true })],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+        ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+      ]);
+    });
+
+    it('only dumps a protected system process and explains the hold-back', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [
+            selector({
+              entityId: 'ent-700',
+              processKey: 'entity:ent-700',
+              processName: 'lsass.exe',
+            }),
+          ],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID]);
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('lsass.exe');
+    });
+
+    it('mints nothing for a stale process and does not count it toward isolate', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          huntWindow: { from: '2026-09-01T00:00:00Z', to: '2026-09-30T00:00:00Z' },
+          processSelectors: [selector({ ...ps1, observedAt: '2026-08-15T00:00:00Z' })],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(result.proposals.filter((p) => p.actionWorkflowId)).toEqual([]);
+      expect(result.proposals[0].comment).toContain('Held back');
+    });
+
+    it('mints isolate on a confirmed lateral-movement sub-technique with one process', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          processSelectors: [ps1Attributed('T1021.002')],
+          evidence: {
+            tier1HitCount: 1,
+            tier2Confirmed: [{ techniqueId: 'T1021.002', rowCount: 1 }],
+          },
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).toContain(
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
+      );
+    });
+
+    it('isolates only the host the technique is attributed to, not every enrolled host', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [enrolledHost('host-a', 'agent-a'), enrolledHost('host-b', 'agent-b')],
+          processSelectors: [ps1Attributed('T1071')],
+          evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1071', rowCount: 1 }] },
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const isolates = result.proposals.filter(
+        (p) => p.actionWorkflowId === ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
+      );
+      expect(isolates.map((p) => p.hostName)).toEqual(['host-a']);
+    });
+
+    it('still mints suspend when memory dump is not installed', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ hosts: [withMemdump], processSelectors: [ps1] }),
+        catalog: { ok: true, actions: [defendIsolate, defendKill, defendSuspend] },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID]);
+    });
+
+    it('does not emit isolate hold-back lines when isolate is not installed', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ processSelectors: [ps1] }),
+        catalog: { ok: true, actions: [defendSuspend] },
+      });
+      expect(result.proposals).toHaveLength(1);
+      expect(result.proposals[0].actionWorkflowId).toBe(
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID
+      );
+    });
+
+    it('never mints the forensics handoff: investigate without endpoint_ids is not fillable', () => {
+      expect(
+        canFillRespondAction({
+          entry: forensicsHandoff,
+          subject: {
+            kind: 'host',
+            value: 'host-a',
+            reachable: true,
+            host: enrolledHost('host-a', 'agent-a'),
+          },
+        })
+      ).toBe(false);
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ processSelectors: [ps1] }),
+        catalog: { ok: true, actions: [forensicsHandoff] },
+      });
+      expect(result.proposals.filter((p) => p.actionWorkflowId)).toEqual([]);
+    });
+
+    it('fills memory dump input with the process scope', () => {
+      const processSubjectFor = (processSelector: ProcessSelector): Subject => ({
+        kind: 'process',
+        value: processSelector.processName,
+        reachable: true,
+        host: enrolledHost('host-a', 'agent-a'),
+        processSelector,
+      });
+      expect(
+        buildActionInput({ entry: defendMemoryDump, subject: processSubjectFor(rundll) })
+      ).toEqual({
+        endpoint_ids: ['agent-a'],
+        parameters: { type: 'process', entity_id: 'ent-2' },
+      });
+      expect(
+        buildActionInput({ entry: defendSuspend, subject: processSubjectFor(rundll) })
+      ).toEqual({ endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } });
+    });
+
+    it('pins the kill/suspend/isolate subject keys (frozen: a change renames every live proposal)', () => {
+      const processKey = 'pid:4212';
+      expect(
+        buildProposalSubjectKey({
+          subjectId: 'agent-a',
+          actionWorkflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+          processKey,
+        })
+      ).toBe('4571fe1a-2cf5-5403-9068-fbd7fe17ac0e');
+      expect(
+        buildProposalSubjectKey({
+          subjectId: 'agent-a',
+          actionWorkflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+          processKey,
+        })
+      ).toBe('290fbfde-55da-5eca-8081-7418fa50a1f0');
+      expect(
+        buildProposalSubjectKey({
+          subjectId: 'agent-a',
+          actionWorkflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+        })
+      ).toBe('206b47f2-780e-5992-9935-6fadb64483fd');
+    });
+
+    it('mints the same subject keys regardless of catalog order', () => {
+      const state = baseHitState({ hosts: [withMemdump], processSelectors: [ps1, rundll] });
+      const a = decidePackageReport({
+        conversationId,
+        state,
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const b = decidePackageReport({
+        conversationId,
+        state,
+        catalog: { ok: true, actions: [...defendCatalog].reverse() },
+      });
+      expect(new Set(a.proposals.map((p) => p.subjectKey))).toEqual(
+        new Set(b.proposals.map((p) => p.subjectKey))
+      );
+    });
   });
 });
 
@@ -466,11 +1207,9 @@ describe('buildProposalSummaryBullets', () => {
   const JOURNAL_NOTE_MESSAGE_MAX = 8000;
 
   it('bounds the bullets for a 50-host, 2-action finding and states how many were omitted', () => {
-    const hosts = Array.from({ length: 50 }, (_, i) => ({
-      name: `a-fairly-long-host-name-number-${i}.corp.example.com`,
-      enrolled: true,
-      agentId: `agent-${i}`,
-    }));
+    const hosts = Array.from({ length: 50 }, (_, i) =>
+      enrolledHost(`a-fairly-long-host-name-number-${i}.corp.example.com`, `agent-${i}`)
+    );
     const { proposals } = decidePackageReport({
       conversationId: 'conv-1',
       state: baseHitState({ hosts }),
@@ -496,11 +1235,9 @@ describe('buildProposalSummaryBullets', () => {
   });
 
   it('stays under the character cap with very long host names and counts what it drops', () => {
-    const hosts = Array.from({ length: 50 }, (_, i) => ({
-      name: `${i}-${'h'.repeat(2000)}`,
-      enrolled: true,
-      agentId: `agent-${i}`,
-    }));
+    const hosts = Array.from({ length: 50 }, (_, i) =>
+      enrolledHost(`${i}-${'h'.repeat(2000)}`, `agent-${i}`)
+    );
     const { proposals } = decidePackageReport({
       conversationId: 'conv-1',
       state: baseHitState({ hosts }),

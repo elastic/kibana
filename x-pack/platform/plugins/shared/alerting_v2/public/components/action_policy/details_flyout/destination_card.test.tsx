@@ -75,6 +75,17 @@ describe('DestinationCard', () => {
     expect(screen.getByTestId('actionPolicyDestinationConnectorIcons')).toBeInTheDocument();
   });
 
+  it('renders the connector icons for a workflow with only a console step', () => {
+    mockWorkflowData['wf-console'] = {
+      definition: { steps: [{ type: 'console', name: 'log' }] },
+    };
+    renderCard({ type: 'workflow', id: 'wf-console' });
+
+    const icons = screen.getByTestId('actionPolicyDestinationConnectorIcons');
+    expect(icons.children.length).toBe(1);
+    delete mockWorkflowData['wf-console'];
+  });
+
   it('renders a link button pointing to the workflow URL', () => {
     renderCard({ type: 'workflow', id: 'wf-42' });
 

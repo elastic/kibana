@@ -86,4 +86,8 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       index: this.deps.indexName,
     });
   }
+
+  public async refresh(): Promise<void> {
+    await this.deps.esClient.indices.refresh({ index: this.deps.indexName });
+  }
 }

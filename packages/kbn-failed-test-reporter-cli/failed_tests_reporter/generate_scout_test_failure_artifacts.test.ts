@@ -94,5 +94,21 @@ describe('generateScoutTestFailureArtifacts', () => {
     const artifact = readArtifactFor('suite - untracked failure');
     expect(artifact).not.toHaveProperty('githubIssue');
     expect(artifact).not.toHaveProperty('failureCount');
+    expect(artifact).not.toHaveProperty('infraReason');
+  });
+
+  it('carries the infra failure reason into the artifact', async () => {
+    const infraReason = { category: 'cdn', message: 'Kibana bundles failed to load from the CDN.' };
+    fs.writeFileSync(
+      Path.join(reportDir, SCOUT_GITHUB_ISSUES_FILENAME),
+      JSON.stringify({ 'without-issue': { infraReason } }),
+      'utf-8'
+    );
+
+    await generateScoutTestFailureArtifacts({ log, bkMeta: {} });
+
+    const artifact = readArtifactFor('suite - untracked failure');
+    expect(artifact.infraReason).toEqual(infraReason);
+    expect(artifact).not.toHaveProperty('githubIssue');
   });
 });

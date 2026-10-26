@@ -8,7 +8,6 @@
 import { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
-import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
@@ -29,6 +28,7 @@ import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './typ
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
 import { ALERT_STATUS_ACTION_IDS } from '../../../constants/action_ids';
 
 export type BulkActionMenuItem = AlertTableContextMenuItem;
@@ -234,28 +234,17 @@ export const useBulkActionItems = ({
       },
     });
 
-  const workflowDocuments = useMemo(() => {
-    if (!data) return [];
-    return data
-      .filter((item) => eventIds.includes(item._id))
-      .map((item) => {
-        const flattened = flattenObject(item.ecs);
-        const fields: Record<string, unknown> = {};
-        for (const [field, value] of Object.entries(flattened)) {
-          fields[field] = value;
-        }
-        return {
-          _id: item._id,
-          _index: item._index ?? '',
-          ...fields,
-        };
-      });
-  }, [data, eventIds]);
+  // Ids only, to keep large selections under `server.maxPayload`.
+  const workflowDocumentIds = useMemo(
+    () => toDocumentSelections((data ?? []).filter(({ _id }) => eventIds.includes(_id))),
+    [data, eventIds]
+  );
 
   const noop = useCallback(() => {}, []);
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
-    documents: workflowDocuments,
+    documentIds: workflowDocumentIds,
     closePopover: closePopover ?? noop,
+    isBulk: true,
   });
 
   const statusItems = useMemo<BulkActionMenuItem[]>(() => {

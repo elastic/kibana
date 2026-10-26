@@ -9,7 +9,13 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
-import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
+  significantEventTypeSchema,
+} from '@kbn/significant-events-schema';
 import {
   createQueryValidationContext,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
@@ -22,7 +28,12 @@ import type { GetScopedClients } from '../../../../routes/types';
 import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../../../types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
-import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlugOrId,
+  toSourceRef,
+} from '../../../utils/resolve_source_slugs';
 
 export { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID };
 
@@ -50,9 +61,9 @@ const candidateQuerySchema = lazySchema(() =>
       .describe(
         'A semantically searchable description explaining what the query detects and why it matters. Should be 1-2 sentences that help users find this query when searching by concept or intent.'
       ),
-    category: z
-      .enum(['operational', 'configuration', 'resource_health', 'error', 'security'])
-      .describe('Significant event category the query belongs to.'),
+    category: significantEventTypeSchema.describe(
+      'Significant event category the query belongs to.'
+    ),
     severity_score: z
       .number()
       .min(0)
@@ -92,10 +103,7 @@ const candidateQuerySchema = lazySchema(() =>
 
 const validateQueriesSchema = lazySchema(() =>
   z.object({
-    target_id: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe('Target identifier against which the candidate ES|QL queries must be validated.'),
+    slug: nightshiftSourceSlugField('Candidate ES|QL queries are validated against this source.'),
     queries: z
       .array(candidateQuerySchema)
       .max(MAX_QUERIES_PER_CALL)
@@ -120,17 +128,26 @@ export const createValidateQueriesTool = ({
     description:
       'Validate and finalize a complete KI query batch. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. A batch is finalized only when every query passes.',
     schema: validateQueriesSchema,
-    handler: async ({ target_id: targetId, queries }, context) => {
+    handler: async ({ slug, queries }, context) => {
       try {
         await assertCanReadSignificantEvents({ request: context.request, server });
 
+        const scopedClients = await getScopedClients({ request: context.request });
+        const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
+        // Stored features and queries are read as the internal user, and the results tell whether a
+        // feature or a query exists, so check the caller's own data access first.
+        await scopedClients.sourcesClient.assertReadable(source.id);
+
+        // Resolved even for an empty batch: the caller checks the finalized
+        // slug, and the model may have passed a source id or an unknown slug.
         if (queries.length === 0) {
           return {
             results: [
               {
                 type: ToolResultType.other,
                 data: {
-                  target_id: targetId,
+                  ...toSourceRef(source),
                   queries: [],
                   finalized: true,
                   finalized_queries: [],
@@ -140,9 +157,7 @@ export const createValidateQueriesTool = ({
           };
         }
 
-        const scopedClients = await getScopedClients({ request: context.request });
-        const stream = await scopedClients.streamsClient.getStream(targetId);
-        const target = streamToAnalysisTarget(stream);
+        const target = sourceToAnalysisTarget(source);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const featureIds = [...new Set(queries.flatMap(({ feature_ids: ids }) => ids))];
         const [{ hits: features }, { [target.id]: existingLinks }] = await Promise.all([
@@ -150,7 +165,7 @@ export const createValidateQueriesTool = ({
             featureIds,
             excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
           }),
-          kiClient.getStreamToQueryLinksMap([target.id]),
+          kiClient.getSourceToQueryLinksMap([target.id]),
         ]);
         const existingQueries = existingLinks.map(({ query }) => ({
           id: query.id,
@@ -193,7 +208,7 @@ export const createValidateQueriesTool = ({
             {
               type: ToolResultType.other,
               data: {
-                target_id: target.id,
+                ...toSourceRef(source),
                 queries: results,
                 finalized,
                 ...(finalized ? { finalized_queries: validatedQueries } : {}),

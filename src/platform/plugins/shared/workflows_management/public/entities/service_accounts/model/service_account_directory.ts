@@ -38,7 +38,7 @@ export const serviceAccountQueryOptions = (http: HttpStart, id: string) => ({
         `/internal/security/service_account/${encodeURIComponent(id)}`
       );
     } catch {
-      // Directory access is optional: workflow executors need not have read_security.
+      // Directory access is optional: workflow executors need not have manage_security.
       return null;
     }
   },

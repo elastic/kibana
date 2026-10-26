@@ -70,8 +70,28 @@ describe('<MitreAttack />', () => {
 
     const { getByTestId } = renderMitreAttack(hit);
 
-    expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toHaveTextContent('Threat mappings');
     expect(getByTestId(MITRE_ATTACK_DETAILS_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render a titled group for each framework of a mixed-framework rule', () => {
+    const entry = (framework: string, id: string) => ({
+      framework,
+      tactic: { id, reference: `https://example.com/${id}`, name: 'Tactic' },
+      technique: [],
+    });
+    const hit = createMockHit({
+      'kibana.alert.rule.parameters': [
+        { threat: [entry('MITRE ATLAS', 'AML.TA0000'), entry('MITRE ATT&CK', 'TA0001')] },
+      ],
+    });
+
+    const { getAllByTestId } = renderMitreAttack(hit);
+
+    expect(getAllByTestId('threatFrameworkGroupTitle').map((title) => title.textContent)).toEqual([
+      'MITRE ATT&CK',
+      'MITRE ATLAS',
+    ]);
   });
 
   it('should render mitre attack information (in object form)', () => {

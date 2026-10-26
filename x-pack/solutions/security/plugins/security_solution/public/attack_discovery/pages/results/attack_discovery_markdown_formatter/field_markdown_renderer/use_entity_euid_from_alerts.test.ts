@@ -7,6 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { of, throwError } from 'rxjs';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -37,6 +38,7 @@ describe('useEntityEuidFromAlerts', () => {
           getEuidRuntimeMapping: getEuidRuntimeMappingMock,
         },
       },
+      getBuiltInEntityDefinition,
     });
   });
 
@@ -100,7 +102,7 @@ describe('useEntityEuidFromAlerts', () => {
 
     expect(result.current.euid).toBe('host:test-id');
     expect(searchMock).toHaveBeenCalledTimes(1);
-    expect(getEuidRuntimeMappingMock).toHaveBeenCalledWith('host');
+    expect(getEuidRuntimeMappingMock).toHaveBeenCalledWith(getBuiltInEntityDefinition('host'));
   });
 
   it('returns undefined EUID when no alert matches the field value', async () => {

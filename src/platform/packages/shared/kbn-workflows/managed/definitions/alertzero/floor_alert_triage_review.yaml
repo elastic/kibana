@@ -8,9 +8,8 @@ description: >
   leaves the tags alone.
 
   Started by the Worker with `workflow.executeAsync` after the batch has been
-  classified, tagged and noted, so the Worker never waits for a human. A
-  per-rule limit caps how many reviews wait at once; further ones are skipped and
-  the alerts stay open and tagged `az:false_positive`.
+  classified, tagged and noted, so the Worker never waits for a human. There is
+  no limit on how many reviews wait at once.
 enabled: true
 tags:
   - security
@@ -25,32 +24,9 @@ settings:
   # Manual autonomy, and a failed or unauthorized attempt re-parks within the same deadline, so
   # the Worker Investigation lifecycle contract puts the ceiling at 168 h. Keep this above it.
   timeout: "170h"
-  # `concurrency.max` reviews per rule wait for a decision at once. The engine counts pending,
-  # waiting and running executions of the group, and a review parked on its proposal is one of
-  # them. One more is SKIPPED at dispatch, before any step runs, and the Worker sees that on the
-  # execution record and says so in the Investigation.
-  #
-  # A slot is held until the proposal is decided or expires (up to 72 h at Manual autonomy), so a
-  # rule that fires faster than analysts decide fills its slots and then raises no further closure
-  # proposals until some are decided. The alerts of a skipped batch are not revisited later.
-  #
-  # The limit is a ceiling, not a guarantee. The engine counts first and then starts the run, so
-  # concurrent dispatches can overshoot it slightly, and it lets a run start when the count itself
-  # fails. Running reviews hold a slot too, including at supervised autonomy where nothing waits
-  # for a human.
-  #
-  # `drop`, not `queue` or `cancel-in-progress`. `queue` holds the review until an analyst decides
-  # the older ones, and expires it after 24h. `cancel-in-progress` cancels the oldest review while
-  # it is parked, which strands its proposal `pending` forever, because nothing withdraws it. Only
-  # the closure proposal is skipped: the classification, tags, notes and Investigation of the batch
-  # are already written by the Worker.
-  #
-  # The key is evaluated before inputs are validated, so it must read a plain input value. It is
-  # scoped to the space the Worker runs in, and a rule id belongs to one space.
-  concurrency:
-    key: "alert-triage-review-{{ inputs.rule_id }}"
-    strategy: drop
-    max: 10
+  # No concurrency limit: every batch with confident false positives raises its proposal. A noisy
+  # rule can therefore have many proposals waiting for a decision at once. Spotting noisy rules,
+  # for example from knowledge indicators, is handled separately and is not decided here.
 
 triggers:
   # Started by the Alert Triage Worker. Manual so it owns no schedule of its own.
@@ -67,8 +43,7 @@ triggers:
           minLength: 1
           maxLength: 512
           description: >-
-            Id of the detection rule that produced the batch. Keys the per-rule limit on
-            reviews waiting for a decision.
+            Id of the detection rule that produced the batch.
         rule_name:
           type: string
           maxLength: 1024
@@ -83,6 +58,12 @@ triggers:
           description: >-
             Alert `_id` values classified as false positive at or above the confidence floor.
             These are the alerts the proposal closes.
+        entity_summary:
+          type: string
+          maxLength: 256
+          description: >-
+            Hosts and users behind the candidates, worded for the proposal title, such as
+            `on build-agent-01 (svc-backup)`. Empty or omitted when no candidate names one.
         confidence_floor:
           type: number
           description: Confidence floor the candidates passed, quoted in the proposal and its comment.
@@ -114,6 +95,11 @@ triggers:
 #   2. gate_fp_close        — post the proposal comment, raise the proposal, wait for the decision
 #   3. one branch per outcome — approved, dismissed, expired, unknown
 
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Alert Triage worker"
+
 steps:
   - name: count_fp_candidates
     type: data.set
@@ -140,6 +126,7 @@ steps:
     on-failure:
       continue: true
     with:
+      author_name: "{{ consts.author_name }}"
       conversation_id: "{{ inputs.conversation_id }}"
       message: >-
         Proposing closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor.
@@ -159,6 +146,7 @@ steps:
           on-failure:
             continue: true
           with:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ inputs.conversation_id }}"
             message: >-
               ⚠️ The closure proposal could not be completed: {{ error.message }}.
@@ -168,6 +156,9 @@ steps:
       run-as-mode: inherit
       inputs:
         conversationId: "{{ inputs.conversation_id }}"
+        title: >-
+          {%- assign entity_summary = inputs.entity_summary | default: '' -%}
+          Close {% if variables.fp_candidate_count == 1 and entity_summary != '' %}alert{% elsif variables.fp_candidate_count == 1 %}1 alert{% else %}{{ variables.fp_candidate_count }} alerts{% endif %}{% if entity_summary != '' %} {{ entity_summary }}{% endif %} as false positive
         comment: >-
           {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ inputs.confidence_floor }}).
           Approving this proposal will close them with workflow_reason=false_positive.
@@ -232,11 +223,22 @@ steps:
             status: closed
             close_reason: false_positive
 
+      - name: report_investigation_closed_after_approval
+        type: alertzero.reportWorkerOutcome
+        if: "${{ steps.close_investigation_after_approval.error == blank and steps.close_investigation_after_approval.output.changed_fields contains 'status' }}"
+        on-failure:
+          continue: true
+        with:
+          event: worker_investigation_closed
+          investigation_id: "{{ inputs.conversation_id }}"
+          close_reason: false_positive
+
       - name: post_comment_outcome_approved
         type: ai.conversation.add_user_message
         on-failure:
           continue: true
         with:
+          author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
             Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.
@@ -331,11 +333,22 @@ steps:
                 status: closed
                 close_reason: other
 
+          - name: report_investigation_closed_after_dismissal
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_investigation_after_dismissal.error == blank and steps.close_investigation_after_dismissal.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ inputs.conversation_id }}"
+              close_reason: other
+
           - name: post_comment_outcome_dismissed
             type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
                 Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
@@ -345,6 +358,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
                 ⚠️ The proposal was dismissed, but its details could not be read after
@@ -378,11 +392,22 @@ steps:
             status: closed
             close_reason: other
 
+      - name: report_investigation_closed_after_expiry
+        type: alertzero.reportWorkerOutcome
+        if: "${{ steps.close_investigation_after_expiry.error == blank and steps.close_investigation_after_expiry.output.changed_fields contains 'status' }}"
+        on-failure:
+          continue: true
+        with:
+          event: worker_investigation_closed
+          investigation_id: "{{ inputs.conversation_id }}"
+          close_reason: other
+
       - name: post_comment_outcome_expired
         type: ai.conversation.add_user_message
         on-failure:
           continue: true
         with:
+          author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
             The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
@@ -401,6 +426,7 @@ steps:
         on-failure:
           continue: true
         with:
+          author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           # Does not assert every candidate remains open: an earlier close attempt may have
           # partly succeeded (action_close_alerts_false_positive's fail_incomplete_close
@@ -410,3 +436,22 @@ steps:
           # wrong) closed/open count.
           message: >-
             ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
+
+  # Telemetry: how the closure proposal settled, once its outcome has been applied.
+  - name: report_closure_resolved
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: alert_triage_closure_resolved
+      outcome: |-
+        {%- if variables.proposal_outcome == 'approved' or variables.proposal_outcome == 'dismissed' or variables.proposal_outcome == 'expired' -%}
+        {{ variables.proposal_outcome }}
+        {%- else -%}
+        unknown
+        {%- endif -%}
+      alerts_proposed: "${{ variables.fp_candidate_count | default: 0 }}"
+      alerts_retag_failed: "${{ variables.failed_retag_count | default: 0 }}"
+      auto_approve_requested: "${{ inputs.autonomy == 'supervised' }}"
+      proposal_read_failed: "${{ steps.get_proposal.error != blank }}"
+      investigation_id: "{{ inputs.conversation_id }}"

@@ -13,12 +13,37 @@ import {
   setAlertingV2EnabledSetting,
   unsetAlertingV2EnabledSetting,
 } from '../../../scout/ui/fixtures/alerting_v2_setting';
+import { deleteInboxEpisode, seedInboxEpisode } from '../../../scout/ui/fixtures/inbox_episode';
 
 const suffix = randomUUID();
 const alertId = `nightshift-v2-alert-${suffix}`;
 const ruleId = `nightshift-v2-rule-${suffix}`;
 const ruleName = `Nightshift v2 test rule ${suffix}`;
 const alertIndex = '.alerts-observability.apm.alerts-default';
+
+/** A shared investigations list response (`GET /internal/investigations/investigations`). */
+const investigationsList = (inProgress?: boolean) => ({
+  results:
+    inProgress === undefined
+      ? []
+      : [
+          {
+            id: 'investigation-1',
+            title: 'Investigation',
+            title_pending: false,
+            created_at: '2026-09-15T12:00:00.000Z',
+            updated_at: '2026-09-15T12:05:00.000Z',
+            agent_id: 'nightshift.investigation',
+            metadata: { status: 'open' },
+            in_progress: inProgress,
+            subjects: [{ type: 'alert', id: alertId, created_at: '2026-09-15T12:00:00.000Z' }],
+          },
+        ],
+  pagination: { total: inProgress === undefined ? 0 : 1, page: 1, per_page: 10 },
+});
+
+const isInvestigationsList = (url: URL) =>
+  url.pathname.endsWith('/internal/investigations/investigations') && url.searchParams.size > 0;
 
 const mockNightshiftApis = async (page: any) => {
   await page.route(
@@ -27,21 +52,9 @@ const mockNightshiftApis = async (page: any) => {
       await route.fulfill({ status: 200, json: { available: true } });
     }
   );
-  await page.route(
-    (url: URL) =>
-      url.pathname.endsWith('/internal/nightshift/investigations') && url.searchParams.size > 0,
-    async (route: any) => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          results: [],
-          page: 1,
-          size: 2,
-          total: 0,
-        },
-      });
-    }
-  );
+  await page.route(isInvestigationsList, async (route: any) => {
+    await route.fulfill({ status: 200, json: investigationsList() });
+  });
   await page.route(
     (url: URL) =>
       url.pathname.endsWith('/internal/nightshift/investigations') && url.searchParams.size === 0,
@@ -55,8 +68,15 @@ test.describe(
   'Observability Alerting v2 Inbox investigation actions',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let nativeRuleId: string;
+    let nativeEpisodeId: string;
+
     test.beforeAll(async ({ esClient, kbnClient }) => {
       await setAlertingV2EnabledSetting(kbnClient, true);
+      ({ ruleId: nativeRuleId, episodeId: nativeEpisodeId } = await seedInboxEpisode(
+        esClient,
+        kbnClient
+      ));
       const timestamp = new Date().toISOString();
       await esClient.create({
         index: alertIndex,
@@ -91,6 +111,7 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, kbnClient }) => {
+      await deleteInboxEpisode(esClient, kbnClient, { ruleId: nativeRuleId });
       await esClient.deleteByQuery({
         index: alertIndex,
         query: { ids: { values: [alertId] } },
@@ -119,7 +140,7 @@ test.describe(
       const investigationsPromise = page.waitForResponse(
         (response) =>
           response.request().method() === 'GET' &&
-          response.url().includes('/internal/nightshift/investigations?')
+          response.url().includes('/internal/investigations/investigations?')
       );
       await menuButton.click();
       await investigationsPromise;
@@ -147,11 +168,35 @@ test.describe(
       await investigateItem.click();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
       await expect(investigateItem).toHaveText('Investigating…');
       await expect(investigateItem).toHaveAttribute('aria-disabled', 'true');
       releaseStart();
+    });
+
+    test('triggers investigation for a native v2 episode using its episode id', async ({
+      page,
+      pageObjects,
+    }) => {
+      const alerting = pageObjects.observabilityAlerting;
+      await alerting.gotoInboxFilteredByRule(nativeRuleId);
+      await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
+
+      const menuButton = page.getByRole('button', { name: 'Additional actions' });
+      await expect(menuButton).toBeVisible({ timeout: 30_000 });
+      await menuButton.click();
+
+      const requestPromise = page.waitForRequest(
+        (request) =>
+          request.method() === 'POST' &&
+          request.url().endsWith('/internal/nightshift/investigations')
+      );
+      await page.testSubj.locator('investigateAlert').click();
+
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', ids: [nativeEpisodeId] },
+      });
     });
 
     test('triggers investigation from classic alert details flyout take action menu', async ({
@@ -180,7 +225,7 @@ test.describe(
       await investigateItem.click();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
     });
 
@@ -188,22 +233,10 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      let status: 'running' | 'completed' = 'running';
-      await page.route(
-        (url: URL) =>
-          url.pathname.endsWith('/internal/nightshift/investigations') && url.searchParams.size > 0,
-        async (route: any) => {
-          await route.fulfill({
-            status: 200,
-            json: {
-              results: [{ investigation_id: 'investigation-1', status }],
-              page: 1,
-              size: 2,
-              total: 1,
-            },
-          });
-        }
-      );
+      let inProgress = true;
+      await page.route(isInvestigationsList, async (route: any) => {
+        await route.fulfill({ status: 200, json: investigationsList(inProgress) });
+      });
       const alerting = pageObjects.observabilityAlerting;
       await alerting.gotoInboxFilteredByRule(ruleId);
       await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
@@ -218,7 +251,7 @@ test.describe(
       const investigationsPromise = page.waitForResponse(
         (response) =>
           response.request().method() === 'GET' &&
-          response.url().includes('/internal/nightshift/investigations?')
+          response.url().includes('/internal/investigations/investigations?')
       );
       await menuButton.click();
       await investigationsPromise;
@@ -231,7 +264,7 @@ test.describe(
 
       await page.keyboard.press('Escape');
 
-      status = 'completed';
+      inProgress = false;
       await page.reload();
       await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
       await expect(menuButton).toBeVisible({ timeout: 30_000 });
@@ -239,7 +272,7 @@ test.describe(
       const completedInvestigationsPromise = page.waitForResponse(
         (response) =>
           response.request().method() === 'GET' &&
-          response.url().includes('/internal/nightshift/investigations?')
+          response.url().includes('/internal/investigations/investigations?')
       );
       await menuButton.click();
       await completedInvestigationsPromise;
@@ -257,7 +290,7 @@ test.describe(
       const viewedInvestigationsPromise = page.waitForResponse(
         (response) =>
           response.request().method() === 'GET' &&
-          response.url().includes('/internal/nightshift/investigations?')
+          response.url().includes('/internal/investigations/investigations?')
       );
       await menuButton.click();
       await viewedInvestigationsPromise;

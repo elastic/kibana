@@ -419,7 +419,7 @@ evaluate.describe(
           dataset: {
             name: 'agent builder: security-find-rules-distractors',
             description:
-              'Distractor queries that touch rule-related vocabulary but should activate a different skill (alert-analysis, threat-hunting, entity-analytics, find-security-ml-jobs, detection-rule-edit, rule-management).',
+              'Distractor queries that touch rule-related vocabulary but should activate a different skill (alert-analysis, threat-hunting, entity-analytics, find-security-ml-jobs, detection-rule-edit, rule-authoring).',
             examples: [
               {
                 input: {
@@ -490,6 +490,20 @@ evaluate.describe(
                   // detection-rule-edit excludes enable/disable actions (see its index.ts
                   // exclusion line), so rule toggles route to find-security-rules instead.
                   expectedSkill: 'find-security-rules',
+                },
+              },
+              {
+                input: {
+                  question:
+                    'Show me my alerting V2 rules with ES|QL queries that monitor system CPU.',
+                },
+                output: {
+                  expected:
+                    'I will look up alerting V2 rules (not Security detection rules) that use ES|QL queries to monitor system CPU.',
+                },
+                metadata: {
+                  query_intent: 'V2 Rule Discovery',
+                  expectedSkill: 'rule-authoring',
                 },
               },
               // Removed the Alerting V2 rule-management row: that skill is gated off by

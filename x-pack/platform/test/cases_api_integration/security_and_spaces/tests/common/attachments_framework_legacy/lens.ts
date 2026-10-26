@@ -8,10 +8,10 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  LENS_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const persistableStateComment = patchedCase.comments?.find(
-        (comment) => comment.type === AttachmentType.persistableState
+        (comment) => comment.type === LENS_ATTACHMENT_TYPE
       );
 
       const esResponse = await getSOFromKibanaIndex({

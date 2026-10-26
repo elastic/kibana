@@ -12,10 +12,12 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getDefaultAdHocDataViews } from './accessors';
 import type { ClassicNavRootProfileProvider } from './types';
 
+export const CLASSIC_NAV_ROOT_PROFILE_ID = 'classic-nav-root-profile';
+
 export const createClassicNavRootProfileProvider = (
   services: ProfileProviderServices
 ): ClassicNavRootProfileProvider => ({
-  profileId: 'classic-nav-root-profile',
+  profileId: CLASSIC_NAV_ROOT_PROFILE_ID,
   profile: { getDefaultAdHocDataViews },
   resolve: (params) => {
     if (typeof params.solutionNavId === 'string') {

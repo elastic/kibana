@@ -53,9 +53,13 @@ describe('PerOsPolicySettingsForm', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     storageMock = mockedContext.startServices.storage;
-    // trustedDevices is on by default in experimental features; keep it off unless a
-    // test is exercising the device-control gate so card presence stays stable.
-    mockedContext.setExperimentalFlag({ linuxDnsEvents: true, trustedDevices: false });
+    // trustedDevices and custom YARA signatures are on by default; keep them off unless a
+    // test is exercising that gate so card presence stays stable.
+    mockedContext.setExperimentalFlag({
+      linuxDnsEvents: true,
+      trustedDevices: false,
+      customYaraSignaturesEnabled: false,
+    });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -289,6 +293,65 @@ describe('PerOsPolicySettingsForm', () => {
       render();
 
       expect(renderResult.getByTestId(testSubj.perOsDeviceControl.card)).toBeInTheDocument();
+    });
+  });
+
+  describe('endpointAiDataCollection gate', () => {
+    it('does not render the AI Data Collection card when the flag is off', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: false,
+      });
+      render();
+
+      expect(
+        renderResult.queryByTestId(testSubj.perOsAiDataCollection.card)
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders the AI Data Collection card when the flag is on', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      render();
+
+      expect(renderResult.getByTestId(testSubj.perOsAiDataCollection.card)).toBeInTheDocument();
+    });
+
+    it('still renders the AI Data Collection card when the protections upsell is active', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      useGetProtectionsUnavailableComponentMock.mockReturnValue(() => (
+        <div data-test-subj="paywall">{'pay up!'}</div>
+      ));
+      render();
+
+      expect(renderResult.getByTestId('paywall')).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.perOsAiDataCollection.card)).toBeInTheDocument();
+    });
+
+    it('renders before the Settings section, ahead of the Event collection card', () => {
+      mockedContext.setExperimentalFlag({
+        linuxDnsEvents: true,
+        trustedDevices: false,
+        endpointAiDataCollection: true,
+      });
+      render();
+
+      const aiDataCollectionCard = renderResult.getByTestId(testSubj.perOsAiDataCollection.card);
+      const eventCollectionCard = renderResult.getByTestId(testSubj.perOsEventCollection.card);
+
+      // The Event collection card sits inside the Settings section, so this confirms the
+      // AI Data Collection card renders ahead of that section rather than inside it.
+      expect(aiDataCollectionCard.compareDocumentPosition(eventCollectionCard)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
     });
   });
 

@@ -40,6 +40,7 @@ import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
+import { PubSubService } from '@kbn/core-pubsub-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -61,10 +62,8 @@ import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import {
-  ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   isUiamCredential,
-  isExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
@@ -118,6 +117,7 @@ export class Server {
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
   private readonly dataStreams: DataStreamsService;
+  private readonly pubsub: PubSubService;
   private readonly userStorage: UserStorageService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
@@ -182,6 +182,7 @@ export class Server {
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
     this.dataStreams = new DataStreamsService(core);
+    this.pubsub = new PubSubService(core);
     this.userStorage = new UserStorageService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
@@ -379,6 +380,7 @@ export class Server {
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();
+    const pubsubSetup = this.pubsub.setup();
 
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
@@ -487,6 +489,7 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
+      pubsub: pubsubSetup,
       userStorage: userStorageSetup,
     };
 
@@ -625,21 +628,7 @@ export class Server {
         if (!credential || !isUiamCredential(credential)) {
           return undefined;
         }
-        if (isExternalUiamCredential(request) || uiam.isExternalApiKey(request)) {
-          return undefined;
-        }
-
-        const inboundClientSecret = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
-        let inboundSecrets: string[] = [];
-        if (typeof inboundClientSecret === 'string') {
-          inboundSecrets = [inboundClientSecret];
-        } else if (Array.isArray(inboundClientSecret)) {
-          inboundSecrets = inboundClientSecret;
-        }
-        const hasUpstreamSecret = inboundSecrets.some(
-          (entry) => entry.length > 0 && !uiam.isOwnClientAuthentication(entry)
-        );
-        if (hasUpstreamSecret) {
+        if (uiam.isExternalApiKey(request)) {
           return undefined;
         }
 
@@ -647,6 +636,9 @@ export class Server {
           UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
         ];
       });
+      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
+        uiam.isOwnClientAuthentication(value)
+      );
     }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
@@ -655,6 +647,7 @@ export class Server {
     });
 
     const featureFlagsStart = this.featureFlags.start();
+    const pubsubStart = this.pubsub.start();
 
     const pricingStart = this.pricing.start();
 
@@ -686,6 +679,7 @@ export class Server {
       pricing: pricingStart,
       injection: injectionStart,
       dataStreams: dataStreamsStart,
+      pubsub: pubsubStart,
       userStorage: userStorageStart,
     };
 
@@ -705,6 +699,7 @@ export class Server {
     this.httpRateLimiter.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
+    this.pubsub.stop(); // Stop dispatching before consumers are torn down, so no handler starts against a stopped plugin
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();

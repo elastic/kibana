@@ -39,7 +39,7 @@ import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
 import { FeatureSettingsLink } from './feature_settings_link';
-import { ViewExecutionsLink } from './view_executions_link';
+import { ViewExecutionsLink } from '../../../components/view_executions_link/view_executions_link';
 import { ThreatIntelSupplySection } from './threat_intel_supply_section';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';

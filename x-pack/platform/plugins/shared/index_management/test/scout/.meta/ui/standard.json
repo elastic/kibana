@@ -1,5 +1,5 @@
 {
-  "sha1": "9279c2b0797f919ec7661d92da2e36e84f1e67f6",
+  "sha1": "4aac21807b31724c72ac29fc59152cc877134758",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -225,8 +225,8 @@
       }
     },
     {
-      "id": "ab141bdc9191bd5-5cb9a65537172d2",
-      "title": "Data streams index mode allows to downgrade data stream from logsdb to time series index mode",
+      "id": "ab141bdc9191bd5-324e34f2be8de9f",
+      "title": "Data streams index mode allows to upgrade data stream from standard to time series index mode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

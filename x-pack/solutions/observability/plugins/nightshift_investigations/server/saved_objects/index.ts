@@ -6,10 +6,6 @@
  */
 
 export {
-  nightshiftInvestigationSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-} from './investigation_saved_object';
-export {
   nightshiftSecretsSavedObjectType,
   nightshiftSecretsEncryptionParams,
   NIGHTSHIFT_SECRETS_SO_TYPE,
@@ -26,3 +22,7 @@ export {
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './automation_saved_object';
+export {
+  nightshiftAutomationBudgetSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
+} from './automation_budget_saved_object';

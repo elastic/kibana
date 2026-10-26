@@ -131,7 +131,7 @@ const kibanaStartMockServicesWithLocator = {
 
 const mockRegisterAppAccess = jest.fn();
 
-const mockKibana = () => {
+const mockKibana = (overrides: Record<string, unknown> = {}) => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMockServicesWithLocator,
@@ -171,6 +171,7 @@ const mockKibana = () => {
           },
         },
       },
+      ...overrides,
     },
   });
 };
@@ -467,6 +468,71 @@ describe('Alert details', () => {
       });
       renderComponent();
       await waitFor(() => expect(mockRegisterAppAccess).not.toHaveBeenCalled());
+    });
+  });
+
+  describe('alerts list breadcrumb', () => {
+    const renderWithAlertingSettings = async ({
+      universalEnabled,
+      showClassicAlertsTable,
+    }: {
+      universalEnabled: boolean;
+      showClassicAlertsTable: boolean;
+    }) => {
+      mockKibana({
+        settings: {
+          ...kibanaStartMockServices.settings,
+          globalClient: {
+            ...kibanaStartMockServices.settings.globalClient,
+            isDeclared: jest.fn().mockReturnValue(true),
+            get: jest.fn().mockReturnValue(universalEnabled),
+          },
+          client: {
+            ...kibanaStartMockServices.settings.client,
+            get: jest.fn().mockReturnValue(showClassicAlertsTable),
+          },
+        },
+        http: {
+          basePath: { prepend: (path: string) => path },
+          get: jest.fn().mockReturnValue({ alertContext: [] }),
+        },
+      });
+      useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
+
+      const alertDetails = renderComponent();
+      await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
+
+      return useBreadcrumbsMock.mock.calls.at(-1)![0][0];
+    };
+
+    it('points at the classic alerts list while universal alerting is disabled', async () => {
+      const crumb = await renderWithAlertingSettings({
+        universalEnabled: false,
+        showClassicAlertsTable: false,
+      });
+
+      expect(crumb.href).toBe('/app/observability/alerts');
+      expect(crumb.deepLinkId).toBe('observability-overview:alerts');
+    });
+
+    it('points at the classic alerts list when universal alerting is enabled and the classic table is still shown', async () => {
+      const crumb = await renderWithAlertingSettings({
+        universalEnabled: true,
+        showClassicAlertsTable: true,
+      });
+
+      expect(crumb.href).toBe('/app/observability/alerts');
+      expect(crumb.deepLinkId).toBe('observability-overview:alerts');
+    });
+
+    it('points at the universal alerts list when universal alerting is enabled and the classic table is hidden', async () => {
+      const crumb = await renderWithAlertingSettings({
+        universalEnabled: true,
+        showClassicAlertsTable: false,
+      });
+
+      expect(crumb.href).toBe('/app/observability/alerting/alerts');
+      expect(crumb.deepLinkId).toBe('observabilityAlerting:alerts');
     });
   });
 });

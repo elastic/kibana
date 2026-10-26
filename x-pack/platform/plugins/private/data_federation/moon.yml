@@ -41,6 +41,9 @@ dependsOn:
   - '@kbn/license-api-guard-plugin'
   - '@kbn/esql-language'
   - '@kbn/esql-utils'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/analytics'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -53,7 +56,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - .storybook/**/*
+    - test/scout_data_federation/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

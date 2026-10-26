@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import {
   UnifiedExecutionStatus,
@@ -69,17 +69,15 @@ export const ReadRuleExecutionResultsRequestBody = lazySchema(() =>
         /**
          * Start of the time range (executions that started within this range).
          */
-        from: z
-          .string()
-          .datetime()
-          .describe('Start of the time range (executions that started within this range).'),
+        from: isoDateTime().describe(
+          'Start of the time range (executions that started within this range).'
+        ),
         /**
          * End of the time range (executions that started within this range).
          */
-        to: z
-          .string()
-          .datetime()
-          .describe('End of the time range (executions that started within this range).'),
+        to: isoDateTime().describe(
+          'End of the time range (executions that started within this range).'
+        ),
       })
       .optional()
       .describe(

@@ -1,12 +1,12 @@
 {
-  "sha1": "7e2f03be824ce018ad0dbbb560ee18b1ea839d45",
+  "sha1": "0910950779d0c2a16f9576d809fea107a3025687",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "f3ddbbb53c28ebe-21381b726c466b4",
-      "title": "Reset alerting v2 nav settings",
+      "id": "f3ddbbb53c28ebe-e56c37aa9bfdb56",
+      "title": "Disable alerting v2",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 6,
+        "line": 14,
         "column": 1
       }
     },
@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 22,
+        "line": 24,
         "column": 1
       }
     },
@@ -356,8 +356,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 19,
-        "column": 43
+        "line": 25,
+        "column": 41
       }
     },
     {
@@ -370,7 +370,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 75,
+        "line": 85,
         "column": 13
       }
     },
@@ -384,7 +384,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 122,
+        "line": 132,
         "column": 91
       }
     },
@@ -398,7 +398,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 166,
+        "line": 176,
         "column": 24
       }
     },
@@ -412,7 +412,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 190,
+        "line": 200,
         "column": 32
       }
     },
@@ -435,7 +435,7 @@
     {
       "id": "d727dcfffd97d68-e91ca78d2096478",
       "title": "Custom Threshold Rule - Ad-hoc Data View should create a custom threshold rule with an ad-hoc data view",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -444,7 +444,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/ad_hoc_data_view.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 7
       }
     },
@@ -941,6 +941,22 @@
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
         "line": 27,
         "column": 72
+      }
+    },
+    {
+      "id": "cdecdef6b56efc9-7f9ce254f0965d8",
+      "title": "Restore the default alerting v2 settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

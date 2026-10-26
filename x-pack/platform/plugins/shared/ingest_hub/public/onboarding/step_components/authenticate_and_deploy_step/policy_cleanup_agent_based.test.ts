@@ -343,3 +343,68 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     expect(payload.inputs['removed-svc-aws-s3']).toEqual({ enabled: false, streams: {} });
   });
 });
+
+describe('cleanupAgentBasedPolicies — typed keys', () => {
+  const vpcflow = makeService('vpcflow');
+  const refs = {
+    access_key_id: { isSecretRef: true, id: 'ref-akid' },
+    secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+  };
+
+  it('stores typed keys once and has the other updated policies use that secret', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    const gets: Record<string, number> = {};
+    mockGetOnePackagePolicy.mockImplementation(async (policyId: string) => {
+      gets[policyId] = (gets[policyId] ?? 0) + 1;
+      // The first read is the update's own; later reads see the secret the first PUT stored.
+      return {
+        data: {
+          item: {
+            name: policyId,
+            namespace: 'default',
+            package: { version: '2.5.0' },
+            ...(gets[policyId] > 1
+              ? {
+                  vars: {
+                    access_key_id: { value: refs.access_key_id },
+                    secret_access_key: { value: refs.secret_access_key },
+                  },
+                }
+              : {}),
+          },
+        },
+      };
+    });
+
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      selectedAgentPolicyIds: [],
+      hasTypedSecrets: true,
+      agentCredentials: {
+        method: 'static_keys',
+        access_key_id: 'AKID',
+        secret_access_key: 'SECRET',
+      } as never,
+      instances: [makeInstance('inst-b', 'vpcflow'), makeInstance('inst-d', 'vpcflow')],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1', 'inst-c': 'policy-2' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1', 'inst-d': 'policy-2' },
+    });
+
+    expect(mockUpdatePackagePolicy).toHaveBeenCalledTimes(2);
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: 'AKID',
+      secret_access_key: 'SECRET',
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[1][1].vars).toEqual(refs);
+    expect(ops.sharedRefs?.get('access_key_id')).toEqual(refs.access_key_id);
+  });
+});

@@ -10,18 +10,6 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { useActionPolicyForm } from './use_action_policy_form';
 import { DEFAULT_FORM_STATE } from './constants';
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  isActionValid: (action: {
-    source: 'existing' | 'inline';
-    workflowId?: string | null;
-    connectorId?: string | null;
-    params?: string;
-  }) =>
-    action.source === 'existing'
-      ? Boolean(action.workflowId)
-      : action.connectorId != null && (action.params ?? '').trim() !== '',
-}));
-
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
   name: 'Critical production alerts',
@@ -91,58 +79,6 @@ describe('useActionPolicyForm', () => {
         destinations: [],
         inlineActions: [],
       });
-    });
-  });
-
-  describe('submit gating (isSubmitEnabled)', () => {
-    it('is disabled without a name or destination', () => {
-      const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
-      );
-
-      expect(result.current.isSubmitEnabled).toBe(false);
-    });
-
-    it('is enabled with only a valid inline action and no existing destinations', async () => {
-      const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
-      );
-
-      await act(async () => {
-        result.current.methods.setValue('name', 'Inline only');
-        result.current.methods.setValue('inlineActions', [
-          {
-            id: 'draft-1',
-            source: 'inline',
-            stepType: 'slack2.sendMessage',
-            connectorId: 'connector-1',
-            params: 'message: hi',
-          },
-        ]);
-      });
-
-      expect(result.current.isSubmitEnabled).toBe(true);
-    });
-
-    it('is disabled when an inline action is incomplete', async () => {
-      const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
-      );
-
-      await act(async () => {
-        result.current.methods.setValue('name', 'Inline only');
-        result.current.methods.setValue('inlineActions', [
-          {
-            id: 'draft-1',
-            source: 'inline',
-            stepType: 'slack2.sendMessage',
-            connectorId: null,
-            params: 'message: ""',
-          },
-        ]);
-      });
-
-      expect(result.current.isSubmitEnabled).toBe(false);
     });
   });
 

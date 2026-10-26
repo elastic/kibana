@@ -1,9 +1,25 @@
 {
-  "sha1": "5727c1dea6ec05110e3e12d5266061b6d1ea3b8e",
+  "sha1": "f22543cdb02507e72b2f9d27796812850c348bd0",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "a86cbde7f31a096-e56c37aa9bfdb56",
+      "title": "Disable alerting v2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/global.setup.ts",
+        "line": 6,
+        "column": 1
+      }
+    },
     {
       "id": "92c848ad333d86d-f3183219f13c400",
       "title": "Alert deletion schedules a deletion task and removes old alerts",
@@ -390,6 +406,22 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/stack_alerts_search_nav_visibility.spec.ts",
         "line": 33,
         "column": 41
+      }
+    },
+    {
+      "id": "24b32a99fd9a180-a55560dcd95bea7",
+      "title": "Restore the default alerting v2 setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pick } from 'lodash';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import {
   discoverSessionApiClassicTabSchema,
@@ -57,7 +58,8 @@ export const toStoredSessionSettings = (tab: DiscoverSessionApiTab): StoredSessi
   ...('chart_interval' in tab &&
     tab.chart_interval !== undefined && { chartInterval: tab.chart_interval }),
   timeRestore: tab.time_range !== undefined,
-  timeRange: tab.time_range,
+  // The shared schema includes mode, but Discover derives it from the dates.
+  timeRange: tab.time_range ? pick(tab.time_range, ['from', 'to']) : undefined,
   refreshInterval: tab.refresh_interval,
   usesAdHocDataView: tab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE,
   ...('esql_approximation' in tab &&
@@ -72,7 +74,10 @@ const fromStoredCommonSessionSettings = (
   ...(tab.breakdownField !== undefined && {
     breakdown_field: tab.breakdownField,
   }),
-  ...(tab.timeRestore && tab.timeRange !== undefined && { time_range: tab.timeRange }),
+  ...(tab.timeRestore &&
+    tab.timeRange !== undefined && {
+      time_range: pick(tab.timeRange, ['from', 'to']),
+    }),
   ...(tab.refreshInterval !== undefined && {
     refresh_interval: tab.refreshInterval,
   }),
