@@ -152,7 +152,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Global data stream namespace from the Service settings step. When omitted, using the default namespace or the one inherited from the agent policy.',
+          'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
       },
     })
   ),
@@ -275,7 +275,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         maxLength: 100,
         meta: {
           description:
-            'Global data stream namespace from the Service settings step. When omitted, using the default namespace or the one inherited from the agent policy.',
+            'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
         },
       })
     ),
@@ -377,7 +377,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
           maxLength: 100,
           meta: {
             description:
-              'Global data stream namespace from the Service settings step. Send null to clear it. When omitted, using the default namespace or the one inherited from the agent policy.',
+              'Global data stream namespace from the Service settings step. Send null to clear it. When omitted or cleared, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
           },
         })
       )
