@@ -29,18 +29,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { getSourcePolicyName } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { supportsNamespace } from './instance_namespace_field';
-import { supportsIntegrationSettings } from './integration_settings';
 import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
+import { useDuplicates } from './use_duplicates';
 import { ServiceSettingsFlyout } from './service_settings_flyout';
 import { SharedSettingsSection } from './shared_settings_section';
 import { DuplicateServiceModal } from './duplicate_service_modal';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
-import { buildDuplicateName } from './duplicate_name';
 import type { SignalFilter } from '../services_step/use_services_step';
 import { StepFooter } from '../step_footer';
 
@@ -110,7 +108,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     );
 
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
-  const [duplicateSourceInstanceId, setDuplicateSourceInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
 
   const activeFlyoutInstance = activeFlyoutInstanceId
@@ -120,12 +117,19 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     ? awsServicesMap?.get(activeFlyoutInstance.serviceId) ?? null
     : null;
 
-  const duplicateSourceInstance = duplicateSourceInstanceId
-    ? instances.find((i) => i.instanceId === duplicateSourceInstanceId) ?? null
-    : null;
-  const duplicateSourceService = duplicateSourceInstance
-    ? awsServicesMap?.get(duplicateSourceInstance.serviceId) ?? null
-    : null;
+  const duplicates = useDuplicates({
+    instances,
+    awsServicesMap,
+    allInstanceNames,
+    getServiceVars,
+    addDuplicate,
+    integrationName,
+    globalNamespace: namespace,
+    bareNamePackage,
+    deploymentMethod,
+    policyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
+  });
+  const { source: duplicateSource, open: openDuplicate } = duplicates;
 
   const handleFlyoutApply =
     (instanceId: string) =>
@@ -138,27 +142,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         instanceId,
         varsByDataStream,
         enabledDataStreams,
-        instanceNamespace
+        instanceNamespace,
+        duplicates.getRenamedName(instanceId, instanceNamespace)
       );
       setActiveFlyoutInstanceId(null);
     };
-
-  const handleDuplicateAdd = (
-    name: string,
-    varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
-    enabledDataStreams: string[],
-    duplicateNamespace: string
-  ) => {
-    if (!duplicateSourceInstanceId) return;
-    addDuplicate(
-      duplicateSourceInstanceId,
-      name,
-      varsByDataStream,
-      enabledDataStreams,
-      duplicateNamespace
-    );
-    setDuplicateSourceInstanceId(null);
-  };
 
   const continueTooltipContent = useMemo(() => {
     if (isReady && !hasUnloadedSelectedManifests && !hasErroredSelectedManifests) return undefined;
@@ -373,7 +361,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                           icon="copy"
                           onClick={() => {
                             setOpenMenuInstanceId(null);
-                            setDuplicateSourceInstanceId(inst.instanceId);
+                            openDuplicate(inst.instanceId);
                           }}
                           data-test-subj={`serviceSettingsStep-duplicateAction-${inst.instanceId}`}
                         >
@@ -415,6 +403,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       globalRegion,
       incompleteInstanceIds,
       openMenuInstanceId,
+      openDuplicate,
       removeInstance,
     ]
   );
@@ -579,29 +568,20 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         />
       )}
 
-      {duplicateSourceService && duplicateSourceInstance && (
+      {duplicateSource && (
         <DuplicateServiceModal
-          service={duplicateSourceService}
-          sourceConfig={getServiceVars(duplicateSourceInstance.instanceId)}
-          suggestedName={buildDuplicateName(
-            // The service name is the duplicate's policy name, so it starts from the name of the
-            // policy the service is deployed into.
-            integrationName.trim() &&
-              supportsIntegrationSettings(duplicateSourceService, deploymentMethod)
-              ? getSourcePolicyName(
-                  integrationName,
-                  duplicateSourceService.packageName,
-                  getServiceVars(duplicateSourceInstance.instanceId).namespace || namespace,
-                  bareNamePackage
-                )
-              : duplicateSourceService.name,
-            allInstanceNames
-          )}
+          service={duplicateSource.service}
+          sourceConfig={getServiceVars(duplicateSource.instance.instanceId)}
+          // The modal starts the duplicate in the global namespace.
+          suggestedName={duplicates.suggestName(duplicateSource.service, namespace)}
+          suggestName={(duplicateNamespace) =>
+            duplicates.suggestName(duplicateSource.service, duplicateNamespace)
+          }
           existingNames={allInstanceNames}
           globalRegion={globalRegion}
           globalNamespace={namespace}
-          onAdd={handleDuplicateAdd}
-          onCancel={() => setDuplicateSourceInstanceId(null)}
+          onAdd={duplicates.add}
+          onCancel={duplicates.close}
         />
       )}
     </div>

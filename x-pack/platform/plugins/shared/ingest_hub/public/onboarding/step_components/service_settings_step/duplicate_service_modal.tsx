@@ -42,6 +42,8 @@ interface DuplicateServiceModalProps {
   sourceConfig: ServiceVars;
   /** Pre-filled name suggestion (e.g. "AWS CloudTrail [Duplicate]"). */
   suggestedName: string;
+  /** The suggestion for a namespace; the name follows it until the user types one. */
+  suggestName?: (namespace: string) => string;
   /** All existing instance names — used for collision detection. */
   existingNames: string[];
   globalRegion: string;
@@ -60,6 +62,7 @@ export function DuplicateServiceModal({
   service,
   sourceConfig,
   suggestedName,
+  suggestName,
   existingNames,
   globalRegion,
   globalNamespace = '',
@@ -68,6 +71,8 @@ export function DuplicateServiceModal({
 }: DuplicateServiceModalProps) {
   const [name, setName] = useState(suggestedName);
   const [nameTouched, setNameTouched] = useState(false);
+  // Whether the user typed a name; until then it follows the namespace.
+  const [nameEdited, setNameEdited] = useState(false);
 
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...sourceConfig.varsByDataStream,
@@ -187,6 +192,7 @@ export function DuplicateServiceModal({
             onChange={(e) => {
               setName(e.target.value);
               setNameTouched(true);
+              setNameEdited(true);
             }}
             onBlur={() => setNameTouched(true)}
             isInvalid={nameTouched && nameInvalid}
@@ -198,7 +204,13 @@ export function DuplicateServiceModal({
 
         {showNamespace && (
           <>
-            <InstanceNamespaceField namespace={namespace} onChange={setNamespace} />
+            <InstanceNamespaceField
+              namespace={namespace}
+              onChange={(value) => {
+                setNamespace(value);
+                if (!nameEdited && suggestName) setName(suggestName(value));
+              }}
+            />
             <EuiSpacer size="m" />
           </>
         )}

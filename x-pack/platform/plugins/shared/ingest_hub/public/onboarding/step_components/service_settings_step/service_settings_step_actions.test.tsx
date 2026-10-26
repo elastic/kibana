@@ -20,6 +20,7 @@ jest.mock('./duplicate_service_modal', () => ({
 }));
 jest.mock('../service_search_filter', () => ({ ServiceSearchFilter: () => null }));
 jest.mock('./duplicate_name', () => ({
+  ...jest.requireActual('./duplicate_name'),
   buildDuplicateName: (base: string) => `${base} [Duplicate]`,
 }));
 jest.mock('@kbn/ui-callout', () => ({ KbnWarningCallout: () => null }));
@@ -160,13 +161,9 @@ describe('ServiceSettingsStep — actions column', () => {
     expect(screen.getByTestId('duplicate-modal')).toBeInTheDocument();
   });
 
-  it('suggests the name of the policy the service is deployed into for a duplicate', () => {
+  it('suggests the policy name in the global namespace, where the duplicate starts', () => {
     const inst = makeInstance('agentless_svc', 'agentless_svc', 'Agentless Service', false);
-    renderStep([inst], new Map([['agentless_svc', AGENTLESS_SVC]]), {
-      getServiceVars: jest
-        .fn()
-        .mockReturnValue({ enabledDataStreams: [], varsByDataStream: {}, namespace: 'prod' }),
-    });
+    renderStep([inst], new Map([['agentless_svc', AGENTLESS_SVC]]), { namespace: 'prod' });
 
     fireEvent.click(screen.getByTestId('serviceSettingsStep-actionsButton-agentless_svc'));
     fireEvent.click(screen.getByTestId('serviceSettingsStep-duplicateAction-agentless_svc'));

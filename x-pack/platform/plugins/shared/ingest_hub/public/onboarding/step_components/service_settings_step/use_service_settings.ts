@@ -442,7 +442,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       instanceId: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      instanceNamespace?: string
+      instanceNamespace?: string,
+      /** A new display name for the instance, written in the same update. */
+      newName?: string
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
@@ -451,7 +453,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       const ownNamespace = isDuplicate ? instanceNamespace ?? current.namespace : undefined;
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        instances,
+        instances: newName
+          ? instances.map((i) => (i.instanceId === instanceId ? { ...i, name: newName } : i))
+          : instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
           [instanceId]: {

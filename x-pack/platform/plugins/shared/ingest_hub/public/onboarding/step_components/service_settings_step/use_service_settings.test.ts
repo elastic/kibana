@@ -200,6 +200,24 @@ describe('useServiceSettings — namespace', () => {
     expect(result.current.getServiceVars('svc_a__dup-2').namespace).toBe('staging');
   });
 
+  it('renames an instance in the same update when a new name is given', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.addDuplicate('svc_a', 'aws-1-staging [Duplicate]', {}, [], 'staging'));
+    act(() =>
+      result.current.setServiceFieldsAndInputs(
+        'svc_a__dup-1',
+        filledVars,
+        ['svc_a'],
+        'qa',
+        'aws-1-qa [Duplicate]'
+      )
+    );
+    expect(result.current.instances.find((i) => i.instanceId === 'svc_a__dup-1')?.name).toBe(
+      'aws-1-qa [Duplicate]'
+    );
+    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('qa');
+  });
+
   it('never keeps a namespace on an original, which follows the global one', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));

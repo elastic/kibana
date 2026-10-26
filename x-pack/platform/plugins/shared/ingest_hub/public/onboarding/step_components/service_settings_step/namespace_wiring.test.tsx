@@ -170,6 +170,23 @@ describe('DuplicateServiceModal namespace', () => {
     );
   });
 
+  it('updates the suggested name with the namespace until the user types a name', () => {
+    const { onAdd } = renderModal({ suggestName: (ns) => `aws-1-${ns} [Duplicate]` });
+    typeNamespace('qa');
+    expect(screen.getByTestId('duplicateServiceModal-nameField')).toHaveValue(
+      'aws-1-qa [Duplicate]'
+    );
+
+    fireEvent.change(screen.getByTestId('duplicateServiceModal-nameField'), {
+      target: { value: 'my copy' },
+    });
+    typeNamespace('prod');
+    expect(screen.getByTestId('duplicateServiceModal-nameField')).toHaveValue('my copy');
+
+    fireEvent.click(screen.getByTestId('duplicateServiceModal-addButton'));
+    expect(onAdd).toHaveBeenCalledWith('my copy', expect.anything(), expect.anything(), 'prod');
+  });
+
   it('disables Add while the namespace is invalid', () => {
     renderModal();
     typeNamespace('prod-eu');
