@@ -55,6 +55,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     application: { navigateToApp },
     cps,
     setBreadcrumbs,
+    showClassicBadge,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -178,6 +179,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           cps={cps}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
+          showClassicBadge={showClassicBadge}
         />
       )}
     </>

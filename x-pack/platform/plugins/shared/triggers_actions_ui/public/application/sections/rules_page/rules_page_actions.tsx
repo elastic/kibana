@@ -43,6 +43,7 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
     notifications: { toasts },
     ruleTypeRegistry,
     cps,
+    showClassicBadge,
   } = useKibana().services;
 
   const [isRuleTypeModalVisible, setIsRuleTypeModalVisible] = useState(false);
@@ -118,6 +119,7 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
           cps={cps}
+          showClassicBadge={showClassicBadge}
         />
       )}
     </RulesPageActionsContext.Provider>
