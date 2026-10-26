@@ -237,26 +237,36 @@ function calendarFits(
 }
 
 function fixedFits(interval: FixedInterval, range: ZonedDateRange, maxBuckets: number): boolean {
-  const alignedFrom = alignFixed(range.from, interval, range.timeZone);
   const width = interval.nominalMs;
-  if (!hasDstTransition(alignedFrom, range.to, range.timeZone)) {
-    const count = Math.floor((range.to - alignedFrom + width - 1) / width);
-    return count <= maxBuckets;
-  }
-
-  let cursor = alignedFrom;
+  // Match ES DateRoundingPicker.roundingIsOkFixedWidthUnit: count arithmetically
+  // inside a constant-offset period, then realign on the post-transition offset.
+  let boundary = alignFixed(range.from, interval, range.timeZone);
   let count = 0;
   let iterations = 0;
-  while (cursor < range.to) {
+  while (boundary < range.to) {
     iterations += 1;
     if (iterations > DST_WALK_CAP) {
       return false;
     }
-    count += 1;
+    const transition = nextTransitionAfter(boundary, range.timeZone);
+    const periodEnd = transition ?? Number.POSITIVE_INFINITY;
+    const limit = Math.min(periodEnd, range.to);
+    const inPeriod = Math.floor((limit - boundary + width - 1) / width);
+    if (inPeriod < 1) {
+      return false;
+    }
+    count += inPeriod;
     if (count > maxBuckets) {
       return false;
     }
-    cursor = moment.tz(cursor, range.timeZone).add(interval.amount, interval.unit).valueOf();
+    if (periodEnd >= range.to) {
+      break;
+    }
+    const next = firstBoundaryOnOrAfter(periodEnd, interval, range.timeZone);
+    if (next <= boundary) {
+      return false;
+    }
+    boundary = next;
   }
   return true;
 }
@@ -273,12 +283,21 @@ function alignFixed(from: number, interval: FixedInterval, timeZone: IanaTimeZon
   return from - localOffset;
 }
 
-function hasDstTransition(from: number, to: number, timeZone: IanaTimeZone): boolean {
+function nextTransitionAfter(utcMillis: number, timeZone: IanaTimeZone): number | undefined {
   const zone = moment.tz.zone(timeZone);
   if (zone == null) {
-    return false;
+    return undefined;
   }
-  return zone.untils.some((until) => until > from && until < to);
+  return zone.untils.find((until) => Number.isFinite(until) && until > utcMillis);
+}
+
+function firstBoundaryOnOrAfter(
+  utcMillis: number,
+  interval: FixedInterval,
+  timeZone: IanaTimeZone
+): number {
+  const rounded = alignFixed(utcMillis, interval, timeZone);
+  return rounded < utcMillis ? rounded + interval.nominalMs : rounded;
 }
 
 function toPublic(interval: InternalInterval): DateInterval {
