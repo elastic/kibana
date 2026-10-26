@@ -17,6 +17,7 @@ import { listConnectors } from './test/vendor_api/find_connector';
 import { updateVendorApi } from './test/vendor_api/update_vendor_api';
 
 const PACKAGE_DIR = path.resolve(__dirname, '..');
+const SPECS_DIR = path.join(__dirname, 'specs');
 const EXEMPTIONS = path.join(PACKAGE_DIR, 'vendor_api_exemptions.json');
 const SCRIPT = 'node scripts/connector_vendor_api';
 const RECORDING_TIMEOUT = 120_000;
@@ -101,19 +102,22 @@ describe('vendor API contract', () => {
   );
 
   describe('recorded artifacts', () => {
+    // Listed synchronously for it.each, and recursively, since connectors can be nested (atlassian/jira-cloud).
     const recorded = fs
-      .readdirSync(path.join(__dirname, 'specs'), { withFileTypes: true })
-      .filter((entry) => entry.isDirectory())
-      .filter((entry) =>
-        fs.existsSync(path.join(__dirname, 'specs', entry.name, 'vendor_api', 'manifest.json'))
+      .readdirSync(SPECS_DIR, { recursive: true, encoding: 'utf8' })
+      .filter(
+        (file) =>
+          path.basename(file) === 'manifest.json' &&
+          path.basename(path.dirname(file)) === 'vendor_api'
       )
-      .map(({ name }) => name);
+      .map((file) => path.dirname(path.dirname(file)))
+      .sort();
 
     it.each(recorded)(
       '%s re-records offline without problems or changes',
       async (name) => {
         const found = connectors.find(
-          ({ directory }) => directory === path.join(__dirname, 'specs', name, 'vendor_api')
+          ({ directory }) => directory === path.join(SPECS_DIR, name, 'vendor_api')
         );
         if (!found) {
           throw new Error(`specs/${name}/vendor_api belongs to no connector in all_specs.ts`);

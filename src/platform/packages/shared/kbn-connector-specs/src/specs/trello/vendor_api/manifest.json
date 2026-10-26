@@ -94,7 +94,18 @@
     "search": [
       {
         "method": "get",
-        "pagination": "none",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "firstPage": 0,
+            "pageParam": "cards_page",
+            "sizeParam": "cards_limit"
+          },
+          "response": {
+            "itemsPath": "cards"
+          },
+          "style": "page"
+        },
         "path": "/search",
         "source": "v3"
       }

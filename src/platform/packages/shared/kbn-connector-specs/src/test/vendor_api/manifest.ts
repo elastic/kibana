@@ -85,7 +85,8 @@ const paginationSchema = z.discriminatedUnion('style', [
   z
     .object({
       style: z.literal('next_url'),
-      request: nextUrlRequestSchema,
+      /** Omitted when the next URL is opaque (Azure's `nextLink`); the mock pages it itself. */
+      request: nextUrlRequestSchema.optional(),
       response: z.object({ itemsPath, nextPath: z.string().min(1) }).strict(),
       end: z.enum(['null', 'missing']).optional(),
       ...defaultSize,

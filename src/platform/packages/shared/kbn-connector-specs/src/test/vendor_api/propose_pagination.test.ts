@@ -82,6 +82,18 @@ describe('assessPagination', () => {
     expect(proposalOf({ 'x-ms-pageable': { nextLinkName: null } })?.pagination).toBe('none');
   });
 
+  it('reads an opaque x-ms-pageable next link without a request parameter', () => {
+    expect(
+      proposalOf({
+        'x-ms-pageable': { nextLinkName: 'nextLink' },
+        responses: json({ type: 'object' }),
+      })?.pagination
+    ).toEqual({
+      style: 'next_url',
+      response: { itemsPath: 'value', nextPath: 'nextLink' },
+    });
+  });
+
   it('proposes body cursors, skipping next-page URLs under links', () => {
     const page = {
       type: 'object',

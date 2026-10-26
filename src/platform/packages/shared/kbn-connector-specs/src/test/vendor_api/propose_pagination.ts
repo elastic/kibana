@@ -341,14 +341,14 @@ const fromMsPageable = (
   if (extension.nextLinkName === null) {
     return 'none';
   }
-  const request = nextUrlRequestOf(byRole(parameters));
-  if (typeof extension.nextLinkName !== 'string' || !request) {
+  if (typeof extension.nextLinkName !== 'string') {
     return undefined;
   }
+  const request = nextUrlRequestOf(byRole(parameters));
   const itemName = typeof extension.itemName === 'string' ? extension.itemName : 'value';
   return {
     style: 'next_url',
-    request,
+    ...(request ? { request } : {}),
     response: {
       itemsPath: joinPath('', itemName),
       nextPath: joinPath('', extension.nextLinkName),

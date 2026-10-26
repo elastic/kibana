@@ -59,6 +59,15 @@ describe('serializeManifest', () => {
     expect(serializeManifest(parseManifest(json))).toBe(json);
   });
 
+  it('accepts a next_url descriptor without a request, for opaque next links', () => {
+    const opaque = withPagination({
+      style: 'next_url',
+      response: { itemsPath: 'value', nextPath: 'nextLink' },
+    }) as VendorApiManifest;
+
+    expect(parseManifest(serializeManifest(opaque))).toEqual(opaque);
+  });
+
   it.each([
     ['an unknown field', { ...manifest, extra: true }],
     [
