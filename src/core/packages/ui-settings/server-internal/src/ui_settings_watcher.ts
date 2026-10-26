@@ -219,7 +219,11 @@ export class UiSettingsWatcher {
     this.running = true;
     do {
       this.dirty = false;
-      await this.tick();
+      try {
+        await this.tick();
+      } catch (error) {
+        this.reportHealth(error);
+      }
     } while (this.dirty && !this.stopped);
     this.running = false;
     if (!this.stopped && this.docs.size > 0) {
@@ -234,16 +238,9 @@ export class UiSettingsWatcher {
     }
     const { repository, id, cache, parse } = this.options;
 
-    let savedObjects: Array<SavedObjectBulkResult<Record<string, unknown>>>;
-    try {
-      ({ saved_objects: savedObjects } = await repository.bulkGet<Record<string, unknown>>(
-        docs.map(({ ref }) => toBulkGetObject(ref, id))
-      ));
-    } catch (error) {
-      this.reportHealth(error);
-      return;
-    }
-
+    const { saved_objects: savedObjects } = await repository.bulkGet<Record<string, unknown>>(
+      docs.map(({ ref }) => toBulkGetObject(ref, id))
+    );
     const observations = await Promise.all(
       docs.map((doc, index) => this.observe(doc, savedObjects[index]))
     );
@@ -263,11 +260,11 @@ export class UiSettingsWatcher {
       const { state, emit } = transition(doc.state, observation, (attributes) =>
         parse(doc.ref, attributes)
       );
-      doc.state = state;
       if (emit) {
         cache.del(doc.ref.namespace);
         doc.snapshots$.next(emit);
       }
+      doc.state = state;
     });
     this.reportHealth(failure);
   }

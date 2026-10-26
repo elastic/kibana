@@ -245,6 +245,26 @@ describe('UiSettingsWatcher', () => {
     expect(log.warn).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps polling after a poll throws unexpectedly, and emits the change it missed', async () => {
+    const { repository, log, cache, store, collect } = setup();
+    store('default', { foo: 'a' });
+    cache.del.mockImplementationOnce(() => {
+      throw new Error('unexpected');
+    });
+
+    const { values } = collect(DEFAULT_REF);
+    await flush();
+    expect(values).toEqual([]);
+    expect(log.warn.mock.calls[0][0]).toContain('unexpected');
+
+    repository.bulkGet.mockClear();
+    await nextPoll();
+
+    expect(repository.bulkGet).toHaveBeenCalledTimes(1);
+    expect(values).toEqual([{ foo: { userValue: 'a' } }]);
+    expect(log.info).toHaveBeenCalledTimes(1);
+  });
+
   it('does not emit anything until the first read succeeds', async () => {
     const { repository, collect } = setup();
     repository.bulkGet.mockRejectedValue(new Error('es down'));
