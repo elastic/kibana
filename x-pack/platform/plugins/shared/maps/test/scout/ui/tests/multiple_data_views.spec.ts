@@ -35,10 +35,6 @@ test.describe('Maps - multiple data views', { tag: '@local-stateful-classic' }, 
     await esArchiver.loadIfNeeded(ES_ARCHIVE_LONG_WINDOW_LOGSTASH);
     await kbnClient.importExport.load(KBN_ARCHIVE_LONG_WINDOW_LOGSTASH);
     await kbnClient.importExport.load(KBN_ARCHIVE_MAP);
-    await kbnClient.uiSettings.update({
-      'timepicker:timeDefaults':
-        '{ "from": "2018-10-23T07:00:00.000Z", "to": "2018-10-23T08:00:00.000Z" }',
-    });
   });
 
   test.beforeEach(async ({ browserAuth }) => {
@@ -47,7 +43,6 @@ test.describe('Maps - multiple data views', { tag: '@local-stateful-classic' }, 
 
   test.afterAll(async ({ kbnClient, uiSettings }) => {
     await uiSettings.unset(UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX);
-    await kbnClient.uiSettings.unset('timepicker:timeDefaults');
     await kbnClient.savedObjects.cleanStandardList();
   });
 
