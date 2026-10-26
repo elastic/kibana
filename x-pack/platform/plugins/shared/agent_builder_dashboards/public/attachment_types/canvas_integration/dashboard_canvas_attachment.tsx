@@ -13,6 +13,7 @@ import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
+import type { CanvasDashboardRegistry } from '../canvas_dashboard_registry';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
 import {
   DashboardPreviewErrorCallout,
@@ -29,6 +30,7 @@ export type DashboardCanvasAttachmentProps = AttachmentRenderProps<DashboardAtta
   data: DataPublicPluginStart;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
+  registerCanvasDashboard: CanvasDashboardRegistry['register'];
 };
 
 export const DashboardCanvasAttachment = (props: DashboardCanvasAttachmentProps) => {

@@ -23,6 +23,7 @@ const dashboardTool = (toolName: string) => {
  */
 export const dashboardTools = {
   generateDashboard: dashboardTool('generate_dashboard'),
+  pointedPanel: dashboardTool('pointed_panel'),
 } as const;
 
 /**

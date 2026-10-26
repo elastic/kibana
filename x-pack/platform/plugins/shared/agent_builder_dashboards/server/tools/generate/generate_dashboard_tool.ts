@@ -32,6 +32,7 @@ import {
   type DashboardUpdatedUiEventData,
 } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
+import { refreshDashboardPanelPointers } from './panel_pointers';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
 import { createLayoutArranger } from './layout_arranger';
@@ -150,7 +151,7 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 - \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
 - \`sections\`: sections to create or update.
-- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
+- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment or dashboard panel pointer (\`source: "attachment"\`).
 - \`controls\`: interactive filters pinned above the dashboard (dropdown, range slider, or time slider) to add, or to replace by id.
 - \`remove\`: ids of panels, sections, or controls to remove.
 - \`layout\`: the user's own arrangement or size request. Omit it otherwise.
@@ -293,6 +294,16 @@ Panel positions and sizes are set automatically after the changes are applied, a
         }
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
+
+        if (!isNewDashboard) {
+          await refreshDashboardPanelPointers({
+            attachments,
+            dashboardAttachmentId,
+            updatedIds: updated,
+            dashboardData,
+            logger,
+          });
+        }
 
         events.sendUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData>(
           DASHBOARD_UPDATED_UI_EVENT,

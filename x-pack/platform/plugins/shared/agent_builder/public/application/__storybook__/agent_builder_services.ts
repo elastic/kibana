@@ -222,6 +222,7 @@ const defaultServices: AgentBuilderInternalService = {
   isEarsEnabled: false,
   isEarsExperimentalEnabled: false,
   openSidebarConversation: () => ({} as never),
+  registerFullPageAttachmentCallbacks: () => () => {},
 };
 
 export const createStorybookAgentBuilderServices = (

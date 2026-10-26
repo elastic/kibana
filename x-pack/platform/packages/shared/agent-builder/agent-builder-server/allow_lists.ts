@@ -125,6 +125,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
 
+  // Platform – Dashboards
+  'platform.dashboard.pointed_panel',
+
   // Custom content panels
   'custom_content_update_panel',
 
@@ -365,6 +368,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Dashboards
   'platform.dashboard.dashboard_state',
+  'platform.dashboard.panel',
 
   // Platform – Streams (significant events)
   'platform.sig_event',

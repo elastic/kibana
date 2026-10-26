@@ -19,9 +19,13 @@ import type {
   AgentBuilderDashboardsPluginStart,
 } from './types';
 import { registerSkills } from './skills';
-import { createDashboardAttachmentType } from './attachment_types';
+import {
+  createDashboardAttachmentType,
+  createDashboardPanelAttachmentType,
+} from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
 import { createDashboardAppStateValidator } from './tools/generate/validate_dashboard_app_state';
+import { createPointedPanelTool } from './tools/pointed_panel';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -59,6 +63,14 @@ export class AgentBuilderDashboardsPlugin
         logger: this.logger,
         getDashboardClient,
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
+    );
+    setupDeps.agentBuilder.attachments.registerType(
+      createDashboardPanelAttachmentType() as Parameters<
+        typeof setupDeps.agentBuilder.attachments.registerType
+      >[0]
+    );
+    setupDeps.agentBuilder.tools.register(
+      createPointedPanelTool() as Parameters<typeof setupDeps.agentBuilder.tools.register>[0]
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 

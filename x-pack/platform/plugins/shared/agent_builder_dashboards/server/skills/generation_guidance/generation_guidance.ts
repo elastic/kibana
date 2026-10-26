@@ -43,7 +43,7 @@ For an existing dashboard:
 Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens and Vega panels pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Custom content panels take no \`index\`; their data comes only from \`esql\` (see Custom Content Panels). Edits of existing panels receive the original configuration and queries automatically through the panel id.
 
 - Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel.
-- Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A \`source: "request"\` would generate a **new**, different panel instead.
+- Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation, or to copy a panel a dashboard panel pointer (\`platform.dashboard.panel-<panelId>\`) names. The tool copies the panel verbatim. A \`source: "request"\` would generate a **new**, different panel instead.
 - Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
 
 ## Panel Type Selection
