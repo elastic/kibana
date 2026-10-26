@@ -53,10 +53,10 @@ export const createSnoozeAction = (
   displayName: i18n.SNOOZE,
   iconType: 'bellSlash',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.some((ep) =>
-      ep.source_id == null
-        ? ep.series_id != null && !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
-        : extension?.isCompatible(ep) ?? false
+    episodes.some(
+      (ep) =>
+        !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until) &&
+        (ep.source_id == null ? ep.series_id != null : extension?.isCompatible(ep) ?? false)
     ),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const { additionalDataSource } = deps;

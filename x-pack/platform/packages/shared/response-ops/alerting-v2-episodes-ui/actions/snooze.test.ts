@@ -87,6 +87,33 @@ describe('createSnoozeAction', () => {
     ).toBe(true);
   });
 
+  it('not compatible when every source episode is already snoozed', () => {
+    expect(
+      createSnoozeAction(makeDeps(), makeExtension()).isCompatible({
+        episodes: [
+          makeSourceEpisode({
+            last_snooze_action: 'snooze',
+            snoozed_until: '2099-01-01T00:00:00.000Z',
+          }),
+        ],
+      })
+    ).toBe(false);
+  });
+
+  it('compatible when a snoozed source episode is selected alongside an unsnoozed one', () => {
+    expect(
+      createSnoozeAction(makeDeps(), makeExtension()).isCompatible({
+        episodes: [
+          makeSourceEpisode({
+            last_snooze_action: 'snooze',
+            snoozed_until: '2099-01-01T00:00:00.000Z',
+          }),
+          makeSourceEpisode({ 'episode.id': 'e2' }),
+        ],
+      })
+    ).toBe(true);
+  });
+
   it('not compatible on empty selection', () => {
     expect(createSnoozeAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });

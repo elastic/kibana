@@ -253,16 +253,16 @@ describe('classicActionExtensions', () => {
   });
 
   describe('snooze extension', () => {
-    it('isCompatible returns true when instanceId and ruleId are present and not snoozed', () => {
+    it('isCompatible returns true when instanceId and ruleId are present', () => {
       expect(snoozeExtension.isCompatible(makeClassicEpisode('c1', 'open'))).toBe(true);
     });
 
-    it('isCompatible returns false when already snoozed', () => {
+    it('isCompatible returns true when already snoozed, so the snooze can be replaced', () => {
       const ep = makeClassicEpisode('c1', 'open', {
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
         snoozed_until: '2099-01-01T00:00:00.000Z',
       });
-      expect(snoozeExtension.isCompatible(ep)).toBe(false);
+      expect(snoozeExtension.isCompatible(ep)).toBe(true);
     });
 
     it('isCompatible returns false when instanceId is missing', () => {
