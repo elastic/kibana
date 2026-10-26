@@ -21,7 +21,9 @@ import {
   MAX_PROPOSALS_PAGE_SIZE,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
+  PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
+  isAwaitingRetry,
   isProposalSettling,
 } from '@kbn/proposals-common';
 import type {
@@ -35,8 +37,29 @@ import { mutationKeys, queryKeys } from '../query_keys';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 import { useProposalDecisionSignal } from './use_proposal_decision_signal';
 
+/**
+ * How long to wait for the retry of a failed action. After that, the failed action is final.
+ * The 30 seconds is a guess. It is long enough for a normal retry.
+ * A state saved on the failed action is the better fix.
+ * FIXME: https://github.com/elastic/security-team/issues/2050
+ */
+export const RETRY_WAIT_MS = 30_000;
+
+const awaitingRetrySince = new Map<string, number>();
+
+/** Running, or failed with no retry yet for up to `RETRY_WAIT_MS`. Poll while this is true. */
+export const isInFlux = (
+  proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
+): boolean => {
+  if (isProposalSettling(proposal)) return true;
+  if (!isAwaitingRetry(proposal)) return false;
+  const since = awaitingRetrySince.get(proposal.id) ?? Date.now();
+  awaitingRetrySince.set(proposal.id, since);
+  return Date.now() - since < RETRY_WAIT_MS;
+};
+
 const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
-  response?.proposals.some(isProposalSettling) ?? false;
+  response?.proposals.some(isInFlux) ?? false;
 
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
@@ -169,7 +192,7 @@ export const useProposal = (id: string | undefined) => {
     },
     enabled: Boolean(id),
     refetchInterval: (data) =>
-      data && isProposalSettling(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
+      data && isInFlux(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };
@@ -279,6 +302,27 @@ export const useDismissProposal = () => {
 };
 
 /**
+ * Marks a to-do proposal that was marked as applied as not applied. The server re-offers it as a
+ * pending successor before it answers, so the proposals are refetched right away.
+ */
+export const useReopenProposal = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: mutationKeys.proposals.reopen,
+    mutationFn: ({ id }: { id: string }): Promise<{ proposalId: string }> =>
+      services.http!.post<{ proposalId: string }>(
+        PROPOSAL_REOPEN_URL.replace('{id}', encodeURIComponent(id)),
+        { version: PROPOSALS_API_VERSION }
+      ),
+    onSuccess: async () => {
+      await invalidateProposals(queryClient);
+    },
+  });
+};
+
+/**
  * Tracks a decline that was issued elsewhere — a bulk close of an investigation releases each
  * pending proposal's gate server-side — until its decision lands. Shares the decline
  * `mutationKey`, so `useIsDecliningProposal` reads "Declining" for the row while it settles.
@@ -336,6 +380,12 @@ export const useSettleDeclinedProposal = () => {
 export const useIsApprovingProposal = (id: string | undefined): boolean =>
   useIsMutating({
     mutationKey: mutationKeys.proposals.approve,
+    predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
+  }) > 0;
+
+export const useIsReopeningProposal = (id: string | undefined): boolean =>
+  useIsMutating({
+    mutationKey: mutationKeys.proposals.reopen,
     predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
   }) > 0;
 

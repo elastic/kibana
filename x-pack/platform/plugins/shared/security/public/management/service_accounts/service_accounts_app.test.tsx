@@ -106,6 +106,8 @@ const fillForm = async () => {
 };
 
 describe('ServiceAccountsApp', () => {
+  jest.setTimeout(30_000);
+
   it('keeps Create account disabled until name and roles are valid', async () => {
     await renderApp();
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();

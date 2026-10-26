@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
-  EuiLink,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
@@ -116,16 +115,15 @@ export const StdErrorLogs = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiToolTip content={isRemote ? VIEW_IN_DISCOVER_REMOTE_TOOLTIP : undefined}>
-                <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
-                  <EuiButtonEmpty
-                    data-test-subj="syntheticsStdErrorLogsButton"
-                    href={isRemote ? undefined : discoverLink}
-                    iconType="discoverApp"
-                    isDisabled={isRemote || !discoverLink}
-                  >
-                    {VIEW_IN_DISCOVER_LABEL}
-                  </EuiButtonEmpty>
-                </EuiLink>
+                <EuiButtonEmpty
+                  data-test-subj="syntheticsStdErrorLogsButton"
+                  href={isRemote ? undefined : discoverLink}
+                  iconType="discoverApp"
+                  isDisabled={isRemote || !discoverLink}
+                  hasAriaDisabled={isRemote}
+                >
+                  {VIEW_IN_DISCOVER_LABEL}
+                </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
