@@ -2224,5 +2224,12 @@ describe('WorkflowContextManager', () => {
         true
       );
     });
+
+    it('shows the interpolated value, not its internal token, in a syntax error', () => {
+      const { underTest } = createContainerWithGuess('hello world');
+      expect(() =>
+        underTest.evaluateBooleanExpressionInContext('consts.secret: {{ inputs.guess }} owner: x')
+      ).toThrow(/consts\.secret: hello world owner: x\n-+\^$/);
+    });
   });
 });

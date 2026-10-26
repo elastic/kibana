@@ -8,7 +8,7 @@ The `if` step provides conditional execution of workflow steps based on boolean 
 steps:
   - name: check-status
     type: if
-    condition: "{{ steps.getData.output.status }}: active"
+    condition: "steps.getData.output.status: active"
     steps:
       ...
     else:
@@ -138,13 +138,15 @@ as that exact text; it does not add an `or` to the condition. This keeps inputs,
 alert fields from changing the condition. Consequences:
 
 - A `*` in an interpolated value matches a literal `*`, not a wildcard. Write the wildcard in the condition itself: `host: {{ prefix }}*`.
-- An empty value is the empty string.
+- An empty value is the empty string. So is a variable that does not exist: it no longer causes a syntax error.
+- The value is compared exactly: leading and trailing spaces or newlines are kept, not trimmed.
+- A value in the field position (`{{ field }}: x`) selects which context path is read, so never build field names from data you don't control.
 - `{% echo %}`, `{% cycle %}` and `{% capture %}` are not available in conditions. Use `{% assign %}` to store a value.
 
 To splice a value in as KQL on purpose, end the output with the `raw` filter, for example
 `condition: "{{ clause | raw }}"`. Only do this with values you control.
 
-`${{ }}` expressions are not affected: they are evaluated to a value, and a boolean result is used as is.
+`${{ }}` expressions are not affected: they are evaluated to a value, and a boolean result is used as is. A string result is parsed as KQL unchanged, like `| raw`, so don't append data you don't control to it.
 
 ## KQL Condition Syntax
 
@@ -221,7 +223,7 @@ steps:
 steps:
   - name: check-status
     type: if
-    condition: "{{ steps.fetchData.output.status }}: completed"
+    condition: "steps.fetchData.output.status: completed"
     steps:
       - name: process-data
         type: http

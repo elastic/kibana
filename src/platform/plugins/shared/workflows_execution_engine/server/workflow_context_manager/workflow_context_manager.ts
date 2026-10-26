@@ -10,7 +10,7 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
-import { evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
+import { decodeKqlTemplateValues, evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
 import {
   type EsWorkflowStepExecution,
   type SerializedError,
@@ -279,9 +279,9 @@ export class WorkflowContextManager {
       } catch (error) {
         if (error instanceof KQLSyntaxError) {
           throw new Error(
-            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
-              error
-            )}`
+            `Syntax error in condition "${condition}" for step ${
+              this.node.stepId
+            }: ${decodeKqlTemplateValues(String(error))}`
           );
         }
         throw error;

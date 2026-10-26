@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KueryNode } from '@kbn/es-query';
 import { KQLSyntaxError } from '@kbn/es-query';
+import { decodeKqlTemplateValues, parseKqlTemplate } from '@kbn/eval-kql';
 import type { ContextManager } from '../../step_registry/types';
 
 export function isKqlSyntaxError(error: unknown): error is KQLSyntaxError {
@@ -29,4 +31,19 @@ export function renderKqlCondition(
     throw new Error('The workflow engine cannot safely render KQL conditions');
   }
   return contextManager.renderKqlConditionTemplate(rawCondition);
+}
+
+/**
+ * Parses a condition rendered by `renderKqlCondition` once, before looping over the items. Syntax
+ * errors are reported with the interpolated values decoded.
+ */
+export function parseKqlCondition(renderedCondition: string): KueryNode {
+  try {
+    return parseKqlTemplate(renderedCondition);
+  } catch (error) {
+    if (isKqlSyntaxError(error)) {
+      throw new Error(`Invalid KQL condition: ${decodeKqlTemplateValues(error.message)}`);
+    }
+    throw error;
+  }
 }

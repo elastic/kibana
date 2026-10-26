@@ -30,7 +30,7 @@ export const evaluateCondition = (
         throw new Error(
           `Syntax error in condition "${decodeKqlTemplateValues(
             renderedCondition
-          )}" for step ${stepId}: ${String(error)}`
+          )}" for step ${stepId}: ${decodeKqlTemplateValues(String(error))}`
         );
       }
       throw error;

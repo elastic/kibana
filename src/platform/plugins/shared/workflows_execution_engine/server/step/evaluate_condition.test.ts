@@ -45,6 +45,20 @@ describe('evaluateCondition', () => {
     ).toThrow(/Syntax error in condition "a: x y invalid ::::"/);
   });
 
+  it('decodes the interpolated values in the parser message too', () => {
+    const condition = `a: ${encodeKqlTemplateValue('x y')} invalid ::::`;
+    let message = '';
+    try {
+      evaluateCondition(condition, {}, 'step-1');
+    } catch (error) {
+      message = (error as Error).message;
+    }
+
+    // once in the quoted condition, once in the query echoed by the parser
+    expect(message.split('a: x y invalid ::::')).toHaveLength(3);
+    expect(message).not.toContain('__wftpl_');
+  });
+
   it('evaluates templated values as literals', () => {
     const context = { consts: { secret: 's3' } };
     expect(

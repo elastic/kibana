@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { decodeKqlTemplateValues, evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
-import { isKqlSyntaxError, renderKqlCondition } from './kql_utils';
+import type { KueryNode } from '@kbn/es-query';
+import { decodeKqlTemplateValues, evaluateKql } from '@kbn/eval-kql';
+import { parseKqlCondition, renderKqlCondition } from './kql_utils';
 import { dataFindStepCommonDefinition } from '../../../common/steps/data';
 import type { StepHandlerContext } from '../../step_registry/types';
 import { createServerStepDefinition } from '../../step_registry/types';
@@ -20,7 +21,7 @@ type FindStepContext = StepHandlerContext<
 
 function searchForMatch(
   items: unknown[],
-  condition: string,
+  kqlAst: KueryNode,
   context: FindStepContext
 ): { item: unknown; index: number | null; aborted?: boolean } {
   for (let i = 0; i < items.length; i++) {
@@ -41,16 +42,13 @@ function searchForMatch(
       );
     } else {
       try {
-        const matches = evaluateKql(parseKqlTemplate(condition), { item, index: i });
+        const matches = evaluateKql(kqlAst, { item, index: i });
 
         if (matches) {
           context.logger.debug(`Found match at index ${i}`);
           return { item, index: i };
         }
       } catch (error) {
-        if (isKqlSyntaxError(error)) {
-          throw new Error(`Invalid KQL condition: ${(error as Error).message}`);
-        }
         context.logger.warn(`Failed to evaluate condition for item at index ${i}`, error);
       }
     }
@@ -94,7 +92,7 @@ export const dataFindStepDefinition = createServerStepDefinition({
         )}`
       );
 
-      const { aborted, ...result } = searchForMatch(items, condition, context);
+      const { aborted, ...result } = searchForMatch(items, parseKqlCondition(condition), context);
 
       if (aborted) {
         return { error: new Error('Operation was aborted') };

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { decodeKqlTemplateValues, evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
-import { isKqlSyntaxError, renderKqlCondition } from './kql_utils';
+import { decodeKqlTemplateValues, evaluateKql } from '@kbn/eval-kql';
+import { parseKqlCondition, renderKqlCondition } from './kql_utils';
 import { dataFilterStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -40,6 +40,7 @@ export const dataFilterStepDefinition = createServerStepDefinition({
         }`
       );
 
+      const kqlAst = parseKqlCondition(condition);
       const filteredItems: unknown[] = [];
       let matchedCount = 0;
 
@@ -64,7 +65,7 @@ export const dataFilterStepDefinition = createServerStepDefinition({
           );
         } else {
           try {
-            const matches = evaluateKql(parseKqlTemplate(condition), { item, index });
+            const matches = evaluateKql(kqlAst, { item, index });
 
             if (matches) {
               filteredItems.push(item);
@@ -76,12 +77,6 @@ export const dataFilterStepDefinition = createServerStepDefinition({
               }
             }
           } catch (error) {
-            if (isKqlSyntaxError(error)) {
-              context.logger.error('Invalid KQL condition', error);
-              return {
-                error: new Error(`Invalid KQL condition: ${(error as Error).message}`),
-              };
-            }
             context.logger.warn(`Failed to evaluate condition for item at index ${index}`, error);
           }
         }

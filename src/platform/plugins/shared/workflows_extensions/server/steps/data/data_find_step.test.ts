@@ -339,5 +339,34 @@ describe('dataFindStepDefinition', () => {
 
       expect(result.error?.message).toContain('cannot safely render KQL conditions');
     });
+
+    it('fails the step, instead of finding nothing, when a value carries the wildcard marker', async () => {
+      const context = createMockContext(
+        { items },
+        { condition: 'item.owner: {{ inputs.owner }}*' }
+      );
+      (context.contextManager.renderKqlConditionTemplate as jest.Mock).mockReturnValue(
+        `item.owner: ${encodeKqlTemplateValue('@kuery-wildcard@')}*`
+      );
+
+      const result = await dataFindStepDefinition.handler(context);
+
+      expect(result.error?.message).toContain('wildcards');
+      expect(result.output).toBeUndefined();
+      expect(context.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('shows the interpolated value, not its internal token, in a syntax error', async () => {
+      const context = createMockContext({ items }, { condition: 'item.owner: {{ inputs.owner }}' });
+      (context.contextManager.renderKqlConditionTemplate as jest.Mock).mockReturnValue(
+        `item.owner: ${encodeKqlTemplateValue('hello world')} owner: x`
+      );
+
+      const result = await dataFindStepDefinition.handler(context);
+
+      expect(result.error?.message).toContain('Invalid KQL condition');
+      expect(result.error?.message).toContain('item.owner: hello world owner: x');
+      expect(result.error?.message).not.toContain('__wftpl_');
+    });
   });
 });
