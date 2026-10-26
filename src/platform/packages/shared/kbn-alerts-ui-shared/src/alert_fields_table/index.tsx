@@ -28,6 +28,7 @@ export const search = {
       defaultMessage: 'Filter by Field, Value, or Description...',
     }),
     schema: true,
+    'data-test-subj': 'alertFieldsTableFilterInput',
   },
 };
 

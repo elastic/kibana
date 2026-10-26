@@ -13,7 +13,11 @@ import { AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
 import type { Agent } from '../../types';
 
-import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  FleetError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { outputType } from '../../../common/constants';
 
@@ -33,7 +37,7 @@ import {
   createErrorActionResults,
   getUnenrollAgentActions,
 } from './actions';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 
 export class UnenrollActionRunner extends ActionRunner {
@@ -67,28 +71,68 @@ export async function unenrollBatch(
     actionId?: string;
     total?: number;
     spaceId?: string;
+    startTime?: string;
+    skipActionCreation?: boolean;
+    skipAgentlessValidation?: boolean;
   }
 ): Promise<{ actionId: string }> {
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents);
   const outgoingErrors: Record<Agent['id'], Error> = {};
 
   // And which are allowed to unenroll
-  const agentsToUpdate = options.force
-    ? givenAgents
-    : givenAgents.reduce<Agent[]>((agents, agent) => {
-        if (isAgentUnenrolled(agent, options.revoke)) {
-          outgoingErrors[agent.id] = new FleetError(`Agent ${agent.id} already unenrolled`);
-        } else if (isHostedAgent(hostedPolicies, agent)) {
-          outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
-            `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
-          );
-        } else {
-          agents.push(agent);
-        }
-        return agents;
-      }, []);
+  const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
+    // force skips all the validations: escape hatch, for example to remove orphaned agentless agents
+    if (
+      !options.skipAgentlessValidation &&
+      !options.force &&
+      isAgentlessAgent(restrictions, agent)
+    ) {
+      outgoingErrors[agent.id] = new AgentlessAgentRestrictionError(
+        `Cannot unenroll managed agent ${agent.id}`
+      );
+    } else if (options.force) {
+      agents.push(agent);
+    } else if (isAgentUnenrolled(agent, options.revoke)) {
+      outgoingErrors[agent.id] = new FleetError(`Agent ${agent.id} already unenrolled`);
+    } else if (isHostedAgent(restrictions, agent)) {
+      outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
+      );
+    } else {
+      agents.push(agent);
+    }
+    return agents;
+  }, []);
 
   const now = new Date().toISOString();
+  const actionId = options.actionId ?? uuidv4();
+  const total = options.total ?? givenAgents.length;
+  const agentIds = agentsToUpdate.map((agent) => agent.id);
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
+
+  // Scheduled unenrollment: create the action with a future start_time but do not
+  // mutate agent state or invalidate API keys yet — the execute phase does that.
+  if (options.startTime) {
+    await createAgentAction(esClient, soClient, {
+      id: actionId,
+      agents: agentIds,
+      created_at: now,
+      start_time: options.startTime,
+      type: 'UNENROLL',
+      total,
+      namespaces,
+    });
+
+    await createErrorActionResults(
+      esClient,
+      actionId,
+      outgoingErrors,
+      'cannot unenroll from a hosted policy or already unenrolled'
+    );
+
+    return { actionId };
+  }
 
   // Update the necessary agents
   const updateData = options.revoke
@@ -101,19 +145,20 @@ export async function unenrollBatch(
     outgoingErrors
   );
 
-  const actionId = options.actionId ?? uuidv4();
-  const total = options.total ?? givenAgents.length;
-
-  const agentIds = agentsToUpdate.map((agent) => agent.id);
-
-  const spaceId = options.spaceId;
-  const namespaces = spaceId ? [spaceId] : [];
-
   if (options.revoke) {
     // Get all API keys that need to be invalidated
     await invalidateAPIKeysForAgents(agentsToUpdate);
 
-    await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
+    if (!options.skipActionCreation) {
+      await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
+    } else {
+      // The scheduled UNENROLL action doc already exists; write results so the action
+      // flips to COMPLETE in the activity flyout instead of staying IN_PROGRESS.
+      await bulkCreateAgentActionResults(
+        esClient,
+        agentIds.map((agentId) => ({ agentId, actionId }))
+      );
+    }
   } else {
     // Create unenroll action for each agent
     await createAgentAction(esClient, soClient, {

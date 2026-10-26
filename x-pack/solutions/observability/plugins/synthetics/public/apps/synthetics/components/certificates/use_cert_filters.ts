@@ -22,9 +22,10 @@ export interface CertFiltersState {
   search: string;
   monitorTypes: string[];
   browserResourceTypes: string[];
-  party: string[];
+  certOrigin: string[];
   tags: string[];
   issuers: string[];
+  remoteNames: string[];
   expiringWithin?: string;
 }
 
@@ -32,21 +33,28 @@ export interface CertFiltersActions {
   setSearch: (value: string) => void;
   setMonitorTypes: (values: string[]) => void;
   setBrowserResourceTypes: (values: string[]) => void;
-  setParty: (values: string[]) => void;
+  setCertOrigin: (values: string[]) => void;
   setTags: (values: string[]) => void;
   setIssuers: (values: string[]) => void;
+  setRemoteNames: (values: string[]) => void;
   setExpiringWithin: (value?: string) => void;
 }
 
 /**
- * Backs the Certificates page quick filters with the URL query string so a
- * filtered view survives a refresh and can be shared. Reuses the shared
- * `search`/`monitorTypes`/`tags` params and adds the certificates-page
- * `issuers`/`browserResourceTypes`/`party`/`expiringWithin` ones.
+ * Persists the Certificates page quick filters in the URL so a filtered view
+ * survives a refresh and is shareable.
  */
 export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
-  const { search, monitorTypes, tags, issuers, browserResourceTypes, party, expiringWithin } =
-    useGetUrlParams();
+  const {
+    search,
+    monitorTypes,
+    tags,
+    issuers,
+    browserResourceTypes,
+    certOrigin,
+    expiringWithin,
+    remoteNames,
+  } = useGetUrlParams();
   const [, updateUrlParams] = useUrlParams();
 
   const setSearch = useCallback(
@@ -61,8 +69,8 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
     (values: string[]) => updateUrlParams({ browserResourceTypes: serializeArray(values) }),
     [updateUrlParams]
   );
-  const setParty = useCallback(
-    (values: string[]) => updateUrlParams({ party: serializeArray(values) }),
+  const setCertOrigin = useCallback(
+    (values: string[]) => updateUrlParams({ certOrigin: serializeArray(values) }),
     [updateUrlParams]
   );
   const setTags = useCallback(
@@ -71,6 +79,10 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
   );
   const setIssuers = useCallback(
     (values: string[]) => updateUrlParams({ issuers: serializeArray(values) }),
+    [updateUrlParams]
+  );
+  const setRemoteNames = useCallback(
+    (values: string[]) => updateUrlParams({ remoteNames: serializeArray(values) }),
     [updateUrlParams]
   );
   const setExpiringWithin = useCallback(
@@ -83,32 +95,36 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
       search: search || '',
       monitorTypes: toArray(monitorTypes),
       browserResourceTypes: toArray(browserResourceTypes),
-      party: toArray(party),
+      certOrigin: toArray(certOrigin),
       tags: toArray(tags),
       issuers: toArray(issuers),
+      remoteNames: toArray(remoteNames),
       expiringWithin,
       setSearch,
       setMonitorTypes,
       setBrowserResourceTypes,
-      setParty,
+      setCertOrigin,
       setTags,
       setIssuers,
+      setRemoteNames,
       setExpiringWithin,
     }),
     [
       search,
       monitorTypes,
       browserResourceTypes,
-      party,
+      certOrigin,
       tags,
       issuers,
+      remoteNames,
       expiringWithin,
       setSearch,
       setMonitorTypes,
       setBrowserResourceTypes,
-      setParty,
+      setCertOrigin,
       setTags,
       setIssuers,
+      setRemoteNames,
       setExpiringWithin,
     ]
   );

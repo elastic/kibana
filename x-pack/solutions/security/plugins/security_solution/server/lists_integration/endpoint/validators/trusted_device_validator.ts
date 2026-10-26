@@ -21,6 +21,7 @@ import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/excep
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { ENTRY_VALUE_MAX_LENGTH } from './constants';
 
 // Error constants following the established pattern
 const TRUSTED_DEVICE_EMPTY_VALUE_ERROR = 'Field value cannot be empty';
@@ -50,11 +51,13 @@ const TrustedDeviceEntrySchema = schema.object({
   operator: schema.literal('included'),
   value: schema.oneOf([
     schema.string({
+      maxLength: ENTRY_VALUE_MAX_LENGTH,
       validate: (value: string) =>
         value.trim().length > 0 ? undefined : TRUSTED_DEVICE_EMPTY_VALUE_ERROR,
     }),
     schema.arrayOf(
       schema.string({
+        maxLength: ENTRY_VALUE_MAX_LENGTH,
         validate: (value: string) =>
           value.trim().length > 0 ? undefined : TRUSTED_DEVICE_EMPTY_VALUE_ERROR,
       }),

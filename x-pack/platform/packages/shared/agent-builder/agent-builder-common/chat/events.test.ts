@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { isConversationUpdatedEvent, isConversationCreatedEvent, ChatEventType } from './events';
+import {
+  isConversationUpdatedEvent,
+  isConversationCreatedEvent,
+  isApiStateChangedEvent,
+  API_STATE_CHANGED_UI_EVENT,
+  TODOS_UPDATED_UI_EVENT,
+  ChatEventType,
+} from './events';
+import type { MessageChunkEvent, ToolUiEvent } from './events';
 import type { AgentBuilderEvent } from '../base/events';
 
 describe('Chat events', () => {
@@ -76,6 +84,34 @@ describe('Chat events', () => {
         },
       };
       expect(isConversationUpdatedEvent(event)).toBe(false);
+    });
+  });
+
+  describe('isApiStateChangedEvent', () => {
+    const toolUiEvent = (customEvent: string): ToolUiEvent => ({
+      type: ChatEventType.toolUi,
+      data: {
+        tool_id: 'execute_api',
+        tool_call_id: 'call-1',
+        custom_event: customEvent,
+        data: { target: 'kibana', api: 'cases.create', method: 'POST', path: '/api/cases' },
+      },
+    });
+
+    it('should return true for an api state changed tool UI event', () => {
+      expect(isApiStateChangedEvent(toolUiEvent(API_STATE_CHANGED_UI_EVENT))).toBe(true);
+    });
+
+    it('should return false for another tool UI event', () => {
+      expect(isApiStateChangedEvent(toolUiEvent(TODOS_UPDATED_UI_EVENT))).toBe(false);
+    });
+
+    it('should return false for a non tool UI event', () => {
+      const event: MessageChunkEvent = {
+        type: ChatEventType.messageChunk,
+        data: { message_id: 'message-1', text_chunk: API_STATE_CHANGED_UI_EVENT },
+      };
+      expect(isApiStateChangedEvent(event)).toBe(false);
     });
   });
 });

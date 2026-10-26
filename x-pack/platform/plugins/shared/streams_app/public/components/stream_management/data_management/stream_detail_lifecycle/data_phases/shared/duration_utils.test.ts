@@ -7,10 +7,11 @@
 
 import {
   formatDuration,
-  formatMillisecondsInUnit,
   getDoubledDurationFromPrevious,
+  getMultipleStepAttributes,
   parseInterval,
   parseIntervalWithDefaultUnit,
+  stepFromMultipleMs,
   toMilliseconds,
 } from './duration_utils';
 
@@ -91,29 +92,22 @@ describe('downsampling/shared/duration_utils', () => {
       expect(formatDuration('20', undefined)).toBeUndefined();
     });
 
+    it('rejects non-finite values by default (no NaNd / Infinityd leaks)', () => {
+      expect(formatDuration('NaN', 'd')).toBeUndefined();
+      expect(formatDuration('abc', 'd')).toBeUndefined();
+      expect(formatDuration('Infinity', 'd')).toBeUndefined();
+      // 0 stays valid, and negatives are only rejected when a minimum is set (lenient previews rely
+      // on keeping a negative value).
+      expect(formatDuration('0', 'd')).toBe('0d');
+      expect(formatDuration('-1', 'd')).toBe('-1d');
+      expect(formatDuration('-1', 'd', { minInclusive: 0 })).toBeUndefined();
+    });
+
     it('supports integer and minimum constraints', () => {
       expect(formatDuration('0', 's', { integerOnly: true, minInclusive: 0 })).toBe('0s');
       expect(formatDuration('-1', 's', { integerOnly: true, minInclusive: 0 })).toBeUndefined();
       expect(formatDuration('1.5', 's', { integerOnly: true })).toBeUndefined();
       expect(formatDuration('0', 's', { integerOnly: true, minExclusive: 0 })).toBeUndefined();
-    });
-  });
-
-  describe('formatMillisecondsInUnit()', () => {
-    it('formats integer values without decimals', () => {
-      expect(formatMillisecondsInUnit(30 * 86_400_000, 'd')).toBe('30d');
-      expect(formatMillisecondsInUnit(2 * 3_600_000, 'h')).toBe('2h');
-    });
-
-    it('formats fractional values with up to 2 decimals by default', () => {
-      expect(formatMillisecondsInUnit(0.5 * 86_400_000, 'd')).toBe('0.5d');
-      expect(formatMillisecondsInUnit(1.234 * 3_600_000, 'h')).toBe('1.23h');
-      expect(formatMillisecondsInUnit(90_000, 'm')).toBe('1.5m');
-    });
-
-    it('allows overriding precision', () => {
-      expect(formatMillisecondsInUnit(1.234 * 3_600_000, 'h', 3)).toBe('1.234h');
-      expect(formatMillisecondsInUnit(106_617_600, 'd', 3)).toBe('1.234d');
     });
   });
 
@@ -170,6 +164,109 @@ describe('downsampling/shared/duration_utils', () => {
           previousValueMinInclusive: 0,
         })
       ).toEqual({ value: '30', unit: 's', ms: 30_000 });
+    });
+  });
+
+  describe('stepFromMultipleMs()', () => {
+    const DAY_MS = 86_400_000;
+
+    it('defaults to 1 when there is no multiple constraint', () => {
+      expect(stepFromMultipleMs(0, 'd')).toBe(1);
+      expect(stepFromMultipleMs(-5, 'd')).toBe(1);
+      expect(stepFromMultipleMs(NaN, 'd')).toBe(1);
+    });
+
+    it('expresses the multiple in the current unit', () => {
+      // A 2d multiple steps by 2 when the unit is days, and by 48 when the unit is hours.
+      expect(stepFromMultipleMs(2 * DAY_MS, 'd')).toBe(2);
+      expect(stepFromMultipleMs(2 * DAY_MS, 'h')).toBe(48);
+      expect(stepFromMultipleMs(DAY_MS, 'd')).toBe(1);
+    });
+
+    it('supports fractional steps when the multiple is not a whole number of units', () => {
+      // 12h expressed in days is 0.5.
+      expect(stepFromMultipleMs(12 * 60 * 60 * 1000, 'd')).toBe(0.5);
+    });
+  });
+
+  describe('getMultipleStepAttributes()', () => {
+    const DAY_MS = 86_400_000;
+
+    it('uses the base min and steps by 1 when there is no multiple constraint', () => {
+      expect(
+        getMultipleStepAttributes({ currentValue: '8', unit: 'd', multipleOfMs: 0, baseMin: 1 })
+      ).toEqual({ min: 1, step: 1 });
+      expect(
+        getMultipleStepAttributes({ currentValue: '8', unit: 'd', multipleOfMs: 0, baseMin: 0 })
+      ).toEqual({ min: 0, step: 1 });
+    });
+
+    it('anchors min and steps by the multiple when the value is already a valid multiple', () => {
+      // 8d is a multiple of the 4d previous interval -> step (and min) become 4 so 8d -> 12d.
+      expect(
+        getMultipleStepAttributes({
+          currentValue: '8',
+          unit: 'd',
+          multipleOfMs: 4 * DAY_MS,
+          baseMin: 1,
+        })
+      ).toEqual({ min: 4, step: 4 });
+      // A value equal to the multiple is still aligned.
+      expect(
+        getMultipleStepAttributes({
+          currentValue: '4',
+          unit: 'd',
+          multipleOfMs: 4 * DAY_MS,
+          baseMin: 1,
+        })
+      ).toEqual({ min: 4, step: 4 });
+    });
+
+    it('falls back to stepping by 1 from the base min when the value is off-grid', () => {
+      // 9d is not a multiple of 4d -> allow nudging by 1 (9d -> 10d) instead of snapping.
+      expect(
+        getMultipleStepAttributes({
+          currentValue: '9',
+          unit: 'd',
+          multipleOfMs: 4 * DAY_MS,
+          baseMin: 1,
+        })
+      ).toEqual({ min: 1, step: 1 });
+    });
+
+    it('treats empty or invalid values as off-grid', () => {
+      expect(
+        getMultipleStepAttributes({
+          currentValue: '',
+          unit: 'd',
+          multipleOfMs: 4 * DAY_MS,
+          baseMin: 1,
+        })
+      ).toEqual({ min: 1, step: 1 });
+    });
+
+    it('expresses the anchored step in the current unit', () => {
+      // 48h is a multiple of the 2d previous interval -> step by 48 hours.
+      expect(
+        getMultipleStepAttributes({
+          currentValue: '48',
+          unit: 'h',
+          multipleOfMs: 2 * DAY_MS,
+          baseMin: 1,
+        })
+      ).toEqual({ min: 48, step: 48 });
+    });
+
+    it('steps by 1 when the multiple is not a whole number of the current unit', () => {
+      // A 12h previous interval shown while this field is in days would step by 0.5 -> use 1 instead.
+      expect(
+        getMultipleStepAttributes({
+          currentValue: '1',
+          unit: 'd',
+          multipleOfMs: 12 * 60 * 60 * 1000,
+          baseMin: 1,
+        })
+      ).toEqual({ min: 1, step: 1 });
     });
   });
 });

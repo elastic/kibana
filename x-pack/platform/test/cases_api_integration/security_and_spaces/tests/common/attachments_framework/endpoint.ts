@@ -7,10 +7,12 @@
 
 import expect from '@kbn/expect';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentActionsReq } from '../../../../common/lib/mock';
@@ -18,300 +20,358 @@ import {
   createCase,
   createComment,
   deleteAllCaseItems,
-  getSOFromKibanaIndex,
+  deleteComment,
+  getComment,
 } from '../../../../common/lib/api';
 
-/**
- * HTTP-boundary coverage for the `security.endpoint` unified attachment.
- *
- *  1. Legacy-shape writes
- *     (`{ type: 'externalReference', externalReferenceAttachmentTypeId: 'endpoint', ... }`)
- *     must continue to succeed after dropping the security_solution-side
- *     legacy `registerExternalReference({ id: 'endpoint' })` registration. The
- *     cases-plugin routes them through `EXTERNAL_REFERENCE_TYPE_MAP` to the
- *     unified validator and re-validates against the registered Zod schema.
- *  2. Invalid endpoint metadata must surface as HTTP 400, not 500. Switching
- *     from the legacy `schemaValidator` to `schema:` swaps io-ts for Zod and
- *     tightens the validator into a strict closed shape.
- *  3. Unified `security.endpoint` writes posted while the FF is OFF must not
- *     leak unified-only attributes (`attachmentId`, `metadata`, `data`) into
- *     the legacy `cases-comments` `_source`.
- */
+const OWNER = 'securitySolutionFixture';
+
+const unifiedTargets = [
+  { endpointId: 'endpoint-1', hostname: 'host-1', agentType: 'endpoint' as const },
+];
+
+const unifiedMetadata = {
+  command: 'isolate',
+  targets: unifiedTargets,
+};
+
+const unifiedData = { content: 'Isolated host because of suspicious activity' };
+
+const unifiedEndpointPayload = (overrides: Record<string, unknown> = {}) =>
+  ({
+    type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+    attachmentId: 'unified-endpoint-1',
+    owner: OWNER,
+    data: unifiedData,
+    metadata: unifiedMetadata,
+    ...overrides,
+  } as unknown as AttachmentRequest);
+
+const legacyExternalReferencePayload = (overrides: Record<string, unknown> = {}) =>
+  ({
+    type: 'externalReference',
+    externalReferenceId: 'legacy-er-endpoint-1',
+    externalReferenceStorage: { type: 'elasticSearchDoc' },
+    externalReferenceAttachmentTypeId: 'endpoint',
+    externalReferenceMetadata: {
+      ...unifiedMetadata,
+      comment: unifiedData.content,
+    },
+    owner: OWNER,
+    ...overrides,
+  } as unknown as AttachmentRequest);
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  const validMetadata = {
-    command: 'isolate',
-    targets: [
-      {
-        endpointId: 'endpoint-1',
-        hostname: 'host-1',
-        agentType: 'endpoint' as const,
+  const searchSO = (soType: string, soId: string) =>
+    es.search({
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      query: {
+        bool: {
+          must: [{ term: { type: soType } }, { term: { _id: `${soType}:${soId}` } }],
+        },
       },
-    ],
-  };
+    });
 
-  // Legacy externalReference payloads keep the analyst comment on
-  // `externalReferenceMetadata.comment`
-  const legacyMetadata = {
-    ...validMetadata,
-    comment: 'Isolated host because of suspicious activity',
-  };
-
-  const validData = { content: 'Isolated host because of suspicious activity' };
-
-  describe('Endpoint unified attachment', () => {
+  describe('Unified Endpoint — CRUD with flag ON', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
-    describe('legacy-shape writes are routed to the unified validator', () => {
-      it('accepts a legacy `externalReference` endpoint POST after dropping the legacy registration', async () => {
+    describe('create', () => {
+      it('writes a unified `security.endpoint` payload to cases-attachments (flag ON)', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            type: 'externalReference',
-            externalReferenceId: 'action-id-1',
-            externalReferenceStorage: { type: 'elasticSearchDoc' },
-            externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceMetadata: legacyMetadata,
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
-          expectedHttpCode: 200,
-        });
-      });
-
-      it('rejects a legacy `externalReference` endpoint POST with empty targets as 400 (not 500)', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            type: 'externalReference',
-            externalReferenceId: 'action-id-2',
-            externalReferenceStorage: { type: 'elasticSearchDoc' },
-            externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceMetadata: { ...legacyMetadata, targets: [] },
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
-          expectedHttpCode: 400,
-        });
-      });
-    });
-
-    describe('unified payload validation returns 400, not 500', () => {
-      it('returns 400 when `targets` is empty', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-            attachmentId: 'action-id-3',
-            data: validData,
-            metadata: { ...validMetadata, targets: [] },
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('returns 400 when `agentType` is not a known value', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-            attachmentId: 'action-id-4',
-            data: validData,
-            metadata: {
-              ...validMetadata,
-              targets: [
-                {
-                  endpointId: 'endpoint-1',
-                  hostname: 'host-1',
-                  agentType: 'not-a-real-agent',
-                },
-              ],
-            },
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('returns 400 when `command` is missing', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-            attachmentId: 'action-id-5',
-            data: validData,
-            metadata: { targets: validMetadata.targets },
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('returns 400 when an unknown top-level metadata key is present (strict)', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-            attachmentId: 'action-id-6',
-            data: validData,
-            metadata: { ...validMetadata, extra: 'nope' },
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('returns 400 when `data.content` is missing', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-            attachmentId: 'action-id-6a',
-            metadata: validMetadata,
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('returns 400 when `metadata.comment` is present (lifted to data.content; strict reject)', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-            attachmentId: 'action-id-6b',
-            data: validData,
-            metadata: { ...validMetadata, comment: 'belongs on data.content' },
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
-          expectedHttpCode: 400,
-        });
-      });
-    });
-
-    describe('legacy `actions` writes (FF OFF)', () => {
-      // Legacy `actions` POSTs bypass the unified Zod schema (the legacy
-      // validator branches only cover externalReference / persistableState);
-      // with the FF off the cases server persists the payload as-is on
-      // `cases-comments` without invoking `actionsAttachmentTransformer`. The
-      // transformer-level rejections (empty targets, non-security owner) are
-      // exercised in the flag-ON FTR companion.
-      it('accepts a legacy `actions` POST', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
         const patched = await createComment({
           supertest,
           caseId: postedCase.id,
-          params: postCommentActionsReq,
-          expectedHttpCode: 200,
-        });
-
-        expect(patched.comments?.length).to.be(1);
-        expect(patched.comments![0].type).to.be(AttachmentType.actions);
-      });
-
-      it('persists the legacy `actions` shape byte-clean on cases-comments', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        const patched = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentActionsReq,
+          params: unifiedEndpointPayload(),
         });
 
         const attachmentId = patched.comments![0].id;
 
-        const esResponse = await getSOFromKibanaIndex({
-          es,
-          soType: CASE_COMMENT_SAVED_OBJECT,
-          soId: attachmentId,
+        const unifiedSOs = await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, attachmentId);
+        expect(unifiedSOs.hits.hits.length).to.be(1);
+
+        const unifiedSO = unifiedSOs.hits.hits[0]._source as {
+          'cases-attachments': {
+            type: string;
+            attachmentId: string;
+            data?: { content?: string };
+            metadata?: { command?: string; targets?: unknown[]; comment?: unknown };
+          };
+        };
+        expect(unifiedSO['cases-attachments'].type).to.be(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+        expect(unifiedSO['cases-attachments'].attachmentId).to.be('unified-endpoint-1');
+        expect(unifiedSO['cases-attachments'].data?.content).to.be(unifiedData.content);
+        expect(unifiedSO['cases-attachments'].metadata?.command).to.be('isolate');
+        expect(unifiedSO['cases-attachments'].metadata?.targets).to.eql(unifiedTargets);
+        expect(unifiedSO['cases-attachments'].metadata).not.to.have.property('comment');
+
+        const legacySOs = await searchSO(CASE_COMMENT_SAVED_OBJECT, attachmentId);
+        expect(legacySOs.hits.hits.length).to.be(0);
+      });
+
+      it('accepts a legacy `externalReference + endpoint` payload and stores it as a unified `security.endpoint` row (server lifts comment → data.content)', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: legacyExternalReferencePayload(),
         });
 
-        const storedAttributes = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT] as
-          | Record<string, unknown>
-          | undefined;
-        expect(storedAttributes).to.be.ok();
+        // API projection always returns the legacy externalReference shape.
+        const fileComment = patched.comments![0];
+        expect(fileComment.type).to.be(AttachmentType.externalReference);
 
-        expect(storedAttributes!.type).to.be(AttachmentType.actions);
-        expect(storedAttributes!.comment).to.be(postCommentActionsReq.comment);
-        expect(storedAttributes!.actions).to.eql(postCommentActionsReq.actions);
+        const unifiedSOs = await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, fileComment.id);
+        expect(unifiedSOs.hits.hits.length).to.be(1);
 
-        // Must not leak any unified-only fields onto the legacy `actions` SO row.
-        expect(storedAttributes!).not.to.have.property('attachmentId');
-        expect(storedAttributes!).not.to.have.property('metadata');
-        expect(storedAttributes!).not.to.have.property('data');
+        const unifiedSO = unifiedSOs.hits.hits[0]._source as {
+          'cases-attachments': {
+            type: string;
+            attachmentId: string;
+            data?: { content?: string };
+            metadata?: { command?: string; targets?: unknown[]; comment?: unknown };
+          };
+        };
+        expect(unifiedSO['cases-attachments'].type).to.be(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+        expect(unifiedSO['cases-attachments'].attachmentId).to.be('legacy-er-endpoint-1');
+        // Comment lifted out of metadata onto data.content.
+        expect(unifiedSO['cases-attachments'].data?.content).to.be(unifiedData.content);
+        expect(unifiedSO['cases-attachments'].metadata).not.to.have.property('comment');
+
+        const legacySOs = await searchSO(CASE_COMMENT_SAVED_OBJECT, fileComment.id);
+        expect(legacySOs.hits.hits.length).to.be(0);
       });
-    });
 
-    describe('byte-clean legacy storage (FF OFF)', () => {
-      it('does not persist `attachmentId` / `metadata` / `data` on the legacy cases-comments SO', async () => {
+      it('accepts a legacy `actions` payload and folds it to a unified `security.endpoint` row (asymmetric retirement)', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentActionsReq,
+        });
 
-        const patchedCase = await createComment({
+        const actionsComment = patched.comments![0];
+        expect(actionsComment.type).to.be(AttachmentType.externalReference);
+
+        const unifiedSOs = await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, actionsComment.id);
+        expect(unifiedSOs.hits.hits.length).to.be(1);
+
+        const unifiedSO = unifiedSOs.hits.hits[0]._source as {
+          'cases-attachments': {
+            type: string;
+            attachmentId: string;
+            data?: { content?: string };
+            metadata?: {
+              command?: string;
+              targets?: Array<{ endpointId: string; hostname: string; agentType: string }>;
+              comment?: unknown;
+            };
+          };
+        };
+        expect(unifiedSO['cases-attachments'].type).to.be(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+        // Synthetic sentinel — legacy `actions` had no foreign reference id.
+        expect(unifiedSO['cases-attachments'].attachmentId).to.be('legacy-actions');
+        expect(unifiedSO['cases-attachments'].data?.content).to.be(postCommentActionsReq.comment);
+        expect(unifiedSO['cases-attachments'].metadata?.command).to.be(
+          postCommentActionsReq.actions.type
+        );
+        // Legacy `actions` targets had no agentType; the transformer defaults to 'endpoint'.
+        expect(unifiedSO['cases-attachments'].metadata?.targets).to.eql(
+          postCommentActionsReq.actions.targets.map((t) => ({ ...t, agentType: 'endpoint' }))
+        );
+        expect(unifiedSO['cases-attachments'].metadata).not.to.have.property('comment');
+
+        const legacySOs = await searchSO(CASE_COMMENT_SAVED_OBJECT, actionsComment.id);
+        expect(legacySOs.hits.hits.length).to.be(0);
+      });
+
+      it('400s a unified `security.endpoint` with empty targets', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedEndpointPayload({ metadata: { ...unifiedMetadata, targets: [] } }),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s a unified `security.endpoint` missing data.content', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedEndpointPayload({ data: undefined }),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s a unified `security.endpoint` with a stray metadata.comment (strict reject)', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedEndpointPayload({
+            metadata: { ...unifiedMetadata, comment: 'belongs on data.content' },
+          }),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s a legacy `actions` payload with empty targets (transformer rejection surfaces as 400)', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
           supertest,
           caseId: postedCase.id,
           params: {
-            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-            attachmentId: 'action-id-7',
-            data: validData,
-            metadata: validMetadata,
-            owner: 'securitySolutionFixture',
-          } as unknown as AttachmentRequest,
+            ...postCommentActionsReq,
+            actions: { ...postCommentActionsReq.actions, targets: [] },
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      // Flag-agnostic validator 400s peeled from the FF-OFF byte-clean suite
+      // (`common/attachments_framework_legacy/endpoint.ts`); a 400 (not 500) is the
+      // contract regardless of feature-flag state.
+      it('400s a legacy `externalReference` endpoint payload with empty targets', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: legacyExternalReferencePayload({
+            externalReferenceMetadata: {
+              ...unifiedMetadata,
+              comment: unifiedData.content,
+              targets: [],
+            },
+          }),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s a unified `security.endpoint` with an unknown `agentType`', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedEndpointPayload({
+            metadata: {
+              ...unifiedMetadata,
+              targets: [
+                { endpointId: 'endpoint-1', hostname: 'host-1', agentType: 'not-a-real-agent' },
+              ],
+            },
+          }),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s a unified `security.endpoint` missing `command`', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedEndpointPayload({ metadata: { targets: unifiedMetadata.targets } }),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s a unified `security.endpoint` with an unknown top-level metadata key (strict)', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedEndpointPayload({ metadata: { ...unifiedMetadata, extra: 'nope' } }),
+          expectedHttpCode: 400,
+        });
+      });
+    });
+
+    describe('read', () => {
+      it('GET projects a unified `security.endpoint` row back to the legacy externalReference shape', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedEndpointPayload({ attachmentId: 'unified-endpoint-read-1' }),
+        });
+        const attachmentId = patched.comments![0].id;
+
+        const fetched = (await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: attachmentId,
+        })) as unknown as {
+          id: string;
+          type: string;
+          externalReferenceAttachmentTypeId: string;
+          externalReferenceStorage: { type: string };
+          externalReferenceMetadata: Record<string, unknown> | null;
+        };
+
+        expect(fetched.type).to.be(AttachmentType.externalReference);
+        expect(fetched.externalReferenceAttachmentTypeId).to.be('endpoint');
+        expect(fetched.externalReferenceStorage.type).to.be('elasticSearchDoc');
+        // data.content is lowered back into externalReferenceMetadata.comment on read.
+        expect(fetched.externalReferenceMetadata?.comment).to.be(unifiedData.content);
+        expect(fetched.externalReferenceMetadata?.command).to.be('isolate');
+        expect(fetched.externalReferenceMetadata?.targets).to.eql(unifiedTargets);
+      });
+
+      it('GET projects a legacy `actions`-origin row back to the legacy externalReference shape (never re-emits `actions`)', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentActionsReq,
+        });
+        const attachmentId = patched.comments![0].id;
+
+        const fetched = (await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: attachmentId,
+        })) as unknown as {
+          type: string;
+          externalReferenceId: string;
+          externalReferenceAttachmentTypeId: string;
+          externalReferenceMetadata: Record<string, unknown> | null;
+        };
+
+        expect(fetched.type).to.be(AttachmentType.externalReference);
+        expect(fetched.externalReferenceAttachmentTypeId).to.be('endpoint');
+        // Synthetic sentinel id survives the round trip so the synthetic origin
+        // stays discoverable to consumers / log readers.
+        expect(fetched.externalReferenceId).to.be('legacy-actions');
+        expect(fetched.externalReferenceMetadata?.comment).to.be(postCommentActionsReq.comment);
+        expect(fetched.externalReferenceMetadata?.command).to.be(
+          postCommentActionsReq.actions.type
+        );
+      });
+    });
+
+    describe('delete', () => {
+      it('deletes a unified `security.endpoint` attachment by id', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedEndpointPayload({ attachmentId: 'unified-endpoint-delete-1' }),
+        });
+        const attachmentId = patched.comments![0].id;
+
+        await deleteComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: attachmentId,
         });
 
-        const attachmentId = patchedCase.comments![0].id;
-
-        const esResponse = await getSOFromKibanaIndex({
-          es,
-          soType: CASE_COMMENT_SAVED_OBJECT,
-          soId: attachmentId,
-        });
-
-        const storedAttributes = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT] as
-          | Record<string, unknown>
-          | undefined;
-        expect(storedAttributes).to.be.ok();
-
-        expect(storedAttributes!.type).to.be('externalReference');
-        expect(storedAttributes!.externalReferenceAttachmentTypeId).to.be('endpoint');
-
-        expect(storedAttributes!).not.to.have.property('attachmentId');
-        expect(storedAttributes!).not.to.have.property('metadata');
-        expect(storedAttributes!).not.to.have.property('data');
-
-        // The unified `data.content` is projected back to
-        // `externalReferenceMetadata.comment` for legacy on-disk shape.
-        const externalReferenceMetadata = storedAttributes!.externalReferenceMetadata as
-          | Record<string, unknown>
-          | undefined;
-        expect(externalReferenceMetadata?.comment).to.be(validData.content);
+        const unifiedSOs = await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, attachmentId);
+        expect(unifiedSOs.hits.hits.length).to.be(0);
       });
     });
   });

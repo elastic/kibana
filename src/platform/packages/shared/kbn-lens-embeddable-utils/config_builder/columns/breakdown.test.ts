@@ -50,3 +50,59 @@ test('uses intervals when field is a number', () => {
   });
   expect(column.operationType).toEqual('range');
 });
+
+test('forwards secondaryFields and orderBy for topValues breakdown', () => {
+  const column = getBreakdownColumn({
+    options: {
+      type: 'topValues',
+      field: 'host.name',
+      size: 3,
+      secondaryFields: ['container.id', 'service.name'],
+      accuracyMode: false,
+      orderBy: {
+        orderDirection: 'desc',
+        orderBy: { type: 'alphabetical', fallback: false },
+      },
+    },
+    dataView: dataView as unknown as DataView,
+  });
+
+  expect(column.operationType).toEqual('terms');
+  expect(column).toMatchObject({
+    sourceField: 'host.name',
+    params: {
+      size: 3,
+      secondaryFields: ['container.id', 'service.name'],
+      accuracyMode: false,
+      orderDirection: 'desc',
+      orderBy: { type: 'alphabetical', fallback: false },
+    },
+  });
+});
+
+test('forwards more than Lens UI MAX_MULTI_FIELDS_SIZE secondary fields', () => {
+  // Lens interactive editor caps secondary fields at 3 (4 fields total).
+  // Programmatic config builder is not subject to that UI-only gate.
+  const secondaryFields = ['container.id', 'event.module', 'labels.groupId', 'labels.scenario'];
+  expect(secondaryFields.length).toBeGreaterThan(3);
+
+  const column = getBreakdownColumn({
+    options: {
+      type: 'topValues',
+      field: 'host.name',
+      size: 3,
+      secondaryFields,
+      accuracyMode: false,
+    },
+    dataView: dataView as unknown as DataView,
+  });
+
+  expect(column).toMatchObject({
+    sourceField: 'host.name',
+    params: {
+      secondaryFields,
+      size: 3,
+      accuracyMode: false,
+    },
+  });
+});

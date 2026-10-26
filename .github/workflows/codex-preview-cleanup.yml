@@ -1,0 +1,14 @@
+name: elastic-internal-docs-cleanup
+
+on:
+  pull_request_target:
+    types:
+      - closed
+
+jobs:
+  preview:
+    uses: elastic/docs-actions/.github/workflows/codex-preview-cleanup.yml@v1
+    permissions:
+      contents: none
+      id-token: write
+      deployments: write

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -13,21 +14,20 @@ export const ThrottlingExceededCallout = () => {
   return (
     <>
       <EuiSpacer />
-      <EuiCallOut
+      <KbnWarningCallout
         title={
           <FormattedMessage
             id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.title"
             defaultMessage="You've exceeded the Synthetics Node bandwidth limits"
           />
         }
-        color="warning"
-        iconType="warning"
-      >
-        <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.message"
-          defaultMessage="When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped."
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.message"
+            defaultMessage="When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped."
+          />
+        }
+      />
     </>
   );
 };

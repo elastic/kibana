@@ -7,9 +7,8 @@
 
 import { type DataTableRecord } from '@kbn/discover-utils';
 import { ALERT_ATTACK_IDS } from '../../../../../../common/field_maps/field_names';
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../../../../common/constants';
-import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
 import { getFieldArray } from '../../../../../flyout/document_details/shared/utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export interface UseShowRelatedAttacksParams {
   /**
@@ -35,10 +34,8 @@ export interface UseShowRelatedAttacksResult {
 export const useShowRelatedAttacks = ({
   hit,
 }: UseShowRelatedAttacksParams): UseShowRelatedAttacksResult => {
-  const { uiSettings } = useKibana().services;
-  const enableAlertsAndAttacksAlignment = uiSettings.get(
-    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    false
+  const enableAlertsAndAttacksAlignment = useIsExperimentalFeatureEnabled(
+    'enableAlertsAndAttacksAlignment'
   );
 
   const attackIds = getFieldArray(hit.flattened[ALERT_ATTACK_IDS]).filter(

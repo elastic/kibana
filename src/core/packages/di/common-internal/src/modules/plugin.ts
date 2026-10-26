@@ -16,7 +16,7 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
+import { createToken, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
@@ -31,7 +31,7 @@ const Context = Symbol('Context') as ServiceIdentifier<Container>;
 /**
  * The service identifier for the global service references.
  */
-export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
+export const Global = createToken<ServiceIdentifier>('Global');
 
 /**
  * Current plugin scope identifier.
@@ -54,14 +54,14 @@ const Parent = Symbol('Parent') as ServiceIdentifier<Container>;
  * The factory creates a new container for the plugin dependencies.
  * Services registered in this scope are not visible outside unless they are explicitely exposed using the `Global` symbol.
  */
-export const Scope = Symbol.for('Scope') as ServiceIdentifier<ScopeFactory>;
+export const Plugin = createToken<ScopeFactory>('Plugin');
 
 /**
  * Isolated child context factory.
  *
  * This factory creates an intermediate or temporary child container to handle HTTP requests or other short-lived operations.
  */
-export const Fork = Symbol.for('Fork') as ServiceIdentifier<ScopeFactory>;
+export const Fork = createToken<ScopeFactory>('Fork');
 
 export class PluginModule extends ContainerModule {
   private services = new WeakMap<Container, Map<ServiceIdentifier, number>>();
@@ -76,7 +76,7 @@ export class PluginModule extends ContainerModule {
       bind(Container).toConstantValue(root);
       bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();
       bind(OnSetup).toConstantValue(this.registerGlobals.bind(this));
-      bind(Scope).toDynamicValue(this.getScopeFactory.bind(this)).inRequestScope();
+      bind(Plugin).toDynamicValue(this.getPluginFactory.bind(this)).inRequestScope();
       bind(Setup).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       bind(Start).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       onActivation(Global, this.onGlobalActivation.bind(this));
@@ -125,7 +125,7 @@ export class PluginModule extends ContainerModule {
       .toResolvedValue<[Container, Container | undefined]>(
         // eslint-disable-next-line @typescript-eslint/no-shadow
         (origin, context = origin) => {
-          const target = context.get(Scope)(id);
+          const target = context.get(Plugin)(id);
 
           this.registerGlobals(origin);
           this.inheritGlobals(target);
@@ -150,15 +150,15 @@ export class PluginModule extends ContainerModule {
       if (id) {
         fork.onDeactivation(
           id,
-          once(() => fork.unbindAll())
+          once(() => fork.unbindAllAsync())
         );
       }
 
-      return fork.get(Scope)(id);
+      return fork.get(Plugin)(id);
     };
   }
 
-  protected getScopeFactory({ get }: ResolutionContext): ScopeFactory {
+  protected getPluginFactory({ get }: ResolutionContext): ScopeFactory {
     const context = get(Container);
 
     return (id) => {
@@ -167,20 +167,20 @@ export class PluginModule extends ContainerModule {
       }
 
       if (!context.isCurrentBound(id)) {
-        const parent = context.get(Parent, { optional: true })?.get(Scope)(id) ?? context;
+        const parent = context.get(Parent, { optional: true })?.get(Plugin)(id) ?? context;
         const scope = this.createChild(parent);
 
         scope.bind(Id).toConstantValue(id);
         scope
           .bind(Context)
           .toConstantValue(context)
-          .onDeactivation(once(() => context.unbind(id).catch(noop)));
+          .onDeactivation(once(() => context.unbindAsync(id).catch(noop)));
         scope.get(Context);
 
         context
           .bind(id)
           .toConstantValue(scope)
-          .onDeactivation(once(() => scope.unbindAll()));
+          .onDeactivation(once(() => scope.unbindAllAsync()));
       }
 
       return context.get(id);

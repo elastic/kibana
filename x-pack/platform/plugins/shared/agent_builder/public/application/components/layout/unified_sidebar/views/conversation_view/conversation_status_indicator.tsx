@@ -38,24 +38,24 @@ export const ConversationStatusIndicator: React.FC<ConversationStatusIndicatorPr
 
   switch (status) {
     case ConversationDisplayStatus.inProgress:
-      return <EuiLoadingSpinner size="s" aria-label={labels.inProgress} />;
+      return <EuiLoadingSpinner size="m" aria-label={labels.inProgress} />;
 
     case ConversationDisplayStatus.awaitingPrompt:
       return (
         <EuiIcon
           type="if"
-          size="s"
+          size="m"
           color={euiTheme.colors.textWarning}
           aria-label={labels.awaitingPrompt}
         />
       );
 
     case ConversationDisplayStatus.error:
-      return <EuiIcon type="warningFill" size="s" color="danger" aria-label={labels.error} />;
+      return <EuiIcon type="warningFill" size="m" color="danger" aria-label={labels.error} />;
 
     case ConversationDisplayStatus.unread:
       return (
-        <EuiIcon type="dot" size="s" color={euiTheme.colors.primary} aria-label={labels.unread} />
+        <EuiIcon type="dot" size="m" color={euiTheme.colors.primary} aria-label={labels.unread} />
       );
 
     case ConversationDisplayStatus.read:

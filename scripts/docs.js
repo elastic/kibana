@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/run_build_docs_cli').runBuildDocsCli();
+require('@kbn/dev/run_build_docs_cli').runBuildDocsCli();

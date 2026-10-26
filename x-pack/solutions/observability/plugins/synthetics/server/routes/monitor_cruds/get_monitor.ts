@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import path from 'path';
+import { z } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { queryBoolean, routeId } from '../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
@@ -17,18 +19,21 @@ import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR,
+  options: {
+    summary: 'Get a monitor',
+    description:
+      'Get a monitor by its config ID.\n\nYou must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'get-synthetic-monitor',
+    oasOperationObject: () => path.join(__dirname, 'examples/get_monitor.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      params: schema.object({
-        monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+      params: z.strictObject({
+        id: routeId.describe('The ID of the monitor.'),
       }),
-      query: schema.object({
-        internal: schema.maybe(
-          schema.boolean({
-            defaultValue: false,
-          })
-        ),
+      query: z.strictObject({
+        internal: queryBoolean.optional().default(false).describe('For internal use only.'),
       }),
     },
   },
@@ -39,7 +44,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     spaceId,
     monitorConfigRepository,
   }): Promise<any> => {
-    const { monitorId } = request.params;
+    const { id: monitorId } = request.params;
     try {
       const { internal } = request.query;
 

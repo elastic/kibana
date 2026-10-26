@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement, ReactNode } from 'react';
+import type { KeyboardEvent, MouseEvent, ReactElement, ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
 
 export const POPOVER_WIDTH_PX = 360;
@@ -32,7 +32,7 @@ export interface ContextSwitcherSpacesConfig {
   /** All available spaces (including the active one). */
   items: SpaceItem[];
   /** Called when user selects a space. */
-  onSelect: (spaceId: string) => void;
+  onSelect: (spaceId: string, event: MouseEvent | KeyboardEvent) => void;
   /** Optional search config. */
   search?: { placeholder?: string; threshold?: number };
   /** Header action (e.g. "Manage" button). */

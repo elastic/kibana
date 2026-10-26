@@ -10,13 +10,13 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { ALERT_GROUP, ALERT_GROUPING, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
-import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { FIRED_ACTION, WARNING_ACTION, NO_DATA_ACTION } from './constants';
 import type { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -27,6 +27,7 @@ import type {
 } from '../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({
@@ -45,7 +46,7 @@ const initialRuleState: TestRuleState = {
 };
 
 const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
-const MOCKED_SPACE_ID = 'mockedSpaceId';
+const MOCKED_SPACE_ID = asSpaceId('mocked-space-id');
 
 const logger = {
   trace: fakeLogger,
@@ -284,6 +285,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire,
+              shouldWarn: false,
               isNoData,
               bucketKey: { groupBy0: '*' },
             },
@@ -343,6 +345,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire,
+              shouldWarn: false,
               isNoData,
               bucketKey: { groupBy0: '*' },
             },
@@ -445,6 +448,75 @@ describe('The custom threshold alert type', () => {
       });
     });
 
+    describe('querying the entire infrastructure with warning threshold', () => {
+      beforeEach(() => jest.clearAllMocks());
+      afterAll(() => clearInstances());
+      const instanceID = '*';
+      const execute = () =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            ...mockOptions.params,
+            criteria: [
+              {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [9.999],
+                warningComparator: COMPARATORS.GREATER_THAN,
+                warningThreshold: [2.49],
+              },
+            ],
+          },
+        });
+
+      const setResults = ({
+        currentValue = 7.59,
+        shouldWarn = false,
+      }: {
+        currentValue?: number;
+        shouldWarn?: boolean;
+      }) =>
+        setEvaluationResults([
+          {
+            '*': {
+              ...customThresholdNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [9.999],
+              warningComparator: COMPARATORS.GREATER_THAN,
+              warningThreshold: [2.49],
+              currentValue,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn,
+              isNoData: false,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+
+      test('warns as expected with the > comparator', async () => {
+        setResults({ currentValue: 2.5, shouldWarn: true });
+        await execute();
+        expect(getLastReportedAlert(instanceID)).toHaveWarningAction();
+
+        setResults({ currentValue: 1.23, shouldWarn: false });
+        await execute();
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+
+      test('writes kibana.alert.severity: warning and the warning-threshold reason', async () => {
+        setResults({ currentValue: 2.5, shouldWarn: true });
+        await execute();
+        const reportedAlert = getLastReportedAlert(instanceID);
+        expect(reportedAlert?.actionGroup).toBe(WARNING_ACTION.id);
+        expect(reportedAlert?.payload).toMatchObject({ 'kibana.alert.severity': 'warning' });
+        expect(reportedAlert?.context?.reason).toBe(
+          'Average test.metric.1 is 2.5, above the threshold of 2.49. (duration: 1 min, data view: mockedDataViewName)'
+        );
+      });
+    });
+
     describe('querying with a groupBy parameter', () => {
       beforeEach(() => jest.clearAllMocks());
       afterAll(() => clearInstances());
@@ -484,6 +556,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -495,6 +568,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -515,6 +589,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -526,6 +601,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -546,6 +622,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -557,6 +634,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -577,6 +655,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -588,6 +667,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -619,6 +699,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -636,6 +717,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -653,6 +735,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
             },
@@ -680,6 +763,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -690,6 +774,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -700,6 +785,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
             },
@@ -730,6 +816,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -740,6 +827,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -809,6 +897,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -826,6 +915,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -843,6 +933,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
             },
@@ -864,6 +955,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -874,6 +966,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -884,6 +977,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
             },
@@ -908,6 +1002,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -918,6 +1013,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -955,6 +1051,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -972,6 +1069,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
             },
@@ -989,6 +1087,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
             },
@@ -1010,6 +1109,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -1020,6 +1120,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
             },
@@ -1030,6 +1131,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
             },
@@ -1057,6 +1159,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
             },
@@ -1067,6 +1170,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
             },
@@ -1131,6 +1235,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'host-01' },
               flattenGrouping: { 'host.name': 'host-01' },
@@ -1145,6 +1250,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'host-02' },
               flattenGrouping: { 'host.name': 'host-02' },
@@ -1166,6 +1272,7 @@ describe('The custom threshold alert type', () => {
         ]);
         // Payload should include group field (i.e. 'host.name': 'host-01')
         expect(reportedAlertInstanceIdA?.payload).toStrictEqual({
+          'kibana.alert.severity': 'critical',
           'host.name': 'host-01',
           'kibana.alert.evaluation.threshold': [0.75],
           'kibana.alert.evaluation.time_range': expect.any(Object),
@@ -1191,6 +1298,7 @@ describe('The custom threshold alert type', () => {
         ]);
         // Payload should include group field (i.e. 'host.name': 'host-02')
         expect(reportedAlertInstanceIdB?.payload).toStrictEqual({
+          'kibana.alert.severity': 'critical',
           'host.name': 'host-02',
           'kibana.alert.evaluation.threshold': [0.75],
           'kibana.alert.evaluation.time_range': expect.any(Object),
@@ -1220,6 +1328,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'host-01' },
               flattenGrouping: { 'host.name': 'host-01' },
@@ -1281,6 +1390,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -1343,6 +1453,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -1355,6 +1466,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -1374,6 +1486,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -1394,6 +1507,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -1405,6 +1519,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -1425,6 +1540,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -1443,6 +1559,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -1457,6 +1574,7 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlertInstanceIdA).toHaveAlertAction();
         // Payload should not include group field (i.e. groupByField)
         expect(reportedAlertInstanceIdA?.payload).toEqual({
+          'kibana.alert.severity': 'critical',
           'kibana.alert.evaluation.threshold': [1, 3],
           'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [1, 3],
@@ -1485,6 +1603,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -1504,6 +1623,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -1552,6 +1672,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -1568,6 +1689,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -1613,6 +1735,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 1,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
                 flattenGrouping: { groupByField: 'a' },
@@ -1624,6 +1747,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 1,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'b' },
                 flattenGrouping: { groupByField: 'b' },
@@ -1642,6 +1766,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 0,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
                 flattenGrouping: { groupByField: 'a' },
@@ -1653,6 +1778,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 0,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'b' },
                 flattenGrouping: { groupByField: 'b' },
@@ -1700,6 +1826,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { 'host.name': 'a' },
               flattenGrouping: { 'host.name': 'a' },
@@ -1724,8 +1851,8 @@ describe('The custom threshold alert type', () => {
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
         const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-        expect(services.alertsClient.setAlertData).toBeCalledTimes(1);
-        expect(services.alertsClient.setAlertData).toBeCalledWith({
+        expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
+        expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
           context: {
             alertDetailsUrl: `http://localhost:5601/s/${MOCKED_SPACE_ID}/app/observability/alerts/uuid-a`,
             viewInAppUrl: 'mockedViewInApp',
@@ -1751,7 +1878,7 @@ describe('The custom threshold alert type', () => {
           },
           id: 'a',
         });
-        expect(getViewInAppUrl).lastCalledWith({
+        expect(getViewInAppUrl).toHaveBeenLastCalledWith({
           dataViewId: 'valid-index-name',
           spaceId: MOCKED_SPACE_ID,
           groups: [
@@ -1798,6 +1925,11 @@ describe('The custom threshold alert type', () => {
                     value: 'host-0',
                   },
                 ],
+                [ALERT_GROUPING]: {
+                  host: {
+                    name: 'host-0',
+                  },
+                },
               },
             },
           ];
@@ -1814,8 +1946,8 @@ describe('The custom threshold alert type', () => {
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
         const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-        expect(getViewInAppUrl).toBeCalledTimes(1);
-        expect(getViewInAppUrl).toBeCalledWith({
+        expect(getViewInAppUrl).toHaveBeenCalledTimes(1);
+        expect(getViewInAppUrl).toHaveBeenCalledWith({
           dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
           groups: [
             {
@@ -1826,6 +1958,7 @@ describe('The custom threshold alert type', () => {
           logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
+          spaceId: MOCKED_SPACE_ID,
           searchConfiguration: {
             index: 'valid-index-name',
             query: {
@@ -1837,6 +1970,65 @@ describe('The custom threshold alert type', () => {
           timeUnit: 'm',
         });
       });
+      test('builds the recovered alert viewInAppUrl from the alert rule parameter snapshot', async () => {
+        setEvaluationResults([{}]);
+        const snapshotMetrics = [
+          { name: 'A', aggType: Aggregators.COUNT, filter: 'snapshot.filter:*' },
+        ];
+        services.alertsClient.getRecoveredAlerts.mockImplementation((params: any) => {
+          return [
+            {
+              alert: {
+                meta: [],
+                state: [],
+                context: {},
+                id: 'host-0',
+                getId: jest.fn().mockReturnValue('host-0'),
+                getUuid: jest.fn().mockReturnValue('mockedUuid'),
+                getStart: jest.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
+              },
+              hit: {
+                'host.name': 'host-0',
+                [ALERT_GROUP]: [{ field: 'host.name', value: 'host-0' }],
+                [ALERT_RULE_PARAMETERS]: {
+                  searchConfiguration: {
+                    index: 'snapshot-data-view',
+                    query: { query: 'snapshot: true', language: 'kuery' },
+                  },
+                  criteria: [{ metrics: snapshotMetrics, timeSize: 5, timeUnit: 'h' }],
+                },
+              },
+            },
+          ];
+        });
+        services.alertFactory.done.mockImplementation(() => {
+          return {
+            getRecoveredAlerts: jest.fn().mockReturnValue([
+              {
+                setContext: jest.fn(),
+                getId: jest.fn().mockReturnValue('mockedId'),
+              },
+            ]),
+          };
+        });
+        await execute(COMPARATORS.GREATER_THAN, [0.9]);
+
+        expect(getViewInAppUrl).toHaveBeenCalledTimes(1);
+        expect(getViewInAppUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dataViewId: 'snapshot-data-view',
+            metrics: snapshotMetrics,
+            spaceId: MOCKED_SPACE_ID,
+            searchConfiguration: {
+              index: 'snapshot-data-view',
+              query: { query: 'snapshot: true', language: 'kuery' },
+            },
+            timeSize: 5,
+            timeUnit: 'h',
+          })
+        );
+      });
+
       test('includes reason message in the recovered alert context pulled from the last active alert ', async () => {
         setEvaluationResults([{}]);
         const mockedSetContext = jest.fn();
@@ -1870,7 +2062,7 @@ describe('The custom threshold alert type', () => {
           };
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
-        expect(services.alertsClient.setAlertData).toBeCalledWith(
+        expect(services.alertsClient.setAlertData).toHaveBeenCalledWith(
           expect.objectContaining({
             context: expect.objectContaining({
               reason: 'This is reason msg for the alert',
@@ -1925,6 +2117,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -1954,6 +2147,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -2013,6 +2207,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: STARTED_AT_MOCK_DATE.toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -2087,6 +2282,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -2110,6 +2306,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -2126,6 +2323,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -2137,6 +2335,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -2169,6 +2368,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -2187,6 +2387,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -2215,6 +2416,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -2233,6 +2435,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -2251,6 +2454,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
               flattenGrouping: { groupByField: 'c' },
@@ -2271,6 +2475,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -2282,6 +2487,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -2340,6 +2546,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2363,6 +2570,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2379,6 +2587,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 1,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
                 flattenGrouping: { groupByField: 'a' },
@@ -2390,6 +2599,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 3,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'b' },
                 flattenGrouping: { groupByField: 'b' },
@@ -2420,6 +2630,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
                 flattenGrouping: { groupByField: 'a' },
@@ -2438,6 +2649,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
                 flattenGrouping: { groupByField: 'b' },
@@ -2489,6 +2701,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2508,6 +2721,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 2,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2553,6 +2767,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
               },
@@ -2563,6 +2778,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
               },
@@ -2586,6 +2802,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 2,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
                 flattenGrouping: { groupByField: 'a' },
@@ -2597,6 +2814,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
               },
@@ -2641,6 +2859,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2686,6 +2905,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2715,6 +2935,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2737,6 +2958,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2773,6 +2995,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2815,6 +3038,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2854,6 +3078,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -2917,6 +3142,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
               },
@@ -2927,6 +3153,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
               },
@@ -2943,6 +3170,65 @@ describe('The custom threshold alert type', () => {
 
           // Reset mock
           services.alertsClient.isTrackedAlert.mockReturnValue(false);
+        });
+      });
+
+      describe('legacy alertOnGroupDisappear: false with noDataBehavior', () => {
+        const runWith = async (params: Record<string, unknown>) => {
+          setEvaluationResults([{}]);
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              ...params,
+            },
+          });
+        };
+
+        const trackedMissingGroups = () =>
+          jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6];
+
+        test('remainActive still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'remainActive',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('alertOnNoData still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'alertOnNoData',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('recover does not track missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'recover',
+            alertOnGroupDisappear: true,
+          });
+          expect(trackedMissingGroups()).toBe(false);
+        });
+
+        test('legacy alertOnGroupDisappear: false without noDataBehavior does not track', async () => {
+          await runWith({
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(false);
         });
       });
 
@@ -2977,6 +3263,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
               },
@@ -2987,6 +3274,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
               },
@@ -3010,6 +3298,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 2,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
                 flattenGrouping: { groupByField: 'a' },
@@ -3021,6 +3310,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
               },
@@ -3071,6 +3361,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
               },
@@ -3081,6 +3372,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
               },
@@ -3091,6 +3383,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 2,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'c' },
                 flattenGrouping: { groupByField: 'c' },
@@ -3124,6 +3417,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
               },
@@ -3134,6 +3428,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
               },
@@ -3163,6 +3458,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
               },
@@ -3173,6 +3469,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
               },
@@ -3231,6 +3528,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire,
+              shouldWarn: false,
               isNoData,
               bucketKey: { groupBy0: '*' },
             },
@@ -3356,6 +3654,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3367,6 +3666,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3387,6 +3687,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3398,6 +3699,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3418,6 +3720,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3429,6 +3732,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3449,6 +3753,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3460,6 +3765,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3491,6 +3797,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3509,6 +3816,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3527,6 +3835,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
               flattenGrouping: { groupByField: 'c' },
@@ -3555,6 +3864,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3566,6 +3876,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3577,6 +3888,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
               flattenGrouping: { groupByField: 'c' },
@@ -3608,6 +3920,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3619,6 +3932,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3689,6 +4003,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3707,6 +4022,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3725,6 +4041,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
               flattenGrouping: { groupByField: 'c' },
@@ -3747,6 +4064,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3758,6 +4076,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3769,6 +4088,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
               flattenGrouping: { groupByField: 'c' },
@@ -3794,6 +4114,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3805,6 +4126,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3843,6 +4165,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3861,6 +4184,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3879,6 +4203,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
               flattenGrouping: { groupByField: 'c' },
@@ -3901,6 +4226,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3912,6 +4238,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -3923,6 +4250,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
               flattenGrouping: { groupByField: 'c' },
@@ -3951,6 +4279,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -3962,6 +4291,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -4027,6 +4357,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'host-01' },
               flattenGrouping: { 'host.name': 'host-01' },
@@ -4041,6 +4372,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'host-02' },
               flattenGrouping: { 'host.name': 'host-02' },
@@ -4062,6 +4394,7 @@ describe('The custom threshold alert type', () => {
         ]);
         // Payload should include group field (i.e. 'host.name': 'host-01')
         expect(reportedAlertInstanceIdA?.payload).toStrictEqual({
+          'kibana.alert.severity': 'critical',
           'host.name': 'host-01',
           'kibana.alert.evaluation.threshold': [0.75],
           'kibana.alert.evaluation.time_range': expect.any(Object),
@@ -4087,6 +4420,7 @@ describe('The custom threshold alert type', () => {
         ]);
         // Payload should include group field (i.e. 'host.name': 'host-02')
         expect(reportedAlertInstanceIdB?.payload).toStrictEqual({
+          'kibana.alert.severity': 'critical',
           'host.name': 'host-02',
           'kibana.alert.evaluation.threshold': [0.75],
           'kibana.alert.evaluation.time_range': expect.any(Object),
@@ -4116,6 +4450,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'host-01' },
               flattenGrouping: { 'host.name': 'host-01' },
@@ -4177,6 +4512,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -4239,6 +4575,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -4251,6 +4588,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -4270,6 +4608,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -4290,6 +4629,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -4301,6 +4641,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -4321,6 +4662,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -4339,6 +4681,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -4353,6 +4696,7 @@ describe('The custom threshold alert type', () => {
         expect(reportedAlertInstanceIdA).toHaveAlertAction();
         // Payload should not include group field (i.e. groupByField)
         expect(reportedAlertInstanceIdA?.payload).toEqual({
+          'kibana.alert.severity': 'critical',
           'kibana.alert.evaluation.threshold': [1, 3],
           'kibana.alert.evaluation.time_range': expect.any(Object),
           'kibana.alert.evaluation.values': [1, 3],
@@ -4381,6 +4725,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -4400,6 +4745,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: '*' },
             },
@@ -4460,6 +4806,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -4489,6 +4836,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -4505,7 +4853,7 @@ describe('The custom threshold alert type', () => {
       const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
         executor({
           ...mockOptions,
-          spaceId: '',
+          spaceId: DEFAULT_SPACE_ID,
           services,
           params: {
             ...mockOptions.params,
@@ -4549,6 +4897,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: STARTED_AT_MOCK_DATE.toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -4623,6 +4972,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -4646,6 +4996,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: '*' },
             },
@@ -4662,6 +5013,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -4673,6 +5025,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -4705,6 +5058,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -4723,6 +5077,7 @@ describe('The custom threshold alert type', () => {
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
+              shouldWarn: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -4751,6 +5106,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -4769,6 +5125,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -4787,6 +5144,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
               flattenGrouping: { groupByField: 'c' },
@@ -4807,6 +5165,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
               flattenGrouping: { groupByField: 'a' },
@@ -4818,6 +5177,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
+              shouldWarn: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
               flattenGrouping: { groupByField: 'b' },
@@ -4876,6 +5236,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -4899,6 +5260,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: '*' },
               },
@@ -4915,6 +5277,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 1,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
                 flattenGrouping: { groupByField: 'a' },
@@ -4926,6 +5289,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: 3,
                 timestamp: new Date().toISOString(),
                 shouldFire: true,
+                shouldWarn: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'b' },
                 flattenGrouping: { groupByField: 'b' },
@@ -4956,6 +5320,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
                 flattenGrouping: { groupByField: 'a' },
@@ -4974,6 +5339,7 @@ describe('The custom threshold alert type', () => {
                 currentValue: null,
                 timestamp: new Date().toISOString(),
                 shouldFire: false,
+                shouldWarn: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
                 flattenGrouping: { groupByField: 'b' },
@@ -5031,6 +5397,7 @@ describe('The custom threshold alert type', () => {
               currentValue: 1.0,
               timestamp: new Date().toISOString(),
               shouldFire,
+              shouldWarn: false,
               isNoData,
               bucketKey: { groupBy0: '*' },
             },
@@ -5157,6 +5524,14 @@ expect.extend({
       pass,
     };
   },
+  toHaveWarningAction(action?: Action) {
+    const pass = action?.actionGroup === WARNING_ACTION.id;
+    const message = () => `expected ${action} to be a WARNING action`;
+    return {
+      message,
+      pass,
+    };
+  },
 });
 
 declare global {
@@ -5165,6 +5540,7 @@ declare global {
     interface Matchers<R> {
       toHaveAlertAction(action?: Action): R;
       toHaveNoDataAction(action?: Action): R;
+      toHaveWarningAction(action?: Action): R;
     }
   }
 }

@@ -37,7 +37,18 @@ export const setLoadFromParameter = (value: string) => {
   window.history.pushState({ path: newUrl }, '', newUrl);
 };
 
-export const removeLoadFromParameter = () => {
+interface RemoveLoadFromParameterOptions {
+  /**
+   * Overwrite the current history entry instead of adding one. Use this when the entry being
+   * cleaned up is the one the user is currently on, so that Back cannot return to a URL that
+   * would re-consume `load_from`.
+   */
+  replace?: boolean;
+}
+
+export const removeLoadFromParameter = ({
+  replace = false,
+}: RemoveLoadFromParameterOptions = {}) => {
   const baseUrl = getBaseUrl();
   const { hasHash, hashRoute, queryString } = parseQueryString();
   if (queryString.load_from) {
@@ -45,6 +56,6 @@ export const removeLoadFromParameter = () => {
 
     const params = Object.keys(queryString).length ? `?${qs.stringify(queryString)}` : '';
     const newUrl = hasHash ? `${baseUrl}${hashRoute}${params}` : `${baseUrl}${params}`;
-    window.history.pushState({ path: newUrl }, '', newUrl);
+    window.history[replace ? 'replaceState' : 'pushState']({ path: newUrl }, '', newUrl);
   }
 };

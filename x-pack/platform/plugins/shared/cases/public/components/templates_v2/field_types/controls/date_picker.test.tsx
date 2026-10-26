@@ -18,6 +18,8 @@ interface FormWrapperProps {
   showTime?: boolean;
   timezone?: 'utc' | 'local';
   initialValue?: string;
+  onConfirm?: () => void;
+  isSaving?: boolean;
   onSubmitResult: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -26,6 +28,8 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   showTime,
   timezone,
   initialValue,
+  onConfirm,
+  isSaving,
   onSubmitResult,
 }) => {
   const form = useForm({
@@ -56,6 +60,8 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
             ? { show_time: showTime, timezone }
             : undefined
         }
+        onConfirm={onConfirm}
+        isSaving={isSaving}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -78,6 +84,12 @@ describe('DatePicker', () => {
       render(<FormWrapper onSubmitResult={onSubmitResult} />);
 
       expect(screen.getByRole('textbox')).toBeInTheDocument();
+    });
+
+    it('disables the input while saving', () => {
+      render(<FormWrapper isSaving onSubmitResult={jest.fn()} />);
+
+      expect(screen.getByRole('textbox')).toBeDisabled();
     });
 
     it('shows Optional label when isRequired is false', () => {
@@ -154,6 +166,21 @@ describe('DatePicker', () => {
 
       // react-datepicker renders a time input only when showTimeSelect is true
       expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('inline actions', () => {
+    it('shows actions after the date changes and confirms it', async () => {
+      const onConfirm = jest.fn();
+      render(<FormWrapper onConfirm={onConfirm} onSubmitResult={jest.fn()} />);
+
+      const input = screen.getByRole('textbox');
+      await userEvent.type(input, '07/15/2026');
+      await userEvent.tab();
+
+      await userEvent.click(screen.getByTestId('template-field-confirm-due_date'));
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
     });
   });
 

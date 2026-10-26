@@ -9,7 +9,7 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
-import { retryTransientEsErrors } from '../utils/retry';
+import { ignoreAlreadyExistsAfterAmbiguousFailure, retryTransientEsErrors } from '../utils/retry';
 import type { SummaryTransformGenerator } from './summary_transform_generator/summary_transform_generator';
 import type { TransformManager } from './transform_manager';
 
@@ -20,17 +20,18 @@ export class DefaultSummaryTransformManager implements TransformManager {
     private generator: SummaryTransformGenerator,
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
-    private abortController: AbortController = new AbortController()
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
     const transformParams = await this.generator.generate(slo);
     try {
       await retryTransientEsErrors(
-        () =>
+        ignoreAlreadyExistsAfterAmbiguousFailure(() =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams, {
-            signal: this.abortController.signal,
-          }),
+            signal: this.signal,
+          })
+        ),
         {
           logger: this.logger,
         }
@@ -57,7 +58,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform(
             { transform_id: transformId },
-            { signal: this.abortController.signal }
+            { signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -73,7 +74,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
             { transform_id: transformId },
-            { ignore: [409], signal: this.abortController.signal }
+            { ignore: [409], signal: this.signal }
           ),
         {
           logger: this.logger,
@@ -91,7 +92,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
             { transform_id: transformId, wait_for_completion: true, force: true },
-            { ignore: [404], signal: this.abortController.signal }
+            { ignore: [404], signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -107,7 +108,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
             { transform_id: transformId, force: true },
-            { ignore: [404], signal: this.abortController.signal }
+            { ignore: [404], signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -123,7 +124,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
             { transform_id: transformId },
-            { signal: this.abortController.signal }
+            { signal: this.signal }
           ),
         { logger: this.logger }
       );

@@ -101,6 +101,9 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiPopover
+                      aria-label={
+                        labels.tools.bulkImportMcp.sourceSection.selectionActionsAriaLabel
+                      }
                       button={
                         <EuiButtonEmpty
                           iconType="chevronSingleDown"

@@ -25,6 +25,12 @@ export const certificateFormTranslations = {
 };
 
 export const alertFormI18n = {
+  defaultConnectorsLabel: i18n.translate(
+    'xpack.uptime.sourceConfiguration.alertDefaultForm.defaultConnectors',
+    {
+      defaultMessage: 'Default connectors',
+    }
+  ),
   inputPlaceHolder: i18n.translate(
     'xpack.uptime.sourceConfiguration.alertDefaultForm.selectConnector',
     {

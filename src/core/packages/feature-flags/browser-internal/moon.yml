@@ -21,8 +21,13 @@ dependsOn:
   - '@kbn/core-feature-flags-browser'
   - '@kbn/logging'
   - '@kbn/core-base-browser-mocks'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-internal'
+  - '@kbn/core-http-browser-mocks'
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/core-injected-metadata-browser-mocks'
+  - '@kbn/use-observable'
+  - '@kbn/std'
 tags:
   - shared-browser
   - package
@@ -35,6 +40,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

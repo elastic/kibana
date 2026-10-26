@@ -6,21 +6,23 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
-import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFormRow, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ProjectRouting } from '@kbn/es-query';
+import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
-import { PageTitle } from '../../../../components/page_title';
+import { getIsMlCpsEnabled } from '../../../../services/ml_server_info';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
   useMlKibana,
   useNavigateToPath,
   useMlManagementLocator,
 } from '../../../../contexts/kibana';
-import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
   nextStepPath: string;
@@ -31,43 +33,108 @@ const RESULTS_PER_PAGE = 20;
 
 type SavedObject = SavedObjectCommon<FinderAttributes & DiscoverSessionFinderAttributes>;
 
+function buildSourceSelectionPath(
+  nextStepPath: string,
+  id: string,
+  type: 'index-pattern' | 'search',
+  projectRouting: string | undefined
+): string {
+  const params = new URLSearchParams();
+  if (type === 'index-pattern') {
+    params.set('index', id);
+  } else {
+    params.set('savedSearchId', id);
+  }
+  if (projectRouting !== undefined && projectRouting !== '') {
+    params.set('project_routing', projectRouting);
+  }
+  return `${nextStepPath}?${params.toString()}`;
+}
+
 export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
-  const { contentManagement, uiSettings } = useMlKibana().services;
+  const { contentManagement, uiSettings, cps } = useMlKibana().services;
   const mlLocator = useMlManagementLocator();
   const navigateToPath = useNavigateToPath();
+  const cpsManager = cps?.cpsManager;
+  const isMlCpsEnabled = getIsMlCpsEnabled();
+  const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
+  const [projectRouting, setProjectRouting] = useState<string | undefined>(undefined);
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
-  const onObjectSelection = async (id: string, type: string, name?: string) => {
+  useEffect(() => {
+    if (isMlCpsEnabled && cpsManager) {
+      setProjectRouting((prev) =>
+        prev === undefined ? cpsManager.getDefaultProjectRouting() ?? undefined : prev
+      );
+    }
+  }, [isMlCpsEnabled, cpsManager]);
+
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
+    [cpsManager]
+  );
+
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager?.getDefaultProjectRouting();
+  }, [cpsManager]);
+
+  const onProjectRoutingChange = useCallback((newProjectRouting: ProjectRouting) => {
+    setProjectRouting(newProjectRouting as string);
+  }, []);
+
+  const onObjectSelection = async (id: string, type: string, _name?: string) => {
+    const savedObjectType: 'index-pattern' | 'search' =
+      type === 'index-pattern' ? 'index-pattern' : 'search';
+    const pathWithQuery = buildSourceSelectionPath(
+      nextStepPath,
+      id,
+      savedObjectType,
+      projectRouting
+    );
     const urlPath = window.location.pathname;
     if (urlPath.includes('management')) {
       await mlLocator?.navigate({
         sectionId: 'ml',
-        appId: `anomaly_detection/${nextStepPath}?${
-          type === 'index-pattern' ? 'index' : 'savedSearchId'
-        }=${encodeURIComponent(id)}`,
+        appId: `anomaly_detection/${pathWithQuery}`,
       });
     } else {
-      navigateToPath(
-        `${nextStepPath}?${
-          type === 'index-pattern' ? 'index' : 'savedSearchId'
-        }=${encodeURIComponent(id)}`
-      );
+      navigateToPath(pathWithQuery);
     }
   };
 
   return (
     <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
-        <MlPageHeader>
-          <PageTitle
-            title={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-                defaultMessage="Select data view or saved Discover session"
-              />
-            }
-          />
-        </MlPageHeader>
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.newJob.wizard.selectDataViewOrSavedSearch', {
+            defaultMessage: 'Select data view or saved Discover session',
+          })}
+          back={anomalyDetectionJobsBack}
+        />
         <EuiPanel hasShadow={false} hasBorder>
+          {isMlCpsEnabled && totalProjectCount > 1 ? (
+            <>
+              <EuiFormRow
+                fullWidth
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.indexOrSearch.projectRoutingLabel"
+                    defaultMessage="Project scope"
+                  />
+                }
+              >
+                <MlProjectPickerPanel
+                  onProjectRoutingChange={onProjectRoutingChange}
+                  fetchProjectsByRouting={fetchProjectsByRouting}
+                  projectRouting={projectRouting}
+                  defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+                  totalProjectCount={totalProjectCount}
+                  projectRoutingValueTestSubj="mlIndexOrSearchProjectRoutingValue"
+                />
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
           <SavedObjectFinder
             id="mlJobsDatafeedDataView"
             key="searchSavedObjectFinder"

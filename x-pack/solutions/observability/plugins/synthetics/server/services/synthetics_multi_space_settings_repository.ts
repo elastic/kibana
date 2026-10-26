@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type {
   SyntheticsMultiSpaceSettings,

@@ -12,10 +12,8 @@ import { isEmpty, isEqual } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
-import type {
-  RulePatchProps,
-  RuleResponse,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { UnresolvedRulePatchProps } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { getIdError } from '../../../utils/utils';
@@ -27,7 +25,7 @@ import {
   toggleRuleEnabledOnUpdate,
   formatBulkEditResultErrors,
   isReadAuthEditField,
-  validateFieldWritePermissions,
+  validateEditedFieldWritePermissions,
 } from '../utils';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 import type { RuleParams } from '../../../../rule_schema';
@@ -39,7 +37,7 @@ interface PatchRuleOptions {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  rulePatch: RulePatchProps;
+  rulePatch: UnresolvedRulePatchProps;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
   changeTracking?: SecurityRuleChangeTracking;
@@ -67,9 +65,13 @@ export const patchRule = async ({
     throw new ClientError(error.message, error.statusCode);
   }
 
-  await validateMlAuth(mlAuthz, rulePatch.type ?? existingRule.type);
+  // PATCH cannot change a rule's type, so the rule being modified is what the ML license gate
+  // applies to.
+  await validateMlAuth(mlAuthz, existingRule.type);
   validateNonCustomizablePatchFields(rulePatch, existingRule);
-  validateFieldWritePermissions(rulePatch, rulesAuthz);
+  // A PATCH payload only carries the fields the client sent, so presence of a
+  // restricted field key (even set to null) means the user is editing it.
+  validateEditedFieldWritePermissions(rulePatch, rulesAuthz);
 
   const patchedRule = await applyRulePatch({
     prebuiltRuleAssetClient,

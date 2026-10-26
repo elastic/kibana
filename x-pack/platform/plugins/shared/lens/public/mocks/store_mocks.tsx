@@ -10,7 +10,6 @@ import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Provider } from 'react-redux';
-import type { PreloadedState } from '@reduxjs/toolkit';
 import type { RenderOptions } from '@testing-library/react';
 import type {
   LensAppState,
@@ -121,7 +120,7 @@ export function makeLensStore({
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
     },
-  } as unknown as PreloadedState<LensState>);
+  } as unknown as LensState);
 
   store.dispatch = jest.spyOn(store, 'dispatch') as jest.Mock;
   return { store, deps: storeDeps };

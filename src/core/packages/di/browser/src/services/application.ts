@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Newable, ServiceIdentifier } from 'inversify';
+import type { Newable } from 'inversify';
 import type { App, AppMount, AppMountParameters } from '@kbn/core-application-browser';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 
 /**
  * The browser application definition.
@@ -34,13 +36,13 @@ export interface ApplicationHandler<HistoryLocationState = unknown> {
  * The service identifier that is used to register the application.
  * @public
  */
-export const Application: ServiceIdentifier<
-  ApplicationDefinition & Exclude<ServiceIdentifier<ApplicationHandler>, keyof any>
-> = Symbol.for('Application');
+export const Application: ServiceToken<
+  ApplicationDefinition & Exclude<ServiceToken<ApplicationHandler>, keyof any>
+> = createToken('Application');
 
 /**
  * The service identifier of the application mount parameters.
  * @public
  */
-export const ApplicationParameters: ServiceIdentifier<AppMountParameters> =
-  Symbol.for('ApplicationParameters');
+export const ApplicationParameters: ServiceToken<AppMountParameters> =
+  createToken('ApplicationParameters');

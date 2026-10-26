@@ -55,9 +55,9 @@ describe('#registerApiDeprecationsInfo', () => {
     deprecationsFactory.getRegistry.mockReturnValue(deprecationsRegistry);
     registerApiDeprecationsInfo({ deprecationsFactory, coreUsageData, http, docLinks });
 
-    expect(deprecationsFactory.getRegistry).toBeCalledWith('core.api_deprecations');
-    expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
-    expect(deprecationsRegistry.registerDeprecations).toBeCalledWith({
+    expect(deprecationsFactory.getRegistry).toHaveBeenCalledWith('core.api_deprecations');
+    expect(deprecationsRegistry.registerDeprecations).toHaveBeenCalledTimes(1);
+    expect(deprecationsRegistry.registerDeprecations).toHaveBeenCalledWith({
       getDeprecations: expect.any(Function),
     });
   });

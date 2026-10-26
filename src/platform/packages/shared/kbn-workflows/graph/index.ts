@@ -9,9 +9,9 @@
 
 export {
   convertToWorkflowGraph,
-  convertToSerializableGraph,
   visitWaitForInputStep,
 } from './build_execution_graph/build_execution_graph';
+export { GraphBuildError, isGraphBuildError } from './build_execution_graph/graph_build_error';
 export { WorkflowGraph } from './workflow_graph/workflow_graph';
 
 export type {
@@ -27,6 +27,10 @@ export type {
   EnterWhileNodeConfigurationSchema,
   EnterWhileNode,
   ExitWhileNode,
+  EnterParallelNode,
+  EnterParallelNodeConfiguration,
+  EnterParallelNodeConfigurationSchema,
+  ExitParallelNode,
   EnterIfNode,
   EnterRetryNode,
   EnterSwitchNode,
@@ -54,6 +58,8 @@ export type {
   WaitGraphNode,
   WaitForInputGraphNodeSchema,
   WaitForInputGraphNode,
+  WaitForApprovalGraphNodeSchema,
+  WaitForApprovalGraphNode,
   EnterTryBlockNode,
   ExitTryBlockNode,
   EnterNormalPathNode,
@@ -67,6 +73,7 @@ export type {
   LoopContinueNode,
   LoopContinueNodeSchema,
   GraphNodeUnion,
+  SyntheticGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
@@ -77,12 +84,14 @@ export type {
 } from './types';
 
 export {
+  isSynthetic,
   isAtomic,
   isDataSet,
   isElasticsearch,
   isKibana,
   isWait,
   isWaitForInput,
+  isWaitForApproval,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,
@@ -91,6 +100,8 @@ export {
   isEnterNormalPath,
   isExitForeach,
   isExitWhile,
+  isEnterParallel,
+  isExitParallel,
   isExitIf,
   isExitRetry,
   isExitTryBlock,

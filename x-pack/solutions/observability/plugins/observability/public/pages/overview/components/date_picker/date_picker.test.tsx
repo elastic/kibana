@@ -112,7 +112,7 @@ describe('DatePicker', () => {
   });
 
   it('updates the URL when the date range changes', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     renderDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',

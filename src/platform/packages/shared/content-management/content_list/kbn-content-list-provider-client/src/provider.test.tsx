@@ -242,12 +242,12 @@ describe('ContentListClientProvider', () => {
         }),
       });
 
+      // Registration wires the KQL field + client-side filtering, but does not
+      // auto-render a toolbar control (placement is explicit via
+      // `createFilterControl`).
       expect(result.current.features.fields).toEqual([
         expect.objectContaining({ fieldName: 'contentType' }),
       ]);
-      expect(result.current.features.toolbarFilters?.contentType).toMatchObject({
-        type: 'custom_component',
-      });
       await expect(
         findIds(result.current.dataSource, {
           filters: { contentType: { include: ['visualization'] } },
@@ -677,6 +677,43 @@ describe('ContentListClientProvider', () => {
       // Read-only flyout: nothing to wrap, no synthesised handler.
       const params = openContentEditor.mock.calls[0]?.[0];
       expect(params?.onSave).toBeUndefined();
+    });
+
+    it('forwards the configured edit restriction to the content editor', () => {
+      const restrictionReason = 'You cannot edit this dashboard.';
+      const editRestriction = jest.fn(() => restrictionReason);
+      const openContentEditor = stubOpenContentEditor();
+
+      const { open } = captureOpen({
+        features: {
+          contentEditor: {
+            isReadonly: false,
+            onSave: jest.fn(async () => {}),
+          },
+        },
+        item: {
+          actions: {
+            edit: {
+              onItemAction: jest.fn(),
+              restriction: editRestriction,
+            },
+          },
+        },
+      });
+      const item = { id: '1', title: 'Dashboard 1' };
+
+      act(() => {
+        open(item);
+      });
+
+      expect(editRestriction).toHaveBeenCalledWith(item);
+      expect(openContentEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isReadonly: true,
+          readonlyReason: restrictionReason,
+          onSave: undefined,
+        })
+      );
     });
   });
 });

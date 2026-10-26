@@ -25,6 +25,8 @@ import {
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type { ConnectorUserAction } from '../../../common/types/domain';
 import { UserActionActions } from '../../../common/types/domain';
+import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_ATTACHMENT_REF_NAME } from '../../common/constants';
 
 describe('transform', () => {
   describe('action_id', () => {
@@ -160,6 +162,31 @@ describe('transform', () => {
 
         expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
       });
+
+      it('sets comment_id correctly from a cases-attachments reference', () => {
+        const userAction = createUserActionSO({
+          action: UserActionActions.create,
+          commentId: '5',
+        });
+        const transformed = transformer(
+          createSOFindResponse([
+            createUserActionFindSO({
+              ...userAction,
+              references: userAction.references.map((reference) =>
+                reference.id === '5'
+                  ? {
+                      ...reference,
+                      name: CASE_ATTACHMENT_REF_NAME,
+                      type: CASE_ATTACHMENT_SAVED_OBJECT,
+                    }
+                  : reference
+              ),
+            }),
+          ])
+        );
+
+        expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
+      });
     });
 
     describe('create connector', () => {
@@ -241,7 +268,7 @@ describe('transform', () => {
             },
           },
           references: [],
-        } as typeof base;
+        } as unknown as typeof base;
 
         const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
 

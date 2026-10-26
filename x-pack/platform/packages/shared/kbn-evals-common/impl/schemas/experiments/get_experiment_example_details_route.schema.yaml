@@ -1,0 +1,83 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Experiment Example Details API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/{experimentId}/datasets/{datasetId}/examples/{exampleId}/repetitions/{repetitionIndex}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationExperimentExampleDetails
+      description: Get input and output for one experiment example repetition
+      summary: Get evaluation experiment example details
+      tags:
+        - Evals API
+      parameters:
+        - name: experimentId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+        - name: exampleId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+        - name: repetitionIndex
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - name: execution_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 1024
+          description: When provided, fetches details from the matching experiment execution
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationExperimentExampleDetails'
+components:
+  schemas:
+    EvaluationExperimentExampleDetails:
+      type: object
+      properties:
+        example:
+          $ref: '#/components/schemas/EvaluationExperimentExampleDetailsExample'
+        task:
+          $ref: '#/components/schemas/EvaluationExperimentExampleDetailsTask'
+      required:
+        - example
+        - task
+    EvaluationExperimentExampleDetailsExample:
+      type: object
+      properties:
+        input:
+          type: object
+          additionalProperties: true
+          nullable: true
+      required:
+        - input
+    EvaluationExperimentExampleDetailsTask:
+      type: object
+      properties:
+        output:
+          type: object
+          additionalProperties: true
+          nullable: true
+      required:
+        - output

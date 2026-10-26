@@ -95,7 +95,17 @@ export const AgentPolicyBaseSchema = {
   ),
   data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   monitoring_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  download_source_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.string({
+        meta: {
+          description: 'Use `download_source_ids` instead',
+          deprecated: true,
+        },
+      }),
+    ])
+  ),
   fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   agent_features: schema.maybe(
     schema.arrayOf(
@@ -359,8 +369,44 @@ export const AgentPolicySchemaV6 = AgentPolicySchemaV5.extends(
   { meta: { id: 'agent_policy_v6' } }
 );
 
+export const AgentPolicySchemaV7 = AgentPolicySchemaV6.extends(
+  {
+    is_preconfigured: schema.maybe(schema.boolean()),
+    revision: schema.maybe(schema.number()),
+    schema_version: schema.maybe(schema.string()),
+    status: schema.maybe(
+      schema.oneOf([
+        schema.literal(agentPolicyStatuses.Active),
+        schema.literal(agentPolicyStatuses.Inactive),
+      ])
+    ),
+    updated_at: schema.maybe(schema.string()),
+    updated_by: schema.maybe(schema.string()),
+  },
+  { meta: { id: 'agent_policy_v7' } }
+);
+
+const downloadSourceIdsSchema = schema.maybe(
+  schema.arrayOf(
+    schema.string({
+      maxLength: 500,
+      meta: {
+        description:
+          "A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.",
+      },
+    }),
+    { maxSize: 3 }
+  )
+);
+
+export const AgentPolicySchemaV8 = AgentPolicySchemaV7.extends(
+  { download_source_ids: downloadSourceIdsSchema },
+  { meta: { id: 'agent_policy_v8' } }
+);
+
 export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
   {
+    download_source_ids: downloadSourceIdsSchema,
     supports_agentless: schema.maybe(
       schema.oneOf([
         schema.literal(null),
@@ -368,7 +414,7 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
           defaultValue: false,
           meta: {
             description:
-              'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.',
+              'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet managed integrations API.',
             deprecated: true,
           },
         }),
@@ -381,6 +427,7 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
 
 export const AgentPolicySchema = AgentPolicySchemaV6.extends(
   {
+    download_source_ids: downloadSourceIdsSchema,
     id: schema.string(),
     is_managed: schema.maybe(schema.boolean()),
     status: schema.oneOf([
@@ -633,6 +680,7 @@ export const FullAgentPolicyResponseSchema = schema.object(
         }),
         download: schema.object({
           sourceURI: schema.string(),
+          sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 3 })),
           ssl: schema.maybe(BaseSSLSchema),
           auth: schema.maybe(
             schema.object({

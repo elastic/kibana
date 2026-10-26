@@ -6,29 +6,28 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 import { InvestigateInTimelineButton } from '../../../../../common/components/event_details/investigate_in_timeline_button';
-import { getTacticMetadata } from '../../../../../attack_discovery/helpers';
-import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
-import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
+import { getOriginalAlertIds } from '../../../../../attack_discovery/helpers';
+import { AttackSummarySections } from '../../../../../attack_discovery/components/attack_summary_sections';
 import { buildAlertsKqlFilter } from '../../../alerts_table/actions';
 import { AttackAiAssistantButton } from './attack_ai_assistant_button';
 
 import * as i18n from './translations';
 
+export {
+  SUMMARY_CONTENT_TEST_ID,
+  DETAILS_TITLE_TEST_ID,
+  DETAILS_CONTENT_TEST_ID,
+  ATTACK_CHAIN_TITLE_TEST_ID,
+} from '../../../../../attack_discovery/components/attack_summary_sections';
+
 export const SUMMARY_TAB_TEST_ID = 'attackSummaryTab';
-export const SUMMARY_CONTENT_TEST_ID = 'summaryContent';
-export const DETAILS_TITLE_TEST_ID = 'detailsTitle';
-export const DETAILS_CONTENT_TEST_ID = 'detailsContent';
-export const ATTACK_CHAIN_TITLE_TEST_ID = 'attackChainTitle';
 export const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = 'investigateInTimelineButton';
-export const TIMELINE_ICON_TEST_ID = 'timelineIcon';
-export const INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID = 'investigateInTimelineLabel';
 
 interface SummaryTabProps {
   /** The attack discovery alert document. If undefined, only the Alerts tab will be shown. */
@@ -42,7 +41,6 @@ interface SummaryTabProps {
  * and optionally the attack chain visualization.
  */
 export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized = false }) => {
-  const { euiTheme } = useEuiTheme();
   const { detailsMarkdown, summaryMarkdown } = useMemo(() => attack, [attack]);
 
   const summaryMarkdownWithReplacements = useMemo(
@@ -63,10 +61,8 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
     [attack.replacements, detailsMarkdown]
   );
 
-  const tacticMetadata = useMemo(() => getTacticMetadata(attack.mitreAttackTactics), [attack]);
-
   const originalAlertIds = useMemo(
-    () => attack.alertIds.map((id) => attack.replacements?.[id] ?? id),
+    () => getOriginalAlertIds(attack.alertIds, attack.replacements),
     [attack.alertIds, attack.replacements]
   );
 
@@ -77,78 +73,30 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
 
   return (
     <div data-test-subj={SUMMARY_TAB_TEST_ID}>
-      <EuiSpacer size="s" />
+      <AttackSummarySections
+        alertIds={originalAlertIds}
+        detailsMarkdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+        disableActions={showAnonymized}
+        mitreAttackTactics={attack.mitreAttackTactics}
+        scopeId={TableId.alertsOnAttacksPage}
+        summaryMarkdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+      />
 
-      <div data-test-subj={SUMMARY_CONTENT_TEST_ID}>
-        <AttackDiscoveryMarkdownFormatter
-          scopeId={TableId.alertsOnAttacksPage}
-          disableActions={showAnonymized}
-          markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
-        />
-      </div>
-
-      <EuiSpacer />
-
-      <EuiTitle data-test-subj={DETAILS_TITLE_TEST_ID} size="xs">
-        <h2>{i18n.DETAILS}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-
-      <div data-test-subj={DETAILS_CONTENT_TEST_ID}>
-        <AttackDiscoveryMarkdownFormatter
-          scopeId={TableId.alertsOnAttacksPage}
-          disableActions={showAnonymized}
-          markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
-        />
-      </div>
-
-      <EuiSpacer />
-
-      {tacticMetadata.length > 0 && (
-        <>
-          <EuiTitle data-test-subj={ATTACK_CHAIN_TITLE_TEST_ID} size="xs">
-            <h2>{i18n.ATTACK_CHAIN}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <AttackChain attackTactics={attack.mitreAttackTactics} />
-          <EuiSpacer size="l" />
-        </>
-      )}
-
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <AttackAiAssistantButton attack={attack} pathway="attacks_page_group_summary" />
         </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            margin-left: ${euiTheme.size.m};
-            margin-top: ${euiTheme.size.xs};
-          `}
-          grow={false}
-        >
+        <EuiFlexItem grow={false}>
           <InvestigateInTimelineButton
             asEmptyButton={true}
+            data-test-subj={INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID}
             dataProviders={null}
             filters={investigateInTimelineFilters}
+            flush="both"
+            iconType="timeline"
+            size="m"
           >
-            <EuiFlexGroup
-              alignItems="center"
-              data-test-subj={INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID}
-              gutterSize="xs"
-              responsive={false}
-              wrap={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  data-test-subj={TIMELINE_ICON_TEST_ID}
-                  type="timeline"
-                  aria-hidden={true}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem data-test-subj={INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID} grow={false}>
-                {i18n.INVESTIGATE_IN_TIMELINE}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {i18n.INVESTIGATE_IN_TIMELINE}
           </InvestigateInTimelineButton>
         </EuiFlexItem>
       </EuiFlexGroup>

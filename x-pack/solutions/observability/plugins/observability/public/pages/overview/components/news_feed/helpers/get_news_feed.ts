@@ -35,8 +35,8 @@ export async function getNewsFeed({
 }): Promise<NewsFeed> {
   try {
     return await http.get(
-      `https://feeds.elastic.co/observability-solution/v${removeSuffixFromVersion(
-        kibanaVersion
+      `https://feeds.elastic.co/observability-solution/v${encodeURIComponent(
+        removeSuffixFromVersion(kibanaVersion) ?? ''
       )}.json`
     );
   } catch (e) {

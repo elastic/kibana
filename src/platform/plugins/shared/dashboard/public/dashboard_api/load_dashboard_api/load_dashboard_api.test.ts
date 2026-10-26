@@ -8,16 +8,18 @@
  */
 
 import { Subject } from 'rxjs';
-
-import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import type { DashboardChangeSource } from '../../../common/change_sources';
+import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
+import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
+import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import { loadDashboardApi } from './load_dashboard_api';
+import type { DashboardBackupState } from '../../services/dashboard_backup_service';
+
 jest.mock('../telemetry/dashboard_load_telemetry', () => {
   return {
     startTrackingDashboardLoadTelemetry: jest.fn(),
   };
 });
-import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
-import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -30,7 +32,7 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
 
 jest.mock('../../dashboard_client', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const defaultState = require('../default_dashboard_state');
+  const defaultState = require('../../../common/default_dashboard_state');
   return {
     dashboardClient: {
       get: jest.fn().mockResolvedValue({
@@ -41,10 +43,13 @@ jest.mock('../../dashboard_client', () => {
 });
 
 const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
+let backupState: DashboardBackupState;
 
 describe('loadDashboardApi', () => {
   const getDashboardApiMock = jest.fn();
   const userActivity$ = new Subject();
+
+  const storeViewModeMock = jest.fn();
 
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -55,11 +60,11 @@ describe('loadDashboardApi', () => {
       internalApi: {},
     });
 
+    backupState = { query: lastSavedQuery };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../../services/dashboard_api_services').getDashboardBackupService = () => ({
-      getState: () => ({
-        query: lastSavedQuery,
-      }),
+      getState: () => backupState,
+      storeViewMode: storeViewModeMock,
     });
 
     window.performance.getEntriesByName = jest.fn().mockReturnValue([
@@ -122,6 +127,76 @@ describe('loadDashboardApi', () => {
     });
   });
 
+  describe('change sources', () => {
+    test('should strip restored change sources from initialState and seed the allowed ones', async () => {
+      backupState = {
+        query: lastSavedQuery,
+        changedBy: ['unknown', 'agent', 7, null] as unknown as DashboardChangeSource[],
+      };
+
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: true,
+        }),
+        savedObjectId: '12345',
+      });
+
+      const [{ initialState, changedBy }] = getDashboardApiMock.mock.calls[0];
+      expect(initialState).toEqual({
+        ...DEFAULT_DASHBOARD_STATE,
+        query: lastSavedQuery,
+      });
+      expect(changedBy).toEqual(['agent']);
+    });
+  });
+
+  describe('view mode', () => {
+    test('passes the view mode from creation options through to getDashboardApi', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+          getInitialInput: () => ({ viewMode: 'non-interactive' }),
+        }),
+        savedObjectId: '12345',
+      });
+      expect(getDashboardApiMock).toHaveBeenCalled();
+      // @ts-ignore
+      expect(getDashboardApiMock.mock.calls[0][0].viewMode).toBe('non-interactive');
+    });
+
+    test('backs up an explicit non-"non-interactive" view mode', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+          getInitialInput: () => ({ viewMode: 'view' }),
+        }),
+        savedObjectId: '12345',
+      });
+      expect(storeViewModeMock).toHaveBeenCalledWith('view');
+    });
+
+    test('never backs up non-interactive view mode, so it cannot be restored on a later load', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+          getInitialInput: () => ({ viewMode: 'non-interactive' }),
+        }),
+        savedObjectId: '12345',
+      });
+      expect(storeViewModeMock).not.toHaveBeenCalled();
+    });
+
+    test('does not back up view mode when none was explicitly provided', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+      expect(storeViewModeMock).not.toHaveBeenCalled();
+    });
+  });
+
   describe('performance monitoring', () => {
     test('should start performance tracking on load', async () => {
       await loadDashboardApi({
@@ -150,7 +225,7 @@ describe('loadDashboardApi', () => {
           useSessionStorageIntegration: false,
         }),
       });
-      expect(nextSpy).toBeCalledTimes(0);
+      expect(nextSpy).toHaveBeenCalledTimes(0);
     });
 
     test('should track view on load of saved object', async () => {
@@ -161,8 +236,8 @@ describe('loadDashboardApi', () => {
         }),
         savedObjectId: '12345',
       });
-      expect(nextSpy).toBeCalledTimes(1);
-      expect(nextSpy).toBeCalledWith(expect.objectContaining({ type: 'view' }));
+      expect(nextSpy).toHaveBeenCalledTimes(1);
+      expect(nextSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'view' }));
     });
   });
 });

@@ -8,7 +8,6 @@
  */
 
 import apm from 'elastic-apm-node';
-import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, TimeoutAbortedError } from '../utils';
 
@@ -25,7 +24,7 @@ export async function flushState(
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
   await Promise.all([
     params.stepIoService.flush(),
-    params.workflowLogger.flushEvents({ signal: options.workflowLogFlushSignal }),
+    params.eventQueue.flush({ signal: options.workflowLogFlushSignal }),
   ]);
   flushSpan?.end();
 }
@@ -33,7 +32,7 @@ export async function flushState(
 /**
  * Continuously persists workflow execution state and logs while the workflow is running.
  *
- * This function runs a loop that flushes the workflow execution state and logger events
+ * This function runs a loop that flushes the workflow execution state and queued log events
  * at regular intervals (every 0.5 seconds) until the workflow execution status is no longer RUNNING
  * OR until the persistenceAbortSignal is triggered (indicating execution has completed).
  *
@@ -54,19 +53,19 @@ export async function persistenceLoop(
   params: WorkflowExecutionLoopParams,
   persistenceAbortSignal?: AbortSignal
 ) {
-  while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
+  while (params.workflowExecutionCursor.isExecuting) {
     if (persistenceAbortSignal?.aborted) {
       return;
     }
 
     await flushState(params, {
-      workflowLogFlushSignal: params.taskAbortController.signal,
+      workflowLogFlushSignal: params.signal,
     });
 
     try {
       const waitSpan = apm.startSpan('persistence wait', 'workflow', 'wait');
       await Promise.race([
-        abortableTimeout(FLUSH_INTERVAL_MS, params.taskAbortController.signal),
+        abortableTimeout(FLUSH_INTERVAL_MS, params.signal),
         persistenceAbortSignal
           ? new Promise<void>((_, reject) => {
               if (persistenceAbortSignal.aborted) {

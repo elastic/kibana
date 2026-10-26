@@ -125,16 +125,16 @@ export class OtelTelemetryService {
 
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => ({
           async run() {
             const { state } = taskInstance;
 
             if (service.telemetryConfigProvider.getIsOptedIn()) {
-              await service.publishOtelPerServiceStats(abortController.signal);
+              await service.publishOtelPerServiceStats(signal);
             } else {
               service.logger.debug('Telemetry opted out, skipping OTel per-service task run');
             }

@@ -25,6 +25,24 @@ describe('PhaseTracker', () => {
     });
   });
 
+  describe('api implements PublishesPauseFetch', () => {
+    test(`should emit 'paused' event when isFetchPaused is true`, (done) => {
+      const phaseTracker = new PhaseTracker(performance.now());
+      phaseTracker
+        .getPhase$()
+        .pipe(skip(1))
+        .subscribe((phaseEvent) => {
+          expect(phaseEvent?.status).toBe('paused');
+          done();
+        });
+      phaseTracker.trackPhaseEvents({
+        dataLoading$: new BehaviorSubject<boolean | undefined>(false),
+        isFetchPaused$: new BehaviorSubject(true),
+        uuid: '1',
+      });
+    });
+  });
+
   describe('api implements PublishesDataLoading', () => {
     test(`should emit 'loading' event when dataLoading is true`, (done) => {
       const phaseTracker = new PhaseTracker(performance.now());

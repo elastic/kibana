@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/core-base-common'
   - '@kbn/core-http-common'
+  - '@kbn/core-spaces-common'
   - '@kbn/zod'
 tags:
   - shared-server
@@ -33,6 +34,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

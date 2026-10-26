@@ -17,7 +17,7 @@ import {
   defineAttachment,
   type UnifiedValueAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
-import { COMMENT, ADDED_COMMENT, DELETE_COMMENT_SUCCESS_TITLE } from './translations';
+import { COMMENT, ADDED_COMMENT, REMOVED_COMMENT_LABEL_TITLE } from './translations';
 import { createCommentActionCss, hasDraftComment } from './utils';
 
 type CommentViewProps = UnifiedValueAttachmentViewProps<CommentAttachmentData>;
@@ -43,6 +43,15 @@ const CommentTimelineAvatarLazy = React.lazy(() =>
     default: CommentTimelineAvatar,
   }))
 );
+
+const CommentTimelineAvatarIcon: React.FC<Pick<CommentViewProps, 'createdBy'>> = ({
+  createdBy,
+}) => (
+  <React.Suspense fallback={null}>
+    <CommentTimelineAvatarLazy createdBy={createdBy} />
+  </React.Suspense>
+);
+CommentTimelineAvatarIcon.displayName = 'CommentTimelineAvatarIcon';
 
 const CommentActionsLazy = React.lazy(() =>
   import('./comment_actions').then(({ CommentActions }) => ({
@@ -70,17 +79,12 @@ const getCommentClassName = (props: CommentViewProps): string | undefined => {
   });
 };
 
-const getCommentAttachmentViewObject = (props: CommentViewProps) => {
+const getCommentCreationActivity = (props: CommentViewProps) => {
   const className = getCommentClassName(props);
   const css = createCommentActionCss(props.rowContext.euiTheme);
 
   return {
     event: ADDED_COMMENT,
-    timelineAvatar: (
-      <React.Suspense fallback={null}>
-        <CommentTimelineAvatarLazy createdBy={props.createdBy} />
-      </React.Suspense>
-    ),
     children: CommentAttachmentChildrenLazy,
     hideDefaultActions: true,
     getActions: (viewProps: CommentViewProps) => [
@@ -111,9 +115,9 @@ const getCommentAttachmentViewObject = (props: CommentViewProps) => {
 export const getCommentAttachmentType = () =>
   defineAttachment({
     id: COMMENT_ATTACHMENT_TYPE,
-    icon: 'editorComment',
-    displayName: COMMENT,
-    getAttachmentViewObject: getCommentAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: DELETE_COMMENT_SUCCESS_TITLE }),
+    getIcon: (props) => <CommentTimelineAvatarIcon createdBy={props.createdBy} />,
+    getLabel: () => COMMENT,
+    getCreationActivity: getCommentCreationActivity,
+    getRemovalActivity: () => ({ event: REMOVED_COMMENT_LABEL_TITLE }),
     schema: CommentAttachmentPayloadSchema,
   });

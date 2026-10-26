@@ -126,42 +126,87 @@ Based on the above, provide the schedule in the following JSON format:
   ],
 ]);
 
+export const SEVERITY_AND_RISK_SCORE_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `Your role is to assess the severity and risk score for an Elastic Detection (SIEM) rule based on its intent, detection logic, and threat context.
+
+Severity levels and their corresponding default risk scores:
+- low: 21 — Informational or low-impact events; benign activity that warrants monitoring
+- medium: 47 — Suspicious activity that may require investigation; moderate impact
+- high: 73 — Likely malicious activity with significant potential impact
+- critical: 99 — Confirmed or near-certain attack; immediate response required
+
+Guidelines for choosing severity:
+- Consider the type of attack and its potential business impact
+- MITRE ATT&CK tactics can inform severity: initial access, discovery (low–medium), lateral movement, privilege escalation, credential access (medium–high), execution, persistence, exfiltration, impact (high–critical)
+- Consider whether the activity is always malicious vs. potentially benign
+- Consider data sensitivity (e.g., detections in authentication or identity data warrant higher severity)
+- The risk_score should reflect the numeric score that matches the chosen severity level (low=21, medium=47, high=73, critical=99), but you may adjust within a ±10 range when context warrants
+
+Respond with ONLY a JSON object in this exact format:
+{{
+  "severity": "medium",
+  "risk_score": 47,
+  "reasoning": "Brief explanation of why this severity was chosen"
+}}`,
+  ],
+  [
+    'human',
+    `
+    <context>
+      User request: {user_request}
+      ES|QL query: {esql_query}
+      Rule description: {rule_description}
+      MITRE ATT&CK mappings: {mitre_mappings}
+    </context>`,
+  ],
+]);
+
 export const MITRE_MAPPING_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `Your role is to analyze user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
+    `Your role is to analyze user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and select relevant MITRE tactics and techniques.
+
+You can map to two MITRE frameworks:
+- MITRE ATT&CK Enterprise: for conventional adversary behavior. Tactic IDs look like TA0001, technique IDs like T1078, subtechnique IDs like T1078.001.
+- MITRE ATLAS: for threats targeting AI/ML systems, LLM applications, model access, prompt injection, data poisoning, and model theft. Tactic IDs look like AML.TA0000, technique IDs like AML.T0044, subtechnique IDs like AML.T0024.002.
 
 Your task is to:
 1. Understand the intent and context of the user's security detection rule request
 2. Analyze the ES|QL query to identify what attack patterns it detects
 3. Consider the rule tags as additional context about the security domain, attack techniques, data sources, and threat types
-4. Select the most relevant MITRE ATT&CK tactics and techniques that match the detection scenario using your knowledge of the MITRE ATT&CK framework
+4. Select the most relevant tactics and techniques that match the detection scenario using your knowledge of the MITRE ATT&CK and MITRE ATLAS frameworks
 5. For each technique, include relevant subtechniques if applicable
 
 Guidelines:
-- Select 1-3 most relevant tactics (use tactic IDs like TA0001, TA0002, etc.)
-- For each tactic, select 1-5 relevant techniques (use technique IDs like T1078, T1059, etc.)
-- Include subtechniques when they are specifically relevant to the detection (use subtechnique IDs like T1078.001, T1059.001, etc.)
+- Select 1-3 most relevant tactics (use tactic IDs like TA0001 or AML.TA0000)
+- For each tactic, select 1-5 relevant techniques (use technique IDs like T1078, T1059, AML.T0044, etc.)
+- Include subtechniques when they are specifically relevant to the detection (use subtechnique IDs like T1078.001 or AML.T0024.002)
+- Pick MITRE ATLAS when the detection targets AI/ML or LLM activity, and MITRE ATT&CK otherwise
+- Select from both frameworks only when the rule genuinely covers both kinds of behavior
+- Never place an ATLAS technique under an ATT&CK tactic, or an ATT&CK technique under an ATLAS tactic
 - Focus on the primary attack patterns being detected
 - Consider the data sources and query logic when making selections
 - Use the provided tags to better understand the security context and threat landscape
 - Only select tactics and techniques that are directly relevant to what the rule detects
-- Use your knowledge of MITRE ATT&CK to select appropriate IDs
+- Use your knowledge of MITRE ATT&CK and MITRE ATLAS to select appropriate IDs
 
 Respond with a JSON object containing only the IDs:
-- "tactics": array of tactic IDs (strings like "TA0001", "TA0002")
+- "tactics": array of tactic IDs (strings like "TA0001" or "AML.TA0000")
 - "techniques": array of objects with "id" field and optional "subtechnique" array (subtechniques also only need "id")
 
 Format:
 {{
-  "tactics": ["TA0001", "TA0002"],
+  "tactics": ["TA0001", "AML.TA0000"],
   "techniques": [
     {{
       "id": "T1078",
       "subtechnique": ["T1078.001"]
     }},
     {{
-      "id": "T1059"
+      "id": "AML.T0024",
+      "subtechnique": ["AML.T0024.002"]
     }}
   ]
 }}`,

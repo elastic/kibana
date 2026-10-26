@@ -8,7 +8,11 @@
  */
 
 import { UrlFormat } from './url';
-import { expectReactElementWithNull, expectReactElementWithBlank } from '../test_utils';
+import {
+  expectReactElementWithNull,
+  expectReactElementWithBlank,
+  renderReactNode,
+} from '../test_utils';
 
 describe('UrlFormat', () => {
   test('outputs a simple <a> tag by default', () => {
@@ -244,6 +248,25 @@ describe('UrlFormat', () => {
 
       expect(url.convertToText('url')).toBe('url');
       expect(url.convertToReact('url')).toBe('url');
+    });
+
+    test('risonValue escapes rison delimiters so values survive Kibana app URL templates', () => {
+      const url = new UrlFormat({
+        urlTemplate: "http://elastic.co/app/kibana#/dashboard?_a=(query:'{{risonValue}}')",
+      });
+
+      // identical to how Kibana itself encodes this value in its own URLs
+      expect(url.convertToText("Roady's Jump (Start) *Travel!* Center")).toBe(
+        "http://elastic.co/app/kibana#/dashboard?_a=(query:'Roady!'s%20Jump%20(Start)%20*Travel!!*%20Center')"
+      );
+    });
+
+    test('value stays plain encodeURIComponent-encoded', () => {
+      const url = new UrlFormat({
+        urlTemplate: 'http://elastic.co/?q={{value}}',
+      });
+
+      expect(url.convertToText("Roady's Travel!")).toBe("http://elastic.co/?q=Roady's%20Travel!");
     });
 
     test('rawValue in url template is not URL-encoded (unlike value)', () => {
@@ -490,6 +513,20 @@ describe('UrlFormat', () => {
       `);
     });
 
+    test('resolves leading-slash relative urls against the base path, including the space prefix', () => {
+      const renderLink = (basePath: string) => {
+        const url = new UrlFormat({ parsedUrl: { origin: 'http://kibana.host.com', basePath } });
+        return renderReactNode(url.convertToReact('/test/hello')).querySelector('a');
+      };
+
+      expect(renderLink('')).toHaveAttribute('href', 'http://kibana.host.com/test/hello');
+      expect(renderLink('/xyz')).toHaveAttribute('href', 'http://kibana.host.com/xyz/test/hello');
+      expect(renderLink('/xyz/s/custom')).toHaveAttribute(
+        'href',
+        'http://kibana.host.com/xyz/s/custom/test/hello'
+      );
+    });
+
     test('should fail gracefully if there are no parsedUrl provided', () => {
       const url = new UrlFormat({});
 
@@ -636,7 +673,7 @@ describe('UrlFormat', () => {
 
   test('wraps highlighted link text in <mark>', () => {
     const url = new UrlFormat({});
-    expect(
+    const container = renderReactNode(
       url.convertToReact('http://elastic.co', {
         field: { name: 'link' },
         hit: {
@@ -645,19 +682,19 @@ describe('UrlFormat', () => {
           },
         },
       })
-    ).toMatchInlineSnapshot(`
-      <a
-        href="http://elastic.co"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        <mark
-          className="ffSearch__highlight"
-        >
-          http://elastic.co
-        </mark>
-      </a>
-    `);
+    );
+    expect(container.querySelector('a')).toHaveAttribute('href', 'http://elastic.co');
+    expect(container.querySelector('mark')).toHaveTextContent('http://elastic.co');
+  });
+
+  test('omits the anchor when isInteractive is false, even with openLinkInCurrentTab', () => {
+    const url = new UrlFormat({ openLinkInCurrentTab: true });
+    const container = renderReactNode(
+      url.convertToReact('http://elastic.co', { isInteractive: false })
+    );
+
+    expect(container.querySelector('a')).toBeNull();
+    expect(container).toHaveTextContent('http://elastic.co');
   });
 
   test('renders a numeric value as text when no URL template is set', () => {
@@ -688,40 +725,14 @@ describe('UrlFormat', () => {
     expect(url.convertToText(['http://elastic.co', 'http://kibana.io'])).toBe(
       '["http://elastic.co","http://kibana.io"]'
     );
-    expect(url.convertToReact(['http://elastic.co', 'http://kibana.io'])).toMatchInlineSnapshot(`
-      <React.Fragment>
-        <span
-          className="ffArray__highlight"
-        >
-          [
-        </span>
-        <a
-          href="http://elastic.co"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          http://elastic.co
-        </a>
-        <span
-          className="ffArray__highlight"
-        >
-          ,
-        </span>
-         
-        <a
-          href="http://kibana.io"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          http://kibana.io
-        </a>
-        <span
-          className="ffArray__highlight"
-        >
-          ]
-        </span>
-      </React.Fragment>
-    `);
+    const container = renderReactNode(
+      url.convertToReact(['http://elastic.co', 'http://kibana.io'])
+    );
+    expect(container.textContent).toBe('[http://elastic.co, http://kibana.io]');
+    expect([...container.querySelectorAll('a')].map(({ href }) => href)).toEqual([
+      'http://elastic.co/',
+      'http://kibana.io/',
+    ]);
   });
 
   test('returns the single element without brackets for a one-element array', () => {

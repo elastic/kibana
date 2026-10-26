@@ -1,0 +1,151 @@
+{
+  "sha1": "9528056fb5cf5a80e5b521cdfd8d39db0caf2dab",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "686626538372374-fa4d61d038fa93d",
+      "title": "CCR auto-follow patterns API returns an empty list when there are no auto-follow patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/auto_follow_pattern.spec.ts",
+        "line": 43,
+        "column": 40
+      }
+    },
+    {
+      "id": "686626538372374-cc4b4975c79853f",
+      "title": "CCR auto-follow patterns API rejects creating a pattern for an unknown remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/auto_follow_pattern.spec.ts",
+        "line": 52,
+        "column": 5
+      }
+    },
+    {
+      "id": "686626538372374-f26d76222bb3325",
+      "title": "CCR auto-follow patterns API creates and reads an auto-follow pattern for a known remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/auto_follow_pattern.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    },
+    {
+      "id": "686626538372374-fd771ababdfff37",
+      "title": "CCR auto-follow patterns API returns a 404 when the auto-follow pattern is not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/auto_follow_pattern.spec.ts",
+        "line": 96,
+        "column": 13
+      }
+    },
+    {
+      "id": "881e86ff81955ce-f25b0007209d18a",
+      "title": "CCR follower indices API returns an empty array when there are no follower indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/follower_indices.spec.ts",
+        "line": 116,
+        "column": 5
+      }
+    },
+    {
+      "id": "881e86ff81955ce-3f085661b7936be",
+      "title": "CCR follower indices API rejects following an index on an unknown remote cluster",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/follower_indices.spec.ts",
+        "line": 122,
+        "column": 44
+      }
+    },
+    {
+      "id": "881e86ff81955ce-0d342a70747136a",
+      "title": "CCR follower indices API rejects following an unknown leader index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/follower_indices.spec.ts",
+        "line": 129,
+        "column": 27
+      }
+    },
+    {
+      "id": "881e86ff81955ce-836efcf03606554",
+      "title": "CCR follower indices API creates a follower for an existing leader and reads it back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/follower_indices.spec.ts",
+        "line": 141,
+        "column": 95
+      }
+    },
+    {
+      "id": "881e86ff81955ce-fcbb971c0a0b7cf",
+      "title": "CCR follower indices API returns a 404 when the follower index does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/follower_indices.spec.ts",
+        "line": 155,
+        "column": 7
+      }
+    },
+    {
+      "id": "881e86ff81955ce-be7046fe048800f",
+      "title": "CCR follower indices API updates a follower index's advanced settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/follower_indices.spec.ts",
+        "line": 163,
+        "column": 23
+      }
+    },
+    {
+      "id": "881e86ff81955ce-75ff552ba58b528",
+      "title": "CCR follower indices API hard-coded advanced-settings defaults match Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/api/tests/follower_indices.spec.ts",
+        "line": 187,
+        "column": 5
+      }
+    }
+  ]
+}

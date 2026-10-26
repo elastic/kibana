@@ -17,9 +17,12 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'disable:entityAnalyticsEntityStoreV2',
       'disable:entityAnalyticsWatchlistEnabled',
+      'riskScoreHistoryEnabled',
     ])}`,
     '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
   ],
+  // Entity analytics tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName: 'Entity Analytics - Risk Engine Integration Tests - Serverless Env - Complete Tier',

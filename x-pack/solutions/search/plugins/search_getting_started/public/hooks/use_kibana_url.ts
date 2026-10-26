@@ -6,7 +6,7 @@
  */
 import { useMemo } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
-import { getSpaceIdFromPath, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { getSpaceIdFromPath, addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { useKibana } from './use_kibana';
 import { useSpaceId } from './use_space_id';
 
@@ -21,9 +21,9 @@ export const useKibanaUrl = () => {
 
     const pathname = new URL(baseUrl).pathname;
     const serverBasePath = http.basePath.serverBasePath;
-    const { pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(pathname, serverBasePath);
+    const { hasExplicitSpaceIdentifier } = getSpaceIdFromPath(pathname, serverBasePath);
 
-    if (!pathHasExplicitSpaceIdentifier) {
+    if (!hasExplicitSpaceIdentifier) {
       return addSpaceIdToPath(baseUrl, spaceId);
     }
 

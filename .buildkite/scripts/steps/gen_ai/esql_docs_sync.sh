@@ -46,11 +46,10 @@ main () {
   pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
 
   if [ "$pr_search_result" == "$PR_TITLE" ]; then
-    echo "PR already exists. Exiting."
-    exit
+    echo "An open ES|QL documentation PR already exists. Opening another."
+  else
+    echo "No existing PR found. Proceeding."
   fi
-
-  echo "No existing PR found. Proceeding."
 
   BRANCH_NAME="esql_docs_sync_$(date +%s)"
 
@@ -63,7 +62,7 @@ main () {
 
   git push origin "$BRANCH_NAME"
 
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:AI Infra'
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:AI Infra' --reviewer 'elastic/kibana-esql'
 }
 
 main

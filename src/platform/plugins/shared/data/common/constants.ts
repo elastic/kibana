@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { UI_SETTINGS } from '@kbn/data-service/src/constants';
+export { UI_SETTINGS, DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service/src/constants';
 
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
 export const KIBANA_USER_QUERY_LANGUAGE_KEY = 'kibana.userQueryLanguage';

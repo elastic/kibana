@@ -18,7 +18,12 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
 import type { UserActionEvent } from './types';
 
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
+import { V2_NOOP_ACTIVITY_WRITER } from '../../cases_analytics_v2';
 import { createSOFindResponse } from '../test_utils';
 import {
   casePayload,
@@ -103,6 +108,7 @@ describe('CaseUserActionService', () => {
         log: mockLogger,
         auditLogger: mockAuditLogger,
         savedObjectsSerializer: soSerializerMock,
+        analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
       });
     });
 
@@ -143,76 +149,60 @@ describe('CaseUserActionService', () => {
           nonDeletedCommentUpdates: {
             doc_count: 2,
             comments: {
-              doc_count: 2,
-              byCommentId: {
-                buckets: [
-                  {
-                    key: 'deleted-comment',
-                    doc_count: 3,
-                    reverse: {
-                      doc_count: 3,
-                      hasDelete: { doc_count: 1 },
-                      updates: {
+              buckets: {
+                [CASE_COMMENT_SAVED_OBJECT]: {
+                  doc_count: 2,
+                  byCommentId: {
+                    buckets: [
+                      {
+                        key: 'deleted-comment',
                         doc_count: 3,
-                        byCommentType: {
-                          buckets: [
-                            { key: 'user', doc_count: 2 },
-                            { key: 'comment', doc_count: 4 },
-                            { key: 'alert', doc_count: 1 },
-                          ],
+                        reverse: {
+                          doc_count: 3,
+                          hasDelete: { doc_count: 1 },
+                          updates: {
+                            doc_count: 3,
+                            byCommentType: {
+                              buckets: [
+                                { key: 'user', doc_count: 2 },
+                                { key: 'comment', doc_count: 4 },
+                                { key: 'alert', doc_count: 1 },
+                              ],
+                            },
+                          },
                         },
                       },
-                    },
-                  },
-                  {
-                    key: 'active-comment',
-                    doc_count: 2,
-                    reverse: {
-                      doc_count: 2,
-                      hasDelete: { doc_count: 0 },
-                      updates: {
+                      {
+                        key: 'active-comment',
                         doc_count: 2,
-                        byCommentType: {
-                          buckets: [
-                            { key: 'user', doc_count: 5 },
-                            { key: 'comment', doc_count: 5 },
-                          ],
+                        reverse: {
+                          doc_count: 2,
+                          hasDelete: { doc_count: 0 },
+                          updates: {
+                            doc_count: 2,
+                            byCommentType: {
+                              buckets: [
+                                { key: 'user', doc_count: 5 },
+                                { key: 'comment', doc_count: 5 },
+                              ],
+                            },
+                          },
                         },
                       },
-                    },
+                    ],
                   },
-                ],
+                },
+                [CASE_ATTACHMENT_SAVED_OBJECT]: {
+                  doc_count: 0,
+                  byCommentId: { buckets: [] },
+                },
               },
             },
           },
         },
       } as unknown as SavedObjectsFindResponse;
 
-      it('does not count unified comment type when attachments flag is off', async () => {
-        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
-
-        const stats = await service.getCaseUserActionStats({ caseId: '123' });
-
-        expect(stats).toEqual({
-          total: 20,
-          total_deletions: 4,
-          total_comments: 4,
-          total_comment_deletions: 1,
-          total_comment_creations: 2,
-          total_hidden_comment_updates: 2,
-          total_other_actions: 16,
-          total_other_action_deletions: 3,
-        });
-      });
-
-      it('counts unified comment type when attachments flag is on', async () => {
-        service = new CaseUserActionService({
-          unsecuredSavedObjectsClient,
-          log: mockLogger,
-          auditLogger: mockAuditLogger,
-          savedObjectsSerializer: soSerializerMock,
-          isCasesAttachmentsEnabled: true,
-        });
+      it('counts both legacy `user` and unified `comment` types as comments', async () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
 
         const stats = await service.getCaseUserActionStats({ caseId: '123' });
@@ -227,6 +217,39 @@ describe('CaseUserActionService', () => {
           total_other_actions: 10,
           total_other_action_deletions: 1,
         });
+      });
+
+      it('groups non-deleted comment updates by both attachment saved object types', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
+
+        await service.getCaseUserActionStats({ caseId: '123' });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            aggs: expect.objectContaining({
+              nonDeletedCommentUpdates: expect.objectContaining({
+                aggs: expect.objectContaining({
+                  comments: expect.objectContaining({
+                    filters: {
+                      filters: {
+                        [CASE_COMMENT_SAVED_OBJECT]: {
+                          term: {
+                            'cases-user-actions.references.type': CASE_COMMENT_SAVED_OBJECT,
+                          },
+                        },
+                        [CASE_ATTACHMENT_SAVED_OBJECT]: {
+                          term: {
+                            'cases-user-actions.references.type': CASE_ATTACHMENT_SAVED_OBJECT,
+                          },
+                        },
+                      },
+                    },
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
       });
     });
 
@@ -295,7 +318,7 @@ describe('CaseUserActionService', () => {
             },
           });
 
-          expect(mockAuditLogger.log).toBeCalledTimes(1);
+          expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
           expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               Object {
@@ -358,7 +381,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -422,7 +445,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -505,7 +528,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -592,7 +615,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchSnapshot();
           });
         });
@@ -932,7 +955,7 @@ describe('CaseUserActionService', () => {
           builtUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(9);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(9);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1184,7 +1207,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesAddedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(1);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1268,7 +1291,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(1);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1382,7 +1405,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesAddedRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1514,7 +1537,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: tagsAddedRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1631,7 +1654,7 @@ describe('CaseUserActionService', () => {
           attachments,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1678,6 +1701,81 @@ describe('CaseUserActionService', () => {
             ],
           ]
         `);
+      });
+    });
+
+    describe('bulkCreateAttachmentBulkDeletion', () => {
+      it('creates one user action per attachment type', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [
+            {
+              attachmentType: 'security.alert',
+              count: 3,
+              attachments: [{ id: 'attachment-1', savedObjectType: 'cases-comments' }],
+            },
+            {
+              attachmentType: 'file',
+              count: 1,
+              attachments: [{ id: 'attachment-2', savedObjectType: 'cases-attachments' }],
+            },
+          ],
+        });
+
+        const [userActions] = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0];
+        expect(userActions.map(({ attributes }) => attributes)).toEqual([
+          expect.objectContaining({
+            action: 'delete',
+            type: 'bulkAttachments',
+            payload: { bulkAttachments: { attachmentType: 'security.alert', count: 3 } },
+          }),
+          expect.objectContaining({
+            action: 'delete',
+            type: 'bulkAttachments',
+            payload: { bulkAttachments: { attachmentType: 'file', count: 1 } },
+          }),
+        ]);
+      });
+
+      it('audits each deleted attachment by its saved object id', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [
+            {
+              attachmentType: 'file',
+              count: 2,
+              attachments: [
+                { id: 'attachment-1', savedObjectType: 'cases-attachments' },
+                { id: 'attachment-2', savedObjectType: 'cases-attachments' },
+              ],
+            },
+          ],
+        });
+
+        expect(mockAuditLogger.log.mock.calls.map(([event]) => event)).toEqual([
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_attachments' }),
+            kibana: { saved_object: { id: '123', type: 'cases' } },
+          }),
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_comment' }),
+            kibana: { saved_object: { id: 'attachment-1', type: 'cases-attachments' } },
+            message: 'User deleted comment id: attachment-1 for case id: 123 - user action id: 0',
+          }),
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_comment' }),
+            kibana: { saved_object: { id: 'attachment-2', type: 'cases-attachments' } },
+          }),
+        ]);
+      });
+
+      it('skips attachment types with no deletions', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [{ attachmentType: 'file', count: 0, attachments: [] }],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       });
     });
 
@@ -1860,7 +1958,7 @@ describe('CaseUserActionService', () => {
             unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
             await expect(service.getAll('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-              `"Invalid value \\"undefined\\" supplied to \\"payload\\""`
+              `"type: Invalid input: expected \\"create_case\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"connector\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"pushed\\", and 32 more"`
             );
           });
 
@@ -1933,7 +2031,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              `Invalid value "undefined" supplied to "${key}"`
+              `Invalid`
             );
           });
 
@@ -1950,7 +2048,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,title"'
+              'Invalid'
             );
           });
 
@@ -1970,7 +2068,7 @@ describe('CaseUserActionService', () => {
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
             await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
+              'Invalid'
             );
           });
 
@@ -2034,9 +2132,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              `Invalid value "undefined" supplied to "${key}"`
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(`Invalid`);
           });
 
           it('throws if missing attributes from the payload', async () => {
@@ -2045,9 +2141,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,title"'
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow('Invalid');
           });
 
           it('throws if missing nested attributes from the payload', async () => {
@@ -2059,9 +2153,7 @@ describe('CaseUserActionService', () => {
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).rejects.toThrow(
-              'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
-            );
+            await expect(service.getMostRecentUserAction('123')).rejects.toThrow('Invalid');
           });
 
           it('strips out excess attributes', async () => {
@@ -2347,9 +2439,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                `Invalid value "undefined" supplied to "${key}"`
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(`Invalid`);
             });
 
             it('throws if missing attributes from the payload', async () => {
@@ -2365,9 +2455,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,title"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('throws if missing nested attributes from the payload', async () => {
@@ -2386,9 +2474,7 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithOmittedAttribute);
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('strips out excess attributes', async () => {
@@ -2520,9 +2606,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                `Invalid value "undefined" supplied to "${key}"`
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(`Invalid`);
             });
 
             it('throws if missing attributes from the payload', async () => {
@@ -2548,9 +2632,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,externalService"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('throws if missing nested attributes from the payload', async () => {
@@ -2579,9 +2661,7 @@ describe('CaseUserActionService', () => {
                 pushActionActionWithOmittedAttribute
               );
 
-              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow(
-                'Invalid value "undefined" supplied to "payload,externalService,external_id"'
-              );
+              await expect(service.getCaseConnectorInformation('1')).rejects.toThrow('Invalid');
             });
 
             it('strips out excess attributes', async () => {

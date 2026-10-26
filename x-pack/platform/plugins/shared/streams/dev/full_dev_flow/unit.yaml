@@ -1,0 +1,47 @@
+# Edit this file and re-run streams_full_dev.sh to try a different unit.
+# __API_KEY__ is replaced at runtime from a key minted into $TMPDIR. Do not
+# put a real key in this file.
+sources:
+  - id: input
+    type: otlp
+    supported_telemetry: [logs]
+destinations:
+  - id: es-prod
+    type: elasticsearch
+    supported_telemetry: [logs]
+    config:
+      - name: index
+        value: logs-application.otel-prod
+      - name: api_key
+        value: __API_KEY__
+  - id: es-dev
+    type: elasticsearch
+    supported_telemetry: [logs]
+    config:
+      - name: index
+        value: logs-application.otel-dev
+      - name: api_key
+        value: __API_KEY__
+processors:
+  - id: uppercase-message
+    type: add_fields
+    supported_telemetry: [logs]
+    config:
+      - name: fields
+        value:
+          - action: upsert
+            path: log.body
+            ottl_value: 'ToUpperCase(log.body)'
+pipelines:
+  - id: main
+    supported_telemetry: [logs]
+    config:
+      - name: sources
+        value: [input]
+      - name: routes
+        value:
+          - when: 'resource.attributes["env"] == "prod"'
+            destinations: [es-prod]
+            processors: [uppercase-message]
+          - when: 'resource.attributes["env"] == "dev"'
+            destinations: [es-dev]

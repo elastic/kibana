@@ -40,16 +40,20 @@ export interface TabInfo {
 }
 
 interface GetTabs {
+  alertsPreviewTabLabel?: string;
   alertsPreviewStackBy0: string;
   alertSummaryStackBy0: string;
+  esqlQuery?: string;
   settings: AlertsSelectionSettings;
   setAlertsPreviewStackBy0: React.Dispatch<React.SetStateAction<string>>;
   setAlertSummaryStackBy0: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const getTabs = ({
+  alertsPreviewTabLabel,
   alertsPreviewStackBy0,
   alertSummaryStackBy0,
+  esqlQuery,
   settings,
   setAlertsPreviewStackBy0,
   setAlertSummaryStackBy0,
@@ -64,6 +68,7 @@ export const getTabs = ({
           dataTestSubj={ALERT_SUMMARY_TEST_SUBJ}
           embeddableId={SUMMARY_TAB_EMBEDDABLE_ID}
           end={settings.end}
+          esqlQuery={esqlQuery}
           filters={settings.filters}
           getLensAttributes={getAlertSummaryLensAttributes}
           getPreviewEsqlQuery={getAlertSummaryEsqlQuery}
@@ -78,7 +83,7 @@ export const getTabs = ({
   },
   {
     id: 'attackDiscoverySettingsAlertsPreviewTab--id',
-    name: i18n.ALERTS_PREVIEW,
+    name: alertsPreviewTabLabel ?? i18n.ALERTS_PREVIEW,
     content: (
       <>
         <EuiSpacer />
@@ -86,6 +91,7 @@ export const getTabs = ({
           dataTestSubj={ALERTS_PREVIEW_TEST_SUBJ}
           embeddableId={PREVIEW_TAB_EMBEDDABLE_ID}
           end={settings.end}
+          esqlQuery={esqlQuery}
           filters={settings.filters}
           getLensAttributes={getAlertsPreviewLensAttributes}
           getPreviewEsqlQuery={getAlertsPreviewEsqlQuery}

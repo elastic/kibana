@@ -152,7 +152,7 @@ export const AgentBuilderSkillsTable = memo(() => {
         })}
         sorting={{
           sort: {
-            field: 'id',
+            field: 'name',
             direction: 'asc',
           },
         }}
@@ -170,7 +170,9 @@ export const AgentBuilderSkillsTable = memo(() => {
       />
       {isDeleteModalOpen && deleteSkillId && (
         <EuiConfirmModal
-          title={labels.skills.deleteSkillTitle(deleteSkillId)}
+          title={labels.skills.deleteSkillTitle(
+            skills.find((s) => s.id === deleteSkillId)?.name ?? deleteSkillId
+          )}
           aria-labelledby={deleteSkillTitleId}
           titleProps={{ id: deleteSkillTitleId }}
           onCancel={cancelDelete}
@@ -185,7 +187,9 @@ export const AgentBuilderSkillsTable = memo(() => {
       )}
       {isForceConfirmModalOpen && usedByAgents && (
         <EuiConfirmModal
-          title={labels.skills.deleteSkillUsedByAgentsTitle(usedByAgents.skillId)}
+          title={labels.skills.deleteSkillUsedByAgentsTitle(
+            skills.find((s) => s.id === usedByAgents.skillId)?.name ?? usedByAgents.skillId
+          )}
           aria-labelledby={deleteSkillUsedByAgentsTitleId}
           titleProps={{ id: deleteSkillUsedByAgentsTitleId }}
           onCancel={cancelForceDelete}
@@ -239,34 +243,23 @@ const useSkillsTableColumns = ({
         },
       },
       {
-        field: 'id',
-        name: labels.skills.skillIdLabel,
+        field: 'name',
+        name: labels.skills.nameLabel,
         sortable: true,
         width: '25%',
-        render: (_id: string, skill: PublicSkillSummary) => (
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiLink
-                onClick={() => handleSkillClick(skill.id)}
-                data-test-subj={`agentBuilderSkillLink-${skill.id}`}
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
-                })}
-              >
-                <EuiText size="s">
-                  <strong>{skill.id}</strong>
-                </EuiText>
-              </EuiLink>
-            </EuiFlexItem>
-            {skill.name !== skill.id && (
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {skill.name}
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+        render: (_name: string, skill: PublicSkillSummary) => (
+          <EuiLink
+            onClick={() => handleSkillClick(skill.id)}
+            data-test-subj={`agentBuilderSkillLink-${skill.id}`}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+            })}
+          >
+            <EuiText size="s">
+              <strong>{skill.name}</strong>
+            </EuiText>
+          </EuiLink>
         ),
       },
       {

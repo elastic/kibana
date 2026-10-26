@@ -10,3 +10,12 @@ export { hasSearch } from './has_searches';
 export { checkForParseErrors } from './check_for_json_errors';
 export { msToPretty } from './ms_to_pretty';
 export { nsToPretty } from './ns_to_pretty';
+export {
+  getInitialSearchProfilerIndex,
+  getInitialSearchProfilerQuery,
+  isSearchProfilerQueryPersistable,
+  readSearchProfilerState,
+  updateSearchProfilerQueryState,
+  updateSearchProfilerState,
+  writeSearchProfilerState,
+} from './search_profiler_state_storage';

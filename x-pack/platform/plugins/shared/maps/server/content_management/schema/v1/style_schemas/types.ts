@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { EMSVectorTileStyleSchema, heatmapStyleSchema, styleSchema } from './style_schemas';
 
-export type EMSVectorTileStyleDescriptor = TypeOf<typeof EMSVectorTileStyleSchema>;
-export type HeatmapStyleDescriptor = TypeOf<typeof heatmapStyleSchema>;
-export type StyleDescriptor = TypeOf<typeof styleSchema>;
+export type EMSVectorTileStyleDescriptor = z.output<typeof EMSVectorTileStyleSchema>;
+export type HeatmapStyleDescriptor = z.output<typeof heatmapStyleSchema>;
+export type StyleDescriptor = z.output<typeof styleSchema>;

@@ -127,7 +127,6 @@ export const InsightsTab = memo(() => {
   return (
     <>
       <EuiButtonGroup
-        color="primary"
         legend={i18n.translate(
           'xpack.securitySolution.flyout.left.insights.buttonGroupLegendLabel',
           { defaultMessage: 'Insights options' }

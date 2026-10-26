@@ -6,9 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiIcon, EuiPagination, useEuiScrollBar, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
 import { Paginate } from '../paginate';
 import type {
@@ -68,51 +69,77 @@ export const Datatable: FC<Props> = ({
   paginate = false,
   perPage = 10,
   showHeader = false,
-}) => (
-  <Paginate rows={datatable.rows} perPage={perPage}>
-    {({ rows, setPage, pageNumber, totalPages }) => (
-      <div className="canvasDataTable">
-        <div className="canvasDataTable__tableWrapper">
-          <table className="canvasDataTable__table">
-            {!showHeader ? null : (
-              <thead className="canvasDataTable__thead">
-                <tr className="canvasDataTable__tr">
-                  {datatable.columns.map((col) => (
-                    <th key={`header-${getColumnName(col)}`} className="canvasDataTable__th">
-                      {getColumnName(col)}
-                      &nbsp;
-                      {getIcon(getColumnType(col))}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-            )}
-            <tbody className="canvasDataTable__tbody">
-              {rows.map((row, i) => (
-                <tr key={i} className="canvasDataTable__tr">
-                  {datatable.columns.map((col) => (
-                    <td key={`row-${i}-${getColumnName(col)}`} className="canvasDataTable__td">
-                      {getFormattedValue(row[getColumnId(col)], getColumnType(col))}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {paginate && (
-          <div className="canvasDataTable__footer">
-            <EuiPagination
-              aria-label={i18n.translate('xpack.canvas.canvasDatatable.pagination.ariaLabel', {
-                defaultMessage: 'Data table pages',
-              })}
-              pageCount={totalPages}
-              activePage={pageNumber}
-              onPageClick={setPage}
-            />
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const scrollBar = useEuiScrollBar();
+  const styles = useMemo(
+    () => css`
+      & .canvasDataTable__tableWrapper {
+        ${scrollBar}
+
+        &::-webkit-scrollbar-corner {
+          background: transparent;
+        }
+      }
+
+      & .canvasDataTable__footer {
+        border-top: ${euiTheme.border.thin};
+      }
+
+      & .canvasDataTable__th,
+      & .canvasDataTable__td {
+        border-bottom: ${euiTheme.border.thin};
+      }
+    `,
+    [euiTheme, scrollBar]
+  );
+
+  return (
+    <Paginate rows={datatable.rows} perPage={perPage}>
+      {({ rows, setPage, pageNumber, totalPages }) => (
+        <div className="canvasDataTable" css={styles}>
+          <div className="canvasDataTable__tableWrapper">
+            <table className="canvasDataTable__table">
+              {!showHeader ? null : (
+                <thead className="canvasDataTable__thead">
+                  <tr className="canvasDataTable__tr">
+                    {datatable.columns.map((col) => (
+                      <th key={`header-${getColumnName(col)}`} className="canvasDataTable__th">
+                        {getColumnName(col)}
+                        &nbsp;
+                        {getIcon(getColumnType(col))}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+              )}
+              <tbody className="canvasDataTable__tbody">
+                {rows.map((row, i) => (
+                  <tr key={i} className="canvasDataTable__tr">
+                    {datatable.columns.map((col) => (
+                      <td key={`row-${i}-${getColumnName(col)}`} className="canvasDataTable__td">
+                        {getFormattedValue(row[getColumnId(col)], getColumnType(col))}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
-    )}
-  </Paginate>
-);
+          {paginate && (
+            <div className="canvasDataTable__footer">
+              <EuiPagination
+                aria-label={i18n.translate('xpack.canvas.canvasDatatable.pagination.ariaLabel', {
+                  defaultMessage: 'Data table pages',
+                })}
+                pageCount={totalPages}
+                activePage={pageNumber}
+                onPageClick={setPage}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </Paginate>
+  );
+};

@@ -347,6 +347,7 @@ export interface TransformedDocumentsBulkIndex extends PostInitState {
   readonly hasTransformedDocs: boolean;
   readonly pitId: string;
   readonly progress: Progress;
+  readonly explainAllocation: boolean;
 }
 
 export interface MarkVersionIndexReady extends PostInitState {

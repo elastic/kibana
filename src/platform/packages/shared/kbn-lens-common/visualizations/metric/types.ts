@@ -17,6 +17,7 @@ export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 export type PrimaryMetricFontSize = ValueFontMode;
 
 export type PrimaryMetricPosition = MetricStyle['valuePosition'];
+export type MetricDensity = 'compact' | 'default';
 export type MetricStyleTemplateId = 'top' | 'middle' | 'bottom' | 'custom';
 export type MetricStyleTemplatePresetId = Exclude<MetricStyleTemplateId, 'custom'>;
 
@@ -32,6 +33,8 @@ export type SecondaryTrend =
       reversed: boolean;
       baselineValue: number | 'primary';
     };
+
+export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -49,6 +52,12 @@ export interface MetricVisualizationState {
    * @deprecated
    */
   secondaryPrefix?: string;
+  /**
+   * Custom text from the removed secondary Metric Label control. An empty string is
+   * the legacy None choice. A non-empty value is a runtime render fallback until
+   * the text lives on the secondary column (`customLabel`).
+   * @deprecated Use the secondary column name and `secondaryNameVisibility`.
+   */
   secondaryLabel?: string;
   secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
@@ -63,13 +72,16 @@ export interface MetricVisualizationState {
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
+  density?: MetricDensity;
   /**
    * legacy state property
    * @deprecated
    */
   titleWeight?: Extract<MetricStyle['titleWeight'], string>;
   primaryPosition?: PrimaryMetricPosition;
+  /** @deprecated */
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
+  secondaryNameVisibility?: SecondaryNameVisibility;
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
@@ -97,9 +109,10 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'secondaryAlign'
   | 'iconAlign'
   | 'valueFontMode'
+  | 'density'
   | 'primaryPosition'
-  | 'secondaryLabelPosition'
   | 'applyColorTo'
+  | 'secondaryNameVisibility'
 >;
 
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;

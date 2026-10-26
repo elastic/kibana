@@ -28,12 +28,19 @@ export interface FormattedRelativeEnhancedProps extends Intl.RelativeTimeFormatO
 // but cross the year boundary (e.g., Dec 20 viewed on Jan 10).
 const MIN_DAYS_FOR_YEAR_UNIT = 180; // 6 months
 
+// Only show "month" unit if the date is at least this many days ago.
+// This prevents "1 month ago" from showing for dates that are only a few days old
+// but cross the calendar month boundary (e.g., Jun 26 viewed on Jul 1).
+const MIN_DAYS_FOR_MONTH_UNIT = 28;
+
 /**
  * Mimic `FormattedRelative` previous behavior from formatJS v2,
- * with a fix for year boundaries to avoid misleading "last year" displays.
+ * with fixes for calendar-boundary rounding to avoid misleading relative displays.
  *
- * The only change from the original: when selectUnit returns "year" but the actual
- * difference is less than MIN_DAYS_FOR_YEAR_UNIT, we recalculate using months instead.
+ * selectUnit picks its unit from calendar arithmetic (e.g. Jul − Jun = 1 month) rather
+ * than elapsed time, so when the current date crosses a month or year boundary it can
+ * inflate a few-days-old timestamp into "1 month ago" or "last year". We recompute in
+ * a smaller unit when the actual elapsed days don't back the reported unit.
  */
 export const FormattedRelativeEnhanced = ({
   value: valueInput,
@@ -64,6 +71,24 @@ export const FormattedRelativeEnhanced = ({
         const diffWeeks = Math.round(diffDays / 7);
         value = isPast ? -diffWeeks : diffWeeks;
         unit = 'week';
+      }
+    }
+  }
+
+  // Fix for month boundary issue: if selectUnit chose "month" but less than
+  // MIN_DAYS_FOR_MONTH_UNIT have actually elapsed, use weeks or days instead. Prevents
+  // "1 month ago" on e.g. Jul 1 for a Jun 26 timestamp.
+  if (unit === 'month') {
+    const diffDays = Math.abs(moment().diff(moment(valueDate), 'days'));
+    if (diffDays < MIN_DAYS_FOR_MONTH_UNIT) {
+      const isPast = value < 0;
+      if (diffDays >= 7) {
+        const diffWeeks = Math.round(diffDays / 7);
+        value = isPast ? -diffWeeks : diffWeeks;
+        unit = 'week';
+      } else {
+        value = isPast ? -diffDays : diffDays;
+        unit = 'day';
       }
     }
   }

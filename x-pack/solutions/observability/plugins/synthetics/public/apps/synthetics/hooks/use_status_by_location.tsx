@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
 import { useMonitorHealthColor } from '../components/monitors_page/hooks/use_monitor_health_color';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
@@ -14,8 +14,15 @@ import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
+  STATUS_LOOKBACK_RANGE_FILTER,
 } from '../../../../common/constants/client_defaults';
-import type { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
+import {
+  HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+  type EncryptedSyntheticsSavedMonitor,
+  type MonitorOrigin,
+  type Ping,
+} from '../../../../common/runtime_types';
+import { getMonitorIdentityFilter, isUnmappedHeartbeatLocation } from '../../../../common/lib';
 import { useSyntheticsRefreshContext } from '../contexts';
 import { useGetUrlParams } from './use_url_params';
 import { useLocations } from './use_locations';
@@ -25,16 +32,20 @@ export type LocationsStatus = Array<{ status: string; id: string; label: string;
 export function useStatusByLocation({
   configId,
   monitorLocations,
+  origin,
 }: {
   configId: string;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
+  origin?: MonitorOrigin;
 }) {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { remoteName } = useGetUrlParams();
 
   const { locations: allLocations } = useLocations();
 
-  const { data, loading } = useEsSearch(
+  const isHeartbeat = origin === 'heartbeat' && !remoteName;
+
+  const { data, loading } = useSyntheticsEsSearch(
     {
       index: getSyntheticsCcsIndex(remoteName),
       size: 0,
@@ -43,11 +54,8 @@ export function useStatusByLocation({
           filter: [
             FINAL_SUMMARY_FILTER,
             EXCLUDE_RUN_ONCE_FILTER,
-            {
-              term: {
-                config_id: configId,
-              },
-            },
+            STATUS_LOOKBACK_RANGE_FILTER,
+            getMonitorIdentityFilter({ monitorId: configId, origin, remoteName }),
           ],
         },
       },
@@ -56,7 +64,7 @@ export function useStatusByLocation({
         locations: {
           terms: {
             field: 'observer.geo.name',
-            missing: UNNAMED_LOCATION,
+            missing: isHeartbeat ? HEARTBEAT_UNMAPPED_LOCATION_LABEL : UNNAMED_LOCATION,
             size: 1000,
           },
           aggs: {
@@ -69,7 +77,7 @@ export function useStatusByLocation({
         },
       },
     },
-    [lastRefresh, configId, remoteName],
+    [lastRefresh, configId, remoteName, origin],
     { name: 'getMonitorStatusByLocation' }
   );
 
@@ -77,7 +85,10 @@ export function useStatusByLocation({
 
   return useMemo(() => {
     const locationPings = (data?.aggregations?.locations.buckets ?? []).map((loc) => {
-      return loc.summary.hits.hits?.[0]._source as Ping;
+      return {
+        key: String(loc.key),
+        ping: loc.summary.hits.hits?.[0]._source as Ping,
+      };
     });
     const locations = (monitorLocations ?? []).map((loc) => {
       // Prefer the local service-locations registry (so private/managed
@@ -86,7 +97,13 @@ export function useStatusByLocation({
       // case for remote monitors whose location ids live only on the source
       // cluster's Kibana.
       const fullLoc = allLocations.find((l) => l.id === loc.id) ?? loc;
-      const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc.label);
+      const match = locationPings.find(
+        ({ key, ping }) =>
+          key === fullLoc.label ||
+          ping.observer?.geo?.name === fullLoc.label ||
+          (isUnmappedHeartbeatLocation(fullLoc.label) && isUnmappedHeartbeatLocation(key))
+      );
+      const ping = match?.ping;
       const status = ping
         ? (ping.summary?.down ?? 0) > 0
           ? MONITOR_STATUS_ENUM.DOWN

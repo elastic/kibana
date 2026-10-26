@@ -11,8 +11,8 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from Kibana OpenAPI specification.
- * Generated at: 2026-02-26T16:36:29.567Z
- * Source: /oas_docs/output/kibana.yaml (9 APIs)
+ * Generated at: 2026-09-14T10:09:39.359Z
+ * Source: /oas_docs/output/kibana.yaml (8 APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -29,7 +29,6 @@ import { SET_ALERTS_STATUS_CONTRACT } from './kibana.set_alerts_status.gen';
 import { SET_ALERT_TAGS_CONTRACT } from './kibana.set_alert_tags.gen';
 import { STREAMS_LIST_CONTRACT } from './kibana.streams_list.gen';
 import { STREAMS_GET_CONTRACT } from './kibana.streams_get.gen';
-import { STREAMS_GET_SIGNIFICANT_EVENTS_CONTRACT } from './kibana.streams_get_significant_events.gen';
 
 // export contracts
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
@@ -41,5 +40,4 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   SET_ALERT_TAGS_CONTRACT,
   STREAMS_LIST_CONTRACT,
   STREAMS_GET_CONTRACT,
-  STREAMS_GET_SIGNIFICANT_EVENTS_CONTRACT,
 ];

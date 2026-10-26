@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
 import { PageLoader } from '../../../common/components/page_loader';
@@ -77,7 +77,7 @@ export const Content: FC<ContentProps> = memo(({ ip, flowTarget }: ContentProps)
   } = useKibana();
 
   const { dataView, status } = useDataView();
-  const selectedPatterns = useSelectedPatterns();
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = !!dataView.matchedIndices?.length;
 
   const [filterQuery, kqlError] = useMemo(

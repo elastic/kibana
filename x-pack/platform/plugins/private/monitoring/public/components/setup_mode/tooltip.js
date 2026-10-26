@@ -43,7 +43,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
             defaultMessage: `We detected usage of this product. Click to start monitoring.`,
           })}
         >
-          <EuiBadge color="warning" iconType="flag" href={badgeClickLink}>
+          <EuiBadge color="warning" iconType="pencil" href={badgeClickLink}>
             {detectedText}
           </EuiBadge>
         </EuiToolTip>
@@ -63,7 +63,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
             },
           })}
         >
-          <EuiBadge color="hollow" iconType="flag" href={badgeClickLink}>
+          <EuiBadge color="hollow" iconType="pencil" href={badgeClickLink}>
             {noMonitoringText}
           </EuiBadge>
         </EuiToolTip>
@@ -86,7 +86,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
           },
         })}
       >
-        <EuiBadge color="danger" iconType="flag" href={badgeClickLink}>
+        <EuiBadge color="danger" iconType="pencil" href={badgeClickLink}>
           {internalCollection}
         </EuiBadge>
       </EuiToolTip>
@@ -105,7 +105,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
           },
         })}
       >
-        <EuiBadge color="warning" iconType="flag" href={badgeClickLink}>
+        <EuiBadge color="warning" iconType="pencil" href={badgeClickLink}>
           {internalAndMB}
         </EuiBadge>
       </EuiToolTip>
@@ -124,7 +124,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
           },
         })}
       >
-        <EuiBadge color="success" iconType="flag" href={badgeClickLink}>
+        <EuiBadge color="success" iconType="pencil" href={badgeClickLink}>
           {metricbeatCollection}
         </EuiBadge>
       </EuiToolTip>

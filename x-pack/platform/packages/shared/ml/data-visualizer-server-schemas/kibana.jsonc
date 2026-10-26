@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/data-visualizer-server-schemas",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -21,7 +21,12 @@ import type {
   UserMessagesDisplayLocationId,
 } from '@kbn/lens-common';
 import { BehaviorSubject } from 'rxjs';
-import { EDITOR_MISSING_VIS_TYPE, EDITOR_UNKNOWN_DATASOURCE_TYPE } from '../../user_messages_ids';
+import { LENS_ERROR_CODES, LENS_ERROR_TYPE } from '@kbn/lens-embeddable-utils';
+import {
+  EDITOR_LOAD_ERROR,
+  EDITOR_MISSING_VIS_TYPE,
+  EDITOR_UNKNOWN_DATASOURCE_TYPE,
+} from '../../user_messages_ids';
 
 const ALL_LOCATIONS: UserMessagesDisplayLocationId[] = [
   'toolbar',
@@ -96,7 +101,7 @@ function buildUserMessagesApi(
 }
 
 describe('User Messages API', () => {
-  describe('resetMessages', () => {
+  describe('discardRuntimeMessages', () => {
     it('should reset the runtime errors', () => {
       const { userMessagesApi } = buildUserMessagesApi();
       // add runtime messages
@@ -105,7 +110,7 @@ describe('User Messages API', () => {
       const userMessageInfo = createUserMessage(['embeddableBadge'], 'info');
       userMessagesApi.addUserMessages([userMessageError, userMessageWarning, userMessageInfo]);
       expect(userMessagesApi.getUserMessages('embeddableBadge').length).toEqual(3);
-      userMessagesApi.resetMessages();
+      userMessagesApi.discardRuntimeMessages();
       expect(userMessagesApi.getUserMessages('embeddableBadge').length).toEqual(0);
     });
   });
@@ -225,6 +230,40 @@ describe('User Messages API', () => {
       }
     });
 
+    describe('when the document failed to load', () => {
+      const loadError = Object.assign(new Error('Internal Server Error'), {
+        body: {
+          attributes: { type: LENS_ERROR_TYPE, code: LENS_ERROR_CODES.DATASOURCE_NOT_FOUND },
+        },
+      });
+
+      it('should only return the load error, ignoring messages about the fallback document', () => {
+        const { userMessagesApi, internalApi } = buildUserMessagesApi();
+        internalApi.updateVisualizationContext({
+          ...internalApi.getVisualizationContext(),
+          activeAttributes: undefined,
+        });
+        internalApi.updateLoadError(loadError);
+
+        expect(
+          userMessagesApi
+            .getUserMessages('visualizationOnEmbeddable')
+            .map(({ uniqueId }) => uniqueId)
+        ).toEqual([EDITOR_LOAD_ERROR]);
+        expect(userMessagesApi.getUserMessages('visualizationOnEmbeddable')[0].longMessage).toBe(
+          'Could not find datasource for the visualization'
+        );
+      });
+
+      it('should stop returning the load error once it is cleared', () => {
+        const { userMessagesApi, internalApi } = buildUserMessagesApi();
+        internalApi.updateLoadError(loadError);
+        internalApi.updateLoadError(undefined);
+
+        expect(userMessagesApi.getUserMessages('visualizationOnEmbeddable')).toEqual([]);
+      });
+    });
+
     it('should detect a URL conflict', () => {
       const { userMessagesApi } = buildUserMessagesApi({ outcome: 'conflict' });
 
@@ -272,17 +311,17 @@ describe('User Messages API', () => {
     });
 
     it('should return deeper validation messages from both datasource and visualization', () => {
-      const vizGetUserMessages = jest.fn();
+      const visGetUserMessages = jest.fn();
       const datasourceGetUserMessages = jest.fn();
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
-        visOverrides: { id: 'lnsXY', getUserMessages: vizGetUserMessages },
+        visOverrides: { id: 'lnsXY', getUserMessages: visGetUserMessages },
         dataOverrides: { id: 'formBased', getUserMessages: datasourceGetUserMessages },
       });
       // now add a message, then check that it has been called in both the visualization and datasource
       const userMessageVisualization = createUserMessage(['visualization']);
       userMessagesApi.addUserMessages([userMessageVisualization]);
       userMessagesApi.getUserMessages('visualization');
-      expect(vizGetUserMessages).toHaveBeenCalled();
+      expect(visGetUserMessages).toHaveBeenCalled();
       expect(datasourceGetUserMessages).toHaveBeenCalled();
     });
 

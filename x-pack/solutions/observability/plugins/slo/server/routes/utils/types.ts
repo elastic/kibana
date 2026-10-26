@@ -34,11 +34,12 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   internalSoClient: SavedObjectsClientContract;
   spaceId: string;
+  isCpsAvailable: boolean;
   dataViewsService: DataViewsService;
   rulesClient: RulesClientApi;
   racClient: AlertsClient;
   repository: SLODefinitionRepository;
-  compositeSloRepository: CompositeSLORepository;
+  compositeRepository: CompositeSLORepository;
   settingsRepository: SLOSettingsRepository;
   templateRepository: SLOTemplateRepository;
   transformManager: TransformManager;
@@ -57,8 +58,10 @@ export interface SLORoutesDependencies {
   };
   corePlugins: CoreSetup;
   getScopedClients: GetScopedClients;
+  commonResourcesInstalled: Promise<void>;
   config: {
     isServerless: boolean;
+    isCpsEnabled: boolean;
     compositeSloSummaryTaskEnabled: boolean;
   };
 }

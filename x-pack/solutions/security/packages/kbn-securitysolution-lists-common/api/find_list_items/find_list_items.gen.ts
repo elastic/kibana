@@ -36,34 +36,50 @@ export const FindListItemsRequestQuery = lazySchema(() =>
     /**
      * Parent value list's `id` to page through items for.
      */
-    list_id: ListId,
+    list_id: ListId.describe("Parent value list's `id` to page through items for."),
     /**
      * The page number to return.
      */
-    page: z.coerce.number().int().optional(),
+    page: z.coerce.number().int().optional().describe('The page number to return.'),
     /**
      * The number of list items to return per page.
      */
-    per_page: z.coerce.number().int().optional(),
+    per_page: z.coerce
+      .number()
+      .int()
+      .optional()
+      .describe('The number of list items to return per page.'),
     /**
      * Determines which field is used to sort the results.
      */
-    sort_field: z.string().min(1).superRefine(isNonEmptyString).optional(),
+    sort_field: z
+      .string()
+      .min(1)
+      .superRefine(isNonEmptyString)
+      .optional()
+      .describe('Determines which field is used to sort the results.'),
     /**
      * Determines the sort order, which can be `desc` or `asc`
      */
-    sort_order: z.enum(['desc', 'asc']).optional(),
+    sort_order: z
+      .enum(['desc', 'asc'])
+      .optional()
+      .describe('Determines the sort order, which can be `desc` or `asc`'),
     /**
       * Opaque cursor returned in a previous response; pass it to continue listing from the next page. Omit on the first request.
 
       */
-    cursor: FindListItemsCursor.optional(),
+    cursor: FindListItemsCursor.optional().describe(
+      'Opaque cursor returned in a previous response; pass it to continue listing from the next page. Omit on the first request.\n'
+    ),
     /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
 
       */
-    filter: FindListItemsFilter.optional(),
+    filter: FindListItemsFilter.optional().describe(
+      'Filters the returned results according to the value of the specified field,\nusing the <field name>:<field value> syntax.\n'
+    ),
   })
 );
 export type FindListItemsRequestQuery = z.infer<typeof FindListItemsRequestQuery>;

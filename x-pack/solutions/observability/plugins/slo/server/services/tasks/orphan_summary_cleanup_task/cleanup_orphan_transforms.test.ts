@@ -79,12 +79,14 @@ describe('cleanupOrphanTransforms', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let logger: jest.Mocked<MockedLogger>;
   let abortController: AbortController;
+  let signal: AbortSignal;
 
   beforeEach(() => {
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
     abortController = new AbortController();
+    signal = abortController.signal;
     jest.clearAllMocks();
   });
 
@@ -96,7 +98,7 @@ describe('cleanupOrphanTransforms', () => {
 
     const result = await cleanupOrphanTransforms(
       {},
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -121,10 +123,7 @@ describe('cleanupOrphanTransforms', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
     expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
@@ -146,19 +145,16 @@ describe('cleanupOrphanTransforms', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(2);
     expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
       { transform_id: 'slo-orphan-slo-1', force: true },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
     expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
       { transform_id: 'slo-summary-orphan-slo-1', force: true },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
   });
 
@@ -179,15 +175,12 @@ describe('cleanupOrphanTransforms', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(1);
     expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
       { transform_id: 'slo-my-slo-1', force: true },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
   });
 
@@ -221,7 +214,7 @@ describe('cleanupOrphanTransforms', () => {
 
     await cleanupOrphanTransforms(
       { pageSize: 2 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(2);
@@ -234,7 +227,7 @@ describe('cleanupOrphanTransforms', () => {
         allow_no_match: true,
         filter_path: 'count,transforms.id,transforms.state',
       },
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
     expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(
       2,
@@ -245,13 +238,13 @@ describe('cleanupOrphanTransforms', () => {
         allow_no_match: true,
         filter_path: 'count,transforms.id,transforms.state',
       },
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
 
     expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(1);
     expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
       { transform_id: 'slo-slo2-1', force: true },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
   });
 
@@ -262,7 +255,7 @@ describe('cleanupOrphanTransforms', () => {
 
     const result = await cleanupOrphanTransforms(
       { from: 200 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: true, completed: false, nextState: { from: 200 } });
@@ -274,7 +267,7 @@ describe('cleanupOrphanTransforms', () => {
 
     const result = await cleanupOrphanTransforms(
       {},
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: true, completed: false, nextState: { from: 0 } });
@@ -314,7 +307,7 @@ describe('cleanupOrphanTransforms', () => {
 
     const result = await cleanupOrphanTransforms(
       { pageSize: 2, maxPages: 2 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: true, completed: false, nextState: { from: 4 } });
@@ -331,10 +324,7 @@ describe('cleanupOrphanTransforms', () => {
       transforms: [],
     } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
       expect.objectContaining({ filter_path: 'count,transforms.id,transforms.state' }),
@@ -371,7 +361,7 @@ describe('cleanupOrphanTransforms', () => {
 
     await cleanupOrphanTransforms(
       { pageSize: 3 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(2);
@@ -384,7 +374,7 @@ describe('cleanupOrphanTransforms', () => {
         allow_no_match: true,
         filter_path: 'count,transforms.id,transforms.state',
       },
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
   });
 
@@ -396,7 +386,7 @@ describe('cleanupOrphanTransforms', () => {
 
     const result = await cleanupOrphanTransforms(
       { from: 50, pageSize: 100 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
@@ -408,7 +398,7 @@ describe('cleanupOrphanTransforms', () => {
         allow_no_match: true,
         filter_path: 'count,transforms.id,transforms.state',
       },
-      expect.objectContaining({ signal: abortController.signal })
+      expect.objectContaining({ signal })
     );
   });
 
@@ -416,7 +406,7 @@ describe('cleanupOrphanTransforms', () => {
     esClient.transform.getTransformStats.mockRejectedValueOnce(new Error('Network error'));
 
     await expect(
-      cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, abortController })
+      cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal })
     ).rejects.toThrow('Network error');
   });
 
@@ -440,10 +430,7 @@ describe('cleanupOrphanTransforms', () => {
       .mockRejectedValueOnce(new Error('Delete failed'))
       .mockResolvedValueOnce({ acknowledged: true } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(
@@ -468,10 +455,7 @@ describe('cleanupOrphanTransforms', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
     expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
@@ -495,10 +479,7 @@ describe('cleanupOrphanTransforms', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
     expect(esClient.transform.stopTransform).toHaveBeenCalledTimes(2);
@@ -509,7 +490,7 @@ describe('cleanupOrphanTransforms', () => {
         force: true,
         allow_no_match: true,
       },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
     expect(esClient.transform.stopTransform).toHaveBeenCalledWith(
       {
@@ -518,7 +499,7 @@ describe('cleanupOrphanTransforms', () => {
         force: true,
         allow_no_match: true,
       },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
   });
 
@@ -540,10 +521,7 @@ describe('cleanupOrphanTransforms', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
     expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
@@ -571,10 +549,7 @@ describe('cleanupOrphanTransforms', () => {
       .mockRejectedValueOnce(new Error('Stop failed'))
       .mockResolvedValueOnce({ acknowledged: true } as any);
 
-    await cleanupOrphanTransforms(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.transform.stopTransform).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(
@@ -597,10 +572,7 @@ describe('cleanupOrphanTransforms', () => {
       soClient.find.mockRejectedValueOnce(new Error('saved objects index unavailable'));
 
       await expect(
-        cleanupOrphanTransforms(
-          {},
-          { esClient, soClient: soClient as any, logger, abortController }
-        )
+        cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal })
       ).rejects.toThrow('saved objects index unavailable');
 
       expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
@@ -628,10 +600,7 @@ describe('cleanupOrphanTransforms', () => {
         per_page: 1,
       } as any);
 
-      await cleanupOrphanTransforms(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -663,10 +632,7 @@ describe('cleanupOrphanTransforms', () => {
         per_page: 2,
       } as any);
 
-      await cleanupOrphanTransforms(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
       expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
@@ -693,10 +659,7 @@ describe('cleanupOrphanTransforms', () => {
         per_page: 1,
       } as any);
 
-      await cleanupOrphanTransforms(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(2);
       const deletedIds = esClient.transform.deleteTransform.mock.calls.map(
@@ -722,10 +685,7 @@ describe('cleanupOrphanTransforms', () => {
         per_page: 1,
       } as any);
 
-      await cleanupOrphanTransforms(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ namespaces: ['*'] }));
     });
@@ -745,7 +705,7 @@ describe('cleanupOrphanTransforms', () => {
 
       await cleanupOrphanTransforms(
         { pageSize: 2 },
-        { esClient, soClient: soClient as any, logger, abortController }
+        { esClient, soClient: soClient as any, logger, signal }
       );
 
       expect(soClient.find).not.toHaveBeenCalled();
@@ -762,10 +722,7 @@ describe('cleanupOrphanTransforms', () => {
         ],
       } as any);
 
-      await cleanupOrphanTransforms(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(soClient.find).not.toHaveBeenCalled();
       expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
@@ -794,10 +751,7 @@ describe('cleanupOrphanTransforms', () => {
         per_page: 2,
       } as any);
 
-      await cleanupOrphanTransforms(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
       expect(esClient.transform.stopTransform).toHaveBeenCalledTimes(1);

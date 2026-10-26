@@ -133,14 +133,17 @@ async function deleteRuleWithOCC(
     context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
   }
 
-  const deleteTime = Date.now();
   const removeResult = await deleteRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     id,
   });
+  const deleteTime = Date.now();
 
   await logRuleChanges({
     ruleSOs: [rule],
+    encryptedFieldsMap: new Map([
+      [id, { apiKey: apiKeyToInvalidate, uiamApiKey: uiamApiKeyToInvalidate }],
+    ]),
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleDelete,

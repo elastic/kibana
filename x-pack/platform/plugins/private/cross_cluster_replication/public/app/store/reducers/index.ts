@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-v4';
 import { reducer as api } from './api';
 import { reducer as autoFollowPattern } from './auto_follow_pattern';
 import { reducer as followerIndex } from './follower_index';

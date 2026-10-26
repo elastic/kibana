@@ -11,12 +11,16 @@ import type { OnUpdateFields } from '../types';
 import { OBSERVABLES_TAB } from '../../user_actions/translations';
 import { AttachmentAccordion } from './attachment_accordion';
 
+export const OBSERVABLES_FILTER_ID = 'observables';
+
 interface CaseViewObservablesProps {
   caseData: CaseUI;
   observables: ObservableUI[];
   searchTerm?: string;
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }
 
 export const CaseViewObservables = ({
@@ -25,6 +29,8 @@ export const CaseViewObservables = ({
   searchTerm,
   isLoading,
   onUpdateField,
+  isOpen,
+  onToggle,
 }: CaseViewObservablesProps) => {
   const caseDataWithFilteredObservables: CaseUI = useMemo(
     () => ({ ...caseData, observables }),
@@ -35,7 +41,7 @@ export const CaseViewObservables = ({
     (isOn: boolean) => {
       onUpdateField({
         key: 'settings',
-        value: { ...caseData.settings, extractObservables: !isOn },
+        value: { ...caseData.settings, extractObservables: isOn },
       });
     },
     [caseData.settings, onUpdateField]
@@ -46,7 +52,13 @@ export const CaseViewObservables = ({
   }
 
   return (
-    <AttachmentAccordion id="observables" title={OBSERVABLES_TAB} count={observables.length}>
+    <AttachmentAccordion
+      id="observables"
+      title={OBSERVABLES_TAB}
+      count={observables.length}
+      isOpen={isOpen}
+      onToggle={onToggle}
+    >
       <ObservablesTable
         caseData={caseDataWithFilteredObservables}
         isLoading={isLoading}

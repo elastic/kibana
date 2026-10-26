@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import { productDocumentationTool } from './product_documentation';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type {
@@ -14,7 +14,6 @@ import type {
   PluginSetupDependencies,
   PluginStartDependencies,
 } from '../types';
-import { casesTool } from './cases/cases';
 import { getDocumentByIdTool } from './get_document_by_id';
 import { getIndexMappingsTool } from './get_index_mapping';
 import { listIndicesTool } from './list_indices';
@@ -22,7 +21,6 @@ import { indexExplorerTool } from './index_explorer';
 import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
-import { createVisualizationTool } from './create_visualization';
 
 export const registerTools = ({
   coreSetup,
@@ -31,20 +29,20 @@ export const registerTools = ({
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
 }) => {
-  const { agentBuilder } = setupDeps;
+  const { agentBuilder, cloud } = setupDeps;
 
-  const tools: Array<BuiltinToolDefinition<any>> = [
+  const tools: Array<StaticToolRegistration<any>> = [
     searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
     getDocumentByIdTool(),
     executeEsqlTool(),
-    generateEsqlTool(),
+    generateEsqlTool({
+      organizationId: cloud?.organizationId,
+    }),
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),
-    createVisualizationTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
-    casesTool(coreSetup),
   ];
 
   tools.forEach((tool) => {

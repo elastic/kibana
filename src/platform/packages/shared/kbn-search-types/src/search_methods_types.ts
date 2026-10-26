@@ -8,9 +8,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import type { ProjectRouting } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 
@@ -34,19 +36,25 @@ export interface IBaseSearchOptions {
   executionContext?: KibanaExecutionContext;
 
   /**
-   * Project routing configuration for cross-project search (CPS).
-   */
-  projectRouting?: ProjectRouting;
-
-  /**
    * Inspector integration options for tracking requests
    */
   inspector?: {
+    /** Requests are not tracked when no adapter is provided */
     adapter?: RequestAdapter;
     title: string;
     description?: string;
-    id?: string;
+    getRequestStats?: () => RequestStatistics;
   };
+}
+
+/**
+ * Params shared by the DSL and ES|QL search methods
+ */
+export interface BaseSearchParams {
+  /**
+   * Project routing configuration for cross-project search (CPS).
+   */
+  projectRouting?: ProjectRouting;
 }
 
 // ============================================================================
@@ -56,7 +64,7 @@ export interface IBaseSearchOptions {
 /**
  * Parameters for DSL (Elasticsearch Query DSL) search
  */
-export interface IDslSearchParams {
+export interface IDslSearchParams extends BaseSearchParams {
   /**
    * Index pattern to search
    */
@@ -103,32 +111,31 @@ export interface IDslSearchParams {
   highlight?: estypes.SearchHighlight;
 
   /**
-   * Allow any additional SearchRequest body properties for maximum compatibility
+   * Kibana query context to apply. The time range, Kibana filters, and KQL/Lucene query are
+   * compiled into a DSL bool query and merged with `query`.
    */
-  [key: string]: unknown;
-}
+  kibanaQueryContext?: KibanaQueryContext;
 
-/**
- * Options specific to DSL search
- */
-export interface IDslSearchOptions extends IBaseSearchOptions {
   /**
    * Control total hits counting precision
    */
   trackTotalHits?: boolean | number;
 
   /**
-   * Callback to provide pre-request metadata stats (e.g., index pattern name)
+   * Allow any additional SearchRequest body properties for maximum compatibility
    */
-  getRequestMetadata?: () => RequestStatistics;
+  [key: string]: unknown;
 }
+
+/**
+ * Options specific to DSL search. `params` shapes the query; `options` is Kibana plumbing
+ * (session, inspector, abort, execution context, project routing).
+ */
+export type IDslSearchOptions = IBaseSearchOptions;
 
 export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
 
-export type IDslPaginatedSearchOptions = Omit<
-  IDslSearchOptions,
-  'trackTotalHits' | 'getRequestMetadata'
->;
+export type IDslPaginatedSearchOptions = IBaseSearchOptions;
 
 /**
  * Pagination helpers for DSL search results
@@ -181,9 +188,47 @@ export interface IDslPaginatedSearchResult {
 // ============================================================================
 
 /**
+ * Kibana query context to apply when calling a search method. The shape matches the corresponding
+ * fields of a dashboard panel's fetch context, so it can be passed through directly.
+ */
+export interface KibanaQueryContext {
+  /**
+   * Time range to restrict the search to. Adds a range filter on `timeField`.
+   */
+  timeRange?: TimeRange;
+
+  /**
+   * The date field to filter `timeRange` on.
+   */
+  timeField?: string;
+
+  /**
+   * Kibana filters to apply.
+   */
+  kibanaFilters?: Filter[];
+
+  /**
+   * KQL or Lucene query to apply. ES|QL (aggregate) queries are ignored.
+   */
+  kqlQuery?: Query | Query[] | AggregateQuery;
+}
+
+/**
+ * ES|QL-specific extension of {@link KibanaQueryContext} that adds control variable support.
+ * For ES|QL, `timeRange` also fills the `?_tstart` and `?_tend` named params; without a
+ * `timeField` the time range is only applied through those params.
+ */
+export interface EsqlKibanaQueryContext extends KibanaQueryContext {
+  /**
+   * ES|QL control variables. Values for variables used in the query are added as named params.
+   */
+  esqlVariables?: ESQLControlVariable[];
+}
+
+/**
  * Parameters for ES|QL search
  */
-export interface IEsqlSearchParams {
+export interface IEsqlSearchParams extends BaseSearchParams {
   /**
    * ES|QL query string
    */
@@ -195,12 +240,13 @@ export interface IEsqlSearchParams {
   params?: ESQLSearchParams['params'];
 
   /**
-   * Additional filter to apply
+   * Raw DSL filter to apply. AND-combined with the filter built from `kibanaQueryContext`
+   * when that is provided.
    */
   filter?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
 
   /**
-   * Time zone for date calculations
+   * Time zone for date calculations. Defaults to the `dateFormat:tz` advanced setting.
    */
   timeZone?: string;
 
@@ -208,21 +254,50 @@ export interface IEsqlSearchParams {
    * Locale for string operations
    */
   locale?: string;
-}
 
-/**
- * Options specific to ES|QL search
- */
-export interface IEsqlSearchOptions extends IBaseSearchOptions {
+  /**
+   * Kibana query context (time range, filters, query bar, ES|QL controls) to apply.
+   * These are Kibana abstractions that get compiled into the ES request body.
+   * Pass the matching fields from a dashboard panel's fetch context directly.
+   */
+  kibanaQueryContext?: EsqlKibanaQueryContext;
+
+  // ── ES|QL-specific request flags ──────────────────────────────────────────
+
   /**
    * Drop columns that only contain null values
    */
   dropNullColumns?: boolean;
 
   /**
-   * When set to true, the response will include an extra _clusters object with information about the clusters that participated in the search along with info such as shards count. This is similar to include_ccs_metadata, but it also returns metadata when the query is not CCS/CPS
+   * When set to true, the response will include an extra _clusters object with information about
+   * the clusters that participated in the search. Similar to `include_ccs_metadata`, but also
+   * returns metadata when the query is not CCS/CPS.
    */
   includeExecutionMetadata?: boolean;
+
+  /**
+   * When set to true, requests the `column_metadata` setting from Elasticsearch, which is required
+   * to receive the `_meta` field on columns in the response.
+   */
+  columnMetadata?: boolean;
+
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  approximation?: boolean;
+}
+
+/**
+ * Options specific to ES|QL search. `params` shapes the query; `options` is Kibana plumbing
+ * (session, inspector, abort, execution context, project routing).
+ */
+export interface IEsqlSearchOptions extends IBaseSearchOptions {
+  /**
+   * When true, the response is also mapped to an expressions `Datatable`, returned as `datatable`
+   * on the result. Defaults to false, so callers that only need `rawResponse` skip the mapping.
+   */
+  includeDataTable?: boolean;
 }
 
 /**
@@ -233,6 +308,15 @@ export interface IEsqlSearchResult {
    * Raw Elasticsearch ES|QL async query response
    */
   rawResponse: estypes.EsqlAsyncQueryResponse;
+  /**
+   * Warning message from the ES Warning HTTP response header
+   */
+  warning?: string;
+  /**
+   * The response mapped to an expressions Datatable, ready for use in visualizations.
+   * Only present when `includeDataTable` is set.
+   */
+  datatable?: Datatable;
 }
 
 // ============================================================================
@@ -292,11 +376,6 @@ export interface IEqlSearchOptions extends IBaseSearchOptions {
    * Field to use for tiebreaking
    */
   tiebreakerField?: string;
-
-  /**
-   * Callback to provide pre-request metadata stats (e.g., index pattern name)
-   */
-  getRequestMetadata?: () => RequestStatistics;
 }
 
 /**

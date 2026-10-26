@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
-const { retrieveConfigFromVault, getVaultPath } = require('./manage_secrets');
+require('@kbn/swc-register').install();
+const {
+  retrieveConfigFromVault,
+  resolveVaultTarget,
+  describeVaultTarget,
+} = require('./manage_secrets');
 const { KBN_EVALS_VAULT_TYPES } = require('../../src/cli/utils');
 const minimist = require('minimist');
 
 async function retrieveSecrets() {
-  const argv = minimist(process.argv.slice(2));
+  const argv = minimist(process.argv.slice(2), { string: ['suite', 'version'] });
   const vault = argv.vault;
 
   if (!vault || !KBN_EVALS_VAULT_TYPES.includes(vault)) {
@@ -20,9 +24,22 @@ async function retrieveSecrets() {
     process.exit(1);
   }
 
+  let version;
+  if (argv.version !== undefined) {
+    if (vault !== 'ci-prod' || !/^[1-9][0-9]*$/.test(argv.version)) {
+      // eslint-disable-next-line no-console
+      console.error(
+        'Error: --version takes a positive integer and only applies to --vault ci-prod'
+      );
+      process.exit(1);
+    }
+    version = Number(argv.version);
+  }
+
+  const target = resolveVaultTarget(vault, argv.suite);
   // eslint-disable-next-line no-console
-  console.log(`Using ${vault} vault (${getVaultPath(vault)})...`);
-  await retrieveConfigFromVault(vault);
+  console.log(describeVaultTarget(target));
+  await retrieveConfigFromVault(target, version);
 }
 
 retrieveSecrets();

@@ -45,7 +45,7 @@ const COLLECTOR_DETAIL_TABS: Array<{ id: CollectorDetailTabId; name: string }> =
   },
 ];
 
-const getCollectorLabel = (agent: Agent): string => {
+export const getCollectorLabel = (agent: Agent): string => {
   const displayName = agent.non_identifying_attributes?.['elastic.display.name'];
   if (typeof displayName === 'string' && displayName) return displayName;
   const hostname =
@@ -102,6 +102,9 @@ export const CollectorDetail: React.FC<CollectorDetailProps> = ({ agents }) => {
             onChange={(e) => setSelectedAgentId(e.target.value)}
             compressed
             data-test-subj="collectorDetailSelector"
+            aria-label={i18n.translate('xpack.fleet.otelUi.collectorDetail.selectorAriaLabel', {
+              defaultMessage: 'Select collector agent',
+            })}
           />
           <EuiSpacer size="m" />
         </>

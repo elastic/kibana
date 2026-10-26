@@ -30,7 +30,7 @@ export const defineInferenceFeaturesRoutes = ({
       path: APIRoutes.GET_INFERENCE_FEATURES,
       security: {
         authz: {
-          requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+          requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
         },
       },
     })
@@ -38,7 +38,7 @@ export const defineInferenceFeaturesRoutes = ({
       {
         security: {
           authz: {
-            requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+            requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
           },
         },
         validate: {},
@@ -80,7 +80,12 @@ export const defineInferenceFeaturesRoutes = ({
           return settingValues.get(condition.key) === condition.value;
         });
 
-        const body: InferenceFeaturesResponse = { features: visibleFeatures };
+        const body: InferenceFeaturesResponse = {
+          features: visibleFeatures.map((feature) => ({
+            ...feature,
+            recommendedEndpoints: feature.recommendedEndpoints.map(({ id }) => id),
+          })),
+        };
 
         return response.ok({
           body,

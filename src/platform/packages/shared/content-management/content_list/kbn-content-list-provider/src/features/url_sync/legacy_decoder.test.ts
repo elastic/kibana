@@ -8,9 +8,15 @@
  */
 
 import { decodeLegacyParams } from './legacy_decoder';
+import type { SortDirectionsByField } from '../sorting';
 
 describe('legacy_decoder', () => {
-  const validSortFields = new Set(['title', 'updatedAt', 'accessedAt']);
+  const bothDirections = new Set<'asc' | 'desc'>(['asc', 'desc']);
+  const validSortFields: SortDirectionsByField = new Map([
+    ['title', bothDirections],
+    ['updatedAt', bothDirections],
+    ['accessedAt', new Set<'asc' | 'desc'>(['desc'])],
+  ]);
 
   it('returns null when no legacy params are present', () => {
     expect(decodeLegacyParams({ q: 'dashboard' }, validSortFields)).toBeNull();
@@ -28,6 +34,36 @@ describe('legacy_decoder', () => {
       state: { queryText: 'search' },
       consumed: ['s', 'title'],
     });
+  });
+
+  it('decodes filter as query text', () => {
+    expect(decodeLegacyParams({ filter: 'graph' }, validSortFields)).toEqual({
+      state: { queryText: 'graph' },
+      consumed: ['filter'],
+    });
+  });
+
+  it('preserves s and title over filter precedence', () => {
+    expect(
+      decodeLegacyParams({ s: 'search', title: 'dashboard', filter: 'graph' }, validSortFields)
+    ).toEqual({
+      state: { queryText: 'search' },
+      consumed: ['s', 'title', 'filter'],
+    });
+
+    expect(decodeLegacyParams({ title: 'dashboard', filter: 'graph' }, validSortFields)).toEqual({
+      state: { queryText: 'dashboard' },
+      consumed: ['title', 'filter'],
+    });
+  });
+
+  it('combines filter free text with createdBy and favorites', () => {
+    expect(
+      decodeLegacyParams(
+        { filter: 'graph', created_by: 'jane@example.com', favorites: 'true' },
+        validSortFields
+      )?.state.queryText
+    ).toBe('graph createdBy:"jane@example.com" is:starred');
   });
 
   it('decodes created_by values with EUI query escaping', () => {
@@ -74,7 +110,8 @@ describe('legacy_decoder', () => {
 
   it('maps legacy title sort to attributes.title when that is the registered field', () => {
     expect(
-      decodeLegacyParams({ sort: 'title' }, new Set(['attributes.title']))?.state.sort
+      decodeLegacyParams({ sort: 'title' }, new Map([['attributes.title', bothDirections]]))?.state
+        .sort
     ).toEqual({
       field: 'attributes.title',
       direction: 'asc',
@@ -94,6 +131,28 @@ describe('legacy_decoder', () => {
   it('uses TLV default sort directions when sortdir is absent', () => {
     expect(decodeLegacyParams({ sort: 'updatedAt' }, validSortFields)?.state.sort).toEqual({
       field: 'updatedAt',
+      direction: 'desc',
+    });
+  });
+
+  it('drops a legacy sort direction the field does not offer and warns', () => {
+    const onUnknown = jest.fn();
+
+    expect(
+      decodeLegacyParams({ sort: 'accessedAt', sortdir: 'asc' }, validSortFields, onUnknown)
+    ).toEqual({ state: {}, consumed: ['sort', 'sortdir'] });
+    expect(onUnknown).toHaveBeenCalledWith('sort', 'accessedAt');
+  });
+
+  it('keeps a legacy sort whose direction is offered', () => {
+    expect(
+      decodeLegacyParams({ sort: 'accessedAt', sortdir: 'desc' }, validSortFields)?.state.sort
+    ).toEqual({ field: 'accessedAt', direction: 'desc' });
+  });
+
+  it('uses the default direction when the field is not offered', () => {
+    expect(decodeLegacyParams({ sort: 'accessedAt' }, validSortFields)?.state.sort).toEqual({
+      field: 'accessedAt',
       direction: 'desc',
     });
   });

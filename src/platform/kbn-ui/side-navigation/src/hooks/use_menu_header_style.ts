@@ -7,27 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { APP_HEADER_ROW_HEIGHT } from '../constants';
+
 /**
- * There is a requirement for the menu header to have a sticky position.
- * We cannot apply border to the header because we need to account for the scrollbar.
+ * Menu header rendered above the scrolling menu body, so it stays in view.
  */
-export function useMenuHeaderStyle() {
+export function useMenuHeaderStyle(isPanel = false) {
   const { euiTheme } = useEuiTheme();
+  const { fontSize, lineHeight } = useEuiFontSize('s');
+  const panelStyles = css`
+    padding-top: calc((${APP_HEADER_ROW_HEIGHT}px - ${lineHeight}) / 2);
+  `;
 
   return css`
     --border-width: ${euiTheme.border.width.thin};
     // 20px is forced by section dividers
     --horizontal-padding: calc(20px - var(--border-width));
 
-    position: sticky;
-    top: 0;
-    z-index: calc(${euiTheme.levels.content} + 1);
+    flex-shrink: 0;
     padding: ${euiTheme.size.base} var(--horizontal-padding) ${euiTheme.size.xxs}
       var(--horizontal-padding);
     margin: 0 1px;
-    min-height: var(--secondary-menu-header-height);
+    ${isPanel && panelStyles}
+
+    & h4 {
+      font-size: ${fontSize};
+      line-height: ${lineHeight};
+    }
   `;
 }

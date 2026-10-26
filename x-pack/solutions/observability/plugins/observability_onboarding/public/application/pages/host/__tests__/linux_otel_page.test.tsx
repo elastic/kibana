@@ -11,8 +11,8 @@ import { HostLinuxOtelPage } from '../linux_otel_page';
 import { buildFetchError, renderWithHostPageProviders } from './test_helpers';
 
 jest.mock('../../../quickstart_flows/otel_logs/steps', () => ({
-  OtelLogsInstallStep: ({ os, ingestionMode }: { os: string; ingestionMode: string }) => (
-    <div data-test-subj="otelInstallStep" data-os={os} data-ingestion-mode={ingestionMode} />
+  OtelLogsInstallStep: ({ os }: { os: string }) => (
+    <div data-test-subj="otelInstallStep" data-os={os} />
   ),
   OtelLogsStartStep: () => <div data-test-subj="otelStartStep" />,
   OtelLogsVisualizeStep: ({
@@ -127,28 +127,19 @@ describe('HostLinuxOtelPage', () => {
     expect(screen.getByTestId('otelInstallStep')).toBeInTheDocument();
   });
 
-  it('preserves the ingestion search param in the Return link href', () => {
-    renderPage(['/host/linux?ingestion=wired']);
+  it('preserves arbitrary search params in the Return link href', () => {
+    renderPage(['/host/linux?foo=bar']);
     const returnLink = screen.getByTestId('observabilityOnboardingHostReturn') as HTMLAnchorElement;
-    expect(returnLink.getAttribute('href')).toContain('ingestion=wired');
+    expect(returnLink.getAttribute('href')).toContain('foo=bar');
   });
 
-  it('coerces an unrecognized ingestion param to classic in the install step', () => {
-    renderPage(['/host/linux?ingestion=foo']);
-    const installStep = screen.getByTestId('otelInstallStep');
-    expect(installStep.getAttribute('data-ingestion-mode')).toBe('classic');
-  });
-
-  it('uses wired ingestion mode when the URL says so', () => {
-    renderPage(['/host/linux?ingestion=wired']);
-    const installStep = screen.getByTestId('otelInstallStep');
-    expect(installStep.getAttribute('data-ingestion-mode')).toBe('wired');
-  });
-
-  it('wires the pre-existing-data probe with the otel_host flow id', () => {
+  it('scopes the pre-existing-data probe to linux so other hosts cannot end the session', () => {
     usePreExistingDataCheckMock.mockClear();
     renderPage();
-    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({ flow: 'otel_host' });
+    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({
+      flow: 'otel_host',
+      osType: 'linux',
+    });
   });
 
   it('reports onboardingFlowType=otel_logs to the window-blur and time-window detection hooks', () => {
@@ -174,11 +165,14 @@ describe('HostLinuxOtelPage', () => {
     );
   });
 
-  it('drops the osType pin under wired streams since the streams pipeline does not project host.os.type onto docs', () => {
+  it('keeps the linux osType pin even for a stale wired ingestion URL, since the param is no longer read', () => {
     useTimeWindowDataDetectionMock.mockClear();
     renderPage(['/host/linux?ingestion=wired']);
     expect(useTimeWindowDataDetectionMock).toHaveBeenCalledWith(
-      expect.objectContaining({ extraQueryParams: undefined })
+      expect.objectContaining({
+        extraQueryParams: { osType: 'linux' },
+        keepExtraParamsOnFallback: true,
+      })
     );
   });
 

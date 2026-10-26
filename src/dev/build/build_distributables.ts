@@ -11,7 +11,7 @@ import execa from 'execa';
 import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, SOLUTION_BUILDS, createRunner } from './lib';
+import { Config, createRunner } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -23,6 +23,7 @@ export interface BuildOptions {
   dockerTag: string | null;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
+  forceNodePointerCompression: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;
   createGenericFolders: boolean;
@@ -41,6 +42,8 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  targetCloudPlatforms: boolean;
+  skipFipsProvider: boolean;
   skipServerless: boolean;
   tarZstd: boolean;
   withExamplePlugins: boolean;
@@ -86,14 +89,9 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateEmptyDirsAndFiles);
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
+    await globalRun(Tasks.AssertPackageEntryPoints);
     await globalRun(Tasks.ReplaceFavicon);
-    // [rspack-transition] Use rspack or legacy webpack optimizer based on env var.
-    // When legacy is removed, keep only Tasks.BuildRspackBundles.
-    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
-      await globalRun(Tasks.BuildRspackBundles);
-    } else {
-      await globalRun(Tasks.BuildKibanaPlatformPlugins);
-    }
+    await globalRun(Tasks.BuildBundles);
     await globalRun(Tasks.CreatePackageJson);
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
@@ -124,6 +122,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.InstallChromium);
     await globalRun(Tasks.CopyBinScripts);
     await globalRun(Tasks.CleanNodeBuilds);
+    if (!options.skipFipsProvider) {
+      await globalRun(Tasks.BundleFipsProvider);
+    }
+    await globalRun(Tasks.CreateDistributionDefaults);
 
     await globalRun(Tasks.AssertFileTime);
     await globalRun(Tasks.AssertPathLength);
@@ -161,8 +163,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     }
     if (options.createRpmPackage) {
       // control w/ --rpm or --skip-os-packages
-      artifactTasks.push(Tasks.CreateRpmPackageX64);
-      artifactTasks.push(Tasks.CreateRpmPackageARM64);
+      artifactTasks.push(Tasks.CreateRpmPackage(config.getPlatform('linux', 'x64')));
+      artifactTasks.push(Tasks.CreateRpmPackage(config.getPlatform('linux', 'arm64')));
     }
   }
 
@@ -188,10 +190,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --docker-images and --skip-docker-serverless
     artifactTasks.push(Tasks.CreateDockerServerless('x64'));
     artifactTasks.push(Tasks.CreateDockerServerless('aarch64'));
-    SOLUTION_BUILDS.forEach((solution) => {
-      artifactTasks.push(Tasks.CreateDockerServerless('x64', solution));
-      artifactTasks.push(Tasks.CreateDockerServerless('aarch64', solution));
-    });
   }
 
   if (options.createDockerFIPS) {

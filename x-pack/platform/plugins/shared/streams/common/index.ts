@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-export { QUERY_STATUSES } from './queries';
-export type { Query, QueryStatus } from './queries';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
   ProcessorSuggestionsResponse,
 } from './ingest_processor_suggestions';
 
-export { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from './feature_flags';
-
 export {
   STREAMS_TIERED_FEATURES,
   STREAMS_TIERED_ML_FEATURE,
   STREAMS_TIERED_AI_FEATURE,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
   ATTACHMENT_SUGGESTIONS_LIMIT,
-  DEFAULT_EXTRACTION_INTERVAL_HOURS,
-  MIN_EXTRACTION_INTERVAL_HOURS,
   FAILURE_STORE_SELECTOR,
+  STREAMS_DEFAULT_UNIT_ID,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';
@@ -41,13 +35,28 @@ export {
   extractMessagesFromField,
 } from './pattern_extraction_helpers';
 
-export type { SigEventsTuningConfig } from './sig_events_tuning_config';
-export { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from './sig_events_tuning_config';
 export {
   type StreamsAppLocation,
   type StreamsAppLocationParams,
   getStreamsLocation,
 } from './get_streams_location/get_streams_location';
+
+export {
+  MAX_RESOLVE_INDEX_PATTERN_LENGTH,
+  MAX_RESOLVE_INDEX_PATTERNS,
+  collectResolvedIndexNames,
+  collectResolvedDataStreamNames,
+} from './resolve_index_patterns';
+export type { ResolvedIndexPatternMatches } from './resolve_index_patterns';
+
+export { matchesIndexPattern } from './matches_index_pattern';
+export { getUnitDestinationWritePatterns } from './unit_destination_write_patterns';
+export type { UnitDestination } from './unit_destination_write_patterns';
+export type {
+  IndexMetadataResponse,
+  ResolvedDestinationIndex,
+  ResolveUnitIndicesResponse,
+} from './resolve_unit_indices';
 
 export type { StreamSummary } from './stream_summary';
 export type { PaginatedResponse } from './pagination';

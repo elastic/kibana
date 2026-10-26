@@ -103,12 +103,11 @@ describe('getEsdslFn', () => {
           title: 'Data',
           description: expect.stringContaining('This request queries Elasticsearch'),
         }),
-        getRequestMetadata: expect.any(Function),
       })
     );
   });
 
-  it('merges input filters with DSL query', async () => {
+  it('passes input filters and query as kibanaQueryContext', async () => {
     const mockSearchService = getMockSearchService();
     const esdslFn = createEsdslFn(mockSearchService);
 
@@ -130,9 +129,11 @@ describe('getEsdslFn', () => {
     await esdslFn.fn(input, { dsl, index: 'test-index', size: 10 }, createExecutionContext());
 
     const callArgs = mockSearchService.dsl.mock.calls[0][0];
-    expect(callArgs.query).toBeDefined();
-    expect(callArgs.query.bool).toBeDefined();
-    expect(callArgs.query.bool.must).toContainEqual({ term: { field3: 'value3' } });
+    expect(callArgs.query).toEqual({ term: { field3: 'value3' } });
+    expect(callArgs.kibanaQueryContext).toEqual({
+      kibanaFilters: input.filters,
+      kqlQuery: input.query,
+    });
   });
 
   it('returns es_raw_response type', async () => {

@@ -125,9 +125,9 @@ describe('useWorkflowActions – import mutations', () => {
       rawWorkflows: [{ id: 'w-1', originalId: 'w-1', yaml: 'name: W1' }],
     };
 
-    it('should parse the file client-side and check conflicts via mgetWorkflows', async () => {
+    it('should parse the file client-side and check conflicts via checkWorkflowIdConflicts', async () => {
       mockParseImportFile.mockResolvedValueOnce(clientParseResult);
-      mockWorkflowApi.mgetWorkflows.mockResolvedValueOnce([]);
+      mockWorkflowApi.checkWorkflowIdConflicts.mockResolvedValueOnce({ existingIds: [] });
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
       const file = createFile('test.yml', 'name: Test');
@@ -139,10 +139,9 @@ describe('useWorkflowActions – import mutations', () => {
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
 
       expect(mockParseImportFile).toHaveBeenCalledWith(file);
-      expect(mockWorkflowApi.mgetWorkflows).toHaveBeenCalledTimes(1);
-      expect(mockWorkflowApi.mgetWorkflows).toHaveBeenCalledWith({
-        ids: ['w-1'],
-        source: ['name'],
+      expect(mockWorkflowApi.checkWorkflowIdConflicts).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowApi.checkWorkflowIdConflicts).toHaveBeenCalledWith({
+        workflows: [{ id: 'w-1', yaml: 'name: W1' }],
       });
     });
 
@@ -178,7 +177,7 @@ describe('useWorkflowActions – import mutations', () => {
         ],
       };
       mockParseImportFile.mockResolvedValueOnce(parseResult);
-      mockWorkflowApi.mgetWorkflows.mockResolvedValueOnce([{ id: 'w-1', name: 'Existing' }]);
+      mockWorkflowApi.checkWorkflowIdConflicts.mockResolvedValueOnce({ existingIds: ['w-1'] });
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
@@ -191,7 +190,8 @@ describe('useWorkflowActions – import mutations', () => {
       expect(result.current.preflightImportWorkflows.data).toEqual({
         format: 'zip',
         totalWorkflows: 2,
-        conflicts: [{ id: 'w-1', existingName: 'Existing' }],
+        conflicts: ['w-1'],
+        conflictCheckFailed: false,
         parseErrors: ['bad line'],
         workflows: parseResult.workflows,
         rawWorkflows: parseResult.rawWorkflows,
@@ -254,8 +254,57 @@ describe('useWorkflowActions – import mutations', () => {
 
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
 
-      expect(mockWorkflowApi.mgetWorkflows).not.toHaveBeenCalled();
+      expect(mockWorkflowApi.checkWorkflowIdConflicts).not.toHaveBeenCalled();
       expect(result.current.preflightImportWorkflows.data?.conflicts).toEqual([]);
+    });
+
+    it('should still resolve with the parsed preview when the conflict check fails (network error)', async () => {
+      // Regression test for the bug: if the conflict-check call throws, the mutation
+      // must NOT reject — the preview table must still appear. Only conflictCheckFailed
+      // is set to true so the UI can render a non-blocking warning.
+      mockParseImportFile.mockResolvedValueOnce(clientParseResult);
+      mockWorkflowApi.checkWorkflowIdConflicts.mockRejectedValueOnce(
+        new Error('Network request failed')
+      );
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.preflightImportWorkflows.mutate({
+          file: createFile('test.yml', 'name: Test'),
+        });
+      });
+
+      await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
+
+      expect(result.current.preflightImportWorkflows.data?.workflows).toHaveLength(1);
+      expect(result.current.preflightImportWorkflows.data?.conflicts).toEqual([]);
+      expect(result.current.preflightImportWorkflows.data?.conflictCheckFailed).toBe(true);
+    });
+
+    it('should surface server-reported existing IDs as conflicts', async () => {
+      // Client-facing: existingIds returned by the dryRun call must appear in
+      // conflicts so the user can choose overwrite / generate-new-ids. The
+      // correctness of what "existing" means (tombstones, cross-space) is
+      // asserted at the service layer in workflow_crud_service.test.ts.
+      mockParseImportFile.mockResolvedValueOnce(clientParseResult);
+      mockWorkflowApi.checkWorkflowIdConflicts.mockResolvedValueOnce({
+        existingIds: ['w-1'],
+      });
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.preflightImportWorkflows.mutate({
+          file: createFile('test.yml', 'name: Test'),
+        });
+      });
+
+      await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
+
+      expect(result.current.preflightImportWorkflows.data?.conflicts).toEqual(['w-1']);
+      expect(result.current.preflightImportWorkflows.data?.conflictCheckFailed).toBe(false);
+      expect(result.current.preflightImportWorkflows.data?.workflows).toHaveLength(1);
     });
   });
 
@@ -332,7 +381,7 @@ describe('useWorkflowActions – import mutations', () => {
         result.current.importWorkflows.mutate({
           workflows,
           generateNewIds: true,
-          conflictIds: [{ id: 'w-1', existingName: 'Existing' }],
+          conflictIds: ['w-1'],
         });
       });
 
@@ -686,7 +735,7 @@ describe('useWorkflowActions – import mutations', () => {
       };
 
       mockParseImportFile.mockResolvedValueOnce(clientResult);
-      mockWorkflowApi.mgetWorkflows.mockResolvedValueOnce([]);
+      mockWorkflowApi.checkWorkflowIdConflicts.mockResolvedValueOnce({ existingIds: [] });
       mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importResponse);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
@@ -707,10 +756,9 @@ describe('useWorkflowActions – import mutations', () => {
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
       expect(result.current.importWorkflows.data?.created).toHaveLength(1);
 
-      expect(mockWorkflowApi.mgetWorkflows).toHaveBeenCalledTimes(1);
-      expect(mockWorkflowApi.mgetWorkflows).toHaveBeenCalledWith({
-        ids: ['w-1'],
-        source: ['name'],
+      expect(mockWorkflowApi.checkWorkflowIdConflicts).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowApi.checkWorkflowIdConflicts).toHaveBeenCalledWith({
+        workflows: [{ id: 'w-1', yaml: 'name: W' }],
       });
       expect(mockWorkflowApi.bulkCreateWorkflows).toHaveBeenCalledTimes(1);
       expect(mockWorkflowApi.bulkCreateWorkflows).toHaveBeenCalledWith({
@@ -747,9 +795,7 @@ describe('useWorkflowActions – import mutations', () => {
       };
 
       mockParseImportFile.mockResolvedValueOnce(clientResult);
-      mockWorkflowApi.mgetWorkflows.mockResolvedValueOnce([
-        { id: 'w-1', name: 'Existing Workflow' },
-      ]);
+      mockWorkflowApi.checkWorkflowIdConflicts.mockResolvedValueOnce({ existingIds: ['w-1'] });
       mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importResponse);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
@@ -799,7 +845,7 @@ describe('useWorkflowActions – import mutations', () => {
       };
 
       mockParseImportFile.mockResolvedValueOnce(clientResult);
-      mockWorkflowApi.mgetWorkflows.mockResolvedValueOnce([]);
+      mockWorkflowApi.checkWorkflowIdConflicts.mockResolvedValueOnce({ existingIds: [] });
       mockWorkflowApi.bulkCreateWorkflows.mockRejectedValueOnce(new Error('Import failed'));
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });

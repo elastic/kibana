@@ -18,6 +18,7 @@ import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import type { CompletionChunk } from './types';
 import { parseSerdeChunkMessage, serializeSerdeChunkMessage } from './serde_utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isInferenceRequestError } from '@kbn/inference-common';
 
 describe('serdeEventstreamIntoObservable', () => {
   const marshaller = new EventStreamMarshaller({
@@ -86,5 +87,42 @@ describe('serdeEventstreamIntoObservable', () => {
     const result = await getChunks(serde$);
 
     expect(result).toEqual(chunks);
+  });
+
+  it('destroys the underlying stream when the subscriber unsubscribes', () => {
+    const stream = new Readable({ read: () => {} });
+
+    const subscription = serdeEventstreamIntoObservable(stream).subscribe();
+    expect(stream.destroyed).toBe(false);
+
+    subscription.unsubscribe();
+    expect(stream.destroyed).toBe(true);
+  });
+
+  it('destroys the stream and errors the subscriber when maxDurationMs is exceeded', async () => {
+    jest.useFakeTimers();
+    try {
+      const stream = new Readable({ read: () => {} });
+
+      const error$ = new Promise<unknown>((resolve) => {
+        serdeEventstreamIntoObservable(stream, { maxDurationMs: 1_000 }).subscribe({
+          error: resolve,
+        });
+      });
+
+      jest.advanceTimersByTime(1_001);
+
+      const error = await error$;
+      expect(stream.destroyed).toBe(true);
+      expect(isInferenceRequestError(error)).toBe(true);
+      expect(error).toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining('maximum allowed duration'),
+          meta: expect.objectContaining({ status: 408 }),
+        })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

@@ -8,6 +8,7 @@
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { RetentionPayload, CategoriesResponse } from '@kbn/siem-readiness';
+import { filterRetentionItemsByCategories } from '@kbn/siem-readiness';
 import {
   createToolTestMocks,
   createToolHandlerContext,
@@ -15,14 +16,16 @@ import {
 } from '../../__mocks__/test_helpers';
 import { getRetentionTool } from './get_retention_tool';
 import { getRetention } from '../../../lib/siem_readiness/dimensions';
-import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
-import { filterRetentionItemsByCategories } from '@kbn/siem-readiness';
+import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
 jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getRetention: jest.fn() }));
-jest.mock('../../../lib/siem_readiness/fetchers', () => ({ fetchCategories: jest.fn() }));
+jest.mock('../../../lib/siem_readiness/fetchers', () => ({
+  getSiemReadinessSharedContext: jest.fn(),
+  fetchSiemReadinessSharedContext: jest.fn(),
+}));
 
 const mockGetRetention = getRetention as jest.Mock;
-const mockFetchCategories = fetchCategories as jest.Mock;
+const mockGetSharedContext = getSiemReadinessSharedContext as jest.Mock;
 
 // Retention items carry data stream names; category map has backing index names.
 // The contains-match is: backing_index.includes(data_stream_name).
@@ -37,6 +40,18 @@ const mockCategories: CategoriesResponse = {
     { category: 'Cloud', indices: [{ indexName: CLOUD_BACKING_INDEX, docs: 500 }] },
     { category: 'Network', indices: [{ indexName: NETWORK_BACKING_INDEX, docs: 200 }] },
   ],
+};
+
+const mockSharedContext = {
+  reverseMapResult: {
+    indexToRules: new Map(),
+    pipelineToIndices: new Map(),
+    categoryToIndices: new Map(),
+    tacticTotals: new Map(),
+    mlRules: [],
+  },
+  categoriesResult: mockCategories,
+  indexToPlatform: new Map(),
 };
 
 const makePayload = (overrides: Partial<RetentionPayload> = {}): RetentionPayload => ({
@@ -64,7 +79,7 @@ describe('getRetentionTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
-    mockFetchCategories.mockResolvedValue(mockCategories);
+    mockGetSharedContext.mockResolvedValue(mockSharedContext);
   });
 
   describe('handler — category filtering (contains-match)', () => {
@@ -111,7 +126,7 @@ describe('getRetentionTool', () => {
         makePayload({
           items: [makeRetentionItem(NETWORK_DATA_STREAM, 'non-compliant')],
           actionableFindings: [
-            { severity: 'warning', message: 'below threshold', resource: NETWORK_DATA_STREAM },
+            { severity: 'WARNING', message: 'below threshold', resource: NETWORK_DATA_STREAM },
           ],
         })
       );
@@ -130,7 +145,7 @@ describe('getRetentionTool', () => {
         makePayload({
           items: [],
           actionableFindings: [
-            { severity: 'warning', message: 'unknown stream', resource: 'logs-orphan-default' },
+            { severity: 'WARNING', message: 'unknown stream', resource: 'logs-orphan-default' },
           ],
         })
       );
@@ -162,10 +177,10 @@ describe('getRetentionTool', () => {
             ...uncategorizedItems,
           ],
           actionableFindings: [
-            { severity: 'warning', message: 'below threshold', resource: CLOUD_DATA_STREAM },
+            { severity: 'WARNING', message: 'below threshold', resource: CLOUD_DATA_STREAM },
             // uncategorized findings that should be filtered out
             ...uncategorizedItems.map((item) => ({
-              severity: 'warning' as const,
+              severity: 'WARNING' as const,
               message: 'below threshold',
               resource: item.indexName,
             })),

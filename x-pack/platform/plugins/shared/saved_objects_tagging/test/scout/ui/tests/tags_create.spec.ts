@@ -11,17 +11,18 @@ import { expect } from '@kbn/scout/ui';
 import { KBN_ARCHIVES, test } from '../fixtures';
 
 test.describe('Tags management create', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ kbnClient, browserAuth, page, kbnUrl, pageObjects }) => {
+  test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
-    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
-
-    await browserAuth.loginAsPrivilegedUser();
-    await page.goto(kbnUrl.app('management/kibana/tags'));
-    await pageObjects.tagManagement.tagsTable.waitForLoaded();
   });
 
-  test.afterEach(async ({ pageObjects }) => {
-    await pageObjects.tagManagement.tagModal.closeIfOpen();
+  test.beforeEach(async ({ browserAuth, pageObjects, kbnClient }) => {
+    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
+    await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.tagManagement.goto();
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   test('creates a valid tag', async ({ pageObjects }) => {

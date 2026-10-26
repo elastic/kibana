@@ -12,6 +12,11 @@ import React from 'react';
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
+import {
+  ESQL_QUERY_NOT_MERGED,
+  EQL_QUERY_NOT_MERGED,
+  SUPER_TIMELINE_QUERY_MERGING_COLUMN_HEADER,
+} from '../../super_timeline/translations';
 import type { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
@@ -29,6 +34,7 @@ export const getIconHeaderColumns = ({
       field: 'eventIdToNoteIds',
       name: (
         <EuiIconTip
+          aria-label={i18n.NOTES}
           content={i18n.NOTES}
           iconProps={{
             'data-test-subj': 'notes-count-header-icon',
@@ -49,6 +55,7 @@ export const getIconHeaderColumns = ({
       field: 'pinnedEventIds',
       name: (
         <EuiIconTip
+          aria-label={i18n.PINNED_EVENTS}
           content={i18n.PINNED_EVENTS}
           iconProps={{
             'data-test-subj': 'pinned-event-header-icon',
@@ -71,6 +78,7 @@ export const getIconHeaderColumns = ({
       field: 'favorite',
       name: (
         <EuiIconTip
+          aria-label={i18n.FAVORITES}
           content={i18n.FAVORITES}
           iconProps={{
             'data-test-subj': 'favorites-header-icon',
@@ -83,7 +91,14 @@ export const getIconHeaderColumns = ({
         const isFavorite = favorite != null && favorite.length > 0;
         const fill = isFavorite ? 'starFill' : 'star';
 
-        return <EuiIcon data-test-subj={`favorite-${fill}-star`} type={fill} size="m" />;
+        return (
+          <EuiIcon
+            data-test-subj={`favorite-${fill}-star`}
+            type={fill}
+            size="m"
+            aria-hidden={true}
+          />
+        );
       },
       sortable: false,
       width: ACTION_COLUMN_WIDTH,
@@ -93,3 +108,43 @@ export const getIconHeaderColumns = ({
   const defaultColumns = [columns.pinnedEvent, columns.note, columns.favorite];
   return timelineType === TimelineTypeEnum.template ? templateColumns : defaultColumns;
 };
+
+/** Returns the column that indicates whether an ES|QL or EQL timeline's query is merged into Super Timeline. */
+export const getSuperTimelineQueryTypeColumn = (): EuiTableFieldDataColumnType<object> => ({
+  align: 'center' as HorizontalAlignment,
+  field: 'savedSearchId',
+  name: (
+    <EuiIconTip
+      aria-label={SUPER_TIMELINE_QUERY_MERGING_COLUMN_HEADER}
+      content={SUPER_TIMELINE_QUERY_MERGING_COLUMN_HEADER}
+      iconProps={{ 'data-test-subj': 'super-timeline-query-type-header-icon' }}
+      size="m"
+      type="merge"
+    />
+  ),
+  render: (savedSearchId: string | null | undefined, timelineResult: OpenTimelineResult) => {
+    if (savedSearchId != null) {
+      return (
+        <EuiIconTip
+          iconProps={{ 'data-test-subj': 'super-timeline-esql-query-not-merged-icon' }}
+          content={ESQL_QUERY_NOT_MERGED}
+          type="info"
+          size="m"
+        />
+      );
+    }
+    if (timelineResult.queryType?.hasEql === true) {
+      return (
+        <EuiIconTip
+          iconProps={{ 'data-test-subj': 'super-timeline-eql-query-not-merged-icon' }}
+          content={EQL_QUERY_NOT_MERGED}
+          type="info"
+          size="m"
+        />
+      );
+    }
+    return null;
+  },
+  sortable: false,
+  width: ACTION_COLUMN_WIDTH,
+});

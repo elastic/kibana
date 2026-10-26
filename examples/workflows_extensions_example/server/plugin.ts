@@ -19,8 +19,10 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { registerEmitEventRoute } from './routes/emit_event';
+import { registerManagedServiceAccountRoutes } from './routes/managed_service_account';
 import { registerEmitLoopRoute } from './routes/emit_loop';
 import { registerStepDefinitions } from './step_types';
 import { registerTriggers } from './triggers';
@@ -39,6 +41,7 @@ export interface WorkflowsExtensionsExamplePluginStart {
 }
 
 export interface WorkflowsExtensionsExamplePluginSetupDeps {
+  spaces: SpacesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
@@ -73,6 +76,9 @@ export class WorkflowsExtensionsExamplePlugin
     const router = core.http.createRouter<WorkflowsExtensionsRequestHandlerContext>();
     registerEmitEventRoute(router);
     registerEmitLoopRoute(router);
+    registerManagedServiceAccountRoutes(router, (request) =>
+      plugins.spaces.spacesService.getSpaceId(request)
+    );
 
     return {};
   }

@@ -28,7 +28,6 @@ describe('KibanaNoDataPage', () => {
   const config = {
     hasESData: false,
     hasDataView: false,
-    hasUserDataView: false,
   };
 
   beforeEach(() => {
@@ -54,7 +53,7 @@ describe('KibanaNoDataPage', () => {
     });
   });
 
-  it('renders NoDataViewsPrompt when ES data exists but no user data views', async () => {
+  it('renders NoDataViewsPrompt when ES data exists but no data views', async () => {
     const services = getKibanaNoDataPageServicesMock({ ...config, hasESData: true });
 
     render(
@@ -80,7 +79,7 @@ describe('KibanaNoDataPage', () => {
 
     // Mock the service methods to return promises that never resolve
     mockServices.hasESData = jest.fn().mockReturnValue(neverResolvePromise);
-    mockServices.hasUserDataView = jest.fn().mockReturnValue(neverResolvePromise);
+    mockServices.hasDataView = jest.fn().mockReturnValue(neverResolvePromise);
 
     const { container } = render(
       <KibanaNoDataPageProvider {...mockServices}>
@@ -103,7 +102,7 @@ describe('KibanaNoDataPage', () => {
 
     // Mock the service methods to return promises that never resolve
     mockServices.hasESData = jest.fn().mockReturnValue(neverResolvePromise);
-    mockServices.hasUserDataView = jest.fn().mockReturnValue(neverResolvePromise);
+    mockServices.hasDataView = jest.fn().mockReturnValue(neverResolvePromise);
 
     const { container } = render(
       <KibanaNoDataPageProvider {...mockServices}>

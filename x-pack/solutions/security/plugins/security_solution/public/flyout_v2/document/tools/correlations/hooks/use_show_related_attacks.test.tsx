@@ -9,64 +9,40 @@ import { renderHook } from '@testing-library/react';
 import type { RenderHookResult } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../../../../common/constants';
 import { ALERT_ATTACK_IDS } from '../../../../../../common/field_maps/field_names';
-import { useKibana as mockUseKibana } from '../../../../../common/lib/kibana/__mocks__';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type {
   UseShowRelatedAttacksParams,
   UseShowRelatedAttacksResult,
 } from './use_show_related_attacks';
 import { useShowRelatedAttacks } from './use_show_related_attacks';
 
-const mockedUseKibana = mockUseKibana();
-const mockUiSettingsGet = jest.fn();
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
-jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
-  const original = jest.requireActual('../../../../../common/lib/kibana/kibana_react');
-
-  return {
-    ...original,
-    useKibana: () => ({
-      ...mockedUseKibana,
-      services: {
-        ...mockedUseKibana.services,
-        uiSettings: {
-          ...mockedUseKibana.services.uiSettings,
-          get: mockUiSettingsGet,
-        },
-      },
-    }),
-  };
-});
+const mockAlignmentEnabled = (enabled: boolean) => {
+  (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+    (feature: string) => feature === 'enableAlertsAndAttacksAlignment' && enabled
+  );
+};
 
 describe('useShowRelatedAttacks', () => {
   let hookResult: RenderHookResult<UseShowRelatedAttacksResult, UseShowRelatedAttacksParams>;
 
   beforeEach(() => {
-    mockUiSettingsGet.mockImplementation((key: string, fallbackValue: boolean) => {
-      if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
-        return true;
-      }
-
-      return fallbackValue;
-    });
+    mockAlignmentEnabled(true);
   });
 
-  it('should return true when setting is enabled even if hit has no attack ids', () => {
+  it('should return true when alignment is enabled even if hit has no attack ids', () => {
     const hit = { flattened: {} } as unknown as DataTableRecord;
     hookResult = renderHook(() => useShowRelatedAttacks({ hit }));
 
     expect(hookResult.result.current).toEqual({ show: true, attackIds: [] });
   });
 
-  it('should return false if setting is disabled, even when attack ids exist', () => {
-    mockUiSettingsGet.mockImplementation((key: string, fallbackValue: boolean) => {
-      if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
-        return false;
-      }
-
-      return fallbackValue;
-    });
+  it('should return false if alignment is disabled, even when attack ids exist', () => {
+    mockAlignmentEnabled(false);
 
     const hit = {
       flattened: { [ALERT_ATTACK_IDS]: ['attack-id-1', 'attack-id-2'] },
@@ -79,7 +55,7 @@ describe('useShowRelatedAttacks', () => {
     });
   });
 
-  it('should return true if setting is enabled and hit has attack ids', () => {
+  it('should return true if alignment is enabled and hit has attack ids', () => {
     const hit = {
       flattened: { [ALERT_ATTACK_IDS]: ['attack-id-1', 'attack-id-2'] },
     } as unknown as DataTableRecord;
@@ -91,7 +67,7 @@ describe('useShowRelatedAttacks', () => {
     });
   });
 
-  it('should return true when setting is enabled even if attack ids are empty', () => {
+  it('should return true when alignment is enabled even if attack ids are empty', () => {
     const hit = { flattened: { [ALERT_ATTACK_IDS]: [] } } as unknown as DataTableRecord;
     hookResult = renderHook(() => useShowRelatedAttacks({ hit }));
 

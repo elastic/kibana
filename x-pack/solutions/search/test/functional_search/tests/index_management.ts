@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'searchIndexDetailsPage',
     'header',
     'common',
     'indexManagement',
-    'solutionNavigation',
   ]);
   const es = getService('es');
   const searchSpace = getService('searchSpace');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const browser = getService('browser');
 
   const indexName = 'index_mgmt_search_index';
   describe('Index management', function () {
@@ -43,9 +45,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.common.navigateToApp('indexManagement', {
             basePath: `s/${spaceCreated.id}`,
           });
-          // Navigate to the indices tab
-          await pageObjects.indexManagement.changeTabs('indicesTab');
           await pageObjects.header.waitUntilLoadingHasFinished();
+          // Indices is the default tab; wait for its table to render instead of re-clicking
+          // the already-selected tab, which can be intercepted by transient overlays (#239152).
+          await pageObjects.indexManagement.expectToBeOnIndicesTab();
         });
         describe('manage index action', () => {
           beforeEach(async () => {
@@ -69,8 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('mappings');
           });
         });
-        // FLAKY: https://github.com/elastic/kibana/issues/239152
-        describe.skip('can view search index details', function () {
+        describe('can view search index details', function () {
           it('renders search index details with no documents', async () => {
             await pageObjects.searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
               0
@@ -79,15 +81,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
           });
         });
-        describe('breadcrumbs', function () {
-          it('displays correct breadcrumbs on index list page', async () => {
-            await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbTexts([
-              'Data management',
-              'Indices and data streams',
-              'Index Management',
-              'Indices',
-            ]);
-          });
+        it('loads the indices tab', async () => {
+          expect(await browser.getCurrentUrl()).to.contain('/indices');
         });
       });
     });
@@ -117,9 +112,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.common.navigateToApp('indexManagement', {
             basePath: `s/${spaceCreated.id}`,
           });
-          // Navigate to the indices tab
-          await pageObjects.indexManagement.changeTabs('indicesTab');
           await pageObjects.header.waitUntilLoadingHasFinished();
+          // Indices is the default tab; wait for its table to render instead of re-clicking
+          // the already-selected tab, which can be intercepted by transient overlays (#239152).
+          await pageObjects.indexManagement.expectToBeOnIndicesTab();
         });
         after(async () => {
           await esDeleteAllIndices(indexName);

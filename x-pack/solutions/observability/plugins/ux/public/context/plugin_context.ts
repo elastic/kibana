@@ -11,10 +11,12 @@ import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/pu
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 export interface PluginContextValue {
-  appMountParameters: AppMountParameters;
+  /** Undefined when the dashboard is embedded in another app. */
+  appMountParameters?: AppMountParameters;
   exploratoryView: ExploratoryViewPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   spaceId: string;
+  isDev: boolean;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

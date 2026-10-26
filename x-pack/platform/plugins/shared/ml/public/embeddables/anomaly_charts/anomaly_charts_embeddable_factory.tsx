@@ -11,8 +11,15 @@ import React from 'react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import { Subscription, map, merge } from 'rxjs';
-import { fetch$, timeRangeComparators, titleComparators } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subscription, map, merge } from 'rxjs';
+import {
+  fetch$,
+  getViewModeSubject,
+  timeRangeComparators,
+  titleComparators,
+  useStateFromPublishingSubject,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -29,9 +36,9 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_charts';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { AnomalyChartsEmbeddableApi } from '..';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import {
   anomalyChartsComparators,
@@ -163,6 +170,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...pluginsStartServices,
       };
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
@@ -183,6 +192,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           });
           const { euiTheme } = useEuiTheme();
 
+          const viewMode = useStateFromPublishingSubject(viewMode$);
+
           return (
             <KibanaRenderContextProvider {...coreStartServices}>
               <KibanaContextProvider services={contextServices}>
@@ -196,13 +207,14 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                 >
                   <LazyAnomalyChartsContainer
                     id={uuid}
-                    severityThreshold={initialState.severityThreshold}
+                    severityThreshold={initialState.severity_threshold}
                     api={api}
                     services={anomalyChartsDependencies}
                     onLoading={onLoading}
                     onRenderComplete={onRenderComplete}
                     onError={onError}
                     timeRange$={appliedTimeRange$}
+                    isInteractive={viewMode !== 'non-interactive'}
                   />
                 </div>
               </KibanaContextProvider>

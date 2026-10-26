@@ -40,6 +40,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     abortSignal,
     metadata,
     timeout,
+    maxContentLength,
     stream = false,
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
@@ -75,6 +76,9 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
       ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
+      ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
+        ? { maxContentLength }
+        : {}),
     };
 
     const connectorResult$ = defer(async () => {
@@ -150,7 +154,7 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
               image: {
                 format,
                 source: {
-                  bytes: new TextEncoder().encode(contentPart.source.data),
+                  bytes: Buffer.from(contentPart.source.data, 'base64'),
                 },
               },
             });
@@ -242,10 +246,9 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       lastMessage &&
       lastMessage.role === 'user' &&
       lastMessage.rawContent?.some((c) => 'toolResult' in c) &&
-      curr.role === 'user' &&
-      curr.rawContent?.some((c) => 'toolResult' in c)
+      curr.role === 'user'
     ) {
-      lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent);
+      lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent ?? []);
     } else {
       acc.push(curr);
     }

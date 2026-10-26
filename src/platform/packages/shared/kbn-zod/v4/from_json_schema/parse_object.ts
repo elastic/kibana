@@ -41,5 +41,19 @@ export function parseObject(
     shape[key] = fieldSchema;
   }
 
+  const { additionalProperties } = schema;
+
+  if (additionalProperties === true) {
+    return z.looseObject(shape);
+  }
+
+  if (additionalProperties === false) {
+    return z.strictObject(shape);
+  }
+
+  if (additionalProperties) {
+    return z.object(shape).catchall(parseJsonSchema(additionalProperties));
+  }
+
   return z.object(shape);
 }

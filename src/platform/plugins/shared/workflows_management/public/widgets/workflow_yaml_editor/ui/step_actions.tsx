@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './run_step_button';
 import {
@@ -51,7 +51,7 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
   const menuButton = useMemo(() => {
     return (
       <EuiToolTip
-        content={i18n.translate('console.requestOptionsButtonAriaLabel', {
+        content={i18n.translate('workflows.requestOptionsButtonAriaLabel', {
           defaultMessage: 'Request options',
         })}
         disableScreenReaderOutput
@@ -59,10 +59,10 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
         <EuiButtonIcon
           onClick={togglePopover}
           data-test-subj="toggleConsoleMenu"
-          aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+          aria-label={i18n.translate('workflows.requestOptionsButtonAriaLabel', {
             defaultMessage: 'Request options',
           })}
-          iconType="boxesVertical"
+          iconType="ellipsis"
           iconSize="s"
         />
       </EuiToolTip>

@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { NoBoundaryCrossingRule } from './no_boundary_crossing';
+import { rules } from '../..';
 import type { ModuleType } from '@kbn/repo-source-classifier';
 import dedent from 'dedent';
 import { formatSuggestions } from '../helpers/report';
@@ -82,13 +82,16 @@ const babelTester = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/imports/no_boundary_crossing', NoBoundaryCrossingRule, {
+    tester.run('@kbn/imports/no_boundary_crossing', rules.no_boundary_crossing, {
       valid: [
         make('common package', 'common package'),
         make('server package', 'common package'),
         make('browser package', 'common package'),
         make('server package', 'server package'),
         make('browser package', 'browser package'),
+        make('tooling', 'browser package'),
+        make('tooling', 'common package'),
+        make('tooling', 'server package'),
         make('tests or mocks', 'common package'),
         make('tests or mocks', 'browser package'),
         make('tests or mocks', 'server package'),
@@ -129,15 +132,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           ...make('browser package', 'tests or mocks'),
-          errors: [
-            {
-              line: 1,
-              messageId: 'TYPE_MISMATCH',
-            },
-          ],
-        },
-        {
-          ...make('common package', 'server package'),
           errors: [
             {
               line: 1,

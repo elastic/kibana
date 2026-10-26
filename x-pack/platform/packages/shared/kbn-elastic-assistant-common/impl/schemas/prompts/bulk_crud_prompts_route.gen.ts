@@ -35,15 +35,15 @@ export const PromptsBulkActionSkipResult = lazySchema(() =>
     /**
      * The ID of the prompt that was skipped.
      */
-    id: z.string(),
+    id: z.string().describe('The ID of the prompt that was skipped.'),
     /**
      * The name of the prompt that was skipped.
      */
-    name: z.string().optional(),
+    name: z.string().optional().describe('The name of the prompt that was skipped.'),
     /**
      * The reason for skipping the prompt.
      */
-    skip_reason: PromptsBulkActionSkipReason,
+    skip_reason: PromptsBulkActionSkipReason.describe('The reason for skipping the prompt.'),
   })
 );
 export type PromptsBulkActionSkipResult = z.infer<typeof PromptsBulkActionSkipResult>;
@@ -53,11 +53,11 @@ export const PromptDetailsInError = lazySchema(() =>
     /**
      * The ID of the prompt that encountered an error.
      */
-    id: z.string(),
+    id: z.string().describe('The ID of the prompt that encountered an error.'),
     /**
      * The name of the prompt that encountered an error.
      */
-    name: z.string().optional(),
+    name: z.string().optional().describe('The name of the prompt that encountered an error.'),
   })
 );
 export type PromptDetailsInError = z.infer<typeof PromptDetailsInError>;
@@ -75,19 +75,19 @@ export const NormalizedPromptError = lazySchema(() =>
     /**
      * A message describing the error encountered.
      */
-    message: z.string(),
+    message: z.string().describe('A message describing the error encountered.'),
     /**
      * The HTTP status code associated with the error.
      */
-    status_code: z.number().int(),
+    status_code: z.number().int().describe('The HTTP status code associated with the error.'),
     /**
      * A code representing the error type.
      */
-    err_code: z.string().optional(),
+    err_code: z.string().optional().describe('A code representing the error type.'),
     /**
      * List of prompts that encountered errors.
      */
-    prompts: z.array(PromptDetailsInError),
+    prompts: z.array(PromptDetailsInError).describe('List of prompts that encountered errors.'),
   })
 );
 export type NormalizedPromptError = z.infer<typeof NormalizedPromptError>;
@@ -99,59 +99,62 @@ export const PromptResponse = lazySchema(() =>
     /**
      * The name of the prompt.
      */
-    name: z.string(),
+    name: z.string().describe('The name of the prompt.'),
     /**
      * The type of the prompt.
      */
-    promptType: PromptType,
+    promptType: PromptType.describe('The type of the prompt.'),
     /**
      * The content of the prompt.
      */
-    content: z.string(),
+    content: z.string().describe('The content of the prompt.'),
     /**
      * Categories associated with the prompt.
      */
-    categories: z.array(z.string()).optional(),
+    categories: z.array(z.string()).optional().describe('Categories associated with the prompt.'),
     /**
      * The color associated with the prompt.
      */
-    color: z.string().optional(),
+    color: z.string().optional().describe('The color associated with the prompt.'),
     /**
      * Whether this prompt is the default for new conversations.
      */
-    isNewConversationDefault: z.boolean().optional(),
+    isNewConversationDefault: z
+      .boolean()
+      .optional()
+      .describe('Whether this prompt is the default for new conversations.'),
     /**
      * Whether this prompt is the default.
      */
-    isDefault: z.boolean().optional(),
+    isDefault: z.boolean().optional().describe('Whether this prompt is the default.'),
     /**
      * The consumer that the prompt is associated with.
      */
-    consumer: z.string().optional(),
+    consumer: z.string().optional().describe('The consumer that the prompt is associated with.'),
     /**
      * The timestamp of when the prompt was last updated.
      */
-    updatedAt: z.string().optional(),
+    updatedAt: z.string().optional().describe('The timestamp of when the prompt was last updated.'),
     /**
      * The user who last updated the prompt.
      */
-    updatedBy: z.string().optional(),
+    updatedBy: z.string().optional().describe('The user who last updated the prompt.'),
     /**
      * The timestamp of when the prompt was created.
      */
-    createdAt: z.string().optional(),
+    createdAt: z.string().optional().describe('The timestamp of when the prompt was created.'),
     /**
      * The user who created the prompt.
      */
-    createdBy: z.string().optional(),
+    createdBy: z.string().optional().describe('The user who created the prompt.'),
     /**
      * List of users associated with the prompt.
      */
-    users: z.array(User).optional(),
+    users: z.array(User).optional().describe('List of users associated with the prompt.'),
     /**
      * Kibana space where the prompt is located.
      */
-    namespace: z.string().optional(),
+    namespace: z.string().optional().describe('Kibana space where the prompt is located.'),
   })
 );
 export type PromptResponse = z.infer<typeof PromptResponse>;
@@ -161,19 +164,19 @@ export const PromptsBulkCrudActionResults = lazySchema(() =>
     /**
      * List of prompts that were updated.
      */
-    updated: z.array(PromptResponse),
+    updated: z.array(PromptResponse).describe('List of prompts that were updated.'),
     /**
      * List of prompts that were created.
      */
-    created: z.array(PromptResponse),
+    created: z.array(PromptResponse).describe('List of prompts that were created.'),
     /**
      * List of IDs of prompts that were deleted.
      */
-    deleted: z.array(z.string()),
+    deleted: z.array(z.string()).describe('List of IDs of prompts that were deleted.'),
     /**
      * List of prompts that were skipped.
      */
-    skipped: z.array(PromptsBulkActionSkipResult),
+    skipped: z.array(PromptsBulkActionSkipResult).describe('List of prompts that were skipped.'),
   })
 );
 export type PromptsBulkCrudActionResults = z.infer<typeof PromptsBulkCrudActionResults>;
@@ -183,19 +186,23 @@ export const PromptsBulkCrudActionResponse = lazySchema(() =>
     /**
      * Indicates if the bulk action was successful.
      */
-    success: z.boolean().optional(),
+    success: z.boolean().optional().describe('Indicates if the bulk action was successful.'),
     /**
      * The HTTP status code of the response.
      */
-    status_code: z.number().int().optional(),
+    status_code: z.number().int().optional().describe('The HTTP status code of the response.'),
     /**
      * A message describing the result of the bulk action.
      */
-    message: z.string().optional(),
+    message: z.string().optional().describe('A message describing the result of the bulk action.'),
     /**
      * The number of prompts processed in the bulk action.
      */
-    prompts_count: z.number().int().optional(),
+    prompts_count: z
+      .number()
+      .int()
+      .optional()
+      .describe('The number of prompts processed in the bulk action.'),
     attributes: z.object({
       results: PromptsBulkCrudActionResults,
       summary: BulkCrudActionSummary,
@@ -210,35 +217,38 @@ export const PromptCreateProps = lazySchema(() =>
     /**
      * The name of the prompt.
      */
-    name: z.string(),
+    name: z.string().describe('The name of the prompt.'),
     /**
      * The type of the prompt.
      */
-    promptType: PromptType,
+    promptType: PromptType.describe('The type of the prompt.'),
     /**
      * The content of the prompt.
      */
-    content: z.string(),
+    content: z.string().describe('The content of the prompt.'),
     /**
      * The color associated with the prompt.
      */
-    color: z.string().optional(),
+    color: z.string().optional().describe('The color associated with the prompt.'),
     /**
      * List of categories for the prompt.
      */
-    categories: z.array(z.string()).optional(),
+    categories: z.array(z.string()).optional().describe('List of categories for the prompt.'),
     /**
      * Whether this prompt should be the default for new conversations.
      */
-    isNewConversationDefault: z.boolean().optional(),
+    isNewConversationDefault: z
+      .boolean()
+      .optional()
+      .describe('Whether this prompt should be the default for new conversations.'),
     /**
      * Whether this prompt should be the default.
      */
-    isDefault: z.boolean().optional(),
+    isDefault: z.boolean().optional().describe('Whether this prompt should be the default.'),
     /**
      * The consumer associated with the prompt.
      */
-    consumer: z.string().optional(),
+    consumer: z.string().optional().describe('The consumer associated with the prompt.'),
   })
 );
 export type PromptCreateProps = z.infer<typeof PromptCreateProps>;
@@ -248,31 +258,34 @@ export const PromptUpdateProps = lazySchema(() =>
     /**
      * The ID of the prompt to update.
      */
-    id: z.string(),
+    id: z.string().describe('The ID of the prompt to update.'),
     /**
      * The updated content for the prompt.
      */
-    content: z.string().optional(),
+    content: z.string().optional().describe('The updated content for the prompt.'),
     /**
      * The updated color associated with the prompt.
      */
-    color: z.string().optional(),
+    color: z.string().optional().describe('The updated color associated with the prompt.'),
     /**
      * The updated categories for the prompt.
      */
-    categories: z.array(z.string()).optional(),
+    categories: z.array(z.string()).optional().describe('The updated categories for the prompt.'),
     /**
      * Whether the prompt should be the default for new conversations.
      */
-    isNewConversationDefault: z.boolean().optional(),
+    isNewConversationDefault: z
+      .boolean()
+      .optional()
+      .describe('Whether the prompt should be the default for new conversations.'),
     /**
      * Whether this prompt should be the default.
      */
-    isDefault: z.boolean().optional(),
+    isDefault: z.boolean().optional().describe('Whether this prompt should be the default.'),
     /**
      * The updated consumer for the prompt.
      */
-    consumer: z.string().optional(),
+    consumer: z.string().optional().describe('The updated consumer for the prompt.'),
   })
 );
 export type PromptUpdateProps = z.infer<typeof PromptUpdateProps>;
@@ -282,15 +295,15 @@ export const PerformPromptsBulkActionRequestBody = lazySchema(() =>
     /**
      * Criteria for deleting prompts in bulk.
      */
-    delete: BulkActionBase.optional(),
+    delete: BulkActionBase.optional().describe('Criteria for deleting prompts in bulk.'),
     /**
      * List of prompts to be created.
      */
-    create: z.array(PromptCreateProps).optional(),
+    create: z.array(PromptCreateProps).optional().describe('List of prompts to be created.'),
     /**
      * List of prompts to be updated.
      */
-    update: z.array(PromptUpdateProps).optional(),
+    update: z.array(PromptUpdateProps).optional().describe('List of prompts to be updated.'),
   })
 );
 export type PerformPromptsBulkActionRequestBody = z.infer<

@@ -33,6 +33,7 @@ interface ESQLDataGridProps {
   fullHeight?: boolean;
   initialRowHeight?: number;
   controlColumnIds?: string[]; // default: ['openDetails', 'select']
+  isApproximate?: boolean;
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
@@ -60,10 +61,12 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
         {getWrapper(
           <DataGridLazy
             data={deps.data}
+            uiActions={deps.uiActions}
             fieldFormats={deps.fieldFormats}
             core={deps.core}
             share={deps.share}
             {...props}
+            isApproximate={props.isApproximate ?? false}
           />
         )}
       </CellActionsProvider>

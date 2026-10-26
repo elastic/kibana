@@ -21,7 +21,7 @@ import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
 import { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import extractZipLib from 'extract-zip';
+import AdmZip from 'adm-zip';
 import minimist from 'minimist';
 import moment from 'moment';
 import Papa from 'papaparse';
@@ -102,7 +102,8 @@ export async function downloadFile(url: string, destPath: string): Promise<void>
 }
 
 export async function extractZip(zipPath: string, destDir: string): Promise<void> {
-  await extractZipLib(zipPath, { dir: destDir });
+  const zip = new AdmZip(zipPath);
+  await zip.extractAllToAsync(destDir);
 }
 
 // ---------------------------------------------------------------------------

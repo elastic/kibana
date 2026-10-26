@@ -277,7 +277,10 @@ components:
           description: filter by search query
           type: string
         shared:
-          description: '`undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.'
+          description: '`undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries. Mutually exclusive with `includeAllAuthors`.'
+          type: boolean
+        includeAllAuthors:
+          description: If `true`, the response will include all attack discoveries matching other criteria regardless of who created them. Mutually exclusive with `shared`.
           type: boolean
         scheduled:
           description: 'Whether to return scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.'

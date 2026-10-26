@@ -19,11 +19,11 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import * as labels from './translations';
 import { UptimeSettingsContext } from '../../../contexts';
 import { ShowLicenseInfo } from './license_info';
@@ -81,19 +81,16 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
         </EuiText>
         <EuiSpacer />
         {!canCreateMLJob && (
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             title={labels.ADD_JOB_PERMISSIONS_NEEDED}
-            color="primary"
-            iconType="info"
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.uptime.ml.enableAnomalyDetectionPanel.insufficient_permissions_add_job"
                 defaultMessage="You must have the Kibana privileges for Machine Learning to use this feature."
               />
-            </p>
-          </EuiCallOut>
+            }
+          />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

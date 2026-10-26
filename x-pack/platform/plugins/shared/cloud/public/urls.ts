@@ -7,8 +7,13 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { CloudConfigType } from '.';
-import { CLOUD_SNAPSHOTS_PATH, CLOUD_USER_BILLING_ADMIN_ROLE } from '../common/constants';
-import { getFullCloudUrl } from '../common/utils';
+import {
+  CLOUD_BILLING_ROLES,
+  CLOUD_PROJECT_SEARCH_POWER_QUERY,
+  CLOUD_SNAPSHOTS_PATH,
+  SEARCH_POWER_EDITOR_ROLES,
+} from '../common/constants';
+import { getFullCloudUrl, getProjectPageUrl } from '../common/utils';
 import type { CloudBasicUrls, CloudPrivilegedUrls } from './types';
 
 /**
@@ -40,16 +45,20 @@ export class CloudUrlsService {
       organization_url: organizationUrl,
       deployments_url: deploymentsUrl,
       deployment_url: deploymentUrl,
+      create_deployment_url: createDeploymentUrl,
       performance_url: performanceUrl,
       projects_url: projectsUrl,
+      create_project_url: createProjectUrl,
     } = this.config;
 
     const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl);
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
+    const fullCloudCreateDeploymentUrl = getFullCloudUrl(baseUrl, createDeploymentUrl);
     const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
     const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
     const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
     const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl);
+    const fullCloudCreateProjectUrl = getFullCloudUrl(baseUrl, createProjectUrl);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
@@ -57,11 +66,13 @@ export class CloudUrlsService {
       kibanaUrl,
       deploymentsUrl: fullCloudDeploymentsUrl,
       deploymentUrl: fullCloudDeploymentUrl,
+      createDeploymentUrl: fullCloudCreateDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
       organizationUrl: fullCloudOrganizationUrl,
       snapshotsUrl: fullCloudSnapshotsUrl,
       performanceUrl: fullCloudPerformanceUrl,
       projectsUrl: fullCloudProjectsUrl,
+      createProjectUrl: fullCloudCreateProjectUrl,
     };
   }
 
@@ -76,7 +87,11 @@ export class CloudUrlsService {
     const coreStart = await this.getCoreStart();
 
     const userRoles = await this.getCurrentUserRoles(coreStart);
-    const showBillingUrl = userRoles.includes(CLOUD_USER_BILLING_ADMIN_ROLE);
+    // TODO: treat admins as billing admins until we can check billing access. The `_ec_billing_admin`
+    // role doesn't reach Kibana on Serverless and was never set on ECH. This matches role names, so on
+    // ECH a custom role named `admin` also gets billing links:
+    // https://github.com/elastic/kibana-team/issues/4343
+    const showBillingUrl = userRoles.some((role) => CLOUD_BILLING_ROLES.includes(role));
     const conditionalFullCloudBillingUrl = showBillingUrl
       ? getFullCloudUrl(this.config.base_url, this.config.billing_url)
       : undefined;
@@ -86,9 +101,20 @@ export class CloudUrlsService {
       ? getFullCloudUrl(this.config.base_url, this.config.users_and_roles_url)
       : undefined;
 
+    const showSearchPowerUrl =
+      Boolean(this.config.serverless?.project_id) &&
+      userRoles.some((role) => SEARCH_POWER_EDITOR_ROLES.includes(role));
+    const conditionalFullCloudSearchPowerUrl = showSearchPowerUrl
+      ? getProjectPageUrl(
+          getFullCloudUrl(this.config.base_url, this.config.deployment_url),
+          CLOUD_PROJECT_SEARCH_POWER_QUERY
+        )
+      : undefined;
+
     return {
       billingUrl: conditionalFullCloudBillingUrl,
       usersAndRolesUrl: conditionalFullCloudUsersAndRolesUrl,
+      searchPowerUrl: conditionalFullCloudSearchPowerUrl,
     };
   }
 

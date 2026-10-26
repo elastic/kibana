@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { escapeHatch } from '../utils';
+import { escapeHatch, getAttachmentRequestType } from '../utils';
 import type { attachmentApiV2 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
@@ -27,19 +27,20 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response, incrementAttachmentTypeCounters }) => {
     try {
       const casesContext = await context.cases;
       const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
-      const attachments = request.body as attachmentApiV2.BulkCreateAttachmentsRequestV2;
-      const res: caseDomainV1.Case = await casesClient.attachments.bulkCreate({
+      const attachments = request.body as attachmentApiV2.BulkCreateUnifiedAttachmentsRequest;
+      const created: caseDomainV1.Case = await casesClient.attachments.bulkCreate({
         caseId,
         attachments,
       });
 
+      incrementAttachmentTypeCounters(attachments.map(getAttachmentRequestType));
       return response.ok({
-        body: res,
+        body: created,
       });
     } catch (error) {
       throw createCaseError({

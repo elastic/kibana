@@ -9,16 +9,18 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import {
-  bulkGetRulesParamsSchema,
+  bulkByIdsSchema,
   bulkGetRulesResponseSchema,
   errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
-import type { BulkGetRulesParams } from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { bulkGetRulesOasExamples } from './bulk_get_rules_oas_example';
 
 @injectable()
 export class BulkGetRulesRoute extends BaseAlertingRoute {
@@ -30,24 +32,26 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Get rules in bulk',
+    description:
+      'Returns the requested rules. Ids that match no rule are reported per item in `errors` as `RULE_NOT_FOUND`. The request itself succeeds as long as it is valid.',
+    oasOperationObject: bulkGetRulesOasExamples,
   } as const;
   static schemas = {
     request: {
-      body: bulkGetRulesParamsSchema,
+      body: bulkByIdsSchema,
     },
     response: {
       200: {
         body: () => bulkGetRulesResponseSchema,
-        description: 'Returns the requested rules.',
+        description:
+          'Returns the rules that were found in `items` and a per-item error in `errors` for every id that matched no rule.',
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
-      },
-      404: {
-        body: () => errorResponseSchema,
-        description: 'One or more rule ids could not be found.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
@@ -57,14 +61,14 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkGetRulesParams>,
+    private readonly request: KibanaRequest<unknown, unknown, BulkByIdsParams>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const rules = await this.rulesClient.getRules(this.request.body.ids);
-    return this.ctx.response.ok({ body: { rules } });
+    const body = await this.rulesClient.getRules(this.request.body.ids);
+    return this.ctx.response.ok({ body });
   }
 }

@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/i18n_tools/bin/run_i18n_integrate');
+require('@kbn/dev/i18n_tools/bin/run_i18n_integrate');

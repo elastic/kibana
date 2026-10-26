@@ -118,12 +118,12 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
                 >
                   <EuiFlexItem grow={false}>
                     <EuiText size="m">
-                      <h4>{LABELS[assetId as LabelId]}</h4>
+                      <strong>{LABELS[assetId as LabelId]}</strong>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiNotificationBadge color="subdued" size="m">
-                      <h3>{module.kibana[assetId]!.length}</h3>
+                      {module.kibana[assetId]!.length}
                     </EuiNotificationBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>

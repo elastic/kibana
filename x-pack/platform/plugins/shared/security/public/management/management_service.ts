@@ -6,31 +6,26 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { combineLatest, distinctUntilChanged } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config';
-import type {
-  Capabilities,
-  FatalErrorsSetup,
-  IUiSettingsClient,
-  StartServicesAccessor,
-} from '@kbn/core/public';
+import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import type {
   ManagementApp,
   ManagementSection,
   ManagementSetup,
 } from '@kbn/management-plugin/public';
-import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { apiKeysManagementApp } from './api_keys';
 import { applicationConnectionsManagementApp } from './application_connections';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
+import { serviceAccountsManagementApp } from './service_accounts';
 import { usersManagementApp } from './users';
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 import type { PluginStartDependencies } from '../plugin';
+import type { ServiceAccountsAPIClient } from '../service_accounts';
 
 export interface ManagementAppConfigType {
   userManagementEnabled?: boolean;
@@ -43,9 +38,9 @@ interface SetupParams {
   license: SecurityLicense;
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
-  uiSettings: IUiSettingsClient;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
   buildFlavor: BuildFlavor;
+  serviceAccountsAPIClient: ServiceAccountsAPIClient;
 }
 
 interface StartParams {
@@ -54,18 +49,19 @@ interface StartParams {
 
 export class ManagementService {
   private license!: SecurityLicense;
-  private uiSettings!: IUiSettingsClient;
   private managementAppsSubscription?: Subscription;
   private securitySection?: ManagementSection;
   private isUIAMEnabled: boolean = false;
   private readonly userManagementEnabled: boolean;
   private readonly roleManagementEnabled: boolean;
   private readonly roleMappingManagementEnabled: boolean;
+  private readonly serviceAccountsEnabled: boolean;
 
   constructor(config: ConfigType) {
     this.userManagementEnabled = config.ui?.userManagementEnabled !== false;
     this.roleManagementEnabled = config.roleManagementEnabled !== false;
     this.roleMappingManagementEnabled = config.ui?.roleMappingManagementEnabled !== false;
+    this.serviceAccountsEnabled = config.serviceAccounts?.enabled === true;
   }
 
   setup({
@@ -74,11 +70,10 @@ export class ManagementService {
     authc,
     license,
     fatalErrors,
-    uiSettings,
     buildFlavor,
+    serviceAccountsAPIClient,
   }: SetupParams) {
     this.license = license;
-    this.uiSettings = uiSettings;
     this.securitySection = management.sections.section.security;
     this.isUIAMEnabled = authc.isUIAMEnabled();
 
@@ -100,20 +95,24 @@ export class ManagementService {
 
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
 
+    if (this.serviceAccountsEnabled) {
+      this.securitySection.registerApp(
+        serviceAccountsManagementApp.create({
+          buildFlavor,
+          roleManagementEnabled: this.roleManagementEnabled,
+          getStartServices,
+          serviceAccountsAPIClient,
+        })
+      );
+    }
+
     if (this.roleMappingManagementEnabled) {
       this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
     }
   }
 
   start({ capabilities }: StartParams) {
-    const uiamOAuthClientManagement$ = this.uiSettings
-      .get$<boolean>(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID)
-      .pipe(distinctUntilChanged());
-
-    this.managementAppsSubscription = combineLatest([
-      this.license.features$,
-      uiamOAuthClientManagement$,
-    ]).subscribe(([features, uiamOAuthClientManagementEnabled]) => {
+    this.managementAppsSubscription = this.license.features$.subscribe((features) => {
       const securitySection = this.securitySection!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
@@ -144,7 +143,14 @@ export class ManagementService {
       if (this.isUIAMEnabled) {
         securityManagementAppsStatuses.push([
           securitySection.getApp(applicationConnectionsManagementApp.id)!,
-          features.showLinks && uiamOAuthClientManagementEnabled,
+          features.showLinks,
+        ]);
+      }
+
+      if (this.serviceAccountsEnabled) {
+        securityManagementAppsStatuses.push([
+          securitySection.getApp(serviceAccountsManagementApp.id)!,
+          features.showLinks,
         ]);
       }
 

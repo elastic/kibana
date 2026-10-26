@@ -15,7 +15,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
@@ -152,7 +152,7 @@ describe('stepCreateRestartInstallation', () => {
           spaceId: DEFAULT_SPACE_ID,
         });
 
-        await expect(promise).rejects.toThrowError(
+        await expect(promise).rejects.toThrow(
           'Concurrent installation or upgrade of xyz-4.5.6 detected, aborting.'
         );
       });
@@ -239,7 +239,7 @@ describe('stepCreateRestartInstallation', () => {
           spaceId: DEFAULT_SPACE_ID,
         });
 
-        expect(mockedRestartInstallation).toBeCalled();
+        expect(mockedRestartInstallation).toHaveBeenCalled();
       });
     });
   });

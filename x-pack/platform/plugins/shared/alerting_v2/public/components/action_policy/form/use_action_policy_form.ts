@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import type {
-  CreateActionPolicyData,
-  ActionPolicyResponse,
-  UpdateActionPolicyBody,
-} from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { useCallback, useMemo } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
-import { THROTTLE_INTERVAL_PATTERN } from './constants';
+import { useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from './constants';
-import { needsInterval, toCreatePayload, toFormState, toUpdatePayload } from './form_utils';
+import { toFormState } from './form_utils';
 import type { ActionPolicyFormState } from './types';
 
 interface UseActionPolicyFormParams {
   initialValues?: ActionPolicyResponse;
-  onSubmitCreate: (data: CreateActionPolicyData) => void;
-  onSubmitUpdate: (id: string, data: UpdateActionPolicyBody) => void;
+  onSubmitCreate: (values: ActionPolicyFormState) => void;
+  onSubmitUpdate: (id: string, values: ActionPolicyFormState) => void;
 }
 
+/**
+ * Validation lives in the field rules of the form components, so `handleSubmit`
+ * only calls the submit callbacks once every mounted field is valid.
+ */
 export const useActionPolicyForm = ({
   initialValues,
   onSubmitCreate,
@@ -40,37 +39,15 @@ export const useActionPolicyForm = ({
     defaultValues,
   });
 
-  const [name, destinations, groupingMode, groupBy, throttleStrategy, throttleInterval] = useWatch({
-    control: methods.control,
-    name: [
-      'name',
-      'destinations',
-      'groupingMode',
-      'groupBy',
-      'throttleStrategy',
-      'throttleInterval',
-    ],
-  });
-
-  const isSubmitEnabled = useMemo(() => {
-    const hasName = name.trim().length > 0;
-    const hasDestinations = destinations.length > 0;
-    const hasValidGroupBy = groupingMode === 'per_field' ? groupBy.length > 0 : true;
-    const hasValidInterval =
-      !needsInterval(throttleStrategy) || THROTTLE_INTERVAL_PATTERN.test(throttleInterval);
-
-    return hasName && hasDestinations && hasValidGroupBy && hasValidInterval;
-  }, [destinations.length, groupBy.length, groupingMode, name, throttleStrategy, throttleInterval]);
-
   const onSubmitValid = useCallback(
     (values: ActionPolicyFormState) => {
-      if (isEditMode && initialValues?.version) {
-        onSubmitUpdate(initialValues.id, toUpdatePayload(values, initialValues.version));
+      if (initialValues) {
+        onSubmitUpdate(initialValues.id, values);
       } else {
-        onSubmitCreate(toCreatePayload(values));
+        onSubmitCreate(values);
       }
     },
-    [isEditMode, initialValues, onSubmitCreate, onSubmitUpdate]
+    [initialValues, onSubmitCreate, onSubmitUpdate]
   );
 
   const handleSubmit = useMemo(() => methods.handleSubmit(onSubmitValid), [methods, onSubmitValid]);
@@ -78,7 +55,6 @@ export const useActionPolicyForm = ({
   return {
     methods,
     isEditMode,
-    isSubmitEnabled,
     handleSubmit,
   };
 };

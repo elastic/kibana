@@ -18,20 +18,29 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
-import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  useWorkflows,
+  useWorkflowsCapabilities,
+  type WorkflowsCreateRouteState,
+} from '@kbn/workflows-ui';
 import { ExportReferencesModal } from './export_references_modal';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
 import { useExportWithReferences } from './use_export_with_references';
 import { WorkflowListTable } from './workflow_list_table';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
-import { WorkflowsEmptyState } from '../../../components';
+import { PLUGIN_ID } from '../../../../common';
+import { AgenticFirstEmptyStateLive } from '../../../components';
+import { WorkflowsEmptyStateReadOnly } from '../../../components/workflows_empty_state/workflows_empty_state';
+import { WorkflowsPageName } from '../../../deep_links';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
+import { getWorkflowDetailRouteState } from '../../../shared/utils/workflow_navigation';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
@@ -41,12 +50,12 @@ import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
   setSearch: (search: WorkflowsSearchParams) => void;
-  onCreateWorkflow?: () => void;
 }
 
-export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
+export function WorkflowList({ search, setSearch }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
+  const location = useLocation();
   const {
     canCreateWorkflow,
     canReadWorkflow,
@@ -89,6 +98,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+  const workflowDetailRouteState = useMemo(
+    () => getWorkflowDetailRouteState(location.search),
+    [location.search]
+  );
 
   const allWorkflowsMap = useMemo(
     () => new Map((workflows?.results ?? []).map((w) => [w.id, w])),
@@ -161,11 +174,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             notifications?.toasts.addSuccess('Workflow run started', {
               toastLifeTimeMs: 3000,
             });
-            application.navigateToUrl(
-              application.getUrlForApp('workflows', {
-                path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
-              })
-            );
+            void application.navigateToApp(PLUGIN_ID, {
+              path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
+              state: workflowDetailRouteState,
+            });
           },
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
@@ -176,7 +188,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         }
       );
     },
-    [application, notifications, runWorkflow]
+    [application, notifications, runWorkflow, workflowDetailRouteState]
   );
 
   const handleCloseExecuteModal = useCallback(() => {
@@ -259,9 +271,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     [notifications?.toasts, updateWorkflow]
   );
 
-  const getEditHref = useCallback(
-    (item: WorkflowListItemDto) => application.getUrlForApp('workflows', { path: `/${item.id}` }),
-    [application]
+  const handleEditWorkflow = useCallback(
+    (item: WorkflowListItemDto) => {
+      void application.navigateToApp(PLUGIN_ID, {
+        path: `/${item.id}`,
+        state: workflowDetailRouteState,
+      });
+    },
+    [application, workflowDetailRouteState]
   );
 
   const showStart = useMemo(() => (page - 1) * size + 1, [page, size]);
@@ -304,15 +321,39 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   // Show empty state if no workflows exist and no filters are applied
   if (shouldShowWorkflowsEmptyState(workflows, search)) {
+    if (!canCreateWorkflow) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
+          <EuiFlexItem grow={false}>
+            <WorkflowsEmptyStateReadOnly />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
-        <EuiFlexItem grow={false}>
-          <WorkflowsEmptyState
-            onCreateWorkflow={onCreateWorkflow}
-            canCreateWorkflow={canCreateWorkflow}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <AgenticFirstEmptyStateLive
+        onSubmitPrompt={(message, attachments) =>
+          application.navigateToApp(PLUGIN_ID, {
+            path: '/create',
+            state: {
+              initialAgentMessage: message,
+              initialAgentAttachments: attachments,
+            } satisfies WorkflowsCreateRouteState,
+          })
+        }
+        onStartManually={() =>
+          application.navigateToApp(PLUGIN_ID, { path: '/create?startBlank=true' })
+        }
+        onSelectTemplate={(template) =>
+          application.navigateToApp(PLUGIN_ID, {
+            deepLinkId: WorkflowsPageName.library,
+            path: template.slug,
+          })
+        }
+        onExploreLibrary={() =>
+          application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
+        }
+      />
     );
   }
 
@@ -330,7 +371,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                 defaultMessage: 'Event-driven triggers are disabled',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="workflows-event-driven-disabled-banner"
             >
               <p>
@@ -361,12 +402,18 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onPageChange={(pageIndex, pageSize) =>
           setSearch({ ...search, page: pageIndex + 1, size: pageSize })
         }
+        onSortChange={(field, order) =>
+          setSearch({ ...search, sortField: field, sortOrder: order, page: 1 })
+        }
+        sortField={search.sortField}
+        sortOrder={search.sortOrder}
         onToggleWorkflow={handleToggleWorkflow}
         onDeleteWorkflow={handleDeleteWorkflow}
         onCloneWorkflow={handleCloneWorkflow}
         onExportWorkflow={handleExportWorkflow}
         onRequestRun={setExecuteWorkflow}
-        getEditHref={getEditHref}
+        onEditWorkflow={handleEditWorkflow}
+        workflowsListSearch={location.search}
         canCreateWorkflow={!!canCreateWorkflow}
         canReadWorkflow={!!canReadWorkflow}
         canReadWorkflowExecution={!!canReadWorkflowExecution}

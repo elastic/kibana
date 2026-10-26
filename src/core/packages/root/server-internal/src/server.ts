@@ -40,6 +40,7 @@ import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
+import { PubSubService } from '@kbn/core-pubsub-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -60,6 +61,11 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import {
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
@@ -111,6 +117,7 @@ export class Server {
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
   private readonly dataStreams: DataStreamsService;
+  private readonly pubsub: PubSubService;
   private readonly userStorage: UserStorageService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
@@ -175,6 +182,7 @@ export class Server {
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
     this.dataStreams = new DataStreamsService(core);
+    this.pubsub = new PubSubService(core);
     this.userStorage = new UserStorageService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
@@ -372,6 +380,7 @@ export class Server {
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();
+    const pubsubSetup = this.pubsub.setup();
 
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
@@ -430,7 +439,9 @@ export class Server {
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
-    const featureFlagsSetup = this.featureFlags.setup();
+    const featureFlagsSetup = this.featureFlags.setup({
+      http: httpSetup,
+    });
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -478,6 +489,7 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
+      pubsub: pubsubSetup,
       userStorage: userStorageSetup,
     };
 
@@ -552,7 +564,6 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
-    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
@@ -583,6 +594,10 @@ export class Server {
       }
     );
 
+    const userActivityStart = this.userActivity.start({
+      typeRegistry: savedObjectsStart.getTypeRegistry(),
+    });
+
     if (this.nodeRoles?.migrator === true) {
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
@@ -604,6 +619,27 @@ export class Server {
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
     );
+    const uiam = securityStart.authc.apiKeys.uiam;
+    if (uiam) {
+      httpStart.setSelfClientUiamAttestationGetter((request, outboundAuthorization) => {
+        const credential = outboundAuthorization
+          ? HTTPAuthorizationHeader.parseFromValue(outboundAuthorization)
+          : null;
+        if (!credential || !isUiamCredential(credential)) {
+          return undefined;
+        }
+        if (uiam.isExternalApiKey(request)) {
+          return undefined;
+        }
+
+        return uiam.getInternalCallerAttestationHeaders(credential)[
+          UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+        ];
+      });
+      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
+        uiam.isOwnClientAuthentication(value)
+      );
+    }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
@@ -611,6 +647,7 @@ export class Server {
     });
 
     const featureFlagsStart = this.featureFlags.start();
+    const pubsubStart = this.pubsub.start();
 
     const pricingStart = this.pricing.start();
 
@@ -642,6 +679,7 @@ export class Server {
       pricing: pricingStart,
       injection: injectionStart,
       dataStreams: dataStreamsStart,
+      pubsub: pubsubStart,
       userStorage: userStorageStart,
     };
 
@@ -661,6 +699,7 @@ export class Server {
     this.httpRateLimiter.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
+    this.pubsub.stop(); // Stop dispatching before consumers are torn down, so no handler starts against a stopped plugin
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();

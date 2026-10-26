@@ -31,3 +31,13 @@ groups:
           stack: ga
           ech: ga
           self: ga
+
+      - setting: xpack.cases.analytics.index.enabled
+        description: |
+          Set to `true` to enable the Cases analytics index, which stores case data in a dedicated index for analytics purposes.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 8.19
+          ech: ga
+          self: ga

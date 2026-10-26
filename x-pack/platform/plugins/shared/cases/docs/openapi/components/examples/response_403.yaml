@@ -1,0 +1,7 @@
+summary: The user does not have access to the requested resource.
+value:
+  {
+    "error": "Forbidden",
+    "message": "Unauthorized to access cases",
+    "statusCode": 403
+  }

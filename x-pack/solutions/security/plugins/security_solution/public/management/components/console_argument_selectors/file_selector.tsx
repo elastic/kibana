@@ -29,6 +29,11 @@ const OPEN_FILE_PICKER_LABEL = i18n.translate(
   { defaultMessage: 'Open file picker' }
 );
 
+const SELECT_FILE_LABEL = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.fileSelector.filePickerAriaLabel',
+  { defaultMessage: 'Select or drag and drop a file' }
+);
+
 const NO_FILE_SELECTED = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.fileSelector.noFileSelected',
   { defaultMessage: 'No file selected' }
@@ -137,9 +142,11 @@ export const ArgumentFileSelector = memo<
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-              <div className="eui-textTruncate" title={selectedFileTitleTooltip}>
-                {selectedFileDisplayText}
-              </div>
+              <EuiToolTip content={selectedFileTitleTooltip}>
+                <div className="eui-textTruncate" tabIndex={0}>
+                  {selectedFileDisplayText}
+                </div>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={OPEN_FILE_PICKER_LABEL} disableScreenReaderOutput>
@@ -156,6 +163,8 @@ export const ArgumentFileSelector = memo<
       >
         {state.isPopoverOpen && (
           <EuiFilePicker
+            aria-label={SELECT_FILE_LABEL}
+            initialPromptText={SELECT_FILE_LABEL}
             id={filePickerUUID}
             onChange={handleFileSelection}
             fullWidth

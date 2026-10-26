@@ -6,13 +6,14 @@
  */
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import { apiClientFixture, mergeTests, test as baseTest, createLazyPageObject } from '@kbn/scout';
 import {
   AppearancePageObject,
   CloudLinksPageObject,
   CloudOnboardingPageObject,
   ConnectionDetailsPageObject,
   TrialInterceptPageObject,
+  SpacesPreferencesPageObject,
 } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
@@ -22,10 +23,14 @@ export interface ExtScoutTestFixtures extends ScoutTestFixtures {
     cloudOnboarding: CloudOnboardingPageObject;
     connectionDetails: ConnectionDetailsPageObject;
     trialIntercept: TrialInterceptPageObject;
+    spacesPreferences: SpacesPreferencesPageObject;
   };
 }
 
-export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
+export const test = mergeTests(baseTest, apiClientFixture).extend<
+  ExtScoutTestFixtures,
+  ScoutWorkerFixtures
+>({
   pageObjects: async (
     {
       pageObjects,
@@ -45,6 +50,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
       cloudOnboarding: createLazyPageObject(CloudOnboardingPageObject, page, kbnUrl),
       connectionDetails: createLazyPageObject(ConnectionDetailsPageObject, page),
       trialIntercept: createLazyPageObject(TrialInterceptPageObject, page),
+      spacesPreferences: createLazyPageObject(SpacesPreferencesPageObject, page),
     });
   },
 });

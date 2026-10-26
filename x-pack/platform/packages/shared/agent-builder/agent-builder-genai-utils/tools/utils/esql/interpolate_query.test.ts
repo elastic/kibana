@@ -127,7 +127,8 @@ describe('interpolateEsqlQuery', () => {
         'FROM events | WHERE MV_CONTAINS(?ids, id) AND MV_CONTAINS(?statuses, status)';
       const params = { ids: [1, 2, 3], statuses: ['active', 'pending'] };
       const expected = `FROM events
-| WHERE MV_CONTAINS([1, 2, 3], id) AND MV_CONTAINS(["active", "pending"], status)`;
+| WHERE
+    MV_CONTAINS([1, 2, 3], id) AND MV_CONTAINS(["active", "pending"], status)`;
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 

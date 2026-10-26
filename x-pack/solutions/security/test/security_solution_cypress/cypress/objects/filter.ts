@@ -10,9 +10,3 @@ export interface SearchBarFilter {
   operator: 'is' | 'is not' | 'is one of' | 'is not one of' | 'exists' | 'does not exist';
   value?: string;
 }
-
-export const getHostIpFilter = (): SearchBarFilter => ({
-  key: 'host.ip',
-  operator: 'is',
-  value: '1.1.1.1',
-});

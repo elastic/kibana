@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  dataViewMock,
-  createDataViewWithBytesField,
-  columnsMetaOverridingBytesType,
-  createFormatFieldValueReactSpy,
-  expectFieldCallToMatch,
-} from '@kbn/discover-utils/src/__mocks__';
+import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render } from '@testing-library/react';
 import React from 'react';
 import SourceDocument from './source_document';
-import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import {
+  esqlSourceOverridingBytesType,
+  createDataViewWithBytesField,
+  createFormatFieldValueReactSpy,
+  dataViewMock,
+  expectFieldCallToMatch,
+} from '@kbn/discover-utils/src/__mocks__';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, within } from '@testing-library/react';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const mockServices = {
   fieldFormats: {
@@ -44,26 +45,28 @@ const rowsSource: EsHitRecord[] = [
 
 const build = (hit: EsHitRecord) => buildDataTableRecord(hit, dataViewMock);
 
-describe('Unified data table source document cell rendering', function () {
+describe('Unified data table source document cell rendering', () => {
   it('renders a description list for source type documents', () => {
     const rows = rowsSource.map(build);
 
-    const component = mountWithIntl(
+    renderWithI18n(
       <SourceDocument
-        useTopLevelObjectColumns={false}
-        row={rows[0]}
-        dataView={dataViewMock}
         columnId="_source"
+        dataSource={createMockEsqlSource()}
+        dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-        shouldShowFieldHandler={() => false}
         maxEntries={100}
-        isPlainRecord={true}
-        columnsMeta={undefined}
+        row={rows[0]}
+        shouldShowFieldHandler={() => false}
+        useTopLevelObjectColumns={false}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(
-      `"<dl class=\\"euiDescriptionList unifiedDataTable__descriptionList unifiedDataTable__cellValue css-5drddg-euiDescriptionList-inline-left-descriptionList\\" data-test-subj=\\"discoverCellDescriptionList\\" data-type=\\"inline\\"><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">extension</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">.gz</dd><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">_score</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">1</dd></dl>"`
-    );
+
+    const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+    expect(within(descriptionList).getByText('extension')).toBeVisible();
+    expect(within(descriptionList).getByText('.gz')).toBeVisible();
+    expect(within(descriptionList).getByText('_score')).toBeVisible();
+    expect(within(descriptionList).getByText('1')).toBeVisible();
   });
 
   it('passes values through appropriate formatter when `useTopLevelObjectColumns` is true', () => {
@@ -71,6 +74,7 @@ describe('Unified data table source document cell rendering', function () {
     const mockFieldFormats = {
       getDefaultInstance: jest.fn(() => ({ convertToReact: mockConvertToReact })),
     };
+
     const row = build({
       _id: '1',
       _index: 'test',
@@ -79,22 +83,61 @@ describe('Unified data table source document cell rendering', function () {
         'foo.data': ['my foo value'],
       },
     });
-    const component = mountWithIntl(
+
+    renderWithI18n(
       <SourceDocument
-        useTopLevelObjectColumns={true}
-        row={row}
-        dataView={dataViewMock}
         columnId="foo"
+        dataSource={createMockEsqlSource()}
+        dataView={dataViewMock}
         fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
-        shouldShowFieldHandler={() => true}
         maxEntries={100}
-        isPlainRecord={true}
-        columnsMeta={undefined}
+        row={row}
+        shouldShowFieldHandler={() => true}
+        useTopLevelObjectColumns={true}
       />
     );
 
+    const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+    expect(within(descriptionList).getByText('foo.data')).toBeVisible();
+    expect(within(descriptionList).getByText('my bar value')).toBeVisible();
     expect(mockConvertToReact).toHaveBeenCalled();
-    expect(component.html()).toContain('my bar value');
+  });
+
+  it('formats only the first `maxEntries` pairs when `useTopLevelObjectColumns` is true', () => {
+    const mockConvertToReact = jest.fn((value: unknown) => `${value}`);
+    const mockFieldFormats = {
+      getDefaultInstance: jest.fn(() => ({ convertToReact: mockConvertToReact })),
+    };
+
+    const row = build({
+      _id: '1',
+      _index: 'test',
+      _score: 1,
+      fields: {
+        'foo.a': ['value a'],
+        'foo.b': ['value b'],
+        'foo.c': ['value c'],
+      },
+    });
+
+    renderWithI18n(
+      <SourceDocument
+        columnId="foo"
+        dataSource={createMockEsqlSource()}
+        dataView={dataViewMock}
+        fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
+        maxEntries={2}
+        row={row}
+        shouldShowFieldHandler={() => true}
+        useTopLevelObjectColumns={true}
+      />
+    );
+
+    const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+    expect(within(descriptionList).getByText('value a')).toBeVisible();
+    expect(within(descriptionList).getByText('value b')).toBeVisible();
+    expect(within(descriptionList).queryByText('value c')).not.toBeInTheDocument();
+    expect(mockConvertToReact).toHaveBeenCalledTimes(2);
   });
 
   it('renders a dash in ES|QL mode when all field values are null', () => {
@@ -105,24 +148,60 @@ describe('Unified data table source document cell rendering', function () {
       _source: { bytes: null, extension: null },
     });
 
-    const { container } = render(
+    renderWithI18n(
       <SourceDocument
-        useTopLevelObjectColumns={false}
-        row={row}
-        dataView={dataViewMock}
         columnId="_source"
+        dataSource={createMockEsqlSource()}
+        dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-        shouldShowFieldHandler={() => false}
         maxEntries={100}
-        isPlainRecord={true}
-        columnsMeta={undefined}
+        row={row}
+        shouldShowFieldHandler={() => false}
+        useTopLevelObjectColumns={false}
       />
     );
-    expect(container.textContent).toBe('—');
+
+    expect(screen.getByText('—')).toBeVisible();
   });
 
-  describe('with columnsMeta', () => {
-    it('should use data view field type when columnsMeta is undefined', () => {
+  it('does not let null fields consume the ES|QL document summary limit', () => {
+    const row = build({
+      _id: 'doc-001',
+      _source: {
+        field_1: null,
+        field_2: null,
+        field_3: null,
+        field_4: null,
+        field_5: null,
+        source: 'void_realm',
+        status: 'missing_in_action',
+      },
+    });
+
+    renderWithI18n(
+      <SourceDocument
+        columnId="_source"
+        dataSource={createMockEsqlSource()}
+        dataView={dataViewMock}
+        fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
+        maxEntries={2}
+        row={row}
+        shouldShowFieldHandler={() => true}
+        useTopLevelObjectColumns={false}
+      />
+    );
+
+    const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+    expect(within(descriptionList).getByText('source')).toBeVisible();
+    expect(within(descriptionList).getByText('void_realm')).toBeVisible();
+    expect(within(descriptionList).getByText('status')).toBeVisible();
+    expect(within(descriptionList).getByText('missing_in_action')).toBeVisible();
+    expect(within(descriptionList).queryByText('field_1')).not.toBeInTheDocument();
+    expect(within(descriptionList).queryByText(/and \d+ more fields/)).not.toBeInTheDocument();
+  });
+
+  describe('with ES|QL columns', () => {
+    it('should use data view field type without ES|QL columns', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -136,25 +215,29 @@ describe('Unified data table source document cell rendering', function () {
         testDataView
       );
 
-      render(
+      renderWithI18n(
         <SourceDocument
-          useTopLevelObjectColumns={false}
-          row={row}
-          dataView={testDataView}
           columnId="_source"
+          dataSource={createMockEsqlSource()}
+          dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          shouldShowFieldHandler={() => true}
           maxEntries={100}
-          isPlainRecord={true}
-          columnsMeta={undefined}
+          row={row}
+          shouldShowFieldHandler={() => true}
+          useTopLevelObjectColumns={false}
         />
       );
 
+      const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+      expect(within(descriptionList).getByText('bytes')).toBeVisible();
+      expect(within(descriptionList).getByText('_index')).toBeVisible();
+      expect(within(descriptionList).getByText('_score')).toBeVisible();
+      expect(within(descriptionList).getAllByText('formatted')).toHaveLength(3);
       expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
       formatFieldValueReactSpy.mockRestore();
     });
 
-    it('should use columnsMeta type instead of data view field type when provided', () => {
+    it('should use the ES|QL column type instead of the data view field type', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -168,20 +251,24 @@ describe('Unified data table source document cell rendering', function () {
         testDataView
       );
 
-      render(
+      renderWithI18n(
         <SourceDocument
-          useTopLevelObjectColumns={false}
-          row={row}
-          dataView={testDataView}
           columnId="_source"
+          dataSource={esqlSourceOverridingBytesType}
+          dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          shouldShowFieldHandler={() => true}
           maxEntries={100}
-          isPlainRecord={true}
-          columnsMeta={columnsMetaOverridingBytesType}
+          row={row}
+          shouldShowFieldHandler={() => true}
+          useTopLevelObjectColumns={false}
         />
       );
 
+      const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+      expect(within(descriptionList).getByText('bytes')).toBeVisible();
+      expect(within(descriptionList).getByText('_index')).toBeVisible();
+      expect(within(descriptionList).getByText('_score')).toBeVisible();
+      expect(within(descriptionList).getAllByText('formatted')).toHaveLength(3);
       expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
       formatFieldValueReactSpy.mockRestore();
     });

@@ -33,11 +33,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { ContentPackObjectsList } from './objects_list';
 import { importContent, previewContent } from './requests';
 import { getFormattedError } from '../../../../util/errors';
 import { hasSelectedObjects, isEmptyContentPack } from './helpers';
+
+const IMPORT_FILE_PICKER_PROMPT = i18n.translate(
+  'xpack.streams.streamDetailDashboard.importContentFilePickerPrompt',
+  {
+    defaultMessage: 'Drop a content pack .zip here to preview and import it.',
+  }
+);
 
 export function ImportContentPackFlyout({
   definition,
@@ -51,10 +57,6 @@ export function ImportContentPackFlyout({
   const {
     core: { http, notifications },
   } = useKibana();
-
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
 
   const modalTitleId = useGeneratedHtmlId();
 
@@ -97,13 +99,8 @@ export function ImportContentPackFlyout({
             `}
             id={'streams-content-import'}
             multiple={false}
-            initialPromptText={i18n.translate(
-              'xpack.streams.streamDetailDashboard.importContentFilePickerPrompt',
-              {
-                defaultMessage:
-                  'You can drop your streams .zip content here and install them right away.',
-              }
-            )}
+            aria-label={IMPORT_FILE_PICKER_PROMPT}
+            initialPromptText={IMPORT_FILE_PICKER_PROMPT}
             fullWidth
             onChange={async (files) => {
               if (files?.length) {
@@ -191,9 +188,6 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={
-                (!!significantEvents?.enabled && !!significantEvents?.available) ?? false
-              }
             />
           </>
         ) : null}
@@ -236,7 +230,7 @@ export function ImportContentPackFlyout({
                   setContentPackObjects(undefined);
                   setFile(undefined);
                   notifications.toasts.addSuccess(
-                    i18n.translate('xpack.streams.exportContentPackFlyout.importSuccess', {
+                    i18n.translate('xpack.streams.importContentPackFlyout.importSuccess', {
                       defaultMessage: 'Content imported successfully',
                     })
                   );

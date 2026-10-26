@@ -1,0 +1,20 @@
+in: query
+name: sortField
+description: Determines which field is used to sort the results.
+required: false
+schema:
+  type: string
+  enum:
+    - templateId
+    - name
+    - templateVersion
+    - owner
+    - deletedAt
+    - author
+    - usageCount
+    - fieldCount
+    - lastUsedAt
+    - isDefault
+    - isLatest
+  default: name
+example: name

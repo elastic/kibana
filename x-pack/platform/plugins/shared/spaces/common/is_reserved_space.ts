@@ -15,6 +15,6 @@ import type { Space } from '.';
  * @param space the space
  * @returns boolean
  */
-export function isReservedSpace(space?: Partial<Space> | null): boolean {
+export function isReservedSpace(space?: Pick<Space, '_reserved'> | null): boolean {
   return get(space, '_reserved', false);
 }

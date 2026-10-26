@@ -5,11 +5,90 @@
  * 2.0.
  */
 
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 import { formatActionToEnqueue } from './format_action_to_enqueue';
 
 describe('formatActionToEnqueue', () => {
+  test('should include uiamApiKeyExternal when the credential is an external UIAM key', () => {
+    const result = formatActionToEnqueue({
+      action: {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {},
+        uuid: '111-111',
+      },
+      apiKey: 'essu_user_created_key',
+      uiamApiKeyExternal: true,
+      executionId: '123',
+      ruleConsumer: 'rule-consumer',
+      ruleId: 'aaa',
+      ruleTypeId: 'security-rule',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    expect(result.uiamApiKeyExternal).toBe(true);
+  });
+
+  test('should omit uiamApiKeyExternal when it is not set', () => {
+    const result = formatActionToEnqueue({
+      action: {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {},
+        uuid: '111-111',
+      },
+      apiKey: 'MTIzOmFiYw==',
+      executionId: '123',
+      ruleConsumer: 'rule-consumer',
+      ruleId: 'aaa',
+      ruleTypeId: 'security-rule',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    expect(result).not.toHaveProperty('uiamApiKeyExternal');
+  });
+
+  test('should include uiamApiKeyId so the invalidation task can see the key is in use', () => {
+    const result = formatActionToEnqueue({
+      action: {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {},
+        uuid: '111-111',
+      },
+      apiKey: 'essu_secret',
+      uiamApiKeyId: 'uiam-key-id',
+      executionId: '123',
+      ruleConsumer: 'rule-consumer',
+      ruleId: 'aaa',
+      ruleTypeId: 'security-rule',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    expect(result.uiamApiKeyId).toBe('uiam-key-id');
+  });
+
+  test('should omit uiamApiKeyId when the credential is not a framework-granted UIAM key', () => {
+    const result = formatActionToEnqueue({
+      action: {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {},
+        uuid: '111-111',
+      },
+      apiKey: 'MTIzOmFiYw==',
+      executionId: '123',
+      ruleConsumer: 'rule-consumer',
+      ruleId: 'aaa',
+      ruleTypeId: 'security-rule',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    expect(result).not.toHaveProperty('uiamApiKeyId');
+  });
+
   test('should format a rule action as expected', () => {
     expect(
       formatActionToEnqueue({
@@ -31,7 +110,7 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
       })
     ).toEqual({
       id: '1',
@@ -43,7 +122,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {
@@ -87,8 +166,8 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
-        priority: TaskPriority.Low,
+        spaceId: DEFAULT_SPACE_ID,
+        priority: TaskPriority.Maintenance,
       })
     ).toEqual({
       id: '1',
@@ -100,7 +179,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {
@@ -146,8 +225,8 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
-        priority: TaskPriority.Low,
+        spaceId: DEFAULT_SPACE_ID,
+        priority: TaskPriority.Maintenance,
       })
     ).toEqual({
       id: '1',
@@ -159,7 +238,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {
@@ -205,7 +284,7 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
       })
     ).toEqual({
       id: '1',
@@ -217,7 +296,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: null,
       consumer: 'rule-consumer',
       source: {
@@ -261,7 +340,7 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'my-special-space',
+        spaceId: asSpaceId('my-special-space'),
       })
     ).toEqual({
       id: '1',
@@ -273,7 +352,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'my-special-space',
+      spaceId: asSpaceId('my-special-space'),
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {
@@ -310,13 +389,13 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
       })
     ).toEqual({
       id: '1',
       uuid: 'xxxyyyyzzzz',
       params: { myParams: 'test' },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {

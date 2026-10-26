@@ -1969,8 +1969,9 @@ Object {
               "type": "object",
             },
             Object {
-              "allOf": Array [
+              "anyOf": Array [
                 Object {
+                  "additionalProperties": false,
                   "properties": Object {
                     "action": Object {
                       "const": "network_direction",
@@ -1996,6 +1997,12 @@ Object {
                     "ignore_missing": Object {
                       "type": "boolean",
                     },
+                    "internal_networks": Object {
+                      "items": Object {
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
                     "source_ip": Object {
                       "minLength": 1,
                       "type": "string",
@@ -2017,38 +2024,65 @@ Object {
                     "action",
                     "source_ip",
                     "destination_ip",
+                    "internal_networks",
                   ],
                   "type": "object",
                 },
                 Object {
-                  "anyOf": Array [
-                    Object {
-                      "properties": Object {
-                        "internal_networks": Object {
-                          "items": Object {
-                            "type": "string",
-                          },
-                          "type": "array",
-                        },
-                      },
-                      "required": Array [
-                        "internal_networks",
-                      ],
-                      "type": "object",
+                  "additionalProperties": false,
+                  "properties": Object {
+                    "action": Object {
+                      "const": "network_direction",
+                      "type": "string",
                     },
-                    Object {
-                      "properties": Object {
-                        "internal_networks_field": Object {
-                          "minLength": 1,
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "internal_networks_field",
-                      ],
-                      "type": "object",
+                    "customIdentifier": Object {
+                      "description": "Custom identifier to correlate this processor across outputs",
+                      "minLength": 1,
+                      "type": "string",
                     },
+                    "description": Object {
+                      "description": "Human-readable notes about this processor step",
+                      "type": "string",
+                    },
+                    "destination_ip": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "ignore_failure": Object {
+                      "description": "Continue pipeline execution if this processor fails",
+                      "type": "boolean",
+                    },
+                    "ignore_missing": Object {
+                      "type": "boolean",
+                    },
+                    "internal_networks_field": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "source_ip": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "target_field": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "where": Object {
+                      "allOf": Array [
+                        Object {
+                          "$ref": "#/definitions/Condition",
+                        },
+                      ],
+                      "description": "Conditional expression controlling whether this processor runs",
+                    },
+                  },
+                  "required": Array [
+                    "action",
+                    "source_ip",
+                    "destination_ip",
+                    "internal_networks_field",
                   ],
+                  "type": "object",
                 },
               ],
               "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.",
@@ -2193,6 +2227,80 @@ Object {
             },
             Object {
               "additionalProperties": false,
+              "description": "Extract details from browser user agent strings",
+              "properties": Object {
+                "action": Object {
+                  "const": "user_agent",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "extract_device_type": Object {
+                  "description": "Extracts device type from the user agent string",
+                  "type": "boolean",
+                },
+                "from": Object {
+                  "description": "The field containing the user agent string",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "description": "Skip processing when source field is missing",
+                  "type": "boolean",
+                },
+                "properties": Object {
+                  "description": "Specific properties to extract (defaults to all)",
+                  "items": Object {
+                    "enum": Array [
+                      "name",
+                      "os",
+                      "device",
+                      "original",
+                      "version",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "regex_file": Object {
+                  "description": "Custom regex file name containing the regular expressions for parsing the user agent string",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "to": Object {
+                  "description": "The field that will be filled with the user agent details",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/Condition",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "from",
+              ],
+              "title": "User Agent",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
               "description": "Extract the domain parts from an FQDN string",
               "properties": Object {
                 "action": Object {
@@ -2330,6 +2438,7 @@ Object {
                 "network_direction",
                 "json_extract",
                 "enrich",
+                "user_agent",
                 "registered_domain",
                 "manual_ingest_pipeline",
               ],
@@ -3542,8 +3651,9 @@ Object {
                 "type": "object",
               },
               Object {
-                "allOf": Array [
+                "anyOf": Array [
                   Object {
+                    "additionalProperties": false,
                     "properties": Object {
                       "action": Object {
                         "const": "network_direction",
@@ -3569,6 +3679,12 @@ Object {
                       "ignore_missing": Object {
                         "type": "boolean",
                       },
+                      "internal_networks": Object {
+                        "items": Object {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
                       "source_ip": Object {
                         "minLength": 1,
                         "type": "string",
@@ -3590,38 +3706,65 @@ Object {
                       "action",
                       "source_ip",
                       "destination_ip",
+                      "internal_networks",
                     ],
                     "type": "object",
                   },
                   Object {
-                    "anyOf": Array [
-                      Object {
-                        "properties": Object {
-                          "internal_networks": Object {
-                            "items": Object {
-                              "type": "string",
-                            },
-                            "type": "array",
-                          },
-                        },
-                        "required": Array [
-                          "internal_networks",
-                        ],
-                        "type": "object",
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "action": Object {
+                        "const": "network_direction",
+                        "type": "string",
                       },
-                      Object {
-                        "properties": Object {
-                          "internal_networks_field": Object {
-                            "minLength": 1,
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "internal_networks_field",
-                        ],
-                        "type": "object",
+                      "customIdentifier": Object {
+                        "description": "Custom identifier to correlate this processor across outputs",
+                        "minLength": 1,
+                        "type": "string",
                       },
+                      "description": Object {
+                        "description": "Human-readable notes about this processor step",
+                        "type": "string",
+                      },
+                      "destination_ip": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "ignore_failure": Object {
+                        "description": "Continue pipeline execution if this processor fails",
+                        "type": "boolean",
+                      },
+                      "ignore_missing": Object {
+                        "type": "boolean",
+                      },
+                      "internal_networks_field": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "source_ip": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "target_field": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "where": Object {
+                        "allOf": Array [
+                          Object {
+                            "$ref": "#/definitions/Condition",
+                          },
+                        ],
+                        "description": "Conditional expression controlling whether this processor runs",
+                      },
+                    },
+                    "required": Array [
+                      "action",
+                      "source_ip",
+                      "destination_ip",
+                      "internal_networks_field",
                     ],
+                    "type": "object",
                   },
                 ],
                 "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.",
@@ -3766,6 +3909,80 @@ Object {
               },
               Object {
                 "additionalProperties": false,
+                "description": "Extract details from browser user agent strings",
+                "properties": Object {
+                  "action": Object {
+                    "const": "user_agent",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "extract_device_type": Object {
+                    "description": "Extracts device type from the user agent string",
+                    "type": "boolean",
+                  },
+                  "from": Object {
+                    "description": "The field containing the user agent string",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "properties": Object {
+                    "description": "Specific properties to extract (defaults to all)",
+                    "items": Object {
+                      "enum": Array [
+                        "name",
+                        "os",
+                        "device",
+                        "original",
+                        "version",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "regex_file": Object {
+                    "description": "Custom regex file name containing the regular expressions for parsing the user agent string",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "to": Object {
+                    "description": "The field that will be filled with the user agent details",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/Condition",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "from",
+                ],
+                "title": "User Agent",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
                 "description": "Extract the domain parts from an FQDN string",
                 "properties": Object {
                   "action": Object {
@@ -3903,6 +4120,7 @@ Object {
                   "network_direction",
                   "json_extract",
                   "enrich",
+                  "user_agent",
                   "registered_domain",
                   "manual_ingest_pipeline",
                 ],

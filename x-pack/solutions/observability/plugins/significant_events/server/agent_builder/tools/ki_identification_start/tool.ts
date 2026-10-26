@@ -1,0 +1,140 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { KIsOnboardingStep } from '@kbn/significant-events-schema';
+import dedent from 'dedent';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../types';
+import { classifyError } from '../../utils/error_utils';
+import {
+  assertSourceEnabled,
+  loadSourceCatalog,
+  resolveSourcesBySlugOrId,
+  toSourceRef,
+} from '../../utils/resolve_source_slugs';
+import { startKiIdentificationToolHandler } from './handler';
+import type { GetScopedClients } from '../../../routes/types';
+
+export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
+  'platform.sig_events.ki_identification_start';
+
+const onboardingStartSchema = lazySchema(() =>
+  z.object({
+    slug: nightshiftSourceSlugField('The source must be enabled.'),
+    steps: z
+      .array(z.enum(KIsOnboardingStep))
+      .optional()
+      .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
+      .describe('Optional ordered KI identification steps for the background task.'),
+    connectors: z
+      .object({
+        features: z.string().max(MAX_ID_LENGTH).optional(),
+        queries: z.string().max(MAX_ID_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
+
+export const createKiIdentificationStartTool = ({
+  server,
+  telemetry,
+  streamsKIsOnboardingClient,
+  maintenanceService,
+  getScopedClients,
+}: {
+  server: Pick<SignificantEventsServer, 'security'>;
+  telemetry: EbtTelemetryClient;
+  streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  maintenanceService: SignificantEventsMaintenanceService;
+  getScopedClients: GetScopedClients;
+}): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
+  id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
+  type: ToolType.builtin,
+  description: dedent`
+    Start Knowledge Indicator (KI) identification for a Nightshift source as a background task.
+
+    This tool schedules the KI identification background task and returns immediately with a
+    Kibana path to the Nightshift Sources page, where each source's onboarding status shows progress.
+
+    Use this tool to:
+    - Kick off KI identification for an enabled source
+    - Run feature identification and query generation steps in a background task
+    - Get a direct Kibana path to track background task progress on the Nightshift Sources page
+
+    Returns:
+    - On success: \`{ slug, title, view_name, kibanaPath: "${NIGHTSHIFT_SOURCES_APP_PATH}" }\`
+    - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
+  `,
+  schema: onboardingStartSchema,
+  handler: async ({ slug, steps, connectors }, { request }) => {
+    let sourceId = '';
+    try {
+      await assertCanManageSignificantEvents({ request, server });
+      const scopedClients = await getScopedClients({ request });
+      const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+      const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
+      assertSourceEnabled(source);
+      sourceId = source.id;
+
+      const data = await startKiIdentificationToolHandler({
+        sourceId: source.id,
+        sourceSlug: source.slug,
+        steps,
+        connectors,
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        request,
+      });
+
+      telemetry.trackAgentToolKiIdentificationStarted({
+        success: true,
+        source_id: source.id,
+      });
+
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: { ...toSourceRef(source), ...data },
+          },
+        ],
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+
+      telemetry.trackAgentToolKiIdentificationStarted({
+        success: false,
+        source_id: sourceId,
+        error_message: message,
+      });
+
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Failed to start KI identification background task for "${slug}": ${message}`,
+              slug,
+              operation: 'ki_identification_start',
+              likely_cause: classifyError(err),
+            },
+          },
+        ],
+      };
+    }
+  },
+});

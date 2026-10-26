@@ -10,10 +10,8 @@
 import type { Monitor } from '../monitor';
 
 export interface INPInfo {
-  currentINP: number; // p75 of interaction latencies within the window
   slowInteractionsCount: number; // count of *unique* interactions in the window
   worstInteractionDelay: number; // max latency in the window
-  lastInteractionDelay: number; // latency of the most recent interaction recorded
 }
 
 // Type definition for PerformanceEventTiming
@@ -35,17 +33,16 @@ export class INPMonitor implements Monitor<INPInfo> {
   private callbacks: Array<(info: INPInfo) => void> = [];
   private eventObserver?: PerformanceObserver;
   private supportedFlag: boolean;
+  private expiryTimer?: ReturnType<typeof setTimeout>;
+  private isMonitoring = false;
+  private sessionStartedAt = 0;
 
   /**
    * We keep one entry per *interaction*, keyed by interactionId when available.
    * Each value stores the worst (max) duration seen for that interaction.
    */
-  private interactionMap: Map<
-    number | string,
-    { duration: number; startTime: number; type: string }
-  > = new Map();
+  private interactionMap: Map<number | string, { duration: number; startTime: number }> = new Map();
 
-  private lastInteractionDelay = 0;
   private worstInteractionDelay = 0;
 
   constructor() {
@@ -68,6 +65,9 @@ export class INPMonitor implements Monitor<INPInfo> {
     if (!this.supportedFlag) return;
     if (this.eventObserver) return; // idempotent
 
+    this.resetSessionState();
+    this.sessionStartedAt = performance.now();
+
     try {
       this.eventObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries() as PerformanceEventTiming[];
@@ -79,13 +79,24 @@ export class INPMonitor implements Monitor<INPInfo> {
       // Let the UA skip fast events for us; still keep our check for safety.
       this.eventObserver.observe({
         type: 'event',
-        buffered: true,
         durationThreshold: INPMonitor.SLOW_INTERACTION_THRESHOLD,
       } as PerformanceObserverInit);
+      this.isMonitoring = true;
+      this.publishCurrentStats();
     } catch (error) {
+      this.stopMonitoring();
       // eslint-disable-next-line no-console
       console.warn('Failed to start INP monitoring:', error);
     }
+  }
+
+  private resetSessionState() {
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
+    this.interactionMap.clear();
+    this.worstInteractionDelay = 0;
   }
 
   private static isUserInteractionName(name?: string): boolean {
@@ -108,41 +119,27 @@ export class INPMonitor implements Monitor<INPInfo> {
   }
 
   private handleInteractionEvent(entry: PerformanceEventTiming) {
+    if (!this.isMonitoring) return;
     const { name, duration, startTime, interactionId } = entry;
+    if (startTime < this.sessionStartedAt) return;
 
     if (!INPMonitor.isUserInteractionName(name)) return;
     if (duration < INPMonitor.SLOW_INTERACTION_THRESHOLD) return;
 
-    // Prefer the browser-provided interactionId for deduplication.
-    // If missing, fall back to a coarse key based on startTime+name (rare, but possible).
+    // Positive interaction IDs are the only browser-provided identities. Some browsers emit
+    // companion events with ID 0 for the same interaction, which must not become extra records.
+    if (interactionId !== undefined && (!Number.isInteger(interactionId) || interactionId <= 0)) {
+      return;
+    }
     const key: number | string =
-      typeof interactionId === 'number'
-        ? interactionId
-        : `${name ?? 'unknown'}@${Math.round(startTime)}`;
+      interactionId === undefined ? `${name ?? 'unknown'}@${Math.round(startTime)}` : interactionId;
 
     const prev = this.interactionMap.get(key);
-    const type = name ?? 'unknown';
-
-    // Keep the worst latency seen for this interaction key.
     if (!prev || duration > prev.duration) {
-      this.interactionMap.set(key, { duration, startTime, type });
+      this.interactionMap.set(key, { duration, startTime });
     }
 
-    // Update rolling stats
-    this.lastInteractionDelay = duration;
-    if (duration > this.worstInteractionDelay) this.worstInteractionDelay = duration;
-
-    // Maintain window + cap
-    this.cleanupHistory();
-
-    // Emit
-    const info: INPInfo = {
-      currentINP: this.calculateP75(),
-      slowInteractionsCount: this.interactionMap.size,
-      worstInteractionDelay: this.worstInteractionDelay,
-      lastInteractionDelay: this.lastInteractionDelay,
-    };
-    for (const cb of this.callbacks) cb(info);
+    this.publishCurrentStats();
   }
 
   private cleanupHistory() {
@@ -151,7 +148,7 @@ export class INPMonitor implements Monitor<INPInfo> {
     // Drop items older than the window
     if (this.interactionMap.size > 0) {
       for (const [key, v] of this.interactionMap) {
-        if (v.startTime < cutoff) this.interactionMap.delete(key);
+        if (v.startTime <= cutoff) this.interactionMap.delete(key);
       }
     }
 
@@ -165,28 +162,42 @@ export class INPMonitor implements Monitor<INPInfo> {
       }
     }
 
-    // Recompute worst within the current window to avoid stale max
+    // Recompute delays from retained interactions only.
     let worst = 0;
-    for (const v of this.interactionMap.values()) {
-      if (v.duration > worst) worst = v.duration;
+    for (const { duration } of this.interactionMap.values()) {
+      if (duration > worst) worst = duration;
     }
     this.worstInteractionDelay = worst;
   }
 
-  private calculateP75(): number {
-    const n = this.interactionMap.size;
-    if (n === 0) return 0;
+  private publishCurrentStats(): void {
+    if (!this.isMonitoring) return;
+    const info = this.getCurrentStats();
+    for (const cb of this.callbacks) cb(info);
+    this.scheduleExpiry();
+  }
 
-    const durations = new Array<number>(n);
-    let i = 0;
-    for (const v of this.interactionMap.values()) durations[i++] = v.duration;
-    durations.sort((a, b) => a - b);
+  private scheduleExpiry(): void {
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
+    if (!this.isMonitoring || this.interactionMap.size === 0) return;
 
-    const idx = Math.max(0, Math.ceil(durations.length * 0.75) - 1);
-    return durations[idx] ?? 0;
+    let oldestStartTime = Infinity;
+    for (const { startTime } of this.interactionMap.values()) {
+      if (startTime < oldestStartTime) oldestStartTime = startTime;
+    }
+    const delay = Math.max(1, oldestStartTime + INPMonitor.HISTORY_DURATION - performance.now());
+    this.expiryTimer = setTimeout(() => this.publishCurrentStats(), delay);
   }
 
   stopMonitoring() {
+    this.isMonitoring = false;
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
     if (this.eventObserver) {
       try {
         this.eventObserver.disconnect();
@@ -200,10 +211,8 @@ export class INPMonitor implements Monitor<INPInfo> {
 
   destroy() {
     this.stopMonitoring();
+    this.resetSessionState();
     this.callbacks = [];
-    this.interactionMap.clear();
-    this.lastInteractionDelay = 0;
-    this.worstInteractionDelay = 0;
   }
 
   subscribe(callback: (info: INPInfo) => void) {
@@ -217,10 +226,8 @@ export class INPMonitor implements Monitor<INPInfo> {
   getCurrentStats(): INPInfo {
     this.cleanupHistory();
     return {
-      currentINP: this.calculateP75(),
       slowInteractionsCount: this.interactionMap.size,
       worstInteractionDelay: this.worstInteractionDelay,
-      lastInteractionDelay: this.lastInteractionDelay,
     };
   }
 }

@@ -25,9 +25,15 @@ import * as notesApi from '../../../../../notes/api/api';
 import { timelineActions } from '../../../../store';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultRowRenderers } from '../../body/renderers';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
 
@@ -41,10 +47,6 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
-}));
-
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
@@ -55,6 +57,14 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 jest.mock('../../../../../common/lib/kibana');
 
 jest.mock('../../../../../common/components/user_privileges');
+
+jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+
+jest.mock('../../body/unified_timeline_body', () => ({
+  UnifiedTimelineBody: ({ header }: { header: React.ReactNode }) => header,
+}));
 
 let useTimelineEventsMock = jest.fn();
 
@@ -91,24 +101,17 @@ const TestComponent = (props: Partial<ComponentProps<typeof EqlTabContentCompone
   return <EqlTabContentComponent {...testComponentDefaultProps} {...props} />;
 };
 
-describe('EQL Tab', () => {
-  const props = {} as EqlTabContentComponentProps;
-
-  beforeAll(() => {
-    // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
-    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
-      get() {
-        return true;
-      },
-    });
-  });
-
+describe('EQL partial results callout', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     useTimelineEventsMock = jest.fn(() => [
       false,
       {
         events: mockTimelineData.slice(0, 1),
         rawEvents: [],
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
         pageInfo: {
           activePage: 0,
           totalPages: 10,
@@ -128,6 +131,173 @@ describe('EQL Tab', () => {
       ...initialUserPrivilegesState(),
       notesPrivileges: { read: true },
     });
+
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
+    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+
+    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+      return {
+        width: 1000,
+        height: 1000,
+        x: 0,
+        y: 0,
+      } as DOMRect;
+    });
+  });
+
+  it(
+    'renders the incomplete results callout when the EQL response is partial',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          rawEvents: [],
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: true,
+          shardFailures: [
+            {
+              index: 'logs-test',
+              shard: 0,
+              reason: { type: 'script_exception', reason: 'boom' },
+            },
+          ],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId('eql-partial-results-warning')).toBeVisible();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'renders shard failure details when the EQL response is partial',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          rawEvents: [],
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: true,
+          shardFailures: [
+            {
+              index: 'logs-test',
+              shard: 0,
+              reason: { type: 'script_exception', reason: 'boom' },
+            },
+          ],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId('eql-partial-results-warning-details')).toHaveTextContent(
+        'logs-test'
+      );
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'hides the incomplete results callout when the EQL response is complete',
+    async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          rawEvents: [],
+          pageInfo: { activePage: 0, totalPages: 10 },
+          totalCount: 1,
+          isPartial: false,
+          shardFailures: [],
+          timedOut: false,
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
+        </TestProviders>
+      );
+      await screen.findByTestId('timelineHeader');
+
+      expect(screen.queryByTestId('eql-partial-results-warning')).toBeNull();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+});
+
+// Failing: See https://github.com/elastic/kibana/issues/277361
+describe.skip('EQL Tab', () => {
+  const props = {} as EqlTabContentComponentProps;
+  const mockOpenFlyout = jest.fn();
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
+  beforeAll(() => {
+    // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
+    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
+      get() {
+        return true;
+      },
+    });
+  });
+
+  beforeEach(() => {
+    // Clear call history between tests. `mockOpenFlyout` is declared once at describe scope, so
+    // without this a legacy `openFlyout` call from one test leaks into the next and trips the
+    // `expect(mockOpenFlyout).not.toHaveBeenCalled()` assertions.
+    jest.clearAllMocks();
+    useTimelineEventsMock = jest.fn(() => [
+      false,
+      {
+        events: mockTimelineData.slice(0, 1),
+        rawEvents: [],
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
+        pageInfo: {
+          activePage: 0,
+          totalPages: 10,
+        },
+      },
+    ]);
+    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
+
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (feature: keyof ExperimentalFeatures) => {
+        return allowedExperimentalValues[feature];
+      }
+    );
+
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      notesPrivileges: { read: true },
+    });
+
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
+      openFlyout: mockOpenFlyout,
+    });
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
@@ -182,6 +352,9 @@ describe('EQL Tab', () => {
               activePage: 0,
               totalPages: 10,
             },
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
           },
         ]);
 
@@ -219,6 +392,9 @@ describe('EQL Tab', () => {
              * This helps in testing `sampleSize` and `loadMore`
              */
             totalCount: 50,
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
             loadPage: loadPageMock,
           },
         ]);
@@ -360,5 +536,92 @@ describe('EQL Tab', () => {
         SPECIAL_TEST_TIMEOUT
       );
     });
+  });
+
+  describe('Leading actions - notes', () => {
+    beforeEach(() => {
+      // The notes control column only renders when the corresponding rawEvent is present,
+      // so we provide a rawEvent that matches the first (and only) event.
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          rawEvents: [
+            {
+              _id: mockTimelineData[0]._id,
+              _index: 'test-index',
+              _source: {},
+            },
+          ],
+          pageInfo: {
+            activePage: 0,
+            totalPages: 10,
+          },
+          isPartial: false,
+          shardFailures: [],
+          timedOut: false,
+        },
+      ]);
+    });
+
+    it(
+      'should open the legacy notes flyout when the new flyout is disabled',
+      async () => {
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
+
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenCalledWith(
+            expect.objectContaining({
+              right: expect.objectContaining({ id: 'document-details-right' }),
+              left: expect.objectContaining({ id: 'document-details-left' }),
+            })
+          );
+        });
+        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should open the new notes flyout when the new flyout is enabled',
+      async () => {
+        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
+
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(flyoutApi.openNotes).toHaveBeenCalledWith({
+            hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            origin: FLYOUT_ORIGIN.TIMELINE,
+          });
+        });
+        expect(mockOpenFlyout).not.toHaveBeenCalled();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 });

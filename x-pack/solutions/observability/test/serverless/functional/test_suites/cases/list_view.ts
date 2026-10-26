@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const cases = getService('cases');
   const svlCases = getService('svlCases');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -19,8 +20,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlObltNavigation = getService('svlObltNavigation');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/246157
-  describe.skip('Cases list', function () {
+  describe('Cases list', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
@@ -34,7 +34,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('empty state', () => {
       it('displays an empty list with an add button correctly', async () => {
-        await testSubjects.existOrFail('cases-table-add-case');
+        await testSubjects.existOrFail('cases-list-add-case');
       });
     });
 
@@ -67,19 +67,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/242130
-      describe.skip('severity', () => {
+      describe('severity', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the severity of cases to medium correctly', async () => {
           await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('case-table-column-severity-low');
+          // existOrFail retries until the refetched list renders; missingOrFail alone waits only ~2.5s.
+          await testSubjects.existOrFail('case-severity-badge-medium');
+          await testSubjects.missingOrFail('case-severity-badge-low');
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/245961
-      describe.skip('tags', () => {
+      describe('tags', () => {
         let caseIds: string[] = [];
         beforeEach(async () => {
           caseIds = [];
@@ -125,26 +125,32 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
            */
           await cases.casesTable.bulkEditTags([0, 1], ['two', 'three', 'five']);
           await header.waitUntilLoadingHasFinished();
-          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
-          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
-          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
 
-          expect(case3.tags).eql(['five', 'three']);
-          expect(case2.tags).eql(['four', 'five', 'three']);
-          expect(case1.tags).eql(['one', 'three']);
+          // The flyout closes before the bulk update request settles, so retry the reads.
+          await retry.try(async () => {
+            const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+            const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+            const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+            expect(case3.tags).eql(['five', 'three']);
+            expect(case2.tags).eql(['four', 'five', 'three']);
+            expect(case1.tags).eql(['one', 'three']);
+          });
         });
 
         it('adds a new tag', async () => {
           await cases.casesTable.bulkAddNewTag([0, 1], 'tw');
           await header.waitUntilLoadingHasFinished();
 
-          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
-          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
-          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+          await retry.try(async () => {
+            const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+            const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+            const case3 = await cases.api.getCase({ caseId: caseIds[2] });
 
-          expect(case3.tags).eql(['two', 'five', 'tw']);
-          expect(case2.tags).eql(['two', 'four', 'tw']);
-          expect(case1.tags).eql(['one', 'three']);
+            expect(case3.tags).eql(['two', 'five', 'tw']);
+            expect(case2.tags).eql(['two', 'four', 'tw']);
+            expect(case1.tags).eql(['one', 'three']);
+          });
         });
       });
     });
@@ -218,8 +224,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAll();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/246048
-      describe.skip('Status', () => {
+      describe('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('to in progress', async () => {
@@ -243,22 +248,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         it('to medium', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+          await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.MEDIUM}`);
         });
 
         it('to high', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.HIGH, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
+          await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.HIGH}`);
         });
 
         it('to critical', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.CRITICAL, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.CRITICAL}`);
+          await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.CRITICAL}`);
         });
 
         it('to low', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.LOW, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.LOW}`);
+          await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.LOW}`);
         });
       });
 

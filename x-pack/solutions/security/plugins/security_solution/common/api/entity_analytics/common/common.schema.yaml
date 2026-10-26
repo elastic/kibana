@@ -15,31 +15,37 @@ components:
           type: boolean
         has_write_permissions:
           type: boolean
+        has_install_permissions:
+          type: boolean
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  type: object
-                  additionalProperties:
-                    type: boolean
-                index:
-                  type: object
-                  additionalProperties:
-                    type: object
-                    additionalProperties:
-                      type: boolean
-            kibana:
-              type: object
-              additionalProperties:
-                type: boolean
-          required:
-            - elasticsearch
+          $ref: "#/components/schemas/EntityAnalyticsPrivilegesDetail"
+        install_privileges:
+          $ref: "#/components/schemas/EntityAnalyticsPrivilegesDetail"
       required:
         - has_all_required
         - privileges
+    EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              type: object
+              additionalProperties:
+                type: boolean
+            index:
+              type: object
+              additionalProperties:
+                type: object
+                additionalProperties:
+                  type: boolean
+        kibana:
+          type: object
+          additionalProperties:
+            type: boolean
+      required:
+        - elasticsearch
     EntityAfterKey:
       type: object
       additionalProperties:
@@ -103,6 +109,11 @@ components:
         - service
         - generic
 
+    EntityViewMode:
+      type: string
+      enum: [single, resolved]
+      description: Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
+
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
       type: object
@@ -144,6 +155,29 @@ components:
         entity_id:
           type: string
           description: The EUID of the entity within the graph that generated this alert.
+
+    RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
+      type: object
+      properties:
+        type:
+          type: string
+          maxLength: 100
+        subtype:
+          type: string
+          maxLength: 100
+        modifier_value:
+          type: number
+          format: double
+        contribution:
+          type: number
+          format: double
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - type
+        - contribution
 
     RiskScoreCategories:
       type: string
@@ -234,24 +268,7 @@ components:
           type: array
           description: A list of modifiers that were applied to the risk score calculation.
           items:
-            type: object
-            properties:
-              type:
-                type: string
-              subtype:
-                type: string
-              modifier_value:
-                type: number
-                format: double
-              contribution:
-                type: number
-                format: double
-              metadata:
-                type: object
-                additionalProperties: true
-            required:
-              - type
-              - contribution
+            $ref: "#/components/schemas/RiskScoreModifier"
         score_type:
           type: string
           enum:

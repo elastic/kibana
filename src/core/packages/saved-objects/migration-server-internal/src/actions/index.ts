@@ -39,6 +39,7 @@ import { waitForIndexStatus } from './wait_for_index_status';
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
 import type {
   TaskCompletedWithRetriableError,
+  TaskNotFound,
   WaitForTaskCompletionTimeout,
 } from './wait_for_task';
 import { waitForTask } from './wait_for_task';
@@ -161,6 +162,7 @@ export interface AcknowledgeResponse {
 export interface ActionErrorTypeMap {
   wait_for_task_completion_timeout: WaitForTaskCompletionTimeout;
   task_completed_with_retriable_error: TaskCompletedWithRetriableError;
+  task_not_found: TaskNotFound;
   retryable_es_client_error: RetryableEsClientError;
   index_not_found_exception: IndexNotFound;
   target_index_had_write_block: TargetIndexHadWriteBlock;

@@ -45,7 +45,6 @@ dependsOn:
   - '@kbn/core-user-settings-server-internal'
   - '@kbn/core-logging-common-internal'
   - '@kbn/core-logging-server-internal'
-  - '@kbn/core-i18n-server'
   - '@kbn/core-i18n-server-internal'
   - '@kbn/core-i18n-server-mocks'
   - '@kbn/apm-config-loader'
@@ -54,6 +53,8 @@ dependsOn:
   - '@kbn/core-feature-flags-server'
   - '@kbn/core-user-storage-server'
   - '@kbn/core-user-storage-server-mocks'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/logging'
   - '@kbn/repo-info'
 tags:
   - shared-server
@@ -67,6 +68,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

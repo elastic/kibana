@@ -9,6 +9,7 @@ import React from 'react';
 import SemVer from 'semver/classes/semver';
 import { merge } from 'lodash';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { ReindexService } from '@kbn/reindex-service-plugin/public';
 import type { Authorization, Privileges } from '../../../public/shared_imports';
@@ -41,15 +42,17 @@ export const WithAppDependencies =
     const appContextMock = getAppContextMock(kibanaVersion) as unknown as RootComponentDependencies;
 
     return (
-      <AuthorizationContext.Provider
-        value={createAuthorizationContextValue(privileges as Privileges)}
-      >
-        <AppContextProvider value={merge(appContextMock, overrides)}>
-          <GlobalFlyoutProvider>
-            <Comp {...props} />
-          </GlobalFlyoutProvider>
-        </AppContextProvider>
-      </AuthorizationContext.Provider>
+      <MockAppHeaderProvider>
+        <AuthorizationContext.Provider
+          value={createAuthorizationContextValue(privileges as Privileges)}
+        >
+          <AppContextProvider value={merge(appContextMock, overrides)}>
+            <GlobalFlyoutProvider>
+              <Comp {...props} />
+            </GlobalFlyoutProvider>
+          </AppContextProvider>
+        </AuthorizationContext.Provider>
+      </MockAppHeaderProvider>
     );
   };
 

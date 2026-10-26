@@ -44,11 +44,11 @@ This is a generated file and should not be updated manually. It contains schema 
 1. Update the OpenAPI schema YML file and/or the Kibana schema file (see References below for help with OpenAPI YAML format)
 2. Generate/re-generate the Zod schema validation modules:
 ```shell
-yarn --cwd x-pack/solutions/security/plugins/security_solution openapi:generate
+pnpm --dir x-pack/solutions/security/plugins/security_solution openapi:generate
 ```
 3. Create a new bundle with the updated APIs:
 ```shell
-yarn --cwd x-pack/solutions/security/plugins/security_solution openapi:bundle:endpoint-management
+pnpm --dir x-pack/solutions/security/plugins/security_solution openapi:bundle:endpoint-management
 ```
 4. Ensure that the newly generated files are commited to source
 

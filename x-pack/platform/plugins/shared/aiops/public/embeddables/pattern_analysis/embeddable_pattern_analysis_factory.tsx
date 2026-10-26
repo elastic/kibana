@@ -25,12 +25,13 @@ import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import { getPatternAnalysisComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
 import type { PatternAnalysisEmbeddableApi } from './types';
-import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 import { canUseAiops } from '../../capabilities';
+import { toUiMinimumTimeRange } from '../../../common/embeddables/pattern_analysis/normalize_legacy_state';
 
 export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
 
@@ -55,11 +56,11 @@ export const getPatternAnalysisEmbeddableFactory = (
         patternAnalysisControlsComparators,
       } = initializePatternAnalysisControls(runtimeState);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const initialDataViewId =
-        runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId());
+        runtimeState.data_view_id ?? (await pluginStart.data.dataViews.getDefaultId());
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         initialDataViewId ? [await pluginStart.data.dataViews.get(initialDataViewId)] : []
       );
@@ -150,7 +151,9 @@ export const getPatternAnalysisEmbeddableFactory = (
       const PatternAnalysisComponent = getPatternAnalysisComponent(coreStart, pluginStart);
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
-      const onRenderComplete = () => dataLoading$.next(false);
+      const onRenderComplete = () => {
+        dataLoading$.next(false);
+      };
       const onError = (error: Error) => blockingError$.next(error);
 
       return {
@@ -198,13 +201,13 @@ export const getPatternAnalysisEmbeddableFactory = (
           const embeddingOrigin = apiHasExecutionContext(parentApi)
             ? parentApi.executionContext.type
             : undefined;
-
           return (
             <PatternAnalysisComponent
+              parentApi={parentApi}
               filtersApi={filtersApi}
               dataViewId={dataViewId ?? ''}
               fieldName={fieldName}
-              minimumTimeRangeOption={minimumTimeRangeOption}
+              minimumTimeRangeOption={toUiMinimumTimeRange(minimumTimeRangeOption)}
               randomSamplerMode={randomSamplerMode}
               randomSamplerProbability={randomSamplerProbability}
               timeRange={timeRange}

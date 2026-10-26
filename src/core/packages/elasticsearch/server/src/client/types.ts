@@ -8,6 +8,7 @@
  */
 
 import type { Headers, KibanaRequest } from '@kbn/core-http-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 /**
  * Fake request object created manually by Kibana plugins.
@@ -16,45 +17,18 @@ import type { Headers, KibanaRequest } from '@kbn/core-http-server';
 export interface FakeRequest {
   /** Headers used for authentication against Elasticsearch */
   headers: Headers;
-}
-
-/**
- * A minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in
- * non-HTTP contexts - for example, background tasks or scheduled jobs - where no real
- * {@link KibanaRequest} is available. The space is derived from the URL pathname
- * (e.g. `/s/<spaceId>/...`) using `getSpaceNPRE` from `@kbn/cps-server-utils`.
- *
- * In route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies
- * {@link ScopeableUrlRequest} without needing this type.
- * @public
- */
-export interface UrlRequest extends FakeRequest {
-  /**
-   * URL used to resolve the space for CPS. Synthetic callers set this to a path that includes
-   * `/s/<spaceId>/...` when applicable; there is no `rewrittenUrl` on this shape.
-   */
-  url: URL;
+  /** The space ID this request is scoped to. Used by CPS for space-level routing. */
+  spaceId?: SpaceId;
 }
 
 /**
  * Union of all request types accepted by `asScoped`. Carries the credentials used to
  * authenticate Elasticsearch calls on behalf of the current user.
  *
+ * Space-scoped CPS routing (`projectRouting: 'space'`) reads `request.spaceId` directly;
+ * no URL field is needed.
+ *
  * @public
  * See {@link KibanaRequest}, {@link FakeRequest}.
  */
 export type ScopeableRequest = KibanaRequest | FakeRequest;
-
-/**
- * A request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.
- *
- * Covers both {@link KibanaRequest} (the typical caller from route handlers) and
- * {@link UrlRequest} (a lightweight synthetic alternative). Space resolution uses
- * `getSpaceNPRE` from `@kbn/cps-server-utils`: for {@link KibanaRequest}, when
- * `rewrittenUrl` is set (original URL before the first pre-routing `rewriteUrl`), that URL is
- * preferred over `url` so the space segment remains visible after Spaces strips `/s/:spaceId`
- * from `request.url`. Synthetic {@link UrlRequest} values only supply `url`.
- *
- * @public
- */
-export type ScopeableUrlRequest = KibanaRequest | UrlRequest;

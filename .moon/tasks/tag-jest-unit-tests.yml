@@ -1,8 +1,12 @@
-$schema: https://moonrepo.dev/schemas/tasks.json
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
 
 inheritedBy:
   tags:
     - jest-unit-tests
+
+fileGroups:
+  jestConfig:
+    - jest.config.js
 
 tasks:
   jest:
@@ -11,10 +15,14 @@ tasks:
       - scripts/jest.js
       - '--passWithNoTests'
       - '--config'
-      - '@files(jest-config)'
+      - '@files(jestConfig)'
     deps:
-      - '~:source'
-      - '~:source-upstream'
+      # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
+      # local/upstream source changes invalidate the jest cache.
+      - target: '~:source'
+        cacheStrategy: hash
+      - target: '~:source-upstream'
+        cacheStrategy: hash
     inputs:
       - '@group(src)'
     options:

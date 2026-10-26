@@ -282,25 +282,26 @@ describe('Metric Flyout Overview Tab', () => {
       );
     });
 
-    it('non-local data_stream (CCS) + streams feature on -> renders Data stream metadata row, no link', () => {
+    it('non-local data_stream (CCS) + streams feature on -> hands the full remote name to the streams renderer', () => {
       mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
       const renderFn = linkRenderer();
       const metricItem = createMockMetric({
         indexName: 'remote_cluster:metrics-activemq.broker-default',
       });
 
-      const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);
+      const { getByTestId } = renderTab(metricItem, renderFn);
 
-      // The streams flyout cannot resolve cross-cluster / cross-project names,
-      // so we fall back to the metadata row instead of rendering a broken link.
-      expect(renderFn).not.toHaveBeenCalled();
-      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
-      expect(getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')).toHaveTextContent(
-        'remote_cluster:metrics-activemq.broker-default'
-      );
-      // Remote sources are not classified via `_resolve/index`; the hook is
-      // always called with `undefined` so we never issue a request that would
-      // fail or return a misleading result.
+      // The full CCS-qualified name is handed to the streams renderer, which is
+      // responsible for annotating it (e.g. `<stream> (Remote cluster: <cluster>)`)
+      // and rendering it as non-clickable text.
+      expect(renderFn).toHaveBeenCalledWith({
+        streamName: 'remote_cluster:metrics-activemq.broker-default',
+      });
+      const row = getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel');
+      expect(row).toContainElement(getByTestId('streamFieldSectionRendered'));
+      // Remote sources are not classified via `_resolve/index`; the source-kind
+      // hook is always called with `undefined` so we never issue a request that
+      // would fail or return a misleading result.
       expect(mockedUseMetricSourceKind).toHaveBeenCalledWith({
         name: undefined,
         fallback: METRIC_SOURCE_KIND.DATA_STREAM,

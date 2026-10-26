@@ -6,26 +6,32 @@
  */
 
 import type {
-  AgentAclEntry,
-  AgentConfiguration,
+  AgentAccessControl,
+  AgentConfigurationInput,
   AgentDefinition,
-  AgentVisibility,
 } from '@kbn/agent-builder-common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentListOptions {}
+export type { AgentListOptions } from '@kbn/agent-builder-common';
 
-export type AgentCreateRequest = Omit<AgentDefinition, 'type' | 'readonly' | 'created_by' | 'acl'>;
+export type AgentCreateRequest = Omit<
+  AgentDefinition,
+  'type' | 'readonly' | 'created_by' | 'access_control' | 'configuration' | 'hidden'
+> & {
+  /**
+   * Id of a registered agent type. Defaults to the chat type (empty base).
+   */
+  type?: string;
+  access_control?: Pick<AgentAccessControl, 'access_mode'>;
+  configuration: AgentConfigurationInput;
+};
 
 export type AgentUpdateRequest = Partial<
   Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
-  visibility?: AgentVisibility;
-  configuration?: Partial<AgentConfiguration>;
+  access_control?: Pick<AgentAccessControl, 'access_mode'>;
+  configuration?: Partial<AgentConfigurationInput>;
 };
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;
 
-export interface AgentAclUpdateRequest {
-  entries: AgentAclEntry[];
-}
+export type AgentAccessControlUpdateRequest = Pick<AgentAccessControl, 'entries'>;

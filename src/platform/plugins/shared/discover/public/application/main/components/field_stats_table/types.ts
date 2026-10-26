@@ -191,4 +191,13 @@ export interface FieldStatisticsTableProps {
    * Callback to handle state updates
    */
   updateState?: (changes: Partial<DataVisualizerTableState>) => void;
+  /**
+   * Callback reporting the number of fields currently displayed in the table.
+   * Reports `undefined` while a (re)load is in progress.
+   */
+  onFieldsCountChange?: (fieldsCount: number | undefined) => void;
+  /**
+   * Whether the table should be interactive or not
+   */
+  isInteractive?: boolean;
 }

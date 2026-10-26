@@ -1,5 +1,8 @@
 {
   "sha1": "1476c7b8ba870e49441fd32720e9d52ccb559c7b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "f2021206c8725fa-04f3bb10cae78cb",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -151,8 +154,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -165,8 +168,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -179,8 +182,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -193,8 +196,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -207,8 +210,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -221,8 +224,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -235,8 +238,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -249,8 +252,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -263,8 +266,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -277,8 +280,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -291,8 +294,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -305,8 +308,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -319,8 +322,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -333,8 +336,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v1_implicit.spec.ts",
-        "line": 28,
-        "column": 16
+        "line": 24,
+        "column": 24
       }
     },
     {
@@ -347,8 +350,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -361,8 +364,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -375,8 +378,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -389,8 +392,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -403,8 +406,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -417,8 +420,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -431,8 +434,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -445,8 +448,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -459,8 +462,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -473,8 +476,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -487,8 +490,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -501,8 +504,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -515,8 +518,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -529,8 +532,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -543,8 +546,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -557,8 +560,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -571,8 +574,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -585,8 +588,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -599,8 +602,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -613,8 +616,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -627,8 +630,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -641,8 +644,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -655,8 +658,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -669,8 +672,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/capabilities_v2_explicit.spec.ts",
-        "line": 27,
-        "column": 16
+        "line": 23,
+        "column": 24
       }
     },
     {
@@ -683,8 +686,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 42,
+        "column": 47
       }
     },
     {
@@ -697,8 +700,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 42,
+        "column": 47
       }
     },
     {
@@ -711,8 +714,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 42,
+        "column": 47
       }
     },
     {
@@ -725,8 +728,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 42,
+        "column": 47
       }
     },
     {
@@ -739,8 +742,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 42,
+        "column": 47
       }
     },
     {
@@ -753,8 +756,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 42,
+        "column": 47
       }
     },
     {
@@ -767,8 +770,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 42,
+        "column": 47
       }
     },
     {
@@ -781,8 +784,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/api/parallel_tests/feature_controls/spaces_disabled_feature.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 42,
+        "column": 47
       }
     }
   ]

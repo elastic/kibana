@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryBoolean } from '../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
@@ -49,8 +50,8 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersR
   method: 'GET',
   path: SYNTHETICS_API_URLS.FILTERS,
   validate: {
-    query: schema.object({
-      showFromAllSpaces: schema.maybe(schema.boolean()),
+    query: z.strictObject({
+      showFromAllSpaces: queryBoolean.optional(),
     }),
   },
   handler: async ({ savedObjectsClient, request }): Promise<any> => {

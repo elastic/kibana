@@ -133,18 +133,18 @@ export const getEqlFn = ({
                 defaultMessage:
                   'This request queries Elasticsearch to fetch the data for the visualization.',
               }),
+              getRequestStats: () => ({
+                indexPattern: {
+                  label: i18n.translate('data.search.es_search.dataViewLabel', {
+                    defaultMessage: 'Data view',
+                  }),
+                  value: args.index,
+                  description: i18n.translate('data.search.es_search.indexPatternDescription', {
+                    defaultMessage: 'The data view that connected to the Elasticsearch indices.',
+                  }),
+                },
+              }),
             },
-            getRequestMetadata: () => ({
-              indexPattern: {
-                label: i18n.translate('data.search.es_search.dataViewLabel', {
-                  defaultMessage: 'Data view',
-                }),
-                value: args.index,
-                description: i18n.translate('data.search.es_search.indexPatternDescription', {
-                  defaultMessage: 'The data view that connected to the Elasticsearch indices.',
-                }),
-              },
-            }),
           }
         );
 

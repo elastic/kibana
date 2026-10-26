@@ -6,135 +6,150 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { createDefaultCloudSetupState } from '../../../common/cloud_setup';
-import { createDefaultSetupState, mergePartialSetupStates } from '../../../common/setup';
+import { createGetOtelStatusService } from '../../otel/services/status';
+import { createGetStatusService } from '../../universal_profiling/services/status';
 import type { RegisterServicesParams } from '../register_services';
-import { getSetupState } from '../setup_state';
-import { createGetStatusService } from '.';
+import { createGetProfilingStatusService } from '.';
 
-jest.mock('../setup_state', () => ({
-  getSetupState: jest.fn(),
+jest.mock('../../otel/services/status', () => ({
+  createGetOtelStatusService: jest.fn(),
 }));
 
-const mockedGetSetupState = jest.mocked(getSetupState);
+jest.mock('../../universal_profiling/services/status', () => ({
+  createGetStatusService: jest.fn(),
+}));
 
-describe('createGetStatusService', () => {
-  const registerServicesParams = {
-    createProfilingEsClient: jest.fn(),
-    logger: {
-      debug: jest.fn(),
-    },
-    deps: {},
-  } as unknown as RegisterServicesParams;
+const mockedCreateGetOtelStatusService = jest.mocked(createGetOtelStatusService);
+const mockedCreateGetStatusService = jest.mocked(createGetStatusService);
 
+describe('createGetProfilingStatusService', () => {
+  const internalUserEsClient = {} as IScopedClusterClient['asInternalUser'];
+  const esClient = {
+    asInternalUser: internalUserEsClient,
+    asCurrentUser: {},
+  } as IScopedClusterClient;
   const soClient = {} as SavedObjectsClientContract;
-  const esClient = {} as IScopedClusterClient;
+
+  const getOtelStatus = jest.fn();
+  const getUniversalProfilingStatus = jest.fn();
+  const profilingStatus = jest.fn();
+  const createProfilingEsClient = jest
+    .fn()
+    .mockReturnValue({ universalProfiling: { status: profilingStatus } });
+
+  const createService = (
+    buildFlavor: RegisterServicesParams['buildFlavor'] = 'traditional'
+  ): ReturnType<typeof createGetProfilingStatusService> =>
+    createGetProfilingStatusService({
+      buildFlavor,
+      createProfilingEsClient,
+      logger: { debug: jest.fn() },
+      deps: {},
+    } as unknown as RegisterServicesParams);
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('returns expected status for cloud setup state', async () => {
-    const cloudSetupState = mergePartialSetupStates(createDefaultCloudSetupState(), [
-      {
-        profiling: { enabled: true },
-        data: { available: true },
-        resource_management: { enabled: true },
-        resources: { created: true, pre_8_9_1_data: false },
-        settings: { configured: true },
-        policies: {
-          collector: { installed: true },
-          symbolizer: { installed: true },
-          apm: { profilingEnabled: false },
-        },
-      },
-    ]);
-
-    mockedGetSetupState.mockResolvedValue({
-      type: 'cloud',
-      setupState: cloudSetupState,
-    });
-
-    const getStatus = createGetStatusService(registerServicesParams);
-
-    await expect(getStatus({ soClient, esClient, spaceId: 'test-space' })).resolves.toEqual({
-      type: 'cloud',
+    mockedCreateGetOtelStatusService.mockReturnValue(getOtelStatus);
+    mockedCreateGetStatusService.mockReturnValue(getUniversalProfilingStatus);
+    profilingStatus.mockResolvedValue({ profiling: { enabled: true } });
+    getOtelStatus.mockResolvedValue({ isAvailable: true, hasData: true });
+    getUniversalProfilingStatus.mockResolvedValue({
       profiling_enabled: true,
       has_setup: true,
-      has_data: true,
-      pre_8_9_1_data: false,
-    });
-  });
-
-  it('returns expected status for self-managed setup state', async () => {
-    const setupState = mergePartialSetupStates(createDefaultSetupState(), [
-      {
-        profiling: { enabled: true },
-        data: { available: true },
-        resource_management: { enabled: true },
-        resources: { created: true, pre_8_9_1_data: true },
-        settings: { configured: true },
-      },
-    ]);
-
-    mockedGetSetupState.mockResolvedValue({
-      type: 'self-managed',
-      setupState,
-    });
-
-    const getStatus = createGetStatusService(registerServicesParams);
-
-    await expect(getStatus({ soClient, esClient, spaceId: 'test-space' })).resolves.toEqual({
-      type: 'self-managed',
-      profiling_enabled: true,
-      has_setup: true,
-      has_data: true,
+      has_data: false,
       pre_8_9_1_data: true,
     });
   });
 
-  it('returns expected status for serverless setup state', async () => {
-    const setupState = mergePartialSetupStates(createDefaultSetupState(), [
-      {
-        profiling: { enabled: false },
-        data: { available: false },
-        resources: { pre_8_9_1_data: false },
-      },
-    ]);
+  it.each(['traditional', 'serverless'] as const)(
+    'only reports that profiling is disabled in Elasticsearch on %s builds',
+    async (buildFlavor) => {
+      profilingStatus.mockResolvedValue({ profiling: { enabled: false } });
 
-    mockedGetSetupState.mockResolvedValue({
-      type: 'serverless',
-      setupState,
-    });
+      await expect(createService(buildFlavor)({ esClient, soClient })).resolves.toStrictEqual({
+        isEnabled: false,
+      });
+      expect(getOtelStatus).not.toHaveBeenCalled();
+      expect(getUniversalProfilingStatus).not.toHaveBeenCalled();
+    }
+  );
 
-    const getStatus = createGetStatusService(registerServicesParams);
+  it('reads whether profiling is enabled as the internal user', async () => {
+    await createService()({ esClient, soClient });
 
-    await expect(
-      getStatus({ soClient, esClient, spaceId: 'test-space', isServerless: true })
-    ).resolves.toEqual({
-      type: 'serverless',
-      profiling_enabled: false,
-      has_setup: false,
-      has_data: false,
-      pre_8_9_1_data: false,
+    expect(createProfilingEsClient).toHaveBeenCalledWith({
+      esClient: internalUserEsClient,
+      abortSignal: undefined,
     });
   });
 
-  it('handles 403 exceptions from getSetupState gracefully', async () => {
-    mockedGetSetupState.mockRejectedValue({
-      meta: {
-        statusCode: 403,
+  it('combines the OTel and Universal Profiling statuses on traditional builds', async () => {
+    await expect(createService()({ esClient, soClient, spaceId: 'my-space' })).resolves.toEqual({
+      isEnabled: true,
+      otel: { isAvailable: true, hasData: true },
+      universalProfiling: {
+        isAvailable: true,
+        hasSetup: true,
+        hasData: false,
+        hasLegacyData: true,
       },
     });
-
-    const getStatus = createGetStatusService(registerServicesParams);
-
-    await expect(getStatus({ soClient, esClient, spaceId: 'test-space' })).resolves.toEqual({
-      profiling_enabled: true,
-      has_setup: true,
-      pre_8_9_1_data: false,
-      has_data: true,
-      unauthorized: true,
+    expect(getUniversalProfilingStatus).toHaveBeenCalledWith({
+      esClient,
+      soClient,
+      spaceId: 'my-space',
+      abortSignal: undefined,
     });
+  });
+
+  it('skips the Universal Profiling checks on serverless builds', async () => {
+    await expect(createService('serverless')({ esClient, soClient })).resolves.toEqual({
+      isEnabled: true,
+      otel: { isAvailable: true, hasData: true },
+      universalProfiling: {
+        isAvailable: false,
+        hasSetup: false,
+        hasData: false,
+        hasLegacyData: false,
+      },
+    });
+    expect(getUniversalProfilingStatus).not.toHaveBeenCalled();
+    expect(getOtelStatus).toHaveBeenCalled();
+  });
+
+  it('passes the abort signal to every check', async () => {
+    const abortSignal = new AbortController().signal;
+
+    await createService()({ esClient, soClient, abortSignal });
+
+    expect(createProfilingEsClient).toHaveBeenCalledWith({
+      esClient: internalUserEsClient,
+      abortSignal,
+    });
+    expect(getOtelStatus).toHaveBeenCalledWith({ esClient, abortSignal });
+    expect(getUniversalProfilingStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ abortSignal })
+    );
+  });
+
+  it('rethrows when the profiling status request fails', async () => {
+    const error = new Error('status failed');
+    profilingStatus.mockRejectedValue(error);
+
+    await expect(createService()({ esClient, soClient })).rejects.toBe(error);
+  });
+
+  it('rethrows when the OTel check fails', async () => {
+    const error = new Error('otel failed');
+    getOtelStatus.mockRejectedValue(error);
+
+    await expect(createService()({ esClient, soClient })).rejects.toBe(error);
+  });
+
+  it('rethrows when the Universal Profiling check fails', async () => {
+    const error = new Error('universal profiling failed');
+    getUniversalProfilingStatus.mockRejectedValue(error);
+
+    await expect(createService()({ esClient, soClient })).rejects.toBe(error);
   });
 });

@@ -37,12 +37,13 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   getIconType: () => APP_ICON,
   order: 10,
   isCompatible: async ({ embeddable }) => isParentApiCompatible(embeddable),
-  execute: async ({ embeddable }) => {
+  execute: async ({ embeddable, returnFocus }) => {
     if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
 
     openLazyFlyout({
       core: coreServices,
       parentApi: embeddable,
+      returnFocus,
       loadContent: async ({ closeFlyout }) => {
         return getEditorFlyout({
           parentDashboard: embeddable,
@@ -50,11 +51,12 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
           onCompleteEdit: async (newState) => {
             if (!newState) return;
 
-            const { layout, links, refId } = newState;
+            const { layout, links, title, refId } = newState;
 
             function serializeState() {
               if (refId !== undefined) {
                 return {
+                  ...(title !== undefined ? { title } : {}),
                   ref_id: refId,
                 };
               }

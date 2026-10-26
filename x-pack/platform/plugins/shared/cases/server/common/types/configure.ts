@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
 import type { SavedObject } from '@kbn/core/server';
 import type {
@@ -15,9 +15,9 @@ import type {
   ConfigurationAttributes,
 } from '../../../common/types/domain';
 import {
-  ConfigurationActivityFieldsRt,
-  ConfigurationAttributesRt,
-  ConfigurationBasicWithoutOwnerRt,
+  ConfigurationActivityFieldsSchema,
+  ConfigurationAttributesSchema,
+  ConfigurationBasicWithoutOwnerSchema,
 } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { User, UserProfile } from './user';
@@ -33,6 +33,17 @@ export interface ConfigurationPersistedAttributes {
   customFields?: PersistedCustomFieldsConfiguration;
   templates?: PersistedTemplatesConfiguration;
   observableTypes?: PersistedObservableTypesConfiguration;
+  extractObservables?: boolean;
+  workflowTags?: string[];
+  legacyTemplatesMigrated?: boolean;
+  legacyCustomFieldsMigrated?: boolean;
+  /**
+   * Set once the legacy custom-field values on this space's existing cases have been backfilled
+   * into each case's `extended_fields`. Tracked separately from `legacyCustomFieldsMigrated` so a
+   * space already marked by an earlier release still gets its cases backfilled. Stored in `_source`
+   * only (the migration task never filters/sorts by it), same as the sibling flags.
+   */
+  legacyCasesMigrated?: boolean;
 }
 
 type PersistedObservableTypesConfiguration = Array<{
@@ -71,14 +82,8 @@ export interface CaseFieldsAttributes {
 export type ConfigurationTransformedAttributes = ConfigurationAttributes;
 export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;
 
-export const ConfigurationPartialAttributesRt = rt.intersection([
-  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.type.props)),
-  rt.exact(rt.partial(ConfigurationActivityFieldsRt.type.props)),
-  rt.exact(
-    rt.partial({
-      owner: rt.string,
-    })
-  ),
-]);
+export const ConfigurationPartialAttributesSchema = ConfigurationBasicWithoutOwnerSchema.partial()
+  .merge(ConfigurationActivityFieldsSchema.partial())
+  .merge(z.object({ owner: z.string() }).partial());
 
-export const ConfigurationTransformedAttributesRt = ConfigurationAttributesRt;
+export const ConfigurationTransformedAttributesSchema = ConfigurationAttributesSchema;

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export function isFiniteNumber(value: any): value is number {
-  return Number.isFinite(value);
-}
+export { isFiniteNumber } from '@kbn/apm-common';

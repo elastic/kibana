@@ -212,7 +212,6 @@ describe('messagesToOpenAI', () => {
     ).toEqual([
       {
         role: 'assistant',
-        content: '',
         tool_calls: [
           {
             function: {
@@ -225,6 +224,62 @@ describe('messagesToOpenAI', () => {
         ],
       },
     ]);
+  });
+
+  it('replaces empty assistant content with a placeholder when there are no tool calls', () => {
+    expect(
+      messagesToOpenAI({
+        messages: [
+          { role: MessageRole.User, content: 'first' },
+          { role: MessageRole.Assistant, content: '', toolCalls: [] },
+          { role: MessageRole.User, content: 'second' },
+        ],
+      })
+    ).toEqual([
+      { role: 'user', content: 'first' },
+      { role: 'assistant', content: '...' },
+      { role: 'user', content: 'second' },
+    ]);
+  });
+
+  it('replaces whitespace-only assistant content with a placeholder when there are no tool calls', () => {
+    expect(
+      messagesToOpenAI({
+        messages: [
+          { role: MessageRole.User, content: 'hello' },
+          { role: MessageRole.Assistant, content: '   \n\t  ' },
+          { role: MessageRole.User, content: 'again' },
+        ],
+      })
+    ).toEqual([
+      { role: 'user', content: 'hello' },
+      { role: 'assistant', content: '...' },
+      { role: 'user', content: 'again' },
+    ]);
+  });
+
+  it('omits content for tool-call assistants with empty content', () => {
+    const result = messagesToOpenAI({
+      messages: [
+        {
+          role: MessageRole.Assistant,
+          content: '',
+          toolCalls: [{ toolCallId: 'call-1', function: { name: 'tool_a', arguments: { x: 1 } } }],
+        },
+      ],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      role: 'assistant',
+      tool_calls: [
+        expect.objectContaining({
+          id: 'call-1',
+          function: expect.objectContaining({ name: 'tool_a' }),
+        }),
+      ],
+    });
+    expect(result[0]).not.toHaveProperty('content');
   });
 
   describe('message merging', () => {
@@ -266,9 +321,32 @@ describe('messagesToOpenAI', () => {
           role: 'user',
           content: [
             { type: 'text', text: 'text message' },
-            { type: 'image_url', image_url: { url: 'base64data' } },
+            { type: 'image_url', image_url: { url: 'data:image/png;base64,base64data' } },
             { type: 'text', text: 'with image' },
           ],
+        },
+      ]);
+    });
+
+    it('passes the image data through unchanged when no mimeType is provided', () => {
+      const result = messagesToOpenAI({
+        messages: [
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'image',
+                source: { data: 'https://example.com/image.png', mimeType: '' },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(result).toEqual([
+        {
+          role: 'user',
+          content: [{ type: 'image_url', image_url: { url: 'https://example.com/image.png' } }],
         },
       ]);
     });
@@ -348,6 +426,37 @@ describe('messagesToOpenAI', () => {
       });
     });
 
+    it('merges consecutive tool-call-only assistants and omits empty content', () => {
+      const result = messagesToOpenAI({
+        messages: [
+          {
+            role: MessageRole.Assistant,
+            content: null,
+            toolCalls: [
+              { toolCallId: 'call-1', function: { name: 'tool_a', arguments: { x: 1 } } },
+            ],
+          },
+          {
+            role: MessageRole.Assistant,
+            content: '',
+            toolCalls: [
+              { toolCallId: 'call-2', function: { name: 'tool_b', arguments: { y: 2 } } },
+            ],
+          },
+        ],
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        role: 'assistant',
+        tool_calls: [
+          expect.objectContaining({ id: 'call-1' }),
+          expect.objectContaining({ id: 'call-2' }),
+        ],
+      });
+      expect(result[0]).not.toHaveProperty('content');
+    });
+
     it('does not merge user messages separated by an empty assistant message', () => {
       const result = messagesToOpenAI({
         messages: [
@@ -358,6 +467,7 @@ describe('messagesToOpenAI', () => {
       });
 
       expect(result).toHaveLength(3);
+      expect(result[1]).toEqual({ role: 'assistant', content: '...' });
     });
   });
 });

@@ -7,9 +7,8 @@
 
 import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useSelector } from 'react-redux';
 
-import { signalIndexOutdatedSelector } from '../../../../data_view_manager/redux/selectors';
+import { useSignalIndexMappingOutdated } from '../../../../data_view_manager/hooks/use_signal_index_mapping_outdated';
 import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
@@ -40,7 +39,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
 
-  const signalIndexMappingOutdated = useSelector(signalIndexOutdatedSelector);
+  const signalIndexMappingOutdated = useSignalIndexMappingOutdated();
   const signalIndexName = useSignalIndexName();
 
   useEffect(() => {

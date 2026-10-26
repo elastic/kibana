@@ -14,7 +14,7 @@ import { useStartServices } from '../../../../../../hooks';
 
 export const PackagePolicyConditionField: React.FunctionComponent<{
   value: string;
-  onChange: (value: string | undefined) => void;
+  onChange: (value: string | null) => void;
   isInvalid: boolean;
   errors: string[] | null;
   dataTestSubj?: string;
@@ -59,7 +59,7 @@ export const PackagePolicyConditionField: React.FunctionComponent<{
         fullWidth
         isInvalid={isInvalid}
         value={value}
-        onChange={(e) => onChange(e.target.value || undefined)}
+        onChange={(e) => onChange(e.target.value || null)}
         data-test-subj={dataTestSubj}
       />
     </EuiFormRow>

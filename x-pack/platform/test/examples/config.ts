@@ -24,7 +24,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
 
     testFiles: [
-      require.resolve('./search_examples'),
       require.resolve('./embedded_lens'),
       require.resolve('./screenshotting'),
       require.resolve('./triggers_actions_ui_examples'),
@@ -37,7 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
-        // Needed for search_examples tests
+        // Search sessions used by example plugins exercised in this suite
         '--data.search.sessions.enabled=true',
         ...findTestPluginPaths([
           resolve(KIBANA_ROOT, 'examples'),

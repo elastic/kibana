@@ -12,12 +12,12 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type {
   ApplicationStart,
   DocLinksStart,
@@ -48,6 +48,32 @@ import {
 } from '../components';
 import type { DeleteRoleMappings } from '../components/delete_provider/delete_provider';
 import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
+
+const roleMappingsTitle = i18n.translate(
+  'xpack.security.management.roleMappings.roleMappingTitle',
+  {
+    defaultMessage: 'Role Mappings',
+  }
+);
+
+const roleMappingsDescription = i18n.translate(
+  'xpack.security.management.roleMappings.roleMappingDescription',
+  {
+    defaultMessage:
+      'Role mappings define which roles are assigned to users from an external identity provider.',
+  }
+);
+
+const createRoleMappingButtonLabel = i18n.translate(
+  'xpack.security.management.roleMappings.createRoleMappingButtonLabel',
+  { defaultMessage: 'Create role mapping' }
+);
+
+const reloadRoleMappingsLabel = i18n.translate(
+  'xpack.security.management.roleMappings.reloadRoleMappingsButton',
+  { defaultMessage: 'Reload' }
+);
+
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
@@ -90,11 +116,64 @@ export class RoleMappingsGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const { loadState, error, roleMappings } = this.state;
-
-    if (loadState === 'permissionDenied') {
+    if (this.state.loadState === 'permissionDenied') {
       return <PermissionDenied />;
     }
+
+    return (
+      <>
+        {this.renderHeader()}
+        <EuiSpacer size="l" />
+        <div>{this.renderBody()}</div>
+      </>
+    );
+  }
+
+  private renderHeader() {
+    const { loadState, roleMappings } = this.state;
+    const hasRows = Boolean(roleMappings && roleMappings.length > 0);
+    const showCreate = !this.props.readOnly && loadState === 'finished' && hasRows;
+    const showReload = loadState === 'loadingTable' || (loadState === 'finished' && hasRows);
+
+    const menu: AppHeaderMenu = {};
+    if (showReload) {
+      menu.items = [
+        {
+          id: 'reloadRoleMappings',
+          label: reloadRoleMappingsLabel,
+          iconType: 'refresh',
+          testId: 'reloadButton',
+          run: () => this.reloadRoleMappings(),
+          isLoading: loadState === 'loadingTable',
+        },
+      ];
+    }
+    if (showCreate) {
+      menu.primaryActionItem = {
+        id: 'createRoleMapping',
+        label: createRoleMappingButtonLabel,
+        iconType: 'plusCircle',
+        testId: 'createRoleMappingButton',
+        href: this.props.history.createHref({ pathname: EDIT_ROLE_MAPPING_PATH }),
+        run: () => this.props.history.push(EDIT_ROLE_MAPPING_PATH),
+      };
+    }
+
+    return (
+      <AppHeader
+        title={roleMappingsTitle}
+        description={{
+          text: roleMappingsDescription,
+          learnMoreUrl: this.props.docLinks.links.security.mappingRoles,
+        }}
+        menu={menu}
+        spacing="bleed"
+      />
+    );
+  }
+
+  private renderBody() {
+    const { loadState, error, roleMappings } = this.state;
 
     if (loadState === 'loadingApp') {
       return (
@@ -139,51 +218,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     return (
       <>
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={
-            <FormattedMessage
-              id="xpack.security.management.roleMappings.roleMappingTitle"
-              defaultMessage="Role Mappings"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.security.management.roleMappings.roleMappingDescription"
-              defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink href={this.props.docLinks.links.security.mappingRoles} external={true}>
-                    <FormattedMessage
-                      id="xpack.security.management.roleMappings.learnMoreLinkText"
-                      defaultMessage="Learn more."
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-          rightSideItems={
-            this.props.readOnly
-              ? undefined
-              : [
-                  <EuiButton
-                    fill
-                    iconType="plusCircle"
-                    data-test-subj="createRoleMappingButton"
-                    {...reactRouterNavigate(this.props.history, EDIT_ROLE_MAPPING_PATH)}
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
-                      defaultMessage="Create role mapping"
-                    />
-                  </EuiButton>,
-                ]
-          }
-        />
-
-        <EuiSpacer size="l" />
-
         {!this.state.hasCompatibleRealms && (
           <>
             <NoCompatibleRealms />
@@ -254,19 +288,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           }}
         </DeleteProvider>
       ) : undefined,
-      toolsRight: (
-        <EuiButton
-          color="success"
-          iconType="refresh"
-          onClick={() => this.reloadRoleMappings()}
-          data-test-subj="reloadButton"
-        >
-          <FormattedMessage
-            id="xpack.security.management.roleMappings.reloadRoleMappingsButton"
-            defaultMessage="Reload"
-          />
-        </EuiButton>
-      ),
       box: {
         incremental: true,
       },

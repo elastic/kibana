@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType, platformCoreTools } from '@kbn/agent-builder-common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -18,7 +18,7 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import { GET_PACKAGE_CONFIGURATIONS_TOOL_ID } from '../..';
 
-const defendPackageConfigurations = z.object({});
+const defendPackageConfigurations = lazySchema(() => z.object({}));
 
 export const getPackageConfigurationsTool = (
   endpointAppContextService: EndpointAppContextService

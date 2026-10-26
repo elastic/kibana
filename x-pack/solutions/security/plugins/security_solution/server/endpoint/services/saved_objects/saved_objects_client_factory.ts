@@ -9,9 +9,9 @@
 
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { IBasePath, KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../../lib/reference_data';
 import { EndpointError } from '../../../../common/endpoint/errors';
@@ -31,17 +31,49 @@ const RESTRICTED_METHODS: readonly SavedObjectsClientContractKeys[] = [
 
 export class InternalReadonlySoClientMethodNotAllowedError extends EndpointError {}
 
+export class StrictReadonlySoClientMethodNotAllowedError extends EndpointError {
+  constructor(methodName: string) {
+    super(`Method [${methodName}] not allowed on readonly SO client`);
+  }
+}
+
+const STRICT_READONLY_METHOD_CLASSIFICATION: Record<
+  keyof SavedObjectsClientContract,
+  'read' | 'blocked' | 'wrapped'
+> = {
+  create: 'blocked',
+  bulkCreate: 'blocked',
+  update: 'blocked',
+  bulkUpdate: 'blocked',
+  delete: 'blocked',
+  bulkDelete: 'blocked',
+  removeReferencesTo: 'blocked',
+  updateObjectsSpaces: 'blocked',
+  changeOwnership: 'blocked',
+  changeAccessMode: 'blocked',
+  createPointInTimeFinder: 'blocked',
+  asScopedToNamespace: 'wrapped',
+  checkConflicts: 'read',
+  find: 'read',
+  search: 'read',
+  esql: 'read',
+  bulkGet: 'read',
+  get: 'read',
+  bulkResolve: 'read',
+  resolve: 'read',
+  openPointInTimeForType: 'read',
+  closePointInTime: 'read',
+  collectMultiNamespaceReferences: 'read',
+  getCurrentNamespace: 'read',
+};
+
 /**
  * Factory service for accessing saved object clients
  */
 export class SavedObjectsClientFactory {
   private static includedHiddenTypes = new Set<string>([REFERENCE_DATA_SAVED_OBJECT_TYPE]);
 
-  constructor(
-    private readonly savedObjectsServiceStart: SavedObjectsServiceStart,
-    /** Can either be the  `HttpServiceSetup` or  `HttpServiceStart` or just an interface that hs a `basePath` implementation from core */
-    private readonly httpServiceSetup: { basePath: IBasePath }
-  ) {}
+  constructor(private readonly savedObjectsServiceStart: SavedObjectsServiceStart) {}
 
   /**
    * Add a hidden Saved Object type to the list of types that should be given access by the SO clients created by the SavedObjectsClientFactory.
@@ -52,19 +84,13 @@ export class SavedObjectsClientFactory {
   }
 
   protected createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): KibanaRequest {
-    const fakeRequest = kibanaRequestFactory({
+    return kibanaRequestFactory({
       headers: {},
-      path: '/',
       route: { settings: {} },
       url: { href: {}, hash: '' } as URL,
       raw: { req: { url: '/' } } as any,
+      spaceId: brandSpaceId(spaceId),
     });
-
-    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-      this.httpServiceSetup.basePath.set(fakeRequest, addSpaceIdToPath('/', spaceId));
-    }
-
-    return fakeRequest;
   }
 
   protected getHiddenTypes(): string[] {
@@ -127,6 +153,58 @@ export class SavedObjectsClientFactory {
 
     if (readonly) {
       return this.toReadonly(soClient);
+    }
+
+    return soClient;
+  }
+
+  protected toStrictReadonly(soClient: SavedObjectsClientContract): SavedObjectsClientContract {
+    const wrap = (client: SavedObjectsClientContract): SavedObjectsClientContract =>
+      new Proxy(client, {
+        get(
+          target: SavedObjectsClientContract,
+          property: string | symbol,
+          receiver: unknown
+        ): unknown {
+          if (
+            typeof property !== 'string' ||
+            !(property in STRICT_READONLY_METHOD_CLASSIFICATION)
+          ) {
+            return Reflect.get(target, property, receiver);
+          }
+
+          const methodName = property as keyof SavedObjectsClientContract;
+          const classification = STRICT_READONLY_METHOD_CLASSIFICATION[methodName];
+
+          if (classification === 'blocked') {
+            throw new StrictReadonlySoClientMethodNotAllowedError(methodName);
+          }
+
+          if (classification === 'wrapped') {
+            return (namespace: string): SavedObjectsClientContract =>
+              wrap(target.asScopedToNamespace(namespace));
+          }
+
+          return Reflect.get(target, methodName, receiver);
+        },
+      });
+
+    return wrap(soClient);
+  }
+
+  createRequestScopedSoClient({
+    request,
+    readonly = true,
+  }: {
+    request: KibanaRequest;
+    readonly?: boolean;
+  }): SavedObjectsClientContract {
+    const soClient = this.savedObjectsServiceStart.getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+
+    if (readonly) {
+      return this.toStrictReadonly(soClient);
     }
 
     return soClient;

@@ -6,7 +6,7 @@
  */
 
 import type { Case } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -69,11 +69,10 @@ describe('search', () => {
       perPage: 10,
       total: casesMap.size,
       casesMap,
-    });
-    clientArgs.services.caseService.getCaseStatusStats.mockResolvedValue({
-      open: 1,
-      'in-progress': 2,
-      closed: 3,
+      searchStats: {
+        statusStats: { open: 1, 'in-progress': 2, closed: 3 },
+        mttr: 120,
+      },
     });
 
     afterEach(() => {
@@ -90,6 +89,78 @@ describe('search', () => {
 
       expect(call.caseOptions.search).toBe(searchTerm);
       expect(call.namespaces).toEqual(['space1']);
+    });
+
+    it('requests stats alongside the search and returns them in the response', async () => {
+      const searchRequest = createCasesClientMockSearchRequest({ search: 'foobar' });
+      const res = await search(searchRequest, clientArgs, casesClientMock);
+
+      const call = clientArgs.services.caseService.searchCasesGroupedByID.mock.calls[0][0];
+
+      // The stats filter is provided (status clause stripped) so counts and MTTR are computed
+      // with the same query as the case list.
+      expect(call).toHaveProperty('statsOptions');
+
+      expect(res.count_open_cases).toBe(1);
+      expect(res.count_in_progress_cases).toBe(2);
+      expect(res.count_closed_cases).toBe(3);
+      expect(res.mttr).toBe(120);
+    });
+
+    it('strips the status clause from the stats query so all three status counts populate under a single-status filter', async () => {
+      const searchRequest = createCasesClientMockSearchRequest({ status: [CaseStatuses.open] });
+      await search(searchRequest, clientArgs, casesClientMock);
+
+      const call = clientArgs.services.caseService.searchCasesGroupedByID.mock.calls[0][0];
+
+      // The stats query is built with `status: undefined` so open/in-progress/closed counts are all
+      // computed even when the list itself is filtered to a single status. The serialized filter
+      // must therefore not mention the requested status.
+      const statsFilter = JSON.stringify(call.statsOptions?.filter ?? null);
+      expect(statsFilter).not.toContain('status');
+    });
+
+    it('returns mttr: null (not 0) when the search yields no stats', async () => {
+      clientArgs.services.caseService.searchCasesGroupedByID.mockResolvedValueOnce({
+        page: 1,
+        perPage: 10,
+        total: 0,
+        casesMap: new Map<string, Case>(),
+        searchStats: {
+          statusStats: { open: 0, 'in-progress': 0, closed: 0 },
+          mttr: null,
+        },
+      });
+
+      const searchRequest = createCasesClientMockSearchRequest({ search: 'no-matches' });
+      const res = await search(searchRequest, clientArgs, casesClientMock);
+
+      expect(res.mttr).toBeNull();
+      expect(res.count_open_cases).toBe(0);
+      expect(res.count_in_progress_cases).toBe(0);
+      expect(res.count_closed_cases).toBe(0);
+    });
+
+    it('fetches global field definitions for search when templates are enabled', async () => {
+      const argsWithTemplates = {
+        ...clientArgs,
+        config: {
+          ...clientArgs.config,
+          templates: { enabled: true },
+        },
+      };
+      const searchRequest = createCasesClientMockSearchRequest({
+        search: 'team',
+        owner: 'cases',
+      });
+      await search(searchRequest, argsWithTemplates, casesClientMock);
+
+      expect(
+        argsWithTemplates.services.fieldDefinitionsService.getGlobalFieldDefinitionsForSearch
+      ).toHaveBeenCalledWith({ owner: ['cases'] });
+      expect(
+        argsWithTemplates.services.templatesService.getTemplateVersionsForExtendedFieldSearch
+      ).toHaveBeenCalledWith({ owner: ['cases'] });
     });
 
     it('search with single custom field', async () => {
@@ -141,11 +212,10 @@ describe('search', () => {
       perPage: 10,
       total: casesMap.size,
       casesMap,
-    });
-    clientArgs.services.caseService.getCaseStatusStats.mockResolvedValue({
-      open: 1,
-      'in-progress': 2,
-      closed: 3,
+      searchStats: {
+        statusStats: { open: 1, 'in-progress': 2, closed: 3 },
+        mttr: 120,
+      },
     });
     casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
 
@@ -160,7 +230,7 @@ describe('search', () => {
         // @ts-expect-error foo is an invalid field
         search({ ...searchRequest, foo: 'bar' }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"cases.title\\",\\"cases.description\\",\\"cases.incremental_id.text\\",\\"cases-comments.comment\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"cases.title\\",\\"cases.description\\",\\"cases.incremental_id.text\\",\\"cases-comments.comment\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: Excess keys are not allowed"`
       );
     });
 
@@ -171,7 +241,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ searchFields });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "searchFields"'
+        'Invalid option: expected one of'
       );
     });
 
@@ -182,7 +252,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ searchFields });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "searchFields"'
+        'Invalid option: expected one of'
       );
     });
 
@@ -193,7 +263,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ sortField });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "sortField"'
+        'Error: sortField: Invalid option: expected one of'
       );
     });
 
@@ -203,7 +273,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ category });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        `Error: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
+        `Error: category: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
       );
     });
 
@@ -212,8 +282,8 @@ describe('search', () => {
 
       const searchRequest = createCasesClientMockSearchRequest({ tags });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
+        `Error: tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
       );
     });
 
@@ -222,8 +292,8 @@ describe('search', () => {
 
       const searchRequest = createCasesClientMockSearchRequest({ assignees });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
+        `Error: assignees: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
       );
     });
 
@@ -232,15 +302,15 @@ describe('search', () => {
 
       const searchRequest = createCasesClientMockSearchRequest({ reporters });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
+        `Error: reporters: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
       );
     });
 
     it('Invalid total items results in error', async () => {
       const searchRequest = createCasesClientMockSearchRequest({ page: 209, perPage: 100 });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
       );
     });
@@ -251,7 +321,7 @@ describe('search', () => {
         perPage: MAX_CASES_PER_PAGE + 1,
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
       );
     });
@@ -261,7 +331,7 @@ describe('search', () => {
         customFields: { second_key: [true] },
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
@@ -272,7 +342,7 @@ describe('search', () => {
         owner: [''],
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
@@ -283,7 +353,7 @@ describe('search', () => {
         owner: ['cases', 'observability'],
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
@@ -294,7 +364,7 @@ describe('search', () => {
         owner: 'cases',
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Invalid custom field key: test_custom_field_key.`
       );
     });
@@ -305,7 +375,7 @@ describe('search', () => {
         owner: 'cases',
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Filtering by custom field of type text is not allowed.`
       );
     });
@@ -316,7 +386,7 @@ describe('search', () => {
         owner: 'cases',
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: Unsupported filtering value for custom field of type toggle.`
       );
     });
@@ -328,7 +398,7 @@ describe('search', () => {
         owner: 'cases',
       });
 
-      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         ` Error: No custom fields configured.`
       );
     });

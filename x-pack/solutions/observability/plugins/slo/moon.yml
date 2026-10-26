@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/slo-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/actionable-obs-team'
+  defaultOwner: '@elastic/nightshift-sre-agent-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/slo-plugin'
   description: Moon project for @kbn/slo-plugin
   channel: ''
-  owner: '@elastic/actionable-obs-team'
+  owner: '@elastic/nightshift-sre-agent-team'
   sourceRoot: x-pack/solutions/observability/plugins/slo
 dependsOn:
   - '@kbn/i18n'
@@ -90,7 +90,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/data-view-field-editor-plugin'
-  - '@kbn/securitysolution-io-ts-utils'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/datemath'
   - '@kbn/dashboard-plugin'
@@ -136,7 +135,15 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/core-analytics-browser'
   - '@kbn/inspector-plugin'
+  - '@kbn/zod-helpers'
+  - '@kbn/core-spaces-common'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
+  - '@kbn/cps-server-utils'
+  - '@kbn/app-header'
+  - '@kbn/ui-callout'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod
@@ -150,6 +157,4 @@ fileGroups:
     - server/**/*
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

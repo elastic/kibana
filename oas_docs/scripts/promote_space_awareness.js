@@ -11,7 +11,7 @@ require('@kbn/setup-node-env');
 const path = require('node:path');
 const fs = require('node:fs');
 const { run } = require('@kbn/dev-cli-runner');
-const yaml = require('js-yaml');
+const { Document, parse, isScalar, visit } = require('yaml');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const NON_SPACE_PATH_PREFIXES = [
@@ -28,14 +28,14 @@ const NON_SPACE_PATH_PREFIXES = [
     '/api/security/role',
     '/api/spaces',
     '/api/security/session/_invalidate',
-    // During technical preview, these paths are replaced by placeholder operations
-    // in kibana.overlays.bump_slim.yaml and should not get the spaces section injected.
-    // TODO(GA): remove these two entries when Dashboards & Visualizations APIs reach GA.
-    // See https://github.com/elastic/kibana/issues/266195
-    '/api/dashboards',
-    '/api/visualizations',
   ]),
 ];
+
+// These paths are replaced by placeholder operations in kibana.overlays.bump_slim.yaml, so they
+// should not get the spaces section injected, unless the document is the full (non-slim) one.
+// Remove this list when Bump.sh is decommissioned.
+// See https://github.com/elastic/kibana/issues/266195
+const BUMP_SLIM_PLACEHOLDER_PATH_PREFIXES = ['/api/dashboards', '/api/visualizations'];
 
 const SPACE_PREFIX = '/s/';
 
@@ -53,14 +53,17 @@ run(
   async ({ log, flagsReader }) => {
     const [relativeFilePath] = flagsReader.getPositionals();
     const absPath = path.resolve(REPO_ROOT, relativeFilePath);
-    const oasDoc = yaml.load(fs.readFileSync(absPath, 'utf8'));
+    const oasDoc = parse(fs.readFileSync(absPath, 'utf8'));
+    const nonSpacePathPrefixes = flagsReader.boolean('full')
+      ? NON_SPACE_PATH_PREFIXES
+      : [...NON_SPACE_PATH_PREFIXES, ...BUMP_SLIM_PLACEHOLDER_PATH_PREFIXES];
 
     for (const [_pathName, pathValue] of Object.entries(oasDoc.paths)) {
       const pathName = _pathName.trim();
       log.debug(`Processing path: ${pathName}`);
       if (
         pathName.startsWith(SPACE_PREFIX) ||
-        NON_SPACE_PATH_PREFIXES.some((nonSpacePrefix) => {
+        nonSpacePathPrefixes.some((nonSpacePrefix) => {
           return pathName.startsWith(nonSpacePrefix);
         })
       ) {
@@ -77,10 +80,46 @@ run(
     }
 
     log.info(`Writing file with spaces promoted to ${absPath}`);
-    fs.writeFileSync(absPath, yaml.dump(oasDoc, { noRefs: true, lineWidth: -1 }), 'utf8');
+    // Mirror @kbn/openapi-bundler's write_yaml_document.ts serialization so the final
+    // output keeps js-yaml's style: single quotes, yaml-1.1 date/boolean quoting, and
+    // literal blocks for multi-line code samples. Key sorting is intentionally omitted
+    // to preserve the upstream (redocly) ordering. See https://github.com/elastic/kibana/pull/252348
+    // Disable YAML anchors/aliases for human readability.
+    const doc = new Document(oasDoc, { aliasDuplicateObjects: false, schema: 'yaml-1.1' });
+    visit(doc, {
+      Pair(_key, node) {
+        // Router specs join several accepted media types into one content key, such as
+        // "application/json; text/plain; */*". YAML allows that unquoted, but strict
+        // parsers (YamlDotNet in docs-builder) reject it, so always quote those keys.
+        if (
+          isScalar(node.key) &&
+          typeof node.key.value === 'string' &&
+          node.key.value.includes('; ')
+        ) {
+          node.key.type = 'QUOTE_SINGLE';
+        }
+        // Preserve exact formatting of multi-line code samples (x-codeSamples `source`).
+        if (
+          isScalar(node.key) &&
+          node.key.value === 'source' &&
+          isScalar(node.value) &&
+          typeof node.value.value === 'string' &&
+          node.value.value.includes('\n')
+        ) {
+          node.value.type = 'BLOCK_LITERAL';
+        }
+      },
+    });
+    fs.writeFileSync(absPath, doc.toString({ singleQuote: true, lineWidth: -1 }), 'utf8');
   },
   {
     description: 'Promote space awareness in OAS documents',
-    usage: 'node scripts/promote_space_awareness.js <path-to-kbn-oas-file>',
+    usage: 'node scripts/promote_space_awareness.js <path-to-kbn-oas-file> [--full]',
+    flags: {
+      boolean: ['full'],
+      help: `
+        --full  The file does not contain the bump-slim placeholders, so Dashboards and Visualizations get the spaces section too.
+      `,
+    },
   }
 );

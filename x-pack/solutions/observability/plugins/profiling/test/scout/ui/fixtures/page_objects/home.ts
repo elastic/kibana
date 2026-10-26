@@ -13,21 +13,23 @@ export class ProfilingHomePage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}`);
-    await this.waitForThreadsTab();
+    await this.waitForExecutablesTab();
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
     await this.page.goto(
       `${this.kbnUrl.app('profiling')}?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
-    await this.waitForThreadsTab();
+    await this.waitForExecutablesTab();
   }
 
   /*
-   * Waits for the Threads tab to be visible
+   * Waits for the Executables tab to be visible
    */
-  private async waitForThreadsTab() {
-    await this.page.getByRole('tab', { name: 'Threads' }).waitFor({ timeout: EXTENDED_TIMEOUT });
+  private async waitForExecutablesTab() {
+    await this.page
+      .getByRole('tab', { name: 'Executables' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Tab navigation methods
@@ -45,11 +47,15 @@ export class ProfilingHomePage {
 
   // Content verification methods
   async expectTopNContent() {
-    await this.page.getByText('Top 46').waitFor({ state: 'visible' });
+    await this.page.getByText('Top 1').waitFor({ state: 'visible' });
   }
 
-  async expectUserPrivilegeLimitation() {
-    await this.page.getByText('User privilege limitation').waitFor({ state: 'visible' });
+  async getStackTracesCharts() {
+    return this.page.getByTestId('profilingSubChartLink');
+  }
+
+  async getStackTracesChart(label: string) {
+    return (await this.getStackTracesCharts()).filter({ hasText: label });
   }
 
   // URL verification methods
@@ -57,22 +63,8 @@ export class ProfilingHomePage {
     await this.page.waitForURL(`**${path}**`);
   }
 
-  // Setup status methods
-  async getSetupStatus() {
-    return this.page.testSubj.locator('profilingSetupStatus');
-  }
-
-  async isSetupComplete() {
-    const status = await this.getSetupStatus();
-    return (await status.getAttribute('data-status')) === 'complete';
-  }
-
   // Error state methods
   async getErrorState() {
-    return this.page.testSubj.locator('profilingErrorState');
-  }
-
-  async getUnauthorizedMessage() {
-    return this.page.getByText('User privilege limitation');
+    return this.page.getByTestId('profilingErrorState');
   }
 }

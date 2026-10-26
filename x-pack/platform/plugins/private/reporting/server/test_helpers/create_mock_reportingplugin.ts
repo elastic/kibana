@@ -51,7 +51,6 @@ export const createMockPluginSetup = (
     },
     encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     features: featuresPluginMock.createSetup(),
-    basePath: { set: jest.fn() },
     router: {
       get: jest.fn(),
       patch: jest.fn(),
@@ -89,6 +88,7 @@ export const createMockPluginStart = async (
   return {
     analytics: coreSetupMock.analytics,
     esClient: elasticsearchServiceMock.createClusterClient(),
+    featureFlags: coreStartMock.featureFlags,
     savedObjects: {
       getScopedClient: jest.fn().mockReturnValue(savedObjectsClient),
       createInternalRepository: jest.fn().mockReturnValue(savedObjectsClient),

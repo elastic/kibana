@@ -30,13 +30,12 @@ export class DataRequest {
   }
 
   getMeta(): DataRequestMeta {
-    if (this._descriptor.dataRequestMetaAtStart) {
-      return this._descriptor.dataRequestMetaAtStart;
-    } else if (this._descriptor.dataRequestMeta) {
-      return this._descriptor.dataRequestMeta;
-    } else {
-      return {};
-    }
+    return this._descriptor.dataRequestMetaAtStart ?? this.getLoadedMeta();
+  }
+
+  /** Meta for the most recently completed request, ignoring in-flight request metadata. */
+  getLoadedMeta(): DataRequestMeta {
+    return this._descriptor.dataRequestMeta ?? {};
   }
 
   hasData(): boolean {

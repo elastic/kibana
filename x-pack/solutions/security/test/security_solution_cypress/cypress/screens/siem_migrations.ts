@@ -122,7 +122,7 @@ export const WATCHLISTS_UPLOAD_STEP = {
   TITLE: getDataTestSubjectSelector('watchlistsUploadTitle'),
 };
 
-export const WATCHLISTS_FILE_PICKER = getDataTestSubjectSelector('lookupsFilePicker');
+export const WATCHLISTS_FILE_PICKER = getDataTestSubjectSelector('watchlistsFilePicker');
 
 export const MIGRATION_VENDOR_BADGE = getDataTestSubjectSelector('migrationVendorBadge');
 

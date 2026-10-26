@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { selectDynamicSettings } from '../../../state/settings/selectors';
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useCanManageRules } from '../../../../../hooks/use_capabilities';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
@@ -40,7 +40,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const isNewRule = useSelector(selectIsNewRule);
   const { settings } = useSelector(selectDynamicSettings);
-  const { canSave } = useSyntheticsSettingsContext();
+  const canManageRules = useCanManageRules();
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
@@ -48,12 +48,12 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     settings && (settings?.defaultStatusRuleEnabled || settings?.defaultTLSRuleEnabled);
 
   const getOrCreateAlerts = useCallback(() => {
-    if (canSave) {
+    if (canManageRules) {
       dispatch(enableDefaultAlertingSilentlyAction.get());
     } else {
       dispatch(getDefaultAlertingAction.get());
     }
-  }, [canSave, dispatch]);
+  }, [canManageRules, dispatch]);
 
   // Fetch or create default rules when popover opens
   useEffect(() => {

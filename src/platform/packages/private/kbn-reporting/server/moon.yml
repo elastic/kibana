@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-ui-settings-server'
   - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/config-schema'
@@ -50,6 +51,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

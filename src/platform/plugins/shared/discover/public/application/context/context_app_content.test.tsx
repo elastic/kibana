@@ -9,12 +9,14 @@
 
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { GetStateReturn } from './services/context_state';
 import type { SortDirection } from '@kbn/data-plugin/public';
 import type { ContextAppContentProps } from './context_app_content';
 import { ContextAppContent } from './context_app_content';
-import { LoadingStatus } from './services/context_query_state';
+import { FailureReason, LoadingStatus } from './services/context_query_state';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
@@ -25,7 +27,7 @@ const dataViewMock = buildDataViewMock({
 });
 
 describe('ContextAppContent test', () => {
-  const renderComponent = async () => {
+  const renderComponent = async (overrides: Partial<ContextAppContentProps> = {}) => {
     const hit = {
       _id: '123',
       _index: 'test_index',
@@ -51,8 +53,8 @@ describe('ContextAppContent test', () => {
       dataView: dataViewMock,
       stateContainer: {} as unknown as GetStateReturn,
       anchorStatus: LoadingStatus.LOADED,
-      predecessorsStatus: LoadingStatus.LOADED,
-      successorsStatus: LoadingStatus.LOADED,
+      predecessorsStatus: { value: LoadingStatus.LOADED },
+      successorsStatus: { value: LoadingStatus.LOADED },
       rows: [buildDataTableRecord(hit, dataViewMock)],
       predecessors: [],
       successors: [],
@@ -67,6 +69,9 @@ describe('ContextAppContent test', () => {
       setAppState: () => {},
       addFilter: () => {},
       interceptedWarnings: [],
+      isWarningCalloutDismissed: false,
+      onDismissWarningCallout: () => {},
+      ...overrides,
     } as unknown as ContextAppContentProps;
     renderWithKibanaRenderContext(
       <DiscoverTestProvider>
@@ -86,10 +91,63 @@ describe('ContextAppContent test', () => {
     expect(screen.getByTestId('unifiedDataTableToolbar')).toBeVisible();
   });
 
+  it('should render the "load newer documents" control inside the grid toolbar', async () => {
+    await renderComponent();
+
+    const toolbar = screen.getByTestId('unifiedDataTableToolbar');
+
+    expect(within(toolbar).getByTestId('predecessorsLoadMoreButton')).toBeVisible();
+    expect(within(toolbar).queryByTestId('successorsLoadMoreButton')).not.toBeInTheDocument();
+  });
+
+  it('should render the "load older documents" control below the grid', async () => {
+    await renderComponent();
+
+    const toolbar = screen.getByTestId('unifiedDataTableToolbar');
+
+    expect(screen.getByTestId('successorsLoadMoreButton')).toBeVisible();
+    expect(within(toolbar).queryByTestId('successorsLoadMoreButton')).not.toBeInTheDocument();
+  });
+
   it('should not show display options button', async () => {
     await renderComponent();
 
     expect(screen.getByTestId('unifiedDataTableToolbar')).toBeVisible();
     expect(screen.queryByTestId('dataGridDisplaySelectorButton')).not.toBeInTheDocument();
+  });
+
+  it('should show inline error callouts instead of the "no documents found" callouts when fetching fails', async () => {
+    const error = new Error('Something went wrong');
+
+    await renderComponent({
+      predecessorsStatus: { value: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN, error },
+      successorsStatus: { value: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN, error },
+    });
+
+    // rendered inside the grid toolbar so it remains visible in full-screen mode
+    const toolbarBottom = screen.getByTestId('unifiedDataTableToolbarBottom');
+
+    expect(within(toolbarBottom).getByTestId('predecessorsErrorMsg')).toBeVisible();
+    expect(screen.getByTestId('successorsErrorMsg')).toBeVisible();
+    expect(screen.queryByTestId('predecessorsWarningMsg')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('successorsWarningMsg')).not.toBeInTheDocument();
+  });
+
+  it('should reset column width in surrounding documents app state', async () => {
+    const user = userEvent.setup();
+    const setAppState = jest.fn();
+
+    await renderComponent({
+      grid: { columns: { _source: { width: 250 } } },
+      setAppState,
+    });
+
+    await user.click(screen.getByTestId('dataGridHeaderCellActionButton-_source'));
+    await waitForEuiPopoverOpen();
+    await user.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
+
+    expect(setAppState).toHaveBeenCalledWith({
+      grid: { columns: { _source: {} } },
+    });
   });
 });

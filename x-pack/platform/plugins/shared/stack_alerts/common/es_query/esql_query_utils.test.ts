@@ -141,6 +141,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.8.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -160,6 +161,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.2.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -226,6 +228,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.8.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -245,6 +248,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 2,
                   key: ['1.2.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -361,6 +365,17 @@ describe('ESQL query utils', () => {
                     'test message',
                     '/app-search',
                   ],
+                  keyFields: [
+                    '@timestamp',
+                    'ecs.version',
+                    'host',
+                    'name',
+                    'geo.dest',
+                    'agent',
+                    'tags',
+                    'message',
+                    'request',
+                  ],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -398,6 +413,18 @@ describe('ESQL query utils', () => {
                     'info',
                     'test message',
                     '/app-search',
+                  ],
+                  keyFields: [
+                    '@timestamp',
+                    'ecs.version',
+                    'error.code',
+                    'host',
+                    'name',
+                    'geo.dest',
+                    'agent',
+                    'tags',
+                    'message',
+                    'request',
                   ],
                   topHitsAgg: {
                     hits: {
@@ -468,6 +495,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['400'],
+                  keyFields: ['error.code'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -529,6 +557,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.8.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -548,6 +577,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['400', '1.2.0'],
+                  keyFields: ['error.code', 'ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -567,6 +597,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.2.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -690,6 +721,111 @@ describe('ESQL query utils', () => {
           { name: 'count', type: 'number' },
         ])
       ).toEqual(['error.code', 'host']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that renames a column inline in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY error.code, host = source.host | KEEP error.code, host, count',
+          [
+            { name: 'error.code', type: 'keyword' },
+            { name: 'host', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['error.code', 'host']);
+
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY code = error.code, host = source.host | KEEP code, host, count',
+          [
+            { name: 'code', type: 'keyword' },
+            { name: 'host', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['code', 'host']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that groups by an unnamed expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields('FROM test-index | STATS count = COUNT(*) BY BUCKET(@timestamp, 1 hour)', [
+          { name: 'BUCKET(@timestamp, 1 hour)', type: 'date' },
+          { name: 'count', type: 'number' },
+        ])
+      ).toEqual(['BUCKET(@timestamp, 1 hour)']);
+
+      expect(
+        getAlertIdFields('FROM test-index | STATS count = COUNT(*) BY a + b', [
+          { name: 'a + b', type: 'number' },
+          { name: 'count', type: 'number' },
+        ])
+      ).toEqual(['a + b']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that mixes a column and an unnamed expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY error.code, BUCKET(@timestamp, 1 hour)',
+          [
+            { name: 'error.code', type: 'keyword' },
+            { name: 'BUCKET(@timestamp, 1 hour)', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['error.code', 'BUCKET(@timestamp, 1 hour)']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that aliases an expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour)',
+          [
+            { name: 'hour', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['hour']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that renames an unnamed expression after the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY BUCKET(@timestamp, 1 hour) | RENAME `BUCKET(@timestamp, 1 hour)` AS bucket',
+          [
+            { name: 'bucket', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['bucket']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that uses INLINE STATS...BY', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | INLINE STATS host.uptime = SUM(event.duration) BY event.provider, event.action',
+          [
+            { name: '@timestamp', type: 'date' },
+            { name: 'event.provider', type: 'keyword' },
+            { name: 'event.action', type: 'keyword' },
+            { name: 'event.duration', type: 'number' },
+            { name: 'host.uptime', type: 'number' },
+          ]
+        )
+      ).toEqual(['event.provider', 'event.action']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that uses INLINE STATS...BY and RENAME', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | INLINE STATS count = COUNT(*) BY error.code, host | RENAME error.code AS code, host AS h',
+          [
+            { name: 'h', type: 'keyword' },
+            { name: 'code', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['code', 'h']);
     });
 
     it('correctly gets the alertId from an ESQL query that uses STATS...BY and RENAME', () => {

@@ -73,7 +73,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expect(getReactConvertText(format, undefined)).toBe('(null)');
+    expect(getReactConvertText(format, undefined)).toBe('-');
   });
 
   test('creates custom format for ip_range', () => {
@@ -106,7 +106,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expect(getReactConvertText(format, undefined)).toBe('(null)');
+    expect(getReactConvertText(format, undefined)).toBe('-');
   });
 
   test('creates custom format for range', () => {
@@ -123,7 +123,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expect(getReactConvertText(format, undefined)).toBe('(null)');
+    expect(getReactConvertText(format, undefined)).toBe('-');
   });
 
   test('creates alternative format for range using the template parameter', () => {

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { map } from 'lodash';
-import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
 import { ElementControls } from './element_controls';
 import type { CustomElement } from '../../../types';
-import { ElementCard } from '../element_card';
+import { ElementCard, ElementCardWrapper } from '../element_card';
 
 export interface Props {
   /**
@@ -54,7 +54,7 @@ export const ElementGrid = ({ elements, filterText = '', onClick, onEdit, onDele
         }
 
         return (
-          <EuiFlexItem key={index} className="canvasElementCard__wrapper">
+          <ElementCardWrapper key={index}>
             <ElementCard
               title={displayName || name}
               description={help}
@@ -62,7 +62,7 @@ export const ElementGrid = ({ elements, filterText = '', onClick, onEdit, onDele
               onClick={whenClicked}
             />
             <ElementControls onEdit={() => onEdit(element)} onDelete={() => onDelete(element)} />
-          </EuiFlexItem>
+          </ElementCardWrapper>
         );
       })}
     </EuiFlexGrid>

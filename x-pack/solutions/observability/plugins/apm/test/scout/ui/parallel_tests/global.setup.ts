@@ -24,6 +24,8 @@ import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_error
 import { distributedTrace } from '../fixtures/synthtrace/distributed_trace';
 import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
 import { infrastructure } from '../fixtures/synthtrace/infrastructure';
+import { generateMultipleServicesData } from '../fixtures/synthtrace/multiple_services';
+import { generateMobileMostUsedData } from '../fixtures/synthtrace/mobile_most_used';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
@@ -108,6 +110,22 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(azureFunctionsData);
     log.info('Azure Functions service data indexed');
+
+    // Bulk services dataset for service inventory pagination tests.
+    const multipleServicesData = generateMultipleServicesData({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(multipleServicesData);
+    log.info('Multiple services data indexed');
+
+    // Mobile app data with device/os/network dimensions for most-used charts.
+    const mobileMostUsedData = generateMobileMostUsedData({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(mobileMostUsedData);
+    log.info('Mobile most-used charts data indexed');
 
     // Shared APM metrics dataset (classic + OTel synth metrics, AWS Lambda
     // transactions fixture, OTel-native Java bulk-indexed metrics). Single

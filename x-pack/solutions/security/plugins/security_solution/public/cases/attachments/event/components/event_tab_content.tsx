@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
+import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import {
   SECURITY_EVENT_ATTACHMENT_TYPE,
   isUnifiedEventAttachment,
@@ -17,7 +17,11 @@ import {
 import type { Event } from './table';
 import { EventsTableForCases } from './table';
 
-export const EventTabContent: React.FC<CommonAttachmentTabViewProps> = ({ caseData }) => {
+export const EventTabContent: React.FC<CommonAttachmentListViewProps> = ({
+  caseData,
+  onRemove,
+  isRemoving,
+}) => {
   const events = useMemo(
     () =>
       caseData.comments.reduce((acc, comment) => {
@@ -44,7 +48,7 @@ export const EventTabContent: React.FC<CommonAttachmentTabViewProps> = ({ caseDa
       `}
       data-test-subj="case-view-events"
     >
-      <EventsTableForCases events={events} />
+      <EventsTableForCases events={events} onRemove={onRemove} isRemoving={isRemoving} />
     </EuiFlexItem>
   );
 };

@@ -24,11 +24,15 @@ export class HomePage {
     return this.page.testSubj.locator('homeManage');
   }
 
-  public async goto() {
+  public async goto(spaceId?: string) {
     await this.page.addInitScript(() => {
       window.localStorage.setItem('home:welcome:show', 'false');
     });
-    await this.page.gotoApp('home');
+    if (spaceId) {
+      await this.page.gotoApp('home', { params: { space: spaceId } });
+    } else {
+      await this.page.gotoApp('home');
+    }
     await this.homeApp.waitFor({ state: 'visible' });
   }
 

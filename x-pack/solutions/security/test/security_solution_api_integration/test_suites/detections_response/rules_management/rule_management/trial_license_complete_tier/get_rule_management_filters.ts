@@ -15,6 +15,7 @@ import {
   getSimpleRule,
   installMockPrebuiltRules,
   deleteAllPrebuiltRuleAssets,
+  stripMissingUiamApiKeyTag,
 } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -83,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        expect(body.aggregated_fields.tags).to.eql(['tag-a']);
+        expect(stripMissingUiamApiKeyTag(body.aggregated_fields.tags)).to.eql(['tag-a']);
       });
     });
 

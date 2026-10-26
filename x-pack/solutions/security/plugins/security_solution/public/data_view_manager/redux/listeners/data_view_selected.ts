@@ -6,7 +6,7 @@
  */
 
 import type { DataView, DataViewLazy, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { isEmpty } from 'lodash';
@@ -47,13 +47,14 @@ export const createDataViewSelectedListener = (dependencies: {
       action: ReturnType<typeof selectDataViewAsync>,
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
-      const spaceId = (await dependencies.spaces.getActiveSpace()).id;
       if (dependencies.scope !== action.payload.scope) {
         return;
       }
 
-      // Cancel effects running for the current scope to prevent race conditions
+      // Cancel effects for this scope. Must precede the first `await`, or they cancel each other.
       listenerApi.cancelActiveListeners();
+
+      const spaceId = (await dependencies.spaces.getActiveSpace()).id;
 
       let dataViewByIdError: unknown;
       let adhocDataViewCreationError: unknown;

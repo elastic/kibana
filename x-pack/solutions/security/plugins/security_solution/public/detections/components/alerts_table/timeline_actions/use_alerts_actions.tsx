@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { AlertWorkflowStatus } from '../../../../common/types';
 import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
@@ -80,7 +80,10 @@ export const useAlertsActions = ({
     setEventsDeleted,
   ]);
 
-  const { items: actionItems, panels } = useBulkActionItems(actionItemArgs);
+  const {
+    groups: { statusItems: actionItems },
+    panels,
+  } = useBulkActionItems(actionItemArgs);
 
   return useMemo(() => {
     return hasAlertsUpdate ? { actionItems, panels } : { actionItems: [], panels: [] };

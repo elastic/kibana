@@ -13,7 +13,7 @@ import type { AIAssistantConversationsDataClient } from '../ai_assistant_data_cl
 import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import type { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import type { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import type { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 
 type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsDataClient>;
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
@@ -70,6 +70,7 @@ const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock =>
     getAttackDiscoveryGenerationById: jest.fn(),
     getReader: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
+    isServiceAccountGeneration: jest.fn().mockResolvedValue(false),
     refreshEventLogIndex: jest.fn(),
     // Properties from AIAssistantDataClient
     spaceId: 'default',

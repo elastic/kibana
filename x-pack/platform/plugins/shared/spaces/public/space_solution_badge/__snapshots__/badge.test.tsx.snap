@@ -116,10 +116,7 @@ exports[`it renders without crashing with solution provided 1`] = `
     }
   }
 >
-  <MemoizedFormattedMessage
-    defaultMessage="Security"
-    id="xpack.spaces.spaceSolutionBadge.security"
-  />
+  Security
 </EuiBadge>
 `;
 
@@ -239,9 +236,6 @@ exports[`it renders without crashing without solution 1`] = `
     }
   }
 >
-  <MemoizedFormattedMessage
-    defaultMessage="Classic"
-    id="xpack.spaces.spaceSolutionBadge.classic"
-  />
+  Classic
 </EuiBadge>
 `;

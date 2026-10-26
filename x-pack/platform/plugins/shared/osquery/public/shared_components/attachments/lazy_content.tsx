@@ -13,7 +13,10 @@ import type { ServicesWrapperProps } from '../services_wrapper';
 import ServicesWrapper from '../services_wrapper';
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
 
-type Props = UnifiedReferenceAttachmentViewProps<OsqueryAttachmentPayload['metadata']>;
+type Props = UnifiedReferenceAttachmentViewProps<
+  OsqueryAttachmentPayload['metadata'],
+  OsqueryAttachmentPayload['attachmentId']
+>;
 
 // `defineAttachment.children` expects a `LazyExoticComponent`, so the auth-gated
 // wrapper is itself produced lazily; cases wraps `children` in <Suspense> on render.

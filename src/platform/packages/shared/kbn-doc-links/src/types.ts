@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -67,6 +68,7 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
+    readonly kibanaApiReference: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -130,6 +132,7 @@ export interface DocLinks {
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
+    readonly connectorsExchangeServer: string;
     readonly connectorsGithub: string;
     readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;
@@ -163,6 +166,7 @@ export interface DocLinks {
     readonly e5Model: string;
     readonly elasticInferenceService: string;
     readonly elasticInferenceServicePricing: string;
+    readonly elasticInferenceServiceSupportedModels: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
@@ -185,8 +189,18 @@ export interface DocLinks {
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
     readonly semanticSearch: string;
+    readonly semanticSearchGetStarted: string;
     readonly searchTemplates: string;
     readonly semanticTextField: string;
+    readonly semanticTextFieldSetupConfiguration: string;
+    readonly semanticTextSearchRetrieval: string;
+    readonly hybridSemanticText: string;
+    readonly esAsVectorDatabase: string;
+    readonly vectorSearch: string;
+    readonly vectorSearchDenseVector: string;
+    readonly jinaEmbeddingModels: string;
+    readonly vectorSearchBringOwnVectors: string;
+    readonly vectorDatabaseFullTextSearch: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -312,6 +326,16 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
+    readonly alertsPage: string;
+    readonly attacksPage: string;
+    readonly dashboardsPage: string;
+    readonly detectionResponsePage: string;
+    readonly notesPage: string;
+    readonly timelinesPage: string;
+    readonly runAttackDiscoveryInWorkflow: string;
+    readonly attackDiscovery: string;
+    readonly mitreCoverage: string;
+    readonly remapMitreAttack: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -328,6 +352,8 @@ export interface DocLinks {
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
+    readonly cloudNativeVulnerabilityManagement: string;
+    readonly cspmGcpAgentless: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
     readonly avcResults: string;
@@ -367,6 +393,12 @@ export interface DocLinks {
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly api: string;
+      readonly explore: {
+        readonly landing: string;
+        readonly hostsPage: string;
+        readonly networkPage: string;
+        readonly usersPage: string;
+      };
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
@@ -387,8 +419,10 @@ export interface DocLinks {
     readonly queryDsl: string;
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
+    readonly queryESQLApproximateResults: string;
     readonly queryESQLMultiValueControls: string;
     readonly queryESQLMvIntersects: string;
+    readonly queryESQLViews: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -413,6 +447,7 @@ export interface DocLinks {
     createApiKeyMetadata: string;
     createApiKeyRoleDescriptors: string;
     createCrossClusterApiKey: string;
+    crossClusterApiKeyStrongVerification: string;
     createPipeline: string;
     createTransformRequest: string;
     cronExpressions: string;
@@ -469,6 +504,14 @@ export interface DocLinks {
     authorization: string;
     guide: string;
     actionTypes: string;
+    actionPolicies: string;
+    manageActionPolicies: string;
+    compareAlertingSystems: string;
+    viewManageRules: string;
+    viewAndManageAlerts: string;
+    investigateAlertEpisodes: string;
+    reviewRuleExecutionHistory: string;
+    reviewActionPolicyExecutionHistory: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -493,6 +536,7 @@ export interface DocLinks {
     teamsAction: string;
     casesWebhookAction: string;
     connectors: string;
+    agentBuilderConnectors: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;
@@ -514,9 +558,11 @@ export interface DocLinks {
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
     definingRoles: string;
+    elasticCloudApiKeys: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
+    esqlDataFederationSecurityPrivileges: string;
     indicesPrivileges: string;
     kibanaTLS: string;
     kibanaPrivileges: string;
@@ -577,6 +623,7 @@ export interface DocLinks {
     secureLogstash: string;
     agentPolicy: string;
     agentlessIntegrations: string;
+    cloudConnectorDeployment: string;
     api: string;
     managedOtlp: string;
     uninstallAgent: string;
@@ -602,6 +649,9 @@ export interface DocLinks {
     elasticAgentStandaloneLoggingConfig: string;
     agentPolicyLogLevel: string;
     elasticAgentLogFileRetention: string;
+    elasticAgentDownloads: string;
+    integrationsReference: string;
+    datastreamsTemplateConflicts: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -704,6 +754,7 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+    readonly securityData: string;
   };
   readonly playground: {
     readonly chatPlayground: string;
@@ -716,6 +767,7 @@ export interface DocLinks {
     readonly inferenceAPIDocumentation: string;
     readonly featureSettings: string;
     readonly externalInference: string;
+    readonly selfHostedInference: string;
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
@@ -725,6 +777,24 @@ export interface DocLinks {
   };
   readonly datasetQuality: {
     readonly failureStore: string;
+  };
+  readonly dataFederation: {
+    readonly overview: string;
+    readonly quickstart: string;
+    readonly dataSources: string;
+    readonly datasets: string;
+    readonly datasetSettings: string;
+    readonly datasetMappings: string;
+    readonly authentication: string;
+    readonly grantReadAccess: string;
+    readonly staticCredentials: string;
+    readonly federatedIdentity: string;
+    readonly querying: string;
+    readonly security: string;
+  };
+  readonly contextEngine: {
+    readonly overview: string;
+    readonly aiIndices: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;
@@ -743,6 +813,10 @@ export interface DocLinks {
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
+    readonly aiAssistant: string;
+  };
+  readonly applicationConnections: {
+    readonly oauthClients: string;
   };
   readonly indexManagement: {
     readonly componentTemplate: string;
@@ -750,8 +824,11 @@ export interface DocLinks {
   };
   readonly subscriptions: string;
   readonly cases: {
+    readonly overview: string;
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
+    readonly manageCaseTemplates: string;
+    readonly createCases: string;
   };
 }
 

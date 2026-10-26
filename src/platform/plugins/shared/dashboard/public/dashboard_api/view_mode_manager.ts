@@ -15,6 +15,7 @@ import type { DashboardUser } from './types';
 import { getAccessControlClient } from '../services/access_control_service';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { getDashboardAccessControlState } from '../utils/get_dashboard_access_control_state';
 
 export function initializeViewModeManager({
   incomingEmbeddables,
@@ -23,6 +24,7 @@ export function initializeViewModeManager({
   accessControl,
   createdBy,
   user,
+  viewMode: creationOptionsViewMode,
 }: {
   incomingEmbeddables?: EmbeddablePackageState[];
   isManaged: boolean;
@@ -30,23 +32,21 @@ export function initializeViewModeManager({
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
   user?: DashboardUser;
+  viewMode?: ViewMode;
 }) {
   const dashboardBackupService = getDashboardBackupService();
   const accessControlClient = getAccessControlClient();
 
-  const isDashboardInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
-
-  const canUserManageAccessControl =
-    user?.hasGlobalAccessControlPrivilege ||
-    accessControlClient.checkUserAccessControl({
-      accessControl,
-      createdBy,
-      userId: user?.uid,
-    });
-
-  const canUserEditDashboard = isDashboardInEditAccessMode || canUserManageAccessControl;
+  const { canEditDashboard: canUserEditDashboard } = getDashboardAccessControlState({
+    accessControlClient,
+    accessControl,
+    createdBy,
+    user,
+  });
 
   function getInitialViewMode() {
+    if (creationOptionsViewMode === 'non-interactive') return creationOptionsViewMode;
+
     if (isManaged || !getDashboardCapabilities().showWriteControls || !canUserEditDashboard) {
       return 'view';
     }
@@ -62,6 +62,11 @@ export function initializeViewModeManager({
   }
 
   const viewMode$ = new BehaviorSubject<ViewMode>(getInitialViewMode());
+  const disableTriggers$ = new BehaviorSubject<boolean>(viewMode$.getValue() === 'non-interactive');
+
+  const disableTriggersSubscription = viewMode$.subscribe((viewMode) => {
+    disableTriggers$.next(viewMode === 'non-interactive');
+  });
 
   function setViewMode(viewMode: ViewMode) {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
@@ -75,7 +80,11 @@ export function initializeViewModeManager({
     api: {
       viewMode$,
       setViewMode,
+      disableTriggers$,
       isEditableByUser: canUserEditDashboard,
+    },
+    cleanup: () => {
+      disableTriggersSubscription.unsubscribe();
     },
   };
 }

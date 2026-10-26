@@ -8,7 +8,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { RUN, RUN_TOOLTIP, DISABLED_TOOLTIP } from './translations';
+import {
+  RUN,
+  RUN_TOOLTIP,
+  DISABLED_TOOLTIP,
+  MISSING_WORKFLOWS_EXECUTE_TOOLTIP,
+} from './translations';
 import { Run } from '.';
 
 const defaultProps = {
@@ -59,5 +64,33 @@ describe('Run', () => {
     fireEvent.click(screen.getByTestId('run'));
 
     expect(defaultProps.onGenerate).toHaveBeenCalledTimes(1);
+  });
+
+  describe('when the user lacks the workflows execute privilege', () => {
+    it('disables the button', () => {
+      render(<Run {...defaultProps} hasWorkflowsExecute={false} />);
+
+      expect(screen.getByTestId('run')).toBeDisabled();
+    });
+
+    it('renders the missing workflows execute tooltip on hover', async () => {
+      render(<Run {...defaultProps} hasWorkflowsExecute={false} />);
+
+      fireEvent.mouseOver(screen.getByTestId('run'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('runTooltip')).toHaveTextContent(
+          MISSING_WORKFLOWS_EXECUTE_TOOLTIP
+        );
+      });
+    });
+
+    it('does not call onGenerate when clicked', () => {
+      render(<Run {...defaultProps} hasWorkflowsExecute={false} />);
+
+      fireEvent.click(screen.getByTestId('run'));
+
+      expect(defaultProps.onGenerate).not.toHaveBeenCalled();
+    });
   });
 });

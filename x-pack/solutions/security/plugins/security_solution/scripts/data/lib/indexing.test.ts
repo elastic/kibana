@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { dateSuffixesBetween, episodeIndexNames } from './indexing';
+import type { Client } from '@elastic/elasticsearch';
+import { dateSuffixesBetween, deleteIndicesChunked, episodeIndexNames } from './indexing';
 
 describe('dateSuffixesBetween', () => {
   it('returns all UTC day suffixes inclusively across the range', () => {
@@ -31,7 +32,7 @@ describe('dateSuffixesBetween', () => {
 });
 
 describe('episodeIndexNames', () => {
-  it('returns ep index names using a provided date suffix override', () => {
+  it('returns opaque episode tokens instead of insights.epN', () => {
     const names = episodeIndexNames({
       episodeId: 'ep1',
       endMs: Date.parse('2026-01-01T00:00:00.000Z'),
@@ -39,6 +40,33 @@ describe('episodeIndexNames', () => {
       dateSuffixOverride: '2026.01.14',
     });
 
-    expect(names.endpointEvents).toEqual('logs-endpoint.events.insights.ep1.2026.01.14');
+    expect(names.endpointEvents).toEqual('logs-endpoint.events.f56865fe.2026.01.14');
+    expect(names.endpointAlerts).toEqual('logs-endpoint.alerts.f56865fe.2026.01.14');
+    expect(names.legacyEndpointEvents).toEqual('logs-endpoint.events.insights.ep1.2026.01.14');
+  });
+});
+
+describe('deleteIndicesChunked', () => {
+  it('splits a long index list into URL-safe delete requests that ignore missing indices', async () => {
+    const deleteIndices = jest.fn().mockResolvedValue({ acknowledged: true });
+    const esClient = { indices: { delete: deleteIndices } } as unknown as Client;
+    const indices = Array.from({ length: 120 }, (_, i) => `logs-okta.system.${i}`);
+
+    await deleteIndicesChunked({ esClient, indices });
+
+    expect(deleteIndices).toHaveBeenCalledTimes(3);
+    expect(deleteIndices.mock.calls.map(([params]) => params.index.length)).toEqual([50, 50, 20]);
+    for (const [params] of deleteIndices.mock.calls) {
+      expect(params.ignore_unavailable).toBe(true);
+    }
+  });
+
+  it('makes no request for an empty list', async () => {
+    const deleteIndices = jest.fn();
+    const esClient = { indices: { delete: deleteIndices } } as unknown as Client;
+
+    await deleteIndicesChunked({ esClient, indices: [] });
+
+    expect(deleteIndices).not.toHaveBeenCalled();
   });
 });

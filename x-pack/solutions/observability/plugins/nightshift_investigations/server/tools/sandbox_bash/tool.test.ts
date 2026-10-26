@@ -1,0 +1,256 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
+import type { ResolveConnectorCredentials } from './connector_credentials';
+import {
+  createSandboxBashTool,
+  MAX_INLINE_OUTPUT_CHARS,
+  MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS,
+} from './tool';
+
+const GITHUB_TOKEN = 'ghp_sandbox_secret_value';
+const CONNECTOR_TOKEN = 'connector-secret-token';
+
+const setup = ({
+  resolveForCommand = jest.fn().mockResolvedValue({
+    env: { GITHUB_TOKEN },
+    secretValues: [GITHUB_TOKEN],
+  }),
+  resolveConnectorCredentials,
+  stdout = '',
+}: {
+  resolveForCommand?: jest.Mock;
+  resolveConnectorCredentials?: ResolveConnectorCredentials;
+  stdout?: string;
+} = {}) => {
+  const runCommand = jest.fn().mockResolvedValue({
+    exit_code: 0,
+    timed_out: false,
+    stdout,
+    stderr: '',
+  });
+  const mkdirs = jest.fn().mockResolvedValue([true]);
+  const writeFiles = jest.fn().mockResolvedValue([{ success: true }]);
+  const session = { runCommand, mkdirs, writeFiles } as unknown as SandboxSession;
+  const sandboxStart = {
+    getSession: jest.fn(() => session),
+  } as unknown as SandboxPluginStart;
+  const sandboxWorkspaceManager = {
+    ensureWorkspaceReady: jest.fn().mockResolvedValue(undefined),
+  } as unknown as SandboxWorkspaceManager;
+  const logger = loggingSystemMock.createLogger();
+
+  const tool = createSandboxBashTool({
+    getSandboxStart: () => sandboxStart,
+    sandboxWorkspaceManager,
+    resolveConnectorCredentials,
+    sandboxSecretsClient: { resolveForCommand },
+    logger,
+  });
+
+  const request = httpServerMock.createKibanaRequest();
+  const context = {
+    request,
+    runContext: { stack: [{ type: 'agent', agentId: 'agent', conversationId: 'conv-1' }] },
+    agentConfiguration: { connector_ids: ['connector-1'] },
+  };
+
+  const run = (params: Record<string, unknown>) =>
+    (tool.handler as unknown as (p: unknown, c: unknown) => Promise<{ results: unknown[] }>)(
+      { command: 'echo hi', ...params },
+      context
+    );
+
+  return { tool, run, runCommand, writeFiles, resolveForCommand, request, logger, session };
+};
+
+describe('sandbox bash tool — sandbox secrets', () => {
+  it('does not resolve secrets when none are requested', async () => {
+    const { run, runCommand, resolveForCommand } = setup();
+
+    await run({});
+
+    expect(resolveForCommand).not.toHaveBeenCalled();
+    expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('GITHUB_TOKEN');
+  });
+
+  it('injects requested secrets into the command environment only', async () => {
+    const { run, runCommand, resolveForCommand, request } = setup();
+
+    await run({ secret_keys: ['GITHUB_TOKEN'] });
+
+    expect(resolveForCommand).toHaveBeenCalledWith(request, ['GITHUB_TOKEN']);
+    expect(runCommand.mock.calls[0][0].env).toMatchObject({ GITHUB_TOKEN });
+  });
+
+  it('applies secrets over agent env and connector credentials over secrets', async () => {
+    const resolveForCommand = jest.fn().mockResolvedValue({
+      env: { GITHUB_TOKEN, SHARED: 'from-secret' },
+      secretValues: [GITHUB_TOKEN],
+    });
+    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+      env: { SHARED: 'from-connector', CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN },
+      secretValues: [CONNECTOR_TOKEN],
+    });
+    const { run, runCommand } = setup({ resolveForCommand, resolveConnectorCredentials });
+
+    await run({
+      env: { GITHUB_TOKEN: 'agent-override', SHARED: 'from-agent' },
+      connector_id: 'connector-1',
+      secret_keys: ['GITHUB_TOKEN', 'SHARED'],
+    });
+
+    expect(runCommand.mock.calls[0][0].env).toMatchObject({
+      GITHUB_TOKEN,
+      SHARED: 'from-connector',
+      CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN,
+    });
+  });
+
+  it('redacts both connector credentials and sandbox secrets from output', async () => {
+    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+      env: { CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN },
+      secretValues: [CONNECTOR_TOKEN],
+    });
+    const { run } = setup({
+      resolveConnectorCredentials,
+      stdout: `${GITHUB_TOKEN} ${CONNECTOR_TOKEN}`,
+    });
+
+    const { results } = await run({ connector_id: 'connector-1', secret_keys: ['GITHUB_TOKEN'] });
+    const serialized = JSON.stringify(results);
+
+    expect(serialized).not.toContain(GITHUB_TOKEN);
+    expect(serialized).not.toContain(CONNECTOR_TOKEN);
+    expect(serialized).toContain('[REDACTED] [REDACTED]');
+  });
+
+  it('returns a tool error and does not run the command when a secret cannot be resolved', async () => {
+    const resolveForCommand = jest
+      .fn()
+      .mockResolvedValue({ errorMessage: 'Unknown sandbox secret(s): MISSING' });
+    const { run, runCommand } = setup({ resolveForCommand });
+
+    const { results } = await run({ secret_keys: ['MISSING'] });
+
+    expect(results).toEqual([
+      { type: ToolResultType.error, data: { message: 'Unknown sandbox secret(s): MISSING' } },
+    ]);
+    expect(runCommand).not.toHaveBeenCalled();
+  });
+
+  it('is not exposed over MCP', () => {
+    const { tool } = setup();
+
+    expect(tool.excludeFromMcp).toBe(true);
+  });
+
+  it('logs only the error type, never the error message, when the sandbox call throws', async () => {
+    const { run, runCommand, logger } = setup({ stdout: '' });
+    runCommand.mockRejectedValue(new Error(`boom while handling ${GITHUB_TOKEN}`));
+
+    await run({ secret_keys: ['GITHUB_TOKEN'] });
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const [loggedMessage] = logger.error.mock.calls[0];
+    expect(loggedMessage).not.toContain(GITHUB_TOKEN);
+    expect(loggedMessage).not.toContain('boom while handling');
+    expect(loggedMessage).toContain('Error');
+  });
+});
+
+describe('sandbox bash tool — command timeout', () => {
+  it.each([
+    ['omitted', undefined, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS],
+    ['zero', 0, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS],
+    ['below the cap', 60, 60],
+    ['above the cap', 600, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS],
+  ])('uses a bounded timeout when the requested timeout is %s', async (_, requested, expected) => {
+    const { run, runCommand } = setup();
+
+    await run(requested === undefined ? {} : { timeout_seconds: requested });
+
+    expect(runCommand.mock.calls[0][0].timeout_seconds).toBe(expected);
+  });
+});
+
+describe('sandbox bash tool — output size', () => {
+  const longOutput = `HEAD${'x'.repeat(MAX_INLINE_OUTPUT_CHARS * 2)}TAIL`;
+
+  it('returns output within the limit unchanged and saves nothing', async () => {
+    const stdout = 'y'.repeat(MAX_INLINE_OUTPUT_CHARS);
+    const { run, writeFiles } = setup({ stdout });
+
+    const { results } = await run({});
+
+    expect(results).toEqual([
+      { type: ToolResultType.other, data: { stdout, stderr: '', exit_code: 0 } },
+    ]);
+    expect(writeFiles).not.toHaveBeenCalled();
+  });
+
+  it('saves long redacted output to a file and returns its head and tail', async () => {
+    const stdout = `${GITHUB_TOKEN}${longOutput}`;
+    const { run, writeFiles } = setup({ stdout });
+
+    const { results } = await run({ secret_keys: ['GITHUB_TOKEN'] });
+
+    const [[{ path, content }]] = writeFiles.mock.calls[0];
+    expect(path).toMatch(/^\/workspace\/\.tool-output\/.+\.stdout\.txt$/);
+    expect(content.toString('utf8')).toBe(`[REDACTED]${longOutput}`);
+
+    const returned = (results[0] as { data: { stdout: string } }).data.stdout;
+    expect(returned.length).toBeLessThan(MAX_INLINE_OUTPUT_CHARS);
+    expect(returned.startsWith('[REDACTED]HEAD')).toBe(true);
+    expect(returned.endsWith('TAIL')).toBe(true);
+    expect(returned).toContain(`full stdout saved to ${path}`);
+  });
+
+  it('truncates long output in the error message of a failed command', async () => {
+    const { run, runCommand } = setup();
+    runCommand.mockResolvedValue({
+      exit_code: 1,
+      timed_out: false,
+      stdout: '',
+      stderr: longOutput,
+    });
+
+    const { results } = await run({});
+
+    const { message } = (results[0] as { data: { message: string } }).data;
+    expect(message.length).toBeLessThan(MAX_INLINE_OUTPUT_CHARS);
+    expect(message).toContain('full stderr saved to /workspace/.tool-output/');
+  });
+
+  it('still truncates when the full output cannot be saved', async () => {
+    const { run, writeFiles } = setup({ stdout: longOutput });
+    writeFiles.mockResolvedValue([{ success: false }]);
+
+    const { results } = await run({});
+
+    const returned = (results[0] as { data: { stdout: string } }).data.stdout;
+    expect(returned.length).toBeLessThan(MAX_INLINE_OUTPUT_CHARS);
+    expect(returned).toContain('full stdout could not be saved');
+  });
+
+  it('suggests redirecting output when the sandbox transport rejects it as too large', async () => {
+    const { run, runCommand } = setup();
+    runCommand.mockRejectedValue(
+      new Error('8 RESOURCE_EXHAUSTED: Received message larger than max')
+    );
+
+    const { results } = await run({});
+
+    expect((results[0] as { data: { message: string } }).data.message).toContain(
+      'redirect it to a file'
+    );
+  });
+});

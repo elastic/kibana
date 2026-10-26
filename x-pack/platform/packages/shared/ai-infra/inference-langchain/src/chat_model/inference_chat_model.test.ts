@@ -15,6 +15,7 @@ import {
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
+import { OutputParserException } from '@langchain/core/output_parsers';
 import type {
   ChatCompleteAPI,
   ChatCompleteResponse,
@@ -433,6 +434,166 @@ describe('InferenceChatModel', () => {
       expect(chatComplete.mock.calls[0][0].toolChoice).toBeUndefined();
       expect(chatComplete.mock.calls[0][0].tools).toBeUndefined();
     });
+
+    it('forwards cacheControl and sessionId per-call options to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        cacheControl: { type: 'ephemeral', ttl: '1h' },
+        sessionId: 'round-1',
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '1h' },
+          sessionId: 'round-1',
+        })
+      );
+    });
+
+    it('omits cacheControl and sessionId from chatComplete when not set', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete.mock.calls[0][0].cacheControl).toBeUndefined();
+      expect(chatComplete.mock.calls[0][0].sessionId).toBeUndefined();
+    });
+
+    it('forwards constructor-level cacheControl and sessionId to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: 'constructor-session',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '5m' },
+          sessionId: 'constructor-session',
+        })
+      );
+    });
+
+    it('per-call options take precedence over constructor-level cacheControl and sessionId', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: 'constructor-session',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        cacheControl: { type: 'ephemeral', ttl: '1h' },
+        sessionId: 'call-session',
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '1h' },
+          sessionId: 'call-session',
+        })
+      );
+    });
+
+    it('forwards cacheControl and sessionId via withConfig', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector }).withConfig({
+        cacheControl: { type: 'ephemeral' },
+        sessionId: 'round-2',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral' },
+          sessionId: 'round-2',
+        })
+      );
+    });
+
+    it('forwards reasoning per-call option to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        reasoning: { effort: 'low' },
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'low' },
+        })
+      );
+    });
+
+    it('omits reasoning from chatComplete when not set', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete.mock.calls[0][0].reasoning).toBeUndefined();
+    });
+
+    it('forwards constructor-level reasoning to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        reasoning: { effort: 'medium' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'medium' },
+        })
+      );
+    });
+
+    it('per-call reasoning takes precedence over constructor-level reasoning', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        reasoning: { effort: 'medium' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        reasoning: { effort: 'high' },
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'high' },
+        })
+      );
+    });
+
+    it('forwards reasoning via withConfig', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector }).withConfig({
+        reasoning: { effort: 'none' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'none' },
+        })
+      );
+    });
   });
 
   describe('Response handling', () => {
@@ -527,6 +688,78 @@ describe('InferenceChatModel', () => {
         promptTokens: 5,
         completionTokens: 10,
         totalTokens: 15,
+      });
+    });
+
+    it('exposes usage_metadata on the returned message, including cache read details', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector, maxRetries: 0 });
+      chatComplete.mockResolvedValue(
+        createResponse({
+          content: 'response',
+          tokens: { prompt: 50, completion: 10, total: 60, cached: 40 },
+        })
+      );
+
+      const output: AIMessage = await chatModel.invoke('Some question');
+
+      expect(output.usage_metadata).toEqual({
+        input_tokens: 50,
+        output_tokens: 10,
+        total_tokens: 60,
+        input_token_details: { cache_read: 40 },
+      });
+    });
+
+    it('omits input_token_details when the provider reports no cached tokens', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector, maxRetries: 0 });
+      chatComplete.mockResolvedValue(
+        createResponse({ content: 'response', tokens: { prompt: 5, completion: 10, total: 15 } })
+      );
+
+      const output: AIMessage = await chatModel.invoke('Some question');
+
+      expect(output.usage_metadata).toEqual({
+        input_tokens: 5,
+        output_tokens: 10,
+        total_tokens: 15,
+      });
+    });
+
+    it('includes thinking tokens in output_tokens and output_token_details', async () => {
+      let rawOutput: Record<string, any>;
+
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        maxRetries: 0,
+        callbacks: [
+          {
+            handleLLMEnd(_output) {
+              rawOutput = _output;
+            },
+          },
+        ],
+      });
+      chatComplete.mockResolvedValue(
+        createResponse({
+          content: 'response',
+          tokens: { prompt: 5, completion: 10, thinking: 30, total: 45 },
+        })
+      );
+
+      const output: AIMessage = await chatModel.invoke('Some question');
+
+      expect(output.usage_metadata).toEqual({
+        input_tokens: 5,
+        output_tokens: 40,
+        total_tokens: 45,
+        output_token_details: { reasoning: 30 },
+      });
+
+      expect(rawOutput!.llmOutput.tokenUsage).toEqual({
+        promptTokens: 5,
+        completionTokens: 40,
+        totalTokens: 45,
       });
     });
 
@@ -696,6 +929,118 @@ describe('InferenceChatModel', () => {
         output_token_details: {},
         output_tokens: 20,
         total_tokens: 25,
+      });
+    });
+
+    it('includes cache read details in the token count chunk usage_metadata', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector, maxRetries: 0 });
+      chatComplete.mockReturnValue(
+        createStreamResponse(['hi'], { prompt: 50, completion: 20, total: 70, cached: 40 })
+      );
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      expect(allChunks[allChunks.length - 1].usage_metadata).toEqual({
+        input_tokens: 50,
+        output_tokens: 20,
+        total_tokens: 70,
+        input_token_details: { cache_read: 40 },
+      });
+    });
+
+    it('includes thinking tokens in the token count chunk usage_metadata', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector, maxRetries: 0 });
+      chatComplete.mockReturnValue(
+        createStreamResponse(['hi'], { prompt: 5, completion: 20, thinking: 15, total: 40 })
+      );
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      expect(allChunks[allChunks.length - 1].usage_metadata).toEqual({
+        input_tokens: 5,
+        output_tokens: 35,
+        total_tokens: 40,
+        output_token_details: { reasoning: 15 },
+      });
+
+      const concatChunk = allChunks.reduce((concat, current) => concat.concat(current));
+      expect(concatChunk.usage_metadata).toEqual({
+        input_tokens: 5,
+        input_token_details: {},
+        output_tokens: 35,
+        output_token_details: { reasoning: 15 },
+        total_tokens: 40,
+      });
+    });
+
+    it('exposes reasoning chunks as additional_kwargs.reasoning_content', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockReturnValue(
+        createStreamResponse([
+          { reasoning: 'Let me ' },
+          { reasoning: 'think.' },
+          { content: 'The answer', reasoning: '' },
+          ' is 42.',
+        ])
+      );
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      expect(allChunks.map((chunk) => chunk.content)).toEqual(['', '', 'The answer', ' is 42.']);
+      expect(allChunks.map((chunk) => chunk.additional_kwargs.reasoning_content)).toEqual([
+        'Let me ',
+        'think.',
+        undefined,
+        undefined,
+      ]);
+
+      const concatChunk = allChunks.reduce((concat, current) => concat.concat(current));
+      expect(concatChunk.content).toEqual('The answer is 42.');
+      expect(concatChunk.additional_kwargs.reasoning_content).toEqual('Let me think.');
+    });
+
+    it('keeps refusal alongside reasoning in additional_kwargs', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockReturnValue(
+        createStreamResponse([{ reasoning: 'Checking policy.', refusal: 'I cannot help.' }])
+      );
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      expect(allChunks[0].additional_kwargs).toEqual({
+        reasoning_content: 'Checking policy.',
+        refusal: 'I cannot help.',
+      });
+    });
+
+    it('omits reasoning_content when chunks carry no reasoning', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockReturnValue(createStreamResponse(['hello ', 'there']));
+
+      const output = await chatModel.stream('Some question');
+      const allChunks: AIMessageChunk[] = [];
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+      }
+
+      allChunks.forEach((chunk) => {
+        expect(chunk.additional_kwargs).not.toHaveProperty('reasoning_content');
       });
     });
 
@@ -967,6 +1312,158 @@ describe('InferenceChatModel', () => {
       ]);
 
       expect(output).toEqual({ city: 'Paris' });
+    });
+
+    const mockExtract = (args: Record<string, unknown>) => {
+      chatComplete.mockResolvedValue(
+        createResponse({
+          content: '',
+          toolCalls: [
+            {
+              toolCallId: 'id',
+              function: {
+                name: 'extract',
+                arguments: args,
+              },
+            },
+          ],
+        })
+      );
+    };
+
+    it('applies schema transforms to tool call args', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        z.object({
+          note: z.string().transform((value) => value.slice(0, 5)),
+        }),
+        { name: 'extract' }
+      );
+
+      mockExtract({ note: 'this is way too long' });
+
+      const output = await structuredOutputModel.invoke([
+        new HumanMessage({ content: 'extract a note' }),
+      ]);
+
+      expect(output).toEqual({ note: 'this ' });
+    });
+
+    it('includes a thrown transform error in the parse failure', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        z.object({
+          note: z.string().transform(() => {
+            throw new Error('transform failed');
+          }),
+        }),
+        { name: 'extract' }
+      );
+
+      mockExtract({ note: 'hello' });
+
+      await expect(
+        structuredOutputModel.invoke([new HumanMessage({ content: 'extract a note' })])
+      ).rejects.toThrow('transform failed');
+    });
+
+    it('rejects tool call args that do not match the schema', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        z.object({
+          level: z.enum(['low', 'high']),
+        }),
+        { name: 'extract' }
+      );
+
+      mockExtract({ level: 'medium' });
+
+      await expect(
+        structuredOutputModel.invoke([new HumanMessage({ content: 'extract a level' })])
+      ).rejects.toThrow(OutputParserException);
+    });
+
+    it('returns transformed output when includeRaw is true', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        z.object({
+          note: z.string().transform((value) => value.slice(0, 5)),
+        }),
+        { name: 'extract', includeRaw: true }
+      );
+
+      mockExtract({ note: 'this is way too long' });
+
+      const output = await structuredOutputModel.invoke([
+        new HumanMessage({ content: 'extract a note' }),
+      ]);
+
+      expect(output.parsed).toEqual({ note: 'this ' });
+      expect(output.raw).toBeDefined();
+    });
+
+    it('returns parsed null when includeRaw is true and output is invalid', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        z.object({
+          level: z.enum(['low', 'high']),
+        }),
+        { name: 'extract', includeRaw: true }
+      );
+
+      mockExtract({ level: 'medium' });
+
+      const output = await structuredOutputModel.invoke([
+        new HumanMessage({ content: 'extract a level' }),
+      ]);
+
+      expect(output.parsed).toBeNull();
+      expect(output.raw).toBeDefined();
+    });
+
+    it('returns raw tool call args when the schema is not zod', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        {
+          type: 'object',
+          properties: {
+            note: { type: 'string' },
+          },
+        },
+        { name: 'extract' }
+      );
+
+      mockExtract({ note: 'this is way too long', extra: true });
+
+      const output = await structuredOutputModel.invoke([
+        new HumanMessage({ content: 'extract a note' }),
+      ]);
+
+      expect(output).toEqual({ note: 'this is way too long', extra: true });
     });
   });
 });

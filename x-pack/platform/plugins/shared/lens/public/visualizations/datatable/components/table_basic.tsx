@@ -6,7 +6,12 @@
  */
 
 import type { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
-import { getFallbackDataBounds, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import {
+  getFallbackDataBounds,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  DEFAULT_MAX_STOP,
+  DEFAULT_MIN_STOP,
+} from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -74,7 +79,11 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getColumnAlignment, hasIncompatibleColorConfig, getColorByValuePalette } from '../utils';
+import {
+  getSupportedColumnAlignment,
+  hasIncompatibleColorConfig,
+  getColorByValuePalette,
+} from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -90,7 +99,7 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
-  const isInteractive = props.interactive;
+  const isInteractive = props.interactive && props.viewMode !== 'non-interactive';
   const isDarkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const { euiTheme } = useEuiTheme();
@@ -138,7 +147,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [props.data]);
 
   const firstTableRef = useRef(firstLocalTable);
-
   useEffect(() => {
     if (!pagination?.pageIndex && !pagination?.pageSize) return;
     const lastPageIndex = firstLocalTable.rows.length
@@ -309,7 +317,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const alignments: Map<string, 'left' | 'right' | 'center'> = useMemo(() => {
     return columnConfig.columns.reduce((acc, column) => {
-      acc.set(column.columnId, getColumnAlignment(column, isNumericMap.get(column.columnId)));
+      acc.set(
+        column.columnId,
+        getSupportedColumnAlignment(column, isNumericMap.get(column.columnId))
+      );
       return acc;
     }, new Map<string, 'left' | 'right' | 'center'>());
   }, [columnConfig.columns, isNumericMap]);
@@ -343,7 +354,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         headerRowLines,
         columnCellValueActions,
         dataGridRef.current?.closeCellPopover,
-        props.columnFilterable
+        props.columnFilterable,
+        props.viewMode !== 'non-interactive'
       ),
     [
       bucketedColumns,
@@ -360,6 +372,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       headerRowLines,
       columnCellValueActions,
       props.columnFilterable,
+      props.viewMode,
     ]
   );
 
@@ -461,8 +474,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
               stops: stops.map(({ stop }) => stop),
               gradient: false,
               range: defaultPalette.params?.rangeType ?? 'percent',
-              rangeMin: dataBounds.min,
-              rangeMax: dataBounds.max,
+              rangeMin: defaultPalette.params?.rangeMin ?? DEFAULT_MIN_STOP,
+              rangeMax: defaultPalette.params?.rangeMax ?? DEFAULT_MAX_STOP,
               continuity: defaultPalette.params?.continuity,
             },
           };
@@ -505,13 +518,18 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       DataContext,
       isDarkMode,
       getCellColor,
-      props.args.fitRowToContent
+      props.paletteService,
+      props.viewMode !== 'non-interactive',
+      props.args.fitRowToContent,
+      props.args.density
     );
   }, [
     formatters,
     columnConfig,
     isDarkMode,
+    props.viewMode,
     props.args.fitRowToContent,
+    props.args.density,
     props.paletteService,
     palettes,
     sortedTable,
@@ -669,7 +687,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellPopover={renderCellPopover}
           gridStyle={gridStyle}
           schemaDetectors={schemaDetectors}
-          sorting={sorting}
+          sorting={props.viewMode === 'non-interactive' ? undefined : sorting}
           pagination={
             pagination && {
               ...pagination,

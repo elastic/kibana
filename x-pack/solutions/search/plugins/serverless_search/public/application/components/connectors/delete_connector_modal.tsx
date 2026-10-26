@@ -41,7 +41,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
   const { isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async () => {
       const result = await http.delete<AcknowledgedResponseBase>(
-        `/internal/serverless_search/connectors/${connectorId}`
+        `/internal/serverless_search/connectors/${encodeURIComponent(connectorId)}`
       );
       return result.acknowledged;
     },

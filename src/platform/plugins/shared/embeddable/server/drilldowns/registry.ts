@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { DrilldownSetup } from './types';
 import { getTransformDrilldownsIn } from '../../common/drilldowns/transform_drilldowns_in';
 import { getTransformDrilldownsOut } from '../../common/drilldowns/transform_drilldowns_out';
@@ -47,25 +46,22 @@ export function getDrilldownRegistry() {
         // sort to ensure consistent order in OAS documenation
         .sort(([aType], [bType]) => aType.localeCompare(bType))
         .map(([type, drilldownSetup]) =>
-          drilldownSetup.schema.extends(
-            {
-              label: schema.string(),
-              trigger: schema.oneOf(
-                drilldownSetup.supportedTriggers
-                  // narrow drilldown triggers to only those that intersect with supported triggers
-                  .filter((trigger) => supportedTriggers.includes(trigger))
-                  // sort to ensure consistent order in OAS documenation
-                  .sort()
-                  .map((trigger) => schema.literal(trigger)) as [Type<string>]
-              ),
-              type: schema.literal(type),
-            },
-            {
-              meta: {
-                title: type,
-              },
-            }
-          )
+          drilldownSetup.schema
+            .and(
+              z.object({
+                label: z.string(),
+                trigger: z.union(
+                  drilldownSetup.supportedTriggers
+                    // narrow drilldown triggers to only those that intersect with supported triggers
+                    .filter((trigger) => supportedTriggers.includes(trigger))
+                    // sort to ensure consistent order in OAS documenation
+                    .sort()
+                    .map((trigger) => z.literal(trigger))
+                ),
+                type: z.literal(type),
+              })
+            )
+            .meta({ title: type })
         );
 
       if (drilldownSchemas.length === 0) {
@@ -74,21 +70,11 @@ export function getDrilldownRegistry() {
         );
       }
 
-      return schema.object({
-        drilldowns: schema.maybe(
-          schema.arrayOf(
-            schema.oneOf(
-              drilldownSchemas as unknown as [
-                Type<Readonly<{} & { label: string; type: string; trigger: string }>>
-              ]
-            ),
-            {
-              // 100 is an arbitrary limit
-              maxSize: 100,
-            }
-          )
-        ),
-      });
+      return z
+        .object({
+          drilldowns: z.array(z.union(drilldownSchemas)).max(100).optional(),
+        })
+        .strict();
     },
   };
 }

@@ -1,0 +1,42 @@
+{
+  "10.2.0": [
+    {
+      "type": "logFiles",
+      "state": {
+        "datasetName": "nginx-access",
+        "serviceName": "nginx",
+        "logFilePaths": ["/var/log/nginx/access.log"],
+        "namespace": "default"
+      },
+      "progress": {
+        "ea-download": { "status": "complete" },
+        "ea-extract": { "status": "complete" },
+        "ea-install": { "status": "complete" },
+        "ea-status": {
+          "status": "complete",
+          "payload": { "agentId": "8f5f2d5e-4b3a-4a1a-9c2e-1a2b3c4d5e6f" }
+        }
+      }
+    }
+  ],
+  "10.3.0": [
+    {
+      "type": "logFiles",
+      "state": {
+        "datasetName": "nginx-access",
+        "serviceName": "nginx",
+        "logFilePaths": ["/var/log/nginx/access.log"],
+        "namespace": "default"
+      },
+      "progress": {
+        "ea-download": { "status": "complete" },
+        "ea-extract": { "status": "complete" },
+        "ea-install": { "status": "complete" },
+        "ea-status": {
+          "status": "complete",
+          "payload": { "agentId": "8f5f2d5e-4b3a-4a1a-9c2e-1a2b3c4d5e6f" }
+        }
+      }
+    }
+  ]
+}

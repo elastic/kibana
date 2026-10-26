@@ -53,6 +53,7 @@ export const renderApp = async (
               return (
                 <PipelineList
                   clusterService={clusterService}
+                  history={history}
                   isServerless={isServerless}
                   isReadOnly={logstashLicenseService.isReadOnly}
                   isForbidden={true}
@@ -61,7 +62,7 @@ export const renderApp = async (
                   monitoringService={monitoringService}
                   openPipeline={(id: string) => history.push(`/pipeline/${id}/edit`)}
                   clonePipeline={(id: string) => history.push(`/pipeline/${id}/edit?clone`)}
-                  createPipeline={() => history.push(`pipeline/new-pipeline`)}
+                  createPipeline={() => history.push(`/pipeline/new-pipeline`)}
                   pipelinesService={pipelinesService}
                   toastNotifications={core.notifications.toasts}
                 />

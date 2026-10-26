@@ -1,0 +1,527 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getBuiltInEntityDefinition } from '../definitions/registry';
+import {
+  getEuidFromObject,
+  getEuidFromObjectForSearch,
+  getEntityIdentifiersFromDocument,
+} from './memory';
+
+describe('getEntityIdentifiersFromDocument', () => {
+  it('returns undefined when doc is null or undefined', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('host'), null)
+    ).toBeUndefined();
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('host'), undefined)
+    ).toBeUndefined();
+  });
+
+  it('returns host.id entry when nested host.id is present', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('host'), { host: { id: 'h1' } })
+    ).toEqual({
+      'host.id': 'h1',
+    });
+  });
+
+  it('returns host.name when host.id is absent', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('host'), {
+        host: { name: 'server1' },
+      })
+    ).toEqual({
+      'host.name': 'server1',
+    });
+  });
+
+  it('unwraps _source like getEuidFromObject', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('generic'), {
+        _source: { entity: { id: 'e-123' } },
+      })
+    ).toEqual({ 'entity.id': 'e-123' });
+  });
+
+  it('returns service.name for single-field service identity', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('service'), {
+        service: { name: 'api-gateway' },
+      })
+    ).toEqual({ 'service.name': 'api-gateway' });
+  });
+
+  it('returns undefined for service when service.name is missing', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('service'), { service: {} })
+    ).toBeUndefined();
+  });
+
+  it('returns user.email and evaluated entity.namespace for IDP email path', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('user'), {
+        user: { email: 'alice@example.com' },
+        event: { kind: 'asset', module: 'okta' },
+      })
+    ).toEqual({
+      'user.email': 'alice@example.com',
+      'entity.namespace': 'okta',
+    });
+  });
+
+  it('returns user.name, host.id, and entity.namespace for non-IDP local path', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('user'), {
+        user: { name: 'alice' },
+        host: { id: 'host-1' },
+      })
+    ).toEqual({
+      'user.name': 'alice',
+      'host.id': 'host-1',
+      'entity.namespace': 'local',
+    });
+  });
+
+  it('returns undefined when user document fails pipeline gate (e.g. wrong IDP module)', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('user'), {
+        user: { email: 'a@b.com' },
+        event: { module: 'azure' },
+      })
+    ).toBeUndefined();
+  });
+
+  it('prefers host.id over host.name for host identifiers', () => {
+    expect(
+      getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('host'), {
+        host: { id: 'h1', name: 'server1', hostname: 'node-1' },
+      })
+    ).toEqual({
+      'host.id': 'h1',
+    });
+  });
+});
+
+describe('getEuidFromObject', () => {
+  it('returns empty string when obj is null or undefined', () => {
+    expect(getEuidFromObject(getBuiltInEntityDefinition('host'), null)).toBe(undefined);
+    expect(getEuidFromObject(getBuiltInEntityDefinition('generic'), undefined)).toBe(undefined);
+  });
+
+  describe('generic', () => {
+    it('returns entity.id without type prefix (skipTypePrepend)', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('generic'), { entity: { id: 'e-123' } })
+      ).toBe('e-123');
+    });
+
+    it('unwraps _source when doc is an Elasticsearch hit', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('generic'), {
+          _source: { entity: { id: 'e-123' } },
+        })
+      ).toBe('e-123');
+    });
+  });
+
+  describe('host', () => {
+    it('uses host.id when present', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('host'), { host: { id: 'host-id-1' } })
+      ).toBe('host:host-id-1');
+    });
+
+    it('uses host.name when host.id is missing', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('host'), { host: { name: 'server1' } })
+      ).toBe('host:server1');
+    });
+
+    it('uses host.hostname when host.id and host.name are missing', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('host'), { host: { hostname: 'node-1' } })
+      ).toBe('host:node-1');
+    });
+
+    it('precedence: host.id over host.name', () => {
+      const obj = { host: { id: 'h1', name: 'server1' } };
+      expect(getEuidFromObject(getBuiltInEntityDefinition('host'), obj)).toBe('host:h1');
+    });
+
+    it('precedence: host.id over host.hostname', () => {
+      const obj = { host: { id: 'h1', hostname: 'node-1' } };
+      expect(getEuidFromObject(getBuiltInEntityDefinition('host'), obj)).toBe('host:h1');
+    });
+
+    it('precedence: host.name over host.hostname when both present', () => {
+      const obj = { host: { name: 'server1', hostname: 'node-1' } };
+      expect(getEuidFromObject(getBuiltInEntityDefinition('host'), obj)).toBe('host:server1');
+    });
+
+    it('returns undefined when no host identity field is present', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('host'), { host: { domain: 'example.com' } })
+      ).toBeUndefined();
+    });
+  });
+
+  describe('user', () => {
+    const withNamespace = (doc: object, module: string = 'okta') => ({
+      ...doc,
+      event: { kind: 'asset', module },
+    });
+
+    it('uses user.email + "@" + entity.namespace when user.email and event.module are present', () => {
+      expect(
+        getEuidFromObject(
+          getBuiltInEntityDefinition('user'),
+          withNamespace({ user: { email: 'alice@example.com' } })
+        )
+      ).toBe('user:alice@example.com@okta');
+    });
+
+    it('maps event.module okta and entityanalytics_okta to namespace okta', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { email: 'a@b.com' },
+          event: { kind: 'asset', module: 'entityanalytics_okta' },
+        })
+      ).toBe('user:a@b.com@okta');
+    });
+
+    it('returns undefined when document fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { email: 'a@b.com' },
+          event: { module: 'azure' },
+        })
+      ).toBeUndefined();
+    });
+
+    it('uses non-IDP path when user.name and host.id are present', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { name: 'alice' },
+          host: { id: 'host-1' },
+        })
+      ).toBe('user:alice@host-1@local');
+    });
+
+    it('returns undefined when event.outcome is failure (documentsFilter)', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { email: 'a@b.com' },
+          event: { kind: 'asset', module: 'okta', outcome: 'failure' },
+        })
+      ).toBeUndefined();
+    });
+
+    it('maps event.module o365 and o365_metrics to namespace microsoft_365', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { email: 'a@b.com' },
+          event: { kind: 'asset', module: 'o365_metrics' },
+        })
+      ).toBe('user:a@b.com@microsoft_365');
+    });
+
+    it('uses event.module as entity.namespace when no whenClause matches (fallback to source)', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { email: 'a@b.com' },
+          event: { kind: 'asset', module: 'custom_module' },
+        })
+      ).toBe('user:a@b.com@custom_module');
+    });
+
+    it('returns euid with entity.namespace fallback when user.email is present but no source (event.module/data_stream.dataset) is set', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { email: 'dev@example.com' },
+          event: { kind: 'asset' },
+        })
+      ).toBe('user:dev@example.com@unknown');
+    });
+
+    it('uses user.name + "@" + entity.namespace when user.name and event.module are present', () => {
+      expect(
+        getEuidFromObject(
+          getBuiltInEntityDefinition('user'),
+          withNamespace({ user: { name: 'alice' } })
+        )
+      ).toBe('user:alice@okta');
+    });
+
+    it('uses user.id + "@" + entity.namespace when user.id and event.module are present', () => {
+      expect(
+        getEuidFromObject(
+          getBuiltInEntityDefinition('user'),
+          withNamespace({ user: { id: 'user-id-42' } })
+        )
+      ).toBe('user:user-id-42@okta');
+    });
+
+    it('precedence: user.email@entity.namespace over user.id@entity.namespace', () => {
+      const obj = withNamespace({
+        user: { email: 'alice@example.com', id: 'user-42' },
+      });
+      expect(getEuidFromObject(getBuiltInEntityDefinition('user'), obj)).toBe(
+        'user:alice@example.com@okta'
+      );
+    });
+
+    it('precedence: user.email over user.name@entity.namespace', () => {
+      const obj = withNamespace({
+        user: { email: 'dev@example.com', name: 'dave', domain: 'corp.com' },
+      });
+      expect(getEuidFromObject(getBuiltInEntityDefinition('user'), obj)).toBe(
+        'user:dev@example.com@okta'
+      );
+    });
+
+    it('uses user.name@user.domain when name and domain present', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { name: 'jane', domain: 'corp.com' },
+          event: { kind: 'asset', module: 'entityanalytics_ad' },
+        })
+      ).toBe('user:jane@corp.com@active_directory');
+    });
+
+    it('uses user.name@user.domain when name and domain present (namespace does not affect which instruction matches)', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { name: 'jane', domain: 'corp.com' },
+          event: { kind: 'asset', module: 'okta' },
+        })
+      ).toBe('user:jane@corp.com@okta');
+    });
+
+    describe('aws: user.entity.id ranked first when cloud.provider is aws', () => {
+      const IAM_USER_ARN = 'arn:aws:iam::123456789012:user/alice';
+      const IAM_ROLE_ARN = 'arn:aws:iam::123456789012:role/path/Admin';
+
+      const inventoryDoc = (arn: string, name: string) => ({
+        user: { id: arn, name, entity: { id: arn } },
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'aws' },
+      });
+
+      const cloudTrailDoc = (user: Record<string, unknown>) => ({
+        user,
+        event: { kind: 'event', module: 'aws', outcome: 'success' },
+        cloud: { provider: 'aws' },
+      });
+
+      it('resolves an inventory IAM role to user:<role ARN>@aws', () => {
+        expect(
+          getEuidFromObject(getBuiltInEntityDefinition('user'), inventoryDoc(IAM_ROLE_ARN, 'Admin'))
+        ).toBe(`user:${IAM_ROLE_ARN}@aws`);
+      });
+
+      it('resolves a CloudTrail IAM user to the same id as the inventory IAM user', () => {
+        const inventoryId = getEuidFromObject(
+          getBuiltInEntityDefinition('user'),
+          inventoryDoc(IAM_USER_ARN, 'alice')
+        );
+        const cloudTrailId = getEuidFromObjectForSearch(
+          getBuiltInEntityDefinition('user'),
+          cloudTrailDoc({ id: 'AIDAEXAMPLE', name: 'alice', entity: { id: IAM_USER_ARN } })
+        );
+
+        expect(inventoryId).toBe(`user:${IAM_USER_ARN}@aws`);
+        expect(cloudTrailId).toBe(inventoryId);
+      });
+
+      it('resolves a CloudTrail assumed role (principalId in user.id) to the role ARN', () => {
+        expect(
+          getEuidFromObjectForSearch(
+            getBuiltInEntityDefinition('user'),
+            cloudTrailDoc({
+              id: 'AROAEXAMPLE:session-1',
+              name: 'session-1',
+              entity: { id: IAM_ROLE_ARN },
+            })
+          )
+        ).toBe(`user:${IAM_ROLE_ARN}@aws`);
+      });
+
+      it('ranks user.entity.id above user.email', () => {
+        expect(
+          getEuidFromObjectForSearch(
+            getBuiltInEntityDefinition('user'),
+            cloudTrailDoc({
+              email: 'alice@example.com',
+              id: 'AROAEXAMPLE:alice@example.com',
+              entity: { id: IAM_ROLE_ARN },
+            })
+          )
+        ).toBe(`user:${IAM_ROLE_ARN}@aws`);
+      });
+
+      it('treats a single-element user.entity.id array like the scalar value', () => {
+        expect(
+          getEuidFromObjectForSearch(
+            getBuiltInEntityDefinition('user'),
+            cloudTrailDoc({ id: 'AIDAEXAMPLE', entity: { id: [IAM_USER_ARN] } })
+          )
+        ).toBe(`user:${IAM_USER_ARN}@aws`);
+      });
+
+      it('falls back to user.id when user.entity.id is missing or empty', () => {
+        expect(
+          getEuidFromObjectForSearch(
+            getBuiltInEntityDefinition('user'),
+            cloudTrailDoc({ id: 'AIDAEXAMPLE' })
+          )
+        ).toBe('user:AIDAEXAMPLE@aws');
+        expect(
+          getEuidFromObjectForSearch(
+            getBuiltInEntityDefinition('user'),
+            cloudTrailDoc({ id: 'AIDAEXAMPLE', entity: { id: '' } })
+          )
+        ).toBe('user:AIDAEXAMPLE@aws');
+      });
+
+      it('does not create a user from a CloudTrail event alone (creation gate unchanged)', () => {
+        expect(
+          getEuidFromObject(
+            getBuiltInEntityDefinition('user'),
+            cloudTrailDoc({ id: 'AIDAEXAMPLE', name: 'alice', entity: { id: IAM_USER_ARN } })
+          )
+        ).toBeUndefined();
+      });
+
+      it('keeps the local namespace first when user.name and host.id are present', () => {
+        expect(
+          getEuidFromObject(getBuiltInEntityDefinition('user'), {
+            user: { name: 'alice', entity: { id: IAM_USER_ARN } },
+            host: { id: 'host-1' },
+            cloud: { provider: 'aws' },
+          })
+        ).toBe('user:alice@host-1@local');
+      });
+
+      it('keeps the default ranking for aws-hosted logs without user.entity.id', () => {
+        expect(
+          getEuidFromObject(getBuiltInEntityDefinition('user'), {
+            user: { email: 'alice@example.com' },
+            event: { kind: 'asset', module: 'okta' },
+            cloud: { provider: 'aws' },
+          })
+        ).toBe('user:alice@example.com@okta');
+      });
+
+      it('ignores user.entity.id when cloud.provider is not aws', () => {
+        expect(
+          getEuidFromObject(getBuiltInEntityDefinition('user'), {
+            user: { email: 'alice@example.com', entity: { id: 'okta-entity-id' } },
+            event: { kind: 'asset', module: 'okta' },
+          })
+        ).toBe('user:alice@example.com@okta');
+        expect(
+          getEuidFromObject(getBuiltInEntityDefinition('user'), {
+            user: { id: 'gcp-user-id', entity: { id: 'gcp-entity-id' } },
+            event: { kind: 'asset', module: 'asset_discovery' },
+            cloud: { provider: 'gcp' },
+          })
+        ).toBe('user:gcp-user-id@gcp');
+      });
+    });
+  });
+
+  describe('service', () => {
+    it('returns undefined when service.name is missing (single-field identity)', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('service'), {
+          service: { entity: { id: 'svc-entity-1' } },
+        })
+      ).toBe(undefined);
+    });
+
+    it('uses service.name (single-field identity)', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('service'), {
+          service: { name: 'api-gateway' },
+        })
+      ).toBe('service:api-gateway');
+    });
+
+    it('returns undefined when no service.name is present', () => {
+      expect(getEuidFromObject(getBuiltInEntityDefinition('service'), {})).toBe(undefined);
+      expect(getEuidFromObject(getBuiltInEntityDefinition('service'), { service: {} })).toBe(
+        undefined
+      );
+    });
+
+    it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
+      const obj = { service: { entity: { id: 'svc-e1' }, name: 'api-gateway' } };
+      expect(getEuidFromObject(getBuiltInEntityDefinition('service'), obj)).toBe(
+        'service:api-gateway'
+      );
+    });
+  });
+
+  describe('detection alerts and postAggFilter', () => {
+    // No host.id so not local, and event.kind is 'signal', so no arm of postAggFilter accepts it.
+    const oktaUser = {
+      user: { email: 'alice@example.com' },
+      event: { kind: 'signal', module: 'okta' },
+    };
+    const asAlert = (doc: object) => ({ ...doc, 'kibana.alert.rule.uuid': 'rule-1' });
+
+    it('resolves an alert on an IdP-namespace user', () => {
+      expect(getEuidFromObject(getBuiltInEntityDefinition('user'), asAlert(oktaUser))).toBe(
+        'user:alice@example.com@okta'
+      );
+    });
+
+    it('resolves an alert nested under kibana.alert.rule as well as flattened', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          ...oktaUser,
+          kibana: { alert: { rule: { uuid: 'rule-1' } } },
+        })
+      ).toBe('user:alice@example.com@okta');
+    });
+
+    it('still rejects the same document when it is not an alert', () => {
+      expect(getEuidFromObject(getBuiltInEntityDefinition('user'), oktaUser)).toBeUndefined();
+    });
+
+    it('still enforces documentsFilter on an alert', () => {
+      expect(
+        getEuidFromObject(
+          getBuiltInEntityDefinition('user'),
+          asAlert({ ...oktaUser, event: { ...oktaUser.event, outcome: 'failure' } })
+        )
+      ).toBeUndefined();
+    });
+
+    it('resolves without the gate in the search variant', () => {
+      expect(getEuidFromObjectForSearch(getBuiltInEntityDefinition('user'), oktaUser)).toBe(
+        'user:alice@example.com@okta'
+      );
+    });
+  });
+});
+
+describe('definition type', () => {
+  it('takes the id prefix from the definition type', () => {
+    const definition = {
+      ...getBuiltInEntityDefinition('service'),
+      type: 'k8s.pod',
+      identityField: { singleField: 'k8s.pod.uid' },
+    };
+
+    const euid = getEuidFromObject(definition, { k8s: { pod: { uid: 'pod-1' } } });
+
+    expect(euid?.startsWith('k8s.pod:')).toBe(true);
+    expect(euid).toBe('k8s.pod:pod-1');
+  });
+});

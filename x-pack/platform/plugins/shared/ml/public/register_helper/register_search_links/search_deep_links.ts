@@ -136,15 +136,14 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.aiOps', {
           defaultMessage: 'AIOps',
         }),
-        // Default to the index select page for log rate analysis since we don't have an AIops overview page
-        path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
+        path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS}`,
         deepLinks: [
           {
             id: 'logRateAnalysis',
             title: i18n.translate('xpack.ml.deepLink.logRateAnalysis', {
               defaultMessage: 'Log rate analysis',
             }),
-            path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
+            path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS}`,
             visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
@@ -160,7 +159,7 @@ function createDeepLinks(
             title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
               defaultMessage: 'Log pattern analysis',
             }),
-            path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
+            path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION}`,
             visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
@@ -176,7 +175,7 @@ function createDeepLinks(
             title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
               defaultMessage: 'Change point detection',
             }),
-            path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT}`,
+            path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION}`,
             visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
@@ -233,18 +232,8 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
           defaultMessage: 'Index data visualizer',
         }),
-        path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
-        visibleIn: ['globalSearch', 'projectSideNav'],
-      };
-    },
-    getIndexDataVisualizerPageDeepLink: (): AppDeepLink<LinkId> => {
-      return {
-        id: 'indexDataVisualizerPage',
-        title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
-          defaultMessage: 'Index data visualizer',
-        }),
         path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`,
-        visibleIn: [],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
 
@@ -265,7 +254,7 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.dataDrift', {
           defaultMessage: 'Data drift',
         }),
-        path: `/${ML_PAGES.DATA_DRIFT_INDEX_SELECT}`,
+        path: `/${ML_PAGES.DATA_DRIFT}`,
         visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },

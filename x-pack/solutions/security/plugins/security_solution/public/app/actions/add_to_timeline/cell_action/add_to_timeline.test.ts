@@ -19,8 +19,12 @@ const services = createStartServicesMock();
 const mockWarningToast = services.notifications.toasts.addWarning;
 
 const mockDispatch = jest.fn();
+const mockGetState = jest.fn(() => ({
+  timeline: { timelineById: { [TimelineId.active]: { isSuperTimeline: false } } },
+}));
 const store = {
   dispatch: mockDispatch,
+  getState: mockGetState,
 } as unknown as SecurityAppStore;
 
 const value = 'the-value';
@@ -151,6 +155,13 @@ describe('createAddToTimelineCellAction', () => {
       });
 
       expect(await addToTimelineActionIsCompatible.isCompatible(context)).toEqual(false);
+    });
+
+    it('should return false when the active timeline is a Super Timeline', async () => {
+      mockGetState.mockReturnValueOnce({
+        timeline: { timelineById: { [TimelineId.active]: { isSuperTimeline: true } } },
+      });
+      expect(await addToTimelineAction.isCompatible(context)).toEqual(false);
     });
   });
 

@@ -52,59 +52,65 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
 
     const eqlSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setEql,
         isSelected: isEqlRule(ruleType),
       }),
-      [ruleType, setEql]
+      [ruleType, setEql, isUpdateView]
     );
 
     const querySelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setQuery,
         isSelected: isQueryRule(ruleType),
       }),
-      [ruleType, setQuery]
+      [ruleType, setQuery, isUpdateView]
     );
 
     const mlSelectableConfig = useMemo(
       () => ({
-        isDisabled: !hasValidLicense || !isMlAdmin,
+        isDisabled: isUpdateView || !hasValidLicense || !isMlAdmin,
         onClick: setMl,
         isSelected: isMlRule(ruleType),
       }),
-      [ruleType, setMl, hasValidLicense, isMlAdmin]
+      [ruleType, setMl, hasValidLicense, isMlAdmin, isUpdateView]
     );
 
     const thresholdSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setThreshold,
         isSelected: isThresholdRule(ruleType),
       }),
-      [ruleType, setThreshold]
+      [ruleType, setThreshold, isUpdateView]
     );
 
     const threatMatchSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setThreatMatch,
         isSelected: isThreatMatchRule(ruleType),
       }),
-      [ruleType, setThreatMatch]
+      [ruleType, setThreatMatch, isUpdateView]
     );
 
     const newTermsSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setNewTerms,
         isSelected: isNewTermsRule(ruleType),
       }),
-      [ruleType, setNewTerms]
+      [ruleType, setNewTerms, isUpdateView]
     );
 
     const esqlSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setEsql,
         isSelected: isEsqlRule(ruleType),
       }),
-      [ruleType, setEsql]
+      [ruleType, setEsql, isUpdateView]
     );
 
     return (
@@ -122,7 +128,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.QUERY_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.QUERY_TYPE_DESCRIPTION}
-                icon={<EuiIcon size="xl" type="magnify" />}
+                icon={<EuiIcon size="xl" type="magnify" aria-hidden={true} />}
                 selectable={querySelectableConfig}
                 layout="horizontal"
               />
@@ -135,7 +141,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.ML_TYPE_TITLE}
                 titleSize="xs"
                 description={<MlCardDescription hasValidLicense={hasValidLicense} />}
-                icon={<EuiIcon size="l" type="machineLearningApp" />}
+                icon={<EuiIcon size="l" type="machineLearningApp" aria-hidden={true} />}
                 isDisabled={mlSelectableConfig.isDisabled && !mlSelectableConfig.isSelected}
                 selectable={mlSelectableConfig}
                 layout="horizontal"
@@ -149,7 +155,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.THRESHOLD_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.THRESHOLD_TYPE_DESCRIPTION}
-                icon={<EuiIcon size="l" type="chartThreshold" />}
+                icon={<EuiIcon size="l" type="chartThreshold" aria-hidden={true} />}
                 selectable={thresholdSelectableConfig}
                 layout="horizontal"
               />
@@ -162,7 +168,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.EQL_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.EQL_TYPE_DESCRIPTION}
-                icon={<EuiIcon size="l" type="query" />}
+                icon={<EuiIcon size="l" type="query" aria-hidden={true} />}
                 selectable={eqlSelectableConfig}
                 layout="horizontal"
               />
@@ -175,7 +181,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.THREAT_MATCH_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
-                icon={<EuiIcon size="l" type="listBullet" />}
+                icon={<EuiIcon size="l" type="listBullet" aria-hidden={true} />}
                 selectable={threatMatchSelectableConfig}
                 layout="horizontal"
               />
@@ -188,7 +194,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.NEW_TERMS_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
-                icon={<EuiIcon size="l" type="magnifyPlus" />}
+                icon={<EuiIcon size="l" type="magnifyPlus" aria-hidden={true} />}
                 selectable={newTermsSelectableConfig}
                 layout="horizontal"
               />
@@ -201,7 +207,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.ESQL_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.ESQL_TYPE_DESCRIPTION}
-                icon={<EuiIcon type="logoElasticsearch" size="l" />}
+                icon={<EuiIcon type="logoElasticsearch" size="l" aria-hidden={true} />}
                 selectable={esqlSelectableConfig}
                 layout="horizontal"
               />

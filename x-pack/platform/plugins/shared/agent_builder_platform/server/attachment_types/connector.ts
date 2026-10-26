@@ -13,16 +13,21 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
-import { getConnectorSpec } from '@kbn/connector-specs';
+import {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  getConnectorSpec,
+} from '@kbn/connector-specs';
 
 /**
  * Creates the definition for the `connector` attachment type.
  *
  * Connector attachments represent a connector instance attached to a conversation,
  * along with its available sub-actions. When a ConnectorSpec is found, the
- * sub-actions (with `isTool: true`) are listed directly from the spec so the
- * agent knows how to call them via the connector tool id `platform.core.execute_connector_sub_action`
- * using the `connectorId` + `subAction` + `params` JSON shape in the attachment text.
+ * sub-actions (recommended isTool actions, or an explicit selected_actions allowlist)
+ * are listed so the agent knows how to call them via
+ * `platform.core.execute_connector_sub_action` using the
+ * `connectorId` + `subAction` + `params` JSON shape in the attachment text.
  */
 export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
   AttachmentType.connector,
@@ -46,12 +51,11 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         connector_id: connectorId,
         connector_name: connectorName,
         connector_type: connectorType,
+        selected_actions: selectedActions,
       } = attachment.data;
 
       const spec = getConnectorSpec(connectorType);
-      const subActionEntries = spec
-        ? Object.entries(spec.actions).filter(([, action]) => action.isTool)
-        : [];
+      const subActionEntries = spec ? filterActionsBySelection(spec.actions, selectedActions) : [];
 
       return {
         getRepresentation: () => {
@@ -73,17 +77,26 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
           if (subActionEntries.length > 0) {
             parts.push('');
             parts.push(`Available sub-actions (call ${toolId} with connectorId="${connectorId}"):`);
+            if (Array.isArray(selectedActions)) {
+              parts.push('Note: only selected sub-actions are enabled; do not call others.');
+            }
             for (const [actionName, action] of subActionEntries) {
-              const actionDesc = action.description ?? actionName;
               const paramsSummary = action.input
                 ? formatSchemaForLlm(action.input)
                 : 'No parameters';
-              parts.push(`  - ${actionName}: ${actionDesc}`);
+              parts.push(`  - ${formatConnectorActionLine(actionName, action)}`);
               parts.push(`    Parameters: ${paramsSummary}`);
             }
 
             if (spec?.skill) {
               parts.push('');
+              if (Array.isArray(selectedActions)) {
+                parts.push(
+                  'Note: not every action may be available on this instance. ' +
+                    'Before calling any action, verify it appears in the list above.'
+                );
+                parts.push('');
+              }
               parts.push(spec.skill);
             }
           }

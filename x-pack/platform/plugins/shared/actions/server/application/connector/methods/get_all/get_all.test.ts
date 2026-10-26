@@ -30,6 +30,20 @@ import { createMockInMemoryConnector } from '../../mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
+
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeHasInboundEvents(actionTypeId)
+    ),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
+    ),
+  };
+});
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -70,6 +84,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const getAxiosInstanceWithAuth = jest.fn();
 const isESOCanEncrypt = true;
+const testInMemoryConnectors: Array<ReturnType<typeof createMockInMemoryConnector>> = [];
 
 let actionsClient: ActionsClient;
 const actionTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
@@ -78,7 +93,14 @@ const authTypeRegistry: AuthTypeRegistry =
 describe('getAll()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation((actionTypeId: string) =>
+      jest.requireActual('@kbn/connector-specs').connectorTypeHasInboundEvents(actionTypeId)
+    );
+    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
+      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    );
     actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+    testInMemoryConnectors.length = 0;
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -86,7 +108,7 @@ describe('getAll()', () => {
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
-      inMemoryConnectors: [],
+      inMemoryConnectors: testInMemoryConnectors,
       actionExecutor,
       bulkExecutionEnqueuer,
       request,
@@ -347,7 +369,111 @@ describe('getAll()', () => {
       ]);
     });
 
-    test.skip('get system actions correctly', async () => {
+    test('filters to sandbox-capable connectors when sandboxCapableOnly is true', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'github-1',
+            type: 'action',
+            attributes: {
+              name: 'GitHub sandbox',
+              actionTypeId: '.github',
+              isMissingSecrets: false,
+              config: { authType: 'bearer' },
+            },
+            score: 1,
+            references: [],
+          },
+          {
+            id: 'slack-1',
+            type: 'action',
+            attributes: {
+              name: 'Slack',
+              actionTypeId: '.slack',
+              isMissingSecrets: false,
+              config: { authType: 'webhook' },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'github-1': { doc_count: 0 },
+          },
+        }
+      );
+
+      actionTypeRegistry.has = jest.fn((id: string) => id === '.github' || id === '.slack');
+      actionTypeRegistry.get = jest.fn((id: string) => {
+        if (id === '.github') {
+          return {
+            sandboxSupportedAuthTypes: ['bearer', 'oauth_authorization_code'],
+            isSystemActionType: false,
+          };
+        }
+        return { sandboxSupportedAuthTypes: [], isSystemActionType: false };
+      }) as unknown as ActionTypeRegistry['get'];
+
+      const result = await actionsClient.getAll({ sandboxCapableOnly: true });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'github-1',
+          actionTypeId: '.github',
+          config: { authType: 'bearer' },
+        })
+      );
+    });
+
+    test('keeps a preconfigured sandbox-capable connector with exposeConfig false', async () => {
+      const preconfigured = { isPreconfigured: true, exposeConfig: false };
+      testInMemoryConnectors.push(
+        createMockInMemoryConnector({
+          ...preconfigured,
+          id: 'pre-github',
+          actionTypeId: '.github',
+          name: 'github',
+          config: { authType: 'bearer' },
+        }),
+        createMockInMemoryConnector({
+          ...preconfigured,
+          id: 'pre-slack',
+          actionTypeId: '.slack',
+          name: 'slack',
+          config: { authType: 'webhook' },
+        })
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 10,
+        page: 1,
+        saved_objects: [],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        { aggregations: { 'pre-github': { doc_count: 0 } } }
+      );
+      actionTypeRegistry.has = jest.fn(() => true);
+      actionTypeRegistry.get = jest.fn((id: string) => ({
+        sandboxSupportedAuthTypes: id === '.github' ? ['bearer'] : [],
+        isSystemActionType: false,
+      })) as unknown as ActionTypeRegistry['get'];
+
+      const result = await actionsClient.getAll({ sandboxCapableOnly: true });
+
+      expect(result.map(({ id }) => id)).toEqual(['pre-github']);
+      expect(result[0]).not.toHaveProperty('config');
+    });
+
+    test('get system actions correctly', async () => {
       const expectedResult = {
         total: 1,
         per_page: 10,
@@ -358,6 +484,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
+              actionTypeId: '.test-connector-type',
               isMissingSecrets: false,
               config: {
                 foo: 'bar',
@@ -588,6 +715,384 @@ describe('getAll()', () => {
       await actionsClient.getAll();
 
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('does not return last-saver identity fields', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'action',
+            attributes: {
+              name: 'inbound',
+              actionTypeId: '.inboundWebhook',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+              apiKey: 'should-not-leak',
+              uiamApiKey: 'should-not-leak-uiam',
+              uiamApiKeyExternal: false,
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 1 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+      expect(result[0]).not.toHaveProperty('apiKey');
+      expect(result[0]).not.toHaveProperty('uiamApiKey');
+      expect(result[0]).not.toHaveProperty('uiamApiKeyExternal');
+      expect(result[0]).not.toHaveProperty('secrets');
+      expect(result[0].isInboundEventsEnabled).toBe(true);
+    });
+
+    test('reports inbound events off for a dual connector without identity', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'action',
+            attributes: {
+              name: 'Datadog',
+              actionTypeId: '.dual',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 1 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+      expect(result[0].isInboundEventsEnabled).toBe(false);
+    });
+
+    test('reports inbound events on for a dual connector with identity', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'action',
+            attributes: {
+              name: 'Datadog',
+              actionTypeId: '.dual',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+              hasInboundEventIdentity: true,
+              apiKey: 'should-not-enable-from-encrypted-key',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 1 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+      expect(result[0].isInboundEventsEnabled).toBe(true);
+      expect(result[0]).not.toHaveProperty('apiKey');
+      expect(result[0]).not.toHaveProperty('hasInboundEventIdentity');
+    });
+
+    test('reports inbound events on for an in-memory connector with events enabled', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 10,
+        page: 1,
+        saved_objects: [],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'elastic-apps-slack': { doc_count: 0 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'elastic-apps-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack (Elastic app)',
+            isPreconfigured: true,
+            isDynamic: true,
+            isInboundEventsEnabled: true,
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+      expect(result[0].isInboundEventsEnabled).toBe(true);
+    });
+
+    test('does not copy preconfigured inbound events onto a saved connector with the same id', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'elastic-apps-slack',
+            type: 'action',
+            attributes: {
+              name: 'Saved Slack',
+              actionTypeId: '.slack2',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'elastic-apps-slack': { doc_count: 0 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'elastic-apps-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack (Elastic app)',
+            isPreconfigured: true,
+            isDynamic: true,
+            isInboundEventsEnabled: true,
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+      const saved = result.find((connector) => connector.isPreconfigured === false);
+      const preconfigured = result.find((connector) => connector.isPreconfigured === true);
+      expect(saved?.isInboundEventsEnabled).toBe(false);
+      expect(preconfigured?.isInboundEventsEnabled).toBe(true);
+    });
+
+    test('does not copy a saved inbound identity onto a preconfigured connector with the same id', async () => {
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.slack2'
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'elastic-apps-slack',
+            type: 'action',
+            attributes: {
+              name: 'Saved Slack',
+              actionTypeId: '.slack2',
+              isMissingSecrets: false,
+              config: {},
+              secrets: {},
+              hasInboundEventIdentity: true,
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'elastic-apps-slack': { doc_count: 0 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'elastic-apps-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack (Elastic app)',
+            isPreconfigured: true,
+            isDynamic: true,
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+      const saved = result.find((connector) => connector.isPreconfigured === false);
+      const preconfigured = result.find((connector) => connector.isPreconfigured === true);
+      expect(saved?.isInboundEventsEnabled).toBe(true);
+      expect(preconfigured?.isInboundEventsEnabled).toBe(false);
     });
 
     test('filters out inference connectors without endpoints', async () => {

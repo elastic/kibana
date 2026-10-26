@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@emotion/jest';
+import { EuiProvider, useEuiTheme } from '@elastic/eui';
+import { render as renderComponent, renderHook } from '@testing-library/react';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { formatReactArray } from './format_react_array';
 
 function render(node: React.ReactNode): string {
-  return ReactDOM.renderToStaticMarkup(<>{node}</>).replace(/&quot;/g, '"');
+  return ReactDOM.renderToStaticMarkup(<>{node}</>)
+    .replace(/&quot;/g, '"')
+    .replace(/ class="css-[^"]+"/g, '');
 }
 
-const open = '<span class="ffArray__highlight">[</span>';
-const close = '<span class="ffArray__highlight">]</span>';
-const comma = '<span class="ffArray__highlight">,</span>';
+const open = '<span>[</span>';
+const close = '<span>]</span>';
+const comma = '<span>,</span>';
 
 describe('formatReactArray', () => {
   describe('empty and single-element arrays', () => {
@@ -35,6 +40,18 @@ describe('formatReactArray', () => {
   });
 
   describe('multi-element arrays — single-line values', () => {
+    test('styles array punctuation with the EUI theme', () => {
+      const { result } = renderHook(() => useEuiTheme(), { wrapper: EuiProvider });
+      const { container } = renderComponent(
+        <EuiProvider>{formatReactArray(['a', 'b'], String)}</EuiProvider>
+      );
+
+      expect(container.querySelector('span')).toHaveStyleRule(
+        'color',
+        result.current.euiTheme.colors.mediumShade
+      );
+    });
+
     test('wraps two elements with one comma', () => {
       expect(render(formatReactArray(['a', 'b'], String))).toBe(`${open}a${comma} b${close}`);
     });

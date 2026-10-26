@@ -23,6 +23,7 @@ export function getNodeSSLOptions(
   pfx?: Buffer;
   passphrase?: string;
   ca?: Buffer;
+  allowPartialTrustChain?: boolean;
 } {
   const agentOptions: {
     rejectUnauthorized?: boolean;
@@ -32,6 +33,7 @@ export function getNodeSSLOptions(
     pfx?: Buffer;
     passphrase?: string;
     ca?: Buffer;
+    allowPartialTrustChain?: boolean;
   } = {};
   if (verificationMode) {
     switch (verificationMode) {
@@ -61,6 +63,7 @@ export function getNodeSSLOptions(
       pfx: sslOverrides.pfx,
       passphrase: sslOverrides.passphrase,
       ca: sslOverrides.ca,
+      allowPartialTrustChain: sslOverrides.allowPartialTrustChain,
     });
   }
   return agentOptions;

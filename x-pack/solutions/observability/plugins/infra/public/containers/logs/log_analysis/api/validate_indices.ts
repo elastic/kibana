@@ -20,15 +20,18 @@ interface RequestArgs {
   indices: string[];
   fields: ValidationIndicesFieldSpecification[];
   runtimeMappings: estypes.MappingRuntimeFields;
+  projectRouting?: string;
 }
 
 export const callValidateIndicesAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
-  const { indices, fields, runtimeMappings } = requestArgs;
+  const { indices, fields, runtimeMappings, projectRouting } = requestArgs;
   const response = await fetch(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
     method: 'POST',
     body: JSON.stringify(
-      // @ts-expect-error TODO: fix after elasticsearch-js bump
-      validationIndicesRequestPayloadRT.encode({ data: { indices, fields, runtimeMappings } })
+      validationIndicesRequestPayloadRT.encode({
+        // @ts-expect-error TODO: fix after elasticsearch-js bump
+        data: { indices, fields, runtimeMappings, projectRouting },
+      })
     ),
     version: '1',
   });
