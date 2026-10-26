@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
@@ -12,10 +13,9 @@ import { getFleetAllIntegrationsNoneRole } from '../fixtures/services/privileges
 
 test.describe(
   'When the user has All privilege for Fleet but None for integrations',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     test('Fleet is accessible', async ({ browserAuth, pageObjects }) => {
-      // custom roles are not supported in ECH yet: https://github.com/elastic/appex-qa-team/issues/713
       // Login with custom role: Fleet v2 (all) but Fleet (none) - which means integrations are none
       await browserAuth.loginWithCustomRole(getFleetAllIntegrationsNoneRole());
       const { fleetHome } = pageObjects;

@@ -292,6 +292,80 @@ describe('AlertEpisodeOverviewListSection', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('shows the grouping row as loading while the data loads', async () => {
+    runEsqlAsyncSearchMock.mockImplementation(async ({ params }) =>
+      String(params.query).includes('JSON_EXTRACT')
+        ? new Promise(() => {})
+        : {
+            columns: [
+              { name: '@timestamp', type: 'date' },
+              { name: 'episode.status', type: 'keyword' },
+              { name: 'rule.id', type: 'keyword' },
+              { name: 'group_hash', type: 'keyword' },
+            ],
+            values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+          }
+    );
+    mockHttp.get.mockResolvedValueOnce(mockRule);
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockResolvedValue([]);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewListSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByTestId('alertingV2EpisodeDetailsOverviewList')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('alertingV2EpisodeDetailsOverviewListGroupingLoading')
+    ).toBeInTheDocument();
+  });
+
+  it('shows an inline grouping error but keeps the list when the data lookup fails', async () => {
+    runEsqlAsyncSearchMock.mockImplementation(async ({ params }) => {
+      if (String(params.query).includes('JSON_EXTRACT')) {
+        throw new Error('boom');
+      }
+      return {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'episode.status', type: 'keyword' },
+          { name: 'rule.id', type: 'keyword' },
+          { name: 'group_hash', type: 'keyword' },
+        ],
+        values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+      };
+    });
+    mockHttp.get.mockResolvedValueOnce(mockRule);
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockResolvedValue([]);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewListSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(
+      await screen.findByTestId('alertingV2EpisodeDetailsOverviewListGroupingError')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeDetailsOverviewList')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2EpisodeOverviewListSectionError')
+    ).not.toBeInTheDocument();
+  });
+
   it('renders the error state when group actions fail to load', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [

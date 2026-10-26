@@ -587,6 +587,21 @@ describe('PayloadConformance contract checks', () => {
     ).toBe(1);
   });
 
+  it('returns 1 for an ungrounded-claim downgrade with no checks and no truncation', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        {
+          ...completed,
+          outcome: 'inconclusive',
+          payload: { verdict: 'inconclusive', summary_markdown: 'A summary' },
+          raw: { coverage: coverage(2, 5), claims: undefined, checks: undefined },
+        },
+        'inconclusive'
+      )
+    ).toBe(1);
+  });
+
   it('returns 1 for a downgraded inconclusive with no checks and truncated events', async () => {
     expect(
       await score(
@@ -1151,10 +1166,8 @@ describe('ClaimGrounding', () => {
     );
   });
 
-  it('grounds an entity claim on entity.id, not the document _id', async () => {
-    // The seeded entity's document _id differs from its _source.entity.id; only
-    // entity.id may ground the claim.
-    const run = groundedRun({
+  const entityClaim = (id: string) =>
+    groundedRun({
       seededEvidence: {
         ...groundedRun().seededEvidence,
         entities: [{ id: 'doc-1', source: { entity: { id: 'ent-1' } } }],
@@ -1162,36 +1175,21 @@ describe('ClaimGrounding', () => {
       raw: {
         ...groundedRun().raw!,
         claims: {
-          world: [
-            { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ent-1' },
-          ],
+          world: [{ check: 'entity_role', result: 'contradicts', source: 'entity_store', id }],
         },
       },
     });
-    expect(await score(claimGrounding, run, 'false_positive')).toBe(1);
 
-    const byDocId = groundedRun({
-      seededEvidence: {
-        ...groundedRun().seededEvidence,
-        entities: [{ id: 'doc-1', source: { entity: { id: 'ent-1' } } }],
-      },
-      raw: {
-        ...groundedRun().raw!,
-        claims: {
-          world: [
-            { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'doc-1' },
-          ],
-        },
-      },
-    });
-    const result = await claimGrounding.evaluate({
-      input: {},
-      output: byDocId,
-      expected: { outcome: 'false_positive' },
-      metadata: {},
-    });
-    expect(result.score).toBe(0);
-    expect(result.explanation).toContain('id "doc-1" not in the seeded entity_store');
+  it('returns 1 when an entity claim cites entity.id', async () => {
+    expect(await score(claimGrounding, entityClaim('ent-1'), 'false_positive')).toBe(1);
+  });
+
+  it('returns 1 when an entity claim cites the document _id', async () => {
+    expect(await score(claimGrounding, entityClaim('doc-1'), 'false_positive')).toBe(1);
+  });
+
+  it('returns 0 when an entity claim cites an id that matches neither', async () => {
+    expect(await score(claimGrounding, entityClaim('invented'), 'false_positive')).toBe(0);
   });
 
   it('scores 0 when an alert link cites the same valid alert id twice', async () => {
