@@ -15,6 +15,7 @@ import {
   FP_TP_ATTACK_ADHOC_INDEX,
   FP_TP_BOOTSTRAP_RULE_ID,
   FP_TP_ENTITY_READ_ALIAS,
+  FP_TP_RAW_EVENT_INGEST_PIPELINE,
   FP_TP_REASONING_FEATURE_ID,
   FP_TP_TWIN_SEED_LABEL,
   fpTpAdhocAttackIndexForSpace,
@@ -24,6 +25,7 @@ import {
 } from './constants';
 import { toEntityCrudRequest } from './entity_crud';
 import type { FpTpEntityCrudRequest } from './entity_crud';
+import { ensureFpTpRawEventStore, rawEventIndexNames } from './raw_events';
 import { shiftTwinToNow } from './shift_timestamps';
 import type { FpTpGold, FpTpTwin, FpTpWorld } from './types';
 
@@ -918,6 +920,12 @@ export const cleanupServerlessSeed = async ({
   kbnRequest: FpTpLiveKbnRequest;
   plan: FpTpServerlessSeedPlan;
 }): Promise<void> => {
+  // A seeder-owned raw-event stream DOES index `labels.ad_portable_seed`
+  // (explicit mapping in the seeder-owned template), so a label sweep removes
+  // a crashed run's leftovers that the id sweep below cannot name.
+  for (const index of rawEventIndexNames(plan.serverlessEvents)) {
+    await deleteBySeedLabel(esClient, index);
+  }
   await deleteDocumentsById(esClient, [
     ...plan.alertIds.map((id) => ({ index: plan.alertsIndex, id })),
     ...plan.serverlessEvents,
@@ -984,13 +992,24 @@ export const seedTwinLiveServerless = async ({
   try {
     await cleanup();
 
+    // The seeder-owned streams must exist (through the seeder-owned template)
+    // before the bulk, and every event passes the pipeline so @timestamp is a
+    // real date and event.ingested reflects ingest time.
+    if (plan.eventOperations.length > 0) {
+      await ensureFpTpRawEventStore(esClient, rawEventIndexNames(plan.serverlessEvents));
+    }
+
     assertBulkOk(
       'alerts',
       await esClient.bulk({ refresh: 'wait_for', operations: plan.alertOperations })
     );
     assertBulkOk(
       'events',
-      await esClient.bulk({ refresh: 'wait_for', operations: plan.eventOperations })
+      await esClient.bulk({
+        refresh: 'wait_for',
+        operations: plan.eventOperations,
+        pipeline: FP_TP_RAW_EVENT_INGEST_PIPELINE,
+      })
     );
 
     for (const entity of plan.entities) {

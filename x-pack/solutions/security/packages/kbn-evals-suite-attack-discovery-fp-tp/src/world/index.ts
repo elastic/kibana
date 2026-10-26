@@ -21,6 +21,9 @@ export {
   FP_TP_BASE_TIME,
   FP_TP_BOOTSTRAP_RULE_ID,
   FP_TP_ENTITY_INDEX,
+  FP_TP_RAW_EVENT_INDEX_PREFIX,
+  FP_TP_RAW_EVENT_INDEX_TEMPLATE,
+  FP_TP_RAW_EVENT_INGEST_PIPELINE,
   FP_TP_RAW_EVENT_PAGE_SIZE,
   FP_TP_RAW_EVENT_WINDOW_MS,
   FP_TP_REASONING_FEATURE_ID,
@@ -53,6 +56,18 @@ export {
   withProcessExecutable,
   withProcessParent,
 } from './mutations';
+export {
+  FP_TP_RAW_EVENT_TEMPLATE_PRIORITY,
+  FP_TP_RAW_EVENT_TOTAL_FIELDS_LIMIT,
+  ensureFpTpRawEventIndices,
+  ensureFpTpRawEventPipeline,
+  ensureFpTpRawEventStore,
+  ensureFpTpRawEventTemplate,
+  rawEventIndexMappings,
+  rawEventIndexNames,
+  rawEventIndexSettings,
+  rawEventIngestPipeline,
+} from './raw_events';
 export {
   assertBulkOk,
   buildLiveSeedPlan,

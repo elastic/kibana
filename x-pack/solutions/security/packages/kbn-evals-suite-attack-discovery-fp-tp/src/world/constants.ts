@@ -48,11 +48,16 @@ export const fpTpEntityReadAliasForSpace = (space: string): string => `entities-
 
 /**
  * Rewrites a scenario-authored `logs-endpoint.events.<kind>-default` index to
- * the seeder-owned `<kind>-<namespace>` namespace. On serverless the
- * `-default` names are product-managed data streams a plain `create` would
- * collide with; the analysis workflow reads the `logs-endpoint.events.*`
- * wildcard, so the seeder-owned namespace stays in scope.
+ * the seeder-owned `logs-endpoint.events.fp-tp-<kind>-<namespace>` namespace.
+ * On serverless the `-default` names are product-managed data streams a plain
+ * `create` would collide with; the analysis workflow reads the
+ * `logs-endpoint.events.*` wildcard, so the seeder-owned namespace stays in
+ * scope. The `fp-tp-` marker is what the seeder-owned index template claims
+ * (see `raw_events.ts`): without it the streams would fall under the generic
+ * `logs` template and ECS fields would map as text.
  */
+const ENDPOINT_EVENTS_LEADER = 'logs-endpoint.events.';
+
 export const toServerlessEventIndex = (index: string, namespace: string): string => {
   if (!index.endsWith('-default')) {
     throw new Error(
@@ -60,7 +65,8 @@ export const toServerlessEventIndex = (index: string, namespace: string): string
         'are rewritten to the seeder-owned namespace'
     );
   }
-  return `${index.slice(0, -'-default'.length)}-${namespace}`;
+  const kind = index.slice(ENDPOINT_EVENTS_LEADER.length, -'-default'.length);
+  return `${FP_TP_RAW_EVENT_INDEX_PREFIX}${kind}-${namespace}`;
 };
 
 /**
@@ -80,6 +86,33 @@ export const FP_TP_REASONING_FEATURE_ID = 'alertzero_reasoning';
 
 /** Half-width of the raw-event window the analysis reads around the cited alerts' original time. */
 export const FP_TP_RAW_EVENT_WINDOW_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * Prefix of the seeder-owned raw-event data streams. The workflow reads
+ * `logs-endpoint.events.*`, but on serverless the `logs-endpoint.events.<kind>-default`
+ * names are product-managed data streams the seeder does not own: a plain
+ * `create` into them is rejected, and a mapping-only write would be an ownership
+ * violation. The `fp-tp-` segment keeps the seeded events inside the workflow's
+ * wildcard while never colliding with a product stream, and the name does not
+ * start with a dot.
+ */
+export const FP_TP_RAW_EVENT_INDEX_PREFIX = 'logs-endpoint.events.fp-tp-';
+
+/**
+ * Ingest pipeline every seeded raw event passes through, so `@timestamp` is a
+ * parseable date and `event.ingested` reflects ingest time. The workflow's
+ * `load_events` step looks back a fixed window, so a stale or malformed
+ * `@timestamp` would leave the seeded events invisible.
+ */
+export const FP_TP_RAW_EVENT_INGEST_PIPELINE = 'alertzero-fp-tp-raw-events';
+
+/**
+ * Composable index template the seeder owns for its raw-event streams. A name in
+ * `logs-endpoint.events.*` matches the generic `logs` template (`logs-*-*`,
+ * data_stream), so a plain index is refused; the seeder defines its own
+ * data-stream template above it (see `raw_events.ts`).
+ */
+export const FP_TP_RAW_EVENT_INDEX_TEMPLATE = 'alertzero-fp-tp-raw-events';
 
 /**
  * Raw events the analysis reads per run (`load_events` `size`). More hits than this

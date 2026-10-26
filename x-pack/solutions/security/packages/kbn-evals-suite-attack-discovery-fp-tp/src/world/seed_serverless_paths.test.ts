@@ -11,7 +11,10 @@ import {
 } from '../scenarios/encoded_powershell';
 import {
   FP_TP_BOOTSTRAP_RULE_ID,
+  FP_TP_RAW_EVENT_INDEX_TEMPLATE,
+  FP_TP_RAW_EVENT_INGEST_PIPELINE,
   FP_TP_REASONING_FEATURE_ID,
+  FP_TP_TWIN_SEED_LABEL,
   toServerlessEventIndex,
 } from './constants';
 import {
@@ -58,7 +61,13 @@ afterEach(() => {
 describe('toServerlessEventIndex', () => {
   it('rewrites a -default index into the seeder-owned namespace', () => {
     expect(toServerlessEventIndex('logs-endpoint.events.process-default', 'fptp-1')).toBe(
-      'logs-endpoint.events.process-fptp-1'
+      'logs-endpoint.events.fp-tp-process-fptp-1'
+    );
+  });
+
+  it('lands inside the template claim and the workflow wildcard', () => {
+    expect(toServerlessEventIndex('logs-endpoint.events.process-default', 'fptp-1')).toMatch(
+      /^logs-endpoint\.events\.fp-tp-/
     );
   });
 
@@ -326,13 +335,21 @@ describe('cleanupServerlessSeed targets', () => {
       plan,
     });
 
-    const byIndex = new Map<string, unknown>(
-      deleteByQuery.mock.calls.map(([params]) => [params.index as string, params.query])
-    );
-    expect(byIndex.get('.alerts-security.alerts-fptp-eval-1')).toEqual({
+    const byIndex = new Map<string, unknown[]>();
+    for (const [params] of deleteByQuery.mock.calls as Array<[Record<string, unknown>]>) {
+      const queries = byIndex.get(params.index as string) ?? [];
+      queries.push(params.query);
+      byIndex.set(params.index as string, queries);
+    }
+    expect(byIndex.get('.alerts-security.alerts-fptp-eval-1')).toContainEqual({
       ids: { values: [...plan.alertIds] },
     });
-    expect(byIndex.get('logs-endpoint.events.process-fptp-eval-1')).toEqual({
+    // the seeder-owned stream is swept by seed label (a crashed run's
+    // leftovers are not nameable by id) and by id
+    expect(byIndex.get('logs-endpoint.events.fp-tp-process-fptp-eval-1')).toContainEqual({
+      term: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL },
+    });
+    expect(byIndex.get('logs-endpoint.events.fp-tp-process-fptp-eval-1')).toContainEqual({
       ids: { values: expect.arrayContaining([ids.process1Id]) as string[] },
     });
     for (const index of byIndex.keys()) {
@@ -364,7 +381,12 @@ describe('seedTwinLiveServerless', () => {
     const esClient = {
       bulk,
       deleteByQuery,
-      indices: { exists: jest.fn().mockResolvedValue(true) },
+      indices: {
+        exists: jest.fn().mockResolvedValue(true),
+        putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+        createDataStream: jest.fn().mockResolvedValue({ acknowledged: true }),
+      },
+      ingest: { putPipeline: jest.fn().mockResolvedValue({ acknowledged: true }) },
       search: jest.fn(async ({ index }: { index: string }) =>
         index.startsWith('.adhoc')
           ? { hits: { hits: [{ _id: 'persisted-attack' }] } }
@@ -417,7 +439,7 @@ describe('seedTwinLiveServerless', () => {
     expect(firstDelete).toBeGreaterThanOrEqual(0);
     expect(firstDelete).toBeLessThan(firstWrite);
     expect(s.order).toContain(`bulk:.alerts-security.alerts-${SPACE}`);
-    expect(s.order).toContain(`bulk:logs-endpoint.events.process-${SPACE}`);
+    expect(s.order).toContain(`bulk:logs-endpoint.events.fp-tp-process-${SPACE}`);
     for (const [{ operations }] of s.bulk.mock.calls as Array<[{ operations: unknown[] }]>) {
       const headers = operations.filter((_, position) => position % 2 === 0) as Array<
         Record<string, unknown>
@@ -426,6 +448,45 @@ describe('seedTwinLiveServerless', () => {
     }
     expect(summary.attackId).toBe('persisted-attack');
     expect(summary.attackIndex).toBe(`.adhoc.alerts-security.attack.discovery.alerts-${SPACE}`);
+  });
+
+  it('provisions the raw-event store and attaches the ingest pipeline to the events bulk', async () => {
+    skipSleeps();
+    const s = setup();
+    const es = s.esClient as unknown as {
+      indices: {
+        putIndexTemplate: jest.Mock;
+        createDataStream: jest.Mock;
+      };
+      ingest: { putPipeline: jest.Mock };
+    };
+
+    await run(s);
+
+    // the seeder-owned template and stream exist before the events bulk runs,
+    // and the bulk targets the stream through the pipeline
+    expect(es.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: FP_TP_RAW_EVENT_INDEX_TEMPLATE })
+    );
+    expect(es.indices.createDataStream.mock.calls.map(([params]) => params.name)).toEqual(
+      expect.arrayContaining([`logs-endpoint.events.fp-tp-process-${SPACE}`])
+    );
+    for (const [params] of es.indices.createDataStream.mock.calls as Array<
+      [Record<string, unknown>]
+    >) {
+      expect(params.name).toMatch(/^logs-endpoint\.events\.fp-tp-/);
+    }
+    const eventsBulk = s.bulk.mock.calls
+      .map(([params]) => params)
+      .find((params) =>
+        (params.operations[0] as { create?: { _index: string } }).create?._index.startsWith(
+          'logs-endpoint.events.'
+        )
+      ) as { pipeline?: string };
+    expect(eventsBulk.pipeline).toBe(FP_TP_RAW_EVENT_INGEST_PIPELINE);
+    const eventsBulkAt = s.order.indexOf(`bulk:logs-endpoint.events.fp-tp-process-${SPACE}`);
+    expect(s.deleteByQuery.mock.calls.length).toBeGreaterThan(0);
+    expect(eventsBulkAt).toBeGreaterThan(0);
   });
 
   it('passes the inference action type to the validate workflow', async () => {

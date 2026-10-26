@@ -43,11 +43,14 @@ describe('buildServerlessPlan', () => {
 
   it('rewrites events into the seeder-owned namespace', () => {
     expect(plan.serverlessEvents[0]).toEqual({
-      index: 'logs-endpoint.events.process-fptp-eval-1',
+      index: 'logs-endpoint.events.fp-tp-process-fptp-eval-1',
       id: ids.process1Id,
     });
     expect(plan.eventOperations[0]).toEqual({
-      create: { _index: 'logs-endpoint.events.process-fptp-eval-1', _id: ids.process1Id },
+      create: {
+        _index: 'logs-endpoint.events.fp-tp-process-fptp-eval-1',
+        _id: ids.process1Id,
+      },
     });
   });
 
