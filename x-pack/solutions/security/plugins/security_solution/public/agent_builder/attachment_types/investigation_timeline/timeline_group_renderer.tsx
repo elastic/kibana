@@ -13,8 +13,8 @@ import type { FlyoutGroupedAttachmentRendererProps } from '@kbn/agentic-investig
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { TIMELINE_TITLE, ENDPOINT_ANALYSIS_SUBTITLE } from '../grouped_attachments';
-import { parseTimelineEvents } from './parse_timeline_events';
-import type { InvestigationTimelineEvent } from './types';
+import { parseTimelineEvents, parseTimelineWindow } from './parse_timeline_events';
+import type { InvestigationTimelineEvent, InvestigationTimelineWindow } from './types';
 
 const LazyTimelineFlyoutOpener = React.lazy(() =>
   import(
@@ -29,9 +29,11 @@ export interface TimelineGroupRendererDeps {
 
 const TimelineRow = ({
   events,
+  window,
   resolveSecurityCanvasContext,
 }: {
   events: InvestigationTimelineEvent[];
+  window?: InvestigationTimelineWindow;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }) => {
   const [openCount, setOpenCount] = useState(0);
@@ -50,6 +52,7 @@ const TimelineRow = ({
           <Suspense fallback={null}>
             <LazyTimelineFlyoutOpener
               events={events}
+              window={window}
               resolveSecurityCanvasContext={resolveSecurityCanvasContext}
             />
           </Suspense>
@@ -61,11 +64,13 @@ const TimelineRow = ({
 
 const firstTimelineRow = (
   attachments: UnknownAttachment[]
-): { id: string; events: InvestigationTimelineEvent[] } | undefined => {
+):
+  | { id: string; events: InvestigationTimelineEvent[]; window?: InvestigationTimelineWindow }
+  | undefined => {
   for (const attachment of attachments) {
     const events = parseTimelineEvents(attachment.data);
     if (events.length > 0) {
-      return { id: attachment.id, events };
+      return { id: attachment.id, events, window: parseTimelineWindow(attachment.data) };
     }
   }
 };
@@ -81,6 +86,7 @@ export const createTimelineGroupRenderer = ({
           <TimelineRow
             key={timelineRow.id}
             events={timelineRow.events}
+            window={timelineRow.window}
             resolveSecurityCanvasContext={resolveSecurityCanvasContext}
           />
         ) : null}

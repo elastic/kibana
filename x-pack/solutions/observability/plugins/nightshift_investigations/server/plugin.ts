@@ -641,6 +641,7 @@ export class NightshiftInvestigationsPlugin
           workflowsManagement: this.workflowsManagement,
           isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
+      isAssistantEnabled: () => this.assistantEnabled,
     };
   }
 
