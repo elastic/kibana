@@ -13,26 +13,15 @@ import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { createDefinition } from './navigation_tree';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
-const buildPluginsStart = (
-  entityInventoryApp?: ObservabilityPublicPluginsStart['entityInventoryApp']
-) =>
-  ({
-    streams: { navigationStatus$: of({ status: 'disabled' as const }) },
-    ingestHub: { navigationAvailable$: of(false) },
-    cloud: { isCloudEnabled: false },
-    entityInventoryApp,
-  } as unknown as ObservabilityPublicPluginsStart);
-
 const getInfrastructureSectionChildren = async (
   entityInventoryApp?: ObservabilityPublicPluginsStart['entityInventoryApp']
 ): Promise<NodeDefinition[]> => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
-  coreStart.settings.globalClient.get.mockReturnValue(false);
-  coreStart.settings.globalClient.isDeclared.mockReturnValue(true);
 
-  const definition = createDefinition(coreStart, buildPluginsStart(entityInventoryApp));
+  const definition = createDefinition(coreStart, {
+    entityInventoryApp,
+  } as unknown as ObservabilityPublicPluginsStart);
 
   const { body } = (await firstValueFrom(definition.navigationTree$)) as NavigationTreeDefinition;
   const metricsSection = body?.find((item) => item.id === 'metrics') as NodeDefinition | undefined;
