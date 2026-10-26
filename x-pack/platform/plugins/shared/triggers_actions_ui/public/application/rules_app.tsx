@@ -104,6 +104,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   inspector?: InspectorStart;
   hideListBackButton?: boolean;
   host?: LocatorHost;
+  showClassicBadge?: boolean;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
