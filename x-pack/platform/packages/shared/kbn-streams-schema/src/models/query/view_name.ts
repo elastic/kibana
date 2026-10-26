@@ -6,24 +6,23 @@
  */
 
 /**
- * Prefix used for ES|QL view names created by query streams.
+ * Prefix used for ES|QL view names created for streams.
  *
  * This prefix serves two purposes:
- * 1. **Avoids shadowing**: Prevents query stream views from colliding with existing
+ * 1. **Avoids shadowing**: Prevents stream views from colliding with existing
  *    data streams or indices that share the same name.
- * 2. **Isolates query streams from parent views**: Ingest streams query their data using
- *    patterns like `FROM logs.otel, logs.otel.*`. Because query stream views live in the
+ * 2. **Isolates views from index patterns**: Ingest streams query their data using
+ *    patterns like `FROM logs.otel, logs.otel.*`. Because stream views live in the
  *    `$.` namespace (e.g. `$.logs.otel.electric`), they are never matched by these
- *    wildcard patterns. This ensures that aggregated or transformed columns defined by
- *    query streams do not leak into parent stream schemas.
+ *    wildcard patterns.
  *
- * To query a query stream directly, use its prefixed view name: `FROM $.cars.electric`.
+ * To query a stream's view directly, use its prefixed view name: `FROM $.cars.electric`.
  *
  * @example
  * // Stream name:  "cars.electric"
  * // ES|QL view:   "$.cars.electric"
  * // Parent query: "FROM cars, cars.*"  → does NOT include $.cars.electric
- * // Direct query: "FROM $.cars.electric"  → returns query stream data
+ * // Direct query: "FROM $.cars.electric"  → returns the stream's view data
  */
 export const ESQL_VIEW_PREFIX = '$.';
 
@@ -68,7 +67,7 @@ export function getWiredStreamViewQuery(
   directChildrenNames: string[] = []
 ): string {
   // METADATA _source must be declared inside each view definition so that
-  // downstream views (including draft streams) can access the raw document
+  // downstream views can access the raw document
   // source. Outer METADATA on a view produces null — a known ES|QL
   // tech-preview limitation where view expansion drops outer metadataFields:
   // https://www.elastic.co/docs/reference/query-languages/esql/esql-views#esql-views-limitations

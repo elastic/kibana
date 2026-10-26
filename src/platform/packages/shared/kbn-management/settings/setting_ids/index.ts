@@ -192,11 +192,9 @@ export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
-export const OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS = 'observability:streamsEnableQueryStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
 export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
   'observability:streamsEnableWiredStreamViews';
-export const OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS = 'observability:streamsEnableDraftStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CANVAS = 'observability:streamsEnableCanvas';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';

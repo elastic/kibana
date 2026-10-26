@@ -11,7 +11,6 @@ import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { RedirectTo } from '../../../redirect_to';
 import type { ManagementTabs } from './wrapper';
@@ -25,7 +24,6 @@ import { StreamOverview } from '../../../stream_detail_overview';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
-import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 import {
   ImportLifecycleFlyoutProvider,
@@ -35,7 +33,6 @@ import {
 const classicStreamManagementSubTabs = [
   'overview',
   'lifecycle',
-  'partitioning',
   'processing',
   'dataQuality',
   'schemaEditor',
@@ -92,10 +89,6 @@ function ClassicStreamDetailManagementContent({
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
-
-  const {
-    features: { queryStreams },
-  } = useStreamsPrivileges();
 
   const isProcessingEnabled = !definition.replicated;
 
@@ -169,17 +162,6 @@ function ClassicStreamDetailManagementContent({
     }),
   };
 
-  if (queryStreams.enabled) {
-    tabs.partitioning = {
-      content: (
-        <ClassicStreamPartitioning definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.partitioningTab', {
-        defaultMessage: 'Partitioning',
-      }),
-    };
-  }
-
   if (isProcessingEnabled) {
     tabs.processing = {
       content: (
@@ -219,12 +201,6 @@ function ClassicStreamDetailManagementContent({
       defaultMessage: 'Attachments',
     }),
   };
-
-  if (tab === 'partitioning' && !queryStreams.enabled) {
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
-    );
-  }
 
   if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;

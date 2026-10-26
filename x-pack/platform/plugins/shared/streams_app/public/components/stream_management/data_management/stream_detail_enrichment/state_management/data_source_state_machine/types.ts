@@ -32,7 +32,6 @@ export interface DataSourceInput {
   streamName: string;
   streamType: 'wired' | 'classic' | 'unknown';
   dataSource: EnrichmentDataSourceWithUIAttributes;
-  isDraft?: boolean;
 }
 
 export type DataSourceParentActor = ActorRef<Snapshot<unknown>, DataSourceToParentEvent>;
@@ -46,7 +45,6 @@ export interface DataSourceContext {
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
   simulationMode: DataSourceSimulationMode;
-  isDraft?: boolean;
   isFetchingMore: boolean;
 }
 

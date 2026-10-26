@@ -22,17 +22,6 @@ const wiredStreamDefinition: Streams.WiredStream.Definition = {
   },
 };
 
-const queryStreamDefinition: Streams.QueryStream.Definition = {
-  type: 'query',
-  name: 'logs.otel.nginx.errors',
-  description: 'Test query stream',
-  updated_at: '2025-01-01T00:00:00.000Z',
-  query: {
-    esql: 'FROM logs.otel.nginx | WHERE log.level == "error"',
-    view: '$.logs.otel.nginx.errors',
-  },
-};
-
 const classicStreamDefinition: Streams.ClassicStream.Definition = {
   type: 'classic',
   name: 'logs-myapp',
@@ -85,20 +74,6 @@ describe('getDiscoverEsqlQuery', () => {
           includeMetadata: true,
         })
       ).toBe('FROM logs.otel, logs.otel.* METADATA _source | SORT @timestamp DESC');
-    });
-  });
-
-  describe('query streams', () => {
-    it('returns FROM with the query view reference and sort', () => {
-      expect(getDiscoverEsqlQuery({ definition: queryStreamDefinition })).toBe(
-        'FROM $.logs.otel.nginx.errors | SORT @timestamp DESC'
-      );
-    });
-
-    it('uses the query view regardless of useViews flag', () => {
-      expect(getDiscoverEsqlQuery({ definition: queryStreamDefinition, useViews: false })).toBe(
-        'FROM $.logs.otel.nginx.errors | SORT @timestamp DESC'
-      );
     });
   });
 

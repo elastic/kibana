@@ -33,7 +33,6 @@ type CacheValue = StreamSummary | typeof ABSENT;
 const STREAM_TYPE_MAP: Record<string, string> = {
   wired: SOURCES_TYPES.WIRED_STREAM,
   classic: SOURCES_TYPES.CLASSIC_STREAM,
-  query: SOURCES_TYPES.QUERY_STREAM,
 };
 
 interface EnrichmentData {

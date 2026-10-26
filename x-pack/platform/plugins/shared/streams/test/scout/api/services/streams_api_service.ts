@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { RoutingStatus, Streams } from '@kbn/streams-schema';
 import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
-  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-} from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 
@@ -23,7 +18,6 @@ export interface StreamsTestApiService {
   listStreams: () => Promise<{ streams: Streams.all.Definition[] }>;
   getStream: (streamName: string) => Promise<IngestStream.all.GetResponse>;
   createStream: (streamName: string, body: Streams.all.UpsertRequest) => Promise<void>;
-  createQueryStream: (streamName: string, esql: string) => Promise<void>;
   updateStream: (streamName: string, body: { ingest: IngestUpsertRequest }) => Promise<void>;
   deleteStream: (streamName: string) => Promise<void>;
   restoreDataStream: (streamName: string) => Promise<void>;
@@ -48,30 +42,16 @@ export interface StreamsTestApiService {
     documentsWithRuntimeFieldsApplied: Array<Record<string, unknown>> | null;
   }>;
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
-  enableQueryStreams: () => Promise<void>;
-  disableQueryStreams: () => Promise<void>;
   enableWiredStreamViews: () => Promise<void>;
   disableWiredStreamViews: () => Promise<void>;
-  enableDraftStreams: () => Promise<void>;
-  disableDraftStreams: () => Promise<void>;
-  forkDraftStream: (
-    parentStream: string,
-    childStream: string,
-    condition: Condition
-  ) => Promise<void>;
-  createEsqlView: (viewName: string, query: string) => Promise<void>;
-  deleteEsqlView: (viewName: string) => Promise<void>;
-  runEsql: (query: string) => Promise<{ columns: Array<{ name: string }>; values: unknown[][] }>;
   cleanupTestStreams: (prefix?: string) => Promise<void>;
 }
 
 export function getStreamsTestApiService({
   kbnClient,
-  esClient,
   log,
 }: {
   kbnClient: KbnClient;
-  esClient: Client;
   log: ScoutLogger;
 }): StreamsTestApiService {
   return {
@@ -129,16 +109,6 @@ export function getStreamsTestApiService({
           method: 'PUT',
           path: `/api/streams/${streamName}`,
           body,
-        });
-      });
-    },
-
-    async createQueryStream(streamName: string, esql: string) {
-      await measurePerformanceAsync(log, 'streamsTestApi.createQueryStream', async () => {
-        await kbnClient.request({
-          method: 'PUT',
-          path: `/api/streams/${streamName}/_query`,
-          body: { query: { esql } },
         });
       });
     },
@@ -250,45 +220,6 @@ export function getStreamsTestApiService({
       });
     },
 
-    async createEsqlView(viewName: string, query: string) {
-      await measurePerformanceAsync(log, 'streamsTestApi.createEsqlView', async () => {
-        await esClient.transport.request({
-          method: 'PUT',
-          path: `/_query/view/${viewName}`,
-          body: { query },
-        });
-      });
-    },
-
-    async deleteEsqlView(viewName: string) {
-      await measurePerformanceAsync(log, 'streamsTestApi.deleteEsqlView', async () => {
-        try {
-          await esClient.transport.request({
-            method: 'DELETE',
-            path: `/_query/view/${viewName}`,
-          });
-        } catch {
-          // Ignore if view doesn't exist
-        }
-      });
-    },
-
-    async enableQueryStreams() {
-      await measurePerformanceAsync(log, 'streamsTestApi.enableQueryStreams', async () => {
-        await kbnClient.uiSettings.update({
-          'observability:streamsEnableQueryStreams': true,
-        });
-      });
-    },
-
-    async disableQueryStreams() {
-      await measurePerformanceAsync(log, 'streamsTestApi.disableQueryStreams', async () => {
-        await kbnClient.uiSettings.update({
-          'observability:streamsEnableQueryStreams': false,
-        });
-      });
-    },
-
     async enableWiredStreamViews() {
       await measurePerformanceAsync(log, 'streamsTestApi.enableWiredStreamViews', async () => {
         await kbnClient.uiSettings.update({
@@ -302,49 +233,6 @@ export function getStreamsTestApiService({
         await kbnClient.uiSettings.update({
           'observability:streamsEnableWiredStreamViews': false,
         });
-      });
-    },
-
-    async enableDraftStreams() {
-      await measurePerformanceAsync(log, 'streamsTestApi.enableDraftStreams', async () => {
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: true,
-          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
-        });
-      });
-    },
-
-    async disableDraftStreams() {
-      await measurePerformanceAsync(log, 'streamsTestApi.disableDraftStreams', async () => {
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: false,
-          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
-        });
-      });
-    },
-
-    async forkDraftStream(parentStream: string, childStream: string, condition: Condition) {
-      await measurePerformanceAsync(log, 'streamsTestApi.forkDraftStream', async () => {
-        await kbnClient.request({
-          method: 'POST',
-          path: `/api/streams/${parentStream}/_fork`,
-          body: {
-            where: condition,
-            stream: { name: childStream },
-            draft: true,
-          },
-        });
-      });
-    },
-
-    async runEsql(query: string) {
-      return measurePerformanceAsync(log, 'streamsTestApi.runEsql', async () => {
-        const response = await esClient.esql.query({ query, format: 'json' }, { meta: true });
-        const body = response.body as unknown as {
-          columns: Array<{ name: string }>;
-          values: unknown[][];
-        };
-        return { columns: body.columns, values: body.values };
       });
     },
 

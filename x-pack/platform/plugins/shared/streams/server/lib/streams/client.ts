@@ -483,13 +483,11 @@ export class StreamsClient {
     name,
     where: condition,
     status,
-    draft,
   }: {
     parent: string;
     name: string;
     where: Condition;
     status: RoutingStatus;
-    draft?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -515,7 +513,6 @@ export class StreamsClient {
                   destination: name,
                   where: condition,
                   status,
-                  ...(draft ? { draft: true } : {}),
                 }),
               },
             },
@@ -528,7 +525,6 @@ export class StreamsClient {
             name,
             description: '',
             updated_at: now,
-            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [], updated_at: now },
@@ -536,42 +532,9 @@ export class StreamsClient {
               wired: {
                 fields: {},
                 routing: [],
-                ...(draft ? { draft: true } : {}),
               },
               failure_store: { inherit: {} },
             },
-          },
-        },
-      ],
-      { ...this.dependencies, streamsClient: this }
-    );
-
-    return { acknowledged: true, result: 'created' };
-  }
-
-  async createQueryStream({
-    name,
-    query,
-    field_descriptions,
-    description = '',
-  }: {
-    name: string;
-    query: Streams.QueryStream.UpsertRequest['stream']['query'];
-    field_descriptions?: Record<string, string>;
-    description?: string;
-  }): Promise<UpsertStreamResponse> {
-    await State.attemptChanges(
-      [
-        {
-          type: 'upsert',
-          definition: {
-            type: 'query',
-            name,
-            description,
-            updated_at: new Date().toISOString(),
-            query_streams: [],
-            query,
-            ...(field_descriptions && { field_descriptions }),
           },
         },
       ],
@@ -1032,17 +995,12 @@ export class StreamsClient {
     }
 
     const privileges = await checkAccessBulk({
-      names: streams
-        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
-        .map((stream) => stream.name),
+      names: streams.map((stream) => stream.name),
       esClient,
       isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
-    return streams.filter((stream) => {
-      if (Streams.QueryStream.Definition.is(stream)) return true;
-      return privileges[stream.name]?.read === true;
-    });
+    return streams.filter((stream) => privileges[stream.name]?.read === true);
   }
 
   /**

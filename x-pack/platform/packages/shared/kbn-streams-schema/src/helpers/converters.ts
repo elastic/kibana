@@ -7,7 +7,6 @@
 
 import { omit } from 'lodash';
 import { Streams } from '../models/streams';
-import { QueryStream } from '../models/query';
 import type {
   IngestStreamProcessing,
   IngestStreamProcessingUpsert,
@@ -32,7 +31,7 @@ export const convertUpsertRequestIntoDefinition = (
 
   if (Streams.WiredStream.UpsertRequest.is(request)) {
     return {
-      ...request.stream,
+      ...omit(request.stream, 'query_streams'),
       name,
       updated_at: now,
       ingest: {
@@ -47,7 +46,7 @@ export const convertUpsertRequestIntoDefinition = (
 
   if (Streams.ClassicStream.UpsertRequest.is(request)) {
     return {
-      ...request.stream,
+      ...omit(request.stream, 'query_streams'),
       name,
       updated_at: now,
       ingest: {
@@ -57,14 +56,6 @@ export const convertUpsertRequestIntoDefinition = (
           updated_at: now,
         } as IngestStreamProcessing,
       },
-    };
-  }
-
-  if (QueryStream.UpsertRequest.is(request)) {
-    return {
-      ...request.stream,
-      name,
-      updated_at: now,
     };
   }
 
@@ -119,14 +110,6 @@ export const convertGetResponseIntoUpsertRequest = (
           ) as IngestStreamProcessingUpsert,
         },
       },
-    };
-  }
-
-  if (QueryStream.GetResponse.is(getResponse)) {
-    return {
-      dashboards: getResponse.dashboards,
-      rules: getResponse.rules,
-      stream: omit(getResponse.stream, ['name', 'updated_at']),
     };
   }
 

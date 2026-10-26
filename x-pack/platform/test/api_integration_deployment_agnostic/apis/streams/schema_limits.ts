@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { emptyAssets, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -33,7 +31,6 @@ const wiredStreamBody = {
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const kibanaServer = getService('kibanaServer');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
@@ -145,73 +142,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 where: { field: 'attributes.env', eq: 'prod' },
               },
             },
-          })
-          .expect(400);
-      });
-    });
-
-    describe('PUT /api/streams/{name}/_query', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
-        });
-        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-        });
-        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
-      });
-
-      it('rejects name longer than MAX_STREAM_NAME_LENGTH with 400', async () => {
-        await apiClient
-          .fetch('PUT /api/streams/{name}/_query 2023-10-31', {
-            params: {
-              path: { name: TOO_LONG_NAME },
-              body: { query: { esql: 'FROM logs.otel | LIMIT 1' } },
-            },
-          })
-          .expect(400);
-      });
-
-      it('rejects esql longer than 65535 chars with 400', async () => {
-        await apiClient
-          .fetch('PUT /api/streams/{name}/_query 2023-10-31', {
-            params: {
-              path: { name: 'logs.otel.query-limit-test' },
-              body: {
-                query: { esql: 'FROM logs.otel | WHERE message == "' + 'x'.repeat(65502) + '"' },
-              },
-            },
-          })
-          .expect(400);
-      });
-
-      it('accepts esql exactly at 65535 chars', async () => {
-        const paddingNeeded = 65535 - 'FROM logs.otel | WHERE message == ""'.length;
-        const esql = 'FROM logs.otel | WHERE message == "' + 'x'.repeat(paddingNeeded) + '"';
-        // Schema validation passes at 65535 chars. The handler may still reject with 400
-        // for domain reasons (e.g. FROM source mismatch for a child stream), but the
-        // Kibana route framework prefixes Zod schema errors with "[request body"; a domain
-        // error has a different message, so we can distinguish the two.
-        const response = await apiClient.fetch('PUT /api/streams/{name}/_query 2023-10-31', {
-          params: {
-            path: { name: 'logs.otel.query-limit-test' },
-            body: { query: { esql } },
-          },
-        });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect(String((response.body as any)?.message ?? '')).not.to.contain('[request body');
-      });
-    });
-
-    describe('GET /api/streams/{name}/_query', () => {
-      it('rejects name longer than MAX_STREAM_NAME_LENGTH with 400', async () => {
-        await apiClient
-          .fetch('GET /api/streams/{name}/_query 2023-10-31', {
-            params: { path: { name: TOO_LONG_NAME } },
           })
           .expect(400);
       });

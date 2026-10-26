@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
@@ -27,16 +26,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AiButtonEmpty } from '@kbn/shared-ux-ai-components';
 import { Streams } from '@kbn/streams-schema';
-import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import { omit } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useGenerateDescription } from '../../hooks/use_generate_description';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
-import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useUpdateStreams } from '../../hooks/use_update_streams';
 import { getFormattedError } from '../../util/errors';
 import markdownMark from '../asset_image/markdown_mark_light.svg';
-import { EditQueryStreamFlyout } from '../query_streams/edit_query_stream_flyout';
 
 export function AboutPanel() {
   const {
@@ -48,15 +44,8 @@ export function AboutPanel() {
 
   const updateStream = useUpdateStreams(definition.stream.name);
 
-  const queryStream = Streams.QueryStream.GetResponse.is(definition) ? definition : null;
-  const streamsPrivileges = useStreamsPrivileges();
-  const canManageQueryStream = queryStream
-    ? streamsPrivileges.ui[STREAMS_UI_PRIVILEGES.manage]
-    : false;
-  const canManageIngestStream =
+  const canEditDescription =
     Streams.ingest.all.GetResponse.is(definition) && definition.privileges.manage;
-
-  const canEditDescription = canManageQueryStream || canManageIngestStream;
 
   const {
     generate: generateDescription,
@@ -66,7 +55,6 @@ export function AboutPanel() {
   } = useGenerateDescription(definition.stream.name);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [isEditQueryFlyoutOpen, setIsEditQueryFlyoutOpen] = useState(false);
   const [isExpanded, setExpanded] = useState(false);
   const [descriptionValue, setDescriptionValue] = useState(description ?? '');
 
@@ -360,79 +348,8 @@ export function AboutPanel() {
               />
             </EuiText>
           )}
-
-          {/* Always show the ES|QL source for query streams */}
-          {queryStream && (
-            <>
-              {(isEditing || description || canEditDescription) && <EuiSpacer size="m" />}
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    <strong>
-                      {i18n.translate('xpack.streams.streamOverview.aboutPanel.queryTitle', {
-                        defaultMessage: 'Query',
-                      })}
-                    </strong>
-                  </EuiText>
-                </EuiFlexItem>
-                {canManageQueryStream && (
-                  <EuiFlexItem
-                    grow={false}
-                    className="aboutPanel__editButton"
-                    css={css`
-                      opacity: 0;
-                      transition: opacity 150ms;
-                    `}
-                  >
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.streams.streamOverview.aboutPanel.editQueryButtonLabel',
-                        {
-                          defaultMessage: 'Edit query',
-                        }
-                      )}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        aria-label={i18n.translate(
-                          'xpack.streams.streamOverview.aboutPanel.editQueryButtonLabel',
-                          {
-                            defaultMessage: 'Edit query',
-                          }
-                        )}
-                        onClick={() => setIsEditQueryFlyoutOpen(true)}
-                        data-test-subj="queryStreamDetailsEditQueryButton"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiCodeBlock
-                language="esql"
-                isCopyable
-                paddingSize="m"
-                overflowHeight={200}
-                data-test-subj="queryStreamDetailsQueryViewerCodeBlock"
-              >
-                {queryStream.stream.query.esql}
-              </EuiCodeBlock>
-            </>
-          )}
         </EuiPanel>
       </EuiFocusTrap>
-
-      {queryStream && isEditQueryFlyoutOpen && (
-        <EditQueryStreamFlyout
-          definition={queryStream}
-          onClose={() => setIsEditQueryFlyoutOpen(false)}
-          onSave={() => {
-            setIsEditQueryFlyoutOpen(false);
-            refresh();
-          }}
-        />
-      )}
     </>
   );
 }

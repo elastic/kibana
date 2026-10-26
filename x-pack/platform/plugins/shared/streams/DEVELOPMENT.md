@@ -2,7 +2,7 @@
 
 This document explains how to develop the current ("new experience") of Streams — unit-scoped map, YAML unit model, and the Kibana unit APIs.
 
-Legacy wired / classic / query streams are documented in [`LEGACY_DEVELOPMENT.md`](./LEGACY_DEVELOPMENT.md).
+Legacy wired / classic streams are documented in [`LEGACY_DEVELOPMENT.md`](./LEGACY_DEVELOPMENT.md).
 
 Also consult the [streams-spec](https://github.com/elastic/streams-spec/tree/main/docs) repo for up to date ADRs, the official schema etc.
 

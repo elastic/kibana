@@ -40,7 +40,6 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
     description: 'Test stream',
     type: 'wired' as const,
     updated_at: new Date().toISOString(),
-    query_streams: [],
     ingest: {
       lifecycle: { dsl: {} },
       processing: { steps: [], updated_at: new Date().toISOString() },
@@ -62,7 +61,6 @@ function createCompleteClassicStreamDefinition(overrides: any = {}) {
     description: 'Test classic stream',
     type: 'classic' as const,
     updated_at: new Date().toISOString(),
-    query_streams: [],
     ingest: {
       lifecycle: { dsl: {} },
       processing: { steps: [], updated_at: new Date().toISOString() },
@@ -228,23 +226,60 @@ describe('migrateOnRead', () => {
     });
   });
 
-  describe('query_streams migration', () => {
-    it('should add query_streams if missing', () => {
-      const definition = {
-        name: 'test-stream',
-        ingest: {
-          lifecycle: { dsl: {} },
-          processing: { steps: [] },
-          wired: {
-            fields: {},
-            routing: [createRoutingRule()],
-          },
-          failure_store: { inherit: {} },
-        },
-      };
+  describe('removed query streams', () => {
+    it('should drop query_streams from ingest streams', () => {
+      const definition = { ...createCompleteWiredStreamDefinition(), query_streams: [] };
 
       const result = migrateOnRead(definition);
-      expect(result.query_streams).toEqual([]);
+      expect(result).not.toHaveProperty('query_streams');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it.each([
+      ['with a type', { type: 'query' }],
+      ['without a type', {}],
+    ])('should leave query stream definitions %s untouched', (_label, typeField) => {
+      const definition = {
+        name: 'my-query-stream',
+        description: 'A query stream',
+        updated_at: new Date().toISOString(),
+        query: { view: '$.my-query-stream', esql: 'FROM logs | LIMIT 10' },
+        ...typeField,
+      };
+
+      expect(migrateOnRead(definition)).toBe(definition);
+      expect(mockStreamsAsserts).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removed draft streams', () => {
+    it('should leave draft stream definitions untouched', () => {
+      const definition = createCompleteWiredStreamDefinition({ draft: true });
+
+      expect(migrateOnRead(definition)).toBe(definition);
+      expect(mockStreamsAsserts).not.toHaveBeenCalled();
+    });
+
+    it('should drop routing to draft children and remove draft flags', () => {
+      const definition = createCompleteWiredStreamDefinition({
+        draft: false,
+        routing: [
+          createRoutingRule({
+            destination: 'test-stream.materialized',
+            status: 'enabled',
+            draft: false,
+          }),
+          createRoutingRule({ destination: 'test-stream.draft', status: 'enabled', draft: true }),
+        ],
+      });
+
+      const result = migrateOnRead(definition);
+      expect((result as Streams.WiredStream.Definition).ingest.wired).toEqual({
+        fields: {},
+        routing: [
+          createRoutingRule({ destination: 'test-stream.materialized', status: 'enabled' }),
+        ],
+      });
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
   });
@@ -457,31 +492,16 @@ describe('migrateOnRead', () => {
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
 
-    it('should add type: query for definitions without an ingest key', () => {
-      const definition = {
-        name: 'my-query-stream',
-        description: 'A query stream',
-        updated_at: new Date().toISOString(),
-        query_streams: [],
-        query: { view: 'my-view', esql: 'FROM logs | LIMIT 10' },
-      };
-
-      const result = migrateOnRead(definition);
-      expect(result.type).toBe('query');
-      expect(mockStreamsAsserts).toHaveBeenCalled();
-    });
-
     it('should throw for documents that have ingest but neither wired nor classic', () => {
       const definition = {
         name: 'corrupted-stream',
         description: 'Corrupted',
         updated_at: new Date().toISOString(),
-        query_streams: [],
         ingest: { lifecycle: { dsl: {} } },
       };
 
       expect(() => migrateOnRead(definition)).toThrow(
-        "Cannot determine stream type: document has an 'ingest' key but it does not contain 'wired' or 'classic'"
+        "Cannot determine stream type: document does not contain 'ingest.wired' or 'ingest.classic'"
       );
     });
 

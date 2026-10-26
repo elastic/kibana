@@ -76,6 +76,5 @@ export const buildRoutingForkRequestPayload = (rule: RoutingDefinition) => {
     stream: {
       name: rule.destination,
     },
-    ...(rule.draft ? { draft: true } : {}),
   };
 };

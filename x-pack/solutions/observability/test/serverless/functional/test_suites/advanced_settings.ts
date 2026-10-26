@@ -11,10 +11,7 @@ import {
   isEditorFieldSetting,
   isGlobalSetting,
 } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
-  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -49,10 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           continue;
         }
         // This setting is read only for the time being
-        if (
-          settingId === OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS ||
-          settingId === OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
-        ) {
+        if (settingId === OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS) {
           continue;
         }
 

@@ -18,7 +18,6 @@ import {
   validateStreamName,
   getEsqlViewName,
   getWiredStreamViewQuery,
-  isDraftStream,
 } from '@kbn/streams-schema';
 import {
   getAncestors,
@@ -68,12 +67,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
-import {
-  computeChange,
-  formatSettings,
-  settingsUpdateRequiresRollover,
-  validateQueryStreams,
-} from './helpers';
+import { computeChange, formatSettings, settingsUpdateRequiresRollover } from './helpers';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface WiredStreamChanges extends StreamChanges {
@@ -83,8 +77,6 @@ interface WiredStreamChanges extends StreamChanges {
   failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
-  query_streams: boolean;
-  draft: boolean;
 }
 
 export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definition> {
@@ -95,8 +87,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     lifecycle: false,
     failure_store: false,
     settings: false,
-    query_streams: false,
-    draft: false,
   };
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
@@ -204,20 +194,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         ),
     });
 
-    this._changes.query_streams =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.query_streams ?? [],
-        startingStateStreamDefinition.query_streams ?? []
-      );
-
-    this._changes.draft = computeChange({
-      isExistingStream,
-      hasMeaningfulValue: isDraftStream(this._definition),
-      hasChanged: () =>
-        isDraftStream(this._definition) !== isDraftStream(startingStateStreamDefinition!),
-    });
-
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
     // we should keep the existing updated_at as processing wasn't touched.
     if (startingStateStreamDefinition && !this._changes.processing) {
@@ -274,7 +250,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                 wired: {
                   fields: {},
                   routing: [],
-                  ...(route.draft ? { draft: true } : {}),
                 },
                 failure_store: { inherit: {} },
               },
@@ -301,7 +276,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               name: parentId,
               description: '',
               updated_at: now,
-              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -320,31 +294,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           });
         }
       }
-    }
-
-    const isMaterializing =
-      isExistingStream &&
-      isDraftStream(startingStateStreamDefinition!) &&
-      !isDraftStream(this._definition);
-
-    if (isMaterializing && parentId && desiredState.has(parentId)) {
-      const parentStream = desiredState.get(parentId) as WiredStream;
-      cascadingChanges.push({
-        type: 'upsert',
-        definition: {
-          ...parentStream.definition,
-          updated_at: now,
-          ingest: {
-            ...parentStream.definition.ingest,
-            wired: {
-              ...parentStream.definition.ingest.wired,
-              routing: parentStream.definition.ingest.wired.routing.map((r) =>
-                r.destination === this._definition.name ? { ...r, draft: false } : r
-              ),
-            },
-          },
-        },
-      });
     }
 
     return { cascadingChanges, changeStatus: 'upserted' };
@@ -378,7 +327,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               name: parentId,
               description: '',
               updated_at: new Date().toISOString(),
-              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -400,15 +348,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'delete' as const,
       }))
     );
-
-    // Cascade delete to all child query streams
-    const childQueryStreams = this._definition.query_streams ?? [];
-    for (const childRef of childQueryStreams) {
-      cascadingChanges.push({
-        type: 'delete',
-        name: childRef.name,
-      });
-    }
 
     return { cascadingChanges, changeStatus: 'deleted' };
   }
@@ -448,22 +387,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     const existsInStartingState = startingState.has(this._definition.name);
 
-    const startingStateStreamDefinition = existsInStartingState
-      ? (startingState.get(this._definition.name)!.definition as Streams.WiredStream.Definition)
-      : undefined;
-
-    if (
-      startingStateStreamDefinition &&
-      !isDraftStream(startingStateStreamDefinition) &&
-      isDraftStream(this._definition)
-    ) {
-      return {
-        isValid: false,
-        errors: [new Error('Cannot revert a materialized stream to draft')],
-      };
-    }
-
-    if (!existsInStartingState && !isDraftStream(this._definition)) {
+    if (!existsInStartingState) {
       const { existsAsIndex, existsAsManagedDataStream, existsAsDataStream } =
         await this.getMatchingDataStream();
       if (existsAsIndex) {
@@ -558,48 +482,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    if (isDraftStream(this._definition)) {
-      for (const routing of this._definition.ingest.wired.routing) {
-        if (!routing.draft) {
-          return {
-            isValid: false,
-            errors: [
-              new Error(
-                `Draft stream "${this._definition.name}" cannot have materialized child "${routing.destination}"`
-              ),
-            ],
-          };
-        }
-      }
-    }
-
-    let seenDraft = false;
-    for (const routing of this._definition.ingest.wired.routing) {
-      if (routing.draft) {
-        seenDraft = true;
-      } else if (seenDraft) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(
-              `Materialized stream "${routing.destination}" cannot appear after a draft stream in the routing list of "${this._definition.name}"`
-            ),
-          ],
-        };
-      }
-    }
-
-    const queryStreamsValidation = validateQueryStreams({
-      desiredState,
-      name: this._definition.name,
-      queryStreams: this._definition.query_streams ?? [],
-    });
-
-    if (queryStreamsValidation) {
-      return queryStreamsValidation;
-    }
-
-    if (!existsInStartingState && !isDraftStream(this._definition)) {
+    if (!existsInStartingState) {
       await this.assertNoHierarchicalConflicts(this._definition.name);
     }
 
@@ -705,22 +588,20 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       return allowlistValidation;
     }
 
-    if (!isDraftStream(this._definition)) {
-      const shouldValidateSettingsWithDryRun =
-        existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
+    const shouldValidateSettingsWithDryRun =
+      existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
 
-      await Promise.all([
-        shouldValidateSettingsWithDryRun
-          ? validateSettingsWithDryRun({
-              esClient: this.dependencies.esClient,
-              streamName: this._definition.name,
-              settings: inheritedSettings,
-              isServerless: this.dependencies.isServerless,
-            })
-          : Promise.resolve(),
-        validateSimulation(this._definition, this.dependencies.esClient),
-      ]);
-    }
+    await Promise.all([
+      shouldValidateSettingsWithDryRun
+        ? validateSettingsWithDryRun({
+            esClient: this.dependencies.esClient,
+            streamName: this._definition.name,
+            settings: inheritedSettings,
+            isServerless: this.dependencies.isServerless,
+          })
+        : Promise.resolve(),
+      validateSimulation(this._definition, this.dependencies.esClient),
+    ]);
 
     return { isValid: true, errors: [] };
   }
@@ -818,8 +699,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       this.dependencies.deferRootDataStreamMaterialization === true &&
       isRootStreamDefinition(this._definition);
 
-    const nonDraftDestinations = this.getNonDraftDestinations();
-
     const actions: ElasticsearchAction[] = [
       {
         type: 'upsert_component_template',
@@ -841,10 +720,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateReroutePipeline({
-          definition: this._definition,
-          excludeDestinations: this.getDraftDestinations(),
-        }),
+        request: generateReroutePipeline({ definition: this._definition }),
       },
       {
         type: 'upsert_index_template',
@@ -893,7 +769,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'upsert_esql_view',
         request: {
           name: getEsqlViewName(this._definition.name),
-          query: getWiredStreamViewQuery(this._definition.name, nonDraftDestinations),
+          query: getWiredStreamViewQuery(this._definition.name, this.getChildDestinations()),
         },
       });
     }
@@ -901,14 +777,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return actions;
   }
 
-  private getNonDraftDestinations(): string[] {
-    return this._definition.ingest.wired.routing.filter((r) => !r.draft).map((r) => r.destination);
-  }
-
-  private getDraftDestinations(): Set<string> {
-    return new Set(
-      this._definition.ingest.wired.routing.filter((r) => r.draft).map((r) => r.destination)
-    );
+  private getChildDestinations(): string[] {
+    return this._definition.ingest.wired.routing.map((r) => r.destination);
   }
 
   public hasChangedFields(): boolean {
@@ -988,18 +858,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateReroutePipeline({
-          definition: this._definition,
-          excludeDestinations: this.getDraftDestinations(),
-        }),
+        request: generateReroutePipeline({ definition: this._definition }),
       });
       if (this.dependencies.isWiredStreamViewsEnabled) {
-        const nonDraftDestinations = this.getNonDraftDestinations();
         actions.push({
           type: 'upsert_esql_view',
           request: {
             name: getEsqlViewName(this._definition.name),
-            query: getWiredStreamViewQuery(this._definition.name, nonDraftDestinations),
+            query: getWiredStreamViewQuery(this._definition.name, this.getChildDestinations()),
           },
         });
       }

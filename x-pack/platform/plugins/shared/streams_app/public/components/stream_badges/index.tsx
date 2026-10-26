@@ -102,26 +102,6 @@ export function WiredStreamBadge() {
   );
 }
 
-export function DraftStreamBadge() {
-  return (
-    <EuiBadge iconType="dashedCircle" color="default" data-test-subj="draftStreamBadge">
-      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
-        defaultMessage: 'Draft',
-      })}
-    </EuiBadge>
-  );
-}
-
-export function QueryStreamBadge() {
-  return (
-    <EuiBadge iconType="code" color="accent">
-      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.queryBadgeLabel', {
-        defaultMessage: 'Query',
-      })}
-    </EuiBadge>
-  );
-}
-
 export function DeprecatedLogsBadge({
   openFlyout,
   hasNewStreams,
@@ -245,24 +225,12 @@ export function LifecycleBadge({
   return <DataRetentionTooltip>{badge}</DataRetentionTooltip>;
 }
 
-interface DiscoverBadgeButtonBaseProps {
+export interface DiscoverBadgeButtonProps {
+  stream: Streams.WiredStream.Definition | Streams.ClassicStream.Definition;
+  indexMode: IndicesIndexMode;
   hasDataStream?: boolean;
   spellOut?: boolean;
 }
-
-interface DiscoverBadgeButtonIngestProps extends DiscoverBadgeButtonBaseProps {
-  stream: Streams.WiredStream.Definition | Streams.ClassicStream.Definition;
-  indexMode: IndicesIndexMode;
-}
-
-interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
-  stream: Streams.QueryStream.Definition;
-  indexMode?: never;
-}
-
-export type DiscoverBadgeButtonProps =
-  | DiscoverBadgeButtonIngestProps
-  | DiscoverBadgeButtonQueryProps;
 
 /**
  * Resolves the "Open in Discover" URL for a stream, or `undefined` when Discover is unavailable
@@ -274,10 +242,7 @@ export function useDiscoverStreamLink({
   indexMode,
   indexName,
 }: {
-  stream?:
-    | Streams.WiredStream.Definition
-    | Streams.ClassicStream.Definition
-    | Streams.QueryStream.Definition;
+  stream?: Streams.WiredStream.Definition | Streams.ClassicStream.Definition;
   hasDataStream?: boolean;
   indexMode?: IndicesIndexMode;
   indexName?: string;
@@ -288,11 +253,10 @@ export function useDiscoverStreamLink({
     },
   } = useKibana();
   const { features } = useStreamsPrivileges();
-  const isIngestStream = stream ? !Streams.QueryStream.Definition.is(stream) : false;
   const esqlQuery = stream
     ? getDiscoverEsqlQuery({
         definition: stream,
-        indexMode: isIngestStream ? indexMode : undefined,
+        indexMode,
         includeMetadata: Streams.WiredStream.Definition.is(stream),
         useViews: features.wiredStreamViews.enabled,
       })

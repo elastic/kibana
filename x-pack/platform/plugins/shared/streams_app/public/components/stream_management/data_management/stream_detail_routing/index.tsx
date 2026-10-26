@@ -80,8 +80,6 @@ export function StreamDetailRoutingImpl() {
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
-  // StreamDetailRoutingImpl is only rendered for wired streams (classic uses ClassicStreamPartitioningImpl)
-  const wiredDefinition = definition as Streams.WiredStream.GetResponse;
   const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
   const canSaveRouting = useStreamsRoutingSelector((snapshot) =>
     snapshot.can({ type: 'routingRule.save' })
@@ -154,7 +152,7 @@ export function StreamDetailRoutingImpl() {
 
   const onBottomBarViewCodeClick = () => {
     const routingPayload = routing.map(routingConverter.toAPIDefinition);
-    const body = buildRoutingSaveRequestPayload(wiredDefinition, routingPayload);
+    const body = buildRoutingSaveRequestPayload(definition, routingPayload);
 
     openRequestPreviewFlyout({
       method: 'PUT',

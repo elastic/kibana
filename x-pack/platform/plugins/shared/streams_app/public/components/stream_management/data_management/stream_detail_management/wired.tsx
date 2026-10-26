@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
+import { type Streams, isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiCallOut } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
@@ -138,9 +138,7 @@ function WiredStreamDetailManagementContent({
   const isNewRootStream =
     isRoot(definition.stream.name) && definition.stream.name !== LOGS_ROOT_STREAM_NAME;
 
-  const isDraft = isDraftStream(definition.stream);
-
-  if (!definition.data_stream_exists && !isNewRootStream && !isDraft) {
+  if (!definition.data_stream_exists && !isNewRootStream) {
     return (
       <>
         <StreamsAppHeader
@@ -188,35 +186,28 @@ function WiredStreamDetailManagementContent({
         defaultMessage: 'Overview',
       }),
     },
-    ...(!isDraft
-      ? {
-          lifecycle: {
-            content: (
-              <StreamDetailLifecycle
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-              />
-            ),
-            label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Data lifecycle',
-            }),
-            toolTipContent: i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-              defaultMessage:
-                'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-            }),
-            'data-test-subj': 'retentionTab',
-            actions: buildLifecycleTabActions({
-              definition,
-              notifications,
-              share,
-              router,
-              timeRange: { rangeFrom, rangeTo },
-              onImportFromStream: importLifecycleFlyout?.open,
-              isImportFromStreamDisabled: importLifecycleFlyout?.isDisabled,
-            }),
-          },
-        }
-      : {}),
+    lifecycle: {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+        defaultMessage: 'Data lifecycle',
+      }),
+      toolTipContent: i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+        defaultMessage:
+          'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+      }),
+      'data-test-subj': 'retentionTab',
+      actions: buildLifecycleTabActions({
+        definition,
+        notifications,
+        share,
+        router,
+        timeRange: { rangeFrom, rangeTo },
+        onImportFromStream: importLifecycleFlyout?.open,
+        isImportFromStreamDisabled: importLifecycleFlyout?.isDisabled,
+      }),
+    },
     partitioning: {
       content: (
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
@@ -248,28 +239,18 @@ function WiredStreamDetailManagementContent({
         defaultMessage: 'Schema',
       }),
     },
-    ...(!isDraft
-      ? {
-          dataQuality: {
-            content: (
-              <StreamDetailDataQuality
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-              />
-            ),
-            label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-              defaultMessage: 'Data quality',
-            }),
-            toolTipContent: i18n.translate(
-              'xpack.streams.managementTab.dataQuality.wired.tooltip',
-              {
-                defaultMessage: "View details about this stream's data quality",
-              }
-            ),
-            'data-test-subj': 'dataQualityTab',
-          },
-        }
-      : {}),
+    dataQuality: {
+      content: (
+        <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+        defaultMessage: 'Data quality',
+      }),
+      toolTipContent: i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
+        defaultMessage: "View details about this stream's data quality",
+      }),
+      'data-test-subj': 'dataQualityTab',
+    },
     attachments: {
       content: <StreamDetailAttachments definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
@@ -290,12 +271,6 @@ function WiredStreamDetailManagementContent({
 
   if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
-  }
-
-  if (isDraft && (tab === 'lifecycle' || tab === 'dataQuality')) {
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
-    );
   }
 
   return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;

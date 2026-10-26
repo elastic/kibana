@@ -10,20 +10,10 @@ import type { OmitUpsertProps } from './core';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {
-  export interface QueryStreamReference {
-    name: string;
-  }
-
   export interface Definition {
     name: string;
     description: string;
     updated_at: string;
-    /**
-     * Child query streams (virtual, read-only ES|QL view streams) that belong to this stream.
-     * Names must follow the parent.childname naming convention. These are not significant-event
-     * queries (`StreamQuery`); those are stored separately from the stream payload.
-     */
-    query_streams?: QueryStreamReference[];
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
@@ -46,7 +36,13 @@ export namespace BaseStream {
   export interface UpsertRequest<TDefinition extends Definition = Definition> {
     dashboards: string[];
     rules: string[];
-    stream: OmitUpsertProps<TDefinition>;
+    stream: OmitUpsertProps<TDefinition> & {
+      /**
+       * @deprecated Query streams have been removed. Accepted for backwards compatibility
+       * with clients that round-trip older GET responses, and ignored.
+       */
+      query_streams?: Array<{ name: string }>;
+    };
   }
 
   export interface Model {
@@ -61,13 +57,6 @@ export const baseStreamDefinitionSchema = z.object({
   name: z.string(),
   description: z.string(),
   updated_at: isoDateTime(),
-  query_streams: z
-    .array(
-      z.object({
-        name: z.string(),
-      })
-    )
-    .optional(),
 });
 
 export const baseStreamGetResponseSchema = z.object({
@@ -80,7 +69,18 @@ export const baseStreamUpsertRequestSchema = z.object({
   rules: z.array(z.string()),
 });
 
-export const baseStreamUpsertDefinitionSchema = baseStreamDefinitionSchema.omit({
-  name: true,
-  updated_at: true,
-});
+export const baseStreamUpsertDefinitionSchema = baseStreamDefinitionSchema
+  .omit({
+    name: true,
+    updated_at: true,
+  })
+  .extend({
+    query_streams: z
+      .array(z.object({ name: z.string() }))
+      .optional()
+      .meta({
+        deprecated: true,
+        description:
+          'Deprecated. Query streams have been removed; this field is accepted for backwards compatibility and ignored.',
+      }),
+  });

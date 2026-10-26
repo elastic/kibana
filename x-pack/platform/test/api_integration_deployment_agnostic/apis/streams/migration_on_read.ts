@@ -126,7 +126,6 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
   name: TEST_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
-  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -147,7 +146,6 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
   name: WIRED_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
-  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {

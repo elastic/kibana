@@ -230,33 +230,33 @@ describe('createStreamsEnrichment', () => {
       expect(result).toEqual(views);
     });
 
-    it('enriches a view matching a query stream with type, description, and link', async () => {
+    it('enriches a view matching a stream with type, description, and link', async () => {
       const { enrichViews } = createStreamsEnrichment(
-        makeRepositoryClient([{ name: 'my-query', type: 'query', description: 'A query stream' }]),
+        makeRepositoryClient([{ name: 'my-view', type: 'wired', description: 'A wired stream' }]),
         makeApplication()
       );
-      const views = [makeView('my-query')];
+      const views = [makeView('my-view')];
 
       const [result] = await enrichViews(views);
 
-      expect(result.type).toBe(SOURCES_TYPES.QUERY_STREAM);
-      expect(result.description).toBe('A query stream');
+      expect(result.type).toBe(SOURCES_TYPES.WIRED_STREAM);
+      expect(result.description).toBe('A wired stream');
       expect(result.links).toHaveLength(1);
-      expect(result.links![0].url).toBe('http://localhost/my-query/management/overview');
-      expect(result.links![0].label).toContain('my-query');
+      expect(result.links![0].url).toBe('http://localhost/my-view/management/overview');
+      expect(result.links![0].label).toContain('my-view');
     });
 
     it('strips $. prefix from view names for cache lookup', async () => {
       const client = makeRepositoryClient([
-        { name: 'my-stream', type: 'query', description: 'Query stream' },
+        { name: 'my-stream', type: 'wired', description: 'Wired stream' },
       ]);
       const { enrichViews } = createStreamsEnrichment(client, makeApplication());
       const views = [makeView('$.my-stream')];
 
       const [result] = await enrichViews(views);
 
-      expect(result.type).toBe(SOURCES_TYPES.QUERY_STREAM);
-      expect(result.description).toBe('Query stream');
+      expect(result.type).toBe(SOURCES_TYPES.WIRED_STREAM);
+      expect(result.description).toBe('Wired stream');
       // The API should have been called with the stripped name
       expect(client.fetch).toHaveBeenCalledWith(
         'POST /internal/streams/_bulk_get_summaries',
@@ -268,7 +268,7 @@ describe('createStreamsEnrichment', () => {
 
     it('preserves the original view name (with $. prefix) in the result', async () => {
       const { enrichViews } = createStreamsEnrichment(
-        makeRepositoryClient([{ name: 'my-stream', type: 'query', description: 'Query stream' }]),
+        makeRepositoryClient([{ name: 'my-stream', type: 'wired', description: 'Wired stream' }]),
         makeApplication()
       );
       const views = [makeView('$.my-stream')];
@@ -280,16 +280,16 @@ describe('createStreamsEnrichment', () => {
 
     it('preserves existing view fields when enriching', async () => {
       const { enrichViews } = createStreamsEnrichment(
-        makeRepositoryClient([{ name: 'my-query', type: 'query', description: 'A query stream' }]),
+        makeRepositoryClient([{ name: 'my-view', type: 'wired', description: 'A wired stream' }]),
         makeApplication()
       );
-      const view = makeView('my-query', { query: 'FROM logs | WHERE level = "error"' });
+      const view = makeView('my-view', { query: 'FROM logs | WHERE level = "error"' });
 
       const [result] = await enrichViews([view]);
 
       expect(result.query).toBe('FROM logs | WHERE level = "error"');
-      expect(result.name).toBe('my-query');
-      expect(result.type).toBe(SOURCES_TYPES.QUERY_STREAM);
+      expect(result.name).toBe('my-view');
+      expect(result.type).toBe(SOURCES_TYPES.WIRED_STREAM);
     });
 
     it('returns views unchanged when the streams API call fails (graceful degradation)', async () => {
@@ -297,7 +297,7 @@ describe('createStreamsEnrichment', () => {
         fetch: jest.fn().mockRejectedValue(new Error('Network error')),
       } as unknown as jest.Mocked<StreamsRepositoryClient>;
       const { enrichViews } = createStreamsEnrichment(failingClient, makeApplication());
-      const views = [makeView('my-query')];
+      const views = [makeView('my-view')];
 
       const result = await enrichViews(views);
 
@@ -306,7 +306,7 @@ describe('createStreamsEnrichment', () => {
 
     it('returns an empty array when views is empty', async () => {
       const { enrichViews } = createStreamsEnrichment(
-        makeRepositoryClient([{ name: 'logs', type: 'query', description: '' }]),
+        makeRepositoryClient([{ name: 'logs', type: 'wired', description: '' }]),
         makeApplication()
       );
 
@@ -326,10 +326,10 @@ describe('createStreamsEnrichment', () => {
 
     it('sets description to undefined when the stream has an empty description', async () => {
       const { enrichViews } = createStreamsEnrichment(
-        makeRepositoryClient([{ name: 'my-query', type: 'query', description: '' }]),
+        makeRepositoryClient([{ name: 'my-view', type: 'wired', description: '' }]),
         makeApplication()
       );
-      const views = [makeView('my-query')];
+      const views = [makeView('my-view')];
 
       const [result] = await enrichViews(views);
 
@@ -340,7 +340,7 @@ describe('createStreamsEnrichment', () => {
   describe('shared cache between sources and views', () => {
     it('shares cache hits between enrichSources and enrichViews', async () => {
       const client = makeRepositoryClient([
-        { name: 'my-stream', type: 'query', description: 'Shared stream' },
+        { name: 'my-stream', type: 'wired', description: 'Shared stream' },
       ]);
       const { enrichSources, enrichViews } = createStreamsEnrichment(client, makeApplication());
 
@@ -353,7 +353,7 @@ describe('createStreamsEnrichment', () => {
       // enrichViews should hit the cache
       const [result] = await enrichViews([makeView('my-stream')]);
       expect(client.fetch).not.toHaveBeenCalled();
-      expect(result.type).toBe(SOURCES_TYPES.QUERY_STREAM);
+      expect(result.type).toBe(SOURCES_TYPES.WIRED_STREAM);
     });
 
     it('shares cache hits between enrichViews (with $. prefix) and enrichSources', async () => {
@@ -460,46 +460,46 @@ describe('createStreamsEnrichment', () => {
     });
 
     it('calls the streams API only once across multiple enrichViews invocations within the TTL', async () => {
-      const client = makeRepositoryClient([{ name: 'my-query', type: 'query', description: '' }]);
+      const client = makeRepositoryClient([{ name: 'my-view', type: 'wired', description: '' }]);
       const { enrichViews } = createStreamsEnrichment(client, makeApplication(), makeFakePerf());
 
-      await enrichViews([makeView('my-query')]);
-      await enrichViews([makeView('my-query')]);
+      await enrichViews([makeView('my-view')]);
+      await enrichViews([makeView('my-view')]);
 
       expect(client.fetch).toHaveBeenCalledTimes(1);
     });
 
     it('re-fetches views from the API after the cache TTL expires', async () => {
-      const client = makeRepositoryClient([{ name: 'my-query', type: 'query', description: '' }]);
+      const client = makeRepositoryClient([{ name: 'my-view', type: 'wired', description: '' }]);
       const perf = makeFakePerf();
       const { enrichViews } = createStreamsEnrichment(client, makeApplication(), perf);
 
-      await enrichViews([makeView('my-query')]);
+      await enrichViews([makeView('my-view')]);
 
       perf.tick(STREAMS_CACHE_TTL_MS + 1);
 
-      await enrichViews([makeView('my-query')]);
+      await enrichViews([makeView('my-view')]);
 
       expect(client.fetch).toHaveBeenCalledTimes(2);
     });
 
     it('reflects updated view data after the cache TTL expires', async () => {
       const client = makeRepositoryClient([
-        { name: 'my-query', type: 'query', description: 'Original' },
+        { name: 'my-view', type: 'wired', description: 'Original' },
       ]);
       const perf = makeFakePerf();
       const { enrichViews } = createStreamsEnrichment(client, makeApplication(), perf);
 
-      const [firstResult] = await enrichViews([makeView('my-query')]);
+      const [firstResult] = await enrichViews([makeView('my-view')]);
       expect(firstResult.description).toBe('Original');
 
       client.fetch.mockResolvedValue({
-        summaries: [{ name: 'my-query', type: 'query', description: 'Updated' }],
+        summaries: [{ name: 'my-view', type: 'wired', description: 'Updated' }],
       });
 
       perf.tick(STREAMS_CACHE_TTL_MS + 1);
 
-      const [secondResult] = await enrichViews([makeView('my-query')]);
+      const [secondResult] = await enrichViews([makeView('my-view')]);
       expect(secondResult.description).toBe('Updated');
       expect(client.fetch).toHaveBeenCalledTimes(2);
     });
@@ -621,24 +621,24 @@ describe('createStreamsEnrichment', () => {
     });
 
     it('deduplicates concurrent requests for the same views', async () => {
-      const client = makeRepositoryClient([{ name: 'my-query', type: 'query', description: '' }]);
+      const client = makeRepositoryClient([{ name: 'my-view', type: 'wired', description: '' }]);
       const { enrichViews } = createStreamsEnrichment(client, makeApplication());
 
       const [result1, result2] = await Promise.all([
-        enrichViews([makeView('my-query')]),
-        enrichViews([makeView('my-query')]),
+        enrichViews([makeView('my-view')]),
+        enrichViews([makeView('my-view')]),
       ]);
 
       expect(client.fetch).toHaveBeenCalledTimes(1);
-      expect(result1[0].type).toBe(SOURCES_TYPES.QUERY_STREAM);
-      expect(result2[0].type).toBe(SOURCES_TYPES.QUERY_STREAM);
+      expect(result1[0].type).toBe(SOURCES_TYPES.WIRED_STREAM);
+      expect(result2[0].type).toBe(SOURCES_TYPES.WIRED_STREAM);
     });
 
     it('batches view cache misses from concurrent calls into a single API request', async () => {
       const client = makeRepositoryClient([
-        { name: 'view-a', type: 'query', description: '' },
-        { name: 'view-b', type: 'query', description: '' },
-        { name: 'view-c', type: 'query', description: '' },
+        { name: 'view-a', type: 'wired', description: '' },
+        { name: 'view-b', type: 'wired', description: '' },
+        { name: 'view-c', type: 'wired', description: '' },
       ]);
       const { enrichViews } = createStreamsEnrichment(client, makeApplication());
 
@@ -662,12 +662,12 @@ describe('createStreamsEnrichment', () => {
           .fn()
           .mockResolvedValueOnce({
             summaries: [
-              { name: 'view-a', type: 'query', description: '' },
-              { name: 'view-b', type: 'query', description: '' },
+              { name: 'view-a', type: 'wired', description: '' },
+              { name: 'view-b', type: 'wired', description: '' },
             ],
           })
           .mockResolvedValueOnce({
-            summaries: [{ name: 'view-c', type: 'query', description: '' }],
+            summaries: [{ name: 'view-c', type: 'wired', description: '' }],
           }),
       } as unknown as jest.Mocked<StreamsRepositoryClient>;
       const { enrichViews } = createStreamsEnrichment(client, makeApplication());
@@ -696,10 +696,10 @@ describe('createStreamsEnrichment', () => {
         expect.objectContaining({ params: { body: { names: ['view-c'] } } })
       );
 
-      expect(result1[0].type).toBe(SOURCES_TYPES.QUERY_STREAM); // view-a
-      expect(result1[1].type).toBe(SOURCES_TYPES.QUERY_STREAM); // view-b
-      expect(result2[0].type).toBe(SOURCES_TYPES.QUERY_STREAM); // view-b (deduplicated)
-      expect(result2[1].type).toBe(SOURCES_TYPES.QUERY_STREAM); // view-c
+      expect(result1[0].type).toBe(SOURCES_TYPES.WIRED_STREAM); // view-a
+      expect(result1[1].type).toBe(SOURCES_TYPES.WIRED_STREAM); // view-b
+      expect(result2[0].type).toBe(SOURCES_TYPES.WIRED_STREAM); // view-b (deduplicated)
+      expect(result2[1].type).toBe(SOURCES_TYPES.WIRED_STREAM); // view-c
     });
   });
 });

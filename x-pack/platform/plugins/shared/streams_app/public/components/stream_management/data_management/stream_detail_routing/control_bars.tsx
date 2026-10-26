@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
-import React, { useState } from 'react';
+import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
@@ -32,8 +32,6 @@ import {
   buildRoutingSaveRequestPayload,
   routingConverter,
 } from './utils';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
-import { ExecutionModeModal } from './execution_mode_modal';
 
 interface AddRoutingRuleControlsProps {
   isStreamNameValid: boolean;
@@ -43,10 +41,6 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
   const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
   const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
-  const [isExecutionModeModalVisible, setIsExecutionModeModalVisible] = useState(false);
-  const {
-    features: { draftStreams },
-  } = useStreamsPrivileges();
 
   const streamName = useStreamsRoutingSelector(
     (snapshot) => snapshot.context.definition.stream.name
@@ -89,19 +83,6 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
     setRequestPreviewCodeContent('');
   };
 
-  const handleCreateStream = () => {
-    if (draftStreams.enabled) {
-      setIsExecutionModeModalVisible(true);
-    } else {
-      forkStream(undefined, false);
-    }
-  };
-
-  const handleExecutionModeConfirm = (isDraft: boolean) => {
-    setIsExecutionModeModalVisible(false);
-    forkStream(undefined, isDraft);
-  };
-
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -122,21 +103,12 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
               <CreateStreamButton
                 isLoading={isForking}
                 isDisabled={!canForkRouting || !isStreamNameValid}
-                onClick={handleCreateStream}
+                onClick={() => forkStream()}
               />
             </PrivilegesTooltip>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {isExecutionModeModalVisible && (
-        <ExecutionModeModal
-          streamName={currentRoutingRule.destination}
-          condition={currentRoutingRule.where}
-          onCancel={() => setIsExecutionModeModalVisible(false)}
-          onConfirm={handleExecutionModeConfirm}
-        />
-      )}
 
       {isRequestPreviewFlyoutOpen && (
         <RequestPreviewFlyout

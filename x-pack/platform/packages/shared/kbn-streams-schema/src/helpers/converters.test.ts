@@ -56,25 +56,27 @@ describe('Converter Helpers', () => {
       expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
     });
 
-    it('converts query streams', () => {
-      const request: Streams.QueryStream.UpsertRequest = {
+    it('drops the deprecated query_streams field', () => {
+      const request: Streams.WiredStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
-          type: 'query',
+          type: 'wired',
           description: '',
-          query: {
-            view: '$.my-query-stream',
-            esql: 'FROM logs | WHERE service.name == "test"',
+          query_streams: [],
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            wired: { fields: {}, routing: [] },
+            failure_store: { inherit: {} },
           },
         },
       };
 
-      const definition = convertUpsertRequestIntoDefinition('my-query-stream', request);
+      const definition = convertUpsertRequestIntoDefinition('wired-stream', request);
 
-      expect(Streams.QueryStream.Definition.is(definition)).toEqual(true);
-      expect((definition as Streams.QueryStream.Definition).query.view).toEqual(
-        '$.my-query-stream'
-      );
+      expect(definition).not.toHaveProperty('query_streams');
+      expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
     });
   });
 
@@ -167,30 +169,6 @@ describe('Converter Helpers', () => {
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
-    });
-
-    it('converts query streams', () => {
-      const getResponse: Streams.QueryStream.GetResponse = {
-        stream: {
-          type: 'query',
-          name: 'my-query-stream',
-          description: '',
-          updated_at: new Date().toISOString(),
-          query: {
-            view: '$.my-query-stream',
-            esql: 'FROM logs | WHERE service.name == "test"',
-          },
-        },
-        inherited_fields: {},
-        ...emptyAssets,
-      };
-
-      const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
-
-      expect(Streams.QueryStream.UpsertRequest.is(upsertRequest)).toEqual(true);
-      expect((upsertRequest as Streams.QueryStream.UpsertRequest).stream.query.view).toEqual(
-        '$.my-query-stream'
-      );
     });
   });
 });

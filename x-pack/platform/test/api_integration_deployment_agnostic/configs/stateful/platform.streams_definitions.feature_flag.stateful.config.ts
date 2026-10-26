@@ -19,7 +19,6 @@ export default createStatefulFeatureFlagTestConfig({
         stream: {
           type: 'wired',
           description: '',
-          query_streams: [],
           ingest: {
             lifecycle: {
               dsl: {},
@@ -58,7 +57,6 @@ export default createStatefulFeatureFlagTestConfig({
         stream: {
           type: 'wired',
           description: '',
-          query_streams: [],
           ingest: {
             lifecycle: {
               dsl: {},

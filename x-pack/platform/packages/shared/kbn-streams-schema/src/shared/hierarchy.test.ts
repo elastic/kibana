@@ -484,8 +484,8 @@ describe('hierarchy', () => {
       });
     });
 
-    describe('user-created query stream nesting', () => {
-      it('should correctly resolve hierarchy for nested query streams', () => {
+    describe('user-created stream nesting', () => {
+      it('should correctly resolve hierarchy for nested streams', () => {
         // Scenario: test -> test.child -> test.child.grandchild
         expect(getParentId('test.child')).toBe('test');
         expect(getParentId('test.child.grandchild')).toBe('test.child');

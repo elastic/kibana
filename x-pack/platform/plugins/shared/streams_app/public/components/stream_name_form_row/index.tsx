@@ -57,8 +57,7 @@ export const getErrorMessage = (
   isDotPresent: boolean,
   prefix: string,
   rootChild: string,
-  router: StatefulStreamsAppRouter,
-  checkRootChildExists: boolean = true
+  router: StatefulStreamsAppRouter
 ): ReactNode | string | undefined => {
   // Return base validation errors from the shared validator first
   if (baseValidationError) {
@@ -70,12 +69,6 @@ export const getErrorMessage = (
     });
   }
   if (isDotPresent) {
-    // Query streams don't have a meaningful child-stream link to point at.
-    if (!checkRootChildExists) {
-      return i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessageSimple', {
-        defaultMessage: `Stream name cannot contain the "." character.`,
-      });
-    }
     if (!rootChildExists) {
       return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
         defaultMessage: `The child stream {rootChild} does not exist. Please create it first.`,
@@ -120,15 +113,11 @@ interface ChildStreamInputHookResponse {
 interface UseChildStreamInputOptions {
   streamName: string;
   readOnly?: boolean;
-  checkRootChildExists?: boolean;
-  additionalExistingNames?: readonly string[];
 }
 
 /**
  * Custom hook that handles computations necessary for child stream input component instances.
  * Used by parent components to lift up the states needed for the local input field so validation concerns can be shared across components.
- * @param options.checkRootChildExists - When true (default), surfaces a root-child existence error on dot. Set to false for query streams.
- * @param options.additionalExistingNames - Extra full names for the duplicate check — covers siblings not present in the wired routing array.
  * @example
  * const { setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput({ streamName: 'logs.linux' });
  * return (
@@ -145,8 +134,6 @@ interface UseChildStreamInputOptions {
 export const useChildStreamInput = ({
   streamName,
   readOnly = false,
-  checkRootChildExists = true,
-  additionalExistingNames,
 }: UseChildStreamInputOptions): ChildStreamInputHookResponse => {
   const [localStreamName, setLocalStreamName] = useState(streamName);
 
@@ -164,10 +151,8 @@ export const useChildStreamInput = ({
   const partitionName = localStreamName.replace(prefix, '');
   const rootChild = partitionName.split('.')[0];
   const isDuplicatedName = useMemo(
-    () =>
-      routing.some((r) => r.destination === localStreamName && !r.isNew) ||
-      (additionalExistingNames?.includes(localStreamName) ?? false),
-    [routing, localStreamName, additionalExistingNames]
+    () => routing.some((r) => r.destination === localStreamName && !r.isNew),
+    [routing, localStreamName]
   );
   const rootChildExists = useMemo(
     () => routing.some((r) => r.destination === prefix + rootChild && !r.isNew),
@@ -177,16 +162,8 @@ export const useChildStreamInput = ({
   // Use shared validation for basic stream name checks
   const baseValidation = validateStreamName(localStreamName);
   const isStreamNameEmpty = localStreamName.length <= prefix.length;
-
-  // `validateStreamName` only checks the start of the full name, so query-stream flows
-  // also validate the partition segment to catch e.g. "-x" under "logs.ecs.android".
-  const partitionValidation =
-    !checkRootChildExists && !isStreamNameEmpty ? validateStreamName(partitionName) : undefined;
-
   const baseValidationError =
-    (!baseValidation.valid && !isStreamNameEmpty && baseValidation.message) ||
-    (partitionValidation && !partitionValidation.valid && partitionValidation.message) ||
-    undefined;
+    !baseValidation.valid && !isStreamNameEmpty ? baseValidation.message : undefined;
 
   const helpText = getHelpText(isStreamNameEmpty, readOnly);
 
@@ -200,19 +177,14 @@ export const useChildStreamInput = ({
     isDotPresent,
     prefix,
     rootChild,
-    router,
-    checkRootChildExists
+    router
   );
 
   return {
     localStreamName,
     setLocalStreamName,
     isStreamNameValid:
-      baseValidation.valid &&
-      (partitionValidation?.valid ?? true) &&
-      !isStreamNameEmpty &&
-      !isDotPresent &&
-      !isDuplicatedName,
+      baseValidation.valid && !isStreamNameEmpty && !isDotPresent && !isDuplicatedName,
     prefix,
     partitionName,
     helpText,

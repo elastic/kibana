@@ -20,7 +20,6 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const mockGetStreamSamplingSource = jest.fn();
 const mockGetStreamTypeFromDefinition = jest.fn();
 const mockIdentifyInferredFeatures = jest.fn();
 const mockIdentifyComputedFeatures = jest.fn();
@@ -30,7 +29,6 @@ const mockResolveNightshiftModelForRequest = jest.fn(
 );
 
 jest.mock('@kbn/streams-schema', () => ({
-  getStreamSamplingSource: (...args: unknown[]) => mockGetStreamSamplingSource(...args),
   getStreamTypeFromDefinition: (...args: unknown[]) => mockGetStreamTypeFromDefinition(...args),
 }));
 

@@ -18,7 +18,6 @@ interface ClassicStreamChanges {
   failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
-  query_streams: boolean;
 }
 
 interface ClassicStreamTestable {

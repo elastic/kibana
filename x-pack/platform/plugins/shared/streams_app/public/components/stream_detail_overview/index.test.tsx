@@ -9,10 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { StreamOverview } from '.';
-import {
-  createMockWiredStreamDefinition,
-  createMockQueryStreamDefinition,
-} from '../stream_management/data_management/shared/mocks';
+import { createMockWiredStreamDefinition } from '../stream_management/data_management/shared/mocks';
 
 const mockUseStreamDetail = jest.fn();
 const mockUseStreamsPrivileges = jest.fn();
@@ -89,61 +86,13 @@ describe('StreamOverview', () => {
     expect(screen.getByText('Import & export')).toBeInTheDocument();
   });
 
-  it('does not render import and export panel for query stream', () => {
-    mockUseStreamsPrivileges.mockReturnValue({
-      features: { contentPacks: { enabled: true } },
-    });
+  it('renders IngestRateChart', () => {
     mockUseStreamDetail.mockReturnValue({
-      definition: createMockQueryStreamDefinition(),
-      refresh: jest.fn(),
+      definition: createMockWiredStreamDefinition(),
     });
 
     renderWithI18n(<StreamOverview />);
 
-    expect(screen.queryByText('Import & export')).not.toBeInTheDocument();
-  });
-
-  it('renders IngestRateChart for all stream types', () => {
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockQueryStreamDefinition(),
-    });
-
-    renderWithI18n(<StreamOverview />);
-
-    expect(screen.getByTestId('mockIngestRateChart')).toBeInTheDocument();
-  });
-
-  it('does not render dataset quality card for query stream', () => {
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockQueryStreamDefinition(),
-    });
-
-    renderWithI18n(<StreamOverview />);
-
-    expect(screen.queryByText('Dataset quality')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mockIngestRateChart')).toBeInTheDocument();
-  });
-
-  it('does not render dataset quality card for draft stream', () => {
-    const baseDefinition = createMockWiredStreamDefinition();
-    const definition = createMockWiredStreamDefinition({
-      stream: {
-        ...baseDefinition.stream,
-        ingest: {
-          ...baseDefinition.stream.ingest,
-          wired: {
-            ...baseDefinition.stream.ingest.wired,
-            draft: true,
-          },
-        },
-      },
-    });
-
-    mockUseStreamDetail.mockReturnValue({ definition });
-
-    renderWithI18n(<StreamOverview />);
-
-    expect(screen.queryByText('Dataset quality')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockIngestRateChart')).toBeInTheDocument();
   });
 });

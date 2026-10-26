@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
-import { Streams, getAdvancedParameters, isDraftGetResponse } from '@kbn/streams-schema';
+import { Streams, getAdvancedParameters } from '@kbn/streams-schema';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
@@ -38,8 +38,6 @@ export const useSchemaFields = ({
 
   const abortController = useAbortController();
 
-  const isDraft = isDraftGetResponse(definition);
-
   const {
     value: unmappedFieldsValue,
     loading: isLoadingUnmappedFields,
@@ -64,16 +62,13 @@ export const useSchemaFields = ({
     refresh: refreshDataViewFields,
   } = useAbortableAsync(
     async ({ signal }) => {
-      if (isDraft) {
-        return [];
-      }
       return dataViews.getFieldsForWildcard({
         pattern: definition.stream.name,
         abortSignal: signal,
         forceRefresh: true,
       });
     },
-    [dataViews, definition.stream.name, isDraft]
+    [dataViews, definition.stream.name]
   );
 
   const [fields, setFields] = useState<SchemaField[]>([]);

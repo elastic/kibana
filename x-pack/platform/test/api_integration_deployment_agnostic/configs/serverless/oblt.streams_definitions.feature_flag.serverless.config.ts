@@ -20,7 +20,6 @@ export default createServerlessFeatureFlagTestConfig({
         stream: {
           type: 'wired',
           description: '',
-          query_streams: [],
           ingest: {
             lifecycle: {
               dsl: {},
@@ -59,7 +58,6 @@ export default createServerlessFeatureFlagTestConfig({
         stream: {
           type: 'wired',
           description: '',
-          query_streams: [],
           ingest: {
             lifecycle: {
               dsl: {},

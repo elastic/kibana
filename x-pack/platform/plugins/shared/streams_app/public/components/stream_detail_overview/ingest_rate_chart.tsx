@@ -36,7 +36,6 @@ import { i18n } from '@kbn/i18n';
 import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import React, { useCallback, useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { isDraftGetResponse, getEsqlViewName } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import {
@@ -66,25 +65,16 @@ export function IngestRateChart() {
   }
 
   const streamName = definition.stream.name;
-  const isQueryStream = Streams.QueryStream.GetResponse.is(definition);
-  const isDraft = isDraftGetResponse(definition);
   const canReadFailureStore = Streams.ingest.all.GetResponse.is(definition)
     ? definition.privileges.read_failure_store &&
       isEnabledFailureStore(definition.effective_failure_store)
     : false;
-  const esqlSource = isQueryStream
-    ? definition.stream.query.view
-    : isDraft
-    ? getEsqlViewName(streamName)
-    : streamName;
 
   return (
     <IngestRateChartContent
       streamName={streamName}
-      esqlSource={esqlSource}
+      esqlSource={streamName}
       canReadFailureStore={canReadFailureStore}
-      isQueryStream={isQueryStream}
-      isDraft={isDraft}
     />
   );
 }
@@ -93,14 +83,10 @@ export function IngestRateChartContent({
   streamName,
   esqlSource,
   canReadFailureStore,
-  isQueryStream,
-  isDraft,
 }: {
   streamName: string;
   esqlSource: string;
   canReadFailureStore: boolean;
-  isQueryStream: boolean;
-  isDraft: boolean;
 }) {
   const {
     core: { uiSettings },
@@ -120,7 +106,7 @@ export function IngestRateChartContent({
 
   const { getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
-    getCanReadFailureStore: () => (isDraft ? false : canReadFailureStore),
+    getCanReadFailureStore: () => canReadFailureStore,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
     // This chart only reads the histogram, never the Ingestion column, so skip the ingestion request.
     fetchIngestionDocCounts: false,
@@ -305,8 +291,6 @@ export function IngestRateChartContent({
         timeEnd={timeState.end}
         esqlSource={esqlSource}
         streamName={streamName}
-        isQueryStream={isQueryStream}
-        isDraft={isDraft}
       />
     </EuiPanel>
   );

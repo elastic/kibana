@@ -7,9 +7,7 @@
 
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CANVAS,
 } from '@kbn/management-settings-ids';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -35,8 +33,6 @@ export function useStreamsPrivileges() {
   // undefined while the license$ has not emitted yet (loading).
   const license = useObservable(licensing.license$);
 
-  const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
-
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
 
   const wiredStreamViewsEnabled = uiSettings.get(
@@ -44,7 +40,6 @@ export function useStreamsPrivileges() {
     false
   );
 
-  const draftStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS, false);
   const canvasEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CANVAS, false);
 
   return {
@@ -56,17 +51,11 @@ export function useStreamsPrivileges() {
       ui: {
         enabled: true,
       },
-      queryStreams: {
-        enabled: queryStreamsEnabled,
-      },
       contentPacks: {
         enabled: contentPacksEnabled,
       },
       wiredStreamViews: {
         enabled: wiredStreamViewsEnabled,
-      },
-      draftStreams: {
-        enabled: draftStreamsEnabled,
       },
       canvas: {
         enabled: canvasEnabled,

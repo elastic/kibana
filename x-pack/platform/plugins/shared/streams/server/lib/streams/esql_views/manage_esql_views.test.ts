@@ -19,7 +19,7 @@ describe('manage_esql_views', () => {
     it('should call GET /_query/view/{name} and return the view', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       const expectedView = {
-        name: '$.my-query-stream',
+        name: '$.my-view',
         query: 'FROM logs-* | LIMIT 100',
       };
       const mockResponse = { views: [expectedView] };
@@ -28,13 +28,13 @@ describe('manage_esql_views', () => {
       const result = await getEsqlView({
         esClient,
         logger,
-        name: '$.my-query-stream',
+        name: '$.my-view',
       });
 
       expect(esClient.transport.request).toHaveBeenCalledTimes(1);
       expect(esClient.transport.request).toHaveBeenCalledWith({
         method: 'GET',
-        path: '/_query/view/%24.my-query-stream',
+        path: '/_query/view/%24.my-view',
       });
       expect(result).toEqual(expectedView);
     });
@@ -65,14 +65,14 @@ describe('manage_esql_views', () => {
       await upsertEsqlView({
         esClient,
         logger,
-        name: 'my-query-stream',
+        name: 'my-view',
         query: 'FROM logs-* | LIMIT 100',
       });
 
       expect(esClient.transport.request).toHaveBeenCalledTimes(1);
       expect(esClient.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
-        path: '/_query/view/my-query-stream',
+        path: '/_query/view/my-view',
         body: { query: 'FROM logs-* | LIMIT 100' },
       });
     });
@@ -88,13 +88,13 @@ describe('manage_esql_views', () => {
       await upsertEsqlView({
         esClient,
         logger,
-        name: 'complex-query-stream',
+        name: 'complex-view',
         query: complexQuery,
       });
 
       expect(esClient.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
-        path: '/_query/view/complex-query-stream',
+        path: '/_query/view/complex-view',
         body: { query: complexQuery },
       });
     });
@@ -107,14 +107,14 @@ describe('manage_esql_views', () => {
       await deleteEsqlView({
         esClient,
         logger,
-        name: 'my-query-stream',
+        name: 'my-view',
       });
 
       expect(esClient.transport.request).toHaveBeenCalledTimes(1);
       expect(esClient.transport.request).toHaveBeenCalledWith(
         {
           method: 'DELETE',
-          path: '/_query/view/my-query-stream',
+          path: '/_query/view/my-view',
         },
         {
           ignore: [404],

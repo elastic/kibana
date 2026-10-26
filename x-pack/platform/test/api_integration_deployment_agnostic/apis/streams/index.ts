@@ -35,7 +35,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./global_search'));
     loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./doc_counts'));
-    loadTestFile(require.resolve('./query_streams'));
     loadTestFile(require.resolve('./deferred_data_stream'));
     loadTestFile(require.resolve('./otel_metrics_processing'));
   });

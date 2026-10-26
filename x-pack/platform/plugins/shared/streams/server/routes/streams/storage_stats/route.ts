@@ -33,7 +33,6 @@ const bulkStorageStatsRoute = createServerRoute({
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    // Streams without backing datastreams (query, draft) have no storage size associated with them.
     const dataStreams = await getDataStreamsWithIndexNames({ esClient });
 
     if (!dataStreams.length) {

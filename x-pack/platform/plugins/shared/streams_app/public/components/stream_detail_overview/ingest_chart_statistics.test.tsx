@@ -105,8 +105,6 @@ const baseProps = {
   timeEnd: ONE_DAY_MS,
   esqlSource: 'logs',
   streamName: 'logs',
-  isQueryStream: false,
-  isDraft: false,
 };
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
@@ -125,23 +123,6 @@ describe('IngestChartStatistics', () => {
       expect(screen.getByText('Docs in time range')).toBeInTheDocument();
       expect(screen.getByText('Peak ingest rate')).toBeInTheDocument();
       expect(screen.getByText('Storage size')).toBeInTheDocument();
-    });
-
-    it('does not render total docs or storage size for a query stream', () => {
-      setupFetches();
-      renderWithI18n(<IngestChartStatistics {...baseProps} isQueryStream />);
-
-      expect(screen.queryByText('Docs total')).not.toBeInTheDocument();
-      expect(screen.queryByText('Storage size')).not.toBeInTheDocument();
-    });
-
-    it('does not render total docs or storage size for a draft stream', () => {
-      setupFetches();
-      renderWithI18n(<IngestChartStatistics {...baseProps} isDraft />);
-
-      expect(screen.queryByText('Docs total')).not.toBeInTheDocument();
-      expect(screen.queryByText('Storage size')).not.toBeInTheDocument();
-      expect(screen.getByText('Docs in time range')).toBeInTheDocument();
     });
   });
 

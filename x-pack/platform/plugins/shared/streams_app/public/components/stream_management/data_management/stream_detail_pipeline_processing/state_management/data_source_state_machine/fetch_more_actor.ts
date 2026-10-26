@@ -11,7 +11,6 @@ import {
   type SampleDocument,
 } from '@kbn/streams-schema';
 import { getFlattenedObject } from '@kbn/std';
-import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { fromObservable } from 'xstate';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
@@ -20,17 +19,12 @@ import { convertQueryToESQLExpression } from '@kbn/esql-utils';
 import { convertFiltersToESQLExpression } from '@kbn/esql-utils';
 import { Observable } from 'rxjs';
 import { esqlResultToPlainObjects } from '../../../../../../util/esql_result_to_plain_objects';
-import { resolveDraftSampleSource } from './data_collector_actor';
 import type {
   EnrichmentDataSourceWithUIAttributes,
   PipelineProcessorsUiDefinition,
 } from '../../types';
 
 const FETCH_MORE_LIMIT = 100;
-
-interface LegacyAncestorProcessing {
-  steps: unknown[];
-}
 
 /**
  * Extracts raw documents from `_source` metadata, discarding ES|QL
@@ -58,12 +52,10 @@ export interface FetchMoreInput {
   existingDocuments: SampleDocument[];
   dataSource: EnrichmentDataSourceWithUIAttributes;
   streamName: string;
-  isDraft?: boolean;
 }
 
 export interface FetchMoreDeps {
   data: DataPublicPluginStart;
-  streamsRepositoryClient: StreamsRepositoryClient;
 }
 
 export function deduplicateDocuments(
@@ -104,38 +96,16 @@ export function buildKqlWhereClause(dataSource: EnrichmentDataSourceWithUIAttrib
   return clauses.join(' AND ');
 }
 
-interface FetchMoreQueryResult {
-  esqlQuery: string;
-  parentIsDraft: boolean;
-  /** Processing steps from all draft ancestors, ordered root to closest parent. */
-  ancestorProcessing: LegacyAncestorProcessing;
-}
-
 async function buildFetchMoreEsqlQuery({
   streamName,
   conditionEsql,
-  isDraft,
   dataSource,
-  streamsRepositoryClient,
 }: {
   streamName: string;
   conditionEsql?: string;
-  isDraft: boolean;
   dataSource: EnrichmentDataSourceWithUIAttributes;
-  streamsRepositoryClient: StreamsRepositoryClient;
-}): Promise<FetchMoreQueryResult> {
-  let baseQuery: string;
-  let parentIsDraft = false;
-  let ancestorProcessing: LegacyAncestorProcessing = { steps: [] };
-
-  if (isDraft) {
-    const draftSource = await resolveDraftSampleSource(streamsRepositoryClient, streamName);
-    baseQuery = draftSource.baseQuery;
-    parentIsDraft = draftSource.parentIsDraft;
-    ancestorProcessing = draftSource.ancestorProcessing;
-  } else {
-    baseQuery = `FROM ${streamName} METADATA _id, _source`;
-  }
+}): Promise<string> {
+  let baseQuery = `FROM ${streamName} METADATA _id, _source`;
 
   const kqlWhereClause = buildKqlWhereClause(dataSource);
   if (kqlWhereClause) {
@@ -151,24 +121,20 @@ async function buildFetchMoreEsqlQuery({
   baseQuery += `\n| SORT @timestamp DESC`;
   baseQuery += `\n| LIMIT ${FETCH_MORE_LIMIT}`;
 
-  const esqlQuery = kqlWhereClause ? baseQuery : withUnmappedFieldsDirective(baseQuery);
-
-  return { esqlQuery, parentIsDraft, ancestorProcessing };
+  return kqlWhereClause ? baseQuery : withUnmappedFieldsDirective(baseQuery);
 }
 
-export function createFetchMoreDocumentsActor({ data, streamsRepositoryClient }: FetchMoreDeps) {
+export function createFetchMoreDocumentsActor({ data }: FetchMoreDeps) {
   return fromObservable<SampleDocument[], FetchMoreInput>(({ input }) => {
-    const { conditionEsql, existingDocuments, dataSource, streamName, isDraft } = input;
+    const { conditionEsql, existingDocuments, dataSource, streamName } = input;
     const abortController = new AbortController();
 
     return new Observable((observer) => {
       const execute = async () => {
-        const { esqlQuery, parentIsDraft, ancestorProcessing } = await buildFetchMoreEsqlQuery({
+        const esqlQuery = await buildFetchMoreEsqlQuery({
           streamName,
           conditionEsql,
-          isDraft: isDraft ?? false,
           dataSource,
-          streamsRepositoryClient,
         });
 
         const { response } = await getESQLResults({
@@ -179,16 +145,6 @@ export function createFetchMoreDocumentsActor({ data, streamsRepositoryClient }:
 
         let docs = esqlResultToPlainObjects<SampleDocument>(response);
         docs = extractRawDocumentsFromSource(docs);
-
-        if (parentIsDraft && ancestorProcessing.steps.length > 0) {
-          docs = await applyAncestorProcessing({
-            docs,
-            ancestorProcessing,
-            streamName,
-            streamsRepositoryClient,
-            signal: abortController.signal,
-          });
-        }
 
         docs = stripOtelAliases(docs);
         return deduplicateDocuments(existingDocuments, docs);
@@ -210,41 +166,4 @@ export function createFetchMoreDocumentsActor({ data, streamsRepositoryClient }:
       };
     });
   });
-}
-
-/**
- * When the parent is a draft stream, `_source` contains only the raw
- * stored document without ancestor draft processing. Uses the simulate
- * endpoint to apply all draft ancestor processing steps to the raw docs,
- * producing the correct pre-processing baseline for the child's
- * simulation diff.
- */
-async function applyAncestorProcessing({
-  docs,
-  ancestorProcessing,
-  streamName,
-  streamsRepositoryClient,
-  signal,
-}: {
-  docs: SampleDocument[];
-  ancestorProcessing: LegacyAncestorProcessing;
-  streamName: string;
-  streamsRepositoryClient: StreamsRepositoryClient;
-  signal: AbortSignal;
-}): Promise<SampleDocument[]> {
-  const result = await streamsRepositoryClient.fetch(
-    'POST /internal/streams/{name}/processing/_simulate',
-    {
-      signal,
-      params: {
-        path: { name: streamName },
-        body: {
-          processing: ancestorProcessing,
-          documents: docs,
-        },
-      },
-    }
-  );
-
-  return result.documents.map((docReport) => docReport.value as SampleDocument);
 }

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
@@ -17,7 +17,6 @@ export function useDataSetQuality(
   definition?: Streams.all.GetResponse,
   canReadFailureStore?: boolean
 ) {
-  const isDraft = definition ? isDraftGetResponse(definition) : false;
   const readFailureStore =
     canReadFailureStore ??
     (definition && Streams.ingest.all.GetResponse.is(definition)
@@ -32,21 +31,11 @@ export function useDataSetQuality(
     fetchIngestionDocCounts: false,
   });
 
-  // Draft streams have no backing data stream so doc_counts endpoints return 404.
-  const docCountsFetch = isDraft ? undefined : getStreamDocCounts(streamId);
+  const docCountsFetch = getStreamDocCounts(streamId);
 
-  const countResult = useAsync(
-    () => docCountsFetch?.docCount ?? Promise.resolve([]),
-    [docCountsFetch]
-  );
-  const failedDocsResult = useAsync(
-    () => docCountsFetch?.failedDocCount ?? Promise.resolve([]),
-    [docCountsFetch]
-  );
-  const degradedDocsResult = useAsync(
-    () => docCountsFetch?.degradedDocCount ?? Promise.resolve([]),
-    [docCountsFetch]
-  );
+  const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
+  const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
+  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
 
   const docCount = countResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
   const degradedDocCount =
