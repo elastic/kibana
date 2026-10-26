@@ -693,9 +693,9 @@ export class Server {
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
+    await this.uiSettings.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
-    await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
     await this.status.stop();
