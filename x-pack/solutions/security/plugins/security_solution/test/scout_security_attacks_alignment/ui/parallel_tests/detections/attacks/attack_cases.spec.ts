@@ -25,11 +25,11 @@
  *  - Selecting rows raises a bulk action bar carrying those same take-action verbs across the
  *    selection, plus "Remove from case".
  *  - Removing an attack from its grid row's "Remove from case" item takes the attack and the
- *    alerts no other attached attack still claims off the case.
+ *    alerts no other attached attack still claims off the case, and that "Remove attack only"
+ *    leaves the alerts on the case.
  *
- * Attaching a `security.attack` requires `attackAttachmentsEnabled`; the attacks-alignment
- * Scout config boots with it (see
- * `kbn-scout/src/servers/configs/config_sets/security_attacks_alignment/shared.ts`).
+ * Attaching a `security.attack` requires the `attackAttachments` experimental flag, which is on
+ * by default.
  *
  * To run locally:
  *
@@ -43,15 +43,13 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
-import { getPlaywrightTagsFor } from '@kbn/scout-security';
+import { tags } from '@kbn/scout-security';
 import { spaceTest } from '../../../fixtures';
 import {
   ATTACK_GRID_COLUMN_ID,
   ATTACK_TAKE_ACTION_ITEM_TEST_ID,
 } from '../../../fixtures/page_objects/attack_cases_page';
 
-const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
-  'securitySolution:enableAlertsAndAttacksAlignment';
 const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
 const CASE_DESCRIPTION = 'Created by the Scout attack case-attachment test';
@@ -169,15 +167,7 @@ const getAttackAttachments = (attachments: readonly FoundCaseAttachment[]): Foun
 
 spaceTest.describe(
   'Attack case attachments',
-  {
-    // Local only: the suite needs `attackAttachmentsEnabled`, which defaults off and is turned
-    // on by this config set's Scout server args. Cloud targets boot without it, so attaching an
-    // attack is refused there.
-    tag: [
-      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
-      ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
-    ],
-  },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     /**
      * The seeded attack whose alert set a test re-pointed, and the set to put back. Held across
@@ -199,7 +189,6 @@ spaceTest.describe(
       await page.setViewportSize({ width: 1920, height: 1080 });
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
       await scoutSpace.uiSettings.set({
-        [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
         // The attack attachment's navigation button supports both flyouts; pin the legacy one
         // so this suite asserts the same flyout body as the rest of the attacks specs.
         [ENABLE_NEW_FLYOUT_SETTING]: false,
@@ -216,7 +205,6 @@ spaceTest.describe(
       }
 
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
-      await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
       await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
     });
 
@@ -559,6 +547,31 @@ spaceTest.describe(
             await expect(attackCases.attackAccordionBadge).toHaveText('1');
             await expect(attackCases.alertAccordionBadge).toHaveText('2');
             await expect(attackCases.attackGridRowTitles).toHaveCount(1);
+          }
+        );
+
+        await spaceTest.step(
+          '"Remove attack only" removes the last attack and keeps its alerts',
+          async () => {
+            const [manualAttachment] = getAttackAttachments(
+              await findCaseAttachments(kbnClient, scoutSpace.id, caseId)
+            );
+
+            if (manualAttachment == null) {
+              throw new Error('The manual attack is no longer attached to the case');
+            }
+
+            await attackCases.removeAttackFromGrid(manualAttachment.id, { includeRelated: false });
+
+            await expect(attackCases.attackGridRowTitles).toHaveCount(0);
+
+            const attachments = await findCaseAttachments(kbnClient, scoutSpace.id, caseId);
+
+            expect(getAttackAttachments(attachments)).toHaveLength(0);
+            expect(getAttachedAlertIds(attachments)).toStrictEqual(
+              [SHARED_ALERT_ID, MANUAL_ONLY_ALERT_ID].sort()
+            );
+            await expect(attackCases.alertAccordionBadge).toHaveText('2');
           }
         );
       }

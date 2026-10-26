@@ -1,7 +1,7 @@
 elastic-observability.global.es-snapshot-dataset:
   data:
     gcs_path: 'gs://nightshift-datasets/orca-bench/data-0418/2026-10-01/snapshots'
-    description: 'ORCA-bench data-0418: six days of OpenTelemetry Demo logs, traces and metrics (2026-04-19 to 2026-04-24 UTC) with 42 feature-flag incidents and SRE-curated ground truth, converted from the OpenSearch/Jaeger/Prometheus originals to OTel-native data streams. Named snapshots: full, day-<yyyy-mm-dd>, incident-<id>. manifest.json (incident windows, snapshot plan, gaps) and ground-truth/ sit next to snapshots/.'
+    description: 'ORCA-bench data-0418: six days of OpenTelemetry Demo logs, traces and metrics (2026-04-19 to 2026-04-24 UTC) with 42 feature-flag incidents and SRE-curated ground truth, converted from the OpenSearch/Jaeger/Prometheus originals to OTel-native data streams. Named snapshots: full, day-<yyyy-mm-dd>, incident-<id>. manifest.json (incident windows, snapshot plan, gaps) and ground-truth/ (the upstream per-incident ground truth) sit next to snapshots/. The KI feature extraction ground truth derived from this data is in gs://nightshift-datasets/detection-engine/ki-feature-extraction/orca-bench/, one folder per version.'
     es_version: '9.6.0-SNAPSHOT'
     indices: 'logs-orcabench.otel-*,traces-orcabench.otel-*,metrics-orcabench.otel-*'
     timestamp_range: '2026-04-19 to 2026-04-24'

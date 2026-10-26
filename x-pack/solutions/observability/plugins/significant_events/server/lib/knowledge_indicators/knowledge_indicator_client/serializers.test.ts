@@ -108,14 +108,14 @@ describe('toStoredFeature', () => {
     expect(stored).not.toHaveProperty('stream.name');
   });
 
-  it('labels the search embedding with the source', () => {
+  it('keeps the source out of the search embedding', () => {
     const stored = toStoredFeature({
       sourceId: SOURCE_ID,
       feature: makeFeature(),
       includeEmbedding: true,
     });
 
-    expect(stored.search_embedding).toContain(`Source: ${SOURCE_ID}`);
+    expect(stored.search_embedding).not.toContain(`Source: ${SOURCE_ID}`);
   });
 
   it('round-trips the source id onto the feature', () => {
