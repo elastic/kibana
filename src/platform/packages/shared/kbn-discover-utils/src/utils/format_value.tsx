@@ -10,12 +10,7 @@
 import React, { type ReactNode } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import {
-  ColorFormat,
-  StaticLookupFormat,
-  StringFormat,
-  UrlFormat,
-} from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
@@ -61,17 +56,26 @@ const getFieldFormatter = (
     : dataView.getFormatterForField(field);
 };
 
-const STRING_TRANSFORMS_OF_WHOLE_VALUE = ['base64', 'urlparam', 'short'];
+const CASE_TRANSFORMS = ['lower', 'upper', 'title'];
 
-// these formatters derive links, images, decoded text, colors or lookups from the whole value, so a part of it would render wrong
-const canTruncateValue = (formatter: FieldFormat): boolean =>
-  !(formatter instanceof UrlFormat) &&
-  !(formatter instanceof StaticLookupFormat) &&
-  !(
-    formatter instanceof StringFormat &&
-    STRING_TRANSFORMS_OF_WHOLE_VALUE.includes(formatter.param('transform'))
-  ) &&
-  !(formatter instanceof ColorFormat && formatter.param('fieldType') === 'string');
+// Cutting a value before formatting is only safe for formatters that leave its text as it is. The URL, Color and
+// Static Lookup formatters, the Short Dots, Base64 and URL Param Decode transforms of the String formatter, and
+// formatters registered by other plugins need the whole value to render correctly, so they are given the full value.
+const canTruncateValue = (formatter: FieldFormat): boolean => {
+  // tests often mock formatters as plain objects without a type
+  const formatterId = formatter.type?.id;
+
+  if (formatterId === FIELD_FORMAT_IDS.TRUNCATE) {
+    return true;
+  }
+
+  if (formatterId === FIELD_FORMAT_IDS.STRING) {
+    const transform = formatter.param('transform');
+    return !transform || CASE_TRANSFORMS.includes(transform);
+  }
+
+  return false;
+};
 
 /**
  * Returns whether a value of the given field can be truncated before formatting without changing its formatted output.
@@ -89,9 +93,11 @@ const convertToReactWithMaxLength = (
   { hit, ...options }: ReactContextTypeOptions & { hit: EsHitRecord },
   maxDisplayLength: number | undefined
 ): ReactNode => {
+  const maxLength =
+    maxDisplayLength !== undefined && canTruncateValue(formatter) ? maxDisplayLength : undefined;
   const truncated = truncateFieldValueWithHighlights({
     value,
-    maxLength: canTruncateValue(formatter) ? maxDisplayLength : undefined,
+    maxLength,
     fieldName: options.field?.name,
     hit,
   });

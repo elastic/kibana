@@ -11,7 +11,11 @@ import { isValidElement } from 'react';
 import type { ReactElement } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { StaticLookupFormat, StringFormat } from '@kbn/field-formats-plugin/common';
+import {
+  FIELD_FORMAT_IDS,
+  StaticLookupFormat,
+  StringFormat,
+} from '@kbn/field-formats-plugin/common';
 import { dataViewMock } from '../__mocks__';
 import {
   formatFieldStringValueWithHighlights,
@@ -101,7 +105,11 @@ describe('formatFieldValueReact', () => {
   it('should truncate the value before formatting and append an ellipsis when maxDisplayLength is exceeded', () => {
     const formatterForFieldMock = dataViewMock.getFormatterForField as jest.Mock;
     const convertToReactMock = jest.fn((value: unknown) => `field-formatted:${value}`);
-    formatterForFieldMock.mockReturnValue({ convertToReact: convertToReactMock });
+    formatterForFieldMock.mockReturnValue({
+      type: { id: FIELD_FORMAT_IDS.STRING },
+      param: jest.fn(),
+      convertToReact: convertToReactMock,
+    });
     const field = dataViewMock.fields.getByName('message');
 
     const result = formatFieldValueReact({
@@ -124,7 +132,11 @@ describe('formatFieldValueReact', () => {
   it('should not truncate the value when it is within maxDisplayLength', () => {
     const formatterForFieldMock = dataViewMock.getFormatterForField as jest.Mock;
     const convertToReactMock = jest.fn((value: unknown) => `field-formatted:${value}`);
-    formatterForFieldMock.mockReturnValue({ convertToReact: convertToReactMock });
+    formatterForFieldMock.mockReturnValue({
+      type: { id: FIELD_FORMAT_IDS.STRING },
+      param: jest.fn(),
+      convertToReact: convertToReactMock,
+    });
     const field = dataViewMock.fields.getByName('message');
 
     const result = formatFieldValueReact({
@@ -179,6 +191,8 @@ describe('formatFieldStringValueWithHighlights', () => {
   it('should truncate the value before formatting and append an ellipsis when maxDisplayLength is exceeded', () => {
     const convertToReactMock = jest.fn((value: unknown) => `default-formatted:${value}`);
     (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
+      type: { id: FIELD_FORMAT_IDS.STRING },
+      param: jest.fn(),
       convertToReact: convertToReactMock,
     });
 
