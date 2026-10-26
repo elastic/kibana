@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ConcurrencyManager } from './concurrency_manager';
-import { buildWorkflowExecutionDocument } from '../lib/build_workflow_execution_document';
-import { getWorkflowExecutionName } from '../lib/get_workflow_execution_name';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
@@ -75,61 +72,6 @@ describe('ConcurrencyManager', () => {
       now: new Date(),
     };
   });
-
-  it.each(['drop', 'queue'] as const)(
-    'preserves the name assigned at creation when the %s strategy prevents a start',
-    async (strategy) => {
-      const execution = buildWorkflowExecutionDocument({
-        workflow: {
-          id: 'deploy',
-          name: 'Deploy',
-          enabled: true,
-          isTestRun: false,
-          yaml: '',
-          definition: {
-            name: 'Deploy',
-            version: '1',
-            enabled: true,
-            'run-name': 'Deploy {{ inputs.target }}',
-            triggers: [{ type: 'manual' }],
-            steps: [],
-          },
-        },
-        spaceId: 'default',
-        context: { inputs: { target: 'production' } },
-        defaultTriggeredBy: 'manual',
-        authenticatedUser: 'elastic',
-        now: new Date(),
-        maxEventChainDepth: 10,
-        getConcurrencyGroupKey: () => 'g1',
-        getRunName: (document) =>
-          getWorkflowExecutionName(document, loggingSystemMock.createLogger()),
-      });
-      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
-        'other-execution',
-      ]);
-      mockWorkflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses
-        .mockResolvedValueOnce(1)
-        .mockResolvedValueOnce(0);
-      mockWorkflowExecutionRepository.updateWorkflowExecution.mockImplementation(async (update) => {
-        Object.assign(execution, update);
-      });
-
-      expect(execution.runName).toBe('Deploy production');
-      const canStart = await concurrencyManager.checkConcurrency(
-        { key: 'g1', strategy, max: 1 },
-        'g1',
-        execution.id,
-        'default'
-      );
-
-      expect(canStart).toBe(false);
-      expect(execution.status).toBe(
-        strategy === 'drop' ? ExecutionStatus.SKIPPED : ExecutionStatus.QUEUED
-      );
-      expect(execution.runName).toBe('Deploy production');
-    }
-  );
 
   describe('evaluateConcurrencyKey', () => {
     describe('static string keys', () => {

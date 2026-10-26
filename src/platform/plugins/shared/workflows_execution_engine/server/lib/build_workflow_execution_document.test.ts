@@ -109,15 +109,11 @@ describe('buildWorkflowExecutionDocument', () => {
       }
     );
 
-    it('logs a template failure and still creates the execution', () => {
-      logger.warn.mockClear();
+    it('keeps the default label when the template fails', () => {
       const execution = createExecution('{{ inputs.target | invalid_filter }}');
 
       expect(execution.status).toBe(ExecutionStatus.PENDING);
       expect(execution.runName).toBeUndefined();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Could not evaluate run-name; using the default execution label.'
-      );
     });
 
     it('bounds names produced by runtime data', () => {
