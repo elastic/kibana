@@ -39,6 +39,7 @@ export function AlertEpisodeStatusBadges({
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
   const hasSnoozeConditions = Boolean(groupAction?.snoozeConditions?.length);
+  const isMuted = Boolean(groupAction?.isMuted);
 
   return (
     <EuiFlexGroup
@@ -68,9 +69,9 @@ export function AlertEpisodeStatusBadges({
           <EuiToolTip
             anchorProps={tooltipAnchorProps}
             content={
-              hasSnoozeConditions ? (
+              hasSnoozeConditions || isMuted ? (
                 buildSnoozeSummary({
-                  isMuted: groupAction?.isMuted,
+                  isMuted,
                   expiresAt: groupAction?.snoozedUntil,
                   conditions: groupAction?.snoozeConditions,
                   conditionOperator: groupAction?.snoozeConditionOperator,
