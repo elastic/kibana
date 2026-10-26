@@ -99,7 +99,12 @@ steps:
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
       #
       # `LIMIT` is the prorated alert cap, and never more than one page of
-      # branches (`batch_size * 100`, itself capped at 10000).
+      # branches (`batch_size * 100`, itself capped at 10000). Newest first:
+      # an ascending sort would spend that cap on the oldest alerts and let
+      # newer ones age out of the lookback without being analyzed. The list
+      # stays time-ordered, so each batch is still a contiguous slice and the
+      # first batch is the newest. Each batch re-sorts its own slice ascending
+      # before the model sees it.
       query: |-
         {%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}
         {%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}
@@ -108,7 +113,7 @@ steps:
           | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
           | WHERE kibana.alert.building_block_type IS NULL
           | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
-          | SORT @timestamp ASC
+          | SORT @timestamp DESC
           | LIMIT {{ alert_limit }}
           | KEEP _id
 

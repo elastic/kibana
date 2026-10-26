@@ -148,8 +148,11 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(query()).toMatch(/\| KEEP _id$/);
     });
 
-    it('sorts by @timestamp so batches are contiguous in time', () => {
-      expect(query()).toContain('SORT @timestamp ASC');
+    // The cap drops everything past LIMIT, so the kept rows have to be the newest.
+    // Descending order also makes the first batch that newest slice.
+    it('sorts newest first so the cap keeps the most recent alerts', () => {
+      expect(query().indexOf('| SORT @timestamp DESC')).toBeGreaterThan(-1);
+      expect(query().indexOf('| SORT @timestamp DESC')).toBeLessThan(query().indexOf('| LIMIT'));
     });
 
     it('retrieves only open and acknowledged alerts', () => {
