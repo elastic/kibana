@@ -7,7 +7,7 @@ post:
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case.
     NOTE: Each case can have a maximum of 1,000 alerts.
-  x-state: Technical preview
+  x-state: Technical preview; added in 9.6.0
   tags:
     - cases
   parameters:
@@ -82,7 +82,7 @@ get:
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case.
-  x-state: Technical preview
+  x-state: Technical preview; added in 9.6.0
   tags:
     - cases
   parameters:
@@ -107,6 +107,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_invalid_attachments_query.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
@@ -125,7 +128,7 @@ delete:
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case.
-  x-state: Technical preview
+  x-state: Technical preview; added in 9.6.0
   tags:
     - cases
   parameters:
@@ -158,3 +161,6 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response404:
+              $ref: '../components/examples/response_404_no_attachments.yaml'

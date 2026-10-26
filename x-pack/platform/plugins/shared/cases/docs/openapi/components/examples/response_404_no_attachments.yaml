@@ -1,0 +1,7 @@
+summary: The case has no attachments.
+value:
+  {
+    "error": "Not Found",
+    "message": "No comments found for 293f1bc0-74f6-11ea-b83a-553aecdb28b6.",
+    "statusCode": 404
+  }

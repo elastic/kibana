@@ -1761,7 +1761,7 @@ paths:
       operationId: createCaseAttachmentDefaultSpace
       description: |
         Adds a single attachment, such as a comment or an alert, to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case. NOTE: Each case can have a maximum of 1,000 alerts.
-      x-state: Technical preview
+      x-state: Technical preview; added in 9.6.0
       tags:
         - cases
       parameters:
@@ -1830,7 +1830,7 @@ paths:
       operationId: findCaseAttachmentsDefaultSpace
       description: |
         Returns a paginated list of attachments for a case, optionally filtered by type. Attachments that you do not have privileges to read are not returned. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
-      x-state: Technical preview
+      x-state: Technical preview; added in 9.6.0
       tags:
         - cases
       parameters:
@@ -1855,6 +1855,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_invalid_attachments_query'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -1869,7 +1872,7 @@ paths:
       operationId: deleteCaseAttachmentsDefaultSpace
       description: |
         Deletes all attachments from a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
-      x-state: Technical preview
+      x-state: Technical preview; added in 9.6.0
       tags:
         - cases
       parameters:
@@ -1902,13 +1905,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404_no_attachments'
   /api/cases/{caseId}/attachments/{attachmentId}:
     get:
       summary: Get a case attachment
       operationId: getCaseAttachmentDefaultSpace
       description: |
         Returns a single attachment from a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
-      x-state: Technical preview
+      x-state: Technical preview; added in 9.6.0
       tags:
         - cases
       parameters:
@@ -1956,7 +1962,7 @@ paths:
       operationId: replaceCaseAttachmentDefaultSpace
       description: |
         Fully replaces an attachment. You cannot change the attachment type or owner. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
-      x-state: Technical preview
+      x-state: Technical preview; added in 9.6.0
       tags:
         - cases
       parameters:
@@ -2025,12 +2031,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response409:
+                  $ref: '#/components/examples/response_409_attachment_version_conflict'
     delete:
       summary: Delete a case attachment
       operationId: deleteCaseAttachmentDefaultSpace
       description: |
         Deletes a single attachment from a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
-      x-state: Technical preview
+      x-state: Technical preview; added in 9.6.0
       tags:
         - cases
       parameters:
@@ -6583,6 +6592,12 @@ components:
         page: 1
         per_page: 20
         total: 1
+    response_400_invalid_attachments_query:
+      summary: A query parameter exceeds its limit.
+      value:
+        error: Bad Request
+        message: '[request query]: The provided perPage value is too high. The maximum allowed perPage value is 100.'
+        statusCode: 400
     create_unified_comment_attachment_request:
       summary: Adds a comment to a case.
       value:
@@ -6626,6 +6641,12 @@ components:
         error: Bad Request
         message: 'Invalid attachment payload for type ''comment'': data.content: Comment content must be a non-empty string'
         statusCode: 400
+    response_404_no_attachments:
+      summary: The case has no attachments.
+      value:
+        error: Not Found
+        message: No comments found for 293f1bc0-74f6-11ea-b83a-553aecdb28b6.
+        statusCode: 404
     update_unified_attachment_request:
       summary: Replaces the content of a comment.
       value:
@@ -6634,6 +6655,12 @@ components:
         data:
           content: An updated comment.
         version: WzIzLDFd
+    response_409_attachment_version_conflict:
+      summary: The attachment version is out of date.
+      value:
+        error: Conflict
+        message: This attachment has been updated. Please refresh before saving additional updates.
+        statusCode: 409
     add_comment_request:
       summary: Adds a comment to a case.
       value:

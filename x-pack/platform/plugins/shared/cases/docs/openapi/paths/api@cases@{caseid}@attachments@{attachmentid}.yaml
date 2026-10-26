@@ -6,7 +6,7 @@ get:
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case.
-  x-state: Technical preview
+  x-state: Technical preview; added in 9.6.0
   tags:
     - cases
   parameters:
@@ -58,7 +58,7 @@ put:
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case.
-  x-state: Technical preview
+  x-state: Technical preview; added in 9.6.0
   tags:
     - cases
   parameters:
@@ -127,6 +127,9 @@ put:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response409:
+              $ref: '../components/examples/response_409_attachment_version_conflict.yaml'
 
 delete:
   summary: Delete a case attachment
@@ -136,7 +139,7 @@ delete:
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case.
-  x-state: Technical preview
+  x-state: Technical preview; added in 9.6.0
   tags:
     - cases
   parameters:

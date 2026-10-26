@@ -47,7 +47,7 @@ describe('attachments routes technical preview', () => {
 
     it.each(routes)('%s is marked technical preview', (_, route) => {
       expect(spec.paths[toDocsPath(route.path)]?.[route.method]?.['x-state']).toBe(
-        'Technical preview'
+        'Technical preview; added in 9.6.0'
       );
     });
   });
