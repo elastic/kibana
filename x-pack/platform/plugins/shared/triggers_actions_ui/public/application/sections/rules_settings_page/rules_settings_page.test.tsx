@@ -47,12 +47,16 @@ jest.mock('@kbn/app-header', () => ({
     back,
   }: {
     title: string;
-    badges: Array<{ label: string }>;
+    badges?: Array<{ label: string }>;
     back: { href: string; label: string };
   }) => (
     <div data-test-subj="appHeader">
       <h1>{title}</h1>
-      <span data-test-subj="appHeaderBadge">{badges[0].label}</span>
+      {badges?.map(({ label }) => (
+        <span key={label} data-test-subj="appHeaderBadge">
+          {label}
+        </span>
+      ))}
       <a data-test-subj="appHeaderBack" href={back.href}>
         {back.label}
       </a>
@@ -136,6 +140,7 @@ describe('RulesSettingsPageContainer', () => {
     } as unknown as IToasts;
     services.isServerless = false;
     services.setBreadcrumbs = setBreadcrumbs;
+    services.showClassicBadge = false;
     services.chrome.docTitle.change = docTitleChange;
 
     fetchFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
@@ -158,12 +163,21 @@ describe('RulesSettingsPageContainer', () => {
     renderPage();
 
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument();
-    expect(screen.getByTestId('appHeaderBadge')).toHaveTextContent('Classic');
     expect(screen.getByTestId('appHeaderBack')).toHaveAttribute('href', '/rules-list-href');
     expect(screen.getByTestId('rulesSettingsCallout')).toHaveTextContent(
       'Applies to all Classic rules within the current space'
     );
     expect(await screen.findByTestId('rulesSettingsFlappingSection')).toBeInTheDocument();
+  });
+
+  it('shows the Classic badge only when showClassicBadge is enabled', () => {
+    renderPage();
+    expect(screen.queryByTestId('appHeaderBadge')).not.toBeInTheDocument();
+    cleanup();
+
+    useKibanaMock().services.showClassicBadge = true;
+    renderPage();
+    expect(screen.getByTestId('appHeaderBadge')).toHaveTextContent('Classic');
   });
 
   it('sets the settings breadcrumb and document title', () => {

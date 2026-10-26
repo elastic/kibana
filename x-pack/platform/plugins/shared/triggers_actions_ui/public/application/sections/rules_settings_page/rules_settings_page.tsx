@@ -58,6 +58,7 @@ export const RulesSettingsPageContainer = () => {
     chrome: { docTitle },
     docLinks,
     setBreadcrumbs,
+    showClassicBadge,
   } = useKibana().services;
   const { rules } = useLocators();
 
@@ -78,7 +79,7 @@ export const RulesSettingsPageContainer = () => {
     <>
       <AppHeader
         title={SETTINGS_PAGE_TITLE}
-        badges={[CLASSIC_RULES_ONLY_BADGE]}
+        badges={showClassicBadge ? [CLASSIC_RULES_ONLY_BADGE] : undefined}
         spacing="bleed"
         back={{ href: rulesListHref, label: BACK_TO_RULES_LABEL }}
         docLink={docLinks.links.alerting.guide}
