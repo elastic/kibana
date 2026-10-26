@@ -8,7 +8,7 @@
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import React from 'react';
 import type { Annotation } from '../../../../common/annotations';
 import { SloSelector } from './slo_selector';
