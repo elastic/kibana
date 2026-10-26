@@ -259,3 +259,4 @@ export {
   getSemanticTextInferenceId,
   isReportsIndexManaged,
 } from './threat_intel_mapping';
+export { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from './impl/hunt/usable_report_filter';

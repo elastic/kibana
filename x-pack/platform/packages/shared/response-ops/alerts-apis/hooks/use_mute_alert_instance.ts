@@ -14,7 +14,7 @@ import { mutationKeys } from '../mutation_keys';
 import type { ServerError, ToggleAlertParams } from '../types';
 import { muteAlertInstance } from '../apis/mute_alert_instance';
 
-const ERROR_TITLE = i18n.translate('alertsApis.muteAlert.error', {
+const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.muteAlert.error', {
   defaultMessage: 'Error muting alert',
 });
 
