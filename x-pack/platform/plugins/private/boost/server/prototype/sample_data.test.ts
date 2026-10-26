@@ -22,7 +22,6 @@ describe('ensureSampleData', () => {
     missingDataStream?: string;
   }) => {
     const client = elasticsearchServiceMock.createElasticsearchClient();
-    client.indices.existsIndexTemplate.mockResolvedValue(true);
     client.indices.exists.mockImplementation(async ({ index }) => index !== missingIndex);
     client.indices.getDataStream.mockImplementation(async (params) => {
       const name = String(params?.name);
@@ -41,11 +40,38 @@ describe('ensureSampleData', () => {
     expect(client.bulk).toHaveBeenCalledTimes(2);
   });
 
-  it('does nothing when all sample data already exists', async () => {
+  it('leaves the documents of sample data that already exists', async () => {
     const client = setup({});
 
     await expect(ensureSampleData(client)).resolves.toEqual([]);
     expect(client.bulk).not.toHaveBeenCalled();
+  });
+
+  it('gives every sample data stream a data stream lifecycle, as on serverless', async () => {
+    const client = setup({ missingDataStream: 'clicks-web' });
+
+    await ensureSampleData(client);
+    // Above Elasticsearch's built-in templates, which use ILM for these names in stateful projects.
+    expect(client.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index_patterns: ['logs-checkout-default', 'logs-search-default'],
+        priority: 200,
+        template: expect.objectContaining({ lifecycle: { data_retention: '90d' } }),
+      })
+    );
+    // Data streams created before their template had a lifecycle get it directly.
+    expect(client.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: 'logs-checkout-default',
+      data_retention: '90d',
+    });
+    expect(client.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: 'metrics-hosts-default',
+      data_retention: undefined,
+    });
+    // A new one gets it from its template.
+    expect(client.indices.putDataLifecycle).not.toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'clicks-web' })
+    );
   });
 
   it('throws when Elasticsearch rejects sample documents', async () => {

@@ -19,13 +19,28 @@ import { ensureSampleConfig } from '../prototype/sample_config';
 import { ensureSampleData } from '../prototype/sample_data';
 import { getRequestClients } from './request_clients';
 
-const hasSeededSampleData = async (client: SavedObjectsClientContract): Promise<boolean> => {
+/**
+ * The sample data's version. Raising it updates projects seeded with an earlier one, such as to give
+ * their sample data streams a data stream lifecycle (version 2).
+ */
+const SAMPLE_DATA_VERSION = 2;
+
+/** The version of the sample data the project was seeded with, or `undefined` if it wasn't. */
+const getSeededVersion = async (
+  client: SavedObjectsClientContract
+): Promise<number | undefined> => {
   try {
-    await client.get(BOOST_SAVED_OBJECT_TYPE, BOOST_SAMPLE_DATA_SAVED_OBJECT_ID);
-    return true;
+    const {
+      attributes: { version },
+    } = await client.get<{ version?: number }>(
+      BOOST_SAVED_OBJECT_TYPE,
+      BOOST_SAMPLE_DATA_SAVED_OBJECT_ID
+    );
+    // Projects seeded before the sample data had versions.
+    return version ?? 1;
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return false;
+      return undefined;
     }
     throw error;
   }
@@ -34,7 +49,7 @@ const hasSeededSampleData = async (client: SavedObjectsClientContract): Promise<
 const markSampleDataSeeded = async (client: SavedObjectsClientContract): Promise<void> => {
   await client.create(
     BOOST_SAVED_OBJECT_TYPE,
-    { kind: 'sample_data', seeded_at: new Date().toISOString() },
+    { kind: 'sample_data', seeded_at: new Date().toISOString(), version: SAMPLE_DATA_VERSION },
     { id: BOOST_SAMPLE_DATA_SAVED_OBJECT_ID, overwrite: true }
   );
 };
@@ -42,7 +57,8 @@ const markSampleDataSeeded = async (client: SavedObjectsClientContract): Promise
 // Sample indices are created with the signed-in user's privileges: Kibana's own service account
 // cannot create indices outside its system indices.
 export const registerPrototypeRoutes = (router: IRouter) => {
-  // Seeds the project once, the first time someone who can manage boost loads Kibana.
+  // Seeds the project once, the first time someone who can manage boost loads Kibana, and updates
+  // the sample data once after each new version of it.
   router.post(
     {
       path: BOOST_SAMPLE_DATA_API_PATH,
@@ -51,12 +67,16 @@ export const registerPrototypeRoutes = (router: IRouter) => {
     },
     async (context, _request, response) => {
       const { savedObjectsClient, esClient } = await getRequestClients(context);
-      if (await hasSeededSampleData(savedObjectsClient)) {
+      const seededVersion = await getSeededVersion(savedObjectsClient);
+      if (seededVersion === SAMPLE_DATA_VERSION) {
         return response.ok({ body: { created: [] } });
       }
 
       const created = await ensureSampleData(esClient);
-      await ensureSampleConfig(savedObjectsClient);
+      // Only a new project gets the sample profiles and rules, so an update keeps the configuration.
+      if (seededVersion === undefined) {
+        await ensureSampleConfig(savedObjectsClient);
+      }
       await markSampleDataSeeded(savedObjectsClient);
       return response.ok({ body: { created } });
     }

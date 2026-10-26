@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { matchesIndexPattern } from '../../common/resolution';
 
 type SampleDocument = Record<string, string | number | boolean>;
 
@@ -143,11 +144,27 @@ const SAMPLE_DATA_STREAMS: readonly SampleTarget[] = [
   },
 ];
 
-// `logs-*-*` and `metrics-*-*` data streams use Elasticsearch's built-in templates.
-const SAMPLE_DATA_STREAM_TEMPLATES = [
-  { name: 'boost-prototype-clicks', indexPattern: 'clicks-*' },
-  { name: 'boost-prototype-events', indexPattern: 'events-*' },
-] as const;
+interface SampleDataStreamTemplate {
+  name: string;
+  indexPatterns: string[];
+  /** How long the data stream lifecycle keeps data, or indefinitely without one. */
+  dataRetention?: string;
+}
+
+// Every sample data stream gets a data stream lifecycle, as every data stream has on serverless.
+// Without these templates, stateful deployments such as a-la-carte would manage the `logs-*-*` and
+// `metrics-*-*` ones with ILM, through Elasticsearch's built-in templates. Retentions vary to show
+// the range, and keep at least the 90 days of illustrative history (see sample_sizes.ts).
+const SAMPLE_DATA_STREAM_TEMPLATES: readonly SampleDataStreamTemplate[] = [
+  {
+    name: 'boost-prototype-logs',
+    indexPatterns: ['logs-checkout-default', 'logs-search-default'],
+    dataRetention: '90d',
+  },
+  { name: 'boost-prototype-metrics', indexPatterns: ['metrics-hosts-default'] },
+  { name: 'boost-prototype-clicks', indexPatterns: ['clicks-*'], dataRetention: '180d' },
+  { name: 'boost-prototype-events', indexPatterns: ['events-*'], dataRetention: '365d' },
+];
 
 const bulkIndex = async (
   client: ElasticsearchClient,
@@ -169,19 +186,32 @@ const bulkIndex = async (
   }
 };
 
-const ensureTemplates = async (client: ElasticsearchClient) => {
-  for (const { name, indexPattern } of SAMPLE_DATA_STREAM_TEMPLATES) {
-    if (!(await client.indices.existsIndexTemplate({ name }))) {
-      await client.indices.putIndexTemplate({
-        name,
-        index_patterns: [indexPattern],
-        data_stream: {},
-        priority: 200,
-        template: { mappings: { properties: { '@timestamp': { type: 'date' } } } },
-        _meta: { description: 'Search boost prototype sample data' },
-      });
-    }
+/** Creates or updates the sample data streams' templates, above Elasticsearch's built-in ones. */
+const putTemplates = async (client: ElasticsearchClient) => {
+  for (const { name, indexPatterns, dataRetention } of SAMPLE_DATA_STREAM_TEMPLATES) {
+    await client.indices.putIndexTemplate({
+      name,
+      index_patterns: indexPatterns,
+      data_stream: {},
+      priority: 200,
+      template: {
+        mappings: { properties: { '@timestamp': { type: 'date' } } },
+        lifecycle: { data_retention: dataRetention },
+      },
+      _meta: { description: 'Search boost prototype sample data' },
+    });
   }
+};
+
+/**
+ * Gives an existing sample data stream its template's lifecycle, since templates only apply as data
+ * streams are created.
+ */
+const putLifecycle = async (client: ElasticsearchClient, name: string) => {
+  const template = SAMPLE_DATA_STREAM_TEMPLATES.find(({ indexPatterns }) =>
+    indexPatterns.some((pattern) => matchesIndexPattern(pattern, name))
+  );
+  await client.indices.putDataLifecycle({ name, data_retention: template?.dataRetention });
 };
 
 const dataStreamExists = async (client: ElasticsearchClient, name: string): Promise<boolean> => {
@@ -193,14 +223,15 @@ const dataStreamExists = async (client: ElasticsearchClient, name: string): Prom
 };
 
 /**
- * Creates any missing sample indices and data streams (with documents), leaving existing ones
- * untouched. Returns the names that were created.
+ * Creates any missing sample indices and data streams (with documents), leaving existing ones'
+ * documents untouched, and gives every sample data stream its lifecycle. Returns the names that
+ * were created.
  */
 export const ensureSampleData = async (client: ElasticsearchClient): Promise<string[]> => {
   const now = Date.now();
   const created: string[] = [];
 
-  await ensureTemplates(client);
+  await putTemplates(client);
 
   for (const index of SAMPLE_INDICES) {
     if (!(await client.indices.exists({ index: index.name }))) {
@@ -211,7 +242,9 @@ export const ensureSampleData = async (client: ElasticsearchClient): Promise<str
   }
 
   for (const dataStream of SAMPLE_DATA_STREAMS) {
-    if (!(await dataStreamExists(client, dataStream.name))) {
+    if (await dataStreamExists(client, dataStream.name)) {
+      await putLifecycle(client, dataStream.name);
+    } else {
       await client.indices.createDataStream({ name: dataStream.name });
       await bulkIndex(client, dataStream, now, 'create');
       created.push(dataStream.name);
