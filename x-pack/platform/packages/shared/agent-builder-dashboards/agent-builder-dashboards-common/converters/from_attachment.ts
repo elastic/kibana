@@ -10,7 +10,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/as-code-dashboard-schema';
-import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { isLensAPIFormat, LensConfigBuilder, type LensApiConfig } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { buildVegaSavedVis, VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
@@ -22,15 +22,53 @@ import type {
 import { isSection } from '../types';
 import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
 
+type PanelConfig = AttachmentPanel['config'];
+type LensConfigConverter = (config: PanelConfig) => PanelConfig;
+
+const withLensAttributes: LensConfigConverter = (config) =>
+  isLensAPIFormat(config)
+    ? { ...config, attributes: new LensConfigBuilder().fromAPIFormat(config) }
+    : config;
+
+const passLensConfigThrough: LensConfigConverter = (config) => config;
+
+// Splits the panel settings from the chart the way the Lens embeddable transform does.
+const toStoredLensState: LensConfigConverter = (config) => {
+  if (!isLensAPIFormat(config)) {
+    return config;
+  }
+  const {
+    title,
+    description,
+    hide_title,
+    hide_border,
+    time_range,
+    drilldowns,
+    ...chartConfig
+  }: PanelConfig = config;
+  return {
+    title,
+    description,
+    hide_title,
+    hide_border,
+    time_range,
+    drilldowns,
+    attributes: new LensConfigBuilder().fromAPIFormat(chartConfig as LensApiConfig),
+  };
+};
+
 /**
  * Converts an AttachmentPanel to a DashboardPanel.
- * - Lens panels with API-format attributes are converted to internal format.
+ * - Lens panel configs go through `convertLensConfig`.
  * - `vega` panels (the future native API shape, `config.spec`) are expanded to a
- *   by-value legacy-vis (`visualization`) embeddable for rendering. This is a
+ *   by-value legacy-vis (`visualization`) embeddable for rendering and saving. This is a
  *   temporary bridge: once the native `vega` embeddable API ships, the panel can
  *   be passed through unchanged and this branch removed.
  */
-const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
+const buildPanelFromConfig = (
+  { config, type, id, grid }: AttachmentPanel,
+  convertLensConfig: LensConfigConverter
+): DashboardPanel => {
   if (type === VEGA_VIS_TYPE) {
     const { spec, title, description, ...restConfig } = config as {
       spec?: unknown;
@@ -57,19 +95,11 @@ const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): Dash
     };
   }
 
-  let configObject = config;
-  if (type === LENS_EMBEDDABLE_TYPE && isLensAPIFormat(config)) {
-    const lensAttributes = new LensConfigBuilder().fromAPIFormat(config);
-    configObject = {
-      ...config,
-      attributes: lensAttributes,
-    };
-  }
   return {
     type,
     id,
     grid,
-    config: configObject,
+    config: type === LENS_EMBEDDABLE_TYPE ? convertLensConfig(config) : config,
   };
 };
 
@@ -79,44 +109,67 @@ type DashboardWidget = DashboardPanel | DashboardSection;
 /**
  * Converts an AgentDashboardSection to a DashboardSection.
  */
-const normalizeSection = (section: AgentDashboardSection): DashboardSection => ({
+const normalizeSection = (
+  section: AgentDashboardSection,
+  convertLensConfig: LensConfigConverter
+): DashboardSection => ({
   id: section.id,
   title: section.title,
   collapsed: section.collapsed,
   grid: { y: section.grid.y },
-  panels: section.panels.map(buildPanelFromConfig),
+  panels: section.panels.map((panel) => buildPanelFromConfig(panel, convertLensConfig)),
 });
 
 /**
  * Converts an array of attachment widgets to dashboard widgets.
  */
-const normalizeWidgets = (widgets: AgentWidget[]): DashboardWidget[] =>
+const normalizeWidgets = (
+  widgets: AgentWidget[],
+  convertLensConfig: LensConfigConverter
+): DashboardWidget[] =>
   (widgets ?? []).map((widget) =>
-    isSection(widget) ? normalizeSection(widget) : buildPanelFromConfig(widget)
+    isSection(widget)
+      ? normalizeSection(widget, convertLensConfig)
+      : buildPanelFromConfig(widget, convertLensConfig)
   );
 
+const toDashboardState =
+  (convertLensConfig: LensConfigConverter) =>
+  ({
+    panels = [],
+    filters,
+    query,
+    pinned_panels,
+    access_control,
+    options,
+    ...rest
+  }: DashboardAttachmentData): DashboardState => ({
+    ...EMPTY_DASHBOARD_STATE,
+    ...rest,
+    options: {
+      ...EMPTY_DASHBOARD_STATE.options,
+      ...options,
+    },
+    panels: normalizeWidgets(panels, convertLensConfig),
+    ...(filters && { filters: filters as DashboardState['filters'] }),
+    ...(query && { query: query as DashboardState['query'] }),
+    ...(pinned_panels && { pinned_panels: pinned_panels as DashboardState['pinned_panels'] }),
+    ...(access_control && { access_control: access_control as DashboardState['access_control'] }),
+  });
+
 /**
- * Converts a DashboardAttachment to a DashboardState.
+ * Converts a DashboardAttachment to the DashboardState the browser renders.
  * Uses provided values from the attachment, falling back to defaults for missing fields.
  */
-export const attachmentDataToDashboardState = ({
-  panels = [],
-  filters,
-  query,
-  pinned_panels,
-  access_control,
-  options,
-  ...rest
-}: DashboardAttachmentData): DashboardState => ({
-  ...EMPTY_DASHBOARD_STATE,
-  ...rest,
-  options: {
-    ...EMPTY_DASHBOARD_STATE.options,
-    ...options,
-  },
-  panels: normalizeWidgets(panels),
-  ...(filters && { filters: filters as DashboardState['filters'] }),
-  ...(query && { query: query as DashboardState['query'] }),
-  ...(pinned_panels && { pinned_panels: pinned_panels as DashboardState['pinned_panels'] }),
-  ...(access_control && { access_control: access_control as DashboardState['access_control'] }),
-});
+export const attachmentDataToDashboardState = toDashboardState(withLensAttributes);
+
+/**
+ * Converts a DashboardAttachment to the DashboardState the Dashboard app saves. The app takes Lens
+ * panels in the Lens API format only while Lens as code is enabled (`lensApiFormat`); otherwise
+ * they are converted to stored Lens state.
+ */
+export const attachmentDataToSavedDashboardState = (
+  data: DashboardAttachmentData,
+  { lensApiFormat }: { lensApiFormat: boolean }
+): DashboardState =>
+  toDashboardState(lensApiFormat ? passLensConfigThrough : toStoredLensState)(data);
