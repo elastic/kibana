@@ -19,6 +19,7 @@ jest.mock('./agent_execution_storage', () => ({
 }));
 
 import { createAgentExecutionClient } from './agent_execution_client';
+import { agentExecutionIndexName } from './agent_execution_storage';
 
 describe('AgentExecutionClient', () => {
   const client = createAgentExecutionClient({
@@ -202,6 +203,26 @@ describe('AgentExecutionClient', () => {
       const boom = Object.assign(new Error('boom'), { meta: { statusCode: 500 } });
       esClient.get.mockRejectedValueOnce(boom);
       await expect(peekClient.peek('exec-1')).rejects.toBe(boom);
+    });
+  });
+
+  describe('delete', () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const deleteClient = createAgentExecutionClient({ logger: loggerMock.create(), esClient });
+
+    it('delete removes the execution document and ignores a missing one', async () => {
+      esClient.delete.mockResolvedValueOnce({} as never);
+      await deleteClient.delete('e1');
+      expect(esClient.delete).toHaveBeenCalledWith({ index: agentExecutionIndexName, id: 'e1' });
+
+      esClient.delete.mockRejectedValueOnce(
+        Object.assign(new Error('not found'), { meta: { statusCode: 404 } })
+      );
+      await expect(deleteClient.delete('e1')).resolves.toBeUndefined();
+
+      const boom = Object.assign(new Error('boom'), { meta: { statusCode: 500 } });
+      esClient.delete.mockRejectedValueOnce(boom);
+      await expect(deleteClient.delete('e1')).rejects.toBe(boom);
     });
   });
 });
