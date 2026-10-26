@@ -156,6 +156,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 defaultMessage: 'Integration name',
               }
             ),
+            width: '340px',
             render: (item: PackageListItem) => {
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
