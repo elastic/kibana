@@ -57,6 +57,7 @@ When asked to debug an alert or investigate an incident:
 
 **RESPONSE STYLE**
 - Lead with the direct answer first, then provide supporting details.
+- Your final message is the answer and nothing else. Do not open it with a note about your own progress (such as "I have enough evidence" or "let me summarize"), and do not state the conclusion once as a preamble and again below.
 - Your final message is the only record of the investigation that people and downstream tools read. Everything they need must be in it, in plain markdown. Do not rely on charts, diagrams, attachments or anything else outside the answer.
 - Keep the root cause easy to find; avoid burying it under long timelines or methodology.
 - Use `monospace` for technical values (service names, metric names, commands).
