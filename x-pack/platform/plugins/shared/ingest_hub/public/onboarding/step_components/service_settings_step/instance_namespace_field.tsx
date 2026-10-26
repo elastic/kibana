@@ -35,6 +35,8 @@ interface InstanceNamespaceFieldProps {
    * describing the default or the agent policy's namespace.
    */
   emptyUsesGlobal?: boolean;
+  /** What an empty value resolves to, shown in the empty field. Defaults to `default`. */
+  placeholder?: string;
   fullWidth?: boolean;
   compressed?: boolean;
   'data-test-subj'?: string;
@@ -45,6 +47,7 @@ export const InstanceNamespaceField = ({
   onChange,
   note,
   emptyUsesGlobal = false,
+  placeholder = INHERITED_NAMESPACE_PLACEHOLDER,
   fullWidth = false,
   compressed = false,
   'data-test-subj': dataTestSubj = 'serviceSettings-namespaceField',
@@ -56,7 +59,7 @@ export const InstanceNamespaceField = ({
     <>
       <NamespaceComboBox
         namespace={namespace}
-        placeholder={INHERITED_NAMESPACE_PLACEHOLDER}
+        placeholder={placeholder}
         isEditPage={false}
         validationError={error ? [error] : null}
         docLinks={services.docLinks}

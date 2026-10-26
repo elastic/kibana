@@ -104,7 +104,9 @@ export function ServiceSettingsFlyout({
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() =>
     withCollectS3Defaults(service, { ...config.varsByDataStream })
   );
-  const [namespace, setNamespace] = useState(config.namespace || globalNamespace);
+  // An empty namespace follows the global one, so it stays empty and the global value is only the
+  // placeholder: saving other settings must not pin the duplicate to today's global namespace.
+  const [namespace, setNamespace] = useState(config.namespace ?? '');
   const showNamespace = isDuplicate && supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
@@ -159,6 +161,7 @@ export function ServiceSettingsFlyout({
           <>
             <InstanceNamespaceField
               emptyUsesGlobal
+              placeholder={globalNamespace || undefined}
               namespace={namespace}
               onChange={setNamespace}
               note={

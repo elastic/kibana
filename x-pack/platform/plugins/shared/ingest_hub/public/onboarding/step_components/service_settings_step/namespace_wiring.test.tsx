@@ -16,16 +16,19 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('@kbn/fleet-plugin/public', () => ({
   NamespaceComboBox: ({
     namespace,
+    placeholder,
     onNamespaceChange,
     'data-test-subj': dataTestSubj,
   }: {
     namespace?: string;
+    placeholder?: string;
     onNamespaceChange: (ns: string) => void;
     'data-test-subj'?: string;
   }) => (
     <input
       data-test-subj={dataTestSubj}
       value={namespace ?? ''}
+      placeholder={placeholder}
       onChange={(e) => onNamespaceChange(e.target.value)}
     />
   ),
@@ -91,9 +94,30 @@ describe('ServiceSettingsFlyout namespace', () => {
     expect(onApply).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'staging');
   });
 
-  it('starts a duplicate without a namespace of its own from the global one', () => {
-    renderFlyout({ config: { ...CONFIG, namespace: undefined }, globalNamespace: 'global' });
-    expect(screen.getByTestId('serviceSettings-namespaceField')).toHaveValue('global');
+  it('shows the global namespace as the placeholder of a duplicate without its own', () => {
+    renderFlyout({ config: { ...CONFIG, namespace: '' }, globalNamespace: 'global' });
+    expect(screen.getByTestId('serviceSettings-namespaceField')).toHaveValue('');
+    expect(screen.getByTestId('serviceSettings-namespaceField')).toHaveAttribute(
+      'placeholder',
+      'global'
+    );
+  });
+
+  it('keeps following the global namespace when other settings are saved', () => {
+    const { onApply } = renderFlyout({
+      config: { ...CONFIG, namespace: '' },
+      globalNamespace: 'global',
+    });
+    fireEvent.click(screen.getByTestId('serviceSettingsFlyout-saveButton'));
+    expect(onApply).toHaveBeenCalledWith(expect.anything(), expect.anything(), '');
+  });
+
+  it('shows the default placeholder when there is no global namespace', () => {
+    renderFlyout({ config: { ...CONFIG, namespace: '' }, globalNamespace: '' });
+    expect(screen.getByTestId('serviceSettings-namespaceField')).toHaveAttribute(
+      'placeholder',
+      'default'
+    );
   });
 
   it('disables Save while the duplicate namespace is invalid', () => {
