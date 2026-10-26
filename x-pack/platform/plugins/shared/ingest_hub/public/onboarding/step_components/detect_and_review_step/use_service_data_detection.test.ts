@@ -33,7 +33,6 @@ function makeEntry(id: string, dataset: string): AwsServiceMatrixEntry {
     id,
     name: id,
     packageName: 'aws',
-    category: 'compute',
     dataStreams: [id],
     signalTypes: ['logs'],
     deploymentMethods: [],

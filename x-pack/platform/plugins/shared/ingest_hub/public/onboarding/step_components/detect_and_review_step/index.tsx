@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,20 +24,13 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { pagePathGetters, useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import type { EsAssetReference, KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import {
-  SERVICE_SETTINGS_SESSION_KEY,
-  type ServiceSettingsPersistedState,
-} from '../service_settings_step/use_service_settings';
+import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import { useServiceDataDetection } from './use_service_data_detection';
 import { DeploymentSummary } from './deployment_summary';
 import { AgentSetupCallout } from './agent_setup_callout';
 import { InstalledContent } from './installed_content';
 import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
-
-const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
-  globalRegion: '',
-  serviceVars: {},
-};
+import { StepFooter } from '../step_footer';
 
 interface DetectAndReviewStepProps {
   onContinue: () => void;
@@ -51,10 +43,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   const { servicesStep, awsServicesMap, deploymentMethod } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
-    SERVICE_SETTINGS_SESSION_KEY,
-    DEFAULT_SERVICE_SETTINGS
-  );
+  const serviceSettings = useReconciledServiceSettings();
 
   // Build a display name map: instanceId → name from settings, falling back to matrix name.
   const serviceNames: Record<string, string> = useMemo(() => {
@@ -145,50 +134,37 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
         </>
       )}
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+      <StepFooter onBack={onBack}>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={policiesHref}
+              onClick={onContinue}
+              data-test-subj="detectAndReviewStep-finishButton"
+            >
               <FormattedMessage
-                id="xpack.ingestHub.detectAndReviewStep.backButton"
-                defaultMessage="Back"
+                id="xpack.ingestHub.detectAndReviewStep.finishButton"
+                defaultMessage="Finish"
               />
             </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={policiesHref}
-                onClick={onContinue}
-                data-test-subj="detectAndReviewStep-finishButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.detectAndReviewStep.finishButton"
-                  defaultMessage="Finish"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                iconType="sortRight"
-                iconSide="right"
-                href={overviewHref}
-                onClick={onContinue}
-                data-test-subj="detectAndReviewStep-continueButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.detectAndReviewStep.continueButton"
-                  defaultMessage="Take me to my data"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="sortRight"
+              iconSide="right"
+              href={overviewHref}
+              onClick={onContinue}
+              data-test-subj="detectAndReviewStep-continueButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.detectAndReviewStep.continueButton"
+                defaultMessage="Take me to my data"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </StepFooter>
     </div>
   );
 }

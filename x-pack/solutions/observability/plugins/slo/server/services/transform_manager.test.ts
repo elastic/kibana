@@ -6,17 +6,20 @@
  */
 /* eslint-disable max-classes-per-file */
 
+jest.mock('timers/promises');
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { DefaultTransformManager } from './transform_manager';
 import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from './transform_generators';
+import { createTransformGenerators } from './transform_generators/transform_generators_factory';
 import type { SLODefinition, IndicatorTypes } from '../domain/models';
 import {
   createAPMTransactionDurationIndicator,
@@ -95,6 +98,50 @@ describe('TransformManager', () => {
         scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
       ).toHaveBeenCalledTimes(1);
       expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
+    });
+  });
+
+  describe('Install idempotency', () => {
+    const alreadyExistsError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'resource_already_exists_exception',
+            reason: 'Transform with id [slo-id-1] already exists',
+          },
+        },
+      })
+    );
+    const createManager = () =>
+      new DefaultTransformManager(
+        createTransformGenerators(spaceId, dataViewsService, false),
+        scopedClusterClientMock,
+        loggerMock
+      );
+
+    it('succeeds when a retry finds the transform created by a timed out attempt', async () => {
+      scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockRejectedValueOnce(alreadyExistsError);
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createManager().install(slo)).resolves.toBe(`slo-${slo.id}-${slo.revision}`);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+      ).toHaveBeenCalledTimes(2);
+    });
+
+    it('fails when the transform already exists on the first attempt', async () => {
+      scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform.mockRejectedValueOnce(
+        alreadyExistsError
+      );
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createManager().install(slo)).rejects.toBe(alreadyExistsError);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+      ).toHaveBeenCalledTimes(1);
     });
   });
 

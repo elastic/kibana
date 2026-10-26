@@ -14,7 +14,12 @@ import { createHash } from 'crypto';
 import { fetchKibanaVersionHeaderString } from './fetch_kibana_version';
 import { isValidHostname, readCloudUsersFromFile } from './helper';
 import type { Session } from './saml_auth';
-import { createCloudSAMLSession, createLocalSAMLSession, getSecurityProfile } from './saml_auth';
+import {
+  createCloudSAMLSession,
+  createCustomRealmSAMLSession,
+  createLocalSAMLSession,
+  getSecurityProfile,
+} from './saml_auth';
 import type { GetSessionByRole, Role, User } from './types';
 
 export interface HostOptions {
@@ -32,7 +37,17 @@ export interface SamlSessionManagerOptions {
   cloudHostName?: string;
   cloudUsersFilePath: string;
   serverless?: SamlSessionManagerServerlessOptions;
+  customSamlRealm?: CustomSamlRealmOptions;
   log: ToolingLog;
+}
+
+/**
+ * Cloud-only: listed roles log in through a custom SAML provider that trusts the mock IdP,
+ * instead of Cloud users from `cloudUsersFilePath`.
+ */
+export interface CustomSamlRealmOptions {
+  providerName: string;
+  roles: string[];
 }
 
 export interface SamlSessionManagerServerlessOptions {
@@ -67,6 +82,7 @@ export class SamlSessionManager {
   private readonly cloudHostName?: string;
   private readonly cloudUsersFilePath: string;
   private readonly serverless?: SamlSessionManagerServerlessOptions;
+  private readonly customSamlRealm?: CustomSamlRealmOptions;
 
   constructor(options: SamlSessionManagerOptions) {
     this.log = options.log;
@@ -88,6 +104,7 @@ export class SamlSessionManager {
     this.roleToUserMap = new Map<Role, User>();
     this.supportedRoles = options.supportedRoles;
     this.serverless = options.serverless;
+    this.customSamlRealm = options.customSamlRealm;
     this.validateCloudSetting();
   }
 
@@ -181,8 +198,26 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
   private createSessionForRole = async (role: string): Promise<Session> => {
     if (this.isCloud) {
-      this.log.debug(`Creating new cloud SAML session for role '${role}'`);
       const kbnVersion = await this.getKibanaVersionForCloudSaml();
+
+      if (this.customSamlRealm?.roles.includes(role)) {
+        const { providerName } = this.customSamlRealm;
+        this.log.debug(
+          `Creating new SAML session for role '${role}' with custom SAML provider '${providerName}'`
+        );
+        return await createCustomRealmSAMLSession({
+          providerName,
+          username: `elastic_${role}`,
+          email: `elastic_${role}@elastic.co`,
+          fullname: `test ${role}`,
+          role,
+          kbnHost: this.kbnHost,
+          kbnVersion,
+          log: this.log,
+        });
+      }
+
+      this.log.debug(`Creating new cloud SAML session for role '${role}'`);
       const { email, password } = this.getCloudUserByRole(role);
       return await createCloudSAMLSession({
         hostname: this.cloudHostName!,

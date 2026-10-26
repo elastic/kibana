@@ -57,12 +57,11 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `template_id`      fabricated `'investigation'`; a proposal is not an investigation.
  * - `worker_execution_ids` empty; no equivalent on a proposal.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
- * - `entityIds`        from the conversation's Impact document; omitted when none.
  * - `status`           deliberately `undefined`. A proposal status (`'pending'`, `'succeeded'`, …)
  *                      is not an investigation status. The bucket gives the queue what it
  *                      needs: a settled proposal goes to `closed`. An approved proposal that
  *                      still runs stays in its category. `isProposalSettling` marks it.
+ * - `conversationStatus` the investigation's own status, read from the conversation.
  * - `severity`         lossy 4→3 collapse: `critical` → `'high'` so the danger icon fires.
  * - `proposalCreatedAt` / `proposalDecidedAt` the proposal's own timestamps. The decision time
  *                      dates the closed rows.
@@ -95,6 +94,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // Proposals do not carry worker execution IDs.
     worker_execution_ids: [],
     // status is deliberately omitted — see the data-gap note above.
+    conversationStatus: proposal.conversationStatus,
     pendingProposalCount: proposal.status === 'pending' ? 1 : 0,
     isProposalSettling: isProposalSettling(proposal),
     recommendedAction: bucket,
@@ -117,10 +117,5 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     assignee: proposal.conversationAssignees[0] ?? null,
     assignees: proposal.conversationAssignees,
     events: [],
-    entityIds: proposal.entityIds,
-    entityTypes: proposal.entityTypes,
-    // First id feeds the flyout Overview "Compromised" row until that surface
-    // reads `entityIds` directly. Pills and the queue filter use `entityIds`.
-    affectedSurface: proposal.entityIds?.[0],
   };
 };

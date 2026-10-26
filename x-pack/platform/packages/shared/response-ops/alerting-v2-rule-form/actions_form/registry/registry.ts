@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
 import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
+import { EMAIL_PARAMS_SCHEMA, SLACK2_PARAMS_SCHEMA } from './params_schemas';
 
 const EMAIL_PARAMS_TEMPLATE = `to: 
   - ""
@@ -24,11 +25,11 @@ text: ""
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [
   {
     id: 'email',
-    label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.email.label', {
+    label: i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.email.label', {
       defaultMessage: 'Email',
     }),
     description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.email.description',
+      'xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.email.description',
       {
         defaultMessage: 'Send an email',
       }
@@ -36,14 +37,15 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: EMAIL_PARAMS_TEMPLATE,
+    paramsSchema: EMAIL_PARAMS_SCHEMA,
   },
   {
     id: 'slack2.sendMessage',
-    label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack2.label', {
+    label: i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.slack2.label', {
       defaultMessage: 'Slack',
     }),
     description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack2.description',
+      'xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.slack2.description',
       {
         defaultMessage: 'Post a Slack message',
       }
@@ -52,6 +54,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     connectorTypeId: '.slack2',
     connectorTypeSubAction: 'sendMessage',
     paramsTemplate: SLACK2_PARAMS_TEMPLATE,
+    paramsSchema: SLACK2_PARAMS_SCHEMA,
     CustomComponent: SlackChannelSelectorWrapper,
   },
 ];

@@ -11,8 +11,8 @@ import {
   ALL_VALUE,
   SLO_GROUPINGS_PREFIX,
   SLO_STATUS,
-  apmTransactionDurationIndicatorTypeSchema,
-  apmTransactionErrorRateIndicatorTypeSchema,
+  apmTransactionDurationIndicatorTypeSchemaZod,
+  apmTransactionErrorRateIndicatorTypeSchemaZod,
   type GetSLOGroupedStatsParams,
   type GetSLOGroupedStatsResponse,
   type GroupedStatsResult,
@@ -151,8 +151,8 @@ const SLO_TYPE_CONFIG: Record<string, SloTypeConfig> = {
     getFilters: (params, fields) => [
       ...termsQuery(
         'slo.indicator.type',
-        apmTransactionDurationIndicatorTypeSchema.value,
-        apmTransactionErrorRateIndicatorTypeSchema.value
+        apmTransactionDurationIndicatorTypeSchemaZod.value,
+        apmTransactionErrorRateIndicatorTypeSchemaZod.value
       ),
       ...serviceNamesFilter(params.serviceNames, fields),
       ...environmentFilter(params.environment),
