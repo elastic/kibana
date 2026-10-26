@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+export {
+  createOrUpgradeSavedConfig,
+  computeUpgradedConfigAttributes,
+} from './create_or_upgrade_saved_config';
 export type { UpgradeableConfigAttributes } from './get_upgradeable_config';

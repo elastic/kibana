@@ -15,7 +15,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+import {
+  computeUpgradedConfigAttributes,
+  createOrUpgradeSavedConfig,
+} from './create_or_upgrade_saved_config';
 
 describe('uiSettings/createOrUpgradeSavedConfig', function () {
   afterEach(() => jest.resetAllMocks());
@@ -288,6 +291,39 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
           refresh: false,
         }
       );
+    });
+  });
+
+  describe('computeUpgradedConfigAttributes', () => {
+    it('returns the attributes the new config would be created with, without writing', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      mockGetUpgradeableConfig.mockResolvedValue({
+        id: prevVersion,
+        attributes: { buildNum: buildNum - 100, defaultIndex: 'some-index', foo: 'bar' },
+      });
+      mockTransform.mockResolvedValue({
+        defaultIndex: 'another-index',
+        isDefaultIndexMigrated: true,
+      });
+
+      const result = await computeUpgradedConfigAttributes({
+        savedObjectsClient,
+        version,
+        buildNum,
+        type: 'config',
+      });
+
+      expect(result).toEqual({
+        attributes: {
+          buildNum,
+          defaultIndex: 'another-index',
+          isDefaultIndexMigrated: true,
+          foo: 'bar',
+        },
+        upgradedFromId: prevVersion,
+      });
+      expect(savedObjectsClient.create).not.toHaveBeenCalled();
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });
   });
 

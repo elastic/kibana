@@ -23,20 +23,28 @@ interface ConfigLogMeta extends LogMeta {
   };
 }
 
-interface Options {
-  savedObjectsClient: SavedObjectsClientContract;
+interface ComputeUpgradedConfigOptions {
+  savedObjectsClient: Pick<SavedObjectsClientContract, 'find' | 'resolve'>;
   version: string;
   buildNum: number;
-  log: Logger;
-  handleWriteErrors: boolean;
   type: 'config' | 'config-global';
 }
 
-export async function createOrUpgradeSavedConfig(
-  options: Options
-): Promise<Record<string, any> | undefined> {
-  const { savedObjectsClient, version, buildNum, log, handleWriteErrors, type } = options;
+interface Options extends ComputeUpgradedConfigOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  log: Logger;
+  handleWriteErrors: boolean;
+}
 
+export const computeUpgradedConfigAttributes = async ({
+  savedObjectsClient,
+  version,
+  buildNum,
+  type,
+}: ComputeUpgradedConfigOptions): Promise<{
+  attributes: Record<string, any>;
+  upgradedFromId?: string;
+}> => {
   // try to find an older config we can upgrade
   const upgradeableConfig = await getUpgradeableConfig({
     savedObjectsClient,
@@ -62,6 +70,16 @@ export async function createOrUpgradeSavedConfig(
     upgradeableConfig?.attributes
   );
 
+  return { attributes, upgradedFromId: upgradeableConfig?.id };
+};
+
+export async function createOrUpgradeSavedConfig(
+  options: Options
+): Promise<Record<string, any> | undefined> {
+  const { savedObjectsClient, version, log, handleWriteErrors, type } = options;
+
+  const { attributes, upgradedFromId } = await computeUpgradedConfigAttributes(options);
+
   try {
     // create the new SavedConfig
     await savedObjectsClient.create(type, attributes, { id: version, refresh: false });
@@ -82,11 +100,11 @@ export async function createOrUpgradeSavedConfig(
     throw error;
   }
 
-  if (upgradeableConfig) {
-    log.debug<ConfigLogMeta>(`Upgrade config from ${upgradeableConfig.id} to ${version}`, {
+  if (upgradedFromId) {
+    log.debug<ConfigLogMeta>(`Upgrade config from ${upgradedFromId} to ${version}`, {
       kibana: {
         config: {
-          prevVersion: upgradeableConfig.id,
+          prevVersion: upgradedFromId,
           newVersion: version,
         },
       },

@@ -15,7 +15,7 @@ import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_con
  * The params needed to execute each transform function.
  */
 interface TransformParams {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: Pick<SavedObjectsClientContract, 'resolve'>;
   configAttributes: UpgradeableConfigAttributes | undefined;
 }
 
