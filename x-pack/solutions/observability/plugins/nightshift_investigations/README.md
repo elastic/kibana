@@ -19,14 +19,19 @@ fresh investigation using a `manual` question subject with an `automatic` trigge
 automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
 The Investigate/Ask selector does not select a different execution path.
 
-`runtime.dailyDispatchLimit` caps dispatch attempts across all triggers of an automation, per space
-and UTC day. The investigation step reserves a slot atomically before calling the investigation
-client; overlapping runs across Kibana instances cannot exceed the limit. Admitted attempts count
-even if starting or running the investigation fails, or continues an existing investigation. Excess
-attempts create no investigation and appear as skipped with reason `daily_limit` in automation
-history. Skipped attempts do not increase today's usage. An omitted limit allows unlimited dispatches;
-a limit of zero blocks all dispatches. Changing the limit takes effect on the next dispatch. The
-budget is separate from the global automatic-investigation quota.
+`runtime.dailyDispatchLimit` caps the new investigations an automation opens, per space and UTC day.
+Attempts that continue an open investigation and starts with the `manual` trigger type do not count
+and are never blocked, even at a limit of zero. For an automatic attempt that would open a new
+investigation, the investigation client first checks the global automatic-investigation quota and
+the automation budget without using either, then charges the budget and the quota. An attempt denied
+by either limit creates no investigation, does not increase today's usage, and appears as skipped in
+automation history: with reason `investigation_limit` when the global quota denies it, and with
+reason `daily_limit` when the automation limit denies it. The global limit wins when both are
+reached. A charged attempt counts even if starting or running the investigation fails afterwards. The
+budget slot is reserved atomically; overlapping runs across Kibana instances cannot exceed the limit.
+A concurrent attempt can still take the last global slot between the check and the charge, which
+wastes one unit of the automation budget. An omitted limit allows unlimited new investigations; a
+limit of zero blocks all new investigations. Changing the limit takes effect on the next attempt.
 
 The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
 It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional
