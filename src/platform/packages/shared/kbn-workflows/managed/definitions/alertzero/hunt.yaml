@@ -76,6 +76,8 @@ outputs:
       items:
         type: object
         additionalProperties: true
+    tier2_invoked:
+      type: boolean
 steps:
   # Start + poll: POST returns `{ run_id, state: running, result_attachment_id }`
   # immediately; the pipeline updates that hidden attachment. Downstream reads
@@ -374,6 +376,9 @@ steps:
       # executed behavior from being dropped behind an unexecuted one, and keeps the array inside
       # the packaging step's input limit.
       result_behaviors: "${{ steps.read_hunt_result.output.data.result.tier2.behaviors | compact | where: 'execution.executed', true | slice: 0, 20 }}"
+      # A Tier 2 that threw still called the model: the coordinator returns `tier1_only` with
+      # `tier2_skipped_reason: tier2_failed`.
+      result_tier2_invoked: "${{ steps.read_hunt_result.output.data.result.status == 'tier1_and_tier2' or steps.read_hunt_result.output.data.result.tier2_skipped_reason == 'tier2_failed' }}"
 
   # Permanent delete after outputs are set; continue on failure.
   - name: delete_hunt_result
@@ -398,3 +403,4 @@ steps:
       sse_count: "${{ variables.result_sse_count }}"
       report_intent_targets: "${{ variables.result_report_intent_targets }}"
       behaviors: "${{ variables.result_behaviors }}"
+      tier2_invoked: "${{ variables.result_tier2_invoked }}"

@@ -63,7 +63,7 @@ import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -192,7 +192,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   disableAutoFocus?: boolean;
   fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
-  indexPatterns?: Array<DataView | string>;
+  indexPatterns?: Array<FilterableSource | string>;
   indicateNoData?: boolean;
   isClearable?: boolean;
   isDirty: boolean;

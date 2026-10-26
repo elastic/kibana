@@ -158,7 +158,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
     const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(installSource, {
       onSuccess: ({ workflowId }) => {
         notifications.toasts.addSuccess(
-          i18n.translate('workflows.library.install.successToast', {
+          i18n.translate('workflowsUi.library.install.successToast', {
             defaultMessage: 'Workflow created from "{name}"',
             values: { name: template.metadata.name },
           })
@@ -221,7 +221,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
         onClick={handleInstall}
         data-test-subj="workflowLibraryTemplateInstallButton"
       >
-        {i18n.translate('workflows.library.install.installButton', {
+        {i18n.translate('workflowsUi.library.install.installButton', {
           defaultMessage: 'Install',
         })}
       </EuiButton>
@@ -231,7 +231,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       <EuiToolTip
         display="block"
         position="top"
-        content={i18n.translate('workflows.library.install.disabledTooltip', {
+        content={i18n.translate('workflowsUi.library.install.disabledTooltip', {
           defaultMessage:
             'Fill in the required {count, plural, one {field} other {fields}} to install: {fields}',
           values: {
@@ -253,7 +253,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
         onClick={handleSetup}
         data-test-subj="workflowLibraryTemplateSetupButton"
       >
-        {i18n.translate('workflows.library.install.setupButton', {
+        {i18n.translate('workflowsUi.library.install.setupButton', {
           defaultMessage: 'Set up workflow',
         })}
       </EuiButton>
@@ -290,7 +290,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
             <>
               <KbnDangerCallout
                 size="s"
-                title={i18n.translate('workflows.library.install.errorTitle', {
+                title={i18n.translate('workflowsUi.library.install.errorTitle', {
                   defaultMessage: 'The template could not be installed',
                 })}
                 data-test-subj="workflowLibraryTemplateInstallError"
@@ -310,7 +310,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
                 onClick={handleRemix}
                 data-test-subj="workflowLibraryTemplateRemixButton"
               >
-                {i18n.translate('workflows.library.install.remixButton', {
+                {i18n.translate('workflowsUi.library.install.remixButton', {
                   defaultMessage: 'Remix with AI',
                 })}
               </AiButton>

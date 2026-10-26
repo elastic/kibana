@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
-import { ExecutionStatus } from '@kbn/workflows';
+import { AGENT_BUILDER_HOOK_TRIGGER_SOURCE, ExecutionStatus } from '@kbn/workflows';
 import type { ExecutionConversationAccess } from '@kbn/agent-builder-server';
 import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
@@ -218,6 +218,8 @@ describe('runBeforeAgentWorkflows', () => {
     });
     expect(executeWorkflowMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        // Lets a workflow refuse runs that a user started directly.
+        triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
         workflowParams: expect.objectContaining({ round_execution_index: roundExecutionIndex }),
       })
     );

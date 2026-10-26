@@ -7,7 +7,7 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceConnector } from '@kbn/inference-common';
+import { isTemplateRequiredConnector, type InferenceConnector } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { getModelStatus } from '../../utils/eis_utils';
 import { EisModelStatus } from '../../types';
@@ -57,11 +57,12 @@ export const getGlobalModelComboOptions = (
   connectors: InferenceConnector[] | undefined,
   includeNoDefaultOption: boolean
 ): EuiComboBoxOptionOption<string>[] => {
+  const selectable = connectors?.filter((connector) => !isTemplateRequiredConnector(connector));
   const preconfigured =
-    connectors?.filter((c) => c.isPreconfigured).map(connectorToGlobalModelComboOption) ?? [];
+    selectable?.filter((c) => c.isPreconfigured).map(connectorToGlobalModelComboOption) ?? [];
 
   const custom =
-    connectors
+    selectable
       ?.filter((c) => !c.isPreconfigured)
       .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
 

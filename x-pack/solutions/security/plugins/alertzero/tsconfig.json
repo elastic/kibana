@@ -74,6 +74,7 @@
     "@kbn/core-chrome-browser-mocks",
     "@kbn/context-engine-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/unsaved-changes-prompt"
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/telemetry-plugin"
   ]
 }

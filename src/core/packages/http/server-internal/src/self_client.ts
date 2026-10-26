@@ -138,7 +138,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
           redirect: 'manual',
           dispatcher: this.dispatcherProvider.get(
             new URL(outbound.url),
-            this.getEffectiveTarget(options.target)
+            this.getEffectiveTarget(options.target),
+            options.headersTimeout
           ),
         };
         return followSameOriginRedirects(outbound, fetchInit, maxRedirects);
@@ -803,6 +804,15 @@ const validateFetchArguments = <TRequestBody>(
 
   if (options.rawResponse && !options.asResponse) {
     throw new Error('Invalid self HTTP options, rawResponse = true requires asResponse = true.');
+  }
+
+  if (
+    options.headersTimeout !== undefined &&
+    (!Number.isInteger(options.headersTimeout) || options.headersTimeout < 0)
+  ) {
+    throw new Error(
+      'Invalid self HTTP options, headersTimeout must be a positive integer or zero.'
+    );
   }
 
   const invalidHeaders = Object.keys(options.headers ?? {}).filter(isProtectedHeader);

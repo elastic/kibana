@@ -29,6 +29,11 @@ import { ID, KI_TYPE_FEATURE, SOURCE_ID, TYPE } from '../fields';
 
 export const REVISION_SIZE_LIMIT = 10_000;
 
+export interface LatestKnowledgeIndicatorRevision {
+  esId: string;
+  doc: StoredKnowledgeIndicator;
+}
+
 /**
  * Identity of a knowledge indicator revision within a space. The space filter
  * must be applied before this grouping: feature ids are derived from
@@ -69,6 +74,36 @@ export class RevisionReader {
     sort?: ComposerSortShorthand[],
     limit: number = REVISION_SIZE_LIMIT
   ): Promise<StoredKnowledgeIndicator[]> {
+    const { hits } = await this.fetchLatestRevisionData(where, postGroupingWhere, sort, limit);
+    return hits;
+  }
+
+  async fetchLatestRevisionEntries(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition,
+    sort?: ComposerSortShorthand[],
+    limit: number = REVISION_SIZE_LIMIT
+  ): Promise<LatestKnowledgeIndicatorRevision[]> {
+    const { hits, esIds } = await this.fetchLatestRevisionData(
+      where,
+      postGroupingWhere,
+      sort,
+      limit
+    );
+    if (hits.length !== esIds.length) {
+      throw new Error(
+        'Latest knowledge indicator revision query did not return an _id for every hit'
+      );
+    }
+    return hits.map((doc, index) => ({ esId: esIds[index], doc }));
+  }
+
+  private async fetchLatestRevisionData(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition,
+    sort?: ComposerSortShorthand[],
+    limit: number = REVISION_SIZE_LIMIT
+  ): Promise<{ hits: StoredKnowledgeIndicator[]; esIds: string[] }> {
     let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
       this.space
     )}`;
@@ -83,10 +118,9 @@ export class RevisionReader {
         `Requested revision limit ${limit} exceeds REVISION_SIZE_LIMIT ${REVISION_SIZE_LIMIT}; capping at ${REVISION_SIZE_LIMIT}.`
       );
     }
-    query = query.keep('_source').limit(Math.min(limit, REVISION_SIZE_LIMIT));
+    query = query.keep('_id', '_source').limit(Math.min(limit, REVISION_SIZE_LIMIT));
 
-    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
-    return hits;
+    return executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
   }
 
   /**

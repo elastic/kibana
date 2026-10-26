@@ -46,6 +46,7 @@ const scoutRestrictedFtrPatterns = {
 const SCOUT_TEST_FILE_GLOBS = [
   `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.ts`,
   'packages/**/test/scout{_*,}/**/*.ts',
+  'src/dev/build/test/scout{_*,}/**/*.ts',
 ];
 
 /** Packages which should not be included within production code. */
@@ -273,18 +274,6 @@ module.exports = {
       files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
     /**
@@ -590,32 +579,7 @@ module.exports = {
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
-        'react/function-component-definition': [
-          'warn',
-          {
-            namedComponents: 'function-declaration',
-            unnamedComponents: 'arrow-function',
-          },
-        ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
-        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'react/function-component-definition': [
-          'off',
-          {
-            namedComponents: 'function-declaration',
-            unnamedComponents: 'arrow-function',
-          },
-        ],
       },
     },
     {
@@ -664,9 +628,9 @@ module.exports = {
      */
     {
       files: ['x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}'],
+      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
       plugins: ['testing-library'],
       rules: {
-        'testing-library/await-async-utils': 'error',
         'import/order': [
           'warn',
           {
@@ -858,7 +822,6 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -903,30 +866,14 @@ module.exports = {
         'prefer-spread': 'error',
         'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
@@ -956,7 +903,8 @@ module.exports = {
     },
     {
       files: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx'],
-      extends: ['plugin:testing-library/react'],
+      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
+      plugins: ['testing-library'],
     },
 
     /**
@@ -1006,32 +954,15 @@ module.exports = {
       },
       rules: {
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-comp': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
       },
     },
     {
@@ -1058,84 +989,12 @@ module.exports = {
     {
       files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
-      extends: ['plugin:playwright/recommended'],
+      // `eslint-plugin-playwright` rules run in oxlint (.oxlint/playwright.mts). The plugin stays
+      // registered so `eslint-disable` directives naming its rules resolve.
       plugins: ['playwright'],
-      settings: {
-        playwright: {
-          globalAliases: {
-            test: ['test', 'spaceTest', 'apiTest'],
-          },
-        },
-      },
       rules: {
-        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
-        // calls. The linter can't trace expects into called functions, so without
-        // this config tests using assertion helpers trigger a false-positive
-        // "Test has no assertions" warning. Registering the assert* pattern as
-        // known assertion functions avoids that.
-        'playwright/expect-expect': [
-          'warn',
-          {
-            assertFunctionNames: ['expect', 'expect.soft'],
-            assertFunctionPatterns: ['^assert[A-Z]'],
-          },
-        ],
-        'playwright/consistent-spacing-between-blocks': 'error',
-        'playwright/no-commented-out-tests': 'error',
-        'playwright/no-conditional-expect': 'error',
-        'playwright/no-duplicate-hooks': 'error',
-        'playwright/no-element-handle': 'error',
-        'playwright/no-eval': 'error',
-        'playwright/no-get-by-title': 'error',
-        'playwright/no-identical-title': 'error',
-        'playwright/no-magic-timeouts': 'warn',
-        'playwright/no-nested-step': 'error',
-        'playwright/no-nth-methods': 'error',
-        'playwright/no-page-pause': 'error',
-        'playwright/no-raw-locators': ['warn', { allowed: ['[data-test-subj'] }],
-        'playwright/no-restricted-matchers': 'error',
-        'playwright/no-slowed-test': 'error',
-        'playwright/no-test-return-statement': 'error',
-        'playwright/no-unnecessary-assertions': 'error',
-        'playwright/no-useless-await': 'error',
-        'playwright/no-wait-for-selector': 'error',
-        'playwright/max-nested-describe': ['error', { max: 1 }],
-        'playwright/prefer-comparison-matcher': 'error',
-        'playwright/prefer-equality-matcher': 'error',
-        'playwright/prefer-hooks-in-order': 'error',
-        'playwright/prefer-hooks-on-top': 'error',
-        'playwright/prefer-native-locators': 'warn',
-        'playwright/prefer-strict-equal': 'error',
-        'playwright/prefer-to-be': 'error',
-        'playwright/prefer-to-contain': 'error',
-        'playwright/prefer-to-have-count': 'error',
-        'playwright/prefer-to-have-length': 'error',
-        'playwright/require-to-throw-message': 'error',
-        'playwright/require-top-level-describe': 'error',
-        // Scout has a its own runtime validator for test tags
-        'playwright/valid-test-tags': 'off',
-        // Check all function arguments to catch unused destructured params
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          {
-            vars: 'all',
-            args: 'all',
-            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
-            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
-            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
-          },
-        ],
-      },
-    },
-    {
-      // no-export only applies to spec files — fixture/helper modules legitimately export
-      files: [
-        '**/kbn-scout*/src/playwright/**/*.spec.ts',
-        `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.spec.ts`,
-        'packages/**/test/scout{_*,}/**/*.spec.ts',
-      ],
-      rules: {
-        'playwright/no-export': 'error',
+        // Turned off by `plugin:playwright/recommended`: fixtures are often destructured as `({}, testInfo)`.
+        'no-empty-pattern': 'off',
       },
     },
     {
@@ -1175,7 +1034,6 @@ module.exports = {
             ignoreDeclarationSort: true,
           },
         ],
-        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -1229,7 +1087,6 @@ module.exports = {
         '@typescript-eslint/no-useless-constructor': 'error',
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
@@ -1326,7 +1183,6 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
       },
     },
     {
@@ -1412,8 +1268,6 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         'react-hooks/exhaustive-deps': 'error',
-        // Custom content renders LLM-generated HTML; it must stay inside the sandboxed iframe.
-        'react/no-danger': 'error',
       },
     },
     {
@@ -1494,13 +1348,8 @@ module.exports = {
           },
         ],
         'react-hooks/exhaustive-deps': 'off',
-        'react/jsx-boolean-value': ['error', 'never'],
         'sort-keys': 1, // warning
         '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
-        ],
       },
     },
     {
@@ -1531,29 +1380,7 @@ module.exports = {
         ],
 
         // react
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
         'react/sort-comp': 'error',
-        'react/jsx-boolean-value': 'error',
-        'react/forbid-elements': [
-          'error',
-          {
-            forbid: [
-              {
-                element: 'EuiConfirmModal',
-                message: 'Use <ConfirmModal> instead',
-              },
-              {
-                element: 'EuiPopover',
-                message: 'Use <Popover> instead',
-              },
-              {
-                element: 'EuiIconTip',
-                message: 'Use <TooltipIcon> instead',
-              },
-            ],
-          },
-        ],
       },
     },
     {
@@ -1652,6 +1479,17 @@ module.exports = {
         'react/no-is-mounted': 'off',
         'react/no-unescaped-entities': 'off',
         'react/no-unknown-property': 'off',
+        'react/jsx-key': 'off',
+        'react/jsx-no-comment-textnodes': 'off',
+        'react/jsx-no-target-blank': 'off',
+        'react/no-children-prop': 'off',
+        'react/no-danger-with-children': 'off',
+        'react/no-direct-mutation-state': 'off',
+        'react/no-find-dom-node': 'off',
+        'react/no-render-return-value': 'off',
+        'react/no-string-refs': 'off',
+        'react/require-render-return': 'off',
+        'react/react-in-jsx-scope': 'off',
         '@typescript-eslint/no-extra-non-null-assertion': 'off',
         '@typescript-eslint/no-misused-new': 'off',
         '@typescript-eslint/no-namespace': 'off',
@@ -1833,7 +1671,6 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -1878,30 +1715,14 @@ module.exports = {
         'prefer-spread': 'error',
         'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
@@ -2009,10 +1830,8 @@ module.exports = {
      */
     {
       files: ['x-pack/solutions/security/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
       plugins: ['testing-library'],
-      rules: {
-        'testing-library/await-async-utils': 'error',
-      },
     },
     /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.

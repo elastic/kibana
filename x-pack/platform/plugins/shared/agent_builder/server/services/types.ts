@@ -88,6 +88,7 @@ export interface InternalStartServices {
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  inference: InferenceServerStart;
   callbackDeliveryService: CallbackDeliveryService;
   spaceSettings: SpaceSettingsService;
   conversationTemplates: ConversationTemplatesServiceStart;

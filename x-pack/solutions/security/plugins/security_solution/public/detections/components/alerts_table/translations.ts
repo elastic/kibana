@@ -366,3 +366,10 @@ export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
     defaultMessage: 'Select workflow',
   }
 );
+
+export const REMOVE_FROM_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.removeFromCase',
+  {
+    defaultMessage: 'Remove from case',
+  }
+);

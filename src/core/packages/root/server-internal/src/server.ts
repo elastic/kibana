@@ -64,7 +64,6 @@ import {
   ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   isUiamCredential,
-  isExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
@@ -625,7 +624,7 @@ export class Server {
         if (!credential || !isUiamCredential(credential)) {
           return undefined;
         }
-        if (isExternalUiamCredential(request) || uiam.isExternalApiKey(request)) {
+        if (uiam.isExternalApiKey(request)) {
           return undefined;
         }
 

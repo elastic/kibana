@@ -2121,12 +2121,13 @@ groups:
           * {applies_to}`stack: ga =9.4` Defaults to `false`.
         datatype: bool
         applies_to:
-          stack: ga 9.4+
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          security: ga
+          stack: ga 9.4-9.5, removed 9.6+
+          ech: removed
+          ece: removed
+          eck: removed
+          self: removed
+          security: removed
+          serverless: removed
         note: |
           :applies_to: serverless: ga
           The **Attacks** view is unavailable on the **Elastic AI SOC Engine (EASE)** feature tier. Use the dedicated [Attack Discovery](docs-content://solutions/security/ai/attack-discovery/run-from-attack-discovery-page.md) page instead.

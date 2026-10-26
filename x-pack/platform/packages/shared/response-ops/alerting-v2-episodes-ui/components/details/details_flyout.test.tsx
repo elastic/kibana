@@ -183,7 +183,9 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
   it('switches to the metadata tab when the rule is loaded', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
-    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
+    const dataContainerTab = screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata');
+    expect(dataContainerTab).toHaveTextContent('Data container');
+    fireEvent.click(dataContainerTab);
     expect(screen.getByTestId('metadataSectionStub')).toBeInTheDocument();
   });
 

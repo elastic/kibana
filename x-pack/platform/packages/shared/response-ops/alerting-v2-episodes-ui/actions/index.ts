@@ -32,6 +32,10 @@ export type { AddToCaseCasesService } from '../components/add_to_case_modal';
 export { closeAddToCaseModal } from '../components/add_to_case_modal';
 export { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
 export {
+  createOpenAlertEventsHistoryAction,
+  OPEN_ALERT_EVENTS_HISTORY_ACTION_ID,
+} from './open_alert_events_history';
+export {
   createCompositeEpisodeAction,
   type CompositeActionDef,
   type CompositeActionDeps,

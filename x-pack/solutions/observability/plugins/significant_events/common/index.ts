@@ -8,6 +8,19 @@
 export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
 export type { PaginatedResponse } from './pagination';
+export {
+  isSignificantEventsSortField,
+  MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+  SIGNIFICANT_EVENTS_SORT_FIELDS,
+  SIGNIFICANT_EVENTS_SORT_ORDERS,
+} from './events_list';
+export type {
+  SignificantEventInvestigationState,
+  SignificantEventsFacets,
+  SignificantEventsSortField,
+  SignificantEventsSortOrder,
+} from './events_list';
 
 export { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from './feature_flags';
 

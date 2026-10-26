@@ -283,6 +283,15 @@ steps:
     with:
       settled: "${{ variables.created_count >= inputs.expectedProposalCount and variables.pending_count == 0 and variables.executing_count == 0 }}"
 
+  # Telemetry: the status route doesn't say whether it changed anything, so read the status first.
+  - name: read_status_before_close
+    type: ai.conversation.metadata.read
+    if: "${{ variables.settled == true }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigationConversationId }}"
+
   # Over the investigations status route, not `ai.conversation.metadata.patch`:
   # that step patches with owner access, and this gate runs as the Forensics
   # Worker's service account while the Investigation was opened by whoever handed
@@ -316,6 +325,16 @@ steps:
         expected_proposal_ids: []
     on-failure:
       continue: true
+
+  - name: report_investigation_closed_settled
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.read_status_before_close.output.metadata.status == 'open' and steps.close_if_settled.error == blank and steps.close_if_settled.output.status == 'closed' }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ inputs.investigationConversationId }}"
+      close_reason: other
 
   - name: emit_result
     type: workflow.output

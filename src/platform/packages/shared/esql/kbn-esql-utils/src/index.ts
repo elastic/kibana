@@ -120,7 +120,6 @@ export {
   type EsqlViewNameValidationError,
   type EsqlViewsClient,
 } from './utils/views';
-export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,
   type ESQLColumnsWithHighlights,

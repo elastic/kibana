@@ -10,6 +10,13 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Migration recommendation: MOVE ALL TO SCOUT; delete nothing. Suggestion content is covered by Jest
+ * in kbn-esql-language (src/language/autocomplete/autocomplete.test.ts), but every test here checks the
+ * Monaco widget wiring, which needs a real browser. Move to the Discover ES|QL Scout suite, merging
+ * only where flows are identical (e.g. the blur/refocus tests).
+ */
+
 const SOURCE_QUERY = 'FROM logstash-* ';
 
 // eslint-disable-next-line import/no-default-export
@@ -35,16 +42,38 @@ export default function ({ getService }: FtrProviderContext) {
       await esql.setEsqlEditorQuery('');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (as part of the single widget test). Suggestion
+     * content is autocomplete.test.ts; only "widget opens on its own" needs a browser.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
+     */
     it('should show suggestions automatically after typing space', async () => {
       await esql.typeEsqlEditorQuery('FROM ');
       await waitForSuggestionWidget(true);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (as a step of the single widget test). The pipe
+     * trigger is a different path from "FROM " (autocomplete.test.ts only asserts suggestion content, not
+     * that the widget opens on its own), so keep browser coverage rather than delete.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
+     */
     it('should show suggestions automatically after pipe and space', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (as part of the single widget test). Snippet
+     * placeholder ($0) handling happens in Monaco's insertion; unit tests can only assert insertText.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
+     */
     it('should not insert unwanted characters after operator selection', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| WHERE bytes `);
       await waitForSuggestionWidget(true);
@@ -55,6 +84,13 @@ export default function ({ getService }: FtrProviderContext) {
       expect(finalValue).to.not.contain('$0');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (as part of the single widget test). Inline items are
+     * inline_suggest.test.ts; the Tab keybinding (esql_editor.tsx) and ghost text need a real Monaco.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
+     */
     it('should accept inline suggestion from query history with TAB', async () => {
       await esql.typeEsqlEditorQuery('FROM logstash-');
       await browser.pressKeys('*');
@@ -72,6 +108,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (as part of the single widget test). Needs the real
+     * Monaco suggest widget plus the date picker popup; jsdom cannot cover that wiring.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
+     */
     it('should open timepicker and insert date when selecting a day', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| WHERE @timestamp > `);
       await esql.selectEsqlSuggestionByLabel('time picker');
@@ -83,6 +126,13 @@ export default function ({ getService }: FtrProviderContext) {
       expect(finalValue).to.contain('T');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (merge with the refocus test below into one
+     * blur/refocus flow). Pure Monaco widget behavior, no unit-testable logic.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
+     */
     it('should close suggestions when loosing focus', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);
@@ -91,6 +141,13 @@ export default function ({ getService }: FtrProviderContext) {
       await waitForSuggestionWidget(false);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (merge with the test above). Pure Monaco widget
+     * behavior; drop the word-wrap toggle step, which is incidental.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
+     */
     it('should automatically show suggestions when refocusing editor', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);
       await waitForSuggestionWidget(true);

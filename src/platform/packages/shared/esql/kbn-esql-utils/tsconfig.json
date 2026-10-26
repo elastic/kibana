@@ -32,8 +32,5 @@
     "@kbn/core",
     "@kbn/index-management-shared-types",
     "@kbn/licensing-types",
-    "@kbn/controls-constants",
-    "@kbn/presentation-publishing",
-    "@kbn/controls-schemas",
   ]
 }

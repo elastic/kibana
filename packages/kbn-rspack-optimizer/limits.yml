@@ -13,7 +13,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 7484
+  alertzero: 8277
   apm: 35746
   apmShared: 2226
   apmSourcesAccess: 1174
@@ -67,6 +67,7 @@ pageLoadAssetSize:
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
+  entityInventoryApp: 892
   entityStore: 2508
   esql: 382
   esqlDataGrid: 215

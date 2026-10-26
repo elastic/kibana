@@ -60,39 +60,39 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.actions.alertAcked',
-    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
+    schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
     id: 'alerting.actions.alertActivated',
-    schemaHash: '136c0fcf0b387b97bac050127c4b14244efd82a31400d28fc4cd2837fae330ca',
+    schemaHash: '1d32fea3765a97a2bb499a9531dc5689dcdea43843cc09f27c72a175ad455600',
   },
   {
     id: 'alerting.actions.alertAssigned',
-    schemaHash: 'bdbe4b8494809fa5e3a5311440aa4ff485bae7a2acd6d8989489aec8c36a279d',
+    schemaHash: '808f1767c070ec1a3f10dc81e56f34dda451b98fac0cf6976471052486cf3818',
   },
   {
     id: 'alerting.actions.alertDeactivated',
-    schemaHash: 'bb9a246794512ad64c03b1da1a61f727fa6b64083d0bd4860c3bf02b2ee03c4f',
+    schemaHash: 'fc9803d06cfc6eb58bc8a1d82a787c535ac5112e882089977376467fc1ffd4ad',
   },
   {
     id: 'alerting.actions.alertSnoozed',
-    schemaHash: 'a13f06208bb87f375480ca8f6c4c3e00665154bd192080a3a6b43d8d4a20fd26',
+    schemaHash: 'ec91e54213ffedd2d0821c2b96ce1af18ce6c1c020752d9d826d141bb27c8258',
   },
   {
     id: 'alerting.actions.alertTagged',
-    schemaHash: 'dc756297ccd64a6df4f36a97b293f2da6701687067416e2007be08b8607f799c',
+    schemaHash: 'ac0172750708b70b9d54fcd7cf4ce138db259028ec1b327d28ae610d51ca9e8f',
   },
   {
     id: 'alerting.actions.alertUnacked',
-    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
+    schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
     id: 'alerting.actions.alertUnassigned',
-    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
+    schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
     id: 'alerting.actions.alertUnsnoozed',
-    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
+    schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
     id: 'alerting.ruleCreated',
@@ -324,7 +324,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'slack2.message',
-    schemaHash: 'ebb7bba37b622893dc2b1fd55b1688fc27cdd0c220d9572c700f72e106c7aab4',
+    schemaHash: '971da8845e40c5900b3d729ae9f02ceccfc2a1b8dd0442534bdf710a0fdd31a3',
   },
   {
     id: 'slack2.reaction_added',

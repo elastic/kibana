@@ -76,7 +76,6 @@ const ShowAttackButton = React.lazy(async () => {
   const { ShowAttackButton: Component } = await import('./components/show_attack_button');
   return { default: Component };
 });
-
 const AttackTabContentWrapper: ComponentType<CommonAttachmentListViewProps> = (props) => (
   <Suspense fallback={null}>
     <AttackTabContentLazy {...props} />
@@ -92,11 +91,18 @@ const DISPLAY_NAME = i18n.translate('xpack.securitySolution.attackDiscovery.case
   defaultMessage: 'Attacks',
 });
 
+const getAttackCountLabel = (count: number): string =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.attacksCount', {
+    defaultMessage: '{count, plural, one {# attack} other {# attacks}}',
+    values: { count },
+  });
+
 export const getAttackAttachment = () =>
   defineAttachment({
     id: SECURITY_ATTACK_ATTACHMENT_TYPE,
     getIcon: () => 'securitySignalDetected',
     getLabel: () => DISPLAY_NAME,
+    getCountLabel: ({ count }) => getAttackCountLabel(count),
     schema: AttackAttachmentPayloadSchema,
     getCreationActivity: () => ({
       eventColor: 'subdued' as const,
@@ -214,7 +220,7 @@ export type AttackAttachmentWithoutOwner = Omit<AttackAttachmentPayload, 'owner'
 export interface AlertAttachmentWithoutOwner {
   type: typeof SECURITY_ALERT_ATTACHMENT_TYPE;
   attachmentId: string[];
-  metadata: { index: string };
+  metadata: { index: string; sourceAttachmentIds: string[] };
 }
 
 /** How many attacks one add-to-case may carry; each attack takes two bulk-create attachments. */
@@ -347,7 +353,8 @@ export const buildAttacksAttachments = (
       attachments.push({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: attachedAlertIds,
-        metadata: { index: attack.alertsIndex },
+        // Records the attack that brought these alerts, so removing it can take them along.
+        metadata: { index: attack.alertsIndex, sourceAttachmentIds: [attack.id] },
       });
     }
   }

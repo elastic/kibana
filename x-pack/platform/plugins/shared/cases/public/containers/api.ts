@@ -28,6 +28,7 @@ import type {
   FindCasesContainingAllDocumentsRequest,
   UpdateSummary,
   CasesPatchResponse,
+  BulkDeleteAttachmentsRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -62,6 +63,7 @@ import {
   getCaseDeleteObservableUrl,
   getCaseBulkDeleteObservablesUrl,
   getCaseSimilarCasesUrl,
+  getCaseBulkDeleteAttachmentsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -574,6 +576,22 @@ export const deleteFileAttachments = async ({
   await KibanaServices.get().http.fetch(getCasesDeleteFileAttachmentsUrl(caseId), {
     method: 'POST',
     body: JSON.stringify({ ids: fileIds }),
+    signal,
+  });
+};
+
+export const bulkDeleteAttachments = async ({
+  caseId,
+  request,
+  signal,
+}: {
+  caseId: string;
+  request: BulkDeleteAttachmentsRequest;
+  signal?: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCaseBulkDeleteAttachmentsUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify(request),
     signal,
   });
 };

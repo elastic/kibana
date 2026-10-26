@@ -24,13 +24,19 @@ import type { OasExampleEntry } from '../oas_types';
 export const SAMPLE_GROUP_HASH = '98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56';
 export const SAMPLE_OTHER_GROUP_HASH =
   '62b86eca4670c2a0a01fa8bb5570c5c2dfa7d20a9d9def5b6acfdef4d98d307a';
+/** `series_id` of the `cpu-high` rule's series for `SAMPLE_GROUP_HASH` in the `default` space. */
+export const SAMPLE_SERIES_ID =
+  'MTo6cnVsZTo6ZGVmYXVsdDo6Y3B1LWhpZ2g6Ojk4MDU4Y2I1NjkwMTdlY2I2YjA4YjU1NGVjYmNiMjUyNGZmN2RkODk3MTgyOGY0ZjJlNTkzOWMxZTY2NjdlNTY';
+/** `series_id` of the `memory-high` rule's series for `SAMPLE_OTHER_GROUP_HASH` in the `default` space. */
+export const SAMPLE_OTHER_SERIES_ID =
+  'MTo6cnVsZTo6ZGVmYXVsdDo6bWVtb3J5LWhpZ2g6OjYyYjg2ZWNhNDY3MGMyYTBhMDFmYThiYjU1NzBjNWMyZGZhN2QyMGE5ZDlkZWY1YjZhY2ZkZWY0ZDk4ZDMwN2E';
 export const SAMPLE_EPISODE_ID = 'alert-1';
 
 /** Shared 400 body for series-level alert-action routes (missing path params). */
 export const INVALID_SERIES_ACTION_PARAMS_RESPONSE = invalidResponseExample({
-  summary: 'Path is missing required group_hash.',
-  message: 'group_hash: Required',
-  details: { errors: { group_hash: ['Required'] } },
+  summary: 'Path is missing required series_id.',
+  message: 'series_id: Required',
+  details: { errors: { series_id: ['Required'] } },
 });
 
 /** Shared 400 body for episode-level alert-action routes (missing path params). */
@@ -43,13 +49,13 @@ export const INVALID_EPISODE_ACTION_PARAMS_RESPONSE = invalidResponseExample({
 /** Shared 404 body for series-level alert-action routes. */
 export const ALERT_SERIES_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'alertSeriesNotFound',
-  summary: 'No alert episode series exists for the given group_hash',
+  summary: 'No alert episode series exists for the given series_id in the current space',
   value: {
     code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
     error: 'Not Found',
-    message: getAlertSeriesNotFoundMessage(SAMPLE_GROUP_HASH),
+    message: getAlertSeriesNotFoundMessage(SAMPLE_SERIES_ID),
     details: {
-      group_hash: SAMPLE_GROUP_HASH,
+      series_id: SAMPLE_SERIES_ID,
     },
   } satisfies ErrorResponse,
 };

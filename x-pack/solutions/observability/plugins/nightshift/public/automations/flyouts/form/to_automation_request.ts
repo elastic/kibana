@@ -29,7 +29,6 @@ const toTriggerRow = (
       kind: 'alert',
       ...(ruleNamePattern ? { ruleNamePattern } : {}),
       ...(trigger.ruleNames.length ? { ruleNames: trigger.ruleNames } : {}),
-      ...(trigger.alertStatus !== 'any' ? { alertStatus: trigger.alertStatus } : {}),
       ...(trigger.ruleTags.length ? { tags: trigger.ruleTags } : {}),
     };
   }

@@ -170,6 +170,7 @@ describe('PerOsAttackSurfaceReductionCard', () => {
   });
 
   it('should not render the registry credential hardening switch when the experimental flag is off', () => {
+    mockedContext.setExperimentalFlag({ registryCredentialHardening: false });
     render();
 
     expect(

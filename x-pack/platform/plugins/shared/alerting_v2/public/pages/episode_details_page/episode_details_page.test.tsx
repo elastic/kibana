@@ -319,7 +319,9 @@ describe('EpisodeDetailsPage', () => {
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule A');
     expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabOverview')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata')).toHaveTextContent(
+      'Data container'
+    );
     expect(episodesLocators.useUrl).toHaveBeenCalledWith({});
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',

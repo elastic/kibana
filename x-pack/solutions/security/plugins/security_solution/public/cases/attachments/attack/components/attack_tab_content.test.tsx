@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import userEvent from '@testing-library/user-event';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
@@ -38,6 +38,7 @@ import {
   REMOVE_ATTACK_MODAL_TEST_ID,
   SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
+import { REMOVE_FROM_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { allCasesPermissions } from '../../../../cases_test_utils';
@@ -874,7 +875,7 @@ describe('AttackTabContent', () => {
       );
     });
 
-    it('offers no way to remove an attachment', async () => {
+    it('offers no way to remove an attachment when the user cannot remove', async () => {
       renderTab();
 
       await user.click(moreActionsButton('so-1'));
@@ -971,6 +972,36 @@ describe('AttackTabContent', () => {
             'This attack could not be loaded. It may have been deleted, aged into a frozen tier, or be outside your access. The details shown were captured when it was attached.'
           )
         ).toBeInTheDocument();
+      });
+
+      it('removes the attack from the case by its attack id', async () => {
+        const onRemove = jest.fn();
+        renderTab({ onRemove });
+
+        await user.click(moreActionsButton('so-1'));
+        await user.click(within(moreActionsMenu()).getByTestId(REMOVE_FROM_CASE_ACTION_ID));
+
+        expect(onRemove).toHaveBeenCalledWith({ attachmentIds: ['attack-id-1'] });
+      });
+
+      it('offers only the removal for an attack that could not be resolved', async () => {
+        mockFindResult([]);
+        const onRemove = jest.fn();
+        renderTab({ onRemove });
+
+        expect(moreActionsButton('so-1')).not.toBeDisabled();
+
+        await user.click(moreActionsButton('so-1'));
+
+        expect(
+          within(moreActionsMenu())
+            .getAllByRole('menuitem')
+            .map(({ textContent }) => textContent)
+        ).toEqual(['Remove from case']);
+
+        await user.click(within(moreActionsMenu()).getByTestId(REMOVE_FROM_CASE_ACTION_ID));
+
+        expect(onRemove).toHaveBeenCalledWith({ attachmentIds: ['attack-id-1'] });
       });
     });
   });
@@ -1224,6 +1255,32 @@ describe('AttackTabContent', () => {
 
       await user.click(rowCheckbox('so-1'));
       await user.click(rowCheckbox('so-1'));
+
+      expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('removes the selected attacks from the case, clearing the selection once removed', async () => {
+      mockResolvedAttacks(['attack-id-1', 'attack-id-2']);
+      const onRemove = jest.fn();
+      renderTab({
+        caseData: buildCaseData([
+          buildAttachment(),
+          buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
+        ]),
+        onRemove,
+      });
+
+      await user.click(rowCheckbox('so-1'));
+      await user.click(rowCheckbox('so-2'));
+      await openBulkActionsMenu();
+      await user.click(within(bulkActionsMenu()).getByTestId(REMOVE_FROM_CASE_ACTION_ID));
+
+      expect(onRemove).toHaveBeenCalledWith(
+        { attachmentIds: ['attack-id-1', 'attack-id-2'] },
+        { onSuccess: expect.any(Function) }
+      );
+
+      act(() => onRemove.mock.calls[0][1].onSuccess());
 
       expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
     });

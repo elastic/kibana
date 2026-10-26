@@ -203,4 +203,82 @@ describe('registerHuntThreatIntelSupplyRoutes', () => {
       },
     });
   });
+
+  describe('Restore authorization', () => {
+    const restoreWithoutManagedUpdate = () =>
+      httpServerMock.createKibanaRequest({
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult: {},
+        },
+      });
+
+    it('returns 403 naming manage_security when the caller lacks the cluster privilege', async () => {
+      const { postHandler } = setupRoutes({
+        getSupplyStatus: jest.fn(),
+        restoreSupplyForSpace: jest.fn(),
+      });
+      const response = httpServerMock.createResponseFactory();
+
+      await postHandler(
+        createRouteContextMock({ manageSecurity: false }),
+        restoreRequest(),
+        response
+      );
+
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: {
+          message: 'Restoring threat intel supply requires the manage_security cluster privilege',
+        },
+      });
+    });
+
+    it('returns 403 naming managed workflows when the caller lacks update access', async () => {
+      const { postHandler } = setupRoutes({
+        getSupplyStatus: jest.fn(),
+        restoreSupplyForSpace: jest.fn(),
+      });
+      const response = httpServerMock.createResponseFactory();
+
+      await postHandler(
+        createRouteContextMock({ manageSecurity: true }),
+        restoreWithoutManagedUpdate(),
+        response
+      );
+
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: {
+          message: 'Restoring threat intel supply requires update access to managed workflows',
+        },
+      });
+    });
+
+    it('does not restore supply when the caller lacks the cluster privilege', async () => {
+      const restoreSupplyForSpace = jest.fn();
+      const { postHandler } = setupRoutes({ getSupplyStatus: jest.fn(), restoreSupplyForSpace });
+
+      await postHandler(
+        createRouteContextMock({ manageSecurity: false }),
+        restoreRequest(),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(restoreSupplyForSpace).not.toHaveBeenCalled();
+    });
+
+    it('does not restore supply when the caller lacks update access', async () => {
+      const restoreSupplyForSpace = jest.fn();
+      const { postHandler } = setupRoutes({ getSupplyStatus: jest.fn(), restoreSupplyForSpace });
+
+      await postHandler(
+        createRouteContextMock({ manageSecurity: true }),
+        restoreWithoutManagedUpdate(),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(restoreSupplyForSpace).not.toHaveBeenCalled();
+    });
+  });
 });

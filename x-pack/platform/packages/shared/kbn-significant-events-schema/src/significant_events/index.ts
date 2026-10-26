@@ -7,8 +7,19 @@
 
 export {
   detectionSchema,
+  detectionSkipSchema,
+  skipMarkerSchema,
+  type SkipMarker,
+  PROBE_STATUSES,
+  type ProbeStatus,
+  type BaselineDecision,
+  SKIP_REASONS,
+  type SkipReason,
+  baselineObservationSchema,
+  type BaselineObservation,
   CHANGE_POINT_TYPES,
   type Detection,
+  type DetectionSkip,
   type ChangePointType,
 } from './detections';
 export {

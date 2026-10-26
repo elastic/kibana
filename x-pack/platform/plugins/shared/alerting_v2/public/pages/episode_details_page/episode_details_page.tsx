@@ -58,7 +58,11 @@ import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { getDiscoverHrefForRuleAndAlertTimestamp } from '../../utils/discover_href_for_alert';
+import {
+  canOpenDiscover,
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '../../utils/discover_href_for_alert';
 import {
   filterAlertActionsByPrivilege,
   ALERT_ACTIONS_PRIVILEGE,
@@ -223,19 +227,37 @@ export function EpisodeDetailsPage() {
               ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
               alertIsoTimestamp: ts,
             }),
+          getAlertEventsHistoryHref: ({ episodeId: selectedEpisodeId, episodeStart, spaceId }) =>
+            getDiscoverHrefForAlertEventsHistory({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              episodeId: selectedEpisodeId,
+              episodeStart,
+              spaceId,
+            }),
+          isAlertEventsHistoryAvailable: () =>
+            canOpenDiscover({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+            }),
         }),
         alertsCapability
       ),
     [services, queryClient, showRuleDependentUi, ruleState, alertsCapability]
   );
 
-  const applicableActions = useMemo(
-    () =>
-      episode
-        ? episodeActions.filter((action) => action.isCompatible({ episodes: [episode] }))
-        : [],
-    [episodeActions, episode]
-  );
+  const applicableActions = useMemo(() => {
+    if (!episode) {
+      return [];
+    }
+    const episodes = [episode];
+    return episodeActions.filter(
+      (action) =>
+        action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+    );
+  }, [episodeActions, episode]);
 
   const headerTabs = useMemo(
     () =>
@@ -468,6 +490,7 @@ export function EpisodeDetailsPage() {
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
                   <AlertEpisodeTimelineSection
                     episodeId={episodeId}
+                    seriesId={episode ? episode.series_id ?? null : undefined}
                     groupHash={groupHash}
                     services={{ data, spaces, userProfile: services.userProfile }}
                   />

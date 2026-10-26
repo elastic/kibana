@@ -1039,6 +1039,45 @@ steps:
         ${{ steps.forensic_analysis.output.structured_output.propose == true
           and steps.resolve_proposal_dispatch.output.failed > 0 }}
 
+  # Telemetry: the verdict this run reached, decided by this point and in the same order as the
+  # `mark_*` writes below. Before them because a write that fails the run would otherwise lose
+  # the report of the run that did the work; its retry then reports again, as reused.
+  - name: report_analysis_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: endpoint_analysis_completed
+      analysis_outcome: |-
+        {%- if steps.read_ki.output.hits.hits[0]._id == blank -%}
+        not_pending
+        {%- elsif steps.resolve_request.output.has_request != true -%}
+        invalid
+        {%- elsif steps.verify_investigation.output.metadata == null -%}
+        unreachable
+        {%- elsif steps.resolve_run_outcome.output.settled != true -%}
+        failed
+        {%- elsif steps.resolve_proposals.output.proposals_lost == true -%}
+        proposals_lost
+        {%- elsif steps.resolve_run_outcome.output.outcome_unrecorded == true -%}
+        failed
+        {%- elsif steps.resolve_host.output.host_name == blank -%}
+        no_host
+        {%- else -%}
+        processed
+        {%- endif -%}
+      reused_prior_assessment: "${{ steps.resolve_prior_assessment.output.count == 2 }}"
+      host_resolved: "${{ steps.resolve_host.output.host_name != blank }}"
+      agent_failed: "${{ steps.forensic_analysis.error != null }}"
+      timeline_found: "${{ steps.resolve_finding_presence.output.timeline == true }}"
+      iocs_found: "${{ steps.resolve_finding_presence.output.iocs == true }}"
+      findings_attached: "${{ steps.resolve_run_outcome.output.attached == true }}"
+      actions_recommended: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | size }}"
+      proposals_dispatched: "${{ steps.propose_actions.output.succeeded | default: 0 }}"
+      proposals_dispatch_failed: "${{ steps.resolve_proposal_dispatch.output.failed | default: 0 }}"
+      # Only a gate a proposal reached was asked to auto-approve.
+      auto_approve_requested: "${{ steps.resolve_autonomy.output.level == 'supervised' and steps.propose_actions.output.succeeded > 0 }}"
+
   # Retiring the indicator so that the sweep stops picking it up.
   # The verdict writes below do not continue on failure. Instead of swallowing
   # these failures and reporting a falsely-completed run, we fail the run. The

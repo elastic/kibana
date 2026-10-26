@@ -26,7 +26,6 @@ import { AssetCriticalityModal } from '../../../../entity_analytics/components/a
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { EntitySourceValue, TruncatedBadgeList } from './entity_source_value';
 import {
   getMaxCriticality,
@@ -40,14 +39,19 @@ const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   { defaultMessage: 'Additional watchlists' }
 );
 
+const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.entityIdsOverflowTitle',
+  { defaultMessage: 'Additional entity IDs' }
+);
+
 interface EntitySummaryGridProps {
-  /** Primary record: drives the Entity ID panel. */
+  /** Primary record: its id is the one shown (and copied) in the Entity ID panel. */
   entityRecord: Entity;
   /**
-   * Other records that resolve to `entityRecord` (its aliases). When non-empty, asset criticality
-   * shows the most severe level across the group, and data sources and watchlists are the union
-   * across the group; criticality is read-only in that mode because a single edit can't target
-   * all members.
+   * Other records that resolve to `entityRecord` (its aliases). When non-empty, the Entity ID panel
+   * lists the alias ids behind a `+N` badge, asset criticality shows the most severe level across
+   * the group, and data sources and watchlists are the union across the group; criticality is
+   * read-only in that mode because a single edit can't target all members.
    */
   aliasRecords?: readonly Entity[];
   criticalityLevel?: CriticalityLevelWithUnassigned | null;
@@ -62,6 +66,7 @@ export const EntitySummaryGrid = memo(
     const isGroupView = isEntityGroupView(aliasRecords);
 
     const groupRecords = isGroupView ? [entityRecord, ...aliasRecords] : [entityRecord];
+    const aliasEntityIds = isGroupView ? getAliasEntityIds(aliasRecords, entityId) : [];
     const dataSources = getUnionEntitySources(groupRecords);
     const watchlistIds = getUnionWatchlistIds(groupRecords);
     const displayedCriticality = isGroupView ? getMaxCriticality(groupRecords) : criticalityLevel;
@@ -78,61 +83,14 @@ export const EntitySummaryGrid = memo(
               { defaultMessage: 'Entity ID' }
             )}
           >
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-              <EuiFlexItem className="eui-textTruncate">
-                <EuiToolTip content={entityId}>
-                  <EuiText size="xs" className="eui-textTruncate" tabIndex={0}>
-                    {entityId ?? getEmptyTagValue()}
-                  </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
-              {entityId && (
-                <EuiFlexItem
-                  grow={false}
-                  // setting height to 0 and overflow to visible to avoid the button from pushing the text down
-                  // translateY(-50%) is used on EuiCopy to center the button vertically
-                  css={css`
-                    height: 0;
-                    overflow: visible;
-                    align-self: center;
-                  `}
-                >
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
-                      { defaultMessage: 'Copy to clipboard' }
-                    )}
-                    disableScreenReaderOutput
-                  >
-                    <EuiCopy textToCopy={entityId}>
-                      {(copy) => (
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
-                            { defaultMessage: 'Copy to clipboard' }
-                          )}
-                          disableScreenReaderOutput
-                        >
-                          <EuiButtonIcon
-                            iconType="copy"
-                            aria-label={i18n.translate(
-                              'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
-                              { defaultMessage: 'Copy to clipboard' }
-                            )}
-                            onClick={copy}
-                            iconSize="s"
-                            color="text"
-                            css={css`
-                              transform: translateY(-50%);
-                            `}
-                          />
-                        </EuiToolTip>
-                      )}
-                    </EuiCopy>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <TruncatedBadgeList
+              values={entityId ? [entityId, ...aliasEntityIds] : []}
+              overflowTooltipTitle={ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE}
+              showValueTooltip
+              trailing={entityId ? <CopyEntityIdButton entityId={entityId} /> : undefined}
+              data-test-subj="entityIdCell"
+              textSize="xs"
+            />
           </SummaryPanel>
           <SummaryPanel
             label={i18n.translate(
@@ -181,6 +139,54 @@ export const EntitySummaryGrid = memo(
   }
 );
 EntitySummaryGrid.displayName = 'EntitySummaryGrid';
+
+/** Distinct `entity.id`s of the aliases, in the order they were loaded, never repeating the target's. */
+const getAliasEntityIds = (
+  aliasRecords: readonly Entity[],
+  targetEntityId: string | undefined
+): string[] =>
+  Array.from(
+    new Set(
+      aliasRecords
+        .map((record) => record.entity?.id)
+        .filter((id): id is string => !!id && id !== targetEntityId)
+    )
+  );
+
+const COPY_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
+  { defaultMessage: 'Copy to clipboard' }
+);
+
+const CopyEntityIdButton = memo(({ entityId }: { entityId: string }) => (
+  // Height 0 with visible overflow keeps the button from pushing the text down; the button is
+  // translated up by half its height to center it vertically.
+  <div
+    css={css`
+      height: 0;
+      overflow: visible;
+      align-self: center;
+    `}
+  >
+    <EuiCopy textToCopy={entityId}>
+      {(copy) => (
+        <EuiToolTip content={COPY_TO_CLIPBOARD} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="copy"
+            aria-label={COPY_TO_CLIPBOARD}
+            onClick={copy}
+            iconSize="s"
+            color="text"
+            css={css`
+              transform: translateY(-50%);
+            `}
+          />
+        </EuiToolTip>
+      )}
+    </EuiCopy>
+  </div>
+));
+CopyEntityIdButton.displayName = 'CopyEntityIdButton';
 
 const SummaryPanel = memo(({ label, children }: { label: string; children: React.ReactNode }) => (
   <EuiPanel

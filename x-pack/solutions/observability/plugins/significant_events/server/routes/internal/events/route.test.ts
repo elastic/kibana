@@ -142,6 +142,9 @@ describe('GET /internal/significant_events/events', () => {
           source_id: 'logs.test',
           topology_feature_id: 'checkout-service',
           search: 'noise',
+          investigation_state: 'in_progress',
+          sort_field: 'severity',
+          sort_order: 'asc',
           page: 2,
           perPage: 10,
         },
@@ -163,6 +166,9 @@ describe('GET /internal/significant_events/events', () => {
       sourceIds: ['logs.test'],
       topologyFeatureIds: ['checkout-service'],
       search: 'noise',
+      investigationStates: ['in_progress'],
+      sortField: 'severity',
+      sortOrder: 'asc',
       page: 2,
       perPage: 10,
     });
@@ -239,12 +245,126 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
         getEventSearchClient: () => ({
           findByEventId: jest.fn().mockResolvedValue({ hits: [firstVersion, latestVersion] }),
         }),
-        getDetectionClient: () => ({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: [] }),
+          findSkippedForEvent: jest.fn().mockResolvedValue({ hits: [], truncated: false }),
+        }),
       }),
       server: {},
     } as never);
 
     expect(response.events).toEqual([firstVersion, latestVersion]);
+  });
+});
+
+describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detections', () => {
+  const detectionSignal = (ruleUuid: string, detectionId: string) => ({
+    type: 'detection' as const,
+    source_id: 'logs.test',
+    description: 'description',
+    verdict: 'confirms' as const,
+    metadata: {
+      rule_uuid: ruleUuid,
+      detection_id: detectionId,
+      rule_name: `Rule ${ruleUuid}`,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+  const event = {
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    event_uuid: 'version-1',
+    event_id: 'event-1',
+    status: 'open' as const,
+    source_ids: ['logs.test'],
+    title: 'Test event',
+    summary: 'Test summary',
+    severity: '40-medium' as const,
+    confidence: 0.8,
+    signals: [detectionSignal('rule-1', 'detection-1')],
+  };
+  const stored = (detectionId: string, overrides: Record<string, unknown> = {}) => ({
+    detection_id: detectionId,
+    rule_uuid: 'rule-1',
+    rule_name: 'Rule 1',
+    source_id: 'logs.test',
+    change_point_type: 'spike',
+    '@timestamp': '2026-01-01T01:00:00.000Z',
+    processed: true,
+    ...overrides,
+  });
+
+  const run = async ({
+    embedded,
+    skipped,
+    truncated = false,
+  }: {
+    embedded: Array<Record<string, unknown>>;
+    skipped: Array<Record<string, unknown>>;
+    truncated?: boolean;
+  }) => {
+    const findSkippedForEvent = jest.fn().mockResolvedValue({ hits: skipped, truncated });
+    const response = await lifecycleRoute.handler({
+      params: { path: { id: event.event_id } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits: [event] }),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: embedded }),
+          findSkippedForEvent,
+        }),
+      }),
+      server: {},
+    } as never);
+    return { response, findSkippedForEvent };
+  };
+
+  const skip = {
+    reason: 'still_breaching',
+    event_id: event.event_id,
+    probe_status: 'ok',
+    checked_at: '2026-01-01T01:00:05.000Z',
+  };
+
+  it('adds the detections the classifier skipped on the strength of this event, with why', async () => {
+    const { response, findSkippedForEvent } = await run({
+      embedded: [stored('detection-1')],
+      skipped: [stored('detection-2', { skip })],
+    });
+
+    expect(findSkippedForEvent).toHaveBeenCalledWith(event.event_id);
+    expect(response.detections.map(({ detection_id: id }) => id)).toEqual([
+      'detection-1',
+      'detection-2',
+    ]);
+    expect(response.detections[1]).toMatchObject({ rule_uuid: 'rule-1', skip });
+    expect(response.detections[0]).not.toHaveProperty('skip');
+    expect(response).not.toHaveProperty('skipped_truncated');
+  });
+
+  it('does not list a detection twice', async () => {
+    const { response } = await run({
+      embedded: [stored('detection-1')],
+      skipped: [stored('detection-1', { skip }), stored('detection-4', { skip })],
+    });
+
+    expect(response.detections.map(({ detection_id: id }) => id)).toEqual([
+      'detection-1',
+      'detection-4',
+    ]);
+  });
+
+  it('says when the event has more skipped detections than it returns', async () => {
+    const { response } = await run({
+      embedded: [],
+      skipped: [stored('detection-2', { skip })],
+      truncated: true,
+    });
+
+    expect(response.skipped_truncated).toBe(true);
   });
 });
 

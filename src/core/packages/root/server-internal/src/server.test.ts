@@ -49,7 +49,6 @@ import {
   ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
-  markExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import { createCoreUiamService } from '@kbn/core-security-server-internal';
@@ -534,15 +533,18 @@ describe('self client UIAM attestation getter', () => {
     expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 
-  it('does not attest a user-created (external) UIAM credential', async () => {
+  // The security plugin's `isExternalApiKey` checks the external marker on fake requests (see
+  // `UiamAPIKeysType.isExternalApiKey`), so this test only covers the delegation.
+  it('does not attest a fake request carrying a user-created (external) UIAM API key', async () => {
     const uiam = getUiamMock();
+    uiam.isExternalApiKey.mockReturnValueOnce(true);
     const getAttestation = await startServerAndGetAttestationGetter();
 
     const request = httpServerMock.createFakeKibanaRequest({
-      headers: { authorization: 'Bearer essu_external' },
+      headers: { authorization: 'ApiKey essu_external' },
     });
-    markExternalUiamCredential(request);
-    expect(getAttestation(request, 'Bearer essu_external')).toBeUndefined();
+    expect(getAttestation(request, 'ApiKey essu_external')).toBeUndefined();
+    expect(uiam.isExternalApiKey).toHaveBeenCalledWith(request);
     expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 

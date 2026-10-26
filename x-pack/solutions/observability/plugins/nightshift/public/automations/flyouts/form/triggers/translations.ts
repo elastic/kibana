@@ -66,21 +66,9 @@ export const triggerLabels = {
   changesTo: i18n.translate('xpack.nightshift.automations.flyout.changesTo', {
     defaultMessage: 'changes to',
   }),
+  active: i18n.translate('xpack.nightshift.automations.activeOption', { defaultMessage: 'Active' }),
   anyRule: i18n.translate('xpack.nightshift.automations.flyout.anyRule', {
     defaultMessage: 'Any rule',
-  }),
-  anyStatus: i18n.translate('xpack.nightshift.automations.anyStatusOption', {
-    defaultMessage: 'Any status',
-  }),
-  active: i18n.translate('xpack.nightshift.automations.activeOption', { defaultMessage: 'Active' }),
-  activeHelp: i18n.translate('xpack.nightshift.automations.flyout.activeHelp', {
-    defaultMessage: 'Rule conditions are currently met',
-  }),
-  recovered: i18n.translate('xpack.nightshift.automations.recoveredOption', {
-    defaultMessage: 'Recovered',
-  }),
-  recoveredHelp: i18n.translate('xpack.nightshift.automations.flyout.recoveredHelp', {
-    defaultMessage: 'Rule conditions are no longer met',
   }),
   everyLead: i18n.translate('xpack.nightshift.automations.flyout.everyLead', {
     defaultMessage: 'Every',

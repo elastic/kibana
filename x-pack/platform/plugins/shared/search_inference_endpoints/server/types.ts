@@ -25,6 +25,12 @@ export interface InferenceFeatureConfig {
   isTechPreview?: boolean;
   isBeta?: boolean;
   ignoreGlobalDefault?: boolean;
+  /**
+   * When true, the feature's model list contains only endpoints whose
+   * `capabilities.templates.policy` is `required`. Other features keep those
+   * endpoints hidden.
+   */
+  allowTemplateRequiredModels?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;

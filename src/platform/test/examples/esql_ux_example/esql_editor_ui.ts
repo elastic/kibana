@@ -11,6 +11,12 @@ import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Migration recommendation: MOVE ALL TO SCOUT; delete nothing. The Jest tests in kbn-esql-editor mock
+ * Monaco actions, QueryStringInput and validation, so none of them exercises the real wiring these
+ * tests check. Move to the ES|QL / Discover Scout suite, merging only where flows are identical.
+ */
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -24,6 +30,15 @@ export default function ({ getService }: FtrProviderContext) {
       await esql.setEsqlEditorQuery('');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (its own short test).
+     * Only the CMD+I keybinding is covered in Jest today (custom_editor_commands.test.ts); mocking the
+     * button, the Monaco model and the prettifier is more setup than one end-to-end check with the real
+     * editor.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
+     */
     it('should prettify query when clicking the format button', async () => {
       await esql.setEsqlEditorQuery(
         'FROM logstash-* | WHERE bytes > 200 | STATS count = COUNT(*) BY geo.dest'
@@ -37,6 +52,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (its own short test). editor_visor.test.tsx covers the
+     * query building, but it mocks QueryStringInput and calls onSubmit directly; it does not cover typing
+     * in the real input, the submit button and the editor update.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
+     */
     it('should search with visor using the editor query source', async () => {
       await esql.setEsqlEditorQuery('FROM logstash-*');
       await esql.toggleQuickSearchVisor(true);
@@ -56,6 +79,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (its own short test). custom_editor_commands.test.ts
+     * calls the registered Monaco action's run() on a mocked editor; it does not prove that a real
+     * Ctrl/Cmd+Enter keypress reaches it. Assert on the submitted query/results in Discover rather than
+     * the example plugin callout.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
+     */
     it('should submit query with Ctrl+Enter keyboard shortcut', async () => {
       await esql.setEsqlEditorQuery('FROM logstash-* | LIMIT 10');
 
@@ -69,6 +101,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (together with the validation test below, as one
+     * footer error flow). Jest (esql_editor.test.tsx) covers the popover but mocks validate; keep an
+     * end-to-end check with the real validator.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
+     */
     it('should show error details when clicking error button in footer', async () => {
       await esql.setEsqlEditorQuery('FROM logstash-* | WHERE wrong_field');
 
@@ -86,6 +126,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (merge with the error details test above). Keep the
+     * valid -> invalid -> fixed transitions for the footer error button; the eight steps can be trimmed
+     * to the distinct ones (e.g. missing operand and mistyped command), since validity of each
+     * query is covered by the kbn-esql-language tests.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
+     */
     it('should update validation when modifying query', async () => {
       // Step 1: Build a complete query
       await esql.setEsqlEditorQuery('FROM logstash-* | WHERE bytes > 100 | STATS count = COUNT(*)');

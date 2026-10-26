@@ -8,6 +8,7 @@
 import { chunk } from 'lodash';
 import Boom from '@hapi/boom';
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
@@ -176,7 +177,7 @@ export class AttachmentGetter {
   private toAttachmentForDeletion(
     so: SavedObject<AttachmentPersistedAttributes> | SavedObject<UnifiedAttachmentAttributes>
   ): AttachmentForDeletion {
-    const { id, type, references } = so;
+    const { id, type, references, version } = so;
     const attributes = this.injectForDeletion(so);
     const { owner: rawOwner }: Record<string, unknown> = attributes;
     const attachment = {
@@ -185,6 +186,7 @@ export class AttachmentGetter {
       owner: typeof rawOwner === 'string' && rawOwner.length > 0 ? rawOwner : undefined,
       references,
       fileId: getStoredFileId(attributes),
+      version,
     };
 
     try {
@@ -1039,6 +1041,47 @@ export class AttachmentGetter {
       return fileAttachments;
     } catch (error) {
       this.context.log.error(`Error retrieving file attachments file ids: ${fileIds}: ${error}`);
+      throw error;
+    }
+  }
+
+  /** Finds the attachments of the case that match the filter, read for deletion. */
+  public async getCaseAttachmentsForDeletion({
+    caseId,
+    filter,
+  }: {
+    caseId: string;
+    filter?: KueryNode;
+  }): Promise<AttachmentForDeletion[]> {
+    try {
+      this.context.log.debug(`Attempting to find attachments for deletion on case ${caseId}`);
+
+      const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<
+        AttachmentPersistedAttributes | UnifiedAttachmentAttributes
+      >({
+        type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        filter,
+        perPage: MAX_DOCS_PER_PAGE,
+      });
+
+      const attachments: AttachmentForDeletion[] = [];
+
+      for await (const { saved_objects: savedObjects } of finder.find()) {
+        attachments.push(
+          ...savedObjects.map((so) =>
+            this.toAttachmentForDeletion(so as SavedObject<AttachmentPersistedAttributes>)
+          )
+        );
+      }
+
+      return attachments;
+    } catch (error) {
+      this.context.log.error(
+        `Error retrieving attachments for deletion on case ${caseId}: ${error}`
+      );
       throw error;
     }
   }

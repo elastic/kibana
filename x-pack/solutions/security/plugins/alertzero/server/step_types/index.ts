@@ -22,6 +22,8 @@ import {
   type SummarizeInvestigationStepDependencies,
 } from './summarize_investigation';
 import type { PackageReportStepDependencies } from './package_report/package_report_step';
+import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
+import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
 
 export const registerStepDefinitions = ({
   workflowsExtensions,
@@ -72,3 +74,15 @@ export const registerStepDefinitions = ({
 };
 
 export { getPackageReportStepDefinition } from './package_report';
+
+export { OPT_IN_TIMEOUT_MS as REPORT_STEP_OPT_IN_TIMEOUT_MS } from './report_worker_outcome/report_worker_outcome_step';
+
+/** Registers the `alertzero.reportWorkerOutcome` step during plugin setup. */
+export const registerAlertZeroStepDefinitions = ({
+  workflowsExtensions,
+  ...deps
+}: ReportWorkerOutcomeStepDeps & {
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+}): void => {
+  workflowsExtensions.registerStepDefinition(getReportWorkerOutcomeStepDefinition(deps));
+};

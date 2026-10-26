@@ -197,6 +197,16 @@ export const AlertEpisodeDetailsFlyout = ({
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
     [actions, episodes]
   );
+  const menuActions = useMemo(
+    () =>
+      actions && episodes.length
+        ? actions.filter(
+            (action) =>
+              action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+          )
+        : [],
+    [actions, episodes]
+  );
 
   const initialWidth = useAlertDetailsFlyoutWidth();
 
@@ -520,7 +530,8 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              groupHash={groupHash}
+              seriesId={episode ? episode.series_id ?? null : undefined}
+              groupHash={episode?.group_hash}
               services={services}
             />
           </FlyoutTemplate.Body.TabPanel>
@@ -599,7 +610,7 @@ export const AlertEpisodeDetailsFlyout = ({
           anchor={menuAnchorRef.current}
           isOpen={isMenuOpen}
           onClose={() => setIsMenuOpen(false)}
-          actions={compatibleActions}
+          actions={menuActions}
           episodes={episodes}
           viewDetailsHref={getEpisodeDetailsHref(episodeId)}
           onSuccess={invalidateEpisodeQueries}

@@ -10,6 +10,7 @@ export type {
   ChatCompleteAPI,
   ChatCompleteAPIResponse,
   ChatCompleteOptions,
+  ChatCompleteTemplate,
   ChatCompleteCacheControl,
   FunctionCallingMode,
   ChatCompleteStreamResponse,
@@ -18,6 +19,7 @@ export type {
 } from './api';
 export type { ChatCompletionReasoning, ChatCompletionReasoningEffort } from './reasoning';
 export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
+export { parseTemplateJson } from './parse_template_json';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,

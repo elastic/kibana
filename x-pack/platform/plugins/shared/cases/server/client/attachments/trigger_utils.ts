@@ -35,6 +35,36 @@ const toIdsAndIndices = (infos: AlertInfo[]) => ({
   indices: infos.map(({ index }) => index),
 });
 
+interface AttachmentsDeletedEventArgs {
+  caseId: string;
+  owner: string;
+  attachmentType: string;
+  /** The deleted attachments. */
+  attachmentIds: string[];
+  /** The removed fields, read for the alert/event IDs; can include ids removed from kept attachments. */
+  removedAttributes: AttachmentAttributesV2[];
+}
+
+/**
+ * Emits one attachmentsDeleted event, including the referenced alert/event IDs.
+ */
+export function emitAttachmentsDeletedEvent(
+  clientArgs: CasesClientArgs,
+  { caseId, owner, attachmentType, attachmentIds, removedAttributes }: AttachmentsDeletedEventArgs
+): void {
+  const alerts = toIdsAndIndices(getAlertInfoFromComments(removedAttributes));
+  const events = toIdsAndIndices(getEventInfoFromComments(removedAttributes));
+
+  clientArgs.casesEventBus?.emitAttachmentsDeleted(clientArgs.request, {
+    caseId,
+    attachmentIds,
+    attachmentType,
+    owner: owner as Owner,
+    ...(alerts.ids.length > 0 ? { alertIds: alerts.ids, alertIndices: alerts.indices } : {}),
+    ...(events.ids.length > 0 ? { eventIds: events.ids, eventIndices: events.indices } : {}),
+  });
+}
+
 /**
  * Emits one attachmentsDeleted event per attachment type, including the referenced alert/event IDs.
  */
@@ -52,17 +82,14 @@ export function emitAttachmentsDeletedEvents(
   }
 
   for (const [attachmentType, attachmentsOfType] of attachmentsByType) {
-    const attributes = attachmentsOfType.map((attachment) => attachment.attributes);
-    const alerts = toIdsAndIndices(getAlertInfoFromComments(attributes));
-    const events = toIdsAndIndices(getEventInfoFromComments(attributes));
+    const removedAttributes = attachmentsOfType.map((attachment) => attachment.attributes);
 
-    clientArgs.casesEventBus?.emitAttachmentsDeleted(clientArgs.request, {
+    emitAttachmentsDeletedEvent(clientArgs, {
       caseId,
-      attachmentIds: attachmentsOfType.map(({ id }) => id),
+      owner: removedAttributes[0].owner,
       attachmentType,
-      owner: attributes[0].owner as Owner,
-      ...(alerts.ids.length > 0 ? { alertIds: alerts.ids, alertIndices: alerts.indices } : {}),
-      ...(events.ids.length > 0 ? { eventIds: events.ids, eventIndices: events.indices } : {}),
+      attachmentIds: attachmentsOfType.map(({ id }) => id),
+      removedAttributes,
     });
   }
 }

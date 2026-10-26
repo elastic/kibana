@@ -1,5 +1,5 @@
 {
-  "sha1": "ff924a25246f2de08b60e9d115df1d8091c3f862",
+  "sha1": "2912059093413b2d13d4043b631770ccea98d75e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -46,8 +46,8 @@
       }
     },
     {
-      "id": "a85e30db18dd980-94855b8ec67dddd",
-      "title": "Stack Management — data section index_management_user sees index_management and transform in the data section",
+      "id": "a85e30db18dd980-63340f362f8cde5",
+      "title": "Stack Management — data section index_management_user sees index_management, esql_views, and transform in the data section",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

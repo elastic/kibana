@@ -22,7 +22,7 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - xy, heatmap, map, table, pie, treemap, mosaic, tag cloud, and waffle panels have one
   - xy axis titles are hidden (`axis.<x|y>.title.visible: false`)
 - **Dashboard Chart Styling** (`CODE`), checks:
-  - area series use `styling.areas.fill: 'gradient'`
+  - area series don't set `styling.areas.fill: 'solid'`
   - xy legends sit outside at the bottom with `visibility` set, because unset hides the legend
   - pie panels leave `legend` to Lens
   - metrics color the value, never the background, and set a primary metric's `apply_color_to` only together with its `color`

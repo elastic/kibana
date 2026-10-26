@@ -225,7 +225,9 @@ export const buildCandidateQuery = async (
       examined.push(id);
       if (
         openProposalConversationIds &&
-        openProposalConversationIds.has(buildHuntInvestigationConversationId(id))
+        openProposalConversationIds.has(
+          buildHuntInvestigationConversationId({ spaceId, reportId: id })
+        )
       ) {
         skipped.push({ id, reason: 'open_proposal' });
         continue;

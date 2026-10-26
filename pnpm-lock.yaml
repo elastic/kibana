@@ -405,8 +405,8 @@ importers:
         specifier: 4.33.0
         version: 4.33.0
       '@elastic/eui':
-        specifier: 123.1.0
-        version: 123.1.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
+        specifier: 123.2.0
+        version: 123.2.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
       '@elastic/eui-illustrations':
         specifier: 1.1.0
         version: 1.1.0
@@ -2069,6 +2069,9 @@ importers:
       '@kbn/entity-access-control-ui':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-entity-access-control-ui
+      '@kbn/entity-inventory-app-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/entity_inventory_app
       '@kbn/entity-inventory-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/entity_inventory
@@ -2114,6 +2117,9 @@ importers:
       '@kbn/esql-composer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-esql-composer
+      '@kbn/esql-controls-utils':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/esql/kbn-esql-controls-utils
       '@kbn/esql-datagrid':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql_datagrid
@@ -5089,8 +5095,8 @@ importers:
         specifier: 3.2.0
         version: 3.2.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@elastic/eui-test-helpers':
-        specifier: 2.0.0
-        version: 2.0.0(@playwright/test@1.63.0)
+        specifier: 2.1.0
+        version: 2.1.0(@playwright/test@1.63.0)
       '@elastic/eui-theme-common':
         specifier: 10.1.0
         version: 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -5649,6 +5655,9 @@ importers:
       '@kbn/inspect-component-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/inspect_component
+      '@kbn/jest':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-jest
       '@kbn/jest-benchmarks':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-jest-benchmarks
@@ -6564,9 +6573,6 @@ importers:
       eslint-plugin-testing-library:
         specifier: 7.1.1
         version: 7.1.1(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
-      eslint-traverse:
-        specifier: 1.0.0
-        version: 1.0.0
       exit-hook:
         specifier: 5.1.0
         version: 5.1.0
@@ -6591,9 +6597,6 @@ importers:
       globby:
         specifier: 16.2.4
         version: 16.2.4
-      gulp-brotli:
-        specifier: 3.0.0
-        version: 3.0.0
       has-ansi:
         specifier: 3.0.0
         version: 3.0.0
@@ -6810,9 +6813,6 @@ importers:
       table:
         specifier: 6.9.0
         version: 6.9.0
-      tar-fs:
-        specifier: 3.1.3
-        version: 3.1.3
       terser-webpack-plugin:
         specifier: 5.3.17
         version: 5.3.17(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack@5.96.1)
@@ -7910,6 +7910,8 @@ importers:
 
   src/platform/packages/shared/esql/kbn-esql-browser: {}
 
+  src/platform/packages/shared/esql/kbn-esql-controls-utils: {}
+
   src/platform/packages/shared/esql/kbn-esql-language: {}
 
   src/platform/packages/shared/esql/kbn-esql-server-utils: {}
@@ -8141,6 +8143,8 @@ importers:
   src/platform/packages/shared/kbn-interpreter: {}
 
   src/platform/packages/shared/kbn-io-ts-utils: {}
+
+  src/platform/packages/shared/kbn-jest: {}
 
   src/platform/packages/shared/kbn-jest-benchmarks: {}
 
@@ -9634,6 +9638,8 @@ importers:
 
   x-pack/solutions/observability/plugins/entity_inventory: {}
 
+  x-pack/solutions/observability/plugins/entity_inventory_app: {}
+
   x-pack/solutions/observability/plugins/exploratory_view: {}
 
   x-pack/solutions/observability/plugins/infra: {}
@@ -11115,8 +11121,8 @@ packages:
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
 
-  '@elastic/eui-test-helpers@2.0.0':
-    resolution: {integrity: sha512-qF2td/xFXOmG3eRe48wR8ddhq7WEhgSjAGtyKxEJVkG5XCgVK8XJ8TRcuAHZbnyJ40qEp5IN2dQIhnopzjqQ+g==}
+  '@elastic/eui-test-helpers@2.1.0':
+    resolution: {integrity: sha512-fBgjT8wiuBpT9OJRydAbjYUhcOb05iKzyQDL4E1ObGAb1tc+2edm9ZPvPYsuTRWXxNN1I51xyWJibJu6fTc2GQ==}
     peerDependencies:
       '@playwright/test': ^1.50.0
     peerDependenciesMeta:
@@ -11133,8 +11139,8 @@ packages:
       react: ^17.0 || ^18.0
       react-dom: ^17.0 || ^18.0
 
-  '@elastic/eui@123.1.0':
-    resolution: {integrity: sha512-DndrCzhyrCxcfTqK13/2y7g8bFiBGLQIb/DIrg8AEKbjwrQo6c4WO0DU6AcZu+/1xyBpj4asmNR4MBSI/GDAlA==}
+  '@elastic/eui@123.2.0':
+    resolution: {integrity: sha512-0R7zjfRB7/bCt9gRbKaLGXmba59nTZ3X//rM5TiSjy5W8ERf1Jbkjy0XtQBbJ0F3/K3Fh4wXxJ224j73JiKWfA==}
     engines: {node: 16.x || 18.x || >=20.x}
     peerDependencies:
       '@elastic/datemath': ^5.0.2
@@ -13434,6 +13440,7 @@ packages:
   '@opentelemetry/propagator-jaeger@2.11.0':
     resolution: {integrity: sha512-RUOqgoIqXOPQTOhpBrs07Y8sBlxVoLY5Fka6ueZ0prW+k6fWQsba/nHDY4gm+gmfuwtRqbX5Y9YKhDvktjbIqQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Package no longer supported. See https://github.com/open-telemetry/opentelemetry-js/pull/7077
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -13504,12 +13511,14 @@ packages:
   '@opentelemetry/sdk-trace-base@2.11.0':
     resolution: {integrity: sha512-H19x/TX/LZdqiYOjM7fqtSxwlplC5pgelavqbQdHbhdq0q/AI/TGkM2dfGuuynTXmJPeF2HoZVoPDu+TGoW78A==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-node@2.11.0':
     resolution: {integrity: sha512-CuvCMJmZxswhNLlM2LfuLOW3h3fZujA4hsG4B+Sz4dX2zvaXO8Ng74cnDHWD64gLszTlhiG3c0iNUjj4g+0/sA==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -16193,10 +16202,6 @@ packages:
   anser@2.3.5:
     resolution: {integrity: sha512-vcZjxvvVoxTeR5XBNJB38oTu/7eDCZlwdz32N1eNgpyPF7j/Z7Idf+CUwQOkKKpJ7RJyjxgLHCM7vdIK0iCNMQ==}
 
-  ansi-colors@1.1.0:
-    resolution: {integrity: sha512-SFKX67auSNoVR38N3L+nvsPjOE0bybKTYbkf5tRvushrAPQ9V75huw0ZxBkKVeRU9kqH3d6HA4xTckbwZ4ixmA==}
-    engines: {node: '>=0.10.0'}
-
   ansi-colors@4.1.3:
     resolution: {integrity: sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw==}
     engines: {node: '>=6'}
@@ -16249,10 +16254,6 @@ packages:
   ansi-styles@6.2.3:
     resolution: {integrity: sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg==}
     engines: {node: '>=12'}
-
-  ansi-wrap@0.1.0:
-    resolution: {integrity: sha512-ZyznvL8k/FZeQHr2T6LzcJ/+vBApDnMNZvfVFy3At0knswWd6rJ3/0Hhmpu8oqa6C92npmozs890sX9Dl6q+Qw==}
-    engines: {node: '>=0.10.0'}
 
   ansis@3.17.0:
     resolution: {integrity: sha512-0qWUglt9JEqLFr3w1I1pbrChn1grhaiAR2ocX1PP/flRmxgtwTzPFFFnfIlD6aMOLQZgSuCRlidD70lvx8yhzg==}
@@ -16310,14 +16311,6 @@ packages:
   aria-query@5.3.2:
     resolution: {integrity: sha512-COROpnaoap1E2F000S62r6A60uHZnmlvomhfyT2DlTcrY1OrBKn2UhH7qn5wTC9zMvD0AY7csdPSNwKP+7WiQw==}
     engines: {node: '>= 0.4'}
-
-  arr-diff@4.0.0:
-    resolution: {integrity: sha512-YVIQ82gZPGBebQV/a8dar4AitzCQs0jjXwMPZllpXMaGjXPYVUawSxQrRsjhjupyVxEvbHgUmIhKVlND+j02kA==}
-    engines: {node: '>=0.10.0'}
-
-  arr-union@3.1.0:
-    resolution: {integrity: sha512-sKpyeERZ02v1FeCZT8lrfJq5u6goHCtpTAzPwJYe7c8SPFOboNjNg1vz2L4VTn9T4PQxEx13TbXLmYUcS6Ug7Q==}
-    engines: {node: '>=0.10.0'}
 
   array-buffer-byte-length@1.0.2:
     resolution: {integrity: sha512-LHE+8BuR7RYGDKvnrmcuSq3tDcKv9OFEXQt/HpbZhY7V6h0zlUXutnAD82GiFx9rdieCMjkvtcsPqBwgUl1Iiw==}
@@ -16400,10 +16393,6 @@ packages:
   assertion-error@2.0.1:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
-
-  assign-symbols@1.0.0:
-    resolution: {integrity: sha512-Q+JC7Whu8HhmTdBph/Tq59IoRtoy6KAm5zzPv00WdujX82lbAL8K7WVjne7vdCsAmbF4AYaDOPyO3k0kl8qIrw==}
-    engines: {node: '>=0.10.0'}
 
   ast-module-types@6.0.2:
     resolution: {integrity: sha512-6KuK/7nZ/2Qh7sGuVEiwxjCxzTY2Pdb5mTo5z1e6/J8BA0tvjR7G8vQJKrQMTqwmnA3UPEyKIFX4YUS1DO1Hvw==}
@@ -18728,9 +18717,6 @@ packages:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  eslint-traverse@1.0.0:
-    resolution: {integrity: sha512-bSp37rQs93LF8rZ409EI369DGCI4tELbFVmFNxI6QbuveS7VRxYVyUhwDafKN/enMyUh88HQQ7ZoGUHtPuGdcw==}
-
   eslint-utils@3.0.0:
     resolution: {integrity: sha512-uuQC43IGctw68pJA1RgbQS8/NP7rch6Cwd4j3ZBtgo4/8Flj4eGE7ZYSZRN3iq5pVUv6GPdW5Z1RFleo84uLDA==}
     engines: {node: ^10.0.0 || ^12.0.0 || >= 14.0.0}
@@ -18879,10 +18865,6 @@ packages:
 
   exsolve@1.1.1:
     resolution: {integrity: sha512-9U/jZUgjnSGyntRr6y5Muu1MJcwFl6kPu7k8qLF0IMNfLqvw0NZ4nnVDq0RVoZ0RvCyumib4Ez3KYrVfilrw+g==}
-
-  extend-shallow@3.0.2:
-    resolution: {integrity: sha512-BwY5b5Ql4+qZoefgMj2NUmx+tehVTH/Kf4k1ZEtOHNFcm2wSxMRo992l6X3TIgni2eZVTZ85xMOjF31fwZAj6Q==}
-    engines: {node: '>=0.10.0'}
 
   extend@3.0.2:
     resolution: {integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==}
@@ -19485,10 +19467,6 @@ packages:
   graphql@17.0.2:
     resolution: {integrity: sha512-FRWbddMxfkjiB7z+aQDWIR+E34xo9I8c9mtK2RPv8PmMzKRvrdsreHL/Ui/TmwHJfhHChEtsFPyMHKI+xuarQQ==}
     engines: {node: ^22.0.0 || ^24.0.0 || ^25.0.0 || >=26.0.0}
-
-  gulp-brotli@3.0.0:
-    resolution: {integrity: sha512-AkGR+FRn4Nrf9Ocx8/WXgNNX+owk4FN4xU4kRrso41DWWd9v1KXO8EyG1cGcwt4364Ax68b7ANcP9Em+/RM2OQ==}
-    engines: {node: '>=10.17.0'}
 
   handle-thing@2.0.1:
     resolution: {integrity: sha512-9Qn4yBxelxoh2Ow62nP+Ka/kMnOXRi8BXnRaUwezLNhqelnN49xKz4F/dPP8OYLxLxq6JDtZb2i9XznUQbNPTg==}
@@ -20099,10 +20077,6 @@ packages:
   is-document.all@1.0.0:
     resolution: {integrity: sha512-+XSoyS05OdBbhFuELhgTCpFNHkpBOJqtsZfUFFpe5QTw+9Sjbh8zitxhQkYAo6wV7e1Vb8cAPvpCk9jGam/82g==}
     engines: {node: '>= 0.4'}
-
-  is-extendable@1.0.1:
-    resolution: {integrity: sha512-arnXMxT1hhoKo9k1LZdmlNyJdDDfy2v0fXjFlmok4+i8ul/6WlbVge9bhM74OpNPQPMGUToDtz+KXa1PneJxOA==}
-    engines: {node: '>=0.10.0'}
 
   is-extglob@2.1.1:
     resolution: {integrity: sha512-SbKbANkN603Vi4jEZv49LeVJMn4yGwsbzZworEoyEiutsN3nJYdbO36zfhGJ6QEDpOZIFkDtnq5JRxmvl3jsoQ==}
@@ -22595,10 +22569,6 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  plugin-error@1.0.1:
-    resolution: {integrity: sha512-L1zP0dk7vGweZME2i+EeakvUNqSrdiI3F91TwEoYiGrAfUXmVv6fJIq4g82PAXxNsWOp0J7ZqQy/3Szz0ajTxA==}
-    engines: {node: '>= 0.10'}
-
   plur@4.0.0:
     resolution: {integrity: sha512-4UGewrYgqDFw9vV6zNV+ADmPAUAfJPKtGvb/VdpQAx25X5f3xXdGdyOEVFwkl8Hl/tl7+xbeHqSEM+D5/TirUg==}
     engines: {node: '>=10'}
@@ -24676,9 +24646,6 @@ packages:
   tar-fs@2.1.5:
     resolution: {integrity: sha512-OboTd8mmMhZDNPV+UjQcK9yKAatXu2aJ+r1w4im1Otd4M4fl2hwvdoXUxIYHFTHWK/3y3FarBP70v3vwmGlOxw==}
 
-  tar-fs@3.1.3:
-    resolution: {integrity: sha512-/hU4AXnIdZu+Gvl1pk0oI5f5HxWsCJRtY2aFaJdk9VvyL48DWU6iU5WAIPG+wIi1YvWA6eTJvIviP/tMAZZNwQ==}
-
   tar-stream@2.2.0:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
     engines: {node: '>=6'}
@@ -24772,9 +24739,6 @@ packages:
 
   through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
-
-  through2@3.0.2:
-    resolution: {integrity: sha512-enaDQ4MUyP2W6ZyT6EsMzqBPZaM/avg8iuo+l2d3QCs0J+6RaqkHV/2/lOwDTueBHeJ/2LG9lrLW3d5rWPucuQ==}
 
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
@@ -27856,7 +27820,7 @@ snapshots:
 
   '@elastic/eui-illustrations@1.1.0': {}
 
-  '@elastic/eui-test-helpers@2.0.0(@playwright/test@1.63.0)':
+  '@elastic/eui-test-helpers@2.1.0(@playwright/test@1.63.0)':
     optionalDependencies:
       '@playwright/test': 1.63.0
 
@@ -27878,7 +27842,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@elastic/eui@123.1.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
+  '@elastic/eui@123.2.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
     dependencies:
       '@elastic/datemath': 5.0.3(moment@2.31.0)
       '@elastic/eui-theme-borealis': 8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -33653,10 +33617,6 @@ snapshots:
 
   anser@2.3.5: {}
 
-  ansi-colors@1.1.0:
-    dependencies:
-      ansi-wrap: 0.1.0
-
   ansi-colors@4.1.3: {}
 
   ansi-escapes@4.3.2:
@@ -33690,8 +33650,6 @@ snapshots:
   ansi-styles@5.2.0: {}
 
   ansi-styles@6.2.3: {}
-
-  ansi-wrap@0.1.0: {}
 
   ansis@3.17.0: {}
 
@@ -33763,10 +33721,6 @@ snapshots:
       dequal: 2.0.3
 
   aria-query@5.3.2: {}
-
-  arr-diff@4.0.0: {}
-
-  arr-union@3.1.0: {}
 
   array-buffer-byte-length@1.0.2:
     dependencies:
@@ -33886,8 +33840,6 @@ snapshots:
       util: 0.12.5
 
   assertion-error@2.0.1: {}
-
-  assign-symbols@1.0.0: {}
 
   ast-module-types@6.0.2: {}
 
@@ -36596,8 +36548,6 @@ snapshots:
       esrecurse: 4.3.0
       estraverse: 5.3.0
 
-  eslint-traverse@1.0.0: {}
-
   eslint-utils@3.0.0(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
       eslint: 8.57.0(supports-color@10.2.2)
@@ -36836,11 +36786,6 @@ snapshots:
       - supports-color
 
   exsolve@1.1.1: {}
-
-  extend-shallow@3.0.2:
-    dependencies:
-      assign-symbols: 1.0.0
-      is-extendable: 1.0.1
 
   extend@3.0.2: {}
 
@@ -37584,11 +37529,6 @@ snapshots:
   graphql@16.14.2: {}
 
   graphql@17.0.2: {}
-
-  gulp-brotli@3.0.0:
-    dependencies:
-      plugin-error: 1.0.1
-      through2: 3.0.2
 
   handle-thing@2.0.1:
     optional: true
@@ -38371,10 +38311,6 @@ snapshots:
   is-document.all@1.0.0:
     dependencies:
       call-bound: 1.0.4
-
-  is-extendable@1.0.1:
-    dependencies:
-      is-plain-object: 2.0.4
 
   is-extglob@2.1.1: {}
 
@@ -41466,13 +41402,6 @@ snapshots:
     dependencies:
       playwright-core: 1.63.0
 
-  plugin-error@1.0.1:
-    dependencies:
-      ansi-colors: 1.1.0
-      arr-diff: 4.0.0
-      arr-union: 3.1.0
-      extend-shallow: 3.0.2
-
   plur@4.0.0:
     dependencies:
       irregular-plurals: 3.5.0
@@ -43975,18 +43904,6 @@ snapshots:
       tar-stream: 2.2.0
     optional: true
 
-  tar-fs@3.1.3:
-    dependencies:
-      pump: 3.0.4
-      tar-stream: 3.2.1
-    optionalDependencies:
-      bare-fs: 4.8.2
-      bare-path: 3.1.2
-    transitivePeerDependencies:
-      - bare-abort-controller
-      - bare-buffer
-      - react-native-b4a
-
   tar-stream@2.2.0:
     dependencies:
       bl: 4.1.0
@@ -44113,11 +44030,6 @@ snapshots:
     dependencies:
       readable-stream: 2.3.8
       xtend: 4.0.2
-
-  through2@3.0.2:
-    dependencies:
-      inherits: 2.0.4
-      readable-stream: 3.6.2
 
   through@2.3.8: {}
 

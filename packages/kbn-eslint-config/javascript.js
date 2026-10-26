@@ -81,7 +81,6 @@ module.exports = {
         'no-unsanitized/method': 'error',
         'no-unsanitized/property': 'error',
         'no-unused-expressions': 'off',
-        'no-unused-vars': [ 'error' ],
         'no-use-before-define': [ 'error', 'nofunc' ],
         'no-var': 'error',
         'one-var': [ 'error', 'never' ],
