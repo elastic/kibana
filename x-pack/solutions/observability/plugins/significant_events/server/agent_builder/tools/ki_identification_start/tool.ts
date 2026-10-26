@@ -23,7 +23,7 @@ import { classifyError } from '../../utils/error_utils';
 import {
   assertSourceEnabled,
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 import { startKiIdentificationToolHandler } from './handler';
@@ -86,7 +86,7 @@ export const createKiIdentificationStartTool = ({
       await assertCanManageSignificantEvents({ request, server });
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-      const [source] = resolveSourcesBySlug(catalog, [slug]);
+      const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
       assertSourceEnabled(source);
       sourceId = source.id;
 

@@ -6,33 +6,28 @@
  */
 
 import { UserActionTypes } from '../action/v1';
-import { AssigneesUserActionPayloadRt, AssigneesUserActionRt } from './v1';
+import { AssigneesUserActionPayloadSchema, AssigneesUserActionSchema } from './v1';
 
 describe('Assignees', () => {
-  describe('AssigneesUserActionPayloadRt', () => {
+  describe('AssigneesUserActionPayloadSchema', () => {
     const defaultRequest = {
       assignees: [{ uid: '1' }, { uid: '2' }, { uid: '3' }],
     };
 
     it('has expected attributes in request', () => {
-      const query = AssigneesUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = AssigneesUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AssigneesUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = AssigneesUserActionPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
-  describe('AssigneesUserActionRt', () => {
+
+  describe('AssigneesUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.assignees,
       payload: {
@@ -41,52 +36,42 @@ describe('Assignees', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = AssigneesUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = AssigneesUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AssigneesUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = AssigneesUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from assignees', () => {
-      const query = AssigneesUserActionRt.decode({
+    it('strips unknown fields from assignees', () => {
+      const result = AssigneesUserActionSchema.safeParse({
         type: UserActionTypes.assignees,
         payload: {
           assignees: [{ uid: '1', foo: 'bar' }, { uid: '2' }, { uid: '3' }],
         },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          type: UserActionTypes.assignees,
-          payload: {
-            assignees: [{ uid: '1' }, { uid: '2' }, { uid: '3' }],
-          },
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({
+        type: UserActionTypes.assignees,
+        payload: {
+          assignees: [{ uid: '1' }, { uid: '2' }, { uid: '3' }],
         },
       });
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = AssigneesUserActionRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = AssigneesUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });
