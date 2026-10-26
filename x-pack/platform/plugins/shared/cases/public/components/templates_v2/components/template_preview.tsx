@@ -14,7 +14,7 @@ import type {
   ParsedTemplateDefinition,
 } from '../../../../common/types/domain/template/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
 import { TemplateCaseDefaultsForm } from './template_case_defaults_form';
 import * as i18n from '../translations';

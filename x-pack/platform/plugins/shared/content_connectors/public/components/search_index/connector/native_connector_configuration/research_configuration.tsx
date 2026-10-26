@@ -44,7 +44,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
           target: '_blank',
           'data-test-subj': 'enterpriseSearchResearchConfigurationDocumentationLink',
           children: i18n.translate(
-            'xpack.contentConnectorscontent.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
+            'xpack.contentConnectors.content.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
             { defaultMessage: 'Documentation' }
           ),
         },
@@ -54,7 +54,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
               target: '_blank',
               'data-test-subj': 'enterpriseSearchResearchConfigurationNameDocumentationLink',
               children: i18n.translate(
-                'xpack.contentConnectorscontent.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
+                'xpack.contentConnectors.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
                 { defaultMessage: '{name} documentation', values: { name } }
               ),
             }

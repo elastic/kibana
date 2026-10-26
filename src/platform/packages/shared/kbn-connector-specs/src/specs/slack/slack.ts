@@ -217,7 +217,7 @@ export const Slack: ConnectorSpec = {
   metadata: {
     id: SLACK_CONNECTOR_TYPE_ID,
     displayName: 'Slack (v2)',
-    description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
+    description: i18n.translate('connectorSpecs.slack.metadata.description', {
       defaultMessage:
         'Send messages and Block Kit cards, edit and react to messages, upload files, list channels and users, read conversation history and thread replies, search messages, and look up users by email in Slack',
     }),
@@ -265,22 +265,19 @@ export const Slack: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.slack.auth.bearer.label', {
             defaultMessage: 'Bot Token',
           }),
           meta: {
             token: {
               sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.slack.auth.bearer.token.label', {
                 defaultMessage: 'Slack Bot Token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.slack.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Slack bot token starting with xoxb-. Create one at api.slack.com/apps.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.slack.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Slack bot token starting with xoxb-. Create one at api.slack.com/apps.',
+              }),
             },
           },
         },
@@ -289,7 +286,7 @@ export const Slack: ConnectorSpec = {
         type: 'relay',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.relay.label', {
+          label: i18n.translate('connectorSpecs.slack.auth.relay.label', {
             defaultMessage: 'Elastic Slack app (Bot Token)',
           }),
         },
@@ -313,7 +310,7 @@ export const Slack: ConnectorSpec = {
 
         if (ctx.secrets?.authType === 'bearer') {
           throw new Error(
-            i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
+            i18n.translate('connectorSpecs.slack.searchMessages.botTokenError', {
               defaultMessage:
                 'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.',
             })
@@ -1629,8 +1626,7 @@ export const Slack: ConnectorSpec = {
   events: slackEvents,
 
   test: {
-    enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.slack.test.description', {
+    description: i18n.translate('connectorSpecs.slack.test.description', {
       defaultMessage: 'Verifies Slack connection by checking API access',
     }),
     handler: async (ctx) => {
