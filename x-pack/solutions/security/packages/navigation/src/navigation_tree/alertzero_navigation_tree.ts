@@ -19,10 +19,10 @@ import { alertZeroLink } from '../links';
  */
 
 /**
- * The AlertZero nodes that sit directly in the solution navigation body, in display order.
+ * The AlertZero nodes that open the solution navigation body, in display order.
  *
  * Returned as a list rather than a single node because AlertZero contributes several top-level entries that
- * interleave with platform ones (Discover sits between this group and Alerts).
+ * interleave with platform ones (Agents sits between this group and Watches).
  */
 export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
   {
@@ -37,7 +37,7 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
   },
 ];
 
-/** AlertZero nodes that follow the platform Discover / Dashboards entries. */
+/** AlertZero nodes that follow the Agents entry. */
 export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
   {
     // Kept a flat entry on purpose: the per-watch, Workers and Skills links are registered as deep

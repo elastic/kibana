@@ -39,6 +39,9 @@ export const createNavigationTree = (
 
   return {
     body: [
+      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
+      ...defaultNavigationTree.alertZero(),
+      ...defaultNavigationTree.alertZeroSecondary(),
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       // Context Engine follows Agent Builder wherever it renders; it no longer has a
       // fixed top position.
@@ -48,14 +51,11 @@ export const createNavigationTree = (
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
-      ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
       services.experimentalFeatures?.enableAlertsAndAttacksAlignment
         ? defaultNavigationTree.alertDetections()

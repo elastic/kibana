@@ -52,12 +52,12 @@ describe('createNavigationTree', () => {
     const escalationsIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroEscalations));
     const watchesIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroWatches));
 
-    expect(alertZeroIndex).toBeGreaterThanOrEqual(0);
+    expect(alertZeroIndex).toBe(0);
     expect(escalationsIndex).toBe(alertZeroIndex + 1);
     expect(watchesIndex).toBeGreaterThan(escalationsIndex);
   });
 
-  it('includes context engine first in classic chat experience, with no agent builder link', async () => {
+  it('includes context engine after the AlertZero entries in classic chat experience, with no agent builder link', async () => {
     const { body } = (await createNavigationTree(
       createServices(),
       AIChatExperience.Classic
@@ -70,7 +70,9 @@ describe('createNavigationTree', () => {
       icon: 'tableSparkles',
       link: 'context_engine',
     });
-    expect(contextEngineIndex).toBe(0);
+    expect(contextEngineIndex).toBe(
+      body.findIndex((item) => item.link === alertZeroLink(SecurityPageName.alertZeroWatches)) + 1
+    );
     expect(agentBuilderNode).toBeUndefined();
   });
 
@@ -83,7 +85,7 @@ describe('createNavigationTree', () => {
     const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
 
-    // Agent Builder stays in its existing (non-top) spot; it must not move to index 0.
+    // Agent Builder stays in its existing (non-top) spot.
     expect(agentBuilderIndex).toBeGreaterThan(0);
     expect(contextEngineIndex).toBe(agentBuilderIndex + 1);
   });
@@ -97,8 +99,10 @@ describe('createNavigationTree', () => {
     const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
 
-    expect(agentBuilderIndex).toBe(0);
-    expect(contextEngineIndex).toBe(1);
+    const discoverIndex = body.findIndex((item) => item.link === 'discover');
+
+    expect(agentBuilderIndex).toBeLessThan(discoverIndex);
+    expect(contextEngineIndex).toBe(agentBuilderIndex + 1);
     expect(body[contextEngineIndex]).toMatchObject({
       icon: 'tableSparkles',
       link: 'context_engine',
