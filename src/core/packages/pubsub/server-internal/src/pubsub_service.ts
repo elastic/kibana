@@ -19,6 +19,7 @@ import {
 } from '@kbn/core-pubsub-server';
 import { scopeConsumerName } from './consumer_name';
 import { findJsonRoundTripMismatch } from './json_round_trip';
+import { runWithoutRequestContext } from './run_without_request_context';
 import type { InternalPubSubSetup, InternalPubSubStart } from './internal_contracts';
 
 type Phase = 'created' | 'setup' | 'started' | 'stopped';
@@ -222,8 +223,10 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
 
     subscription.running = true;
-    setImmediate(() => {
-      void this.drain(subscription);
+    runWithoutRequestContext(() => {
+      setImmediate(() => {
+        void this.drain(subscription);
+      });
     });
   }
 
@@ -236,7 +239,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
 
       const event = this.deliverable(accepted);
       try {
-        await subscription.handler(event);
+        await runWithoutRequestContext(() => subscription.handler(event));
       } catch (error) {
         const detail = error instanceof Error ? error.message : 'unknown failure';
         this.logger.error(

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AsyncLocalStorage } from 'async_hooks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { defineTopic } from '@kbn/core-pubsub-server';
@@ -215,6 +216,42 @@ describe('PubSubService dispatch', () => {
     gate.resolve();
     await flushDispatch();
     expect(finished).toBe(true);
+  });
+
+  it('does not run handlers in the publisher request context', async () => {
+    const { service, setup, topic } = createHarness();
+    const requestContext = new AsyncLocalStorage<string>();
+    const seen: Array<{ id: string; store: string | undefined }> = [];
+    const gate = deferred();
+    const firstId = nextId();
+    const secondId = nextId();
+
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'sync',
+      handler: async (event) => {
+        seen.push({ id: event.id, store: requestContext.getStore() });
+        if (event.id === firstId) {
+          await gate.promise;
+        }
+      },
+    });
+
+    const { publish } = start(service);
+
+    await requestContext.run('alice', () =>
+      publish(PLUGIN, topic, { id: firstId, data: { secret: 'one' } })
+    );
+    await flushDispatch();
+    await requestContext.run('bob', () =>
+      publish(PLUGIN, topic, { id: secondId, data: { secret: 'two' } })
+    );
+    gate.resolve();
+    await flushDispatch();
+
+    expect(seen).toEqual([
+      { id: firstId, store: undefined },
+      { id: secondId, store: undefined },
+    ]);
   });
 
   it('delivers every event on the topic to every consumer, and nothing from other topics', async () => {
