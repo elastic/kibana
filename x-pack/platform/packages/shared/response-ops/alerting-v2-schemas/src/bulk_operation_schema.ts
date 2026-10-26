@@ -24,7 +24,20 @@ export const bulkByIdsSchema = lazySchema(() =>
         .array(entityIdSchema)
         .min(1)
         .max(MAX_BULK_ITEMS)
-        .describe('Explicit list of IDs to operate on.'),
+        .superRefine((ids, ctx) => {
+          const seen = new Set<string>();
+          ids.forEach((id, index) => {
+            if (seen.has(id)) {
+              ctx.addIssue({
+                code: 'custom',
+                message: `Each id can appear at most once per request; [${id}] is repeated`,
+                path: [index],
+              });
+            }
+            seen.add(id);
+          });
+        })
+        .describe('Explicit list of IDs to operate on. Each id can appear at most once.'),
     })
     .strict()
     .meta({ id: 'alerting_bulk_by_ids_request' })

@@ -230,6 +230,7 @@ describe('ProposedActionButton', () => {
       ['approved', {}, /^Approved by\s/],
       ['declined', { decision: 'dismissed' }, /^Declined by\s/],
       ['failed', { status: 'failed' }, /^Executed by\s/],
+      ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, /^Applied by\s/],
     ])('captions a %s proposal with who acted and when', (_, overrides, caption) => {
       renderButton({ proposal: { ...decidedProposal, ...overrides } });
 

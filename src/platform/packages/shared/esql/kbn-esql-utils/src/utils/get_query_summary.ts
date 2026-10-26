@@ -11,6 +11,7 @@ import type { ESQLAstCommand } from '@elastic/esql/types';
 import { Parser } from '@elastic/esql';
 import { esqlCommandRegistry, type ESQLCommandSummary } from '@kbn/esql-language';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
+import { parseEsqlCached } from './parse_esql_cached';
 
 function processCommand(
   command: ESQLAstCommand,
@@ -91,7 +92,7 @@ export function getQuerySummaryFromCommands(
  * @returns An object containing sets of new columns, renamed column pairs, metadata columns, aggregates, and grouping.
  */
 export function getQuerySummary(query: string): ESQLCommandSummary {
-  const { root } = Parser.parse(query);
+  const { root } = parseEsqlCached(query);
   return getQuerySummaryFromCommands(root.commands, query);
 }
 

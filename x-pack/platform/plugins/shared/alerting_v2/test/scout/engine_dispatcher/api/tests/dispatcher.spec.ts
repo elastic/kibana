@@ -254,8 +254,9 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActionsEvents.cleanUp();
+    // Events first: wiping `.alert-actions` dedup state while events remain re-dispatches them.
     await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
 
     await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
@@ -277,8 +278,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
@@ -1713,7 +1714,10 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       // regression that re-reads stale events a chance to surface.
       await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
 
-      const actions = await apiServices.alertingV2.alertActionsEvents.find({ ruleId: 'rule-1' });
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId: 'rule-1',
+        groupHash: 'rule-1-old-series',
+      });
       expect(actions).toHaveLength(0);
     }
   );

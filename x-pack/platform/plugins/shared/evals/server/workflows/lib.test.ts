@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EVALS_EVALUATE_URL, EVALS_SCORES_URL } from '@kbn/evals-common';
+import { EVALS_EVALUATE_URL, EVALS_ONLINE_SCORES_URL, EVALS_SCORES_URL } from '@kbn/evals-common';
 import type { EvalsTaskProvider, TaskProviderRegistry } from '../task_providers/types';
 import {
   evaluateWorkBatch,
   normalizeReferenceData,
+  persistOnlineScores,
   runExampleEvaluation,
   type DatasetEvaluationConfig,
   type DatasetWorkItem,
@@ -496,5 +497,57 @@ describe('evaluateWorkBatch reference data', () => {
     // ex-1 finished before the abort; ex-2 was never started.
     expect(result.completed).toBe(1);
     expect(runs).toBe(1);
+  });
+});
+
+describe('persistOnlineScores', () => {
+  it('posts the successful results to the online scores route and counts failed evaluators', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { created: 2, skipped: 1, failed_evaluators: 0 },
+    });
+    const runtime = {
+      ...createRuntime([]),
+      callKibanaApi: callKibanaApi as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    const response = await persistOnlineScores(runtime, {
+      monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+      traceId: VALID_TRACE_ID,
+      connectorId: 'conn-1',
+      results: [
+        {
+          evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+          scores: [
+            { name: 'factuality', score: 0.9, label: 'pass', explanation: null },
+            { name: 'relevance', score: null, label: null },
+          ],
+        },
+      ],
+      errors: ['Evaluator "groundedness" failed: boom'],
+    });
+
+    expect(callKibanaApi).toHaveBeenCalledWith({
+      method: 'POST',
+      path: EVALS_ONLINE_SCORES_URL,
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+        trace_id: VALID_TRACE_ID,
+        connector_id: 'conn-1',
+        results: [
+          {
+            status: 'ok',
+            evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+            scores: [
+              { name: 'factuality', score: 0.9, label: 'pass' },
+              { name: 'relevance', score: null },
+            ],
+          },
+        ],
+      },
+    });
+    expect(response).toEqual({ created: 2, skipped: 1, failed_evaluators: 1 });
   });
 });
