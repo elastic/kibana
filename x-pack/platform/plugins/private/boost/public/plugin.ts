@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { BOOST_SAMPLE_DATA_API_PATH, PLUGIN_ID } from '../common/constants';
+import { registerIndexManagementExtensions } from './index_management_extensions';
 import { BOOST_APP_TITLE } from './translations';
 import type { BoostSetupDependencies, BoostStartDependencies } from './types';
 
@@ -33,8 +34,13 @@ export class BoostPlugin
     });
   }
 
-  public start(core: CoreStart) {
-    if (core.application.capabilities[PLUGIN_ID]?.save !== true) {
+  public start(core: CoreStart, deps: BoostStartDependencies) {
+    const capabilities = core.application.capabilities[PLUGIN_ID];
+    const { indexManagement } = deps;
+    if (indexManagement && capabilities?.show === true) {
+      registerIndexManagementExtensions(core, { ...deps, indexManagement });
+    }
+    if (capabilities?.save !== true) {
       return;
     }
 

@@ -10,6 +10,7 @@ import {
   countRulesByProfile,
   findConflictingRule,
   getAppliedRules,
+  getMatchingRules,
   getRuleCoverage,
   matchesIndexPattern,
   patternsOverlap,
@@ -137,6 +138,21 @@ describe('resolveRule', () => {
     expect(resolveRule(index('products'), rules, profilesByName)?.name).toBe('picked');
     expect(resolveRule(index('users'), rules, profilesByName)?.name).toBe('picked');
     expect(resolveRule(index('products-2'), rules, profilesByName)?.name).toBe('wildcard');
+  });
+});
+
+describe('getMatchingRules', () => {
+  it('lists every matching rule of the data source type, the one that applies first', () => {
+    const rules = [
+      ...defaultRules,
+      rule('match-all', '*'),
+      rule('wildcard', 'prod*'),
+      rule('exact', 'products'),
+      rule('other', 'users'),
+    ];
+    expect(
+      getMatchingRules(index('products'), rules, profilesByName).map(({ name }) => name)
+    ).toEqual(['exact', 'wildcard', 'match-all', '_default-indices']);
   });
 });
 

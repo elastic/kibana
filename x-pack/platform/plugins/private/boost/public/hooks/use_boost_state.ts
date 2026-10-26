@@ -10,11 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   BOOST_DEFAULT_RULES_API_PATH,
+  BOOST_EXPLAIN_API_PATH,
   BOOST_PROFILES_API_PATH,
   BOOST_RULES_API_PATH,
   BOOST_STATE_API_PATH,
 } from '../../common/constants';
 import type {
+  BoostExplanation,
   BoostProfileInput,
   BoostProfileType,
   BoostRuleInput,
@@ -23,6 +25,7 @@ import type {
 import { useBoostServices } from './use_boost_services';
 
 const BOOST_STATE_QUERY_KEY = ['boost', 'state'] as const;
+const BOOST_EXPLAIN_QUERY_KEY = ['boost', 'explain'] as const;
 
 export const useBoostState = () => {
   const { http } = useBoostServices();
@@ -30,6 +33,19 @@ export const useBoostState = () => {
   return useQuery<BoostState, IHttpFetchError>({
     queryKey: BOOST_STATE_QUERY_KEY,
     queryFn: ({ signal }) => http.get<BoostState>(BOOST_STATE_API_PATH, { signal }),
+  });
+};
+
+/** How boost rules apply to one index or data stream, such as for its details in Index Management. */
+export const useBoostExplanation = (name: string) => {
+  const { http } = useBoostServices();
+
+  return useQuery<BoostExplanation, IHttpFetchError>({
+    queryKey: [...BOOST_EXPLAIN_QUERY_KEY, name],
+    queryFn: ({ signal }) =>
+      http.get<BoostExplanation>(`${BOOST_EXPLAIN_API_PATH}/${encodeURIComponent(name)}`, {
+        signal,
+      }),
   });
 };
 
@@ -49,7 +65,11 @@ const useBoostMutation = <TVariables>(
 
   return useMutation<BoostState, IHttpFetchError, TVariables>({
     mutationFn: (variables) => request(http, variables),
-    onSuccess: (state) => queryClient.setQueryData(BOOST_STATE_QUERY_KEY, state),
+    onSuccess: (state) => {
+      queryClient.setQueryData(BOOST_STATE_QUERY_KEY, state);
+      // What applies to each index or data stream may have changed with it.
+      queryClient.invalidateQueries({ queryKey: BOOST_EXPLAIN_QUERY_KEY });
+    },
     onError: (error) => notifications.toasts.addError(error, { title: errorTitle }),
   });
 };

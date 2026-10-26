@@ -23,7 +23,9 @@
     "@kbn/app-header",
     "@kbn/core-chrome-browser-components",
     "@kbn/share-plugin",
-    "@kbn/index-management-shared-types"
+    "@kbn/index-management-shared-types",
+    "@kbn/es-errors",
+    "@kbn/index-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }

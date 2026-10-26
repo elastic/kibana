@@ -14,6 +14,7 @@ import { useLocatorUrl } from '@kbn/share-plugin/public';
 import type { DataSourceType } from '../../common/types';
 import { useBoostServices } from '../hooks/use_boost_services';
 import { useRefetchBoostState } from '../hooks/use_boost_state';
+import { isModifiedClick } from './is_modified_click';
 
 interface IndexManagementLinkProps {
   type: DataSourceType;
@@ -22,10 +23,6 @@ interface IndexManagementLinkProps {
   children?: ReactNode;
   className?: string;
 }
-
-// Modified clicks, such as to open the link in a new tab, are left to the browser.
-const isModifiedClick = (event: MouseEvent) =>
-  event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 /**
  * An index or data stream, linking to its details in Index Management. An index's details are a
@@ -42,13 +39,15 @@ export const IndexManagementLink = ({
   const refetchBoostState = useRefetchBoostState();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const locator = share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
-  // Created once, since each call returns a new component, which would remount the flyout.
+  const history = appParams?.history;
+  // Created once, since each call returns a new component, which would remount the flyout. Outside
+  // the boost app, such as within Index Management, a data stream's details open there instead.
   const DataStreamFlyout = useMemo(
     () =>
-      type === 'data_stream'
-        ? indexManagement?.getDatastreamFlyoutComponent({ history: appParams.history })
+      type === 'data_stream' && history
+        ? indexManagement?.getDatastreamFlyoutComponent({ history })
         : undefined,
-    [type, indexManagement, appParams.history]
+    [type, indexManagement, history]
   );
   const params: IndexManagementLocatorParams =
     type === 'data_stream'

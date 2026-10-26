@@ -108,6 +108,15 @@ export interface BoostDataSource {
   data_ages?: BoostDataAge[];
 }
 
+/**
+ * How boost rules apply to one index or data stream, as Elasticsearch's explain API reports it: the
+ * profile that applies, if any, and every rule that matches, with the one that applies first.
+ */
+export interface BoostExplanation {
+  boost_profile?: string;
+  matches: BoostRule[];
+}
+
 export interface BoostState {
   settings: BoostSettings;
   profiles: BoostProfile[];

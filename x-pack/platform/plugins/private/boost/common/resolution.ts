@@ -86,10 +86,13 @@ export const patternsOverlap = (a: string, b: string): boolean => {
   return overlapsFrom(0, 0);
 };
 
+/** What rules match a data source by: its name, and its type. */
+type DataSourceIdentity = Pick<BoostDataSource, 'name' | 'type'>;
+
 /** Returns the rule's most specific pattern that matches the data source, if any. */
 const getMatchingPattern = (
   { index_patterns: patterns, boost_profile: profileName }: BoostRule,
-  dataSource: BoostDataSource,
+  dataSource: DataSourceIdentity,
   profilesByName: ReadonlyMap<string, BoostProfile>
 ): string | undefined =>
   profilesByName.get(profileName)?.type === PROFILE_TYPE_BY_DATA_SOURCE[dataSource.type]
@@ -107,16 +110,16 @@ const isRuleMatch = (match: { rule: BoostRule; pattern?: string }): match is Rul
   match.pattern !== undefined;
 
 /**
- * Returns the rule that applies to a data source, or `undefined` if none matches. Matching rules
- * are ordered the way the Elasticsearch boost rule resolver does: higher priority first, then exact
- * names over other patterns, then those over `*`. Elasticsearch rejects rules that would still tie
- * (see `findConflictingRule`), so the rule name only orders ties saved before the prototype checked.
+ * Returns the rules that match a data source, ordered the way the Elasticsearch boost rule resolver
+ * does: higher priority first, then exact names over other patterns, then those over `*`. The first
+ * applies. Elasticsearch rejects rules that would still tie (see `findConflictingRule`), so the rule
+ * name only orders ties saved before the prototype checked.
  */
-export const resolveRule = (
-  dataSource: BoostDataSource,
+export const getMatchingRules = (
+  dataSource: DataSourceIdentity,
   rules: readonly BoostRule[],
   profilesByName: ReadonlyMap<string, BoostProfile>
-): BoostRule | undefined =>
+): BoostRule[] =>
   rules
     .map((rule) => ({ rule, pattern: getMatchingPattern(rule, dataSource, profilesByName) }))
     .filter(isRuleMatch)
@@ -125,7 +128,15 @@ export const resolveRule = (
         b.rule.priority - a.rule.priority ||
         compareSpecificity(a.pattern, b.pattern) ||
         a.rule.name.localeCompare(b.rule.name)
-    )[0]?.rule;
+    )
+    .map(({ rule }) => rule);
+
+/** Returns the rule that applies to a data source, or `undefined` if none matches. */
+export const resolveRule = (
+  dataSource: DataSourceIdentity,
+  rules: readonly BoostRule[],
+  profilesByName: ReadonlyMap<string, BoostProfile>
+): BoostRule | undefined => getMatchingRules(dataSource, rules, profilesByName)[0];
 
 /**
  * Returns a rule that would tie with the given one, which Elasticsearch rejects: one with the same

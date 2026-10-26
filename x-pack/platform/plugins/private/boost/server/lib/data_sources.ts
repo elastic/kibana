@@ -6,8 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { BoostDataAge, BoostDataLifecycle, BoostDataSource } from '../../common/types';
 import { SAMPLE_DATA_SIZES_GB, getSampleDataAges } from '../prototype/sample_sizes';
+import { BoostRequestError } from './errors';
 
 const BYTES_PER_GB = 1e9;
 const MS_PER_HOUR = 3_600_000;
@@ -132,4 +134,45 @@ export const getDataSources = async (client: ElasticsearchClient): Promise<Boost
         };
       }),
   ].sort((a, b) => a.name.localeCompare(b.name));
+};
+
+/**
+ * Finds what boost rules match for one index or data stream, as Elasticsearch resolves them: its
+ * name and type, or a backing index's data stream. System indices match no rules, so they have
+ * nothing to match by.
+ */
+export const resolveDataSource = async (
+  client: ElasticsearchClient,
+  name: string
+): Promise<Pick<BoostDataSource, 'name' | 'type'> | undefined> => {
+  if (/[*,]/.test(name)) {
+    throw new BoostRequestError(400, `[${name}] must name one index or data stream`);
+  }
+  try {
+    const {
+      indices,
+      aliases,
+      data_streams: dataStreams,
+    } = await client.indices.resolveIndex({ name, expand_wildcards: 'all' });
+    if (dataStreams.some((dataStream) => dataStream.name === name)) {
+      return { name, type: 'data_stream' };
+    }
+    const index = indices.find((item) => item.name === name);
+    if (index) {
+      if (index.attributes.includes('system')) {
+        return undefined;
+      }
+      return index.data_stream
+        ? { name: index.data_stream, type: 'data_stream' }
+        : { name, type: 'index' };
+    }
+    if (aliases.some((alias) => alias.name === name)) {
+      throw new BoostRequestError(400, `[${name}] is an alias, not an index or data stream`);
+    }
+  } catch (error) {
+    if (!isNotFoundError(error)) {
+      throw error;
+    }
+  }
+  throw new BoostRequestError(404, `No such index or data stream [${name}]`);
 };

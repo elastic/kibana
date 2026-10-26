@@ -16,6 +16,7 @@ export const BOOST_STATE_API_PATH = `${BOOST_API_BASE_PATH}/state`;
 export const BOOST_DEFAULT_RULES_API_PATH = `${BOOST_API_BASE_PATH}/default_rules`;
 export const BOOST_PROFILES_API_PATH = `${BOOST_API_BASE_PATH}/profiles`;
 export const BOOST_RULES_API_PATH = `${BOOST_API_BASE_PATH}/rules`;
+export const BOOST_EXPLAIN_API_PATH = `${BOOST_API_BASE_PATH}/explain`;
 export const BOOST_SAMPLE_DATA_API_PATH = `${BOOST_API_BASE_PATH}/prototype/sample_data`;
 export const BOOST_RESTORE_API_PATH = `${BOOST_API_BASE_PATH}/prototype/restore`;
 

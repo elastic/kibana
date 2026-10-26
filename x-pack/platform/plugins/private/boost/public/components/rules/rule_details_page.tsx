@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { EuiBadge, EuiCode } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common/constants';
@@ -29,14 +29,13 @@ import { ShareMeter, ShareMeterGroup } from '../details/share_meter';
 import { DetailsLink } from '../details_link';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
 import { LoadError } from '../load_error';
-import { MANAGED_BADGE_LABEL } from '../profiles/profiles_tab';
 import { DeleteRuleModal } from './delete_rule_modal';
 import { MatchedTable } from './matched_table';
 import { getDefaultRuleType } from '../../../common/presets';
 import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { RuleFlyout } from './rule_flyout';
-import { getAllUnmatchedLabel } from './rule_matches';
-import { DEFAULT_BADGE_LABEL } from './rules_table';
+import { getRuleTargetItems } from './rule_targets';
+import { DEFAULT_BADGE_LABEL, MANAGED_BADGE_LABEL } from '../badge_labels';
 
 type FlyoutState = 'edit' | 'duplicate' | undefined;
 
@@ -64,7 +63,7 @@ export const RuleDetailsPage = () => {
     return <DetailsPage list="rules" name={name} isFound={false} />;
   }
 
-  const { is_builtin: isDefaultRule, index_patterns: patterns } = rule;
+  const { is_builtin: isDefaultRule } = rule;
   const defaultType = isDefaultRule ? getDefaultRuleType(name) : undefined;
   const profile = profiles.find((item) => item.name === rule.boost_profile);
   const type = profile?.type;
@@ -79,28 +78,6 @@ export const RuleDetailsPage = () => {
   const vcus = profile ? estimateDataSourcesVcuRange(applied, profile) : { atRest: 0, atPeak: 0 };
   // The whole project's search cost, which the rule's is a share of.
   const projectVcus = estimateProjectVcuRange(dataSources, appliedRules, profiles);
-  const existingNames = new Set(dataSources.map(({ name: dataSourceName }) => dataSourceName));
-  const [firstPattern = ''] = patterns;
-  // Matches how the rule form opens it: a pattern, or names that were selected.
-  const isPattern =
-    patterns.length === 1 && (firstPattern.includes('*') || !existingNames.has(firstPattern));
-
-  const targets = isDefaultRule ? (
-    getAllUnmatchedLabel(type)
-  ) : isPattern ? (
-    <>
-      {i18n.translate('xpack.boost.ruleDetails.patternTarget', {
-        defaultMessage: 'Index pattern',
-      })}{' '}
-      <EuiCode>{firstPattern}</EuiCode>
-    </>
-  ) : (
-    i18n.translate('xpack.boost.ruleDetails.selectedTargets', {
-      defaultMessage: 'Selected {targets}',
-      values: { targets: formatDataSourceCount(type, patterns.length) },
-    })
-  );
-
   return (
     <DetailsPage
       list="rules"
@@ -180,22 +157,7 @@ export const RuleDetailsPage = () => {
                     </span>
                   ),
                 },
-                {
-                  title: i18n.translate('xpack.boost.ruleDetails.targets', {
-                    defaultMessage: 'Targets',
-                  }),
-                  description: targets,
-                },
-                {
-                  title: i18n.translate('xpack.boost.ruleDetails.priority', {
-                    defaultMessage: 'Priority',
-                  }),
-                  tip: i18n.translate('xpack.boost.ruleDetails.priorityTip', {
-                    defaultMessage:
-                      'When several rules match the same index or data stream, the highest priority applies.',
-                  }),
-                  description: rule.priority,
-                },
+                ...getRuleTargetItems(rule, type, dataSources),
               ]}
             />
           </DetailsSection>

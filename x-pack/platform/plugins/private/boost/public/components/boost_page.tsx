@@ -44,7 +44,7 @@ export const BoostPage = () => {
   const { data: state, error, refetch } = useBoostState();
 
   useEffect(() => {
-    appParams.setBreadcrumbs([{ text: BOOST_APP_TITLE }]);
+    appParams?.setBreadcrumbs([{ text: BOOST_APP_TITLE }]);
     chrome.docTitle.change(BOOST_APP_TITLE);
   }, [appParams, chrome]);
 

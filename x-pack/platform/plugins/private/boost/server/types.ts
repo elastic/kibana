@@ -6,7 +6,9 @@
  */
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
 
 export interface BoostSetupDependencies {
   features: FeaturesPluginSetup;
+  indexManagement?: IndexManagementPluginSetup;
 }

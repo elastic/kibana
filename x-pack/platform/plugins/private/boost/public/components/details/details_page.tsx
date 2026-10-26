@@ -63,7 +63,7 @@ export const DetailsPage = ({ list, name, isFound, badges, menu, children }: Det
 
   useEffect(() => {
     // Links are relative to this app, which the management app scopes them to.
-    appParams.setBreadcrumbs([
+    appParams?.setBreadcrumbs([
       { text: BOOST_APP_TITLE, href: '/' },
       { text: listLabel, href: listPath },
       { text: name },
@@ -142,13 +142,15 @@ export const DetailsBand = ({
 interface DetailsSplitBandProps {
   start: ReactNode;
   end: ReactNode;
+  /** Whether a divider follows the band, which the last band leaves out. */
+  hasDivider?: boolean;
 }
 
 /**
  * Two sections side by side in a band, with a divider between them that runs the band's height.
  * On narrow screens they stack, with a divider between them.
  */
-export const DetailsSplitBand = ({ start, end }: DetailsSplitBandProps) => {
+export const DetailsSplitBand = ({ start, end, hasDivider = true }: DetailsSplitBandProps) => {
   const { euiTheme } = useEuiTheme();
   const narrow = useEuiMaxBreakpoint('m');
   return (
@@ -156,7 +158,7 @@ export const DetailsSplitBand = ({ start, end }: DetailsSplitBandProps) => {
       css={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        borderBlockEnd: euiTheme.border.thin,
+        borderBlockEnd: hasDivider ? euiTheme.border.thin : undefined,
         [narrow]: { gridTemplateColumns: '1fr' },
       }}
     >
@@ -183,6 +185,11 @@ interface DetailsSectionProps {
   title: string;
   /** Shown at the title's end, such as a button. */
   titleAppend?: ReactNode;
+  /**
+   * Keeps the title as tall as a small button, even without one, so it lines up with a section
+   * beside it that has one.
+   */
+  reservesButtonSpace?: boolean;
   children: ReactNode;
   'data-test-subj'?: string;
 }
@@ -190,7 +197,8 @@ interface DetailsSectionProps {
 const DetailsTitle = ({
   title,
   titleAppend,
-}: Pick<DetailsSectionProps, 'title' | 'titleAppend'>) => {
+  reservesButtonSpace = false,
+}: Pick<DetailsSectionProps, 'title' | 'titleAppend' | 'reservesButtonSpace'>) => {
   const { euiTheme } = useEuiTheme();
   return (
     <>
@@ -202,6 +210,7 @@ const DetailsTitle = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: euiTheme.size.m,
+          minBlockSize: reservesButtonSpace ? euiTheme.size.xl : undefined,
         }}
       >
         <EuiTitle size="xs">
@@ -218,11 +227,16 @@ const DetailsTitle = ({
 export const DetailsSection = ({
   title,
   titleAppend,
+  reservesButtonSpace,
   children,
   'data-test-subj': dataTestSubj,
 }: DetailsSectionProps) => (
   <div data-test-subj={dataTestSubj}>
-    <DetailsTitle title={title} titleAppend={titleAppend} />
+    <DetailsTitle
+      title={title}
+      titleAppend={titleAppend}
+      reservesButtonSpace={reservesButtonSpace}
+    />
     {children}
   </div>
 );

@@ -25,12 +25,9 @@ import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout
 import { DeleteRuleModal } from './delete_rule_modal';
 import { RuleFlyout } from './rule_flyout';
 import { RuleMatches } from './rule_matches';
+import { DEFAULT_BADGE_LABEL } from '../badge_labels';
 
 export type RuleRow = BoostRule & RuleCoverage & { profileType?: BoostProfileType };
-
-export const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', {
-  defaultMessage: 'Default',
-});
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
 

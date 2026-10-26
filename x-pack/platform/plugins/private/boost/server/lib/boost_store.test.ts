@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_RULE_PROFILES } from '../../common/presets';
-import { createRule, getState, updateDefaultRule, updateRule } from './boost_store';
+import { createRule, explain, getState, updateDefaultRule, updateRule } from './boost_store';
 import { BoostRequestError } from './errors';
 
 const catalogsRule = {
@@ -114,6 +114,40 @@ describe('getState', () => {
     expect(state.rules.find(({ name }) => name === 'catalogs')?.boost_profile).toBe(
       '_high-availability'
     );
+  });
+});
+
+describe('explain', () => {
+  const settings = { kind: 'settings', default_profiles: DEFAULT_RULE_PROFILES };
+
+  it('reports the profile that applies, and every matching rule, the applied rule first', async () => {
+    const esClient = createEsClient();
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [{ name: 'catalog-fall', attributes: ['open'] }],
+      aliases: [],
+      data_streams: [],
+    });
+
+    await expect(explain(createClient(settings), esClient, 'catalog-fall')).resolves.toEqual({
+      boost_profile: '_on-demand',
+      matches: [
+        expect.objectContaining({ name: 'catalogs' }),
+        expect.objectContaining({ name: '_default-indices' }),
+      ],
+    });
+  });
+
+  it('reports no profile for what no rule matches, such as a system index', async () => {
+    const esClient = createEsClient();
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [{ name: '.kibana_1', attributes: ['open', 'hidden', 'system'] }],
+      aliases: [],
+      data_streams: [],
+    });
+
+    await expect(explain(createClient(settings), esClient, '.kibana_1')).resolves.toEqual({
+      matches: [],
+    });
   });
 });
 

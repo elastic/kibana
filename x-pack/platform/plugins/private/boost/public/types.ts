@@ -21,5 +21,6 @@ export interface BoostStartDependencies {
 
 export type BoostServices = CoreStart &
   BoostStartDependencies & {
-    appParams: ManagementAppMountParams;
+    /** The boost app's, which boost's parts in Index Management's pages don't have. */
+    appParams?: ManagementAppMountParams;
   };

@@ -18,8 +18,9 @@ import {
   DEFAULT_RULE_PROFILES,
   createDefaultRules,
 } from '../../common/presets';
-import { findConflictingRule } from '../../common/resolution';
+import { findConflictingRule, getMatchingRules } from '../../common/resolution';
 import type {
+  BoostExplanation,
   BoostProfile,
   BoostProfileInput,
   BoostProfileType,
@@ -31,7 +32,7 @@ import type {
   DefaultRuleProfiles,
   IndicesPresetId,
 } from '../../common/types';
-import { getDataSources } from './data_sources';
+import { getDataSources, resolveDataSource } from './data_sources';
 import { BoostRequestError } from './errors';
 
 /** Settings saved before the project's defaults and boost rules shared one page. */
@@ -174,22 +175,47 @@ const getCustomRules = async (client: SavedObjectsClientContract): Promise<Boost
 };
 
 /** Returns the settings, the profiles and rules, and the project's data sources. */
-export const getState = async (
-  client: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-): Promise<BoostState> => {
-  const [settings, customProfiles, customRules, dataSources] = await Promise.all([
+/** The project's settings, its profiles, and its rules, the custom ones ahead of the two default rules. */
+const getConfiguration = async (
+  client: SavedObjectsClientContract
+): Promise<Omit<BoostState, 'data_sources'>> => {
+  const [settings, customProfiles, customRules] = await Promise.all([
     getSettings(client),
     getCustomProfiles(client),
     getCustomRules(client),
-    getDataSources(esClient),
   ]);
   return {
     settings,
     profiles: [...BUILTIN_PROFILES, ...customProfiles],
     rules: [...customRules, ...createDefaultRules(settings.default_profiles)],
-    data_sources: dataSources,
   };
+};
+
+export const getState = async (
+  client: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+): Promise<BoostState> => {
+  const [configuration, dataSources] = await Promise.all([
+    getConfiguration(client),
+    getDataSources(esClient),
+  ]);
+  return { ...configuration, data_sources: dataSources };
+};
+
+/** How boost rules apply to one index or data stream, as Elasticsearch's explain API reports it. */
+export const explain = async (
+  client: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  name: string
+): Promise<BoostExplanation> => {
+  const [dataSource, { profiles, rules }] = await Promise.all([
+    resolveDataSource(esClient, name),
+    getConfiguration(client),
+  ]);
+  const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
+  const matches = dataSource ? getMatchingRules(dataSource, rules, profilesByName) : [];
+  const [appliedRule] = matches;
+  return appliedRule ? { boost_profile: appliedRule.boost_profile, matches } : { matches };
 };
 
 const saveProfile = async (

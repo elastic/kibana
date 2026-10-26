@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import {
-  EuiBadge,
   EuiButton,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -23,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_ID } from '../../../common/constants';
 import { getAppliedRules } from '../../../common/resolution';
-import type { BoostProfile, IndicesBoostProfile } from '../../../common/types';
+import type { BoostProfile } from '../../../common/types';
 import { estimateDataSourcesVcuRange, estimateProjectVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
@@ -38,22 +37,17 @@ import {
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { ShareMeter, ShareMeterGroup } from '../details/share_meter';
-import { PROFILE_TYPE_LABELS, formatBoostRange, formatDataSourceCount } from '../format';
+import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
 import { LoadError } from '../load_error';
 import { RuleFlyout } from '../rules/rule_flyout';
 import { getProfileRulesLocation } from '../rules/rules_tab';
 import { RulesTable } from '../rules/rules_table';
 import { DeleteProfileModal } from './delete_profile_modal';
 import { PhaseList } from './phase_list';
-import { INDEX_OPTIONS, ProfileFlyout } from './profile_flyout';
-import { MANAGED_BADGE_LABEL, USED_BY_DEFAULT_RULE_DESCRIPTIONS } from './profiles_tab';
-
-const ON_LABEL = i18n.translate('xpack.boost.profileDetails.on', { defaultMessage: 'On' });
-const OFF_LABEL = i18n.translate('xpack.boost.profileDetails.off', { defaultMessage: 'Off' });
-
-const BOOST_LABEL = i18n.translate('xpack.boost.profileDetails.boost', {
-  defaultMessage: 'Boost',
-});
+import { getIndicesSettingsItems } from './indices_settings';
+import { ProfileFlyout } from './profile_flyout';
+import { MANAGED_BADGE_LABEL } from '../badge_labels';
+import { USED_BY_DEFAULT_RULE_DESCRIPTIONS } from './profiles_tab';
 
 const RULES_TITLE = i18n.translate('xpack.boost.profileDetails.rulesTitle', {
   defaultMessage: 'Boost rules using this profile',
@@ -64,36 +58,6 @@ const RULES_SEARCH_LABEL = i18n.translate('xpack.boost.profileDetails.searchRule
 });
 
 type FlyoutState = 'edit' | 'duplicate' | 'createRule' | undefined;
-
-const IndicesSettings = ({ profile }: { profile: IndicesBoostProfile }) => {
-  const optionValues = {
-    extraCopy: profile.high_availability === 'one_extra_copy',
-    prewarm: profile.prewarm,
-    pinned: profile.pinned,
-  };
-  return (
-    <DetailsList
-      items={[
-        // One range, as a data streams profile's phases show theirs.
-        {
-          title: BOOST_LABEL,
-          description: formatBoostRange(profile.min_boost, profile.max_boost),
-        },
-        ...INDEX_OPTIONS.map(({ key, title, description }) => ({
-          title,
-          tip: description,
-          // On stands out in the success color; off is a usual choice, such as to save cost,
-          // so it's neutral rather than a warning.
-          description: optionValues[key] ? (
-            <EuiBadge color="success">{ON_LABEL}</EuiBadge>
-          ) : (
-            <EuiBadge color="default">{OFF_LABEL}</EuiBadge>
-          ),
-        })),
-      ]}
-    />
-  );
-};
 
 /** A boost profile's settings, the rules that use it, and what it applies to. */
 export const ProfileDetailsPage = () => {
@@ -200,7 +164,7 @@ export const ProfileDetailsPage = () => {
             data-test-subj="boostProfileSettings"
           >
             {profile.type === 'indices' ? (
-              <IndicesSettings profile={profile} />
+              <DetailsList items={getIndicesSettingsItems(profile)} />
             ) : (
               <PhaseList profile={profile} />
             )}

@@ -41,6 +41,7 @@ import { getProfileRulesLocation } from '../rules/rules_tab';
 import { DetailsLink } from '../details_link';
 import { ProfileFlyout } from './profile_flyout';
 import { useTablePage } from '../use_table_page';
+import { MANAGED_BADGE_LABEL } from '../badge_labels';
 
 interface ProfilesTabProps {
   profiles: BoostProfile[];
@@ -58,10 +59,6 @@ type ProfileRow = BoostProfile & {
 };
 
 type FlyoutState = { profile?: BoostProfile; duplicateOf?: BoostProfile } | undefined;
-
-export const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.profilesTab.managedBadge', {
-  defaultMessage: 'Managed',
-});
 
 const isCustomProfile = ({ is_builtin: isBuiltin }: BoostProfile) => !isBuiltin;
 

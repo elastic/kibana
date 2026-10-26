@@ -7,15 +7,17 @@
 
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { boostFeature } from './feature';
+import { markBoostableIndices } from './lib/boostable_indices';
 import { registerRoutes } from './routes';
 import { boostPrototypeSavedObjectType } from './saved_objects/boost_prototype';
 import type { BoostSetupDependencies } from './types';
 
 export class BoostPlugin implements Plugin<void, void, BoostSetupDependencies> {
-  public setup(core: CoreSetup, { features }: BoostSetupDependencies) {
+  public setup(core: CoreSetup, { features, indexManagement }: BoostSetupDependencies) {
     core.savedObjects.registerType(boostPrototypeSavedObjectType);
     features.registerKibanaFeature(boostFeature);
     registerRoutes(core.http.createRouter());
+    indexManagement?.indexDataEnricher.add(markBoostableIndices);
   }
 
   public start() {}
