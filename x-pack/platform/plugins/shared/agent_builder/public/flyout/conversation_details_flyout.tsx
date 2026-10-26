@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import {
@@ -43,6 +44,8 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.
 });
 
 const POLL_INTERVAL_MS = 5_000;
+
+const isNotFoundError = (error: IHttpFetchError | null): boolean => error?.response?.status === 404;
 
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
@@ -200,6 +203,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
+  onNotFound?: () => void;
 }
 
 /**
@@ -212,16 +216,27 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationsService,
   conversationTemplatesService,
   titleId,
+  onNotFound,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
     data: conversation,
+    error,
     isLoading,
     refetch,
-  } = useQuery({
+  } = useQuery<Conversation, IHttpFetchError>({
     queryKey: ['conversation-details-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
-    refetchInterval: POLL_INTERVAL_MS,
+    retry: (failureCount, httpError) => !isNotFoundError(httpError) && failureCount < 3,
+    refetchInterval: (data, query) =>
+      isNotFoundError(query.state.error) ? false : POLL_INTERVAL_MS,
   });
+
+  const isNotFound = isNotFoundError(error);
+  useEffect(() => {
+    if (isNotFound) {
+      onNotFound?.();
+    }
+  }, [isNotFound, onNotFound]);
 
   const refetchConversation = useCallback(async () => {
     await refetch();

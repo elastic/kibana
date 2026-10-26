@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
+import { combineAbortSignals } from './combine_abort_signals';
 import { createTargetIdResolver, type ResolveTargetId } from './distributor_target_id';
 import type { UnitConfigHooks, UnitCredential, UnitValidationResult } from './types';
 
@@ -33,6 +34,10 @@ export type ConfigDistributorClient = Required<Pick<UnitConfigHooks, 'publish' |
 type UnitDiagnostic = StreamsUnit.Diagnostic;
 
 const REQUEST_TIMEOUT_MS = 30_000;
+
+const VALIDATE_PATH = '/v1/units/validate';
+// Distributors before streams-config-distributor#441 serve validate here. Drop once every target runs #441.
+const LEGACY_VALIDATE_PATH = '/v1/validate';
 
 const serializeUnitYaml = (unit: StreamsUnit.Configuration): string => YAML.stringify(unit);
 
@@ -185,20 +190,23 @@ export const createConfigDistributorClient = ({
     path,
     method,
     body,
+    signal,
   }: {
     path: string;
     method: string;
     body: string;
+    signal?: AbortSignal;
   }): Promise<{ ok: boolean; status: number; text: string }> => {
-    const abortController = new AbortController();
-    const timeout = setTimeout(() => abortController.abort(), REQUEST_TIMEOUT_MS);
+    const timeoutController = new AbortController();
+    const timeout = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
+    const requestSignal = combineAbortSignals([timeoutController.signal, signal]);
 
     try {
       const response = await requestWithTls(`${baseUrl}${path}`, {
         method,
         headers: { 'content-type': 'application/json' },
         body,
-        signal: abortController.signal,
+        signal: requestSignal.signal,
       });
 
       return {
@@ -210,11 +218,12 @@ export const createConfigDistributorClient = ({
       throw statusErrorFromFetchFailure(baseUrl, error, ssl);
     } finally {
       clearTimeout(timeout);
+      requestSignal.dispose();
     }
   };
 
   return {
-    publish: async ({ unitId, unit, credentials }) => {
+    publish: async ({ unitId, unit, credentials, signal }) => {
       const unitYaml = serializeUnitYaml(unit);
       const configHash = hashUnitPublishPayload(unitYaml, credentials);
 
@@ -228,6 +237,7 @@ export const createConfigDistributorClient = ({
           config_hash: configHash,
           ...credentialsField(credentials),
         }),
+        signal,
       });
 
       if (!response.ok) {
@@ -237,17 +247,18 @@ export const createConfigDistributorClient = ({
         );
       }
     },
-    validate: async ({ unit, credentials }) => {
+    validate: async ({ unit, credentials, signal }) => {
       const unitYaml = serializeUnitYaml(unit);
 
       logger.debug('Validating Streams unit with config distributor');
 
-      const response = await request({
-        path: '/v1/validate',
-        method: 'POST',
-        // The distributor compiles references during validate too, so it needs the same blobs.
-        body: JSON.stringify({ unit_yaml: unitYaml, ...credentialsField(credentials) }),
-      });
+      // The distributor compiles references during validate too, so it needs the same blobs.
+      const body = JSON.stringify({ unit_yaml: unitYaml, ...credentialsField(credentials) });
+      let response = await request({ path: VALIDATE_PATH, method: 'POST', body, signal });
+      // An older distributor answers 405 here, because the path matches its `PUT /v1/units/{unitId}`.
+      if (response.status === 405) {
+        response = await request({ path: LEGACY_VALIDATE_PATH, method: 'POST', body, signal });
+      }
 
       const parsed = parseValidateResponse(response.text);
 

@@ -8,13 +8,16 @@
 import Boom from '@hapi/boom';
 import type { CasesClient, CasesClientArgs } from '..';
 
-import type { CustomFieldPutRequest } from '../../../common/types/api';
-import { CustomFieldPutRequestRt, CaseRequestCustomFieldsRt } from '../../../common/types/api';
+import type { CustomFieldPutRequest, CaseRequestCustomFields } from '../../../common/types/api';
+import {
+  CustomFieldPutRequestSchema,
+  CaseRequestCustomFieldsSchema,
+} from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type { CaseCustomField } from '../../../common/types/domain';
-import { CaseCustomFieldRt } from '../../../common/types/domain';
+import { CaseCustomFieldSchema } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
   validateCaseExtendedFields,
@@ -69,7 +72,7 @@ export const replaceCustomField = async (
   try {
     const { value, caseVersion } = request;
 
-    decodeWithExcessOrThrow(CustomFieldPutRequestRt)(request);
+    decodeWithExcessOrThrowZod(CustomFieldPutRequestSchema)(request);
 
     const caseToUpdate = await caseService.getCase({
       id: caseId,
@@ -122,8 +125,9 @@ export const replaceCustomField = async (
       ...caseToUpdate.attributes.customFields.filter((field) => field.key !== customFieldId),
     ];
 
-    const decodedCustomFields =
-      decodeWithExcessOrThrow(CaseRequestCustomFieldsRt)(customFieldsToUpdate);
+    const decodedCustomFields = decodeWithExcessOrThrowZod(CaseRequestCustomFieldsSchema)(
+      customFieldsToUpdate
+    ) as CaseRequestCustomFields;
 
     const updatedAt = new Date().toISOString();
 
@@ -166,7 +170,9 @@ export const replaceCustomField = async (
     // Definition-aware validation of the FINAL map, matching create.ts/bulk_create.ts/bulk_update.ts:
     // the pairing-derived extended_fields entry must also be a valid key with a valid value
     // against the linked definition. `partial: true` — pairing never makes an absent field
-    // "required-missing".
+    // "required-missing". Only the keys this request wrote are validated (the full map is still
+    // passed so `show_when` / `required_when` see stored values): untouched fields were validated
+    // when written, and a stored value that is now invalid must not block an unrelated edit.
     if (extendedFieldsChanged && paired.extendedFields != null) {
       const globalFields = await resolveGlobalFields(
         caseToUpdate.attributes.owner,
@@ -174,6 +180,7 @@ export const replaceCustomField = async (
       );
       await validateCaseExtendedFields({
         extendedFields: paired.extendedFields as Record<string, string>,
+        touchedKeys: new Set(Object.values(paired.pairedKeyToStorageKey)),
         templateId: caseToUpdate.attributes.template?.id,
         globalFields,
         templatesService,
@@ -234,7 +241,7 @@ export const replaceCustomField = async (
       builtUserActions,
     });
 
-    return decodeOrThrow(CaseCustomFieldRt)(updatedCustomField);
+    return decodeOrThrowZod(CaseCustomFieldSchema)(updatedCustomField);
   } catch (error) {
     throw createCaseError({
       message: `Failed to replace customField, id: ${customFieldId} of case: ${caseId} version:${request.caseVersion} : ${error}`,
