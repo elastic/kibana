@@ -52,7 +52,7 @@ describe('registerFeaturePrivileges', () => {
       id: 'alerting',
       label: 'Universal Alerting',
       order: 1000,
-      euiIconType: 'watchesApp',
+      euiIconType: 'warning',
     });
   });
 

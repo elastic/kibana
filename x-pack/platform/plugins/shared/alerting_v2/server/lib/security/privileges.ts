@@ -27,7 +27,7 @@ const category: AppCategory = {
     defaultMessage: 'Universal Alerting',
   }),
   order: 1000,
-  euiIconType: 'watchesApp',
+  euiIconType: 'warning',
 };
 
 const featureDescriptions: Record<AlertingV2Feature, string> = {

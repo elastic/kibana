@@ -38,7 +38,7 @@ export const EmptyPrompt = ({
 
   return (
     <EuiPageTemplate.EmptyPrompt
-      iconType="watchesApp"
+      iconType="if"
       data-test-subj="createFirstRuleEmptyPrompt"
       title={
         <h2>
