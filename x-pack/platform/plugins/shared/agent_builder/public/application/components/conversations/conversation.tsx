@@ -89,18 +89,11 @@ export const Conversation: React.FC<{}> = () => {
   }, [staleAttachments, stagedAttachmentIds]);
 
   const handleStageStaleAttachments = useCallback(() => {
-    if (upsertAttachments && staleAttachmentInputs.length > 0) {
-      upsertAttachments(staleAttachmentInputs);
-      staleAttachmentInputs.forEach(({ id, type, data }) => {
-        if (id) {
-          attachmentsService
-            .getAttachmentUiDefinition(type)
-            ?.onStaleUpdateStaged?.({ id, type, data });
-        }
-      });
+    if (staleAttachmentInputs.length > 0) {
+      upsertAttachments?.(staleAttachmentInputs);
     }
     setDismissStaleAttachments(true);
-  }, [staleAttachmentInputs, upsertAttachments, attachmentsService]);
+  }, [staleAttachmentInputs, upsertAttachments]);
 
   // Display stale attachments panel when stale attachments response changes or conversationId changes
   useEffect(() => {

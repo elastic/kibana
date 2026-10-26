@@ -11,10 +11,7 @@ import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  attachmentDataToDashboardState,
-} from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import {
@@ -126,7 +123,6 @@ describe('registerDashboardAppIntegration', () => {
   let addAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
-  let staleUpdateStaged$: Subject<DashboardAttachment>;
   let draftAttachmentId: IdGenerator;
   let emitConversationChange: (change: {
     id?: string;
@@ -146,7 +142,6 @@ describe('registerDashboardAppIntegration', () => {
     addAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
     checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
-    staleUpdateStaged$ = new Subject<DashboardAttachment>();
     let currentDraftAttachmentId = 'draft-attachment-id-1';
     draftAttachmentId = {
       get current() {
@@ -193,7 +188,6 @@ describe('registerDashboardAppIntegration', () => {
       api: mockApi as unknown as DashboardApi,
       draftAttachmentId,
       checkSavedDashboardExist,
-      staleUpdateStaged$,
     });
   };
 
@@ -422,37 +416,5 @@ describe('registerDashboardAppIntegration', () => {
       })
     );
     expect(addAttachment.mock.calls[0][0].id).not.toBe(firstDraftAttachment.id);
-  });
-
-  it('applies a staged stale update to the open dashboard it is linked to', () => {
-    const attachment = createDashboardAttachment({ origin: 'dashboard-1' });
-    mockApi.savedObjectId$.next('dashboard-1');
-    register();
-    emitConversationChange({
-      id: 'conversation-1',
-      attachments: [createVersionedAttachment(attachment)],
-    });
-
-    const updatedData = { ...attachment.data, title: 'Saved elsewhere' };
-    staleUpdateStaged$.next({ ...attachment, data: updatedData });
-
-    expect(mockApi.setState).toHaveBeenCalledWith(attachmentDataToDashboardState(updatedData));
-  });
-
-  it('ignores a staged stale update for an attachment linked to another dashboard', () => {
-    const attachment = createDashboardAttachment({ origin: 'dashboard-2' });
-    mockApi.savedObjectId$.next('dashboard-1');
-    register();
-    emitConversationChange({
-      id: 'conversation-1',
-      attachments: [createVersionedAttachment(attachment)],
-    });
-
-    staleUpdateStaged$.next({
-      ...attachment,
-      data: { ...attachment.data, title: 'Saved elsewhere' },
-    });
-
-    expect(mockApi.setState).not.toHaveBeenCalled();
   });
 });

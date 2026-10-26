@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { combineLatest, EMPTY, from, Subject, switchMap } from 'rxjs';
+import { combineLatest, EMPTY, from, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
@@ -69,7 +69,6 @@ export const registerDashboardAttachmentUiDefinition = ({
   draftAttachmentId: IdGenerator;
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
-  const staleUpdateStaged$ = new Subject<DashboardAttachment>();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
   const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
@@ -95,7 +94,6 @@ export const registerDashboardAttachmentUiDefinition = ({
                   api,
                   draftAttachmentId,
                   checkSavedDashboardExist,
-                  staleUpdateStaged$,
                 })
               )
             )
@@ -113,7 +111,6 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onStaleUpdateStaged: (attachment) => staleUpdateStaged$.next(attachment),
     renderCanvasContent: (props, callbacks) => (
       <React.Suspense fallback={null}>
         <LazyDashboardCanvasAttachment
@@ -161,7 +158,6 @@ export const registerDashboardAttachmentUiDefinition = ({
 
   return () => {
     dashboardAppApiSubscription.unsubscribe();
-    staleUpdateStaged$.complete();
     dashboardApi = undefined;
   };
 };

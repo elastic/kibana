@@ -22,7 +22,6 @@ import {
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
-import { createStaleUpdateSubscription } from './stale_update_subscription';
 import type { IdGenerator } from '..';
 
 /**
@@ -38,7 +37,6 @@ export interface DashboardAppIntegrationParams {
   api: DashboardApi;
   draftAttachmentId: IdGenerator;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
-  staleUpdateStaged$: Observable<DashboardAttachment>;
 }
 
 interface State {
@@ -51,7 +49,6 @@ export const registerDashboardAppIntegration = ({
   api,
   draftAttachmentId,
   checkSavedDashboardExist,
-  staleUpdateStaged$,
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
@@ -142,12 +139,6 @@ export const registerDashboardAppIntegration = ({
     },
   });
 
-  const staleUpdateSubscription = createStaleUpdateSubscription({
-    api,
-    staleUpdateStaged$,
-    getAttachments: () => state.attachments,
-  });
-
   const manualChangesSubscription = api.anyStateChange$
     .pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS))
     .subscribe(addAttachmentFromDashboard);
@@ -156,7 +147,6 @@ export const registerDashboardAppIntegration = ({
     agentLiveUpdatesSubscription.unsubscribe();
     newAttachmentIdRegenerationSubscription.unsubscribe();
     originSyncSubscription.unsubscribe();
-    staleUpdateSubscription.unsubscribe();
     manualChangesSubscription.unsubscribe();
     conversationChangesSubscription.unsubscribe();
     if (pendingAddAttachmentTimeout !== undefined) {
