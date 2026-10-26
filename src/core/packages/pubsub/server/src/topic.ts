@@ -20,13 +20,27 @@ export interface Topic<TData = unknown> {
   readonly [dataType]?: TData;
 }
 
-const TOPIC_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9._-]{0,255}$/;
+/** A topic name is at most this many characters. */
+const TOPIC_NAME_MAX_LENGTH = 256;
 
-/** Returns a topic token. Registration is a separate setup call. */
+/**
+ * Dot-separated segments. Each segment starts with a letter, so `a..b` and a trailing `.` are
+ * rejected. Digits, `_` and `-` may follow the first letter of a segment.
+ */
+const TOPIC_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*(\.[a-zA-Z][a-zA-Z0-9_-]*)*$/;
+
+/**
+ * Returns a topic token. Registration is a separate setup call.
+ *
+ * Producers and consumers each call this with the same name and a shared data type. Don't import
+ * another plugin's token: that is a runtime dependency, and a consumer must not have to depend on
+ * the producer. Share the data type instead (a type-only import, or a small types-only package
+ * when two plugins would otherwise reference each other).
+ */
 export const defineTopic = <TData = unknown>(name: string): Topic<TData> => {
-  if (!TOPIC_NAME_PATTERN.test(name)) {
+  if (name.length > TOPIC_NAME_MAX_LENGTH || !TOPIC_NAME_PATTERN.test(name)) {
     throw new Error(
-      `Topic name "${name}" is invalid. Use a letter followed by letters, numbers, ".", "_" or "-".`
+      `Topic name "${name}" is invalid. Use dot-separated segments of letters, numbers, "_" or "-", each starting with a letter.`
     );
   }
 

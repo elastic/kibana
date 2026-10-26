@@ -50,8 +50,18 @@ describe('PubSubService registration', () => {
     );
   });
 
-  it('throws when defineTopic is given an invalid name', () => {
+  it('throws when a topic name has an empty segment, a trailing dot, or is too long', () => {
     expect(() => defineTopic('')).toThrow(/invalid/i);
     expect(() => defineTopic('has space')).toThrow(/invalid/i);
+    expect(() => defineTopic('a..b')).toThrow(/invalid/i);
+    expect(() => defineTopic('orders.')).toThrow(/invalid/i);
+    expect(() => defineTopic('a'.repeat(257))).toThrow(/invalid/i);
+    expect(() => defineTopic('cases.updated')).not.toThrow();
+  });
+
+  it('throws when a topic is registered without going through defineTopic', () => {
+    const setup = createService().setup();
+
+    expect(() => setup.registerTopic('ordersPlugin', { name: 'a..b' })).toThrow(/invalid/i);
   });
 });

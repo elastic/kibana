@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { Topic } from '@kbn/core-pubsub-server';
+import { defineTopic, type Topic } from '@kbn/core-pubsub-server';
 import type { InternalPubSubSetup } from './internal_contracts';
 
 type Phase = 'created' | 'setup' | 'started' | 'stopped';
@@ -56,6 +56,9 @@ export class PubSubService implements CoreService<InternalPubSubSetup, void> {
     if (this.phase !== 'setup') {
       throw new Error(`Cannot register topic "${topic.name}" outside of setup.`);
     }
+
+    // `Topic` is structural, so a caller can skip `defineTopic` and hand in `{ name }`.
+    defineTopic(topic.name);
 
     const registeredBy = this.topics.get(topic.name);
     if (registeredBy) {
