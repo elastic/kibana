@@ -12,7 +12,7 @@ import type {
   InvestigationAttachmentContentProps,
   InvestigationAttachmentRenderer,
 } from '../../investigation_attachments';
-import type { SubjectLinkServices } from './subject_link';
+import type { SubjectServices } from './subject_services';
 import { SUBJECT_LABEL, slackChannelLabel, subjectAttachmentLabel } from './translations';
 
 const labelDetail = ({
@@ -34,7 +34,7 @@ const labelDetail = ({
  * links the subject to its page through the `share` locators in `services`.
  */
 export const createSubjectAttachmentRenderer = (
-  services: SubjectLinkServices
+  services: SubjectServices
 ): InvestigationAttachmentRenderer<InvestigationSubject> & {
   type: typeof SUBJECT_ATTACHMENT_TYPE;
 } => ({

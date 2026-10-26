@@ -91,7 +91,18 @@ export class AgenticInvestigationsPublicPlugin
           application: core.application,
         });
       }
-      registerSubjectAttachmentTypes(agentBuilder, { share: startDeps.share });
+      registerSubjectAttachmentTypes(agentBuilder, {
+        // The alert flyout renders shared alerting components that read core and their plugins
+        // from this context, so core is passed whole.
+        ...core,
+        share: startDeps.share,
+        data: startDeps.data,
+        dataViews: startDeps.dataViews,
+        expressions: startDeps.expressions,
+        spaces: startDeps.spaces,
+        unifiedDocViewer: startDeps.unifiedDocViewer,
+        charts: startDeps.charts,
+      });
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,

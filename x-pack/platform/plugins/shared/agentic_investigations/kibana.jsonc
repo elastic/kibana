@@ -18,7 +18,12 @@
       "proposals",
       "workflowsManagement",
       "entityStore",
-      "share"
+      "share",
+      "data",
+      "dataViews",
+      "expressions",
+      "unifiedDocViewer",
+      "charts"
     ],
     "extraPublicDirs": ["common"]
   }

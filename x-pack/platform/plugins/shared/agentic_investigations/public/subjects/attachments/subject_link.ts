@@ -10,14 +10,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ALERTING_V2_EPISODES_LOCATOR } from '@kbn/alerting-v2-constants';
 import { ALERTS_LOCATOR_ID, createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SubjectRowData } from './subject_title';
-
-/** The services a subject link reads; `share` is optional, without it subjects keep their own link. */
-export interface SubjectLinkServices {
-  share?: Pick<SharePluginStart, 'url'>;
-}
+import type { SubjectServices } from './subject_services';
 
 interface SubjectLocatorTarget {
   locatorId: string;
@@ -85,7 +80,8 @@ export const getOwnSubjectHref = ({
   return undefined;
 };
 
-const isModifiedClick = (event: React.MouseEvent): boolean =>
+/** A click that the browser handles itself: middle button, or a new tab/window modifier. */
+export const isModifiedClick = (event: React.MouseEvent): boolean =>
   event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 export interface SubjectLink {
@@ -102,7 +98,7 @@ export interface SubjectLink {
  * do not link.
  */
 export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink => {
-  const { share } = useKibana<SubjectLinkServices>().services;
+  const { share } = useKibana<SubjectServices>().services;
   const subjectType = subject?.type;
   const subjectId = subject?.id;
   const alertVersion = subject?.snapshot?.alert_version;

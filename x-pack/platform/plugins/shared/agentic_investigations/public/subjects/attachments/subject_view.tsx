@@ -10,13 +10,15 @@ import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectTitle, type SubjectRowData } from './subject_title';
-import { useSubjectLink } from './subject_link';
+import { isModifiedClick, useSubjectLink } from './subject_link';
+import { canOpenSubjectFlyout, type SubjectServices } from './subject_services';
 import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
@@ -271,20 +273,58 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
   isNested = false,
 }) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
+  const { services } = useKibana<SubjectServices>();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const alertVersion = subject.snapshot?.alert_version;
+  // An alert opens next to the investigation; everything else keeps its link.
+  const opensFlyout = subject.type === 'alert' && canOpenSubjectFlyout(services, alertVersion);
+
+  const onRowClick = (event: React.MouseEvent) => {
+    if (!opensFlyout) {
+      onLinkClick?.(event);
+      return;
+    }
+    // A new-tab or new-window click keeps the browser's own behavior, so `href` still matters.
+    if (isModifiedClick(event)) {
+      return;
+    }
+    event.preventDefault();
+    setIsFlyoutOpen(true);
+  };
+
   return (
-    <CompactRow
-      iconType={SUBJECT_ICONS[subject.type]}
-      tone={SUBJECT_ICON_TONES[subject.type]}
-      title={getSubjectTitle(subject)}
-      description={getSubjectDescription(subject, isNested)}
-      href={href}
-      isExternal={isExternal}
-      onLinkClick={onLinkClick}
-      isNested={isNested}
-      data-test-subj={`investigationSubject-${subject.type}`}
-    />
+    <>
+      <CompactRow
+        iconType={SUBJECT_ICONS[subject.type]}
+        tone={SUBJECT_ICON_TONES[subject.type]}
+        title={getSubjectTitle(subject)}
+        description={getSubjectDescription(subject, isNested)}
+        href={href}
+        isExternal={isExternal}
+        onLinkClick={href === undefined ? undefined : onRowClick}
+        isNested={isNested}
+        data-test-subj={`investigationSubject-${subject.type}`}
+      />
+      {isFlyoutOpen && (
+        <React.Suspense fallback={null}>
+          <LazySubjectDetailsFlyout
+            alertId={subject.id}
+            alertVersion={alertVersion}
+            detailsHref={href}
+            onClose={() => setIsFlyoutOpen(false)}
+            services={services}
+          />
+        </React.Suspense>
+      )}
+    </>
   );
 };
+
+/** The flyout pulls in the alerting v2 episode UI, so it loads when a subject is clicked. */
+const LazySubjectDetailsFlyout = React.lazy(async () => {
+  const { SubjectDetailsFlyout } = await import('./subject_details_flyout');
+  return { default: SubjectDetailsFlyout };
+});
 
 const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 
