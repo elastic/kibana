@@ -704,17 +704,13 @@ module.exports = {
         complexity: 'warn',
 
         'no-duplicate-imports': 'off',
-        'no-implicit-globals': 'error',
         // rely on typescript
         'no-undef': 'off',
-        'no-useless-return': 'error',
         'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-access-state-in-setstate': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
-        'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
         'require-atomic-updates': 'error',
@@ -779,16 +775,6 @@ module.exports = {
         'x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}',
       ],
-      rules: {
-        '@typescript-eslint/no-for-in-array': 'error',
-      },
-    },
-    {
-      // typescript for /public and /common
-      files: [
-        'x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}',
-        'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}',
-      ],
       plugins: ['react'],
       env: {
         jest: true,
@@ -796,12 +782,9 @@ module.exports = {
       rules: {
         'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-access-state-in-setstate': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
-        'react/no-unused-state': 'error',
-        'react/sort-comp': 'error',
         'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
       },
@@ -866,10 +849,8 @@ module.exports = {
         ],
 
         'no-duplicate-imports': 'off',
-        'no-implicit-globals': 'error',
         // rely on typescript
         'no-undef': 'off',
-        'no-useless-return': 'error',
         'require-atomic-updates': 'error',
         'sort-keys': 'error',
         'no-restricted-imports': [
@@ -1018,7 +999,6 @@ module.exports = {
           },
         ],
         'react-hooks/exhaustive-deps': 'off',
-        'sort-keys': 1, // warning
         '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
       },
     },
@@ -1036,9 +1016,6 @@ module.exports = {
             groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
           },
         ],
-
-        // react
-        'react/sort-comp': 'error',
       },
     },
     {
@@ -1092,10 +1069,6 @@ module.exports = {
           },
         ],
         // Rules from `eslint:recommended` and `plugin:react/recommended` that don't run in oxlint.
-        'no-dupe-args': 'error',
-        'no-new-symbol': 'error',
-        'no-octal': 'error',
-        'no-unsafe-optional-chaining': 'error',
         'react/display-name': 'error',
         'react/no-deprecated': 'error',
       },
@@ -1211,17 +1184,13 @@ module.exports = {
         complexity: 'warn',
 
         'no-duplicate-imports': 'off',
-        'no-implicit-globals': 'error',
         // rely on typescript
         'no-undef': 'off',
-        'no-useless-return': 'error',
         'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-access-state-in-setstate': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
-        'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
         'require-atomic-updates': 'error',
