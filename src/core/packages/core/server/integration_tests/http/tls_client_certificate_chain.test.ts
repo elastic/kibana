@@ -296,7 +296,7 @@ describe.each<Protocol>(['http1', 'http2'])('TLS client certificate chain (%s)',
 
         for (const response of responses) {
           expect(response.authorized).toBe(false);
-          expect(response.authorizationError).toEqual(expect.any(String));
+          expect(response.authorizationError).toBe('UNABLE_TO_VERIFY_LEAF_SIGNATURE');
         }
       });
 
@@ -309,7 +309,7 @@ describe.each<Protocol>(['http1', 'http2'])('TLS client certificate chain (%s)',
 
         for (const response of responses) {
           expect(response.authorized).toBe(false);
-          expect(response.authorizationError).toEqual(expect.any(String));
+          expect(response.authorizationError).toBe('UNABLE_TO_VERIFY_LEAF_SIGNATURE');
         }
       });
     });
@@ -386,7 +386,7 @@ describe.each<Protocol>(['http1', 'http2'])('TLS client certificate chain (%s)',
 
         for (const response of responses) {
           expect(response.authorized).toBe(false);
-          expect(response.authorizationError).toEqual(expect.any(String));
+          expect(response.authorizationError).toBe('UNABLE_TO_VERIFY_LEAF_SIGNATURE');
         }
       });
     });
