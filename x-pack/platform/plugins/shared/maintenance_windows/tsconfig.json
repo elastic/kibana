@@ -49,6 +49,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/alerting-v2-schemas",
     "@kbn/alerting-v2-constants",
+    "@kbn/alerting-v2-utils",
     "@kbn/kql",
     "@kbn/data-views-plugin"
   ],

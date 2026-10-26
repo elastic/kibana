@@ -11,42 +11,8 @@ import { test } from '../fixtures';
 import { EXPECTED_CLOUD_ID, EXPECTED_ES_URL } from '../fixtures/constants';
 
 test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
-  // The billing link requires _ec_billing_admin. Mirror the FTR setup: map the SAML realm to
-  // include the role for the duration of this suite, then restore it afterwards.
-  let originalMapping: { roles: string[]; existed: boolean } = { roles: [], existed: false };
-
-  test.beforeAll(async ({ esClient }) => {
-    try {
-      const { 'cloud-saml-kibana': mapping } = await esClient.security.getRoleMapping({
-        name: 'cloud-saml-kibana',
-      });
-      originalMapping = { roles: mapping?.roles ?? [], existed: true };
-    } catch {
-      // mapping may not exist yet
-    }
-    await esClient.security.putRoleMapping({
-      name: 'cloud-saml-kibana',
-      roles: ['superuser', '_ec_billing_admin'],
-      enabled: true,
-      rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
-    });
-  });
-
   test.afterEach(async ({ esClient }) => {
     await esClient.security.invalidateApiKey({ name: 'test-api-key-*' });
-  });
-
-  test.afterAll(async ({ esClient }) => {
-    if (!originalMapping.existed) {
-      await esClient.security.deleteRoleMapping({ name: 'cloud-saml-kibana' });
-    } else {
-      await esClient.security.putRoleMapping({
-        name: 'cloud-saml-kibana',
-        roles: originalMapping.roles,
-        enabled: true,
-        rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
-      });
-    }
   });
 
   test('connection details overlay shows ES URL and Cloud ID', async ({
@@ -104,17 +70,34 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     const { cloudLinks } = pageObjects;
     await cloudLinks.openUserMenu();
 
-    await test.step('Profile link is visible', async () => {
-      expect(await cloudLinks.isProfileLinkVisible()).toBe(true);
-    });
+    // URLs come from the mocked `cloud_links` server config set. Configs under `test/scout_*`
+    // are excluded from ECH/MKI runs, so asserting exact values is safe here.
+    const externalLinks = [
+      {
+        link: cloudLinks.profileLink,
+        label: 'Profile',
+        href: 'https://cloud.elastic.co/user/userId',
+      },
+      {
+        link: cloudLinks.billingLink,
+        label: 'Billing and subscription',
+        href: 'https://cloud.elastic.co/billing',
+      },
+      {
+        link: cloudLinks.organizationLink,
+        label: 'Organization',
+        href: 'https://cloud.elastic.co/organization/organizationId',
+      },
+    ];
 
-    await test.step('Billing link is visible', async () => {
-      expect(await cloudLinks.isBillingLinkVisible()).toBe(true);
-    });
-
-    await test.step('Organization link is visible', async () => {
-      expect(await cloudLinks.isOrganizationLinkVisible()).toBe(true);
-    });
+    for (const { link, label, href } of externalLinks) {
+      await test.step(`${label} link opens Cloud in a new tab`, async () => {
+        await expect(link).toBeVisible();
+        await expect(link).toContainText(label);
+        await expect(link).toHaveAttribute('href', href);
+        await expect(link).toHaveAttribute('target', '_blank');
+      });
+    }
 
     await test.step('Appearance button is visible', async () => {
       expect(await cloudLinks.isAppearanceButtonVisible()).toBe(true);

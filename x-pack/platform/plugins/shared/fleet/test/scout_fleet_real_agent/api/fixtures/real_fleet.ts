@@ -35,8 +35,15 @@ export interface EnrolledAgent {
 
 export interface RealFleet {
   fleetServerUrl: string;
-  /** Starts an Elastic Agent container enrolled into the agent policy and waits until it is online. */
-  enrollAgent: (agentPolicyId: string) => Promise<EnrolledAgent>;
+  /**
+   * Starts an Elastic Agent container enrolled into the agent policy and waits until it is online.
+   * With `allowUnhealthy` it also accepts an agent that checked in as degraded or in error, for
+   * policies with inputs that cannot run against a real service.
+   */
+  enrollAgent: (
+    agentPolicyId: string,
+    options?: { allowUnhealthy?: boolean }
+  ) => Promise<EnrolledAgent>;
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -239,7 +246,13 @@ export const startRealFleet = async (
       return items.some((agent) => agent.status === 'online') ? true : undefined;
     });
 
-    const enrollAgent = async (agentPolicyId: string): Promise<EnrolledAgent> => {
+    const enrollAgent = async (
+      agentPolicyId: string,
+      options: { allowUnhealthy?: boolean } = {}
+    ): Promise<EnrolledAgent> => {
+      const acceptedStatuses = options.allowUnhealthy
+        ? ['online', 'degraded', 'error']
+        : ['online'];
       const enrollmentKey = await waitFor('the enrollment key', 60_000, async () => {
         const { items } = await request<{ items: Array<{ api_key: string }> }>(
           kbnClient,
@@ -290,7 +303,7 @@ export const startRealFleet = async (
               `local_metadata.host.hostname:"${hostname}"`
             )}`
           );
-          return items[0]?.status === 'online' ? items[0].id : undefined;
+          return items[0] && acceptedStatuses.includes(items[0].status) ? items[0].id : undefined;
         }
       );
 

@@ -128,6 +128,8 @@ export class JourneyFtrHarness {
     }
 
     this.page = await this.context.newPage();
+    // first page loads can exceed Playwright's 30s default when serving unoptimized bundles locally
+    this.page.setDefaultNavigationTimeout(120_000);
 
     await this.interceptBrowserRequests(this.page);
 

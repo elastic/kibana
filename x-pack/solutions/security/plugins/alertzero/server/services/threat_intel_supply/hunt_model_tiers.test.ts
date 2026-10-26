@@ -87,7 +87,8 @@ const states = async (
     } as never)
   ).map(({ state }) => state);
 
-const everyTier = (state: string) => [state, state, state];
+// One per tier Hunt runs on: Efficient and Frontier. Balanced is registered but has no hunt consumer.
+const everyTier = (state: string) => [state, state];
 
 describe('evaluateHuntModelTiers', () => {
   it('reports every tier in tier order, each on its own feature id, from one registry read each', async () => {
@@ -100,14 +101,14 @@ describe('evaluateHuntModelTiers', () => {
       logger,
     } as never);
 
-    expect(tiers.map(({ tier }) => tier)).toEqual(['efficient', 'balanced', 'frontier']);
+    expect(tiers.map(({ tier }) => tier)).toEqual(['efficient', 'frontier']);
     const calls = (searchInferenceEndpoints.endpoints.getForFeature as jest.Mock).mock.calls;
     expect(calls.map(([featureId]) => featureId).sort()).toEqual(
-      [
-        ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
-        ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
-        ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
-      ].sort()
+      [ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID, ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID].sort()
+    );
+    // Balanced is not a hunt tier, so its model is not Hunt supply.
+    expect(calls.map(([featureId]) => featureId)).not.toContain(
+      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
     );
     // Default mode, the same read Hunt makes: no `onlyReturnConfigured`.
     expect(calls.every(([, , opts]) => opts === undefined)).toBe(true);
@@ -238,7 +239,6 @@ describe('evaluateHuntModelTiers', () => {
 
     expect(await states(searchInferenceEndpoints, deployment())).toEqual([
       'recommended',
-      'unavailable',
       'configured',
     ]);
   });

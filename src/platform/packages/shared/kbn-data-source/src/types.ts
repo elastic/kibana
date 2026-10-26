@@ -11,6 +11,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { HttpStart } from '@kbn/core/public';
+import type { FilterableSource } from './filterable_source';
 
 export type DataSourceKind = 'index-pattern' | 'esql';
 
@@ -82,6 +83,13 @@ export interface DataSourceBase extends DataViewBase {
    * resolved with `http`.
    */
   getFilterableFields(http?: HttpStart): Promise<readonly Column[]>;
+
+  /**
+   * What filtering (unified search, KQL, filter pills) needs from this source. For `DataViewSource` it
+   * is the `DataView` itself. For `EsqlSource` it is a plain object with the dataset identity, with no
+   * `DataView` and nothing registered anywhere. See {@link FilterableSource}.
+   */
+  toFilterableSource(http?: HttpStart): Promise<FilterableSource>;
 
   /**
    * True iff this source is time-based.

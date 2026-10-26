@@ -148,7 +148,8 @@ interface KnowledgeIndicatorOnboardingScheduledProps {
 interface AgentToolEventWriteProps {
   success: boolean;
   event_id: string;
-  status: SignificantEventStatus;
+  /** Absent when no status was decided for the item (it was rejected or skipped earlier). */
+  status?: SignificantEventStatus;
   written: boolean;
   source_ids: string[];
   error_message?: string;

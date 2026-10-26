@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
@@ -98,7 +97,6 @@ describe('DetectionRulesClient change tracking', () => {
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
-      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient: savedObjectsClientMock.create(),

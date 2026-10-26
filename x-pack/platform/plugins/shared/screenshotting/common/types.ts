@@ -36,4 +36,9 @@ export interface PerformanceMetrics {
  * Timestamp metrics about a running screenshot task
  * which determine the maximum timeouts possible
  */
-export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'>;
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'> & {
+  /** page-render-service times its retries from the report, across task runs. */
+  report?: { id: string; createdAt: Date; waitingSince?: Date };
+  /** Whether the run can hand its worker back while waiting for page-render-service capacity. */
+  canHandBack?: boolean;
+};

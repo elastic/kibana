@@ -11,4 +11,5 @@ export type {
   ExecutionHistoryClientContract,
   ListRuleExecutionsArgs,
   ListRuleExecutionsResult,
+  RuleSearchMatches,
 } from './types';

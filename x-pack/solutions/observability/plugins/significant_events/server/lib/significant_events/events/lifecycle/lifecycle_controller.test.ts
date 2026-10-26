@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  SignalEntry,
+  SignificantEvent,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
+import { assessMembers } from '../event_members';
 import {
   decideLifecycle,
   decideStatusChange,
   requestedStatus,
-  type StatusChange,
+  StatusChange,
   type LifecycleDecision,
 } from './lifecycle_controller';
 
@@ -162,8 +167,13 @@ describe('decideLifecycle', () => {
         'no_data',
         RECOVERING,
       ],
-      ['does not open a new series on healthy members', undefined, 'recovered', NOT_A_BREACH],
-      ['does not open a new series on unjudged members', undefined, 'no_data', NOT_A_BREACH],
+      [
+        'does not open a series from healthy members: only evidence of an error is born',
+        undefined,
+        'recovered',
+        NOT_A_BREACH,
+      ],
+      ['opens a new series active when a member cannot be judged', undefined, 'no_data', ACTIVE],
       ['does not reopen a closed series on healthy members', 'inactive', 'recovered', NOT_A_BREACH],
       ['does not reopen a closed series on unjudged members', 'inactive', 'no_data', NOT_A_BREACH],
     ])('%s', (_label, status, outcome, expected) => {
@@ -232,18 +242,18 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('enters recovering only from an assessment of an active series', () => {
+    it('enters recovering only from an assessment of an active or new series', () => {
       everyCase.forEach(({ status, change, decision }) => {
         if (decision.write && decision.status === 'recovering' && status !== 'recovering') {
           expect(change.kind).toBe('assessment');
-          expect(status).toBe('active');
+          expect(['active', undefined]).toContain(status);
         }
       });
     });
 
-    it('never lets an assessment close a series, and lets it leave recovering only back to active', () => {
+    it('never lets an assessment close a live series, and lets it leave recovering only back to active', () => {
       everyCase.forEach(({ status, change, decision }) => {
-        if (change.kind === 'assessment' && decision.write) {
+        if (change.kind === 'assessment' && decision.write && status !== undefined) {
           expect(decision.status).not.toBe('inactive');
           if (status === 'recovering') {
             expect(['recovering', 'active']).toContain(decision.status);
@@ -252,21 +262,119 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('never lets an assessment open or reopen a series unless it is breaching', () => {
+    it('never lets a non-breaching assessment reopen a closed series', () => {
       everyCase.forEach(({ status, change, decision }) => {
-        const notLive = status === undefined || status === 'inactive';
-        if (change.kind === 'assessment' && change.outcome !== 'breached' && notLive) {
+        if (
+          change.kind === 'assessment' &&
+          change.outcome !== 'breached' &&
+          status === 'inactive'
+        ) {
           expect(decision.write).toBe(false);
         }
       });
     });
 
-    it('closes a series only through an operator or a deleted rule', () => {
-      everyCase.forEach(({ change, decision }) => {
-        if (decision.write && decision.status === 'inactive') {
+    it('closes a live series only through an operator or a deleted rule', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        const wasLive = status === 'active' || status === 'recovering';
+        if (wasLive && decision.write && decision.status === 'inactive') {
           expect(['operator', 'rule_deleted']).toContain(change.kind);
         }
       });
     });
+  });
+});
+
+const decideFromMembers = ({
+  latest,
+  signals,
+}: {
+  latest: SignificantEvent | undefined;
+  signals: SignalEntry[];
+}): LifecycleDecision =>
+  decideLifecycle({
+    state: { status: latest?.status },
+    change: StatusChange.assessed(assessMembers(signals)),
+  });
+
+const eventAt = (status: SignificantEvent['status']): SignificantEvent =>
+  ({ event_id: 'e1', status } as SignificantEvent);
+
+const signal = (rule: string, verdict: SignalEntry['verdict']): SignalEntry =>
+  ({
+    type: 'detection',
+    source_id: 'logs',
+    description: `${rule} ${verdict}`,
+    verdict,
+    metadata: { rule_uuid: rule, rule_name: rule },
+  } as SignalEntry);
+
+const breaching = [signal('a', 'confirms'), signal('b', 'confirms')];
+const oneHealthy = [signal('a', 'refutes'), signal('b', 'confirms')];
+const allHealthy = [signal('a', 'refutes'), signal('b', 'refutes')];
+
+describe('discovery assessments: the status comes from the members, never from the agent', () => {
+  it('opens a new event as active on a breach', () => {
+    expect(decideFromMembers({ latest: undefined, signals: breaching })).toEqual({
+      write: true,
+      status: 'active',
+    });
+  });
+
+  it('does not open an event from healthy members', () => {
+    expect(decideFromMembers({ latest: undefined, signals: allHealthy })).toEqual({
+      write: false,
+      reason: 'not_a_breach',
+    });
+  });
+
+  it('keeps an active event active while any member still breaches', () => {
+    expect(decideFromMembers({ latest: eventAt('active'), signals: oneHealthy })).toEqual({
+      write: true,
+      status: 'active',
+    });
+  });
+
+  it('starts recovery when every member is healthy', () => {
+    expect(decideFromMembers({ latest: eventAt('active'), signals: allHealthy })).toEqual({
+      write: true,
+      status: 'recovering',
+    });
+  });
+
+  it('returns a recovering event to active when a member breaches again', () => {
+    expect(
+      decideFromMembers({
+        latest: eventAt('recovering'),
+        signals: [signal('a', 'refutes'), signal('b', 'refutes'), signal('c', 'confirms')],
+      })
+    ).toEqual({ write: true, status: 'active' });
+  });
+
+  it('keeps a recovering event recovering while members stay healthy', () => {
+    expect(decideFromMembers({ latest: eventAt('recovering'), signals: allHealthy })).toEqual({
+      write: true,
+      status: 'recovering',
+    });
+  });
+
+  it('reopens a closed event on a breach, and ignores healthy members of a closed one', () => {
+    expect(decideFromMembers({ latest: eventAt('inactive'), signals: breaching })).toEqual({
+      write: true,
+      status: 'active',
+    });
+    expect(decideFromMembers({ latest: eventAt('inactive'), signals: allHealthy })).toEqual({
+      write: false,
+      reason: 'not_a_breach',
+    });
+  });
+
+  it('holds the status when a member cannot be judged', () => {
+    expect(
+      decideFromMembers({
+        latest: eventAt('active'),
+        signals: [signal('a', 'refutes'), signal('b', 'inconclusive')],
+      })
+    ).toEqual({ write: true, status: 'active' });
   });
 });

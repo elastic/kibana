@@ -42,6 +42,16 @@ export interface ConnectorDetail {
 }
 
 /**
+ * Resolves the connector allow-list for a run. When an agent configuration is present,
+ * an unset `connector_ids` means no connectors are assigned; with no agent context
+ * there is no scoping (undefined). Mirrors `execute_connector_sub_action` and `sml_search`.
+ */
+export const resolveAllowedConnectorIds = (
+  agentConfiguration?: { connector_ids?: string[] } | undefined
+): string[] | undefined =>
+  agentConfiguration ? agentConfiguration.connector_ids ?? [] : undefined;
+
+/**
  * Returns connectors that have a ConnectorSpec and, when allowedIds is provided,
  * are within that set. Pass undefined to allow all connectors; pass [] to block all.
  */

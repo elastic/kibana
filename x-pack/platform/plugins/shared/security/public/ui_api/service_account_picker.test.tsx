@@ -241,7 +241,7 @@ describe('getServiceAccountPicker UI API', () => {
       });
     await render();
     await user.click(await screen.findByRole('button', { name: 'Create account' }));
-    const selector = await screen.findByRole('button', { name: 'Set privileges' });
+    const selector = await screen.findByRole('combobox', { name: 'Set privileges' });
     await waitFor(() => expect(selector).toBeEnabled());
     fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
       target: { value: created.name },

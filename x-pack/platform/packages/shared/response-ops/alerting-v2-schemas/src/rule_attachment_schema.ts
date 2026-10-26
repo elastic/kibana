@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
+import { lazySchema, type z } from '@kbn/zod/v4';
 import { optionalWithDescription as opt } from './common';
 import { ruleResponseSchema } from './rule_data_schema';
 
@@ -38,17 +38,20 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
  * strictness itself, `.strip()` does not cascade, so the nested metadata needs
  * its own.
  */
-const { shape } = ruleResponseSchema;
 
-export const ruleAttachmentDataSchema = ruleResponseSchema
-  .omit({ created_by: true, updated_by: true, version: true })
-  .extend({
-    id: opt(shape.id),
-    enabled: opt(shape.enabled),
-    created_at: opt(shape.created_at),
-    updated_at: opt(shape.updated_at),
-    metadata: shape.metadata.strip(),
-  })
-  .strip();
+export const ruleAttachmentDataSchema = lazySchema(() => {
+  const { shape } = ruleResponseSchema;
+
+  return ruleResponseSchema
+    .omit({ created_by: true, updated_by: true, version: true })
+    .extend({
+      id: opt(shape.id),
+      enabled: opt(shape.enabled),
+      created_at: opt(shape.created_at),
+      updated_at: opt(shape.updated_at),
+      metadata: shape.metadata.strip(),
+    })
+    .strip();
+});
 
 export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;

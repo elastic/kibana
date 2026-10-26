@@ -150,7 +150,12 @@ export const DashboardAppNoDataPage = ({
         }
         hidden
       />
-      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} onTryESQL={onTryESQL} />
+      <AnalyticsNoDataPage
+        onDataViewCreated={onDataViewCreated}
+        onTryESQL={onTryESQL}
+        // the handler needs the Lens state helpers, so keep the button disabled until they resolve
+        isTryESQLDisabled={!lensHelpersAsync.value}
+      />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };

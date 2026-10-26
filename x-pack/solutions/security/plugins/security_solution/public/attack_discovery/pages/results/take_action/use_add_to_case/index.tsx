@@ -6,7 +6,11 @@
  */
 
 import { COMMENT_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
+import type {
+  CaseAttachmentWithoutOwner,
+  CaseAttachmentsWithoutOwner,
+} from '@kbn/cases-plugin/public/types';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
@@ -17,9 +21,28 @@ import * as i18n from './translations';
 interface Props {
   canUserCreateAndReadCases: () => boolean;
   onClick?: () => void;
-  onSuccess?: (isNewCase: boolean) => void;
+  /** Called once the attachments have been posted, with the case they were posted to. */
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
   title: string;
 }
+
+/** Attaches the discoveries as markdown comments plus their constituent alerts. */
+interface AddMarkdownToCaseParams {
+  alertIds: string[];
+  markdownComments: string[];
+  replacements?: Replacements;
+}
+
+/** Attaches whatever the caller builds once the user has picked (or created) a case. */
+interface AddAttachmentsToCaseParams {
+  /**
+   * Builds the payload for the chosen case, or with no case before the create-case flyout has one.
+   * Must be pure, as the case selector also calls it on every render.
+   */
+  getAttachments: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
+}
+
+export type AddToCaseParams = AddMarkdownToCaseParams | AddAttachmentsToCaseParams;
 
 export const useAddToCase = ({
   canUserCreateAndReadCases,
@@ -28,15 +51,7 @@ export const useAddToCase = ({
   title,
 }: Props): {
   disabled: boolean;
-  onAddToCase: ({
-    alertIds,
-    markdownComments,
-    replacements,
-  }: {
-    alertIds: string[];
-    markdownComments: string[];
-    replacements?: Replacements;
-  }) => void;
+  onAddToCase: (params: AddToCaseParams) => void;
 } => {
   const { cases } = useKibana().services;
   const { alertsIndexPattern } = useAssistantContext();
@@ -54,22 +69,22 @@ export const useAddToCase = ({
       },
     },
     onClose: onClick,
-    onSuccess: (_theCase, isNewCase) => onSuccess?.(isNewCase),
+    onSuccess,
     successToaster: {
       content: i18n.ADD_TO_CASE_SUCCESS,
     },
   });
 
   const onAddToCase = useCallback(
-    ({
-      alertIds,
-      markdownComments,
-      replacements,
-    }: {
-      alertIds: string[];
-      markdownComments: string[];
-      replacements?: Replacements;
-    }) => {
+    (params: AddToCaseParams) => {
+      if ('getAttachments' in params) {
+        const { getAttachments } = params;
+        openSelectCaseModal({ getAttachments: ({ theCase }) => getAttachments(theCase) });
+        return;
+      }
+
+      const { alertIds, markdownComments, replacements } = params;
+
       const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
         type: COMMENT_ATTACHMENT_TYPE,
         data: { content: x },

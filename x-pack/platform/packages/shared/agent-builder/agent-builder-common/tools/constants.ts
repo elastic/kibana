@@ -82,6 +82,15 @@ export const platformSignificantEventsTools = {
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
 } as const;
 
+/** Nightshift source tools, registered by the Significant Events plugin. */
+export const observabilityNightshiftSourceTools = {
+  listSources: `${internalNamespaces.observability}.nightshift.source_list`,
+  getSource: `${internalNamespaces.observability}.nightshift.source_get`,
+  createSource: `${internalNamespaces.observability}.nightshift.source_create`,
+  updateSource: `${internalNamespaces.observability}.nightshift.source_update`,
+  deleteSource: `${internalNamespaces.observability}.nightshift.source_delete`,
+} as const;
+
 /** AI-index tools, registered by the Context Engine Agent Builder plugin. */
 export const contextEngineAiIndexTools = {
   listAiIndices: `${internalNamespaces.platformContextEngine}.list_ai_indices`,
@@ -126,6 +135,7 @@ export const internalTools = {
   describeApi: 'describe_api',
   describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
+  executeDynamicTool: 'execute_dynamic_tool',
 };
 
 export const isAttachmentTool = (toolName: string) =>

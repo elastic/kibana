@@ -122,10 +122,10 @@ export interface SignificantEventsMaintenanceService {
     updatedBy?: string;
   }): Promise<SignificantEventsMaintenanceSummary>;
   /**
-   * Destructively clear all Significant Events data across every space and return
-   * every space to enabled, including spaces a user had paused beforehand. Each space is
-   * paused through its own document while the data is being deleted, and the spaces reset
-   * paused are released again if it aborts before the data is touched.
+   * Clear the current space's KIs, queries, backing rules and detections, then return
+   * it to enabled with feature settings off. Other spaces, shared streams, sources,
+   * investigations and rule-event history are preserved. An abort before cleanup
+   * rolls back reset's pause and sweep; completed deletions are never rolled back.
    */
   reset(params: {
     request: KibanaRequest;

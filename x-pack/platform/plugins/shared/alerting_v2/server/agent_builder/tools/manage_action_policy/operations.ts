@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type {
   ActionPolicyAttachmentData,
   ActionPolicyGrouping,
@@ -30,87 +30,101 @@ import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 // Derived from shared alerting-v2-schemas so tool-level validation stays
 // in sync with the CRUD API constraints automatically.
 
-export const setMetadataOperationSchema = z
-  .object({
-    operation: z.literal('set_metadata'),
-    name: z.string().min(1).max(256).optional().describe('The action policy name.'),
-    description: z.string().max(1024).optional().describe('A description of the action policy.'),
-  })
-  .describe('Use `set_metadata` to name the action policy and add a description.');
+export const setMetadataOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('set_metadata'),
+      name: z.string().min(1).max(256).optional().describe('The action policy name.'),
+      description: z.string().max(1024).optional().describe('A description of the action policy.'),
+    })
+    .describe('Use `set_metadata` to name the action policy and add a description.')
+);
 
-export const setDestinationsOperationSchema = z
-  .object({
-    operation: z.literal('set_destinations'),
-    destinations: z
-      .array(actionPolicyDestinationSchema)
-      .min(1, 'At least one destination must be provided')
-      .max(10)
-      .describe('The list of workflow destinations.'),
-  })
-  .describe(
-    'Use `set_destinations` to choose which workflows receive notifications (email, Slack, PagerDuty, etc.).'
-  );
+export const setDestinationsOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('set_destinations'),
+      destinations: z
+        .array(actionPolicyDestinationSchema)
+        .min(1, 'At least one destination must be provided')
+        .max(10)
+        .describe('The list of workflow destinations.'),
+    })
+    .describe(
+      'Use `set_destinations` to choose which workflows receive notifications (email, Slack, PagerDuty, etc.).'
+    )
+);
 
-export const setMatcherOperationSchema = z
-  .object({
-    operation: z.literal('set_matcher'),
-    matcher: policyMatcherSchema
-      .nullable()
-      .describe('Structured matcher for alerts, or null for a catch-all.'),
-  })
-  .describe(
-    'Use `set_matcher` to limit which alerts this policy notifies on. A null matcher matches all alerts in the space; an empty matcher is rejected, so use null instead.'
-  );
+export const setMatcherOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('set_matcher'),
+      matcher: policyMatcherSchema
+        .nullable()
+        .describe('Structured matcher for alerts, or null for a catch-all.'),
+    })
+    .describe(
+      'Use `set_matcher` to limit which alerts this policy notifies on. A null matcher matches all alerts in the space; an empty matcher is rejected, so use null instead.'
+    )
+);
 
-export const setGroupingOperationSchema = z
-  .object({
-    operation: z.literal('set_grouping'),
-    groupingMode: groupingModeSchema.optional().describe('The grouping mode.'),
-    groupBy: z
-      .array(z.string().min(1).max(256))
-      .max(10)
-      .optional()
-      .nullable()
-      .describe(
-        'Fields used to group alerts. Required by `per_field`, and rejected by the other modes, which group on no field.'
-      ),
-  })
-  .describe(
-    'Use `set_grouping` to batch matched alerts into notifications — one per alert (`per_alert`), one for all matching alerts, or grouped by field.'
-  );
+export const setGroupingOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('set_grouping'),
+      groupingMode: groupingModeSchema.optional().describe('The grouping mode.'),
+      groupBy: z
+        .array(z.string().min(1).max(256))
+        .max(10)
+        .optional()
+        .nullable()
+        .describe(
+          'Fields used to group alerts. Required by `per_field`, and rejected by the other modes, which group on no field.'
+        ),
+    })
+    .describe(
+      'Use `set_grouping` to batch matched alerts into notifications — one per alert (`per_alert`), one for all matching alerts, or grouped by field.'
+    )
+);
 
-export const setThrottleOperationSchema = z
-  .object({
-    operation: z.literal('set_throttle'),
-    strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-    interval: durationSchema
-      .optional()
-      .describe(
-        'The throttle interval (e.g. 5m, 1h). Required by `per_status_interval` and `time_interval`, and rejected by the other strategies, which do not notify on a schedule.'
-      ),
-  })
-  .describe(
-    'Use `set_throttle` to limit how often notifications fire so the user is not flooded by repeat alerts.'
-  );
+export const setThrottleOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('set_throttle'),
+      strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
+      interval: durationSchema
+        .optional()
+        .describe(
+          'The throttle interval (e.g. 5m, 1h). Required by `per_status_interval` and `time_interval`, and rejected by the other strategies, which do not notify on a schedule.'
+        ),
+    })
+    .describe(
+      'Use `set_throttle` to limit how often notifications fire so the user is not flooded by repeat alerts.'
+    )
+);
 
-export const validateOperationSchema = z
-  .object({
-    operation: z.literal('validate'),
-  })
-  .describe(
-    'Use `validate` as the last operation to confirm the action policy is complete and ready to save.'
-  );
+export const validateOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('validate'),
+    })
+    .describe(
+      'Use `validate` as the last operation to confirm the action policy is complete and ready to save.'
+    )
+);
 
 // ─── Discriminated union ──────────────────────────────────────────────────────
 
-export const actionPolicyOperationSchema = z.discriminatedUnion('operation', [
-  setMetadataOperationSchema,
-  setDestinationsOperationSchema,
-  setMatcherOperationSchema,
-  setGroupingOperationSchema,
-  setThrottleOperationSchema,
-  validateOperationSchema,
-]);
+export const actionPolicyOperationSchema = lazySchema(() =>
+  z.discriminatedUnion('operation', [
+    setMetadataOperationSchema,
+    setDestinationsOperationSchema,
+    setMatcherOperationSchema,
+    setGroupingOperationSchema,
+    setThrottleOperationSchema,
+    validateOperationSchema,
+  ])
+);
 
 export type ActionPolicyOperation = z.infer<typeof actionPolicyOperationSchema>;
 

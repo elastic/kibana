@@ -5,74 +5,102 @@
  * 2.0.
  */
 
-import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { DiscoveryEvaluationExample, DiscoveryAgentOutput } from '../../types';
+import type { DiscoveryEvaluator } from '../../types';
 
-/** Status decision gates, mirrored from the discovery agent instructions. Severity is graded separately. */
-const STATUS_DECISION_RUBRIC = [
-  "Grade whether the agent's `status` for each event is correct given the gates below. Do not grade severity; the severity-calibration evaluator owns that decision.",
-  'You cannot run queries. Use the signal counts in the summary and the agent output evidence.',
-  '',
-  'Status gates:',
-  '- `active`: a current failure, material degradation, or sensitive-data exposure has a `confirms` verdict, or an `inconclusive` verdict leaves one plausible, or a `not_checked` verdict leaves one plausible only when evidence shows no backed query was available. A concrete non-benign error in a found `off_topic` row directly confirms a separate observed-error event; judge that event from the row’s error signature and impact.',
-  '- `inactive` for a new candidate: the proposed incident is a false alarm, benign/positive change, unrelated finding, or non-confirming finding (`confirmsVerdictCount == 0`), with no plausible failure, degradation, or exposure left unresolved. A concrete non-benign error found in an off-topic row is independent current evidence: reject the original rule, but represent the observed error with an `active` event rather than marking it inactive.',
-  '- `inactive` for an existing active event is a recovery state. For an active or ambiguous failure shape it requires recovery-lens grounding with verified healthy/opposite rows or a successfully executed exact query with no matching failure rows.',
-  '- An active event with the same rule may be reconciled to `inactive` even when its prior signal is unconfirmed, if a current exact query shows verified healthy/opposite rows or no matching failure rows. This exception applies to directionally ambiguous detections, preserves the existing episode, and does not create a new inactive event.',
-  '- `inactive` for a settled episode requires every signal to be settled/downward or to satisfy the same-rule recovery reconciliation exception. Carried settled signals are trusted; each fresh settled signal requires recovery-lens grounding with verified healthy/opposite rows or a successfully executed exact query with no matching failure rows. A query error, telemetry gap, unrelated result, or active failure row blocks closure.',
-  '',
-  'Hard constraints: a matching healthy or positive row is verified but does not confirm an incident; mark it rejected and dismiss when no failure, degradation, or exposure remains. The observed-error exception applies only to a concrete non-benign error, not healthy, ambiguous, or merely unrelated rows. A successful empty recovery-lens query can support closure; a query error or telemetry gap cannot. A `dip` alone establishes neither active failure nor recovery.',
-].join('\n');
+const ruleUuidOf = (detection: { rule_uuid?: string; metadata?: { rule_uuid?: string } }): string =>
+  detection.rule_uuid ?? detection.metadata?.rule_uuid ?? '';
 
 /**
- * LLM evaluator: grades whether `status` matches the IC decision gates.
- * Severity is graded by the dedicated severity-calibration evaluator.
+ * Status follows from the verdicts the agent stores, so the decision left to grade is whether an
+ * event was written at all: one for every active expected event, and no *confirmed* event for a
+ * detection no expected event covers (a false alarm). An unconfirmed event, or one for a detection
+ * the dataset expects as inactive, is the agent's to judge and scores the same written or not.
+ * `grouping_correctness` and
+ * `confirmation_alignment` ignore events outside the expected rules, so this is where those are
+ * caught.
  */
-export const createStatusCorrectnessEvaluator = (
-  criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator
-): Evaluator<DiscoveryEvaluationExample, DiscoveryAgentOutput> => ({
+export const statusCorrectnessEvaluator: DiscoveryEvaluator = {
   name: 'status_correctness',
-  kind: 'LLM',
+  kind: 'CODE',
   direction: 'maximize',
-  evaluate: async (params) => {
-    const { output, expected } = params;
-    const expectedGroundTruth = expected?.expected_ground_truth;
-
-    if (!expectedGroundTruth) {
-      return {
+  evaluate: ({ input, output, expected }) => {
+    const expectedEvents = expected?.expected_significant_events ?? [];
+    if (expectedEvents.length === 0) {
+      return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'expected_ground_truth not specified — skipping status correctness check',
-      };
+        explanation: 'No expected_significant_events declared for this scenario',
+      });
     }
 
-    const events = output?.significantEvents ?? [];
-    const eventsSummary = events.map((e) => ({
-      event_id: e.event_id,
-      status: e.status,
-      confirmsVerdictCount: (e.signals ?? []).filter((s) => s.verdict === 'confirms').length,
-      refutesVerdictCount: (e.signals ?? []).filter((s) => s.verdict === 'refutes').length,
-      offTopicVerdictCount: (e.signals ?? []).filter((s) => s.verdict === 'off_topic').length,
-      unresolvedVerdictCount: (e.signals ?? []).filter(
-        (s) => s.verdict === 'inconclusive' || s.verdict === 'not_checked'
-      ).length,
-    }));
+    const ruleSetOf = (event: (typeof expectedEvents)[number]) =>
+      new Set(
+        (event.signals ?? []).map(({ metadata }) => ruleUuidOf(metadata ?? {})).filter(Boolean)
+      );
+    // An expected `inactive` event is a benign case discovery judges for itself: it is not owed,
+    // and writing it is no mistake. Only the active ones are owed, and a detection that no expected
+    // event covers at all is forbidden.
+    const expectedRuleSets = expectedEvents
+      .filter((event) => event.status !== 'inactive')
+      .map(ruleSetOf);
+    const optionalRules = new Set(
+      expectedEvents
+        .filter((event) => event.status === 'inactive')
+        .flatMap((event) => [...ruleSetOf(event)])
+    );
+    const expectedUniverse = new Set(expectedRuleSets.flatMap((rules) => [...rules]));
+    const forbiddenRules = new Set(
+      (input?.detections ?? [])
+        .map(ruleUuidOf)
+        .filter((rule) => rule && !expectedUniverse.has(rule) && !optionalRules.has(rule))
+    );
 
-    const criteria: EvaluationCriterion[] = [
-      {
-        id: 'status_correctness',
-        score: 1,
-        text:
-          `${STATUS_DECISION_RUBRIC}\n\n` +
-          `Expected outcome: ${expectedGroundTruth}. ` +
-          `The discovery agent returned: ${JSON.stringify(eventsSummary)}. ` +
-          `PASS only if each event's returned status matches the expected outcome (match by title/content, not by exact event_id) AND is justified by the event's ` +
-          `signals and the gates above. Ignore severity in this evaluator. A status or constraint violation is a FAIL even if it is "close".`,
-      },
+    const writtenSignals = (output?.significantEvents ?? []).flatMap(
+      (event) => event.signals ?? []
+    );
+    const writtenRules = new Set(
+      writtenSignals.map(({ metadata }) => ruleUuidOf(metadata ?? {})).filter(Boolean)
+    );
+    const confirmedRules = new Set(
+      writtenSignals
+        .filter(({ verdict }) => verdict === 'confirms')
+        .map(({ metadata }) => ruleUuidOf(metadata ?? {}))
+        .filter(Boolean)
+    );
+
+    const missingEvents = expectedRuleSets.filter(
+      (rules) => ![...rules].some((rule) => writtenRules.has(rule))
+    );
+    const wronglyWritten = [...forbiddenRules].filter((rule) => confirmedRules.has(rule)).sort();
+
+    const checks = expectedRuleSets.length + forbiddenRules.size;
+    const failures = missingEvents.length + wronglyWritten.length;
+    if (checks === 0) {
+      return Promise.resolve({
+        score: null,
+        label: 'unavailable',
+        explanation: 'No active expected or forbidden rules declared for this scenario',
+      });
+    }
+    const issues = [
+      ...missingEvents.map(
+        (rules) => `no event written for expected rules [${[...rules].sort().join(', ')}]`
+      ),
+      ...(wronglyWritten.length > 0
+        ? [
+            `confirmed event written for rules no expected event covers [${wronglyWritten.join(
+              ', '
+            )}]`,
+          ]
+        : []),
     ];
 
-    return criteriaFn(criteria).evaluate({
-      ...params,
-      output,
+    return Promise.resolve({
+      score: (checks - failures) / checks,
+      explanation:
+        issues.length === 0
+          ? 'An event was written for every expected event and none confirmed an uncovered detection'
+          : issues.join('; '),
     });
   },
-});
+};

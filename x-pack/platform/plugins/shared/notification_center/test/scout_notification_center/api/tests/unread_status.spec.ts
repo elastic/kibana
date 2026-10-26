@@ -16,13 +16,12 @@ apiTest.describe('Notification Center - unread status', { tag: [...tags.stateful
   let cookieHeader: Record<string, string>;
   const h = createHelpers(() => cookieHeader);
 
-  apiTest.beforeAll(async ({ samlAuth, esClient, apiClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, systemEsClient, apiClient }) => {
     ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
-    await h.getNotifications(apiClient);
     const markAll = await h.markAllRead(apiClient);
     const marker = Date.parse(markAll.body.read_all_before);
 
-    await seedNotifications(esClient, [
+    await seedNotifications(systemEsClient, [
       makeDoc('unread-status-a', {
         namespace: NAMESPACE,
         '@timestamp': new Date(marker + 1).toISOString(),
@@ -34,8 +33,8 @@ apiTest.describe('Notification Center - unread status', { tag: [...tags.stateful
     ]);
   });
 
-  apiTest.afterAll(async ({ esClient }) => {
-    await clearNotifications(esClient, NAMESPACE);
+  apiTest.afterAll(async ({ systemEsClient }) => {
+    await clearNotifications(systemEsClient, NAMESPACE);
   });
 
   apiTest('tracks read-state transitions', async ({ apiClient }) => {
