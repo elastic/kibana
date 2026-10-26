@@ -15,6 +15,7 @@ import type {
 } from '@kbn/connector-schemas/servicenow';
 import type {
   ExternalService,
+  ExternalServiceChoices,
   ExternalServiceParamsCreate,
   ExternalServiceParamsUpdate,
   ImportSetApiResponse,
@@ -39,6 +40,35 @@ export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
 const TABLE_GET: RequestContext = { endpoint: 'table', method: 'get' };
 const HEALTH_GET: RequestContext = { endpoint: 'health', method: 'get' };
+
+interface TableChoice extends ExternalServiceChoices {
+  name?: string;
+}
+
+/**
+ * Choices are fetched from both the parent `task` table and the specific table, and the specific
+ * table can override a parent choice. Each (element, value, dependent_value) is kept once, using
+ * the specific table's entry when both define it. `dependent_value` is part of the key because
+ * dependent choices such as subcategories legitimately repeat a value under different parents.
+ */
+const dedupeChoices = (choices: TableChoice[], table: string): ExternalServiceChoices[] => {
+  const choicesByKey = new Map<string, TableChoice>();
+
+  for (const choice of choices) {
+    const key = JSON.stringify([choice.element, choice.value, choice.dependent_value]);
+    const existing = choicesByKey.get(key);
+    if (existing === undefined || (existing.name !== table && choice.name === table)) {
+      choicesByKey.set(key, choice);
+    }
+  }
+
+  return Array.from(choicesByKey.values(), ({ label, value, dependent_value, element }) => ({
+    label,
+    value,
+    dependent_value,
+    element,
+  }));
+};
 
 export const createExternalService: ServiceFactory = ({
   credentials,
@@ -104,7 +134,7 @@ export const createExternalService: ServiceFactory = ({
       .slice(1)
       .reduce((acc, field) => `${acc}^ORelement=${field}`, `element=${fields[0]}`);
 
-    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}^language=en&sysparm_fields=label,value,dependent_value,element`;
+    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}^language=en&sysparm_fields=label,value,dependent_value,element,name`;
   };
 
   const checkInstance = (res: AxiosResponse) => {
@@ -413,7 +443,7 @@ export const createExternalService: ServiceFactory = ({
         connectorUsageCollector,
       });
       checkInstance(res);
-      return res.data.result;
+      return dedupeChoices(res.data.result, table);
     } catch (error) {
       throw addServiceMessageToError(error, 'Unable to get choices', TABLE_GET);
     }

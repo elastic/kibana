@@ -1272,7 +1272,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element,name',
         connectorUsageCollector,
       });
     });
@@ -1283,6 +1283,95 @@ describe('ServiceNow service', () => {
       }));
       const res = await service.getChoices(['priority']);
       expect(res).toEqual(serviceNowChoices);
+    });
+
+    describe('when the task and specific tables both define choices', () => {
+      const choice = (
+        overrides: Partial<(typeof serviceNowChoices)[number]> & { name: string }
+      ) => ({
+        dependent_value: '',
+        label: '2 - Medium',
+        value: '2',
+        element: 'impact',
+        ...overrides,
+      });
+
+      const getChoices = async (result: unknown[], fields = ['impact']) => {
+        requestMock.mockImplementation(() => ({ data: { result } }));
+        return service.getChoices(fields);
+      };
+
+      test('it keeps the specific table label for a value both tables define', async () => {
+        const res = await getChoices([
+          choice({ name: 'task', label: '2 - Medium' }),
+          choice({ name: 'incident', label: '2 - High' }),
+        ]);
+
+        expect(res).toEqual([
+          { dependent_value: '', label: '2 - High', value: '2', element: 'impact' },
+        ]);
+      });
+
+      test('it keeps the specific table label regardless of the order of the results', async () => {
+        const res = await getChoices([
+          choice({ name: 'incident', label: '2 - High' }),
+          choice({ name: 'task', label: '2 - Medium' }),
+        ]);
+
+        expect(res).toEqual([
+          { dependent_value: '', label: '2 - High', value: '2', element: 'impact' },
+        ]);
+      });
+
+      test('it keeps choices that are only defined on the task table', async () => {
+        const res = await getChoices([
+          choice({ name: 'task', value: '1', label: '1 - Low' }),
+          choice({ name: 'task', value: '2', label: '2 - Medium' }),
+          choice({ name: 'incident', value: '2', label: '2 - High' }),
+        ]);
+
+        expect(res).toEqual([
+          { dependent_value: '', label: '1 - Low', value: '1', element: 'impact' },
+          { dependent_value: '', label: '2 - High', value: '2', element: 'impact' },
+        ]);
+      });
+
+      test('it keeps the same value for different elements', async () => {
+        const res = await getChoices(
+          [
+            choice({ name: 'task', element: 'impact', label: '2 - Medium' }),
+            choice({ name: 'task', element: 'urgency', label: '2 - Normal' }),
+          ],
+          ['impact', 'urgency']
+        );
+
+        expect(res.map(({ element, label }) => [element, label])).toEqual([
+          ['impact', '2 - Medium'],
+          ['urgency', '2 - Normal'],
+        ]);
+      });
+
+      test('it keeps the same subcategory value under different categories', async () => {
+        const res = await getChoices(
+          [
+            choice({
+              name: 'incident',
+              element: 'subcategory',
+              value: 'other',
+              dependent_value: 'software',
+            }),
+            choice({
+              name: 'incident',
+              element: 'subcategory',
+              value: 'other',
+              dependent_value: 'hardware',
+            }),
+          ],
+          ['subcategory']
+        );
+
+        expect(res.map(({ dependent_value: parent }) => parent)).toEqual(['software', 'hardware']);
+      });
     });
 
     test('it should call request with correct arguments when table changes', async () => {
@@ -1308,7 +1397,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category^language=en&sysparm_fields=label,value,dependent_value,element,name',
         connectorUsageCollector,
       });
     });
