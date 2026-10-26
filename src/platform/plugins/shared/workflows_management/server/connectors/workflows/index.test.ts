@@ -315,22 +315,22 @@ describe('Workflows Connector', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      jest.mocked(mockWorkflowsManagementApi.assertRunnableStandalone).mockReset();
       jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue(storedWorkflow as any);
     });
 
-    it('refuses a delegated-identity-only workflow without running it', async () => {
-      jest.mocked(mockWorkflowsManagementApi.assertRunnableStandalone).mockImplementation(() => {
-        throw new WorkflowRequiresDelegatedIdentityError('cannot be run standalone');
-      });
+    it('refuses a delegated-identity-only workflow through the runWorkflow gate', async () => {
+      // The standalone gate lives inside runWorkflow; the connector does not re-check.
+      jest
+        .mocked(mockWorkflowsManagementApi.runWorkflow)
+        .mockRejectedValue(new WorkflowRequiresDelegatedIdentityError('cannot be run standalone'));
 
       const run = await getRunService();
 
       await expect(run('managed-workflow-id', 'default', {}, mockRequest)).rejects.toBeInstanceOf(
         WorkflowRequiresDelegatedIdentityError
       );
-      expect(mockWorkflowsManagementApi.assertRunnableStandalone).toHaveBeenCalledTimes(1);
-      expect(mockWorkflowsManagementApi.runWorkflow).not.toHaveBeenCalled();
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).not.toHaveBeenCalled();
     });
 
     it('runs the workflow when the standalone check passes', async () => {
@@ -340,9 +340,6 @@ describe('Workflows Connector', () => {
 
       await expect(run('managed-workflow-id', 'default', { a: 1 }, mockRequest)).resolves.toBe(
         'run-123'
-      );
-      expect(mockWorkflowsManagementApi.assertRunnableStandalone).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'managed-workflow-id' })
       );
       expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'managed-workflow-id' }),

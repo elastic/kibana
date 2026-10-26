@@ -19,11 +19,18 @@ import type { CaseRoute } from '../types';
 import { createRunWorkflowRoute, runCaseWorkflowParamsSchema } from './run_workflow';
 
 /**
- * Mirrors the workflows plugin's `WorkflowTriggerInputError`, which that plugin does not export:
- * trigger preprocessing rejects a bad selection with an error carrying `statusCode: 400`.
+ * Mirrors the workflows plugin's error classes, which that plugin does not export:
+ * `WorkflowTriggerInputError` (trigger preprocessing rejects a bad selection, 400) and
+ * `WorkflowRequiresDelegatedIdentityError` (WorkflowForbiddenError subclass, 403). Both
+ * carry `statusCode`, which is all Cases' wrapError (`isHTTPError`) reads.
  */
-class TriggerInputError extends Error {
-  public readonly statusCode = 400;
+class MirroredWorkflowsError extends Error {
+  public readonly statusCode: number;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+  }
 }
 
 describe('run workflow route', () => {
@@ -110,7 +117,7 @@ describe('run workflow route', () => {
     const [, registeredHandler] = router.post.mock.calls[0];
     const response = httpServerMock.createResponseFactory();
     service.run.mockRejectedValue(
-      new TriggerInputError('No documents found with the provided IDs')
+      new MirroredWorkflowsError('No documents found with the provided IDs', 400)
     );
 
     await registeredHandler(
@@ -131,6 +138,48 @@ describe('run workflow route', () => {
       expect.objectContaining({
         statusCode: 400,
         body: expect.objectContaining({ message: 'No documents found with the provided IDs' }),
+      })
+    );
+  });
+
+  it('responds with a 403 when the workflow refuses standalone runs', async () => {
+    const router = httpServiceMock.createRouter();
+    registerRoutes({
+      router,
+      logger: loggingSystemMock.createLogger(),
+      routes: [route] as CaseRoute[],
+      kibanaVersion: '9.3.0',
+    });
+    const [, registeredHandler] = router.post.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    service.run.mockRejectedValue(
+      new MirroredWorkflowsError(
+        "Workflow 'workflow-1' delegates its execution identity to a parent workflow and cannot be run standalone.",
+        403
+      )
+    );
+
+    await registeredHandler(
+      { cases: {} } as unknown as CasesRequestHandlerContext,
+      httpServerMock.createKibanaRequest({
+        method: 'post',
+        params: { workflow_id: 'workflow-1' },
+        body: {
+          caseIds: ['case-1'],
+          inputs: { event: { triggerType: 'document', documentIds: [] } },
+          origin: { type: 'cases.case', caseId: 'case-1' },
+        },
+      }),
+      response
+    );
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 403,
+        body: expect.objectContaining({
+          message:
+            "Workflow 'workflow-1' delegates its execution identity to a parent workflow and cannot be run standalone.",
+        }),
       })
     );
   });

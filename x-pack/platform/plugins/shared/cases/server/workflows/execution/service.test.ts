@@ -891,6 +891,28 @@ describe('CasesWorkflowRunService', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
+  it('propagates the standalone-run refusal of a delegated-identity workflow', async () => {
+    // "Run workflow from a case" goes through runWorkflowWithAlertPreprocessing → runWorkflow,
+    // which refuses workflows that can only execute as a parent's delegated identity
+    // (WorkflowRequiresDelegatedIdentityError, 403-class). Cases must not swallow that
+    // refusal and report the doomed run as started.
+    const refusalMessage =
+      "Workflow 'workflow-1' delegates its execution identity to a parent workflow and cannot be run standalone.";
+    const refusal = new Error(refusalMessage);
+    management.runWorkflowWithAlertPreprocessing.mockRejectedValue(refusal);
+
+    await expect(run()).rejects.toBe(refusal);
+    expect(auditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: { message: refusalMessage },
+        event: expect.objectContaining({
+          action: 'case_workflow_run',
+          outcome: 'failure',
+        }),
+      })
+    );
+  });
+
   it('audits execution failures', async () => {
     management.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('execution failed'));
 

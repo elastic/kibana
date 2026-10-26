@@ -1512,7 +1512,6 @@ steps:
           inputs: {},
           request: mockRequest,
           preprocessingContext: {} as AlertPreprocessingContext,
-          rejectDelegatedIdentity: true,
         })
         .catch((e: unknown) => e);
 
@@ -1524,42 +1523,9 @@ steps:
       expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
     });
 
-    it('does not refuse delegated-identity workflows unless the caller opts in', async () => {
-      const workflow = {
-        id: 'delegating-workflow',
-        name: 'Delegating',
-        enabled: true,
-        definition: {
-          version: '1',
-          name: 'Delegating',
-          enabled: true,
-          triggers: [{ type: 'manual' }],
-          steps: [
-            {
-              name: 'child',
-              type: 'workflow.execute',
-              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
-            },
-          ],
-        },
-        yaml: 'name: Delegating',
-      } as WorkflowExecutionEngineModel;
-      mockPreprocessTriggerInputs.mockResolvedValue({});
-
-      await api.runWorkflowWithAlertPreprocessing({
-        workflow,
-        spaceId: 'default',
-        inputs: {},
-        request: mockRequest,
-        preprocessingContext: {} as AlertPreprocessingContext,
-      });
-
-      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
-    });
-
     it('does not refuse a workflow whose only inherit is conditional, even on the Run path', async () => {
-      // The Run route opts in to the gate, but the gate only refuses workflows that
-      // always need delegation. A conditional inherit may never execute standalone.
+      // The gate inside runWorkflow only refuses workflows that always need delegation.
+      // A conditional inherit may never execute standalone.
       const conditionalInheritDefinition = {
         version: '1',
         name: 'Conditionally delegating',
@@ -1596,7 +1562,6 @@ steps:
         inputs: {},
         request: mockRequest,
         preprocessingContext: {} as AlertPreprocessingContext,
-        rejectDelegatedIdentity: true,
       });
 
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
@@ -1701,8 +1666,8 @@ steps:
     it('runs a workflow whose only inherit is conditional (server-side caller, not gated)', async () => {
       // Regression (Libra P2): shape of the proposals `system-create-proposal` workflow —
       // an `inherit` step in if/else inside a while loop. A standalone run may complete
-      // without ever executing it, so neither the Run gate nor anything else refuses it;
-      // `executeWorkflow` (agent tools) was never gated to begin with.
+      // without ever executing it, so the predicate never refuses it — including on the
+      // `executeWorkflow` path, where the gate inside `runWorkflow` now also applies.
       const definition = {
         version: '1' as const,
         name: 'Create proposal shape',
@@ -1764,6 +1729,49 @@ steps:
       expect(outcome).not.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
       expect(outcome).toEqual(expect.objectContaining({ workflowExecutionId: 'test-exec-id' }));
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses a delegated-identity-only workflow on the executeWorkflow path too', async () => {
+      // executeWorkflow funnels into runWorkflow, which enforces the standalone gate —
+      // a doomed direct start through an agent tool must be refused like any other.
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Attack Discovery Runner',
+        definition: {
+          version: '1',
+          name: 'Attack Discovery Runner',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: {
+                'workflow-id': 'system-security-attack-discovery-batched-generation',
+                'run-as-mode': 'inherit',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const outcome = await runWithTimers(
+        api
+          .executeWorkflow({
+            workflowId: 'system-security-attack-discovery-worker',
+            inputs: {},
+            spaceId: 'default',
+            request: mockRequest,
+            waitForCompletion: false,
+          })
+          .catch((e: unknown) => e)
+      );
+
+      expect(outcome).toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
     });
 
     it('executes an inline workflow as ephemeral without forcing test-run semantics', async () => {

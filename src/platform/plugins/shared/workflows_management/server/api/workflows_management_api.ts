@@ -264,8 +264,6 @@ export interface RunWorkflowWithAlertPreprocessingParams {
    * supports; a caller that validates selections itself should list only the kinds it checked.
    */
   expandSelections?: readonly TriggerSelectionKind[];
-  /** Set by manual-run entry points to refuse delegated-identity-only workflows. */
-  rejectDelegatedIdentity?: boolean;
 }
 
 export interface RunWorkflowWithAlertPreprocessingResult {
@@ -725,10 +723,10 @@ export class WorkflowsManagementApi {
   }
 
   /**
-   * Rejects a manual, top-level run of a workflow that can only execute as the delegated
-   * identity of a parent run. Only manual-run entry points (the Run route, the workflows
-   * connector action) call this. Server-side callers such as `executeWorkflow` are not
-   * gated: they own the run, and an `inherit` step nested in the definition is legitimate.
+   * Rejects a direct run of a workflow that can only execute as the delegated identity of a
+   * parent run. Enforced inside `runWorkflow`, the lowest common point every direct start
+   * passes through; `testWorkflow` (engine-direct) calls it separately. Runs started by a
+   * parent's `workflow.execute` step and the scheduled path never reach it.
    */
   public assertRunnableStandalone(workflow: WorkflowExecutionEngineModel): void {
     if (requiresDelegatedIdentity(workflow)) {
@@ -754,6 +752,11 @@ export class WorkflowsManagementApi {
     if (!workflow.isEphemeral) {
       await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
     }
+    // Direct starts land here from every entry point (the Run route, Cases, the workflows
+    // connector, executeWorkflow and its plugin callers). A parent's `workflow.execute` step
+    // goes straight to the engine and never passes through, so gating here cannot block a
+    // valid inherited run.
+    this.assertRunnableStandalone(workflow);
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
       event,
@@ -793,11 +796,11 @@ export class WorkflowsManagementApi {
     metadata,
     eventOverrides,
     expandSelections = ALL_TRIGGER_SELECTION_KINDS,
-    rejectDelegatedIdentity,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
-    if (rejectDelegatedIdentity) {
-      this.assertRunnableStandalone(workflow);
-    }
+    // Refuse before trigger preprocessing: the ES lookups it performs would otherwise
+    // run (and could surface a 400 for a bad selection) for a run this gate rejects.
+    // runWorkflow applies the same check again after preprocessing.
+    this.assertRunnableStandalone(workflow);
     const processedInputs = await preprocessTriggerInputs(
       inputs,
       preprocessingContext,
