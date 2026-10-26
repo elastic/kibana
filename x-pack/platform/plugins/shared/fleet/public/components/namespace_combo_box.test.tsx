@@ -39,4 +39,10 @@ describe('NamespaceComboBox', () => {
     expect(screen.getByTestId('namespace-helpTooltip')).toBeInTheDocument();
     expect(screen.getByText('Namespace')).toBeInTheDocument();
   });
+
+  it('accepts replacement tooltip text', () => {
+    renderField({ helpTextAsTooltip: true, tooltipContent: 'Leave empty to use the global one.' });
+
+    expect(screen.getByTestId('namespace-helpTooltip')).toBeInTheDocument();
+  });
 });

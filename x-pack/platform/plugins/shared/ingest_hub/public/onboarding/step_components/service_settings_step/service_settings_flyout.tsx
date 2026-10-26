@@ -158,6 +158,7 @@ export function ServiceSettingsFlyout({
         {showNamespace && (
           <>
             <InstanceNamespaceField
+              emptyUsesGlobal
               namespace={namespace}
               onChange={setNamespace}
               note={

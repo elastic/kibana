@@ -30,6 +30,8 @@ interface NamespaceFormRowProps {
   helpTextId?: string;
   /** Shows the help text as a tooltip on an info icon next to the label, instead of under the field. */
   helpTextAsTooltip?: boolean;
+  /** Replaces the default tooltip text, for a form where an empty namespace resolves differently. */
+  tooltipContent?: string;
   /** Renders the field in the compact size. */
   compressed?: boolean;
 }
@@ -45,6 +47,7 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
   'data-test-subj': dataTestSubj = 'packagePolicyNamespaceInput',
   fullWidth = false,
   helpTextAsTooltip = false,
+  tooltipContent,
   compressed = false,
 }) => {
   const getHelpText = () => {
@@ -103,13 +106,16 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
             <EuiIconTip
               type="info"
               color="subdued"
-              content={i18n.translate(
-                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceTooltip',
-                {
-                  defaultMessage:
-                    "Sets the namespace in the integration's data stream. Leave empty to use default or inherit the agent policy namespace.",
-                }
-              )}
+              content={
+                tooltipContent ??
+                i18n.translate(
+                  'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceTooltip',
+                  {
+                    defaultMessage:
+                      "Sets the namespace in the integration's data stream. Leave empty to use default or inherit the agent policy namespace.",
+                  }
+                )
+              }
               anchorProps={{ 'data-test-subj': `${dataTestSubj}-helpTooltip` }}
             />
           </>

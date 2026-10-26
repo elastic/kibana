@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
@@ -29,6 +30,11 @@ interface InstanceNamespaceFieldProps {
   onChange: (namespace: string) => void;
   /** Extra note under the field, e.g. what a change means for services that are already deployed. */
   note?: string;
+  /**
+   * For a duplicate, whose empty namespace is the global one, so the tooltip says so instead of
+   * describing the default or the agent policy's namespace.
+   */
+  emptyUsesGlobal?: boolean;
   fullWidth?: boolean;
   compressed?: boolean;
   'data-test-subj'?: string;
@@ -38,6 +44,7 @@ export const InstanceNamespaceField = ({
   namespace,
   onChange,
   note,
+  emptyUsesGlobal = false,
   fullWidth = false,
   compressed = false,
   'data-test-subj': dataTestSubj = 'serviceSettings-namespaceField',
@@ -57,6 +64,17 @@ export const InstanceNamespaceField = ({
         fullWidth={fullWidth}
         compressed={compressed}
         helpTextAsTooltip
+        tooltipContent={
+          emptyUsesGlobal
+            ? i18n.translate(
+                'xpack.ingestHub.serviceSettingsStep.namespace.globalFallbackTooltip',
+                {
+                  defaultMessage:
+                    "Sets the namespace in the integration's data stream name. Leave empty to use the global namespace.",
+                }
+              )
+            : undefined
+        }
         data-test-subj={dataTestSubj}
       />
       {note && (

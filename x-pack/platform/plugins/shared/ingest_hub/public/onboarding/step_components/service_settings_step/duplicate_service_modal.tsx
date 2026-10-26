@@ -205,6 +205,7 @@ export function DuplicateServiceModal({
         {showNamespace && (
           <>
             <InstanceNamespaceField
+              emptyUsesGlobal
               namespace={namespace}
               onChange={(value) => {
                 setNamespace(value);

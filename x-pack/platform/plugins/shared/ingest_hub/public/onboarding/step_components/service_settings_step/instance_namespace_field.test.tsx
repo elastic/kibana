@@ -18,15 +18,20 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
     validationError,
     onNamespaceChange,
     helpTextAsTooltip,
+    tooltipContent,
     'data-test-subj': dataTestSubj,
   }: {
     namespace?: string;
     validationError?: string[] | null;
     onNamespaceChange: (ns: string) => void;
     helpTextAsTooltip?: boolean;
+    tooltipContent?: string;
     'data-test-subj'?: string;
   }) => (
-    <div data-help-as-tooltip={String(!!helpTextAsTooltip)}>
+    <div
+      data-help-as-tooltip={String(!!helpTextAsTooltip)}
+      data-tooltip-content={tooltipContent ?? ''}
+    >
       <input
         data-test-subj={dataTestSubj}
         value={namespace ?? ''}
@@ -87,6 +92,21 @@ describe('InstanceNamespaceField', () => {
       'data-help-as-tooltip',
       'true'
     );
+  });
+
+  it('keeps the default tooltip text for the global namespace', () => {
+    renderField();
+    expect(screen.getByTestId('serviceSettings-namespaceField').parentElement).toHaveAttribute(
+      'data-tooltip-content',
+      ''
+    );
+  });
+
+  it('says an empty namespace uses the global one for a duplicate', () => {
+    renderField({ emptyUsesGlobal: true });
+    expect(
+      screen.getByTestId('serviceSettings-namespaceField').parentElement?.dataset.tooltipContent
+    ).toContain('Leave empty to use the global namespace');
   });
 
   it('shows the note under the field', () => {
