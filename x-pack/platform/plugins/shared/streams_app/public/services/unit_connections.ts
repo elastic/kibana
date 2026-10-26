@@ -188,11 +188,63 @@ const findWirableProcessingPipelineIndex = (unit: Unit, ref: ProcessingNodeRef):
     : -1;
 };
 
+/** The signals the listed components handle, or `undefined` when one of them is not on the unit. */
+const componentSignals = (
+  components: ReadonlyArray<{ id: string; supported_telemetry: readonly UnitSignal[] }>,
+  ids: readonly string[]
+): Set<UnitSignal> | undefined => {
+  if (ids.length === 0) {
+    return undefined;
+  }
+  const signals = new Set<UnitSignal>();
+  for (const id of ids) {
+    const component = components.find((candidate) => candidate.id === id);
+    if (!component) {
+      return undefined;
+    }
+    component.supported_telemetry.forEach((signal) => signals.add(signal));
+  }
+  return signals;
+};
+
+/**
+ * Narrows a pipeline's signals to those its sources send and its destinations
+ * accept. The distributor compiles one collector pipeline per declared signal
+ * and rejects one with no receiver or exporter, which a line leaving a widened
+ * pipeline would otherwise cause. Delegating pipelines and unknown components
+ * are left as they are, and a pipeline never ends up with no signal.
+ */
+const fitSignals = (
+  unit: Unit,
+  telemetry: UnitPipeline['supported_telemetry'],
+  config: PipelineConfig
+): UnitPipeline['supported_telemetry'] => {
+  const routes = readRoutes(config);
+  if (routes.some(isDelegatingRoute)) {
+    return [...telemetry];
+  }
+  const sent = componentSignals(unit.unit.sources, readEntryIds(config, PIPELINE_ENTRY.sources));
+  const accepted = componentSignals(unit.unit.destinations, [
+    ...readEntryIds(config, PIPELINE_ENTRY.destinations),
+    ...routes.flatMap(routeDestinationIds),
+  ]);
+  const fitting = telemetry.filter(
+    (signal) => (sent?.has(signal) ?? true) && (accepted?.has(signal) ?? true)
+  );
+  return fitting.length > 0 ? fitting : [...telemetry];
+};
+
 const replacePipelineConfig = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit =>
   replacePipelines(
     unit,
     unit.unit.pipelines.map((pipeline, index) =>
-      index === pipelineIndex ? { ...pipeline, config } : pipeline
+      index === pipelineIndex
+        ? {
+            ...pipeline,
+            config,
+            supported_telemetry: fitSignals(unit, pipeline.supported_telemetry, config),
+          }
+        : pipeline
     )
   );
 
@@ -213,7 +265,11 @@ const writePipeline = (
       {
         ...pipeline,
         config,
-        ...(supportedTelemetry ? { supported_telemetry: [...supportedTelemetry] } : {}),
+        supported_telemetry: fitSignals(
+          unit,
+          supportedTelemetry ?? pipeline.supported_telemetry,
+          config
+        ),
       },
     ];
   });
@@ -229,15 +285,16 @@ const insertSourcePipeline = (
   sourceId: string,
   supportedTelemetry: UnitPipeline['supported_telemetry'],
   forwarding: PipelineConfig
-): Unit =>
-  replacePipelines(unit, [
+): Unit => {
+  const config: PipelineConfig = [
+    { name: PIPELINE_ENTRY.sources, value: [sourceId] },
+    ...forwarding,
+  ];
+  return replacePipelines(unit, [
     ...unit.unit.pipelines,
-    {
-      id: pipelineId,
-      supported_telemetry: [...supportedTelemetry],
-      config: [{ name: PIPELINE_ENTRY.sources, value: [sourceId] }, ...forwarding],
-    },
+    { id: pipelineId, supported_telemetry: fitSignals(unit, supportedTelemetry, config), config },
   ]);
+};
 
 const appendSourcePipeline = (
   unit: Unit,
@@ -762,7 +819,13 @@ const removeComponentReferences = (unit: Unit, componentId: string): Unit =>
       if (hadSources && !config.some((entry) => entry.name === PIPELINE_ENTRY.sources)) {
         return [];
       }
-      return [{ ...pipeline, config }];
+      return [
+        {
+          ...pipeline,
+          config,
+          supported_telemetry: fitSignals(unit, pipeline.supported_telemetry, config),
+        },
+      ];
     })
   );
 

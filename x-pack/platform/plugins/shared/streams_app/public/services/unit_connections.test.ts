@@ -556,6 +556,57 @@ describe('unit connections', () => {
     });
   });
 
+  describe('signals of a pipeline whose lines change', () => {
+    const mixedUnit = (): Unit => {
+      const unit = unitWith([
+        {
+          id: 'p-mixed',
+          supported_telemetry: ['metrics', 'traces'],
+          config: [
+            { name: 'sources', value: ['mixed'] },
+            { name: 'destinations', value: ['only-metrics', 'only-traces'] },
+          ],
+        },
+      ]);
+      unit.unit.sources = [
+        { id: 'mixed', type: 'otlp', supported_telemetry: ['metrics', 'traces'] },
+      ];
+      unit.unit.destinations = [
+        { id: 'only-metrics', type: 'elasticsearch', supported_telemetry: ['metrics'] },
+        { id: 'only-traces', type: 'elasticsearch', supported_telemetry: ['traces'] },
+      ];
+      return unit;
+    };
+    const signalsOf = (unit: Unit) =>
+      Object.fromEntries(
+        unit.unit.pipelines.map(({ id, supported_telemetry }) => [id, supported_telemetry])
+      );
+
+    it('splits the signals when a line moves onto its own pipeline', () => {
+      const isolated = isolateSourceLine(mixedUnit(), 'mixed', 'only-traces');
+
+      expect(signalsOf(isolated?.unit ?? mixedUnit())).toEqual({
+        'p-mixed': ['metrics'],
+        'p-mixed-2': ['traces'],
+      });
+    });
+
+    it('drops a signal no remaining destination accepts', () => {
+      const unhooked = disconnectFromDestination(mixedUnit(), source('mixed'), 'only-traces');
+      const deleted = removeComponentFromPipelines(mixedUnit(), 'only-metrics');
+
+      expect(signalsOf(unhooked)).toEqual({ 'p-mixed': ['metrics'] });
+      expect(signalsOf(deleted)).toEqual({ 'p-mixed': ['traces'] });
+    });
+
+    it('widens again when the line comes back', () => {
+      const unhooked = disconnectFromDestination(mixedUnit(), source('mixed'), 'only-traces');
+      const reconnected = connectSourceToDestination(unhooked, 'mixed', 'only-traces');
+
+      expect(signalsOf(reconnected)).toEqual({ 'p-mixed': ['metrics', 'traces'] });
+    });
+  });
+
   describe('with telemetry-scoped wiring', () => {
     const scoped = (processors: string[] = []): Unit => {
       const unit = unitWith([
