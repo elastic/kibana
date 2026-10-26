@@ -20,9 +20,13 @@ import {
 } from '../fixtures/endpoint_generated_alerts';
 import { apiTest } from '../fixtures';
 
-const EICAR_URL = 'https://secure.eicar.org/eicar.com.txt';
-/** Writes the EICAR test file, which Elastic Defend malware protection detects and alerts on. */
-const MALICIOUS_COMMAND = `curl -sS -o /tmp/eicar.com.txt ${EICAR_URL}`;
+const EICAR_FILE_NAME = 'eicar.com.txt';
+const EICAR_URL = `https://secure.eicar.org/${EICAR_FILE_NAME}`;
+/**
+ * Writes the EICAR test file to the VM user's home directory, which Elastic Defend malware
+ * protection detects and alerts on. Same trigger as `endpoint_agent_runner`.
+ */
+const MALICIOUS_COMMAND = `curl -LO ${EICAR_URL}`;
 const ENDPOINT_ALERT_TIMEOUT_MS = 240_000;
 const DETECTION_ALERT_TIMEOUT_MS = 180_000;
 const POLL_INTERVAL_MS = 2_000;
@@ -42,7 +46,7 @@ apiTest.describe(
           const detectionState = await describeEndpointDetectionState(
             esClient,
             enrolledEndpoint.agentId,
-            EICAR_URL
+            { processArg: EICAR_URL, fileName: EICAR_FILE_NAME }
           );
           log.error(`[edr_real_fleet] Endpoint detection state: ${detectionState}`);
           await testInfo.attach('endpoint-detection-state', {

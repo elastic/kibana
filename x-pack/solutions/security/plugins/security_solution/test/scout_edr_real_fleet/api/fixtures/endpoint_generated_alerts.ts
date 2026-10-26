@@ -21,7 +21,10 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '../../../../common/constants';
-import { POLICY_RESPONSE_INDEX } from '../../../../common/endpoint/constants';
+import {
+  FILE_EVENTS_INDEX_PATTERN,
+  POLICY_RESPONSE_INDEX,
+} from '../../../../common/endpoint/constants';
 import type { HostPolicyResponse } from '../../../../common/endpoint/types';
 import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 import {
@@ -37,6 +40,19 @@ const HOST_COMMAND_TIMEOUT_MS = 60_000;
 interface ProcessEventSource {
   process?: { command_line?: string; args?: string[] };
   event?: { action?: string };
+}
+
+interface FileEventSource {
+  file?: { path?: string };
+  process?: { name?: string };
+  event?: { action?: string };
+}
+
+interface DetectionTrigger {
+  /** Argument of the trigger process, matched against `process.args`. */
+  processArg: string;
+  /** Name of the file the trigger writes, matched against `file.name`. */
+  fileName: string;
 }
 
 interface SecurityRoleApiKeyProvider {
@@ -72,17 +88,21 @@ export const countEndpointAlertsForAgent = async (
   return count;
 };
 
+const getTotalHits = (total: number | { value: number } | undefined): number | undefined =>
+  typeof total === 'number' ? total : total?.value;
+
 /**
  * Summarizes why an Endpoint alert may be missing: whether the Endpoint recorded the
- * trigger process, and which protections and global artifacts its policy response reports.
+ * trigger process and the file it wrote, and which protections and global artifacts
+ * its policy response reports.
  */
 export const describeEndpointDetectionState = async (
   esClient: EsClient,
   agentId: string,
-  triggerArg: string
+  { processArg, fileName }: DetectionTrigger
 ): Promise<string> => {
   const agentFilter = { term: { 'agent.id': agentId } };
-  const [triggerEvents, processEventCount, policyResponses] = await Promise.all([
+  const [triggerEvents, triggerFileEvents, processEventCount, policyResponses] = await Promise.all([
     esClient.search<ProcessEventSource>({
       index: ENDPOINT_EVENTS_INDEX,
       ignore_unavailable: true,
@@ -90,7 +110,16 @@ export const describeEndpointDetectionState = async (
       track_total_hits: true,
       sort: [{ '@timestamp': 'desc' }],
       _source: ['process.command_line', 'process.args', 'event.action'],
-      query: { bool: { filter: [agentFilter, { term: { 'process.args': triggerArg } }] } },
+      query: { bool: { filter: [agentFilter, { term: { 'process.args': processArg } }] } },
+    }),
+    esClient.search<FileEventSource>({
+      index: FILE_EVENTS_INDEX_PATTERN,
+      ignore_unavailable: true,
+      size: 3,
+      track_total_hits: true,
+      sort: [{ '@timestamp': 'desc' }],
+      _source: ['file.path', 'process.name', 'event.action'],
+      query: { bool: { filter: [agentFilter, { term: { 'file.name': fileName } }] } },
     }),
     esClient.count({ index: ENDPOINT_EVENTS_INDEX, ignore_unavailable: true, query: agentFilter }),
     esClient.search<HostPolicyResponse>({
@@ -103,12 +132,15 @@ export const describeEndpointDetectionState = async (
   ]);
 
   const applied = policyResponses.hits.hits[0]?._source?.Endpoint.policy.applied;
-  const { total } = triggerEvents.hits;
 
   return JSON.stringify({
     triggerProcessEvents: {
-      total: typeof total === 'number' ? total : total?.value,
+      total: getTotalHits(triggerEvents.hits.total),
       samples: triggerEvents.hits.hits.map(({ _source }) => _source),
+    },
+    triggerFileEvents: {
+      total: getTotalHits(triggerFileEvents.hits.total),
+      samples: triggerFileEvents.hits.hits.map(({ _source }) => _source),
     },
     processEventsForAgent: processEventCount.count,
     policyResponse: applied
