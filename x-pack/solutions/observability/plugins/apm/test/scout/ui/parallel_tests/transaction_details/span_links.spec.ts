@@ -89,10 +89,7 @@ test.describe(
       });
 
       await test.step('opens span flyout and shows span links details', async () => {
-        await page
-          .getByTestId('waterfall')
-          .getByLabel('View details for Span B', { exact: true })
-          .click();
+        await transactionDetailsPage.openWaterfallItemFlyout('Span B');
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const consumerMultipleLink = page.getByRole('link', {
@@ -123,7 +120,7 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByRole('button', { name: /View details for Transaction C/ }).click();
+        await transactionDetailsPage.openWaterfallItemFlyout('Transaction C');
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const consumerMultipleLink = page.getByRole('link', {
@@ -160,7 +157,7 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByRole('button', { name: /View details for Transaction D/ }).click();
+        await transactionDetailsPage.openWaterfallItemFlyout('Transaction D');
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const producerConsumerLink = page.getByRole('link', { name: 'zzz-producer-consumer' });

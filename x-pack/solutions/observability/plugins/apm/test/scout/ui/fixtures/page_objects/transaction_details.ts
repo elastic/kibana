@@ -165,6 +165,18 @@ export class TransactionDetailsPage {
   // Transaction interaction methods
 
   /**
+   * Open a waterfall item's details flyout by clicking its name, so the click can never land
+   * on the nested service badge link that navigates to the service overview instead.
+   */
+  async openWaterfallItemFlyout(name: string) {
+    await this.page
+      .getByTestId('waterfall')
+      .getByRole('button', { name: `View details for ${name}`, exact: true })
+      .getByTestId('apmBarDetailsName')
+      .click();
+  }
+
+  /**
    * Click transaction accordion button using aria-controls selector
    */
   async clickTransactionWithAriaControls(transactionId: string) {
