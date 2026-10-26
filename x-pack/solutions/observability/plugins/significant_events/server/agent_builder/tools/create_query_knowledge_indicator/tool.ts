@@ -25,7 +25,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   assertSourceEnabled,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
@@ -142,7 +142,7 @@ export function createQueryKnowledgeIndicatorTool({
         await assertCanManageSignificantEvents({ request, server });
 
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         assertSourceEnabled(source);
         sourceId = source.id;
 

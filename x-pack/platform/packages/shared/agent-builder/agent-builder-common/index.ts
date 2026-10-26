@@ -49,6 +49,7 @@ export {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  observabilityNightshiftSourceTools,
   attachmentTools,
   internalTools,
   defaultAgentToolIds,
