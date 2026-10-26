@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { setNodeLabel, type GraphDispatch } from '../../state_management';
 import type { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
@@ -21,6 +23,7 @@ interface SelectedNodeEditorProps {
 
 export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEditorProps) => {
   const { euiTheme } = useEuiTheme();
+  const dispatch = useDispatch<GraphDispatch>();
   const groupButtonMsg = i18n.translate('xpack.graph.sidebar.groupButtonTooltip', {
     defaultMessage: 'group the currently selected items into {latestSelectionLabel}',
     values: { latestSelectionLabel: selectedNode.label },
@@ -37,8 +40,7 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
     workspace.ungroup(selectedNode);
   };
   const onChangeSelectedVertexLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    selectedNode.label = event.target.value;
-    workspace.changeHandler();
+    dispatch(setNodeLabel({ nodeId: selectedNode.id, label: event.target.value }));
   };
 
   return (

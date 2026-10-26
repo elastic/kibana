@@ -282,7 +282,7 @@ export const getLinksEmbeddableFactory = () => {
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
-    padding: 0,
+    padding: `0 ${euiTheme.size.s}`,
     '.linksPanelLink': {
       maxWidth: 'fit-content', // ensures that the error tooltip shows up **right beside** the link label
     },

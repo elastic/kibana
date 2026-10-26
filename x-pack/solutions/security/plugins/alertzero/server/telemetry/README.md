@@ -44,6 +44,7 @@ The schema tests (`event_types.test.ts`) enforce the following:
 | `safe_report_event.ts` | `safeReportEvent` and `createAlertZeroTelemetryReporter`, the never-throw reporters; both return whether the event was reported |
 | `envelope/` | `buildAlertZeroEnvelope` and its resolvers |
 | `../../common/telemetry/constants.ts` | The Worker outcome vocabularies (the Attack Discovery Worker's, the shared run outcome, and each Worker's item events) and the Investigation close reasons any Worker reports, which the report step's input schema shares |
+| `worker_investigation/` | `buildWorkerInvestigationReopenedPayload`, used by Hunt's find-or-create route |
 
 ## The envelope
 
@@ -155,6 +156,22 @@ The reason is the one the close writes, and `other` when it writes none. A run t
 Only a Worker's own closes are measured, and only for a Worker whose YAML calls the step. A close by an Agent Builder agent (`set_conversation_metadata`), a custom workflow or a direct Agent Builder API call sends nothing here. A human close through Agentic Investigations reports its own `agentic_investigations_investigation_closed`.
 
 Agent Builder's `agent_builder_conversation_fields_changed` counts every close, whoever made it, with the same close reason, so a Worker's close sends both events, joined on `investigation_id` = `conversation_id`. This event stays because Agent Builder's carries no run or execution id, so it can't tell a Worker's close from anyone else's. This one says which Worker and which run closed the Investigation.
+
+### `alertzero_worker_investigation_reopened`
+
+Emitted when the Hunt Worker reopens an Investigation a previous run closed, so a new run on the same threat report records into active work.
+
+- Hunt's find-or-create route (`routes/hunt/find_or_create_investigation.ts`) reopens it in TypeScript, not YAML, so the route reports it once the reopen succeeds. Reporting never fails the find-or-create.
+- It has no run envelope and no `run_id`, because the route doesn't verify which run called it. Only the Hunt Worker's find-or-create step calls the route, so the event is attributed to that Worker.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `worker_id` | keyword | yes | Catalog id of the Worker that reopened the Investigation (the Hunt Worker) |
+| `watch_tag` | keyword | yes | The Worker's catalog watch tag |
+| `is_default_space` | boolean | yes | Whether the Investigation is in the default space |
+| `investigation_id` | keyword | yes | The Investigation the Worker reopened. A Hunt Investigation id is a UUID v5 of the threat report id |
+
+The reopen keeps the Investigation's last `close_reason`, since the template has no value meaning "not closed", so read the reason only from close events. Agent Builder's `agent_builder_conversation_fields_changed` also reports the reopen (`status` to `open`, with `source: server_api`); this event is what says the Hunt Worker made it.
 
 ### `alertzero_worker_run_completed`
 
@@ -274,7 +291,7 @@ The epic's sweep counts (reports swept, Tier 2 invoked, findings reviewable or c
 
 ### `alertzero_endpoint_analysis_completed`
 
-Emitted by one Endpoint Analysis run for one indicator, when it ends. The run works on the Attack Discovery Investigation named by the indicator and never opens one of its own. The Worker's proposal gate closes that Investigation once every containment Proposal is decided.
+Emitted by one Endpoint Analysis run for one indicator, once it has reached its verdict and before it writes it to the indicator. The run works on the Attack Discovery Investigation named by the indicator and never opens one of its own. The Worker's proposal gate closes that Investigation once every containment Proposal is decided.
 
 | Field | Type | Required | Description |
 |---|---|---|---|

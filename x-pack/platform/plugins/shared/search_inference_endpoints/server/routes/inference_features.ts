@@ -80,7 +80,12 @@ export const defineInferenceFeaturesRoutes = ({
           return settingValues.get(condition.key) === condition.value;
         });
 
-        const body: InferenceFeaturesResponse = { features: visibleFeatures };
+        const body: InferenceFeaturesResponse = {
+          features: visibleFeatures.map((feature) => ({
+            ...feature,
+            recommendedEndpoints: feature.recommendedEndpoints.map(({ id }) => id),
+          })),
+        };
 
         return response.ok({
           body,

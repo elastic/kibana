@@ -7,7 +7,7 @@
 
 import type { YAMLMap } from 'yaml';
 import { parse as parseYaml, parseDocument, isMap } from 'yaml';
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { NONE_CONNECTOR_ID } from '../../../../common/constants';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';

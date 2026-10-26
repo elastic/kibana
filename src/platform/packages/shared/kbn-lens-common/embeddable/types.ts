@@ -353,6 +353,8 @@ export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 't
 export type LensRuntimeState = Simplify<
   Omit<ComponentSerializedProps, 'attributes' | 'references'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
+    /** Set when the by-reference document failed to load and empty attributes were used instead */
+    loadError?: Error;
   } & Pick<
       LensComponentForwardedProps,
       'viewMode' | 'abortController' | 'executionContext' | 'forceDSL'
@@ -382,6 +384,7 @@ export type LensInternalApi = Simplify<
     PublishesDataViews &
     VisualizationContextHelper & {
       esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+      loadError$: PublishingSubject<Error | undefined>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<boolean>;
@@ -405,6 +408,7 @@ export type LensInternalApi = Simplify<
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       blockingError$: PublishingSubject<Error | undefined>;
       updateBlockingError: (newBlockingError: Error | undefined) => void;
+      updateLoadError: (newLoadError: Error | undefined) => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
       updateEditingState: (inProgress: boolean) => void;
       isEditingInProgress: () => boolean;

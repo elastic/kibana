@@ -411,8 +411,17 @@ describe('detection rule workflows', () => {
           caseSteps.map(({ name }) => name),
         ])
       ).toEqual([
-        ['dismissed', ['mark_alerts_declined', 'close_investigation_declined', 'stop_declined']],
-        ['expired', ['stop_expired']],
+        [
+          'dismissed',
+          [
+            'mark_alerts_declined',
+            'close_investigation_declined',
+            'report_investigation_closed_declined',
+            'report_review_completed_declined',
+            'stop_declined',
+          ],
+        ],
+        ['expired', ['report_review_completed_undecided', 'stop_expired']],
       ]);
       expect(entryDecision.default).toBeUndefined();
       for (const [decision, routed] of [
@@ -1322,26 +1331,24 @@ describe('detection rule workflows', () => {
         expect(rendered.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
       });
 
-      // Appended with `trigger_mode: never` so the note does not run the investigation
-      // agent. A direct request rather than the journal note workflow keeps the
-      // proposal gate the only synchronous child in its wake-up cycle.
+      // Appended as a user message so the note does not run the investigation agent. A
+      // step rather than the journal note workflow keeps the proposal gate the only
+      // synchronous child in its wake-up cycle.
       it.each([
         ['post_fp_pattern', '{{ steps.diagnose_rule.output.structured_output.fp_pattern }}'],
         ['post_reasoning', '{{ steps.diagnose_rule.output.structured_output.reasoning }}'],
       ])('posts %s to the investigation without running the agent', (stepName, field) => {
         const note = reviewSteps.find(({ name }) => name === stepName)!;
-        const body = note.with?.body as Record<string, string>;
+        const input = note.with as Record<string, string>;
 
-        expect(note.type).toBe('kibana.request');
-        expect(note.with?.method).toBe('POST');
-        expect(note.with?.path).toBe('/s/{{ workflow.spaceId }}/api/chat/converse');
+        expect(note.type).toBe('ai.conversation.add_user_message');
         expect(note.if).toContain('steps.create_investigation.output.conversation_id != null');
         expect(note['on-failure']).toEqual({ continue: true });
-        expect(body.conversation_id).toBe(
+        expect(input.conversation_id).toBe(
           '{{ steps.create_investigation.output.conversation_id }}'
         );
-        expect(body.trigger_mode).toBe('never');
-        expect(body.input).toContain(field);
+        expect(input.author_name).toBe('{{ consts.author_name }}');
+        expect(input.message).toContain(field);
         expect(reviewSteps.indexOf(note)).toBeLessThan(
           reviewSteps.findIndex(({ name }) => name === 'compose_proposal')
         );

@@ -38,6 +38,12 @@ triggers:
         conversationId:
           type: string
           description: Conversation this Proposal belongs to (create_proposal.yaml's own required field).
+        proposalId:
+          type: string
+          description: >
+            The id to create the Proposal under, derived by the caller from what is proposed
+            so two runs that race over one subject create one Proposal. Must be a UUID.
+            Omit for a Proposal that is always new.
         title:
           type: string
           description: Short plain-text label naming what is proposed; absent falls back to the action's own name.
@@ -79,6 +85,11 @@ outputs:
     type: string
   - name: expired
     type: boolean
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Endpoint Analysis worker"
+
 steps:
   # The gate child adds no second gate: this is a single sync wrap of
   # system-create-alertzero-proposal's own waitForApproval.
@@ -95,6 +106,13 @@ steps:
   # bridge as undefined rather than `''` (see create_proposal.yaml): Endpoint
   # analysis omits `impact` and `category` on purpose so the action's own apply,
   # and `autoApprove` is a boolean the bridge's trigger would reject as `''`.
+  #
+  # A lost race also lands here: if two runs reach the same host at once, both
+  # can find the subject free, but only one create succeeds under `proposalId`.
+  # The loser fails before any gate is parked and `continue` moves it on.
+  # `journal_lost_race` records where the finding went. `expectedProposalCount`
+  # still counts the lost Proposal, so the Investigation stays open until an
+  # analyst closes it.
   - name: create_and_gate_proposal
     type: workflow.execute
     with:
@@ -102,6 +120,7 @@ steps:
       run-as-mode: inherit
       inputs:
         conversationId: "${{ inputs.conversationId }}"
+        proposalId: "${{ inputs.proposalId }}"
         title: "${{ inputs.title }}"
         comment: "${{ inputs.comment }}"
         actionWorkflowId: "${{ inputs.actionWorkflowId }}"
@@ -111,20 +130,72 @@ steps:
     on-failure:
       continue: true
 
+  # Get existing proposal when the previous create step failed under a
+  # caller-derived id: did another Investigation get there first? The
+  # Proposal under this id says which one raised it. Its document can
+  # take a moment to be searchable after the conflict, so the read is
+  # retried. A read that still fails is not an error - the loser just gets the generic note below.
+  - name: fetch_existing_proposal
+    type: kibana.request
+    if: >-
+      ${{ steps.create_and_gate_proposal.error.message != nil
+        and steps.create_and_gate_proposal.error.message != empty
+        and inputs.proposalId != nil
+        and inputs.proposalId != empty }}
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ inputs.proposalId }}"
+      headers:
+        elastic-api-version: "1"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 1s
+      continue: true
+
+  # A lost race is a Proposal under this id owned by a different conversation.
+  # Any other failure is left to `journal_wrap_failed`.
+  - name: resolve_lost_race
+    type: data.set
+    with:
+      lost_race: >-
+        ${{ steps.fetch_existing_proposal.output.conversationId != nil
+          and steps.fetch_existing_proposal.output.conversationId != empty
+          and steps.fetch_existing_proposal.output.conversationId != inputs.conversationId }}
+      lost_race_note: >-
+        A containment proposal for "{{ inputs.title | default: 'the proposed action' }}" was raised by
+        [another Investigation]({% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/alertzero?selectedConversationId={{ steps.fetch_existing_proposal.output.conversationId }})
+        at the same moment as this one, so no second Proposal was created and this finding is covered by that one.
+        This Investigation stays open until an analyst closes it.
+
+  - name: journal_lost_race
+    type: workflow.execute
+    if: "${{ variables.lost_race == true }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: "{{ variables.lost_race_note }}"
+    on-failure:
+      continue: true
+
   # A wrap that errors before settling may mean this Proposal was never created, in
   # which case the settlement counts below can never reach `expectedProposalCount`
   # and the Investigation stays open with nothing saying why. Journal it so the
   # analyst can see that. Best-effort: a failed note must not stop the requery/close
   # steps. No `error.message`, same as journal_analysis_problem in
   # forensics_run_endpoint_analysis.yaml: later agent rounds read the journal as
-  # user input.
+  # user input. A lost race already has its own note above.
   - name: journal_wrap_failed
     type: workflow.execute
-    if: "${{ steps.create_and_gate_proposal.error != blank }}"
+    if: "${{ steps.create_and_gate_proposal.error != blank and variables.lost_race != true }}"
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: >-
           The containment proposal{% if inputs.title != blank %} "{{ inputs.title }}"{% endif %}
@@ -283,6 +354,15 @@ steps:
     with:
       settled: "${{ variables.created_count >= inputs.expectedProposalCount and variables.pending_count == 0 and variables.executing_count == 0 }}"
 
+  # Telemetry: the status route doesn't say whether it changed anything, so read the status first.
+  - name: read_status_before_close
+    type: ai.conversation.metadata.read
+    if: "${{ variables.settled == true }}"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigationConversationId }}"
+
   # Over the investigations status route, not `ai.conversation.metadata.patch`:
   # that step patches with owner access, and this gate runs as the Forensics
   # Worker's service account while the Investigation was opened by whoever handed
@@ -316,6 +396,16 @@ steps:
         expected_proposal_ids: []
     on-failure:
       continue: true
+
+  - name: report_investigation_closed_settled
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.read_status_before_close.output.metadata.status == 'open' and steps.close_if_settled.error == blank and steps.close_if_settled.output.status == 'closed' }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ inputs.investigationConversationId }}"
+      close_reason: other
 
   - name: emit_result
     type: workflow.output

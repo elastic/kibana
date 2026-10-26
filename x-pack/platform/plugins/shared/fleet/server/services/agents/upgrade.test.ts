@@ -112,6 +112,33 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
   });
 
+  it('cannot upgrade from an agentless agent policy, even with force=true', async () => {
+    const { soClient, esClient, agentInAgentlessDoc, agentInRegularDoc } = mocks;
+    esClient.search.mockResponse({
+      hits: { hits: [agentInRegularDoc, agentInAgentlessDoc] },
+    } as any);
+
+    await sendUpgradeAgentsActions(soClient, esClient, {
+      agentIds: [agentInRegularDoc._id, agentInAgentlessDoc._id],
+      force: true,
+      version: '8.5.0',
+    });
+
+    const calledWith = esClient.bulk.mock.calls[0][0];
+    const ids = (calledWith as estypes.BulkRequest)?.operations
+      ?.filter((i: any) => i.update !== undefined)
+      .map((i: any) => i.update._id);
+    expect(ids).toEqual([agentInRegularDoc._id]);
+
+    const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
+    expect(calledWithActionResults.operations?.[1]).toEqual(
+      expect.objectContaining({
+        agent_id: agentInAgentlessDoc._id,
+        error: expect.stringContaining('Cannot upgrade managed agent'),
+      })
+    );
+  });
+
   it('can upgrade from hosted agent policy with force=true', async () => {
     const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } = mocks;
 

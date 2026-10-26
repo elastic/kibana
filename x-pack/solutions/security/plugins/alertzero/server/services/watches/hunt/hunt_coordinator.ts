@@ -44,6 +44,11 @@ import { huntBehavior } from './tier2/hunt_behavior';
 import type { HuntBehaviorResult } from './tier2/types';
 
 export type HuntCoordinatorTier2SkipReason =
+  /**
+   * The report's enrichment has not finished, so there is nothing to hunt yet. The whole
+   * hunt is skipped and the gap is retryable, so the report stays eligible for a later sweep.
+   */
+  | 'extraction_pending'
   | 'configured_never'
   | 'no_inference'
   | 'no_environment_hits'
@@ -454,6 +459,60 @@ const coordinatorGaps = ({
   return gaps;
 };
 
+/**
+ * The result for a `report_id` run that stopped before any search: nothing about the
+ * report could be hunted, so every search-shaped field is empty. Only the reason and the
+ * completeness differ between callers.
+ */
+const buildSkippedReportResult = ({
+  reportId,
+  runId,
+  timeRange,
+  reason,
+  message,
+  nextStep,
+  gap,
+}: {
+  reportId: string;
+  runId: string;
+  timeRange: HuntCoordinatorParams['time_range'];
+  reason: HuntCoordinatorTier2SkipReason;
+  message: string;
+  nextStep: string;
+  gap?: HuntIncompleteness;
+}): HuntCoordinatorCoreResult => {
+  return {
+    status: 'tier1_only',
+    report_id: reportId,
+    run_id: runId,
+    index_patterns: [],
+    tier2_targets: [],
+    tier2_target_sources: [],
+    report_intent_targets: [],
+    actionable_indices: [],
+    tier1: {
+      tier: 1,
+      ...emptyHuntForThreatResult(
+        'no_searchable_terms',
+        [],
+        [],
+        timeRange ?? { from: 'now-24h', to: 'now' },
+        message
+      ),
+    },
+    tier2_skipped_reason: reason,
+    message,
+    next_step: nextStep,
+    has_confirmed_hit: false,
+    // Nothing about this run says whether the environment is clean, and a later run can
+    // differ: the report may be indexed, enrichment may finish, the scope may resolve.
+    // The report has to stay eligible.
+    completeness: 'incomplete_retryable',
+    completed_successfully: false,
+    ...(gap ? { incomplete: [gap] } : {}),
+  };
+};
+
 const huntCoordinatorCore = async (
   { esClient, reportsEsClient, mitreDataClient }: HuntCoordinatorClients,
   models: HuntModels,
@@ -488,37 +547,35 @@ const huntCoordinatorCore = async (
       ? await loadReportHuntContext({ esClient: reportsEsClient, spaceId, reportId })
       : null;
   if (reportId !== undefined && reportContext === null) {
-    const message = `Report ${reportId} was not found in space ${spaceId}.`;
-    return {
-      status: 'tier1_only',
-      report_id: reportId,
-      run_id,
-      index_patterns: [],
-      tier2_targets: [],
-      tier2_target_sources: [],
-      report_intent_targets: [],
-      actionable_indices: [],
-      tier1: {
-        tier: 1,
-        ...emptyHuntForThreatResult(
-          'no_searchable_terms',
-          [],
-          [],
-          timeRange ?? { from: 'now-24h', to: 'now' },
-          message
-        ),
-      },
-      tier2_skipped_reason: 'report_not_found',
-      message,
-      next_step:
+    return buildSkippedReportResult({
+      reportId,
+      runId: run_id,
+      timeRange,
+      reason: 'report_not_found',
+      message: `Report ${reportId} was not found in space ${spaceId}.`,
+      nextStep:
         'A report_id run requires the report to be visible in this space. Pass a report id that exists here, or omit report_id and pass iocs/techniques/text for an ad hoc hunt.',
-      has_confirmed_hit: false,
-      // Nothing about this run says whether the environment is clean, and a later run
-      // can differ: the report may be indexed, the scope may resolve, the index may
-      // come back. The report has to stay eligible.
-      completeness: 'incomplete_retryable',
-      completed_successfully: false,
-    };
+    });
+  }
+  if (reportContext?.title) narrativeContext.reportTitle = reportContext.title;
+  // Even when the caller supplied explicit inputs: a report_id run writes its evidence
+  // and Investigation state to that report, so an unenriched report is never hunted
+  // (or retired) until enrichment finishes.
+  if (reportId !== undefined && reportContext?.extraction_pending === true) {
+    return buildSkippedReportResult({
+      reportId,
+      runId: run_id,
+      timeRange,
+      reason: 'extraction_pending',
+      message: `Report ${reportId} has not been enriched yet.`,
+      nextStep:
+        'Wait for the threat intel extraction workflow to finish enriching this report, then re-run the hunt.',
+      gap: {
+        reason: 'extraction_pending',
+        detail:
+          'This report has not been enriched yet, so neither Tier 1 nor Tier 2 ran against it. It is not marked as hunted, so a later sweep can pick it up once enrichment finishes.',
+      },
+    });
   }
   // An omitted array falls back to the report; an explicitly empty one is a
   // choice and wins, as the contract above says caller input does. Testing length
@@ -526,7 +583,6 @@ const huntCoordinatorCore = async (
   // alone — still searched the report's IOCs and could confirm a hit on them.
   const iocs = callerIocs ?? reportContext?.iocs ?? [];
   const techniques = callerTechniques ?? reportContext?.techniques ?? [];
-  if (reportContext?.title) narrativeContext.reportTitle = reportContext.title;
   // Clamp after merge: request schema bounds caller `text`, but report-loaded
   // `content.body_text` has no such bound and must not exceed the Tier 2 contract.
   const text = clampHuntReportText(callerText ?? reportContext?.text);
