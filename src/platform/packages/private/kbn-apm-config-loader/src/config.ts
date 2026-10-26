@@ -371,10 +371,11 @@ export class ApmConfiguration {
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
     const config = merge({}, configFromKibanaConfig, configFromEnv);
 
+    // The APM agent rejects context propagation while the agent is inactive.
+    // `contextPropagationOnly` defaults to true (applied after this merge), so turn it
+    // off unless it was explicitly set to false.
     if (config.active === false && config.contextPropagationOnly !== false) {
-      throw new Error(
-        'APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false'
-      );
+      config.contextPropagationOnly = false;
     }
 
     if (config.active === true) {
