@@ -591,6 +591,26 @@ function getColumnName(node: ESQLAstItem | undefined): string {
   return BasicPrettyPrinter.expression(node as ESQLSingleAstItem);
 }
 
+type FullTextOperator = ':' | 'MATCH' | 'MATCH_PHRASE';
+
+const FULL_TEXT_CALL_NAMES: Record<string, FullTextOperator> = {
+  match: 'MATCH',
+  match_phrase: 'MATCH_PHRASE',
+};
+
+/** The full-text operator a function node represents, or null when it is any other function. */
+function getFullTextOperator(fn: ESQLFunction): FullTextOperator | null {
+  if (fn.name === ':') {
+    // `:` is also used by non-predicate syntax; only the binary form is the match operator.
+    return fn.subtype === 'binary-expression' ? ':' : null;
+  }
+  return FULL_TEXT_CALL_NAMES[fn.name] ?? null;
+}
+
+function isColumnNode(node: ESQLAstItem | undefined): boolean {
+  return !!node && !Array.isArray(node) && 'type' in node && node.type === 'column';
+}
+
 /**
  * Finds multi-word `:` / `MATCH` predicates - ORed term-by-term on text, an over-match.
  * Mapping-blind on purpose: a field's type is ambiguous across backing indices, and the fix
@@ -603,68 +623,70 @@ export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredic
   const issues: OverBroadMatchPredicate[] = [];
   walk(root, {
     visitFunction: (fn) => {
-      const isColon = fn.name === ':' && fn.subtype === 'binary-expression';
-      const isMatch = fn.name === 'match' && fn.subtype === 'variadic-call';
-      if (!isColon && !isMatch) return;
+      const operator = getFullTextOperator(fn);
+      if (operator !== ':' && operator !== 'MATCH') return;
 
       const value = getUnquotedLiteral(fn.args[1]);
       if (value === null) return;
-      if (isMatch && matchOptionsForceAndOperator(fn.args[2])) return;
+      if (operator === 'MATCH' && matchOptionsForceAndOperator(fn.args[2])) return;
       if (!/\s/.test(value.trim())) return;
 
-      issues.push({ field: getColumnName(fn.args[0]), value, operator: isColon ? ':' : 'MATCH' });
+      issues.push({ field: getColumnName(fn.args[0]), value, operator });
     },
   });
   return issues;
 }
 
-/** A full-text predicate whose field argument is an expression, not a mapped column. */
-export interface CastFullTextArgument {
-  function: ':' | 'MATCH' | 'MATCH_PHRASE';
-  argument: string;
+/** A full-text predicate whose field argument is an expression (a cast, a function call), not a mapped column. */
+export interface NonColumnFullTextArgument {
+  operator: FullTextOperator;
+  field: string;
 }
 
 /**
  * Finds `:` / `MATCH` / `MATCH_PHRASE` calls whose field argument is anything other than a plain
  * column, typically a `field::keyword` cast. Elasticsearch pushes full-text functions down to the
- * index, so it rejects them with `not a field from an index mapping`. The check is static because
- * a validation run can miss it when the time filter prunes the backing indices with a union type.
+ * index, so it rejects them with `not a field from an index mapping`.
+ *
+ * The check is static because the validation query can run against fewer backing indices than the
+ * real one, so the union-type error may never surface there. It only sees the argument as written:
+ * a cast assigned by `EVAL` and referenced as a plain column afterwards is not detected.
+ * Returns an empty list when the query does not parse; the live validation reports that.
  */
-export function findCastFullTextArguments(esql: string): CastFullTextArgument[] {
+export function findNonColumnFullTextArguments(esql: string): NonColumnFullTextArgument[] {
   const { root, parsed } = tryParseEsql(esql);
   if (!parsed) return [];
 
-  const issues: CastFullTextArgument[] = [];
+  const issues: NonColumnFullTextArgument[] = [];
   walk(root, {
     visitFunction: (fn) => {
-      const isColon = fn.name === ':' && fn.subtype === 'binary-expression';
-      const isCall = fn.name === 'match' || fn.name === 'match_phrase';
-      if (!isColon && !isCall) {
-        return;
-      }
-
+      const operator = getFullTextOperator(fn);
       const [field] = fn.args;
-      if (!field || Array.isArray(field) || ('type' in field && field.type === 'column')) {
+      if (!operator || !field || isColumnNode(field)) {
         return;
       }
 
-      issues.push({
-        function: isColon ? ':' : fn.name === 'match' ? 'MATCH' : 'MATCH_PHRASE',
-        argument: getColumnName(field),
-      });
+      issues.push({ operator, field: getColumnName(field) });
     },
   });
   return issues;
 }
 
-/** Rejection message for {@link findCastFullTextArguments} results, written for the LLM that must repair the query. */
-export function renderCastFullTextArgumentError(issues: CastFullTextArgument[]): string {
-  const rendered = issues.map((issue) => `${issue.function}(${issue.argument}, ...)`).join(', ');
+/** Rejection message for {@link findNonColumnFullTextArguments} results, written for the LLM that must repair the query. */
+export function renderNonColumnFullTextArgumentError(issues: NonColumnFullTextArgument[]): string {
+  const rendered = issues
+    .map((issue) =>
+      issue.operator === ':' ? `${issue.field} : ...` : `${issue.operator}(${issue.field}, ...)`
+    )
+    .join(', ');
   return (
-    `Full-text function(s) need a plain mapped field, not a cast or expression: ${rendered}. ` +
-    `Elasticsearch rejects them with "not a field from an index mapping". Reference the bare ` +
-    `field name. For a union-typed field that needs a cast, use an exact comparison on the cast ` +
-    `field instead, e.g. field::keyword LIKE "*a phrase*".`
+    `Full-text predicate(s) need a plain mapped field, not a cast or expression: ${rendered}. ` +
+    `Elasticsearch rejects them with "not a field from an index mapping". If the field is not ` +
+    `union-typed, reference the bare field name. If dataset_analysis says the field needs a cast, ` +
+    `a full-text predicate cannot be used on it: compare the cast field with LIKE or ==, using ` +
+    `the recommended cast and not necessarily keyword, e.g. field::<recommended cast> LIKE ` +
+    `"*a phrase*". LIKE is case-sensitive, so match the casing in the sample values or lower both ` +
+    `sides with TO_LOWER, and escape any * ? or \\ in the phrase.`
   );
 }
 

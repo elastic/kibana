@@ -12,11 +12,11 @@ import type { Feature, QueryFeature, QueryType } from '@kbn/significant-events-s
 import {
   deriveQueryType,
   extractReferencedColumns,
-  findCastFullTextArguments,
+  findNonColumnFullTextArguments,
   findOverBroadMatchPredicates,
   getStatsQueryHints,
   normalizeEsqlSafe,
-  renderCastFullTextArgumentError,
+  renderNonColumnFullTextArgumentError,
   renderOverBroadMatchError,
   replaceFromSources,
 } from '@kbn/streams-schema';
@@ -281,8 +281,8 @@ export async function validateKIQueries({
           };
         }
 
-        const castFullTextArguments = findCastFullTextArguments(rewritten);
-        if (castFullTextArguments.length > 0) {
+        const nonColumnFullTextArguments = findNonColumnFullTextArguments(rewritten);
+        if (nonColumnFullTextArguments.length > 0) {
           hasNonIntentFailures = true;
           return {
             query,
@@ -290,7 +290,7 @@ export async function validateKIQueries({
             status: 'Failed to add',
             failureReason: 'validation_error',
             exactDuplicate,
-            error: renderCastFullTextArgumentError(castFullTextArguments),
+            error: renderNonColumnFullTextArgumentError(nonColumnFullTextArguments),
           };
         }
 

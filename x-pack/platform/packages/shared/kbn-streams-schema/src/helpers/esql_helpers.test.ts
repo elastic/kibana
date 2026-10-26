@@ -13,12 +13,13 @@ import {
   extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
-  findCastFullTextArguments,
+  findNonColumnFullTextArguments,
   findOverBroadMatchPredicates,
   getStatsQueryHints,
   hasSameEsql,
   hasStatsCommand,
   normalizeEsqlSafe,
+  renderNonColumnFullTextArgumentError,
 } from './esql_helpers';
 
 describe('extractWhereExpression', () => {
@@ -478,31 +479,31 @@ describe('extractReferencedColumns', () => {
   });
 });
 
-describe('findCastFullTextArguments', () => {
+describe('findNonColumnFullTextArguments', () => {
   it('flags MATCH_PHRASE on a casted field', () => {
     expect(
-      findCastFullTextArguments(
+      findNonColumnFullTextArguments(
         'FROM logs | WHERE MATCH_PHRASE(exception.message::KEYWORD, "i/o timeout")'
       )
-    ).toEqual([{ function: 'MATCH_PHRASE', argument: 'exception.message::KEYWORD' }]);
+    ).toEqual([{ operator: 'MATCH_PHRASE', field: 'exception.message::KEYWORD' }]);
   });
 
-  it('flags MATCH on a casted field', () => {
+  it('flags MATCH on a casted field, normalising the cast to upper case', () => {
     expect(
-      findCastFullTextArguments('FROM logs | WHERE MATCH(message::keyword, "timeout")')
-    ).toEqual([{ function: 'MATCH', argument: 'message::KEYWORD' }]);
+      findNonColumnFullTextArguments('FROM logs | WHERE MATCH(message::keyword, "timeout")')
+    ).toEqual([{ operator: 'MATCH', field: 'message::KEYWORD' }]);
   });
 
   it('flags the `:` operator on a casted field', () => {
-    expect(findCastFullTextArguments('FROM logs | WHERE message::keyword : "timeout"')).toEqual([
-      { function: ':', argument: 'message::KEYWORD' },
-    ]);
+    expect(
+      findNonColumnFullTextArguments('FROM logs | WHERE message::keyword : "timeout"')
+    ).toEqual([{ operator: ':', field: 'message::KEYWORD' }]);
   });
 
   it('flags a function wrapping the field', () => {
     expect(
-      findCastFullTextArguments('FROM logs | WHERE MATCH_PHRASE(TO_LOWER(message), "timeout")')
-    ).toEqual([{ function: 'MATCH_PHRASE', argument: 'TO_LOWER(message)' }]);
+      findNonColumnFullTextArguments('FROM logs | WHERE MATCH_PHRASE(TO_LOWER(message), "timeout")')
+    ).toEqual([{ operator: 'MATCH_PHRASE', field: 'TO_LOWER(message)' }]);
   });
 
   it('flags the generated query that failed in production', () => {
@@ -510,14 +511,22 @@ describe('findCastFullTextArguments', () => {
 | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)
 | LIMIT 6`;
 
-    expect(findCastFullTextArguments(esql)).toEqual([
-      { function: 'MATCH_PHRASE', argument: 'exception.message::KEYWORD' },
+    expect(findNonColumnFullTextArguments(esql)).toEqual([
+      { operator: 'MATCH_PHRASE', field: 'exception.message::KEYWORD' },
     ]);
+  });
+
+  it('does not flag a backticked column containing a slash', () => {
+    expect(
+      findNonColumnFullTextArguments(
+        'FROM logs | WHERE `kubernetes.labels.app_kubernetes_io/name` : "api" AND MATCH_PHRASE(`a/b`, "x y")'
+      )
+    ).toEqual([]);
   });
 
   it('does not flag full-text functions on plain columns', () => {
     expect(
-      findCastFullTextArguments(
+      findNonColumnFullTextArguments(
         'FROM logs | WHERE MATCH_PHRASE(exception.message, "i/o timeout") AND message : "timeout"'
       )
     ).toEqual([]);
@@ -525,11 +534,32 @@ describe('findCastFullTextArguments', () => {
 
   it('does not flag a cast used with an exact comparison', () => {
     expect(
-      findCastFullTextArguments('FROM logs | WHERE exception.message::keyword == "timeout"')
+      findNonColumnFullTextArguments('FROM logs | WHERE exception.message::keyword == "timeout"')
     ).toEqual([]);
   });
 
   it('returns nothing when the query does not parse', () => {
-    expect(findCastFullTextArguments('FROM | WHERE (')).toEqual([]);
+    expect(findNonColumnFullTextArguments('FROM | WHERE (')).toEqual([]);
+  });
+});
+
+describe('renderNonColumnFullTextArgumentError', () => {
+  it('renders function calls as calls and the `:` operator as an infix predicate', () => {
+    const message = renderNonColumnFullTextArgumentError([
+      { operator: 'MATCH_PHRASE', field: 'a::KEYWORD' },
+      { operator: ':', field: 'b::KEYWORD' },
+    ]);
+
+    expect(message).toContain('MATCH_PHRASE(a::KEYWORD, ...), b::KEYWORD : ...');
+    expect(message).not.toContain(':(');
+  });
+
+  it('tells the model to use the recommended cast and to mind LIKE case sensitivity', () => {
+    const message = renderNonColumnFullTextArgumentError([
+      { operator: 'MATCH', field: 'a::KEYWORD' },
+    ]);
+
+    expect(message).toContain('field::<recommended cast> LIKE');
+    expect(message).toContain('case-sensitive');
   });
 });
