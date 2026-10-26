@@ -318,33 +318,15 @@ export const PrivateLocationsTable = ({
 
   const renderToolRight = () => {
     return [
-      <EuiFlexGroup
+      <EuiButton
         key="refreshPrivateLocations"
-        direction="column"
-        gutterSize="xs"
-        alignItems="center"
-        responsive={false}
+        data-test-subj="syntheticsRefreshPrivateLocationsButton"
+        iconType="refresh"
+        onClick={refreshApp}
+        isLoading={loading || agentStatsLoading}
       >
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="syntheticsRefreshPrivateLocationsButton"
-            iconType="refresh"
-            onClick={refreshApp}
-            isLoading={loading || agentStatsLoading}
-          >
-            {REFRESH_LABEL}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-            <FormattedMessage
-              id="xpack.synthetics.monitorManagement.lastUpdated"
-              defaultMessage="Updated {time}"
-              values={{ time: <RelativeTimestamp timestamp={lastRefresh} /> }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>,
+        {REFRESH_LABEL}
+      </EuiButton>,
     ];
   };
 
@@ -373,6 +355,20 @@ export const PrivateLocationsTable = ({
             label={PRIVATE_LOCATIONS}
             pageIndex={pageIndex}
             pageSize={pageSize}
+            rightContent={
+              <EuiText
+                size="xs"
+                color="subdued"
+                className="eui-textNoWrap"
+                data-test-subj="syntheticsPrivateLocationsLastUpdated"
+              >
+                <FormattedMessage
+                  id="xpack.synthetics.monitorManagement.lastUpdated"
+                  defaultMessage="Updated {time}"
+                  values={{ time: <RelativeTimestamp timestamp={lastRefresh} /> }}
+                />
+              </EuiText>
+            }
           />
         }
         pagination={{

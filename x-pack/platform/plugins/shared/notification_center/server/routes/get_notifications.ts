@@ -33,11 +33,15 @@ export const registerGetNotificationsRoute = ({ router, core, logger }: Notifica
         },
       },
       async (_context, request, response) => {
-        const [{ dataStreams, userStorage }] = await core.getStartServices();
+        const [{ elasticsearch, userStorage }] = await core.getStartServices();
         const client = userStorage.asScoped(request);
         // read-state fetch runs concurrently with the ES query
         const readState = client ? getReadState(client, logger) : undefined;
-        const result = await queryNotifications({ dataStreams, logger }, request.query, readState);
+        const result = await queryNotifications(
+          { esClient: elasticsearch.client.asInternalUser, logger },
+          request.query,
+          readState
+        );
         return response.ok({ body: result });
       }
     );

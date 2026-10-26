@@ -7,9 +7,15 @@
 
 import Boom from '@hapi/boom';
 import type { z } from '@kbn/zod/v4';
+import { UnifiedAttachmentBoundsSchema } from '../../../common/types/api/attachment/v2';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { isTypeAllowedForOwner } from '../../../common/utils/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
+
+const summarizeIssues = (error: z.ZodError): string =>
+  error.issues
+    .map(({ path, message }) => `${path.length > 0 ? path.join('.') : '(root)'}: ${message}`)
+    .join('; ');
 
 /** Throws `Boom.badRequest` with a `path: message` summary of every zod issue. */
 export const parseUnifiedAttachmentWithSchema = (
@@ -21,10 +27,9 @@ export const parseUnifiedAttachmentWithSchema = (
   if (result.success) {
     return;
   }
-  const summary = result.error.issues
-    .map(({ path, message }) => `${path.length > 0 ? path.join('.') : '(root)'}: ${message}`)
-    .join('; ');
-  throw Boom.badRequest(`Invalid attachment payload for type '${type}': ${summary}`);
+  throw Boom.badRequest(
+    `Invalid attachment payload for type '${type}': ${summarizeIssues(result.error)}`
+  );
 };
 
 export const validateUnifiedAttachments = ({
@@ -34,6 +39,12 @@ export const validateUnifiedAttachments = ({
   query: UnifiedAttachmentPayload;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }) => {
+  // Runs first so later errors, which echo `type` and `owner`, only see bounded values.
+  const bounds = UnifiedAttachmentBoundsSchema.safeParse(query);
+  if (!bounds.success) {
+    throw Boom.badRequest(`Invalid attachment payload: ${summarizeIssues(bounds.error)}`);
+  }
+
   if (!unifiedAttachmentTypeRegistry.has(query.type)) {
     throw Boom.badRequest(
       `Attachment type ${query.type} is not registered in unified attachment type registry.`

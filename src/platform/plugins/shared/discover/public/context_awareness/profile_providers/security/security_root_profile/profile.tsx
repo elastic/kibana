@@ -7,79 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent } from 'react';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
-import type { ProfileProviderServices } from '../../profile_provider_services';
 import type { SecurityProfileProviderFactory } from '../types';
-import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
-import { createDefaultSecuritySolutionAppStateGetter as createDefaultSecuritySolutionAppStateGetter } from '../accessors/get_default_app_state';
-import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
-import {
-  ALERTS_INDEX_PATTERN,
-  ALLOWED_CELL_RENDER_FIELDS,
-  SECURITY_PROFILE_ID,
-} from '../constants';
-
-interface SecurityRootProfileContext {
-  getSecuritySolutionCellRenderer?: (
-    fieldName: string
-  ) => FunctionComponent<DataGridCellValueElementProps> | undefined;
-}
+import { SECURITY_PROFILE_ID } from '../constants';
 
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
-  RootProfileProvider<SecurityRootProfileContext>
-> = (services: ProfileProviderServices) => {
-  const { discoverShared } = services;
-  const discoverFeaturesRegistry = discoverShared.features.registry;
-  const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-renderer');
+  RootProfileProvider
+> = () => ({
+  profileId: SECURITY_PROFILE_ID.root,
+  profile: {},
+  resolve: (params) => {
+    if (params.solutionNavId !== SolutionType.Security) {
+      return { isMatch: false };
+    }
 
-  return {
-    profileId: SECURITY_PROFILE_ID.root,
-    profile: {
-      getCellRenderers:
-        (prev, { context }) =>
-        (params) => {
-          const entries = prev(params);
-          if (!params.dataView.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
-            return entries;
-          }
-          ALLOWED_CELL_RENDER_FIELDS.forEach((fieldName) => {
-            entries[fieldName] =
-              context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
-          });
-
-          for (const field of params.dataView.fields.getByType('ip')) {
-            if (!entries[field.name]) {
-              const renderer = context.getSecuritySolutionCellRenderer?.(field.name);
-              if (renderer) {
-                entries[field.name] = renderer;
-              }
-            }
-          }
-
-          return entries;
-        },
-      getRowIndicatorProvider: () => () => getAlertEventRowIndicator,
-      getDefaultAppState: createDefaultSecuritySolutionAppStateGetter(),
-    },
-    resolve: async (params) => {
-      if (params.solutionNavId !== SolutionType.Security) {
-        return {
-          isMatch: false,
-        };
-      }
-
-      const getCellRenderer = await createCellRendererAccessor(cellRendererFeature);
-
-      return {
-        isMatch: true,
-        context: {
-          solutionType: SolutionType.Security,
-          getSecuritySolutionCellRenderer: getCellRenderer,
-        },
-      };
-    },
-  };
-};
+    return {
+      isMatch: true,
+      context: {
+        solutionType: SolutionType.Security,
+      },
+    };
+  },
+});

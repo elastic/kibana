@@ -507,6 +507,7 @@ const ContentListClientProviderInner = ({
     entityName: rest.labels.entity,
     isReadOnly: rest.isReadOnly,
     queryKeyScope,
+    editRestriction: itemConfigProp?.actions?.edit?.restriction,
   });
 
   // Rewrite the client-flavored `contentEditor` config into the base

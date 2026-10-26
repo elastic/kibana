@@ -15,6 +15,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
@@ -75,4 +76,6 @@ export interface WorkflowValidationDeps {
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getCoreStart: () => CoreStart;
+  licensing: LicensingPluginStart;
+  logger: Logger;
 }

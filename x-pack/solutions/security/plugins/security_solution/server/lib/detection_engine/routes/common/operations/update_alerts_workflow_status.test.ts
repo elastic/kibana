@@ -172,4 +172,67 @@ describe('updateAlertsWorkflowStatus', () => {
       })
     ).rejects.toThrow('Test error');
   });
+
+  describe('audit events', () => {
+    const ids = ['somefakeid1', 'somefakeid2'];
+
+    it('logs one alert_update intent event per id before updateByQuery', async () => {
+      const auditLogger = context.securitySolution.getAuditLogger();
+
+      await updateAlertsWorkflowStatus({
+        ...defaultArgs,
+        status: 'acknowledged',
+        context: requestContextMock.convertContext(context),
+      });
+
+      ids.forEach((id, index) => {
+        expect(auditLogger?.log).toHaveBeenNthCalledWith(index + 1, {
+          message: `User is updating alert [id=${id}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            type: ['change'],
+            outcome: 'unknown',
+          },
+          error: undefined,
+        });
+      });
+      expect(jest.mocked(auditLogger!.log).mock.invocationCallOrder[0]).toBeLessThan(
+        context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.invocationCallOrder[0]
+      );
+      expect(auditLogger?.log).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'alert_acknowledge', outcome: 'success' }),
+        })
+      );
+    });
+
+    it('logs a failure event per id and rethrows when updateByQuery rejects', async () => {
+      const auditLogger = context.securitySolution.getAuditLogger();
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
+        new Error('Test error')
+      );
+
+      await expect(
+        updateAlertsWorkflowStatus({
+          ...defaultArgs,
+          context: requestContextMock.convertContext(context),
+        })
+      ).rejects.toThrow('Test error');
+
+      ids.forEach((id) => {
+        expect(auditLogger?.log).toHaveBeenCalledWith({
+          message: `Failed attempt to update alert [id=${id}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            type: ['change'],
+            outcome: 'failure',
+          },
+          error: { code: 'Error', message: 'Test error' },
+        });
+      });
+    });
+  });
 });

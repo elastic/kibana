@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { withTimeout } from '@kbn/std';
 import type { Logger } from '@kbn/logging';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
@@ -232,49 +233,40 @@ const withTimeoutAndAbort = async <T>(
   }: { timeoutMs: number; abortSignal?: AbortSignal; logger?: Logger }
 ): Promise<T> => {
   const controller = new AbortController();
-  let timedOut = false;
-
   const onAbort = () => controller.abort();
-  if (abortSignal) {
-    if (abortSignal.aborted) {
-      controller.abort();
-    } else {
-      abortSignal.addEventListener('abort', onAbort, { once: true });
-    }
-  }
-  const timer = setTimeout(() => {
-    timedOut = true;
+  if (abortSignal?.aborted) {
     controller.abort();
-  }, timeoutMs);
+  } else {
+    abortSignal?.addEventListener('abort', onAbort, { once: true });
+  }
 
-  let onControllerAbort: (() => void) | undefined;
-  const aborted = new Promise<never>((_resolve, reject) => {
-    onControllerAbort = () => {
-      const reason = timedOut
-        ? `selectRelevantSkills timed out after ${timeoutMs}ms`
-        : 'selectRelevantSkills aborted';
-      if (timedOut) {
-        logger?.debug(reason);
-      }
-      reject(new Error(reason));
-    };
-    if (controller.signal.aborted) {
-      onControllerAbort();
-    } else {
-      controller.signal.addEventListener('abort', onControllerAbort);
-    }
-  });
+  const operation = fn(controller.signal);
+  // Prevent an unhandled rejection if the operation settles after the race is already decided.
+  operation.catch(() => {});
+
+  let onCancel: (() => void) | undefined;
+  const aborted = abortSignal
+    ? new Promise<never>((_, reject) => {
+        onCancel = () => reject(new Error('selectRelevantSkills aborted'));
+        if (abortSignal.aborted) onCancel();
+        else abortSignal.addEventListener('abort', onCancel);
+      })
+    : undefined;
 
   try {
-    const operation = fn(controller.signal);
-    // Prevent an unhandled rejection if the operation settles after the race is already decided.
-    operation.catch(() => {});
-    return await Promise.race([operation, aborted]);
-  } finally {
-    clearTimeout(timer);
-    abortSignal?.removeEventListener('abort', onAbort);
-    if (onControllerAbort) {
-      controller.signal.removeEventListener('abort', onControllerAbort);
+    const outcome = await withTimeout({
+      promise: aborted ? Promise.race([operation, aborted]) : operation,
+      timeoutMs,
+    });
+    if (outcome.timedout) {
+      controller.abort();
+      const reason = `selectRelevantSkills timed out after ${timeoutMs}ms`;
+      logger?.debug(reason);
+      throw new Error(reason);
     }
+    return outcome.value;
+  } finally {
+    abortSignal?.removeEventListener('abort', onAbort);
+    if (onCancel) abortSignal?.removeEventListener('abort', onCancel);
   }
 };

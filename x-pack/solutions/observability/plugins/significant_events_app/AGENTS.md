@@ -11,8 +11,7 @@
   onboards) come from the `nightshiftSources` plugin: `await
   dependencies.start.nightshiftSources.getClient()`, then `fetch` on
   `/internal/nightshift/sources*`. Read them through `useFetchSources` /
-  `useSourcesById`, write them through `useSourcesApi`.
+  `useSourcesById`. Source editing and onboarding live in the Nightshift app.
 - The app does not depend on the `streams` plugin. The KI and onboarding routes keep
   their `/internal/streams/{sourceId}` paths, and `{sourceId}` is a source id.
-- The default tab is `sources` (`/streams` redirects there). URL state and the locator
-  filter knowledge indicators with `source` (source ids).
+- The default tab is `queries`. Sources, Knowledge Indicators, Cortex, Memory and Decision Trees live in the Nightshift app.

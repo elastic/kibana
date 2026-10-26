@@ -32,7 +32,7 @@ import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 
 const DetectionResponseComponent = () => {
-  const { cases } = useKibana().services;
+  const { cases, docLinks } = useKibana().services;
   const { filterQuery } = useGlobalFilterQuery();
 
   const { dataView, status } = useDataView();
@@ -48,7 +48,7 @@ const DetectionResponseComponent = () => {
   const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
 
   if (!canReadAlerts && !canReadCases) {
-    return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
+    return <NoPrivileges docLinkSelector={({ siem }: DocLinks) => siem.privileges} />;
   }
 
   if (status === 'pristine') {
@@ -60,7 +60,11 @@ const DetectionResponseComponent = () => {
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
-            <SecurityAppHeader title={i18n.DETECTION_RESPONSE_TITLE} spacing="largeBleed" />
+            <SecurityAppHeader
+              title={i18n.DETECTION_RESPONSE_TITLE}
+              spacing="largeBleed"
+              docLink={docLinks.links.siem.detectionResponsePage}
+            />
             {isDataViewReady && (
               <>
                 <EuiSpacer size="m" />

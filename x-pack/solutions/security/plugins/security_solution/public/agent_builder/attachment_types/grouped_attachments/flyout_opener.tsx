@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
+import React, { useEffect, useRef } from 'react';
 import { useInitDataViewManager } from '../../../data_view_manager/hooks/use_init_data_view_manager';
 import { useDataViewManagerStatus } from '../../../data_view_manager/hooks/use_data_view_manager_status';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
-import { FlyoutSessionContextProvider } from '../../../flyout_v2/session_context';
-import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { getOpenConversationFlyoutWidth } from './conversation_flyout_width';
+import { ConversationFlyoutHost } from './conversation_flyout_host';
 
 /** The app shell normally does this; without it the opened flyout spins forever. */
 const DataViewManagerBootstrap = () => {
@@ -44,10 +41,7 @@ const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => 
       return;
     }
     hasOpened.current = true;
-    // Attack, alert, and rule rows open at the flyout they replace. Other descriptors ignore this and keep their own size.
-    openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY, {
-      originFlyoutSize: getOpenConversationFlyoutWidth() ?? 's',
-    });
+    openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY);
   }, [descriptor, api]);
 
   return null;
@@ -61,44 +55,9 @@ export interface GroupedAttachmentFlyoutOpenerProps {
 export const GroupedAttachmentFlyoutOpener = ({
   descriptor,
   resolveSecurityCanvasContext,
-}: GroupedAttachmentFlyoutOpenerProps) => {
-  const [bundle, setBundle] = useState<SecurityCanvasEmbeddedBundle>();
-
-  useEffect(() => {
-    let isMounted = true;
-    resolveSecurityCanvasContext()
-      .then((resolved) => {
-        if (isMounted) {
-          setBundle(resolved);
-        }
-      })
-      .catch((error) => {
-        // Mounted out of view, so there is nowhere to surface this; the row just does not open.
-        window.console.warn('Grouped attachment could not start Security', error);
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, [resolveSecurityCanvasContext]);
-
-  if (!bundle) {
-    return null;
-  }
-
-  return flyoutProviders({
-    services: bundle.kibanaServices,
-    store: bundle.store,
-    children: (
-      <FlyoutSessionContextProvider
-        value={{
-          session: 'start',
-          historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-          type: 'push',
-        }}
-      >
-        <DataViewManagerBootstrap />
-        <OpenFlyoutOnMount descriptor={descriptor} />
-      </FlyoutSessionContextProvider>
-    ),
-  });
-};
+}: GroupedAttachmentFlyoutOpenerProps) => (
+  <ConversationFlyoutHost resolveSecurityCanvasContext={resolveSecurityCanvasContext}>
+    <DataViewManagerBootstrap />
+    <OpenFlyoutOnMount descriptor={descriptor} />
+  </ConversationFlyoutHost>
+);

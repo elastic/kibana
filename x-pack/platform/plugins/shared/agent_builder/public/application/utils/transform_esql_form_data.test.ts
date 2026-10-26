@@ -46,6 +46,7 @@ describe('transformEsqlFormData', () => {
         },
       ],
       labels: ['test', 'esql'],
+      includeFrozen: false,
       type: ToolType.esql,
     };
 
@@ -68,6 +69,7 @@ describe('transformEsqlFormData', () => {
             optional: false,
           },
         },
+        include_frozen: false,
       },
       type: ToolType.esql,
       tags: ['test', 'esql'],
@@ -79,12 +81,36 @@ describe('transformEsqlFormData', () => {
       const result = transformEsqlToolToFormData(mockTool);
       expect(result).toEqual(mockFormData);
     });
+
+    it('should default includeFrozen to false when the tool does not set it', () => {
+      const { include_frozen: _, ...configuration } = mockTool.configuration;
+
+      const result = transformEsqlToolToFormData({ ...mockTool, configuration });
+
+      expect(result.includeFrozen).toBe(false);
+    });
+
+    it('should carry over an opted-in include_frozen', () => {
+      mockTool.configuration.include_frozen = true;
+
+      const result = transformEsqlToolToFormData(mockTool);
+
+      expect(result.includeFrozen).toBe(true);
+    });
   });
 
   describe('transformFormDataToEsqlTool', () => {
     it('should transform form data to an ES|QL tool', () => {
       const result = transformFormDataToEsqlTool(mockFormData);
       expect(result).toEqual(mockTool);
+    });
+
+    it('should map includeFrozen to include_frozen', () => {
+      mockFormData.includeFrozen = true;
+
+      const result = transformFormDataToEsqlTool(mockFormData);
+
+      expect(result.configuration.include_frozen).toBe(true);
     });
 
     it('should filter out unused params', () => {
@@ -128,6 +154,7 @@ describe('transformEsqlFormData', () => {
         esql: 'FROM other_index',
         params: [],
         labels: [],
+        includeFrozen: false,
         type: ToolType.esql,
       };
 
@@ -137,6 +164,7 @@ describe('transformEsqlFormData', () => {
         configuration: {
           query: 'FROM other_index',
           params: {},
+          include_frozen: false,
         },
         type: ToolType.esql,
         tags: [],
@@ -168,6 +196,7 @@ describe('transformEsqlFormData', () => {
           },
         ],
         labels: ['test', 'esql'],
+        includeFrozen: false,
         type: ToolType.esql,
       };
 
@@ -183,6 +212,7 @@ describe('transformEsqlFormData', () => {
               optional: false,
             },
           },
+          include_frozen: false,
         },
         type: ToolType.esql,
         tags: ['test', 'esql'],

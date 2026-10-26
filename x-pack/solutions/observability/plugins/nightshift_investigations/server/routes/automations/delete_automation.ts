@@ -6,7 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE } from '../../saved_objects/automation_budget_saved_object';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
@@ -37,20 +39,35 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
     );
 
     // Delete the backing workflow first so it cannot fire after the SO is gone.
-    // Best-effort: if workflow deletion fails the SO is still removed; any orphaned
-    // workflow will be inert because the automation SO is the source of truth for routing.
     if (workflowsManagement && existing.attributes.workflowId) {
-      try {
-        await workflowsManagement.management.deleteWorkflows(
-          [existing.attributes.workflowId],
-          spaceId,
-          request
-        );
-      } catch {
-        // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+      const { workflowId } = existing.attributes;
+      const workflow = await workflowsManagement.management
+        .getWorkflow(workflowId, spaceId, request)
+        .catch(() => null);
+      // Only a workflow read as unbound may outlive its automation. A workflow bound to a service
+      // account keeps running as that account; so may one whose binding can't be read (lookup
+      // failed, or the caller can't read it). For those, a failed delete fails the request and
+      // keeps the automation. Deleting a workflow that no longer exists succeeds.
+      const isKnownUnbound =
+        Boolean(workflow?.definition) && !workflow?.definition?.settings?.run_as;
+      if (!isKnownUnbound) {
+        await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
+      } else {
+        // Best-effort: if workflow deletion fails the SO is still removed; an orphaned unbound
+        // workflow is inert because the automation SO is the source of truth for routing.
+        try {
+          await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
+        } catch {
+          // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+        }
       }
     }
 
+    try {
+      await soClient.delete(NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE, params.path.id);
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) throw error;
+    }
     await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
 
     return {};

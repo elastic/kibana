@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { EuiBadge, EuiTextBlockTruncate, EuiTextColor, useEuiTheme } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
 import { css } from '@emotion/react';
+import type { FilterableSource } from '@kbn/data-source';
 import { FilterBadgeGroup } from './filter_badge_group';
 import type { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
 import { badgePaddingCss, marginLeftLabelCss } from './filter_badge.styles';
@@ -20,7 +20,7 @@ import { strings } from './i18n';
 
 export interface FilterBadgeProps {
   filter: Filter;
-  dataViews: DataView[];
+  dataViews: FilterableSource[];
   valueLabel: string;
   hideAlias?: boolean;
   filterLabelStatus: FilterLabelStatus;

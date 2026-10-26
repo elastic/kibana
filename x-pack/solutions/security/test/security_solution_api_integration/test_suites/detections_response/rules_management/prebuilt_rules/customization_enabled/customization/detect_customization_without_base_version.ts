@@ -5,7 +5,10 @@
  * 2.0.
  */
 import expect from 'expect';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type {
+  MachineLearningRuleCreateFields,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -227,6 +230,43 @@ export default ({ getService }: FtrProviderContext): void => {
             fieldName: 'to',
             customizedValue: 'now-1m',
           }));
+      });
+    });
+
+    describe('rule schedule with equivalent duration formats', () => {
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 3,
+            interval: '60m',
+            from: 'now-24h',
+          }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+        await deleteAllPrebuiltRuleAssets(es, log);
+      });
+
+      [
+        ['interval', '1h'],
+        ['from', 'now-1d'],
+      ].forEach(([fieldName, value]) => {
+        it(`"${fieldName}" patched to an equivalent value "${value}" does NOT customize the rule`, async () => {
+          const { body: patchedRule } = await detectionsApi
+            .patchRule({
+              body: { rule_id: PREBUILT_RULE_ID, [fieldName]: value },
+            })
+            .expect(200);
+
+          expect(patchedRule.rule_source).toMatchObject({
+            type: 'external',
+            is_customized: false,
+            customized_fields: [],
+            has_base_version: false,
+          });
+          // The patched value is kept as is, not normalized
+          expect(patchedRule).toMatchObject({ [fieldName]: value });
+        });
       });
     });
 
@@ -517,6 +557,94 @@ export default ({ getService }: FtrProviderContext): void => {
         }));
     });
 
+    describe('query with surrounding whitespace differences', () => {
+      const STOCK_QUERY = 'data_stream.dataset: "aws.cloudtrail" and\n event.action: "GetObject"';
+
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 3,
+            query: STOCK_QUERY,
+          }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+        await deleteAllPrebuiltRuleAssets(es, log);
+      });
+
+      [
+        ['leading spaces', `    ${STOCK_QUERY}`],
+        ['trailing spaces', `${STOCK_QUERY}   `],
+        ['trailing blank lines', `${STOCK_QUERY}\n\n`],
+        ['leading and trailing whitespace', `\n  ${STOCK_QUERY}  \n`],
+      ].forEach(([description, query]) => {
+        it(`"query" with ${description} does NOT customize the rule`, async () => {
+          const { body: patchedRule } = await detectionsApi
+            .patchRule({ body: { rule_id: PREBUILT_RULE_ID, query } })
+            .expect(200);
+
+          expect(patchedRule.rule_source).toMatchObject({
+            type: 'external',
+            is_customized: false,
+            customized_fields: [],
+            has_base_version: false,
+          });
+        });
+      });
+    });
+
+    describe('machine learning job id with equivalent scalar and array formats', () => {
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({
+            ...getPrebuiltRuleMockOfType<MachineLearningRuleCreateFields>('machine_learning'),
+            rule_id: PREBUILT_RULE_ID,
+            version: 3,
+            machine_learning_job_id: 'job_a',
+          }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+        await deleteAllPrebuiltRuleAssets(es, log);
+      });
+
+      it('"machine_learning_job_id" patched from a scalar to an equivalent array does NOT customize the rule', async () => {
+        const { body: patchedRule } = await detectionsApi
+          .patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              type: 'machine_learning',
+              machine_learning_job_id: ['job_a'],
+            },
+          })
+          .expect(200);
+
+        expect(patchedRule.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+          has_base_version: false,
+        });
+      });
+
+      it('"machine_learning_job_id" patched to a different job id in an array customizes the rule', async () => {
+        const { body: patchedRule } = await detectionsApi
+          .patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              type: 'machine_learning',
+              machine_learning_job_id: ['job_a', 'job_b'],
+            },
+          })
+          .expect(200);
+
+        expect(patchedRule.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
+        });
+      });
+    });
     describe('new terms rule type fields', () => {
       beforeEach(async () => {
         await createPrebuiltRuleAssetSavedObjects(es, [NEW_TERMS_PREBUILT_RULE_ASSET]);

@@ -118,7 +118,95 @@ describe('AgentPolicyActionMenu', () => {
       expect(deleteButton).toHaveAttribute('disabled');
     });
 
-    it('is disabled when agent policy support agentless  is true', async () => {
+    it('is disabled when the package policies summary has a managed package policy', async () => {
+      const testRenderer = createFleetTestRendererMock();
+      const agentPolicyWithSummary: AgentPolicy = {
+        ...baseAgentPolicy,
+        package_policies: undefined,
+        package_policies_summary: {
+          count: 4301,
+          has_fleet_server: false,
+          has_managed: true,
+          has_root_integrations: false,
+          has_shared: false,
+        },
+      };
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={agentPolicyWithSummary} />
+      );
+
+      await userEvent.click(result.getByTestId('agentActionsBtn'));
+
+      expect(result.getByTestId('agentPolicyActionMenuDeleteButton')).toHaveAttribute('disabled');
+    });
+
+    it('is enabled when the package policies summary has no managed package policy', async () => {
+      const testRenderer = createFleetTestRendererMock();
+      const agentPolicyWithSummary: AgentPolicy = {
+        ...baseAgentPolicy,
+        package_policies: undefined,
+        package_policies_summary: {
+          count: 4301,
+          has_fleet_server: false,
+          has_managed: false,
+          has_root_integrations: false,
+          has_shared: false,
+        },
+      };
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={agentPolicyWithSummary} />
+      );
+
+      await userEvent.click(result.getByTestId('agentActionsBtn'));
+
+      expect(result.getByTestId('agentPolicyActionMenuDeleteButton')).not.toHaveAttribute(
+        'disabled'
+      );
+    });
+
+    describe('when the package policies are not available', () => {
+      const agentPolicyWithoutPackagePolicies: AgentPolicy = {
+        ...baseAgentPolicy,
+        package_policies: undefined,
+        package_policies_summary: undefined,
+      };
+
+      it('keeps the actions that do not depend on them and disables the others', async () => {
+        jest.mocked(useAuthz).mockReturnValue({
+          fleet: { allAgentPolicies: true, addAgents: true },
+          integrations: { writeIntegrationPolicies: true },
+        } as any);
+        const testRenderer = createFleetTestRendererMock();
+
+        const result = testRenderer.render(
+          <AgentPolicyActionMenu agentPolicy={agentPolicyWithoutPackagePolicies} />
+        );
+        await userEvent.click(result.getByTestId('agentActionsBtn'));
+
+        expect(result.getByTestId('agentPolicyActionMenuAddAgentButton')).not.toHaveAttribute(
+          'disabled'
+        );
+        expect(result.getByTestId('agentPolicyActionMenuDeleteButton')).toHaveAttribute('disabled');
+        expect(result.getByTestId('agentPolicyActionMenuCopyButton')).toHaveAttribute('disabled');
+      });
+
+      it('offers to add a Fleet Server when the policy is flagged as having one', async () => {
+        const testRenderer = createFleetTestRendererMock();
+
+        const result = testRenderer.render(
+          <AgentPolicyActionMenu
+            agentPolicy={{ ...agentPolicyWithoutPackagePolicies, has_fleet_server: true }}
+          />
+        );
+        await userEvent.click(result.getByTestId('agentActionsBtn'));
+
+        expect(result.getByText('Add Fleet Server')).toBeInTheDocument();
+      });
+    });
+
+    it('does not offer to delete the policy when agent policy support agentless is true', async () => {
       const testRenderer = createFleetTestRendererMock();
       const agentlessPolicy: AgentPolicy = {
         ...baseAgentPolicy,
@@ -147,8 +235,8 @@ describe('AgentPolicyActionMenu', () => {
       const agentActionsButton = result.getByTestId('agentActionsBtn');
       await userEvent.click(agentActionsButton);
 
-      const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
-      expect(deleteButton).not.toHaveAttribute('disabled');
+      expect(result.queryByTestId('agentPolicyActionMenuDeleteButton')).not.toBeInTheDocument();
+      expect(result.getByText('View policy')).toBeInTheDocument();
     });
   });
 

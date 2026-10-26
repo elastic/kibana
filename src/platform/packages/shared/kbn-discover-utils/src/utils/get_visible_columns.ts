@@ -12,10 +12,12 @@ import type { DataSource } from '@kbn/data-source';
 
 export function canPrependTimeFieldColumn(
   columns: string[] | undefined,
-  timeFieldName: string | undefined,
+  dataView: DataView,
   dataSource: DataSource | undefined,
   showTimeCol: boolean // based on Advanced Settings `doc_table:hideTimeColumn`
 ) {
+  const { timeFieldName } = dataView;
+
   if (!showTimeCol || !timeFieldName) {
     return false;
   }
@@ -24,7 +26,7 @@ export function canPrependTimeFieldColumn(
     return !!columns && Boolean(dataSource.getColumn(timeFieldName));
   }
 
-  return true;
+  return !dataView.fields || Boolean(dataView.getFieldByName(timeFieldName));
 }
 
 export function getVisibleColumns(

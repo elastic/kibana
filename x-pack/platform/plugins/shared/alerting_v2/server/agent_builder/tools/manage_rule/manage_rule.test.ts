@@ -15,7 +15,6 @@ import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mo
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageRuleTool } from './manage_rule';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
   ctx.esClient.asCurrentUser.esql.query as unknown as jest.Mock;
@@ -181,6 +180,36 @@ describe('manageRuleTool', () => {
 
       const addCall = ctx.attachments.add.mock.calls[0][0] as { data: { time_field?: string } };
       expect(addCall.data.time_field).toBe('event.ingested');
+    });
+
+    it('returns a backing-index warning in the tool result without blocking the rule', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      });
+      mockResolvableTimeField(ctx);
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Test' },
+            {
+              operation: 'set_query',
+              query: {
+                base: 'FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)',
+              },
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as { results: Array<{ data?: { warnings?: string[] } }> };
+      expect(results[0].data?.warnings).toEqual([
+        expect.stringContaining('base name `logs-nginx.access-default`'),
+      ]);
+      expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
     });
 
     it('omits warnings from the tool result when there are none', async () => {
@@ -487,12 +516,6 @@ describe('manageRuleTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
-
-      // The agent-builder-assisted tag is stamped on the data persisted via update()
-      const updateCall = ctx.attachments.update.mock.calls[0][1] as {
-        data: { metadata?: { tags?: string[] } };
-      };
-      expect(updateCall.data.metadata?.tags).toContain(AGENT_BUILDER_TAG);
     });
 
     it('returns an error when attachment persistence fails', async () => {

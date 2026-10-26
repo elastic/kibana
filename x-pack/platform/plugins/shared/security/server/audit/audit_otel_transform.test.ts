@@ -47,6 +47,28 @@ describe('applyAuditOtelFieldMap', () => {
     );
   });
 
+  it('passes the service account target and workload of a service account event through', () => {
+    const result = applyAuditOtelFieldMap({
+      'user.id': 'kibana/nightshift-relay',
+      'user.name': 'kibana/nightshift-relay',
+      'user.target.id': 'kibana/nightshift-relay',
+      'user.target.name': 'nightshift-relay',
+      'kibana.workload.plugin_id': 'workflowsManagement',
+      'kibana.workload.type': 'workflow',
+      'kibana.workload.id': 'WORKFLOW_ID',
+    });
+
+    expect(result).toMatchObject({
+      'user.id': 'kibana/nightshift-relay',
+      'user.name': 'kibana/nightshift-relay',
+      'user.target.id': 'kibana/nightshift-relay',
+      'user.target.name': 'nightshift-relay',
+      'kibana.workload.plugin_id': 'workflowsManagement',
+      'kibana.workload.type': 'workflow',
+      'kibana.workload.id': 'WORKFLOW_ID',
+    });
+  });
+
   it('maps kibana.authentication_realm to user.domain', () => {
     const result = applyAuditOtelFieldMap({ 'kibana.authentication_realm': 'cloud-saml-kibana' });
 

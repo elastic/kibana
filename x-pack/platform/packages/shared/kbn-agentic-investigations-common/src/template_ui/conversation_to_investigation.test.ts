@@ -42,7 +42,7 @@ const runSummary = {
 };
 
 describe('conversationToInvestigation', () => {
-  it('reads the identity and timestamps straight off the conversation', () => {
+  it('reads the identity and creation time straight off the conversation', () => {
     const result = conversationToInvestigation(conversation());
 
     expect(result).toMatchObject({
@@ -50,7 +50,6 @@ describe('conversationToInvestigation', () => {
       template_id: 'investigation',
       title: 'Impossible travel — exec account',
       createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-02T00:00:00Z',
     });
   });
 

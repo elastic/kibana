@@ -19,7 +19,10 @@ import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import type { PerOsBehaviourProtectionCardProps } from './per_os_behaviour_protection_card';
-import { PerOsBehaviourProtectionCard } from './per_os_behaviour_protection_card';
+import {
+  BEHAVIOUR_PROTECTION_CARD_TITLE,
+  PerOsBehaviourProtectionCard,
+} from './per_os_behaviour_protection_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
 jest.mock('../../../../../../common/hooks/use_license');
@@ -237,7 +240,7 @@ describe('PerOsBehaviourProtectionCard', () => {
     render();
 
     expect(renderResult.getByTestId(testSubj.lockedCardTitle)).toHaveTextContent(
-      'Malicious Behavior'
+      BEHAVIOUR_PROTECTION_CARD_TITLE
     );
     expect(renderResult.queryByTestId(testSubj.card)).not.toBeInTheDocument();
   });

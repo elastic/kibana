@@ -91,6 +91,7 @@ export function defineRoutes(opts: RouteOptions) {
       maxBodyBytes: inboundEvents.maxBodyBytes,
       inboundEventsClient: inboundEvents.client,
       getSpaceId: inboundEvents.getSpaceId,
+      logger,
     });
     rotateInboundIngressRoute(router, licenseState);
   }

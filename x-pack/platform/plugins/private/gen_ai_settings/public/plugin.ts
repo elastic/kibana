@@ -56,7 +56,7 @@ export class GenAiSettingsPlugin
     // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
     this.registeredApp = management.sections.section.ai.registerApp({
       id: 'genAiSettings',
-      title: i18n.translate('genAiSettings.managementSectionLabel', {
+      title: i18n.translate('xpack.genAiSettings.managementSectionLabel', {
         defaultMessage: 'GenAI Settings',
       }),
       order: 1,

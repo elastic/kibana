@@ -57,8 +57,11 @@ export const ServicePanelFooter = ({
     if (!euidApi?.euid || !entity) {
       return undefined;
     }
-    return euidApi.euid.kql.getEuidFilterBasedOnDocument('service', entity);
-  }, [euidApi?.euid, entity]);
+    return euidApi.euid.kql.getEuidFilterBasedOnDocument(
+      euidApi.getBuiltInEntityDefinition('service'),
+      entity
+    );
+  }, [euidApi, entity]);
 
   const entityStoreId = entity?.entity?.id;
   const risk = entity ? getRiskFromEntityRecord(entity) : undefined;

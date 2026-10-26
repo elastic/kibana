@@ -23,6 +23,8 @@ const RELEASE_NOTE = `Release note:
 
 ${releaseNote.guidance}
 
+${releaseNote.breakingContext}
+
 See the @kbn/api-contracts README for tier definitions and the allowlist workflow: ${README_LINK}
 `;
 

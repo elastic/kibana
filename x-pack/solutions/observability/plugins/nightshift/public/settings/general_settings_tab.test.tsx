@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { useKibana } from '../hooks/use_kibana';
 import { GeneralSettingsTab } from './general_settings_tab';
-import { useDeveloperMode } from './hooks/use_developer_mode';
+import { useDeveloperMode } from '../hooks/use_developer_mode';
 
 const baseCapabilities = coreMock.createStart().application.capabilities;
 let mockApplication: Pick<ReturnType<typeof useKibana>['services']['application'], 'capabilities'> =
@@ -22,7 +22,7 @@ let mockApplication: Pick<ReturnType<typeof useKibana>['services']['application'
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { application: mockApplication } }),
 }));
-jest.mock('./hooks/use_developer_mode');
+jest.mock('../hooks/use_developer_mode');
 jest.mock('./components/apps_section', () => ({
   AppsSection: ({ canEdit }: { canEdit: boolean }) => (
     <div data-test-subj="apps-section" data-can-edit={canEdit ? 'true' : 'false'} />

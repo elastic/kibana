@@ -34,7 +34,7 @@ describe('useSignificantEventsUrlState', () => {
     it('falls back to the defaults when the params are absent', () => {
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
-      expect(result.current.statusFilter).toEqual(['active']);
+      expect(result.current.statusFilter).toEqual(['active', 'recovering']);
       expect(result.current.severityFilter).toEqual(['critical', 'high']);
       expect(result.current.sourceFilter).toEqual([]);
       expect(result.current.serviceFilter).toEqual([]);

@@ -6,7 +6,6 @@
  */
 
 import {
-  ALERTZERO_FEATURE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -14,15 +13,15 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from './constants';
-import { WORKER_ROLE_DEFINITIONS, buildSecurityRoleUrl } from './worker_roles';
+import {
+  WORKER_SERVICE_ACCOUNT_NAMES,
+  buildSecurityRoleUrl,
+  getWorkerRoleName,
+} from './worker_roles';
 
-describe('WORKER_ROLE_DEFINITIONS', () => {
-  it('defines one alertzero_<worker> role for each system worker', () => {
-    expect(
-      Object.fromEntries(
-        Object.entries(WORKER_ROLE_DEFINITIONS).map(([id, { name }]) => [id, name])
-      )
-    ).toEqual({
+describe('worker roles', () => {
+  it('names one alertzero_<worker> service account for each system worker', () => {
+    expect(WORKER_SERVICE_ACCOUNT_NAMES).toEqual({
       [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 'alertzero_alert_triage',
       [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 'alertzero_attack_discovery',
       [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 'alertzero_endpoint_analysis',
@@ -32,86 +31,16 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
     });
   });
 
-  it.each(Object.values(WORKER_ROLE_DEFINITIONS))(
-    'never grants $name read on Elastic AI indices, which would bypass their document filter',
-    ({ role }) => {
-      const elasticAiIndexReads = role.elasticsearch.indices.filter(
-        ({ names, privileges }) =>
-          names.some((name) => /^\.ai-index-(idx|ds)-/.test(name)) &&
-          privileges.some((privilege) => ['read', 'all'].includes(privilege))
-      );
-      expect(elasticAiIndexReads).toEqual([]);
-    }
-  );
-
-  it.each(Object.values(WORKER_ROLE_DEFINITIONS))(
-    'grants $name the common baseline in every space',
-    ({ role }) => {
-      expect(role.elasticsearch.cluster).toEqual(['monitor_inference']);
-      expect(role.elasticsearch.indices).toContainEqual({
-        names: ['ai-index-idx-security-investigations'],
-        privileges: ['read', 'view_index_metadata', 'index', 'auto_configure'],
-      });
-      expect(role.elasticsearch.indices).toContainEqual({
-        names: ['.ai-index-idx-elastic-index'],
-        privileges: ['view_index_metadata'],
-      });
-      expect(role.kibana).toHaveLength(1);
-      expect(role.kibana[0].spaces).toEqual(['*']);
-      expect(role.kibana[0].feature).toMatchObject({
-        [ALERTZERO_FEATURE_ID]: ['all'],
-        agentBuilder: ['read'],
-        contextEngine: ['all'],
-        proposals: ['all'],
-        actions: ['read'],
-      });
-    }
-  );
-
-  it.each([
-    [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, ['.internal.alerts-security.alerts-*']],
-    [
-      SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-      [
-        '.internal.alerts-security.attack.discovery.alerts-*',
-        '.internal.adhoc.alerts-security.attack.discovery.alerts-*',
-      ],
-    ],
-    [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID, ['.internal.alerts-security.alerts-*']],
-  ])('lets %s write to the backing indices of the alerts it updates by query', (id, names) => {
-    expect(WORKER_ROLE_DEFINITIONS[id].role.elasticsearch.indices).toContainEqual({
-      names,
-      privileges: ['index', 'maintenance'],
-    });
-  });
-
-  it('leaves out privileges only needed by approver-run rule actions', () => {
-    const tuning = WORKER_ROLE_DEFINITIONS[SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID];
-    const coverage = WORKER_ROLE_DEFINITIONS[SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID];
-
-    expect(tuning.role.kibana[0].feature.securitySolutionRulesV4).toEqual(['read']);
-    expect(coverage.role.kibana[0].feature.securitySolutionRulesV4).toEqual(['all']);
-    expect(coverage.role.kibana[0].feature).not.toHaveProperty('siemV5');
-  });
-
-  it('lets the Alert Triage sweep read its batch workflow executions and start batches', () => {
-    const { feature } =
-      WORKER_ROLE_DEFINITIONS[SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID].role.kibana[0];
-
-    // The sweep reads the managed batch workflow's executions to see which rules have a live
-    // batch, and starts batches. Without these it plans nothing (`live_batches_unreadable`).
-    expect(feature.workflowsManagement).toEqual(
-      expect.arrayContaining([
-        'workflow_read_managed',
-        'workflow_execution_read',
-        'workflow_execution_read_managed',
-        'workflow_execute',
-        'workflow_execution_cancel',
-      ])
-    );
-  });
-
   it('encodes the role name in the role URL', () => {
     expect(buildSecurityRoleUrl('a/b')).toBe('/api/security/role/a%2Fb');
+  });
+
+  it('names the built-in role after the account, with the predefined-role prefix on Serverless', () => {
+    expect(getWorkerRoleName('alertzero_alert_triage', { isServerless: false })).toBe(
+      'alertzero_alert_triage'
+    );
+    expect(getWorkerRoleName('alertzero_alert_triage', { isServerless: true })).toBe(
+      '_alertzero_alert_triage'
+    );
   });
 });

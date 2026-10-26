@@ -41,4 +41,30 @@ describe('WatchWorkflowsManagementClientImpl', () => {
       'other-space'
     );
   });
+
+  it('reads the newest execution of a workflow in any status', async () => {
+    const newest = { id: 'run-2', status: ExecutionStatus.COMPLETED };
+    const searchExecutionsView = jest.fn().mockResolvedValue({ results: [newest], total: 2 });
+    const client = new WatchWorkflowsManagementClientImpl({
+      searchExecutionsView,
+    } as unknown as NonNullable<WorkflowsServerPluginSetup['management']>);
+    const request = httpServerMock.createKibanaRequest();
+
+    await expect(
+      client.getLatestWorkflowExecution('worker-default', 'space', request)
+    ).resolves.toBe(newest);
+
+    expect(searchExecutionsView).toHaveBeenCalledWith(
+      {
+        request,
+        includeManagedExecutions: true,
+        query: { bool: { filter: [{ term: { workflowId: 'worker-default' } }] } },
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        size: 1,
+      },
+      'space'
+    );
+  });
 });

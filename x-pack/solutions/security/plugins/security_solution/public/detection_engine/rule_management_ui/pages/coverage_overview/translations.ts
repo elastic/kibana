@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getMitreFrameworkById, THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
 
 export const COVERAGE_OVERVIEW_DASHBOARD_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.pageTitle',
   {
-    defaultMessage: 'MITRE ATT&CK\u00AE coverage',
+    defaultMessage: 'MITRE coverage',
   }
 );
 
@@ -152,7 +153,7 @@ export const CoverageOverviewSearchBarPlaceholder = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.searchBarPlaceholder',
   {
     defaultMessage:
-      'Search for the tactic, technique (e.g.,"Defense Evasion" or "TA0005") or rule name',
+      'Search for the tactic, technique (e.g., "Defense Evasion", "TA0005" or "AML.T0044") or rule name',
   }
 );
 
@@ -170,13 +171,12 @@ export const CoverageOverviewFilterPopoverClearAll = i18n.translate(
   }
 );
 
-export const CoverageOverviewDashboardInformation = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.dashboardInformation',
-  {
+export const CoverageOverviewDashboardInformation = (framework: string) =>
+  i18n.translate('xpack.securitySolution.coverageOverviewDashboard.dashboardInformation', {
+    values: { framework },
     defaultMessage:
-      "Your current coverage of MITRE ATT&CK\u00AE tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the MITRE ATT&CK\u00AE framework to be displayed.",
-  }
-);
+      "Your current coverage of {framework} tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the {framework} framework to be displayed.",
+  });
 
 export const COVERAGE_OVERVIEW_FETCH_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.fetchErrorTitle',
@@ -185,12 +185,14 @@ export const COVERAGE_OVERVIEW_FETCH_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const INVALID_MITRE_RULES_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.title',
-  {
-    defaultMessage: 'Some rules have outdated MITRE ATT&CK\u00AE mappings',
-  }
-);
+export const INVALID_MITRE_RULES_CALLOUT_TITLE = (framework: string) =>
+  i18n.translate(
+    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.title',
+    {
+      values: { framework },
+      defaultMessage: 'Some rules have outdated {framework} mappings',
+    }
+  );
 
 export const INVALID_MITRE_RULES_CALLOUT_DESCRIPTION_LEARN_MORE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.descriptionLearnMore',
@@ -199,13 +201,15 @@ export const INVALID_MITRE_RULES_CALLOUT_DESCRIPTION_LEARN_MORE = i18n.translate
   }
 );
 
-export const INVALID_MITRE_RULES_CALLOUT_PREBUILT_NOTICE = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.prebuiltNotice',
-  {
-    defaultMessage:
-      'Elastic prebuilt rule mappings were updated for this MITRE ATT&CK\u00AE version. Install the latest prebuilt rule updates to keep coverage accurate.',
-  }
-);
+export const INVALID_MITRE_RULES_CALLOUT_PREBUILT_NOTICE = (framework: string) =>
+  i18n.translate(
+    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.prebuiltNotice',
+    {
+      values: { framework },
+      defaultMessage:
+        'Elastic prebuilt rule mappings were updated for this {framework} version. Install the latest prebuilt rule updates to keep coverage accurate.',
+    }
+  );
 
 export const INVALID_MITRE_RULES_VIEW_RULES_BUTTON = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.viewRulesButton',
@@ -214,20 +218,21 @@ export const INVALID_MITRE_RULES_VIEW_RULES_BUTTON = i18n.translate(
   }
 );
 
-export const INVALID_MITRE_RULES_MODAL_TITLE = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.title',
-  {
-    defaultMessage: 'Rules with outdated MITRE ATT&CK\u00AE mappings',
-  }
-);
+export const INVALID_MITRE_RULES_MODAL_TITLE = (framework: string) =>
+  i18n.translate('xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.title', {
+    values: { framework },
+    defaultMessage: 'Rules with outdated {framework} mappings',
+  });
 
-export const INVALID_MITRE_RULES_MODAL_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.description',
-  {
-    defaultMessage:
-      'These rules reference MITRE ATT&CK\u00AE tactic, technique, or sub-technique IDs that are not present in the currently supported version. They may not appear correctly in the coverage matrix. Open each rule to update its mappings.',
-  }
-);
+export const INVALID_MITRE_RULES_MODAL_DESCRIPTION = (framework: string) =>
+  i18n.translate(
+    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.description',
+    {
+      values: { framework },
+      defaultMessage:
+        'These rules reference {framework} tactic, technique, or sub-technique IDs that are not present in the currently supported version. They may not appear correctly in the coverage matrix. Open each rule to update its mappings.',
+    }
+  );
 
 export const INVALID_MITRE_RULES_MODAL_CLOSE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.closeButton',
@@ -250,26 +255,24 @@ export const INVALID_MITRE_RULES_MODAL_DISABLED_SECTION = i18n.translate(
   }
 );
 
-export const COVERAGE_OVERVIEW_MITRE_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.mitreErrorTitle',
-  {
-    defaultMessage: 'Failed to load MITRE ATT&CK® data',
-  }
-);
+export const COVERAGE_OVERVIEW_MITRE_ERROR_TITLE = (framework: string) =>
+  i18n.translate('xpack.securitySolution.coverageOverviewDashboard.mitreErrorTitle', {
+    values: { framework },
+    defaultMessage: 'Failed to load {framework} data',
+  });
 
-export const COVERAGE_OVERVIEW_MITRE_ERROR_BODY = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.mitreErrorBody',
-  {
+export const COVERAGE_OVERVIEW_MITRE_ERROR_BODY = (framework: string) =>
+  i18n.translate('xpack.securitySolution.coverageOverviewDashboard.mitreErrorBody', {
+    values: { framework },
     defaultMessage:
-      'The coverage matrix could not be displayed because MITRE ATT&CK® data failed to load. Refresh the page to try again.',
-  }
-);
+      'The coverage matrix could not be displayed because {framework} data failed to load. Refresh the page to try again.',
+  });
 
 export const INVALID_MITRE_ID_BADGE_TOOLTIP = (id: string) =>
   i18n.translate(
     'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.invalidMitreIdBadgeTooltip',
     {
-      values: { id },
-      defaultMessage: 'Open MITRE ATT&CK\u00AE reference for {id}',
+      values: { id, framework: THREAT_FRAMEWORK_NAME[getMitreFrameworkById(id)] },
+      defaultMessage: 'Open {framework} reference for {id}',
     }
   );

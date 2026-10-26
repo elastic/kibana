@@ -32,7 +32,8 @@ export const expectErrors = (
     arg2: ICommandContext,
     arg3?: ICommandCallbacks,
     arg4?: string
-  ) => ESQLMessage[]
+  ) => ESQLMessage[],
+  callbacks?: ICommandCallbacks
 ) => {
   const { root } = Parser.parse(query);
   const command = root.commands.find((cmd) => cmd.name === commandName.toLowerCase());
@@ -46,7 +47,7 @@ export const expectErrors = (
       ...context,
       isTimeseriesSource: context.isTimeseriesSource ?? isTimeseriesSourceCommand(root.commands),
     },
-    undefined,
+    callbacks,
     query
   );
 

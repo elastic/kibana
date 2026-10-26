@@ -122,14 +122,14 @@ describe('useEsqlViewPreview', () => {
     });
 
     act(() => {
-      result.current.resetPreviewIfQueryChanged('FROM logs-*\n  | KEEP message');
+      result.current.clearPreviewErrorIfQueryChanged('FROM logs-*\n  | KEEP message');
     });
 
     expect(result.current.hasRun).toBe(true);
     expect(result.current.result?.rows).toEqual([['hello']]);
   });
 
-  it('resets preview results when the query meaningfully changes', async () => {
+  it('preserves preview results when the query meaningfully changes', async () => {
     mockGetESQLResults.mockResolvedValue(createResponse() as never);
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
 
@@ -138,11 +138,12 @@ describe('useEsqlViewPreview', () => {
     });
 
     act(() => {
-      result.current.resetPreviewIfQueryChanged('FROM logs-* | KEEP host.name');
+      result.current.clearPreviewErrorIfQueryChanged('FROM logs-* | KEEP host.name');
     });
 
-    expect(result.current.hasRun).toBe(false);
-    expect(result.current.result).toBeUndefined();
+    expect(result.current.hasRun).toBe(true);
+    expect(result.current.result?.query).toEqual({ esql: 'FROM logs-* | KEEP message' });
+    expect(result.current.result?.rows).toEqual([['hello']]);
   });
 
   it('exposes execution errors without producing a result', async () => {
@@ -156,6 +157,60 @@ describe('useEsqlViewPreview', () => {
     expect(result.current.error).toEqual(new Error('Invalid query'));
     expect(result.current.result).toBeUndefined();
     expect(result.current.isLoading).toBe(false);
+  });
+
+  it('preserves the last successful result when a subsequent query fails', async () => {
+    mockGetESQLResults
+      .mockResolvedValueOnce(createResponse({ rows: [['existing']] }) as never)
+      .mockRejectedValueOnce(new Error('Invalid query'));
+    const { result } = renderHook(() => useEsqlViewPreview(dependencies));
+
+    await act(async () => {
+      await result.current.runPreview(query('FROM logs-*'));
+    });
+    await act(async () => {
+      await result.current.runPreview(query('FROM missing'));
+    });
+
+    expect(result.current.error).toEqual(new Error('Invalid query'));
+    expect(result.current.result?.query).toEqual({ esql: 'FROM logs-*' });
+    expect(result.current.result?.rows).toEqual([['existing']]);
+
+    act(() => {
+      result.current.clearPreviewErrorIfQueryChanged('FROM fixed-*');
+    });
+
+    expect(result.current.error).toBeUndefined();
+    expect(result.current.result?.rows).toEqual([['existing']]);
+  });
+
+  it('keeps the previous result until a replacement query succeeds', async () => {
+    const replacementRequest = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
+    mockGetESQLResults
+      .mockResolvedValueOnce(createResponse({ rows: [['existing']] }) as never)
+      .mockReturnValueOnce(replacementRequest.promise);
+    const { result } = renderHook(() => useEsqlViewPreview(dependencies));
+
+    await act(async () => {
+      await result.current.runPreview(query('FROM logs-*'));
+    });
+
+    let replacementPromise = Promise.resolve();
+    act(() => {
+      replacementPromise = result.current.runPreview(query('FROM new-logs-*'));
+    });
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.result?.rows).toEqual([['existing']]);
+
+    replacementRequest.resolve(createResponse({ rows: [['replacement']] }) as never);
+    await act(async () => {
+      await replacementPromise;
+    });
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.result?.query).toEqual({ esql: 'FROM new-logs-*' });
+    expect(result.current.result?.rows).toEqual([['replacement']]);
   });
 
   it('stops loading when the editor aborts the query', async () => {
@@ -184,35 +239,41 @@ describe('useEsqlViewPreview', () => {
     expect(result.current.result).toBeUndefined();
   });
 
-  it('resets and aborts the active query when the editor query changes', async () => {
+  it('aborts the active query without clearing existing results when the editor query changes', async () => {
     let requestSignal: AbortSignal | undefined;
     const deferred = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
-    mockGetESQLResults.mockImplementation(({ signal }) => {
-      requestSignal = signal;
-      return deferred.promise;
-    });
+    mockGetESQLResults
+      .mockResolvedValueOnce(createResponse({ rows: [['existing']] }) as never)
+      .mockImplementationOnce(({ signal }) => {
+        requestSignal = signal;
+        return deferred.promise;
+      });
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
+
+    await act(async () => {
+      await result.current.runPreview(query('FROM logs-*'));
+    });
 
     let runPromise = Promise.resolve();
     act(() => {
-      runPromise = result.current.runPreview(query('FROM logs-*'));
+      runPromise = result.current.runPreview(query('FROM new-logs-*'));
     });
 
     act(() => {
-      result.current.resetPreview();
+      result.current.clearPreviewErrorIfQueryChanged('FROM edited-logs-*');
     });
 
     expect(requestSignal?.aborted).toBe(true);
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.hasRun).toBe(false);
+    expect(result.current.hasRun).toBe(true);
     expect(result.current.error).toBeUndefined();
-    expect(result.current.result).toBeUndefined();
+    expect(result.current.result?.rows).toEqual([['existing']]);
 
-    deferred.resolve(createResponse() as never);
+    deferred.resolve(createResponse({ rows: [['stale']] }) as never);
     await act(async () => {
       await runPromise;
     });
-    expect(result.current.result).toBeUndefined();
+    expect(result.current.result?.rows).toEqual([['existing']]);
   });
 
   it('aborts the active query when unmounted', async () => {

@@ -65,7 +65,6 @@ import {
 import {
   SO_SEARCH_LIMIT,
   outputType,
-  kafkaAuthType,
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
@@ -104,27 +103,26 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
+import { checkKafkaAuthMethodAllowed } from './outputs/kafka_auth_gate';
+import type { KafkaAuthMethod, KafkaAuthOutput } from './outputs/kafka_auth';
 import {
-  findAgentlessPolicies,
-  checkOtlpOutputAllowed,
-  checkKafkaOAuth2Allowed,
-} from './outputs/helpers';
-import {
+  KAFKA_AUTH_METHODS,
   clearKafkaAuthFieldsForType,
-  getRemovedKafkaOAuth2Secrets,
+  getKafkaAuthMethod,
+  getRemovedKafkaAuthSecrets,
   omitKafkaSecretsOfOtherAuthTypes,
-  keepsKafkaOAuth2,
-  omitRemovedKafkaOAuth2Secrets,
-  omitRemovedKafkaOAuth2Settings,
-  usesKafkaOAuth2,
-  withRemovedKafkaOAuth2Settings,
-  withSavedKafkaOAuth2,
+  keepsKafkaAuth,
+  omitRemovedKafkaAuthData,
+  usesKafkaAuth,
+  withRemovedKafkaAuthSettings,
+  withSavedKafkaAuth,
 } from './outputs/kafka_auth';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
   validateOutputSslPaths,
   ensureNoDuplicateSecrets,
-  validateKafkaOAuth2,
+  validateKafkaAuthMethods,
   validateOutputServerless,
 } from './outputs/validators';
 
@@ -173,7 +171,7 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
       ssl,
       proxy_id: proxyId,
       ...attributes
-    } = omitRemovedKafkaOAuth2Settings(omitRemovedKafkaOAuth2Secrets(so.attributes));
+    } = omitRemovedKafkaAuthData(so.attributes);
     let parsedSsl;
     try {
       parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
@@ -525,15 +523,33 @@ class OutputService {
     }
   }
 
-  private async assertKafkaOAuth2Allowed(
-    output: Parameters<typeof usesKafkaOAuth2>[0],
+  /**
+   * Throws if the output uses an authentication method of the Kafka output that is not allowed in
+   * this deployment (feature flag, Fleet Server versions). When `original` is given, a method that
+   * the update keeps exactly as it is does not need to be allowed: it is an ordinary edit.
+   */
+  private async assertKafkaAuthMethodsAllowed(
+    output: KafkaAuthOutput,
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract
+    soClient: SavedObjectsClientContract,
+    original?: KafkaAuthOutput
   ): Promise<void> {
-    if (!usesKafkaOAuth2(output)) return;
-    const { result, error } = await checkKafkaOAuth2Allowed(esClient, soClient);
-    if (!result) {
-      throw new OutputInvalidError(error!);
+    for (const method of KAFKA_AUTH_METHODS) {
+      if (
+        !usesKafkaAuth(method, output) ||
+        (original && keepsKafkaAuth(method, original, output))
+      ) {
+        continue;
+      }
+      const { result, error } = await checkKafkaAuthMethodAllowed(
+        method,
+        esClient,
+        soClient,
+        output
+      );
+      if (!result) {
+        throw new OutputInvalidError(error!);
+      }
     }
   }
 
@@ -724,7 +740,7 @@ class OutputService {
     await this.assertOtlpOutputAllowed(output, esClient, soClient);
     // preconfigured outputs are checked before they are created, so Fleet setup does not fail
     if (!options?.fromPreconfiguration) {
-      await this.assertKafkaOAuth2Allowed(output, esClient, soClient);
+      await this.assertKafkaAuthMethodsAllowed(output, esClient, soClient);
     }
 
     if (output.type === outputType.Kafka && output.secrets) {
@@ -1229,13 +1245,21 @@ class OutputService {
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
 
     if (mergedType === outputType.Kafka) {
-      // an update that does not touch the authentication keeps the OAuth2 settings and secrets
-      data = withSavedKafkaOAuth2(originalOutput, data);
+      // an update that does not touch the authentication keeps its settings and secrets
+      data = KAFKA_AUTH_METHODS.reduce(
+        (kept, method) => withSavedKafkaAuth(method, originalOutput, kept),
+        data
+      );
     }
 
-    // an edit that keeps the OAuth2 authentication as it is does not need OAuth2 to be allowed
-    if (!fromPreconfiguration && !keepsKafkaOAuth2(originalOutput, { ...data, type: mergedType })) {
-      await this.assertKafkaOAuth2Allowed({ ...data, type: mergedType }, esClient, soClient);
+    // an edit that keeps the authentication as it is does not need its method to be allowed
+    if (!fromPreconfiguration) {
+      await this.assertKafkaAuthMethodsAllowed(
+        { ...data, type: mergedType },
+        esClient,
+        soClient,
+        originalOutput
+      );
     }
 
     if (mergedType === outputType.Kafka && (data as { secrets?: object }).secrets) {
@@ -1253,7 +1277,21 @@ class OutputService {
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
     const isPreconfigured = (fromPreconfiguration || originalOutput.is_preconfigured) ?? false;
-    this._runOutputValidators(typedFullUpdateData, isPreconfigured);
+    // the authentication methods that the update keeps as they are were checked when they were saved
+    const keptAuthMethods = KAFKA_AUTH_METHODS.filter((method) =>
+      keepsKafkaAuth(method, originalOutput, typedFullUpdateData)
+    );
+    // the update may leave out the authentication type: the one of the saved output applies
+    const validatedData =
+      mergedType === outputType.Kafka
+        ? ({
+            ...typedFullUpdateData,
+            auth_type:
+              (typedFullUpdateData as KafkaOutput).auth_type ??
+              (originalOutput as KafkaOutput).auth_type,
+          } as UpdateTypedOutput)
+        : typedFullUpdateData;
+    this._runOutputValidators(validatedData, isPreconfigured, keptAuthMethods);
 
     // type is always defined here after merging; ssl/secrets/id omitted at runtime but allowed on the type.
     // id is stripped to prevent poisoning the saved object's identity field.
@@ -1307,6 +1345,7 @@ class OutputService {
       target.password = null;
       target.sasl = null;
       target.oauth2 = null;
+      target.kerberos = null;
       target.partition = null;
       target.random = null;
       target.round_robin = null;
@@ -1526,19 +1565,27 @@ class OutputService {
       if (!typedFullUpdateData.sasl) {
         updateData.sasl = null;
       }
-      if (typedFullUpdateData.auth_type === kafkaAuthType.OAuth2) {
-        // the credentials and the sasl mechanism do not apply to OAuth2
+      const authMethod = getKafkaAuthMethod(typedFullUpdateData.auth_type);
+      if (authMethod) {
+        // the credentials and the sasl mechanism do not apply to these methods
         updateData.username = null;
         updateData.password = null;
         updateData.sasl = null;
-      } else if (typedFullUpdateData.auth_type || !typedFullUpdateData.oauth2) {
-        updateData.oauth2 = null;
       }
-      if (updateData.oauth2) {
-        // the saved object update merges objects: the settings that are no longer sent have to be
-        // removed explicitly
-        updateData.oauth2 = withRemovedKafkaOAuth2Settings(originalOutput, updateData.oauth2);
-      }
+      KAFKA_AUTH_METHODS.forEach((method) => {
+        const target = updateData as Record<string, unknown>;
+        const settings = target[method];
+        if (
+          method !== authMethod &&
+          (typedFullUpdateData.auth_type || !typedFullUpdateData[method])
+        ) {
+          target[method] = null;
+        } else if (settings) {
+          // the saved object update merges objects: the settings that are no longer sent have to
+          // be removed explicitly
+          target[method] = withRemovedKafkaAuthSettings(method, originalOutput, settings as object);
+        }
+      });
       if (!typedFullUpdateData.ssl) {
         updateData.ssl = null;
       }
@@ -1647,17 +1694,20 @@ class OutputService {
 
     // The secrets that are no longer part of the output are deleted above. Their references have to
     // be removed too, or the output would keep pointing at deleted secrets.
-    const removedOAuth2Secrets = getRemovedKafkaOAuth2Secrets(
-      originalOutput,
-      mergedType === outputType.Kafka ? (data as { secrets?: unknown }).secrets : undefined
-    );
-    if (removedOAuth2Secrets) {
-      const newSecrets = updateData.secrets as { oauth2?: Record<string, unknown> } | undefined;
-      updateData.secrets = {
-        ...newSecrets,
-        oauth2: { ...newSecrets?.oauth2, ...removedOAuth2Secrets },
-      } as typeof updateData.secrets;
-    }
+    KAFKA_AUTH_METHODS.forEach((method) => {
+      const removedSecrets = getRemovedKafkaAuthSecrets(
+        method,
+        originalOutput,
+        mergedType === outputType.Kafka ? (data as { secrets?: unknown }).secrets : undefined
+      );
+      if (removedSecrets) {
+        const newSecrets = updateData.secrets as Record<string, object> | undefined;
+        updateData.secrets = {
+          ...newSecrets,
+          [method]: { ...newSecrets?.[method], ...removedSecrets },
+        } as typeof updateData.secrets;
+      }
+    });
 
     patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
 
@@ -1844,14 +1894,15 @@ class OutputService {
 
   private _runOutputValidators(
     output: UpdateTypedOutput | NewOutput,
-    isPreconfigured: boolean
+    isPreconfigured: boolean,
+    keptAuthMethods: KafkaAuthMethod[] = []
   ): void {
     try {
       if (isBeatsOutput(output)) {
         validateOutputSslPaths(output);
       }
       ensureNoDuplicateSecrets(output);
-      validateKafkaOAuth2(output);
+      validateKafkaAuthMethods(output, keptAuthMethods);
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);

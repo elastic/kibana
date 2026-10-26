@@ -137,6 +137,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
           panels={panels}
           refresh={refresh}
           setIsBulkActionsLoading={setIsBulkActionsLoading}
+          totalItems={totalItems}
         />
       </EuiPopover>
       <EuiButtonEmpty

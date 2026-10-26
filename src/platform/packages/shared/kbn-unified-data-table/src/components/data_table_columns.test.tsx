@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { getVisibleColumns } from '@kbn/discover-utils';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { deserializeHeaderRowHeight, getEuiGridColumns } from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
@@ -74,6 +75,38 @@ describe('Data table columns', function () {
         cellActionsHandling: 'replace',
       });
       expect(actual).toMatchSnapshot();
+    });
+
+    it('treats the time field column as a regular column when it does not match any field', async () => {
+      const dataViewWithMissingTimeField = buildDataViewMock({
+        name: 'the-data-view-with-missing-time-field',
+        fields: deepMockedFields,
+        timeFieldName: 'missing_time_field',
+      });
+      const [missingTimeFieldColumn] = getEuiGridColumns({
+        documentsDisplayMode: 'table',
+        columns: ['missing_time_field', 'extension'],
+        settings: {},
+        dataView: dataViewWithMissingTimeField,
+        isSummaryOnlyColumn: false,
+        isSortEnabled: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+      expect(missingTimeFieldColumn.actions).toMatchObject({
+        showHide: { label: 'Remove column' },
+      });
+      expect(missingTimeFieldColumn.initialWidth).toBeUndefined();
     });
 
     it('returns eui grid with in memory sorting', async () => {
@@ -476,6 +509,46 @@ describe('Data table columns', function () {
       });
       expect(actual).toMatchSnapshot();
       expect(actual.find((column) => column.id === '_source')?.initialWidth).toBeUndefined();
+    });
+  });
+
+  describe('Summary column without a data view field', () => {
+    it('still has cell actions when the data view has no _source field, as in ES|QL', () => {
+      const getByName = dataViewWithTimefieldMock.fields.getByName.bind(
+        dataViewWithTimefieldMock.fields
+      );
+      const getByNameSpy = jest
+        .spyOn(dataViewWithTimefieldMock.fields, 'getByName')
+        .mockImplementation((name: string) => (name === '_source' ? undefined : getByName(name)));
+
+      const actual = getEuiGridColumns({
+        documentsDisplayMode: 'table',
+        columns: ['_source'],
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        isSummaryOnlyColumn: false,
+        isSortEnabled: false,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        dataSource: createMockEsqlSource([]),
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+
+      getByNameSpy.mockRestore();
+
+      expect(actual.find((column) => column.id === '_source')?.cellActions?.length).toBeGreaterThan(
+        0
+      );
     });
   });
 

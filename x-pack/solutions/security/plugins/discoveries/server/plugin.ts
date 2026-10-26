@@ -37,6 +37,7 @@ import {
 import { reportMisconfiguration } from '@kbn/discoveries/impl/lib/telemetry/report_misconfiguration';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import { DEFAULT_CONNECTOR_TIMEOUT_MS } from '.';
+import { preCreateDefaultAdhocAttackDiscoveryIndex } from './lib/attack_discovery/pre_create_default_adhoc_index';
 import { logStartupHealthCheck } from './lib/startup_health_check';
 import { workflowExecutor } from './lib/schedules/workflow_executor';
 import { registerRoutes } from './routes';
@@ -190,6 +191,13 @@ export class DiscoveriesPlugin
 
     this.adhocAttackDiscoveryDataClient =
       plugins.ruleRegistry.ruleDataService.initializeIndex(ruleDataServiceOptions);
+
+    preCreateDefaultAdhocAttackDiscoveryIndex({
+      core,
+      dataClient: this.adhocAttackDiscoveryDataClient,
+      frameworkAlerts: plugins.alerting.frameworkAlerts,
+      logger: this.logger,
+    });
 
     const getStartServices = async () => {
       const [coreStart, pluginsStart] = await core.getStartServices();

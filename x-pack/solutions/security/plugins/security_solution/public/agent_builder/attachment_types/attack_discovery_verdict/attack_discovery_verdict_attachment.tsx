@@ -148,6 +148,16 @@ export const AttackDiscoveryVerdictInlineContent = ({
   attachment,
 }: AttachmentRenderProps<AttackDiscoveryVerdictAttachment>) => {
   const { euiTheme } = useEuiTheme();
+  // Markdown headings default to a size far larger than the body text; keep them at the body size.
+  const markdownCss = css`
+    && h1,
+    && h2,
+    && h3,
+    && h4 {
+      font-size: ${euiTheme.font.scale.m}rem;
+      line-height: ${euiTheme.font.lineHeightMultiplier * euiTheme.font.scale.m}rem;
+    }
+  `;
   const rationaleMarkdown = attachment.data?.rationale_markdown;
   const summaryMarkdown = attachment.data?.summary_markdown ?? '';
 
@@ -167,11 +177,12 @@ export const AttackDiscoveryVerdictInlineContent = ({
         title={DEFAULT_LABEL}
       />
       <EuiSpacer size="s" />
-      <div data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_SUMMARY_TEST_ID}>
+      <div css={markdownCss} data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_SUMMARY_TEST_ID}>
         <AttackDiscoveryMarkdownFormatter
           disableActions={true}
           markdown={summaryMarkdown}
           scopeId={ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID}
+          textSize="s"
           wrapFieldValues={true}
         />
       </div>
@@ -182,11 +193,12 @@ export const AttackDiscoveryVerdictInlineContent = ({
             <h2>{RATIONALE_TITLE}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <div data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_RATIONALE_TEST_ID}>
+          <div css={markdownCss} data-test-subj={ATTACK_DISCOVERY_VERDICT_INLINE_RATIONALE_TEST_ID}>
             <AttackDiscoveryMarkdownFormatter
               disableActions={true}
               markdown={rationaleMarkdown}
               scopeId={ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID}
+              textSize="s"
               wrapFieldValues={true}
             />
           </div>

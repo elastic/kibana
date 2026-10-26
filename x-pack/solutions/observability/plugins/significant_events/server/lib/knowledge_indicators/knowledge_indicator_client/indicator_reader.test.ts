@@ -31,13 +31,14 @@ const SOURCE = 'logs-app';
 
 function makeReader(): {
   reader: IndicatorReader;
+  revisionReader: RevisionReader;
   runEsql: jest.Mock;
 } {
   const runEsql = executeAndDecodeSource as jest.Mock;
   const logger = loggerMock.create();
   const revisionReader = new RevisionReader({} as ElasticsearchClient, logger, SPACE);
   const reader = new IndicatorReader(revisionReader);
-  return { reader, runEsql };
+  return { reader, revisionReader, runEsql };
 }
 
 function createQueryDoc(
@@ -106,7 +107,83 @@ describe('IndicatorReader.countKnowledgeIndicators', () => {
   });
 });
 
+describe('IndicatorReader overview counts', () => {
+  it('counts active features for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(12);
+
+    await expect(reader.countFeatures([SOURCE, 'logs-other'])).resolves.toBe(12);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}", "logs-other")`);
+    expect(query).toContain('"feature"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain('excluded IS NULL OR excluded == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+  });
+
+  it('counts distinct live entity slugs across sources, without the list limit', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(1500);
+
+    await expect(reader.countEntities([SOURCE, 'logs-other'])).resolves.toBe(1500);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}", "logs-other")`);
+    expect(query).toContain('`feature.type` IN ("entity")');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain('excluded IS NULL OR excluded == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    // Distinct slugs merge the same entity learned from two sources; the type filter runs after
+    // picking the latest revision, so a revision that changed type isn't counted.
+    expect(query).toContain('STATS total = COUNT_DISTINCT(`feature.slug`)');
+    expect(query.indexOf('`feature.type` IN ("entity")')).toBeGreaterThan(
+      query.indexOf('INLINE STATS tiebreaker_id')
+    );
+    expect(query).not.toContain('LIMIT 1000');
+  });
+
+  it('counts active unbacked queries for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(4);
+
+    await expect(reader.countUnbackedQueries([SOURCE])).resolves.toBe(4);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}")`);
+    expect(query).toContain('"query"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    expect(query).toContain('`query.rule_backed` == FALSE');
+  });
+
+  it('counts rule-backed queries for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(8);
+
+    await expect(reader.countRuleBackedQueries([SOURCE])).resolves.toBe(8);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}")`);
+    expect(query).toContain('"query"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    expect(query).toContain('`query.rule_backed` == TRUE');
+  });
+});
+
 describe('IndicatorReader space scoping', () => {
+  it('retains the Elasticsearch IDs of the selected latest revisions', async () => {
+    const { revisionReader, runEsql } = makeReader();
+    const doc = createQueryDoc();
+    runEsql.mockResolvedValueOnce({ hits: [doc], esIds: ['latest-es-id'] });
+
+    await expect(revisionReader.fetchLatestRevisionEntries()).resolves.toEqual([
+      { esId: 'latest-es-id', doc },
+    ]);
+    expect(capturedQueryString(runEsql)).toContain('KEEP _id, _source');
+  });
+
   it('filters every read by the client space with no IS NULL fallback', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
@@ -223,6 +300,52 @@ describe('IndicatorReader.getFeatures', () => {
     expect(query).toContain('"payment"');
     expect(query).toContain('feature.type');
     expect(query).toContain('"entity"');
+  });
+});
+
+describe('IndicatorReader.getFeatureSourcesBySlug', () => {
+  const featureDoc = (sourceId: string, slug: string) => ({
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    id: `${sourceId}-${slug}`,
+    type: KI_TYPE_FEATURE,
+    'source.id': sourceId,
+    title: slug,
+    description: slug,
+    feature: { slug, type: 'technology', subtype: 'cache', properties: {}, confidence: 90 },
+  });
+
+  it('groups active latest holders by slug', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({
+      hits: [
+        featureDoc('src-a', 'redis'),
+        featureDoc('src-b', 'redis'),
+        featureDoc('src-b', 'redis'),
+        featureDoc('src-c', 'kafka'),
+      ],
+    });
+
+    const holders = await reader.getFeatureSourcesBySlug(
+      ['src-a', 'src-b', 'src-c'],
+      'technology',
+      ['redis', 'kafka']
+    );
+
+    expect(holders).toEqual(
+      new Map([
+        ['redis', ['src-a', 'src-b']],
+        ['kafka', ['src-c']],
+      ])
+    );
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('`source.id` IN ("src-a", "src-b", "src-c")');
+    expect(query).toContain('(excluded IS NULL OR excluded == FALSE)');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    const grouping = query.indexOf('INLINE STATS');
+    expect(query.indexOf('`source.id` IN ("src-a", "src-b", "src-c")')).toBeLessThan(grouping);
+    expect(query.indexOf('`feature.slug` IN ("redis", "kafka")')).toBeGreaterThan(grouping);
+    expect(query.indexOf('`feature.type` IN ("technology")')).toBeGreaterThan(grouping);
+    expect(query.indexOf('deleted IS NULL')).toBeGreaterThan(grouping);
   });
 });
 
