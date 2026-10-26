@@ -279,6 +279,22 @@ describe('DeepStrict', () => {
       .fails({ field: 'user.name', eq: 'user1', sdfsd: 'sdf' });
   });
 
+  it('rejects excess keys in an array element when another element legitimately has that key', () => {
+    wrap(
+      z.array(
+        z.union([
+          z.object({ type: z.literal('a'), shared: z.string() }),
+          z.object({ type: z.literal('b') }),
+        ])
+      )
+    )
+      .passes([{ type: 'a', shared: 'x' }, { type: 'b' }])
+      .fails([
+        { type: 'a', shared: 'x' },
+        { type: 'b', shared: 'excess' },
+      ]);
+  });
+
   it('matches union types', () => {
     const type = z.intersection(
       z.object({
