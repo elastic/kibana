@@ -58,7 +58,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./feature_controls/maps_security'));
     loadTestFile(require.resolve('./feature_controls/maps_spaces'));
   });
 }
