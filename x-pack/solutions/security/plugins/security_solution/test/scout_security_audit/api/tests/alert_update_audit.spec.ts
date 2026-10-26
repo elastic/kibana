@@ -224,5 +224,50 @@ apiTest.describe(
       );
       expect(e).toMatchObject({ event: { action: 'alert_update', outcome: 'unknown' } });
     });
+
+    apiTest(
+      'signals/status by query with an invalid Elasticsearch query writes alert_update failure',
+      async ({ apiClient }) => {
+        const testStart = Date.now();
+        const marker = `scout-audit-invalid-query-${testStart}`;
+
+        // Ensure the alerts index exists so the request reaches Elasticsearch
+        // and fails on the query, not on a missing index.
+        const indexResponse = await apiClient.post(DETECTION_ENGINE_INDEX_URL, {
+          headers: { ...REQUEST_HEADERS, ...admin.apiKeyHeader },
+          responseType: 'json',
+        });
+        expect(indexResponse).toHaveStatusCode(200);
+
+        // An unknown query type makes Elasticsearch reject `_update_by_query` with a 400,
+        // which reaches auditAlertUpdateFailure in updateSignalsStatusByQuery.
+        const response = await apiClient.post(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+          headers: { ...REQUEST_HEADERS, ...admin.apiKeyHeader },
+          body: {
+            query: { scout_audit_unknown_query_type: { marker } },
+            status: 'closed',
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(400);
+
+        const e = await waitForAuditEvent(
+          (ev) =>
+            eventAction(ev) === 'alert_update' &&
+            eventOutcome(ev) === 'failure' &&
+            (ev.message as string | undefined)?.includes(marker) === true &&
+            new Date((ev['@timestamp'] as string) ?? 0).getTime() >= testStart
+        );
+        expect(e).toMatchObject({
+          event: { action: 'alert_update', outcome: 'failure' },
+        });
+        expect(e.message).toContain('Failed attempt to update alerts');
+        expect(e.error).toMatchObject({
+          code: 'ResponseError',
+          message: expect.stringContaining('parsing_exception'),
+        });
+      }
+    );
   }
 );

@@ -1,5 +1,5 @@
 {
-  "sha1": "e1035bcb66c5ef155065da3e7a01ce9982d0171c",
+  "sha1": "6823dd3c1dcf7ebc1ff9f7b5eef6d559c6b39f7d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -58,6 +58,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_audit/api/tests/alert_update_audit.spec.ts",
         "line": 203,
         "column": 13
+      }
+    },
+    {
+      "id": "8daf5a2d8c71358-92a2f4df39ce1b7",
+      "title": "Security Solution alert update audit events signals/status by query with an invalid Elasticsearch query writes alert_update failure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_audit/api/tests/alert_update_audit.spec.ts",
+        "line": 230,
+        "column": 32
       }
     }
   ]
