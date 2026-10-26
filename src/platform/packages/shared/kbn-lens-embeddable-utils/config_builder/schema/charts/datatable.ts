@@ -326,12 +326,11 @@ const progressBarValueRangeSchema = lazySchema(() =>
 
 /**
  * Progress bar variants of a column, one per fill mode, replacing its `apply_color_to`, `color` and `alignment` options.
+ * Each variant and the union get a component `id`, so the OpenAPI spec stays within 2 levels of nested unions.
  */
-const getProgressBarVariants = <
-  Shape extends z.ZodRawShape,
-  Config extends z.core.$ZodObjectConfig
->(
-  columnSchema: z.ZodObject<Shape, Config>
+const getProgressBarSchema = <Shape extends z.ZodRawShape, Config extends z.core.$ZodObjectConfig>(
+  columnSchema: z.ZodObject<Shape, Config>,
+  { id, title }: { id: string; title: string }
 ) => {
   const progressBarSchema = columnSchema.extend({
     apply_color_to: z.literal('progress_bar').meta({
@@ -354,31 +353,46 @@ const getProgressBarVariants = <
     .default(AUTO_COLOR)
     .meta({ description: 'Palette the bar takes its colors from.' });
 
-  return [
-    progressBarSchema.extend({
-      fill_mode: z.literal('single').meta({ description: 'Fills the bar with one fixed color.' }),
-      color: z
-        .union([staticColorSchema, autoColorSchema])
-        .default(AUTO_COLOR)
-        .meta({ description: 'Bar color.' }),
-    }),
-    progressBarSchema.extend({
-      fill_mode: z.literal('solid').meta({
-        description: 'Fills the bar with the palette color of the band the value falls in.',
-      }),
-      color: paletteColorSchema,
-    }),
-    progressBarSchema.extend({
-      fill_mode: z.literal('gradient').meta({ description: 'Reveals the palette along the bar.' }),
-      color: paletteColorSchema,
-    }),
-  ] as const;
+  return z
+    .discriminatedUnion('fill_mode', [
+      progressBarSchema
+        .extend({
+          fill_mode: z
+            .literal('single')
+            .meta({ description: 'Fills the bar with one fixed color.' }),
+          color: z
+            .union([staticColorSchema, autoColorSchema])
+            .default(AUTO_COLOR)
+            .meta({ description: 'Bar color.' }),
+        })
+        .meta({ id: `${id}Single`, title: `${title} (single fill)` }),
+      progressBarSchema
+        .extend({
+          fill_mode: z.literal('solid').meta({
+            description: 'Fills the bar with the palette color of the band the value falls in.',
+          }),
+          color: paletteColorSchema,
+        })
+        .meta({ id: `${id}Solid`, title: `${title} (solid fill)` }),
+      progressBarSchema
+        .extend({
+          fill_mode: z
+            .literal('gradient')
+            .meta({ description: 'Reveals the palette along the bar.' }),
+          color: paletteColorSchema,
+        })
+        .meta({ id: `${id}Gradient`, title: `${title} (gradient fill)` }),
+    ])
+    .meta({ id, title });
 };
 
 const datatableMetricOptionsSchema = lazySchema(() =>
   z.discriminatedUnion('apply_color_to', [
     datatableConfigMetricsOptionsSchema,
-    z.discriminatedUnion('fill_mode', getProgressBarVariants(datatableConfigMetricsOptionsSchema)),
+    getProgressBarSchema(datatableConfigMetricsOptionsSchema, {
+      id: 'visDatatableProgressBar',
+      title: 'Datatable metric progress bar',
+    }),
   ])
 );
 
@@ -501,7 +515,10 @@ const visDatatableESQLMetricSchema = lazySchema(() => {
   const metricSchema = esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape);
   return z.discriminatedUnion('apply_color_to', [
     metricSchema.meta({ id: 'visDatatableESQLMetric', title: 'Datatable Metric (ES|QL)' }),
-    z.discriminatedUnion('fill_mode', getProgressBarVariants(metricSchema)),
+    getProgressBarSchema(metricSchema, {
+      id: 'visDatatableESQLMetricProgressBar',
+      title: 'Datatable metric progress bar (ES|QL)',
+    }),
   ]);
 });
 
@@ -509,7 +526,10 @@ const visDatatableESQLRowSchema = lazySchema(() => {
   const rowSchema = esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape);
   return z.discriminatedUnion('apply_color_to', [
     rowSchema,
-    z.discriminatedUnion('fill_mode', getProgressBarVariants(rowSchema)),
+    getProgressBarSchema(rowSchema, {
+      id: 'visDatatableESQLRowProgressBar',
+      title: 'Datatable row progress bar (ES|QL)',
+    }),
   ]);
 });
 
