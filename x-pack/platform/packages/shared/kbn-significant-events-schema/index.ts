@@ -114,6 +114,7 @@ export {
   detectionSkipSchema,
   skipMarkerSchema,
   type SkipMarker,
+  describeSkip,
   PROBE_STATUSES,
   type ProbeStatus,
   type BaselineDecision,
@@ -162,6 +163,12 @@ export { KIsOnboardingStep, KIS_ONBOARDING_IN_PROGRESS_STATUSES } from './src/on
 export type { SignificantEventsWorkflowStatusResult } from './src/workflows';
 
 export { SignificantEventsWorkflowStatus } from './src/workflows';
+
+export {
+  type SourceWriteConflictReason,
+  isRetryableSourceWriteConflict,
+  isSourceWriteConflictReason,
+} from './src/source_write_conflict';
 
 export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
