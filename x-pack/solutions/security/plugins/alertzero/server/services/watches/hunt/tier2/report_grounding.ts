@@ -502,116 +502,6 @@ const isSpecificToEligibleIoc = (
   return false;
 };
 
-/**
- * Unescape regex punctuation (`\.` -> `.`) while turning regex character-class or boundary
- * escapes (`\b`, `\d`, `\w`, `\s`) into spaces so they cannot glue onto an adjacent token.
- */
-const unescapeRegex = (value: string): string =>
-  value.replace(/\\([A-Za-z0-9])|\\(.)/g, (_match, alpha, punct) => (alpha ? ' ' : punct));
-
-/**
- * The first rejected value a literal anywhere in the query carries, or undefined.
- *
- * Every literal node in the AST is read (inside `WHERE`, `EVAL`, `IN (...)`, parenthesized
- * expressions, `MATCH`, `RLIKE`, `NOT RLIKE`, or `QSTR`) rather than going through the
- * positive-grounding `groundingRequirements` whitelist, which returns `[]` for operators or
- * tokens it refuses to ground positively (`MATCH` on a dotted IP/domain, `RLIKE` with parens or
- * quantifiers, `NOT RLIKE`) and would fail open here. A literal carries a rejected value when a
- * wildcard-free or regex-unescaped fragment equals one or embeds one as a term, unless it is an
- * eligible IOC or a distinguishing substring of one.
- *
- * What the operator does with the literal decides how much of that exemption applies. Under an
- * exact operator (`==`, `IN`) the whole literal is tried first: an exact eligible URL carrying
- * `?` in its query string is the hunt the run asked for, not a pattern whose `?`-split prefix
- * happens to end at the rejected host. `MATCH_PHRASE` counts as exact too: its terms are all
- * required, in order, so a phrase that is an eligible URL searches for that URL. Under the
- * token-`OR` functions (`MATCH`, `:`, `QSTR`, `KQL`) there is no exemption at all: the literal
- * is analyzed into alternatives, so an eligible URL under `MATCH` matches events carrying only
- * its rejected host.
- */
-const EXACT_VALUE_OPERATORS: ReadonlySet<string> = new Set([
-  '==',
-  '!=',
-  'in',
-  'not in',
-  'match_phrase',
-]);
-
-const asLiteral = (node: ESQLAstNode): ESQLLiteral | undefined =>
-  !Array.isArray(node) && 'type' in node && node.type === 'literal' ? node : undefined;
-
-/** The literal nodes an operator reads directly, through an `IN (...)` list or parentheses. */
-const literalArgsOf = (fn: ESQLFunction): ESQLLiteral[] =>
-  fn.args.flatMap((arg) => {
-    if (Array.isArray(arg)) return [];
-    const direct = asLiteral(arg);
-    if (direct) return [direct];
-    if (arg.type === 'list') {
-      return (arg as ESQLList).values.flatMap((value) => asLiteral(value) ?? []);
-    }
-    if (arg.type === 'parens' && !Array.isArray(arg.child)) {
-      return asLiteral(arg.child) ?? [];
-    }
-    return [];
-  });
-
-const rejectedValueCarriedBy = (
-  query: ESQLAstQueryExpression,
-  rejected: ReadonlySet<string>,
-  eligible: ScrubbedEligibleIocs
-): string | undefined => {
-  const exactLiterals = new Set<ESQLLiteral>();
-  const tokenizedLiterals = new Set<ESQLLiteral>();
-  Walker.walk(query, {
-    visitFunction: (fn) => {
-      const operator = fn.name.toLowerCase();
-      if (EXACT_VALUE_OPERATORS.has(operator)) {
-        for (const literal of literalArgsOf(fn)) exactLiterals.add(literal);
-      } else if (FULL_TEXT_FUNCTIONS.has(operator) || QUERY_STRING_FUNCTIONS.has(operator)) {
-        for (const literal of literalArgsOf(fn)) tokenizedLiterals.add(literal);
-      }
-    },
-  });
-
-  let found: string | undefined;
-  Walker.walk(query, {
-    visitLiteral: (literal) => {
-      if (found !== undefined) return;
-      const stripped = valueOf(literal).replace(REGEXP_SURROUND, '');
-      const tokenized = tokenizedLiterals.has(literal);
-      if (exactLiterals.has(literal)) {
-        const whole = normalize(stripped);
-        if (
-          eligible.has(whole) ||
-          (whole.length >= MIN_GROUNDING_LENGTH &&
-            isSpecificToEligibleIoc(whole, rejected, eligible))
-        ) {
-          return;
-        }
-      }
-      const unescaped = unescapeRegex(stripped);
-      const candidates = [...stripped.split(LIKE_WILDCARDS), ...unescaped.split(LIKE_WILDCARDS)];
-      for (const candidate of candidates) {
-        const value = normalize(candidate);
-        if (value.length < MIN_GROUNDING_LENGTH) continue;
-        if (!tokenized && eligible.has(value)) continue;
-        if (rejected.has(value)) {
-          found = value;
-          return;
-        }
-        if (!tokenized && isSpecificToEligibleIoc(value, rejected, eligible)) continue;
-        for (const rejectedValue of rejected) {
-          if (appearsAsTerm(value, rejectedValue)) {
-            found = rejectedValue;
-            return;
-          }
-        }
-      }
-    },
-  });
-  return found;
-};
-
 interface GroundingRules {
   /** Whether a literal read by this operator is a value drawn from the report. */
   grounds: (operator: string, literal: string) => boolean;
@@ -711,6 +601,14 @@ const isPipelineGrounded = (
  * the query filled with a constant, or no column at all, matches every row while reading as a hunt
  * for the value it carries.
  *
+ * Values intel review adjudicated out (`excludedIocValues`) may narrow a query but never ground
+ * it. Their mentions are blanked out of the report text before the check, so a predicate on one
+ * is ungrounded on its own (and so is a wildcard fragment of one), while beside a predicate the
+ * report does support it only narrows the rows: a `reference` IMDS address can scope a hunt for a
+ * grounded cloud-metadata request without being the thing hunted. A value still in `iocValues`
+ * wins, and an eligible IOC that embeds a rejected value (an approved URL under a rejected
+ * shared-platform root) still grounds on its distinguishing part.
+ *
  * It remains a value test rather than a semantic one: it establishes that the report constrains
  * the rows, not that the constraint is tight. A tautology disjoined onto a grounded comparison is
  * caught as an ungrounded `OR` branch, but a predicate that is grounded and still matches most of
@@ -751,20 +649,12 @@ export const assertEsqlGroundedInReport = (
       .filter((value) => value.length >= MIN_GROUNDING_LENGTH && !groundingIocs.has(value))
   );
   const scrubbedEligible = scrubEligibleIocs(groundingIocs, excludedSet);
-  const rejected =
-    excludedSet.size > 0 ? rejectedValueCarriedBy(root, excludedSet, scrubbedEligible) : undefined;
-  if (rejected !== undefined) {
-    return {
-      ok: false,
-      reason: `query filters on a value intel review rejected (${rejected})`,
-    };
-  }
 
-  // A rejected mention cannot lend its text to a pattern either. With `169.254.169.254` in the
-  // report, `LIKE "169.254.169*"` carries no rejected value yet grounds on nothing but that
-  // mention, so the mentions are blanked out of the text the fragments are checked against. A
-  // fragment the report also uses on its own (`kubernetes` as a word, not only inside a rejected
-  // `kubernetes.io`) still grounds; one found nowhere else no longer does.
+  // A rejected value may narrow a query but never ground it. Its mentions are blanked out of the
+  // text literals are checked against, so `WHERE source.ip == "169.254.169.254"` on its own, or
+  // `LIKE "169.254.169*"` on nothing but that mention, is ungrounded, while the same predicate
+  // beside one the report does support only narrows the rows. A fragment the report also uses on
+  // its own (`kubernetes` as a word, not only inside a rejected `kubernetes.io`) still grounds.
   const rawHaystack = normalize(reportText);
   const haystack =
     excludedSet.size > 0 ? withoutRejectedMentions(rawHaystack, excludedSet) : rawHaystack;
@@ -804,8 +694,8 @@ export const assertEsqlGroundedInReport = (
     return { ok: true };
   }
 
-  // Grounded only while the rejected mentions were still in the text: the query steers on a
-  // fragment of a rejected value. Name the fragment so the retry instruction can say which.
+  // Grounded only while the rejected mentions were still in the text: the query hunts a rejected
+  // value, or a fragment of one. Name it so the retry instruction can say which.
   if (excludedSet.size > 0 && isPipelineGrounded(root, groundsIn(rawHaystack, false))) {
     const qualifiesRaw = qualifiesIn(rawHaystack, false);
     const qualifiesScrubbed = qualifiesIn(haystack, true);
@@ -814,19 +704,29 @@ export const assertEsqlGroundedInReport = (
       visitLiteral: (literal) => {
         if (fragment !== undefined) return;
         const text = valueOf(literal);
-        fragment = [
+        const found = [
           ...groundingRequirements('like', text).flat(),
           ...groundingRequirements('rlike', text).flat(),
         ].find(
           (candidate) => qualifiesRaw(candidate, false) && !qualifiesScrubbed(candidate, false)
         );
+        if (found !== undefined) fragment = normalize(found);
       },
     });
+    const carried =
+      fragment === undefined
+        ? undefined
+        : [...excludedSet].find(
+            (rejected) => rejected === fragment || appearsAsTerm(fragment as string, rejected)
+          );
     return {
       ok: false,
-      reason: `query filters on a fragment of a value intel review rejected${
-        fragment !== undefined ? ` (${normalize(fragment)})` : ''
-      }`,
+      reason:
+        carried !== undefined
+          ? `query filters on a value intel review rejected (${carried})`
+          : `query filters on a fragment of a value intel review rejected${
+              fragment !== undefined ? ` (${fragment})` : ''
+            }`,
     };
   }
 

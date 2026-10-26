@@ -67,10 +67,11 @@ artifact values from the "Extracted IOCs" list and the report text.
 Hard requirements:
 - The query MUST filter on at least one concrete artifact value (or a tight pattern derived
   from one, e.g. a package name with a version wildcard). Generic queries are worthless.
-- Values listed under "ADJUDICATED OUT" were rejected by intel review and MUST NOT be used as a
-  quoted filter value in any predicate, even if the report text mentions them. They are values,
-  not field names: a field whose name happens to match a listed string (for example process.name
-  or host.name) remains usable as a field.
+- Values listed under "ADJUDICATED OUT" were rejected by intel review. A query MUST NOT rely on
+  one of them as the artifact it hunts, even if the report text mentions it: such a value may
+  only appear beside a predicate on an artifact the report does support, to narrow that hunt
+  (for example scoping a credential-theft request to the cloud metadata address). They are
+  values, not field names: a field whose name happens to match a listed string remains usable.
 - NEVER filter on the ATT&CK technique name as a message substring
   (e.g. \`TO_LOWER(message) LIKE "*credentials in files*"\` is forbidden).
 - Return row-level events rather than aggregations (no STATS): the caller attributes each hit

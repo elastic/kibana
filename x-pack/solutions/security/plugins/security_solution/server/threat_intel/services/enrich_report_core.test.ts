@@ -32,7 +32,8 @@ const iocs: ExtractedIoc[] = [
     value: HASH,
     tier: 'discriminating',
     tier_heuristic: 'discriminating',
-    tier_basis: 'test',
+    // Only prose hashes are reviewed; section and defanged hashes stay deterministic.
+    tier_basis: 'hash_high_entropy',
     context: `Payload hash ${HASH}.`,
   },
 ];

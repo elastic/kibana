@@ -92,6 +92,34 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable).toHaveLength(0);
   });
 
+  it.each(['ioc_section', 'defanged_source'])(
+    'keeps a %s hash deterministic: never reviewed, never deferred, still an anchor',
+    (basis) => {
+      const hash = 'b'.repeat(64);
+      const prepared = prepareIocAdjudication({
+        iocs: [
+          candidate(hash, {
+            type: 'hash',
+            tier: 'discriminating',
+            tier_heuristic: 'discriminating',
+            tier_basis: basis,
+            context: `${hash} listed under Indicators.`,
+          }),
+        ],
+      });
+      const result = reconcileIocAdjudication(prepared, new Set());
+
+      expect(prepared.reviewable).toHaveLength(0);
+      expect(prepared.deferredUnreviewed).toBe(0);
+      expect(result.iocs[0]).toEqual(
+        expect.objectContaining({ tier: 'discriminating', tier_basis: basis })
+      );
+      expect(result.iocs[0].deferred_unreviewed).toBeUndefined();
+      expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(true);
+      expect(result.promotable_count).toBe(1);
+    }
+  );
+
   it('includes a hash with non-empty context in reviewable candidates', () => {
     const hash = 'a'.repeat(64);
     const prepared = prepareIocAdjudication({
