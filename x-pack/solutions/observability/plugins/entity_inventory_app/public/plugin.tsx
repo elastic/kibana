@@ -116,13 +116,11 @@ export class EntityInventoryAppPlugin
               }),
               app: 'entityInventoryApp',
               path: '/all-resources',
-              isTechnicalPreview: true,
             },
             ...NAV_ITEMS.map(({ label, app, path }) => ({
               label: label(),
               app,
               path,
-              isTechnicalPreview: true,
             })),
           ],
         },
@@ -135,7 +133,6 @@ export class EntityInventoryAppPlugin
         title: i18n.translate('xpack.entityInventoryApp.nav.allResourcesLabel', {
           defaultMessage: 'All resources',
         }),
-        badgeType: 'techPreview' as const,
         getIsActive: ({
           pathNameSerialized,
           prepend,
@@ -147,7 +144,6 @@ export class EntityInventoryAppPlugin
       ...NAV_ITEMS.map(({ deepLinkId, label, path }) => ({
         link: `entityInventoryApp:${deepLinkId}` as const,
         title: label(),
-        badgeType: 'techPreview' as const,
         getIsActive: ({
           pathNameSerialized,
           prepend,

@@ -280,7 +280,6 @@ function createNavTree({
                     'xpack.observability.obltNav.infrastructure.entitiesGroupTitle',
                     { defaultMessage: 'Entity Inventory' }
                   ),
-                  badgeType: 'beta' as const,
                   children: entityInventoryNavChildren,
                 },
               ]
