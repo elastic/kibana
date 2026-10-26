@@ -43,11 +43,10 @@ apiTest.describe(
     apiTest.afterEach(async ({ esClient, enrolledEndpoint, log }, testInfo) => {
       try {
         if (testInfo.status !== testInfo.expectedStatus) {
-          const detectionState = await describeEndpointDetectionState(
-            esClient,
-            enrolledEndpoint.agentId,
-            { processArg: EICAR_URL, fileName: EICAR_FILE_NAME }
-          );
+          const detectionState = await describeEndpointDetectionState(esClient, enrolledEndpoint, {
+            processArg: EICAR_URL,
+            fileName: EICAR_FILE_NAME,
+          });
           log.error(`[edr_real_fleet] Endpoint detection state: ${detectionState}`);
           await testInfo.attach('endpoint-detection-state', {
             body: detectionState,
