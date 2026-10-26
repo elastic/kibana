@@ -558,6 +558,7 @@ The system resolves icons in the following order:
 | `@kbn/connector-specs/common` | Shared types, constants, and helpers. Does not load the specs barrel |
 | `@kbn/connector-specs/server` | Server-only auth types and client types |
 | `@kbn/connector-specs/icons` | Lazy icon map |
+| `@kbn/connector-specs/events` | Packaged inbound event definitions and schemas. Does not load the specs barrel |
 
 ## TypeScript Support
 
@@ -585,14 +586,15 @@ When adding a new connector:
 
 1. Create the connector folder in `src/specs/<connector>/` with `<connector>.ts`
 2. Export it from `src/all_specs.ts`
-3. (Optional) Add an icon:
+3. If the spec declares `events`, define them in `src/specs/<connector>/events.ts` and register them in `events.ts` at the package root. `events.test.ts` fails if the map and the specs drift.
+4. (Optional) Add an icon:
    - For simple cases: Use a built-in EUI icon by setting `metadata.icon` to an EUI icon name (e.g., `'globe'`, `'addDataApp'`)
    - For custom branding: Create a lazy icon component in `src/specs/<connector>/icon/` and register it in `src/connector_icons_map.ts`
-4. Follow the existing patterns for consistency
-5. Include proper TypeScript types
-6. Add appropriate UI metadata for better UX
-7. Consider adding a test file (`src/specs/{connector}.test.ts`) to validate your action handlers. See existing connector tests for examples.
-8. End-user documentation for connectors lives in `docs/reference/connectors-kibana/{connector-name}-action-type.md`. See existing connector docs for the expected structure. Don't forget to update the TOC and relevant `_snippets/` files!
+5. Follow the existing patterns for consistency
+6. Include proper TypeScript types
+7. Add appropriate UI metadata for better UX
+8. Consider adding a test file (`src/specs/{connector}.test.ts`) to validate your action handlers. See existing connector tests for examples.
+9. End-user documentation for connectors lives in `docs/reference/connectors-kibana/{connector-name}-action-type.md`. See existing connector docs for the expected structure. Don't forget to update the TOC and relevant `_snippets/` files!
 
 ### Adding a Lazy Icon
 
