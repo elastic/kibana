@@ -1697,6 +1697,24 @@ describe('RulesClient', () => {
           rule: expect.objectContaining({ id: 'rule-id-1', enabled: false }),
         });
       });
+
+      it('records the given template on the created rule', async () => {
+        const client = createClient();
+
+        await client.upsertRule({
+          id: 'rule-id-1',
+          data: baseCreateData,
+          template: { id: 'template-1' },
+        });
+
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+          expect.objectContaining({
+            attrs: expect.objectContaining({
+              metadata: expect.objectContaining({ template: { id: 'template-1' } }),
+            }),
+          }),
+        ]);
+      });
     });
 
     describe('replace rule (id exists)', () => {
@@ -1740,7 +1758,7 @@ describe('RulesClient', () => {
         expect(res.created).toBe(false);
       });
 
-      it('keeps the existing template', async () => {
+      it('keeps the existing template, ignoring a template passed for creation', async () => {
         const client = createClient();
         const existingDoc = {
           id: 'rule-id-1',
@@ -1757,6 +1775,7 @@ describe('RulesClient', () => {
         await client.upsertRule({
           id: 'rule-id-1',
           data: { ...baseCreateData, metadata: { name: 'after' } },
+          template: { id: 'template-2' },
         });
 
         expect(rulesSavedObjectService.update).toHaveBeenCalledWith(

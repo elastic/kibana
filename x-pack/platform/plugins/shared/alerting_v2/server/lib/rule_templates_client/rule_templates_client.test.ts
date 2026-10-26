@@ -52,6 +52,7 @@ const createClient = (
   const { loggerService, mockLogger } = createLoggerService();
   const rulesClient = {
     createRule: jest.fn(),
+    upsertRule: jest.fn(),
     getRuleCountsByTemplateId: jest.fn().mockResolvedValue({}),
   } as unknown as jest.Mocked<RulesClient>;
   const client = new RuleTemplatesClient(savedObjectsClient, loggerService, rulesClient);
@@ -481,6 +482,55 @@ describe('RuleTemplatesClient', () => {
       await expect(client.installRuleTemplate({ id: 'template-1', data })).rejects.toThrow(
         'Invalid rule'
       );
+    });
+  });
+
+  describe('upsertInstallRuleTemplate', () => {
+    const data = {
+      ...validTemplateAttributes.rule,
+      metadata: { name: 'Pod CrashLoopBackOff (edited)' },
+    } as CreateRuleData;
+    const upserted = { rule: { id: 'pre-assigned-id' } as RuleResponse, created: true };
+
+    it('upserts the rule with the requested id and the template id', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'template-1',
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        attributes: validTemplateAttributes,
+        references: [],
+      });
+      const { client, rulesClient } = createClient(savedObjectsClient);
+      rulesClient.upsertRule.mockResolvedValue(upserted);
+
+      await expect(
+        client.upsertInstallRuleTemplate({ id: 'template-1', ruleId: 'pre-assigned-id', data })
+      ).resolves.toBe(upserted);
+
+      expect(rulesClient.upsertRule).toHaveBeenCalledWith({
+        id: 'pre-assigned-id',
+        data,
+        template: { id: 'template-1' },
+      });
+    });
+
+    it('does not upsert a rule when the template does not exist', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          'missing'
+        )
+      );
+      const { client, rulesClient } = createClient(savedObjectsClient);
+
+      await expect(
+        client.upsertInstallRuleTemplate({ id: 'missing', ruleId: 'pre-assigned-id', data })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_TEMPLATE_NOT_FOUND },
+      });
+      expect(rulesClient.upsertRule).not.toHaveBeenCalled();
     });
   });
 });

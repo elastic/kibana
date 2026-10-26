@@ -8,7 +8,7 @@
 import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
-import { createRuleDataSchema } from './rule_data_schema';
+import { createRuleDataSchema, ruleIdSchema } from './rule_data_schema';
 import {
   FIND_DEFAULT_PER_PAGE,
   FIND_MAX_RESULT_WINDOW,
@@ -127,6 +127,17 @@ export const ruleTemplateIdParamsSchema = lazySchema(() =>
 );
 
 export type RuleTemplateIdParams = z.infer<typeof ruleTemplateIdParamsSchema>;
+
+export const upsertInstallRuleTemplateParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
+      rule_id: ruleIdSchema.describe('The identifier for the rule to create or replace.'),
+    })
+    .strict()
+);
+
+export type UpsertInstallRuleTemplateParams = z.infer<typeof upsertInstallRuleTemplateParamsSchema>;
 
 export const ruleTemplateTagsParamsSchema = lazySchema(() =>
   z

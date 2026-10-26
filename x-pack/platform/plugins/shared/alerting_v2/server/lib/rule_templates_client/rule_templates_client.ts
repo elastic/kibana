@@ -30,6 +30,7 @@ import type {
   GetRuleTemplateArgs,
   InstallRuleTemplateArgs,
   RuleTemplateSavedObjectAttributes,
+  UpsertInstallRuleTemplateArgs,
 } from './types';
 import {
   buildFindRuleTemplatesFilter,
@@ -120,6 +121,20 @@ export class RuleTemplatesClient {
     await this.getRuleTemplate({ id });
 
     return this.rulesClient.createRule({ data, options: { template: { id } } });
+  }
+
+  /**
+   * Creates rule `ruleId` from `data` attributed to the template, or replaces it
+   * when it already exists. A replaced rule keeps its existing template attribution.
+   */
+  public async upsertInstallRuleTemplate({
+    id,
+    ruleId,
+    data,
+  }: UpsertInstallRuleTemplateArgs): Promise<{ rule: RuleResponse; created: boolean }> {
+    await this.getRuleTemplate({ id });
+
+    return this.rulesClient.upsertRule({ id: ruleId, data, template: { id } });
   }
 
   public async getTags({ search }: RuleTemplateTagsParams = {}): Promise<string[]> {

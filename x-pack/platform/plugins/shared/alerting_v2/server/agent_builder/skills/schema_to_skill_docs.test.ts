@@ -39,6 +39,7 @@ import {
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
   generateNotificationsOverviewDoc,
+  generateRuleTemplatesDoc,
   generateWorkflowDestinationsDoc,
   generateDispatchFlowDoc,
   generateSingleRuleActionPolicyDoc,
@@ -581,6 +582,28 @@ describe('schema_to_skill_docs', () => {
       const doc = generateNotificationsOverviewDoc();
       expect(doc).toContain('(./rule-kind.md)');
       expect(doc).toContain('(./alert-lifecycle.md)');
+      expect(doc).not.toContain('./references/');
+    });
+  });
+
+  describe('generateRuleTemplatesDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateRuleTemplatesDoc()).toMatchSnapshot();
+    });
+
+    it('names the template tools and explains the derived fields', () => {
+      const doc = generateRuleTemplatesDoc();
+      expect(doc).toContain('platform.alerting.find_rule_templates');
+      expect(doc).toContain('`apply_template`');
+      for (const field of [
+        'index_patterns',
+        'data_streams',
+        'integration',
+        'has_data',
+        'rule_count',
+      ]) {
+        expect(doc).toContain(`\`${field}\``);
+      }
       expect(doc).not.toContain('./references/');
     });
   });

@@ -21,6 +21,11 @@ import {
   installFullStackDataForge,
   removeFullStackDataForge,
 } from './full_stack_data';
+import {
+  EVAL_RULE_TEMPLATES,
+  installEvalRuleTemplates,
+  removeEvalRuleTemplates,
+} from './rule_templates_data';
 
 export const evaluate = evalsBase.extend<{
   evaluateDataset: EvaluateDataset;
@@ -47,6 +52,8 @@ export const evaluate = evalsBase.extend<{
   hostMetricsDataStream: HostMetricsDataStream;
   /** Creates a test `.email` connector */
   emailConnectorId: string;
+  /** Seeds the eval rule templates (see `rule_templates_data.ts`) and removes them afterwards. */
+  ruleTemplates: typeof EVAL_RULE_TEMPLATES;
 }>({
   evaluateDataset: [
     ({ agentBuilderClient, evaluators, executorClient, log }, use, testInfo) => {
@@ -124,6 +131,17 @@ export const evaluate = evalsBase.extend<{
           path: `/api/actions/connector/${data.id}`,
         });
         log.info(`Deleted eval email connector ${data.id}`);
+      }
+    },
+    { scope: 'test' },
+  ],
+  ruleTemplates: [
+    async ({ kbnClient, log }, use) => {
+      await installEvalRuleTemplates(kbnClient, log);
+      try {
+        await use(EVAL_RULE_TEMPLATES);
+      } finally {
+        await removeEvalRuleTemplates(kbnClient, log);
       }
     },
     { scope: 'test' },

@@ -24,6 +24,7 @@ import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_st
 import { EpisodesClient } from '../lib/episodes_client';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { RulesClient } from '../lib/rules_client';
+import { RuleTemplatesClient } from '../lib/rule_templates_client';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -143,8 +144,12 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     const projectType = container.isBound(cloudToken)
       ? container.get(cloudToken).serverless.projectType
       : undefined;
+    const injection = container.get(CoreStart('injection'));
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
+      getRuleTemplatesClient: (request) =>
+        resolveRequestScoped(injection, request, RuleTemplatesClient),
+      getPrivilegeChecker: (request) => resolveRequestScoped(injection, request, PrivilegeChecker),
       getWorkflowClient: (request) => workflowsManagementApi.getClient(request),
       getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
       availability: createAlertingV2Availability({

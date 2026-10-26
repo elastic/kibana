@@ -9,13 +9,15 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import Boom from '@hapi/boom';
+import type { RuleAttachmentData, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { ROUTING_TAGS_SIGNAL_RULE_MESSAGE } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import {
   executeRuleOperations as executeRuleOperationsImpl,
   RuleOperationValidationError,
   ruleOperationSchema,
+  type ExecuteRuleOperationsOptions,
   type RuleOperation,
 } from './operations';
 
@@ -55,10 +57,124 @@ const executeRuleOperations = (
   operations: RuleOperation[],
   esClient?: IScopedClusterClient,
   savedObjectsClient: SavedObjectsClientContract = createMockSoClient(),
-  options: { isNew?: boolean } = {}
+  options: ExecuteRuleOperationsOptions = {}
 ) => executeRuleOperationsImpl(data, operations, esClient, savedObjectsClient, options);
 
+const nginxTemplate: RuleTemplateResponse = {
+  id: 'tpl-nginx',
+  engine: 'v2',
+  rule: {
+    kind: 'alert',
+    metadata: { name: 'Nginx errors', tags: ['nginx'] },
+    time_field: '@timestamp',
+    schedule: { every: '1m', lookback: '5m' },
+    query: {
+      base: 'FROM logs-nginx.access-* | STATS c = COUNT(*) BY host.name',
+      breach: { segment: 'WHERE c > 10' },
+    },
+    grouping: { fields: ['host.name'] },
+    state_transition: { pending: { count: 3 } },
+  },
+};
+
 describe('executeRuleOperations', () => {
+  describe('apply_template', () => {
+    const applyTemplate: RuleOperation = { operation: 'apply_template', template_id: 'tpl-nginx' };
+
+    it('seeds the draft from the template and records the template id', async () => {
+      const getRuleTemplate = jest.fn().mockResolvedValue(nginxTemplate);
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      } as never);
+
+      const result = await executeRuleOperations({}, [applyTemplate], esClient, undefined, {
+        isNew: true,
+        getRuleTemplate,
+      });
+
+      expect(getRuleTemplate).toHaveBeenCalledWith('tpl-nginx');
+      expect(esClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
+        query: 'FROM logs-nginx.access-* | STATS c = COUNT(*) BY host.name | LIMIT 0',
+        format: 'json',
+      });
+      expect(result.data).toEqual({ ...nginxTemplate.rule, template_id: 'tpl-nginx' });
+      expect(result.queryColumns).toEqual([{ name: 'host.name', type: 'keyword' }]);
+    });
+
+    it('lets later operations customize the template', async () => {
+      const result = await executeRuleOperations(
+        {},
+        [
+          applyTemplate,
+          {
+            operation: 'set_query',
+            query: { ...nginxTemplate.rule.query, breach: { segment: 'WHERE c > 50' } },
+          },
+          { operation: 'validate' },
+        ],
+        undefined,
+        undefined,
+        { isNew: true, getRuleTemplate: jest.fn().mockResolvedValue(nginxTemplate) }
+      );
+
+      expect(result.data.query?.breach).toEqual({ segment: 'WHERE c > 50' });
+      expect(result.data.template_id).toBe('tpl-nginx');
+    });
+
+    it('rejects apply_template on an existing attachment', async () => {
+      await expect(
+        executeRuleOperations(
+          { metadata: { name: 'Existing' } },
+          [applyTemplate],
+          undefined,
+          undefined,
+          {
+            getRuleTemplate: jest.fn().mockResolvedValue(nginxTemplate),
+          }
+        )
+      ).rejects.toThrow(RuleOperationValidationError);
+    });
+
+    it('rejects apply_template when it is not the first operation', async () => {
+      await expect(
+        executeRuleOperations(
+          {},
+          [{ operation: 'set_metadata', name: 'First' }, applyTemplate],
+          undefined,
+          undefined,
+          { isNew: true, getRuleTemplate: jest.fn().mockResolvedValue(nginxTemplate) }
+        )
+      ).rejects.toThrow('only allowed as the first operation');
+    });
+
+    it('maps a missing template to a validation error', async () => {
+      const getRuleTemplate = jest.fn().mockRejectedValue(Boom.notFound('missing'));
+
+      await expect(
+        executeRuleOperations({}, [applyTemplate], undefined, undefined, {
+          isNew: true,
+          getRuleTemplate,
+        })
+      ).rejects.toThrow('Rule template "tpl-nginx" not found');
+    });
+
+    it('surfaces query validation errors when the template data is missing', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+        new Error('Unknown index [logs-nginx.access-*]')
+      );
+
+      await expect(
+        executeRuleOperations({}, [applyTemplate], esClient, undefined, {
+          isNew: true,
+          getRuleTemplate: jest.fn().mockResolvedValue(nginxTemplate),
+        })
+      ).rejects.toThrow('Invalid ES|QL query: Unknown index [logs-nginx.access-*]');
+    });
+  });
+
   describe('set_query with ES|QL validation', () => {
     it('validates a valid query against ES and stores the result', async () => {
       const esClient = createMockEsClient();

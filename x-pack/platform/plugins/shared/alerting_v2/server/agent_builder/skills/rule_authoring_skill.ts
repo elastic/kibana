@@ -15,6 +15,8 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
+import type { FindRuleTemplatesToolDeps } from '../tools/find_rule_templates';
+import { findRuleTemplatesTool } from '../tools/find_rule_templates';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
@@ -23,9 +25,11 @@ import {
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
   generateNotificationsOverviewDoc,
+  generateRuleTemplatesDoc,
 } from './schema_to_skill_docs';
 
-type RuleAuthoringSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
+type RuleAuthoringSkillDeps = ManageRuleToolDeps &
+  FindRuleTemplatesToolDeps & { availability: AvailabilityConfig };
 
 export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
   defineSkillType({
@@ -33,7 +37,7 @@ export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
     name: RULE_AUTHORING_SKILL_ID,
     basePath: 'skills/platform/alerting',
     description:
-      'Compose, discover, and modify universal alerting rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-authoring skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
+      'Compose, discover, and modify universal alerting rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index, and starting rules from prebuilt integration rule templates ("recommended alerts for nginx"). For notification / action policy setup, load the action-policy-authoring skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     availability: deps.availability,
     referencedContent: [
@@ -67,12 +71,18 @@ export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
         relativePath: './references',
         content: generateNotificationsOverviewDoc(),
       },
+      {
+        name: 'rule-templates',
+        relativePath: './references',
+        content: generateRuleTemplatesDoc(),
+      },
     ],
     content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing alerting rules.
 - A user asks to create a new alerting rule from natural language requirements.
+- A user asks for recommended or prebuilt alerts for an integration or technology.
 - A user asks to change a rule's query, schedule, thresholds, or metadata.
 
 Do **not** use this skill for:
@@ -95,13 +105,42 @@ When a user asks about existing rules:
       ALERTING_TOOL_IDS.manageRule
     } calls.
 
+## Rule Templates
+
+Integrations ship prebuilt rule templates. Starting from one gives the user a rule tuned for that data source.
+
+Search templates with ${ALERTING_TOOL_IDS.findRuleTemplates} when:
+- The user names a technology or integration ("alert on nginx errors", "monitor my Kubernetes pods").
+- The user asks for recommended, prebuilt, or best-practice alerts.
+- The request is vague but names a domain ("alert me on host problems").
+
+Do **not** search templates when:
+- The user gave a complete specification (index, condition, and threshold). Compose the rule directly.
+- The user is editing an existing rule.
+
+Steps:
+1. Call ${
+      ALERTING_TOOL_IDS.findRuleTemplates
+    } with \`integration\` (e.g. \`nginx\`) or \`dataset\` (e.g. \`nginx.access\`). Add \`search\` for the condition when it helps narrow results.
+2. If several templates match, summarize each in plain language (name, what it detects, data source) and ask the user which to use. Never apply a template without the user choosing it, unless exactly one template matches the request.
+3. Call ${
+      ALERTING_TOOL_IDS.manageRule
+    } with \`{ operation: "apply_template", template_id }\` as the **first** operation of a new rule, followed by operations for the changes the user asked for (threshold in \`set_query\`, \`set_grouping\`, \`set_schedule\`, \`set_metadata\`), and end with \`validate\`.
+4. Tell the user which template the rule was started from.
+
+Data availability:
+- When a template has \`has_data: false\`, or \`apply_template\` fails with an unknown index, tell the user the integration data was not found and that the integration may need to be installed. Do **not** rewrite the template query to read from a different index.
+- When \`rule_count\` is greater than zero, mention that the template is already in use so the user can avoid a duplicate rule.
+
+If no template matches, compose the rule from scratch as described below without mentioning templates. See the [rule-templates reference](./references/rule-templates.md) for how integration and data source are derived.
+
 ## Composing and Modifying Rules
 
 Build the request for ${
       ALERTING_TOOL_IDS.manageRule
     } as an ordered \`operations\` array. Operations run in sequence.
 
-For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, \`set_query\`, \`set_recovery\`, and \`set_no_data\`.
+For a new rule started from a template, start with \`apply_template\` (see **Rule Templates** above). Otherwise start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, \`set_query\`, \`set_recovery\`, and \`set_no_data\`.
 
 For an existing rule, pass the \`ruleAttachmentId\` and only include the operations needed for the changes requested.
 
@@ -203,6 +242,9 @@ When the user wants alerts to recover only when a condition is met, to never rec
 When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), use \`set_no_data\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
-When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps)],
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).
+
+### Rule Templates
+When the user asks how templates are matched to their data, what \`has_data\` or \`rule_count\` mean, or how a rule is linked to its template, consult the [rule-templates reference](./references/rule-templates.md).`,
+    getInlineTools: () => [manageRuleTool(deps), findRuleTemplatesTool(deps)],
   });

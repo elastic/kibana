@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ACTION_POLICY_AUTHORING_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import {
+  ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_TOOL_IDS,
+  RULE_KIND_LABELS,
+} from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -727,6 +731,40 @@ export const generateNotificationsOverviewDoc = (): string => {
     `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill for notification setup.`,
   ].join('\n');
 };
+
+/** Generates the rule templates reference: derived source fields, data availability, and attribution. */
+export const generateRuleTemplatesDoc = (): string =>
+  [
+    '# Rule Templates',
+    '',
+    `Rule templates are prebuilt rules shipped by integrations (for example nginx, Kubernetes, or system metrics) and installed by Fleet. Find them with \`${ALERTING_TOOL_IDS.findRuleTemplates}\` and start a rule from one with the \`apply_template\` operation of \`${ALERTING_TOOL_IDS.manageRule}\`.`,
+    '',
+    '## How the Data Source Is Derived',
+    '',
+    'Templates do not store their integration or data source. Both are derived from the `FROM` / `TS` sources of the template query, following the data stream naming scheme `{type}-{dataset}-{namespace}`:',
+    '',
+    '- `index_patterns`: the sources exactly as written in the query, for example `logs-nginx.access-*`.',
+    '- `data_streams`: the `type` and `dataset` of each source that names a concrete dataset, for example `{ type: "logs", dataset: "nginx.access" }`.',
+    '- `integration`: the dataset prefix before the first dot (`nginx.access` gives `nginx`). Omitted when the sources span several integrations.',
+    '',
+    'Broad patterns such as `logs-*` or `metrics-*` have no dataset and no derived integration. The `integration` filter also matches template tags, so those templates can still be found by integration name, or with `search` and `tags`.',
+    '',
+    '## Data Availability',
+    '',
+    '`has_data` reports whether the template sources resolve to at least one index, data stream, or alias the user can read:',
+    '',
+    '- `true`: the data exists. The template query is expected to validate.',
+    '- `false`: no matching data exists. The integration is probably not installed or not sending data. Tell the user instead of applying the template, and do not point the template query at a different index.',
+    '- Missing: the lookup could not run. `apply_template` validates the query and reports an unknown index if the data is missing.',
+    '',
+    '## Existing Usage',
+    '',
+    '`rule_count` is the number of rules in the current space already created from the template. When it is greater than zero, tell the user the template is already in use so they can avoid creating a duplicate rule.',
+    '',
+    '## Attribution',
+    '',
+    '`apply_template` records the template on the rule attachment. When the user saves the rule with the **Create rule** button, the rule is installed from the template so it is listed as created from that template. Changes made after `apply_template` (thresholds, grouping, schedule, name) are kept and do not break the attribution.',
+  ].join('\n');
 
 /** Generates the State Transition section with heading, field list from schema, and constraints. */
 export const generateStateTransitionDoc = (): string => {

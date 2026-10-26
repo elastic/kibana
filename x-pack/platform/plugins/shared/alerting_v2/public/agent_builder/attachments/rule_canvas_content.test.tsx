@@ -13,6 +13,10 @@ import { RuleCanvasContent } from './rule_canvas_content';
 
 const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
 const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
+const mockInstallRuleTemplate = jest.fn().mockResolvedValue({ id: 'installed-rule-id' });
+const mockUpsertInstallRuleTemplate = jest
+  .fn()
+  .mockImplementation(async (_templateId: string, ruleId: string) => ({ id: ruleId }));
 const mockRulesNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockUseQueryClient = jest.requireActual('@kbn/react-query').useQueryClient;
@@ -35,8 +39,18 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
+    if (token === 'RuleTemplatesApi') {
+      return {
+        installRuleTemplate: mockInstallRuleTemplate,
+        upsertInstallRuleTemplate: mockUpsertInstallRuleTemplate,
+      };
+    }
     return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
+}));
+
+jest.mock('../../services/rule_templates_api', () => ({
+  RuleTemplatesApi: 'RuleTemplatesApi',
 }));
 
 jest.mock('../../components/rule/rule_summary', () => ({
@@ -73,9 +87,14 @@ jest.mock('../../services/rules_api', () => ({
   RulesApi: Symbol('RulesApi'),
 }));
 
-const createAttachment = (
-  overrides: { origin?: string; enabled?: boolean; dataId?: string } = {}
-) => ({
+interface AttachmentOverrides {
+  origin?: string;
+  enabled?: boolean;
+  dataId?: string;
+  templateId?: string;
+}
+
+const createAttachment = (overrides: AttachmentOverrides = {}) => ({
   id: 'att-1',
   type: RULE_ATTACHMENT_TYPE,
   versions: [],
@@ -89,11 +108,12 @@ const createAttachment = (
     query: { base: 'FROM logs-*' },
     enabled: overrides.enabled,
     ...(overrides.dataId ? { id: overrides.dataId } : {}),
+    ...(overrides.templateId ? { template_id: overrides.templateId } : {}),
   } as any,
 });
 
 const renderCanvas = (
-  overrides: { origin?: string; enabled?: boolean; dataId?: string } = {},
+  overrides: AttachmentOverrides = {},
   callbackOverrides: Record<string, jest.Mock> = {}
 ) => {
   const attachment = createAttachment(overrides);
@@ -199,6 +219,42 @@ describe('RuleCanvasContent', () => {
       );
       expect(updateOrigin).toHaveBeenCalledWith('pre-assigned-id');
       expect(mockAddSuccess).toHaveBeenCalled();
+    });
+
+    it('installs from the template when the proposal was started from one', async () => {
+      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const { registerActionButtons } = renderCanvas(
+        { dataId: 'pre-assigned-id', templateId: 'tpl-nginx' },
+        { updateOrigin }
+      );
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      const createButton = buttons.find((button) => button.label === 'Create rule')!;
+      await createButton.handler();
+
+      expect(mockUpsertInstallRuleTemplate).toHaveBeenCalledWith(
+        'tpl-nginx',
+        'pre-assigned-id',
+        expect.not.objectContaining({ template_id: expect.anything() })
+      );
+      expect(mockUpsertRule).not.toHaveBeenCalled();
+      expect(updateOrigin).toHaveBeenCalledWith('pre-assigned-id');
+    });
+
+    it('installs from the template with a generated id when the proposal has no id', async () => {
+      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const { registerActionButtons } = renderCanvas({ templateId: 'tpl-nginx' }, { updateOrigin });
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      const createButton = buttons.find((button) => button.label === 'Create rule')!;
+      await createButton.handler();
+
+      expect(mockInstallRuleTemplate).toHaveBeenCalledWith(
+        'tpl-nginx',
+        expect.not.objectContaining({ template_id: expect.anything() })
+      );
+      expect(mockUpsertInstallRuleTemplate).not.toHaveBeenCalled();
+      expect(updateOrigin).toHaveBeenCalledWith('installed-rule-id');
     });
 
     it('creates a rule and stores its generated id when the proposal has no id', async () => {

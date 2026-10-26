@@ -15,7 +15,9 @@ import {
   buildCreateRuleData,
   buildRuleTemplateData,
   buildV1RuleTemplateAttributes,
+  getFindRuleTemplatesUrl,
   getInstallRuleTemplateUrl,
+  getUpsertInstallRuleTemplateUrl,
   NO_ACCESS_ROLE,
   testData,
 } from '../fixtures';
@@ -65,6 +67,80 @@ apiTest.describe('Install rule template API', { tag: API_ENGINE_TAG }, () => {
     const persisted = await apiServices.alertingV2.rules.get(response.body.id);
     expect(persisted.metadata.name).toBe('nginx-error-rate-edited');
   });
+
+  apiTest(
+    'PUT: should create the rule with the given id, then replace it on a second call',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.ruleTemplates.create({
+        id: 'pre-assigned-template',
+        attributes: buildRuleTemplateData({ metadata: { name: 'pre-assigned-template' } }),
+      });
+      const url = getUpsertInstallRuleTemplateUrl('pre-assigned-template', 'agent-rule-id');
+
+      const created = await apiClient.put(url, {
+        headers: writerHeaders,
+        body: buildCreateRuleData({ metadata: { name: 'from-agent' } }),
+      });
+      expect(created).toHaveStatusCode(201);
+      expect(created.body.id).toBe('agent-rule-id');
+
+      const replaced = await apiClient.put(url, {
+        headers: writerHeaders,
+        body: buildCreateRuleData({ metadata: { name: 'from-agent-edited' } }),
+      });
+      expect(replaced).toHaveStatusCode(200);
+      expect(replaced.body.id).toBe('agent-rule-id');
+      expect(replaced.body.metadata.name).toBe('from-agent-edited');
+
+      const templates = await apiClient.get(getFindRuleTemplatesUrl(), { headers: writerHeaders });
+      expect(templates).toHaveStatusCode(200);
+      const template = templates.body.items.find(
+        ({ id }: { id: string }) => id === 'pre-assigned-template'
+      );
+      expect(template.rule_count).toBe(1);
+    }
+  );
+
+  apiTest(
+    'PUT: should return 404 when no template has that id',
+    async ({ apiClient, apiServices }) => {
+      const response = await apiClient.put(
+        getUpsertInstallRuleTemplateUrl('does-not-exist', 'orphan-rule'),
+        {
+          headers: writerHeaders,
+          body: buildCreateRuleData({ metadata: { name: 'orphan' } }),
+        }
+      );
+
+      expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('RULE_TEMPLATE_NOT_FOUND');
+      const rules = await apiServices.alertingV2.rules.find({ search: 'orphan' });
+      expect(rules.items).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'PUT authorization: should return 403 for a user with read-only rules privileges',
+    async ({ apiClient, apiServices, requestAuth }) => {
+      await apiServices.alertingV2.ruleTemplates.create({
+        id: 'read-only-put-template',
+        attributes: buildRuleTemplateData({ metadata: { name: 'read-only-put-template' } }),
+      });
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_READ_ROLE
+      );
+
+      const response = await apiClient.put(
+        getUpsertInstallRuleTemplateUrl('read-only-put-template', 'reader-rule'),
+        {
+          headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
+          body: buildCreateRuleData({ metadata: { name: 'reader-cannot-install' } }),
+        }
+      );
+
+      expect(response).toHaveStatusCode(403);
+    }
+  );
 
   apiTest('should not let the body choose the template', async ({ apiClient, apiServices }) => {
     await apiServices.alertingV2.ruleTemplates.create({

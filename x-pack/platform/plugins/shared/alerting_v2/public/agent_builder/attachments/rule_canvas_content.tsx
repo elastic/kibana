@@ -17,6 +17,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { bindLocatorsToHost, getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import { LocatorProvider } from '../../application/locator_context';
@@ -29,6 +30,7 @@ import {
 import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
 import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
 import { RulesApi } from '../../services/rules_api';
+import { RuleTemplatesApi } from '../../services/rule_templates_api';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
@@ -41,6 +43,7 @@ export const RuleCanvasContent = ({
   updateOrigin,
 }: RuleCanvasContentProps) => {
   const rulesApi = useService(RulesApi);
+  const ruleTemplatesApi = useService(RuleTemplatesApi);
   const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
   const [queryClient] = React.useState(() => new QueryClient());
@@ -66,6 +69,16 @@ export const RuleCanvasContent = ({
     }
 
     if (!isPersisted) {
+      const { id, template_id: templateId } = data;
+      const saveNewRule = (payload: CreateRuleData) => {
+        if (templateId) {
+          return id
+            ? ruleTemplatesApi.upsertInstallRuleTemplate(templateId, id, payload)
+            : ruleTemplatesApi.installRuleTemplate(templateId, payload);
+        }
+        return id ? rulesApi.upsertRule(id, payload) : rulesApi.createRule(payload);
+      };
+
       registerActionButtons([
         {
           label: i18n.translate('xpack.alertingV2.ruleAttachment.createRule', {
@@ -74,9 +87,8 @@ export const RuleCanvasContent = ({
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
-            const savedRule = data.id
-              ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
-              : await rulesApi.createRule(buildRulePayload(data));
+            const payload = buildRulePayload(data);
+            const savedRule = await saveNewRule(payload);
             await updateOrigin(savedRule.id);
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
@@ -130,6 +142,7 @@ export const RuleCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     rulesApi,
+    ruleTemplatesApi,
     share,
     notifications,
     data,

@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { lazySchema, z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -25,6 +26,7 @@ import {
 } from './operations';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import type { RuleTemplatesClient } from '../../../lib/rule_templates_client';
 import { generateRuleOperationsUsageList } from '../../skills/schema_to_skill_docs';
 
 const manageRuleSchema = lazySchema(() =>
@@ -41,10 +43,12 @@ const manageRuleSchema = lazySchema(() =>
 
 export interface ManageRuleToolDeps {
   logger: LoggerServiceContract;
+  getRuleTemplatesClient: (request: KibanaRequest) => Pick<RuleTemplatesClient, 'getRuleTemplate'>;
 }
 
 export const manageRuleTool = ({
   logger,
+  getRuleTemplatesClient,
 }: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
@@ -60,7 +64,7 @@ ${generateRuleOperationsUsageList()}`,
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
-    { attachments, esClient, spaceId, savedObjectsClient }
+    { attachments, esClient, spaceId, savedObjectsClient, request }
   ) => {
     let ruleId: string | undefined;
     try {
@@ -81,6 +85,7 @@ ${generateRuleOperationsUsageList()}`,
         warnings,
       } = await executeRuleOperations(currentData, operations, esClient, savedObjectsClient, {
         isNew,
+        getRuleTemplate: (id) => getRuleTemplatesClient(request).getRuleTemplate({ id }),
       });
 
       // Pre-assign a stable rule ID so that action policies can reference it
@@ -143,6 +148,7 @@ ${generateRuleOperationsUsageList()}`,
                 time_field: updatedData.time_field,
                 recovery: updatedData.recovery,
                 no_data: updatedData.no_data,
+                ...(updatedData.template_id ? { templateId: updatedData.template_id } : {}),
                 ...(dashboards.length > 0 ? { dashboards } : {}),
                 ...(runbookAttached ? { runbookAttached: true } : {}),
               },

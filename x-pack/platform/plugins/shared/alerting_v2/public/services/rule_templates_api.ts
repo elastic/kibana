@@ -13,6 +13,7 @@ import type {
   CreateRuleData,
   FindRuleTemplatesRequest,
   FindRuleTemplatesResponse,
+  PutRuleData,
   RuleResponse,
   RuleTemplateResponse,
   RuleTemplateTagsParams,
@@ -25,6 +26,12 @@ const buildRuleTemplatePath = (id: string): string =>
 
 const buildInstallRuleTemplatePath = (id: string): string =>
   buildPath(`${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/{id}/_install`, { id });
+
+const buildUpsertInstallRuleTemplatePath = (id: string, ruleId: string): string =>
+  buildPath(`${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/{id}/_install/{ruleId}`, {
+    id,
+    ruleId,
+  });
 
 @injectable()
 export class RuleTemplatesApi {
@@ -63,6 +70,16 @@ export class RuleTemplatesApi {
   /** Creates a rule from `payload` and records `id` as the template it came from. */
   public async installRuleTemplate(id: string, payload: CreateRuleData) {
     return this.http.post<RuleResponse>(buildInstallRuleTemplatePath(id), {
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /**
+   * Creates rule `ruleId` from `payload` attributed to template `id`, or replaces
+   * it when it already exists.
+   */
+  public async upsertInstallRuleTemplate(id: string, ruleId: string, payload: PutRuleData) {
+    return this.http.put<RuleResponse>(buildUpsertInstallRuleTemplatePath(id, ruleId), {
       body: JSON.stringify(payload),
     });
   }
