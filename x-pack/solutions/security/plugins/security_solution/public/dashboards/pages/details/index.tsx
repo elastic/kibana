@@ -31,7 +31,22 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { useDashboardTitle } from '../../hooks/use_dashboard_title';
 
-const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
+/* dshDashboardViewport--panelExpanded: dashboard_viewport.tsx
+   dshLayout-isMaximizedPanel: dashboard_grid.tsx */
+const dashboardExpandedStyles = {
+  '&:has(.dshDashboardViewport--panelExpanded)': {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    flex: '1 1 auto',
+    height: '100%',
+    minHeight: 0,
+  },
+};
+
+const dashboardViewFlexGroupStyle = {
+  minHeight: 'calc(100vh - 140px)',
+  ...dashboardExpandedStyles,
+};
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;
@@ -100,7 +115,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
           id={InputsModelId.global}
         />
       </FiltersGlobal>
-      <SecuritySolutionPageWrapper>
+      <SecuritySolutionPageWrapper css={dashboardExpandedStyles}>
         <EuiFlexGroup
           direction="column"
           css={dashboardViewFlexGroupStyle}
@@ -117,7 +132,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
             )}
           </EuiFlexItem>
           {!errorState && (
-            <EuiFlexItem grow>
+            <EuiFlexItem css={dashboardExpandedStyles} grow>
               <DashboardRenderer
                 query={query}
                 filters={filters}

@@ -32,6 +32,10 @@ import type {
   UnifiedAttachment,
   UnifiedAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  CasesByAttachmentIDsRequest,
+  GetCaseIDsByAttachmentIDsResponse,
+} from '@kbn/cases-plugin/server/client/cases/get';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -546,4 +550,28 @@ export const updateAttachmentV2 = async ({
     .expect(expectedHttpCode);
 
   return attachment;
+};
+
+/**
+ * Calls the cases client's getCasesByAttachmentIDs, which has no public route, through the fixture plugin.
+ */
+export const getCasesByAttachmentIds = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  params: CasesByAttachmentIDsRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<GetCaseIDsByAttachmentIDsResponse> => {
+  const { body } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}/api/cases_fixture/cases:getCasesByAttachmentIds`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return body;
 };

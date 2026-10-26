@@ -9,6 +9,7 @@ import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { kiIdQuery } from '@kbn/context-engine-plugin/server/ai_indices/ki_get';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { coreMock } from '@kbn/core/server/mocks';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
@@ -24,6 +25,7 @@ describe('forget tool', () => {
   const get = jest.fn();
   const search = jest.fn();
   const index = jest.fn();
+  const update = jest.fn();
 
   const createTool = () =>
     createForgetTool({
@@ -48,6 +50,7 @@ describe('forget tool', () => {
         asCurrentUser: {
           search,
           index,
+          update,
         },
       },
       runContext: {
@@ -80,6 +83,7 @@ describe('forget tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     assertContextEngineWriteAccessMock.mockResolvedValue();
+    update.mockResolvedValue({ result: 'updated' });
     get.mockResolvedValue({
       id: 'support',
       memory_enabled: true,
@@ -135,7 +139,7 @@ describe('forget tool', () => {
     expect(tool.confirmation).toBeUndefined();
   });
 
-  it('tombstones an index-backed memory using concurrency metadata', async () => {
+  it('tombstones an index-backed memory in place using concurrency metadata', async () => {
     const result = await run();
 
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
@@ -143,38 +147,36 @@ describe('forget tool', () => {
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'ai-index-idx-support',
-        query: { ids: { values: ['memory-1'] } },
+        query: kiIdQuery('memory-1'),
+        size: 2,
         seq_no_primary_term: true,
-      })
+        _source: true,
+      }),
+      expect.objectContaining({ signal: expect.anything() })
     );
-    expect(index).toHaveBeenCalledWith({
-      index: 'ai-index-idx-support',
-      id: 'memory-1',
-      if_seq_no: 7,
-      if_primary_term: 2,
-      document: expect.objectContaining({
-        '@timestamp': '2026-09-01T00:00:00.000Z',
+    expect(update).toHaveBeenCalledWith(
+      {
+        index: 'ai-index-idx-support',
         id: 'memory-1',
-        updated_at: expect.any(String),
-        attributes: { 'memory.session_id': 'conversation-1' },
-        governance: {
-          provenance: {
-            created_by: {
-              uri: 'tool://platform.context_engine.remember',
-              metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+        doc: {
+          updated_at: expect.any(String),
+          governance: {
+            provenance: {
+              updated_by: {
+                uri: 'tool://platform.context_engine.forget',
+                metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+              },
             },
-            updated_by: {
-              uri: 'tool://platform.context_engine.forget',
-              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
-            },
-          },
-          lifecycle: {
-            status: 'deleted',
+            lifecycle: { status: 'deleted' },
           },
         },
-      }),
-      refresh: 'wait_for',
-    });
+        if_seq_no: 7,
+        if_primary_term: 2,
+        refresh: 'wait_for',
+      },
+      expect.objectContaining({ signal: expect.anything() })
+    );
+    expect(index).not.toHaveBeenCalled();
     expect(result).toEqual({
       results: [
         {
@@ -185,7 +187,7 @@ describe('forget tool', () => {
     });
   });
 
-  it('appends a tombstone for a data-stream-backed memory', async () => {
+  it('appends a tombstone revision for a data-stream-backed memory', async () => {
     get.mockResolvedValue({
       id: 'support',
       memory_enabled: true,
@@ -225,37 +227,44 @@ describe('forget tool', () => {
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'ai-index-ds-support',
-        query: { term: { id: 'memory-1' } },
-        sort: [{ '@timestamp': 'desc' }],
-        size: 1,
-      })
-    );
-    expect(index).toHaveBeenCalledWith({
-      index: 'ai-index-ds-support',
-      document: expect.objectContaining({
-        '@timestamp': expect.any(String),
-        id: 'memory-1',
-        updated_at: expect.any(String),
-        attributes: { 'memory.session_id': 'conversation-1' },
-        governance: {
-          provenance: {
-            created_by: {
-              uri: 'tool://platform.context_engine.remember',
-              metadata: { run_id: 'run-0', agent_id: 'agent-1' },
-            },
-            updated_by: {
-              uri: 'tool://platform.context_engine.forget',
-              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
-            },
-          },
-          lifecycle: {
-            status: 'deleted',
-          },
-        },
+        query: kiIdQuery('memory-1'),
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+        size: 10,
+        seq_no_primary_term: true,
+        _source: true,
       }),
-      op_type: 'create',
-      refresh: 'wait_for',
-    });
+      expect.objectContaining({ signal: expect.anything() })
+    );
+    expect(index).toHaveBeenCalledWith(
+      {
+        index: 'ai-index-ds-support',
+        document: expect.objectContaining({
+          '@timestamp': expect.any(String),
+          id: 'memory-1',
+          updated_at: expect.any(String),
+          attributes: { 'memory.session_id': 'conversation-1' },
+          governance: {
+            provenance: {
+              created_by: {
+                uri: 'tool://platform.context_engine.remember',
+                metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+              },
+              updated_by: {
+                uri: 'tool://platform.context_engine.forget',
+                metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+              },
+            },
+            lifecycle: {
+              status: 'deleted',
+            },
+          },
+        }),
+        op_type: 'create',
+        refresh: 'wait_for',
+      },
+      expect.objectContaining({ signal: expect.anything() })
+    );
+    expect(update).not.toHaveBeenCalled();
     expect(index.mock.calls[0][0]).not.toHaveProperty('id');
     expect(index.mock.calls[0][0].document['@timestamp']).not.toBe('2026-09-01T00:00:00.000Z');
   });
@@ -287,6 +296,7 @@ describe('forget tool', () => {
 
     const result = await run();
 
+    expect(update).not.toHaveBeenCalled();
     expect(index).not.toHaveBeenCalled();
     expect(result).toEqual({
       results: [
@@ -318,6 +328,26 @@ describe('forget tool', () => {
       ],
     });
     expect(search).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when the memory does not exist', async () => {
+    search.mockResolvedValue({ hits: { hits: [] } });
+
+    const result = await run();
+
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message: "Failed to forget memory: KI 'memory-1' not found in AI index 'support'",
+          },
+        },
+      ],
+    });
+    expect(update).not.toHaveBeenCalled();
     expect(index).not.toHaveBeenCalled();
   });
 
@@ -357,6 +387,46 @@ describe('forget tool', () => {
         },
       ],
     });
+    expect(update).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  it('rejects a memory that is ambiguous across multiple backing indices', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'memory-1',
+            _index: 'ai-index-idx-support-000001',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: { type: 'memory.session_fact' },
+          },
+          {
+            _id: 'memory-1',
+            _index: 'ai-index-idx-support-000002',
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: { type: 'memory.session_fact' },
+          },
+        ],
+      },
+    });
+
+    const result = await run();
+
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message:
+              "Failed to forget memory: KI 'memory-1' is ambiguous in AI index 'support': it exists in multiple backing indices",
+          },
+        },
+      ],
+    });
+    expect(update).not.toHaveBeenCalled();
     expect(index).not.toHaveBeenCalled();
   });
 });

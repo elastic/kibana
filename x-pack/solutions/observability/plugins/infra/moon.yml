@@ -176,6 +176,4 @@ fileGroups:
     - test/scenarios/**/*
     - test/scout/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

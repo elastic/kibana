@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import shutil
 import subprocess
 import sys
 import unittest
@@ -13,7 +14,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from file_bug import (  # noqa: E402
     CreateFailed,
+    FILED_MARKER,
     FILED_VIA,
+    KIBANA_REPO,
+    SECURITY_TEAM_REPO,
     IssueMatch,
     PartialWrite,
     TESTER_SOURCE_LABEL,
@@ -32,7 +36,11 @@ from file_bug import (  # noqa: E402
     pack_gaps,
     parse_search_results,
     render_bug_body,
+    has_media,
+    scan_security_hints,
     scan_sensitive,
+    search_queries,
+    run_search,
     scan_wip,
     upload_evidence,
     validate_labels,
@@ -683,6 +691,148 @@ class ScanSensitiveTest(unittest.TestCase):
         self.assertEqual(scan_sensitive("Table shows 0 entities"), [])
 
 
+class SecurityRoutingTest(unittest.TestCase):
+    def test_flags_security_signals(self):
+        for text in (
+            "See CVE-2024-12345",
+            "Authorization: Basic ZWxhc3RpYzpzM2NyZXRQYXNz",
+            "curl -u elastic:MyRealPassword https://x",
+            "curl --user elastic:MyRealPassword https://x",
+            "https://admin:hunter2pass@cluster.example.com",
+            "Authorization: Bearer abcdefghijklmnopqrstuvwxyz0123",
+            "api_key=sk_live_abcdef123456",
+            "-----BEGIN RSA PRIVATE KEY-----",
+        ):
+            self.assertIn("security_issue", scan_sensitive(text), text)
+
+    def test_credential_lookalikes_do_not_gate(self):
+        for text in (
+            "Basic configuration is required",
+            "Token: undefined",
+            "Password: required",
+            "api_key=$BASE64_API_KEY",
+            "https://elastic:changeme@localhost:9200",
+            "curl -u elastic:changeme http://localhost:5601",
+            "curl -u elastic:password http://localhost:5601",
+            "Token: expired_or_invalid_value",
+            "Secret: configuration-not-found",
+            "token=verification-pending",
+            "curl -u elastic:$ES_PASS https://x",
+            "https://user:${PASS}@host",
+            "curl -u elastic:**** https://x",
+            "https://user:***@cluster.example.com",
+            "https://example.com/app/security",
+        ):
+            self.assertNotIn("security_issue", scan_sensitive(text), text)
+
+    def test_plain_ui_bug_is_not_security(self):
+        self.assertNotIn("security_issue", scan_sensitive("Table shows 0 entities"))
+
+    def _finding(self):
+        return {
+            "title": "Risk table empty",
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["click"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+
+    def _body(self, extra):
+        return render_bug_body(self._finding(), {"kibana_version": "9.3.0"}) + extra
+
+    def _gaps(self, **kwargs):
+        return check_draft(
+            body=self._body("\nSee CVE-2024-12345.\n"),
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=self._finding(),
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+            **kwargs,
+        )
+
+    def test_check_draft_blocks_kibana_repo(self):
+        self.assertIn("security_issue:file_in_security_team", self._gaps())
+
+    def test_check_draft_allows_security_team_repo(self):
+        self.assertNotIn(
+            "security_issue:file_in_security_team",
+            self._gaps(repo=SECURITY_TEAM_REPO),
+        )
+
+    def test_sensitive_ok_does_not_unlock_kibana_repo(self):
+        self.assertIn(
+            "security_issue:file_in_security_team", self._gaps(sensitive_ok=True)
+        )
+
+    def test_security_ok_unlocks_kibana_repo(self):
+        self.assertNotIn(
+            "security_issue:file_in_security_team", self._gaps(security_ok=True)
+        )
+
+    def _write(self, repo, **kwargs):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            return {
+                "returncode": 0,
+                "stdout": f"https://github.com/{repo}/issues/1",
+                "stderr": "",
+            }
+
+        write_github(
+            action="create",
+            repo=repo,
+            title="Bug",
+            body="See CVE-2024-12345",
+            labels=["bug"],
+            number=None,
+            run_gh=run_gh,
+            **kwargs,
+        )
+        return calls
+
+    def test_write_refuses_kibana_repo(self):
+        with self.assertRaises(ValueError):
+            self._write(KIBANA_REPO)
+
+    def test_write_allows_security_team_and_security_ok(self):
+        self.assertTrue(self._write(SECURITY_TEAM_REPO))
+        self.assertTrue(self._write(KIBANA_REPO, security_ok=True))
+
+
+class MediaGateTest(unittest.TestCase):
+    def test_has_media(self):
+        self.assertTrue(has_media("![shot](https://x/y.png)"))
+        self.assertTrue(has_media("Recording: /tmp/flow.mp4"))
+        self.assertFalse(has_media("Table shows 0 entities"))
+
+    def test_check_draft_requires_media_review(self):
+        finding = {
+            "title": "Risk table empty",
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["click"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        body = render_bug_body(finding, {"kibana_version": "9.3.0"}) + "\n![s](a.png)\n"
+        kwargs = dict(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("media_review", check_draft(**kwargs))
+        self.assertNotIn("media_review", check_draft(**kwargs, media_ok=True))
+
+
 class ScanWipTest(unittest.TestCase):
     def test_flags_draft_pr_note(self):
         hits = scan_wip(
@@ -744,6 +894,24 @@ class CheckDraftTest(unittest.TestCase):
         self.assertEqual(gaps, [])
         self.assertNotIn("stamp", gaps)
         self.assertNotIn("body_describe", gaps)
+
+    def test_comment_without_finding_skips_template_gaps_but_keeps_safety_gates(self):
+        clean = check_draft(
+            body="Still reproducible on 9.3.0: 0 results for Last 24 hours.\n",
+            title=None,
+            finding={},
+            config={},
+        )
+        self.assertEqual(clean, [])
+        flagged = check_draft(
+            body="Ping ada@elastic.co, CVE-2024-12345, ![s](a.png)\n",
+            title=None,
+            finding={},
+            config={},
+        )
+        self.assertIn("sensitive:email", flagged)
+        self.assertIn("security_issue:file_in_security_team", flagged)
+        self.assertIn("media_review", flagged)
 
     def test_missing_stamp_and_bad_title(self):
         gaps = check_draft(
@@ -1027,9 +1195,43 @@ class CheckDraftTest(unittest.TestCase):
     def test_with_filed_stamp_appends_when_only_in_comment(self):
         body = f"<!-- {FILED_VIA} -->\n**Describe the bug:**\nRisk table empty\n"
         updated = with_filed_stamp(body)
-        self.assertTrue(updated.rstrip().endswith(FILED_VIA))
+        self.assertTrue(updated.rstrip().endswith(FILED_MARKER))
         visible = updated.split("-->", 1)[-1]
         self.assertIn(FILED_VIA, visible)
+
+    def test_with_filed_stamp_adds_hidden_marker_once(self):
+        updated = with_filed_stamp("**Describe the bug:**\nRisk table empty\n")
+        self.assertEqual(updated.count(FILED_MARKER), 1)
+        self.assertEqual(updated.count(FILED_VIA), 1)
+        self.assertEqual(with_filed_stamp(updated), updated)
+
+
+class MarkerMetaTest(unittest.TestCase):
+    def test_marker_carries_agent_model_and_run(self):
+        updated = with_filed_stamp(
+            "Body\n", {"agent": "codex", "model": "gpt-5", "run": "abc123"}
+        )
+        self.assertIn("<!-- filed-via: file-bug v1 agent=codex model=gpt-5 run=abc123 -->", updated)
+        self.assertEqual(updated.count("filed-via: file-bug"), 1)
+
+    def test_enriched_marker_replaces_the_plain_one(self):
+        plain = with_filed_stamp("Body\n")
+        self.assertIn(FILED_MARKER, plain)
+        updated = with_filed_stamp(plain, {"agent": "cursor"})
+        self.assertNotIn(FILED_MARKER, updated)
+        self.assertEqual(updated.count("filed-via: file-bug"), 1)
+        self.assertEqual(updated.count(FILED_VIA), 1)
+
+    def test_unsafe_marker_values_are_dropped(self):
+        updated = with_filed_stamp("Body\n", {"agent": "a --> <b>", "model": "ok-1"})
+        self.assertNotIn("agent=", updated)
+        self.assertIn("model=ok-1", updated)
+        self.assertEqual(updated.count("-->"), 1)
+
+    def test_write_cli_accepts_agent_and_model(self):
+        result = run_cli("write", "--help")
+        self.assertIn("--agent", result.stdout)
+        self.assertIn("--model", result.stdout)
 
 
 class PathADraftTest(unittest.TestCase):
@@ -1738,6 +1940,17 @@ class FileBugCliTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("wip_or_limitation", json.loads(result.stdout)["hits"])
 
+    def test_check_draft_cli_help_explains_gaps(self):
+        with TemporaryDirectory() as tmp:
+            body_path = Path(tmp) / "body.md"
+            body_path.write_text("PR #12 is still a draft\n", encoding="utf-8")
+            result = run_cli(
+                "check-draft", "--action", "comment", "--body", str(body_path)
+            )
+        out = json.loads(result.stdout)
+        self.assertIn("wip_or_limitation", out["help"])
+        self.assertIn("--wip-ok", out["help"]["wip_or_limitation"])
+
     def test_check_draft_cli_exits_2_without_stamp(self):
         finding = {
             "current_behavior": "Table shows 0",
@@ -1931,6 +2144,19 @@ class FileBugCliTest(unittest.TestCase):
                 json.loads(result.stdout)["body"], "See ![shot.png](https://img/shot.png)\n"
             )
 
+    def test_embed_uploads_cli_rejects_malformed_map(self):
+        with TemporaryDirectory() as tmp:
+            body = Path(tmp) / "body.md"
+            mapping = Path(tmp) / "uploaded.json"
+            body.write_text("See /tmp/shot.png\n", encoding="utf-8")
+            mapping.write_text(
+                json.dumps([["/tmp/shot.png", "https://img/shot.png"]]),
+                encoding="utf-8",
+            )
+            result = run_cli("embed-uploads", "--body", str(body), "--map", str(mapping))
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("path", result.stderr)
+
 
 TESTER_PARSE = (
     Path(__file__).resolve().parents[2]
@@ -2012,6 +2238,317 @@ class TesterPackIntegrationTest(unittest.TestCase):
         self.assertIn(f"Flow: {finding['flow_name']}", body)
 
 
+class SearchCommandTest(unittest.TestCase):
+    ISSUE = {
+        "number": 900001,
+        "state": "open",
+        "title": "[Bug] `Raw document_parsing_exception` shown for an invalid IP",
+        "body": "raw document_parsing_exception from Elasticsearch",
+    }
+
+    def _github_like(self, calls):
+        """Mimic GitHub: an identifier ANDed with other words and no in: qualifier returns []."""
+
+        def run_gh(argv):
+            query = argv[-1]
+            calls.append(argv)
+            qualified = "in:title" in query or "in:body" in query
+            bare = query.strip() == "document_parsing_exception"
+            has_token = "document_parsing_exception" in query
+            hit = bare or (has_token and qualified) or (not has_token and qualified)
+            stdout = json.dumps([self.ISSUE] if hit and argv[2] == "issues" else [])
+            return {"returncode": 0, "stdout": stdout, "stderr": ""}
+
+        return run_gh
+
+    def test_query_set_qualifies_every_identifier_plus_words_query(self):
+        queries = search_queries("document_parsing_exception", "value list ip", "Manage value lists")
+        self.assertEqual(queries[0], "document_parsing_exception")
+        for query in queries[1:]:
+            if "document_parsing_exception" in query:
+                self.assertTrue(query.endswith(("in:title", "in:body")), query)
+        self.assertIn("value list ip", queries)
+        self.assertIn("document_parsing_exception value list ip in:title", queries)
+        self.assertIn("document_parsing_exception value list ip in:body", queries)
+        self.assertIn("Manage value lists in:title", queries)
+
+    def test_without_token_only_split_plain_queries_run(self):
+        self.assertEqual(
+            search_queries(None, "value list invalid ip"),
+            [
+                "value list invalid ip",
+                "value list invalid ip in:title",
+                "value list invalid ip in:body",
+            ],
+        )
+
+    def test_bad_token_and_empty_input_rejected(self):
+        for token, words in (("-x", "a"), ("two words", "a"), (None, "")):
+            with self.assertRaises(ValueError):
+                search_queries(token, words)
+
+    def test_search_finds_duplicate_that_unqualified_and_misses(self):
+        calls = []
+        matches, ran = run_search(
+            repo="elastic/kibana",
+            token="document_parsing_exception",
+            words="value list ip",
+            run_gh=self._github_like(calls),
+        )
+        self.assertEqual([m.number for m in matches], [900001])
+        kinds = {(c[2], c[-1]) for c in calls}
+        self.assertIn(("issues", "document_parsing_exception"), kinds)
+        self.assertTrue(any(c[2] == "prs" and "--state" in c and "open" in c for c in calls))
+        self.assertEqual(len(ran), len(calls))
+
+    def test_gh_failure_is_an_error_not_an_empty_result(self):
+        def run_gh(argv):
+            return {"returncode": 1, "stdout": "", "stderr": "rate limited"}
+
+        with self.assertRaises(RuntimeError):
+            run_search(repo="elastic/kibana", token=None, words="value list", run_gh=run_gh)
+
+    def test_cli_search_asks_on_duplicate_via_gh_override(self):
+        with TemporaryDirectory() as tmp:
+            stub = Path(tmp) / "gh_stub.py"
+            stub.write_text(
+                "import json, sys\n"
+                "q = sys.argv[-1]\n"
+                "hit = q == 'document_parsing_exception' or 'in:' in q\n"
+                "print(json.dumps([{'number': 7, 'state': 'open', 'title': 't', 'body': 'b'}] "
+                "if hit and sys.argv[2] == 'issues' else []))\n",
+                encoding="utf-8",
+            )
+            env = {**os.environ, "FILE_BUG_GH": f"{sys.executable} {stub}"}
+            result = subprocess.run(
+                [sys.executable, str(CLI), "search", "--repo", "elastic/kibana",
+                 "--token", "document_parsing_exception", "--words", "value list ip"],
+                capture_output=True, text=True, check=False, env=env,
+            )
+        self.assertEqual(result.returncode, 2, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["action"], "ask")
+        self.assertEqual(payload["candidates"][0]["number"], 7)
+        self.assertTrue(payload["queries"])
+
+    def test_cli_search_create_when_everything_is_empty(self):
+        with TemporaryDirectory() as tmp:
+            stub = Path(tmp) / "gh_stub.py"
+            stub.write_text("print('[]')\n", encoding="utf-8")
+            env = {**os.environ, "FILE_BUG_GH": f"{sys.executable} {stub}"}
+            result = subprocess.run(
+                [sys.executable, str(CLI), "search", "--repo", "elastic/kibana", "--words", "x y"],
+                capture_output=True, text=True, check=False, env=env,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["action"], "create")
+
+
+class WriteLocalPathGuardTest(unittest.TestCase):
+    def _write(self, body):
+        def run_gh(argv):
+            return {"returncode": 0, "stdout": "https://github.com/o/r/issues/1", "stderr": ""}
+
+        return write_github(
+            action="create",
+            repo="elastic/kibana",
+            title="[T] [Bug] x",
+            body=body,
+            labels=["bug"],
+            number=None,
+            run_gh=run_gh,
+        )
+
+    def test_refuses_body_with_local_media_path(self):
+        for body in (
+            "Screenshot: /tmp/shot.png",
+            "![s](./shot.jpg)",
+            "Screenshot: $SESSION_DIR/screenshots/a.png",
+            "Recording: ~/flow.mp4",
+            "Screenshot: `/tmp/shot.png`",
+            "Recording: `flow.mp4`",
+            "![s](`./a.png`)",
+        ):
+            with self.assertRaises(ValueError, msg=body):
+                self._write(body)
+
+    def test_allows_repro_snippets_that_look_like_paths(self):
+        for body in (
+            '<img src="/missing.png" onerror="alert(1)">',
+            'Payload: `<video src="missing.mp4" onerror="alert(1)">`',
+            'Payload: `![x](./x.png)`',
+            'Payload: ``![s](`./a.png`)`` renders',
+            '```html\n<video src="missing.mp4" onerror="alert(1)">\n![x](./x.png)\n```',
+            "Payload: `<img src=/a/b.png onerror=alert(1)>` renders",
+            "```html\n<img src=\"/tmp/x/shot.png\">\n```",
+        ):
+            self.assertTrue(self._write(body), body)
+        with self.assertRaises(ValueError):
+            self._write("See /tmp/x/shot.png for the screenshot")
+
+    def test_allows_embedded_urls_and_plain_text(self):
+        self.assertTrue(self._write("![s](https://github.com/user-attachments/assets/1)"))
+        self.assertTrue(self._write("<video src=\"https://img/flow.mp4\" controls></video>"))
+        self.assertTrue(self._write("The table shows 0 results"))
+
+
+class PrepareCommandTest(unittest.TestCase):
+    def test_prepare_runs_the_path_b_pipeline(self):
+        with TemporaryDirectory() as tmp:
+            session = Path(tmp) / "session"
+            shutil.copytree(TESTER_SESSION, session)
+            out = Path(tmp) / "out"
+            result = run_cli(
+                "prepare", "--session-dir", str(session), "--out-dir", str(out), "--index", "1"
+            )
+            payload = json.loads(result.stdout)
+            self.assertIn(result.returncode, (0, 2), result.stderr)
+            self.assertTrue((out / "finding.json").exists())
+            self.assertTrue((out / "body.md").exists())
+            self.assertEqual(
+                json.loads((out / "finding.json").read_text())["source"], "exploratory-tester"
+            )
+            for key in ("pack_gaps", "deployment", "release", "sensitive"):
+                self.assertIn(key, payload)
+
+    def test_prepare_fails_cleanly_without_findings(self):
+        with TemporaryDirectory() as tmp:
+            result = run_cli("prepare", "--session-dir", tmp, "--out-dir", str(Path(tmp) / "o"))
+            self.assertNotEqual(result.returncode, 0)
+
+
+class SecurityGateRegressionTest(unittest.TestCase):
+    UI_TEXT = (
+        "Findings > Vulnerabilities table is empty",
+        "Exploit prevention toggle does not save",
+        "Potential RCE via PowerShell (prebuilt rule name)",
+        "Token: undefined after refresh",
+        "Basic configuration.settings.value is shown",
+        "api_key: ****",
+    )
+
+    def test_normal_ui_text_never_gates(self):
+        for text in self.UI_TEXT:
+            self.assertNotIn("security_issue", scan_sensitive(text), text)
+
+    def test_high_precision_patterns_still_gate(self):
+        for text in (
+            "see CVE-2024-12345",
+            "-----BEGIN RSA PRIVATE KEY-----",
+            "Authorization: Bearer abcdefghijklmnopqrstuv9",
+            "api_key=sk_live_abcdef123456",
+            "password: hunter2hunter",
+        ):
+            self.assertIn("security_issue", scan_sensitive(text), text)
+
+    def test_word_list_terms_are_hints_not_hits(self):
+        for text in self.UI_TEXT[:3] + ("a stored XSS in the rule name", "authentication bypass"):
+            self.assertEqual(scan_security_hints(text), ["security_hint"], text)
+            self.assertNotIn("security_issue", scan_sensitive(text), text)
+        self.assertEqual(scan_security_hints("Alerts table shows 0 results"), [])
+
+    def test_title_is_scanned(self):
+        gaps = check_draft(
+            body="Alerts table is empty\n",
+            title="[T] [Bug] leaks key AKIAABCDEFGHIJKLMNOP",
+            finding={},
+            config={},
+            action="comment",
+        )
+        self.assertIn("security_issue:file_in_security_team", gaps)
+
+    def test_create_without_title_is_a_gap(self):
+        gaps = check_draft(body="x\n", title=None, finding={}, config={}, action="create")
+        self.assertIn("title", gaps)
+
+    def test_cli_check_draft_needs_title_or_explicit_comment_action(self):
+        with TemporaryDirectory() as tmp:
+            body = Path(tmp) / "b.md"
+            body.write_text("Still reproducible on 9.3.0\n", encoding="utf-8")
+            forgotten = run_cli("check-draft", "--body", str(body))
+            self.assertEqual(forgotten.returncode, 1)
+            comment = run_cli("check-draft", "--body", str(body), "--action", "comment")
+            self.assertEqual(comment.returncode, 0, comment.stderr)
+
+    def test_cli_check_draft_reports_hints_without_gapping(self):
+        with TemporaryDirectory() as tmp:
+            body = Path(tmp) / "b.md"
+            body.write_text("Potential RCE via PowerShell is the rule name\n", encoding="utf-8")
+            result = run_cli("check-draft", "--body", str(body), "--action", "comment")
+            payload = json.loads(result.stdout)
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(payload["hints"], ["security_hint"])
+
+    def test_cli_scan_sensitive_hint_only_exits_zero(self):
+        result = run_cli("scan-sensitive", "--text", "Exploit prevention toggle does not save")
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(json.loads(result.stdout)["hints"], ["security_hint"])
+
+
+class LocalPathAndMediaRegressionTest(unittest.TestCase):
+    def test_relative_paths_are_caught(self):
+        for body in ("Screenshot: shot.png", "![s](screenshots/a.png)", '<video src="a.mp4" controls></video>'):
+            with self.assertRaises(ValueError, msg=body):
+                write_github(
+                    action="comment", repo="elastic/kibana", title=None, body=body,
+                    labels=[], number=1,
+                    run_gh=lambda argv: {"returncode": 0, "stdout": "u", "stderr": ""},
+                )
+
+    def test_urls_and_prose_are_not_caught(self):
+        for body in (
+            "Screenshot: https://github.com/user-attachments/assets/1",
+            "![s](https://x/y/a.png)",
+            "prose mentioning foo.mov and bar.png",
+        ):
+            write_github(
+                action="comment", repo="elastic/kibana", title=None, body=body,
+                labels=[], number=1,
+                run_gh=lambda argv: {"returncode": 0, "stdout": "https://github.com/o/r/issues/1", "stderr": ""},
+            )
+
+    def test_prose_filenames_do_not_trigger_media_review(self):
+        self.assertFalse(has_media("see foo.mov and bar.png in prose"))
+        self.assertTrue(has_media("Screenshot: shot.png"))
+
+
+class RepoAllowListTest(unittest.TestCase):
+    def _gh(self, argv):
+        return {"returncode": 0, "stdout": "https://github.com/o/r/issues/1", "stderr": ""}
+
+    def test_write_requires_a_known_repo(self):
+        for repo in ("", "someone/else", "elastic/kibana-other"):
+            with self.assertRaises(ValueError, msg=repo):
+                write_github(action="comment", repo=repo, title=None, body="x", labels=[], number=1, run_gh=self._gh)
+        write_github(action="comment", repo="elastic/security-team", title=None, body="x", labels=[], number=1, run_gh=self._gh)
+
+    def test_extra_repo_env_allows_a_scratch_repo(self):
+        os.environ["FILE_BUG_EXTRA_REPOS"] = "me/scratch"
+        try:
+            write_github(action="comment", repo="me/scratch", title=None, body="x", labels=[], number=1, run_gh=self._gh)
+        finally:
+            del os.environ["FILE_BUG_EXTRA_REPOS"]
+
+    def test_upload_requires_a_known_repo(self):
+        with self.assertRaises(ValueError):
+            upload_evidence(repo="someone/else", files=[], token="t")
+
+
+class GhOverrideIsReadOnlyTest(unittest.TestCase):
+    def test_override_blocks_write_commands(self):
+        from file_bug import _default_run_gh
+
+        os.environ["FILE_BUG_GH"] = f"{sys.executable} -c pass"
+        try:
+            blocked = _default_run_gh(["gh", "issue", "create", "--repo", "elastic/kibana"])
+            read = _default_run_gh(["gh", "search", "issues", "x"])
+        finally:
+            del os.environ["FILE_BUG_GH"]
+        self.assertEqual(blocked["returncode"], 1)
+        self.assertIn("blocked", blocked["stderr"])
+        self.assertEqual(read["returncode"], 0)
+
+
 SKILL = SKILL_ROOT / "SKILL.md"
 
 
@@ -2022,6 +2559,7 @@ class SkillProtocolTest(unittest.TestCase):
             [
                 self.skill,
                 (SKILL_ROOT / "references" / "drafting.md").read_text(encoding="utf-8"),
+                (SKILL_ROOT / "references" / "path-b.md").read_text(encoding="utf-8"),
                 (SKILL_ROOT / "templates" / "bug-report.md").read_text(encoding="utf-8"),
             ]
         )
@@ -2096,7 +2634,7 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("not already on that issue", self.text)
         self.assertIn("parse-findings.py", self.text)
         self.assertIn("from-findings", self.text)
-        self.assertIn("1-based", self.skill)
+        self.assertIn("1-based", self.text)
         self.assertIn("parse-search", self.text)
         self.assertIn("format-title", self.text)
         self.assertIn("infer-deployment", self.text)

@@ -130,6 +130,18 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       jest.useRealTimers();
     });
 
+    it('defaults startDate to 24 hours before `to` when `from` is omitted', async () => {
+      const { client, eventLogService } = createMocks();
+      const request = httpServerMock.createKibanaRequest();
+      const to = '2026-05-06T10:00:00.000Z';
+
+      await client.listExecutionHistory({ request, to });
+
+      expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ startDate: '2026-05-05T10:00:00.000Z', endDate: to })
+      );
+    });
+
     it('uses the provided `from` as the startDate lower bound', async () => {
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
@@ -465,7 +477,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           page: 1,
           perPage: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
           total: 0,
-          searchMatches: { policies: 0, rules: 0, is_truncated: false },
+          searchMatches: { policy_count: 0, rule_count: 0, is_truncated: false },
         });
       });
 
@@ -481,7 +493,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 823, rules: 0, is_truncated: true });
+        expect(result.searchMatches).toEqual({
+          policy_count: 823,
+          rule_count: 0,
+          is_truncated: true,
+        });
       });
 
       it('flags truncation and reports the rule total when matches exceed the cap', async () => {
@@ -496,7 +512,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 0, rules: 612, is_truncated: true });
+        expect(result.searchMatches).toEqual({
+          policy_count: 0,
+          rule_count: 612,
+          is_truncated: true,
+        });
       });
 
       it('reports counts within the cap without flagging truncation', async () => {
@@ -517,7 +537,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 1, rules: 500, is_truncated: false });
+        expect(result.searchMatches).toEqual({
+          policy_count: 1,
+          rule_count: 500,
+          is_truncated: false,
+        });
       });
 
       it('returns searchMatches=null when no search is provided', async () => {

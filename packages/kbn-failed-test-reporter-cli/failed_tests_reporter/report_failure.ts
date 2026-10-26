@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
+import type { ExistingFailedTestIssue, FlakySuiteIssue } from './existing_failed_test_issues';
 import {
   NOT_AVAILABLE,
   formatDurationFromTime,
@@ -15,7 +15,8 @@ import {
   formatOwners,
   getConfigPathFromCommandLine,
 } from './failure_details';
-import type { TestFailure } from './get_failures';
+import { isScoutFailure } from './failure_identity';
+import type { JUnitTestType, TestFailure } from './get_failures';
 import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssueComment } from './github_api';
@@ -44,10 +45,6 @@ export function redactSensitiveGithubFailureText(text: string): string {
     out = redactHostnameSuffix(out, suffix);
   }
   return out.replace(/\S+@elastic\.co\b/g, '<redacted>@elastic.co');
-}
-
-function isScoutFailure(failure: TestFailure): failure is ScoutTestFailureExtended {
-  return 'id' in failure && 'target' in failure && 'location' in failure;
 }
 
 function truncateFailureBody(failure: string, maxCharacters: number = 8192): string {
@@ -280,6 +277,16 @@ function createScoutBody(
   );
 }
 
+/**
+ * Distinct from the type definition so we don't silently create new GitHub
+ * labels if we add a new test framework.
+ */
+const JUNIT_FRAMEWORK_LABELS: Record<JUnitTestType, string> = {
+  ftr: 'ftr',
+  jest: 'jest',
+  cypress: 'cypress',
+};
+
 async function createJUnitFailureIssue(
   buildUrl: string,
   failure: TestFailure,
@@ -290,7 +297,9 @@ async function createJUnitFailureIssue(
 ) {
   const title = createJUnitTitle(failure, prependTitle);
   const body = createJUnitBody(failure, buildUrl, branch, pipeline);
-  const labels = ['failed-test'];
+  const labels = failure.testType
+    ? ['failed-test', JUNIT_FRAMEWORK_LABELS[failure.testType]]
+    : ['failed-test'];
 
   return await api.createIssue(title, body, labels);
 }
@@ -324,19 +333,31 @@ export async function createFailureIssue(
   }
 }
 
+/** Options of a follow-up comment. */
+interface CommentOptions {
+  /** Name the test in the first line, for an issue that tracks a whole suite */
+  nameTest?: boolean;
+}
+
+/** How a suite issue comment names the failed test: a Scout failure only knows its describe and title */
+const testLabel = (failure: TestFailure | ScoutTestFailureExtended): string =>
+  isScoutFailure(failure) ? `${failure.classname} ${failure.name}` : failure.name;
+
 function createJUnitComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
   errorMessage: ErrorMessageForComment,
-  failure?: TestFailure
+  failure?: TestFailure,
+  { nameTest }: CommentOptions = {}
 ): string {
   /*
    * The error message is only included when it has not been reported on the
    * issue before (see getErrorMessageForComment), so repeat failures with a
    * known error stay compact while genuinely new errors surface immediately.
    */
-  const buildLink = `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+  const subject = nameTest && failure ? `New failure of \`${testLabel(failure)}\`` : 'New failure';
+  const buildLink = `${subject}: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
   const prefix =
     branch === 'main' && failure ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
   return `${prefix}${renderErrorMessageSection(errorMessage)}`;
@@ -347,7 +368,8 @@ function createScoutComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
-  errorMessage: ErrorMessageForComment
+  errorMessage: ErrorMessageForComment,
+  { nameTest }: CommentOptions = {}
 ): string {
   /*
    * When there's a new error message, include it in the comment. This provides
@@ -374,7 +396,8 @@ function createScoutComment(
    * previous comment), a short note replaces the code block. When no message
    * was available to compare, only the link line is posted.
    */
-  const buildLink = `New failure for "${failure.target}" target: [${
+  const subject = nameTest ? `New failure of \`${testLabel(failure)}\`` : 'New failure';
+  const buildLink = `${subject} for "${failure.target}" target: [${
     pipeline || 'CI Build'
   } - ${branch}](${buildUrl})`;
   const prefix = branch === 'main' ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
@@ -453,4 +476,42 @@ export async function updateFailureIssue(
   } else {
     return updateJUnitFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   }
+}
+
+/**
+ * Record a failure on the flaky suite issue tracking its test, as on a per-test issue: bump the
+ * fail count, reopen the issue and comment with the build. The body text and the
+ * `flaky-test-suite` metadata belong to `report_flaky_test_issues` and are left alone, so the
+ * count lives in the `failed-test` metadata next to it.
+ */
+export async function updateSuiteIssue(
+  buildUrl: string,
+  issue: FlakySuiteIssue,
+  api: GithubApi,
+  branch: string,
+  pipeline: string,
+  failure: TestFailure | ScoutTestFailureExtended
+) {
+  const { number } = issue.github;
+  // the daily report edits the body too, so count on what github has now rather than on the
+  // ci-stats copy, which is all there is in dry-run mode
+  const body = (await api.getIssue(number))?.body ?? issue.github.body;
+  const newCount = getIssueMetadata(body, 'test.failCount', 0) + 1;
+  const newBody = updateIssueMetadata(body, { 'test.failCount': newCount });
+
+  await api.editIssueBodyAndEnsureOpen(number, newBody);
+
+  const comments = await api.getIssueComments(number);
+  const scout = isScoutFailure(failure);
+  const errorMessage = getErrorMessageForComment(
+    body,
+    comments,
+    scout ? failure.errorMessage : extractErrorMessage(failure.failure)
+  );
+  const commentText = scout
+    ? createScoutComment(failure, buildUrl, branch, pipeline, errorMessage, { nameTest: true })
+    : createJUnitComment(buildUrl, branch, pipeline, errorMessage, failure, { nameTest: true });
+  await api.addIssueComment(number, commentText);
+
+  return { newBody, newCount };
 }

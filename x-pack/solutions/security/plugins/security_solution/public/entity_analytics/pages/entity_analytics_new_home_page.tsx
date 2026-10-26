@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
 import { css } from '@emotion/react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { isNoneGroup } from '@kbn/grouping';
 import { EntityType, useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -80,6 +81,8 @@ import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import { usePinnedBarsHeight } from '../components/home/use_pinned_bars_height';
+import { GenerateAiBriefButton } from '../components/home/ai_brief/generate_ai_brief_button';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
@@ -106,7 +109,14 @@ import {
 } from '../components/home/needs_attention_tiles/hooks';
 import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
-import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
+import { getEntityAnalyticsNewHomeScopeId } from '../common/scope_time_ranges';
+import { HuntWithAiButton } from '../components/home/hunt_with_ai_button';
+import {
+  ProductTour,
+  ProductTourBanner,
+  ROWS_MODE_SELECTOR_TEST_ID,
+  useProductTour,
+} from '../components/home/product_tour';
 import {
   MAX_TILE_FILTER_ENTITY_IDS,
   getCappedTileEntityIds,
@@ -345,10 +355,13 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
-  // Flyouts opened from the table query alerts over the range it shows.
+  const productTour = useProductTour();
+  // The scope pins every time-bounded section of the flyouts opened from here (alerts, observed
+  // data, anomalies, highlights, graph) to the selected range — see `SCOPE_FLYOUT_TIME_RANGES`.
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
+  const [pinnedBarsHeight, gridAreaRef] = usePinnedBarsHeight(isGridFullScreen);
 
   const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
@@ -398,6 +411,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           entityType,
           value: entity.entityName ?? '',
           entityId: entity.entityId,
+          scopeId,
           mode: getEntityViewMode(rowMode),
         });
       },
@@ -903,6 +917,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        entityIds: severeAlertsEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
@@ -936,6 +952,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        entityIds: anomaliesEntityIds,
+        // Without ML jobs the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
         noDataMessage: !canReadAnomalies
           ? NO_ANOMALIES_ACCESS_MESSAGE
           : anomaliesTimedOut
@@ -974,6 +993,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
+        entityIds: riskMoversEntityIds,
+        isUnavailable: Boolean(riskMoversError),
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : riskMoversTimedOut
@@ -1011,6 +1032,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
+        entityIds: newlyHCEntityIds,
+        isUnavailable: Boolean(newlyHCError),
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : newlyHCTimedOut
@@ -1050,6 +1073,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        entityIds: watchlistedEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
@@ -1079,6 +1104,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        entityIds: newEntityEntityIds,
+        isUnavailable: Boolean(newEntityError),
         noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -1096,6 +1123,17 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       },
     ],
     [
+      severeAlertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+      alertBasedError,
+      anomaliesError,
+      riskMoversError,
+      newlyHCError,
+      newEntityError,
       canReadAlerts,
       canReadAnomalies,
       canReadRisk,
@@ -1145,6 +1183,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   );
 
   const onGroupChange = useCallback((key: string) => {
+    // Grouping unmounts the grid, and EUI doesn't report leaving full screen when it unmounts.
+    if (key !== 'none') setIsGridFullScreen(false);
     setGroupsSelected((prev) => {
       if (key === 'none') return ['none'];
       const cleaned = prev.filter((g) => g !== 'none');
@@ -1194,7 +1234,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             options={ROWS_OPTIONS}
             selectedKey={rowsMode}
             onChange={onRowsModeChange}
-            data-test-subj="eaRowsModeSelector"
+            data-test-subj={ROWS_MODE_SELECTOR_TEST_ID}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -1225,15 +1265,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   return (
     <>
-      <div className="entityAnalyticsPageHeader" css={isGridFullScreen ? hiddenCss : undefined}>
-        <EntityAnalyticsHomeHeader />
-      </div>
+      {/* Unwrapped: a wrapper would stop the header from sticking. */}
+      {!isGridFullScreen && <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />}
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           className="entityAnalyticsSearchSection"
           css={[
             css`
               padding-block-start: ${euiTheme.size.s};
+              padding-inline: ${euiTheme.size.base};
               display: flex;
               flex-direction: column;
               height: 100%;
@@ -1241,6 +1281,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             isGridFullScreen && hiddenCss,
           ]}
         >
+          {productTour.isBannerVisible && (
+            <>
+              <ProductTourBanner
+                onStartTour={productTour.startTour}
+                onDismiss={productTour.dismissBanner}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           {/* SiemSearchBar has internal left padding; pull it left so its content aligns with the page edge */}
           <div
             css={css`
@@ -1267,11 +1316,21 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
           <EuiSpacer size="m" />
 
-          <div
-            css={css`
-              padding-inline: ${euiTheme.size.base};
-            `}
-          >
+          <div>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <GenerateAiBriefButton
+                  cards={signalCards}
+                  timeRange={timeRange}
+                  entityFilters={entityFilters}
+                  focusTileId={activeTile ?? undefined}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <HuntWithAiButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
             <SignalCards
               activeTile={activeTile}
               cards={signalCards}
@@ -1283,10 +1342,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         <EuiSpacer size="m" />
 
         <div
-          css={css`
-            padding-inline: ${euiTheme.size.base};
-            padding-block-end: ${euiTheme.size.base};
-          `}
+          ref={gridAreaRef}
+          css={[
+            css`
+              padding-inline: ${euiTheme.size.base};
+            `,
+            // Scrolled to, the grid fills the view between the pinned bars; groups keep their
+            // natural height.
+            !isGroupSelected && kbnFullBodyHeightCss(`${pinnedBarsHeight}px`),
+          ]}
         >
           <DataViewContext.Provider value={dataViewContextValue}>
             {isGroupSelected ? (
@@ -1325,6 +1389,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           </DataViewContext.Provider>
         </div>
       </SecuritySolutionPageWrapper>
+      {/* Full screen hides the tour's anchors; the tour picks up at the same step on exit. */}
+      {!isGridFullScreen && (
+        <ProductTour
+          steps={productTour.steps}
+          currentStep={productTour.currentStep}
+          onNext={productTour.nextStep}
+          onEnd={productTour.endTour}
+        />
+      )}
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );

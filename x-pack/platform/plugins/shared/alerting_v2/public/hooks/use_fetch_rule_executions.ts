@@ -27,6 +27,7 @@ export interface ListRuleExecutionsUiParams {
   sortField?: 'startedAt' | 'duration';
   sortOrder?: 'asc' | 'desc';
   enabled?: boolean;
+  keepPreviousData?: boolean;
 }
 
 const SORT_FIELD_BY_UI_FIELD = {
@@ -48,7 +49,9 @@ export const toListRuleExecutionsRequest = ({
   sortField,
   sortOrder,
   ...rest
-}: Omit<ListRuleExecutionsUiParams, 'enabled'>): Complete<Partial<ListRuleExecutionsRequest>> => {
+}: Omit<ListRuleExecutionsUiParams, 'enabled' | 'keepPreviousData'>): Complete<
+  Partial<ListRuleExecutionsRequest>
+> => {
   assertAllFieldsMapped(rest);
   return {
     page,
@@ -65,6 +68,7 @@ export const toListRuleExecutionsRequest = ({
 
 export const useFetchRuleExecutions = ({
   enabled = true,
+  keepPreviousData = true,
   ...params
 }: ListRuleExecutionsUiParams) => {
   const api = useService(ExecutionHistoryApi);
@@ -73,7 +77,7 @@ export const useFetchRuleExecutions = ({
     queryKey: ruleExecutionKeys.list(params),
     queryFn: () => api.listRuleExecutions(toListRuleExecutionsRequest(params)),
     refetchOnWindowFocus: false,
-    keepPreviousData: true,
+    keepPreviousData,
     enabled,
   });
 };

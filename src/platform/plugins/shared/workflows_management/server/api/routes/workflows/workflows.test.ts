@@ -10,6 +10,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import {
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
@@ -561,6 +562,28 @@ describe('Workflow routes', () => {
         acknowledgeAclLoss: true,
       });
       expect(response.ok).toHaveBeenCalledWith();
+    });
+
+    it('should answer a delete that matched no workflow with a not-found error', async () => {
+      mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 0, failures: [] });
+      jest.spyOn(mockAudit, 'logWorkflowDeleted');
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        query: { force: false, acknowledgeAclLoss: false },
+      });
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), request, response);
+
+      const error = new WorkflowNotFoundError('wf-1');
+      expect(handleRouteError).toHaveBeenCalledWith(response, error);
+      expect(mockAudit.logWorkflowDeleted).toHaveBeenCalledTimes(1);
+      expect(mockAudit.logWorkflowDeleted).toHaveBeenCalledWith(request, {
+        id: 'wf-1',
+        force: false,
+        error,
+      });
+      expect(response.ok).not.toHaveBeenCalled();
     });
   });
 
