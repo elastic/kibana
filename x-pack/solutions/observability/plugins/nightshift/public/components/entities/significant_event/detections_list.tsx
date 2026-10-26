@@ -37,7 +37,7 @@ import {
   type OccurrencePoint,
 } from '../detection/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
-
+import { SkippedDetectionBadge } from '../detection/skipped_detection';
 import { nightshiftBackgroundTransition } from '../../../common/transition';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 
@@ -205,6 +205,11 @@ function DetectionCard({
                 {detection.change_point_type && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="default">{changePointLabel}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {detection.skip && (
+                  <EuiFlexItem grow={false}>
+                    <SkippedDetectionBadge skip={detection.skip} />
                   </EuiFlexItem>
                 )}
                 {visibleEntityLabels.map((label) => (
