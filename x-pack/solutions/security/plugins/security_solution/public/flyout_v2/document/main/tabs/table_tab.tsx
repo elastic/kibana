@@ -122,18 +122,13 @@ export interface TableTabProps {
    */
   scopeId?: string;
   /**
-   * Whether the flyout is opened in rule preview
-   */
-  isRulePreview?: boolean;
-  /**
    * Wraps each value cell with cell actions (filter for/out, copy, etc.). The caller decides
    * what to inject (real security cell actions in Security Solution, no-op elsewhere).
    */
   renderCellActions: CellActionRenderer;
   /**
    * Optional wrapper that turns supported field values (host, ip, rule) into links that open the
-   * relevant system flyout. Injected by the new flyout; when omitted (legacy expandable flyout),
-   * the value cell keeps using the `PreviewLink` preview panel.
+   * relevant system flyout. When omitted, the value cell falls back to the `PreviewLink` preview panel.
    */
   renderFlyoutLink?: OpenFlyoutLinkRenderer;
 }
@@ -142,13 +137,7 @@ export interface TableTabProps {
  * Table view displayed in the document details flyout Table tab
  */
 export const TableTab = memo(
-  ({
-    hit,
-    scopeId = '',
-    isRulePreview = false,
-    renderCellActions,
-    renderFlyoutLink,
-  }: TableTabProps) => {
+  ({ hit, scopeId = '', renderCellActions, renderFlyoutLink }: TableTabProps) => {
     const smallFontSize = useEuiFontSize('xs').fontSize;
     const { euiTheme } = useEuiTheme();
     const {
@@ -367,7 +356,6 @@ export const TableTab = memo(
           scopeId,
           getLinkValue,
           ruleId,
-          isRulePreview,
           onTogglePinned,
           entityId,
           renderCellActions,
@@ -381,7 +369,6 @@ export const TableTab = memo(
         scopeId,
         getLinkValue,
         ruleId,
-        isRulePreview,
         onTogglePinned,
         renderCellActions,
         hit,

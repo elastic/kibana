@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
 
 export function toQuery(search?: string) {
-  return search ? parse(search.slice(1), { sort: false }) : {};
+  return search ? queryString.parse(search.slice(1), { sort: false }) : {};
 }
 
 export function fromQuery(query: Record<string, any>) {
@@ -17,5 +17,5 @@ export function fromQuery(query: Record<string, any>) {
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
 
-  return stringify(encodedQuery, { sort: false, encode: false });
+  return queryString.stringify(encodedQuery, { sort: false, encode: false });
 }

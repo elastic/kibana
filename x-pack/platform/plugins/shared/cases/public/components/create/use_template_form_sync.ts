@@ -16,6 +16,7 @@ import type { CaseConnectorWithoutName } from '../../../common/types/domain_zod/
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
 import {
   buildExtendedFieldsDefaults,
+  excludeRefFieldsToDefinitions,
   resolveTemplateFields,
 } from '../../../common/utils/template_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
@@ -154,6 +155,9 @@ interface UseTemplateFormSyncReturn {
   isLoading: boolean;
 }
 
+// Stable default so omitting the parameter never changes the effect's dependency identity.
+const EMPTY_EXCLUDED_REF_NAMES: ReadonlySet<string> = new Set();
+
 /**
  * Syncs the selected template into the create-case form.
  *
@@ -164,10 +168,17 @@ interface UseTemplateFormSyncReturn {
  *   parent's `extendedFields` field by that component.
  * - `globalFieldKeys` contains the snake_case keys of `isGlobal` field
  *   definitions; their values are preserved across template changes and resets.
+ * - `excludedLinkedRefNames` contains the normalized names of field definitions whose linked
+ *   legacy custom field is currently rendered as an input on this form. Template `$ref`s to
+ *   them are dropped before default resolution — the legacy control is the single source of
+ *   input for those fields, and writing their template defaults into `extendedFields` would
+ *   submit a second value the server rejects as a dual-input conflict. The set participates in
+ *   the applied-template identity so a legacy-visibility change re-syncs the form.
  */
 export const useTemplateFormSync = (
   innerForm: UseFormReturn,
-  globalFieldKeys: ReadonlySet<string>
+  globalFieldKeys: ReadonlySet<string>,
+  excludedLinkedRefNames: ReadonlySet<string> = EMPTY_EXCLUDED_REF_NAMES
 ): UseTemplateFormSyncReturn => {
   const { setFieldValue, updateFieldValues } = useFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
@@ -213,7 +224,11 @@ export const useTemplateFormSync = (
     }
 
     const { definition } = template;
-    const key = `${template.templateId}:${template.templateVersion}`;
+    // The exclusion set is part of the applied identity: when legacy custom-field visibility
+    // changes (e.g. the forced-on switch resolves after the configuration loads), the same
+    // template must re-sync so excluded defaults are removed from — or restored to — the form.
+    const exclusionIdentity = [...excludedLinkedRefNames].sort().join('|');
+    const key = `${template.templateId}:${template.templateVersion}:${exclusionIdentity}`;
     if (appliedRef.current === key) {
       return;
     }
@@ -252,9 +267,12 @@ export const useTemplateFormSync = (
       didApplyConnectorRef
     );
 
-    // Resolve all fields — inline fields pass through, ref fields are looked up in the library
+    // Resolve all fields — inline fields pass through, ref fields are looked up in the library.
+    // `$ref`s to legacy-visible linked definitions are dropped first (see the hook doc): their
+    // input lives in the legacy custom-fields section, so no default may be written for them.
     const libraryDefs = fieldDefsData?.fieldDefinitions ?? [];
-    const resolvedFields = resolveTemplateFields(definition.fields ?? [], libraryDefs);
+    const syncableFields = excludeRefFieldsToDefinitions(definition.fields, excludedLinkedRefNames);
+    const resolvedFields = resolveTemplateFields(syncableFields, libraryDefs);
     const nextExtended = buildExtendedFieldsDefaults(resolvedFields);
     // Preserve current values for global fields when template changes.
     innerForm.reset({
@@ -273,6 +291,7 @@ export const useTemplateFormSync = (
     fieldDefsData,
     isLoadingFieldDefs,
     globalFieldKeys,
+    excludedLinkedRefNames,
     connectors,
     isLoadingConnectors,
   ]);

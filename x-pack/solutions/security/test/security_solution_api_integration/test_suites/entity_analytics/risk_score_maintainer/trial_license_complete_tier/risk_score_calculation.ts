@@ -14,7 +14,6 @@ import {
   createAndSyncRuleAndAlertsFactory,
   readRiskScores,
   normalizeScores,
-  waitForRiskScoresToBePresent,
   waitForRiskScoreForId,
   EntityStoreUtils,
   entityMaintainerRouteHelpersFactory,
@@ -27,7 +26,6 @@ import {
   riskScoreMaintainerScenarioFactory,
   riskScoreMaintainerEntityBuilders,
   waitForEntityScoreResetToZero,
-  waitForEntityStoreEntities,
   indexListOfDocumentsFactory,
   waitForEntityStoreDoc,
   setupMaintainerLogsDataStream,
@@ -111,7 +109,10 @@ export default ({ getService }: FtrProviderContext): void => {
       it('calculates and persists risk score for a single host entity', async () => {
         const documentId = uuidv4();
         const { documentIds, testEntities } = await maintainerScenario.seedEntities([
-          riskScoreMaintainerEntityBuilders.host({ hostName: 'host-1', documentId }),
+          riskScoreMaintainerEntityBuilders.host({
+            hostName: `host-single-${uuidv4().slice(0, 8)}`,
+            documentId,
+          }),
         ]);
         const [host] = testEntities;
         await maintainerScenario.createAlertsForDocumentIds({
@@ -157,7 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           await maintainerScenario.installAndRunMaintainer({ dataViewPattern: testLogsIndex });
-          await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
+          await waitForRiskScoreForId({ es, log, idValue: host.expectedEuid });
 
           const rawScores = await readRiskScores(es);
           const ecsDoc = rawScores.find((s) => s.host?.risk?.id_value === host.expectedEuid);
@@ -224,7 +225,6 @@ export default ({ getService }: FtrProviderContext): void => {
             entityTypes: ['user', 'host'],
             dataViewPattern: testLogsIndex,
           });
-          await waitForEntityStoreEntities({ es, log, count: 1 });
 
           // Set up both modifiers while the maintainer runs freely in the
           // background. Any scoring runs that happen before both modifiers
@@ -322,8 +322,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('calculates risk scores for hosts and users together', async () => {
         const { documentIds, testEntities } = await maintainerScenario.seedEntities([
-          riskScoreMaintainerEntityBuilders.host({ hostName: 'host-1' }),
-          riskScoreMaintainerEntityBuilders.idpUser({ userName: 'user-1' }),
+          riskScoreMaintainerEntityBuilders.host({ hostName: `host-pair-${uuidv4().slice(0, 8)}` }),
+          riskScoreMaintainerEntityBuilders.idpUser({
+            userName: `user-pair-${uuidv4().slice(0, 8)}`,
+          }),
         ]);
         const [host, idpUser] = testEntities;
         await maintainerScenario.createAlertsForDocumentIds({
@@ -331,8 +333,22 @@ export default ({ getService }: FtrProviderContext): void => {
           alerts: 2,
           riskScore: 21,
         });
-        await maintainerScenario.installAndRunMaintainer({ dataViewPattern: testLogsIndex });
-        await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 });
+
+        // Install separately so we can wait for both entities to be extracted
+        // before running the maintainer. installAndRunMaintainer only waits for
+        // count:1 entity internally, so the IdP user can lag behind the host and
+        // the maintainer runs before it is scored.
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+        });
+        await waitForEntityStoreDoc({ es, retry, entityId: host.expectedEuid });
+        await waitForEntityStoreDoc({ es, retry, entityId: idpUser.expectedEuid });
+        await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        await waitForRiskScoreForId({ es, log, idValue: host.expectedEuid });
+        await waitForRiskScoreForId({ es, log, idValue: idpUser.expectedEuid });
 
         const scores = await readRiskScores(es);
         const normalized = normalizeScores(scores);

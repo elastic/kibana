@@ -48,7 +48,7 @@ export interface ToolsFlyoutHeaderProps {
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
   ({ title, onTitleClick, label, iconType, badge, timestamp }) => {
     const { euiTheme } = useEuiTheme();
-    const showSourceContext = !!onTitleClick && !!label && !!iconType;
+    const showSourceContext = !!label && !!iconType;
 
     return (
       <EuiFlexGroup
@@ -56,7 +56,7 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
         alignItems="center"
         gutterSize="m"
         responsive={false}
-        css={{ flexWrap: 'nowrap' }}
+        css={{ flexWrap: 'nowrap', paddingRight: 0 }}
         data-test-subj={TOOLS_FLYOUT_HEADER_TEST_ID}
       >
         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>

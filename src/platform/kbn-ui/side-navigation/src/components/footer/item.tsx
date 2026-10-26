@@ -107,10 +107,11 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
         align-items: center;
         gap: ${euiTheme.size.s};
       `;
-      const tooltipContent = badgeType ? (
+      const tooltipBadgeType = badgeType === 'new' && !isNew ? undefined : badgeType;
+      const tooltipContent = tooltipBadgeType ? (
         <span css={tooltipStyles}>
           {label}
-          <BetaBadge type={badgeType} isInverted />
+          <BetaBadge type={tooltipBadgeType} isInverted />
         </span>
       ) : (
         label

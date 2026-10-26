@@ -272,12 +272,12 @@ describe('ApiKeyService', () => {
       const err = new Error('bulkCreate failed');
       invalidationSavedObjectsClient.bulkCreate = jest.fn().mockRejectedValue(err);
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
-      const apiKeys = [Buffer.from('123').toString('base64')];
+      const apiKeys = [Buffer.from('123:secret').toString('base64')];
 
       await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toBeUndefined();
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to bulk mark list of API keys ["MTIz"] for invalidation: bulkCreate failed',
+        'Failed to bulk mark list of API keys ["123"] for invalidation: bulkCreate failed',
         { error: { stack_trace: err.stack } }
       );
     });

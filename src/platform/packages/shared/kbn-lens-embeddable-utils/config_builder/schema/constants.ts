@@ -8,9 +8,7 @@
  */
 
 // @TODO: move it to shared type/values package
-export const LENS_HISTOGRAM_GRANULARITY_DEFAULT_NUMERIC_VALUE = 5;
 export const LENS_HISTOGRAM_GRANULARITY_MIN = 1;
-export const LENS_HISTOGRAM_GRANULARITY_MAX = 7;
 export const LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE = 'auto';
 export const LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT = true;
 
@@ -19,6 +17,9 @@ export const LENS_TERMS_MISSING_BUCKET_DEFAULT = false;
 
 export const LENS_FORMAT_NUMBER_DECIMALS_DEFAULT = 2;
 export const LENS_FORMAT_COMPACT_DEFAULT = false;
+
+export const LENS_FORMAT_DURATION_DECIMALS_DEFAULT = 0;
+export const LENS_FORMAT_DURATION_COMPACT_DEFAULT = true;
 
 /** Default source unit in Lens as code API (`from`). */
 export const LENS_DURATION_API_INPUT_UNIT_DEFAULT = 's';

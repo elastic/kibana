@@ -7,13 +7,15 @@
 
 import type { FlattenRecord } from '@kbn/streams-schema';
 import {
-  flattenRecord,
+  MAX_STREAM_NAME_LENGTH,
+  boundedFlattenRecord,
+  boundedNamedFieldDefinitionSchema,
   isEnabledFailureStore,
-  namedFieldDefinitionConfigSchema,
 } from '@kbn/streams-schema';
 import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { z } from '@kbn/zod/v4';
-import { streamlangDSLSchema } from '@kbn/streamlang';
+import { streamlangDSLSchema, isConditionBlock } from '@kbn/streamlang';
+import type { StreamlangDSL } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
@@ -41,12 +43,63 @@ import type { FailureStoreSamplesResponse } from './failure_store_samples_handle
 import { getFailureStoreSamples } from './failure_store_samples_handler';
 import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
+type StreamlangStep = StreamlangDSL['steps'][number];
+
+const MAX_DSL_STEPS_TOTAL = 500;
+// Depth cap runs on the raw (pre-parse) value so deeply nested payloads are rejected
+// before streamlangDSLSchema's recursive z.lazy() evaluation begins.
+const MAX_DSL_NESTING_DEPTH = 30;
+
+function rawNestingDepthOk(val: unknown, depth: number): boolean {
+  if (depth > MAX_DSL_NESTING_DEPTH) return false;
+  if (Array.isArray(val)) return val.every((item) => rawNestingDepthOk(item, depth + 1));
+  if (val !== null && typeof val === 'object')
+    return Object.values(val as Record<string, unknown>).every((v) =>
+      rawNestingDepthOk(v, depth + 1)
+    );
+  return true;
+}
+
+function countDSLSteps(steps: StreamlangStep[], acc: number): number {
+  for (const step of steps) {
+    if (++acc > MAX_DSL_STEPS_TOTAL) return acc;
+    if (isConditionBlock(step)) {
+      acc = countDSLSteps(step.condition.steps, acc);
+      if (step.condition.else) acc = countDSLSteps(step.condition.else, acc);
+    }
+  }
+  return acc;
+}
+
+// z.preprocess throws bubble past safeParse in Zod v4. Use superRefine + pipe instead
+// so depth failures produce a proper 400 ZodIssue, not an uncaught 500.
+const boundedStreamlangDSLSchema = z
+  .unknown()
+  .superRefine((val, ctx) => {
+    if (!rawNestingDepthOk(val, 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Processing DSL exceeds maximum nesting depth of ${MAX_DSL_NESTING_DEPTH}`,
+      });
+    }
+  })
+  .pipe(
+    streamlangDSLSchema.superRefine((val, ctx) => {
+      if (countDSLSteps(val.steps, 0) > MAX_DSL_STEPS_TOTAL) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Processing DSL exceeds maximum of ${MAX_DSL_STEPS_TOTAL} total steps`,
+        });
+      }
+    })
+  ) as z.ZodType<StreamlangDSL>;
+
 const paramsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
-    processing: streamlangDSLSchema,
-    documents: z.array(flattenRecord),
-    detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
+    processing: boundedStreamlangDSLSchema,
+    documents: z.array(boundedFlattenRecord).max(1000),
+    detected_fields: z.array(boundedNamedFieldDefinitionSchema).max(1000).optional(),
   }),
 }) satisfies z.Schema<ProcessingSimulationParams>;
 
@@ -265,12 +318,12 @@ export const processingDateSuggestionsRoute = createServerRoute({
 });
 
 const failureStoreSamplesParamsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   query: z
     .object({
       size: z.coerce.number().optional(),
-      start: z.string().optional(),
-      end: z.string().optional(),
+      start: z.string().max(64).optional(),
+      end: z.string().max(64).optional(),
     })
     .optional(),
 });

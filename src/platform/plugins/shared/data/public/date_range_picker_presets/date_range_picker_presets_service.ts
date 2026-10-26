@@ -15,7 +15,8 @@ import {
   DEFAULT_STORED_PRESETS,
   MAX_PRESETS,
   getPresetKey,
-  normalize,
+  mergePresets,
+  migrateStoredPresets,
   type DateRangePickerPresetsService as IDateRangePickerPresetsService,
   type PresetItem,
   type SavePresetOutcome,
@@ -37,12 +38,16 @@ const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
 });
 
 /**
- * Owns date range presets end to end: the quick-ranges defaults (from the
+ * Owns date range presets end to end: the locked quick ranges (from the
  * `timepicker:quickRanges` uiSetting this plugin registers), the space-scoped
  * `userStorage` overrides (under {@link DATE_RANGE_PICKER_PRESETS_KEY}), and the
  * dedupe/cap rules. Exposed as `data.dateRangePickerPresets` so consumers depend
  * on the storage-agnostic {@link IDateRangePickerPresetsService} contract rather
  * than on `userStorage`/`uiSettings` directly.
+ *
+ * Storage holds the user's own presets only. The quick ranges are merged in on
+ * every read, so they stay administrator-owned: not editable here, and picked up
+ * as soon as the uiSetting changes.
  */
 export class DateRangePickerPresetsService implements IDateRangePickerPresetsService {
   private readonly userStorage: CoreStart['userStorage'];
@@ -62,7 +67,13 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
   public getPresets$(): Observable<PresetItem[]> {
     return this.userStorage
       .get$<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, DEFAULT_STORED_PRESETS)
-      .pipe(map((stored) => normalize(stored).presets ?? this.getDefaultPresets()));
+      .pipe(
+        map((stored) => {
+          const defaultPresets = this.getDefaultPresets();
+
+          return mergePresets(migrateStoredPresets(stored, defaultPresets).presets, defaultPresets);
+        })
+      );
   }
 
   public getCanWrite$(): Observable<boolean> {
@@ -70,30 +81,34 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
   }
 
   public async savePreset(preset: PresetItem): Promise<SavePresetOutcome> {
-    const base = this.getMutationBase();
     const presetKey = getPresetKey(preset);
+    const base = this.getMutationBase();
+    const matchesExistingPreset = [...base, ...this.getDefaultPresets()].some(
+      (item) => getPresetKey(item) === presetKey
+    );
 
-    if (base.some((item) => getPresetKey(item) === presetKey)) {
-      return 'duplicate';
-    }
+    if (matchesExistingPreset) return 'duplicate';
+    if (base.length >= MAX_PRESETS) return 'limit-reached';
 
-    if (base.length >= MAX_PRESETS) {
-      return 'limit-reached';
-    }
-
-    await this.persist([...base, preset]);
+    // Stored newest first, so a saved preset lands at the top of the displayed list.
+    await this.persist([preset, ...base]);
     return 'saved';
   }
 
   public async deletePreset(preset: PresetItem): Promise<void> {
     const presetKey = getPresetKey(preset);
-    const next = this.getMutationBase().filter((item) => getPresetKey(item) !== presetKey);
+    const base = this.getMutationBase();
+    const next = base.filter((item) => getPresetKey(item) !== presetKey);
+
+    // A quick range is never stored, so there is nothing to remove and no reason to write.
+    if (next.length === base.length) return;
+
     await this.persist(next);
   }
 
   /**
-   * Current presets used as the base for a mutation, read synchronously from
-   * the local cache via `peek`.
+   * The user's own presets, used as the base for a mutation, read synchronously
+   * from the local cache via `peek`.
    *
    * NOTE: with the `preload: false` key, `peek` returns the unseeded default
    * until the lazy fetch triggered by `getPresets$` hydrates the cache — so a
@@ -103,16 +118,17 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
    * one-spot change.
    */
   private getMutationBase(): PresetItem[] {
-    const cached = normalize(
-      this.userStorage.peek<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, DEFAULT_STORED_PRESETS)
+    const stored = this.userStorage.peek<StoredPresets>(
+      DATE_RANGE_PICKER_PRESETS_KEY,
+      DEFAULT_STORED_PRESETS
     );
 
-    return cached.presets ?? this.getDefaultPresets();
+    return migrateStoredPresets(stored, this.getDefaultPresets()).presets;
   }
 
   private async persist(presets: PresetItem[]): Promise<void> {
     await this.userStorage.set<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, {
-      version: 1,
+      version: 2,
       presets: presets.map(toPresetItem),
     });
   }

@@ -150,6 +150,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
   }
 
+  public async pressDelete(times: number = 1) {
+    const textArea = await this.getTextArea();
+    for (let i = 0; i < times; i++) {
+      await textArea.pressKeys(Key.DELETE);
+    }
+  }
+
   public async pressCtrlSpace() {
     const textArea = await this.getTextArea();
     await textArea.pressKeys([
@@ -204,6 +211,18 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys([selectionKey, 'a']);
   }
 
+  public async getSelectedRequestsCount() {
+    const container = await this.testSubjects.find('consoleMonacoEditorContainer');
+    const count = await container.getAttribute('data-currently-selected-requests');
+    return Number(count ?? 0);
+  }
+
+  public async waitForSelectedRequestsCount(expectedCount: number) {
+    await this.retry.waitFor(`editor to recognize ${expectedCount} selected requests`, async () => {
+      return (await this.getSelectedRequestsCount()) === expectedCount;
+    });
+  }
+
   public async getEditor() {
     return await this.testSubjects.find('consoleMonacoEditor');
   }
@@ -248,18 +267,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickPlayAndWaitForResults() {
-    // Retry the Play click until the request starts. A single click can be a no-op if the editor
-    // hasn't finished registering the current request (see #240147).
-    await this.retry.try(async () => {
-      await this.clickPlay();
-      const started =
-        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
-        (await this.testSubjects.exists('consoleRequestInProgressBadge')) ||
-        (await this.testSubjects.exists('consoleMonacoOutput'));
-      if (!started) throw new Error('Console request did not start after clicking Play');
-    });
-
-    // Wait for loading indicators to clear and output to be present.
+    // Play lives in an overlay that is only visible once the editor has registered a request under
+    // the cursor (#240147). Clicking moves focus off the editor, which hides the overlay, so the
+    // click must not be retried.
+    await this.testSubjects.existOrFail('sendRequestButton', { timeout: 20_000 });
+    await this.clickPlay();
     await this.waitForRequestToComplete();
   }
 
@@ -487,15 +499,23 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+    const tourShown = await this.testSubjects.waitForExists('consoleSkipTourButton', {
+      timeout: 2000,
+    });
     if (tourShown) {
       await this.clickSkipTour();
     }
   }
 
   public async clickContextMenu() {
-    const contextMenu = await this.testSubjects.find('toggleConsoleMenu');
-    await contextMenu.click();
+    if (await this.isContextMenuOpen()) return;
+    await this.retry.tryForTime(5000, async () => {
+      const contextMenu = await this.testSubjects.find('toggleConsoleMenu', 1000);
+      await contextMenu.scrollIntoViewIfNecessary();
+      await contextMenu.moveMouseTo();
+      await contextMenu.click();
+      await this.testSubjects.existOrFail('consoleMenu', { timeout: 1500 });
+    });
   }
 
   public async isContextMenuOpen() {

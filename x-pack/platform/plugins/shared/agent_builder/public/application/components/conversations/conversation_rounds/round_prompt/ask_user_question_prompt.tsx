@@ -161,12 +161,9 @@ export const AskUserQuestionPrompt = (props: AskUserQuestionPromptProps) => {
                 <EuiIcon type="pencil" size="m" color="subdued" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
-                {/* Intentional: this field is only ever reached by selecting the custom
-                    option above (or restored on Back) — it must not be a stray Tab stop. */}
-                {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element */}
                 <EuiFieldText
                   inputRef={refs.customInputRef}
-                  tabIndex={-1}
+                  tabIndex={isCustomActive ? 0 : -1}
                   value={currentDraft.custom ?? ''}
                   placeholder={labels.customPlaceholder}
                   onChange={(e) => handlers.handleCustomChange(e.target.value)}

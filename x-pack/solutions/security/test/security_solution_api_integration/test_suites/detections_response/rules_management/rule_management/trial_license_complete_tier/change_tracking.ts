@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { range } from 'lodash';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import {
@@ -22,6 +23,7 @@ import {
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   getCustomQueryRuleParams,
+  importRulesWithSuccess,
   installPrebuiltRules,
   performUpgradePrebuiltRules,
   refreshChangeHistory,
@@ -269,10 +271,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('records rule_import when importing a new rule', async () => {
         const ruleId = 'import-action-test-rule';
-        const ndjson = combineToNdJson(getCustomQueryRuleParams({ rule_id: ruleId }));
+        const ndjson = combineToNdJson(
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            name: 'Imported custom rule',
+            enabled: false,
+          })
+        );
 
         await detectionsApi
-          .importRules({ query: { overwrite: true } })
+          .importRules({ query: { overwrite: false } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -285,17 +293,99 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.items).toHaveLength(1);
-        expect(body.items[0].action).toBe('rule_import');
+
+        const [item] = body.items;
+        expect(item.action).toBe('rule_import');
+        expect(item.user).toEqual({ name: 'elastic' });
+        expect(item.old_values).toBeNull();
+        expect(item.metadata?.bulk_count).toBe(1);
+        expect(item.rule).toMatchObject({
+          id: rule.id,
+          rule_id: ruleId,
+          name: 'Imported custom rule',
+          revision: 0,
+          enabled: false,
+          immutable: false,
+          rule_source: { type: 'internal' },
+        });
+        // Fresh create/import stamps created_at === updated_at on the snapshot.
+        expect(item.rule.created_at).toBe(item.rule.updated_at);
+      });
+
+      it('records rule_import when importing a prebuilt rule', async () => {
+        const ruleId = 'import-prebuilt-action-test-rule';
+        const asset = createRuleAssetSavedObject({
+          rule_id: ruleId,
+          version: 1,
+          name: 'Prebuilt import history rule',
+        });
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [asset]);
+
+        const ndjson = combineToNdJson({
+          ...asset['security-rule'],
+          immutable: true,
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+            customized_fields: [],
+            has_base_version: true,
+          },
+        });
+
+        await detectionsApi
+          .importRules({ query: { overwrite: false } })
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(200);
+
+        const { body: rule } = await detectionsApi.readRule({ query: { rule_id: ruleId } });
+
+        await refreshChangeHistory(es);
+
+        const { body } = await detectionsApi
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+          .expect(200);
+
+        expect(body.items).toHaveLength(1);
+
+        const [item] = body.items;
+        expect(item.action).toBe('rule_import');
+        expect(item.user).toEqual({ name: 'elastic' });
+        expect(item.old_values).toBeNull();
+        expect(item.metadata?.bulk_count).toBe(1);
+        expect(item.rule).toMatchObject({
+          id: rule.id,
+          rule_id: ruleId,
+          name: 'Prebuilt import history rule',
+          revision: 0,
+          immutable: true,
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+            customized_fields: [],
+            has_base_version: true,
+          },
+        });
+        expect(item.rule.created_at).toBe(item.rule.updated_at);
       });
 
       it('records rule_import when overwriting an existing rule', async () => {
         const ruleId = 'overwrite-action-test-rule';
         const { body: rule } = await detectionsApi
-          .createRule({ body: getCustomQueryRuleParams({ rule_id: ruleId }) })
+          .createRule({
+            body: getCustomQueryRuleParams({
+              rule_id: ruleId,
+              name: 'Before import overwrite',
+              enabled: false,
+            }),
+          })
           .expect(200);
 
         const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({ rule_id: ruleId, name: 'overwritten name' })
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            name: 'overwritten name',
+            enabled: false,
+          })
         );
 
         await detectionsApi
@@ -310,7 +400,34 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // Most recent event (index 0) is the import overwrite; index 1 is the original create.
-        expect(body.items[0].action).toBe('rule_import');
+        expect(body.total).toBe(2);
+        expect(body.items).toHaveLength(2);
+
+        const [imported, created] = body.items;
+        expect(imported.action).toBe('rule_import');
+        expect(imported.user).toEqual({ name: 'elastic' });
+        expect(imported.metadata?.bulk_count).toBe(1);
+        expect(imported.rule).toMatchObject({
+          id: rule.id,
+          rule_id: ruleId,
+          name: 'overwritten name',
+          revision: 1,
+          enabled: false,
+        });
+        expect(imported.old_values).toMatchObject({
+          name: 'Before import overwrite',
+          revision: 0,
+        });
+        expect(imported.rule.created_at).not.toBe(imported.rule.updated_at);
+
+        expect(created.action).toBe('rule_create');
+        expect(created.old_values).toBeNull();
+        expect(created.rule).toMatchObject({
+          id: rule.id,
+          rule_id: ruleId,
+          name: 'Before import overwrite',
+          revision: 0,
+        });
       });
 
       it('records rule_install when installing a prebuilt rule', async () => {
@@ -511,7 +628,98 @@ export default ({ getService }: FtrProviderContext): void => {
           .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
           .expect(200);
 
-        expect(body.items[0].metadata?.bulk_count).toBe(3);
+        const [item] = body.items;
+        expect(item.action).toBe('rule_import');
+        expect(item.old_values).toBeNull();
+        expect(item.metadata?.bulk_count).toBe(3);
+        expect(item.rule).toMatchObject({
+          id: rule.id,
+          rule_id: 'bulk-import-count-1',
+          revision: 0,
+        });
+      });
+
+      it('records bulkCount as the full import size for rules across chunk boundaries', async () => {
+        // Above main import chunking (50) and planned rewrite batches (300–500).
+        const ruleCount = 568;
+
+        await importRulesWithSuccess({
+          getService,
+          rules: range(ruleCount).map((i) =>
+            getCustomQueryRuleParams({
+              rule_id: `bulk-import-chunk-${i}`,
+              name: `Bulk chunk ${i}`,
+              enabled: false,
+            })
+          ),
+          overwrite: false,
+        });
+
+        await refreshChangeHistory(es);
+
+        // First chunk, past main's 50-chunk, past planned 300/500 batches, and the final remainder.
+        const sampleIndexes = [0, 50, 300, 500, ruleCount - 1];
+
+        for (const i of sampleIndexes) {
+          const { body: rule } = await detectionsApi
+            .readRule({ query: { rule_id: `bulk-import-chunk-${i}` } })
+            .expect(200);
+
+          const { body } = await detectionsApi
+            .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+            .expect(200);
+
+          expect(body.items[0].action).toBe('rule_import');
+          expect(body.items[0].metadata?.bulk_count).toBe(ruleCount);
+        }
+      });
+
+      it('records bulkCount as the full import size when overwriting across chunk boundaries', async () => {
+        // Above main import chunking (50) and planned rewrite batches (300–500).
+        const ruleCount = 568;
+
+        await importRulesWithSuccess({
+          getService,
+          rules: range(ruleCount).map((i) =>
+            getCustomQueryRuleParams({
+              rule_id: `bulk-overwrite-chunk-${i}`,
+              name: `Before overwrite ${i}`,
+              enabled: false,
+            })
+          ),
+          overwrite: false,
+        });
+
+        await clearChangeHistory(es);
+
+        await importRulesWithSuccess({
+          getService,
+          rules: range(ruleCount).map((i) =>
+            getCustomQueryRuleParams({
+              rule_id: `bulk-overwrite-chunk-${i}`,
+              name: `After overwrite ${i}`,
+              enabled: false,
+            })
+          ),
+          overwrite: true,
+        });
+
+        await refreshChangeHistory(es);
+
+        const sampleIndexes = [0, 50, 300, 500, ruleCount - 1];
+
+        for (const i of sampleIndexes) {
+          const { body: rule } = await detectionsApi
+            .readRule({ query: { rule_id: `bulk-overwrite-chunk-${i}` } })
+            .expect(200);
+
+          const { body } = await detectionsApi
+            .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+            .expect(200);
+
+          expect(body.items[0].action).toBe('rule_import');
+          expect(body.items[0].metadata?.bulk_count).toBe(ruleCount);
+        }
       });
 
       it('records bulkCount equal to the number of installed prebuilt rules', async () => {

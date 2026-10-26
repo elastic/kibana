@@ -27,9 +27,9 @@ const openTestTab = async (page: ScoutPage, connectorName: string) => {
   await page.testSubj.locator('test-connector-form').waitFor({ state: 'visible' });
 };
 
-const fillSubjectAndMessage = async (page: ScoutPage) => {
-  await page.testSubj.locator('subjectInput').fill('test subject');
-  await page.testSubj.locator('messageTextArea').fill('test message');
+const waitForTestModeForm = async (page: ScoutPage) => {
+  // Test mode hides subject/message and shows a fixed-content callout instead.
+  await page.testSubj.locator('emailTestModeFixedMessageCallout').waitFor({ state: 'visible' });
 };
 
 test.describe('Email connector', { tag: tags.stateful.classic }, () => {
@@ -92,7 +92,7 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
 
     await navigateToConnectors(page, kbnUrl);
     await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+    await waitForTestModeForm(page);
 
     // Touch and blur the To combobox to surface the field-level error
     await page.testSubj.locator('toEmailAddressInput').locator('input').click();
@@ -114,7 +114,7 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
 
     await navigateToConnectors(page, kbnUrl);
     await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+    await waitForTestModeForm(page);
 
     const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
     await toInput.fill('   ');
@@ -137,7 +137,7 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
 
     await navigateToConnectors(page, kbnUrl);
     await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+    await waitForTestModeForm(page);
 
     const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
     await toInput.fill('-user@example.com');
@@ -159,7 +159,7 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
 
     await navigateToConnectors(page, kbnUrl);
     await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+    await waitForTestModeForm(page);
 
     const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
     await toInput.fill('user@-example.com');
@@ -181,7 +181,7 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
 
     await navigateToConnectors(page, kbnUrl);
     await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+    await waitForTestModeForm(page);
 
     // Trigger the recipients-required error
     await page.testSubj.locator('toEmailAddressInput').locator('input').click();

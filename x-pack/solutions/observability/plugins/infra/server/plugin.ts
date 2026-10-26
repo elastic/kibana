@@ -50,6 +50,7 @@ import type {
   InfraPluginRequestHandlerContext,
   InfraPluginSetup,
   InfraPluginStart,
+  ServerlessInfo,
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
@@ -77,10 +78,14 @@ export class InfraServerPlugin
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
   private metricsExplorerViews?: MetricsExplorerViewsService;
+  private serverless: ServerlessInfo;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.serverless = {
+      isServerless: context.env.packageInfo.buildFlavor === 'serverless',
+    };
     this.logsRules = new RulesService(
       LOGS_FEATURE_ID,
       LOGS_RULES_ALERT_CONTEXT,
@@ -113,7 +118,7 @@ export class InfraServerPlugin
     });
 
     const sourceStatus = new InfraSourceStatus(
-      new InfraElasticsearchSourceStatusAdapter(framework),
+      new InfraElasticsearchSourceStatusAdapter(framework, this.serverless.isServerless),
       { sources }
     );
 

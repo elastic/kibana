@@ -2,7 +2,7 @@
 
 exports[`Summary Status Component should allow label to be optional 1`] = `
 <div
-  class="css-1tsor0s-summaryStatusNoWrapStyle"
+  class="css-1ewewnc-summaryStatusNoWrapStyle"
 >
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
@@ -84,7 +84,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
 
 exports[`Summary Status Component should allow status to be optional 1`] = `
 <div
-  class="css-1tsor0s-summaryStatusNoWrapStyle"
+  class="css-1ewewnc-summaryStatusNoWrapStyle"
 >
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
@@ -143,7 +143,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
 
 exports[`Summary Status Component should render metrics in a summary bar 1`] = `
 <div
-  class="css-1tsor0s-summaryStatusNoWrapStyle"
+  class="css-1ewewnc-summaryStatusNoWrapStyle"
 >
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"

@@ -268,7 +268,7 @@ export const buildPinnedEsql = (candidateColumns: string[], pinnedIds?: string[]
   }
   const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
   const arms = candidateColumns
-    .map((col) => `${col} IN (${pinnedParamsStr}), ${col}`)
+    .map((col) => `COALESCE(${col}, "") IN (${pinnedParamsStr}), ${col}`)
     .join(',\n    ');
   return `| EVAL pinned = CASE(
     ${arms},

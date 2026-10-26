@@ -242,7 +242,7 @@ const getExportItems = (
     });
   }
 
-  if (hasScheduledReports) {
+  if (hasCsvReports && hasScheduledReports) {
     exportItems.push({
       id: 'scheduledReports',
       label: i18n.translate('discover.localMenu.export.scheduleExportLabel', {

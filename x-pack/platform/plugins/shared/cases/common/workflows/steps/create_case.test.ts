@@ -37,6 +37,22 @@ describe('create_case common step definition', () => {
     expect(InputSchema.safeParse(inputWithoutSettings).success).toBe(true);
   });
 
+  it('accepts create case input with extended_fields', () => {
+    const inputWithExtendedFields = {
+      ...createCaseRequestFixture,
+      extended_fields: { priority_as_keyword: 'high' },
+    };
+    expect(InputSchema.safeParse(inputWithExtendedFields).success).toBe(true);
+  });
+
+  it('rejects create case input with non-string extended_fields values', () => {
+    const inputWithInvalidExtendedFields = {
+      ...createCaseRequestFixture,
+      extended_fields: { priority_as_keyword: 42 },
+    };
+    expect(InputSchema.safeParse(inputWithInvalidExtendedFields).success).toBe(false);
+  });
+
   it('rejects invalid create case input', () => {
     const invalidInput = {
       ...createCaseRequestFixture,

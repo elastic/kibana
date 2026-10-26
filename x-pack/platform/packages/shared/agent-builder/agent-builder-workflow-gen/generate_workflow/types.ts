@@ -52,6 +52,8 @@ export type GenerateWorkflowParams = GenerateWorkflowOptions & GenerateWorkflowD
 export interface GenerateWorkflowResponse {
   /** The validated, parsed workflow definition. */
   workflow: WorkflowYaml;
+  /** The validated workflow YAML, preserving comments and formatting. */
+  yaml: string;
   /** The natural-language text content of the LLM's final turn */
   response: string;
 }

@@ -13,7 +13,7 @@ import {
   DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
 } from '@kbn/workflows/server';
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
-import { assertConnectorSucceeded } from './hitl_connector_helpers';
+import { assertConnectorSucceeded, slackApiChannelTarget } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
 type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['channels']>;
@@ -71,12 +71,12 @@ function buildDefaultInputSlackApiBlocks({
 
 function buildSlackApiBlockkitInput(
   blocks: Array<Record<string, unknown>>,
-  target: { channelIds: string[] }
+  target: { channelNames?: string[]; channelIds?: string[] }
 ) {
   return {
     subAction: 'postBlockkit' as const,
     subActionParams: {
-      channelIds: target.channelIds,
+      ...target,
       text: JSON.stringify({ blocks }),
     },
   };
@@ -148,8 +148,8 @@ export async function sendWaitForInputNotifications({
 
   const slackApiConfig = channels.slack_api;
   const slackApiConnectorId = slackApiConfig?.['connector-id'];
-  const slackApiChannelIds = slackApiConfig?.channels;
-  if (slackApiConnectorId && slackApiChannelIds?.length) {
+  const slackApiChannels = slackApiConfig?.channels;
+  if (slackApiConnectorId && slackApiChannels?.length) {
     const slackApiBlocks =
       slackApiConfig.message != null
         ? buildInputSlackApiBlocksFromMessage(
@@ -162,13 +162,11 @@ export async function sendWaitForInputNotifications({
           )
         : buildDefaultInputSlackApiBlocks({ stepMessage, formUrl });
 
-    for (const channelId of slackApiChannelIds) {
+    for (const channel of slackApiChannels) {
       const result = await connectorExecutor.execute({
         connectorType: 'slack_api',
         connectorNameOrId: slackApiConnectorId,
-        input: buildSlackApiBlockkitInput(slackApiBlocks, {
-          channelIds: [channelId],
-        }),
+        input: buildSlackApiBlockkitInput(slackApiBlocks, slackApiChannelTarget(channel)),
         abortController,
       });
       assertConnectorSucceeded(result);

@@ -7,8 +7,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiButtonEmpty, EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TEST_MESSAGE } from '@kbn/connector-schemas/email/constants';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionParamsProps, ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextFieldWithMessageVariables,
@@ -63,7 +65,9 @@ export const EmailParamsFields = ({
   useDefaultMessage,
   ruleTypeId,
   actionConnector,
+  executionMode,
 }: ActionParamsProps<EmailActionParams>) => {
+  const isTestMode = executionMode === ActionConnectorMode.Test;
   const { to, cc, bcc, subject, message, replyTo } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
@@ -75,10 +79,19 @@ export const EmailParamsFields = ({
 
   const emailSender: string[] = getEmailSender(actionConnector);
 
+  useEffect(() => {
+    if (isTestMode) {
+      if (subject !== TEST_MESSAGE) editAction('subject', TEST_MESSAGE, index);
+      if (message !== TEST_MESSAGE) editAction('message', TEST_MESSAGE, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTestMode]);
+
   const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
     [boolean, string | undefined]
   >([false, defaultMessage]);
   useEffect(() => {
+    if (isTestMode) return;
     if (
       useDefaultMessage ||
       !actionParams?.message ||
@@ -90,7 +103,7 @@ export const EmailParamsFields = ({
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage]);
+  }, [defaultMessage, isTestMode]);
   const isToInvalid: boolean =
     to !== undefined && errors.to !== undefined && Number(errors.to.length) > 0;
   const isSubjectInvalid: boolean =
@@ -331,39 +344,61 @@ export const EmailParamsFields = ({
           />
         </EuiFormRow>
       ) : null}
-      {showEmailSubjectAndMessage && (
-        <EuiFormRow
-          fullWidth
-          error={errors.subject as string}
-          isInvalid={isSubjectInvalid}
-          label={subjectLabel}
-        >
-          <TextFieldWithMessageVariables
-            index={index}
-            editAction={editAction}
-            messageVariables={messageVariables}
-            paramsProperty={'subject'}
-            inputTargetValue={subject}
-            errors={(errors.subject ?? []) as string[]}
-            aria-label={subjectLabel}
-          />
-        </EuiFormRow>
-      )}
-      {showEmailSubjectAndMessage && (
-        <TextAreaWithMessageVariables
-          index={index}
-          editAction={editAction}
-          messageVariables={messageVariables}
-          paramsProperty={'message'}
-          inputTargetValue={message}
-          label={i18n.translate(
-            'xpack.stackConnectors.components.email.messageTextAreaFieldLabel',
-            {
-              defaultMessage: 'Message',
-            }
+      {isTestMode ? (
+        <EuiCallOut
+          announceOnMount
+          color="primary"
+          data-test-subj="emailTestModeFixedMessageCallout"
+          title={i18n.translate(
+            'xpack.stackConnectors.components.email.testModeFixedMessageTitle',
+            { defaultMessage: 'Fixed test message' }
           )}
-          errors={(errors.message ?? []) as string[]}
-        />
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.stackConnectors.components.email.testModeFixedMessageDescription"
+              defaultMessage="Testing this connector always sends the fixed subject and message: {testMessage}"
+              values={{ testMessage: <strong>{TEST_MESSAGE}</strong> }}
+            />
+          </p>
+        </EuiCallOut>
+      ) : (
+        <>
+          {showEmailSubjectAndMessage && (
+            <EuiFormRow
+              fullWidth
+              error={errors.subject as string}
+              isInvalid={isSubjectInvalid}
+              label={subjectLabel}
+            >
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editAction}
+                messageVariables={messageVariables}
+                paramsProperty={'subject'}
+                inputTargetValue={subject}
+                errors={(errors.subject ?? []) as string[]}
+                aria-label={subjectLabel}
+              />
+            </EuiFormRow>
+          )}
+          {showEmailSubjectAndMessage && (
+            <TextAreaWithMessageVariables
+              index={index}
+              editAction={editAction}
+              messageVariables={messageVariables}
+              paramsProperty={'message'}
+              inputTargetValue={message}
+              label={i18n.translate(
+                'xpack.stackConnectors.components.email.messageTextAreaFieldLabel',
+                {
+                  defaultMessage: 'Message',
+                }
+              )}
+              errors={(errors.message ?? []) as string[]}
+            />
+          )}
+        </>
       )}
     </>
   );

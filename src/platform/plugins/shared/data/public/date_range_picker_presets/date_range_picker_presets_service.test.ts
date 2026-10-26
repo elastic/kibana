@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import {
@@ -16,6 +16,7 @@ import {
   MAX_PRESETS,
   type PresetItem,
   type StoredPresets,
+  type StoredPresetsV2,
 } from '@kbn/date-range-picker-presets-common';
 
 import { DateRangePickerPresetsService } from './date_range_picker_presets_service';
@@ -30,6 +31,11 @@ const quickRangePresets: PresetItem[] = [
   { start: 'now/d', end: 'now/d', label: 'Today' },
   { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
 ];
+
+const lockedQuickRangePresets: PresetItem[] = quickRangePresets.map((preset) => ({
+  ...preset,
+  isEditable: false,
+}));
 
 const setup = () => {
   const core = coreMock.createStart();
@@ -46,7 +52,26 @@ const setup = () => {
   return { core, service };
 };
 
-const storedPresets = (presets: PresetItem[] | null): StoredPresets => ({ version: 1, presets });
+/**
+ * Backs the `userStorage` mock with a single in-memory value, so a write through
+ * `savePreset`/`deletePreset` is visible to a later `getPresets$()` subscription.
+ */
+const withInMemoryStorage = ({ userStorage }: ReturnType<typeof setup>['core']) => {
+  const stored$ = new BehaviorSubject<unknown>(DEFAULT_STORED_PRESETS);
+
+  userStorage.peek.mockImplementation(() => stored$.getValue());
+  userStorage.get$.mockReturnValue(stored$.asObservable());
+  userStorage.set.mockImplementation(async (_key, value) => {
+    stored$.next(value);
+    return value;
+  });
+};
+
+const storedPresets = (presets: PresetItem[]): StoredPresetsV2 => ({ version: 2, presets });
+const legacyStoredPresets = (presets: PresetItem[] | null): StoredPresets => ({
+  version: 1,
+  presets,
+});
 
 describe('DateRangePickerPresetsService', () => {
   describe('getDefaultPresets', () => {
@@ -63,19 +88,72 @@ describe('DateRangePickerPresetsService', () => {
   });
 
   describe('getPresets$', () => {
-    it('emits the stored presets when present', async () => {
+    it('emits the user presets ahead of the locked quick ranges', async () => {
       const { core, service } = setup();
-      const stored: PresetItem[] = [{ start: 'now-1h', end: 'now', label: 'Last hour' }];
-      core.userStorage.get$.mockReturnValue(of(storedPresets(stored)));
+      core.userStorage.get$.mockReturnValue(
+        of(storedPresets([{ start: 'now-1h', end: 'now', label: 'Last hour' }]))
+      );
 
-      expect(await firstValueFrom(service.getPresets$())).toEqual(stored);
+      expect(await firstValueFrom(service.getPresets$())).toEqual([
+        { start: 'now-1h', end: 'now', label: 'Last hour' },
+        ...lockedQuickRangePresets,
+      ]);
     });
 
-    it('falls back to the default presets when nothing is stored', async () => {
+    it('emits the most recently saved preset at the top of the list', async () => {
+      const { core, service } = setup();
+      withInMemoryStorage(core);
+      const oldest: PresetItem = { start: 'now-2h', end: 'now', label: 'Last 2 hours' };
+      const newest: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
+
+      await service.savePreset(oldest);
+      await service.savePreset(newest);
+
+      expect(await firstValueFrom(service.getPresets$())).toEqual([
+        newest,
+        oldest,
+        ...lockedQuickRangePresets,
+      ]);
+    });
+
+    it('stops emitting a deleted preset', async () => {
+      const { core, service } = setup();
+      withInMemoryStorage(core);
+      const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
+
+      await service.savePreset(preset);
+      await service.deletePreset(preset);
+
+      expect(await firstValueFrom(service.getPresets$())).toEqual(lockedQuickRangePresets);
+    });
+
+    it('emits only the locked quick ranges when nothing is stored', async () => {
       const { core, service } = setup();
       core.userStorage.get$.mockReturnValue(of(DEFAULT_STORED_PRESETS));
 
-      expect(await firstValueFrom(service.getPresets$())).toEqual(quickRangePresets);
+      expect(await firstValueFrom(service.getPresets$())).toEqual(lockedQuickRangePresets);
+    });
+
+    it('treats a legacy seeded value as quick ranges plus the user additions', async () => {
+      const { core, service } = setup();
+      core.userStorage.get$.mockReturnValue(
+        of(legacyStoredPresets([...quickRangePresets, { start: 'now-1h', end: 'now' }]))
+      );
+
+      expect(await firstValueFrom(service.getPresets$())).toEqual([
+        { start: 'now-1h', end: 'now' },
+        ...lockedQuickRangePresets,
+      ]);
+    });
+
+    it('picks up quick ranges added after the user stored their own presets', async () => {
+      const { core, service } = setup();
+      core.userStorage.get$.mockReturnValue(of(storedPresets([])));
+      core.uiSettings.get.mockReturnValue([{ from: 'now-1y', to: 'now', display: 'Last year' }]);
+
+      expect(await firstValueFrom(service.getPresets$())).toEqual([
+        { start: 'now-1y', end: 'now', label: 'Last year', isEditable: false },
+      ]);
     });
   });
 
@@ -97,7 +175,7 @@ describe('DateRangePickerPresetsService', () => {
   });
 
   describe('savePreset', () => {
-    it('persists a new preset appended to the stored presets', async () => {
+    it('persists a new preset', async () => {
       const { core, service } = setup();
       core.userStorage.peek.mockReturnValue(storedPresets([]));
       const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
@@ -106,6 +184,19 @@ describe('DateRangePickerPresetsService', () => {
       expect(core.userStorage.set).toHaveBeenCalledWith(
         DATE_RANGE_PICKER_PRESETS_KEY,
         storedPresets([preset])
+      );
+    });
+
+    it('prepends a new preset so the newest is stored first', async () => {
+      const { core, service } = setup();
+      const existing: PresetItem = { start: 'now-2h', end: 'now', label: 'Last 2 hours' };
+      core.userStorage.peek.mockReturnValue(storedPresets([existing]));
+      const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
+
+      await service.savePreset(preset);
+      expect(core.userStorage.set).toHaveBeenCalledWith(
+        DATE_RANGE_PICKER_PRESETS_KEY,
+        storedPresets([preset, existing])
       );
     });
 
@@ -119,7 +210,15 @@ describe('DateRangePickerPresetsService', () => {
       expect(core.userStorage.set).not.toHaveBeenCalled();
     });
 
-    it('does not persist beyond MAX_PRESETS', async () => {
+    it('does not persist a preset that duplicates a quick range', async () => {
+      const { core, service } = setup();
+      core.userStorage.peek.mockReturnValue(storedPresets([]));
+
+      await expect(service.savePreset({ start: 'now/d', end: 'now/d' })).resolves.toBe('duplicate');
+      expect(core.userStorage.set).not.toHaveBeenCalled();
+    });
+
+    it('does not persist beyond MAX_PRESETS user presets', async () => {
       const { core, service } = setup();
       const full = Array.from({ length: MAX_PRESETS }, (_, i) => ({
         start: `now-${i}m`,
@@ -133,7 +232,18 @@ describe('DateRangePickerPresetsService', () => {
       expect(core.userStorage.set).not.toHaveBeenCalled();
     });
 
-    it('uses the default presets as the base when nothing is stored yet', async () => {
+    it('does not count the quick ranges towards MAX_PRESETS', async () => {
+      const { core, service } = setup();
+      const nearlyFull = Array.from({ length: MAX_PRESETS - 1 }, (_, i) => ({
+        start: `now-${i}m`,
+        end: 'now',
+      }));
+      core.userStorage.peek.mockReturnValue(storedPresets(nearlyFull));
+
+      await expect(service.savePreset({ start: 'now-999d', end: 'now' })).resolves.toBe('saved');
+    });
+
+    it('starts from an empty list when nothing is stored yet', async () => {
       const { core, service } = setup();
       core.userStorage.peek.mockReturnValue(DEFAULT_STORED_PRESETS);
       const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
@@ -141,7 +251,18 @@ describe('DateRangePickerPresetsService', () => {
       await expect(service.savePreset(preset)).resolves.toBe('saved');
       expect(core.userStorage.set).toHaveBeenCalledWith(
         DATE_RANGE_PICKER_PRESETS_KEY,
-        storedPresets([...quickRangePresets, preset])
+        storedPresets([preset])
+      );
+    });
+
+    it('does not persist the isEditable flag', async () => {
+      const { core, service } = setup();
+      core.userStorage.peek.mockReturnValue(storedPresets([]));
+
+      await service.savePreset({ start: 'now-1h', end: 'now', isEditable: true });
+      expect(core.userStorage.set).toHaveBeenCalledWith(
+        DATE_RANGE_PICKER_PRESETS_KEY,
+        storedPresets([{ start: 'now-1h', end: 'now' }])
       );
     });
   });
@@ -161,6 +282,22 @@ describe('DateRangePickerPresetsService', () => {
         DATE_RANGE_PICKER_PRESETS_KEY,
         storedPresets([{ start: 'now-2h', end: 'now' }])
       );
+    });
+
+    it('no-ops when nothing matches the given start/end', async () => {
+      const { core, service } = setup();
+      core.userStorage.peek.mockReturnValue(storedPresets([{ start: 'now-1h', end: 'now' }]));
+
+      await service.deletePreset({ start: 'now-999d', end: 'now' });
+      expect(core.userStorage.set).not.toHaveBeenCalled();
+    });
+
+    it('does not write when asked to remove a quick range', async () => {
+      const { core, service } = setup();
+      core.userStorage.peek.mockReturnValue(storedPresets([{ start: 'now-1h', end: 'now' }]));
+
+      await service.deletePreset({ start: 'now/d', end: 'now/d', label: 'Today' });
+      expect(core.userStorage.set).not.toHaveBeenCalled();
     });
   });
 });

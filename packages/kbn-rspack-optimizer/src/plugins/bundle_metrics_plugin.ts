@@ -8,8 +8,9 @@
  */
 
 import Path from 'path';
-import { rspack, type Compiler, type Chunk } from '@rspack/core';
+import type { Compiler, Chunk } from '@rspack/core';
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import { rspack } from '../rspack_runtime';
 import { METRICS_FILENAME } from '../paths';
 
 /**
@@ -112,8 +113,8 @@ export interface PluginMetricsInfo {
  * 6. HOOK STAGE
  *
  *    `PROCESS_ASSETS_STAGE_ANALYSE` (stage 4000) runs AFTER `XPackBannerPlugin`
- *    (stage `PROCESS_ASSETS_STAGE_ADDITIONS` = 100), so sizes include license
- *    banners. This matches legacy's stage choice.
+ *    (stage `PROCESS_ASSETS_STAGE_SUMMARIZE` = 1000, post-minify), so sizes
+ *    include license banners. This matches legacy's stage choice.
  *
  * 7. COMPARISON WITH LEGACY
  *

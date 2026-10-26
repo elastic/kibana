@@ -9,6 +9,7 @@
 
 import type { DataType, LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
+import { LENS_LAST_VALUE_DEFAULT_MULTI_VALUE } from '../../schema/constants';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
@@ -37,8 +38,7 @@ export const fromLastValueLensStateToAPI = (
     operation: 'last_value',
     field: options.sourceField,
     time_field: options.params.sortField,
-    // when undefined or null, we default to true to match the behavior of the Lens 8.2 migration
-    multi_value: options.params.showArrayValues ?? true,
+    multi_value: options.params.showArrayValues ?? LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };

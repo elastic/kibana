@@ -204,7 +204,9 @@ export function WorkflowsPage() {
                 <EuiFilterGroup>
                   <WorkflowsFilterPopover
                     filter="enabled"
-                    title="Enabled"
+                    title={i18n.translate('workflows.management.enabledFilter.title', {
+                      defaultMessage: 'Enabled',
+                    })}
                     values={filtersData?.enabled || []}
                     selectedValues={search.enabled || []}
                     onSelectedValuesChanged={(newValues) => {
@@ -225,7 +227,9 @@ export function WorkflowsPage() {
                 <EuiFilterGroup>
                   <WorkflowsFilterPopover
                     filter="createdBy"
-                    title="Created By"
+                    title={i18n.translate('workflows.management.createdByFilter.title', {
+                      defaultMessage: 'Created By',
+                    })}
                     values={filtersData?.createdBy || []}
                     selectedValues={search.createdBy || []}
                     onSelectedValuesChanged={(newValues) => {
@@ -238,7 +242,9 @@ export function WorkflowsPage() {
                 <EuiFilterGroup>
                   <WorkflowsFilterPopover
                     filter="tags"
-                    title="Tags"
+                    title={i18n.translate('workflows.management.tagsFilter.title', {
+                      defaultMessage: 'Tags',
+                    })}
                     values={filtersData?.tags || []}
                     selectedValues={search.tags || []}
                     onSelectedValuesChanged={(newValues) => {

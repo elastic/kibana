@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/ebt-click'
   - '@kbn/zod'
   - '@kbn/i18n'
-  - '@kbn/i18n-react'
 tags:
   - shared-common
   - package

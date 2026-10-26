@@ -5,7 +5,7 @@ Lighthouse performance benchmarking CLI for Kibana. Measures page-load performan
 ## Prerequisites
 
 ```bash
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 ## Commands

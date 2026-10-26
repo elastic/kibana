@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { omit } from 'lodash';
 
 import type { CasesColumnSelection } from '../types';
@@ -19,6 +19,9 @@ import {
 } from '../../../all_cases/utils/merge_selected_columns_with_configuration';
 import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
 import { LIST_ALWAYS_VISIBLE_FIELDS } from '../constants';
+import { useGlobalInlineFields } from '../../../all_cases/hooks/use_global_inline_fields';
+import { getExtendedFieldColumnKey } from '../../../all_cases/extended_field_columns';
+import { useCasesConfig } from '../../../../common/lib/kibana';
 
 const getListFieldsConfiguration = (
   casesColumnsConfig: CasesColumnsConfiguration
@@ -31,15 +34,25 @@ export function useListFieldsSelection() {
     [casesColumnsConfig]
   );
 
-  const [selectedFields, setSelectedFields] = useCasesLocalStorage<CasesColumnSelection[]>(
+  const { templatesEnabled } = useCasesConfig();
+  const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
+
+  const globalFieldKeys = useMemo(
+    () => new Set(globalInlineFields.map(getExtendedFieldColumnKey)),
+    [globalInlineFields]
+  );
+
+  const [storedListFields, setStoredListFields] = useCasesLocalStorage<CasesColumnSelection[]>(
     LOCAL_STORAGE_KEYS.casesListFields,
     []
   );
 
+  const [storedGlobalFieldChecked, setStoredGlobalFieldChecked] = useCasesLocalStorage<
+    Record<string, boolean>
+  >(LOCAL_STORAGE_KEYS.casesGlobalFieldColumns, {});
+
   const mergedFields = useMemo(() => {
-    const fields = selectedFields || [];
-    // Match on the flag-independent base key so a migrated field stored under the other flag's
-    // key (`<key>` vs `<key>_as_<type>`) is still recognized as "already stored" and keeps its state.
+    const fields = storedListFields || [];
     const storedBaseKeys = new Set(fields.map(({ field }) => getColumnBaseKey(field)));
 
     const merged = mergeSelectedColumnsWithConfiguration({
@@ -47,13 +60,46 @@ export function useListFieldsSelection() {
       casesColumnsConfig: listFieldsConfig,
     });
 
-    // Fields already in localStorage keep their checked state; newly added fields default to unchecked.
-    const withDefaults = merged.map((column) =>
-      storedBaseKeys.has(getColumnBaseKey(column.field)) ? column : { ...column, isChecked: false }
-    );
+    return merged.map((column) => {
+      // Global fields: use shared checked state if stored; otherwise fall back to the
+      // value already in the stored list array (upgrade compat) or the config default.
+      // This keeps the selection in sync with the table view (Bug 19099).
+      if (globalFieldKeys.has(column.field)) {
+        return {
+          ...column,
+          isChecked:
+            column.field in storedGlobalFieldChecked
+              ? storedGlobalFieldChecked[column.field]
+              : column.isChecked,
+        };
+      }
+      // Non-global fields: keep stored state; default newly added fields to unchecked.
+      return storedBaseKeys.has(getColumnBaseKey(column.field))
+        ? column
+        : { ...column, isChecked: false };
+    });
+  }, [storedListFields, listFieldsConfig, globalFieldKeys, storedGlobalFieldChecked]);
 
-    return withDefaults;
-  }, [selectedFields, listFieldsConfig]);
+  const setSelectedFields = useCallback(
+    (newFields: CasesColumnSelection[]) => {
+      const globalUpdates: Record<string, boolean> = {};
+
+      for (const col of newFields) {
+        if (globalFieldKeys.has(col.field)) {
+          globalUpdates[col.field] = col.isChecked;
+        }
+      }
+
+      // Persist the full array (including global fields) so field order is preserved.
+      // Global field checked state is additionally written to the shared key so the
+      // table view picks up the same value.
+      setStoredListFields(newFields);
+      if (Object.keys(globalUpdates).length > 0) {
+        setStoredGlobalFieldChecked((prev) => ({ ...prev, ...globalUpdates }));
+      }
+    },
+    [globalFieldKeys, setStoredListFields, setStoredGlobalFieldChecked]
+  );
 
   return {
     selectedFields: mergedFields,

@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -57,6 +57,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { FirstDayOfWeek } from '@kbn/date-range-picker';
 import {
   DateRangePicker,
   type DateRangePickerSettings,
@@ -64,6 +65,7 @@ import {
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
+import moment from 'moment';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -451,8 +453,10 @@ export const QueryBarTopRow = React.memo(
 
     const backgroundSearchState = useObservable(
       data.search.session.state$.pipe(
-        mergeMap((state) => {
-          // We want to delay enabling the button to avoid flickering when searches are quick
+        switchMap((state) => {
+          // We want to delay enabling the button to avoid flickering when searches are quick.
+          // switchMap (not mergeMap) cancels any in-flight delayed Loading emission when the
+          // state transitions to Completed, preventing a stale re-enable of the button.
           if (state === SearchSessionState.Loading) return of(state).pipe(delay(500));
           return of(state);
         })
@@ -678,12 +682,38 @@ export const QueryBarTopRow = React.memo(
       return () => subscription.unsubscribe();
     }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
 
+    const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
+
+    const calendarOptions = useMemo(
+      () => ({
+        firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+      }),
+      [dayOfWeekSetting]
+    );
+
+    // Visualize-style consumers request auto-refresh-only mode via
+    // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
+    // only the auto-refresh play/pause button operable.
+    const isAutoRefreshOnly = showAutoRefreshOnly && !showDatePicker;
+
+    const dateFormatSetting: string | undefined = uiSettings.get('dateFormat');
+    const inputDateFormats = useMemo(
+      () => (dateFormatSetting ? [dateFormatSetting] : undefined),
+      [dateFormatSetting]
+    );
+
     const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
       () =>
         propsOnRefreshChange
-          ? { ...dateRangePickerSettings, autoRefresh }
+          ? {
+              ...dateRangePickerSettings,
+              // In auto-refresh-only mode the settings panel (the only place to
+              // enable auto-refresh) is unreachable behind readOnly, so force the
+              // play/pause button visible; paused state still follows props.
+              autoRefresh: isAutoRefreshOnly ? { ...autoRefresh, isEnabled: true } : autoRefresh,
+            }
           : dateRangePickerSettings,
-      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange]
+      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange, isAutoRefreshOnly]
     );
 
     const onDateRangePickerSettingsChange = useCallback(
@@ -875,28 +905,24 @@ export const QueryBarTopRow = React.memo(
       } else {
         const noTimeFieldNameDisabled =
           typeof isDisabled === 'object' && isDisabled.display !== undefined;
-        // Visualize-style consumers request auto-refresh-only mode via
-        // `showAutoRefreshOnly` + `!showDatePicker`. The legacy picker rendered a
-        // read-only date display while still letting users operate the auto-refresh
-        // controls. The new picker has no read-only mode, so we disable it here —
-        // but that also removes access to auto-refresh, a temporary regression.
-        // TODO: add a `readOnly` prop to the new picker so auto-refresh stays
-        // operable, and use it instead of `disabled` for this case.
-        const autoRefreshOnlyDisabled = Boolean(showAutoRefreshOnly && !showDatePicker);
-        const pickerDisabled =
-          Boolean(props.isDisabled) || noTimeFieldNameDisabled || autoRefreshOnlyDisabled;
+        // In auto-refresh-only mode (`isAutoRefreshOnly`) the picker renders
+        // readOnly — like the legacy picker's read-only date display, no time
+        // filtering is possible but the auto-refresh play/pause button (which
+        // ignores `readOnly`, unlike `disabled`) stays operable.
+        const pickerDisabled = Boolean(props.isDisabled) || noTimeFieldNameDisabled;
         datePicker = (
           <>
-            {(noTimeFieldNameDisabled || autoRefreshOnlyDisabled) && (
-              // Hidden sibling so FTR tests can detect the disabled state via
-              // testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'), matching
-              // the span the legacy picker renders inside its isDisabled.display node.
+            {(noTimeFieldNameDisabled || isAutoRefreshOnly) && (
+              // Hidden sibling so FTR tests can detect that the time filter is off
+              // via testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'),
+              // matching the span the legacy picker renders inside its
+              // isDisabled.display node.
               <span data-test-subj="kbnQueryBar-datePicker-disabled" style={{ display: 'none' }} />
             )}
             <DateRangePicker
               className="kbnQueryBar__datePicker"
               value={
-                noTimeFieldNameDisabled || autoRefreshOnlyDisabled
+                noTimeFieldNameDisabled || isAutoRefreshOnly
                   ? strings.getDisabledDatePickerLabel()
                   : dateRangeValue
               }
@@ -904,6 +930,7 @@ export const QueryBarTopRow = React.memo(
               onInputChange={onDateRangeInputChange}
               isInvalid={isDateRangeInvalid}
               disabled={pickerDisabled}
+              readOnly={isAutoRefreshOnly}
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}
@@ -916,8 +943,9 @@ export const QueryBarTopRow = React.memo(
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
-              dateFormat={uiSettings.get('dateFormat')}
+              inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
+              calendarOptions={calendarOptions}
               prependBasePath={http?.basePath.prepend}
               canAccessAdvancedSettings={
                 (application?.capabilities.advancedSettings?.save as boolean | undefined) ?? false

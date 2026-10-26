@@ -62,6 +62,12 @@ export const useDashboardExportItems = (
       'exportDerivatives'
     );
 
+    const canScheduleExport = exportIntegrations.some(
+      (item) =>
+        item.shareType === 'integration' &&
+        (item.id === 'pdfReports' || item.id === 'imageReports' || item.id === 'csvReports')
+    );
+
     const exportItems = exportIntegrations
       .filter((item) => item.shareType === 'integration')
       .map((item) => {
@@ -80,6 +86,7 @@ export const useDashboardExportItems = (
         (item): item is typeof item & { shareType: 'integration'; id: string } =>
           item.shareType === 'integration' && item.groupId === 'exportDerivatives'
       )
+      .filter((item) => item.id !== 'scheduledReports' || canScheduleExport)
       .map((item) => ({
         ...getExportItemMeta(item.id),
         id: item.id,

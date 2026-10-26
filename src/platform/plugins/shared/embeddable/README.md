@@ -171,7 +171,7 @@ Embeddables should never throw. Instead, use [PublishesBlockingError](https://gi
 ### Examples 
 Examples available at [/examples/embeddable_examples](https://github.com/elastic/kibana/tree/main/examples/embeddable_examples)
 
-Run examples with `yarn start --run-examples`
+Run examples with `pnpm start --run-examples`
 
 #### Embeddable factory examples
 Use the following examples to learn how to create new Embeddable types. To access new Embeddable types, create a new dashboard, click "Add panel" and finally select "Embeddable examples".

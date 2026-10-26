@@ -35,6 +35,13 @@ export const ALERTING_V2_ERROR_CODES = {
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
   /** Bulk rule operation params combine `ids` with `filter` / `search`. */
   INVALID_BULK_PARAMS: 'INVALID_BULK_PARAMS',
+  /** A signal rule's merged shape violates signal constraints. */
+  INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
+  /**
+   * A rule's merged shape has a recovery/no-data query block that is
+   * inconsistent with its `recovery_strategy`/`no_data_strategy`.
+   */
+  INVALID_RULE_QUERY_CONFIG: 'INVALID_RULE_QUERY_CONFIG',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression referenced an unknown field. */

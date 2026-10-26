@@ -36,7 +36,7 @@ const DashboardAttachmentsTab = createSavedObjectAttachmentsTab({
   soType: DASHBOARD_SO_TYPE,
 });
 
-const getDashboardAttachmentViewObject = ({ attachmentId, metadata, data }: DashboardViewProps) => {
+const getDashboardCreationActivity = ({ attachmentId, metadata, data }: DashboardViewProps) => {
   const event = (
     <SavedObjectAddedEvent
       soType={DASHBOARD_SO_TYPE}
@@ -49,7 +49,6 @@ const getDashboardAttachmentViewObject = ({ attachmentId, metadata, data }: Dash
 
   return {
     event,
-    timelineAvatar: 'dashboardApp' as const,
     hideDefaultActions: false,
     ...(data ? { children: DashboardEmbedAttachmentLazy } : {}),
   };
@@ -58,11 +57,11 @@ const getDashboardAttachmentViewObject = ({ attachmentId, metadata, data }: Dash
 export const getDashboardAttachmentType = () =>
   defineAttachment({
     id: DASHBOARD_ATTACHMENT_TYPE,
-    icon: 'dashboardApp',
-    displayName: i18n.DASHBOARDS,
-    getAttachmentViewObject: getDashboardAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_DASHBOARD }),
-    getAttachmentTabViewObject: () => ({ children: DashboardAttachmentsTab }),
+    getIcon: () => 'dashboardApp',
+    getLabel: () => i18n.DASHBOARDS,
+    getCreationActivity: getDashboardCreationActivity,
+    getRemovalActivity: () => ({ event: i18n.REMOVED_DASHBOARD }),
+    getAttachmentList: () => ({ children: DashboardAttachmentsTab }),
     schema: DashboardAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema
     workflowSchema: DashboardAttachmentPayloadSchema.omit({ data: true }),

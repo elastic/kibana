@@ -114,7 +114,7 @@ rm -f "$TMP_JSON"
 
 Scout **Skipped** inventory follows §2 only (suite/test `.skip` patterns). **Do not** apply Cypress **`@skipIn…`** tag rules to the Scout row.
 
-Bootstrap: match root **`engines.node`**, run **`yarn kbn bootstrap`** if `@kbn/*` resolution fails during `--list`.
+Bootstrap: match root **`engines.node`**, run **`pnpm kbn bootstrap`** if `@kbn/*` resolution fails during `--list`.
 
 **Skipped column (format):** Do **not** repeat the column name. Use **`<br>`** for line breaks.
 
@@ -196,7 +196,7 @@ ls .buildkite/pipelines/pull_request/security_solution/
 rg -l '<team-keyword>' .buildkite/pipelines/pull_request/security_solution/
 
 # Post-merge
-grep -n '<team-keyword>' .buildkite/pipelines/on_merge_fanout.yml
+grep -n '<team-keyword>' .buildkite/pipelines/on_merge.yml .buildkite/pipelines/security_solution_on_merge.yml
 
 # Quality gate + periodic
 ls .buildkite/pipelines/security_solution_quality_gate/

@@ -20,6 +20,7 @@ import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './subqueries';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
+import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
 import type { ESQLMessage } from '../../commands';
 
@@ -92,6 +93,8 @@ async function validateAst(
     ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
     : undefined;
 
+  const isRootTimeseries = isTimeseriesSourceCommand(rootCommands);
+
   // Validate the header commands
   for (const command of headerCommands) {
     const references: ReferenceMaps = {
@@ -105,7 +108,7 @@ async function validateAst(
       datasets: datasets?.datasets ?? [],
     };
 
-    const commandMessages = validateCommand(command, references, rootCommands, {
+    const commandMessages = validateCommand(command, references, rootCommands, isRootTimeseries, {
       ...callbacks,
       hasMinimumLicenseRequired,
     });
@@ -157,6 +160,7 @@ async function validateAst(
       currentCommand,
       references,
       rootCommands,
+      isTimeseriesSourceCommand(subquery.commands),
       {
         ...callbacks,
         hasMinimumLicenseRequired,
@@ -189,6 +193,7 @@ function validateCommand(
   command: ESQLAstAllCommands,
   references: ReferenceMaps,
   rootCommands: ESQLCommand[],
+  isTimeseriesSource: boolean,
   callbacks?: ICommandCallbacks,
   unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLMessage[] {
@@ -230,6 +235,7 @@ function validateCommand(
     views: references.views,
     datasets: references.datasets,
     unmappedFieldsStrategy,
+    isTimeseriesSource,
   };
 
   if (commandDefinition.methods.validate) {

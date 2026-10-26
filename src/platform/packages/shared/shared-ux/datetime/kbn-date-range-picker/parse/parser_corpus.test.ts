@@ -55,7 +55,7 @@ type CheckedFields = Pick<
 interface CorpusRow {
   /** What the user types into the input. */
   input: string;
-  /** Options passed to the parser (presets, delimiter, roundRelativeTime, dateFormat). */
+  /** Options passed to the parser (presets, delimiter, roundRelativeTime, inputDateFormats). */
   options?: TimeRangeTransformOptions;
   /** Why this row exists / what behaviour it documents. */
   note: string;
@@ -305,6 +305,50 @@ describe('parser corpus: textToTimeRange (English)', () => {
           startOffset: null,
         },
       },
+      {
+        input: 'now/y+3M',
+        note: 'rounding then offset (chained date math); validity is calendar-dependent (Apr 1 vs now)',
+        expected: {
+          start: 'now/y+3M',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+        },
+      },
+      {
+        input: 'now-3M/y+3M',
+        note: 'offset, rounding, then further offset',
+        expected: {
+          start: 'now-3M/y+3M',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '-1y/y+3M to now/y+3M',
+        note: 'fiscal-year style range: chained math on both bounds',
+        expected: {
+          start: 'now-1y/y+3M',
+          end: 'now/y+3M',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+          startOffset: null,
+          endOffset: null,
+          isInvalid: false,
+        },
+      },
+      {
+        input: 'now-1d/d+8h+50m',
+        note: 'longer chained expression (offset + round + offsets)',
+        expected: {
+          start: 'now-1d/d+8h+50m',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          startOffset: null,
+          isInvalid: false,
+        },
+      },
     ]);
   });
 
@@ -462,6 +506,12 @@ describe('parser corpus: textToTimeRange (English)', () => {
         note: 'false preserves an existing rounding suffix',
         expected: { start: 'now-7d/d', end: 'now', startOffset: offset(-7, 'd', 'd') },
       },
+      {
+        input: 'now/y+3M',
+        options: { roundRelativeTime: true },
+        note: 'chained date math is left unchanged (no extra inferred rounding)',
+        expected: { start: 'now/y+3M', end: 'now', startOffset: null },
+      },
     ]);
   });
 
@@ -515,6 +565,14 @@ describe('parser corpus: textToTimeRange (English)', () => {
           end: 'now-7d',
           type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
           isInvalid: true,
+        },
+      },
+      {
+        input: '/d',
+        note: 'leading slash is not a valid datemath start',
+        expected: {
+          isInvalid: true,
+          start: '',
         },
       },
     ]);
@@ -586,6 +644,16 @@ describe('parser corpus: prettifyValue (English)', () => {
         input: '-7d to Jan 5, 2026',
         note: 'relative start, non-ISO absolute end (only ISO ends get reformatted)',
         expected: '-7d to Jan 5, 2026',
+      },
+      {
+        input: 'now/y+3M to now',
+        note: 'chained date math is not collapsed',
+        expected: 'now/y+3M to now',
+      },
+      {
+        input: '-1y/y+3M to now/y+3M',
+        note: 'chained date math range is not prettified',
+        expected: '-1y/y+3M to now/y+3M',
       },
     ]);
   });

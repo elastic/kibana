@@ -334,10 +334,12 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
     ];
   }
 
-  // empty response -> we format that as an empty AI message and user message asking to try again.
+  // empty response -> placeholder AI turn + user nudge to retry.
+  // Use non-empty assistant text: Anthropic rejects empty content blocks, and dropping the
+  // turn collapses consecutive user messages (endless empty-response retries).
   if (isExecutionError(error, AgentExecutionErrorCode.emptyResponse)) {
     return [
-      createAIMessage(``),
+      createAIMessage('...'),
       createUserMessage('Looks like you did not provide any answer. Please try again.'),
     ];
   }

@@ -6,7 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Logger } from '@kbn/core/server';
 import type { EventOutcome, StatusCode, Transaction } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
@@ -51,6 +51,7 @@ import type {
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { compactMap } from '../../utils/compact_map';
+import { createApmEventFieldsAccessor } from '../../utils/create_apm_event_fields_accessor';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
 import { fields, getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
@@ -58,27 +59,23 @@ import { fields, getUnifiedTraceItemsPaginated } from './get_unified_trace_items
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   const groupedErrorsByDocId: Record<
     string,
-    Array<{ errorDocId: string; errorDocIndex?: string }>
+    Array<{ errorDocId: string; errorDocIndex?: string; source: 'apm' | 'unprocessedOtel' }>
   > = {};
 
-  unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
-    if (errorDoc.span?.id) {
+  // Key on span.id when present; fall back to transaction.id for classic APM errors that carry
+  // only a transaction ref (gap #1 from #290844). Both sources use the same logic.
+  const allErrors = [...unifiedTraceErrors.apmErrors, ...unifiedTraceErrors.unprocessedOtelErrors];
+  for (const errorDoc of allErrors) {
+    const docId = errorDoc.span?.id ?? errorDoc.transaction?.id;
+    if (docId) {
       const errorDocIndex = errorDoc.index;
-      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
+      (groupedErrorsByDocId[docId] ??= []).push({
         errorDocId: errorDoc.id,
+        source: errorDoc.source,
         ...(errorDocIndex ? { errorDocIndex } : {}),
       });
     }
-  });
-  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
-    if (errorDoc.span?.id) {
-      const errorDocIndex = errorDoc.index;
-      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
-        errorDocId: errorDoc.id,
-        ...(errorDocIndex ? { errorDocIndex } : {}),
-      });
-    }
-  });
+  }
 
   return groupedErrorsByDocId;
 }
@@ -89,6 +86,7 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
 export async function getUnifiedTraceItems({
   apmEventClient,
   logsClient,
+  logger,
   maxTraceItems,
   traceId,
   start,
@@ -98,6 +96,7 @@ export async function getUnifiedTraceItems({
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
+  logger: Logger;
   maxTraceItems: number;
   traceId: string;
   start: number;
@@ -114,6 +113,7 @@ export async function getUnifiedTraceItems({
     getUnifiedTraceErrors({
       apmEventClient,
       logsClient,
+      logger,
       traceId,
       start,
       end,
@@ -138,8 +138,14 @@ export async function getUnifiedTraceItems({
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
   const agentMarks: Record<string, number> = {};
   const noDestinationTraceItems = new Set<TraceItem>();
+  const accessor = createApmEventFieldsAccessor({ logger, operation: 'get_unified_trace_items' });
   const traceItems = compactMap(unifiedTraceItems.hits, (hit) => {
-    const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
+    const event = accessor.tryAccess(hit, fields);
+
+    if (!event) {
+      return undefined;
+    }
+
     const isTransactionDocument = event[PROCESSOR_EVENT] === ProcessorEvent.transaction;
     if (isTransactionDocument) {
       const source = hit._source as {

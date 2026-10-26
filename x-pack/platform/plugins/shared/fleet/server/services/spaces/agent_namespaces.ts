@@ -39,7 +39,8 @@ export async function isAgentInNamespace(agent: Agent, namespace?: string) {
 
 export async function agentsKueryNamespaceFilter(namespace?: string) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
-  if (!useSpaceAwareness || !namespace) {
+  // undefined or '*' both mean "all spaces" — omit the filter entirely
+  if (!useSpaceAwareness || !namespace || namespace === '*') {
     return;
   }
   return namespace === DEFAULT_SPACE_ID

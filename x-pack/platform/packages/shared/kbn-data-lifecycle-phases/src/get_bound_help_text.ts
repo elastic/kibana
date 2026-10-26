@@ -9,6 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { IlmPhase } from './phases';
 import { PHASE_NAMES_LOWERCASE } from './phases';
 
+/** Token emitted by validators when a boundary constraint is violated; field components detect it and show their computed help text as the error. */
+export const BOUNDARY_VALIDATION_ERROR = '__kbn_boundary_error__';
+
 /** The neighbor that constrains a timing/interval field. */
 export type BoundNeighbor =
   | { type: 'phase'; phase: IlmPhase }

@@ -62,16 +62,13 @@ describe('workflow privilege checks', () => {
   });
 
   describe('hasWorkflowExecutePrivilege', () => {
-    it('requires both execute and read', async () => {
+    it('requires execute only, so a workflow can be run without reading its definition', async () => {
       const { security, atSpace } = createSecurityMock(true);
 
       await expect(hasWorkflowExecutePrivilege({ security, request, spaceId })).resolves.toBe(true);
 
       expect(atSpace).toHaveBeenCalledWith(spaceId, {
-        kibana: [
-          `api:${WorkflowsManagementApiActions.execute}`,
-          `api:${WorkflowsManagementApiActions.read}`,
-        ],
+        kibana: [`api:${WorkflowsManagementApiActions.execute}`],
       });
     });
 

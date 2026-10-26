@@ -33,8 +33,6 @@ export const addFile = async (
   const {
     logger,
     authorization,
-    persistableStateAttachmentTypeRegistry,
-    externalReferenceAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
     services: { userActionService },
     fileService,
@@ -81,8 +79,6 @@ export const addFile = async (
 
     validateRegisteredAttachments({
       query: commentReq,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
     });
 

@@ -27,15 +27,11 @@ const evaluate = base.extend<{ evaluateExternalDataset: EvaluateExternalDataset 
   ],
 });
 
-evaluate.describe(
-  'Default Agent - External Phoenix Dataset',
-  { tag: tags.serverless.search },
-  () => {
-    evaluate.skip(!process.env.DATASET_NAME, 'DATASET_NAME is not set');
+evaluate.describe('Default Agent - External Dataset', { tag: tags.serverless.search }, () => {
+  evaluate.skip(!process.env.DATASET_NAME, 'DATASET_NAME is not set');
 
-    evaluate('external dataset', async ({ evaluateExternalDataset }) => {
-      const datasetName = process.env.DATASET_NAME!;
-      await evaluateExternalDataset(datasetName);
-    });
-  }
-);
+  evaluate('external dataset', async ({ evaluateExternalDataset }) => {
+    const datasetName = process.env.DATASET_NAME!;
+    await evaluateExternalDataset(datasetName);
+  });
+});

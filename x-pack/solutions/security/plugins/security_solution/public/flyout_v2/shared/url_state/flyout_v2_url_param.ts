@@ -135,7 +135,6 @@ export interface DocumentCorrelationsDescriptor {
   documentId: string;
   indexName: string;
   scopeId: string;
-  isRulePreview: boolean;
 }
 
 export interface DocumentPrevalenceDescriptor {

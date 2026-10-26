@@ -7,11 +7,11 @@
 
 import { useMemo } from 'react';
 import type { SingleCaseMetricsFeature } from '../../common/ui';
+import { getCaseSettings } from '../../common/utils/case_settings';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useLicense } from './use_license';
 
 export interface UseCasesFeatures {
-  isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
   observablesAuthorized: boolean;
   connectorsAuthorized: boolean;
@@ -29,8 +29,10 @@ export interface UseCasesFeatures {
   hasCaseSettings: boolean;
 }
 
-export const useCasesFeatures = (): UseCasesFeatures => {
+/** `caseOwner` overrides the context owner (create form: selected solution when the host did not pin one). */
+export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
   const {
+    owner,
     features,
     permissions: { assign },
   } = useCasesContext();
@@ -38,47 +40,35 @@ export const useCasesFeatures = (): UseCasesFeatures => {
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
   const hasLicenseWithAtLeastGold = isAtLeastGold();
   const casesFeatures = useMemo(() => {
-    const isSyncAlertsEnabled =
-      !features.alerts.enabled || !features.alerts.all ? false : features.alerts.sync;
+    const { syncAlerts, extractObservables, observablesEnabled } = getCaseSettings(
+      caseOwner || owner[0] || ''
+    );
+    // `alerts.all` is a host/privilege flag; sync itself comes from OWNER_INFO.
+    const isSyncAlertsEnabled = Boolean(features.alerts.all && syncAlerts);
     const observablesAuthorized = hasLicenseGreaterThanPlatinum;
-    const isExtractObservablesEnabled =
-      !!features.observables.enabled && !!features.observables.autoExtract;
     const metricsFeatures = features.metrics;
 
     return {
-      isAlertsEnabled: features.alerts.enabled,
-      /**
-       * If the alerts feature is disabled we will disable everything.
-       * If not, then we honor the sync option.
-       * The sync and enabled option in DEFAULT_FEATURES in x-pack/plugins/cases/common/constants.ts
-       * is defaulted to true. This will help consumers to set the enabled
-       * option to true and get the whole alerts experience without the need
-       * to explicitly set the sync to true
-       */
       isSyncAlertsEnabled,
       metricsFeatures,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
       observablesAuthorized,
       connectorsAuthorized: hasLicenseWithAtLeastGold,
-      isObservablesFeatureEnabled: !!features.observables.enabled,
-      isExtractObservablesEnabled,
-      // Mirrors the switches shown by CaseSettingsPopover: sync alerts, observable extraction
-      // (license-gated), or metrics. Keep in sync with that component's render conditions.
+      isObservablesFeatureEnabled: observablesEnabled,
+      isExtractObservablesEnabled: extractObservables,
       hasCaseSettings:
         isSyncAlertsEnabled ||
-        (observablesAuthorized && isExtractObservablesEnabled) ||
+        (observablesAuthorized && extractObservables) ||
         metricsFeatures.length > 0,
     };
   }, [
-    features.alerts.enabled,
-    features.alerts.sync,
+    caseOwner,
+    owner,
     features.alerts.all,
     features.metrics,
     hasLicenseGreaterThanPlatinum,
     assign,
-    features.observables?.enabled,
-    features.observables?.autoExtract,
     hasLicenseWithAtLeastGold,
   ]);
 

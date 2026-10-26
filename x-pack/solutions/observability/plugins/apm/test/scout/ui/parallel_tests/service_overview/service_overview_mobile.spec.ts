@@ -29,7 +29,7 @@ test.describe(
       });
 
       await test.step('Click on android mobile service', async () => {
-        await serviceInventoryPage.clickServiceLink(testData.SERVICE_MOBILE_ANDROID);
+        await serviceInventoryPage.clickServiceLink(testData.SERVICE_MOBILE_ANDROID, true);
       });
 
       await test.step('Verify redirected to mobile service overview', async () => {
@@ -52,7 +52,7 @@ test.describe(
       });
 
       await test.step('Click on iOS mobile service', async () => {
-        await serviceInventoryPage.clickServiceLink(testData.SERVICE_MOBILE_IOS);
+        await serviceInventoryPage.clickServiceLink(testData.SERVICE_MOBILE_IOS, true);
       });
 
       await test.step('Verify redirected to mobile service overview', async () => {

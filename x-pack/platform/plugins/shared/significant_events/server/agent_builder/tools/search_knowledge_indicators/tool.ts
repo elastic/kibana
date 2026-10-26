@@ -9,11 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  BuiltinToolDefinition,
-  StaticToolRegistration,
-  ToolAvailabilityResult,
-} from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -62,7 +58,7 @@ export function createSearchKnowledgeIndicatorsTool({
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-}): StaticToolRegistration<typeof searchKnowledgeIndicatorsSchema> {
+}): BuiltinToolDefinition<typeof searchKnowledgeIndicatorsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof searchKnowledgeIndicatorsSchema> = {
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
     type: ToolType.builtin,

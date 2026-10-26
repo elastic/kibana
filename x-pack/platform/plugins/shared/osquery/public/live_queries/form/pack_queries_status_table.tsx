@@ -66,6 +66,12 @@ const queryClampFlexItemCss = {
   minWidth: 0,
 };
 
+const errorTextCss = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap' as const,
+};
+
 const euiBasicTableCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
     border: euiTheme.border.thin,
@@ -149,11 +155,12 @@ const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
   </EuiFlexGroup>
 );
 
-type PackQueryStatusItem = Partial<{
+export type PackQueryStatusItem = Partial<{
   action_id: string;
   id: string;
-  query: string;
+  query?: string;
   agents: string[];
+  interval: number;
   ecs_mapping?: ECSMapping;
   version?: string;
   platform?: string;
@@ -233,7 +240,20 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderQueryColumn = useCallback(
-    (query: string, item: any) => {
+    (query: string | undefined, item: PackQueryStatusItem) => {
+      // Error rows carry no SQL — render the error text instead of crashing on removeMultilines(undefined).
+      if (!query) {
+        const errorText = item?.error ?? '';
+
+        return (
+          <EuiToolTip content={errorText} display="block">
+            <EuiText size="s" color="danger" tabIndex={0} css={errorTextCss}>
+              {errorText}
+            </EuiText>
+          </EuiToolTip>
+        );
+      }
+
       const singleLine = removeMultilines(query);
       const content = singleLine.length > 120 ? `${singleLine.substring(0, 120)}...` : singleLine;
 
@@ -309,24 +329,24 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item: any) => (
+    (item: PackQueryStatusItem) => (
       <PackViewInDiscoverAction
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
-        timestamp={scheduleId ? startDate : undefined}
+        timestamp={startDate}
       />
     ),
     [scheduleId, executionCount, startDate]
   );
 
   const renderLensResultsAction = useCallback(
-    (item: any) => (
+    (item: PackQueryStatusItem) => (
       <PackViewInLensAction
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
-        timestamp={scheduleId ? startDate : undefined}
+        timestamp={startDate}
       />
     ),
     [scheduleId, executionCount, startDate]
@@ -498,22 +518,26 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderViewQueryColumn = useCallback(
-    (row: PackQueryStatusItem) => (
-      <EuiToolTip
-        content={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
-          defaultMessage: 'View query',
-        })}
-        disableScreenReaderOutput
-      >
-        <EuiButtonIcon
-          iconType="expand"
-          onClick={handleQueryFlyoutOpen(row)}
-          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+    (row: PackQueryStatusItem) => {
+      if (!row.query) return null;
+
+      return (
+        <EuiToolTip
+          content={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
             defaultMessage: 'View query',
           })}
-        />
-      </EuiToolTip>
-    ),
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="expand"
+            onClick={handleQueryFlyoutOpen(row)}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+              defaultMessage: 'View query',
+            })}
+          />
+        </EuiToolTip>
+      );
+    },
     [handleQueryFlyoutOpen]
   );
 

@@ -1811,7 +1811,10 @@ describe('update()', () => {
       },
     });
 
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: myType/my alert name',
+      undefined
+    );
   });
 
   it('should update rule flapping', async () => {
@@ -5013,7 +5016,7 @@ describe('update()', () => {
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );

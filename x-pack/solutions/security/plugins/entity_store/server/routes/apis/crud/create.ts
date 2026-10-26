@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { unflattenObject } from '@kbn/object-utils';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -21,9 +21,11 @@ import {
 } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const paramsSchema = z.object({
-  entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to create.'),
-});
+const paramsSchema = lazySchema(() =>
+  z.object({
+    entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to create.'),
+  })
+);
 
 export function registerCRUDCreate(router: EntityStorePluginRouter) {
   router.versioned
@@ -55,34 +57,36 @@ export function registerCRUDCreate(router: EntityStorePluginRouter) {
           oasOperationObject: () => path.join(__dirname, '../examples/entities_create.yaml'),
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
-        const entityStoreCtx = await ctx.entityStore;
-        const { logger, crudClient } = entityStoreCtx;
+      wrapMiddlewares<z.infer<typeof paramsSchema>, never, z.infer<typeof Entity>>(
+        async (ctx, req, res): Promise<IKibanaResponse> => {
+          const entityStoreCtx = await ctx.entityStore;
+          const { logger, crudClient } = entityStoreCtx;
 
-        logger.debug('CRUD Create api called');
+          logger.debug('CRUD Create api called');
 
-        try {
-          await crudClient.createEntity(req.params.entityType, req.body);
-        } catch (error) {
-          if (error instanceof EntityStoreNotInstalledError) {
-            return res.badRequest({ body: error });
-          }
-          if (error instanceof BadCRUDRequestError) {
-            return res.badRequest({ body: error });
-          }
-          if (error instanceof EntityAlreadyExistsError) {
-            return res.conflict({ body: error });
+          try {
+            await crudClient.createEntity(req.params.entityType, req.body);
+          } catch (error) {
+            if (error instanceof EntityStoreNotInstalledError) {
+              return res.badRequest({ body: error });
+            }
+            if (error instanceof BadCRUDRequestError) {
+              return res.badRequest({ body: error });
+            }
+            if (error instanceof EntityAlreadyExistsError) {
+              return res.conflict({ body: error });
+            }
+
+            logger.error(error);
+            throw error;
           }
 
-          logger.error(error);
-          throw error;
+          return res.ok({
+            body: {
+              ok: true,
+            },
+          });
         }
-
-        return res.ok({
-          body: {
-            ok: true,
-          },
-        });
-      })
+      )
     );
 }

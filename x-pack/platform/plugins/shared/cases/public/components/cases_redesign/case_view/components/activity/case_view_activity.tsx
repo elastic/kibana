@@ -12,6 +12,10 @@ import { StatusActionButton } from '../../../../status/button';
 import { CaseViewAttachButton } from '../../../../case_view/components/case_view_attach_button';
 import { UserActions } from '../../../user_actions';
 import { UserActionsFilterBar } from '../user_actions_filter_bar';
+import {
+  ActivityCollapseControls,
+  ActivityCollapseProvider,
+} from '../../../user_actions/activity_collapse_context';
 import { SidebarToggleButton } from '../sidebar/sidebar_toggle_button';
 import { Description } from '../../../description';
 import { useCaseViewActivity } from './hooks/use_case_view_activity';
@@ -50,7 +54,8 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
     userActionsStats;
 
   return (
-    <>
+    // Wraps both the controls below and the feed that publishes them.
+    <ActivityCollapseProvider>
       <EuiSpacer size="s" />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
@@ -61,19 +66,21 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
               params={userActivityQueryParams}
               userActionsStats={userActionsStats}
               isLoading={isLoadingUserActionsStats}
+              rightAction={<ActivityCollapseControls />}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SidebarToggleButton />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}
           onUpdateField={onUpdateField}
         />
       </EuiFlexItem>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       {(isLoadingUserActionsStats || isLoadingCaseConnectors || isLoadingCaseUsers) && (
         <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
       )}
@@ -103,7 +110,7 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
-    </>
+    </ActivityCollapseProvider>
   );
 };
 CaseViewActivity.displayName = 'CaseViewActivity';

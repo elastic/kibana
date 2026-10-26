@@ -7,6 +7,7 @@
 
 export type {
   BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,
@@ -15,9 +16,9 @@ export type {
   ToolAvailabilityHandler,
   ToolAvailabilityResult,
   ToolAvailabilityConfig,
+  ToolSchemaContext,
   ToolReturnSummarizerFn,
-  ToolConfirmationPolicy,
-  ToolConfirmationPolicyMode,
+  BuiltInToolConfirmationPolicy,
 } from './builtin';
 export {
   type ToolHandlerFn,

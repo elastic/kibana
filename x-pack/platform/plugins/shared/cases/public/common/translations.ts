@@ -147,6 +147,10 @@ export const REQUIRED_ON_CLOSE = i18n.translate('xpack.cases.caseView.requiredOn
   defaultMessage: 'Required on close',
 });
 
+export const REQUIRED = i18n.translate('xpack.cases.caseView.required', {
+  defaultMessage: 'Required',
+});
+
 export const PAGE_TITLE = i18n.translate('xpack.cases.pageTitle', {
   defaultMessage: 'Cases',
 });

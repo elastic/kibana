@@ -442,6 +442,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     eventsTelemetry,
                     licensing,
                     scheduleNotificationResponseActionsService: responseActionsService,
+                    cpsData: options.cpsData,
                   },
                 });
 

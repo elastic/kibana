@@ -35,7 +35,7 @@
  *                            the soft-interface `reasoning` render is visible
  *                            on live pending rows in the Respond flyout.
  *
- * Env overrides (defaults match `yarn start --no-base-path`):
+ * Env overrides (defaults match `pnpm start --no-base-path`):
  *   KIBANA_URL=http://localhost:5601
  *   KIBANA_USERNAME=elastic
  *   KIBANA_PASSWORD=changeme

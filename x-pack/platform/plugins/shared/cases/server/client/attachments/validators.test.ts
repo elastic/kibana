@@ -19,8 +19,6 @@ import { CommentAttachmentPayloadSchema } from '../../../common/types/domain_zod
 import { LensAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/lens/v2';
 import { FileAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/file/v2';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import {
   validateLegacyRegisteredAttachments,
   validateUnifiedRegisteredAttachments,
@@ -123,9 +121,6 @@ describe('validateUnifiedRegisteredAttachments', () => {
 });
 
 describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-  const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-
   const validFileEntry = {
     name: 'screenshot',
     extension: 'png',
@@ -165,8 +160,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
       expect(() =>
         validateLegacyRegisteredAttachments({
           query: buildLegacyFilePayload() as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).not.toThrow();
@@ -186,8 +179,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
               files: [{ ...validFileEntry, extra: 'not-allowed' }],
             },
           }) as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'file'/);
@@ -205,8 +196,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
           query: buildLegacyFilePayload({
             externalReferenceMetadata: { files: [{ name: 'screenshot' }] },
           }) as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'file'/);
@@ -224,8 +213,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
           query: buildLegacyFilePayload({
             externalReferenceMetadata: { files: [] },
           }) as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'file'/);
@@ -286,8 +273,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
       expect(() =>
         validateLegacyRegisteredAttachments({
           query: buildLegacyEndpointPayload() as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).not.toThrow();
@@ -308,8 +293,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
               targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
             },
           }) as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'security\.endpoint'/);
@@ -331,8 +314,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
               targets: [],
             },
           }) as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'security\.endpoint'/);
@@ -350,8 +331,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
       expect(() =>
         validateLegacyRegisteredAttachments({
           query: buildLegacyLensPayload() as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).not.toThrow();
@@ -369,8 +348,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
       expect(() =>
         validateLegacyRegisteredAttachments({
           query: buildLegacyLensPayload() as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'lens'/);

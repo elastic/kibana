@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
+import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import {
   SECURITY_EVENT_ATTACHMENT_TYPE,
   isUnifiedEventAttachment,
@@ -17,7 +17,7 @@ import {
 import type { Event } from './table';
 import { EventsTableForCases } from './table';
 
-export const EventTabContent: React.FC<CommonAttachmentTabViewProps> = ({ caseData }) => {
+export const EventTabContent: React.FC<CommonAttachmentListViewProps> = ({ caseData }) => {
   const events = useMemo(
     () =>
       caseData.comments.reduce((acc, comment) => {

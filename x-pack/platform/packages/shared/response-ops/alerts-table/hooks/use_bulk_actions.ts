@@ -119,14 +119,16 @@ const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: strin
 const getCaseAttachments = ({
   alerts,
   caseId,
+  owner,
   groupAlertsByRule,
 }: {
   caseId: string;
+  owner: string;
   groupAlertsByRule?: CasesService['helpers']['groupAlertsByRule'];
   alerts?: TimelineItem[];
 }) => {
   const filteredAlerts = filterAlertsAlreadyAttachedToCase(alerts ?? [], caseId);
-  return groupAlertsByRule?.(filteredAlerts) ?? [];
+  return groupAlertsByRule?.(filteredAlerts, owner) ?? [];
 };
 
 const addItemsToInitialPanel = ({
@@ -173,6 +175,7 @@ export const useBulkAddToCaseActions = ({
       content: ALERTS_ALREADY_ATTACHED_TO_CASE,
     },
   });
+  const caseOwner = casesConfig?.owner?.[0];
 
   return useMemo(() => {
     return isCasesContextAvailable &&
@@ -188,11 +191,9 @@ export const useBulkAddToCaseActions = ({
             disableOnQuery: true,
             disabledLabel: ADD_TO_NEW_CASE,
             onClick: (alerts?: TimelineItem[]) => {
-              const caseAttachments = alerts
-                ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
-                : [];
               createCaseFlyout.open({
-                attachments: caseAttachments,
+                getAttachments: (owner) =>
+                  alerts ? casesService?.helpers.groupAlertsByRule(alerts, owner) ?? [] : [],
               });
             },
           },
@@ -206,12 +207,15 @@ export const useBulkAddToCaseActions = ({
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
                   if (theCase == null) {
-                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
+                    return alerts && caseOwner
+                      ? casesService?.helpers.groupAlertsByRule(alerts, caseOwner) ?? []
+                      : [];
                   }
 
                   return getCaseAttachments({
                     alerts,
                     caseId: theCase.id,
+                    owner: theCase.owner,
                     groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
                   });
                 },
@@ -221,6 +225,7 @@ export const useBulkAddToCaseActions = ({
         ]
       : [];
   }, [
+    caseOwner,
     casesService?.helpers,
     createCaseFlyout,
     isCasesContextAvailable,

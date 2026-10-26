@@ -12,7 +12,7 @@ import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
-import type { ESQLQueryParams } from './get_esql_query';
+import type { DiscoverIndexSource, ESQLQueryParams } from './get_esql_query';
 import { useDiscoverHref } from './use_discover_href';
 
 const linkStyle = css`
@@ -23,37 +23,41 @@ const linkStyle = css`
 
 type DiscoverButtonVariant = 'button' | 'emptyButton' | 'iconButton' | 'link';
 
-interface OpenInDiscoverProps {
+type OpenInDiscoverProps = DiscoverIndexSource & {
   dataTestSubj: string;
   label: string;
   variant: DiscoverButtonVariant;
-  indexType: 'traces' | 'error';
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
   ebt: Partial<EbtClickAttrs> & Pick<EbtClickAttrs, 'element'>;
-}
+};
 
 export function OpenInDiscover({
   dataTestSubj,
   label,
   variant,
-  indexType,
   rangeFrom,
   rangeTo,
   queryParams,
   ebt,
+  ...source
 }: OpenInDiscoverProps) {
   const { indexSettingsStatus } = useApmIndexSettingsContext();
 
   const discoverHref = useDiscoverHref({
-    indexType,
+    ...source,
     rangeFrom,
     rangeTo,
     queryParams,
   });
 
-  const isDisabled = !discoverHref || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
+  // For log-source links, the APM index settings are irrelevant — the link is gated only
+  // on whether the log-sources pattern resolved (which arrives via queryParams/indexPattern).
+  const usesApmIndexSettings = source.indexType !== 'logs';
+  const isLoading = usesApmIndexSettings && indexSettingsStatus === FETCH_STATUS.LOADING;
+  const isDisabled =
+    !discoverHref || (usesApmIndexSettings && indexSettingsStatus !== FETCH_STATUS.SUCCESS);
   const ebtProps = ebt ? getEbtProps({ action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER, ...ebt }) : {};
 
   switch (variant) {
@@ -62,7 +66,7 @@ export function OpenInDiscover({
         <EuiButton
           data-test-subj={dataTestSubj}
           aria-label={label}
-          isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+          isLoading={isLoading}
           isDisabled={isDisabled}
           iconType="discoverApp"
           href={discoverHref}
@@ -76,7 +80,7 @@ export function OpenInDiscover({
         <EuiButtonEmpty
           data-test-subj={dataTestSubj}
           aria-label={label}
-          isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+          isLoading={isLoading}
           isDisabled={isDisabled}
           iconType="discoverApp"
           href={discoverHref}
@@ -91,7 +95,7 @@ export function OpenInDiscover({
           <EuiButtonIcon
             data-test-subj={dataTestSubj}
             aria-label={label}
-            isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+            isLoading={isLoading}
             isDisabled={isDisabled}
             iconType="discoverApp"
             href={discoverHref}

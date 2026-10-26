@@ -29,6 +29,16 @@ import {
   createMockActionResultsResponse,
 } from './mocks';
 
+jest.mock('../../utils/find_osquery_action_metadata', () => ({
+  findOsqueryActionMetadata: jest.fn(),
+}));
+
+import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
+
+const mockFindOsqueryActionMetadata = findOsqueryActionMetadata as jest.MockedFunction<
+  typeof findOsqueryActionMetadata
+>;
+
 describe('getActionResultsRoute', () => {
   let mockOsqueryContext: OsqueryAppContext;
   let mockRouter: ReturnType<typeof createMockRouter>;
@@ -656,6 +666,98 @@ describe('getActionResultsRoute', () => {
         expect.objectContaining({ spaceId: 'my-space' }),
         expectedSearchOptions
       );
+    });
+  });
+
+  describe('action document gate', () => {
+    const createNonCpsHandler = () => {
+      const context = createMockOsqueryContext();
+      const internalEsClient = {
+        search: jest.fn(),
+        indices: { exists: jest.fn().mockResolvedValue(true) },
+      };
+      (context.getStartServices as jest.Mock).mockResolvedValue([
+        {
+          savedObjects: {
+            getScopedClient: jest.fn().mockReturnValue({}),
+            createInternalRepository: jest.fn(),
+          },
+          http: { basePath: { set: jest.fn(), get: jest.fn().mockReturnValue('') } },
+          elasticsearch: { client: { asInternalUser: internalEsClient, asScoped: jest.fn() } },
+        },
+        {},
+        {},
+      ]);
+      const router = createMockRouter();
+      getActionResultsRoute(router, context);
+
+      return {
+        handler: router.versioned.getRoute('get', '/api/osquery/action_results/{actionId}')
+          .versions['2023-10-31']!.handler,
+        internalEsClient,
+      };
+    };
+
+    it('returns 404 when the actions index exists but has no same-space action document', async () => {
+      mockFindOsqueryActionMetadata.mockResolvedValue(false);
+      const { handler } = createNonCpsHandler();
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await handler(
+        createMockContext(mockSearchFn),
+        createMockRequest({ actionId: 'unknown-action-id', query: {} }),
+        mockResponse
+      );
+
+      expect(mockFindOsqueryActionMetadata).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionId: 'unknown-action-id',
+          spaceId: 'default',
+          actionsIndexExists: true,
+        })
+      );
+      expect(mockSearchFn).not.toHaveBeenCalled();
+      expect(mockResponse.notFound).toHaveBeenCalledWith({
+        body: { message: 'Action not found' },
+      });
+    });
+
+    it('looks up metadata with the internal client and proceeds when it exists', async () => {
+      mockFindOsqueryActionMetadata.mockResolvedValue(true);
+      const { handler, internalEsClient } = createNonCpsHandler();
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await handler(
+        createMockContext(mockSearchFn),
+        createMockRequest({ actionId: 'authorized-action-id', query: {} }),
+        mockResponse
+      );
+
+      expect(mockFindOsqueryActionMetadata).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: internalEsClient })
+      );
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionId: 'authorized-action-id',
+          factoryQueryType: OsqueryQueries.actionResults,
+        }),
+        expectedSearchOptions
+      );
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('skips the metadata gate when no osquery actions index exists', async () => {
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({ actionId: 'test-action-id', query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockFindOsqueryActionMetadata).not.toHaveBeenCalled();
+      expect(mockSearchFn).toHaveBeenCalled();
     });
   });
 });

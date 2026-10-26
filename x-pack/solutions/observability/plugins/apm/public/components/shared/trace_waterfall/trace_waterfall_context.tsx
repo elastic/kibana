@@ -8,7 +8,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
-import type { Error } from '@kbn/apm-types';
+import type { Error, TraceErrorRowSource } from '@kbn/apm-types';
 import type {
   IWaterfallGetRelatedErrorsHref,
   WaterfallGetServiceBadgeHref,
@@ -109,6 +109,11 @@ export type OnErrorClick = (params: {
   errorCount: number;
   errorDocId?: string;
   docIndex?: string;
+  /**
+   * Per-row aggregate source. 'mixed' means the row carries both classic APM errors and
+   * unprocessed OTel exception logs. Use TraceErrorRowSource from @kbn/apm-types.
+   */
+  errorSource?: TraceErrorRowSource;
 }) => void;
 
 interface Props {

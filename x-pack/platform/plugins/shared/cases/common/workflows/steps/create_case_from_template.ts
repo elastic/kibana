@@ -66,6 +66,8 @@ export const createCaseFromTemplateStepCommonDefinition: CommonStepDefinition<
       title: "Template based case title"
       severity: "high"
       status: "in-progress"
+      extended_fields:
+        priority_as_keyword: "critical"
 \`\`\``,
     ],
   },

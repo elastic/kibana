@@ -7,14 +7,15 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { EventAttachmentPayload } from '../../../common/types/domain';
 import {
   addEventsStepCommonDefinition,
   type AddEventsStepInput,
 } from '../../../common/workflows/steps/add_events';
-import { AttachmentType } from '../../../common';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
+import { LEGACY_EVENT_TYPE } from '../../../common/constants/attachments';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 
 const groupEventsByIndex = (
   events: AddEventsStepInput['events']
@@ -39,12 +40,12 @@ export const addEventsStepDefinition = (
     ...addEventsStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddEventsStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
-        const attachments: EventAttachmentPayload[] = [
+        const attachments: AttachmentRequestV2[] = [
           ...groupEventsByIndex(input.events).values(),
         ].map((group) => ({
-          type: AttachmentType.event,
-          eventId: group.map((event) => event.eventId),
-          index: group.map((event) => event.index),
+          type: toUnifiedAttachmentType(LEGACY_EVENT_TYPE, owner),
+          attachmentId: group.map((event) => event.eventId),
+          metadata: { index: group.map((event) => event.index) },
           owner,
         }));
 

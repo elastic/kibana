@@ -77,6 +77,13 @@ export interface PatchCase extends IndexRefresh {
   originalCase: CaseSavedObjectTransformed;
   closeReason?: string;
   version?: string;
+  /**
+   * v1 customFields key → linked `extended_fields` storage key for fields the
+   * pairing adapter synchronized in this update. When the canonical
+   * `extended_fields` user action records the same edit, the duplicate legacy
+   * `customFields` user action for that key is suppressed (#282474).
+   */
+  pairedCustomFieldStorageKeys?: Record<string, string>;
 }
 
 export type PatchCaseArgs = PatchCase;

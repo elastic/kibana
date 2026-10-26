@@ -473,7 +473,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s when attempting to add a persistable state to a case that already has 100', async () => {
+      // Skipped pending the attachment-cap redesign: these rely on a custom `.test` ER/PS subtype to
+      // reach MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES (100), which no longer exists once the
+      // ER/PS registries are removed. Re-enable when the cap is revisited (UNIFIED_ATTACHMENT_PLAN "Deferred").
+      it.skip('400s when attempting to add a persistable state to a case that already has 100', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const attachments = Array(100).fill({
@@ -508,7 +511,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s when attempting to add an external reference to a case that already has 100', async () => {
+      // Skipped pending the attachment-cap redesign (see the sibling persistable-state limit test above).
+      it.skip('400s when attempting to add an external reference to a case that already has 100', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const attachments = Array(100).fill({

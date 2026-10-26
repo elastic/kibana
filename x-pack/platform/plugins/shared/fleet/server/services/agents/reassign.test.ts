@@ -6,7 +6,10 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -77,6 +80,46 @@ describe('reassignAgent', () => {
       expect(esClient.update).toBeCalledTimes(0);
     });
 
+    it('cannot reassign from agentless agent policy', async () => {
+      const { soClient, esClient, agentInAgentlessDoc, regularAgentPolicySO } = mocks;
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await expect(
+        reassignAgent(soClient, esClient, agentInAgentlessDoc._id, regularAgentPolicySO.id)
+      ).rejects.toThrow(AgentlessAgentRestrictionError);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
+    });
+
+    it('cannot reassign a regular agent to an agentless agent policy', async () => {
+      const { soClient, esClient, agentInRegularDoc, agentlessAgentPolicySO } = mocks;
+      esClient.search.mockResponse({ hits: { hits: [agentInRegularDoc] } } as any);
+      await expect(
+        reassignAgent(soClient, esClient, agentInRegularDoc._id, agentlessAgentPolicySO.id)
+      ).rejects.toThrow(AgentlessAgentRestrictionError);
+      expect(esClient.update).toHaveBeenCalledTimes(0);
+    });
+
+    it('can reassign an agentless agent between variants of its own policy', async () => {
+      const { soClient, esClient, agentInAgentlessDoc, agentInAgentlessVariantDoc } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await reassignAgent(
+        soClient,
+        esClient,
+        agentInAgentlessDoc._id,
+        'agentless-agent-policy#9.6'
+      );
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessVariantDoc] } } as any);
+      await reassignAgent(
+        soClient,
+        esClient,
+        agentInAgentlessVariantDoc._id,
+        'agentless-agent-policy'
+      );
+      expect(esClient.update).toHaveBeenCalledTimes(2);
+    });
+
     it('update namespaces with reassign', async () => {
       const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
 
@@ -142,6 +185,52 @@ describe('reassignAgent', () => {
       expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
     });
 
+    it('agentless agents are not reassigned to another policy', async () => {
+      const { soClient, esClient, agentInRegularDoc, agentInAgentlessDoc, regularAgentPolicySO2 } =
+        mocks;
+
+      esClient.search.mockResponse({
+        hits: { hits: [agentInRegularDoc, agentInAgentlessDoc] },
+      } as any);
+
+      await reassignAgents(
+        soClient,
+        esClient,
+        { agentIds: [agentInRegularDoc._id, agentInAgentlessDoc._id] },
+        regularAgentPolicySO2.id
+      );
+
+      const updated = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+      expect(updated.operations?.length).toBe(2);
+      // @ts-expect-error
+      expect(updated.operations[0].update._id).toEqual(agentInRegularDoc._id);
+
+      const actionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
+      expect(actionResults.operations?.[1]).toEqual(
+        expect.objectContaining({
+          agent_id: agentInAgentlessDoc._id,
+          error: expect.stringContaining('managed agent policy'),
+        })
+      );
+    });
+
+    it('agentless agents are reassigned to a variant of their own policy', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+
+      await reassignAgents(
+        soClient,
+        esClient,
+        { agentIds: [agentInAgentlessDoc._id] },
+        'agentless-agent-policy#9.6'
+      );
+
+      const updated = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+      expect(updated.operations?.length).toBe(2);
+      // @ts-expect-error
+      expect(updated.operations[0].update._id).toEqual(agentInAgentlessDoc._id);
+    });
     it('should report errors from ES agent update call', async () => {
       const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO2 } = mocks;
 
@@ -221,6 +310,34 @@ describe('reassignAgents kuery construction', () => {
       expect.objectContaining({
         kuery: `(namespaces:custom_space) AND (${kuery})`,
       })
+    );
+  });
+
+  it('skips namespace filter for cross-space kuery (spaceId "*") so non-default-space agents are matched', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    // simulate an unscoped internal client by overriding getCurrentNamespace to return undefined
+    soClient.getCurrentNamespace = jest.fn().mockReturnValue(undefined);
+    const unscopedClient = soClient;
+
+    // make the filter return an empty string for undefined so buildFilterWithNamespace is a no-op
+    mockAgentsKueryNamespaceFilter.mockResolvedValueOnce(undefined);
+
+    await reassignAgents(
+      unscopedClient,
+      esClient,
+      { kuery: 'status:online', spaceId: '*', _internalCrossSpace: true },
+      regularAgentPolicySO2.id
+    );
+
+    // The key regression guard: agentsKueryNamespaceFilter must receive undefined,
+    // meaning no space restriction is applied. If the default-space filter were applied
+    // instead, non-default-space agents would be invisible to this query.
+    expect(mockAgentsKueryNamespaceFilter).toHaveBeenCalledWith(undefined);
+    // buildFilterWithNamespace wraps the single kuery in parens even without a namespace prefix
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      unscopedClient,
+      expect.objectContaining({ kuery: '(status:online)' })
     );
   });
 });
@@ -405,6 +522,59 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
 
     expect(result).toEqual({ count: 2 });
     expect(mockReassignBatch).not.toHaveBeenCalled();
+    mockGetAgentsById.mockRestore();
+  });
+
+  it('throws when spaceId "*" is used without _internalCrossSpace flag', async () => {
+    const { esClient, regularAgentPolicySO2 } = createClientMock();
+    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue(undefined) } as any;
+
+    await expect(
+      reassignAgents(
+        scopedClient,
+        esClient,
+        { agentIds: ['agent-1'], spaceId: '*' },
+        regularAgentPolicySO2.id
+      )
+    ).rejects.toThrow(`spaceId '*' requires _internalCrossSpace: true`);
+  });
+
+  it('throws when spaceId "*" with _internalCrossSpace is used with a custom-space scoped soClient', async () => {
+    const { esClient, regularAgentPolicySO2 } = createClientMock();
+    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue('space-a') } as any;
+
+    await expect(
+      reassignAgents(
+        scopedClient,
+        esClient,
+        { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
+        regularAgentPolicySO2.id
+      )
+    ).rejects.toThrow(`spaceId '*' requires an unscoped SO client`);
+  });
+
+  it('with spaceId "*", passes skipNamespaceFilter to getAgentsById and spaceId to reassignBatch', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const mockGetAgentsById = jest
+      .spyOn(crud, 'getAgentsById')
+      .mockResolvedValue([{ id: 'agent-1', policy_id: 'other-policy' } as any]);
+
+    await reassignAgents(
+      soClient,
+      esClient,
+      { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(mockGetAgentsById).toHaveBeenCalledWith(esClient, soClient, ['agent-1'], {
+      skipNamespaceFilter: true,
+    });
+    expect(mockReassignBatch).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({ spaceId: '*' }),
+      expect.anything(),
+      expect.anything()
+    );
     mockGetAgentsById.mockRestore();
   });
 });

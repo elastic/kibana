@@ -1,0 +1,151 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`hasRumDataQuery builds a tier restricted existence query 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "transaction.type": "page-load",
+          },
+        },
+        Object {
+          "term": Object {
+            "processor.event": "transaction",
+          },
+        },
+        Object {
+          "terms": Object {
+            "_tier": Array [
+              "data_hot",
+              "data_warm",
+            ],
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+  "terminate_after": 1,
+  "track_total_hits": 1,
+}
+`;
+
+exports[`hasRumDataQuery builds an unrestricted existence query 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "transaction.type": "page-load",
+          },
+        },
+        Object {
+          "term": Object {
+            "processor.event": "transaction",
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+  "terminate_after": 1,
+  "track_total_hits": 1,
+}
+`;
+
+exports[`hasRumDataWithServiceNameQuery builds a tier restricted query with a services aggregation 1`] = `
+Object {
+  "aggs": Object {
+    "services": Object {
+      "aggs": Object {
+        "mostTraffic": Object {
+          "terms": Object {
+            "field": "service.name",
+            "size": 1,
+          },
+        },
+      },
+      "filter": Object {
+        "range": Object {
+          "@timestamp": Object {
+            "format": "epoch_millis",
+            "gte": 0,
+            "lte": 50000,
+          },
+        },
+      },
+    },
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "transaction.type": "page-load",
+          },
+        },
+        Object {
+          "term": Object {
+            "processor.event": "transaction",
+          },
+        },
+        Object {
+          "terms": Object {
+            "_tier": Array [
+              "data_hot",
+              "data_warm",
+            ],
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+}
+`;
+
+exports[`hasRumDataWithServiceNameQuery builds an unrestricted query with a services aggregation 1`] = `
+Object {
+  "aggs": Object {
+    "services": Object {
+      "aggs": Object {
+        "mostTraffic": Object {
+          "terms": Object {
+            "field": "service.name",
+            "size": 1,
+          },
+        },
+      },
+      "filter": Object {
+        "range": Object {
+          "@timestamp": Object {
+            "format": "epoch_millis",
+            "gte": 0,
+            "lte": 50000,
+          },
+        },
+      },
+    },
+  },
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "transaction.type": "page-load",
+          },
+        },
+        Object {
+          "term": Object {
+            "processor.event": "transaction",
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+}
+`;

@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
+import React from 'react';
+import { act, renderHook, fireEvent, render } from '@testing-library/react';
 
 import { sendGetAgents } from '../../hooks';
 
-import { usePollingAgentCount } from './confirm_agent_enrollment';
+import { ConfirmAgentEnrollment, usePollingAgentCount } from './confirm_agent_enrollment';
+
+const mockNavigateToUrl = jest.fn();
 
 jest.mock('../../hooks', () => ({
   sendGetAgents: jest.fn(),
+  useLink: jest.fn(() => ({
+    getHref: jest.fn((page: string, values?: { kuery?: string }) => {
+      const kuery = values?.kuery ? `?kuery=${values.kuery}` : '';
+      return `/app/fleet/agents${kuery}`;
+    }),
+  })),
+  useStartServices: jest.fn(() => ({
+    application: { navigateToUrl: mockNavigateToUrl },
+  })),
 }));
 
 const mockSendGetAgents = sendGetAgents as jest.Mock;
@@ -61,5 +73,51 @@ describe('usePollingAgentCount', () => {
 
     const { kuery } = mockSendGetAgents.mock.calls[0][0];
     expect(kuery).not.toContain('enrolled_at >=');
+  });
+});
+
+describe('ConfirmAgentEnrollment', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('navigates to the agent list with an OPAMP kuery filter when isCollector is true', () => {
+    const onClickViewAgents = jest.fn();
+
+    const { getByTestId } = render(
+      <ConfirmAgentEnrollment
+        policyId="opamp-policy"
+        troubleshootLink=""
+        onClickViewAgents={onClickViewAgents}
+        agentCount={1}
+        isCollector={true}
+      />
+    );
+
+    fireEvent.click(getByTestId('ConfirmAgentEnrollmentButton'));
+
+    expect(onClickViewAgents).toHaveBeenCalled();
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      expect.stringContaining('fleet-agents.type:OPAMP')
+    );
+  });
+
+  it('navigates to the plain agent list when isCollector is false', () => {
+    const onClickViewAgents = jest.fn();
+
+    const { getByTestId } = render(
+      <ConfirmAgentEnrollment
+        policyId="default-policy"
+        troubleshootLink=""
+        onClickViewAgents={onClickViewAgents}
+        agentCount={1}
+        isCollector={false}
+      />
+    );
+
+    fireEvent.click(getByTestId('ConfirmAgentEnrollmentButton'));
+
+    expect(onClickViewAgents).toHaveBeenCalled();
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.not.stringContaining('agent.type:OPAMP'));
   });
 });

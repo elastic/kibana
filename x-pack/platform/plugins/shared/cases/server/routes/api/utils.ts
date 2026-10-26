@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { CustomHttpResponseOptions, ResponseError, Logger } from '@kbn/core/server';
 import type { CaseError, HTTPError } from '../../common/error';
 import { isCaseError, isHTTPError } from '../../common/error';
+import { getTypedApiErrorAttributes } from '../../common/api_errors';
 
 /**
  * Transforms an error into the correct format for a kibana response.
@@ -28,8 +29,14 @@ export function wrapError(
     boom = isBoom(error) ? error : boomify(error, options);
   }
 
+  // Kibana's response adapter only serializes `payload.attributes` — a Boom's
+  // `data` is silently dropped. Lift typed attributes (created via
+  // createTypedApiError) into a ResponseError object so machine-readable codes
+  // like `field_identity_immutable` reach API clients.
+  const attributes = getTypedApiErrorAttributes(boom);
+
   return {
-    body: boom,
+    body: attributes ? { message: boom.message, attributes } : boom,
     headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };

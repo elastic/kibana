@@ -288,6 +288,7 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
       'xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksCheckboxLabel',
       { defaultMessage: 'Disable' }
     ),
+    hidden: true,
   },
   {
     name: 'agent.internal',

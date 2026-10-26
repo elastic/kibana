@@ -108,25 +108,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
-    it('can edit tab label with keyboard events', async () => {
-      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
-      await unifiedTabs.createNewTab();
-      await openTabContextMenuWithKeyboard();
-      await browser.pressKeys(browser.keys.ARROW_DOWN);
-      await browser.pressKeys(browser.keys.ENTER);
-      await unifiedTabs.enterNewTabLabel('Test label');
-      expect(await unifiedTabs.getTabLabels()).to.eql([
-        'Untitled 1',
-        'Untitled 2',
-        'Untitled 3',
-        'Untitled 4',
-        'Untitled 5',
-        'Untitled 6',
-        'Untitled 7',
-        'Test label',
-      ]);
-    });
-
     it('should support mouse events for navigating between tabs', async () => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 1');

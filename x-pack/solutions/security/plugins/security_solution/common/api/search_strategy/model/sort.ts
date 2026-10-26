@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { Direction, order } from './order';
 
-export const sort = z
-  .object({
-    direction: order.default(Direction.desc),
-    field: z.string().default('@timestamp'),
-  })
-  .default({ direction: Direction.desc, field: '@timestamp' });
+export const sort = lazySchema(() =>
+  z
+    .object({
+      direction: order.default(Direction.desc),
+      field: z.string().default('@timestamp'),
+    })
+    .default({ direction: Direction.desc, field: '@timestamp' })
+);

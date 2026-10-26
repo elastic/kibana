@@ -456,7 +456,7 @@ describe('ConfigureCasesRedesign', () => {
 
   it('does not render observable types when the observables feature is disabled', async () => {
     renderWithTestingProviders(<ConfigureCasesRedesign />, {
-      wrapperProps: { features: { observables: { enabled: false, autoExtract: false } } },
+      wrapperProps: { owner: ['observability'] },
     });
 
     await screen.findByTestId('cases-redesign-settings-panel');

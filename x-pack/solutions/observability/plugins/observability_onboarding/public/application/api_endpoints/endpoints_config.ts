@@ -64,7 +64,8 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
     }) => {
       // Serverless or ECH with mOTLP PRW endpoint enabled
       if (managedOtlpServiceUrl && (isServerless || managedOtlpPrwEndpointEnabled)) {
-        return `${trimTrailingSlashes(managedOtlpServiceUrl)}/api/v1/write`;
+        const managedUrl = trimTrailingSlashes(managedOtlpServiceUrl);
+        return `${managedUrl}/inputs/prometheus-remote-write/_default_/api/v1/write`;
       }
       // ECH with mOTLP PRW endpoint disabled or on-prem
       if (elasticsearchUrl) {

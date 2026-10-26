@@ -65,6 +65,7 @@ export const EPM_API_ROUTES = {
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
   REVIEW_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/review_upgrade`,
   ILM_POLICIES_PATTERN: `${INTERNAL_ROOT}/epm/ilm_policies`,
+  NAMESPACE_PREFLIGHT_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/namespace_customization/_preflight_check`,
 };
 
 // Data stream API routes
@@ -102,6 +103,7 @@ export const AGENT_POLICY_API_ROUTES = {
   AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
   CREATE_WITH_PACKAGE_POLICIES: `${INTERNAL_ROOT}/agent_and_package_policies`,
   CLEANUP_REVISIONS_PATTERN: `${INTERNAL_ROOT}/agent_policies/_cleanup_revisions`,
+  PACKAGE_POLICIES_SUMMARY_PATTERN: `${INTERNAL_ROOT}/agent_policies/_package_policies_summary`,
 };
 
 // Cloud Connector API routes
@@ -138,6 +140,7 @@ export const OUTPUT_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
   GET_OUTPUT_HEALTH_PATTERN: `${API_ROOT}/outputs/{outputId}/health`,
+  GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN: `${INTERNAL_ROOT}/outputs/{outputId}/agent_policy_count`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 

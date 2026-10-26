@@ -9,7 +9,7 @@
 
 import { URL } from 'url';
 import { Socket } from 'net';
-import { stringify } from 'query-string';
+import qs from 'query-string';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { schema } from '@kbn/config-schema';
 import {
@@ -89,7 +89,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   auth = { isAuthenticated: true },
   spaceId,
 }: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
-  const queryString = stringify(query, { sort: false });
+  const queryString = qs.stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
   const appState = spaceId

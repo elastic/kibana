@@ -43,6 +43,7 @@ const props: CasesTableFiltersProps = {
   onFilterChanged,
   filterOptions: DEFAULT_FILTER_OPTIONS,
   availableSolutions: [],
+  canCreateCase: true,
   isLoading: false,
   currentUserProfile: undefined,
   deselectCases: jest.fn(),
@@ -472,6 +473,25 @@ describe('CasesTableFilters ', () => {
       await waitForComponentToUpdate();
       // NOTE: intentionally checking no arguments are passed
       expect(onCreateCasePressed).toHaveBeenCalledWith();
+    });
+
+    it('should disable the create case button without create permission', async () => {
+      const onCreateCasePressed = jest.fn();
+
+      renderWithTestingProviders(
+        <CasesTableFilters
+          {...props}
+          isSelectorView={true}
+          onCreateCasePressed={onCreateCasePressed}
+          canCreateCase={false}
+        />
+      );
+
+      const createCaseButton = await screen.findByTestId('cases-table-add-case-filter-bar');
+      expect(createCaseButton).toBeDisabled();
+
+      await userEvent.click(createCaseButton);
+      expect(onCreateCasePressed).not.toHaveBeenCalled();
     });
   });
 

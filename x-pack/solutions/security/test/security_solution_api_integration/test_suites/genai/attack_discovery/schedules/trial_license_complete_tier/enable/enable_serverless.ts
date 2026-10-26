@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           await apis.enable({ id: createdSchedule.id, kibanaSpace: kibanaSpace1 });
 
-          checkIfScheduleEnabled({
+          await checkIfScheduleEnabled({
             getService,
             id: createdSchedule.id,
             kibanaSpace: kibanaSpace1,

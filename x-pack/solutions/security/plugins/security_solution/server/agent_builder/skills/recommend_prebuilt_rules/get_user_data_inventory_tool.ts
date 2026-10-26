@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -15,7 +15,7 @@ import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_co
 
 export const GET_USER_DATA_INVENTORY_INLINE_TOOL_ID = 'security.get_user_data_inventory';
 
-export const getUserDataInventorySchema = z.object({}).strict();
+export const getUserDataInventorySchema = lazySchema(() => z.object({}).strict());
 
 interface GetUserDataInventoryToolDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;

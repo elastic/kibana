@@ -8,7 +8,13 @@
  */
 import { SPAN_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
-import { PROCESSOR_EVENT, ERROR_LOG_LEVEL, OTEL_EVENT_NAME } from '@kbn/apm-types';
+import {
+  PROCESSOR_EVENT,
+  ERROR_LOG_LEVEL,
+  EXCEPTION_MESSAGE,
+  EXCEPTION_TYPE,
+  OTEL_EVENT_NAME,
+} from '@kbn/apm-types';
 
 const createBaseTraceContextFilters = ({
   traceId,
@@ -58,11 +64,16 @@ export const createTraceContextWhereClauseForErrors = ({
 }) => {
   let queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
 
+  // Mirrors the `should` clauses and the `must_not exists processor.event` filter of the
+  // server-side getUnprocessedOtelErrors query, so that every row rendered in the errors table
+  // is also matched by the section-level "Open in Discover" link.
+  const unprocessedOtelException = `(${OTEL_EVENT_NAME}: "exception" or ${EXCEPTION_TYPE}: * or ${EXCEPTION_MESSAGE}: *) and not ${PROCESSOR_EVENT}: *`;
+
   const conditions = [
     `${PROCESSOR_EVENT}: "error"`,
     `${ERROR_LOG_LEVEL}: "error"`,
-    `${OTEL_EVENT_NAME}: "exception"`,
-    `${OTEL_EVENT_NAME}: "error" `,
+    `${OTEL_EVENT_NAME}: "error"`,
+    `(${unprocessedOtelException})`,
   ];
 
   queryString += ` AND  KQL("""${conditions.join(' OR ')}""")`;

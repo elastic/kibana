@@ -27,7 +27,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type { PackagePolicyAssetsMap } from '../../common/types';
+import type { AgentPolicyPackagePoliciesSummary, PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
@@ -135,7 +135,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
@@ -150,6 +150,11 @@ export interface PackagePolicyClient {
     agentPolicyId: string,
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  getSummaryForAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicyIds: string[]
+  ): Promise<Map<string, AgentPolicyPackagePoliciesSummary>>;
 
   compilePackagePolicyForVersions(
     soClient: SavedObjectsClientContract,
@@ -186,7 +191,8 @@ export interface PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
     },
-    currentVersion?: string
+    /** Request context so update callbacks can use the caller's Elasticsearch client. */
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy>;
 
   delete(
@@ -261,6 +267,11 @@ export interface PackagePolicyClient {
     outputId: string,
     options?: { force?: boolean }
   ): Promise<void>;
+
+  getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs
@@ -340,7 +351,15 @@ export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
 
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   user?: AuthenticatedUser;
+  /**
+   * When true, skip unassigning from surviving agent policies and skip the agent policy revision
+   * bump. This also suppresses the agentless agent policy cascade-delete. Use only when the caller
+   * manages those side-effects itself.
+   */
   skipUnassignFromAgentPolicies?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
+  /** Bypass `is_managed` and hosted-agent-policy guards. */
   force?: boolean;
   asyncDeploy?: boolean;
   ignoreMissing?: boolean;
@@ -349,6 +368,8 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
 export interface PackagePolicyClientBulkUpdateOptions {
   user?: AuthenticatedUser;
   force?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];

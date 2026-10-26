@@ -48,7 +48,7 @@ const createMockLogger = (): Logger =>
 
 describe('buildLensConfig', () => {
   const events = {} as ToolEventEmitter;
-  const esClient = { asCurrentUser: {} } as IScopedClusterClient;
+  const esClient = { asCurrentUser: {}, asInternalUser: {} } as IScopedClusterClient;
   const modelProvider = {
     getDefaultModel: jest.fn().mockResolvedValue({}),
   } as unknown as ModelProvider;
@@ -89,7 +89,10 @@ describe('buildLensConfig', () => {
   it('passes a valid provided ES|QL through to the graph verbatim', async () => {
     await run(PROVIDED_ESQL);
 
-    expect(mockedBuildCallbacks).toHaveBeenCalledWith({ client: esClient.asCurrentUser });
+    expect(mockedBuildCallbacks).toHaveBeenCalledWith({
+      esClient,
+      logger,
+    });
     expect(mockedValidateEsqlQuery).toHaveBeenCalledWith(PROVIDED_ESQL, {});
     expect(invoke).toHaveBeenCalledTimes(1);
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });

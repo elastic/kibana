@@ -85,6 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('mapFilterActionButton__drilldown1');
 
         // Assert on new dashboard with filter from action
+        await dashboard.expectOnDashboard('map embeddable example');
         await dashboard.waitForRenderComplete();
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.equal(2);

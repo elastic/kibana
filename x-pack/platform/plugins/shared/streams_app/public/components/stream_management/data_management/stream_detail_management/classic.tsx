@@ -26,6 +26,10 @@ import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
 import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
 import { StreamDetailCanvas } from '../stream_detail_canvas';
+import {
+  ImportLifecycleFlyoutProvider,
+  useImportLifecycleFlyoutContext,
+} from '../stream_detail_lifecycle/import_from_stream';
 
 const classicStreamManagementSubTabs = [
   'overview',
@@ -60,6 +64,23 @@ export function ClassicStreamDetailManagement({
   definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  return (
+    <ImportLifecycleFlyoutProvider>
+      <ClassicStreamDetailManagementContent
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+      />
+    </ImportLifecycleFlyoutProvider>
+  );
+}
+
+function ClassicStreamDetailManagementContent({
+  definition,
+  refreshDefinition,
+}: {
+  definition: Streams.ClassicStream.GetResponse;
+  refreshDefinition: () => void;
+}) {
   const {
     core: { notifications },
     dependencies: {
@@ -69,6 +90,7 @@ export function ClassicStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+  const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const {
     features: { canvas, queryStreams },
@@ -125,6 +147,8 @@ export function ClassicStreamDetailManagement({
         showActions={tab === 'lifecycle'}
         notifications={notifications}
         share={share}
+        onImportFromStream={importLifecycleFlyout?.open}
+        isImportFromStreamDisabled={importLifecycleFlyout?.isDisabled}
       />
     ),
   };

@@ -11,6 +11,7 @@ import { STREAMS_INSPECT_STREAMS_TOOL_ID } from '@kbn/streams-plugin/server';
 import { createMemoryTools } from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
 import { createSearchKnowledgeIndicatorsTool } from '../../tools/search_knowledge_indicators/tool';
+import { toInlineMemoryTool } from './to_inline_tools';
 
 import description from './gap_detection.description.text';
 import content from './gap_detection.skill.md.text';
@@ -38,16 +39,12 @@ export const createGapDetectionSkill = (options: MemoryToolsOptions) =>
 
       const extraTools: SkillBoundedTool[] = [];
       if (options.getScopedClients && options.server && options.logger) {
-        const { availability: _availability, ...kiTool } = createSearchKnowledgeIndicatorsTool({
+        const kiTool = createSearchKnowledgeIndicatorsTool({
           getScopedClients: options.getScopedClients,
           server: options.server,
           logger: options.logger,
         });
-        extraTools.push({
-          ...kiTool,
-          id: kiTool.id.replaceAll('.', '_'),
-          experimental: false,
-        } as SkillBoundedTool);
+        extraTools.push({ ...toInlineMemoryTool(kiTool), experimental: false });
       }
 
       return [...memoryTools, ...extraTools];

@@ -932,6 +932,21 @@ describe('updateRuleDataSchema', () => {
     expect(result.metadata?.description).toBe('updated description');
   });
 
+  it('accepts a non-empty tags update', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { tags: ['prod', 'infra'] } });
+    expect(result.metadata?.tags).toEqual(['prod', 'infra']);
+  });
+
+  it('accepts metadata.tags set to null (clear all tags)', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { tags: null } });
+    expect(result.metadata?.tags).toBeNull();
+  });
+
+  it('rejects metadata.tags as an empty array (use null to clear)', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { tags: [] } });
+    expect(result.success).toBe(false);
+  });
+
   it('accepts artifacts in update payload and supports null removal', () => {
     const withArtifacts = updateRuleDataSchema.parse({
       artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
