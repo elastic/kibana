@@ -95,3 +95,6 @@ export {
   sloTemplateSchema as sloTemplateSchemaZod,
   storedSloTemplateSchema as storedSloTemplateSchemaZod,
 } from './zod';
+
+// Unsuffixed: a helper, not an io-ts twin.
+export { is } from './zod';
