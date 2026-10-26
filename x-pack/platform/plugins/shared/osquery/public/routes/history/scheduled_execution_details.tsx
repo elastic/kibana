@@ -207,7 +207,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
       <QueryResultsAppHeader
         actionId={scheduleId}
         data={headerData}
-        title={removeMultilines(firstQueryData.query)}
+        title={removeMultilines(firstQueryData.query) || FALLBACK_TITLE}
         back={historyBack}
         metadata={scheduledMetadata}
         docLink={docLinks.links.osquery.guide}

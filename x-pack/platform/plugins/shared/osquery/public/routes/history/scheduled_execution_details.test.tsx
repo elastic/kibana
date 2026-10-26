@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
@@ -36,8 +36,8 @@ jest.mock('../../common/experimental_features_context', () => ({
     .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
   ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-// The Discover/Lens "View in" items don't apply to scheduled runs at all; mocked purely so the
-// menu hook's shared Discover/Lens hooks don't need the real data-view query machinery.
+// Lets the "View in" Discover/Lens items resolve their URLs without the real data-view query
+// machinery.
 jest.mock('../../common/hooks/use_logs_data_view', () => ({
   useLogsDataView: jest.fn().mockReturnValue({ data: { id: 'logs-id', title: 'logs' } }),
 }));
@@ -51,6 +51,7 @@ jest.mock('../saved_queries/edit/tabs', () => ({
   },
 }));
 
+const mockDiscoverGetUrl = jest.fn();
 const mockCanUseCases = jest.fn();
 const mockOpenCaseModal = jest.fn();
 // A plain passthrough stands in for the real `CasesContext` component the `cases` plugin would
@@ -75,6 +76,7 @@ const setupKibana = ({
   casePermissions = { read: true, update: true, push: true },
 }: SetupKibanaOptions = {}) => {
   mockCanUseCases.mockReturnValue(casePermissions);
+  mockDiscoverGetUrl.mockResolvedValue('http://localhost/discover');
 
   mockUseKibana.mockReturnValue({
     services: {
@@ -99,7 +101,7 @@ const setupKibana = ({
           useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: mockOpenCaseModal }),
         },
       },
-      discover: { locator: { getUrl: jest.fn().mockResolvedValue('http://localhost/discover') } },
+      discover: { locator: { getUrl: mockDiscoverGetUrl } },
       lens: {
         canUseEditor: jest.fn().mockReturnValue(true),
         navigateToPrefilledEditor: jest.fn(),
@@ -186,6 +188,22 @@ describe('ScheduledExecutionDetailsPage', () => {
       );
     });
 
+    it('brackets the execution timestamp on both sides of the View in window so earlier agent responses are included', async () => {
+      renderPage();
+
+      await waitFor(() =>
+        expect(mockDiscoverGetUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            timeRange: {
+              from: '2026-09-01T11:00:00.000Z',
+              to: '2026-09-01T13:00:00.000Z',
+              mode: 'absolute',
+            },
+          })
+        )
+      );
+    });
+
     it('shows View in and Add to Case in the overflow, a disabled Add tags, and no Save query with full permissions', async () => {
       renderPage();
       await openAppMenuOverflow();
@@ -220,18 +238,22 @@ describe('ScheduledExecutionDetailsPage', () => {
       expect(screen.getByTestId('query-details-add-to-case')).toBeInTheDocument();
     });
 
-    it('still renders the full header when the pack saved object is gone but hits exist', () => {
+    it('falls back to "Query results" as the title when the pack saved object is gone but hits exist', () => {
+      // The scheduled results API resolves the query text from the pack saved object, so a deleted
+      // pack (or pack query) leaves only the execution hits.
       mockHookResult({
         data: {
           ...baseDetails,
           packName: '',
           queryName: '',
+          queryText: '',
         },
       });
 
       renderPage();
 
-      expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('SELECT * FROM processes');
+      expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Query results');
+      expect(screen.getByTestId('result-tabs')).toBeInTheDocument();
       expect(screen.queryByText('No details for this execution')).not.toBeInTheDocument();
     });
   });
