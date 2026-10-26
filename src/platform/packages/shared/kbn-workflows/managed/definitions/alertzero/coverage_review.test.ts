@@ -993,6 +993,17 @@ describe('Detection Coverage review', () => {
         expect(emitFailure?.with?.[key]).toBe(stepByName('emit_result')?.with?.[key]);
       }
     });
+
+    it.each([
+      [{ check_error: 'coverage_check produced no verdict', creation_error: '' }],
+      [{ check_error: '', creation_error: 'rule creation failed: boom' }],
+    ])('fails the run with the error that happened: %o', (output) => {
+      expect(
+        render(stepByName('emit_failure')?.with?.message as string, {
+          resolve_failure: { output },
+        })
+      ).toBe(output.check_error || output.creation_error);
+    });
   });
 
   describe('inputs', () => {
