@@ -237,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
    * the Attacks page and the attack flyout, and registers the `security.attack` unified
    * cases attachment type on the server.
    */
-  attackAttachmentsEnabled: false,
+  attackAttachments: true,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -388,7 +388,7 @@ export const allowedExperimentalValues = Object.freeze({
    * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
    * Release: 9.6
    */
-  endpointAiDataCollection: false,
+  endpointAiDataCollection: true,
 
   /**
    * Enables the Registry credential hardening toggle in the Elastic Defend policy

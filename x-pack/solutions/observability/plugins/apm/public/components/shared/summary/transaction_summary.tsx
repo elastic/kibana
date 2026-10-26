@@ -23,11 +23,14 @@ interface Props {
   coldStartBadge?: boolean;
 }
 
+export function getTransactionUrl(transaction: Transaction) {
+  const urlFull = transaction.url?.full || transaction.transaction?.page?.url;
+  return urlFull ?? buildUrl(transaction);
+}
+
 function getTransactionResultSummaryItem(transaction: Transaction) {
   const result = transaction.transaction.result;
-  const urlFull = transaction.url?.full || transaction.transaction?.page?.url;
-
-  const url = urlFull ?? buildUrl(transaction);
+  const url = getTransactionUrl(transaction);
 
   if (url) {
     const method = transaction.http?.request?.method;

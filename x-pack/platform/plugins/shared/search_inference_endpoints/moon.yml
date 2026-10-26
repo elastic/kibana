@@ -78,6 +78,4 @@ fileGroups:
     - server/**/*
     - test/scout_inference_test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -365,7 +365,7 @@ export const updateCaseAttachmentStats = async ({
 };
 
 /**
- * Removes the ids that the `getRelatedAttachments` hooks of the attachments' types take along
+ * Removes the ids that the `relatedAttachments` hooks of the attachments' types take along
  * with them, recording 1 user action per related type.
  */
 export const deleteRelatedAttachments = async (
@@ -533,7 +533,7 @@ export const deleteByAttachmentIds = async (
       caseId,
       owner: caseOwner,
       attachmentType: type,
-      attachmentIds: deleted.map(({ id }) => id),
+      ids: deleted.map(({ id }) => id),
       removedAttributes,
     });
   };

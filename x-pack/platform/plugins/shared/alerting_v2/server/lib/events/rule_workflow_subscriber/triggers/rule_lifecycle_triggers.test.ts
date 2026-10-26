@@ -38,7 +38,6 @@ const enrichedPayload: RuleEvent['payload'] = {
     metadata: { name: 'secret rule', tags: [...tags] },
   }),
   correlationId: 'bulk-1',
-  origin: { channel: 'api' },
 };
 
 interface Case {
@@ -101,7 +100,7 @@ describe('toLifecycleWorkflowPayload', () => {
   it('defaults tags to an empty array when the domain rule is missing (bulk-delete fallback)', () => {
     const event: RuleEvent = {
       type: RULE_DELETED_EVENT_TYPE,
-      payload: { ruleId: 'rule-1', spaceId: 'default', origin: { channel: 'api' } },
+      payload: { ruleId: 'rule-1', spaceId: 'default' },
     };
 
     expect(toLifecycleWorkflowPayload(event)).toEqual({
@@ -116,7 +115,6 @@ describe('toLifecycleWorkflowPayload', () => {
         ruleId: 'rule-1',
         spaceId: 'default',
         rule: createRuleResponse({ id: 'rule-1' }),
-        origin: { channel: 'api' },
       },
     };
 
@@ -130,7 +128,7 @@ describe('toLifecycleWorkflowPayload', () => {
     });
     const event: RuleEvent = {
       type: RULE_UPDATED_EVENT_TYPE,
-      payload: { ruleId: 'rule-1', spaceId: 'default', rule, origin: { channel: 'api' } },
+      payload: { ruleId: 'rule-1', spaceId: 'default', rule },
     };
 
     const result = toLifecycleWorkflowPayload(event);
