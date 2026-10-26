@@ -38,11 +38,12 @@ const filterDestinations = (
 
 /**
  * Rate, failed rate and latency per destination, from a plain `FROM`. A rate is the exact sum of
- * items over the time from the destination's first data point in the window to the end of it, so a
- * destination that started inside the window is not diluted. The time is taken in milliseconds
- * because `DATE_DIFF` in seconds truncates. `failed_rate` counts every outcome except `success`:
- * 0 when there are items and no failures, null when there are no items. `AVG` of the duration
- * histograms is the mean of all observations. `items` is a counter, so it is cast first.
+ * items over the time from where the first delta in the window starts (a document is a delta from
+ * `start_timestamp` to `@timestamp`) to the end of the window, so a destination that started inside
+ * the window is not diluted and the first delta's own interval is counted. The time is taken in
+ * milliseconds because `DATE_DIFF` in seconds truncates. `failed_rate` counts every outcome except
+ * `success`: 0 when there are items and no failures, null when there are no items. `AVG` of the
+ * duration histograms is the mean of all observations. `items` is a counter, so it is cast first.
  */
 export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): ComposerQuery => {
   const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
@@ -59,9 +60,9 @@ export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): 
     .pipe`EVAL delta = TO_DOUBLE(${items})`.pipe`STATS sum_items = SUM(delta),
         failed_items = SUM(delta) WHERE ${outcome} != "success",
         ${avgLatency} = AVG(${duration}),
-        first_seen = MIN(@timestamp)
+        covered_from = MIN(start_timestamp)
       BY ${id} = ${destinationId}`
-    .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", first_seen, ${end}) / 1000.0`
+    .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, ${end}) / 1000.0`
     .pipe`EVAL ${incomingRate} = sum_items / window_seconds,
         ${failedRate} = CASE(sum_items IS NOT NULL, COALESCE(failed_items, 0.0) / window_seconds)`
     .pipe`KEEP ${id}, ${incomingRate}, ${failedRate}, ${avgLatency}`;

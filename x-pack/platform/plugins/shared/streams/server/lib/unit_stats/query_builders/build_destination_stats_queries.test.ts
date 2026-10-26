@@ -17,9 +17,9 @@ const params = { unitId: 'default', window, ids: ['es-prod', 'es-dev'] };
 const head = `SET unmapped_fields = "nullify"; FROM ${UNIT_METRICS_STREAM} | WHERE resource.attributes.unit.id == "default" AND @timestamp >= "${window.start}" AND @timestamp < "${window.end}" | WHERE scope.attributes.streams.destination.id IN ("es-prod", "es-dev")`;
 
 describe('buildDestinationRateQuery', () => {
-  it('divides the items and the failed items by the time since the first data point, and averages the latency', () => {
+  it('divides the items and the failed items by the time since the first delta starts, and averages the latency', () => {
     expect(buildDestinationRateQuery(params).print('basic')).toBe(
-      `${head} | EVAL delta = TO_DOUBLE(metrics.streams.destination.items) | STATS sum_items = SUM(delta), failed_items = SUM(delta) WHERE attributes.outcome != "success", avg_latency = AVG(metrics.streams.destination.duration), first_seen = MIN(@timestamp) BY id = scope.attributes.streams.destination.id | EVAL window_seconds = DATE_DIFF("milliseconds", first_seen, "${window.end}") / 1000.0 | EVAL incoming_rate = sum_items / window_seconds, failed_rate = CASE(sum_items IS NOT NULL, COALESCE(failed_items, 0.0) / window_seconds) | KEEP id, incoming_rate, failed_rate, avg_latency`
+      `${head} | EVAL delta = TO_DOUBLE(metrics.streams.destination.items) | STATS sum_items = SUM(delta), failed_items = SUM(delta) WHERE attributes.outcome != "success", avg_latency = AVG(metrics.streams.destination.duration), covered_from = MIN(start_timestamp) BY id = scope.attributes.streams.destination.id | EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, "${window.end}") / 1000.0 | EVAL incoming_rate = sum_items / window_seconds, failed_rate = CASE(sum_items IS NOT NULL, COALESCE(failed_items, 0.0) / window_seconds) | KEEP id, incoming_rate, failed_rate, avg_latency`
     );
   });
 

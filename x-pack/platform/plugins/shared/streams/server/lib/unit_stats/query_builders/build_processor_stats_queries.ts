@@ -41,11 +41,11 @@ const filterProcessors = (
 /**
  * The rate of items in (direction `in`) and the time per item of each instance of a processor
  * over the window, from a plain `FROM`. An instance is a pipeline and a route position, null for
- * the processors of the pipeline itself. The rate is the sum of items in over the time from the
- * instance's first data point in the window to the end of it, in milliseconds because
- * `DATE_DIFF` in seconds truncates. `avg_duration_per_item` is the duration sum over the items in,
- * as an average of the duration histograms would be per batch. `items` is a counter, so it is
- * cast first.
+ * the processors of the pipeline itself. The rate is the sum of items in over the time from where
+ * the instance's first delta in the window starts (a document is a delta from `start_timestamp`
+ * to `@timestamp`) to the end of the window, in milliseconds because `DATE_DIFF` in seconds
+ * truncates. `avg_duration_per_item` is the duration sum over the items in, as an average of the
+ * duration histograms would be per batch. `items` is a counter, so it is cast first.
  *
  * Processor failures are not queried, see
  * https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/52158.
@@ -68,9 +68,9 @@ export const buildProcessorSumsQuery = (params: ProcessorStatsQueryParams): Comp
     .pipe`EVAL delta = TO_DOUBLE(${stepItems})`
     .pipe`STATS sum_items_in = SUM(delta) WHERE ${direction} == "in",
         duration_sum = SUM(${stepDuration}),
-        first_seen = MIN(@timestamp)
+        covered_from = MIN(start_timestamp)
       BY ${step} = ${stepId}, ${pipeline} = ${stepPipelineId}, ${routeIndex} = ${stepRouteIndex}`
-    .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", first_seen, ${end}) / 1000.0`
+    .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, ${end}) / 1000.0`
     .pipe`EVAL ${incomingRate} = sum_items_in / window_seconds,
         ${avgDurationPerItem} = CASE(sum_items_in > 0, duration_sum / sum_items_in)`
     .pipe`KEEP ${step}, ${pipeline}, ${routeIndex}, ${incomingRate}, ${avgDurationPerItem}`
