@@ -189,6 +189,25 @@ export const enableAlertZeroInSpace = async (args: {
 }): Promise<void> => setAlertZeroEnabledInSpace({ ...args, enabled: true });
 
 /**
+ * Enables the per-space AlertZero gate for one suite and returns the restore callback for its
+ * afterAll. The suites run serially (`workers: 1`), so a suite that only enables — never
+ * restores — would 404 the gated routes of the next gated suite on the same stack; restoring
+ * the captured baseline keeps the shared space exactly as this suite found it, including the
+ * case where a previous suite (or the deployment) had the gate already on.
+ */
+export const withAlertZeroEnabledInSpace = async (args: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+}): Promise<() => Promise<void>> => {
+  const baseline = {
+    enabled: await readAlertZeroEnabledInSpace(args),
+  };
+  await setAlertZeroEnabledInSpace({ ...args, enabled: true });
+  return () => setAlertZeroEnabledInSpace({ ...args, enabled: baseline.enabled });
+};
+
+/**
  * Creates a space-scoped `.gen-ai` connector (so Workers are not blocked by `noModel`),
  * assigns it to the AlertZero parent inference feature when getForFeature would otherwise
  * see nothing, and creates a uniquely named service account that holds the Hunt Worker's

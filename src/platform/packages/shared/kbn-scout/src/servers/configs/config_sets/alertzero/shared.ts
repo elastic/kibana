@@ -28,6 +28,12 @@ interface AvailableConnector {
   actionTypeId: string;
   config: Record<string, unknown>;
   secrets?: Record<string, unknown>;
+  /**
+   * Actions omits a preconfigured connector's `config` from its API responses unless this is
+   * true, so dropping it here would hide `config.taskType` from the suites that read connectors
+   * to decide whether the LLM-dependent flows can run (see `listChatCompletionConnectors`).
+   */
+  exposeConfig?: boolean;
 }
 
 const getConnectorsFromKibanaDevYml = (): Record<string, AvailableConnector> => {
@@ -46,12 +52,16 @@ const getConnectorsFromKibanaDevYml = (): Record<string, AvailableConnector> => 
       AvailableConnector
     >;
 
-    return mapValues(preconfiguredConnectors, ({ actionTypeId, config, name, secrets }) => ({
-      actionTypeId,
-      config,
-      name,
-      secrets,
-    }));
+    return mapValues(
+      preconfiguredConnectors,
+      ({ actionTypeId, config, exposeConfig, name, secrets }) => ({
+        actionTypeId,
+        ...(exposeConfig === undefined ? {} : { exposeConfig }),
+        config,
+        name,
+        secrets,
+      })
+    );
   } catch {
     return {};
   }

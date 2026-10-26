@@ -21,6 +21,7 @@ import {
   patchWorker,
   resetWorker,
   updateWorker,
+  withAlertZeroEnabledInSpace,
 } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
@@ -61,6 +62,20 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     });
   };
 
+  // Worker routes are gated on the per-space AlertZero setting; the server config deliberately
+  // does not pin it (an override makes it read-only), so this suite turns it on itself and puts
+  // the captured baseline back in teardown.
+  let restoreAlertZero: (() => Promise<void>) | undefined;
+
+  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+    restoreAlertZero = await withAlertZeroEnabledInSpace({
+      apiClient,
+      headers: cookieHeader,
+      spaceId: 'default',
+    });
+  });
+
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     const api = await getAdminApi(apiClient, samlAuth);
     // Unbind before deleting the accounts: a worker left pointing at a deleted account leaks into
@@ -74,6 +89,8 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     for (const id of serviceAccountIds) {
       await deleteServiceAccount(api, id);
     }
+    // Last, and best-effort: the worker resets above already stopped the gated routes' users.
+    await restoreAlertZero?.().catch(() => undefined);
   });
 
   apiTest('lists the managed security workers', async ({ apiClient, samlAuth }) => {

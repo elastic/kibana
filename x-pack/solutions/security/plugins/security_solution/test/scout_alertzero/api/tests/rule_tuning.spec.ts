@@ -12,6 +12,7 @@ import {
   assertExecutionCompleted,
   cancelNewExecutions,
   createServiceAccount,
+  deleteInvestigation,
   deleteServiceAccount,
   getAdminApi,
   getWorker,
@@ -23,6 +24,7 @@ import {
   tags,
   testData,
   updateWorker,
+  withAlertZeroEnabledInSpace,
   waitForExecution,
   waitForNewExecution,
 } from '../fixtures';
@@ -84,6 +86,8 @@ const EXCLUSION_OPERATORS = ['is_not', 'is_not_one_of', 'does_not_match', 'exclu
 
 let api: AlertZeroApi | undefined;
 let esClientRef: EsClient | undefined;
+/** Restores the per-space AlertZero gate this suite enabled in beforeAll (see beforeAll). */
+let restoreAlertZero: (() => Promise<void>) | undefined;
 const serviceAccountIds: string[] = [];
 const seededRules: SeededRule[] = [];
 /** The rule the scoped exception was applied to: the negative control exercises that rule. */
@@ -96,6 +100,13 @@ let controlIndex: string | undefined;
  * the runs this suite started before the service accounts are deleted.
  */
 const executionBaselines: Map<string, string[]> = new Map();
+/**
+ * Investigations the tuning reviews created, by the conversations behind the proposals this run
+ * leaves (each review parks a persistent Investigation; without this they accumulate in the
+ * shared default space pointing at rules this suite deletes). Populated by the tests as they
+ * read proposals, and by teardown as it dismisses them.
+ */
+const investigationIds = new Set<string>();
 
 const entryValues = (entry: ExceptionEntry): string[] => {
   const values: string[] = [];
@@ -426,6 +437,7 @@ const applyScopedExceptionToRule = async (
   const sweepExecutionId = await runTuningSweep(adminApi);
 
   const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
+  investigationIds.add(entryProposal.conversationId);
   await approveTuningProposal(adminApi, entryProposal);
 
   const tuningProposal = await waitForTuningProposal(adminApi, rule, startedAt, sweepExecutionId);
@@ -448,6 +460,7 @@ const applyScopedExceptionToRule = async (
     'the tuning proposal'
   );
 
+  investigationIds.add(tuningProposal.conversationId);
   await approveTuningProposal(adminApi, tuningProposal);
   await assertPersistedScopedException(adminApi, rule);
   return rule;
@@ -626,6 +639,19 @@ const skipWithoutChatConnector = async (adminApi: AlertZeroApi): Promise<void> =
 };
 
 apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic] }, () => {
+  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    // The worker routes this suite drives are gated on the per-space AlertZero setting, which the
+    // server config deliberately leaves writable (an override would make it read-only and break
+    // the hunt suites' baseline writes). Enable it for this suite and restore the baseline in
+    // teardown, so the next gated suite starts from the state this one found.
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+    restoreAlertZero = await withAlertZeroEnabledInSpace({
+      apiClient,
+      headers: cookieHeader,
+      spaceId: 'default',
+    });
+  });
+
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     const errors: unknown[] = [];
     const attempt = async (step: () => Promise<unknown>) => {
@@ -660,9 +686,14 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
     }
     // Settle what is only waiting for a human: dismissal releases the parked review behind each
     // pending proposal on its declined branch, and that run may still need the service account,
-    // so this belongs before the account teardown.
+    // so this belongs before the account teardown. The conversations it returns are this run's
+    // Investigations; they outlive the proposals and are deleted after the accounts.
     await attempt(async () => {
-      if (api && seededRules.length > 0) await dismissRunTuningProposals(api, seededRules);
+      if (api && seededRules.length > 0) {
+        for (const conversationId of await dismissRunTuningProposals(api, seededRules)) {
+          investigationIds.add(conversationId);
+        }
+      }
     });
     await attempt(async () => {
       if (api) await resetWorker(api, WORKER_ID);
@@ -672,6 +703,19 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
         if (api) await deleteServiceAccount(api, account);
       });
     }
+    // Delete the Investigations behind this run's proposals only after the accounts: the
+    // declined-branch runs that dismissal released may still be writing their final messages,
+    // and they execute as the service accounts deleted just above.
+    for (const investigationId of investigationIds) {
+      await attempt(async () => {
+        if (api) await deleteInvestigation(api, investigationId);
+      });
+    }
+    // Restore the per-space AlertZero gate this suite enabled (see beforeAll). Best-effort: the
+    // gated routes' users are all settled by now.
+    await attempt(async () => {
+      await restoreAlertZero?.();
+    });
     await attempt(async () => {
       if (esClientRef && controlIndex) {
         await esClientRef.indices
@@ -824,6 +868,7 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
 
       // Settling the review is what closes it without a diagnosis: declining marks its alerts
       // reviewed and ends the run, so no model call and no second proposal is left behind.
+      investigationIds.add(entryProposal.conversationId);
       await dismissTuningProposal(adminApi, entryProposal);
     }
   );

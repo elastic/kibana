@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/api';
+import type { EsClient } from '@kbn/scout-security';
 import { getAd2Scenario } from '@kbn/evals-suite-attack-discovery-agent-builder';
 import { seedEndpointHosts } from '../../../scout/edr_response_actions/common/seed_endpoint_hosts';
 import {
@@ -15,9 +16,11 @@ import {
 import {
   assertExecutionCompleted,
   apiTest,
+  cancelNewExecutions,
   tags,
   testData,
   createServiceAccount,
+  deleteInvestigation,
   deleteServiceAccount,
   dismissRunProposals,
   getAdminApi,
@@ -29,6 +32,7 @@ import {
   resetWorker,
   seedAttackScenario,
   updateWorker,
+  withAlertZeroEnabledInSpace,
   listChatCompletionConnectors,
   waitForExecution,
   waitForExecutionStatus,
@@ -45,6 +49,42 @@ interface EndpointAction {
   agents: string[];
   startedAt: string;
 }
+
+/** Index the AlertZero generation step writes its correlated Attack Discovery alert to. */
+const ATTACK_DISCOVERY_ALERTS_INDEX = '.alerts-security.attack.discovery.alerts-default';
+
+/**
+ * Deletes the Attack Discovery alerts this run minted from the flow's own index. The id is
+ * chosen by the product at generation time, so teardown discovers it by correlation — an AD
+ * alert whose `kibana.alert.attack_discovery.alert_ids` references one of this run's seeded
+ * scenario alerts — instead of predicting it. Runs after the proposal dismissal and account
+ * deletion: a still-live generation run could otherwise re-write the alert after the delete.
+ */
+const deleteRunAttackDiscoveryAlerts = async ({
+  esClient,
+  runReferences,
+}: {
+  esClient: EsClient;
+  runReferences: RunReferences | undefined;
+}): Promise<void> => {
+  const alertIds = runReferences?.alertIds ?? [];
+  if (alertIds.length === 0) {
+    return;
+  }
+  await esClient.deleteByQuery({
+    index: ATTACK_DISCOVERY_ALERTS_INDEX,
+    conflicts: 'proceed',
+    refresh: true,
+    query: {
+      bool: {
+        should: alertIds.map((alertId) => ({
+          term: { 'kibana.alert.attack_discovery.alert_ids': alertId },
+        })),
+        minimum_should_match: 1,
+      },
+    },
+  });
+};
 
 /**
  * Seeded attack chain -> Attack Discovery -> review -> Investigate proposal -> approve ->
@@ -67,6 +107,36 @@ apiTest.describe(
     let runReferences: RunReferences | undefined;
     // Isolate actions submitted during the test; `cleanupHosts` only knows the seed-time ids.
     const submittedActionIds: string[] = [];
+    /**
+     * Workflows this run started, with the executions that existed before it enabled them:
+     * teardown cancels and drains exactly this run's executions before deleting the account they
+     * execute as. Disabling the workers stops new dispatches, and dismissing the proposals
+     * releases the parked runs behind them — but a review still making a model call when the
+     * account disappears fails against the deleted account and can raise a proposal after the
+     // dismissal has already finished. The drain is what bounds that.
+     */
+    const executionBaselines = new Map<string, string[]>();
+    // The Investigation the Investigate approval creates and the Attack Discovery alert the flow
+    // generates; both are business records pointing at seed data this suite deletes, so teardown
+    // removes them once the executions have settled. Both ids are minted by the product, so both
+    // are captured as soon as the flow reveals them: the Investigation id is the conversation
+    // behind the Investigate proposal, the alert id is discovered in teardown by query.
+    let investigationId: string | undefined;
+
+    // The worker routes this suite drives are gated on the per-space AlertZero setting, which
+    // the server config deliberately leaves writable (an override would make it read-only and
+    // break the hunt suites' baseline writes). Enable it for this suite and restore the captured
+    // baseline in teardown.
+    let restoreAlertZero: (() => Promise<void>) | undefined;
+
+    apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      restoreAlertZero = await withAlertZeroEnabledInSpace({
+        apiClient,
+        headers: cookieHeader,
+        spaceId: 'default',
+      });
+    });
 
     apiTest.afterAll(async ({ apiClient, samlAuth, esClient, config }) => {
       // Every step runs even when an earlier one throws, so one failure cannot leak the seeded
@@ -83,12 +153,21 @@ apiTest.describe(
       await attempt(async () => {
         api = await getAdminApi(apiClient, samlAuth);
       });
+      // Stop new dispatches first and drain what is in flight: `resetWorker` disables future
+      // scheduling, but the runs the enables started keep going until they finish or are
+      // cancelled, and a review still mid-model-call when the account disappears fails against
+      // the deleted account and can raise a proposal after the dismissal below has finished.
       await attempt(async () => {
         if (api) await resetWorker(api, WORKER_ID);
       });
       await attempt(async () => {
         if (api) await resetWorker(api, FORENSICS_WORKER_ID);
       });
+      for (const [workflowId, knownIds] of executionBaselines) {
+        await attempt(async () => {
+          if (api) await cancelNewExecutions(api, workflowId, knownIds);
+        });
+      }
       await attempt(async () =>
         deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds })
       );
@@ -103,7 +182,20 @@ apiTest.describe(
       await attempt(async () => {
         if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
       });
+      // The flow's own business records, deleted after the runs that maintain them settled: the
+      // Investigation the Investigate approval created, and the Attack Discovery alert the
+      // generation step wrote. Both point at telemetry and a host this teardown removes.
+      await attempt(async () => {
+        if (api && investigationId) await deleteInvestigation(api, investigationId);
+      });
+      await attempt(async () => {
+        await deleteRunAttackDiscoveryAlerts({ esClient, runReferences });
+      });
       await attempt(async () => scenario?.cleanup());
+      // Restore the per-space AlertZero gate this suite enabled (see beforeAll).
+      await attempt(async () => {
+        await restoreAlertZero?.();
+      });
       if (errors.length > 0) {
         throw new Error(
           `AlertZero e2e cleanup failed: ${errors
@@ -206,6 +298,16 @@ apiTest.describe(
           },
           { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
         );
+        // Baseline the forensics workflow BEFORE its enable, same as the AD workflow: teardown
+        // cancels exactly the executions each enable started, never another suite's. The worker
+        // carries its workflow id now — the poll above just confirmed it.
+        const forensicsWorkflowId = (await getWorker(api, FORENSICS_WORKER_ID)).workflowId;
+        if (forensicsWorkflowId) {
+          executionBaselines.set(
+            forensicsWorkflowId,
+            await listExecutionIds(api, forensicsWorkflowId)
+          );
+        }
         expect((await updateWorker(api, FORENSICS_WORKER_ID, { enabled: true })).enabled).toBe(
           true
         );
@@ -217,6 +319,10 @@ apiTest.describe(
         // parent executing as a service account", and it shares a `cancel-in-progress` concurrency
         // key with the worker's own run, so whichever starts second cancels the other.
         const knownExecutionIds = await listExecutionIds(api, workerWorkflowId);
+        // Baseline before the enable: teardown (see afterAll) cancels exactly the executions
+        // this enable starts — the AD workflow's scheduled run, the review it dispatches, and
+        // any handoff children — never another suite's.
+        executionBaselines.set(workerWorkflowId, knownExecutionIds);
         const startedAt = new Date().toISOString();
         expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
         const workflowExecutionId = await waitForNewExecution(
@@ -271,7 +377,10 @@ apiTest.describe(
           );
         };
 
-        // 3. Approve it exactly as the approval modal does; forensics now runs.
+        // 3. Approve it exactly as the approval modal does; forensics now runs. The approval
+        // creates the Investigation the handoff executes against: the proposal's conversation
+        // is that Investigation, so capture it here for teardown.
+        investigationId = investigate.conversationId;
         await approveProposal('Investigate', investigate);
 
         // 4. Forensics ends in an Isolate proposal for the compromised host. Same run

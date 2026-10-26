@@ -55,11 +55,16 @@ export const actionTarget = (input: Record<string, unknown> | undefined): unknow
  * behind it on its declined branch, so it must run while the service account the review executes
  * as still exists. A 409 means the proposal was decided concurrently (its spec approved or
  * dismissed it, or a teardown cancel already ended its run), which teardown accepts.
+ *
+ * Returns the conversation ids behind every run-tied proposal it saw, decided or not, so the
+ * caller can delete the Investigations those conversations are: they persist after the proposals
+ * are gone and point at rules the teardown deletes next.
  */
 export const dismissRunTuningProposals = async (
   api: AlertZeroApi,
   rules: ReadonlyArray<{ ruleId: string; runMarker: string }>
-): Promise<void> => {
+): Promise<string[]> => {
+  const dismissedConversations: string[] = [];
   for (const proposal of await listTuningProposals(api)) {
     const fromThisRun = rules.some(
       (rule) =>
@@ -67,6 +72,9 @@ export const dismissRunTuningProposals = async (
         proposal.comment.includes(rule.runMarker)
     );
     if (fromThisRun) {
+      // Record the conversation before the dismiss: a 409 leaves the proposal decided but its
+      // Investigation still needs deleting, and the dismiss response does not carry the id.
+      dismissedConversations.push(proposal.conversationId);
       const response = await api.internal(
         'POST',
         `${PROPOSALS_URL}/${encodeURIComponent(proposal.id)}/dismiss`,
@@ -88,6 +96,7 @@ export const dismissRunTuningProposals = async (
       }
     }
   }
+  return dismissedConversations;
 };
 
 /**

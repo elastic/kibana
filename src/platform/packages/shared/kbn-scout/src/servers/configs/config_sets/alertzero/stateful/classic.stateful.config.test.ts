@@ -28,7 +28,10 @@ describe('alertzero stateful classic server config', () => {
     const args: string[] = servers.kbnTestServer.serverArgs;
 
     expect(args).toContain('--xpack.alertzero.enabled=true');
-    expect(args).toContain('--uiSettings.overrides.securitySolution:enableAlertZero=true');
+    // The per-space gate must stay writable: an `uiSettings.overrides` pin would make
+    // `securitySolution:enableAlertZero` read-only, and the hunt suites' baseline writes
+    // through `internal/kibana/settings` would then fail even when the value is unchanged.
+    expect(args).not.toContain('--uiSettings.overrides.securitySolution:enableAlertZero=true');
   });
 
   it('turns on alert analysis so the Alert Triage worker can be enabled', () => {

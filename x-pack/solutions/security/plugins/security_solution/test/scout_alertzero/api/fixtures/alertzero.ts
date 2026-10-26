@@ -434,6 +434,12 @@ export const assertExecutionCompleted = async (
 export interface PendingProposal {
   id: string;
   createdAt: string;
+  /**
+   * Conversation behind the proposal — the Investigation the review that raised it owns.
+   * Optional because older proposals (and list views without it) resolve without the field;
+   * teardowns that collect it must treat `undefined` as "nothing to delete".
+   */
+  conversationId?: string;
   actionWorkflowId?: string;
   workflowExecutionId?: string;
   actionInput?: unknown;

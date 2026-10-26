@@ -34,6 +34,7 @@ export {
   setSupplyWorkflowEnabled,
   setupHuntPrerequisites,
   spaceUrl,
+  withAlertZeroEnabledInSpace,
   withHuntHeaders,
   type HuntPrerequisites,
   type SupplyStatusBody,

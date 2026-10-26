@@ -103,6 +103,36 @@ export const deleteInvestigation = async (api: AlertZeroApi, id: string): Promis
   }
 };
 
+/**
+ * Dismisses every pending proposal attached to one Investigation. The endpoint-analysis run
+ * raises containment cards (isolate/collect) whose action input can carry only `endpoint_ids`
+ * and a comment, so the alert- and agent-keyed run correlation cannot match them; the
+ * conversation id is the one identifier every card on this Investigation shares. Dismissal —
+ * not approval — releases the parked run behind each card, which then ends on its declined
+ * branch while the service account still exists, so this belongs before the account teardown.
+ */
+export const dismissInvestigationProposals = async (
+  api: AlertZeroApi,
+  conversationId: string
+): Promise<void> => {
+  for (const proposal of await listInvestigationProposals(api, conversationId)) {
+    const response = await api.internal(
+      'POST',
+      `${PROPOSALS_URL}/${encodeURIComponent(proposal.id)}/dismiss`,
+      { body: { dismissReason: 'handled_elsewhere', rationale: 'AlertZero e2e teardown' } }
+    );
+    // A 409 means the card was decided concurrently (its spec approved it, or a teardown cancel
+    // already ended the run behind it), which teardown accepts.
+    if (response.statusCode >= 300 && response.statusCode !== 409) {
+      throw new Error(
+        `dismiss proposal ${proposal.id} of investigation ${conversationId} failed: ${
+          response.statusCode
+        } ${JSON.stringify(response.body)}`
+      );
+    }
+  }
+};
+
 export interface AttachmentVersion<DataType = unknown> {
   readonly version: number;
   readonly data?: DataType;

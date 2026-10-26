@@ -22,6 +22,7 @@ import {
   createServiceAccount,
   deleteInvestigation,
   deleteServiceAccount,
+  dismissInvestigationProposals,
   dismissRunProposals,
   endpointIdsOf,
   ensureInvestigationsAiIndex,
@@ -42,6 +43,7 @@ import {
   tags,
   testData,
   updateWorker,
+  withAlertZeroEnabledInSpace,
   waitForExecution,
   waitForNewExecution,
 } from '../fixtures';
@@ -212,6 +214,21 @@ let esClientRef: EsClient | undefined;
 let serviceAccountId: string | undefined;
 
 apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.classic] }, () => {
+  // The worker routes this suite drives are gated on the per-space AlertZero setting, which the
+  // server config deliberately leaves writable (an override would make it read-only and break the
+  // hunt suites' baseline writes). Enable it for this suite and restore the captured baseline in
+  // teardown, so the next gated suite starts from the state this one found.
+  let restoreAlertZero: (() => Promise<void>) | undefined;
+
+  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+    restoreAlertZero = await withAlertZeroEnabledInSpace({
+      apiClient,
+      headers: cookieHeader,
+      spaceId: 'default',
+    });
+  });
+
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     // Every step runs even when an earlier one throws, so one failure cannot leak the seeded
     // scenarios, the Attack Discovery alerts, the indicators, the investigations and their
@@ -249,7 +266,10 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       });
     }
     // Dismissal releases the parked run behind each pending card, and that run may still need
-    // the service account — so this, too, belongs before the account teardown.
+    // the service account — so this, too, belongs before the account teardown. The per-card
+    // correlation covers the handoff-keyed proposals; the containment cards an analysis run
+    // raises can carry only endpoint ids, so every tracked Investigation's pending cards are
+    // dismissed by their conversation (the one id all of them share).
     await attempt(async () => {
       if (api && scenarios.length > 0) {
         await dismissRunProposals(api, {
@@ -257,6 +277,11 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         });
       }
     });
+    for (const investigationId of investigationIds) {
+      await attempt(async () => {
+        if (api) await dismissInvestigationProposals(api, investigationId);
+      });
+    }
     await attempt(async () => {
       if (api) await resetWorker(api, WORKER_ID);
     });
@@ -284,6 +309,11 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     for (const scenario of scenarios) {
       await attempt(async () => scenario.cleanup());
     }
+    // Restore the per-space AlertZero gate this suite enabled (see beforeAll). Last and
+    // best-effort: every gated-route user above has settled by now.
+    await attempt(async () => {
+      await restoreAlertZero?.();
+    });
     if (errors.length > 0) {
       throw new Error(
         `AlertZero e2e cleanup failed: ${errors

@@ -91,7 +91,12 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
-      '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+      // The per-space `securitySolution:enableAlertZero` advanced setting is deliberately NOT
+      // overridden here: an override makes it read-only, and `internal/kibana/settings` rejects
+      // writes to overridden settings — including the baseline writes the hunt suites make to
+      // restore a value they never changed. Each suite that needs AlertZero in a space enables
+      // the setting itself and restores it in teardown (see `enableAlertZeroInSpace`), exactly
+      // as the hunt suites already do.
       // Attack Discovery workflows + Context Engine (the review and forensics workflows are
       // workflow runs; context engine is what the forensics skill reads), mirroring the
       // evals_attack_discovery_agent_builder set.
