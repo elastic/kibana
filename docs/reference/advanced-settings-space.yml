@@ -405,7 +405,7 @@ groups:
         description: |
           When date histograms use the `auto` interval, {{product.kibana}} attempts to generate this number of bars.
         datatype: int
-        default: 100
+        default: 50
         applies_to:
           stack: ga
           ech: ga

@@ -10,13 +10,15 @@ import { mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { StreamsPlugin } from './plugin';
 import type { StreamsConfig } from '../common/config';
-import type { StreamsPluginSetupDependencies } from './types';
+import type { StreamsPluginSetupDependencies, StreamsPluginStartDependencies } from './types';
 
 jest.mock('./agent_builder/register', () => ({
   registerStreamsAgentBuilder: jest.fn().mockResolvedValue(undefined),
@@ -85,6 +87,7 @@ function createPluginsSetup(): jest.Mocked<StreamsPluginSetupDependencies> {
     fieldsMetadata: {
       registerIntegrationFieldsExtractor: jest.fn(),
     } as unknown as StreamsPluginSetupDependencies['fieldsMetadata'],
+    taskManager: taskManagerMock.createSetup(),
   } as unknown as jest.Mocked<StreamsPluginSetupDependencies>;
 }
 
@@ -250,5 +253,144 @@ describe('StreamsPlugin credential sealing wiring', () => {
   it('registers no preparer when encryptionKey.path is unset', () => {
     expect(registeredPrepareCredentials(getConfig())).toBeUndefined();
     expect(createCredentialPreparer).not.toHaveBeenCalled();
+  });
+});
+
+describe('StreamsPlugin unit republish task', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const startPlugin = (config: StreamsConfig) => {
+    const plugin = new StreamsPlugin(coreMock.createPluginInitializerContext(config));
+    const pluginsSetup = createPluginsSetup();
+    plugin.setup(coreMock.createSetup(), pluginsSetup);
+    const taskManagerStart = taskManagerMock.createStart();
+    plugin.start(coreMock.createStart(), {
+      taskManager: taskManagerStart,
+    } as unknown as StreamsPluginStartDependencies);
+    return { taskManagerSetup: pluginsSetup.taskManager, taskManagerStart };
+  };
+
+  it('registers and schedules the task when canvas and the distributor are configured', async () => {
+    const { taskManagerSetup, taskManagerStart } = startPlugin(
+      getConfig({
+        canvas: { enabled: true },
+        distributor: { url: 'http://localhost:18081', ssl: {} },
+      } as Partial<StreamsConfig>)
+    );
+    await flushPromises();
+
+    expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
+      'streams:republish-units': expect.objectContaining({ timeout: '2m' }),
+    });
+    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'streams:republish-units', schedule: { interval: '30m' } })
+    );
+    expect(taskManagerStart.runSoon).toHaveBeenCalledWith('streams:republish-units');
+  });
+
+  const setupRepublishRun = async () => {
+    const { createConfigDistributorClient: actualCreateClient } = jest.requireActual<
+      typeof import('./lib/unit_config/config_distributor_client')
+    >('./lib/unit_config/config_distributor_client');
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValue({ ok: true, status: 200, text: async () => '{}' });
+    createConfigDistributorClient.mockImplementationOnce(
+      (args: Parameters<typeof actualCreateClient>[0]) => actualCreateClient({ ...args, fetchImpl })
+    );
+
+    const storedConfiguration = {
+      id: 'default',
+      type: 'streams-configuration',
+      version: 'v1',
+      references: [],
+      attributes: { unit_id: 'default', unit: {}, secrets: {}, sealed_credentials: [] },
+    };
+    const encryptedSavedObjectsClient = {
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(storedConfiguration),
+    };
+    const encryptedSavedObjectsStart = { getClient: jest.fn(() => encryptedSavedObjectsClient) };
+    const coreSetup = coreMock.createSetup({
+      pluginStartDeps: { encryptedSavedObjects: encryptedSavedObjectsStart },
+    });
+    const pluginsSetup = createPluginsSetup();
+    const plugin = new StreamsPlugin(
+      coreMock.createPluginInitializerContext(
+        getConfig({
+          canvas: { enabled: true },
+          distributor: { url: 'http://localhost:18081', ssl: {} },
+        } as Partial<StreamsConfig>)
+      )
+    );
+    plugin.setup(coreSetup, pluginsSetup);
+
+    const [coreStart] = await coreSetup.getStartServices();
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [{ ...storedConfiguration, score: 0 }],
+      total: 1,
+      per_page: 100,
+      page: 1,
+    });
+    soClient.get.mockResolvedValue(storedConfiguration);
+    (coreStart.savedObjects.getUnsafeInternalClient as jest.Mock).mockReturnValue(soClient);
+
+    const definition = jest.mocked(pluginsSetup.taskManager.registerTaskDefinitions).mock
+      .calls[0][0]['streams:republish-units'];
+    const runTask = () =>
+      definition
+        .createTaskRunner({
+          taskInstance: {},
+          signal: new AbortController().signal,
+        } as unknown as RunContext)
+        .run();
+    return { plugin, runTask, coreStart, encryptedSavedObjectsStart, fetchImpl };
+  };
+
+  it('runs the registered task through the encrypting internal client and publishes', async () => {
+    const { runTask, coreStart, encryptedSavedObjectsStart, fetchImpl } = await setupRepublishRun();
+
+    await runTask();
+
+    // A task has no request, so the spaces extension cannot authorize `namespaces: ['*']`.
+    expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
+      includedHiddenTypes: ['streams-configuration'],
+      excludedExtensions: ['spaces'],
+    });
+    expect(coreStart.savedObjects.createInternalRepository).not.toHaveBeenCalled();
+    expect(encryptedSavedObjectsStart.getClient).toHaveBeenCalledWith({
+      includedHiddenTypes: ['streams-configuration'],
+    });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'http://localhost:18081/v1/units/default',
+      expect.objectContaining({ method: 'PUT' })
+    );
+  });
+
+  it('stops republishing once the plugin stops', async () => {
+    const { plugin, runTask, fetchImpl } = await setupRepublishRun();
+
+    await plugin.stop();
+    await runTask();
+
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['canvas is disabled', { distributor: { url: 'http://localhost:18081', ssl: {} } }],
+    ['the distributor URL is unset', { canvas: { enabled: true } }],
+  ])('registers the task but removes instead of scheduling it when %s', async (_, overrides) => {
+    const { taskManagerSetup, taskManagerStart } = startPlugin(
+      getConfig(overrides as Partial<StreamsConfig>)
+    );
+    await flushPromises();
+
+    expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
+      'streams:republish-units': expect.objectContaining({ timeout: '2m' }),
+    });
+    expect(taskManagerStart.ensureScheduled).not.toHaveBeenCalled();
+    expect(taskManagerStart.removeIfExists).toHaveBeenCalledWith('streams:republish-units');
   });
 });
