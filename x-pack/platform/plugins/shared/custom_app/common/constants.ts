@@ -8,6 +8,7 @@
 export const ADD_CUSTOM_APP_ACTION_ID = 'ADD_CUSTOM_APP_PANEL';
 export const VIEW_CUSTOM_APP_SOURCE_ACTION_ID = 'VIEW_CUSTOM_APP_SOURCE';
 export const OPEN_CUSTOM_APP_ACTION_ID = 'OPEN_CUSTOM_APP';
+export const SAVE_AS_CUSTOM_APP_ACTION_ID = 'SAVE_AS_CUSTOM_APP';
 
 /** The saved object type of an app in the library, which is also what a standalone app opens. */
 export const CUSTOM_APP_SAVED_OBJECT_TYPE = 'custom_app';

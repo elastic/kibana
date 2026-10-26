@@ -8,7 +8,14 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { RunQuery, SourceData } from './data/data_layer';
-import { createDefaultDocument, SERVICES_QUERY, SERVICE_DETAIL_QUERY } from './default_document';
+import {
+  createDefaultDocument,
+  ERRORS_COUNT_QUERY,
+  ERROR_BUDGET_QUERY,
+  SERVICES_COUNT_QUERY,
+  SERVICES_QUERY,
+  SERVICE_DETAIL_QUERY,
+} from './default_document';
 import { renderApp } from './components/test_utils';
 
 const SERVICES: ReadonlyArray<[string, number]> = [
@@ -44,6 +51,19 @@ const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async (quer
       rows: service ? [[service, errors, `${service}-team`]] : [],
     } satisfies SourceData;
   }
+  if (query === SERVICES_COUNT_QUERY || query === ERRORS_COUNT_QUERY) {
+    const [now, before] = query === SERVICES_COUNT_QUERY ? [4, 3] : [47, 52];
+    return {
+      columns: [
+        { name: 'now', type: 'long' },
+        { name: 'before', type: 'long' },
+      ],
+      rows: [[now, before]],
+    } satisfies SourceData;
+  }
+  if (query === ERROR_BUDGET_QUERY) {
+    return { columns: [{ name: 'used', type: 'long' }], rows: [[62]] } satisfies SourceData;
+  }
   throw new Error(`Unexpected query: ${query}`);
 });
 
@@ -59,7 +79,8 @@ describe('the starter app', () => {
 
     expect(await screen.findByText('checkout')).toBeInTheDocument();
     expect(screen.getByText('search')).toBeInTheDocument();
-    expect(queriesRun()).toEqual([SERVICES_QUERY]);
+    expect(queriesRun()).toContain(SERVICES_QUERY);
+    expect(queriesRun()).not.toContain(SERVICE_DETAIL_QUERY);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
@@ -96,6 +117,41 @@ describe('the starter app', () => {
     await screen.findByText('checkout-team');
 
     expect(queriesRun().filter((query) => query === SERVICES_QUERY)).toHaveLength(1);
+  });
+
+  describe('what it shows of the components', () => {
+    it('shows the numbers with how they changed, and the error budget', async () => {
+      await renderApp(createDefaultDocument(), runQuery);
+
+      expect(await screen.findByText('Services running')).toBeInTheDocument();
+      const changes = await screen.findAllByTestId('customAppMetricChange');
+      expect(changes.map((change) => change.textContent?.trim())).toEqual(['+33.3%', '-9.6%']);
+      expect(await screen.findByText('62 / 100')).toBeInTheDocument();
+      expect(screen.getByText('On track')).toBeInTheDocument();
+    });
+
+    it('shows the tip while the switch is on, and hides it when the switch is turned off', async () => {
+      await renderApp(createDefaultDocument(), runQuery);
+
+      expect(
+        await screen.findByText('Everything here follows the values of the app')
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('switch'));
+
+      expect(
+        screen.queryByText('Everything here follows the values of the app')
+      ).not.toBeInTheDocument();
+    });
+
+    it('has a second tab that says what can be done', async () => {
+      await renderApp(createDefaultDocument(), runQuery);
+
+      await userEvent.click(await screen.findByRole('tab', { name: 'What you can do' }));
+
+      expect(await screen.findByText(/use your own data/)).toBeInTheDocument();
+      expect(screen.queryByText('checkout')).not.toBeInTheDocument();
+    });
   });
 
   describe('filters', () => {

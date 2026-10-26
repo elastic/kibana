@@ -14,6 +14,7 @@ import {
   findNode,
   getDocumentIssues,
   getNodeChildren,
+  isContainerNode,
   moveNode,
   pruneUnusedValues,
   removeNode,
@@ -60,7 +61,7 @@ const ok = (document: AppDocument): MutationResult => ({ ok: true, document });
 const defaultParentId = (document: AppDocument, selectedId: string): string => {
   const location = findNode(document.root, selectedId);
   if (!location) return document.root.id;
-  const isContainer = location.node.type === 'stack' || location.node.type === 'flyout';
+  const isContainer = isContainerNode(location.node);
   return isContainer ? location.node.id : location.parent?.id ?? document.root.id;
 };
 

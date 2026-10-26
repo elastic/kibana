@@ -105,7 +105,7 @@ describe('the custom app panel', () => {
       mockAgentBuilder = undefined;
     });
 
-    it('offers no editor, but the assistant, when the editor is turned off', async () => {
+    it('offers no editor, but the assistant and the example, when the editor is turned off', async () => {
       mockIsEditorEnabled = false;
       mockAgentBuilder = {
         openChat: jest.fn(),
@@ -116,7 +116,7 @@ describe('the custom app panel', () => {
 
         expect(api.isEditingEnabled()).toBe(false);
         expect(screen.queryByTestId('customAppEmptyBuild')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('customAppEmptyExample')).not.toBeInTheDocument();
+        expect(screen.getByTestId('customAppEmptyExample')).toBeInTheDocument();
         expect(screen.getByTestId('customAppEmptyDescribe')).toBeInTheDocument();
       } finally {
         mockIsEditorEnabled = true;

@@ -483,12 +483,24 @@ describe('the custom apps page', () => {
       expect(screen.queryByTestId('customAppEmptyDescribe')).not.toBeInTheDocument();
     });
 
-    it('offers no editor when it is turned off, and still offers to describe the app to the assistant', async () => {
+    it('offers no editor when it is turned off, and still offers the assistant and the example', async () => {
       setup({ path: '/create', isEditorEnabled: false, agentBuilder: makeAgentBuilder() });
 
       await screen.findByTestId('customAppEmptyDescribe');
       expect(screen.queryByTestId('customAppEmptyBuild')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('customAppEmptyExample')).not.toBeInTheDocument();
+      expect(screen.getByTestId('customAppEmptyExample')).toBeInTheDocument();
+    });
+
+    it('makes the example the draft itself when the editor is turned off, ready to be saved', async () => {
+      setup({ path: '/create', isEditorEnabled: false });
+
+      await userEvent.click(await screen.findByTestId('customAppEmptyExample'));
+
+      expect(screen.queryByTestId('editor')).not.toBeInTheDocument();
+      expect(await screen.findByTestId('liveApp')).toBeInTheDocument();
+      expect(screen.queryByText('Build your app')).not.toBeInTheDocument();
+      expect(await queryMenuItem('customAppEdit')).not.toBeInTheDocument();
+      expect(screen.getByTestId('customAppSave')).toBeEnabled();
     });
 
     it('shows the draft as the editor changes it, in place of the empty state', async () => {

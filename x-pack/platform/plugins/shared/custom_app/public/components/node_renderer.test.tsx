@@ -216,5 +216,20 @@ describe('NodeRenderer', () => {
       renderLayout(stackOf('horizontal', []));
       expect(screen.queryByTestId('customAppFilterBar')).not.toBeInTheDocument();
     });
+
+    it('keeps a status and a button together at the start of a row, and does not spread them', () => {
+      renderLayout(
+        stackOf('horizontal', [
+          { type: 'badge', id: 'b', text: 'Country: US' },
+          { type: 'button', id: 'go', label: 'Clear' },
+          search,
+        ])
+      );
+
+      const itemOf = (element: HTMLElement) => element.closest('.euiFlexItem')?.className ?? '';
+      expect(itemOf(screen.getByText('Country: US'))).toMatch(/growZero/);
+      expect(itemOf(screen.getByText('Clear'))).toMatch(/growZero/);
+      expect(itemOf(screen.getByRole('searchbox'))).not.toMatch(/growZero/);
+    });
   });
 });

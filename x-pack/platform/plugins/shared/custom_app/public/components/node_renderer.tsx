@@ -66,6 +66,10 @@ const isInput = (node: AppNode): boolean =>
   node.type === 'switch' ||
   node.type === 'time_range';
 
+/** What takes only the room it needs in a row: a status, a button, a link. They do not fill it. */
+const isCompact = (node: AppNode): boolean =>
+  node.type === 'badge' || node.type === 'button' || node.type === 'link';
+
 const CALLOUTS = {
   primary: KbnInfoCallout,
   success: KbnSuccessCallout,
@@ -243,12 +247,15 @@ export const NodeRenderer = ({ node: written }: NodeRendererProps) => {
       const isRow = node.direction === 'horizontal';
       // A row of inputs reads as a toolbar for what is below it, so it is drawn as one.
       const isFilterBar = isRow && node.children.length > 0 && node.children.every(isInput);
+      // A row of statuses and buttons, such as a filter and the button that clears it, sits together
+      // on one line, at the start, and not spread across the width.
+      const isCompactRow = isRow && node.children.length > 0 && node.children.every(isCompact);
       const group = (
         <EuiFlexGroup
           direction={isRow ? 'row' : 'column'}
           // Stacked things get room to breathe; things side by side belong together, so sit closer.
           gutterSize={isRow ? 'm' : 'l'}
-          alignItems={isFilterBar ? 'flexEnd' : 'stretch'}
+          alignItems={isFilterBar ? 'flexEnd' : isCompactRow ? 'center' : 'stretch'}
           responsive={false}
           wrap={isRow}
           data-node-id={node.id}
@@ -269,7 +276,7 @@ export const NodeRenderer = ({ node: written }: NodeRendererProps) => {
                 <NodeRenderer node={child} />
               </EuiFlexItem>
             ) : (
-              <EuiFlexItem key={child.id} grow={isRow}>
+              <EuiFlexItem key={child.id} grow={isRow && !isCompact(child)}>
                 <NodeRenderer node={child} />
               </EuiFlexItem>
             )

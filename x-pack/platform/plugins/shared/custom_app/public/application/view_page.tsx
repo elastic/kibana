@@ -435,14 +435,15 @@ export const ViewPage = ({
                     )
                 : undefined
             }
-            onUseExample={
-              isEditorEnabled
-                ? () => {
-                    setSeed(createDefaultDocument());
-                    setIsEditing(true);
-                  }
-                : undefined
-            }
+            onUseExample={() => {
+              // Without the editor the example is the app itself, which can be saved as it is.
+              if (!isEditorEnabled) {
+                setDraft(createDefaultDocument());
+                return;
+              }
+              setSeed(createDefaultDocument());
+              setIsEditing(true);
+            }}
           />
         ) : (
           <InlineEditContext.Provider value={preview ? undefined : changeNodeWords}>

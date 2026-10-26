@@ -158,4 +158,42 @@ describe('resolveCustomContent', () => {
     expect(result).toEqual({ error: expect.stringContaining(`Only ${MAX_TEMPLATES_PER_CALL}`) });
     expect(resolver).not.toHaveBeenCalled();
   });
+
+  it('writes the template of a component inside any container, such as the tab of a page', async () => {
+    const document = appDocumentShapeSchema.parse({
+      state: {},
+      root: {
+        type: 'stack',
+        id: 'root',
+        children: [
+          {
+            type: 'tabs',
+            id: 'tabs',
+            children: [
+              {
+                type: 'section',
+                id: 'board-tab',
+                label: 'Board',
+                children: [
+                  {
+                    type: 'card',
+                    id: 'card',
+                    children: [
+                      { type: 'custom_content', id: 'board', query: 'FROM s', prompt: 'A board' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    const result = await resolveCustomContent(document, resolver);
+
+    if ('error' in result) throw new Error(result.error);
+    expect(JSON.stringify(result.document.root)).toContain('<p>written</p>');
+    expect(JSON.stringify(result.document.root)).not.toContain('"prompt"');
+  });
 });

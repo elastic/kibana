@@ -203,14 +203,15 @@ export const CreatePage = ({
                     )
                 : undefined
             }
-            onUseExample={
-              isEditorEnabled
-                ? () => {
-                    setSeed(createDefaultDocument());
-                    setIsEditing(true);
-                  }
-                : undefined
-            }
+            onUseExample={() => {
+              // Without the editor the example is the app itself, which can be saved as it is.
+              if (!isEditorEnabled) {
+                setDraft(createDefaultDocument());
+                return;
+              }
+              setSeed(createDefaultDocument());
+              setIsEditing(true);
+            }}
           />
         ) : (
           <LiveApp document={preview ?? draft} />

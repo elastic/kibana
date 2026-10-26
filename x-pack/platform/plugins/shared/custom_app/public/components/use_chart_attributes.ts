@@ -23,6 +23,9 @@ const LENS_CHART_TYPES = {
   donut: ChartType.Donut,
 } as const;
 
+/** The visualization of Lens that draws a pie and a donut. */
+const DONUT_VISUALIZATION_ID = 'lnsPie';
+
 interface ChartAttributes {
   attributes?: TypedLensByValueInput['attributes'];
   error?: Error;
@@ -59,18 +62,25 @@ export const useChartAttributes = (
           meta: { type: esFieldTypeToKibanaFieldType(type) },
         } as DatatableColumn)
     );
-    const [suggestion] =
-      helpers.suggestions(
-        {
-          dataViewSpec: dataView.toSpec(),
-          fieldName: '',
-          textBasedColumns,
-          query: { esql: query },
-        },
-        dataView,
-        [],
-        chartType ? LENS_CHART_TYPES[chartType] : undefined
-      ) ?? [];
+    const context = {
+      dataViewSpec: dataView.toSpec(),
+      fieldName: '',
+      textBasedColumns,
+      query: { esql: query },
+    };
+    // A donut is asked for from the list of what fits, and made a donut, as Lens does when it is
+    // switched to one: asked for by its name, Lens may answer with another chart that it likes more.
+    const fitting =
+      chartType === 'donut' ? helpers.suggestions(context, dataView, [], undefined) ?? [] : [];
+    const pie = fitting.find(({ visualizationId }) => visualizationId === DONUT_VISUALIZATION_ID);
+    const [suggestion] = pie
+      ? [{ ...pie, visualizationState: { ...(pie.visualizationState as object), shape: 'donut' } }]
+      : helpers.suggestions(
+          context,
+          dataView,
+          [],
+          chartType ? LENS_CHART_TYPES[chartType] : undefined
+        ) ?? [];
     if (!suggestion) {
       throw new Error('No chart fits the columns of this query.');
     }

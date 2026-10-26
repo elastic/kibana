@@ -395,9 +395,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
                       canEdit={viewMode === 'edit'}
                       onBuild={isEditorEnabled ? () => api.onEdit() : undefined}
                       onDescribe={agentBuilder ? () => generateWithChat(document) : undefined}
-                      onUseExample={
-                        isEditorEnabled ? () => document$.next(createDefaultDocument()) : undefined
-                      }
+                      onUseExample={() => document$.next(createDefaultDocument())}
                     />
                   ) : (
                     <AppFrame theme={document.theme}>

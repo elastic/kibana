@@ -41,6 +41,7 @@ export {
   isStateRef,
   resolveBoundProps,
   resolveBoundValue,
+  stateRef,
   stateRefSchema,
   THEME_BOUND_PROPS,
   type StateRef,
@@ -107,3 +108,5 @@ export {
   type NodeLocation,
 } from './document_mutations';
 export { getDocumentIssues, type DocumentIssue } from './document_issues';
+
+export * from './a2ui';

@@ -9,6 +9,7 @@ import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   getNodeChildren,
+  isContainerNode,
   type AppNode,
   type AppTheme,
   type StateDeclaration,
@@ -41,11 +42,12 @@ const getSampleParams = (
 const replaceNodes = (node: AppNode, replacements: ReadonlyMap<string, AppNode>): AppNode => {
   const replacement = replacements.get(node.id);
   if (replacement) return replacement;
-  if (node.type === 'stack' || node.type === 'flyout') {
+  // Any component that holds others: a template may be inside tabs, a card or columns as well.
+  if (isContainerNode(node)) {
     return {
       ...node,
       children: node.children.map((child) => replaceNodes(child, replacements)),
-    };
+    } as AppNode;
   }
   return node;
 };

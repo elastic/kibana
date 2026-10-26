@@ -7,10 +7,21 @@
 
 import { Parser } from '@elastic/esql';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { appDocumentSchema } from '@kbn/custom-app-common';
+import { appDocumentSchema, findNode } from '@kbn/custom-app-common';
 import { createDefaultDocument, SERVICE_DETAIL_QUERY, SERVICES_QUERY } from './default_document';
 
 describe('createDefaultDocument', () => {
+  it('lets the picker choose the accent, and only with accents the picker offers', () => {
+    const { theme, state, root } = createDefaultDocument();
+    const picker = (
+      findNode(root, 'look-picker')?.node as { options: Array<{ value: string }> }
+    ).options.map(({ value }) => value);
+
+    expect(theme?.accent).toEqual({ $state: 'look' });
+    expect(state.look).toEqual({ type: 'string', default: 'teal' });
+    expect(picker).toEqual(['teal', 'purple', 'orange', 'blue']);
+  });
+
   it('is a valid document', () => {
     expect(appDocumentSchema.safeParse(createDefaultDocument()).success).toBe(true);
   });

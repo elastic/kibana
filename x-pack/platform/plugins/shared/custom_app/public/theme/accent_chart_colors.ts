@@ -18,29 +18,12 @@ interface ChartLayer {
   /** The fields a donut is cut by. */
   primaryGroups?: string[];
   yConfig?: Array<{ forAccessor: string; color?: string }>;
-  /** How the values of a breakdown or the slices of a donut are coloured, as Lens keeps it. */
-  colorMapping?: { assignments?: unknown[]; colorMode?: unknown } & Record<string, unknown>;
 }
 
 /**
- * The values of a breakdown, or the slices of a donut, from the accent to a fainter one of it, one
- * shade for each, as Lens's own gradient colouring does for a single colour. Nothing is assigned to
- * a value by name, so any values the query gives are coloured.
- */
-const toAccentGradient = (
-  colorMapping: NonNullable<ChartLayer['colorMapping']>,
-  color: string
-): NonNullable<ChartLayer['colorMapping']> => ({
-  ...colorMapping,
-  assignments: [],
-  colorMode: { type: 'gradient', steps: [{ type: 'colorCode', colorCode: color }], sort: 'desc' },
-});
-
-/**
- * The Lens chart in the accent of the page. A layer that is broken down by a field, and a donut,
- * take shades of the accent, one for each value; a layer of one series that is not broken down takes
- * the accent itself. More than one series with no breakdown is left to the palette of Lens, as one
- * accent for all of them could not be told apart.
+ * The Lens chart in the accent of the page: a layer of one series that is not broken down takes the
+ * accent itself. Anything with several values, a breakdown, a donut, or more than one series, is left
+ * to the palette of Lens, as one accent for all of them could not be told apart.
  */
 export const applyAccentToChart = (
   attributes: Attributes,
@@ -61,12 +44,9 @@ export const applyAccentToChart = (
         ...state,
         layers: state.layers.map((layer) => {
           if (layer.layerType !== 'data') return layer;
-          // Lens gives a layer a colour mapping even when nothing is broken down, where it is not used.
-          const isBrokenDown =
-            layer.splitAccessor !== undefined || layer.primaryGroups !== undefined;
-          if (layer.colorMapping && isBrokenDown) {
-            return { ...layer, colorMapping: toAccentGradient(layer.colorMapping, color) };
-          }
+          // A layer broken down by a field, and a donut, keep the palette of Lens, which tells their
+          // values apart. Lens gives every layer a colour mapping, even where nothing uses it.
+          if (layer.splitAccessor !== undefined || layer.primaryGroups !== undefined) return layer;
           return layer.accessors?.length === 1 && !layer.splitAccessor
             ? {
                 ...layer,

@@ -64,50 +64,24 @@ describe('applyAccentToChart', () => {
     expect(layerOf(result).colorMapping).toEqual({ paletteId: 'default', assignments: [] });
   });
 
-  it('colours the values of a breakdown in shades of the accent, keeping the rest of the mapping', () => {
-    const result = applyAccentToChart(
-      chart({
-        accessors: ['count'],
-        splitAccessor: 'service',
-        colorMapping: {
-          paletteId: 'default',
-          assignments: [{ rules: [] }],
-          specialAssignments: [],
-        },
-      }),
-      'purple',
-      false
-    );
-
-    expect(layerOf(result).colorMapping).toEqual({
-      paletteId: 'default',
-      assignments: [],
-      specialAssignments: [],
-      colorMode: {
-        type: 'gradient',
-        steps: [{ type: 'colorCode', colorCode: ACCENT_COLORS.purple.fill }],
-        sort: 'desc',
-      },
+  it('leaves the values of a breakdown to the palette of Lens, which tells them apart', () => {
+    const attributes = chart({
+      accessors: ['count'],
+      splitAccessor: 'service',
+      colorMapping: { paletteId: 'default', assignments: [] },
     });
-    expect(layerOf(result).yConfig).toBeUndefined();
+
+    expect(applyAccentToChart(attributes, 'purple', false)).toEqual(attributes);
   });
 
-  it('colours the slices of a donut the same way', () => {
-    const result = applyAccentToChart(
-      chart({
-        primaryGroups: ['service'],
-        metrics: ['count'],
-        colorMapping: { paletteId: 'default' },
-      }),
-      'teal',
-      true
-    );
-
-    expect((layerOf(result).colorMapping as { colorMode: unknown }).colorMode).toEqual({
-      type: 'gradient',
-      steps: [{ type: 'colorCode', colorCode: ACCENT_COLORS.teal.textOnDark }],
-      sort: 'desc',
+  it('leaves the slices of a donut to the palette of Lens too', () => {
+    const attributes = chart({
+      primaryGroups: ['service'],
+      metrics: ['count'],
+      colorMapping: { paletteId: 'default' },
     });
+
+    expect(applyAccentToChart(attributes, 'teal', true)).toEqual(attributes);
   });
 
   it.each([

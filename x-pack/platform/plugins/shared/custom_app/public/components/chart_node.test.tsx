@@ -15,6 +15,7 @@ import { renderApp } from './test_utils';
 
 const suggestions = jest.fn();
 let mockAttributes: unknown = { title: 'suggested' };
+let mockDrawn: unknown;
 const embeddableProps = jest.fn();
 
 // One object for every call, as the real services are: a new one would restart the chart each render.
@@ -37,7 +38,10 @@ jest.mock('@kbn/esql-utils', () => ({
 }));
 jest.mock('@kbn/visualization-utils', () => ({
   ...jest.requireActual('@kbn/visualization-utils'),
-  getLensAttributesFromSuggestion: () => mockAttributes,
+  getLensAttributesFromSuggestion: ({ suggestion }: { suggestion: unknown }) => {
+    mockDrawn = suggestion;
+    return mockAttributes;
+  },
 }));
 
 const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async () => ({
@@ -271,6 +275,33 @@ describe('the chart node', () => {
 
     await screen.findByTestId('lensChart');
     expect(suggestions.mock.calls[0][3]).toBe(ChartType.Line);
+  });
+
+  it('draws a donut from the pie that Lens finds for the columns, made a donut, and not the first chart it likes', async () => {
+    suggestions.mockReturnValue([
+      { visualizationId: 'lnsXY', visualizationState: { preferredSeriesType: 'bar' } },
+      { visualizationId: 'lnsPie', visualizationState: { shape: 'pie', layers: [] } },
+    ]);
+
+    await renderApp(documentWith({ chartType: 'donut' }), runQuery);
+
+    await screen.findByTestId('lensChart');
+    // Asked for the whole list, as no type is asked for by name.
+    expect(suggestions.mock.calls[0][3]).toBeUndefined();
+    expect(mockDrawn).toMatchObject({
+      visualizationId: 'lnsPie',
+      visualizationState: { shape: 'donut', layers: [] },
+    });
+  });
+
+  it('asks Lens for a donut by name when it finds no pie for the columns', async () => {
+    suggestions.mockReturnValue([{ visualizationId: 'lnsXY', visualizationState: {} }]);
+
+    await renderApp(documentWith({ chartType: 'donut' }), runQuery);
+
+    await screen.findByTestId('lensChart');
+    expect(suggestions.mock.calls.at(-1)?.[3]).toBe(ChartType.Donut);
+    expect(mockDrawn).toMatchObject({ visualizationId: 'lnsXY' });
   });
 
   it('shows its heading above the chart', async () => {

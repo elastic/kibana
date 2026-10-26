@@ -47,6 +47,13 @@ export const bindable = <T extends z.ZodType>(schema: T): T =>
   z.union([schema, stateRefSchema]) as unknown as T;
 
 /**
+ * A reference to a key for a property of a document written in code. It is typed as the value the
+ * property has, as `bindable` types the schema, since it is replaced by that value before anything
+ * draws the component.
+ */
+export const stateRef = <T>(key: string): T => ({ $state: key } as unknown as T);
+
+/**
  * Whether a component is shown: when the key is true, or, with `equals`, when it is that value, such
  * as the option of a select. Left out, it is always shown.
  */
