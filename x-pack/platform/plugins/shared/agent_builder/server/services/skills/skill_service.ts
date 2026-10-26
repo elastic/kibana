@@ -121,7 +121,7 @@ class SkillServiceImpl implements SkillService {
       getRegistry: async ({ request }) => {
         await this.mutationQueue;
         await validated;
-        const space = getCurrentSpaceId({ request, spaces });
+        const space = getCurrentSpaceId({ request });
         const builtinProvider = createBuiltinSkillProvider(
           [...this.skills.values()],
           this.availabilityCache

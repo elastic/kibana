@@ -13,7 +13,7 @@ export function createSpacesTutorialContextFactory(getSpacesService: () => Space
   return function spacesTutorialContextFactory(request: KibanaRequest) {
     const spacesService = getSpacesService();
     return {
-      spaceId: spacesService.getSpaceId(request),
+      spaceId: request.spaceId,
       isInDefaultSpace: spacesService.isInDefaultSpace(request),
     };
   };

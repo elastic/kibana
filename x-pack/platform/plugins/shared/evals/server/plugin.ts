@@ -155,10 +155,7 @@ export class EvalsPlugin
     const getInferenceStart = () =>
       coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.inference);
 
-    const getSpaceId = async (request: KibanaRequest): Promise<string> => {
-      const [, pluginsStart] = await coreSetup.getStartServices();
-      return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-    };
+    const getSpaceId = async (request: KibanaRequest): Promise<string> => request.spaceId;
 
     const getCurrentUsername = async (request: KibanaRequest): Promise<string | undefined> => {
       const [, pluginsStart] = await coreSetup.getStartServices();

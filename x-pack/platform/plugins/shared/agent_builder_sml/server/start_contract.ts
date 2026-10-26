@@ -37,8 +37,7 @@ export const buildIndexAttachment =
         ? { includedHiddenTypes: params.includedHiddenTypes }
         : {}),
     });
-    const spaceId =
-      params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
+    const spaceId = params.spaceId ?? params.request.spaceId;
     return smlService.indexAttachment({
       originId: params.originId,
       attachmentType: params.attachmentType,
@@ -68,8 +67,7 @@ export const buildDeleteAttachment =
         ? { includedHiddenTypes: params.includedHiddenTypes }
         : {}),
     });
-    const spaceId =
-      params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
+    const spaceId = params.spaceId ?? params.request.spaceId;
     return smlService.deleteAttachment({
       originId: params.originId,
       attachmentType: params.attachmentType,

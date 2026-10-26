@@ -15,7 +15,7 @@ import { WORKFLOW_EXECUTION_CANCEL_SECURITY } from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerCancelWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerCancelWorkflowExecutionsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .post({
       path: '/api/workflows/workflow/{workflowId}/executions/cancel',
@@ -45,7 +45,7 @@ export function registerCancelWorkflowExecutionsRoute({ router, api, spaces }: R
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { workflowId } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           await api.cancelAllActiveWorkflowExecutions(workflowId, spaceId, request, {
             channel: 'kibana_execution_view',
           });

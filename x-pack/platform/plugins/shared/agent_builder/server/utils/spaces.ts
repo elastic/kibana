@@ -8,20 +8,13 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export const isDefaultSpace = (space: string | undefined): boolean => {
   return !space || space === DEFAULT_SPACE_ID;
 };
 
-export const getCurrentSpaceId = ({
-  spaces,
-  request,
-}: {
-  request: KibanaRequest;
-  spaces: SpacesPluginStart | undefined;
-}): string => {
-  return spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
+export const getCurrentSpaceId = ({ request }: { request: KibanaRequest }): string => {
+  return request.spaceId;
 };
 
 export const createSpaceDslFilter = (space: string): QueryDslQueryContainer => {

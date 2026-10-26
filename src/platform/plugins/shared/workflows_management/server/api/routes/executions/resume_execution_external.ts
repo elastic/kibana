@@ -36,7 +36,7 @@ const externalResumeParamsSchema = schema.object({
 });
 
 export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies) {
-  const { router, api, spaces, logger } = deps;
+  const { router, api, logger } = deps;
 
   router.versioned
     .post({
@@ -73,7 +73,7 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
           try {
             const { executionId, stepId } = request.params;
             const { token } = resolveExternalResumeCredentials(request.query);
-            const spaceId = spaces.getSpaceId(request);
+            const spaceId = request.spaceId;
             await api.resumeWorkflowExecutionExternallyWithInput({
               token,
               executionId,
@@ -94,7 +94,7 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
 }
 
 export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies) {
-  const { router, api, spaces, logger } = deps;
+  const { router, api, logger } = deps;
 
   router.versioned
     .get({
@@ -151,7 +151,7 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
               token,
               executionId,
               stepId,
-              spaceId: spaces.getSpaceId(request),
+              spaceId: request.spaceId,
               query: request.query as Record<string, unknown>,
               request,
             });

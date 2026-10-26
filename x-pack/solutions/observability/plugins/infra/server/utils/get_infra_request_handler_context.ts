@@ -6,7 +6,6 @@
  */
 
 import type { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InfraPluginRequestHandlerContext } from '../types';
 import type { InfraServerPluginSetupDeps } from '../lib/adapters/framework';
 
@@ -25,7 +24,7 @@ export async function getInfraRequestHandlerContext({
 
   const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
   const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, savedObjectsClient);
-  const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+  const spaceId = request.spaceId;
 
   const getMetricsIndices = async () => {
     return metricsClient.getMetricIndices({

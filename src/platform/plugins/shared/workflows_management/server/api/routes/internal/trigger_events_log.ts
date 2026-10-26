@@ -29,7 +29,7 @@ export const triggerEventsLogSearchBodySchema = schema.object({
 });
 
 export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
-  const { router, workflowsService, spaces } = deps;
+  const { router, workflowsService } = deps;
 
   router.versioned
     .post({
@@ -49,7 +49,7 @@ export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
       },
       withAvailabilityCheck(async (_context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const { triggerEvents } = await workflowsService.getWorkflowsExecutionEngine();
           const { kql, from: fromTs, to: toTs, page, size } = request.body;
 

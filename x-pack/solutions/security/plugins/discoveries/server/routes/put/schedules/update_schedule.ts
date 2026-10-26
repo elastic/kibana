@@ -80,7 +80,7 @@ export const registerUpdateScheduleRoute = (
         try {
           const { pluginsStart } = await getStartServices();
 
-          const spaceId = getSpaceId({ request, spaces: pluginsStart.spaces?.spacesService });
+          const spaceId = getSpaceId({ request });
           // Reject a client-supplied alerts index that targets another space or
           // a cross-space wildcard so the updated schedule stays space-correct.
           assertAlertsIndexPatternInSpace({

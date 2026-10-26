@@ -18,7 +18,7 @@ import {
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetChildrenExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetChildrenExecutionsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/executions/{executionId}/children',
@@ -48,7 +48,7 @@ export function registerGetChildrenExecutionsRoute({ router, api, spaces }: Rout
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
             request,
             omitStepExecutions: true,

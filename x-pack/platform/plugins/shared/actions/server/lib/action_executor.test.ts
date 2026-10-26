@@ -78,7 +78,7 @@ const executeParams = {
   actionId: CONNECTOR_ID,
   params: ACTION_PARAMS,
   executionId: '123abc',
-  request: {} as KibanaRequest,
+  request: { spaceId: asSpaceId('some-namespace') } as KibanaRequest,
   source: SOURCE,
 };
 
@@ -308,7 +308,6 @@ beforeEach(() => {
   jest.resetAllMocks();
   jest.clearAllMocks();
   mockGetRequestBodyByte.mockReturnValue(0);
-  spacesMock.getSpaceId.mockReturnValue(asSpaceId('some-namespace'));
   loggerMock.get.mockImplementation(() => loggerMock);
   securityMockStart.authc.getCurrentUser.mockImplementation(() => mockUser);
 
@@ -390,10 +389,8 @@ describe('Action Executor', () => {
       }
 
       if (executeUnsecure) {
-        expect(spacesMock.getSpaceId).not.toHaveBeenCalled();
         expect(securityMockStart.authc.getCurrentUser).not.toHaveBeenCalled();
       } else {
-        expect(spacesMock.getSpaceId).toHaveBeenCalled();
         expect(securityMockStart.authc.getCurrentUser).toHaveBeenCalled();
       }
 
@@ -771,7 +768,7 @@ describe('Action Executor', () => {
           secrets: {},
           params: { foo: true },
           logger: loggerMock,
-          request: {},
+          request: executeParams.request,
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
           profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
           ...(executeUnsecure ? {} : { source: SOURCE }),
@@ -1276,7 +1273,7 @@ describe('Action Executor', () => {
         secrets: {},
         params: { foo: true },
         logger: loggerMock,
-        request: {},
+        request: executeParams.request,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         source: SOURCE,
         profileUid: mockUser?.profile_uid,
@@ -1462,7 +1459,7 @@ describe('Action Executor', () => {
         secrets: {},
         params: { foo: true },
         logger: loggerMock,
-        request: {},
+        request: executeParams.request,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         source: SOURCE,
         profileUid: mockUser?.profile_uid,
@@ -2271,7 +2268,7 @@ describe('Event log', () => {
       executionId: '123abc',
       consumer: 'test-consumer',
       relatedSavedObjects: [],
-      request: {} as KibanaRequest,
+      request: executeParams.request,
       actionExecutionId: '2',
     });
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -2824,9 +2821,6 @@ describe('execute() - spaceId override', () => {
       spaceId: asSpaceId('override-space'),
     });
 
-    // spacesMock.getSpaceId should not be called when spaceId is provided
-    expect(spacesMock.getSpaceId).not.toHaveBeenCalled();
-
     // The action should be fetched from the override space namespace
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       'action',
@@ -2842,9 +2836,6 @@ describe('execute() - spaceId override', () => {
     connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
 
     await actionExecutor.execute(executeParams);
-
-    // spacesMock.getSpaceId should be called when no spaceId override is provided
-    expect(spacesMock.getSpaceId).toHaveBeenCalled();
 
     // The action should be fetched from the namespace derived from request
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(

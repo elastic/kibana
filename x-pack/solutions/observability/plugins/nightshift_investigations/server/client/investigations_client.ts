@@ -7,12 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
@@ -309,7 +307,6 @@ type InstalledWorkflow = StoredWorkflow & {
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
-  spaces?: SpacesPluginStart;
   logger: Logger;
   /**
    * Explicit override for contexts where the request cannot carry space info (e.g. workflow step
@@ -334,7 +331,6 @@ export interface NightshiftInvestigationsClientDeps {
 export class NightshiftInvestigationsClient {
   private readonly request: KibanaRequest;
   private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined;
-  private readonly spaces: SpacesPluginStart | undefined;
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
@@ -351,7 +347,6 @@ export class NightshiftInvestigationsClient {
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
     this.workflowsManagement = deps.workflowsManagement;
-    this.spaces = deps.spaces;
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
@@ -387,11 +382,7 @@ export class NightshiftInvestigationsClient {
   };
 
   private getSpaceId(): string {
-    return (
-      this.spaceIdOverride ??
-      this.spaces?.spacesService.getSpaceId(this.request) ??
-      DEFAULT_SPACE_ID
-    );
+    return this.spaceIdOverride ?? this.request.spaceId;
   }
 
   /**
@@ -1263,7 +1254,7 @@ export class NightshiftInvestigationsClient {
    * request ever lacks it, matching and claims would happen in another space than the run.
    */
   private warnOnSpaceMismatch(spaceId: string): void {
-    const requestSpaceId = this.spaces?.spacesService.getSpaceId(this.request);
+    const requestSpaceId = this.request.spaceId;
     if (requestSpaceId !== undefined && requestSpaceId !== spaceId) {
       this.logger.warn(
         `Starting an investigation in space "${spaceId}" from a request scoped to space "${requestSpaceId}"; subjects are matched in the request's space`

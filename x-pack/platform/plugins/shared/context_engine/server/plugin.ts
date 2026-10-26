@@ -396,7 +396,7 @@ export class ContextEnginePlugin
     this.createAiIndexDataReadService = ({ esClient, request }) =>
       new AiIndexDataReadService({
         esClient,
-        spaceId: resolveSpaceId(startDeps.spaces, request),
+        spaceId: resolveSpaceId(request),
         auditLogger: coreStart.security.audit.asScoped(request),
         aiIndexService,
         logger: this.logger,

@@ -12,7 +12,6 @@ import type {
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
 import type { CurrentUser } from '@kbn/agent-builder-common';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceStart } from '../agents';
@@ -36,7 +35,6 @@ interface ConversationServiceDeps {
   logger: Logger;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
-  spaces?: SpacesPluginStart;
   agents: AgentsServiceStart;
   eventBus?: ConversationEventBus;
   conversationEvents: ConversationEventsServiceStart;
@@ -48,7 +46,6 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly logger: Logger;
   private readonly security: SecurityServiceStart;
   private readonly elasticsearch: ElasticsearchServiceStart;
-  private readonly spaces?: SpacesPluginStart;
   private readonly agents: AgentsServiceStart;
   private readonly eventBus?: ConversationEventBus;
   private readonly conversationEvents: ConversationEventsServiceStart;
@@ -59,7 +56,6 @@ export class ConversationServiceImpl implements ConversationService {
     logger,
     security,
     elasticsearch,
-    spaces,
     agents,
     eventBus,
     conversationEvents,
@@ -69,7 +65,6 @@ export class ConversationServiceImpl implements ConversationService {
     this.logger = logger;
     this.security = security;
     this.elasticsearch = elasticsearch;
-    this.spaces = spaces;
     this.agents = agents;
     this.eventBus = eventBus;
     this.conversationEvents = conversationEvents;
@@ -105,7 +100,7 @@ export class ConversationServiceImpl implements ConversationService {
     user: CurrentUser;
   }): Promise<ConversationClient> {
     const esClient = this.getScopedEsClient(request).asInternalUser;
-    const space = getCurrentSpaceId({ request, spaces: this.spaces });
+    const space = getCurrentSpaceId({ request });
     const agentRegistry = await this.agents.getRegistry({ request });
     const eventBus = this.eventBus;
     const analyticsService = this.analyticsService;

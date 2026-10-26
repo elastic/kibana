@@ -45,7 +45,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
     const spacesService = getSpacesService();
 
-    const spaceId = spacesService.getSpaceId(request);
+    const spaceId = request.spaceId;
 
     // The root of kibana is also the root of the default space,
     // since the default space does not have a URL Identifier (i.e., `/s/foo`).

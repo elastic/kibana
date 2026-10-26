@@ -93,8 +93,7 @@ export const registerSearchRoute = ({
         const { query, size, fields, constraints, filters } = request.body;
         const esClient = coreContext.elasticsearch.client;
 
-        const [, startDeps] = await coreSetup.getStartServices();
-        const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+        const spaceId = request.spaceId;
 
         const { results } = await sml.search({
           query,

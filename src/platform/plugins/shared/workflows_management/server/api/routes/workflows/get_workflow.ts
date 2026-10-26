@@ -20,7 +20,7 @@ import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetWorkflowRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .get({
       path: '/api/workflows/workflow/{id}',
@@ -51,7 +51,7 @@ export function registerGetWorkflowRoute(deps: RouteDependencies) {
             return response.forbidden();
           }
           const { id } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const workflow = await api.getWorkflow(id, spaceId, request);
           if (!workflow) {
             audit.logWorkflowAccessed(request, {

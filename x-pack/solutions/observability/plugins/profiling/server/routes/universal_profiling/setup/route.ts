@@ -7,7 +7,6 @@
 
 import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/server';
 import { isServerless } from '@kbn/profiling-data-access-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { RouteRegisterParameters } from '../..';
 import { getRoutePaths } from '../../../../common';
@@ -93,7 +92,7 @@ export function registerSetupRoute({
           await dependencies.start.profilingDataAccess.services.universalProfiling.getStatus({
             esClient: core.elasticsearch.client,
             soClient: core.savedObjects.client,
-            spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
+            spaceId: request.spaceId,
             abortSignal: getRequestAbortedSignal(request.events.aborted$),
           });
 
@@ -179,8 +178,7 @@ export function registerSetupRoute({
           clientWithProfilingAuth: client,
           logger,
           soClient: core.savedObjects.client,
-          spaceId:
-            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+          spaceId: request.spaceId,
         };
 
         const { universalProfiling } = dependencies.start.profilingDataAccess.services;

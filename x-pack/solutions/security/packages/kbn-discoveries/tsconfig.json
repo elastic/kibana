@@ -26,7 +26,6 @@
     "@kbn/logging-mocks",
     "@kbn/rule-data-utils",
     "@kbn/discoveries-schemas",
-    "@kbn/spaces-plugin",
     "@kbn/utility-types",
     "@kbn/zod",
     "@kbn/i18n",

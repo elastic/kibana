@@ -16,7 +16,7 @@ import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerTestStepRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/step/test',
@@ -59,7 +59,7 @@ export function registerTestStepRoute(deps: RouteDependencies) {
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const workflowExecutionId = await api.testStep(
             request.body.workflowYaml,
             request.body.stepId,

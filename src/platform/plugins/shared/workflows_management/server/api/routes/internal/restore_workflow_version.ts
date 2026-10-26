@@ -23,7 +23,7 @@ const paramsSchema = idParamSchema.extends({
 });
 
 export function registerRestoreWorkflowVersionRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .post({
       path: '/internal/workflows/workflow/{id}/history/{eventId}/restore',
@@ -45,7 +45,7 @@ export function registerRestoreWorkflowVersionRoute(deps: RouteDependencies) {
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id, eventId } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const restored = await api.restoreWorkflowVersion(id, eventId, spaceId, request);
           audit.logWorkflowRestored(request, { id, eventId, version: restored.version });
           return response.ok({ body: restored });

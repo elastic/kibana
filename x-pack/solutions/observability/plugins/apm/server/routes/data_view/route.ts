@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { CreateDataViewResponse } from './create_static_data_view';
 import { createOrUpdateStaticDataView } from './create_static_data_view';
@@ -21,9 +20,7 @@ const staticDataViewRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const coreContext = await context.core;
 
-    // get name of selected (name)space
-    const spacesStart = await plugins.spaces?.start();
-    const spaceId = spacesStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const spaceId = request.spaceId;
 
     if (!spaceId) {
       throw new Error('No spaceId found');

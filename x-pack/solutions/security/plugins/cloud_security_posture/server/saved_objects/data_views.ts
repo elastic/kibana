@@ -49,7 +49,7 @@ const getCurrentSpaceId = (
   spacesService: SpacesServiceStart | undefined,
   request: KibanaRequest
 ): string => {
-  return spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
+  return request.spaceId || DEFAULT_SPACE_ID;
 };
 
 const deleteDataViewSafe = async (

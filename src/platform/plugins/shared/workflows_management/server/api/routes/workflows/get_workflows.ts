@@ -85,7 +85,7 @@ const querySchema = schema.object({
   ),
 });
 
-export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetWorkflowsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows',
@@ -110,7 +110,7 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
         try {
           const managedFilter = resolveAuthorizedManagedFilter(request, request.query.managed);
           const params = prepareParams({ ...request.query, managed: managedFilter });
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const includeExecutionHistory =
             request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
           return response.ok({

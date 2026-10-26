@@ -191,7 +191,7 @@ export async function runBeforeAgentWorkflows({
   getInternalServices,
   logger,
 }: RunBeforeAgentWorkflowsParams): Promise<void | HookHandlerResult<HookLifecycle.beforeAgent>> {
-  const { agents, spaces, uiSettings, savedObjects } = getInternalServices();
+  const { agents, uiSettings, savedObjects } = getInternalServices();
   const soClient = savedObjects.getScopedClient(context.request);
   const uiSettingsClient = uiSettings.asScopedToClient(soClient);
   const isEnabled = await isPreExecutionWorkflowEnabled(uiSettingsClient);
@@ -205,7 +205,7 @@ export async function runBeforeAgentWorkflows({
     return;
   }
 
-  const spaceId = getCurrentSpaceId({ request: context.request, spaces });
+  const spaceId = getCurrentSpaceId({ request: context.request });
   let currentNextInput = context.nextInput;
   let preExecutionWorkflow = context.preExecutionWorkflow;
   let nextInputChanged = false;

@@ -9,7 +9,6 @@ import { firstValueFrom } from 'rxjs';
 import type { CoreStart, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -108,8 +107,7 @@ export const createSandboxSecretsClient = ({
   canEncrypt: boolean;
   logger: Logger;
 }): SandboxSecretsClient => {
-  const getSpaceId = (request: KibanaRequest): string =>
-    getDeps().spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+  const getSpaceId = (request: KibanaRequest): string => request.spaceId;
 
   // Access is authorized by the route privileges and `getSandboxAccessDeniedReason`, so the
   // security extension is skipped; the encryption extension stays enabled so `values` is

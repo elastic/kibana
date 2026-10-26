@@ -17,7 +17,7 @@ import { GLOBAL_SPACE_ID } from '../../../common/threat_intel';
  *
  * Falls back to `'default'` only when the spaces plugin is missing (e.g. legacy
  * setup or test bootstrap) so the rest of the plugin keeps working without
- * spaces installed. When Spaces *is* installed, `spaces.getSpaceId(request)`
+ * spaces installed. When Spaces *is* installed, `request.spaceId`
  * resolves the active space from the request's path; it does not throw, and an
  * unresolvable request maps to the default space id per the Spaces contract
  * rather than to another space's data.
@@ -28,7 +28,7 @@ export const resolveCurrentSpaceId = (
   request: KibanaRequest
 ): string => {
   if (!spaces) return 'default';
-  return spaces.getSpaceId(request);
+  return request.spaceId;
 };
 
 export const buildSpaceFilterTerms = (

@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/screenshotting-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/spaces-plugin'
   - '@kbn/config-schema'
   - '@kbn/i18n'
   - '@kbn/utility-types'
@@ -89,6 +88,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/deeplinks-analytics'
   - '@kbn/es-query'
+  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod

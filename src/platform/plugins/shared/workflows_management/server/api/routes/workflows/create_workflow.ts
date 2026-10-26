@@ -16,7 +16,7 @@ import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerCreateWorkflowRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow',
@@ -44,7 +44,7 @@ export function registerCreateWorkflowRoute(deps: RouteDependencies) {
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const createdWorkflow = await api.createWorkflow(request.body, spaceId, request);
           audit.logWorkflowCreated(request, {
             id: createdWorkflow.id,

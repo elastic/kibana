@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/ebt-click'
   - '@kbn/usage-collection-plugin'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod

@@ -454,7 +454,7 @@ export class EsoModelVersionExample
       async (context, request, response) => {
         // Decrypt the objects as the internal user so we can display the secrets
         const [, { encryptedSavedObjects }] = await core.getStartServices();
-        const spaceId = plugins.spaces.spacesService.getSpaceId(request);
+        const spaceId = request.spaceId;
         const namespace = plugins.spaces.spacesService.spaceIdToNamespace(spaceId);
         try {
           const esoClient = encryptedSavedObjects.getClient({

@@ -6,7 +6,7 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { actionsConfigMock } from '../actions_config.mock';
 import { createInboundEventsClient } from './factory';
@@ -86,7 +86,7 @@ describe('setupInboundEvents', () => {
     );
   });
 
-  it('registers admission and reads the space id from spaces when the cap is on', () => {
+  it('registers admission and reads the space id from the request when the cap is on', () => {
     const actionsConfigUtils = actionsConfigMock.create();
     actionsConfigUtils.isInboundEventsEnabled.mockReturnValue(true);
     actionsConfigUtils.getInboundEventsAdmission.mockReturnValue({
@@ -94,24 +94,20 @@ describe('setupInboundEvents', () => {
       maxInFlight: 50,
       maxInFlightPerConnector: 10,
     });
-    const request = httpServerMock.createKibanaRequest();
-    const getSpaceId = jest.fn().mockReturnValue('space-a');
+    const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId('space-a') });
 
     const inboundEvents = setupInboundEvents({
       actionsConfigUtils,
       http,
       getStartServices,
       logger,
-      spaces: { spacesService: { getSpaceId } },
       inMemoryConnectors: [],
       getConnectorEventEmitter: () => undefined,
     });
 
     expect(http.registerOnPreAuth).toHaveBeenCalledTimes(1);
     expect(http.registerOnPreResponse).toHaveBeenCalledTimes(1);
-    expect(getSpaceId).not.toHaveBeenCalled();
     expect(inboundEvents?.getSpaceId(request)).toBe('space-a');
-    expect(getSpaceId).toHaveBeenCalledWith(request);
   });
 
   it('reads the connector event emitter when an event is emitted', async () => {

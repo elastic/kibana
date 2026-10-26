@@ -38,7 +38,7 @@ export const executionStepsQuerySchema = schema.object({
   }),
 });
 
-export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetExecutionStepsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/executions/{executionId}/steps',
@@ -69,7 +69,7 @@ export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDep
         try {
           const { executionId } = request.params;
           const { page, size } = request.query;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const { workflowExecution, stepExecutionListResult } =
             await api.getExecutionStepExecutions(
               {

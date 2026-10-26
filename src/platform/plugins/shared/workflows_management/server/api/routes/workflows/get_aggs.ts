@@ -44,7 +44,7 @@ const fieldSchema = schema.string({
   },
 });
 
-export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetAggsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/aggs',
@@ -97,7 +97,7 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
           }
           const { fields: rawFields, managed } = request.query;
           const fields = Array.isArray(rawFields) ? rawFields : [rawFields];
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const managedFilter = resolveAuthorizedManagedFilter(request, managed);
           const aggs = await api.getWorkflowAggs(fields, spaceId, { managedFilter, request });
           return response.ok({ body: aggs || {} });

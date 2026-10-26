@@ -17,7 +17,6 @@ import { DEFAULT_APP_CATEGORIES, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -344,10 +343,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients: this.streamsGetScopedClients,
         unitConfigHooks,
-        getSpaceId: async (request: KibanaRequest) => {
-          const [, pluginsStart] = await core.getStartServices();
-          return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        },
+        getSpaceId: async (request: KibanaRequest) => request.spaceId,
       },
       core,
       logger: this.logger,

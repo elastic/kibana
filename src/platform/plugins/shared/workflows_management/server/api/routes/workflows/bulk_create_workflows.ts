@@ -17,7 +17,7 @@ import { WORKFLOW_BULK_CREATE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerBulkCreateWorkflowsRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows',
@@ -62,7 +62,7 @@ export function registerBulkCreateWorkflowsRoute(deps: RouteDependencies) {
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const { overwrite, dryRun } = request.query;
 
           if (dryRun) {

@@ -14,8 +14,7 @@ import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '../../plugin';
 
 export const getLastRun = async (context: AlertDeletionContext, req: KibanaRequest) => {
   const esClient = await context.elasticsearchClientPromise;
-  const spacesService = await context.spacesService;
-  const currentSpaceId = spacesService ? spacesService.getSpaceId(req) : 'default';
+  const currentSpaceId = req.spaceId;
 
   try {
     const searchResponse: SearchResponse<IValidatedEvent> = await esClient.search({

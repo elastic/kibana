@@ -276,7 +276,7 @@ async function startOAuthAuthorizationFlow(params: {
     }),
   });
 
-  const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
+  const spaceId = req.spaceId;
   let namespace: string | undefined;
   if (spaces && spaceId) {
     namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
