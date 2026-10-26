@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { fireEvent, render } from '@testing-library/react';
+import type { Filter } from '@kbn/es-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   INTEGRATION_BUTTON_TEST_ID,
@@ -15,7 +15,6 @@ import {
   INTEGRATIONS_LIST_TEST_ID,
 } from './integrations_filter_button';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import userEvent from '@testing-library/user-event';
 import { RELATED_INTEGRATION } from '../../../constants';
 
 jest.mock('../../../../common/lib/kibana');
@@ -34,93 +33,57 @@ const integrations: EuiSelectableOption[] = [
   },
 ];
 
+const negatedFilter = (value: string): Filter => ({
+  meta: {
+    alias: null,
+    disabled: false,
+    index: undefined,
+    key: RELATED_INTEGRATION,
+    negate: true,
+    params: { query: value },
+    type: 'phrase',
+  },
+  query: { match_phrase: { [RELATED_INTEGRATION]: value } },
+});
+
 describe('<IntegrationFilterButton />', () => {
-  it('should render the component', async () => {
+  it('should render the component', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: { data: { query: { filterManager: jest.fn() } } },
     });
 
-    const { getByTestId, findByTestId } = render(
-      <IntegrationFilterButton integrations={integrations} />
-    );
+    const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
     const button = getByTestId(INTEGRATION_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
-    await userEvent.click(button);
 
-    // The popover and its EuiSelectable mount asynchronously after the click,
-    // so wait for the list (and its options) to appear before asserting on them.
-    expect(await findByTestId(INTEGRATIONS_LIST_TEST_ID)).toBeInTheDocument();
+    fireEvent.click(button);
 
-    await waitFor(() => {
-      expect(getByTestId('first')).toHaveTextContent('firstLabel');
-      expect(getByTestId('second')).toHaveTextContent('secondLabel');
-    });
+    expect(getByTestId(INTEGRATIONS_LIST_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId('first')).toHaveTextContent('firstLabel');
+    expect(getByTestId('second')).toHaveTextContent('secondLabel');
   });
 
-  it('should add a negated filter to filterManager', async () => {
-    const getFilters = jest.fn().mockReturnValue([]);
-    const setFilters = jest.fn();
+  it('should add and remove the negated filter in filterManager', () => {
+    let filters: Filter[] = [];
+    const getFilters = jest.fn(() => filters);
+    const setFilters = jest.fn((newFilters: Filter[]) => {
+      filters = newFilters;
+    });
     (useKibana as jest.Mock).mockReturnValue({
       services: { data: { query: { filterManager: { getFilters, setFilters } } } },
     });
 
     const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
-    await userEvent.click(getByTestId(INTEGRATION_BUTTON_TEST_ID));
-    await waitForEuiPopoverOpen();
+    fireEvent.click(getByTestId(INTEGRATION_BUTTON_TEST_ID));
 
-    const option = getByTestId('first');
-    expect(option).toBeInTheDocument();
+    // deselecting an integration negates the filter for its rule
+    fireEvent.click(getByTestId('first'));
+    expect(setFilters).toHaveBeenLastCalledWith([negatedFilter('firstKey')]);
 
-    await userEvent.click(option);
-
-    expect(setFilters).toHaveBeenCalledWith([
-      {
-        meta: {
-          alias: null,
-          disabled: false,
-          index: undefined,
-          key: RELATED_INTEGRATION,
-          negate: true,
-          params: { query: 'firstKey' },
-          type: 'phrase',
-        },
-        query: { match_phrase: { [RELATED_INTEGRATION]: 'firstKey' } },
-      },
-    ]);
-  });
-
-  it('should remove the negated filter from filterManager', async () => {
-    const getFilters = jest.fn().mockReturnValue([
-      {
-        meta: {
-          alias: null,
-          disabled: false,
-          index: undefined,
-          key: RELATED_INTEGRATION,
-          negate: true,
-          params: { query: 'secondKey' },
-          type: 'phrase',
-        },
-        query: { match_phrase: { [RELATED_INTEGRATION]: 'secondKey' } },
-      },
-    ]);
-    const setFilters = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { query: { filterManager: { getFilters, setFilters } } } },
-    });
-
-    const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
-
-    await userEvent.click(getByTestId(INTEGRATION_BUTTON_TEST_ID));
-    await waitForEuiPopoverOpen();
-
-    const option = getByTestId('second');
-    expect(option).toBeInTheDocument();
-
-    // creates a new filter that
-    await userEvent.click(option);
-    expect(setFilters).toHaveBeenCalledWith([]);
+    // selecting it back drops the negated filter
+    fireEvent.click(getByTestId('first'));
+    expect(setFilters).toHaveBeenLastCalledWith([]);
   });
 });

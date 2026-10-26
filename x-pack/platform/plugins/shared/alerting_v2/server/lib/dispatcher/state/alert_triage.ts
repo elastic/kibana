@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+import type { AlertActionSubtype } from '../../../resources/datastreams/alert_actions';
 import type { Alert, RuleId } from '../types';
 
-export type SuppressedAlert = Alert & { reason: string };
+export type SuppressedAlert = Alert & Suppression;
+
+/** A suppression verdict. */
+export interface Suppression {
+  reason: string;
+  action_subtype: AlertActionSubtype;
+  maintenance_window_id?: string;
+}
 
 /**
  * The evolving verdict on candidate alerts: which may still notify
@@ -37,12 +45,12 @@ export class AlertTriage {
     return AlertTriage.EMPTY;
   }
 
-  /** Partition alerts: a returned reason means "suppress". */
+  /** Partition alerts: a returned suppression means "suppress". */
   public static partition(
     alerts: readonly Alert[],
-    suppressionReasonFor: (alert: Alert) => string | undefined
+    suppressionFor: (alert: Alert) => Suppression | undefined
   ): AlertTriage {
-    return AlertTriage.EMPTY.suppressWhere(alerts, suppressionReasonFor);
+    return AlertTriage.EMPTY.suppressWhere(alerts, suppressionFor);
   }
 
   /**
@@ -52,9 +60,9 @@ export class AlertTriage {
    * so callers can detect a no-op by identity.
    */
   public suppressDispatchableWhere(
-    suppressionReasonFor: (alert: Alert) => string | undefined
+    suppressionFor: (alert: Alert) => Suppression | undefined
   ): AlertTriage {
-    return this.suppressWhere(this.dispatchable, suppressionReasonFor);
+    return this.suppressWhere(this.dispatchable, suppressionFor);
   }
 
   /** Replace each dispatchable alert 1:1 (e.g. `data` enrichment). */
@@ -86,7 +94,7 @@ export class AlertTriage {
 
   private suppressWhere(
     alerts: readonly Alert[],
-    suppressionReasonFor: (alert: Alert) => string | undefined
+    suppressionFor: (alert: Alert) => Suppression | undefined
   ): AlertTriage {
     const dispatchable: Alert[] = [];
     // Only copied on the first newly suppressed alert, so a tick where
@@ -94,10 +102,10 @@ export class AlertTriage {
     let suppressed: SuppressedAlert[] | undefined;
 
     for (const alert of alerts) {
-      const reason = suppressionReasonFor(alert);
-      if (reason !== undefined) {
+      const suppression = suppressionFor(alert);
+      if (suppression !== undefined) {
         suppressed ??= [...this.suppressed];
-        suppressed.push({ ...alert, reason });
+        suppressed.push({ ...alert, ...suppression });
       } else {
         dispatchable.push(alert);
       }

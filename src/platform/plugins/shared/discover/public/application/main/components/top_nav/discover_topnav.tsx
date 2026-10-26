@@ -21,7 +21,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   useDiscoverCustomization,
   useDiscoverCustomizationContext,
@@ -79,10 +79,7 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation } = services;
   const customizationContext = useDiscoverCustomizationContext();
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
-  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const [initialCopyOnSave, setInitialCopyOnSave] = useState(false);
-
-  const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
+  const saveSessionModal = useInternalStateSelector((state) => state.saveSessionModal);
 
   const query = useAppStateSelector((state) => state.query);
   const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
@@ -178,21 +175,16 @@ export const DiscoverTopNav = ({
   );
 
   const onOpenSaveModal = useCallback(() => {
-    setInitialCopyOnSave(false);
-    onSaveCbRef.current = undefined;
-    setIsSaveModalVisible(true);
-  }, []);
+    dispatch(internalStateActions.openSaveSessionModal({}));
+  }, [dispatch]);
 
   const onOpenSaveAsModal = useCallback(() => {
-    setInitialCopyOnSave(true);
-    onSaveCbRef.current = undefined;
-    setIsSaveModalVisible(true);
-  }, []);
+    dispatch(internalStateActions.openSaveSessionModal({ initialCopyOnSave: true }));
+  }, [dispatch]);
 
   const onCloseSaveModal = useCallback(() => {
-    setIsSaveModalVisible(false);
-    onSaveCbRef.current = undefined;
-  }, []);
+    dispatch(internalStateActions.closeSaveSessionModal());
+  }, [dispatch]);
   const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
   const onChangeDataView = useCallback(
     (dataViewOrDataViewId: string | DataView) => {
@@ -452,11 +444,11 @@ export const DiscoverTopNav = ({
             : undefined
         }
       />
-      {isSaveModalVisible && (
+      {saveSessionModal.isOpen && (
         <DiscoverSessionSaveModalContainer
-          initialCopyOnSave={initialCopyOnSave}
+          initialCopyOnSave={saveSessionModal.initialCopyOnSave}
+          initialTitle={saveSessionModal.initialTitle}
           onClose={onCloseSaveModal}
-          onSaveCb={onSaveCbRef.current}
           services={services}
         />
       )}

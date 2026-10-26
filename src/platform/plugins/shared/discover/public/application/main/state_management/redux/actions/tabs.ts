@@ -479,21 +479,16 @@ export const initializeTabs = createInternalStateAsyncThunk(
     }
 
     const savedDataViewIds = getState().savedDataViews.map(({ id }) => id);
-    const {
-      inlineDataViewIds,
-      draftSessionTitle,
-      outdatedSelectedTab,
-      hasNewSavedVersion,
-      ...initialTabsState
-    } = tabsStorageManager.loadLocally({
-      userId,
-      spaceId,
-      persistedDiscoverSession,
-      shouldClearAllTabs,
-      defaultTab: services.embeddableEditor.getByValueTab(),
-      navigationDataViewSpec: initialTabState?.dataViewSpec,
-      savedDataViewIds,
-    });
+    const { inlineDataViewIds, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
+      tabsStorageManager.loadLocally({
+        userId,
+        spaceId,
+        persistedDiscoverSession,
+        shouldClearAllTabs,
+        defaultTab: services.embeddableEditor.getByValueTab(),
+        navigationDataViewSpec: initialTabState?.dataViewSpec,
+        savedDataViewIds,
+      });
     const selectedTab = initialTabsState.allTabs.find(
       ({ id }) => id === initialTabsState.selectedTabId
     );
@@ -521,7 +516,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
       replace: true,
     });
 
-    dispatch(internalStateSlice.actions.setDraftSessionTitle(draftSessionTitle));
     dispatch(setTabs(initialTabsState));
 
     if (hasNewSavedVersion) {

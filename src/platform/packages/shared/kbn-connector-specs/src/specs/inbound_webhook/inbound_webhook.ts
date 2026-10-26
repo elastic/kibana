@@ -74,10 +74,10 @@ const handleInboundWebhookEvents = async (
 export const InboundWebhook: ConnectorSpec = {
   metadata: {
     id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
-    displayName: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.metadata.displayName', {
+    displayName: i18n.translate('connectorSpecs.inboundWebhook.metadata.displayName', {
       defaultMessage: 'Inbound Webhook',
     }),
-    description: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.metadata.description', {
+    description: i18n.translate('connectorSpecs.inboundWebhook.metadata.description', {
       defaultMessage: 'Receive HTTP events into Kibana workflows via a public ingest URL.',
     }),
     icon: 'plugs',
@@ -105,15 +105,12 @@ export const InboundWebhook: ConnectorSpec = {
     definitions: {
       [INBOUND_WEBHOOK_RECEIVED_EVENT_KEY]: {
         eventId: INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
-        title: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.events.received.title', {
+        title: i18n.translate('connectorSpecs.inboundWebhook.events.received.title', {
           defaultMessage: 'Received',
         }),
-        description: i18n.translate(
-          'core.kibanaConnectorSpecs.inboundWebhook.events.received.description',
-          {
-            defaultMessage: 'An HTTP payload was accepted on the ingest URL for this connector.',
-          }
-        ),
+        description: i18n.translate('connectorSpecs.inboundWebhook.events.received.description', {
+          defaultMessage: 'An HTTP payload was accepted on the ingest URL for this connector.',
+        }),
         eventSchema: InboundWebhookReceivedEventSchema,
       },
     },

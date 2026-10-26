@@ -159,7 +159,7 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
    * Callback to execute after editing/deleting a runtime field
    */
   onFieldEdited?: (options: {
-    editedDataView: UnifiedFieldListSidebarContainerProps['dataView'];
+    editedDataView: UnifiedFieldListSidebarCustomizableProps['dataView'];
     removedFieldName?: string;
     editedFieldName?: string;
   }) => Promise<void>;

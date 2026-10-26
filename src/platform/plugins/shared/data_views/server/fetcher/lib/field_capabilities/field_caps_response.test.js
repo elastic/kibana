@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint import/no-duplicates: 0 */
 import { cloneDeep, omit } from 'lodash';
 import sinon from 'sinon';
 

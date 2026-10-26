@@ -48,6 +48,8 @@ export const InfraMetadataHostRT = rt.partial({
   os: InfraMetadataOSRT,
   architecture: rt.string,
   containerized: rt.boolean,
+  // OpenTelemetry `host.type` reaches the root through the `resource.attributes` passthrough object.
+  type: rt.string,
 });
 
 export const InfraMetadataContainerRT = rt.partial({
@@ -85,6 +87,8 @@ export const InfraMetadataCloudRT = rt.partial({
   machine: InfraMetadataMachineRT,
   region: rt.string,
   imageId: rt.string,
+  // OpenTelemetry `cloud.resource_id` reaches the root through the `resource.attributes` passthrough object.
+  resource_id: rt.string,
 });
 
 export const InfraMetadataAgentRT = rt.partial({
@@ -99,15 +103,18 @@ export const InfraMetadataResourceRT = rt.partial({
       ip: rt.union([rt.array(rt.string), rt.string]),
       name: rt.string,
       mac: rt.union([rt.array(rt.string), rt.string]),
+      type: rt.string,
     }),
     agent: rt.partial({}),
     cloud: rt.partial({
       provider: rt.string,
       resource_id: rt.string,
+      availability_zone: rt.string,
     }),
     os: rt.partial({
       name: rt.string,
       version: rt.string,
+      type: rt.string,
     }),
   }),
 });

@@ -35,6 +35,14 @@ export interface ExportModalShareOpts {
   isServerless?: boolean;
 }
 
+export interface ScreenCaptureExportShareOpts
+  extends Pick<ExportModalShareOpts, 'apiClient' | 'startServices$'> {
+  /**
+   * marks the PDF/PNG export as experimental in the export flyout
+   */
+  isExperimental?: boolean;
+}
+
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;
   license: ILicense;

@@ -9,7 +9,10 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
+import {
+  isTemplateRequiredConnector,
+  type EisInferenceEndpointMetadata,
+} from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
 import { EisModelStatus } from '../../common/types';
@@ -30,6 +33,15 @@ const HIDDEN_EIS_INFERENCE_ID_PREFIXES = ['.gp-llm-v2', '.rainbow-sprinkles'];
 
 export const isHiddenEisEndpoint = (ep: InferenceAPIConfigResponse): boolean =>
   HIDDEN_EIS_INFERENCE_ID_PREFIXES.some((prefix) => ep.inference_id.startsWith(prefix));
+
+/**
+ * True when the endpoint accepts only a prompt template.
+ * Those endpoints are omitted from the inference management page: a user cannot
+ * call them with messages, so they are not a model someone can choose.
+ */
+export const isTemplateRequiredEisEndpoint = (endpoint: {
+  metadata?: EisInferenceEndpointMetadata;
+}): boolean => isTemplateRequiredConnector(endpoint);
 
 export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank';
 
@@ -365,38 +377,15 @@ export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefin
 export function getModelEOLMessage(eolFormattedDate: string | null) {
   return eolFormattedDate
     ? i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
+        'xpack.searchInferenceEndpoints.settings.defaultModel.error.unavailableSince',
         {
-          defaultMessage:
-            "This model's end of life date is {eolFormattedDate}. It is no longer available.",
+          defaultMessage: 'This model has been unavailable since {eolFormattedDate}.',
           values: { eolFormattedDate },
         }
       )
-    : i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate',
-        {
-          defaultMessage: 'This model has reached end of life and is no longer available.',
-        }
-      );
-}
-
-export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null) {
-  return deprecatedFormattedDate
-    ? i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
-        {
-          defaultMessage:
-            'This model will be deprecated on {deprecatedFormattedDate}. We recommend a newer model for optimal results.',
-          values: { deprecatedFormattedDate },
-        }
-      )
-    : i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.contentNoDate',
-        {
-          defaultMessage:
-            'This model is deprecated. We recommend a newer model for optimal results.',
-        }
-      );
+    : i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.error.endOfLife', {
+        defaultMessage: 'This model has reached end of life and is no longer available.',
+      });
 }
 
 const GEO_DISPLAY_NAMES: Record<string, string> = {

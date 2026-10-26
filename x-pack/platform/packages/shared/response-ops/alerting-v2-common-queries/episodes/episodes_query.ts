@@ -23,6 +23,7 @@ import {
   normalizeEpisodeSeverity,
 } from './episode_severity';
 import { convertKqlToEsqlExpression } from './kql_to_esql';
+import { SERIES_ID_EVAL } from './series_id_eval';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 /**
@@ -38,6 +39,7 @@ export const ALERT_EPISODE_FIELDS = [
   'episode.status',
   'rule.id',
   'group_hash',
+  'series_id',
   'first_timestamp',
   'last_timestamp',
   'duration',
@@ -114,7 +116,7 @@ const resolveSortField = (sortField: string): string => {
 
 export const addEpisodeAggregation = (query: ComposerQuery) => {
   /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
-   * Matches `buildEpisodeEventDataQuery`.
+   * Matches `buildEpisodeDataRequest`.
    */
 
   // prettier-ignore
@@ -125,13 +127,14 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
     .pipe`WHERE @timestamp == last_timestamp`;
 };
 
-const addGroupHashActionStats = (query: ComposerQuery) => {
+const addSeriesActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
+    .pipe(SERIES_ID_EVAL)
     .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
                        snoozed_until      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
-                       first_series_event_timestamp = MIN(@timestamp)    WHERE type == "alert"
-          BY group_hash`;
+                       first_series_event_timestamp = MIN(@timestamp)     WHERE type == "alert"
+          BY series_id`;
 };
 
 const addEpisodeIdActionStats = (query: ComposerQuery) => {
@@ -235,8 +238,8 @@ export type EpisodesBaseFilterState = Pick<
 
 /**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
- * `.alert-actions` (last tags per group_hash, last ack / assignee per
- * episode) and narrows to alert episode rows.
+ * `.alert-actions` (last snooze state per series, last ack / assignee / tags
+ * per episode) and narrows to alert episode rows.
  *
  * `episode.status` comes straight from `.rule-events`. User-initiated
  * `deactivate` / `activate` actions also write a synthetic `.rule-events`
@@ -252,7 +255,8 @@ export const buildEpisodesBaseQuery = (
 
   // Narrowing to a single rule or series before the INLINE STATS lets ES skip
   // the space-wide aggregation: all the event and action docs of an episode
-  // carry its rule id and `group_hash`, so the aggregated rows are identical.
+  // carry its space, owner and `group_hash`, so they share one `series_id` and
+  // the aggregated rows are identical.
   if (filterState?.ruleId) {
     // `.rule-events` docs carry the nested `rule.id`, `.alert-actions` docs
     // the flat `rule_id` — match both so action docs aren't dropped.
@@ -264,7 +268,7 @@ export const buildEpisodesBaseQuery = (
 
   query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
 
-  addGroupHashActionStats(query);
+  addSeriesActionStats(query);
   addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
   addEpisodeAggregation(query);

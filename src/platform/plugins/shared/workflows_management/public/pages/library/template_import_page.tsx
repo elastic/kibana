@@ -23,13 +23,12 @@ import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const libraryBreadcrumbLabel = i18n.translate(
-  'workflowsManagement.libraryImportPage.libraryBreadcrumb',
-  { defaultMessage: 'Template Library' }
-);
+const libraryBreadcrumbLabel = i18n.translate('workflows.libraryImportPage.libraryBreadcrumb', {
+  defaultMessage: 'Template library',
+});
 
 /**
- * Workflow Template Library import page (`/app/workflows/library/import`).
+ * Workflow Template library import page (`/app/workflows/library/import`).
  * Renders the same setup/install experience as the detail page, but for a
  * template supplied client-side (an uploaded file) rather than a catalog slug.
  * The raw YAML travels on history state (`WorkflowsImportRouteState`), so a

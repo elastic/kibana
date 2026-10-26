@@ -32,6 +32,7 @@ export {
   PACKAGES_SAVED_OBJECT_TYPE,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
   OUTPUT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -93,6 +94,7 @@ export {
   packagePolicyRouteService,
   fleetSetupRouteService,
   // Package policy helpers
+  getMaxPackageName,
   isValidNamespace,
   isValidDataset,
   isValidDataStreamType,
@@ -123,6 +125,10 @@ export {
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
+  extractAgentIdsWithData,
+  getIncompatibleIntegrations,
 } from './services';
 
 export type {

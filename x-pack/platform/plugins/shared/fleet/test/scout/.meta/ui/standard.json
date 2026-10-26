@@ -1,5 +1,5 @@
 {
-  "sha1": "18d8e0533604d6db7c148035f072be92e2566928",
+  "sha1": "cefa7fb1d9b9e0333fc4145e5aac3ff562fa45bb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -71,6 +71,34 @@
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/copy_integration.spec.ts",
         "line": 130,
         "column": 5
+      }
+    },
+    {
+      "id": "405128a68c1c281-d1349f6c1402fdd",
+      "title": "Integration tile navigation clicking a tile with data streams opens the add-integration page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
+        "line": 21,
+        "column": 45
+      }
+    },
+    {
+      "id": "405128a68c1c281-77486d9fb19bffd",
+      "title": "Integration tile navigation clicking a tile as a user without integrations write privileges opens the overview page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
+        "line": 33,
+        "column": 9
       }
     },
     {

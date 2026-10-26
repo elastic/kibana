@@ -36,9 +36,15 @@ describe('getFileType', () => {
       getCreationActivity: expect.any(Function),
       getRemovalActivity: expect.any(Function),
       getAttachmentList: expect.any(Function),
+      getCountLabel: expect.any(Function),
       schema: expect.any(Object),
       workflowSchema: false,
     });
+  });
+
+  it('counts files', () => {
+    expect(fileType.getCountLabel?.({ count: 1 })).toBe('1 file');
+    expect(fileType.getCountLabel?.({ count: 2 })).toBe('2 files');
   });
 
   describe('getCreationActivity', () => {

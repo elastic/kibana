@@ -58,7 +58,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./reconcile'));
     loadTestFile(require.resolve('./reset'));
     loadTestFile(require.resolve('./per_space_data_views'));
+    loadTestFile(require.resolve('./runtime_fields_refresh'));
     loadTestFile(require.resolve('./activity'));
     loadTestFile(require.resolve('./attachments'));
+    loadTestFile(require.resolve('./deleted_spaces'));
   });
 };

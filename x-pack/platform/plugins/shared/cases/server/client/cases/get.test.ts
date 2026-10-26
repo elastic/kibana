@@ -10,7 +10,18 @@ import type { Template, AttachmentAttributes } from '../../../common/types/domai
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { mockCases, mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { get, resolve, getCasesByAlertID, getTags, getReporters, getCategories } from './get';
+import { CaseStatuses } from '../../../common/types/domain';
+import { MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP } from '../../../common/constants';
+import { Operations } from '../../authorization';
+import {
+  get,
+  resolve,
+  getCasesByAlertID,
+  getCasesByAttachmentIDs,
+  getTags,
+  getReporters,
+  getCategories,
+} from './get';
 
 describe('get', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -28,6 +39,186 @@ describe('get', () => {
           clientArgs
         )
       ).rejects.toThrow('invalid keys "foo"');
+    });
+  });
+
+  describe('getCasesByAttachmentIDs', () => {
+    const request = {
+      type: 'security.entity',
+      owner: 'securitySolution',
+      attachmentIds: ['host:a', 'host:b', 'host:c'],
+    };
+
+    beforeEach(() => {
+      clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds.mockResolvedValue([
+        {
+          attachmentId: 'host:a',
+          cases: [
+            { id: 'case-1', owner: 'securitySolution' },
+            { id: 'case-2', owner: 'securitySolution' },
+          ],
+        },
+        { attachmentId: 'host:b', cases: [{ id: 'case-2', owner: 'securitySolution' }] },
+      ]);
+    });
+
+    const getAttachmentsFilter = () =>
+      clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds.mock.calls[0][0]
+        .unifiedFilter;
+
+    it('reads the attachments of the owners the user can read, scoped to the given owner', async () => {
+      await getCasesByAttachmentIDs(request, clientArgs);
+
+      expect(clientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledWith(
+        Operations.getCaseIDsByAttachmentIDs
+      );
+      expect(
+        clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'security.entity',
+          attachmentIds: ['host:a', 'host:b', 'host:c'],
+        })
+      );
+      expect(JSON.stringify(getAttachmentsFilter())).toContain('securitySolution');
+    });
+
+    it('scopes the attachments it reads to the owners the user can read', async () => {
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        authorizedOwners: ['observability'],
+        ensureSavedObjectsAreAuthorized: () => {},
+      });
+
+      await getCasesByAttachmentIDs(request, clientArgs);
+
+      expect(JSON.stringify(getAttachmentsFilter())).toContain(
+        'cases-attachments.attributes.owner'
+      );
+      expect(JSON.stringify(getAttachmentsFilter())).toContain('observability');
+    });
+
+    it('scopes the legacy attachments it reads the same way', async () => {
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        authorizedOwners: ['observability'],
+        ensureSavedObjectsAreAuthorized: () => {},
+      });
+
+      await getCasesByAttachmentIDs(request, clientArgs);
+
+      const { legacyFilter } =
+        clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds.mock.calls[0][0];
+      expect(JSON.stringify(legacyFilter)).toContain('cases-comments.attributes.owner');
+      expect(JSON.stringify(legacyFilter)).toContain('observability');
+      expect(JSON.stringify(legacyFilter)).toContain('securitySolution');
+    });
+
+    it('does not read the attachments when the user may not read cases', async () => {
+      clientArgs.authorization.getAuthorizationFilter.mockRejectedValueOnce(
+        new Error('Unauthorized')
+      );
+
+      await expect(getCasesByAttachmentIDs(request, clientArgs)).rejects.toThrow('Unauthorized');
+      expect(
+        clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds
+      ).not.toHaveBeenCalled();
+    });
+
+    it('returns the case IDs per attachment ID, leaving out attachment IDs in no case', async () => {
+      await expect(getCasesByAttachmentIDs(request, clientArgs)).resolves.toEqual([
+        { attachmentId: 'host:a', caseIds: ['case-1', 'case-2'] },
+        { attachmentId: 'host:b', caseIds: ['case-2'] },
+      ]);
+      expect(clientArgs.services.caseService.getCaseStatuses).not.toHaveBeenCalled();
+    });
+
+    it('keeps only the cases with one of the statuses', async () => {
+      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
+        new Map([
+          ['case-1', CaseStatuses.closed],
+          ['case-2', CaseStatuses['in-progress']],
+        ])
+      );
+
+      await expect(
+        getCasesByAttachmentIDs(
+          { ...request, status: [CaseStatuses.open, CaseStatuses['in-progress']] },
+          clientArgs
+        )
+      ).resolves.toEqual([
+        { attachmentId: 'host:a', caseIds: ['case-2'] },
+        { attachmentId: 'host:b', caseIds: ['case-2'] },
+      ]);
+      expect(clientArgs.services.caseService.getCaseStatuses).toHaveBeenCalledWith({
+        caseIds: ['case-1', 'case-2'],
+      });
+    });
+
+    it('authorizes and audits only the cases left after the status filter', async () => {
+      const ensureSavedObjectsAreAuthorized = jest.fn();
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        ensureSavedObjectsAreAuthorized,
+      });
+      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
+        new Map([
+          ['case-1', CaseStatuses.closed],
+          ['case-2', CaseStatuses.open],
+        ])
+      );
+
+      await getCasesByAttachmentIDs({ ...request, status: CaseStatuses.open }, clientArgs);
+
+      expect(ensureSavedObjectsAreAuthorized).toHaveBeenCalledWith([
+        { id: 'case-2', owner: 'securitySolution' },
+      ]);
+    });
+
+    it('authorizes and audits each case it returns once, without reading the cases', async () => {
+      const ensureSavedObjectsAreAuthorized = jest.fn();
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        ensureSavedObjectsAreAuthorized,
+      });
+
+      await getCasesByAttachmentIDs(request, clientArgs);
+
+      expect(ensureSavedObjectsAreAuthorized).toHaveBeenCalledWith([
+        { id: 'case-1', owner: 'securitySolution' },
+        { id: 'case-2', owner: 'securitySolution' },
+      ]);
+      expect(clientArgs.services.caseService.getCaseStatuses).not.toHaveBeenCalled();
+    });
+
+    it('leaves out cases that are not found', async () => {
+      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
+        new Map([['case-2', CaseStatuses.open]])
+      );
+
+      await expect(
+        getCasesByAttachmentIDs({ ...request, status: CaseStatuses.open }, clientArgs)
+      ).resolves.toEqual([
+        { attachmentId: 'host:a', caseIds: ['case-2'] },
+        { attachmentId: 'host:b', caseIds: ['case-2'] },
+      ]);
+    });
+
+    it('rejects an empty list of attachment IDs', async () => {
+      await expect(
+        getCasesByAttachmentIDs({ ...request, attachmentIds: [] }, clientArgs)
+      ).rejects.toThrow('The length of the field attachmentIds is too short');
+    });
+
+    it(`rejects more than ${MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP} attachment IDs`, async () => {
+      await expect(
+        getCasesByAttachmentIDs(
+          {
+            ...request,
+            attachmentIds: Array.from(
+              { length: MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP + 1 },
+              (_, i) => `host:${i}`
+            ),
+          },
+          clientArgs
+        )
+      ).rejects.toThrow('The length of the field attachmentIds is too long');
     });
   });
 
