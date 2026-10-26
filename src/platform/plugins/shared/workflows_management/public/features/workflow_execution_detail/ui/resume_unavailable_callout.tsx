@@ -16,7 +16,7 @@ interface ResumeUnavailableCalloutProps {
   onRetry: () => void;
 }
 
-const retryLabel = i18n.translate('workflowsManagement.executionDetail.resumeUnavailable.retry', {
+const retryLabel = i18n.translate('workflows.executionDetail.resumeUnavailable.retry', {
   defaultMessage: 'Retry',
 });
 
@@ -27,13 +27,13 @@ export const ResumeUnavailableCallout = React.memo<ResumeUnavailableCalloutProps
     data-test-subj="resumeUnavailableCallout"
     title={
       <FormattedMessage
-        id="workflowsManagement.executionDetail.resumeUnavailable.title"
+        id="workflows.executionDetail.resumeUnavailable.title"
         defaultMessage="Unable to load the pending action"
       />
     }
     text={
       <FormattedMessage
-        id="workflowsManagement.executionDetail.resumeUnavailable.message"
+        id="workflows.executionDetail.resumeUnavailable.message"
         defaultMessage="This run is waiting for input, but its details could not be loaded."
       />
     }

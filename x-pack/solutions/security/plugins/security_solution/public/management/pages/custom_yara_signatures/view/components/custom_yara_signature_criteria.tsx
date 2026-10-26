@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiExpression, EuiSpacer } from '@elastic/eui';
+import { EuiExpression, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
 import type { OsType } from '@kbn/securitysolution-io-ts-list-types';
@@ -18,6 +18,7 @@ import {
   OS_WINDOWS,
 } from '../../../../components/artifact_entry_card/components/translations';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import { YaraCodeEditor } from './yara_code_editor';
 
 const OS_LABELS: Readonly<Record<OsType, string>> = {
   linux: OS_LINUX,
@@ -49,15 +50,14 @@ export const CustomYaraSignatureCriteria = memo<CriteriaConditionsProps>(
         </div>
         <EuiSpacer size="s" />
 
-        <EuiCodeBlock
-          paddingSize="s"
-          fontSize="s"
-          overflowHeight={240}
+        <YaraCodeEditor
+          value={rule}
+          readOnly
+          isCopyable
+          maxLines={11}
           aria-label={YARA_RULE_ARIA_LABEL}
           data-test-subj={getTestId('rule')}
-        >
-          {rule}
-        </EuiCodeBlock>
+        />
       </div>
     );
   }

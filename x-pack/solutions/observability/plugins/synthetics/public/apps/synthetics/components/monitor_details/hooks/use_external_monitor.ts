@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
+import { getMonitorIdentityFilter } from '../../../../../../common/lib';
 import {
   ConfigKey,
   HEARTBEAT_UNMAPPED_LOCATION_ID,
@@ -90,16 +91,11 @@ export const useExternalMonitor = ({
   // getSyntheticsCcsIndex returns the local pattern.
   const index = enabled ? getSyntheticsCcsIndex(remoteName) : '';
 
-  // Remote (CCS) monitors are real saved objects on the origin cluster, so they
-  // are addressable by `config_id`. Heartbeat/Agent autodiscovered monitors have
-  // no saved object and their pings carry no `config_id` — their identity is
-  // `monitor.id` (the canonical ping identity field, and what the overview and
-  // detail routes key them by). Matching `config_id` for heartbeat would return
-  // zero hits and the detail page would render "monitor not found".
-  const identityFilter =
-    origin === 'heartbeat' && !remoteName
-      ? { term: { 'monitor.id': configId } }
-      : { term: { config_id: configId } };
+  const identityFilter = getMonitorIdentityFilter({
+    monitorId: configId,
+    origin,
+    remoteName,
+  });
 
   const { data, loading, error } = useSyntheticsEsSearch(
     {

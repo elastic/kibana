@@ -49,7 +49,8 @@ describe('notification routing attachments', () => {
 
   it('freezes participants on initialization and adds queued destinations only when their execution starts', async () => {
     const { client } = createRoutingTestContext();
-    const first = await client.initialize('exec-1', 'workflow', [destination]);
+    const channel = { ...destination, params: { channel: '#alerts' } };
+    const first = await client.initialize('exec-1', 'workflow', [channel]);
     const next = { ...destination, params: { channel: '#oncall' } };
     const replay = await client.initialize('exec-1', 'workflow', [next]);
     expect(replay.destinations).toEqual(first.destinations);
@@ -57,6 +58,17 @@ describe('notification routing attachments', () => {
     expect(second.executions[0].destination_ids).toHaveLength(1);
     expect(second.executions[1].destination_ids).toHaveLength(2);
     expect(second.destinations).toHaveLength(2);
+  });
+
+  it('includes a destination under a caller-named message only in executions that ask for it', async () => {
+    const { client } = createRoutingTestContext();
+    const first = await client.initialize('exec-1', 'workflow', [destination]);
+    const [{ id }] = first.destinations;
+    expect(first.executions[0].destination_ids).toEqual([id]);
+    const reply = await client.initialize('exec-2', 'workflow', []);
+    expect(reply.executions[1].destination_ids).toEqual([]);
+    const again = await client.initialize('exec-3', 'workflow', [destination]);
+    expect(again.executions[2].destination_ids).toEqual([id]);
   });
 
   it('uses factory stale-write handling to preserve concurrent claims and unrelated attempts', async () => {

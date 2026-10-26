@@ -17,7 +17,7 @@ import { License } from '@kbn/license-api-guard-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { LicenseType } from '@kbn/licensing-types';
 import { MINIMUM_LICENSE_TYPE, PLUGIN_ID, PLUGIN_NAME } from '../../common';
-import type { DataFederationConfigType } from '../config';
+import { DEFAULT_AWS_CLOUDFORMATION_TEMPLATE_URL, type DataFederationConfigType } from '../config';
 import { registerDataSetsRoutes } from './register_routes';
 
 const config: DataFederationConfigType = {
@@ -25,6 +25,7 @@ const config: DataFederationConfigType = {
   enableFederatedIdentityAuth: false,
   enableGoogleCloudStorageDataSourceType: false,
   enableAzureDataSourceType: false,
+  awsCloudFormationTemplateUrl: DEFAULT_AWS_CLOUDFORMATION_TEMPLATE_URL,
 };
 
 const setup = (type: LicenseType) => {

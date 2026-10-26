@@ -312,17 +312,17 @@ describe('createRuleAttachmentType', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('mentions rule attachment, persistence states, and the rule-management skill', () => {
+    it('mentions rule attachment, persistence states, and the rule-authoring skill', () => {
       const description = definition.getAgentDescription!();
-      expect(description).toContain('Alerting v2 rule');
+      expect(description).toContain('Universal Rule');
       expect(description).toContain('proposed');
       expect(description).toContain('saved rule');
-      expect(description).toContain('rule-management');
+      expect(description).toContain('rule-authoring');
     });
 
     it('does not mention non-existent tools or skills', () => {
       const description = definition.getAgentDescription!();
-      expect(description).not.toContain('rule-authoring');
+      expect(description).not.toContain('rule-management');
       expect(description).not.toContain('enable_rule');
       expect(description).not.toContain('disable_rule');
     });

@@ -16,3 +16,5 @@ export {
 } from './attestation';
 export type { UiamProjectType } from './project_type';
 export { markExternalUiamCredential, isExternalUiamCredential } from './external_credential';
+export { resolveUiamClientAuthentication } from './client_authentication';
+export type { UiamClientAuthenticationParams } from './client_authentication';

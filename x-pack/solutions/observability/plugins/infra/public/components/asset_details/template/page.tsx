@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/e
 import {
   EmbeddableProfilingSearchBar,
   type EmbeddableProfilingSearchBarProps,
+  useProfilingSchemaState,
 } from '@kbn/observability-shared-plugin/public';
 import { capitalize } from 'lodash';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -166,6 +167,7 @@ const SearchBarWithDatePicker = ({ searchBar }: { searchBar: React.ReactNode }) 
 const ProfilingSearchBarHeader = () => {
   const { dateRange, setDateRange } = useDatePickerContext();
   const { customKuery, setCustomKuery } = useProfilingKuery();
+  const { schema } = useProfilingSchemaState();
 
   const onSearchSubmit = useCallback<EmbeddableProfilingSearchBarProps['onQuerySubmit']>(
     ({ dateRange: range, query }) => {
@@ -184,6 +186,7 @@ const ProfilingSearchBarHeader = () => {
       kuery={customKuery}
       rangeFrom={dateRange.from}
       rangeTo={dateRange.to}
+      schema={schema}
       onQuerySubmit={onSearchSubmit}
       onRefresh={onSearchRefresh}
     />

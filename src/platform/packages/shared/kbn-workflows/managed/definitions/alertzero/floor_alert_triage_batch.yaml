@@ -70,6 +70,11 @@ triggers:
           maximum: 1
           description: Minimum confidence for a false positive to be proposed for closure.
 
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Alert Triage worker"
+
 steps:
   # ---------------------------------------------------------------------------
   # 1. Abort before opening an Investigation when Alert Analysis is off in this
@@ -161,7 +166,7 @@ steps:
 
   # ---------------------------------------------------------------------------
   # 2. Open an Investigation conversation seeded from the `investigation`
-  #    template. Seeds status, severity, and the workflow_execution_ids that link
+  #    template. Seeds status and the workflow_execution_ids that link
   #    the Investigation to this run.
   # ---------------------------------------------------------------------------
   - name: create_investigation
@@ -173,9 +178,6 @@ steps:
         access_mode: public
       metadata:
         status: open
-        # The rule input carries no severity, so it is read off the first alert. A rule's alerts share one severity unless the rule
-        # maps it per alert. Both alert document shapes are read: dotted keys and nested objects.
-        severity: "{{ steps.load_alerts.output.alerts[0]['kibana.alert.severity'] | default: steps.load_alerts.output.alerts[0].kibana.alert.severity | default: 'medium' }}"
         description: >-
           Automated triage of {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %} from rule
           "{{ inputs.rule_name }}" ({{ inputs.rule_id }}).
@@ -227,9 +229,10 @@ steps:
     on-failure:
       continue: true
     with:
+      author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
-        Triage started for rule **{{ inputs.rule_name }}** ({{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}). Model routed via the `alertzero_reasoning` Model Management feature.
+        Triage started for rule **{{ inputs.rule_name }}** ({{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}). Model routed via the `alertzero_efficient` Model Management feature.
         {% if variables.failed_attach_chunk_count > 0 %}
         ⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach as evidence after retries; some alerts are not visible in this Investigation.
         {% else %}
@@ -246,10 +249,12 @@ steps:
   #    calledByWorker: true — the sub-workflow classifies and tags but leaves the
   #    verdict note to this Worker (add_verdict_notes), so each alert gets one note.
   #
-  #    connectorIdByFeature: alertzero_reasoning — the Reasoning tier rather than
-  #    Fast. Each verdict drives a tag, a note, and potentially a HITL proposal, so
-  #    classification quality matters more than throughput here. Operators pick the
-  #    model for the tier in Stack Management → Model Settings.
+  #    connectorIdByFeature: alertzero_efficient — the Efficient tier, not Balanced. Each
+  #    verdict drives a tag, a note, and potentially a HITL proposal, and the batch runs on
+  #    every alert sweep. The batch reliability eval (kbn-evals-suite-alert-analysis-workflow,
+  #    alert_analysis_batch.spec.ts) found Claude Haiku 4.5 on par with Claude Sonnet 5 on
+  #    accuracy, verdict coverage and consistency at batches of up to 100 alerts, for less than
+  #    half the cost. Operators pick the model for the tier in Stack Management → Model Settings.
   #
   #    autoCloseConfidenceScoreMinThreshold is passed through so the sub-workflow
   #    reports against the same floor this Worker applies in compute_fp_candidates.
@@ -270,6 +275,7 @@ steps:
           on-failure:
             continue: true
           with:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
             message: >-
               ⚠️ Classification step failed for {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}.
@@ -304,12 +310,13 @@ steps:
       workflow-id: system-security-alert-analysis
       run-as-mode: inherit
       inputs:
+        authorName: "{{ consts.author_name }}"
         # A child run has no trigger event of its own, so the batch must be passed
         # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
         alerts: "${{ steps.load_alerts.output.alerts }}"
         autoCloseEnabled: false
         autoCloseConfidenceScoreMinThreshold: "${{ inputs.confidence_floor }}"
-        connectorIdByFeature: alertzero_reasoning
+        connectorIdByFeature: alertzero_efficient
         calledByWorker: true
         investigationConversationId: "{{ steps.create_investigation.output.conversation_id }}"
 
@@ -343,6 +350,53 @@ steps:
     with:
       fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
 
+  # Distinct hosts and users behind the candidates, for the proposal title. Same predicate as
+  # `compute_fp_candidates`, so the title never names an entity whose alerts are not being closed.
+  # `__missing__` marks an alert with no host or user field and is not a name.
+  - name: compute_fp_entities
+    type: data.set
+    with:
+      fp_hosts: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_threshold_expr
+            | reject: 'host_name', '__missing__'
+            | map: 'host_name' | uniq }}
+      fp_users: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_threshold_expr
+            | reject: 'user_name', '__missing__'
+            | map: 'user_name' | uniq }}
+
+  # Title suffix, empty when no candidate carries a host or user. Per list: up to 5 names show as
+  # the first 2 plus `+N`, more than 5 collapse to a count. Hosts lead and users follow in
+  # parentheses; a list that is empty drops out (`for` users when there are no hosts).
+  - name: build_fp_entity_summary
+    type: data.set
+    with:
+      fp_entity_summary: >-
+        {%- assign host_count = variables.fp_hosts | size -%}
+        {%- assign user_count = variables.fp_users | size -%}
+        {%- capture host_text -%}
+        {%- if host_count > 5 -%}{{ host_count }} hosts
+        {%- else -%}
+        {%- for name in variables.fp_hosts limit: 2 -%}{%- unless forloop.first -%}, {% endunless -%}{{ name | truncate: 40 }}{%- endfor -%}
+        {%- if host_count > 2 %} +{{ host_count | minus: 2 }}{% endif -%}
+        {%- endif -%}
+        {%- endcapture -%}
+        {%- capture user_text -%}
+        {%- if user_count > 5 -%}{{ user_count }} users
+        {%- else -%}
+        {%- for name in variables.fp_users limit: 2 -%}{%- unless forloop.first -%}, {% endunless -%}{{ name | truncate: 40 }}{%- endfor -%}
+        {%- if user_count > 2 %} +{{ user_count | minus: 2 }}{% endif -%}
+        {%- endif -%}
+        {%- endcapture -%}
+        {%- if host_count > 0 and user_count > 0 -%}on {{ host_text }} ({{ user_text }})
+        {%- elsif host_count > 0 -%}on {{ host_text }}
+        {%- elsif user_count > 0 -%}for {{ user_text }}
+        {%- endif -%}
+
   # Guard: analysis is on (or this run would have aborted at step 1) but the
   # sub-workflow returned 0 verdicts for a non-empty batch — a missing Model
   # Management connector, or the sub-workflow skipped.
@@ -370,11 +424,12 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 ⚠️ Alert Analysis returned no verdicts for {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}.
                 Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
-                Likely causes: the `alertzero_reasoning` Model Management feature has no connector,
+                Likely causes: the `alertzero_efficient` Model Management feature has no connector,
                 or the sub-workflow skipped the batch.
                 Alerts have NOT been tagged or closed.
         else:
@@ -393,6 +448,7 @@ steps:
                 on-failure:
                   continue: true
                 with:
+                  author_name: "{{ consts.author_name }}"
                   conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   message: >-
                     ⚠️ Alert Analysis returned no verdict for {{ variables.missing_alert_count }} of
@@ -445,13 +501,30 @@ steps:
     on-failure:
       continue: true
     with:
+      author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
         Classification complete: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
 
         {{ steps.classify_alerts.output.grouped_counts_summary }}
 
-        {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
+        {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`{% if steps.classify_alerts.output.agent_id != '' %}, Agent: `{{ steps.classify_alerts.output.agent_id }}`{% endif %})_{% endif %}
+
+  # Telemetry: how the batch was classified.
+  - name: report_batch_classified
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: alert_triage_batch_classified
+      alerts_total: "${{ variables.alert_count | default: 0 }}"
+      verdicts_true_positive: "${{ steps.classify_alerts.output.true_positive_count | default: 0 }}"
+      verdicts_false_positive: "${{ steps.classify_alerts.output.false_positive_count | default: 0 }}"
+      verdicts_inconclusive: "${{ steps.classify_alerts.output.inconclusive_count | default: 0 }}"
+      alerts_without_verdict: "${{ variables.alert_count | default: 0 | minus: variables.verdict_count | at_least: 0 }}"
+      fp_candidates: "${{ variables.fp_candidate_count | default: 0 }}"
+      fp_below_floor: "${{ steps.classify_alerts.output.false_positive_count | default: 0 | minus: variables.fp_candidate_count | at_least: 0 }}"
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
 
   # ---------------------------------------------------------------------------
   # 6. Record the impacted hosts and users on the Investigation through the shared
@@ -713,6 +786,7 @@ steps:
     on-failure:
       continue: true
     with:
+      author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: >-
         Verdict notes written and classification tags submitted for {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
@@ -749,6 +823,7 @@ steps:
               on-failure:
                 continue: true
               with:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 message: >-
                   ⚠️ The closure review could not be started: {{ error.message }}.
@@ -761,6 +836,7 @@ steps:
             rule_id: "{{ inputs.rule_id }}"
             rule_name: "{{ inputs.rule_name }}"
             fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
+            entity_summary: "{{ variables.fp_entity_summary }}"
             confidence_floor: "${{ inputs.confidence_floor }}"
             autonomy: "{{ inputs.autonomy }}"
 
@@ -788,6 +864,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 Closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor was handed to the closure review.
@@ -804,6 +881,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
@@ -862,12 +940,53 @@ steps:
               updates:
                 status: closed
 
+          - name: report_investigation_closed_no_fp
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_no_fp.error == blank and steps.close_no_fp.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              close_reason: other
+
           - name: post_comment_outcome_no_fp
             type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 Triage complete. No false positive alerts met the {{ inputs.confidence_floor }} confidence floor; no proposal created.
                 {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+
+  # Telemetry: the run's outcome, last so it sees whether the closure review started.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      candidates_found: "${{ variables.alert_count | default: 0 }}"
+      items_dispatched: "${{ variables.verdict_count | default: 0 }}"
+      items_failed: "${{ variables.alert_count | default: 0 | minus: variables.verdict_count | at_least: 0 }}"
+      items_in_flight: "{% if variables.review_dispatch == 'started' %}{{ variables.fp_candidate_count }}{% else %}0{% endif %}"
+      degraded_reason: |-
+        {%- if variables.alert_count > 0 and variables.verdict_count == 0 -%}
+        dependency_unavailable
+        {%- elsif variables.verdict_count < variables.alert_count -%}
+        missing_data
+        {%- else -%}
+        none
+        {%- endif -%}
+      run_outcome: |-
+        {%- if variables.alert_count == 0 -%}
+        empty_nothing_pending
+        {%- elsif variables.verdict_count == 0 -%}
+        failed_all_items
+        {%- elsif variables.verdict_count < variables.alert_count -%}
+        degraded_partial
+        {%- else -%}
+        produced
+        {%- endif -%}

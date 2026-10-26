@@ -43,6 +43,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
 import { LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE, useColumns } from './use_columns';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 const EXPAND_COLUMN_WIDTH = '40px';
 const MAX_GROUP_BADGES = 5;
@@ -62,6 +63,8 @@ interface LogRateAnalysisResultsTableProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+
+  parentApi?: unknown;
 }
 
 export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTableProps> = ({
@@ -71,7 +74,10 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
+  parentApi,
 }) => {
+  const isInteractive = useIsInteractive(parentApi);
+
   const prevSkippedColumns = usePrevious(skippedColumns);
 
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
@@ -109,6 +115,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
+          parentApi={parentApi}
         />
       );
     }
@@ -253,7 +260,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
-    skippedColumns,
+    isInteractive ? skippedColumns : [...skippedColumns, 'Actions'],
     searchQuery,
     barColorOverride,
     barHighlightColorOverride
@@ -307,15 +314,17 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         pageSize,
         totalItemCount: itemCount,
         pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+        showPerPageOptions: isInteractive,
       },
       sorting: {
         sort: {
           field: sortField,
           direction: sortDirection,
         },
+        ...(!isInteractive && { readOnly: true }),
       },
     };
-  }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems]);
+  }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems, isInteractive]);
 
   useEffect(() => {
     // If no row is hovered or pinned or the user switched to a new page,
@@ -402,7 +411,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       onChange={onChange}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
       loading={false}
-      sorting={sorting as EuiTableSortingType<GroupTableItem>}
+      sorting={isInteractive ? (sorting as EuiTableSortingType<GroupTableItem>) : undefined}
       rowProps={(group) => {
         return {
           'data-test-subj': `aiopsLogRateAnalysisResultsGroupsTableRow row-${group.id}`,

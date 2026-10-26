@@ -1,5 +1,5 @@
 {
-  "sha1": "16e7c57c493262482e4f6dcabfdb729a0fa2a712",
+  "sha1": "0910950779d0c2a16f9576d809fea107a3025687",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -356,8 +356,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 19,
-        "column": 43
+        "line": 25,
+        "column": 41
       }
     },
     {
@@ -370,7 +370,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 75,
+        "line": 85,
         "column": 13
       }
     },
@@ -384,7 +384,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 122,
+        "line": 132,
         "column": 91
       }
     },
@@ -398,7 +398,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 166,
+        "line": 176,
         "column": 24
       }
     },
@@ -412,7 +412,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 190,
+        "line": 200,
         "column": 32
       }
     },
@@ -435,7 +435,7 @@
     {
       "id": "d727dcfffd97d68-e91ca78d2096478",
       "title": "Custom Threshold Rule - Ad-hoc Data View should create a custom threshold rule with an ad-hoc data view",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -444,7 +444,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/ad_hoc_data_view.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 7
       }
     },

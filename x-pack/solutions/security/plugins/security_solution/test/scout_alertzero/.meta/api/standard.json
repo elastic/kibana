@@ -1,5 +1,5 @@
 {
-  "sha1": "ecc85ef26e52bc74b617eff5f7ecec51349130f7",
+  "sha1": "ec6f9ade4bc081d96ca4f1aca0d0a16902d7e93b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/attack_discovery_to_isolate.spec.ts",
-        "line": 106,
-        "column": 21
+        "line": 116,
+        "column": 12
       }
     },
     {
@@ -28,8 +28,203 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
-        "line": 272,
-        "column": 26
+        "line": 301,
+        "column": 10
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-8769fe0d7fbbac4",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 on every hunt route for a user without AlertZero",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 102,
+        "column": 12
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-7f2652e1327b1b6",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 on hunt write routes for an AlertZero read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 125,
+        "column": 12
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-9da793c87c6d843",
+      "title": "Hunt Watch - authz isolation and evidence projection lets an AlertZero read-only user read supply status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 142,
+        "column": 12
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-e980d26230765dd",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 when an AlertZero read-only user calls Restore",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 154,
+        "column": 12
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-00bef75323a0279",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 when an AlertZero read-only user PATCHes a Worker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 172,
+        "column": 12
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-e287d6765fb732b",
+      "title": "Hunt Watch - authz isolation and evidence projection projects only the caller space evidence on a shared report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 185,
+        "column": 12
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-10311515b5ade2d",
+      "title": "Hunt Watch - authz isolation and evidence projection omits evidence from find_threat_reports",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 196,
+        "column": 12
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-05671b12826c6a9",
+      "title": "Hunt Watch - authz isolation and evidence projection lets a B-only role read a shared report in space B but not in space A",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 214,
+        "column": 12
+      }
+    },
+    {
+      "id": "973daa931f715ba-491b49ea72ca709",
+      "title": "Hunt Watch - internal API restriction returns 400 when an admin omits the internal-origin header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
+        "line": 21,
+        "column": 12
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-bf23879094f8703",
+      "title": "Hunt Watch - threat intel supply across two spaces enabling Hunt in A turns ingest, enrich, and attribute-A on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 159,
+        "column": 12
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-5f713ed11b67204",
+      "title": "Hunt Watch - threat intel supply across two spaces enabling Hunt in B leaves deployment rows on and turns attribute-B on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 182,
+        "column": 12
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-f5c08ca70dc8b90",
+      "title": "Hunt Watch - threat intel supply across two spaces disabling Hunt in A turns attribute-A off and marks deployment rows in use elsewhere",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 207,
+        "column": 12
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-74b92691a7ce09c",
+      "title": "Hunt Watch - threat intel supply across two spaces disabling Hunt in B turns deployment rows off unless another space still hunts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 231,
+        "column": 12
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-ef22601761a5484",
+      "title": "Hunt Watch - threat intel supply across two spaces re-enable A, drift ingest off, Restore clears drift",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 253,
+        "column": 12
       }
     },
     {
@@ -42,8 +237,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 38,
-        "column": 20
+        "line": 47,
+        "column": 10
       }
     },
     {
@@ -56,8 +251,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 70,
-        "column": 27
+        "line": 86,
+        "column": 10
       }
     },
     {
@@ -70,8 +265,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 86,
-        "column": 74
+        "line": 99,
+        "column": 10
       }
     },
     {
@@ -84,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
-        "line": 49,
-        "column": 48
+        "line": 53,
+        "column": 10
       }
     },
     {
@@ -98,8 +293,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
-        "line": 74,
-        "column": 14
+        "line": 85,
+        "column": 11
       }
     },
     {
@@ -112,8 +307,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 641,
-        "column": 11
+        "line": 627,
+        "column": 10
       }
     },
     {
@@ -126,8 +321,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 673,
-        "column": 27
+        "line": 674,
+        "column": 10
       }
     },
     {
@@ -140,8 +335,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 732,
-        "column": 7
+        "line": 737,
+        "column": 10
       }
     },
     {
@@ -154,8 +349,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
-        "line": 43,
-        "column": 11
+        "line": 47,
+        "column": 10
       }
     },
     {
@@ -168,8 +363,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
-        "line": 64,
-        "column": 28
+        "line": 78,
+        "column": 10
       }
     },
     {
@@ -182,8 +377,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
-        "line": 88,
-        "column": 16
+        "line": 107,
+        "column": 10
       }
     },
     {
@@ -196,8 +391,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
-        "line": 107,
-        "column": 11
+        "line": 126,
+        "column": 10
       }
     },
     {
@@ -210,8 +405,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 71,
-        "column": 28
+        "line": 79,
+        "column": 10
       }
     },
     {
@@ -224,8 +419,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 79,
-        "column": 69
+        "line": 91,
+        "column": 10
       }
     },
     {
@@ -238,8 +433,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 102,
-        "column": 7
+        "line": 116,
+        "column": 10
       }
     },
     {
@@ -252,8 +447,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 136,
-        "column": 7
+        "line": 152,
+        "column": 10
       }
     }
   ]

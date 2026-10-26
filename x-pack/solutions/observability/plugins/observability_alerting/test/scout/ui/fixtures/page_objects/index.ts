@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { AddToCaseModal } from './add_to_case_modal';
 export {
   ObservabilityAlertingPage,
   OBSERVABILITY_ALERTING_SURFACES,

@@ -27,6 +27,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import * as sourceDocumentModule from '../components/source_document';
 import * as sourcePopoverContentModule from '../components/source_popover_content';
 import { getRenderCellValueFn } from './get_render_cell_value';
+import { UrlFormat } from '@kbn/field-formats-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
@@ -211,6 +212,40 @@ describe('Unified data table cell rendering', () => {
     expect(element).toHaveClass('unifiedDataTable__cellValue');
   });
 
+  it('passes isInteractive through to formatFieldValueReact so links can be suppressed when false', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+
+    const DataTableCellValue = getRenderCellValueFn({
+      documentsDisplayMode: 'table',
+      closePopover: jest.fn(),
+      dataSource: undefined,
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      rows: rowsSource.map(build),
+      shouldShowFieldHandler: () => false,
+      isInteractive: false,
+    });
+
+    renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="bytes"
+        isDetails={false}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    expect(formatFieldValueReactSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ options: { isInteractive: false } })
+    );
+
+    formatFieldValueReactSpy.mockRestore();
+  });
+
   it('renders bytes column correctly using _source when details is true', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
@@ -306,6 +341,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: '_source',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -469,6 +505,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: '_source',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -520,6 +557,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: '_source',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -569,6 +607,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: '_source',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -642,6 +681,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: 'object',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -691,6 +731,7 @@ describe('Unified data table cell rendering', () => {
 
     expect(mockSourceDocument).toHaveBeenCalledWith(
       {
+        isInteractive: true,
         columnId: 'object',
         dataSource: undefined,
         dataView: dataViewMock,
@@ -1197,6 +1238,94 @@ describe('Unified data table cell rendering', () => {
 
       expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
       formatFieldValueReactSpy.mockRestore();
+    });
+  });
+
+  describe('non-interactive source summaries with URL-formatted fields', () => {
+    const URL_VALUE = 'https://example.com/page';
+    const urlDataView = {
+      ...dataViewMock,
+      getFormatterForField: () => new UrlFormat({ urlTemplate: '{{rawValue}}' }),
+    } as unknown as DataView;
+
+    const urlSourceRows: EsHitRecord[] = [
+      { _id: '1', _index: 'test', _score: 1, _source: { extension: URL_VALUE } },
+    ];
+    const urlTopLevelObjectRows: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { 'object.value': [URL_VALUE] },
+      },
+    ];
+
+    const getCellValueFn = (rows: DataTableRecord[], isInteractive: boolean) =>
+      getRenderCellValueFn({
+        documentsDisplayMode: 'table',
+        closePopover: jest.fn(),
+        dataSource: undefined,
+        dataView: urlDataView,
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        rows,
+        shouldShowFieldHandler: (fieldName: string) =>
+          ['extension', 'object.value'].includes(fieldName),
+        isInteractive,
+      });
+
+    const renderCell = (
+      DataTableCellValue: ReturnType<typeof getRenderCellValueFn>,
+      columnId: string
+    ) =>
+      renderWithI18n(
+        <DataTableCellValue
+          colIndex={0}
+          columnId={columnId}
+          isDetails={false}
+          isExpandable={true}
+          isExpanded={false}
+          rowIndex={0}
+          setCellProps={jest.fn()}
+        />
+      );
+
+    it.each([
+      ['_source', urlSourceRows],
+      ['object', urlTopLevelObjectRows],
+    ])('renders %s summary URLs as links when isInteractive is true', (columnId, hits) => {
+      renderCell(getCellValueFn(hits.map(build), true), columnId);
+
+      const link = within(screen.getByTestId('discoverCellDescriptionList')).getByRole('link');
+      expect(link).toHaveAttribute('href', URL_VALUE);
+    });
+
+    it.each([
+      ['_source', urlSourceRows],
+      ['object', urlTopLevelObjectRows],
+    ])('renders %s summary URLs as plain text when isInteractive is false', (columnId, hits) => {
+      renderCell(getCellValueFn(hits.map(build), false), columnId);
+
+      const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+      expect(within(descriptionList).queryByRole('link')).not.toBeInTheDocument();
+      expect(within(descriptionList).getByText(URL_VALUE)).toBeVisible();
+    });
+
+    it('does not reuse the cached _source summary when switching modes for the same hit', () => {
+      const rows = urlSourceRows.map(build);
+
+      const interactive = renderCell(getCellValueFn(rows, true), '_source');
+      expect(screen.getByRole('link')).toBeVisible();
+      interactive.unmount();
+
+      const nonInteractive = renderCell(getCellValueFn(rows, false), '_source');
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      expect(screen.getByText(URL_VALUE)).toBeVisible();
+      nonInteractive.unmount();
+
+      renderCell(getCellValueFn(rows, true), '_source');
+      expect(screen.getByRole('link')).toBeVisible();
     });
   });
 

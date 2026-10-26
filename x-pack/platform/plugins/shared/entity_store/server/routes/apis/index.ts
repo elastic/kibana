@@ -26,6 +26,7 @@ export { registerResolutionGroup } from './resolution/group';
 export { registerResolutionRulesList } from './resolution/rules/list';
 export { registerResolutionRulesEnable } from './resolution/rules/enable';
 export { registerResolutionRulesDisable } from './resolution/rules/disable';
+export { registerCustomResolutionRulesRoutes } from './resolution/custom_rules';
 export { registerStartMaintainer } from './entity_maintainers/start';
 export { registerStopMaintainer } from './entity_maintainers/stop';
 export { registerGetMaintainers } from './entity_maintainers/get_maintainers';

@@ -19,6 +19,7 @@ import {
   ExecuteRuleQueryStep,
   CreateAlertEventsStep,
   ClassifyAbsentGroupsStep,
+  SuppressRedundantNoDataEventsStep,
 } from '../lib/rule_executor/steps';
 import {
   CancellationBoundaryMiddleware,
@@ -91,6 +92,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ClassifyAbsentGroupsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(SuppressRedundantNoDataEventsStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 
   bind(RuleExecutionPipeline).toSelf().inRequestScope();

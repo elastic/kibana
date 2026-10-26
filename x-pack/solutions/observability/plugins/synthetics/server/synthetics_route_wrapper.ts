@@ -12,6 +12,7 @@ import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es
 import { MonitorConfigRepository } from './services/monitor_config_repository';
 import { MonitorIntegrationHealthApi } from './services/monitor_integration_health_api';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
+import { syntheticsSecretConnectionType } from '../common/types/saved_objects';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { resolveHeartbeatIndices } from './services/resolve_heartbeat_indices';
@@ -49,7 +50,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       const { client: esClient } = elasticsearch;
       const savedObjectsClient = savedObjects.getClient({
-        includedHiddenTypes: [syntheticsServiceApiKey.name],
+        includedHiddenTypes: [syntheticsServiceApiKey.name, syntheticsSecretConnectionType],
       });
 
       // specifically needed for the synthetics service api key generation

@@ -1,12 +1,12 @@
 {
-  "sha1": "",
+  "sha1": "0b1df81a87e8c7ca4b27da41715ce4422135ed9c",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "8e7b651129dfe98-460301e2b6bc371",
-      "title": "AlertZero managed workflows system-security-detection-coverage: is installed and valid",
+      "id": "8e7b651129dfe98-247be790ba7076d",
+      "title": "AlertZero managed workflows system-security-coverage-review: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -14,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
-        "line": 44,
-        "column": 26
+        "line": 148,
+        "column": 12
+      }
+    },
+    {
+      "id": "8e7b651129dfe98-7eb9a7581b53e8d",
+      "title": "AlertZero managed workflows system-security-coverage-worker: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
+        "line": 148,
+        "column": 12
       }
     },
     {
@@ -28,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
-        "line": 44,
-        "column": 26
+        "line": 148,
+        "column": 12
       }
     }
   ]

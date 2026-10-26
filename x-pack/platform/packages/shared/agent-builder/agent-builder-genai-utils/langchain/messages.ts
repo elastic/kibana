@@ -32,6 +32,19 @@ export const extractTextContent = (message: BaseMessage): string => {
   }
 };
 
+/**
+ * Extract the refusal the inference layer attached to a message, if any.
+ *
+ * `@kbn/inference-langchain` carries a chat completion's `refusal` (the provider's refusal text,
+ * or the inference plugin's placeholder for a `content_filter` finish reason) in
+ * `additional_kwargs.refusal`. A refused response otherwise looks like an empty one: no text,
+ * no tool calls.
+ */
+export const extractRefusal = (message: BaseMessage): string | undefined => {
+  const refusal = message.additional_kwargs?.refusal;
+  return typeof refusal === 'string' && refusal.length > 0 ? refusal : undefined;
+};
+
 export interface ToolCall {
   toolCallId: string;
   toolName: string;

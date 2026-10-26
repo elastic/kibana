@@ -15,5 +15,5 @@ export function createTypedGraph(opt?: {
   multigraph?: boolean;
   compound?: boolean;
 }): WorkflowGraphType {
-  return new graphlib.Graph<unknown, GraphNodeUnion>(opt);
+  return new graphlib.Graph<Record<string, unknown>, GraphNodeUnion>(opt);
 }

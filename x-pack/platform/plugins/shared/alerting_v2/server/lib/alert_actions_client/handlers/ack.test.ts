@@ -14,7 +14,7 @@ const buildAckItem = (acknowledged: boolean) =>
     { action_type: ALERT_EPISODE_ACTION_TYPE.ACK } as const,
     buildAlertEventRecord(),
     {
-      actionState: { acknowledged },
+      alertActionState: { acknowledged },
     }
   );
 
@@ -22,7 +22,7 @@ const buildUnackItem = (acknowledged: boolean) =>
   buildHandlerItem(
     { action_type: ALERT_EPISODE_ACTION_TYPE.UNACK } as const,
     buildAlertEventRecord(),
-    { actionState: { acknowledged } }
+    { alertActionState: { acknowledged } }
   );
 
 describe('ackHandler', () => {

@@ -1,5 +1,5 @@
 {
-  "sha1": "7694a64a2658ad4919401913f2685ca25862e1c4",
+  "sha1": "b07e4595e44567f10bfe70ce367e7d736c9b85da",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -752,7 +752,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 482,
+        "line": 486,
         "column": 21
       }
     },
@@ -772,7 +772,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 535,
+        "line": 539,
         "column": 79
       }
     },
@@ -792,7 +792,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 660,
+        "line": 664,
         "column": 22
       }
     },
@@ -812,7 +812,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 669,
+        "line": 673,
         "column": 24
       }
     }

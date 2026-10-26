@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/deeplinks-security'
   - '@kbn/core-chrome-browser'
+  - '@kbn/securitysolution-list-constants'
 tags:
   - shared-common
   - package
@@ -33,6 +34,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

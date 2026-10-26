@@ -81,16 +81,14 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     summary: 'Start an investigation',
     description:
       'Starts an investigation for a given subject, or continues the open investigation that ' +
-      'already holds it, and returns the investigation (Agent Builder conversation) id. The ' +
-      'investigation workflow creates the conversation, so it can take a few seconds to resolve.',
+      'already holds it, and returns the investigation (Agent Builder conversation) id. A new ' +
+      'investigation is created when the start is accepted; its run records the subjects.',
   },
   security: {
-    // agentBuilder:write is used as a proxy for "this user is authorized to spend AI tokens."
-    // The investigation workflow itself creates the Agent Builder conversation — the calling user
-    // does not create it directly — so this is not a strict AB permission requirement. We use
-    // agentBuilder:write because it is the best available signal that a user has been granted
-    // access to AI-resource-consuming features in this deployment. When conversation templates
-    // land with their own privilege model, this should be revisited.
+    // agentBuilder:write is required because a start that opens a new investigation creates its
+    // Agent Builder conversation as the calling user. It is also the best available signal that
+    // a user has been granted access to AI-resource-consuming features in this deployment. When
+    // conversation templates land with their own privilege model, this should be revisited.
     authz: {
       requiredPrivileges: ['agentBuilder:write'],
     },

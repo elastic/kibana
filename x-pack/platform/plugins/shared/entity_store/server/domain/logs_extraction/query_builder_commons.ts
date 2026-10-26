@@ -20,6 +20,7 @@ import { castEntityField, castField } from '../../../common/esql/cast';
 import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
+  ExtractedEntityDefinition,
   FieldValueSchema,
   GatedEntityDefinition,
   SetFieldsByCondition,
@@ -302,9 +303,9 @@ export function statsFieldDestinations(fields: EntityField[]): Set<string> {
  */
 export function mapPostAggFilterFieldsToRecentForEsql(
   postAggFilter: Condition,
-  entityDefinition: Pick<EntityDefinition, 'fields'>
+  entityDefinition: Pick<ExtractedEntityDefinition, 'extraction'>
 ): Condition {
-  const destinations = statsFieldDestinations(entityDefinition.fields);
+  const destinations = statsFieldDestinations(entityDefinition.extraction.fields);
 
   const mapNode = (node: Condition): Condition => {
     if (isAlwaysCondition(node) || isNeverCondition(node)) {

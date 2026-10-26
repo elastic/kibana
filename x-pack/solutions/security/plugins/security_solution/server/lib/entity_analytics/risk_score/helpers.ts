@@ -28,7 +28,6 @@ import {
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
 import type { CalculateScoresParams, RiskScoreBucket } from '../types';
-import { RIEMANN_ZETA_VALUE } from './constants';
 
 export const getFieldForIdentifier = (identifierType: EntityType): string =>
   EntityTypeToIdentifierField[identifierType];
@@ -108,7 +107,7 @@ const formatForResponse = ({
     calculated_level: calculatedLevel,
     calculated_score: max10DecimalPlaces(weightedScore),
     calculated_score_norm: max10DecimalPlaces(normalizedScoreWithCriticality),
-    category_1_score: max10DecimalPlaces(riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE), // normalize value to be between 0-100
+    category_1_score: max10DecimalPlaces(riskDetails.value.normalized_score), // already normalized by the sample size the query used
     category_1_count: riskDetails.value.category_1_count,
     notes: riskDetails.value.notes,
     inputs: riskDetails.value.risk_inputs.map((riskInput) => ({

@@ -37,9 +37,11 @@ describe('useOpenInChat', () => {
       const href = result.current.getChatHref('esc-1', 'agent-1');
 
       expect(getUrlForApp).toHaveBeenCalledWith(AGENTBUILDER_APP_ID, {
-        path: '/agents/agent-1/conversations/esc-1?openConversationDetails=true',
+        path: '/agents/agent-1/conversations/esc-1?openConversationDetails=true&sidebarCollapsed=true',
       });
-      expect(href).toBe('/mock/agents/agent-1/conversations/esc-1?openConversationDetails=true');
+      expect(href).toBe(
+        '/mock/agents/agent-1/conversations/esc-1?openConversationDetails=true&sidebarCollapsed=true'
+      );
     });
 
     it('builds a legacy path when agentId is omitted', () => {
@@ -47,9 +49,11 @@ describe('useOpenInChat', () => {
       const href = result.current.getChatHref('esc-1');
 
       expect(getUrlForApp).toHaveBeenCalledWith(AGENTBUILDER_APP_ID, {
-        path: '/conversations/esc-1?openConversationDetails=true',
+        path: '/conversations/esc-1?openConversationDetails=true&sidebarCollapsed=true',
       });
-      expect(href).toBe('/mock/conversations/esc-1?openConversationDetails=true');
+      expect(href).toBe(
+        '/mock/conversations/esc-1?openConversationDetails=true&sidebarCollapsed=true'
+      );
     });
 
     it('URI-encodes the conversation and agent ids', () => {
@@ -57,7 +61,7 @@ describe('useOpenInChat', () => {
       result.current.getChatHref('a b/c', 'ag ent');
 
       expect(getUrlForApp).toHaveBeenCalledWith(AGENTBUILDER_APP_ID, {
-        path: '/agents/ag%20ent/conversations/a%20b%2Fc?openConversationDetails=true',
+        path: '/agents/ag%20ent/conversations/a%20b%2Fc?openConversationDetails=true&sidebarCollapsed=true',
       });
     });
 
@@ -86,7 +90,7 @@ describe('useOpenInChat', () => {
       result.current.openChat('esc-1', 'agent-1');
 
       expect(navigateToApp).toHaveBeenCalledWith(AGENTBUILDER_APP_ID, {
-        path: '/agents/agent-1/conversations/esc-1?openConversationDetails=true',
+        path: '/agents/agent-1/conversations/esc-1?openConversationDetails=true&sidebarCollapsed=true',
       });
     });
 
@@ -95,7 +99,7 @@ describe('useOpenInChat', () => {
       result.current.openChat('esc-1');
 
       expect(navigateToApp).toHaveBeenCalledWith(AGENTBUILDER_APP_ID, {
-        path: '/conversations/esc-1?openConversationDetails=true',
+        path: '/conversations/esc-1?openConversationDetails=true&sidebarCollapsed=true',
       });
     });
 
