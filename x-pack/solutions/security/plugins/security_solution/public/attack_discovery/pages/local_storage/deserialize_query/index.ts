@@ -6,14 +6,16 @@
  */
 
 import type { Query } from '@kbn/es-query';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { getDefaultQuery } from '../../helpers';
 
-const querySchema = z.object({
-  query: z.union([z.string(), z.object({}).catchall(z.unknown())]),
-  language: z.string(),
-});
+const querySchema = lazySchema(() =>
+  z.object({
+    query: z.union([z.string(), z.object({}).catchall(z.unknown())]),
+    language: z.string(),
+  })
+);
 
 export const deserializeQuery = (value: string): Query => {
   try {

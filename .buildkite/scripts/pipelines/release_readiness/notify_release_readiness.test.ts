@@ -13,8 +13,8 @@ import {
   composeMessage,
   parseDevCommit,
   parsePromotionMessage,
-} from './notify_release_readiness';
-import type { DevPromotion, FtrRunInfo, ReadinessInput } from './notify_release_readiness';
+} from './notify_release_readiness.ts';
+import type { DevPromotion, FtrRunInfo, ReadinessInput } from './notify_release_readiness.ts';
 
 const NOW = new Date('2026-08-10T12:00:00Z');
 

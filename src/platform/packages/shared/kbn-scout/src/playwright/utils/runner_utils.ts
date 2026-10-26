@@ -8,11 +8,11 @@
  */
 
 import moment from 'moment';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { testTargets, type ScoutTestTarget } from '@kbn/scout-info';
 
-export const execPromise = promisify(exec);
+export const execFilePromise = promisify(execFile);
 
 const BABEL_REGISTER_REQUIRE = '--require=@kbn/babel-register/install';
 

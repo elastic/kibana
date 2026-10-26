@@ -20,6 +20,11 @@ export async function getPackagePoliciesCountByPackageName(soClient: SavedObject
   >({
     type: savedObjectType,
     perPage: 0,
+    // Query across all spaces so the count reflects cluster-wide usage, not
+    // just the current space. Required because the caller uses a client with
+    // the Spaces extension excluded; without an explicit namespaces value
+    // Core defaults to ['default'] rather than all spaces.
+    namespaces: ['*'],
     // Use NOT false instead of :true so that policies without the field
     // (8.x policies where latest_revision was never persisted to ES) are
     // treated as current revisions and included in the count.

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CtiQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
-export const threatIntelSourceRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  factoryQueryType: z.literal(CtiQueries.dataSource),
-});
+export const threatIntelSourceRequestOptionsSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    factoryQueryType: z.literal(CtiQueries.dataSource),
+  })
+);
 
 export type ThreatIntelSourceRequestOptionsInput = z.input<
   typeof threatIntelSourceRequestOptionsSchema

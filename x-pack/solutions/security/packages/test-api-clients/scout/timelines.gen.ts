@@ -19,7 +19,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type {
   CleanDraftTimelinesRequestBodyInput,
@@ -247,7 +247,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
     const path = `${basePath}/api/timeline/_export`;
 
     return apiClient.post<ScoutResponseBody<TResponseType>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -272,7 +272,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
     const path = `${basePath}/api/timeline/_draft`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetDraftTimelinesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -308,7 +308,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     const path = `${basePath}/api/note`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetNotesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -333,7 +333,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     const path = `${basePath}/api/timeline`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetTimelineResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -358,7 +358,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     const path = `${basePath}/api/timelines`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetTimelinesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -527,7 +527,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
     const path = `${basePath}/api/timeline/resolve`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ResolveTimelineResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',

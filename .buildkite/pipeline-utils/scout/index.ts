@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './pick_scout_test_group_run_order';
-export * from './pick_scout_flaky_run_order';
-export * from './paths';
-export * from './test_tracks';
-export * from './test_distribution_strategies';
+export * from './pick_scout_test_group_run_order.ts';
+export * from './pick_scout_flaky_run_order.ts';
+export * from './paths.ts';
+export * from './test_tracks.ts';
+export * from './test_distribution_strategies.ts';
