@@ -12,6 +12,7 @@ import {
   withoutAttackDiscovery,
   withoutEntities,
   withoutEvents,
+  withTruncatingBenignEvents,
   type FpTpWorld,
 } from '../../world';
 import type { FpTpExample } from '../types';
@@ -94,6 +95,18 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
       networkDestination: 'supports',
     },
     buildWorld: (runMarker) => withEntitiesFrom(tp(runMarker), fp(runMarker)),
+  },
+  // The fp world plus more benign raw events than the analysis reads in one page. The
+  // checks still contradict, so the model's verdict is `false_positive`, but the
+  // truncated page makes `block_truncated_clear` emit `inconclusive`. No `checks`:
+  // the verdict rules do not model truncation, so the gold would not follow from them.
+  {
+    id: 'encoded-powershell.fp-events-truncated',
+    situation: 'U1',
+    evidenceState: 'events_truncated',
+    expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    buildWorld: (runMarker) => withTruncatingBenignEvents(fp(runMarker), runMarker),
   },
   {
     id: 'encoded-powershell.failed-missing-ad',

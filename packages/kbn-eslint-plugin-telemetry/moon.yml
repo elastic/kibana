@@ -33,6 +33,4 @@ fileGroups:
     - oxlint_plugin.js
     - rules/**/*.mjs
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

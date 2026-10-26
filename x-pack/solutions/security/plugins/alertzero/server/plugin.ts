@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -15,11 +14,15 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
+import { chunk } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_ENABLED_SETTING_ID,
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
@@ -39,6 +42,9 @@ const INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
 const INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
 const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
 const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
+
+const INVESTIGATION_SUMMARY_PLUGIN_ID = 'agentic_investigations_summary';
+const PROPOSAL_READ_CONCURRENCY = 5;
 import type {
   AlertZeroRequestHandlerContext,
   AlertZeroPluginSetup,
@@ -67,11 +73,22 @@ import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertz
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
-import { registerStepDefinitions } from './step_types';
+import type { StoryProposal } from './services/investigation_summary/format_story';
+import { resolveScopedModel } from './routes/hunt/lib/scoped_model';
 import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
 import { ThreatIntelSupplyService } from './services/threat_intel_supply';
+import {
+  createAlertZeroTelemetryReporter,
+  readTelemetryOptIn,
+  registerAlertZeroTelemetryEvents,
+} from './telemetry';
+import {
+  REPORT_STEP_OPT_IN_TIMEOUT_MS,
+  registerAlertZeroStepDefinitions,
+  registerStepDefinitions,
+} from './step_types';
 
 export class AlertZeroPlugin
   implements
@@ -93,6 +110,8 @@ export class AlertZeroPlugin
   private spaces?: AlertZeroStartDependencies['spaces'];
   private taskManager?: AlertZeroStartDependencies['taskManager'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
+  /** Resolved during `start`; the report step awaits it for its owner-bound managed check. */
+  private managedWorkflows?: Promise<PluginScopedManagedWorkflowsApi | undefined>;
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
@@ -103,13 +122,11 @@ export class AlertZeroPlugin
   private agentBuilderConversations?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'];
-  private agentBuilderExecution?: NonNullable<
-    AlertZeroStartDependencies['agentBuilder']
-  >['execution'];
   private agentBuilderAttachments?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['attachments'];
   private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
+  private inference?: AlertZeroStartDependencies['inference'];
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
@@ -164,6 +181,8 @@ export class AlertZeroPlugin
     // Registered inside the config guard so the deployment kill switch removes the setting
     // entirely; `withAlertZeroEnabled` then never reads an unregistered key.
     registerUiSettings(coreSetup.uiSettings);
+    // Inside the guard too: with the kill switch off, no AlertZero event type exists to report.
+    registerAlertZeroTelemetryEvents(coreSetup.analytics);
 
     this.workflowsManagementApi = workflowsManagement.management;
 
@@ -172,6 +191,24 @@ export class AlertZeroPlugin
     if (contextEngine) {
       registerInvestigationsAiIndex({ contextEngine });
     }
+    // Outside the optional-plugin guard below: the browser offers this step whenever AlertZero is
+    // enabled, and an unregistered step type fails the run before `on-failure: continue` applies.
+    // The handler reports only for a managed Worker, which needs those plugins.
+    registerAlertZeroStepDefinitions({
+      analytics: coreSetup.analytics,
+      areServiceAccountsEnabled: () => this.serviceAccountsEnabled,
+      getManagedWorkflowState: async () => this.managedWorkflows,
+      getWorkflowsManagement: () => this.workflowsManagementApi,
+      isTelemetryOptedIn: async () => {
+        const [, { telemetry }] = await coreSetup.getStartServices();
+        return readTelemetryOptIn({
+          isOptedIn$: telemetry?.isOptedIn$,
+          timeoutMs: REPORT_STEP_OPT_IN_TIMEOUT_MS,
+        });
+      },
+      logger: this.logger.get('telemetry'),
+      workflowsExtensions,
+    });
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
         const [core, { security }] = await coreSetup.getStartServices();
@@ -205,8 +242,9 @@ export class AlertZeroPlugin
       workflowsExtensions,
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
-      getExecution: (params) => this.requireAgentBuilderExecution().executeAgent(params),
-      resolveConnectorId: (request) => this.resolveSummaryConnectorId(request),
+      resolveChatModel: (request) => this.resolveSummaryChatModel(request),
+      getProposals: (proposalIds, spaceId, request) =>
+        this.readProposals(proposalIds, spaceId, request),
       getHuntServices: () => this.requireHuntServices(),
       getResolveHostEnrollment: makeScopedResolveHostEnrollment(
         () => this.fleetAgentService,
@@ -281,6 +319,10 @@ export class AlertZeroPlugin
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
+      reportTelemetryEvent: createAlertZeroTelemetryReporter({
+        analytics: coreSetup.analytics,
+        logger: this.logger.get('telemetry'),
+      }),
     });
 
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
@@ -293,9 +335,9 @@ export class AlertZeroPlugin
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
-    this.agentBuilderExecution = plugins.agentBuilder?.execution;
     this.agentBuilderAttachments = plugins.agentBuilder?.attachments;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+    this.inference = plugins.inference;
 
     if (!this.config.enabled) {
       return this.alertZeroStartContract();
@@ -327,6 +369,7 @@ export class AlertZeroPlugin
       );
       return undefined;
     });
+    this.managedWorkflows = managedWorkflows;
 
     this.conversationProposalsService = new ConversationProposalsService(
       proposals.getProposalsService(),
@@ -429,36 +472,63 @@ export class AlertZeroPlugin
     return this.requireStarted(this.agentBuilderConversations, 'agentBuilder.conversations');
   }
 
-  private requireAgentBuilderExecution(): NonNullable<
-    AlertZeroStartDependencies['agentBuilder']
-  >['execution'] {
-    return this.requireStarted(this.agentBuilderExecution, 'agentBuilder.execution');
-  }
-
   private requireAgentBuilderAttachments(): NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['attachments'] {
     return this.requireStarted(this.agentBuilderAttachments, 'agentBuilder.attachments');
   }
 
-  private async resolveSummaryConnectorId(request: KibanaRequest): Promise<string | undefined> {
-    const searchInferenceEndpoints = this.searchInferenceEndpoints;
-    if (!searchInferenceEndpoints) {
-      return undefined;
-    }
+  private async resolveSummaryChatModel(request: KibanaRequest) {
+    const core = this.requireCoreStart();
+    const outcome = await resolveScopedModel({
+      inference: this.inference,
+      searchInferenceEndpoints: this.searchInferenceEndpoints,
+      featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      request,
+      uiSettingsClient: core.uiSettings.asScopedToClient(
+        core.savedObjects.getScopedClient(request)
+      ),
+      logger: this.logger.get('investigation-summary'),
+      chatModelOptions: {
+        telemetryMetadata: {
+          pluginId: INVESTIGATION_SUMMARY_PLUGIN_ID,
+          aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+        },
+      },
+    });
+    return outcome.ok ? outcome.model.chatModel : undefined;
+  }
+
+  private async readProposals(
+    proposalIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<Record<string, StoryProposal>> {
     try {
-      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-        ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
-        request
-      );
-      return endpoints[0]?.connectorId;
+      const proposals = this.requireProposals();
+      // The service reads as the internal user, so the caller's own privilege is checked first.
+      await proposals.getProposalPrivileges().assertCanRead(request);
+      const service = proposals.getProposalsService();
+      const found: Array<[string, StoryProposal]> = [];
+      for (const batch of chunk(proposalIds, PROPOSAL_READ_CONCURRENCY)) {
+        const results = await Promise.allSettled(
+          batch.map((id) => service.get(id, spaceId, request))
+        );
+        results.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            const { title, status, decision, comment, supersededBy } = result.value;
+            found.push([batch[index], { title, status, decision, comment, supersededBy }]);
+          } else {
+            this.logger.debug(
+              `AlertZero investigation summary could not read proposal ${batch[index]}. ${result.reason}`
+            );
+          }
+        });
+      }
+      return Object.fromEntries(found);
     } catch (error) {
-      this.logger.warn(
-        `AlertZero investigation summary connector could not be resolved. ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return undefined;
+      this.logger.debug(`AlertZero investigation summary could not read proposals. ${error}`);
+      return {};
     }
   }
 

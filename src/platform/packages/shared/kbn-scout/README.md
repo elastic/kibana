@@ -438,6 +438,10 @@ When an attribute has no history, lane packing falls back to statistics measured
 
 The `test_run.target.attributes` mapping ships with the code. `scout initialize-report-datastream` applies it explicitly; failing that, the first event carrying the field creates it dynamically. Until either happens the column does not exist, and `update-test-config-stats` logs a warning and falls back to attribute-blind statistics rather than failing.
 
+#### Test run scope in test events
+
+Every Scout test event records why its run was started as `test_run.scope`, read from `SCOUT_TEST_RUN_SCOPE` (`unknown` when unset). On CI, each pipeline that reports test events sets it in its pipeline resource definition (`.buildkite/pipeline-resource-definitions/`), e.g. `pull-request`, `on-merge` or `batch-daily-ipv6`. It is reporting metadata only, used to filter test events after ingestion; it never affects which tests run or how.
+
 ### Test Types and Directory Structure
 
 Scout supports two distinct types of tests: UI and API, each with their own directory structure and import patterns:
@@ -589,6 +593,8 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 }
 ```
 
+Custom roles (`custom_role_worker_<n>`) can't be assigned to Cloud users on ECH. If the deployment has a SAML realm that trusts Kibana's mock IdP (QAF adds one named `qaf` with `--add-custom-saml-realm`), set `"customSamlProviderName": "qaf"` and custom roles log in through it. Predefined roles still use the users from `cloudUsersFilePath`.
+
 - **`mki`**: Tests are executed against a Serverless project created in Elastic Cloud (MKI). Configuration is **manually** defined in `KIBANA_REPO_ROOT/.scout/servers/cloud_mki.json`.
 
 ```json
@@ -637,6 +643,7 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 - `projectType` (serverless only) must be one of `es | oblt | security | vectordb`.
 - Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
 - `license` is optional and defaults to `"trial"`.
+- `customSamlProviderName` is only allowed in `cloud_ech.json`.
 - You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
 
 #### Starting Servers Only

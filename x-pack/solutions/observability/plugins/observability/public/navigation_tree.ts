@@ -171,6 +171,12 @@ function createNavTree({
                   defaultMessage: 'User experience',
                 }),
               },
+              {
+                link: 'digital_experience',
+                title: i18n.translate('xpack.observability.obltNav.apm.digitalExperience', {
+                  defaultMessage: 'Digital experience',
+                }),
+              },
             ],
           },
           {
@@ -519,6 +525,9 @@ function createNavTree({
                 link: 'management:index_management',
               },
               {
+                link: 'management:data_federation',
+              },
+              {
                 link: 'management:index_lifecycle_management',
               },
               {
@@ -529,9 +538,6 @@ function createNavTree({
               },
               {
                 link: 'management:rollup_jobs',
-              },
-              {
-                link: 'management:data_federation',
               },
               {
                 link: 'management:esql_views',

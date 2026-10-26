@@ -63,7 +63,7 @@ export const buildHuntCoordinatorResultAttachmentId = (runId: string): string =>
 /** Reports index the hunt services read candidates from and write feedback to. */
 export const HUNT_REPORTS_INDEX = '.kibana-threat-reports' as const;
 
-/** Investigation conversation id namespace: the id is `uuidv5(${HUNT_INVESTIGATION_ID_NAMESPACE}${reportId})` within the originating space. */
+/** Investigation conversation id namespace: the id is `uuidv5(${HUNT_INVESTIGATION_ID_NAMESPACE}${spaceId}|${reportId})`. */
 export const HUNT_INVESTIGATION_ID_NAMESPACE = 'hunt:report:' as const;
 
 /**

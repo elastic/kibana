@@ -45,6 +45,7 @@ export const createStepInfo = (overrides: Partial<StepInfo> = {}): StepInfo => (
   stepId: 'step-1',
   stepType: 'action',
   stepYamlNode: getDefaultStepYamlNode(),
+  path: ['steps', 0],
   lineStart: 1,
   lineEnd: 10,
   propInfos: {},

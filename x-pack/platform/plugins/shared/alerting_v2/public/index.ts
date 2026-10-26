@@ -96,6 +96,10 @@ export type {
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
 } from './locators';
+export {
+  useV2RulesTabNewBadge,
+  V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY,
+} from './hooks/use_v2_rules_tab_new_badge';
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();

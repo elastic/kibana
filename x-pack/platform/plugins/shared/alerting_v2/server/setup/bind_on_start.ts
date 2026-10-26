@@ -17,6 +17,8 @@ import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_
 import { INVALIDATE_API_KEYS_TASK_ID } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
 import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
+import { scheduleAlertActionsCleanupTask } from '../lib/tasks/alert_actions_cleanup/schedule_task';
+import { ALERT_ACTIONS_CLEANUP_TASK_ID } from '../lib/tasks/alert_actions_cleanup/constants';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 import { TASK_ID as TELEMETRY_TASK_ID } from '../lib/usage/constants';
@@ -80,6 +82,18 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         error,
         code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
         labels: { task_id: INVALIDATE_API_KEYS_TASK_ID },
+      });
+    });
+
+    scheduleAlertActionsCleanupTask({
+      logger: tasksLogger,
+      taskManager,
+      enabled: config.retention.alertActions.dispatcher.enabled,
+    }).catch((error) => {
+      tasksLogger.error({
+        error,
+        code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
+        labels: { task_id: ALERT_ACTIONS_CLEANUP_TASK_ID },
       });
     });
 

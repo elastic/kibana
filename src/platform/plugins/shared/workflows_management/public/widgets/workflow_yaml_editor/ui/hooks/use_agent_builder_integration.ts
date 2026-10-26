@@ -90,10 +90,9 @@ interface UseAgentBuilderIntegrationReturn {
 
 const ATTACHMENT_SYNC_DEBOUNCE_TIME = 500;
 
-const WORKFLOW_EDITOR_GREETING = i18n.translate(
-  'workflowsManagement.agentBuilder.workflowEditorGreeting',
-  { defaultMessage: 'What do you want to automate?' }
-);
+const WORKFLOW_EDITOR_GREETING = i18n.translate('workflows.agentBuilder.workflowEditorGreeting', {
+  defaultMessage: 'What do you want to automate?',
+});
 
 export const useAgentBuilderIntegration = ({
   editorRef,

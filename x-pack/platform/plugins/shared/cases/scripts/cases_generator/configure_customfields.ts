@@ -10,7 +10,7 @@ import { AUTO_GENERATED_TAG, pick, rng } from './utils';
 // The cases plugin's typed customFields support exactly three primitive
 // types — see common/types/domain/custom_field/v1.ts (CustomFieldTypes).
 // Mirrored here as a literal-string union so this script doesn't depend on
-// io-ts at runtime.
+// zod at runtime.
 export type LegacyCustomFieldType = 'text' | 'toggle' | 'number';
 
 // One entry registered on the cases-configure saved object's `customFields`

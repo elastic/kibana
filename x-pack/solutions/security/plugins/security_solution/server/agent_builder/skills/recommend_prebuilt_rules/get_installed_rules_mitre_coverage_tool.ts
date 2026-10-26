@@ -6,6 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { getMitreFrameworkByThreatName } from '@kbn/security-mitre-attack-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -26,6 +27,7 @@ interface MitreCoverageEntry {
   id: string;
   name: string;
   count: number;
+  framework: string;
 }
 
 export interface MitreCoverageData {
@@ -41,7 +43,7 @@ const byCountDescThenId = (a: MitreCoverageEntry, b: MitreCoverageEntry): number
   b.count - a.count || a.id.localeCompare(b.id);
 
 /**
- * Tallies MITRE ATT&CK coverage from installed rules. All counts — including
+ * Tallies MITRE (ATT&CK and ATLAS) coverage from installed rules. All counts — including
  * `total_installed_rules` — are derived from the rules actually passed in, so the mapping
  * total and the rule total always share the same base.
  */
@@ -49,9 +51,9 @@ export const buildMitreCoverageFromRules = (
   rules: Array<{ params: RuleWithThreat }>
 ): MitreCoverageData => {
   const tacticCounts = new Map<string, number>();
-  const tacticNames = new Map<string, string>();
   const techniqueCounts = new Map<string, number>();
-  const techniqueNames = new Map<string, string>();
+  const tacticInfo = new Map<string, { name: string; framework: string }>();
+  const techniqueInfo = new Map<string, { name: string; framework: string }>();
   let totalWithMitreMapping = 0;
 
   for (const rule of rules) {
@@ -60,21 +62,29 @@ export const buildMitreCoverageFromRules = (
     const ruleTactics = new Set<string>();
     const ruleTechniques = new Set<string>();
 
-    const mitreThreats = threat.filter((threatItem) => threatItem.framework === 'MITRE ATT&CK');
+    const mitreThreats = threat.filter(
+      (threatItem) => getMitreFrameworkByThreatName(threatItem.framework) !== undefined
+    );
     for (const threatItem of mitreThreats) {
       const tacticId = threatItem.tactic?.id;
       if (tacticId) {
         ruleTactics.add(tacticId);
-        if (threatItem.tactic?.name) {
-          tacticNames.set(tacticId, threatItem.tactic.name);
+        if (!tacticInfo.has(tacticId)) {
+          tacticInfo.set(tacticId, {
+            name: threatItem.tactic?.name || tacticId,
+            framework: threatItem.framework,
+          });
         }
       }
 
       for (const technique of threatItem.technique ?? []) {
         if (technique.id) {
           ruleTechniques.add(technique.id);
-          if (technique.name) {
-            techniqueNames.set(technique.id, technique.name);
+          if (!techniqueInfo.has(technique.id)) {
+            techniqueInfo.set(technique.id, {
+              name: technique.name || technique.id,
+              framework: threatItem.framework,
+            });
           }
         }
       }
@@ -91,12 +101,22 @@ export const buildMitreCoverageFromRules = (
     }
   }
 
-  const tactics = Array.from(tacticCounts.entries())
-    .map(([id, count]) => ({ id, name: tacticNames.get(id) ?? id, count }))
+  const tactics = Array.from(tacticInfo.entries())
+    .map(([id, { name, framework }]) => ({
+      id,
+      name,
+      count: tacticCounts.get(id) ?? 0,
+      framework,
+    }))
     .sort(byCountDescThenId);
 
-  const techniques = Array.from(techniqueCounts.entries())
-    .map(([id, count]) => ({ id, name: techniqueNames.get(id) ?? id, count }))
+  const techniques = Array.from(techniqueInfo.entries())
+    .map(([id, { name, framework }]) => ({
+      id,
+      name,
+      count: techniqueCounts.get(id) ?? 0,
+      framework,
+    }))
     .sort(byCountDescThenId);
 
   return {
@@ -121,11 +141,12 @@ export const createGetInstalledRulesMitreCoverageTool = ({
   id: GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    "Returns MITRE ATT&CK coverage across the user's currently-installed detection rules. " +
+    "Returns MITRE coverage (ATT&CK and ATLAS) across the user's currently-installed detection rules. " +
     'Includes total rule count, count with MITRE mappings, and per-tactic and per-technique ' +
-    'rule counts. ' +
+    'rule counts, each tagged with its framework. ' +
+    '`total_with_mitre_mapping` counts rules mapped to either framework. ' +
     'Only returns tactics and techniques with count > 0 — absence means zero coverage. ' +
-    'The canonical 15-tactic list is in the skill prompt; use it to identify missing tactics. ' +
+    'The canonical ATT&CK tactic list is in the skill prompt; use it to identify missing ATT&CK tactics (ATLAS tactics are listed only when covered). ' +
     'Session-cached — do not call again in the same conversation.',
   schema: getInstalledRulesMitreCoverageSchema,
   handler: async (_input, { request }) => {

@@ -8,6 +8,7 @@
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { LogMessageSource } from '@kbn/logging';
 import type { AlertingV2LogCode } from '../../errors/error_codes';
+import type { ErrorSource } from '../../errors/error_source';
 
 /**
  * Closed vocabulary of the entity identifiers an operator filters on. Values
@@ -30,6 +31,11 @@ export type AlertingLabels = Partial<{
   attachment_type: string;
   event_type: string;
   step: string;
+  /**
+   * Who a failure is attributed to (`user` or `framework`), as Task Manager counts
+   * it. Set on `RULE_EXECUTION_STEP_FAILED`.
+   */
+  error_source: ErrorSource;
   subsystem: string;
   /**
    * Which member of a fixed, statically declared set failed - e.g. a saved object
@@ -56,7 +62,8 @@ export type AlertingSubsystemName =
   | 'tasks'
   | 'savedObjects'
   | 'agentBuilder'
-  | 'events';
+  | 'events'
+  | 'telemetry';
 
 export interface DebugParams {
   message: LogMessageSource;

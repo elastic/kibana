@@ -19,6 +19,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type { GaugeConfig, LensApiConfig } from '../../schema';
 import {
   AUTO_COLOR,
@@ -132,7 +133,7 @@ function reverseBuildVisualizationState(
   );
 
   if (!dataSource || dataSource.type == null) {
-    throw new Error('Unsupported DataSource type');
+    throw new DatasourceUnsupportedError();
   }
 
   const props: DeepPartial<DeepMutable<GaugeConfig>> = {

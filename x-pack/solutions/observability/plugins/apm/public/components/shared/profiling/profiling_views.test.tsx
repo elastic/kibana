@@ -51,14 +51,18 @@ describe.each([
     ProfilingFlamegraph,
     'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
     ProfilingFlamegraphLink,
+    { TotalSamples: 0 },
+    { TotalSamples: 42 },
   ],
   [
     'ProfilingTopNFunctions',
     ProfilingTopNFunctions,
     'GET /internal/apm/services/{serviceName}/profiling/functions',
     ProfilingTopNFunctionsLink,
+    { TotalCount: 0 },
+    { TotalCount: 5 },
   ],
-])('%s', (_name, View, endpoint, Link) => {
+])('%s', (_name, View, endpoint, Link, emptyData, nonEmptyData) => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useFetcher).mockReturnValue({
@@ -90,5 +94,66 @@ describe.each([
       expect.objectContaining({ schema: ProfilingSchema.OTEL }),
       expect.anything()
     );
+  });
+
+  describe('fallback', () => {
+    it('renders the fallback when the service has no profiling samples', () => {
+      jest.mocked(useFetcher).mockReturnValue({
+        data: emptyData as any,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
+      });
+      const fallback = <div data-test-subj="fallback" />;
+
+      const { queryByTestId } = render(
+        <View {...props} schema={ProfilingSchema.OTEL} fallback={fallback} />
+      );
+
+      expect(queryByTestId('fallback')).toBeInTheDocument();
+    });
+
+    it('does not render the fallback when the service has profiling samples', () => {
+      jest.mocked(useFetcher).mockReturnValue({
+        data: nonEmptyData as any,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
+      });
+      const fallback = <div data-test-subj="fallback" />;
+
+      const { queryByTestId } = render(
+        <View {...props} schema={ProfilingSchema.OTEL} fallback={fallback} />
+      );
+
+      expect(queryByTestId('fallback')).not.toBeInTheDocument();
+    });
+
+    it('calls onFallback once when the fallback first renders', () => {
+      jest.mocked(useFetcher).mockReturnValue({
+        data: emptyData as any,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
+      });
+      const onFallback = jest.fn();
+
+      render(
+        <View {...props} schema={ProfilingSchema.OTEL} fallback={<div />} onFallback={onFallback} />
+      );
+
+      expect(onFallback).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call onFallback when still loading', () => {
+      jest.mocked(useFetcher).mockReturnValue({
+        status: FETCH_STATUS.LOADING,
+        refetch: jest.fn(),
+      });
+      const onFallback = jest.fn();
+
+      render(
+        <View {...props} schema={ProfilingSchema.OTEL} fallback={<div />} onFallback={onFallback} />
+      );
+
+      expect(onFallback).not.toHaveBeenCalled();
+    });
   });
 });

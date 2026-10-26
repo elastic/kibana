@@ -51,6 +51,8 @@ export interface WorkspaceSnapshot {
   edgeIds: string[];
   blocklistedNodesById: Record<string, WorkspaceNodeState>;
   blocklistedNodeIds: string[];
+  selectedNodeIds: string[];
+  selectedEdgeIds: string[];
 }
 
 export interface WorkspaceState extends WorkspaceSnapshot {
@@ -65,10 +67,23 @@ const initialWorkspaceState: WorkspaceState = {
   edgeIds: [],
   blocklistedNodesById: {},
   blocklistedNodeIds: [],
+  selectedNodeIds: [],
+  selectedEdgeIds: [],
 };
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const workspaceChanged = actionCreator<WorkspaceSnapshot>('WORKSPACE_CHANGED');
+export const selectAllNodes = actionCreator('SELECT_ALL_NODES');
+export const clearNodeSelection = actionCreator('CLEAR_NODE_SELECTION');
+export const invertNodeSelection = actionCreator('INVERT_NODE_SELECTION');
+export const selectNeighborNodes = actionCreator('SELECT_NEIGHBOR_NODES');
+export const toggleNodeSelection = actionCreator<{ nodeId: string; replace: boolean }>(
+  'TOGGLE_NODE_SELECTION'
+);
+export const deselectNode = actionCreator<string>('DESELECT_NODE');
+export const toggleEdgeSelection = actionCreator<string>('TOGGLE_EDGE_SELECTION');
+export const setNodeLabel = actionCreator<{ nodeId: string; label: string }>('SET_NODE_LABEL');
+export const colorSelectedNodes = actionCreator<string>('COLOR_SELECTED_NODES');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
@@ -78,6 +93,53 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     ...workspace,
     isInitialized: state.isInitialized,
   }))
+  .case(selectAllNodes, (state) => ({
+    ...state,
+    selectedNodeIds: state.nodeIds.filter((id) => state.nodesById[id].parentId === undefined),
+  }))
+  .case(clearNodeSelection, (state) => ({ ...state, selectedNodeIds: [] }))
+  .case(invertNodeSelection, (state) => {
+    const selectedNodeIds = new Set(state.selectedNodeIds);
+    return {
+      ...state,
+      selectedNodeIds: state.nodeIds.filter(
+        (id) => state.nodesById[id].parentId === undefined && !selectedNodeIds.has(id)
+      ),
+    };
+  })
+  .case(selectNeighborNodes, (state) => ({
+    ...state,
+    selectedNodeIds: selectNodesAndNeighbors(state),
+  }))
+  .case(toggleNodeSelection, (state, { nodeId, replace }) => ({
+    ...state,
+    selectedNodeIds: toggleSelectedId(state.selectedNodeIds, nodeId, replace),
+  }))
+  .case(deselectNode, (state, nodeId) => ({
+    ...state,
+    selectedNodeIds: state.selectedNodeIds.filter((id) => id !== nodeId),
+  }))
+  .case(toggleEdgeSelection, (state, edgeId) => ({
+    ...state,
+    selectedEdgeIds: state.selectedEdgeIds.includes(edgeId) ? [] : [edgeId],
+  }))
+  .case(setNodeLabel, (state, { nodeId, label }) => {
+    const node = state.nodesById[nodeId];
+    if (!node) return state;
+    return { ...state, nodesById: { ...state.nodesById, [nodeId]: { ...node, label } } };
+  })
+  .case(colorSelectedNodes, (state, color) => {
+    const selectedNodeIds = new Set(getSelectedNodeIds(state));
+    return {
+      ...state,
+      nodesById: Object.fromEntries(
+        Object.entries(state.nodesById).map(([id, node]) => [
+          id,
+          selectedNodeIds.has(id) ? { ...node, color } : node,
+        ])
+      ),
+    };
+  })
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -85,6 +147,49 @@ export const workspaceInitializedSelector = createSelector(
   workspaceSelector,
   (workspace: WorkspaceState) => workspace.isInitialized
 );
+
+export const selectedNodeIdsSelector = createSelector(
+  workspaceSelector,
+  (workspace: WorkspaceState) => workspace.selectedNodeIds
+);
+
+const getSelectedNodeIds = (state: WorkspaceState): string[] => {
+  const selectedNodeIds = new Set(state.selectedNodeIds);
+  for (const id of state.nodeIds) {
+    let parentId = state.nodesById[id].parentId;
+    while (parentId) {
+      if (selectedNodeIds.has(parentId)) {
+        selectedNodeIds.add(id);
+        break;
+      }
+      parentId = state.nodesById[parentId]?.parentId;
+    }
+  }
+  return state.nodeIds.filter((id) => selectedNodeIds.has(id));
+};
+
+const toggleSelectedId = (selectedIds: string[], id: string, replace: boolean): string[] => {
+  const isSelected = selectedIds.includes(id);
+  if (replace) {
+    return isSelected && selectedIds.length === 1 ? [] : [id];
+  }
+  return isSelected ? selectedIds.filter((selectedId) => selectedId !== id) : [...selectedIds, id];
+};
+
+const selectNodesAndNeighbors = (state: WorkspaceState): string[] => {
+  const originallySelectedNodeIds = new Set(state.selectedNodeIds);
+  const selectedNodeIds = new Set(state.selectedNodeIds);
+  for (const edgeId of state.edgeIds) {
+    const edge = state.edgesById[edgeId];
+    if (originallySelectedNodeIds.has(edge.topSourceId)) {
+      selectedNodeIds.add(edge.topTargetId);
+    }
+    if (originallySelectedNodeIds.has(edge.topTargetId)) {
+      selectedNodeIds.add(edge.topSourceId);
+    }
+  }
+  return state.nodeIds.filter((id) => selectedNodeIds.has(id));
+};
 
 export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot => {
   const blocklistedNodes = (workspace.blocklistedNodes ?? []) as WorkspaceNode[];
@@ -121,6 +226,12 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot =>
     edgeIds: Object.keys(edgesById),
     blocklistedNodesById,
     blocklistedNodeIds: Object.keys(blocklistedNodesById),
+    selectedNodeIds: (workspace.selectedNodes ?? [])
+      .map(({ id }) => id)
+      .filter((id) => nodesById[id]),
+    selectedEdgeIds: (workspace.getEdgeSelection?.() ?? [])
+      .map(getEdgeId)
+      .filter((id) => edgesById[id]),
   };
 };
 
@@ -141,6 +252,34 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
   id ?? `${source.id}-${target.id}`;
 
+const presentationActionTypes = new Set([setNodeLabel.type, colorSelectedNodes.type]);
+
+const selectionActionTypes = new Set([
+  selectAllNodes.type,
+  clearNodeSelection.type,
+  invertNodeSelection.type,
+  selectNeighborNodes.type,
+  toggleNodeSelection.type,
+  deselectNode.type,
+  toggleEdgeSelection.type,
+]);
+
+const synchronizeWorkspaceSelection = (workspace: Workspace, state: WorkspaceState): void => {
+  const selectedNodeIds = new Set(state.selectedNodeIds);
+  workspace.selectedNodes = workspace.nodes.filter((node) => {
+    node.isSelected = selectedNodeIds.has(node.id);
+    return node.isSelected;
+  });
+
+  const selectedEdgeIds = new Set(state.selectedEdgeIds);
+  workspace.clearEdgeSelection();
+  workspace.edges.forEach((edge) => {
+    if (selectedEdgeIds.has(getEdgeId(edge))) {
+      workspace.addEdgeToSelection(edge);
+    }
+  });
+};
+
 /**
  * Listener handling filling in top terms into workspace.
  *
@@ -150,6 +289,37 @@ export const registerWorkspaceListeners = (
   startListening: StartGraphListening,
   { getWorkspace, notifyReact, http, notifications, handleSearchQueryError }: GraphStoreDependencies
 ) => {
+  startListening({
+    predicate: (action) => selectionActionTypes.has(action.type),
+    effect: (_action, listenerApi) => {
+      const workspace = getWorkspace();
+      if (!workspace) {
+        return;
+      }
+
+      synchronizeWorkspaceSelection(workspace, listenerApi.getState().workspace);
+      notifyReact();
+    },
+  });
+
+  startListening({
+    predicate: (action) => presentationActionTypes.has(action.type),
+    effect: (action, listenerApi) => {
+      const workspace = getWorkspace();
+      if (!workspace) return;
+      if (setNodeLabel.match(action)) {
+        const node = workspace.nodesMap[action.payload.nodeId];
+        if (node) node.label = action.payload.label;
+      } else if (colorSelectedNodes.match(action)) {
+        getSelectedNodeIds(listenerApi.getState().workspace).forEach((id) => {
+          const node = workspace.nodesMap[id];
+          if (node) node.color = action.payload;
+        });
+      }
+      notifyReact();
+    },
+  });
+
   startListening({
     predicate: fillWorkspace.match,
     effect: async (_action, listenerApi) => {

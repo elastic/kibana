@@ -23,6 +23,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -118,6 +119,11 @@ export interface AlertZeroStartDependencies {
    * technique catalog. Absence (or its managed source being off) leaves the catalog empty.
    */
   mitreAttack?: MitreAttackServerStart;
+  /**
+   * Optional, matching the plugin manifest. The report step reads its opt-in state before any
+   * Elasticsearch work; a missing telemetry plugin counts as opted out.
+   */
+  telemetry?: TelemetryPluginStart;
 }
 
 export type AlertZeroRouter = IRouter<AlertZeroRequestHandlerContext>;

@@ -6,6 +6,7 @@
  */
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
+import { InPortal } from 'react-reverse-portal';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -15,6 +16,7 @@ import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { useRefresh } from '@kbn/cloud-security-posture/src/hooks/use_refresh';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
+import { FindingsSearchBarPortalContext } from '../../../common/contexts/findings_search_bar_portal_context';
 import type { FindingsBaseURLQuery } from '../../../common/types';
 import { PLUGIN_NAME } from '../../../../common';
 
@@ -45,6 +47,7 @@ export const FindingsSearchBar = ({
   } = useKibana<CspClientPluginStartDeps>().services;
 
   const securitySolutionContext = useContext(SecuritySolutionContext);
+  const searchBarPortalNode = useContext(FindingsSearchBarPortalContext);
 
   const { dataView } = useDataViewContext();
 
@@ -70,6 +73,10 @@ export const FindingsSearchBar = ({
       />
     </div>
   );
+
+  if (searchBarPortalNode) {
+    return <InPortal node={searchBarPortalNode}>{searchBarNode}</InPortal>;
+  }
 
   if (securitySolutionContext) {
     const FiltersGlobal = securitySolutionContext.getFiltersGlobalComponent();

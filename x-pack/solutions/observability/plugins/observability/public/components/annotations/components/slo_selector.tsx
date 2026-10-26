@@ -11,7 +11,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { useFetchSloList } from '../hooks/use_fetch_slo_list';
 export interface SloItem {
   id: string;
