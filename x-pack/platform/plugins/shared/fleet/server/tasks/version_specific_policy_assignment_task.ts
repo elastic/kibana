@@ -483,14 +483,14 @@ export class VersionSpecificPolicyAssignmentTask {
       `[VersionSpecificPolicyAssignmentTask] Searching for agents with kuery: ${combinedKuery}`
     );
 
-    // Agents that are inactive by timeout are moved too, only the unenrolled ones (`active:false`) are not.
-    // Moving them is a metadata update, so they never stay on a policy that does not exist.
-    const activeAgentsKuery = `(${combinedKuery}) and active:true`;
-
+    // Without the agent status runtime field (and the inactivity timeouts scan it needs), `showInactive: false`
+    // filters on the stored `active:true`: agents that are inactive by timeout are moved too, only the
+    // unenrolled ones are not. Moving them is a metadata update, so they never stay on a policy that does not exist.
     // First, check if there are any agents matching our criteria
     const { total } = await getAgentsByKuery(esClient, soClient, {
-      kuery: activeAgentsKuery,
-      showInactive: true,
+      kuery: combinedKuery,
+      showInactive: false,
+      includeStatusRuntimeField: false,
       perPage: 0,
     });
 
@@ -504,9 +504,13 @@ export class VersionSpecificPolicyAssignmentTask {
 
     // Fetch agents and group by minor version
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: activeAgentsKuery,
+      kuery: combinedKuery,
       perPage: AGENTS_BATCHSIZE,
-      showInactive: true,
+      showInactive: false,
+      // Only the agent id, policy id and version are read
+      includeStatusRuntimeField: false,
+      fetchFields: [],
+      _source: ['policy_id', 'agent.version'],
     });
 
     for await (const agentsBatch of agentsFetcher) {

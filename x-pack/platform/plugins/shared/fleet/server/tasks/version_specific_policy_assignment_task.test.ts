@@ -586,14 +586,19 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       await runTask();
 
-      // no agent status filter (inactive by timeout), the stored `active` field excludes unenrolled agents
-      for (const [, , options] of [
-        mockedGetAgentsByKuery.mock.calls[0],
-        mockedFetchAllAgentsByKuery.mock.calls[0],
-      ]) {
-        expect(options.showInactive).toBe(true);
-        expect(options.kuery).toMatch(/ and active:true$/);
-      }
+      // no agent status runtime field: the stored `active` field excludes unenrolled agents, not the
+      // ones that are inactive by timeout
+      expect(mockedGetAgentsByKuery.mock.calls[0][2]).toEqual(
+        expect.objectContaining({ showInactive: false, includeStatusRuntimeField: false })
+      );
+      expect(mockedFetchAllAgentsByKuery.mock.calls[0][2]).toEqual(
+        expect.objectContaining({
+          showInactive: false,
+          includeStatusRuntimeField: false,
+          fetchFields: [],
+          _source: ['policy_id', 'agent.version'],
+        })
+      );
       expect(mockedReassignAgents).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),

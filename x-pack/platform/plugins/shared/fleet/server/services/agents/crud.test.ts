@@ -6,7 +6,11 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import { toElasticsearchQuery } from '@kbn/es-query';
 
 import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/helpers';
@@ -573,10 +577,53 @@ describe('Agents CRUD test', () => {
       expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
     });
 
+    it('should omit the status runtime mapping when includeStatusRuntimeField is false', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+      await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        includeStatusRuntimeField: false,
+      });
+      expect(searchMock.mock.calls[0][0].runtime_mappings).not.toHaveProperty('status');
+      expect(searchMock.mock.calls[0][0].query).toEqual(
+        toElasticsearchQuery(_joinFilters(['active:true'])!)
+      );
+    });
+
     describe('status filters', () => {
       beforeEach(() => {
         searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
       });
+
+      it('should exclude unenrolled via active:true when the status runtime field is skipped', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: true,
+          includeStatusRuntimeField: false,
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].runtime_mappings).not.toHaveProperty('status');
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['active:true'])!)
+        );
+      });
+
+      it('should keep status filters and the runtime field when the kuery references status', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+          includeStatusRuntimeField: false,
+          kuery: 'status:online',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].runtime_mappings).toHaveProperty('status');
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(
+            _joinFilters(['status:online', 'NOT (status:inactive)', 'NOT status:unenrolled'])!
+          )
+        );
+      });
+
       it('should add inactive and unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
           showAgentless: true,
@@ -1050,6 +1097,80 @@ describe('Agents CRUD test', () => {
         // consume to trigger search
       }
       expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ fields: ['status'] }));
+    });
+
+    describe('includeStatusRuntimeField', () => {
+      const consume = async (options: Parameters<typeof fetchAllAgentsByKuery>[2]) => {
+        searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+        for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, options)) {
+          // consume to trigger search
+        }
+        return searchMock.mock.calls[0][0] as any;
+      };
+
+      it('builds the status runtime field and filters inactive agents by status by default', async () => {
+        const request = await consume({ showInactive: false });
+
+        expect(request.runtime_mappings).toHaveProperty('status');
+        expect(request.fields).toContain('status');
+        expect(JSON.stringify(request.query)).toContain('status');
+      });
+
+      it('skips the status runtime field and filters by the stored active field when disabled', async () => {
+        const request = await consume({ showInactive: false, includeStatusRuntimeField: false });
+
+        expect(request.runtime_mappings).not.toHaveProperty('status');
+        expect(request.fields).not.toContain('status');
+        expect(JSON.stringify(request.query)).not.toContain('status');
+        expect(JSON.stringify(request.query)).toContain('"active"');
+      });
+
+      it('does not add an active filter when inactive agents are shown', async () => {
+        const request = await consume({ showInactive: true, includeStatusRuntimeField: false });
+
+        expect(JSON.stringify(request.query ?? {})).not.toContain('active');
+      });
+
+      it.each(['status : inactive', 'status:inactive', 'NOT status:online'])(
+        'keeps the status runtime field for the kuery %s that references the status',
+        async (kuery) => {
+          const request = await consume({
+            kuery,
+            showInactive: true,
+            includeStatusRuntimeField: false,
+          });
+
+          expect(request.runtime_mappings).toHaveProperty('status');
+        }
+      );
+
+      it('does not keep the status runtime field for a kuery that only contains the word status', async () => {
+        const request = await consume({
+          kuery: 'local_metadata.host.hostname:"status-host" and last_checkin_status:online',
+          showInactive: true,
+          includeStatusRuntimeField: false,
+        });
+
+        expect(request.runtime_mappings).not.toHaveProperty('status');
+      });
+
+      it('does not log an error for agents without the status field when disabled', async () => {
+        const logger = loggingSystemMock.createLogger();
+        jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+        const mock = createEsSearchResultMock(['agent-1']);
+        delete (mock.hits.hits[0] as any).fields;
+        searchMock.mockResolvedValueOnce(mock).mockResolvedValueOnce(createEsSearchResultMock([]));
+
+        const agents: Agent[] = [];
+        for await (const page of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+          includeStatusRuntimeField: false,
+        })) {
+          agents.push(...page);
+        }
+
+        expect(agents.map((agent) => agent.id)).toEqual(['agent-1']);
+        expect(logger.error).not.toHaveBeenCalled();
+      });
     });
 
     it('should map agents correctly from filtered _source', async () => {
