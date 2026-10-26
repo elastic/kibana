@@ -19,6 +19,7 @@ export type {
   TimePrecision,
   AutoRefreshSettings,
   AutoRefreshIntervalUnit,
+  FirstDayOfWeek,
 } from './types';
 export { useDateRangePickerContext } from './date_range_picker_context';
 export type { DateRangePickerContextValue } from './date_range_picker_context';
