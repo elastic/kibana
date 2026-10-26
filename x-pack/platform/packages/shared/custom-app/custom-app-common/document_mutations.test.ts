@@ -624,3 +624,55 @@ describe('pruneUnusedValues', () => {
     expect(Object.keys(orphaned.state)).toEqual(['service', 'orphan']);
   });
 });
+
+describe('the components that hold others', () => {
+  const nested = appDocumentSchema.parse({
+    root: {
+      type: 'stack',
+      id: 'root',
+      children: [
+        {
+          type: 'tabs',
+          id: 'tabs',
+          children: [
+            {
+              type: 'section',
+              id: 'one',
+              label: 'One',
+              children: [{ type: 'card', id: 'card', title: 'Card', children: [] }],
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  it('take nodes added to them, however deep', () => {
+    const result = addNode(nested, 'card', { type: 'heading', id: 'inside', text: 'Hi' });
+
+    expect(result.ok).toBe(true);
+    expect(result.ok && findNode(result.document.root, 'inside')?.parent?.id).toBe('card');
+  });
+
+  it('are changed, and have what is in them removed, wherever they are', () => {
+    const changed = updateNode(nested, 'card', { title: 'New' });
+    expect(
+      changed.ok && (findNode(changed.document.root, 'card')?.node as { title: string }).title
+    ).toBe('New');
+
+    const removed = removeNode(nested, 'one');
+    expect(removed.ok && findNode(removed.document.root, 'card')).toBeUndefined();
+  });
+
+  it('are copied with everything in them, under new ids', () => {
+    const result = duplicateNode(nested, 'one');
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const copies = getNodeChildren(findNode(result.document.root, 'tabs')!.node);
+    expect(copies).toHaveLength(2);
+    expect(
+      new Set(copies.flatMap((section) => getNodeChildren(section).map(({ id }) => id))).size
+    ).toBe(2);
+  });
+});

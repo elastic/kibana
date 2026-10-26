@@ -44,3 +44,13 @@ describe('icons', () => {
     expect(unknown).toEqual([]);
   });
 });
+
+describe('icons of the components', () => {
+  const { CARD_ICONS } = jest.requireActual<{ CARD_ICONS: readonly string[] }>(
+    '@kbn/custom-app-common'
+  );
+
+  it.each([...CARD_ICONS, 'sortUp', 'sortDown'])('has an EUI icon called %s', (name) => {
+    expect(Object.keys(typeToPathMap)).toContain(name);
+  });
+});

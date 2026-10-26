@@ -42,6 +42,10 @@ export const MAX_INPUT_OPTIONS = 50;
 export const MAX_QUERY_OPTIONS = 500;
 /** What is added to the id of a select to name the source of its options, which is not a component. */
 export const OPTIONS_SOURCE_SUFFIX = ':options';
+/** The source of the annotations of a chart, which is not the one of the chart itself. */
+export const ANNOTATIONS_SOURCE_SUFFIX = ':annotations';
+/** The most annotations a chart draws; more than that is not a chart anyone can read. */
+export const MAX_CHART_ANNOTATIONS = 100;
 
 /** What a filter of the cases a component shows can hold: a search text, a tag. */
 export const MAX_CASES_FILTER_LENGTH = 256;
@@ -62,6 +66,38 @@ export const CASES_FILTERS = ['status', 'severity', 'search', 'tag'] as const;
 export const MAX_BUTTON_GROUP_OPTIONS = 10;
 /** The accents a page can have, a few named colours and not any colour, so that text stays readable. */
 export const THEME_ACCENTS = ['blue', 'teal', 'purple', 'pink', 'orange', 'green', 'red'] as const;
+/** The icons a card can have, from the ones EUI draws. */
+export const CARD_ICONS = [
+  'alert',
+  'bell',
+  'bolt',
+  'calendar',
+  'check',
+  'clock',
+  'search',
+  'database',
+  'flag',
+  'gear',
+  'globe',
+  'heart',
+  'lock',
+  'user',
+  'users',
+] as const;
+/** The colours a badge can have. */
+export const BADGE_COLORS = [
+  'default',
+  'primary',
+  'success',
+  'accent',
+  'warning',
+  'danger',
+  'hollow',
+] as const;
+/** The colours of a progress bar. */
+export const PROGRESS_COLORS = ['primary', 'success', 'warning', 'danger'] as const;
+/** The most columns a row of columns has. */
+export const MAX_COLUMNS = 4;
 /** How round the corners of a page are. */
 export const THEME_SHAPES = ['soft', 'sharp'] as const;
 /** A link to another page of Kibana: the longest path it can have, with its values in it. */

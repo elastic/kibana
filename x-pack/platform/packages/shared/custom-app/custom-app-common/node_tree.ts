@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { OPTIONS_SOURCE_SUFFIX } from './constants';
-import type { Action, AppNode, DataSource } from './document_schema';
+import { ANNOTATIONS_SOURCE_SUFFIX, OPTIONS_SOURCE_SUFFIX } from './constants';
+import { isContainerNode, type Action, type AppNode, type DataSource } from './document_schema';
 
 /** Returns the direct children of a node, empty for leaf nodes. */
 export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
-  node.type === 'stack' || node.type === 'flyout' ? node.children : [];
+  isContainerNode(node) ? node.children : [];
 
 /**
  * Whether an app has nothing in it yet: a root that is a stack with no components. A new app starts
@@ -34,7 +34,21 @@ export const getInterpolatedText = (
       ];
     case 'stat':
     case 'flyout':
+    case 'metric':
       return [{ prop: 'title', text: node.title }];
+    case 'card':
+      return [
+        ...(node.title === undefined ? [] : [{ prop: 'title', text: node.title }]),
+        ...(node.description === undefined
+          ? []
+          : [{ prop: 'description', text: node.description }]),
+      ];
+    case 'badge':
+      return [{ prop: 'text', text: node.text }];
+    case 'progress':
+      return node.label === undefined ? [] : [{ prop: 'label', text: node.label }];
+    case 'section':
+      return [{ prop: 'label', text: node.label }];
     case 'chart':
       return node.title === undefined ? [] : [{ prop: 'title', text: node.title }];
     case 'link':
@@ -52,6 +66,8 @@ export const getInterpolatedText = (
 /** The ES|QL query a node runs, if it shows data. */
 export const getNodeQuery = (node: AppNode): string | undefined =>
   node.type === 'stat' ||
+  node.type === 'metric' ||
+  node.type === 'progress' ||
   node.type === 'chart' ||
   node.type === 'custom_content' ||
   node.type === 'table' ||
@@ -61,7 +77,13 @@ export const getNodeQuery = (node: AppNode): string | undefined =>
 
 /** Where a node gets what it shows, if it shows data: a query, or a source of cases. */
 export const getNodeSource = (node: AppNode): DataSource | undefined => {
-  if (node.type === 'stat' || node.type === 'table' || node.type === 'key_value') {
+  if (
+    node.type === 'stat' ||
+    node.type === 'metric' ||
+    node.type === 'progress' ||
+    node.type === 'table' ||
+    node.type === 'key_value'
+  ) {
     if (node.source) return node.source;
   }
   const query = getNodeQuery(node);
@@ -71,6 +93,10 @@ export const getNodeSource = (node: AppNode): DataSource | undefined => {
 /** The id the source of the options of a select is known by, which is not that of a component. */
 export const getOptionsSourceId = (nodeId: string): string => `${nodeId}${OPTIONS_SOURCE_SUFFIX}`;
 
+/** The id the source of the annotations of a chart is known by. */
+export const getAnnotationsSourceId = (nodeId: string): string =>
+  `${nodeId}${ANNOTATIONS_SOURCE_SUFFIX}`;
+
 /** Every source in the tree, by the id of the node that shows it, and of the options of a select. */
 export const collectSources = (root: AppNode): Record<string, DataSource> => {
   const source = getNodeSource(root);
@@ -78,6 +104,9 @@ export const collectSources = (root: AppNode): Record<string, DataSource> => {
     ...(source === undefined ? {} : { [root.id]: source }),
     ...(root.type === 'select' && root.optionsQuery !== undefined
       ? { [getOptionsSourceId(root.id)]: { type: 'esql', query: root.optionsQuery } }
+      : {}),
+    ...(root.type === 'chart' && root.annotations !== undefined
+      ? { [getAnnotationsSourceId(root.id)]: { type: 'esql', query: root.annotations.query } }
       : {}),
     ...Object.assign({}, ...getNodeChildren(root).map(collectSources)),
   };
@@ -96,6 +125,7 @@ export const getNodeBindings = (node: AppNode): string[] => {
   switch (node.type) {
     case 'select':
     case 'button_group':
+    case 'switch':
     case 'search':
     case 'list_input':
       return [node.bind];
@@ -108,11 +138,13 @@ export const getNodeBindings = (node: AppNode): string[] => {
 
 /**
  * What kind of value an input sets: a list for a box of lines, and for a select that takes several
- * options, and text for every other.
+ * options, a true or a false for a switch, and text for every other.
  */
-export const getBindingType = (node: AppNode): 'string' | 'list' =>
+export const getBindingType = (node: AppNode): 'string' | 'list' | 'boolean' =>
   node.type === 'list_input' || (node.type === 'select' && node.multiple === true)
     ? 'list'
+    : node.type === 'switch'
+    ? 'boolean'
     : 'string';
 
 /** The actions a node can run, with the event that runs them. */
@@ -130,6 +162,7 @@ export const getNodeActions = (
       return [{ event: 'onSubmit', actions: node.onSubmit }];
     case 'select':
     case 'button_group':
+    case 'switch':
     case 'search':
     case 'list_input':
       return [{ event: 'onChange', actions: node.onChange }];

@@ -11,7 +11,7 @@ import { EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { interpolate, type AppNodeOfType } from '@kbn/custom-app-common';
+import { getAnnotationsSourceId, interpolate, type AppNodeOfType } from '@kbn/custom-app-common';
 import { useDataLayer } from '../data/data_layer_context';
 import { toEsqlVariables } from '../data/esql_variables';
 import { useSource } from '../data/use_source';
@@ -24,6 +24,7 @@ import { DataState } from './data_state';
 import { EditableText } from './editable_text';
 import { DroppedActions } from './dropped_actions';
 import { applyAccentToChart } from '../theme/accent_chart_colors';
+import { addAnnotationsToChart } from './chart_annotations';
 import { usePageAccent } from './app_frame';
 import { useChartAttributes } from './use_chart_attributes';
 import type { SourceData } from '../data/data_layer';
@@ -31,7 +32,16 @@ import type { SourceData } from '../data/data_layer';
 /** A chart is this tall everywhere: its look is not the author's to decide. */
 const CHART_HEIGHT = 280;
 
-const Chart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData }) => {
+const Chart = ({
+  node,
+  data,
+  annotationData,
+}: {
+  node: AppNodeOfType<'chart'>;
+  data: SourceData;
+  /** The rows to mark on the chart, when it has annotations that are to be shown now. */
+  annotationData?: SourceData;
+}) => {
   const { lens } = getServices();
   const layer = useDataLayer();
   const state = useStateValues();
@@ -39,10 +49,14 @@ const Chart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData 
   const { attributes: lensAttributes, error } = useChartAttributes(node, data.columns);
   const accent = usePageAccent();
   const { colorMode } = useEuiTheme();
-  const attributes = useMemo(
-    () => lensAttributes && applyAccentToChart(lensAttributes, accent, colorMode === 'DARK'),
-    [lensAttributes, accent, colorMode]
-  );
+  const annotations = node.annotations;
+  const attributes = useMemo(() => {
+    if (!lensAttributes) return undefined;
+    const coloured = applyAccentToChart(lensAttributes, accent, colorMode === 'DARK');
+    return annotations && annotationData
+      ? addAnnotationsToChart(coloured, annotationData, annotations)
+      : coloured;
+  }, [lensAttributes, accent, colorMode, annotations, annotationData]);
   const run = useActionRunner(node.id);
   const [dropped, setDropped] = useState<string[]>([]);
   // One id for as long as the chart is shown, so Lens keeps its own state between refreshes.
@@ -95,6 +109,22 @@ const Chart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData 
   );
 };
 
+/** A chart with annotations: it reads their rows, and marks them while the value that shows them is true. */
+const AnnotatedChart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData }) => {
+  const values = useStateValues();
+  const source = useSource(getAnnotationsSourceId(node.id));
+  const { showWhen } = node.annotations ?? {};
+  const isShown = showWhen === undefined || values[showWhen] === true;
+
+  return (
+    <Chart
+      node={node}
+      data={data}
+      annotationData={isShown && source.status === 'success' ? source.data : undefined}
+    />
+  );
+};
+
 export const ChartNode = ({ node }: { node: AppNodeOfType<'chart'> }) => {
   const layer = useDataLayer();
   const state = useSource(node.id);
@@ -112,7 +142,13 @@ export const ChartNode = ({ node }: { node: AppNodeOfType<'chart'> }) => {
         </EuiTitle>
       ) : null}
       <DataState state={state} onRetry={layer.retry}>
-        {(data) => <Chart node={node} data={data} />}
+        {(data) =>
+          node.annotations ? (
+            <AnnotatedChart node={node} data={data} />
+          ) : (
+            <Chart node={node} data={data} />
+          )
+        }
       </DataState>
     </EuiPanel>
   );

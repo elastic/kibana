@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownFormat,
+  EuiPanel,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { interpolate, type AppNode } from '@kbn/custom-app-common';
@@ -19,6 +26,16 @@ import {
 import { useStateValues } from '../runtime/app_runtime_context';
 import { escapeMarkdownValues } from '../utils/escape_markdown';
 import { ChartNode } from './chart_node';
+import {
+  AccordionFrame,
+  CardFrame,
+  Column,
+  ColumnsFrame,
+  TabsFrame,
+  type FrameSection,
+} from './container_frames';
+import { MetricNode } from './metric_node';
+import { ProgressNode } from './progress_node';
 import { EditableText } from './editable_text';
 import { CustomContentNode } from './custom_content_node';
 import { ButtonGroupNode } from './button_group_node';
@@ -31,6 +48,7 @@ import { ListInputNode } from './list_input_node';
 import { SearchNode } from './search_node';
 import { SelectNode } from './select_node';
 import { StatNode } from './stat_node';
+import { SwitchNode } from './switch_node';
 import { TableNode } from './table_node';
 import { TimeRangeNode } from './time_range_node';
 
@@ -39,6 +57,7 @@ const isInput = (node: AppNode): boolean =>
   node.type === 'list_input' ||
   node.type === 'select' ||
   node.type === 'button_group' ||
+  node.type === 'switch' ||
   node.type === 'time_range';
 
 const CALLOUTS = {
@@ -101,6 +120,70 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
     }
     case 'stat':
       return <StatNode node={node} />;
+    case 'metric':
+      return <MetricNode node={node} />;
+    case 'progress':
+      return <ProgressNode node={node} />;
+    case 'badge':
+      return (
+        <div data-node-id={node.id}>
+          <EuiBadge color={node.color}>{text(node.text)}</EuiBadge>
+        </div>
+      );
+    case 'card':
+      return (
+        <CardFrame
+          nodeId={node.id}
+          title={node.title === undefined ? undefined : text(node.title)}
+          description={node.description === undefined ? undefined : text(node.description)}
+          icon={node.icon}
+        >
+          {node.children.map((child) => (
+            <NodeRenderer key={child.id} node={child} />
+          ))}
+        </CardFrame>
+      );
+    case 'columns':
+      return (
+        <ColumnsFrame nodeId={node.id} columns={node.columns as 2 | 3 | 4}>
+          {node.children.map((child) => (
+            <NodeRenderer key={child.id} node={child} />
+          ))}
+        </ColumnsFrame>
+      );
+    case 'tabs':
+    case 'accordion': {
+      const sections: FrameSection[] = node.children.flatMap((child) =>
+        child.type === 'section'
+          ? [
+              {
+                id: child.id,
+                label: text(child.label),
+                open: child.open,
+                content: child.children.map((inner) => (
+                  <NodeRenderer key={inner.id} node={inner} />
+                )),
+              },
+            ]
+          : []
+      );
+      return node.type === 'tabs' ? (
+        <TabsFrame nodeId={node.id} sections={sections} />
+      ) : (
+        <AccordionFrame nodeId={node.id} sections={sections} />
+      );
+    }
+    case 'section':
+      // Only tabs and an accordion draw a section, with its title; on its own it shows what it holds.
+      return (
+        <div data-node-id={node.id}>
+          <Column>
+            {node.children.map((child) => (
+              <NodeRenderer key={child.id} node={child} />
+            ))}
+          </Column>
+        </div>
+      );
     case 'chart':
       return <ChartNode node={node} />;
     case 'custom_content':
@@ -113,6 +196,8 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
       return <SelectNode node={node} />;
     case 'button_group':
       return <ButtonGroupNode node={node} />;
+    case 'switch':
+      return <SwitchNode node={node} />;
     case 'search':
       return <SearchNode node={node} />;
     case 'list_input':

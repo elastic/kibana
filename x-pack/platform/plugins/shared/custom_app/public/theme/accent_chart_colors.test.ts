@@ -51,6 +51,19 @@ describe('applyAccentToChart', () => {
     ]);
   });
 
+  it('colours a series that is not broken down even when Lens gave the layer a colour mapping it does not use', () => {
+    const result = applyAccentToChart(
+      chart({ accessors: ['count'], colorMapping: { paletteId: 'default', assignments: [] } }),
+      'purple',
+      false
+    );
+
+    expect(layerOf(result).yConfig).toEqual([
+      { forAccessor: 'count', color: ACCENT_COLORS.purple.fill },
+    ]);
+    expect(layerOf(result).colorMapping).toEqual({ paletteId: 'default', assignments: [] });
+  });
+
   it('colours the values of a breakdown in shades of the accent, keeping the rest of the mapping', () => {
     const result = applyAccentToChart(
       chart({

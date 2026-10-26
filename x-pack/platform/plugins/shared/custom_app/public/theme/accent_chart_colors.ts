@@ -15,6 +15,8 @@ interface ChartLayer {
   layerType?: string;
   accessors?: string[];
   splitAccessor?: string;
+  /** The fields a donut is cut by. */
+  primaryGroups?: string[];
   yConfig?: Array<{ forAccessor: string; color?: string }>;
   /** How the values of a breakdown or the slices of a donut are coloured, as Lens keeps it. */
   colorMapping?: { assignments?: unknown[]; colorMode?: unknown } & Record<string, unknown>;
@@ -59,7 +61,10 @@ export const applyAccentToChart = (
         ...state,
         layers: state.layers.map((layer) => {
           if (layer.layerType !== 'data') return layer;
-          if (layer.colorMapping) {
+          // Lens gives a layer a colour mapping even when nothing is broken down, where it is not used.
+          const isBrokenDown =
+            layer.splitAccessor !== undefined || layer.primaryGroups !== undefined;
+          if (layer.colorMapping && isBrokenDown) {
             return { ...layer, colorMapping: toAccentGradient(layer.colorMapping, color) };
           }
           return layer.accessors?.length === 1 && !layer.splitAccessor

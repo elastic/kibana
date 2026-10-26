@@ -7,12 +7,14 @@
 
 import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { appDocumentSchema } from '@kbn/custom-app-common';
 import { ChartType } from '@kbn/visualization-utils';
 import type { RunQuery } from '../data/data_layer';
 import { renderApp } from './test_utils';
 
 const suggestions = jest.fn();
+let mockAttributes: unknown = { title: 'suggested' };
 const embeddableProps = jest.fn();
 
 // One object for every call, as the real services are: a new one would restart the chart each render.
@@ -35,7 +37,7 @@ jest.mock('@kbn/esql-utils', () => ({
 }));
 jest.mock('@kbn/visualization-utils', () => ({
   ...jest.requireActual('@kbn/visualization-utils'),
-  getLensAttributesFromSuggestion: () => ({ title: 'suggested' }),
+  getLensAttributesFromSuggestion: () => mockAttributes,
 }));
 
 const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async () => ({
@@ -169,6 +171,75 @@ describe('clicking the chart', () => {
     await click(event());
 
     expect(await screen.findByText('Column "nope" is not in the row')).toBeInTheDocument();
+  });
+});
+
+describe('the annotations of a chart', () => {
+  const xyAttributes = {
+    title: 'xy',
+    visualizationType: 'lnsXY',
+    references: [],
+    state: {
+      adHocDataViews: { adhoc: { id: 'adhoc', title: 'logs' } },
+      visualization: { layers: [{ layerId: 'data', layerType: 'data', accessors: ['count'] }] },
+    },
+  };
+  const annotated = () =>
+    appDocumentSchema.parse({
+      state: { show: { type: 'boolean', default: false } },
+      root: {
+        type: 'stack',
+        id: 'root',
+        children: [
+          { type: 'switch', id: 'flag', label: 'Show deploys', bind: 'show' },
+          {
+            type: 'chart',
+            id: 'trend',
+            query: 'FROM logs | STATS count = COUNT(*) BY @timestamp',
+            annotations: {
+              query: 'FROM deploys | KEEP @timestamp, name',
+              time: '@timestamp',
+              label: 'name',
+              showWhen: 'show',
+            },
+          },
+        ],
+      },
+    });
+  const layerTypes = () =>
+    (
+      embeddableProps.mock.calls.at(-1)?.[0].attributes.state.visualization.layers as Array<{
+        layerType: string;
+      }>
+    ).map(({ layerType }) => layerType);
+
+  beforeEach(() => {
+    runQuery.mockClear();
+    suggestions.mockReset().mockReturnValue([{ suggestion: true }]);
+    embeddableProps.mockClear();
+    mockAttributes = xyAttributes;
+  });
+  afterEach(() => {
+    mockAttributes = { title: 'suggested' };
+  });
+
+  it('are marked on the chart while the value that shows them is true, and not otherwise', async () => {
+    await renderApp(annotated(), runQuery);
+    await screen.findByTestId('lensChart');
+
+    expect(layerTypes()).toEqual(['data']);
+    expect(runQuery).toHaveBeenCalledWith(
+      'FROM deploys | KEEP @timestamp, name',
+      expect.anything(),
+      expect.anything()
+    );
+
+    await userEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => expect(layerTypes()).toEqual(['data', 'annotations']));
+
+    await userEvent.click(screen.getByRole('switch'));
+    await waitFor(() => expect(layerTypes()).toEqual(['data']));
   });
 });
 

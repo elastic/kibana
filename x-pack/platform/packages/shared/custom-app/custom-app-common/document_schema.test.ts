@@ -694,6 +694,92 @@ describe('a theme whose accent follows a value of the app', () => {
   });
 });
 
+describe('a switch', () => {
+  const withSwitch = (state: Record<string, unknown>) => ({
+    state,
+    root: { type: 'switch', id: 'flag', label: 'Show errors', bind: 'show_errors' },
+  });
+  const messagesOf = (document: unknown) => {
+    const result = appDocumentSchema.safeParse(document);
+    return result.success ? [] : result.error.issues.map(({ message }) => message);
+  };
+
+  it('is bound to a key that is a true or a false', () => {
+    expect(messagesOf(withSwitch({ show_errors: { type: 'boolean', default: true } }))).toEqual([]);
+  });
+
+  it.each([
+    ['a text', { type: 'string', default: 'yes' }],
+    ['a list', { type: 'list', default: [] }],
+  ])('is not bound to %s', (_what, declaration) => {
+    expect(messagesOf(withSwitch({ show_errors: declaration }))[0]).toContain(
+      'a switch sets a true or a false and needs a boolean key'
+    );
+  });
+
+  it('is not bound to a key that does not exist', () => {
+    expect(messagesOf(withSwitch({}))).toEqual([
+      'Node "flag" binds unknown state key "show_errors"',
+    ]);
+  });
+
+  it('is not a way to set a text with a boolean key', () => {
+    const select = {
+      state: { flag: { type: 'boolean', default: true } },
+      root: {
+        type: 'select',
+        id: 'pick',
+        label: 'Pick',
+        bind: 'flag',
+        options: [{ value: 'a' }],
+      },
+    };
+
+    expect(messagesOf(select)[0]).toContain('an input needs a string key');
+  });
+});
+
+describe('the annotations of a chart', () => {
+  const chart = (annotations: unknown, state: Record<string, unknown> = {}) => ({
+    state,
+    root: { type: 'chart', id: 'trend', query: 'FROM logs | STATS c = COUNT(*)', annotations },
+  });
+  const messagesOf = (document: unknown) => {
+    const result = appDocumentSchema.safeParse(document);
+    return result.success ? [] : result.error.issues.map(({ message }) => message);
+  };
+
+  it('are a query of their own, the column of their time, and optionally their label and a switch', () => {
+    expect(
+      messagesOf(
+        chart(
+          { query: 'FROM deploys', time: '@timestamp', label: 'name', showWhen: 'show' },
+          { show: { type: 'boolean', default: true } }
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it('need a query and a time column', () => {
+    expect(messagesOf(chart({ time: '@timestamp' })).length).toBeGreaterThan(0);
+    expect(messagesOf(chart({ query: 'FROM deploys' })).length).toBeGreaterThan(0);
+  });
+
+  it('are shown by a key that exists and is a true or a false', () => {
+    expect(messagesOf(chart({ query: 'FROM d', time: 't', showWhen: 'show' }))).toEqual([
+      'Node "trend" shows its annotations by unknown state key "show"',
+    ]);
+    expect(
+      messagesOf(
+        chart(
+          { query: 'FROM d', time: 't', showWhen: 'show' },
+          { show: { type: 'string', default: 'x' } }
+        )
+      )[0]
+    ).toContain('it needs a boolean key');
+  });
+});
+
 describe('links', () => {
   const linkDoc = (to: unknown, state: Record<string, unknown> = {}, label = 'Open') => ({
     state,
@@ -1503,5 +1589,135 @@ describe('getNodeChildren', () => {
     });
     expect(getNodeChildren(root)).toHaveLength(1);
     expect(getNodeChildren(getNodeChildren(root)[0])).toEqual([]);
+  });
+});
+
+describe('presentation components', () => {
+  const messagesOf = (document: unknown) => {
+    const result = appDocumentSchema.safeParse(document);
+    return result.success ? [] : result.error.issues.map(({ message }) => message);
+  };
+  const doc = (root: unknown, state: Record<string, unknown> = {}) => ({ state, root });
+  const heading = { type: 'heading', id: 'h', text: 'Hi' };
+
+  it('accepts each of them, with what they hold', () => {
+    expect(
+      messagesOf(
+        doc({
+          type: 'stack',
+          id: 'root',
+          children: [
+            {
+              type: 'card',
+              id: 'c',
+              title: 'Card',
+              description: 'More',
+              icon: 'check',
+              children: [heading],
+            },
+            {
+              type: 'columns',
+              id: 'cols',
+              columns: 3,
+              children: [{ type: 'badge', id: 'b', text: 'Open', color: 'success' }],
+            },
+            {
+              type: 'tabs',
+              id: 't',
+              children: [{ type: 'section', id: 's1', label: 'One', children: [] }],
+            },
+            {
+              type: 'accordion',
+              id: 'a',
+              children: [{ type: 'section', id: 's2', label: 'Two', open: true, children: [] }],
+            },
+            {
+              type: 'metric',
+              id: 'm',
+              title: 'Errors',
+              query: 'ROW now = 3, before = 2',
+              compare: 'before',
+            },
+            { type: 'progress', id: 'p', label: 'Used', query: 'ROW used = 40', max: 200 },
+          ],
+        })
+      )
+    ).toEqual([]);
+  });
+
+  it('give a metric and a progress bar defaults that are the same everywhere', () => {
+    const parsed = appDocumentSchema.parse(
+      doc({
+        type: 'stack',
+        id: 'root',
+        children: [
+          { type: 'metric', id: 'm', title: 'x', query: 'ROW a = 1' },
+          { type: 'progress', id: 'p', query: 'ROW a = 1' },
+          { type: 'columns', id: 'c', children: [] },
+        ],
+      })
+    );
+    const [metric, progress, columns] = (
+      parsed.root as { children: Array<Record<string, unknown>> }
+    ).children;
+
+    expect(metric.betterWhen).toBe('higher');
+    expect(progress).toMatchObject({ max: 100, color: 'primary' });
+    expect(columns.columns).toBe(2);
+  });
+
+  it.each([
+    ['an icon that is not offered', { type: 'card', id: 'c', icon: 'skull', children: [] }],
+    ['one column', { type: 'columns', id: 'c', columns: 1, children: [] }],
+    ['five columns', { type: 'columns', id: 'c', columns: 5, children: [] }],
+    ['a colour of its own', { type: 'badge', id: 'b', text: 'x', color: '#f00' }],
+    ['a bar that never fills', { type: 'progress', id: 'p', query: 'ROW a = 1', max: 0 }],
+  ])('refuses %s', (_what, node) => {
+    expect(messagesOf(doc({ type: 'stack', id: 'root', children: [node] })).length).toBeGreaterThan(
+      0
+    );
+  });
+
+  it('holds in tabs and in an accordion only sections', () => {
+    const wrong = (type: string) => messagesOf(doc({ type, id: 'x', children: [heading] }));
+
+    expect(wrong('tabs')).toEqual(['Node "x" is tabs and holds only sections, not "h" (heading)']);
+    expect(wrong('accordion')).toEqual([
+      'Node "x" is an accordion and holds only sections, not "h" (heading)',
+    ]);
+  });
+
+  it('has a section only inside tabs or an accordion', () => {
+    expect(
+      messagesOf(
+        doc({
+          type: 'stack',
+          id: 'root',
+          children: [{ type: 'section', id: 's', label: 'Alone', children: [] }],
+        })
+      )
+    ).toEqual(['Node "s" is a section, which is only part of tabs or an accordion']);
+  });
+
+  it('shows data from a query or from cases, and one of them only, as a stat does', () => {
+    expect(messagesOf(doc({ type: 'metric', id: 'm', title: 'x' }))[0]).toContain(
+      'needs a query or a source'
+    );
+    expect(
+      messagesOf(
+        doc({
+          type: 'progress',
+          id: 'p',
+          query: 'ROW a = 1',
+          source: { type: 'cases', count: true },
+        })
+      )[0]
+    ).toContain('needs a query or a source');
+  });
+
+  it('checks the references in what they say', () => {
+    expect(
+      messagesOf(doc({ type: 'card', id: 'c', title: 'For {{state.who}}', children: [] }))
+    ).toEqual(['Node "c" refers to unknown state key "who"']);
   });
 });

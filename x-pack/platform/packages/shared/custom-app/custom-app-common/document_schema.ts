@@ -36,6 +36,10 @@ import {
   MAX_WORKFLOW_INPUTS,
   MAX_TEXT_LENGTH,
   RESERVED_STATE_KEYS,
+  BADGE_COLORS,
+  CARD_ICONS,
+  MAX_COLUMNS,
+  PROGRESS_COLORS,
 } from './constants';
 import { validateDocument } from './validate_document';
 
@@ -193,6 +197,19 @@ const chartNodeSchema = z.object({
   query: querySchema,
   /** Left out, the chart is suggested from the columns of the query, as Discover does. */
   chartType: z.enum(CHART_TYPES).optional(),
+  /**
+   * Moments to mark on a chart that is over time, from a query of their own: each row is a vertical
+   * line, at the time of its `time` column and named by its `label` column. With `showWhen`, they are
+   * shown only while that value of the app, a switch for example, is true.
+   */
+  annotations: z
+    .object({
+      query: querySchema,
+      time: z.string().min(1).max(MAX_HEADING_LENGTH),
+      label: z.string().min(1).max(MAX_HEADING_LENGTH).optional(),
+      showWhen: stateKeySchema.optional(),
+    })
+    .optional(),
   /**
    * What happens when a bar, a point or a slice is clicked. The columns of the clicked row of the
    * query can be remembered, as a row click of a table does.
@@ -382,6 +399,15 @@ const listInputNodeSchema = z.object({
   placeholder: z.string().max(MAX_HEADING_LENGTH).optional(),
 });
 
+/**
+ * A switch, which is on or off. The value it sets is a true or a false, so it is bound to a key that
+ * is one, and what it shows follows what the key is.
+ */
+const switchNodeSchema = z.object({
+  type: z.literal('switch'),
+  ...inputFields,
+});
+
 const searchNodeSchema = z.object({
   type: z.literal('search'),
   ...inputFields,
@@ -396,6 +422,38 @@ const keyValueNodeSchema = z.object({
   fields: z.array(z.string().min(1).max(MAX_HEADING_LENGTH)).max(MAX_KEY_VALUE_FIELDS).optional(),
 });
 
+/**
+ * A number that is a thing among others, with how it changed: the first column of the first row is
+ * the value, and `compare`, a column, is what it was before, shown as the change and coloured by
+ * whether that is for the better.
+ */
+const metricNodeSchema = z.object({
+  type: z.literal('metric'),
+  id: nodeIdSchema,
+  title: z.string().max(MAX_HEADING_LENGTH),
+  ...dataFields,
+  compare: z.string().min(1).max(MAX_HEADING_LENGTH).optional(),
+  betterWhen: z.enum(['higher', 'lower']).default('higher'),
+});
+
+/** A bar that is filled as far as the first column of the first row is of `max`. */
+const progressNodeSchema = z.object({
+  type: z.literal('progress'),
+  id: nodeIdSchema,
+  label: z.string().max(MAX_HEADING_LENGTH).optional(),
+  ...dataFields,
+  max: z.number().finite().positive().default(100),
+  color: z.enum(PROGRESS_COLORS).default('primary'),
+});
+
+/** A short word or two with a colour, such as a status. */
+const badgeNodeSchema = z.object({
+  type: z.literal('badge'),
+  id: nodeIdSchema,
+  text: z.string().min(1).max(MAX_HEADING_LENGTH),
+  color: z.enum(BADGE_COLORS).default('default'),
+});
+
 const stackFields = {
   type: z.literal('stack'),
   id: nodeIdSchema,
@@ -408,7 +466,37 @@ const flyoutFields = {
   title: z.string().max(MAX_HEADING_LENGTH),
 };
 
+const cardFields = {
+  type: z.literal('card'),
+  id: nodeIdSchema,
+  title: z.string().max(MAX_HEADING_LENGTH).optional(),
+  description: z.string().max(MAX_TEXT_LENGTH).optional(),
+  icon: z.enum(CARD_ICONS).optional(),
+};
+
+/** What is inside is laid out in this many columns, which wrap under each other on a narrow screen. */
+const columnsFields = {
+  type: z.literal('columns'),
+  id: nodeIdSchema,
+  columns: z.number().int().min(2).max(MAX_COLUMNS).default(2),
+};
+
+/** A titled part of `tabs` or `accordion`, which hold nothing else. */
+const sectionFields = {
+  type: z.literal('section'),
+  id: nodeIdSchema,
+  label: z.string().min(1).max(MAX_HEADING_LENGTH),
+  /** In an accordion, whether it starts open. */
+  open: z.boolean().optional(),
+};
+
+const tabsFields = { type: z.literal('tabs'), id: nodeIdSchema };
+const accordionFields = { type: z.literal('accordion'), id: nodeIdSchema };
+
 type LeafNode =
+  | z.output<typeof metricNodeSchema>
+  | z.output<typeof progressNodeSchema>
+  | z.output<typeof badgeNodeSchema>
   | z.output<typeof headingNodeSchema>
   | z.output<typeof textNodeSchema>
   | z.output<typeof calloutNodeSchema>
@@ -420,20 +508,39 @@ type LeafNode =
   | z.output<typeof selectNodeSchema>
   | z.output<typeof buttonGroupNodeSchema>
   | z.output<typeof searchNodeSchema>
+  | z.output<typeof switchNodeSchema>
   | z.output<typeof listInputNodeSchema>
   | z.output<typeof buttonNodeSchema>
   | z.output<typeof linkNodeSchema>
   | z.output<typeof formNodeSchema>
   | z.output<typeof timeRangeNodeSchema>;
 
-type StackNode = z.output<z.ZodObject<typeof stackFields>> & { children: AppNode[] };
-type FlyoutNode = z.output<z.ZodObject<typeof flyoutFields>> & { children: AppNode[] };
+type WithChildren<Fields extends z.ZodRawShape> = z.output<z.ZodObject<Fields>> & {
+  children: AppNode[];
+};
+type StackNode = WithChildren<typeof stackFields>;
+type FlyoutNode = WithChildren<typeof flyoutFields>;
+type CardNode = WithChildren<typeof cardFields>;
+type ColumnsNode = WithChildren<typeof columnsFields>;
+type SectionNode = WithChildren<typeof sectionFields>;
+type TabsNode = WithChildren<typeof tabsFields>;
+type AccordionNode = WithChildren<typeof accordionFields>;
+
+/** The nodes that hold other nodes. */
+export type ContainerNode =
+  | StackNode
+  | FlyoutNode
+  | CardNode
+  | ColumnsNode
+  | SectionNode
+  | TabsNode
+  | AccordionNode;
 
 /**
  * Written out by hand because TypeScript cannot infer a union that contains itself. The
  * `satisfies` on `nodeSchema` fails to compile if the schemas stop producing this type.
  */
-export type AppNode = LeafNode | StackNode | FlyoutNode;
+export type AppNode = LeafNode | ContainerNode;
 export type AppNodeType = AppNode['type'];
 export type AppNodeOfType<T extends AppNodeType> = Extract<AppNode, { type: T }>;
 export type Action = z.output<typeof actionSchema>;
@@ -456,6 +563,41 @@ const flyoutNodeSchema = z.object({
   },
 });
 
+const cardNodeSchema = z.object({
+  ...cardFields,
+  get children(): z.ZodArray<z.ZodType<AppNode>> {
+    return z.array(nodeSchema).max(MAX_CHILDREN_PER_NODE);
+  },
+});
+
+const columnsNodeSchema = z.object({
+  ...columnsFields,
+  get children(): z.ZodArray<z.ZodType<AppNode>> {
+    return z.array(nodeSchema).max(MAX_CHILDREN_PER_NODE);
+  },
+});
+
+const sectionNodeSchema = z.object({
+  ...sectionFields,
+  get children(): z.ZodArray<z.ZodType<AppNode>> {
+    return z.array(nodeSchema).max(MAX_CHILDREN_PER_NODE);
+  },
+});
+
+const tabsNodeSchema = z.object({
+  ...tabsFields,
+  get children(): z.ZodArray<z.ZodType<AppNode>> {
+    return z.array(nodeSchema).max(MAX_CHILDREN_PER_NODE);
+  },
+});
+
+const accordionNodeSchema = z.object({
+  ...accordionFields,
+  get children(): z.ZodArray<z.ZodType<AppNode>> {
+    return z.array(nodeSchema).max(MAX_CHILDREN_PER_NODE);
+  },
+});
+
 export const nodeSchema = z.discriminatedUnion('type', [
   headingNodeSchema,
   textNodeSchema,
@@ -467,19 +609,42 @@ export const nodeSchema = z.discriminatedUnion('type', [
   keyValueNodeSchema,
   selectNodeSchema,
   buttonGroupNodeSchema,
+  switchNodeSchema,
   searchNodeSchema,
   listInputNodeSchema,
   buttonNodeSchema,
   linkNodeSchema,
   formNodeSchema,
   timeRangeNodeSchema,
+  metricNodeSchema,
+  progressNodeSchema,
+  badgeNodeSchema,
   stackNodeSchema,
   flyoutNodeSchema,
+  cardNodeSchema,
+  columnsNodeSchema,
+  sectionNodeSchema,
+  tabsNodeSchema,
+  accordionNodeSchema,
 ]) satisfies z.ZodType<AppNode>;
+
+const CONTAINER_TYPES: ReadonlySet<string> = new Set([
+  'stack',
+  'flyout',
+  'card',
+  'columns',
+  'section',
+  'tabs',
+  'accordion',
+]);
+
+/** Whether a node holds other nodes. */
+export const isContainerNode = (node: AppNode): node is ContainerNode =>
+  CONTAINER_TYPES.has(node.type);
 
 /** Returns the direct children of a node, empty for leaf nodes. */
 export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
-  node.type === 'stack' || node.type === 'flyout' ? node.children : [];
+  isContainerNode(node) ? node.children : [];
 
 /**
  * The shape of a document, without the checks that look across it. For anything that only needs

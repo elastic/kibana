@@ -132,6 +132,12 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
     }
   }
 
+  // The sections that are held by what holds them, which is all they are for.
+  const sectionParents = new Set(
+    nodes
+      .filter(({ type }) => type === 'tabs' || type === 'accordion')
+      .flatMap((node) => getNodeChildren(node).map(({ id }) => id))
+  );
   const firstTimeRangeId = nodes.find(({ type }) => type === 'time_range')?.id;
   const flyoutIds = new Set(nodes.filter(({ type }) => type === 'flyout').map(({ id }) => id));
 
@@ -149,12 +155,46 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
           `Node "${node.id}" binds state key "${binding}" (${declaration.type}); ${
             wanted === 'list'
               ? 'this input sets a list and needs a list key'
+              : wanted === 'boolean'
+              ? 'a switch sets a true or a false and needs a boolean key'
               : 'an input needs a string key'
           }`,
           node.id
         );
       }
     });
+
+    if (node.type === 'chart' && node.annotations?.showWhen !== undefined) {
+      const { showWhen } = node.annotations;
+      const declaration = state[showWhen];
+      if (!declaration) {
+        issue(
+          `Node "${node.id}" shows its annotations by unknown state key "${showWhen}"`,
+          node.id
+        );
+      } else if (declaration.type !== 'boolean') {
+        issue(
+          `Node "${node.id}" shows its annotations by state key "${showWhen}" (${declaration.type}); it needs a boolean key`,
+          node.id
+        );
+      }
+    }
+
+    if (node.type === 'tabs' || node.type === 'accordion') {
+      node.children
+        .filter((child) => child.type !== 'section')
+        .forEach((child) =>
+          issue(
+            `Node "${node.id}" is ${
+              node.type === 'tabs' ? 'tabs' : 'an accordion'
+            } and holds only sections, not "${child.id}" (${child.type})`,
+            node.id
+          )
+        );
+    }
+    if (node.type === 'section' && !sectionParents.has(node.id)) {
+      issue(`Node "${node.id}" is a section, which is only part of tabs or an accordion`, node.id);
+    }
 
     if (node.type === 'form') {
       const seenKeys = new Set<string>();
@@ -181,7 +221,13 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       });
     }
 
-    if (node.type === 'stat' || node.type === 'table' || node.type === 'key_value') {
+    if (
+      node.type === 'stat' ||
+      node.type === 'metric' ||
+      node.type === 'progress' ||
+      node.type === 'table' ||
+      node.type === 'key_value'
+    ) {
       if ((node.query === undefined) === (node.source === undefined)) {
         issue(
           `Node "${node.id}" shows data and needs a query or a source, and one of them only`,

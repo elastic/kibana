@@ -45,8 +45,17 @@ const summarize = (node: AppNode): string => {
       return node.text;
     case 'callout':
     case 'stat':
+    case 'metric':
     case 'flyout':
       return node.title;
+    case 'card':
+      return node.title ?? '';
+    case 'badge':
+      return node.text;
+    case 'section':
+      return node.label;
+    case 'progress':
+      return node.label ?? '';
     case 'chart':
       return node.title ?? node.query.split('\n')[0];
     case 'custom_content':
@@ -56,6 +65,7 @@ const summarize = (node: AppNode): string => {
       );
     case 'select':
     case 'button_group':
+    case 'switch':
     case 'search':
     case 'list_input':
     case 'button':
@@ -75,6 +85,9 @@ const summarize = (node: AppNode): string => {
       });
     case 'stack':
       return node.direction;
+    default:
+      // A component with nothing to tell it apart by, such as one this editor has no form for.
+      return '';
   }
 };
 

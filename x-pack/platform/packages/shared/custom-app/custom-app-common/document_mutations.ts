@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type {
-  Action,
-  AppDocument,
-  AppNode,
-  AppNodeOfType,
-  AppNodeType,
-  StateDeclaration,
+import {
+  isContainerNode,
+  type Action,
+  type AppDocument,
+  type AppNode,
+  type AppNodeOfType,
+  type AppNodeType,
+  type ContainerNode,
+  type StateDeclaration,
 } from './document_schema';
 import {
   getNodeActions,
@@ -41,7 +43,7 @@ export interface NodeLocation {
 const ok = (document: AppDocument): MutationResult => ({ ok: true, document });
 const fail = (reason: string): MutationResult => ({ ok: false, reason });
 
-const isContainer = (node: AppNode): boolean => node.type === 'stack' || node.type === 'flyout';
+const isContainer = isContainerNode;
 
 export const findNode = (root: AppNode, id: string): NodeLocation | undefined => {
   if (root.id === id) return { node: root, index: 0 };
@@ -87,7 +89,7 @@ const mapNode = (
   if (node.id === id) return replace(node);
   if (!isContainer(node)) return node;
 
-  const container = node as AppNodeOfType<'stack'> | AppNodeOfType<'flyout'>;
+  const container = node as ContainerNode;
   return {
     ...container,
     children: container.children.flatMap((child) => mapNode(child, id, replace) ?? []),
@@ -96,11 +98,7 @@ const mapNode = (
 
 const withRoot = (document: AppDocument, root: AppNode): AppDocument => ({ ...document, root });
 
-const insertChild = (
-  parent: AppNodeOfType<'stack'> | AppNodeOfType<'flyout'>,
-  node: AppNode,
-  index: number | undefined
-): AppNode => {
+const insertChild = (parent: ContainerNode, node: AppNode, index: number | undefined): AppNode => {
   const at =
     index === undefined
       ? parent.children.length
@@ -124,7 +122,7 @@ export const addNode = (
   if (findNode(document.root, node.id)) return fail(`There is already a node "${node.id}"`);
 
   const root = mapNode(document.root, parentId, (found) =>
-    insertChild(found as AppNodeOfType<'stack'>, node, index)
+    insertChild(found as ContainerNode, node, index)
   );
   return root ? ok(withRoot(document, root)) : fail(`There is no node "${parentId}"`);
 };
@@ -140,14 +138,13 @@ const dropActionsOpening = (node: AppNode, removed: ReadonlySet<string>): AppNod
     case 'button_group':
     case 'search':
       return { ...node, onChange: keep(node.onChange) };
-    case 'stack':
-    case 'flyout':
-      return {
-        ...node,
-        children: node.children.map((child) => dropActionsOpening(child, removed)),
-      };
     default:
-      return node;
+      return isContainerNode(node)
+        ? {
+            ...node,
+            children: node.children.map((child) => dropActionsOpening(child, removed)),
+          }
+        : node;
   }
 };
 
@@ -189,7 +186,7 @@ export const moveNode = (
   const without = mapNode(document.root, id, () => undefined);
   if (!without) return fail('The root cannot be moved');
   const root = mapNode(without, parentId, (found) =>
-    insertChild(found as AppNodeOfType<'stack'>, moving.node, index)
+    insertChild(found as ContainerNode, moving.node, index)
   );
   return root ? ok(withRoot(document, root)) : fail(`There is no node "${parentId}"`);
 };
@@ -201,9 +198,7 @@ const reId = (node: AppNode, document: AppDocument, taken: Set<string>): AppNode
     ? ({
         ...node,
         id,
-        children: (node as AppNodeOfType<'stack'>).children.map((child) =>
-          reId(child, document, taken)
-        ),
+        children: (node as ContainerNode).children.map((child) => reId(child, document, taken)),
       } as AppNode)
     : ({ ...node, id } as AppNode);
 };
