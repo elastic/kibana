@@ -34,7 +34,8 @@ export const groupById = (rows: EsqlRow[], idColumn: string): Record<string, Esq
   const groups: Record<string, EsqlRow[]> = {};
 
   for (const { [idColumn]: id, ...row } of rows) {
-    groups[String(id)] = [...(groups[String(id)] ?? []), row];
+    const key = String(id);
+    groups[key] = [...(Object.hasOwn(groups, key) ? groups[key] : []), row];
   }
 
   return groups;

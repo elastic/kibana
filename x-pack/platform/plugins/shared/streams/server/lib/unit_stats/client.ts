@@ -248,7 +248,10 @@ export class UnitStatsClient {
 
       return {
         results: Object.fromEntries(
-          ids.map((id) => [id, mapped[id] ?? noDestinationStats(bucketMs)])
+          ids.map((id) => [
+            id,
+            Object.hasOwn(mapped, id) ? mapped[id] : noDestinationStats(bucketMs),
+          ])
         ),
       };
     } catch (error) {
@@ -291,7 +294,9 @@ export class UnitStatsClient {
       const mapped = mapProcessorStatsRows({ rows });
 
       return {
-        results: Object.fromEntries(ids.map((id) => [id, mapped[id] ?? noProcessorStats()])),
+        results: Object.fromEntries(
+          ids.map((id) => [id, Object.hasOwn(mapped, id) ? mapped[id] : noProcessorStats()])
+        ),
       };
     } catch (error) {
       const failure = toSearchError(error, what);

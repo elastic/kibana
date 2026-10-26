@@ -60,6 +60,7 @@ describe('groupById', () => {
       { id: 'es-prod', bucket: 'b1', sum_items: 60 },
       { id: 'es-dev', bucket: 'b1', sum_items: 30 },
       { id: 'es-prod', bucket: 'b2', sum_items: 270 },
+      { id: 'constructor', bucket: 'b1', sum_items: 5 },
     ];
 
     expect(groupById(rows, 'id')).toEqual({
@@ -68,6 +69,7 @@ describe('groupById', () => {
         { bucket: 'b2', sum_items: 270 },
       ],
       'es-dev': [{ bucket: 'b1', sum_items: 30 }],
+      constructor: [{ bucket: 'b1', sum_items: 5 }],
     });
   });
 
