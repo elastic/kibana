@@ -300,6 +300,23 @@ describe('narrowChangePointEsqlToEntity', () => {
     expect(narrowChangePointEsqlToEntity(query, {}, [])).toBe(query);
   });
 
+  it('keeps a comment between the pipe and CHANGE_POINT', () => {
+    expect(
+      narrowChangePointEsqlToEntity(
+        'FROM idx | STATS m = AVG(x) BY host | /* note */ CHANGE_POINT m',
+        { host: 'a' },
+        ['host']
+      )
+    ).toBe('FROM idx | STATS m = AVG(x) BY host | WHERE host == "a" | /* note */ CHANGE_POINT m');
+    expect(
+      narrowChangePointEsqlToEntity(
+        'FROM idx | STATS m = AVG(x) BY host\n| // note\nCHANGE_POINT m',
+        { host: 'a' },
+        ['host']
+      )
+    ).toBe('FROM idx | STATS m = AVG(x) BY host | WHERE host == "a"\n| // note\nCHANGE_POINT m');
+  });
+
   it('keeps an existing WHERE and inserts the entity filter before CHANGE_POINT', () => {
     const withWhere = 'FROM idx | WHERE region == "east" | CHANGE_POINT m ON @timestamp BY host';
     expect(narrowChangePointEsqlToEntity(withWhere, { host: 'a' }, ['host'])).toBe(

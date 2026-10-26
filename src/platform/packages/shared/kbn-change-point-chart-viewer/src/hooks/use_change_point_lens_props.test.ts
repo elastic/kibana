@@ -255,6 +255,50 @@ describe('useChangePointLensProps', () => {
     expect(result.current.lensProps).toBeUndefined();
   });
 
+  it('keeps viewport visibility out of React state unless reporting asks for it', async () => {
+    const chartRef = {
+      current: document.createElement('div'),
+    } as unknown as HookProps['chartRef'];
+    const props = makeDefaultProps({ chartRef });
+    const { result } = renderHook(() => useChangePointLensProps(props));
+
+    act(() => {
+      capturedIntersectionCallback!(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    });
+
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
+    expect(result.current.isInView).toBeUndefined();
+  });
+
+  it('exposes viewport visibility when reporting asks for it', async () => {
+    const chartRef = {
+      current: document.createElement('div'),
+    } as unknown as HookProps['chartRef'];
+    const props = makeDefaultProps({ chartRef, reportVisibility: true });
+    const { result } = renderHook(() => useChangePointLensProps(props));
+
+    expect(result.current.isInView).toBeUndefined();
+
+    act(() => {
+      capturedIntersectionCallback!(
+        [{ isIntersecting: false } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    });
+    await waitFor(() => expect(result.current.isInView).toBe(false));
+
+    act(() => {
+      capturedIntersectionCallback!(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    });
+    await waitFor(() => expect(result.current.isInView).toBe(true));
+  });
+
   it('holds the build result until the chart enters the viewport', async () => {
     // Provide a real DOM element so the hook takes the IntersectionObserver path instead
     // of the immediate-emit fallback. capturedIntersectionCallback is set when the observer

@@ -127,4 +127,55 @@ describe('getChangePointGridEmbeddableFactory', () => {
     api.setTimeRange(undefined);
     expect(api.serializeState().time_range).toBeUndefined();
   });
+
+  it('publishes chart rendering and clears it when a search starts', async () => {
+    const parentApi = {} as PresentationContainer;
+    const uuid = 'change-point-grid';
+    const factory = getChangePointGridEmbeddableFactory({
+      discoverServices: discoverServiceMock,
+    });
+    const { api, Component } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      uuid,
+      parentApi,
+      initialState: {
+        esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp',
+        apply_dashboard_context: true,
+      },
+      finalizeApi: (apiRegistration) => ({
+        ...apiRegistration,
+        uuid,
+        type: factory.type,
+        parentApi,
+        phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
+      }),
+    });
+
+    expect(api.rendered$.getValue()).toBe(false);
+    const [{ setDataLoading, cards$, searchContext$ }] = jest
+      .mocked(initializeChangePointGridFetch)
+      .mock.calls.at(-1)!;
+    searchContext$.next({
+      timeRange: { from: '2020-01-01T00:00:00.000Z', to: '2020-01-02T00:00:00.000Z' },
+      filters: [],
+      esqlVariables: [],
+      isApproximate: false,
+      projectRouting: undefined,
+    });
+    cards$.next([]);
+    render(<Component />);
+
+    await waitFor(() => {
+      expect(jest.mocked(ChangePointGridRenderer).mock.calls.at(-1)?.[0].onRenderedChange).toEqual(
+        expect.any(Function)
+      );
+    });
+    jest.mocked(ChangePointGridRenderer).mock.calls.at(-1)?.[0].onRenderedChange(true);
+    expect(api.rendered$.getValue()).toBe(true);
+
+    setDataLoading(true);
+    expect(api.rendered$.getValue()).toBe(false);
+    setDataLoading(false);
+    expect(api.rendered$.getValue()).toBe(false);
+  });
 });

@@ -106,4 +106,50 @@ describe('resolveChangePointGridSearchRequest', () => {
       })?.timeRange
     ).toEqual(fetchContext.timeRange);
   });
+
+  it('uses the dashboard time slider instead of the full time range', () => {
+    const timeslice = [
+      Date.parse('2020-01-01T00:00:00.000Z'),
+      Date.parse('2020-01-01T01:00:00.000Z'),
+    ] as [number, number];
+
+    expect(
+      resolveChangePointGridSearchRequest({
+        state: followingState,
+        fetchContext: { ...fetchContext, timeslice },
+      })?.timeRange
+    ).toEqual({
+      from: '2020-01-01T00:00:00.000Z',
+      to: '2020-01-01T01:00:00.000Z',
+      mode: 'absolute',
+    });
+  });
+
+  it('refetches a static panel when the dashboard time slider moves', () => {
+    const staticStateWithoutRange = { ...staticState, time_range: undefined };
+    const firstSlice = [
+      Date.parse('2020-01-01T00:00:00.000Z'),
+      Date.parse('2020-01-01T01:00:00.000Z'),
+    ] as [number, number];
+    const secondSlice = [
+      Date.parse('2020-01-01T01:00:00.000Z'),
+      Date.parse('2020-01-01T02:00:00.000Z'),
+    ] as [number, number];
+
+    expect(
+      resolveChangePointGridSearchRequest({
+        state: staticStateWithoutRange,
+        fetchContext: { ...fetchContext, timeslice: secondSlice },
+        previousTimeRange: {
+          from: new Date(firstSlice[0]).toISOString(),
+          to: new Date(firstSlice[1]).toISOString(),
+          mode: 'absolute',
+        },
+      })?.timeRange
+    ).toEqual({
+      from: '2020-01-01T01:00:00.000Z',
+      to: '2020-01-01T02:00:00.000Z',
+      mode: 'absolute',
+    });
+  });
 });

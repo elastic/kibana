@@ -83,6 +83,7 @@ export const useChangePointLensProps = ({
   userMessages,
   description,
   searchContext,
+  reportVisibility = false,
 }: {
   lensInstanceId: string;
   /** Human-readable label shown in the Lens panel header, e.g. `"web-server-1"`. */
@@ -115,6 +116,8 @@ export const useChangePointLensProps = ({
     filters: Filter[];
     query?: Query;
   };
+  /** When true, mirror viewport visibility into React state for panel render reporting. */
+  reportVisibility?: boolean;
 } & Pick<UnifiedChangePointGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   // Captured once — used only as IntersectionObserver rootMargin and does not need to cause the
@@ -168,6 +171,7 @@ export const useChangePointLensProps = ({
 
   const [lensPropsContext, setLensPropsContext] = useState<ChangePointLensProps>();
   const [buildError, setBuildError] = useState<Error | undefined>();
+  const [isInView, setIsInView] = useState<boolean | undefined>();
 
   // useStableCallback always invokes the latest closure, so fetchParams and timeRangeOverride
   // are always current even though this callback is only created once (stable identity).
@@ -249,13 +253,23 @@ export const useChangePointLensProps = ({
         setBuildError(undefined);
         updateLensPropsContext(attributes);
       });
+    // Ordinary charts keep the observer inside this pipeline. Reporting is the only caller
+    // that needs the visibility result as React state.
+    const visibilitySubscription = reportVisibility
+      ? intersecting$.subscribe(setIsInView)
+      : undefined;
 
     return () => {
       subscription.unsubscribe();
+      visibilitySubscription?.unsubscribe();
     };
-  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef]);
+  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef, reportVisibility]);
 
-  return { lensProps: lensPropsContext, buildError };
+  return {
+    lensProps: lensPropsContext,
+    buildError,
+    isInView: reportVisibility ? isInView : undefined,
+  };
 };
 
 export const getChangePointLensProps = ({

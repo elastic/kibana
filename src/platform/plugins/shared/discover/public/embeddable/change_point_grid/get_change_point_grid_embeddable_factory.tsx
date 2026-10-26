@@ -26,6 +26,7 @@ import {
   type PublishesDataLoading,
   type PublishesDataViews,
   type PublishesEsql,
+  type PublishesRendered,
   type PublishesWritableTimeRange,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -65,6 +66,7 @@ type ChangePointGridApi = DefaultEmbeddableApi<ChangePointGridEmbeddableState> &
   HasTypeDisplayName &
   PublishesDataLoading &
   PublishesBlockingError &
+  PublishesRendered &
   PublishesDataViews &
   PublishesEsql &
   PublishesWritableTimeRange & {
@@ -90,10 +92,12 @@ export const getChangePointGridEmbeddableFactory = ({
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const applyDashboardContext = initialState.apply_dashboard_context !== false;
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+    const rendered$ = new BehaviorSubject(false);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     const disabledActionIds$ = new BehaviorSubject<string[] | undefined>([ACTION_EXPLORE_DATA]);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
     const refresh$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1);
+    const setRendered = (rendered: boolean) => rendered$.next(rendered);
 
     const stateApi = initializeStateApi<ChangePointGridEmbeddableState>({
       uuid,
@@ -125,6 +129,7 @@ export const getChangePointGridEmbeddableFactory = ({
       ...timeRangeManager.api,
       defaultTitle$,
       dataLoading$,
+      rendered$,
       dataViews$,
       disabledActionIds$,
       blockingError$,
@@ -143,7 +148,14 @@ export const getChangePointGridEmbeddableFactory = ({
       searchContext$,
       // The chart hook only uses this emission as a rebuild trigger and ignores the payload.
       onCardsUpdated: () => refresh$.next(undefined as unknown as UnifiedHistogramFetch$Arguments),
-      setDataLoading: (loading) => dataLoading$.next(loading),
+      setDataLoading: (loading) => {
+        // Charts reload only after the new cards arrive, so clear the previous completion as
+        // soon as the search starts. Otherwise it is visible again the moment loading ends.
+        if (loading) {
+          rendered$.next(false);
+        }
+        dataLoading$.next(loading);
+      },
       setDataViews: (dataViews) => dataViews$.next(dataViews),
       setSearchError: (error) => blockingError$.next(error),
       setApproximationApplied: (applied) => approximationApplied$.next(applied),
@@ -189,6 +201,7 @@ export const getChangePointGridEmbeddableFactory = ({
               filters: searchContext.filters,
               query: searchContext.inputQuery,
             }}
+            onRenderedChange={setRendered}
           />
         );
       },

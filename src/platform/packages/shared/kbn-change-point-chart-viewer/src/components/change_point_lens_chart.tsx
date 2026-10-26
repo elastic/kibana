@@ -17,8 +17,9 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { apiPublishesRendered } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import React, { useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ACTION_ADD_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -93,6 +94,10 @@ export interface ChangePointLensChartProps
     filters: Filter[];
     query?: Query;
   };
+  /** Dashboard reporting signal. Discover omits it and keeps the chart's current behavior. */
+  onRenderedChange?: (rendered: boolean) => void;
+  /** Changes identity when the dashboard grid replaces the card list, so a chart reports for the new search. */
+  renderGeneration?: object;
 }
 
 export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
@@ -108,9 +113,20 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   actions,
   showPanelActions = true,
   searchContext,
+  onRenderedChange,
+  renderGeneration,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
+  const onRenderedChangeRef = useRef(onRenderedChange);
+  onRenderedChangeRef.current = onRenderedChange;
+  const renderGenerationRef = useRef(renderGeneration);
+  renderGenerationRef.current = renderGeneration;
+  const lensGenerationRef = useRef<object | undefined>(undefined);
+  const [lensApi, setLensApi] = useState<unknown>();
+  const handleApiAvailable = useCallback((api: unknown) => {
+    setLensApi((current: unknown) => (current === api ? current : api));
+  }, []);
 
   const chartLayers = useMemo((): LensXYConfig['layers'] => {
     const seriesLayer: LensSeriesLayer = {
@@ -163,7 +179,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [card.annotationEvents, fetchParams.timeRange]);
 
-  const { lensProps, buildError } = useChangePointLensProps({
+  const { lensProps, buildError, isInView } = useChangePointLensProps({
     lensInstanceId: `changePointMiniLens-${card.id}`,
     title: card.title,
     // Stored on attributes for case-attachment metadata.
@@ -176,7 +192,38 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     chartLayers,
     timeRange: chartTimeRange,
     searchContext,
+    reportVisibility: onRenderedChange !== undefined,
   });
+
+  const reportsRender = onRenderedChange !== undefined;
+  useEffect(() => {
+    if (!reportsRender || !apiPublishesRendered(lensApi)) {
+      return;
+    }
+    // Keep this subscription for the life of the Lens API. Resubscribing on a new card list
+    // would replay the previous search's rendered value before the new chart draw starts.
+    const subscription = lensApi.rendered$.subscribe((rendered) => {
+      lensGenerationRef.current = renderGenerationRef.current;
+      onRenderedChangeRef.current?.(rendered);
+    });
+    return () => subscription.unsubscribe();
+  }, [lensApi, reportsRender]);
+
+  useEffect(() => {
+    const report = onRenderedChangeRef.current;
+    if (!report) {
+      return;
+    }
+    if (buildError || isInView === false) {
+      report(true);
+      return;
+    }
+    if (isInView !== true || lensGenerationRef.current !== renderGeneration) {
+      report(false);
+      return;
+    }
+    report(apiPublishesRendered(lensApi) ? lensApi.rendered$.getValue() : false);
+  }, [buildError, isInView, lensApi, renderGeneration]);
 
   const { EmbeddableComponent } = services.lens;
 
@@ -257,6 +304,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const chart = lensProps ? (
     <EmbeddableComponent
       {...lensProps}
+      onApiAvailable={onRenderedChange ? handleApiAvailable : undefined}
       extraActions={showPanelActions ? extraActions : undefined}
       {...(fetchParams.abortController ? { abortController: fetchParams.abortController } : {})}
       disabledActions={showPanelActions ? DEFAULT_DISABLED_ACTIONS : undefined}

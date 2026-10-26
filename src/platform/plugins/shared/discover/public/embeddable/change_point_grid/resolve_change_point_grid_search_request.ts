@@ -14,6 +14,7 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { ChangePointGridEmbeddableState } from '../../../server/embeddable/change_point_grid_schema';
+import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 
 export interface ChangePointGridSearchRequest {
   timeRange: TimeRange;
@@ -31,8 +32,8 @@ const isSameTimeRange = (left?: TimeRange, right?: TimeRange): boolean =>
 /**
  * A following panel uses the dashboard context. A static panel keeps the filters, query, and
  * variables captured in Discover, and searches again only when its effective time range changes
- * or the dashboard refreshes. `fetch$` has already chosen the panel time range over the dashboard
- * time range.
+ * or the dashboard refreshes. The effective range is the dashboard time slider when one is
+ * selected, otherwise the panel time range that `fetch$` chose over the dashboard time range.
  */
 export const resolveChangePointGridSearchRequest = ({
   state,
@@ -43,7 +44,8 @@ export const resolveChangePointGridSearchRequest = ({
   fetchContext: FetchContext;
   previousTimeRange?: TimeRange;
 }): ChangePointGridSearchRequest | undefined => {
-  if (!fetchContext.timeRange) {
+  const timeRange = getTimeRangeFromFetchContext(fetchContext);
+  if (!timeRange) {
     return undefined;
   }
 
@@ -51,7 +53,7 @@ export const resolveChangePointGridSearchRequest = ({
   if (
     isStatic &&
     previousTimeRange &&
-    isSameTimeRange(previousTimeRange, fetchContext.timeRange) &&
+    isSameTimeRange(previousTimeRange, timeRange) &&
     !fetchContext.isReload
   ) {
     return undefined;
@@ -60,7 +62,7 @@ export const resolveChangePointGridSearchRequest = ({
   if (isStatic) {
     const staticContext = state.static_context;
     return {
-      timeRange: fetchContext.timeRange,
+      timeRange,
       filters: (toStoredFilters(staticContext?.filters) ?? []) as Filter[],
       inputQuery: toStoredQuery(staticContext?.query),
       esqlVariables: staticContext?.esql_variables ?? [],
@@ -71,7 +73,7 @@ export const resolveChangePointGridSearchRequest = ({
   }
 
   return {
-    timeRange: fetchContext.timeRange,
+    timeRange,
     filters: fetchContext.filters ?? [],
     inputQuery: isOfQueryType(fetchContext.query) ? fetchContext.query : undefined,
     esqlVariables: fetchContext.esqlVariables ?? [],

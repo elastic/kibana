@@ -15,7 +15,14 @@ import { getChangePointSeriesColumns } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+
+interface RenderGeneration {
+  cards: ChangePointCardModel[];
+  renderedByKey: Map<string, boolean>;
+}
+
+const getCardKey = (card: ChangePointCardModel, index: number): string => `${card.id}-${index}`;
 
 export const ChangePointGridRenderer = ({
   esql,
@@ -24,6 +31,7 @@ export const ChangePointGridRenderer = ({
   fetchParams,
   fetch$,
   searchContext,
+  onRenderedChange,
 }: {
   esql: string;
   cards: ChangePointCardModel[];
@@ -34,10 +42,41 @@ export const ChangePointGridRenderer = ({
     filters: Filter[];
     query?: Query;
   };
+  onRenderedChange: (rendered: boolean) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const seriesColumns = getChangePointSeriesColumns(esql);
-  if (!seriesColumns || cards.length === 0) {
+  const isEmpty = !seriesColumns || cards.length === 0;
+  // Each card list gets its own generation, so a report for an older list cannot complete this one.
+  const renderGeneration = useMemo<RenderGeneration>(
+    () => ({ cards, renderedByKey: new Map() }),
+    [cards]
+  );
+  const currentGenerationRef = useRef(renderGeneration);
+  // Charts report from passive effects, which run after this, so they always see the current list.
+  useLayoutEffect(() => {
+    currentGenerationRef.current = renderGeneration;
+  }, [renderGeneration]);
+
+  useEffect(() => {
+    if (isEmpty) {
+      onRenderedChange(true);
+    }
+  }, [isEmpty, onRenderedChange, renderGeneration]);
+
+  const reportChartRendered = (generation: RenderGeneration, key: string, rendered: boolean) => {
+    if (generation !== currentGenerationRef.current) {
+      return;
+    }
+    generation.renderedByKey.set(key, rendered);
+    onRenderedChange(
+      generation.cards.every(
+        (card, index) => generation.renderedByKey.get(getCardKey(card, index)) === true
+      )
+    );
+  };
+
+  if (isEmpty) {
     return (
       <EuiEmptyPrompt
         title={
@@ -77,7 +116,7 @@ export const ChangePointGridRenderer = ({
       `}
     >
       {cards.map((card, index) => (
-        <EuiFlexItem key={`${card.id}-${index}`}>
+        <EuiFlexItem key={getCardKey(card, index)}>
           <ChangePointLensChart
             card={card}
             cardIndex={index}
@@ -88,6 +127,10 @@ export const ChangePointGridRenderer = ({
             fetch$={fetch$}
             showPanelActions={false}
             searchContext={searchContext}
+            renderGeneration={renderGeneration}
+            onRenderedChange={(rendered) =>
+              reportChartRendered(renderGeneration, getCardKey(card, index), rendered)
+            }
           />
         </EuiFlexItem>
       ))}

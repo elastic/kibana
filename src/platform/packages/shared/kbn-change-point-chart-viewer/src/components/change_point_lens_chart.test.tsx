@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import { ChangePointLensChart } from './change_point_lens_chart';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
@@ -246,5 +247,96 @@ describe('ChangePointLensChart', () => {
     );
 
     expect(capturedExtraActions).toBeUndefined();
+  });
+
+  it('forwards every Lens rendered value and stops after unmount', () => {
+    const rendered$ = new BehaviorSubject(false);
+    const onRenderedChange = jest.fn();
+    const firstGeneration = {};
+    const EmbeddableSpy = ({ onApiAvailable }: { onApiAvailable?: (api: unknown) => void }) => {
+      React.useEffect(() => {
+        onApiAvailable?.({ rendered$ });
+      }, [onApiAvailable]);
+      return <div data-test-subj="lensEmbeddable" />;
+    };
+    useChangePointLensProps.mockReturnValue({
+      lensProps: stubLensProps,
+      buildError: undefined,
+      isInView: true,
+    });
+
+    const { rerender, unmount } = render(
+      <ChangePointLensChart
+        {...baseProps}
+        onRenderedChange={onRenderedChange}
+        renderGeneration={firstGeneration}
+        services={{ lens: { EmbeddableComponent: EmbeddableSpy } } as never}
+      />
+    );
+
+    rendered$.next(true);
+    rendered$.next(true);
+    expect(onRenderedChange.mock.calls.filter(([rendered]) => rendered === true)).toHaveLength(2);
+
+    onRenderedChange.mockClear();
+    rerender(
+      <ChangePointLensChart
+        {...baseProps}
+        onRenderedChange={onRenderedChange}
+        renderGeneration={{}}
+        services={{ lens: { EmbeddableComponent: EmbeddableSpy } } as never}
+      />
+    );
+    expect(onRenderedChange).toHaveBeenCalledWith(false);
+    expect(onRenderedChange).not.toHaveBeenCalledWith(true);
+
+    rendered$.next(true);
+    expect(onRenderedChange).toHaveBeenLastCalledWith(true);
+
+    const callsAfterUnmount = onRenderedChange.mock.calls.length;
+    unmount();
+    rendered$.next(false);
+    expect(onRenderedChange).toHaveBeenCalledTimes(callsAfterUnmount);
+  });
+
+  it('reports a chart as rendered when it is out of view or failed to build', () => {
+    const onRenderedChange = jest.fn();
+    useChangePointLensProps.mockReturnValue({
+      lensProps: undefined,
+      buildError: undefined,
+      isInView: undefined,
+    });
+
+    const { rerender } = render(
+      <ChangePointLensChart {...baseProps} onRenderedChange={onRenderedChange} />
+    );
+    expect(useChangePointLensProps).toHaveBeenCalledWith(
+      expect.objectContaining({ reportVisibility: true })
+    );
+    expect(onRenderedChange).toHaveBeenCalledWith(false);
+
+    onRenderedChange.mockClear();
+    useChangePointLensProps.mockReturnValue({
+      lensProps: undefined,
+      buildError: undefined,
+      isInView: false,
+    });
+    rerender(<ChangePointLensChart {...baseProps} onRenderedChange={onRenderedChange} />);
+    expect(onRenderedChange).toHaveBeenCalledWith(true);
+
+    onRenderedChange.mockClear();
+    useChangePointLensProps.mockReturnValue({
+      lensProps: undefined,
+      buildError: new Error('build failed'),
+      isInView: true,
+    });
+    rerender(
+      <ChangePointLensChart
+        {...baseProps}
+        onRenderedChange={onRenderedChange}
+        renderGeneration={{}}
+      />
+    );
+    expect(onRenderedChange).toHaveBeenCalledWith(true);
   });
 });

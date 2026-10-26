@@ -29,6 +29,8 @@ export const getChangePointGridDiscoverLocatorParams = ({
   searchContext: ChangePointGridSearchRequest;
   parentApi?: unknown;
 }): DiscoverAppLocatorParams => {
+  // Discover ES|QL mode can't accept DSL filters, so untranslatable filters are dropped, matching
+  // Lens's "Explore in Discover" for ES|QL charts.
   const expressions = [
     convertQueryToESQLExpression(searchContext.inputQuery),
     convertFiltersToESQLExpression(searchContext.filters).esqlExpression,
