@@ -12,6 +12,8 @@ import type {
   IndicesListColumn,
   EmptyListContent,
   IndexContent,
+  IndexOverviewCard,
+  DataStreamDetail,
   ExtensionsSetup,
 } from '@kbn/index-management-shared-types';
 import type { IndexDetailsTab } from '../../common/constants';
@@ -47,6 +49,8 @@ export class ExtensionsService {
   private _emptyListContent: EmptyListContent | null = null;
   private _indexDetailsTabs: IndexDetailsTab[] = [];
   private _indexOverviewContent: IndexContent | null = null;
+  private _indexOverviewCards: IndexOverviewCard[] = [];
+  private _dataStreamDetails: DataStreamDetail[] = [];
   private service?: ExtensionsSetup;
 
   public setup(): ExtensionsSetup {
@@ -60,6 +64,8 @@ export class ExtensionsService {
       setEmptyListContent: this.setEmptyListContent.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
       setIndexOverviewContent: this.setIndexOverviewContent.bind(this),
+      addIndexOverviewCard: this.addIndexOverviewCard.bind(this),
+      addDataStreamDetail: this.addDataStreamDetail.bind(this),
     };
 
     return this.service;
@@ -109,6 +115,14 @@ export class ExtensionsService {
     }
   }
 
+  private addIndexOverviewCard(card: IndexOverviewCard) {
+    this._indexOverviewCards.push(card);
+  }
+
+  private addDataStreamDetail(detail: DataStreamDetail) {
+    this._dataStreamDetails.push(detail);
+  }
+
   public get actions() {
     return this._actions;
   }
@@ -143,5 +157,13 @@ export class ExtensionsService {
 
   public get indexOverviewContent() {
     return this._indexOverviewContent;
+  }
+
+  public get indexOverviewCards() {
+    return this._indexOverviewCards;
+  }
+
+  public get dataStreamDetails() {
+    return this._dataStreamDetails;
   }
 }

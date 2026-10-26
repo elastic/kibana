@@ -28,7 +28,7 @@ import { useManageIndexMenu } from './use_manage_index_menu';
 import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageSettings } from './details_page_settings';
 import { DetailsPageStats } from './details_page_stats';
-import { DetailsPageTab } from './details_page_tab';
+import { DetailsPageTab, getSelectedTab } from './details_page_tab';
 import { IndexErrorCallout } from './index_error_callout';
 import { DetailsPageOverview } from './details_page_overview/details_page_overview';
 
@@ -273,7 +273,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
         menu={appMenu}
         spacing="bleed"
       />
-      <EuiSpacer size="l" />
+      {getSelectedTab(tabs, tab).hasTopSpacing !== false && <EuiSpacer size="l" />}
       {indexErrors.length > 0 && <IndexErrorCallout errors={indexErrors} />}
       <div
         data-test-subj={`indexDetailsContent`}

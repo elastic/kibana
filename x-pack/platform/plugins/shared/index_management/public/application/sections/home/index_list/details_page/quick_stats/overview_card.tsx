@@ -45,8 +45,9 @@ export const OverviewCard: FunctionComponent<Props> = ({
             <h4>{title}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
+          {/* When the right side wraps below the left, the gutter spaces them. */}
           <EuiFlexGroup
-            gutterSize="none"
+            gutterSize="s"
             justifyContent="spaceBetween"
             wrap={true}
             alignItems="center"

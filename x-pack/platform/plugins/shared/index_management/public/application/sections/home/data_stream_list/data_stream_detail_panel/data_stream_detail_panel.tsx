@@ -91,7 +91,12 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     closeInspectFlyout,
   } = useEditDataLifecycle({ dataStream, resolvedLifecycle, onClose });
 
-  const { url, config, core } = useAppContext();
+  const {
+    url,
+    config,
+    core,
+    services: { extensionsService },
+  } = useAppContext();
   const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
   const summaryIlmPolicyName =
     streamsGetResponse && isStreamsIlmLifecycle(streamsGetResponse.effective_lifecycle)
@@ -172,6 +177,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         ilmPolicyLink={ilmPolicyLink}
         resolvedLifecycle={resolvedLifecycle}
         streamsGetResponse={streamsGetResponse}
+        extensionDetails={extensionsService.dataStreamDetails}
+        getUrlForApp={core.getUrlForApp}
       />
     );
   }

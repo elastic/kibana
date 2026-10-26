@@ -87,6 +87,43 @@ describe('DataStreamDetailPanel', () => {
     });
   });
 
+  describe('extension details', () => {
+    it('shows the details that other plugins add, after the built-in ones', async () => {
+      mockAppContext.services.extensionsService.dataStreamDetails.push({
+        id: 'test',
+        name: 'Test detail',
+        toolTip: 'What the test detail is',
+        renderContent: ({ dataStreamName, getUrlForApp }) => (
+          <a href={getUrlForApp('test', { path: `/${dataStreamName}` })}>{dataStreamName}</a>
+        ),
+      });
+      mockUseLoadDataStream.mockReturnValue({
+        data: createMockDataStream(),
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      const { getByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('dataStreamDetail-test')).toHaveTextContent('test-data-stream');
+      });
+      expect(within(getByTestId('dataStreamDetail-test')).getByRole('link')).toHaveAttribute(
+        'href',
+        '/app/test-data-stream'
+      );
+      // It follows the last built-in detail, with its tooltip's icon after its name.
+      const names = Array.from(document.querySelectorAll('dt')).map(
+        ({ textContent }) => textContent
+      );
+      expect(names[names.length - 1]).toMatch(/^Test detail/);
+    });
+  });
+
   describe('failed ingest lifecycle', () => {
     it('displays "Disabled" when failure store is not enabled', async () => {
       const dataStream = createMockDataStream({

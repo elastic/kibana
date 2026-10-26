@@ -19,9 +19,12 @@ interface Props {
   tab: IndexDetailsTabId;
   index: Index;
 }
+// The overview tab is the fallback/default tab
+export const getSelectedTab = (tabs: IndexDetailsTab[], tab: IndexDetailsTabId): IndexDetailsTab =>
+  tabs.find((tabConfig) => tabConfig.id === tab) ?? tabs[0];
+
 export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, index }) => {
-  const effectiveTab = tabs[0]; // Set the overview tab as the fallback/default tab
-  const selectedTab = tabs.find((tabConfig) => tabConfig.id === tab) ?? effectiveTab;
+  const selectedTab = getSelectedTab(tabs, tab);
   const {
     core: { getUrlForApp },
   } = useAppContext();

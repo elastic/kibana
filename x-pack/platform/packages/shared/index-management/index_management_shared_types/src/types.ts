@@ -140,10 +140,12 @@ export interface IndexAttributes {
   // Configured `index.lifecycle.name`; ES reports lookup indices as unmanaged even when this is set.
   ilmPolicyName?: string;
 
-  // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR)
+  // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR, Search boost)
   isRollupIndex?: boolean;
   ilm?: IlmExplainLifecycleLifecycleExplain;
   isFollowerIndex?: boolean;
+  // false for indices that search boost doesn't apply to, such as system indices
+  isBoostable?: boolean;
 
   // The types from here below represent information returned from the index stats API;
   // treated optional as the stats API is not available on serverless

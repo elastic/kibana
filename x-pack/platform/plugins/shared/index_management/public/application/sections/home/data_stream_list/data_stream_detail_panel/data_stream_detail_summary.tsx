@@ -20,7 +20,10 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type {
+  DataStreamDetail,
+  IndexManagementLocatorParams,
+} from '@kbn/index-management-shared-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { IlmPolicyForFlyout } from '@kbn/data-lifecycle-phases';
 import type { Streams } from '@kbn/streams-schema';
@@ -56,7 +59,7 @@ import { LookupLifecycleNotApplicable } from '../data_retention_value';
 
 interface Detail {
   name: string;
-  toolTip: string;
+  toolTip?: string;
   content: React.ReactNode;
   dataTestSubj: string;
 }
@@ -124,6 +127,9 @@ interface DataStreamDetailSummaryProps {
   ilmPolicyLink?: string;
   resolvedLifecycle: ResolvedDataStreamLifecycle;
   streamsGetResponse?: Streams.ingest.all.GetResponse;
+  // details that other plugins add, after the built-in ones
+  extensionDetails: readonly DataStreamDetail[];
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSummaryProps> = ({
@@ -140,6 +146,8 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
   ilmPolicyLink,
   resolvedLifecycle,
   streamsGetResponse,
+  extensionDetails,
+  getUrlForApp,
 }) => {
   const dlmTiersLayoutEnabled = !isServerless;
   const {
@@ -591,6 +599,15 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
       dataTestSubj: 'failedIngestLifecycleDetail',
     }
   );
+
+  extensionDetails.forEach(({ id, name, toolTip, renderContent }) => {
+    defaultDetails.push({
+      name,
+      toolTip,
+      content: renderContent({ dataStreamName, getUrlForApp }),
+      dataTestSubj: `dataStreamDetail-${id}`,
+    });
+  });
 
   return <DetailsList details={defaultDetails} />;
 };

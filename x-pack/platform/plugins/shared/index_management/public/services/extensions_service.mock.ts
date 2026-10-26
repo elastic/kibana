@@ -21,6 +21,8 @@ const createServiceMock = (): ExtensionsSetupMock => ({
   setEmptyListContent: jest.fn(),
   addIndexDetailsTab: jest.fn(),
   setIndexOverviewContent: jest.fn(),
+  addIndexOverviewCard: jest.fn(),
+  addDataStreamDetail: jest.fn(),
 });
 
 const createMock = () => {

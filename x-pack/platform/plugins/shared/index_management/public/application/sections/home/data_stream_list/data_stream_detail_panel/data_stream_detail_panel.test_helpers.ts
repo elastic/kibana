@@ -86,6 +86,9 @@ export const createMockAppContext = (): AppDependencies =>
       cloud: undefined,
     },
     services: {
+      extensionsService: {
+        dataStreamDetails: [],
+      },
       notificationService: {
         showDangerToast: jest.fn(),
         showWarningToast: jest.fn(),

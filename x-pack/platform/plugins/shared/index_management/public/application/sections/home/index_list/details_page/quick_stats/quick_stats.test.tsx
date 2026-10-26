@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
+import type { IndexOverviewCard } from '@kbn/index-management-shared-types';
 import { QuickStats } from './quick_stats';
 import { useAppContext } from '../../../../../app_context';
 import { loadIndexVectorCount } from '../../../../../services/api';
@@ -30,22 +31,79 @@ const mockUseAppContext = jest.mocked(useAppContext);
 const mockLoadIndexVectorCount = jest.mocked(loadIndexVectorCount);
 
 describe('QuickStats', () => {
+  const createAppContext = ({
+    enableVectorCount = true,
+    indexOverviewCards = [],
+  }: {
+    enableVectorCount?: boolean;
+    indexOverviewCards?: IndexOverviewCard[];
+  } = {}) =>
+    ({
+      config: { enableSizeAndDocCount: true, enableVectorCount },
+      core: { getUrlForApp: (appId: string) => `/app/${appId}` },
+      services: { extensionsService: { indexOverviewCards } },
+    } as unknown as ReturnType<typeof useAppContext>);
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAppContext.mockReturnValue({
-      config: { enableSizeAndDocCount: true, enableVectorCount: true },
-    } as ReturnType<typeof useAppContext>);
+    mockUseAppContext.mockReturnValue(createAppContext());
   });
 
   it('does not call loadIndexVectorCount when enableVectorCount is disabled', async () => {
-    mockUseAppContext.mockReturnValue({
-      config: { enableSizeAndDocCount: true, enableVectorCount: false },
-    } as ReturnType<typeof useAppContext>);
+    mockUseAppContext.mockReturnValue(createAppContext({ enableVectorCount: false }));
 
     await act(async () => {
       render(<QuickStats indexDetails={{ name: 'test-index' }} />);
     });
 
     expect(mockLoadIndexVectorCount).not.toHaveBeenCalled();
+  });
+
+  it('shows the cards that other plugins add, with their title, content, and footer', async () => {
+    mockUseAppContext.mockReturnValue(
+      createAppContext({
+        indexOverviewCards: [
+          {
+            id: 'test',
+            title: 'Test card',
+            renderCard: ({ index, getUrlForApp }) => ({
+              content: { left: index.name, right: <a href={getUrlForApp('test')}>Open</a> },
+              footer: { left: 'Test footer' },
+            }),
+          },
+        ],
+      })
+    );
+
+    await act(async () => {
+      render(<QuickStats indexDetails={{ name: 'test-index' }} />);
+    });
+
+    const card = screen.getByTestId('indexDetailsOverviewCard-test');
+    expect(card).toHaveTextContent('Test card');
+    expect(card).toHaveTextContent('test-index');
+    expect(within(card).getByRole('link', { name: 'Open' })).toHaveAttribute('href', '/app/test');
+    expect(card).toHaveTextContent('Test footer');
+  });
+
+  it("leaves out a card that another plugin doesn't show for the index", async () => {
+    mockUseAppContext.mockReturnValue(
+      createAppContext({
+        indexOverviewCards: [
+          {
+            id: 'test',
+            title: 'Test card',
+            shouldRenderCard: ({ index }) => index.name !== 'test-index',
+            renderCard: () => ({ content: { left: 'Test content' } }),
+          },
+        ],
+      })
+    );
+
+    await act(async () => {
+      render(<QuickStats indexDetails={{ name: 'test-index' }} />);
+    });
+
+    expect(screen.queryByTestId('indexDetailsOverviewCard-test')).not.toBeInTheDocument();
   });
 });

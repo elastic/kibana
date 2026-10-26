@@ -1051,6 +1051,30 @@ describe('<IndexDetailsPage />', () => {
       });
     });
 
+    it("starts a tab's content right below the tabs when the tab asks to", async () => {
+      await renderPage(undefined, {
+        services: {
+          extensionsService: {
+            indexDetailsTabs: [
+              { ...additionalTab, id: 'flushTab', name: 'Flush tab', hasTopSpacing: false },
+            ],
+          },
+        },
+      });
+      // Other tabs' content is spaced from the tabs.
+      expect(screen.getByTestId('indexDetailsContent').previousElementSibling).toHaveClass(
+        'euiSpacer'
+      );
+
+      fireEvent.click(screen.getByTestId('indexDetailsTab-flushTab'));
+      await waitFor(() => {
+        expect(screen.getByTestId('indexDetailsContent').textContent).toEqual(testContent);
+      });
+      expect(screen.getByTestId('indexDetailsContent').previousElementSibling).not.toHaveClass(
+        'euiSpacer'
+      );
+    });
+
     it('additional tab is the first in the order', async () => {
       await renderPage(undefined, {
         services: { extensionsService: { indexDetailsTabs: [additionalTab] } },

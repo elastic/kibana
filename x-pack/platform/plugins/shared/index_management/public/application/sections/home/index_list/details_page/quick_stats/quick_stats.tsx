@@ -17,6 +17,7 @@ import { StatusDetails } from './status_details';
 import { SizeDocCountDetails } from './size_doc_count_details';
 import { AliasesDetails } from './aliases_details';
 import { DataStreamDetails } from './data_stream_details';
+import { OverviewCard } from './overview_card';
 
 export interface DocCountState {
   count?: number;
@@ -40,6 +41,8 @@ export const QuickStats = ({ indexDetails }: Props) => {
   const isLarge = useIsWithinMinBreakpoint('xl');
   const {
     config: { enableSizeAndDocCount, enableVectorCount },
+    core: { getUrlForApp },
+    services: { extensionsService },
   } = useAppContext();
   const {
     name,
@@ -146,6 +149,21 @@ export const QuickStats = ({ indexDetails }: Props) => {
       <SizeDocCountDetails size={sizeFormatted} docCount={docCount} vectorCount={vectorCount} />
       <AliasesDetails aliases={aliases} />
       {dataStream && <DataStreamDetails dataStreamName={dataStream} />}
+      {extensionsService.indexOverviewCards.map(({ id, title, shouldRenderCard, renderCard }) => {
+        if (shouldRenderCard && !shouldRenderCard({ index: indexDetails })) {
+          return null;
+        }
+        const { content, footer } = renderCard({ index: indexDetails, getUrlForApp });
+        return (
+          <OverviewCard
+            key={id}
+            data-test-subj={`indexDetailsOverviewCard-${id}`}
+            title={title}
+            content={{ left: content.left, right: content.right ?? null }}
+            footer={footer}
+          />
+        );
+      })}
     </EuiFlexGrid>
   );
 };

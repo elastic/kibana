@@ -47,6 +47,30 @@ export interface IndicesListColumn {
   sort?: (index: Index) => any;
 }
 
+export interface IndexOverviewCard {
+  // identifies the card, such as in its test subject
+  id: string;
+  title: string;
+  // whether the card shows for an index, which it does by default
+  shouldRenderCard?: (args: { index: Index }) => boolean;
+  // the card's body and footer, each with content on the left and the right, like the built-in cards
+  renderCard: (args: { index: Index; getUrlForApp: ApplicationStart['getUrlForApp'] }) => {
+    content: { left: ReactNode; right?: ReactNode };
+    footer?: { left?: ReactNode; right?: ReactNode };
+  };
+}
+
+export interface DataStreamDetail {
+  // identifies the detail, such as in its test subject
+  id: string;
+  name: string;
+  toolTip?: string;
+  renderContent: (args: {
+    dataStreamName: string;
+    getUrlForApp: ApplicationStart['getUrlForApp'];
+  }) => ReactNode;
+}
+
 export interface ExtensionsSetup {
   // adds an option to the "manage index" menu
   addAction(action: any): void;
@@ -66,4 +90,8 @@ export interface ExtensionsSetup {
   addIndexDetailsTab(tab: IndexDetailsTab): void;
   // sets content to render instead of the code block on the overview tab of the index page
   setIndexOverviewContent(content: IndexContent): void;
+  // adds a card to the overview tab of the index page, after the built-in cards
+  addIndexOverviewCard(card: IndexOverviewCard): void;
+  // adds a detail to the data stream details flyout, after the built-in details
+  addDataStreamDetail(detail: DataStreamDetail): void;
 }

@@ -56,5 +56,8 @@ export interface IndexDetailsTab {
   // an optional function to return a boolean for when to render the tab
   // if omitted, the tab is always rendered
   shouldRenderTab?: (args: { index: Index }) => boolean;
+  // whether the tab's content is spaced from the tabs above it, which it is by default; content
+  // with its own dividers can start right below them instead
+  hasTopSpacing?: boolean;
   breadcrumb?: EuiBreadcrumb;
 }
