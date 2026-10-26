@@ -247,7 +247,10 @@ export function GenAiDetailsTable({
   columns,
 }: GenAiDetailsTableProps) {
   const fieldNames = useMemo(() => getGenAiDetailFieldNames(hit.flattened), [hit]);
-  const fieldConfigurations = useMemo(() => buildFieldConfigurations(hit.flattened), [hit]);
+  const fieldConfigurations = useMemo(
+    () => buildFieldConfigurations(hit.flattened),
+    [hit.flattened]
+  );
 
   return (
     <ContentFrameworkTable
