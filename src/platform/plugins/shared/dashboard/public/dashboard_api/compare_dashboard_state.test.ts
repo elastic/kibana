@@ -115,6 +115,25 @@ describe('diffDashboardStates', () => {
     });
   });
 
+  it('returns only turning time restore off, like unsaved changes reads the current flag', () => {
+    const timeRange = { from: 'now-15m', to: 'now' };
+
+    expect(
+      diffDashboardStates(
+        state({ time_range: timeRange, refresh_interval: { pause: false, value: 60000 } }),
+        state()
+      )
+    ).toStrictEqual({ time_restore: false });
+  });
+
+  it('returns only turning project routing restore off', () => {
+    expect(
+      diffDashboardStates(state({ project_routing: '_alias:_origin' }), state())
+    ).toStrictEqual({
+      project_routing_restore: false,
+    });
+  });
+
   it('uses a panel comparator instead of the raw panel config', () => {
     const baseline = state({
       panels: [
