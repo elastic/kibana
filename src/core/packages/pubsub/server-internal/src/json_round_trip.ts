@@ -50,7 +50,8 @@ const findObjectMismatch = (
     if (!Array.isArray(roundTripped)) {
       return mismatch(path, 'an array', roundTripped);
     }
-    return original
+    // `Array.prototype.map` skips holes, and JSON turns a hole into null.
+    return Array.from(original)
       .map((item, index) =>
         findJsonRoundTripMismatch(item, roundTripped[index], `${path}[${index}]`)
       )
@@ -65,6 +66,11 @@ const findObjectMismatch = (
     return mismatch(path, 'an object', roundTripped);
   }
 
+  const droppedProperty = findDroppedOwnProperty(original, path);
+  if (droppedProperty) {
+    return droppedProperty;
+  }
+
   return Object.entries(original)
     .filter(([, value]) => value !== undefined)
     .map(([key, value]) =>
@@ -76,6 +82,37 @@ const findObjectMismatch = (
     )
     .find((found) => found !== undefined);
 };
+
+/** Symbol keys and non-enumerable data fields are omitted by `JSON.stringify`. */
+const findDroppedOwnProperty = (original: object, path: string): string | undefined => {
+  const symbolKey = Object.getOwnPropertySymbols(original).find((key) =>
+    hasDefinedDataValue(Object.getOwnPropertyDescriptor(original, key))
+  );
+  if (symbolKey) {
+    return mismatch(
+      `${path}[${symbolKey.toString()}]`,
+      describeOriginal(Object.getOwnPropertyDescriptor(original, symbolKey)?.value),
+      undefined
+    );
+  }
+
+  const hiddenName = Object.getOwnPropertyNames(original).find((key) => {
+    const descriptor = Object.getOwnPropertyDescriptor(original, key);
+    return descriptor?.enumerable === false && hasDefinedDataValue(descriptor);
+  });
+  if (!hiddenName) {
+    return undefined;
+  }
+
+  return mismatch(
+    `${path}.${hiddenName}`,
+    describeOriginal(Object.getOwnPropertyDescriptor(original, hiddenName)?.value),
+    undefined
+  );
+};
+
+const hasDefinedDataValue = (descriptor: PropertyDescriptor | undefined): boolean =>
+  descriptor !== undefined && 'value' in descriptor && descriptor.value !== undefined;
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   if (typeof value !== 'object' || value === null) {

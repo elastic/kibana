@@ -40,6 +40,8 @@ interface Subscription {
   readonly handler: SubscriptionHandler;
   readonly queue: AcceptedEvent[];
   running: boolean;
+  /** Events dropped since this queue last drained, while it was at the cap. */
+  droppedWhileFull: number;
 }
 
 /** Pending events per consumer, not counting the one already in flight. */
@@ -169,6 +171,9 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       );
     }
 
+    // `Topic` is structural, so a caller can skip `defineTopic` and hand in `{ name }`.
+    defineTopic(topic.name);
+
     const scopedConsumer = scopeConsumerName(pluginId, consumer);
     const alreadySubscribed = this.subscriptions.some(
       (subscription) =>
@@ -186,6 +191,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       handler: (event) => handler(event as PubSubEvent<TData>),
       queue: [],
       running: false,
+      droppedWhileFull: 0,
     });
   }
 
@@ -194,9 +200,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       .filter((subscription) => subscription.topic === event.topic)
       .forEach((subscription) => {
         if (subscription.queue.length >= PUBSUB_MAX_PENDING_EVENTS) {
-          this.logger.warn(
-            `Pubsub consumer "${subscription.consumer}" dropped event "${event.id}" on topic "${event.topic}" because ${PUBSUB_MAX_PENDING_EVENTS} events are already waiting.`
-          );
+          this.noteQueueFull(subscription, event.topic);
           return;
         }
 
@@ -235,6 +239,33 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
 
     subscription.running = false;
+    this.logDroppedWhileFull(subscription);
+  }
+
+  /** Warn on the first drop, then count the rest until the queue drains. */
+  private noteQueueFull(subscription: Subscription, topic: string): void {
+    subscription.droppedWhileFull += 1;
+    if (subscription.droppedWhileFull > 1) {
+      return;
+    }
+
+    this.logger.warn(
+      `Pubsub consumer "${subscription.consumer}" on topic "${topic}" has ${PUBSUB_MAX_PENDING_EVENTS} events waiting; further events for it will be dropped until the queue drains.`
+    );
+  }
+
+  private logDroppedWhileFull(subscription: Subscription): void {
+    if (subscription.droppedWhileFull === 0) {
+      return;
+    }
+
+    const dropped = subscription.droppedWhileFull;
+    subscription.droppedWhileFull = 0;
+    this.logger.warn(
+      `Pubsub consumer "${subscription.consumer}" on topic "${
+        subscription.topic
+      }" dropped ${dropped} ${dropped === 1 ? 'event' : 'events'} while its queue was full.`
+    );
   }
 
   /** Each consumer gets its own parsed copy, as it would from a durable store. */

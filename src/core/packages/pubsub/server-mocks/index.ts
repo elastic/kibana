@@ -19,7 +19,7 @@ const createSetupContract = (): jest.Mocked<PubSubSetup> => {
 
 const createStartContract = (): jest.Mocked<PubSubStart> => {
   return {
-    publish: jest.fn(),
+    publish: jest.fn().mockResolvedValue({ id: 'id', acceptedAt: new Date(0).toISOString() }),
   };
 };
 
@@ -32,7 +32,7 @@ const createInternalSetupContract = (): jest.Mocked<InternalPubSubSetup> => {
 
 const createInternalStartContract = (): jest.Mocked<InternalPubSubStart> => {
   return {
-    publish: jest.fn(),
+    publish: jest.fn().mockResolvedValue({ id: 'id', acceptedAt: new Date(0).toISOString() }),
   };
 };
 

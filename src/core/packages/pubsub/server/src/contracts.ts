@@ -32,8 +32,8 @@ export interface PubSubEventInit<TData> {
 
 /**
  * Event accepted by the bus: the producer's event plus the fields the bus sets.
- * `data` is a JSON copy made for each consumer, never the producer's reference, so a `Date`
- * arrives as a string and one handler cannot affect another.
+ * `data` is a JSON copy made for each consumer, never the producer's reference, so one handler
+ * cannot affect another.
  *
  * @public
  */
@@ -66,7 +66,7 @@ export interface PubSubPublishResult {
  * @public
  */
 export interface PubSubSubscription<TData> {
-  /** Plugin-local consumer name; core prefixes it with the plugin id. */
+  /** Name of this consumer within the plugin. Core scopes it so another plugin cannot take it. */
   readonly consumer: string;
   readonly handler: PubSubHandler<TData>;
 }
@@ -100,9 +100,10 @@ export interface PubSubStart {
    * Accepts an event and returns once it is queued. Does not wait for handlers.
    *
    * Delivery is best effort and local to this Kibana node; a resolved promise means the event
-   * was accepted, not that any consumer ran. A consumer's copy is dropped (with a warning) when
-   * that consumer already has 1000 events pending, and events still queued when Kibana stops
-   * are discarded. Consumers on other nodes never see the event.
+   * was accepted, not that any consumer ran. A consumer's copy is dropped when that consumer
+   * already has 1000 events pending. The overflow is logged once, then again with the drop count
+   * when the queue drains. Events still queued when Kibana stops are discarded. Consumers on
+   * other nodes never see the event.
    */
   publish<TData>(
     topic: Topic<TData>,

@@ -88,6 +88,14 @@ describe('PubSubService registration', () => {
     expect(() => setup.registerTopic('ordersPlugin', { name: 'a..b' })).toThrow(/invalid/i);
   });
 
+  it('throws when a subscription uses a topic that skipped defineTopic', () => {
+    const setup = createService().setup();
+
+    expect(() =>
+      setup.subscribe('ordersPlugin', { name: 'a..b' }, { consumer: 'sync', handler: () => {} })
+    ).toThrow(/invalid/i);
+  });
+
   it('starts when a subscription is added before its topic is registered', () => {
     const service = createService();
     const setup = service.setup();
@@ -418,23 +426,32 @@ describe('PubSubService dispatch', () => {
       await flushDispatch();
     }
 
-    const dropped = await publishOne(secret);
+    const droppedIds = await Promise.all([
+      publishOne(secret),
+      publishOne(secret),
+      publishOne(secret),
+    ]);
     await flushDispatch();
 
-    expect(fastCalls).toBe(PUBSUB_MAX_PENDING_EVENTS + 2);
+    expect(fastCalls).toBe(PUBSUB_MAX_PENDING_EVENTS + 4);
     expect(slowCalls).toBe(1);
 
-    const logged = loggerMock
-      .collect(logger)
-      .warn.map(([message]) => String(message))
-      .join('\n');
-    expect(logged).toContain('ordersPlugin.slow');
-    expect(logged).toContain(dropped.id);
-    expect(logged).not.toContain(secret);
+    const warnings = () => loggerMock.collect(logger).warn.map(([message]) => String(message));
+    const whileFull = warnings().join('\n');
+    expect(warnings()).toHaveLength(1);
+    expect(whileFull).toContain('ordersPlugin.slow');
+    expect(whileFull).toContain('will be dropped until the queue drains');
+    expect(whileFull).not.toContain(secret);
+    droppedIds.forEach(({ id }) => expect(whileFull).not.toContain(id));
 
     gate.resolve();
     await flushDispatch();
     expect(slowCalls).toBe(PUBSUB_MAX_PENDING_EVENTS + 1);
+
+    const drained = warnings().join('\n');
+    expect(warnings().filter((message) => message.includes('will be dropped'))).toHaveLength(1);
+    expect(drained).toContain('dropped 3 events');
+    expect(drained).not.toContain(secret);
   });
 
   it('does not start a queued handler after stop, and rejects later publishes', async () => {

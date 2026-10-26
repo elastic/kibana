@@ -62,6 +62,25 @@ describe('findJsonRoundTripMismatch', () => {
     );
   });
 
+  it('names a hole in an array, which JSON turns into null', () => {
+    expect(check(new Array(1))).toBe('data[0] is undefined and arrives as null');
+  });
+
+  it('names a symbol key, which JSON drops', () => {
+    expect(check({ [Symbol('id')]: 'order-1' })).toBe(
+      'data[Symbol(id)] is a string and arrives as nothing (the property is dropped)'
+    );
+  });
+
+  it('names a non-enumerable field, which JSON drops', () => {
+    const data = {};
+    Object.defineProperty(data, 'secret', { value: 'x', enumerable: false });
+
+    expect(check(data)).toBe(
+      'data.secret is a string and arrives as nothing (the property is dropped)'
+    );
+  });
+
   it('names a function property, which JSON drops', () => {
     expect(check({ onDone: () => {} })).toBe(
       'data.onDone is a function and arrives as nothing (the property is dropped)'
