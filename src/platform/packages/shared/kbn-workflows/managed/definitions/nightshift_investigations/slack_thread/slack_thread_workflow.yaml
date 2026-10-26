@@ -7,6 +7,8 @@ description: >
   later run leaves it showing the previous findings until its own are ready.
 enabled: true
 settings:
+  # The per-space copy runs as the bound service account; the global copy drops this line.
+  run_as: __SERVICE_ACCOUNT_ID__
   # Longer than the investigation's own timeout, since this run waits for it.
   timeout: '65m'
   # One run per thread at a time, in arrival order, so replies build on each other and a
@@ -35,6 +37,22 @@ triggers:
       condition: 'event.threadId:* and event.workspace:* and event.text:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast or event.subtype:file_share)'
 
 steps:
+  # Only a Slack message event may start this workflow. The workflow run API accepts any workflow
+  # and takes the trigger event from the caller's inputs, so a direct run could otherwise continue
+  # any investigation thread with made-up text and post to Slack, as whoever the workflow runs as
+  # (the Nightshift service account once it is bound). An event
+  # run's `triggeredBy` is its trigger id, which only server code sets.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "slack2.message"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow continues Nightshift investigations from Slack thread replies. Only a
+            Slack message event may start it. This run was started by {{ execution.triggeredBy }}.
+
   # A reply only continues an existing investigation; this workflow never creates one. Delivery
   # is at least once, so the thread records each event with the execution handling it, and skips
   # an event another execution already handled. A retry within this execution is not a duplicate.
