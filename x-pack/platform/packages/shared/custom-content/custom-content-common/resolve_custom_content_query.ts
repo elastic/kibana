@@ -32,8 +32,7 @@ export interface ResolvedCustomContentQuery {
  * declared data-free. An edit keeps the stored query unless it is replaced, removed or explicitly
  * regenerated, so a style-only edit never pays for generation or schema sampling.
  *
- * `hasData` left undefined on a new panel generates a query. A caller whose default is a static
- * panel (the dashboard tool) passes `hasData === true` instead of forwarding it.
+ * On a new panel `hasData: false` makes it static; otherwise a query is generated.
  */
 export const resolveCustomContentQuery = async ({
   suppliedQuery,

@@ -115,8 +115,8 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
         regenerate: regenerateEsql,
         existingQuery: currentData?.esql_query,
         isNewPanel: false,
-        generate: async (existingQueries) => {
-          const generated = await generateCustomContentEsql({
+        generate: (existingQueries) =>
+          generateCustomContentEsql({
             nlQuery: prompt ?? '',
             index,
             existingQueries,
@@ -124,12 +124,9 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
             events,
             logger,
             esClient,
-          });
-          if (!generated.query) {
-            throw new Error(generated.error ?? 'no query was produced');
-          }
-          return generated.query;
-        },
+            noQueryHint:
+              'Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.',
+          }),
       });
     } catch (err) {
       logger.error(`custom_content_update_panel: query generation failed — ${err}`);
@@ -139,9 +136,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
             tool_result_id: getToolResultId(),
             type: ToolResultType.error,
             data: {
-              message: `Could not generate an ES|QL query for this panel: ${
-                err instanceof Error ? err.message : String(err)
-              }. Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.`,
+              message: err instanceof Error ? err.message : String(err),
             },
           },
         ],

@@ -150,7 +150,7 @@ An edit targets a panel by its id in `panels`, so this path can reach any custom
 
 All three flows (dashboard generation tool, `custom_content_update_panel`, and `create_visualization`) decide a panel's final query with `resolveCustomContentQuery` (`@kbn/custom-content-common`): an explicit query wins, `has_data: false` or `null` removes it, a new panel generates one unless it is declared static, and an edit keeps the stored query unless it is replaced, removed or regenerated. It also reports whether the query changed, which is what lets the template resolver skip schema sampling for unchanged queries.
 
-Generation goes through `generateCustomContentEsql` (`@kbn/agent-builder-visualizations-server`), a wrapper around the shared visualization generator with custom content instructions: one row per item shown, `LIMIT 100` unless the user names a number, funnel steps in the order listed. The stored query is passed as `existingQueries` so edits modify it instead of starting over. The generator always returns a query, so a request with no data in it must be declared static (`hasData` omitted or false) rather than sent through generation.
+Generation goes through `generateCustomContentEsql` (`@kbn/agent-builder-visualizations-server`), a wrapper around the shared visualization generator with custom content instructions: one row per item shown, `LIMIT 100` unless the user names a number, funnel steps in the order listed. The stored query is passed as `existingQueries` so edits modify it instead of starting over. The generator always returns a query or throws, so a request with no data in it must be declared static (`hasData: false`, which new panels always state) rather than sent through generation.
 
 ### The shared template resolver
 

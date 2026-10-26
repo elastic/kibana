@@ -59,15 +59,16 @@ const toCreationResolutionRequest = (
 ): ResolutionRequestResult => {
   if (content.renderer === 'custom_content') {
     const { renderer, query, esql, hasData, regenerateESQL, index } = content;
-    if (query === undefined) {
-      return { error: `Panel "${id}" is new. Provide \`query\` to create it.` };
+    if (query === undefined || hasData === undefined) {
+      const missing = [
+        ...(query === undefined ? ['`query`'] : []),
+        ...(hasData === undefined
+          ? ['`hasData` (true to generate its ES|QL query, false for static content with no query)']
+          : []),
+      ];
+      return { error: `Panel "${id}" is new. Provide ${missing.join(' and ')} to create it.` };
     }
-    if (hasData === undefined) {
-      return {
-        error: `Panel "${id}" is new. Provide \`hasData\`: true to generate its ES|QL query, or false for static content with no query.`,
-      };
-    }
-    if (regenerateESQL !== undefined) {
+    if (regenerateESQL) {
       return {
         error: `Panel "${id}" is new, so \`regenerateESQL\` does not apply. Use \`hasData\` to say whether it has a query.`,
       };
@@ -103,6 +104,11 @@ const toEditResolutionRequest = (
     if (regenerateESQL && hasData === false) {
       return {
         error: `Panel "${existingPanel.id}" cannot combine \`regenerateESQL\` with \`hasData\`: false, which removes the query.`,
+      };
+    }
+    if (esql === null && (hasData === true || regenerateESQL)) {
+      return {
+        error: `Panel "${existingPanel.id}" cannot combine \`esql\`: null, which removes the query, with \`hasData\`: true or \`regenerateESQL\`.`,
       };
     }
     const changesOnlyQuery = (esql !== undefined || hasData === false) && !regenerateESQL;

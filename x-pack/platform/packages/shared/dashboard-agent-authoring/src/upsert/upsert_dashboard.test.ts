@@ -632,7 +632,12 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'kpi',
-              content: { source: 'request', renderer: 'custom_content', esql: 'FROM logs' },
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                esql: 'FROM logs',
+                hasData: true,
+              },
             },
           ],
         },
@@ -703,7 +708,62 @@ describe('executeDashboardUpsert', () => {
         kind: 'panel',
         identifier: 'kpi',
         error:
-          'Panel "kpi" is new. Provide `hasData`: true to generate its ES|QL query, or false for static content with no query.',
+          'Panel "kpi" is new. Provide `hasData` (true to generate its ES|QL query, false for static content with no query) to create it.',
+      },
+      {
+        name: 'a new custom_content panel without query and hasData',
+        panels: [],
+        upsert: {
+          panels: [{ id: 'kpi', content: { source: 'request', renderer: 'custom_content' } }],
+        },
+        kind: 'panel',
+        identifier: 'kpi',
+        error:
+          'Panel "kpi" is new. Provide `query` and `hasData` (true to generate its ES|QL query, false for static content with no query) to create it.',
+      },
+      {
+        name: 'a custom_content edit that removes the query and asks for one',
+        panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
+        upsert: {
+          panels: [
+            {
+              id: 'cc-1',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                query: 'show errors by host',
+                esql: null,
+                hasData: true,
+              },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'cc-1',
+        error:
+          'Panel "cc-1" cannot combine `esql`: null, which removes the query, with `hasData`: true or `regenerateESQL`.',
+      },
+      {
+        name: 'a custom_content edit that removes the query and regenerates it',
+        panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
+        upsert: {
+          panels: [
+            {
+              id: 'cc-1',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                query: 'show errors by host',
+                esql: null,
+                regenerateESQL: true,
+              },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'cc-1',
+        error:
+          'Panel "cc-1" cannot combine `esql`: null, which removes the query, with `hasData`: true or `regenerateESQL`.',
       },
       {
         name: 'a new custom_content panel with regenerateESQL',
@@ -2033,6 +2093,40 @@ describe('executeDashboardUpsert', () => {
           },
         }),
       ]);
+    });
+
+    it('accepts regenerateESQL: false on a new custom_content panel', async () => {
+      const resolvePanelContent = createResolverMock(async () =>
+        createResolvedPanelContent({
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: { template: '<div>Note</div>' },
+        })
+      );
+
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Test', panels: [] },
+        upsert: {
+          panels: [
+            {
+              id: 'note',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                query: 'A note about the release',
+                hasData: false,
+                regenerateESQL: false,
+              },
+            },
+          ],
+        },
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(resolvePanelContent).toHaveBeenCalledWith(
+        expect.objectContaining({ renderer: 'custom_content', hasData: false })
+      );
     });
 
     it('passes hasData, regenerateESQL and index of a custom_content edit to the panel resolver', async () => {

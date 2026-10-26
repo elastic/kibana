@@ -349,8 +349,8 @@ Ground first: make sure the target index exists and every field you reference is
               regenerate: regenerateEsql,
               existingQuery: existingEsql,
               isNewPanel: !existingData,
-              generate: async (existingQueries) => {
-                const generated = await generateCustomContentEsql({
+              generate: (existingQueries) =>
+                generateCustomContentEsql({
                   nlQuery,
                   index,
                   existingQueries,
@@ -358,17 +358,9 @@ Ground first: make sure the target index exists and every field you reference is
                   events,
                   logger,
                   esClient,
+                  noQueryHint: NO_QUERY_HINT,
                   ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
-                });
-                if (!generated.query) {
-                  throw new Error(
-                    `Could not generate an ES|QL query for this panel: ${
-                      generated.error ?? 'no query was produced'
-                    }. ${NO_QUERY_HINT}`
-                  );
-                }
-                return generated.query;
-              },
+                }),
             });
 
           // Sampling costs a round trip, so it only happens when the query actually changes,

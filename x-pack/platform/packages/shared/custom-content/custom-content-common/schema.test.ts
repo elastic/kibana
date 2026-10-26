@@ -113,6 +113,17 @@ describe('customContentPanelUpdateSchema', () => {
     ).toBe(false);
   });
 
+  it('rejects regenerateEsql together with esqlQuery: null', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({
+        embeddable_id: 'p1',
+        prompt: 'Show errors by host',
+        esqlQuery: null,
+        regenerateEsql: true,
+      }).success
+    ).toBe(false);
+  });
+
   it('rejects an index longer than the limit', () => {
     expect(
       customContentPanelUpdateSchema.safeParse({

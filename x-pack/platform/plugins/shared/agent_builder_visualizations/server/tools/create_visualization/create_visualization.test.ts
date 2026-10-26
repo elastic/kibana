@@ -329,7 +329,7 @@ describe('createVisualizationTool handler', () => {
       to: 'now',
       mode: 'relative',
     });
-    mockGenerateEsql.mockResolvedValue({ query: 'FROM logs | STATS count() BY host' });
+    mockGenerateEsql.mockResolvedValue('FROM logs | STATS count() BY host');
     mockResolveTemplate.mockResolvedValue({
       template: '<div>{{ row["host"].value }}</div>',
       height: 420,
@@ -788,7 +788,11 @@ describe('createVisualizationTool handler', () => {
 
     // Data-free is a request, not what you get when a query cannot be generated.
     it('fails rather than falling back to a data-free panel when query generation fails', async () => {
-      mockGenerateEsql.mockResolvedValue({ error: 'no suitable index' });
+      mockGenerateEsql.mockRejectedValue(
+        new Error(
+          'Could not generate an ES|QL query for this panel: no suitable index. Pass a hint.'
+        )
+      );
 
       const { result } = await runHandler({
         query: 'a status board per host',
@@ -937,9 +941,7 @@ describe('createVisualizationTool handler', () => {
     });
 
     it('regenerates the stored query when an update passes regenerate_esql: true', async () => {
-      mockGenerateEsql.mockResolvedValue({
-        query: 'FROM logs | STATS count() BY host, os',
-      });
+      mockGenerateEsql.mockResolvedValue('FROM logs | STATS count() BY host, os');
 
       const { result } = await runHandler(
         {

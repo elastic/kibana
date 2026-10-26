@@ -86,6 +86,10 @@ const regenerateNeedsPrompt = {
   message: 'regenerateEsql requires a prompt describing the change.',
 };
 
+const regenerateExcludesRemoval = {
+  message: 'esqlQuery: null removes the query, so it cannot be combined with regenerateEsql.',
+};
+
 /**
  * Edit input for the chat tool. A conversation can hold one context attachment per panel, so the
  * target has to be explicit — without it the tool would act on whichever panel was attached first.
@@ -105,6 +109,10 @@ export const customContentPanelUpdateSchema = z
   .refine(
     ({ prompt, regenerateEsql }) => !regenerateEsql || prompt !== undefined,
     regenerateNeedsPrompt
+  )
+  .refine(
+    ({ esqlQuery, regenerateEsql }) => !(esqlQuery === null && regenerateEsql),
+    regenerateExcludesRemoval
   );
 
 export type CustomContentPanelUpdate = z.output<typeof customContentPanelUpdateSchema>;

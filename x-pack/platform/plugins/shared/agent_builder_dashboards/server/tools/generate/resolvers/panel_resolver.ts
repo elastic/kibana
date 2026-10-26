@@ -19,8 +19,8 @@ const NO_QUERY_HINT =
 
 const createCustomContentEsqlGenerator =
   ({ logger, modelProvider, events, esClient }: VisPanelResolverDeps): CustomContentEsqlGenerator =>
-  async ({ nlQuery, index, existingQueries }) => {
-    const generated = await generateCustomContentEsql({
+  ({ nlQuery, index, existingQueries }) =>
+    generateCustomContentEsql({
       nlQuery,
       index,
       existingQueries,
@@ -28,16 +28,8 @@ const createCustomContentEsqlGenerator =
       events,
       logger,
       esClient,
+      noQueryHint: NO_QUERY_HINT,
     });
-    if (!generated.query) {
-      throw new Error(
-        `Could not generate an ES|QL query for this panel: ${
-          generated.error ?? 'no query was produced'
-        }. ${NO_QUERY_HINT}`
-      );
-    }
-    return generated.query;
-  };
 
 /**
  * Default implementation of dashboard authoring's `ResolvePanelContent` seam:

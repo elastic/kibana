@@ -27,14 +27,31 @@ These rules replace the chart defaults above for this panel:
 type GenerateCustomContentEsqlParams = Omit<
   Parameters<typeof generateVisualizationEsql>[0],
   'extraInstructions'
->;
+> & {
+  /** What the caller suggests when no query comes back, in terms of its own parameters. */
+  noQueryHint: string;
+};
 
 /**
  * Generates the ES|QL query of a custom content panel with the shared visualization generator and
  * the custom content guidance. Pass the panel's stored query as `existingQueries` on an edit so
- * the parts the request does not change are kept.
+ * the parts the request does not change are kept. Throws, with the reason and `noQueryHint`, when
+ * no query is produced.
  */
-export const generateCustomContentEsql = (
-  params: GenerateCustomContentEsqlParams
-): ReturnType<typeof generateVisualizationEsql> =>
-  generateVisualizationEsql({ ...params, extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS });
+export const generateCustomContentEsql = async ({
+  noQueryHint,
+  ...params
+}: GenerateCustomContentEsqlParams): Promise<string> => {
+  const { query, error } = await generateVisualizationEsql({
+    ...params,
+    extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
+  });
+  if (!query) {
+    throw new Error(
+      `Could not generate an ES|QL query for this panel: ${
+        error ?? 'no query was produced'
+      }. ${noQueryHint}`
+    );
+  }
+  return query;
+};

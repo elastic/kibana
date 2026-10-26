@@ -76,7 +76,7 @@ describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockResolver.mockResolvedValue({ template: '<div>generated</div>', height: 320 });
-    mockGenerateEsql.mockResolvedValue({ query: 'FROM logs | STATS count = COUNT(*) BY host' });
+    mockGenerateEsql.mockResolvedValue('FROM logs | STATS count = COUNT(*) BY host');
   });
 
   describe('missing attachment', () => {
@@ -169,9 +169,9 @@ describe('createUpdateCustomContentTool handler', () => {
     };
 
     it('generates from the stored query and samples the new schema when regenerateEsql is set', async () => {
-      mockGenerateEsql.mockResolvedValue({
-        query: 'FROM logs | STATS count = COUNT(*), errors = COUNT(*) WHERE status >= 500 BY host',
-      });
+      mockGenerateEsql.mockResolvedValue(
+        'FROM logs | STATS count = COUNT(*), errors = COUNT(*) WHERE status >= 500 BY host'
+      );
 
       const { ctx } = await callHandler(
         {
@@ -247,7 +247,11 @@ describe('createUpdateCustomContentTool handler', () => {
     });
 
     it('returns an error and stores nothing when the query cannot be generated', async () => {
-      mockGenerateEsql.mockResolvedValue({ error: 'no suitable index' });
+      mockGenerateEsql.mockRejectedValue(
+        new Error(
+          'Could not generate an ES|QL query for this panel: no suitable index. Pass a hint.'
+        )
+      );
 
       const { results, ctx } = await callHandler(
         { embeddable_id: 'p1', prompt: 'Show hosts', regenerateEsql: true },
