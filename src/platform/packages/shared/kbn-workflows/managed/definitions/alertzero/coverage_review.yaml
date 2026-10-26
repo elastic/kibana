@@ -536,6 +536,7 @@ steps:
               run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: Coverage check needs follow-up
                 comment: |-
                   **Coverage check needs a manual follow-up**
 
@@ -597,6 +598,7 @@ steps:
               run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: Coverage check needs follow-up
                 comment: |-
                   **Coverage check needs a manual follow-up**
 
@@ -620,6 +622,7 @@ steps:
               run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: Confirm rule coverage
                 comment: |-
                   **Confirm an enabled rule already covers this gap**
 
@@ -651,6 +654,7 @@ steps:
               run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: Coverage check needs follow-up
                 comment: |-
                   **Coverage check needs a manual follow-up**
 
@@ -674,6 +678,7 @@ steps:
           run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            title: Coverage check needs follow-up
             comment: |-
               **Coverage check needs a manual follow-up**
 
