@@ -150,7 +150,10 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   ),
   namespace: schema.maybe(
     schema.string({
-      meta: { description: 'Global data stream namespace from the Service settings step. When omitted, using the default namespace or the one inherited from the agent policy.' },
+      meta: {
+        description:
+          'Global data stream namespace from the Service settings step. When omitted, using the default namespace or the one inherited from the agent policy.',
+      },
     })
   ),
   dataFormat: schema.maybe(DataFormatSchema),
@@ -270,7 +273,10 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     namespace: schema.maybe(
       schema.string({
         maxLength: 100,
-        meta: { description: 'Global data stream namespace from the Service settings step. When omitted, using the default namespace or the one inherited from the agent policy.' },
+        meta: {
+          description:
+            'Global data stream namespace from the Service settings step. When omitted, using the default namespace or the one inherited from the agent policy.',
+        },
       })
     ),
     dataFormat: schema.maybe(DataFormatSchema),
