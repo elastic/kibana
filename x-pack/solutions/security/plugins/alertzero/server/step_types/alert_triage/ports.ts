@@ -19,6 +19,7 @@ import {
   VERDICT_TAGS,
   type AlertSeverity,
 } from '../../alert_triage/constants';
+import { getDetection } from '../../alert_triage/pattern_key';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
 import type { TriageAlert } from '../../alert_triage/types';
 
@@ -74,14 +75,12 @@ interface AlertHit {
 const toTriageAlert = ({ _id, _source = {} }: AlertHit): TriageAlert => {
   const tags = readField(_source, ALERT_FIELDS.tags);
   const timestamp = readField(_source, ALERT_FIELDS.timestamp);
-  const detection = readField(_source, ALERT_FIELDS.nameOverride)
-    ? readField(_source, ALERT_FIELDS.defendRuleId) || readField(_source, ALERT_FIELDS.eventCode)
-    : undefined;
+  const detection = getDetection(_source);
   return {
     id: _id,
     ruleId: String(readField(_source, ALERT_FIELDS.ruleId) ?? ''),
     ruleName: String(readField(_source, ALERT_FIELDS.ruleName) ?? ''),
-    ...(detection ? { detection: String(detection) } : {}),
+    ...(detection ? { detection } : {}),
     riskScore: Number(readField(_source, ALERT_FIELDS.riskScore) ?? 0),
     timestamp: typeof timestamp === 'number' ? timestamp : Date.parse(String(timestamp)) || 0,
     status: String(readField(_source, ALERT_FIELDS.status) ?? ''),
