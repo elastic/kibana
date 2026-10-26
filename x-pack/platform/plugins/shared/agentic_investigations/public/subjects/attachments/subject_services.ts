@@ -6,6 +6,7 @@
  */
 
 import type {
+  ApplicationStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
@@ -24,6 +25,7 @@ export interface SubjectServices {
   /** Locators that resolve a subject's details page; without it a subject keeps its own link. */
   share?: Pick<SharePluginStart, 'url'>;
   http?: HttpStart;
+  application?: ApplicationStart;
   uiSettings?: IUiSettingsClient;
   userProfile?: UserProfileService;
   notifications?: NotificationsStart;

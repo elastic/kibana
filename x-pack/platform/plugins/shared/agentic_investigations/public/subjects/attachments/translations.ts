@@ -97,19 +97,9 @@ export const ALERT_FLYOUT_ERROR_BODY = i18n.translate(
   { defaultMessage: 'The alert may have been deleted, or you may not have access to it.' }
 );
 
-export const ALERT_FLYOUT_CLOSE = i18n.translate(
-  'xpack.agenticInvestigations.subjects.alertFlyout.close',
-  { defaultMessage: 'Close' }
-);
-
 export const ALERT_FLYOUT_VIEW_DETAILS = i18n.translate(
   'xpack.agenticInvestigations.subjects.alertFlyout.viewDetails',
   { defaultMessage: 'View alert details' }
-);
-
-export const ALERT_FLYOUT_FIELD_STATUS = i18n.translate(
-  'xpack.agenticInvestigations.subjects.alertFlyout.fieldStatus',
-  { defaultMessage: 'Status' }
 );
 
 export const ALERT_FLYOUT_FIELD_RULE = i18n.translate(

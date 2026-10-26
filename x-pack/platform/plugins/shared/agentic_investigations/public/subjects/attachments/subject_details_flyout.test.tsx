@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
@@ -59,7 +59,7 @@ describe('SubjectDetailsFlyout', () => {
     jest.clearAllMocks();
   });
 
-  it('shows a classic alert in a flyout, with a link to its details page', async () => {
+  it('shows a classic alert in a flyout, and opens its details page in place', async () => {
     fetchAlert.mockResolvedValue({
       'kibana.alert.rule.name': ['High latency'],
       'kibana.alert.status': ['active'],
@@ -67,7 +67,11 @@ describe('SubjectDetailsFlyout', () => {
       'kibana.alert.duration.us': [120_000_000],
     } as never);
 
-    renderFlyout({ detailsHref: '/app/observability/alerts/alert-1' });
+    const navigateToUrl = jest.fn();
+    renderFlyout({
+      detailsHref: '/app/observability/alerts/alert-1',
+      services: { http: present, application: { navigateToUrl } as never },
+    });
 
     await waitFor(() =>
       expect(screen.getByTestId('investigationSubjectAlertFlyoutTitle')).toHaveTextContent(
@@ -77,10 +81,8 @@ describe('SubjectDetailsFlyout', () => {
     const overview = screen.getByTestId('investigationSubjectAlertFlyoutOverview');
     expect(overview).toHaveTextContent('p99 above 500 ms');
     expect(overview).toHaveTextContent('120,000 ms');
-    expect(screen.getByTestId('investigationSubjectAlertFlyoutViewDetails')).toHaveAttribute(
-      'href',
-      '/app/observability/alerts/alert-1'
-    );
+    fireEvent.click(screen.getByTestId('investigationSubjectAlertFlyoutViewDetails'));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/observability/alerts/alert-1');
   });
 
   it('shows an error when the alert cannot be loaded', async () => {

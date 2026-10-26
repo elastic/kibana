@@ -90,7 +90,7 @@ export const SubjectDetailsFlyout = ({
         alertId={alertId}
         detailsHref={detailsHref}
         onClose={onClose}
-        services={{ http: services.http }}
+        services={{ http: services.http, application: services.application }}
       />
     </QueryClientProvider>
   );
