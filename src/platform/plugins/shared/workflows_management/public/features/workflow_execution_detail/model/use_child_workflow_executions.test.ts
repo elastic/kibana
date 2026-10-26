@@ -56,6 +56,9 @@ const createMockExecution = (overrides?: Partial<WorkflowExecutionDto>): Workflo
 });
 
 describe('useChildWorkflowExecutions', () => {
+  // RTL's 4.5s asyncUtilTimeout leaves no room inside Jest's 5s default on a loaded CI worker.
+  jest.setTimeout(20_000);
+
   let mockGetChildrenExecutions: jest.Mock;
   let queryClient: QueryClient;
 
@@ -140,6 +143,7 @@ describe('useChildWorkflowExecutions', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
+    expect(mockGetChildrenExecutions).toHaveBeenCalledWith('exec-1');
     expect(result.current.childExecutions.size).toBe(0);
   });
 
