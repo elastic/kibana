@@ -115,6 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.workflows',
         'actions:.xmatters',
         'actions:.xsoar',
+        'actions:catalog_refresh',
         'actions:connector_usage_reporting',
         'actions:oauth_state_cleanup',
         'actions:user_connector_token_cleanup',

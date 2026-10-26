@@ -44,6 +44,7 @@ import {
 } from './constants/saved_objects';
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
+import { DEFAULT_CATALOG_URL } from './catalog';
 
 function getConfig(overrides = {}) {
   return {
@@ -85,6 +86,11 @@ function getConfig(overrides = {}) {
       ...defaultInboundEventsLimitConfigs,
     },
     connectorSigningKeys: { enabled: false },
+    catalog: {
+      enabled: false,
+      url: DEFAULT_CATALOG_URL,
+      refreshInterval: moment.duration(5, 'm'),
+    },
     ...overrides,
   };
 }
@@ -150,6 +156,11 @@ describe('Actions Plugin', () => {
           ...defaultInboundEventsLimitConfigs,
         },
         connectorSigningKeys: { enabled: false },
+        catalog: {
+          enabled: false,
+          url: DEFAULT_CATALOG_URL,
+          refreshInterval: moment.duration(5, 'm'),
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -597,6 +608,11 @@ describe('Actions Plugin', () => {
           ...defaultInboundEventsLimitConfigs,
         },
         connectorSigningKeys: { enabled: false },
+        catalog: {
+          enabled: false,
+          url: DEFAULT_CATALOG_URL,
+          refreshInterval: moment.duration(5, 'm'),
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -1236,6 +1252,52 @@ describe('Actions Plugin', () => {
           },
         });
         expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: true });
+      });
+    });
+
+    describe('catalog', () => {
+      it('does not register or schedule the refresh task when disabled', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(pluginsSetup.taskManager.registerTaskDefinitions).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            'actions:catalog_refresh': expect.anything(),
+          })
+        );
+        expect(pluginsStart.taskManager.ensureScheduled).not.toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'actions-catalog_refresh' })
+        );
+      });
+
+      it('registers and schedules the refresh task when enabled', async () => {
+        const enabledPlugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>({
+            ...getConfig(),
+            catalog: {
+              enabled: true,
+              url: DEFAULT_CATALOG_URL,
+              refreshInterval: moment.duration(5, 'm'),
+            },
+          })
+        );
+        await enabledPlugin.setup(coreSetup, pluginsSetup);
+        enabledPlugin.start(coreStart, pluginsStart);
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(pluginsSetup.taskManager.registerTaskDefinitions).toHaveBeenCalledWith(
+          expect.objectContaining({
+            'actions:catalog_refresh': expect.objectContaining({ timeout: '2m' }),
+          })
+        );
+        expect(pluginsStart.taskManager.ensureScheduled).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'actions-catalog_refresh',
+            taskType: 'actions:catalog_refresh',
+            schedule: { interval: '300s' },
+          })
+        );
       });
     });
 

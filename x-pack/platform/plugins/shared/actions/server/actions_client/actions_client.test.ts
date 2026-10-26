@@ -569,6 +569,11 @@ describe('create()', () => {
         ...defaultInboundEventsLimitConfigs,
       },
       connectorSigningKeys: { enabled: false },
+      catalog: {
+        enabled: false,
+        url: 'https://workflows.elastic.co/connectors/v1',
+        refreshInterval: moment.duration(5, 'm'),
+      },
     });
 
     const localActionTypeRegistryParams = {

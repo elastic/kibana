@@ -50,6 +50,12 @@ import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-spe
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
+import {
+  CatalogService,
+  getCatalogPublicKeys,
+  registerCatalogRefreshTask,
+  scheduleCatalogRefreshTask,
+} from './catalog';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
@@ -327,8 +333,13 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private catalogService?: CatalogService;
+  private readonly isDev: boolean;
+  private readonly kibanaVersion: string;
 
   constructor(initContext: PluginInitializerContext) {
+    this.isDev = initContext.env.mode.dev;
+    this.kibanaVersion = initContext.env.packageInfo.version;
     this.logger = initContext.logger.get();
     this.clientLeasePool = new LeasePool<unknown>(this.logger);
     this.actionsConfig = getValidatedConfig(
@@ -534,6 +545,8 @@ export class ActionsPlugin
       oauthRateLimiter,
       inboundEvents,
     });
+
+    this.maybeSetupCatalog(plugins);
 
     return {
       registerType: <
@@ -893,6 +906,7 @@ export class ActionsPlugin
     }
 
     this.validateEnabledConnectorTypes(plugins);
+    this.startCatalog(core, plugins);
 
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
@@ -1261,7 +1275,33 @@ export class ActionsPlugin
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.catalogService?.stop();
     this.clientLeasePool.stop();
+  }
+
+  private maybeSetupCatalog(plugins: ActionsPluginsSetup): void {
+    if (!this.actionsConfig.catalog.enabled) {
+      return;
+    }
+    // Consumed by the remote catalog source when fetch is wired.
+    void this.kibanaVersion;
+    this.catalogService = new CatalogService({
+      logger: this.logger.get('catalog'),
+      publicKeys: getCatalogPublicKeys(this.isDev),
+      refreshIntervalMs: this.actionsConfig.catalog.refreshInterval.asMilliseconds(),
+    });
+    registerCatalogRefreshTask(plugins.taskManager, () => this.catalogService);
+  }
+
+  private startCatalog(_core: CoreStart, plugins: ActionsPluginsStart): void {
+    if (!this.actionsConfig.catalog.enabled || !this.catalogService) {
+      return;
+    }
+    scheduleCatalogRefreshTask(
+      plugins.taskManager,
+      this.actionsConfig.catalog.refreshInterval,
+      this.logger
+    ).catch(() => {});
   }
 }
 
