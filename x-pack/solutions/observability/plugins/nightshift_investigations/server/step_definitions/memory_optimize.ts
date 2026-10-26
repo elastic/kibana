@@ -14,13 +14,10 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
 import { runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
-import { withToolResults } from './cortex_optimize';
-import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 import { withTimeout } from './with_timeout';
-
-const MAX_ROUND_TEXT_LENGTH = 65_536;
 
 /** Bounds the non-blocking post-round optimizer so a stuck inference call cannot hang a task. */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
@@ -50,25 +47,12 @@ export const memoryOptimizeStepDefinition = ({
       'Labels recalled Semantic Memory pages from a completed investigation round and ' +
       'extracts durable customer-environment facts into the Semantic Memory index.',
     inputSchema: z.object({
-      prompt: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe('The user message that started the round.'),
-      response: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe("The assistant's final response for the round."),
+      ...investigationRoundInputsSchema,
       agent_id: z
         .string()
         .max(1024)
         .optional()
         .describe('Supported agent policy selector; never used as a storage boundary.'),
-      tool_calls: toolCallsSchema.describe(
-        'Investigator tool calls from this round. Lets the optimizer see what the investigator queried.'
-      ),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
-      ),
       recalled_ids: z
         .array(z.string().max(2_000))
         .max(100)
@@ -92,16 +76,6 @@ export const memoryOptimizeStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
-      conversation_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Agent Builder conversation id for telemetry correlation.'),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Completed Agent Builder round id for telemetry correlation.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
@@ -149,6 +123,7 @@ export const memoryOptimizeStepDefinition = ({
               ),
               conversationId: context.input.conversation_id,
               roundId: context.input.round_id,
+              roundIndex: context.input.round_index,
               recalledIds: context.input.recalled_ids ?? [],
               esClient: context.contextManager.getScopedEsClient(),
               spaceId,

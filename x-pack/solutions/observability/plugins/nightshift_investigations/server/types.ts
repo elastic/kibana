@@ -47,6 +47,8 @@ export interface NightshiftInvestigationsServerSetup {
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;
+  /** Whether the assistant agent is registered, which needs the sandbox. */
+  isAssistantEnabled: () => boolean;
 }
 
 export interface NightshiftInvestigationsSetupDeps {

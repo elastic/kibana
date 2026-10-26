@@ -15,6 +15,10 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   markApplied: i18n.translate('xpack.proposals.approvalModal.markApplied', {
     defaultMessage: "I've applied",
   }),
+  /** Takes back a to-do proposal's "I've applied", re-offering it. */
+  markNotApplied: i18n.translate('xpack.proposals.approvalModal.markNotApplied', {
+    defaultMessage: 'Mark as not applied',
+  }),
   dismiss: i18n.translate('xpack.proposals.approvalModal.dismiss', {
     defaultMessage: 'Decline',
   }),
