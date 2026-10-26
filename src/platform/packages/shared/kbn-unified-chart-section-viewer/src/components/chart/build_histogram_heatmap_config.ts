@@ -18,12 +18,15 @@ import {
 export const buildHistogramHeatmapConfig = ({
   query,
   title,
+  description,
 }: {
   query: string;
   title: string;
+  description?: string;
 }): LensHeatmapConfig => ({
   chartType: 'heatmap',
   title,
+  description,
   dataset: { esql: query },
   value: HISTOGRAM_COUNT_COLUMN,
   xAxis: createTimeBucketAggregation({}),
