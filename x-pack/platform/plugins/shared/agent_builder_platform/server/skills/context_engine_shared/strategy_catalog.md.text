@@ -41,7 +41,8 @@ Choose from the shape of the data, read off the row sample, the row count and th
 `analyze-and-improve` runs, not from a default:
 
 - **Long text bodies in a bounded corpus** — articles, incident reports, product docs → Bottom-Up.
-  Bottom-Up covers at most 2,000 documents per run. When the source has more, say so in the
+  Bottom-Up covers at most 2,000 documents per run, always the first 2,000 by `_id` after the
+  corpus filter, so re-running never reaches the rest. When the source has more, say so in the
   recommendation, and either agree on a corpus filter that keeps the slice within 2,000 or recommend
   an aggregate strategy (Index/Table Metadata or Cumulative) for the whole source.
 - **A keyword key with many rows per value in one index** — customers, products, hosts →
