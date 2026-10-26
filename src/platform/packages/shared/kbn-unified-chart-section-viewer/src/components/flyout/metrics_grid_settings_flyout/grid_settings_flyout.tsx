@@ -74,6 +74,8 @@ export const GridSettingsFlyout = ({
   onClose,
 }: GridSettingsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
+  // EUI drops the size "s" width cap when maxWidth is omitted. This restores that cap.
+  const maxWidth = Math.round(euiTheme.breakpoint.s * 0.7);
   const { trackAggregationConfigChanged } = useTelemetry();
   const titleId = useGeneratedHtmlId({ prefix: 'metricsGridSettingsFlyoutTitle' });
   const aggregationAccordionId = useGeneratedHtmlId({
@@ -257,7 +259,7 @@ export const GridSettingsFlyout = ({
     <EuiFlyout
       onClose={onClose}
       size="s"
-      maxWidth={euiTheme.breakpoint.xs}
+      maxWidth={maxWidth}
       type="push"
       ownFocus
       data-test-subj="metricsExperienceGridSettingsFlyout"
