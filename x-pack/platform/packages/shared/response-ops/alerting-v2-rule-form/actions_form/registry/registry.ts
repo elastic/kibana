@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
 import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
+import { EMAIL_PARAMS_SCHEMA, SLACK2_PARAMS_SCHEMA } from './params_schemas';
 
 const EMAIL_PARAMS_TEMPLATE = `to: 
   - ""
@@ -36,6 +37,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: EMAIL_PARAMS_TEMPLATE,
+    paramsSchema: EMAIL_PARAMS_SCHEMA,
   },
   {
     id: 'slack2.sendMessage',
@@ -52,6 +54,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     connectorTypeId: '.slack2',
     connectorTypeSubAction: 'sendMessage',
     paramsTemplate: SLACK2_PARAMS_TEMPLATE,
+    paramsSchema: SLACK2_PARAMS_SCHEMA,
     CustomComponent: SlackChannelSelectorWrapper,
   },
 ];

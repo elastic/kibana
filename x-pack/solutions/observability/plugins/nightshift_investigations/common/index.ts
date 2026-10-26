@@ -27,20 +27,24 @@ export type {
   AlertSnapshot,
   AlertSnapshotEvaluation,
   AlertSnapshotGroup,
+  InvestigationAlertSnapshot,
   InvestigationContext,
   InvestigationNotificationDestination,
   InvestigationSubject,
+  V2AlertSnapshot,
 } from './schemas';
 
 export {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
   freeFormContextSchema,
+  investigationAlertSnapshotSchema,
   investigationNotificationDestinationSchema,
   investigationNotificationDestinationsSchema,
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
   MAX_INVESTIGATION_NOTIFICATIONS,
+  v2AlertSnapshotSchema,
 } from './schemas';
 
 import type {

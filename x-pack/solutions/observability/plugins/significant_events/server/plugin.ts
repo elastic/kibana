@@ -423,14 +423,15 @@ export class SignificantEventsPlugin
       void core
         .getStartServices()
         .then(async () => {
-          const { getScopedClients, server } = this;
-          if (!getScopedClients || !server) return;
+          const { getScopedClients, server, maintenanceService } = this;
+          if (!getScopedClients || !server || !maintenanceService) return;
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients,
             server,
             logger: this.logger,
             telemetry: telemetryClient,
+            maintenanceService,
           });
         })
         .catch((err) => {

@@ -70,6 +70,11 @@ triggers:
           maximum: 1
           description: Minimum confidence for a false positive to be proposed for closure.
 
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Alert Triage worker"
+
 steps:
   # ---------------------------------------------------------------------------
   # 1. Abort before opening an Investigation when Alert Analysis is off in this
@@ -224,6 +229,7 @@ steps:
     on-failure:
       continue: true
     with:
+      author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
         Triage started for rule **{{ inputs.rule_name }}** ({{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}). Model routed via the `alertzero_efficient` Model Management feature.
@@ -269,6 +275,7 @@ steps:
           on-failure:
             continue: true
           with:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
             message: >-
               ⚠️ Classification step failed for {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}.
@@ -303,6 +310,7 @@ steps:
       workflow-id: system-security-alert-analysis
       run-as-mode: inherit
       inputs:
+        authorName: "{{ consts.author_name }}"
         # A child run has no trigger event of its own, so the batch must be passed
         # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
         alerts: "${{ steps.load_alerts.output.alerts }}"
@@ -416,6 +424,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 ⚠️ Alert Analysis returned no verdicts for {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}.
@@ -439,6 +448,7 @@ steps:
                 on-failure:
                   continue: true
                 with:
+                  author_name: "{{ consts.author_name }}"
                   conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   message: >-
                     ⚠️ Alert Analysis returned no verdict for {{ variables.missing_alert_count }} of
@@ -491,6 +501,7 @@ steps:
     on-failure:
       continue: true
     with:
+      author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
         Classification complete: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
@@ -775,6 +786,7 @@ steps:
     on-failure:
       continue: true
     with:
+      author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: >-
         Verdict notes written and classification tags submitted for {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
@@ -811,6 +823,7 @@ steps:
               on-failure:
                 continue: true
               with:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 message: >-
                   ⚠️ The closure review could not be started: {{ error.message }}.
@@ -851,6 +864,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 Closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor was handed to the closure review.
@@ -867,6 +881,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
@@ -940,6 +955,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 Triage complete. No false positive alerts met the {{ inputs.confidence_floor }} confidence floor; no proposal created.
