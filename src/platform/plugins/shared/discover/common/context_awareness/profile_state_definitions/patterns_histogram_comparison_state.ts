@@ -11,13 +11,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { ProfileStateDefinition } from '../profile_state';
 import { ProfileStateType } from '../profile_state';
 
-export type PatternsHistogramComparisonResultStatus =
-  | ''
-  | 'loading'
-  | 'applied'
-  | 'approximate'
-  | 'unavailable';
-
 /** Ephemeral, tab-scoped selection for comparing one pattern with the histogram total. */
 export interface PatternsHistogramComparisonState extends SerializableRecord {
   label: string;
@@ -26,8 +19,6 @@ export interface PatternsHistogramComparisonState extends SerializableRecord {
   documentQuery: string;
   sourceQuery: string;
   sourceVariables: string;
-  resultKey: string;
-  resultStatus: PatternsHistogramComparisonResultStatus;
 }
 
 export const PATTERNS_HISTOGRAM_COMPARISON_STATE_DEFAULTS: PatternsHistogramComparisonState = {
@@ -37,8 +28,6 @@ export const PATTERNS_HISTOGRAM_COMPARISON_STATE_DEFAULTS: PatternsHistogramComp
   documentQuery: '',
   sourceQuery: '',
   sourceVariables: '',
-  resultKey: '',
-  resultStatus: '',
 };
 
 export const PATTERNS_HISTOGRAM_COMPARISON_STATE_DEF: ProfileStateDefinition<PatternsHistogramComparisonState> =
@@ -51,8 +40,6 @@ export const PATTERNS_HISTOGRAM_COMPARISON_STATE_DEF: ProfileStateDefinition<Pat
       documentQuery: { type: ProfileStateType.Ui },
       sourceQuery: { type: ProfileStateType.Ui },
       sourceVariables: { type: ProfileStateType.Ui },
-      resultKey: { type: ProfileStateType.Ui },
-      resultStatus: { type: ProfileStateType.Ui },
     },
     defaultState: PATTERNS_HISTOGRAM_COMPARISON_STATE_DEFAULTS,
   };

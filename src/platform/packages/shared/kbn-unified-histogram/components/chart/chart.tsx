@@ -59,9 +59,15 @@ import {
 } from './histogram_comparison';
 import {
   getHistogramBucket,
+  HISTOGRAM_OVERLAY_COLUMN,
+  HISTOGRAM_REMAINDER_COLUMN,
   splitHistogramTable,
   type HistogramComparisonCount,
 } from './split_histogram_table';
+import {
+  HistogramComparisonBadge,
+  type HistogramComparisonStatus,
+} from './histogram_comparison_badge';
 
 export interface UnifiedHistogramChartProps {
   isChartAvailable: boolean;
@@ -95,7 +101,14 @@ export interface UnifiedHistogramChartProps {
    */
   comparison?: {
     key: string;
+    /**
+     * Legend name of the selected series.
+     */
     label: string;
+    /**
+     * Full description of the selection, shown in the toolbar badge.
+     */
+    description: string;
     /**
      * Counts the subset with the request params that produced the loaded histogram.
      * Buckets `timeField` by `interval` and returns each bucket keyed by `timeColumn`.
@@ -107,10 +120,7 @@ export interface UnifiedHistogramChartProps {
       interval: string;
       signal: AbortSignal;
     }) => Promise<HistogramComparisonCount[]>;
-    onResult: (result: {
-      key: string;
-      status: 'loading' | 'applied' | 'approximate' | 'unavailable';
-    }) => void;
+    onClear: () => void;
   };
 }
 
@@ -223,6 +233,10 @@ export function UnifiedHistogramChart({
     histogram: LoadedHistogram;
     attributes: LensAttributes;
   }>();
+  const [comparisonStatus, setComparisonStatus] = useState<{
+    key: string;
+    status: HistogramComparisonStatus;
+  }>();
   // Lens keeps the `onLoad` it was mounted with, so each load is attributed to what was last rendered.
   const renderedLensRef = useRef<{
     fetchParams: UnifiedHistogramFetchParams | undefined;
@@ -280,7 +294,13 @@ export function UnifiedHistogramChart({
 
       if (!isLoading && loadFetchParams === fetchParams) {
         const table = Object.values(adapterTables ?? {})[0];
-        setLoadedHistogram(table ? { table, fetchParams: loadFetchParams } : undefined);
+        const columnIds = new Set(table?.columns.map((column) => column.id));
+        // A comparison completion can arrive after Compare is cleared. Saving it would split it again.
+        const isComparisonTable =
+          columnIds.has(HISTOGRAM_OVERLAY_COLUMN) && columnIds.has(HISTOGRAM_REMAINDER_COLUMN);
+        if (!isComparisonTable) {
+          setLoadedHistogram(table ? { table, fetchParams: loadFetchParams } : undefined);
+        }
       }
     }
   );
@@ -316,9 +336,11 @@ export function UnifiedHistogramChart({
       return;
     }
 
-    const { key, label, loadCounts, onResult } = comparison;
+    const { key, label, loadCounts } = comparison;
+    const reportStatus = (status: HistogramComparisonStatus) =>
+      setComparisonStatus({ key, status });
     if (!currentHistogram || !baseAttributes) {
-      onResult({ key, status: 'loading' });
+      reportStatus('loading');
       return;
     }
 
@@ -330,10 +352,11 @@ export function UnifiedHistogramChart({
       currentHistogram.fetchParams.breakdown?.field ||
       !canApplyHistogramComparison(baseAttributes)
     ) {
-      onResult({ key, status: 'unavailable' });
+      reportStatus('unavailable');
       return;
     }
 
+    reportStatus('loading');
     const controller = new AbortController();
     loadCounts({
       fetchParams: currentHistogram.fetchParams,
@@ -360,15 +383,15 @@ export function UnifiedHistogramChart({
             colors: { overlay: overlayColor, remainder: remainderColor },
           });
         if (!split || !attributes) {
-          onResult({ key, status: 'unavailable' });
+          reportStatus('unavailable');
           return;
         }
         setComparisonAttributes({ key, histogram: currentHistogram, attributes });
-        onResult({ key, status: split.approximate ? 'approximate' : 'applied' });
+        reportStatus(split.approximate ? 'approximate' : 'applied');
       })
       .catch((error: { name?: string }) => {
         if (!controller.signal.aborted && error?.name !== 'AbortError') {
-          onResult({ key, status: 'unavailable' });
+          reportStatus('unavailable');
         }
       });
 
@@ -421,6 +444,13 @@ export function UnifiedHistogramChart({
           />
         )}
       </div>,
+      chartVisible && comparison ? (
+        <HistogramComparisonBadge
+          description={comparison.description}
+          status={comparisonStatus?.key === comparison.key ? comparisonStatus.status : 'loading'}
+          onClear={comparison.onClear}
+        />
+      ) : null,
     ],
     [
       chartVisible,
@@ -430,6 +460,8 @@ export function UnifiedHistogramChart({
       breakdown,
       dataSource,
       onBreakdownFieldChange,
+      comparison,
+      comparisonStatus,
     ]
   );
 

@@ -100,15 +100,15 @@ columns: [
 
 **Use when:** A row should be compared with the histogram total. Profiles that replace the chart do not implement this.
 
-**Returns:** A controller with the current selection observable, its result, and `onResult`. Publishing accepts a generic group value or `undefined` to clear it.
+**Returns:** A controller with the current selection observable. Publishing accepts a generic group value or `undefined` to clear it.
 
 **Table-to-main-view pattern:** The table calls the named `publish…` extension point, the
 owning profile writes registered `Ui` state, and the main view subscribes through the matching
 `get…` controller. The state is observable, scoped to one tab, and never persisted to the URL or
-saved session. Query or variable changes invalidate a selection. Time and filter changes preserve
-the user's selection, but the main view waits for matching request context before applying it.
+saved session. Query or variable changes invalidate a selection. Time and filter changes keep
+the selection, and the histogram recounts it with the request that produced the loaded chart.
 Discover owns requests, cancellation, and Inspector integration; Unified Histogram applies
-render-only attributes. New effects should add a specifically named pair rather than a generic
+render-only attributes and shows a dismissible badge that clears the selection. New effects should add a specifically named pair rather than a generic
 event bus.
 
 ---

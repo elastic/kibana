@@ -74,12 +74,7 @@ describe('patterns histogram comparison', () => {
     const selection = await firstValueFrom(controller.selection$);
     expect(selection?.documentQuery).toContain('MATCH');
 
-    controller.onResult({ key: selection!.key, status: 'applied' });
-    expect(state$.getValue().resultStatus).toBe('applied');
-
-    controller.onResult({ key: 'someone-else', status: 'unavailable' });
-    expect(state$.getValue().resultStatus).toBe('applied');
-
+    const storedState = state$.getValue();
     publishPatternsHistogramComparison(toolkit, {
       label: '.*?Failed login for .+? from .+?',
       column: 'CATEGORIZE(message)',
@@ -87,7 +82,7 @@ describe('patterns histogram comparison', () => {
       query,
       dataView,
     });
-    expect(state$.getValue().resultStatus).toBe('applied');
+    expect(state$.getValue()).toBe(storedState);
 
     const stale = createPatternsHistogramComparison(toolkit, {
       query: { esql: 'FROM logs | STATS count = COUNT(*) BY CATEGORIZE(other)' },

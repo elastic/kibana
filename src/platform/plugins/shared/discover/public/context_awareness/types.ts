@@ -350,7 +350,7 @@ export interface RowControlsExtensionParams {
   esqlVariables?: ESQLControlVariable[];
   /**
    * False when the ungrouped grid should not offer a histogram comparison, for example while the
-   * chart is hidden, replaced, or the grouped layout is already publishing the selection.
+   * chart is hidden or replaced, a breakdown is set, or the grouped layout is shown.
    */
   histogramComparisonEnabled?: boolean;
 }
@@ -362,13 +362,6 @@ export interface HistogramComparisonSelection {
   column: string;
   value: string;
   documentQuery: string;
-}
-
-export type HistogramComparisonResultStatus = 'loading' | 'applied' | 'approximate' | 'unavailable';
-
-export interface HistogramComparisonResult {
-  key: string;
-  status: HistogramComparisonResultStatus;
 }
 
 /** Inputs the chart uses to decide whether the current selection still applies. */
@@ -393,8 +386,6 @@ export interface HistogramComparisonTableSelection {
 
 export interface HistogramComparisonController {
   selection$: Observable<HistogramComparisonSelection | undefined>;
-  result$: Observable<HistogramComparisonResult | undefined>;
-  onResult: (result: HistogramComparisonResult) => void;
 }
 
 /**

@@ -57,7 +57,5 @@ export const enrichLensAttributesWithTablesData = ({
 export const removeTablesFromLensAttributes = (
   attributes: LensAttributes
 ): TypedLensByValueInput => {
-  return {
-    attributes: enrichLensAttributesWithTablesData({ attributes, table: undefined }),
-  };
+  return { attributes: enrichLensAttributesWithTablesData({ attributes, table: undefined }) };
 };

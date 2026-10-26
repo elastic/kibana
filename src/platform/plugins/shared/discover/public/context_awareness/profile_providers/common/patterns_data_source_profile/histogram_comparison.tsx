@@ -23,7 +23,6 @@ import type { ContextAwarenessToolkit } from '../../../toolkit';
 import type {
   HistogramComparisonContext,
   HistogramComparisonController,
-  HistogramComparisonResult,
   HistogramComparisonSelection,
   HistogramComparisonTableSelection,
   RowControlsExtensionParams,
@@ -85,17 +84,6 @@ const selectionFromState = (
     value: state.value,
     documentQuery: state.documentQuery,
   };
-};
-
-const resultFromState = (
-  state: PatternsHistogramComparisonState,
-  selection: HistogramComparisonSelection | undefined
-): HistogramComparisonResult | undefined => {
-  if (!selection || state.resultKey !== selection.key || state.resultStatus === '') {
-    return undefined;
-  }
-
-  return { key: state.resultKey, status: state.resultStatus };
 };
 
 const clearComparison = (toolkit: ContextAwarenessToolkit) => {
@@ -160,8 +148,6 @@ export const publishPatternsHistogramComparison = (
     documentQuery,
     sourceQuery: params.query.esql,
     sourceVariables,
-    resultKey: '',
-    resultStatus: '',
   });
   return true;
 };
@@ -177,22 +163,6 @@ export const createPatternsHistogramComparison = (
       map((state) => selectionFromState(state, params)),
       distinctUntilChanged((previous, current) => previous?.key === current?.key)
     ),
-    result$: state$.pipe(
-      map((state) => resultFromState(state, selectionFromState(state, params))),
-      distinctUntilChanged(
-        (previous, current) =>
-          previous?.key === current?.key && previous?.status === current?.status
-      )
-    ),
-    onResult: (result) => {
-      const adapter = toolkit.getStateAdapter(PATTERNS_HISTOGRAM_COMPARISON_STATE_DEF);
-      const state = adapter.getState();
-      if (selectionFromState(state, params)?.key !== result.key) {
-        return;
-      }
-
-      adapter.updateState({ resultKey: result.key, resultStatus: result.status });
-    },
   };
 };
 

@@ -29,7 +29,6 @@ export type UnifiedDataTableRenderCustomToolbar = (
 interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarProps {
   saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
-  centerContent?: React.ReactNode;
   bottomSection?: React.ReactElement;
   wrap?: boolean;
 }
@@ -40,7 +39,6 @@ export const internalRenderCustomToolbar = (
   const {
     saveToDashboardButton,
     leftSide,
-    centerContent,
     bottomSection,
     wrap = true,
     toolbarProps: {
@@ -53,7 +51,6 @@ export const internalRenderCustomToolbar = (
     },
     gridProps: { additionalControls, inTableSearchButton, inTableSearchInput },
   } = props;
-  const showCenterContent = Boolean(centerContent) && hasRoomForGridControls;
 
   const buttons = hasRoomForGridControls ? (
     <>
@@ -103,14 +100,6 @@ export const internalRenderCustomToolbar = (
             </EuiFlexGroup>
           )}
         </EuiFlexItem>
-        {showCenterContent ? (
-          <EuiFlexItem
-            css={styles.centerContent}
-            data-test-subj="unifiedDataTableToolbarCenterContent"
-          >
-            {centerContent}
-          </EuiFlexItem>
-        ) : null}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             {Boolean(leftSide) && buttons}
@@ -160,13 +149,11 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = internal
 export const getRenderCustomToolbarWithElements = ({
   saveToDashboardButton,
   leftSide,
-  centerContent,
   bottomSection,
   wrap = true,
 }: {
   saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
-  centerContent?: React.ReactNode;
   bottomSection?: React.ReactElement;
   wrap?: boolean;
 }): UnifiedDataTableRenderCustomToolbar => {
@@ -175,7 +162,6 @@ export const getRenderCustomToolbarWithElements = ({
     internalRenderCustomToolbar({
       ...props,
       leftSide: leftSide || reservedSpace,
-      centerContent,
       bottomSection,
       saveToDashboardButton,
       wrap,
@@ -187,11 +173,6 @@ export const styles = {
     css({
       padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
     }),
-  centerContent: css({
-    flexBasis: 0,
-    minWidth: 0,
-    overflow: 'hidden',
-  }),
   controlButton: ({ euiTheme }: UseEuiTheme) =>
     euiTheme
       ? css({

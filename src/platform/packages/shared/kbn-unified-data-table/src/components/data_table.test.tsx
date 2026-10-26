@@ -1385,6 +1385,38 @@ describe('UnifiedDataTable', () => {
     );
   });
 
+  describe('getRowClassName', () => {
+    it(
+      'should add row classes by displayed row index and keep gridStyleOverride row classes',
+      async () => {
+        const props = getProps();
+        const [, highlightedRow] = props.rows ?? [];
+        await renderComponent({
+          ...props,
+          gridStyleOverride: { rowClasses: { 0: 'customRow', 1: 'otherRow' } },
+          getRowClassName: (record) =>
+            record.id === highlightedRow?.id ? 'highlightedRow' : undefined,
+        });
+
+        expect(getLastEuiDataGridProps().gridStyle?.rowClasses).toEqual({
+          0: 'customRow',
+          1: 'otherRow highlightedRow',
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should leave row classes unset without getRowClassName',
+      async () => {
+        await renderComponent(getProps());
+
+        expect(getLastEuiDataGridProps().gridStyle?.rowClasses).toBeUndefined();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
   describe('rowLineHeightOverride', () => {
     it(
       'should render the grid with the default row line height if no rowLineHeightOverride is provided',

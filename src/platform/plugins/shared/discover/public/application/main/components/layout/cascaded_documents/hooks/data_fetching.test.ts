@@ -12,7 +12,6 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { GROUP_NOT_SET_VALUE } from '@kbn/esql-utils';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { AggregateQuery } from '@kbn/es-query';
-import { FetchStatus } from '../../../../../types';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
 import { useGroupedCascadeData, useDataCascadeRowExpansionHandlers } from './data_fetching';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
@@ -281,8 +280,7 @@ describe('data_fetching related hooks', () => {
         cascadedLeafDataSource: undefined,
         esqlQuery,
         esqlVariables: undefined,
-        documentsFetchStatus: FetchStatus.PARTIAL,
-        documentsQuery: esqlQuery.esql,
+        histogramComparisonEnabled: false,
         timeRange: undefined,
         esqlApproximation: false,
         renderViewModeToggle: undefined,

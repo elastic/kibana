@@ -27,15 +27,10 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import type { ESQLDataGroupNode } from './types';
-import {
-  PatternComparisonMessage,
-  type PatternComparisonMessageState,
-} from '../../histogram_comparison/pattern_comparison_message';
 
 interface UseTableHeaderProps {
   renderViewModeToggle: CascadedDocumentsContext['renderViewModeToggle'];
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
-  patternComparison?: PatternComparisonMessageState;
 }
 
 interface GroupBySelectorRendererProps {
@@ -186,7 +181,6 @@ export function useGetGroupBySelectorRenderer({
 export function useEsqlDataCascadeHeaderComponent({
   renderViewModeToggle,
   cascadeGroupingChangeHandler,
-  patternComparison,
 }: UseTableHeaderProps) {
   const groupBySelectorRenderer = useGetGroupBySelectorRenderer({
     cascadeGroupingChangeHandler,
@@ -196,47 +190,21 @@ export function useEsqlDataCascadeHeaderComponent({
     NonNullable<DataCascadeProps<ESQLDataGroupNode, DataTableRecord>['customTableHeader']>
   >(
     ({ currentSelectedColumns, availableColumns }) => {
-      const groupBySelector = (
-        <EuiFlexItem grow={false}>
-          {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
-        </EuiFlexItem>
-      );
-
-      if (!patternComparison) {
-        return (
-          <EuiFlexGroup
-            justifyContent={renderViewModeToggle ? 'spaceBetween' : 'flexEnd'}
-            alignItems="center"
-            responsive={false}
-          >
-            {renderViewModeToggle && (
-              <EuiFlexItem>{renderViewModeToggle({ hitsCounterVariant: 'groups' })}</EuiFlexItem>
-            )}
-            {groupBySelector}
-          </EuiFlexGroup>
-        );
-      }
-
       return (
-        <EuiFlexGroup alignItems="center" responsive={false}>
+        <EuiFlexGroup
+          justifyContent={renderViewModeToggle ? 'spaceBetween' : 'flexEnd'}
+          alignItems="center"
+          responsive={false}
+        >
           {renderViewModeToggle && (
-            <EuiFlexItem grow={false}>
-              {renderViewModeToggle({ hitsCounterVariant: 'groups' })}
-            </EuiFlexItem>
+            <EuiFlexItem>{renderViewModeToggle({ hitsCounterVariant: 'groups' })}</EuiFlexItem>
           )}
-          <EuiFlexItem
-            css={css({
-              flexBasis: 0,
-              minWidth: 0,
-              overflow: 'hidden',
-            })}
-          >
-            <PatternComparisonMessage patternComparison={patternComparison} />
+          <EuiFlexItem grow={false}>
+            {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
           </EuiFlexItem>
-          {groupBySelector}
         </EuiFlexGroup>
       );
     },
-    [groupBySelectorRenderer, patternComparison, renderViewModeToggle]
+    [groupBySelectorRenderer, renderViewModeToggle]
   );
 }

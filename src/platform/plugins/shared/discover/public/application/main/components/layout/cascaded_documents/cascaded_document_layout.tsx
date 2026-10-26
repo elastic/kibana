@@ -37,12 +37,9 @@ import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_comp
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
 import { useCascadedDocumentsTelemetry } from './telemetry';
+import type { GroupHistogramComparison } from './blocks/use_row_header_components';
 import { useProfileAccessor } from '../../../../../context_awareness';
-import { useAppStateSelector } from '../../../state_management/redux';
-import { FetchStatus } from '../../../../types';
-import { usePatternComparisonMessageState } from '../histogram_comparison/pattern_comparison_message';
 import { useHistogramComparisonState } from '../histogram_comparison/use_histogram_comparison_state';
-import type { HistogramComparisonSelection } from '../../../../../context_awareness/types';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -62,31 +59,6 @@ export interface ESQLDataCascadeProps
 
 type EsqlDataCascade = typeof DataCascade<ESQLDataGroupNode>;
 
-const resolveHistogramComparisonPublication = ({
-  fetchStatus,
-  rowsQuery,
-  currentQuery,
-  expandedNode,
-  selection,
-}: {
-  fetchStatus: FetchStatus;
-  rowsQuery: string | undefined;
-  currentQuery: string;
-  expandedNode: ESQLDataGroupNode | undefined;
-  selection: HistogramComparisonSelection | undefined;
-}): 'publish' | 'preserve' | 'clear' => {
-  if (fetchStatus === FetchStatus.ERROR || !expandedNode) {
-    return 'clear';
-  }
-  if (fetchStatus !== FetchStatus.PARTIAL && fetchStatus !== FetchStatus.COMPLETE) {
-    return !selection ||
-      (selection.column === expandedNode.groupColumn && selection.value === expandedNode.groupValue)
-      ? 'preserve'
-      : 'clear';
-  }
-  return rowsQuery === currentQuery ? 'publish' : 'preserve';
-};
-
 const ESQLDataCascade = React.memo(
   ({ rows, columns, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
     const {
@@ -98,15 +70,52 @@ const ESQLDataCascade = React.memo(
       setDataCascadeUiState,
       cascadeGroupingChangeHandler,
       esqlQuery,
-      documentsFetchStatus,
-      documentsQuery,
+      histogramComparisonEnabled,
     } = useCascadedDocumentsContext();
+
+    const canComparePatterns =
+      histogramComparisonEnabled &&
+      queryMeta.groupByFields.length === 1 &&
+      queryMeta.groupByFields[0].type === 'categorize';
     const publishHistogramComparison = useProfileAccessor('publishHistogramComparison');
     const { selection: histogramComparisonSelection } = useHistogramComparisonState({
       query: esqlQuery,
       esqlVariables,
-      defaultHistogramAvailable: true,
+      defaultHistogramAvailable: canComparePatterns,
     });
+    const histogramComparison = useMemo<GroupHistogramComparison | undefined>(() => {
+      if (!canComparePatterns) {
+        return undefined;
+      }
+
+      const isSelected = (rowData: ESQLDataGroupNode) =>
+        histogramComparisonSelection?.column === rowData.groupColumn &&
+        histogramComparisonSelection.value === rowData.groupValue;
+
+      return {
+        isSelected,
+        toggle: (rowData) =>
+          publishHistogramComparison(() => {})(
+            isSelected(rowData)
+              ? undefined
+              : {
+                  label: rowData.groupValue,
+                  column: rowData.groupColumn,
+                  value: rowData.groupValue,
+                  query: esqlQuery,
+                  dataView,
+                  esqlVariables,
+                }
+          ),
+      };
+    }, [
+      canComparePatterns,
+      dataView,
+      esqlQuery,
+      esqlVariables,
+      histogramComparisonSelection,
+      publishHistogramComparison,
+    ]);
 
     const { data: cascadeGroupData, columnTypes } = useGroupedCascadeData({
       selectedCascadeGroups,
@@ -134,32 +143,17 @@ const ESQLDataCascade = React.memo(
       [cascadeGroupingChangeHandler, trackCascadeOptOut]
     );
 
-    const { chartHidden, breakdownField } = useAppStateSelector((state) => ({
-      chartHidden: Boolean(state.hideChart),
-      breakdownField: state.breakdownField,
-    }));
-    const canComparePatterns =
-      !breakdownField &&
-      queryMeta.groupByFields.length === 1 &&
-      queryMeta.groupByFields[0].type === 'categorize';
-    const patternComparison = usePatternComparisonMessageState({
-      query: esqlQuery,
-      esqlVariables,
-      defaultHistogramAvailable: canComparePatterns,
-      chartHidden,
-    });
-
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
       renderViewModeToggle,
       cascadeGroupingChangeHandler: cascadeGroupingChangeHandlerWithTracking,
-      patternComparison,
     });
 
     const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
       queryMeta,
       columns,
       togglePopover,
-      columnTypes
+      columnTypes,
+      histogramComparison
     );
 
     const cascadeLeafRowRenderer = useCallback<
@@ -212,70 +206,6 @@ const ESQLDataCascade = React.memo(
         unsubscribeSnapshot();
       };
     }, [dataCascadeRef, latestSetDataCascadeUiState]);
-
-    useEffect(() => {
-      const snapshotStore = dataCascadeRef?.getUISnapshotStore();
-
-      if (!snapshotStore || !canComparePatterns) {
-        publishHistogramComparison(() => {})(undefined);
-        return;
-      }
-
-      const publish = () => {
-        const snapshot = snapshotStore.getSnapshot();
-        const expanded = snapshot.expanded;
-        const expandedNodes =
-          expanded && typeof expanded !== 'boolean'
-            ? cascadeGroupData.filter((node) => expanded[node.id])
-            : [];
-        const expandedNode = expandedNodes.length === 1 ? expandedNodes[0] : undefined;
-        const decision = resolveHistogramComparisonPublication({
-          fetchStatus: documentsFetchStatus,
-          rowsQuery: documentsQuery,
-          currentQuery: esqlQuery.esql,
-          expandedNode,
-          selection: histogramComparisonSelection,
-        });
-
-        if (decision === 'preserve') {
-          return;
-        }
-
-        publishHistogramComparison(() => {})(
-          decision === 'publish' && expandedNode
-            ? {
-                label: expandedNode.groupValue,
-                column: expandedNode.groupColumn,
-                value: expandedNode.groupValue,
-                query: esqlQuery,
-                dataView,
-                esqlVariables,
-              }
-            : undefined
-        );
-      };
-
-      publish();
-      return snapshotStore.subscribe(publish);
-    }, [
-      cascadeGroupData,
-      canComparePatterns,
-      dataCascadeRef,
-      documentsFetchStatus,
-      documentsQuery,
-      dataView,
-      esqlQuery,
-      esqlQuery.esql,
-      esqlVariables,
-      histogramComparisonSelection,
-      publishHistogramComparison,
-    ]);
-
-    useEffect(() => {
-      return () => {
-        publishHistogramComparison(() => {})(undefined);
-      };
-    }, [publishHistogramComparison]);
 
     return (
       <DataCascade<ESQLDataGroupNode>

@@ -10,7 +10,9 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UnifiedHistogramChartProps } from '@kbn/unified-histogram';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { fetchEsql } from '../../data_fetching/fetch_esql';
 import type { HistogramComparisonContext } from '../../../../context_awareness/types';
@@ -23,12 +25,17 @@ const inspectorTitle = i18n.translate('discover.histogramComparison.inspectorTit
   defaultMessage: 'Pattern comparison',
 });
 
+const selectedPatternLabel = i18n.translate('discover.histogramComparison.selectedPattern', {
+  defaultMessage: 'Selected pattern',
+});
+
 /** Connects the profile's table selection to the histogram as an exact count series. */
 export const useHistogramComparison = (
   context: HistogramComparisonContext
 ): UnifiedHistogramChartProps['comparison'] => {
   const { data, expressions } = useDiscoverServices();
   const { scopedProfilesManager } = useScopedServices();
+  const publishHistogramComparison = useProfileAccessor('publishHistogramComparison');
   const controller = useHistogramComparisonController(context);
   const selection = useOptionalObservable(controller?.selection$);
 
@@ -38,14 +45,17 @@ export const useHistogramComparison = (
     }
     return {
       key: selection.key,
-      label: selection.label,
-      onResult: controller.onResult,
+      label: selectedPatternLabel,
+      description: selection.label,
+      onClear: () => publishHistogramComparison(() => {})(undefined),
       loadCounts: async ({ fetchParams, timeField, timeColumn, interval, signal }) => {
         const { dataSource, filters, timeRange, esqlVariables, isApproximate, requestAdapter } =
           fetchParams;
         const response = await fetchEsql({
           query: {
-            esql: `${selection.documentQuery} | STATS count = COUNT(*) BY \`${timeColumn}\` = BUCKET(\`${timeField}\`, ${interval})`,
+            esql: `${selection.documentQuery} | STATS count = COUNT(*) BY ${sanitazeESQLInput(
+              timeColumn
+            )} = BUCKET(${sanitazeESQLInput(timeField)}, ${interval})`,
           },
           filters,
           timeRange,
@@ -65,5 +75,5 @@ export const useHistogramComparison = (
         }));
       },
     };
-  }, [controller, data, expressions, scopedProfilesManager, selection]);
+  }, [controller, data, expressions, publishHistogramComparison, scopedProfilesManager, selection]);
 };

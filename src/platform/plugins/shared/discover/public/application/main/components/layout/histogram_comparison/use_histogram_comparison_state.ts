@@ -13,7 +13,6 @@ import { useProfileAccessor } from '../../../../../context_awareness';
 import type {
   HistogramComparisonContext,
   HistogramComparisonController,
-  HistogramComparisonResult,
   HistogramComparisonSelection,
 } from '../../../../../context_awareness/types';
 
@@ -48,10 +47,8 @@ export const useHistogramComparisonState = (
   context: HistogramComparisonContext
 ): {
   selection: HistogramComparisonSelection | undefined;
-  result: HistogramComparisonResult | undefined;
 } => {
   const controller = useHistogramComparisonController(context);
   const selection = useOptionalObservable(controller?.selection$);
-  const result = useOptionalObservable(controller?.result$);
-  return { selection, result };
+  return { selection };
 };

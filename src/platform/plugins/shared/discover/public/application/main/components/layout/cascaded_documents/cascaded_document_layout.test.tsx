@@ -19,7 +19,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { DataCascade, DataCascadeImplRef } from '@kbn/shared-ux-document-data-cascade';
 import type { ESQLDataGroupNode } from './blocks/types';
-import { FetchStatus } from '../../../../types';
+import type { useEsqlDataCascadeRowHeaderComponents } from './blocks';
 import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
@@ -64,7 +64,6 @@ jest.mock('@kbn/shared-ux-document-data-cascade', () => {
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLStatsQueryMeta: jest.fn(),
-  getCountSparkline: jest.fn(),
 }));
 
 jest.mock('@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils', () => ({
@@ -86,7 +85,9 @@ jest.mock('@kbn/esql-language', () => {
 });
 
 const mockGetESQLStatsQueryMeta = jest.requireMock('@kbn/esql-utils').getESQLStatsQueryMeta;
-const mockGetCountSparkline = jest.requireMock('@kbn/esql-utils').getCountSparkline as jest.Mock;
+const mockUseEsqlDataCascadeRowHeaderComponents: jest.MockedFunction<
+  typeof useEsqlDataCascadeRowHeaderComponents
+> = jest.requireMock('./blocks').useEsqlDataCascadeRowHeaderComponents;
 
 const defaultQueryMeta: ESQLStatsQueryMeta = {
   groupByFields: [{ field: 'category', type: 'column' }],
@@ -134,8 +135,7 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     cascadedLeafDataSource: undefined,
     esqlQuery,
     esqlVariables: undefined,
-    documentsFetchStatus: FetchStatus.PARTIAL,
-    documentsQuery: esqlQuery.esql,
+    histogramComparisonEnabled: false,
     timeRange: undefined,
     esqlApproximation: false,
     renderViewModeToggle: undefined,
@@ -196,9 +196,7 @@ describe('CascadedDocumentsLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDataCascadeProps.length = 0;
-    mockGetUISnapshotStore.mockReturnValue(null);
     mockGetESQLStatsQueryMeta.mockReturnValue(defaultQueryMeta);
-    mockGetCountSparkline.mockReturnValue(undefined);
   });
 
   describe('when persistedCascadeUiState does not exist (getDataCascadeUiState returns undefined)', () => {
@@ -275,40 +273,59 @@ describe('CascadedDocumentsLayout', () => {
     });
   });
 
-  it('does not parse row sparklines for histogram comparison', async () => {
-    const listeners = new Set<() => void>();
-    mockGetUISnapshotStore.mockReturnValue({
-      getSnapshot: () => ({
-        expanded: { row: true },
-        rowSelection: {},
-        connectedChildren: {},
-      }),
-      subscribe: (listener: () => void) => {
-        listeners.add(listener);
-        return () => {
-          listeners.delete(listener);
-        };
-      },
+  describe('histogram comparison', () => {
+    const patternQueryMeta: ESQLStatsQueryMeta = {
+      groupByFields: [{ field: 'Pattern', type: 'categorize' }],
+      appliedFunctions: [],
+    };
+    const lastHistogramComparison = () =>
+      mockUseEsqlDataCascadeRowHeaderComponents.mock.lastCall?.[4];
+
+    it('offers a comparison for a single CATEGORIZE group when enabled', async () => {
+      mockGetESQLStatsQueryMeta.mockReturnValue(patternQueryMeta);
+      const { Wrapper } = await createWrapper({ histogramComparisonEnabled: true });
+
+      render(
+        <Wrapper>
+          <CascadedDocumentsLayout {...defaultLayoutProps} />
+        </Wrapper>
+      );
+
+      const histogramComparison = lastHistogramComparison();
+      expect(histogramComparison).toBeDefined();
+      expect(
+        histogramComparison?.isSelected({
+          id: 'row-1',
+          groupColumn: 'Pattern',
+          groupValue: 'user .* logged in',
+          aggregatedValues: {},
+        })
+      ).toBe(false);
     });
-    mockGetCountSparkline.mockReturnValue({
-      column: 'Sparkline',
-      timeField: 'timestamp',
-      from: { kind: 'date', value: '2020-01-01T00:00:00.000Z' },
-      to: { kind: 'date', value: '2020-01-02T00:00:00.000Z' },
-      isSampled: false,
+
+    it('does not offer a comparison when disabled', async () => {
+      mockGetESQLStatsQueryMeta.mockReturnValue(patternQueryMeta);
+      const { Wrapper } = await createWrapper({ histogramComparisonEnabled: false });
+
+      render(
+        <Wrapper>
+          <CascadedDocumentsLayout {...defaultLayoutProps} />
+        </Wrapper>
+      );
+
+      expect(lastHistogramComparison()).toBeUndefined();
     });
-    const { Wrapper } = await createWrapper();
 
-    render(
-      <Wrapper>
-        <CascadedDocumentsLayout {...defaultLayoutProps} />
-      </Wrapper>
-    );
+    it('does not offer a comparison for a non-CATEGORIZE group', async () => {
+      const { Wrapper } = await createWrapper({ histogramComparisonEnabled: true });
 
-    expect(mockGetCountSparkline).not.toHaveBeenCalled();
-    listeners.forEach((listener) => listener());
-    listeners.forEach((listener) => listener());
+      render(
+        <Wrapper>
+          <CascadedDocumentsLayout {...defaultLayoutProps} />
+        </Wrapper>
+      );
 
-    expect(mockGetCountSparkline).not.toHaveBeenCalled();
+      expect(lastHistogramComparison()).toBeUndefined();
+    });
   });
 });
