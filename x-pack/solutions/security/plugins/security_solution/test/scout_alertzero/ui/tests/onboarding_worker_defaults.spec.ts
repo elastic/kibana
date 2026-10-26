@@ -30,13 +30,13 @@ spaceTest.describe(
     spaceTest.setTimeout(150_000);
 
     /** Advances past the intro and waits for the worker-selection step. */
-    const advanceToWorkers = async (page: import('@kbn/scout-security/ui').Page) => {
+    const advanceToWorkers = async (page: import('@kbn/scout-security').ScoutPage) => {
       await page.testSubj.locator('alertZeroOnboardingContinueButton').click();
       await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible();
     };
 
     const countTogglesOn = async (
-      page: import('@kbn/scout-security/ui').Page,
+      page: import('@kbn/scout-security').ScoutPage,
       workers: WorkerInfo[]
     ): Promise<number> => {
       let on = 0;

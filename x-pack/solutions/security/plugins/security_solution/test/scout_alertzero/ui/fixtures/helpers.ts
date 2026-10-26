@@ -115,7 +115,9 @@ export const createApiFromKbnClient = (kbnClient: KbnClient): AlertZeroApi => {
       return { statusCode: response.status, body: response.data };
     } catch (error) {
       if (error instanceof KbnClientRequesterError && error.status !== undefined) {
-        return { statusCode: error.status, body: (error.body ?? {}) as T };
+        // The requester error carries no structured body (the body is folded
+        // into its message text), so non-2xx callers get an empty object.
+        return { statusCode: error.status, body: {} as T };
       }
       throw error;
     }

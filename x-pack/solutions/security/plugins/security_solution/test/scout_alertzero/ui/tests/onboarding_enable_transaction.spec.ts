@@ -32,7 +32,7 @@ spaceTest.describe(
     spaceTest.setTimeout(240_000);
 
     /** Advances past the intro and clicks Enable and run. */
-    const enableAll = async (page: import('@kbn/scout-security/ui').Page) => {
+    const enableAll = async (page: import('@kbn/scout-security').ScoutPage) => {
       await page.testSubj.locator('alertZeroOnboardingContinueButton').click();
       await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible();
       await page.testSubj.locator('alertZeroOnboardingEnableButton').click();

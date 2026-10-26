@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import type { Page } from '@kbn/scout-security/ui';
+import type { ScoutPage } from '@kbn/scout-security';
 import {
   createUiOnboardingSpace,
   isWorkerEnableBlocked,
@@ -36,7 +36,7 @@ spaceTest.describe(
      * Advances past the intro and waits for the worker-selection step. Call
      * `page.goto(kbnUrl.app('alertzero', { space }))` before this.
      */
-    const advanceToWorkers = async (page: Page): Promise<void> => {
+    const advanceToWorkers = async (page: ScoutPage): Promise<void> => {
       await page.testSubj.locator('alertZeroOnboardingContinueButton').click();
       await expect(page.testSubj.locator('alertZeroOnboardingSelectedCount')).toBeVisible();
     };

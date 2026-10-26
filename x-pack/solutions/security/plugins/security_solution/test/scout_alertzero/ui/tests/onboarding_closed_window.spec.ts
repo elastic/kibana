@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import type { Page } from '@kbn/scout-security/ui';
+import type { ScoutPage } from '@kbn/scout-security';
 import {
   createUiOnboardingSpace,
   createWorkerServiceAccount,
@@ -60,7 +60,7 @@ spaceTest.describe(
      * Opens the app root, waits for the queue, expands the closed accordion.
      * The closed bucket starts collapsed (`useState(id !== CLOSED_GROUP_KEY)`).
      */
-    const openClosedBucket = async (page: Page): Promise<void> => {
+    const openClosedBucket = async (page: ScoutPage): Promise<void> => {
       const closedToggle = page.getByRole('button', { name: /Closed Actions/ });
       await closedToggle.click();
     };
