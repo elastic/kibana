@@ -13,7 +13,11 @@ import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto, WorkflowRunAsMode } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { workflowSystemIndex } from '../../../../server/storage/indices';
-import { authenticationStep, createServiceAccountSuite } from '../fixtures/service_account_suite';
+import {
+  authenticationStep,
+  commonHeaders,
+  createServiceAccountSuite,
+} from '../fixtures/service_account_suite';
 
 interface ManagedOptions {
   serviceAccountId?: string;
@@ -41,7 +45,7 @@ apiTest.describe(
     let editorHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth, apiClient, samlAuth, config, esClient }) => {
-      await setup({ apiClient, samlAuth, config, esClient });
+      await setup({ apiClient, samlAuth, requestAuth, config, esClient });
       const admin = await requestAuth.getApiKey('admin');
       const editor = await requestAuth.getApiKeyForCustomRole({
         elasticsearch: { cluster: [], indices: [] },
@@ -398,7 +402,7 @@ apiTest.describe(
             },
           ],
         });
-        const scopedHeaders = { ...getContext().headers, ...cookieHeader };
+        const scopedHeaders = { ...commonHeaders, ...cookieHeader };
         const suffix = `scope-${Date.now()}`;
         const local = await apiClient.post(path(suffix), {
           headers: scopedHeaders,

@@ -12,6 +12,7 @@ import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import {
   authenticationStep,
+  commonHeaders,
   createServiceAccountSuite,
   waitStep,
   workflowYaml,
@@ -35,15 +36,14 @@ apiTest.describe(
           boundChild ? 'bound' : 'unbound'
         } child approval does not change parent identity`,
         async ({ apiClient, samlAuth }) => {
-          const { headers, accountId, otherAccountId, create, run, wait, expectAccount } =
-            getContext();
+          const { accountId, otherAccountId, create, run, wait, expectAccount } = getContext();
 
           apiTest.setTimeout(180_000);
           const { cookieHeader } = await samlAuth.asInteractiveUser({
             elasticsearch: { cluster: [], indices: [] },
             kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
           });
-          const approverHeaders = { ...headers, ...cookieHeader };
+          const approverHeaders = { ...commonHeaders, ...cookieHeader };
           const childYaml = workflowYaml(otherAccountId, waitStep + authenticationStep);
           const childId = await create(
             apiClient,
