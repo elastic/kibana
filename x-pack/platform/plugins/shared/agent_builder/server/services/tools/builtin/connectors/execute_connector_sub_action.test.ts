@@ -468,6 +468,90 @@ describe('createExecuteConnectorSubActionTool', () => {
     ).toContain('Rate limited');
   });
 
+  describe('error hints by HTTP status', () => {
+    const subActionHint = 'Check the connector attachment for the correct sub-action names';
+
+    const executeWithErrorMeta = async (errorMeta?: Record<string, unknown>) => {
+      mockExecute.mockResolvedValue({
+        status: 'error',
+        message: 'Request failed',
+        serviceMessage: 'service said no',
+        ...(errorMeta ? { errorMeta } : {}),
+      });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        mockContext
+      );
+      return ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data;
+    };
+
+    it('tells the agent to wait the Retry-After delay on a 429, without the sub-action hint', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 429, retryAfterSeconds: 30 });
+
+      expect(data.message).toContain('rate limiting');
+      expect(data.message).toContain('Wait 30 seconds before retrying');
+      expect(data.message).not.toContain(subActionHint);
+      expect(data.metadata).toEqual({
+        connectorId: 'conn-123',
+        subAction: 'searchMessages',
+        serviceMessage: 'service said no',
+        statusCode: 429,
+        retryAfterSeconds: 30,
+      });
+    });
+
+    it('allows a single retry on a 429 without a retry delay', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 429 });
+
+      expect(data.message).toContain('rate limiting');
+      expect(data.message).toContain('Retry at most once after a short wait');
+      expect(data.message).not.toContain(subActionHint);
+      expect(data.metadata).not.toHaveProperty('retryAfterSeconds');
+    });
+
+    it.each([401, 403])('points at the connector credentials on a %i', async (statusCode) => {
+      const data = await executeWithErrorMeta({ statusCode });
+
+      expect(data.message).toContain("check the connector's credentials");
+      expect(data.message).not.toContain(subActionHint);
+      expect(data.metadata).toMatchObject({ statusCode });
+    });
+
+    it.each([500, 502, 503])('reports a failing service on a %i', async (statusCode) => {
+      const data = await executeWithErrorMeta({ statusCode });
+
+      expect(data.message).toContain('The service failed to handle the request');
+      expect(data.message).toContain('Retry at most once');
+      expect(data.message).not.toContain(subActionHint);
+    });
+
+    it.each([400, 404, 422])('keeps the sub-action hint on a %i', async (statusCode) => {
+      const data = await executeWithErrorMeta({ statusCode });
+
+      expect(data.message).toContain(subActionHint);
+      expect(data.metadata).toMatchObject({ statusCode });
+    });
+
+    it('keeps the sub-action hint and adds no HTTP metadata when there is no status', async () => {
+      const data = await executeWithErrorMeta();
+
+      expect(data.message).toContain(subActionHint);
+      expect(data.metadata).toEqual({
+        connectorId: 'conn-123',
+        subAction: 'searchMessages',
+        serviceMessage: 'service said no',
+      });
+    });
+
+    it('ignores a non-numeric status code', async () => {
+      const data = await executeWithErrorMeta({ statusCode: '429' });
+
+      expect(data.message).toContain(subActionHint);
+      expect(data.metadata).not.toHaveProperty('statusCode');
+    });
+  });
+
   it('returns success message when data is null', async () => {
     mockExecute.mockResolvedValue({ status: 'ok', data: null });
 
