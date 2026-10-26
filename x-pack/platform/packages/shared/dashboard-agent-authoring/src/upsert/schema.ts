@@ -41,7 +41,7 @@ const upsertPanelSchema = z.object({
   content: upsertPanelContentSchema
     .optional()
     .describe(
-      'Panel content. Required for new panels. For an existing panel, edits it (e.g. a request with a query describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move the panel.'
+      'Panel content. Required for new panels. For an existing panel, edits it in place and must match its kind. Prefer an edit to removing and re-adding the panel. For a request edit, put only the requested change in query (e.g. "make the error series blue"); unrelated settings are kept. To change the kind, remove the panel and add a new one with a new id. DSL, form-based, and other non-ES|QL Lens panels cannot be edited; they can only be replaced with a new panel. Omit to only move the panel.'
     ),
 });
 
@@ -58,7 +58,13 @@ export const upsertDashboardSchema = z.object({
     .describe(
       'Dashboard title. Required for a new dashboard. If the current title is empty, missing, or a placeholder such as "User Dashboard", invent one from the dashboard\'s contents.'
     ),
-  description: z.string().max(2048).optional().describe('Dashboard description. "" clears it.'),
+  description: z
+    .string()
+    .max(2048)
+    .optional()
+    .describe(
+      'Short summary of what the dashboard shows. Set it when creating a dashboard. "" clears it.'
+    ),
   time_range: timeRangeSchema
     .optional()
     .describe(
@@ -69,21 +75,28 @@ export const upsertDashboardSchema = z.object({
     .max(50)
     .optional()
     .describe(
-      'Sections to create or update. Sections group related panels under a collapsible title.'
+      'Sections to create or update. Sections group related panels under a collapsible title. Group panels by purpose, and order sections as summary metrics, then trends, then breakdowns, or use one section per domain with that order inside it. A section holds only panels of its purpose. Use sections for roughly 6 or more visualization panels; keep smaller dashboards flat.'
     ),
   panels: z
     .array(upsertPanelSchema)
     .max(100)
     .optional()
     .describe(
-      'Panels to create, edit, or move between sections, by id. Panels you leave out stay unchanged.'
+      `Panels to create, edit, or move between sections, by id. Panels you leave out stay unchanged.
+On a new dashboard, cover what the data supports: summary metrics (metric or gauge), trends over time (xy line or area), and breakdowns or distributions (xy bar, data_table, pie, treemap, heatmap, tag_cloud). Add as many panels as the data and the request justify, each with a clear purpose. For a vague request, cover the breadth of the mapped fields rather than a minimal set. A markdown panel can add context.
+Pick the first panel kind that fits:
+- Lens (source "request", renderer omitted): metrics, time series, bar, area, pie, and tables. chartType is required for a new Lens panel.
+- Vega (source "request", renderer "vega"): scatter or bubble plots, small multiples, layered or combination charts, or when asked for Vega.
+- markdown (source "config"): static text or links with no data.
+- custom content (source "request", renderer "custom_content"): a last resort for HTML layouts that Lens and Vega cannot express, such as status boards or KPI cards with badges, or when asked for custom HTML. It shows live data only from its own esql.
+ML anomaly panels are also authored by value with source "config". Source "attachment" places a visualization already created in the same Agent Builder conversation, by its id; other callers cannot use it.`
     ),
   controls: z
     .array(controlInputSchema)
     .max(20)
     .optional()
     .describe(
-      'Controls to add or replace, by id. Controls you leave out stay unchanged. Use options_list_control for categorical/keyword fields, range_slider_control for numeric fields, time_slider_control for time sub-range filtering (at most one per dashboard).'
+      'Controls to add or replace, by id. Controls you leave out stay unchanged. Controls are filters pinned above the panels that let viewers narrow the data without editing queries. On a new dashboard, add 3-5 options_list_control dropdowns on low-cardinality keyword fields the panels group or filter by (e.g. service.name, host.name, region), not identifiers such as trace or request ids. Skip controls when the dashboard covers a single entity, such as one host. Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back one; add fewer or none when no mapped field fits. Use range_slider_control sparingly, for a numeric field worth filtering across panels. Use time_slider_control for time sub-range filtering, at most one per dashboard.'
     ),
   remove: z
     .array(idSchema)

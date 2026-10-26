@@ -141,16 +141,11 @@ export const generateDashboardTool = ({
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
-    description: `Create or update a dashboard by describing the desired changes, keyed by id.
+    description: `Create or update a Kibana dashboard by describing the desired changes, keyed by id. Everything you leave out stays unchanged. Make all changes in one call when possible.
 
 Returns an id for the dashboard plus a compact summary (not the full dashboard). Pass that id as \`dashboardId\` to edit the dashboard later; do not copy the dashboard into follow-up tool calls.
 
-- \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
-- \`sections\`: sections to create or update.
-- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
-- \`controls\`: interactive filters pinned above the dashboard (dropdown, range slider, or time slider) to add, or to replace by id.
-- \`remove\`: ids of panels, sections, or controls to remove.
-- \`layout\`: the user's own arrangement or size request. Omit it otherwise.
+Set \`title\`, \`description\` and \`time_range\`, create or update \`sections\`, \`panels\` and \`controls\`, and list ids to delete in \`remove\`. Each field's description says how to use it well.
 
 Panel positions and sizes are set automatically after the changes are applied, and the summary shows the resulting \`grid\` of every panel. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel instead of updating one is visible. A panel only moved or resized by the layout step is not listed as updated.`,
     schema: generateDashboardSchema,

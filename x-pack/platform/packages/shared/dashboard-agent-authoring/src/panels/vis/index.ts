@@ -87,7 +87,7 @@ export const lensPanelContentSchema = visPanelContentBaseSchema.extend({
     .nativeEnum(SupportedChartType)
     .optional()
     .describe(
-      'The Lens chart type to create. Choose it from the dashboard chart type guidance. Required for new panels. On an existing panel, omit it to keep the chart type, or set it when the request changes the chart family, such as from xy to pie.'
+      "The Lens chart type that fits the data's shape and the request. Required for new panels. On an existing panel, omit it to keep the chart type, or set it when the request changes the chart family, such as from xy to pie."
     ),
   applyChartRules: z
     .boolean()
