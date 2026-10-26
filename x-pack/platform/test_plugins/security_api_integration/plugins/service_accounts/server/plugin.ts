@@ -27,14 +27,16 @@ interface StartDependencies {
 }
 
 const NOOP_TASK_TYPE = 'serviceAccountsTest:noop';
+/** The ID the security plugin schedules its stale binding cleanup task under. */
+const BINDING_CLEANUP_TASK_ID = 'service_account_binding_cleanup';
 
 export class ServiceAccountsTestPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   setup(core: CoreSetup<StartDependencies>, { security, taskManager }: SetupDependencies): void {
-    // Resolves jobs by the prefix of their ID, so tests can pick what Core gets back: a job that
-    // is gone, one that cannot be checked, a path Core must refuse, a title alone, or a title and
-    // a path.
+    // Resolves jobs by the prefix of their ID, so tests can pick what the management page and the
+    // stale binding cleanup get back: a job that is gone, one that cannot be checked, a path Core
+    // must refuse, a title alone, or a title and a path.
     core.security.serviceAccounts.registerWorkloadType({
       type: 'job',
       name: 'Test job',
@@ -114,6 +116,27 @@ export class ServiceAccountsTestPlugin
         const [, { taskManager: taskManagerStart }] = await core.getStartServices();
         await taskManagerStart.removeIfExists(request.params.taskId);
         return response.noContent();
+      }
+    );
+    // Runs the security plugin's stale binding cleanup now, rather than at its next interval.
+    router.post(
+      {
+        path: '/internal/service_accounts_test/_binding_cleanup',
+        options: { access: 'internal' },
+        security: {
+          authz: { enabled: false, reason: 'Test endpoint running a system task on demand' },
+        },
+        validate: false,
+      },
+      async (_context, _request, response) => {
+        const [, { taskManager: taskManagerStart }] = await core.getStartServices();
+        try {
+          await taskManagerStart.runSoon(BINDING_CLEANUP_TASK_ID);
+          return response.noContent();
+        } catch (error) {
+          // Task Manager refuses while the task is already running. The caller tries again.
+          return response.conflict({ body: { message: error.message } });
+        }
       }
     );
     // Reports how Core classified the request's principal. Authorization is intentionally off:
