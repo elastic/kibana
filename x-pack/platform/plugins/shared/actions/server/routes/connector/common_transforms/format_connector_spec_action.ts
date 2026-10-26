@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionScope } from '@kbn/connector-specs';
+import type { ConnectorSpecActionSummary } from '../../../../common/connector_spec';
 import type { GetConnectorSpecResponseV1 } from '../../../../common/routes/connector/response';
 
 export const formatConnectorSpecAction = ({
@@ -13,14 +13,9 @@ export const formatConnectorSpecAction = ({
   description,
   isTool,
   scope,
-}: {
-  name: string;
-  description?: string;
-  isTool: boolean;
-  scope?: ActionScope;
-}): GetConnectorSpecResponseV1['actions'][number] => ({
+}: ConnectorSpecActionSummary): GetConnectorSpecResponseV1['actions'][number] => ({
   name,
   is_tool: isTool,
   ...(description !== undefined ? { description } : {}),
-  ...(scope !== undefined ? { scope } : {}),
+  scope,
 });

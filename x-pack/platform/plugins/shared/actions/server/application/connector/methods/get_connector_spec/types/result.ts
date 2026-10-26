@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import type { ActionScope, ConnectorMetadata } from '@kbn/connector-specs';
+import type { ConnectorMetadata } from '@kbn/connector-specs';
+import type { ConnectorSpecDetail } from '../../../../../../common/connector_spec';
 
-export interface GetConnectorSpecActionResult {
-  name: string;
-  description?: string;
-  isTool: boolean;
-  scope: ActionScope;
-  inputSchema: Record<string, unknown>;
-}
-
-export interface GetConnectorSpecResult {
+export type GetConnectorSpecResult = Pick<
+  ConnectorSpecDetail,
+  | 'isTestable'
+  | 'authTypeIds'
+  | 'hasInboundEvents'
+  | 'isInboundOnly'
+  | 'isEarsExperimental'
+  | 'actions'
+  | 'skill'
+> & {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
-  isTestable: boolean;
-  authTypeIds: string[];
-  hasInboundEvents: boolean;
-  isInboundOnly: boolean;
-  isEarsExperimental: boolean;
-  actions: GetConnectorSpecActionResult[];
-  /** Bundled agent skill text for server callers. Never sent over HTTP. */
-  skill?: string;
-}
+};

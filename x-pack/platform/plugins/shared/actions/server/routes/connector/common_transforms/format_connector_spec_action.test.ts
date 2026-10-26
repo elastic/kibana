@@ -24,10 +24,11 @@ describe('formatConnectorSpecAction', () => {
     });
   });
 
-  it('omits optional fields when undefined', () => {
-    expect(formatConnectorSpecAction({ name: 'ping', isTool: false })).toEqual({
+  it('omits description when undefined', () => {
+    expect(formatConnectorSpecAction({ name: 'ping', isTool: false, scope: 'read' })).toEqual({
       name: 'ping',
       is_tool: false,
+      scope: 'read',
     });
   });
 });
