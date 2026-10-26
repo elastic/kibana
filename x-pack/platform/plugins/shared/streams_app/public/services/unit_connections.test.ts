@@ -25,7 +25,7 @@ const destination = (id: string): RouteTarget => ({ kind: 'destination', id });
 const pipelineTarget = (id: string): RouteTarget => ({ kind: 'pipeline', id });
 
 const configuredSources = new Set(['nop-input', 'otlp-input', 'bulk-input']);
-const configuredDestinations = new Set(['debug-out', 'es-logs', 'es-metrics']);
+const configuredDestinations = new Set(['debug-out', 'es-logs', 'es-metrics', 'es-traces']);
 
 const unitWith = (pipelines: Unit['unit']['pipelines']): Unit => ({
   ...createDefaultUnit(),
@@ -85,6 +85,47 @@ describe('unit connections', () => {
     expect(canConnectSourceToDestination(connected, 'otlp-input', 'es-metrics')).toBe(false);
     expect(connectSourceToDestination(connected, 'otlp-input', 'es-metrics')).toBe(connected);
   });
+
+  it('keeps a second destination on the same source pipeline', () => {
+    const unit: Unit = {
+      ...unitWith([]),
+      unit: {
+        ...unitWith([]).unit,
+        sources: [
+          {
+            id: 'otlp-input',
+            type: 'otlp',
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+          },
+        ],
+        destinations: [
+          { id: 'es-logs', type: 'elasticsearch', supported_telemetry: ['logs'] },
+          { id: 'es-metrics', type: 'elasticsearch', supported_telemetry: ['metrics'] },
+          { id: 'es-traces', type: 'elasticsearch', supported_telemetry: ['traces'] },
+        ],
+      },
+    };
+    const connected = connectSourceToDestination(unit, 'otlp-input', 'es-logs');
+
+    expect(connected.unit.pipelines[0]?.supported_telemetry).toEqual(['logs']);
+    expect(canConnectSourceToDestination(connected, 'otlp-input', 'es-metrics')).toBe(true);
+    expect(canConnectSourceToDestination(connected, 'otlp-input', 'es-traces')).toBe(true);
+
+    const withMetrics = connectSourceToDestination(connected, 'otlp-input', 'es-metrics');
+    const next = connectSourceToDestination(withMetrics, 'otlp-input', 'es-traces');
+
+    expect(next.unit.pipelines[0]?.config).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'destinations', value: ['es-logs', 'es-metrics', 'es-traces'] },
+    ]);
+    expect(next.unit.pipelines[0]?.supported_telemetry).toEqual(['logs', 'metrics', 'traces']);
+    expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
+      { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'direct' },
+      { sourceId: 'otlp-input', destinationId: 'es-metrics', forwarding: 'direct' },
+      { sourceId: 'otlp-input', destinationId: 'es-traces', forwarding: 'direct' },
+    ]);
+  });
+
   it('lets several sources share one destination', () => {
     const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
     const next = connectSourceToDestination(connected, 'bulk-input', 'es-logs');

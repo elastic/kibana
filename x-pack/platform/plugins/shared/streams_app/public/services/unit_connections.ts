@@ -121,7 +121,12 @@ const findSourcePipelineIndex = (pipelines: Unit['unit']['pipelines'], sourceId:
       readIdentifiers(pipeline.config, 'sources').includes(sourceId)
   );
 
-const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit => {
+const writePipeline = (
+  unit: Unit,
+  pipelineIndex: number,
+  config: PipelineConfig,
+  supportedTelemetry?: UnitPipeline['supported_telemetry']
+): Unit => {
   const pipelines = unit.unit.pipelines.flatMap((pipeline, index) => {
     if (index !== pipelineIndex) {
       return [pipeline];
@@ -129,9 +134,30 @@ const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig
     if (!pipelineForwards(config)) {
       return [];
     }
-    return [{ ...pipeline, config }];
+    return [
+      {
+        ...pipeline,
+        config,
+        ...(supportedTelemetry ? { supported_telemetry: [...supportedTelemetry] } : {}),
+      },
+    ];
   });
   return replacePipelines(unit, pipelines);
+};
+
+const unionTelemetry = (
+  current: UnitPipeline['supported_telemetry'],
+  added: UnitPipeline['supported_telemetry']
+): UnitPipeline['supported_telemetry'] => {
+  const seen = new Set(current);
+  const next = [...current];
+  for (const signal of added) {
+    if (!seen.has(signal)) {
+      seen.add(signal);
+      next.push(signal);
+    }
+  }
+  return next;
 };
 
 const usedIds = (unit: Unit): Set<string> => {
@@ -301,9 +327,22 @@ export const canConnectSourceToDestination = (
   unit: Unit,
   sourceId: string,
   destinationId: string
-): boolean =>
-  telemetryFit(unit, sourceId, destinationId) !== 'incompatible' &&
-  !hasSourceConnection(unit, sourceId);
+): boolean => {
+  const fit = telemetryFit(unit, sourceId, destinationId);
+  if (fit === 'incompatible') {
+    return false;
+  }
+  const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
+  if (pipelineIndex === -1) {
+    return true;
+  }
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  if (pipelineUsesRoutes(pipeline)) {
+    const routes = readRoutes(pipeline.config);
+    return !routesIncludeDestination(routes, destinationId) && !catchAllBlocksDestination(routes);
+  }
+  return !readIdentifiers(pipeline.config, 'destinations').includes(destinationId);
+};
 
 /** Gives an unconnected source its own direct pipeline to one destination. */
 export const connectSourceToDestination = (
@@ -314,9 +353,48 @@ export const connectSourceToDestination = (
   if (!canConnectSourceToDestination(unit, sourceId, destinationId)) {
     return unit;
   }
-  return appendSourcePipeline(unit, sourceId, pipelineTelemetry(unit, sourceId, destinationId), [
-    { name: 'destinations', value: [destinationId] },
-  ]);
+  const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
+  if (pipelineIndex === -1) {
+    return appendSourcePipeline(unit, sourceId, pipelineTelemetry(unit, sourceId, destinationId), [
+      { name: 'destinations', value: [destinationId] },
+    ]);
+  }
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  const sources = readIdentifiers(pipeline.config, 'sources');
+  const nextTelemetry = unionTelemetry(
+    pipeline.supported_telemetry,
+    pipelineTelemetry(unit, sourceId, destinationId)
+  );
+  if (pipelineUsesRoutes(pipeline)) {
+    const routes = addDestinationToRoutes(readRoutes(pipeline.config), destinationId);
+    if (sources.length === 1) {
+      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes), nextTelemetry);
+    }
+    return appendSourcePipeline(
+      detachSource(unit, pipelineIndex, sourceId),
+      sourceId,
+      nextTelemetry,
+      [...processorEntries(pipeline.config), { name: 'routes', value: routes }]
+    );
+  }
+  const destinations = readIdentifiers(pipeline.config, 'destinations');
+  if (sources.length === 1) {
+    return writePipeline(
+      unit,
+      pipelineIndex,
+      withIdentifiers(pipeline.config, 'destinations', [...destinations, destinationId]),
+      nextTelemetry
+    );
+  }
+  return appendSourcePipeline(
+    detachSource(unit, pipelineIndex, sourceId),
+    sourceId,
+    nextTelemetry,
+    [
+      ...processorEntries(pipeline.config),
+      { name: 'destinations', value: [...destinations, destinationId] },
+    ]
+  );
 };
 
 /** Drops one drawn line from the source's direct pipeline. */

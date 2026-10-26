@@ -86,7 +86,7 @@ export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
     displayName: 'ServiceNow',
-    description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.metadata.description', {
+    description: i18n.translate('connectorSpecs.servicenowSearch.metadata.description', {
       defaultMessage:
         'Create, update, and search records, incidents, security incidents, events, and attachments in ServiceNow',
     }),
@@ -774,7 +774,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.test.description', {
+    description: i18n.translate('connectorSpecs.servicenowSearch.test.description', {
       defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',
     }),
     handler: async (ctx) => {

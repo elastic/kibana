@@ -174,6 +174,48 @@ describe('ProposalsService', () => {
   });
 
   describe('create', () => {
+    it('refuses a to-do that would run an action workflow', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      // "I've applied" would otherwise approve the gate and run the action again.
+      await expect(
+        service.create(
+          {
+            conversationId: 'conv-1',
+            comment: 'Tune the noisy rule',
+            actionWorkflowId: 'system-alertzero-action-create-rule',
+            actionInput: { name: 'Suspicious PowerShell' },
+            category: 'todo',
+            confidence: 'medium',
+            origin: 'nightshift',
+          },
+          { spaceId: SPACE_ID, request }
+        )
+      ).rejects.toThrow(ProposalInvalidActionInputError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('accepts a to-do without an action', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Revert the pool-size config change',
+          category: 'todo',
+          confidence: 'medium',
+          origin: 'nightshift',
+        },
+        { spaceId: SPACE_ID, request }
+      );
+
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ category: 'todo' }) })
+      );
+    });
+
     it("titles the attachment card with the proposal's own title over the action's name", async () => {
       const storage = createStorage();
       const { service, attachmentsClient } = createService(storage);
@@ -3317,5 +3359,113 @@ describe('ProposalsService', () => {
         'all shards failed'
       );
     });
+  });
+});
+
+describe('ProposalsService.reopen', () => {
+  const manual = (overrides: Partial<ProposalDocument> = {}) =>
+    baseDocument({
+      actionWorkflowId: undefined,
+      actionInput: undefined,
+      category: 'todo',
+      origin: 'nightshift',
+      decision: 'approved',
+      status: 'no_action',
+      decidedBy: analyst('ava'),
+      ...overrides,
+    });
+
+  /** Serves documents by id, so the successor appears once the gate "creates" it. */
+  const createChainStorage = (original: ProposalDocument) => {
+    const storage = createStorage();
+    const documents = new Map<string, ProposalDocument>([['proposal-1', original]]);
+    storage.search.mockImplementation(
+      async ({ query }: { query: { bool: { filter: Array<{ ids?: { values: string[] } }> } } }) => {
+        const id = query.bool.filter.find((clause) => clause.ids)?.ids?.values[0];
+        const document = id === undefined ? undefined : documents.get(id);
+        return { hits: { hits: document && id ? [searchHit(document, id)] : [] } };
+      }
+    );
+    storage.index.mockImplementation(
+      async ({ id, document }: { id: string; document: ProposalDocument }) => {
+        documents.set(id, document);
+        return { _id: id };
+      }
+    );
+    return { storage, documents };
+  };
+
+  const withGate = (documents: Map<string, ProposalDocument>) => {
+    const workflowsApi = {
+      ...createWorkflowsApi(),
+      executeWorkflow: jest.fn(
+        async ({ inputs }: { inputs: { proposalId: string; title: string } }) => {
+          // What the gate's `createProposal` step writes: a fresh root of its own.
+          documents.set(inputs.proposalId, {
+            ...manual({ decision: undefined, decidedBy: undefined, status: 'pending' }),
+            rootProposalId: inputs.proposalId,
+            title: inputs.title,
+            workflowExecutionId: 'exec-2',
+          });
+          return { workflowExecutionId: 'exec-2' };
+        }
+      ),
+    };
+    return workflowsApi;
+  };
+
+  it('re-offers the proposal through a new gate and links the two', async () => {
+    const { storage, documents } = createChainStorage(manual());
+    const workflowsApi = withGate(documents);
+    const { service } = createService(storage, workflowsApi);
+
+    const { proposalId } = await service.reopen('proposal-1', SPACE_ID, request);
+
+    expect(workflowsApi.executeWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'system-create-proposal',
+        waitForCompletion: false,
+        inputs: expect.objectContaining({
+          conversationId: 'conv-1',
+          title: 'Tune the noisy rule',
+          origin: 'nightshift',
+          // Still a to-do, so "I've applied" is offered on it again.
+          category: 'todo',
+          proposalId,
+        }),
+      })
+    );
+    // The original keeps its decision; it is only pointed at its successor.
+    expect(documents.get('proposal-1')).toMatchObject({
+      decision: 'approved',
+      status: 'no_action',
+      supersededBy: proposalId,
+    });
+    expect(documents.get(proposalId)).toMatchObject({
+      status: 'pending',
+      rootProposalId: 'proposal-1',
+      supersedes: 'proposal-1',
+      revision: 2,
+    });
+  });
+
+  it.each<[string, Partial<ProposalDocument>]>([
+    ['is not a to-do', { category: 'tune' }],
+    [
+      'ran an action',
+      { status: 'succeeded', actionWorkflowId: 'system-alertzero-action-create-rule' },
+    ],
+    ['is undecided', { decision: undefined, status: 'pending' }],
+    ['was dismissed', { decision: 'dismissed' }],
+    ['was already re-offered', { supersededBy: 'proposal-2' }],
+  ])('refuses a proposal that %s', async (_, overrides) => {
+    const { storage, documents } = createChainStorage(manual(overrides));
+    const workflowsApi = withGate(documents);
+    const { service } = createService(storage, workflowsApi);
+
+    await expect(service.reopen('proposal-1', SPACE_ID, request)).rejects.toBeInstanceOf(
+      ProposalConflictError
+    );
+    expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
   });
 });
