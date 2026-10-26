@@ -652,6 +652,72 @@ describe('Replace custom field', () => {
       });
     });
 
+    it('does not re-validate untouched extended_fields that were stored with an invalid value', async () => {
+      // A checkbox-group value written before it was validated (e.g. a comma-separated string)
+      // must not make an unrelated linked custom field edit fail.
+      const caseWithInvalidStoredValue = {
+        ...theCase,
+        attributes: {
+          ...theCase.attributes,
+          extended_fields: { pick_as_keyword: 'a,b' },
+        },
+      };
+
+      const clientArgsWithFlag = createCasesClientMockArgs();
+      clientArgsWithFlag.config = { ...clientArgsWithFlag.config, templates: { enabled: true } };
+      clientArgsWithFlag.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          ...mirrorFieldDefinitions.fieldDefinitions,
+          {
+            fieldDefinitionId: 'fd-pick',
+            name: 'pick',
+            owner: mockCases[0].attributes.owner,
+            description: '',
+            isGlobal: true,
+            definition:
+              'name: pick\ntype: keyword\ncontrol: CHECKBOX_GROUP\nlabel: Pick\nmetadata:\n  options:\n    - a\n    - b\n',
+          },
+        ],
+        total: 3,
+      });
+      clientArgsWithFlag.services.caseService.getCase.mockResolvedValue(caseWithInvalidStoredValue);
+      clientArgsWithFlag.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+        { [mockCases[0].id]: 1 }
+      );
+      clientArgsWithFlag.services.caseService.patchCase.mockResolvedValue({
+        ...caseWithInvalidStoredValue,
+      });
+
+      const casesClientLocal = createCasesClientMock();
+      casesClientLocal.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: mockCases[0].attributes.owner,
+          customFields: [
+            { key: 'first_key', type: CustomFieldTypes.TEXT, label: 'First', required: true },
+            { key: 'second_key', type: CustomFieldTypes.TOGGLE, label: 'Second', required: false },
+          ],
+        },
+      ]);
+
+      await expect(
+        replaceCustomField(
+          {
+            caseId: mockCases[0].id,
+            customFieldId: 'first_key',
+            request: { caseVersion: mockCases[0].version ?? '', value: 'new_value' },
+          },
+          clientArgsWithFlag,
+          casesClientLocal
+        )
+      ).resolves.not.toThrow();
+
+      const [[patchArgs]] = clientArgsWithFlag.services.caseService.patchCase.mock.calls;
+      expect(patchArgs.updatedAttributes.extended_fields).toEqual({
+        first_key_as_keyword: 'new_value',
+        pick_as_keyword: 'a,b',
+      });
+    });
+
     it('records the paired storage key on the patch payload for user-action suppression', async () => {
       const clientArgsWithFlag = createCasesClientMockArgs();
       clientArgsWithFlag.config = { ...clientArgsWithFlag.config, templates: { enabled: true } };
