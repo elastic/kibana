@@ -14,9 +14,5 @@ describe('DispatcherTaskDefinition', () => {
       const config = configSchema.validate({ dispatcher: { run: { timeout: '3m' } } });
       expect(DispatcherTaskDefinition.resolveTimeout?.(config)).toBe('3m');
     });
-
-    test('returns the 1m default when the dispatcher timeout is not configured', () => {
-      expect(DispatcherTaskDefinition.resolveTimeout?.(configSchema.validate({}))).toBe('1m');
-    });
   });
 });

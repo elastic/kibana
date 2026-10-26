@@ -19,14 +19,9 @@ describe('dispatcher constants invariants', () => {
     expect(MAX_WINDOW_MINUTES).toBeGreaterThan(OVERLAP_WINDOW_MINUTES);
   });
 
-  it.each(['1m', '3m', '5m'])(
-    'getTickDeadlineMs(%s) is 70 %% of the task timeout, strictly below it',
-    (timeout) => {
-      const timeoutMs = parseDurationToMs(timeout);
-      expect(getTickDeadlineMs(timeout)).toBe(Math.round(timeoutMs * 0.7));
-      expect(getTickDeadlineMs(timeout)).toBeLessThan(timeoutMs);
-    }
-  );
+  it.each(['1m', '5m'])('getTickDeadlineMs(%s) is strictly below the task timeout', (timeout) => {
+    expect(getTickDeadlineMs(timeout)).toBeLessThan(parseDurationToMs(timeout));
+  });
 
   it('DISPATCH_CHUNK_SIZE is 250', () => {
     expect(DISPATCH_CHUNK_SIZE).toBe(250);

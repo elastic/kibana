@@ -102,20 +102,18 @@ describe('FetchAlertsStep', () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchAlertsStep(
       queryService,
-      createDispatcherConfigAccessor({ run: { alerts: { max: 2 } } })
+      createDispatcherConfigAccessor({ run: { alerts: { max: 1000 } } })
     );
 
-    mockEsClient.esql.query.mockResolvedValueOnce(
-      createDispatchableAlertEventsResponse([
-        createAlert({ alert_id: 'e1' }),
-        createAlert({ alert_id: 'e2' }),
-      ])
+    const alerts = Array.from({ length: 1000 }, (_, i) =>
+      createAlert({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
     );
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(alerts));
 
     const result = await step.execute(createDispatcherPipelineState(), logger);
 
     const request = mockEsClient.esql.query.mock.calls[0][0];
-    expect(request.query.trimEnd().endsWith('| LIMIT 2')).toBe(true);
+    expect(request.query.trimEnd().endsWith('| LIMIT 1000')).toBe(true);
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.scan?.truncated).toBe(true);

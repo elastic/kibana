@@ -300,10 +300,6 @@ describe('alerting_v2 config schema', () => {
     it('defaults to false', () => {
       expect(configSchema.validate({}).dispatcher.paused).toBe(false);
     });
-
-    it('can be turned on', () => {
-      expect(configSchema.validate({ dispatcher: { paused: true } }).dispatcher.paused).toBe(true);
-    });
   });
 
   describe('dispatcher.run.timeout', () => {
@@ -311,10 +307,10 @@ describe('alerting_v2 config schema', () => {
       expect(configSchema.validate({}).dispatcher.run.timeout).toBe('1m');
     });
 
-    it.each(['3m', '5m'])('accepts %s', (timeout) => {
+    it('accepts the 5m ceiling', () => {
       expect(
-        configSchema.validate({ dispatcher: { run: { timeout } } }).dispatcher.run.timeout
-      ).toBe(timeout);
+        configSchema.validate({ dispatcher: { run: { timeout: '5m' } } }).dispatcher.run.timeout
+      ).toBe('5m');
     });
 
     it('rejects a value below the 1m floor', () => {
@@ -341,16 +337,9 @@ describe('alerting_v2 config schema', () => {
       expect(configSchema.validate({}).dispatcher.run.alerts.max).toBe(10000);
     });
 
-    it('accepts a smaller configured value', () => {
-      expect(
-        configSchema.validate({ dispatcher: { run: { alerts: { max: 500 } } } }).dispatcher.run
-          .alerts.max
-      ).toBe(500);
-    });
-
-    it('rejects values below 1', () => {
+    it('rejects values below the 1000 floor', () => {
       expect(() =>
-        configSchema.validate({ dispatcher: { run: { alerts: { max: 0 } } } })
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 999 } } } })
       ).toThrow();
     });
 

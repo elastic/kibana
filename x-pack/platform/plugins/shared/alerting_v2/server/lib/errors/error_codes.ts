@@ -474,8 +474,9 @@ export const ALERTING_LOG_CODES = {
   /**
    * `xpack.alerting_v2.dispatcher.paused` is true: every dispatcher tick is a
    * no-op and the watermark is held, so no alerting v2 notification is sent.
-   * The backlog is dispatched late once the setting is removed. Logged once
-   * per Kibana start; remove the override after the incident.
+   * The backlog is dispatched late once the setting is removed, except events
+   * older than the cold-start seed when no watermark was persisted yet.
+   * Logged once per Kibana start; remove the override after the incident.
    */
   DISPATCHER_PAUSED: 'DISPATCHER_PAUSED',
 

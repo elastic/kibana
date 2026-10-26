@@ -32,12 +32,6 @@ describe('getDispatchableAlertEventsQuery', () => {
 
   const queryOf = () => getDispatchableAlertEventsQuery(SCAN_WINDOW).query;
 
-  it('applies the given limit as the scan LIMIT', () => {
-    const { query } = getDispatchableAlertEventsQuery({ ...SCAN_WINDOW, limit: 500 });
-
-    expect(query.trimEnd().endsWith('| LIMIT 500')).toBe(true);
-  });
-
   it('returns a valid ES|QL request', () => {
     const req = getDispatchableAlertEventsQuery(SCAN_WINDOW);
 

@@ -152,6 +152,7 @@ const retentionSchema = schema.object({
 
 const MIN_DISPATCHER_TIMEOUT = '1m';
 const MAX_DISPATCHER_TIMEOUT = '5m';
+const MIN_DISPATCHER_ALERTS_PER_TICK = 1000;
 const MAX_DISPATCHER_ALERTS_PER_TICK = 10000;
 
 const validateDispatcherTimeout = (duration: string): string | undefined => {
@@ -173,8 +174,10 @@ const dispatcherSchema = schema.object({
   /**
    * Operator kill switch. While true, every dispatcher tick is a no-op: no
    * alert is scanned or notified and the watermark is held, so the backlog is
-   * dispatched late once the switch is removed. Logged once per Kibana start
-   * as `DISPATCHER_PAUSED`; revert the override after the incident.
+   * dispatched late once the switch is removed. Without a persisted watermark
+   * (first tick after a deploy) resume cold-starts and older events are lost.
+   * Logged once per Kibana start as `DISPATCHER_PAUSED`; revert the override
+   * after the incident.
    */
   paused: schema.boolean({ defaultValue: false }),
   run: schema.object({
@@ -194,11 +197,13 @@ const dispatcherSchema = schema.object({
        * before their deadline under alert overload: smaller batches complete
        * and the watermark keeps advancing. The drain rate is roughly this many
        * alerts per ~5 s tick, so too low a value lets lag grow under sustained
-       * load. Defaults to the ES|QL maximum of 10000.
+       * load. Below the alerts one rule run writes with the same `@timestamp`,
+       * the truncation edge cannot pass them; the 1000 floor makes that rarer.
+       * Defaults to the ES|QL maximum of 10000.
        */
       max: schema.number({
         defaultValue: MAX_DISPATCHER_ALERTS_PER_TICK,
-        min: 1,
+        min: MIN_DISPATCHER_ALERTS_PER_TICK,
         max: MAX_DISPATCHER_ALERTS_PER_TICK,
       }),
     }),
