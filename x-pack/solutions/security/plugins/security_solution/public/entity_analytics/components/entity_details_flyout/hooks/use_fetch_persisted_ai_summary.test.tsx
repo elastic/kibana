@@ -57,7 +57,7 @@ describe('useFetchPersistedAiSummary', () => {
       expect(result.current.canRead).toBe(true);
     });
     expect(fetchPersistedAiSummary).toHaveBeenCalledWith({
-      params: { entityType: 'user', entityIdentifier: 'user:alice' },
+      params: { entityType: 'user', entityIdentifier: 'user:alice', mode: 'single' },
       signal: expect.any(AbortSignal),
       context: {
         child: {
@@ -67,6 +67,27 @@ describe('useFetchPersistedAiSummary', () => {
         },
       },
     });
+  });
+
+  it('requests the resolution-group variant when mode is resolved', async () => {
+    fetchPersistedAiSummary.mockResolvedValueOnce(persisted);
+
+    const { result } = renderHook(
+      () =>
+        useFetchPersistedAiSummary({
+          entityType: 'user',
+          entityIdentifier: 'user:alice',
+          mode: 'resolved',
+        }),
+      { wrapper: TestWrapper }
+    );
+
+    await waitFor(() => expect(result.current.summary).toEqual(persisted.summary));
+    expect(fetchPersistedAiSummary).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: { entityType: 'user', entityIdentifier: 'user:alice', mode: 'resolved' },
+      })
+    );
   });
 
   it('exposes canRead: false with a null summary when the user lacks metadata read access', async () => {

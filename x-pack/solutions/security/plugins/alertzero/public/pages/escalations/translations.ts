@@ -43,3 +43,9 @@ export const ESCALATIONS_EMPTY_BANNER = Object.freeze({
     defaultMessage: 'Example',
   }),
 });
+
+export const ESCALATIONS_OPEN_NOTE = Object.freeze({
+  emptyTitle: i18n.translate('xpack.alertzero.escalationsPage.openNote.emptyTitle', {
+    defaultMessage: 'No open escalations',
+  }),
+});

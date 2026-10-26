@@ -54,13 +54,15 @@ interface EscalationQueueProps {
    * Cmd/middle-click to open in a new tab and showing the URL on hover.
    */
   getHref?: (escalation: EscalationQueueItem) => string | undefined;
+  /** When false, cards are inert and show a tooltip naming the missing privilege. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
   /** An Impact filter is applied, so an empty list means "no match" rather than "no escalations". */
   isFiltered?: boolean;
   /**
-   * Number of escalations loaded from the server before the Impact filter, so "Show more (N)"
-   * stays accurate while `escalations` is narrowed. Defaults to `escalations.length`.
+   * Explanatory content rendered at the bottom of the section body. When the bucket is empty
+   * and unfiltered it replaces the "No escalations" line.
    */
-  loadedCount?: number;
+  note?: React.ReactNode;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -94,19 +96,14 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     onClickCard,
     selectedConversationId,
     getHref,
+    canOpenInvestigationDetails = true,
     isFiltered = false,
-    loadedCount,
+    note,
   }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
-    const remaining = serverTotal - (loadedCount ?? escalations.length);
+    const remaining = serverTotal - escalations.length;
     const showLoadMore = onLoadMore !== undefined && remaining > 0;
-
-    // Filtered, the badge counts the matching rows. Rows still to load may match too, so
-    // the figure is a floor then.
-    const badgeCount = isFiltered
-      ? `${escalations.length}${remaining > 0 ? '+' : ''}`
-      : serverTotal;
 
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -121,8 +118,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {/* Unfiltered, show the server total so the badge reflects the full bucket. */}
-          <EuiBadge color="hollow">{badgeCount}</EuiBadge>
+          <EuiBadge color="hollow">{serverTotal}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -160,6 +156,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
                   onClickCard={onClickCard}
                   isSelected={escalation.id === selectedConversationId}
                   href={getHref?.(escalation)}
+                  canOpenInvestigationDetails={canOpenInvestigationDetails}
                 />
               ))}
               {/* Sibling of the cards so the last card keeps its divider above it. */}
@@ -167,6 +164,9 @@ export const EscalationQueue = memo<EscalationQueueProps>(
             </EuiFlexGroup>
           </>
         );
+      }
+      if (note && !isFiltered) {
+        return loadMoreButton;
       }
       return (
         <>
@@ -198,6 +198,18 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           }}
         >
           {bodyContent}
+          {note && !error ? (
+            <div
+              css={css`
+                padding: ${euiTheme.size.base};
+              `}
+              data-test-subj={`escalationQueueNote-${status}`}
+            >
+              <EuiText size="xs" color="subdued">
+                {note}
+              </EuiText>
+            </div>
+          ) : null}
         </StyledAccordion>
       </EuiPanel>
     );

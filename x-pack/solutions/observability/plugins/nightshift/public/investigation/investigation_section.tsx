@@ -32,6 +32,7 @@ import type {
   InvestigationSectionState,
 } from '../hooks/use_investigation_sections';
 import { useKibana } from '../hooks/use_kibana';
+import { InvestigationCardActions } from './investigation_card_actions';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
@@ -146,7 +147,7 @@ const SectionPanel = ({
       css={css`
         box-sizing: border-box;
         overflow: hidden;
-        border-radius: ${euiTheme.size.s};
+        border-radius: ${euiTheme.border.radius.panel};
       `}
     >
       {children}
@@ -274,6 +275,7 @@ const SectionRows = ({
                 investigation={investigation}
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
+                actions={<InvestigationCardActions investigation={investigation} />}
               />
             )}
           </EuiFlexItem>

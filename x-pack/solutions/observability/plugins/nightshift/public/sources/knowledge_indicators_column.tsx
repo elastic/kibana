@@ -14,11 +14,14 @@ import { useStreamFeatures } from '../data/knowledge_indicators/use_stream_featu
 interface KnowledgeIndicatorsColumnProps {
   sourceId: string;
   streamOnboardingResult?: SignificantEventsWorkflowStatusResult;
+  /** The count belongs to the previous query until the new run is reported. */
+  isAwaitingRun: boolean;
 }
 
 export function KnowledgeIndicatorsColumn({
   sourceId,
   streamOnboardingResult,
+  isAwaitingRun,
 }: KnowledgeIndicatorsColumnProps) {
   const { features } = useStreamFeatures(sourceId, [streamOnboardingResult]);
 
@@ -30,7 +33,7 @@ export function KnowledgeIndicatorsColumn({
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {features.length ? <EuiI18nNumber value={features.length} /> : '—'}
+      {!isAwaitingRun && features.length ? <EuiI18nNumber value={features.length} /> : '—'}
     </EuiText>
   );
 }

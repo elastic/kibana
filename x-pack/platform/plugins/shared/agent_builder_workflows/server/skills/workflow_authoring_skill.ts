@@ -153,12 +153,12 @@ narrowest \`ai.*\` step for the task: \`ai.summarize\` for summarization,
 
 These steps manage knowledge indicators (KIs) in Context Engine AI indices. All of them require the \`contextEngine:enabled\` advanced setting (fails with \`FeatureDisabledError\` when off) and the Context Engine write privilege (fails with \`PermissionError\` when the workflow user lacks it).
 
-- **context-engine.createKi**: Index a KI document into an AI index. Inputs: \`ai_index_id\`, \`ki\`, optional \`ki_id\` (a re-run with the same id replaces the KI on an index and appends a revision on a data stream), optional \`verifiers\`. \`ki\` may carry \`references\` (\`{ uri, relation, description }\`, relation \`derived_from\`, \`relates_to\` or \`supersedes\`) and \`expires_at\`. Provenance is stamped by the step. When the AI index does not exist yet, it is created automatically. Output: the document \`id\` of the created KI, plus \`verification\` (\`passed\` and per-verifier \`results\`) when \`verifiers\` was given. When any verifier fails, the KI is not written and \`id\` is absent.
+- **context-engine.createKi**: Index a KI document into an AI index. Inputs: \`ai_index_id\`, \`ki\`, optional \`ki_id\` (a re-run with the same id replaces the KI on an index and appends a revision on a data stream), optional \`verifiers\`. \`ki\` may carry \`references\` (\`{ uri, relation, description }\`, relation \`derived_from\`, \`relates_to\` or \`supersedes\`) and \`expires_at\`. Provenance is stamped by the step. When the AI index does not exist yet, it is created automatically. Output: the document \`id\` of the created KI, plus \`verification\` (\`passed\` and per-verifier \`results\`) when \`verifiers\` was given. When any verifier fails, the KI is written with lifecycle status \`verification_failed\` and excluded from search.
 - **context-engine.updateKi**: Partially update an existing KI. Inputs: \`ai_index_id\`, \`ki_id\`, \`ki\` (only the provided fields change; arrays are replaced; a null \`expires_at\` clears it), optional \`lifecycle.status\` (\`active\` or \`deleted\`) and \`force\` (update a deleted KI). Output: \`id\` and \`result\` (\`updated\` or \`noop\`). Fails when the KI or AI index does not exist (unlike \`createKi\`, the index is not auto-created), or when the KI is deleted and \`force\` is not set.
 - **context-engine.deleteKi**: Delete a KI. Inputs: \`ai_index_id\`, \`ki_id\`. On an index the document is removed; on a data stream the KI is marked deleted and earlier revisions remain. Fails when the KI or AI index does not exist.
 - **context-engine.verifyKi**: Run all applicable Context Engine KI verifiers against a KI without writing anything — use it for report-only checks or before a write. Input: \`ki\`. Output: \`passed\` (true only when every applicable verifier passed) and \`results\`, one entry per verifier that ran, each with \`verifier\` (its id), \`passed\`, and a \`reason\` on failure. A verifier only applies when the KI carries the field it checks — for example, ES|QL verifiers read \`attributes.esql\` (a query string or an array of query strings). When no verifier applies, the step passes with empty \`results\`.
 
-To avoid persisting a KI that fails verification, pass \`verifiers\` to \`createKi\`; the step runs them before writing and skips the write when any fails:
+To keep a KI that fails verification out of search, pass \`verifiers\` to \`createKi\`; the step runs them before writing and writes a failing KI as \`verification_failed\`:
 
 \`\`\`yaml
 - name: create_ki
@@ -177,7 +177,7 @@ To avoid persisting a KI that fails verification, pass \`verifiers\` to \`create
   type: console
   if: "steps.create_ki.output.verification.passed : false"
   with:
-    message: "KI not written: {{ steps.create_ki.output.verification.results | json }}"
+    message: "KI written as verification_failed: {{ steps.create_ki.output.verification.results | json }}"
 \`\`\`
 
 When verification fails, report \`steps.create_ki.output.verification.results\` — each failing entry names the verifier and the reason it failed.
@@ -241,7 +241,7 @@ Useful filters:
 
 ### Verifying ES Queries After Generation
 
-\`${platformCoreTools.generateWorkflow}\` does not know the schema of the user's indices, so an ES query it produces may reference field names that don't exist. **Only when the workflow is about to run** (the user wants to execute or save it), and only for \`elasticsearch.search\` / \`elasticsearch.esql.query\` steps that target a specific user-named index, you can call \`${workflowTools.executeStep}\` on that step to confirm it returns rows. If it returns zero rows, ask the user to confirm the index/fields rather than silently broadening the query. Do NOT pre-discover index fields before calling \`${platformCoreTools.generateWorkflow}\` — that turns one tool call into many.
+\`${platformCoreTools.generateWorkflow}\` does not know the schema of the user's indices, so an ES query it produces may reference field names that don't exist. **Only when the workflow is about to run** (the user wants to execute or save it), and only for \`elasticsearch.search\` / \`elasticsearch.esql.query\` steps that target a specific user-named index, you can call \`${workflowTools.executeStep}\` on that step to confirm it returns rows. If it returns zero rows, ask the user to confirm the index/fields rather than silently broadening the query. Validation also checks ES|QL against this cluster: an "Unknown data source" / "Unknown index" error on a user-named index can mean the index does not exist yet, so confirm with the user instead of renaming the index or replacing the step. Do NOT pre-discover index fields before calling \`${platformCoreTools.generateWorkflow}\` — that turns one tool call into many.
 
 If a step references previous step outputs during a debug execution, provide \`contextOverride\` with mock data:
 \`{ "steps": { "previous_step": { "output": { "data": [...] } } } }\`

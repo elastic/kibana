@@ -27,12 +27,12 @@ const getTodayRange = (now: Date): RunRange => {
   return { startedAfter: start.toISOString(), startedBefore: end.toISOString() };
 };
 
-const useRunTotals = (ids: string[], { startedAfter, startedBefore }: RunRange) => {
+const useTodayUsage = (ids: string[], { startedAfter, startedBefore }: RunRange) => {
   const queries = useAutomationsRunsInRange(ids, startedAfter, startedBefore);
   return new Map(
     ids.flatMap((id, index) => {
-      const total = queries[index]?.data?.total;
-      return total === undefined ? [] : [[id, total] as const];
+      const usedToday = queries[index]?.data?.usedToday;
+      return usedToday === undefined ? [] : [[id, usedToday] as const];
     })
   );
 };
@@ -75,6 +75,6 @@ export const useAutomationUsage = (
   return {
     runRange,
     runCounts: useRunCounts(ids, runRange),
-    usedToday: useRunTotals(ids, today),
+    usedToday: useTodayUsage(ids, today),
   };
 };

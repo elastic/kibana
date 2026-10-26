@@ -314,7 +314,7 @@ Default per extraction process (`DEFAULT_CONFIG_BY_MODE` in `domain/config/merge
 | `priority` | `defer` | No intentional loss of identity records; falls behind under load, then catches up |
 | `nonPriority` | `drop` | Best-effort over high volume; stays current |
 
-For non-priority, the volume fields (`maxLogsPerPage`, `maxTimeWindowSize`, `maxLogsPerWindow`, `maxLogsPerWindowCapBehavior`, `docsLimit`) are not read from the store-wide or per-type config. Only `nonPriorityLogExtractionConfig` can set them (`NON_PRIORITY_EXCLUSIVE_FIELDS`).
+For non-priority, `maxLogsPerWindowCapBehavior` is not read from the store-wide or per-type config — only `nonPriorityLogExtractionConfig` can set it (`NON_PRIORITY_EXCLUSIVE_FIELDS`). The other volume fields (`maxLogsPerPage`, `maxTimeWindowSize`, `maxLogsPerWindow`, `docsLimit`) are shared: they're inherited from the store-wide or per-type config the same way `frequency` is, and `nonPriorityLogExtractionConfig` remains available to give non-priority a different value when that's wanted.
 
 ### Disabling the cap
 

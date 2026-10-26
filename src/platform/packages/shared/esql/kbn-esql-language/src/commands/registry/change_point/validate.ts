@@ -46,7 +46,7 @@ export const validate = (
   if (!onColumn && !hasDefaultOnColumn) {
     messages.push({
       location: changePointCommand.location,
-      text: i18n.translate('kbn-esql-language.esql.validation.changePointOnFieldMissing', {
+      text: i18n.translate('esqlLanguage.esql.validation.changePointOnFieldMissing', {
         defaultMessage: '[CHANGE_POINT] Default {defaultOnColumnName} column is missing',
         values: { defaultOnColumnName },
       }),

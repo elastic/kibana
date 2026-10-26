@@ -31,6 +31,7 @@ import {
   LegacyRemoteLogExtractionStateType,
 } from './domain/saved_objects';
 import { EntityResolutionRuleType } from './domain/resolution/rules/saved_object';
+import { CustomResolutionRuleType } from './domain/resolution/rules';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { getMaintainerStatus } from './domain/entity_maintainers';
@@ -122,6 +123,7 @@ export class EntityStorePlugin
     core.savedObjects.registerType(LegacyRemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
     core.savedObjects.registerType(EntityResolutionRuleType);
+    core.savedObjects.registerType(CustomResolutionRuleType);
 
     registerEntityMaintainerTask({
       taskManager: plugins.taskManager,

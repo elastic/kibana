@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { queryUnreadStatus } from './query_unread_status';
 
 const setup = (documents: Array<{ notification_id: string; '@timestamp': string }>) => {
-  const search = jest.fn().mockResolvedValue({
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.search.mockResolvedValue({
     hits: { hits: documents.map((source, index) => ({ _id: `doc-${index}`, _source: source })) },
-  });
-  const dataStreams = dataStreamServiceMock.createStartContract();
-  dataStreams.initializeClient.mockResolvedValue({ search } as never);
+  } as never);
 
   return {
-    deps: { dataStreams, logger: loggingSystemMock.createLogger() },
-    search,
+    deps: { esClient, logger: loggingSystemMock.createLogger() },
+    search: esClient.search,
   };
 };
 
@@ -57,6 +57,8 @@ describe('queryUnreadStatus', () => {
     });
 
     expect(search).toHaveBeenCalledWith({
+      index: NOTIFICATION_DATA_STREAM_NAME,
+      ignore_unavailable: true,
       query: {
         bool: { filter: [{ range: { '@timestamp': { gt: '2026-07-15T00:00:00.000Z' } } }] },
       },

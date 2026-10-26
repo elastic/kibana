@@ -201,7 +201,7 @@ export const assertCommonPropertiesShown = (properties: Partial<PrebuiltRuleAsse
   cy.get(RULE_NAME_OVERRIDE_TITLE).should('have.text', 'Rule name override');
   cy.get(RULE_NAME_OVERRIDE_VALUE).should('have.text', properties.rule_name_override);
 
-  cy.get(THREAT_TITLE).should('have.text', 'MITRE ATT&CK™');
+  cy.get(THREAT_TITLE).should('have.text', 'Threat mappings');
   properties.threat?.forEach((threatItem, index) => {
     cy.get(THREAT_TACTIC).eq(index).should('contain', threatItem.tactic.id);
   });

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 // NOTE: This is the configuration to apply the typescript eslint parser
 // in order to lint typescript files with eslint.
 // Some IDEs could not be running eslint with the correct extensions yet
@@ -11,6 +30,8 @@ module.exports = {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
+      // `ban/*` and `@eslint-community/eslint-comments/*` rules run in oxlint (.oxlint/ban.mts,
+      // .oxlint/eslint_comments.mts); registered so `eslint-disable` directives naming them resolve.
       plugins: ['@typescript-eslint', 'ban', 'import', '@eslint-community/eslint-comments'],
 
       env: {
@@ -53,18 +74,9 @@ module.exports = {
           // ##
           // Replacing old @typescript-eslint/ban-types
           '@typescript-eslint/no-unsafe-function-type': 'off',
-          '@typescript-eslint/no-wrapper-object-types': 'off',
           '@typescript-eslint/no-empty-object-type': 'off',
           // ##
           camelcase: 'off',
-          "@typescript-eslint/consistent-type-imports": [
-            "error",
-            {
-              "prefer": "type-imports",
-              "disallowTypeAnnotations": false,
-              "fixStyle": "separate-type-imports"
-            }
-          ],
           '@typescript-eslint/naming-convention': [
             'error',
             {
@@ -146,48 +158,25 @@ module.exports = {
               modifiers: ['requiresQuotes'],
             },
           ],
-          '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': [
             'error',
             {
               default: ['public-static-field', 'static-field', 'instance-field'],
             },
           ],
-          '@typescript-eslint/no-shadow': 'error',
           // rely on typescript
           'no-undef': 'off',
 
-          '@typescript-eslint/triple-slash-reference': [
-            'error',
-            {
-              path: 'never',
-              types: 'never',
-              lib: 'never',
-            },
-          ],
           '@typescript-eslint/no-var-requires': 'error',
-          eqeqeq: ['error', 'always', { null: 'ignore' }],
           'import/order': [
             'error',
             {
               groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
             },
           ],
-          'max-classes-per-file': ['error', 1],
-          'no-bitwise': 'error',
-          'no-console': 'error',
-          'no-throw-literal': 'error',
           'no-undef-init': 'error',
-          'no-unsafe-finally': 'error',
           'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
-          '@typescript-eslint/no-unused-expressions': ["error", { "allowTaggedTemplates": true }],
-          'no-var': 'error',
-          'object-shorthand': 'error',
-          'one-var': ['error', 'never'],
-          'prefer-const': 'error',
-          'prefer-rest-params': 'error',
-          radix: 'error',
           'spaced-comment': [
             'error',
             'always',
@@ -196,20 +185,6 @@ module.exports = {
             },
           ],
           // Old tslint yml override or defined rules
-          'ban/ban': [
-            2,
-            { name: ['describe', 'only'], message: 'No exclusive suites.' },
-            { name: ['it', 'only'], message: 'No exclusive tests.' },
-            { name: ['test', 'only'], message: 'No exclusive tests.' },
-            { name: ['testSuggestions', 'only'], message: 'No exclusive tests.' },
-            { name: ['testErrorsAndWarnings', 'only'], message: 'No exclusive tests.' },
-          ],
-          'import/no-default-export': 'error',
-
-          // `no-unused-disable` is intentionally not enabled: oxlint (`node scripts/lint`) honors
-          // `eslint-disable` directives for the rules it owns, which ESLint would report as unused
-          // and strip on autofix.
-          '@eslint-community/eslint-comments/no-unused-enable': 'error',
           'no-restricted-syntax': [
             'error',
             {

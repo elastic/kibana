@@ -56,6 +56,7 @@ describe('When defining a kibana role for Endpoint security access', { tags: '@e
         'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',
         'Event Filters Filter out endpoint events that you do not need or want stored in Elasticsearch.Event Filters sub-feature privilegeAllReadNone',
         'Endpoint Exceptions Reduce false positive alerts, and keep Elastic Defend from blocking standard processes.Endpoint Exceptions sub-feature privilegeAllReadNone',
+        'Custom YARA Signatures Management of custom YARA signatures used with Elastic Defend.Custom YARA Signatures sub-feature privilegeAllReadNone',
         'Elastic Defend Policy Management Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.Elastic Defend Policy Management sub-feature privilegeAllReadNone',
         'Elastic Defend Scripts Management Management of scripts used with Elastic Defend response actions.Elastic Defend Scripts Management sub-feature privilegeAllReadNone',
         'Response Actions History Access the history of response actions performed on endpoints.Response Actions History sub-feature privilegeAllReadNone',

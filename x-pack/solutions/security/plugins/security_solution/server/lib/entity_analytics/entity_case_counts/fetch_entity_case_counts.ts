@@ -114,20 +114,26 @@ const fetchUnclosedCaseIds = async (
  * The open and in-progress Security cases of the space per entity id. Entities without such
  * cases are left out. Check `canReadSecurityCases` first: the repository is internal.
  */
+/** A group's cases are the distinct cases of its main entity and members, so a shared case counts once. */
 export const fetchEntityCaseCounts = async (
   internalRepository: ISavedObjectsRepository,
   casesClient: CasesClient,
   spaceId: string,
-  entityIds: readonly string[]
+  entityIds: readonly string[],
+  memberIds: Readonly<Record<string, readonly string[]>> = {}
 ): Promise<Map<string, number>> => {
   if (entityIds.length === 0) return new Map();
-  const caseIdsByEntity = await fetchCaseIdsByEntity(internalRepository, spaceId, entityIds);
+  const attachedIds = [...new Set([...entityIds, ...Object.values(memberIds).flat()])];
+  const caseIdsByEntity = await fetchCaseIdsByEntity(internalRepository, spaceId, attachedIds);
   const unclosed = await fetchUnclosedCaseIds(casesClient, [
     ...new Set([...caseIdsByEntity.values()].flat()),
   ]);
   return new Map(
-    [...caseIdsByEntity].flatMap(([entityId, caseIds]) => {
-      const count = caseIds.filter((id) => unclosed.has(id)).length;
+    entityIds.flatMap((entityId) => {
+      const caseIds = new Set(
+        [entityId, ...(memberIds[entityId] ?? [])].flatMap((id) => caseIdsByEntity.get(id) ?? [])
+      );
+      const count = [...caseIds].filter((id) => unclosed.has(id)).length;
       return count > 0 ? [[entityId, count] as const] : [];
     })
   );

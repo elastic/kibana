@@ -145,11 +145,7 @@ describe('useAddToCase', () => {
     const buildAttachments = jest.fn().mockReturnValue(attachments);
 
     act(() => {
-      result.current.onAddToCase({
-        alertIds: mockAlertIds,
-        markdownComments: mockMarkdownComments,
-        getAttachments: buildAttachments,
-      });
+      result.current.onAddToCase({ getAttachments: buildAttachments });
     });
 
     const { getAttachments } = mockOpenSelectCaseModal.mock.calls[0][0];
@@ -160,7 +156,7 @@ describe('useAddToCase', () => {
     expect(buildAttachments).toHaveBeenCalledWith(theCase);
   });
 
-  it.each([true, false])('forwards the case path on success when isNewCase is %s', (isNewCase) => {
+  it.each([true, false])('forwards the case on success when isNewCase is %s', (isNewCase) => {
     const onSuccess = jest.fn();
     const useCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
       open: jest.fn(),
@@ -186,9 +182,11 @@ describe('useAddToCase', () => {
     );
 
     const { onSuccess: onCaseSelectorSuccess } = useCasesAddToExistingCaseModal.mock.calls[0][0];
-    onCaseSelectorSuccess({}, isNewCase);
+    const theCase = { id: 'case-1', totalAlerts: 12 } as unknown as CaseUI;
+    onCaseSelectorSuccess(theCase, isNewCase);
 
-    expect(onSuccess).toHaveBeenCalledWith(isNewCase);
+    // The case is what the caller needs to report on the attach that just landed.
+    expect(onSuccess).toHaveBeenCalledWith(theCase, isNewCase);
   });
 
   it('preserves the create-case prefill in the selector modal', () => {

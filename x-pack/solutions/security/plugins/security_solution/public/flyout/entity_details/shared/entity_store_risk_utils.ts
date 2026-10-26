@@ -52,11 +52,16 @@ export function getHeaderRiskLevel(
   return (risk?.calculated_level ?? 'Unknown') as RiskSeverity;
 }
 
-/** Current entity signals used for AI summary staleness checks. */
+/**
+ * Current entity signals used for AI summary staleness checks. In resolved mode the summary is
+ * generated from the resolution-group risk, so that is the score the snapshot must track.
+ */
 export function buildEntitySummaryStalenessEntitySnapshot(
-  record?: EntityStoreRecord | null
+  record?: EntityStoreRecord | null,
+  { useResolutionRisk = false }: { useResolutionRisk?: boolean } = {}
 ): EntitySummaryStalenessEntitySnapshot {
-  const risk = record ? getRiskFromEntityRecord(record) : null;
+  const getRisk = useResolutionRisk ? getResolutionRiskFromEntityRecord : getRiskFromEntityRecord;
+  const risk = record ? getRisk(record) : null;
   return {
     // Matches flyout risk summary (`entity.risk.calculated_score_norm`), not raw calculated_score.
     riskScoreNorm: risk?.calculated_score_norm ?? null,

@@ -99,7 +99,11 @@ describe('DirectorService', () => {
         alertEvents: [],
       });
 
-      expect(result).toEqual({ alertEvents: [], stats: { newEpisodeIds: [] } });
+      expect(result).toEqual({
+        alertEvents: [],
+        stats: { newEpisodeIds: [] },
+        previousAlertStateByGroupHash: new Map(),
+      });
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
 
@@ -1126,6 +1130,35 @@ describe('DirectorService', () => {
         expect(c).toBe('existing-episode-c');
         expect(new Set(result.stats.newEpisodeIds)).toEqual(new Set([a, b]));
       });
+    });
+  });
+
+  describe('previous alert state', () => {
+    it('returns the persisted state it loaded, keyed by group_hash, alongside a 1:1 batch', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'no_data',
+        alert: undefined,
+      });
+      const previous = {
+        last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+        last_status: 'no_data' as const,
+        last_episode_id: 'held-episode',
+        last_episode_status: alertEpisodeStatus.active,
+        last_episode_status_count: null,
+        group_hash: 'hash-1',
+      };
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([previous]));
+
+      const result = await directorService.run({
+        spaceId: 'default',
+        rule: createRuleResponse({ no_data: { strategy: 'keep_last' } }),
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
+
+      expect(result.alertEvents).toHaveLength(1);
+      expect(result.previousAlertStateByGroupHash.get('hash-1')).toMatchObject(previous);
     });
   });
 });

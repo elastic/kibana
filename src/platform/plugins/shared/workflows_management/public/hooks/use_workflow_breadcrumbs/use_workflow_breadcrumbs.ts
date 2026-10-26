@@ -50,16 +50,7 @@ export const useSetWorkflowsBreadcrumbs = () => {
         serverless.setBreadcrumbs(trailingBreadcrumbs);
       } else {
         const allBreadcrumbs: ChromeBreadcrumb[] = [
-          {
-            text: workflowsTitle,
-            href: application?.getUrlForApp(PLUGIN_ID),
-            onClick: (event) => {
-              if (event) {
-                event.preventDefault();
-              }
-              application?.navigateToApp(PLUGIN_ID);
-            },
-          },
+          { text: workflowsTitle, href: application?.getUrlForApp(PLUGIN_ID) },
           ...trailingBreadcrumbs,
         ];
         chrome.setBreadcrumbs(allBreadcrumbs, { project: { value: trailingBreadcrumbs } });

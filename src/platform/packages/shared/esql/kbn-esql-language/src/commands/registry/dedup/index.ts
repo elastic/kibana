@@ -21,7 +21,7 @@ export const dedupCommand = {
   methods: dedupCommandMethods,
   metadata: {
     docPreserving: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.dedupDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.dedupDoc', {
       defaultMessage: "A surrogate for LIMIT 1 BY '<'all-fields'>'.",
     }),
     declaration: 'DEDUP',

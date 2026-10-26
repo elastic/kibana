@@ -79,12 +79,56 @@ describe('AlertingV2RulesLocatorDefinition', () => {
       });
     });
 
-    it('resolves list with templateId', async () => {
+    it('resolves list filtered to the rules derived from a template', async () => {
       const loc = await locator.getLocation({
-        templateId: 't-1',
+        derivedFromTemplateId: 'nginx-error-rate',
         host: OBSERVABILITY_HOST.rules,
       });
-      expect(loc.path).toBe('/rules/v2?templateId=t-1');
+      expect(loc.app).toBe('observabilityAlerting');
+      expect(loc.path).toBe('/rules/v2?q=template%3A%22nginx-error-rate%22');
+      expect(new URLSearchParams(loc.path.split('?')[1]).get('q')).toBe(
+        'template:"nginx-error-rate"'
+      );
+    });
+
+    it('keeps dots, dashes, underscores and slashes of a template id in the search text', async () => {
+      const loc = await locator.getLocation({
+        derivedFromTemplateId: 'kubernetes_otel-1.2.0/pod crash',
+        host: OBSERVABILITY_HOST.rules,
+      });
+      expect(new URLSearchParams(loc.path.split('?')[1]).get('q')).toBe(
+        'template:"kubernetes_otel-1.2.0/pod crash"'
+      );
+    });
+
+    it('escapes quotes and backslashes in the template id', async () => {
+      const loc = await locator.getLocation({
+        derivedFromTemplateId: 'a"b\\c',
+        host: OBSERVABILITY_HOST.rules,
+      });
+      expect(new URLSearchParams(loc.path.split('?')[1]).get('q')).toBe('template:"a\\"b\\\\c"');
+    });
+
+    it('prefers the rule details over the template filter', async () => {
+      const loc = await locator.getLocation({
+        ruleId: 'abc-123',
+        derivedFromTemplateId: 'nginx-error-rate',
+        host: OBSERVABILITY_HOST.rules,
+      });
+      expect(loc.path).toBe('/rules/v2/abc-123');
+    });
+  });
+
+  describe('search host', () => {
+    it('resolves list filtered to the rules derived from a template', async () => {
+      const loc = await AlertingV2RulesLocatorDefinition.getLocation({
+        derivedFromTemplateId: 'nginx-error-rate',
+        host: SEARCH_HOST.rules,
+      });
+      expect(loc).toMatchObject({
+        app: 'search',
+        path: '/alerting?q=template%3A%22nginx-error-rate%22',
+      });
     });
   });
 });

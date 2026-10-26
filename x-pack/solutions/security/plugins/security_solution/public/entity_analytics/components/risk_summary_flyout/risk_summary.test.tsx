@@ -75,16 +75,12 @@ describe('FlyoutRiskSummary', () => {
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
 
-    // Alerts
+    // Alerts, with the input count next to the name
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
+      `Alerts (${mockHostRiskScoreState.data?.[0].host.risk.category_1_count})`
     );
 
     // Result
-    expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
-    );
-
     expect(getByTestId('risk-summary-result-score')).toHaveTextContent(
       `${
         (mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0) +
@@ -350,7 +346,7 @@ describe('FlyoutRiskSummary', () => {
     });
   });
 
-  it('group view "Entity risk contributions" link opens the resolution-group risk inputs', () => {
+  it('group view "Risk contributions" link opens the resolution-group risk inputs', () => {
     const openDetailsPanel = jest.fn();
     const { getByTestId } = renderSummary(
       <FlyoutRiskSummary
@@ -368,7 +364,7 @@ describe('FlyoutRiskSummary', () => {
     );
 
     const link = getByTestId('resolutionRiskInputsTitleLink');
-    expect(link).toHaveTextContent('Entity risk contributions');
+    expect(link).toHaveTextContent('Risk contributions');
     fireEvent.click(link);
 
     expect(openDetailsPanel).toHaveBeenCalledWith({
@@ -548,9 +544,7 @@ describe('FlyoutRiskSummary', () => {
       />
     );
 
-    expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
-      'Entity risk contributions'
-    );
+    expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
     expect(mockVisualizationEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
         lensAttributes: expect.objectContaining({
@@ -564,7 +558,7 @@ describe('FlyoutRiskSummary', () => {
       })
     );
     expect(JSON.stringify(mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes)).toContain(
-      'Entity risk score'
+      'Risk score'
     );
   });
 
@@ -587,7 +581,7 @@ describe('FlyoutRiskSummary', () => {
     expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
       'Resolution group risk contributions'
     );
-    expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Entity risk contributions');
+    expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
   });
 
   it('shows only the entity score outside the group view when the flag is on, even with a resolution score', () => {
@@ -607,7 +601,7 @@ describe('FlyoutRiskSummary', () => {
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
     expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-    expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Entity risk contributions');
+    expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
   });
 
   it('holds the entity score back while the resolution score for a group is loading', () => {
@@ -700,8 +694,6 @@ describe('FlyoutRiskSummary', () => {
 
     expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
     expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
-    expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
-      'Entity risk contributions'
-    );
+    expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
   });
 });

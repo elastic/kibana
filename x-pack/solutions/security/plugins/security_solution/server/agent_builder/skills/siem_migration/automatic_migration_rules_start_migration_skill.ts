@@ -24,15 +24,13 @@ import {
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
   MIGRATION_STATE_FRESHNESS_BLOCK,
 } from './rules/content';
-import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_catalog';
 
 export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
-  id: RULE_MIGRATION_SKILLS.START,
-  name: RULE_MIGRATION_SKILLS.START,
+  id: RULE_MIGRATION_SKILLS.START.id,
+  name: RULE_MIGRATION_SKILLS.START.id,
   basePath: 'skills/security/siem_migrations',
-  description: `Start, reprocess, or resume an Automatic Rule Migration translation run.
-
-Resolves the inference endpoint (AI connector) and picks the right request body (START vs REPROCESS vs RESUME) from the rule migration state.`,
+  description: RULE_MIGRATION_SKILLS.START.description,
   content: `
 # Start / Reprocess / Resume an Automatic Rule Migration
 
@@ -201,7 +199,7 @@ between them.
 | \`finished\` | 0 | User-selected rules, including rules with mixed statuses | **REPROCESS selected** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "selected", selection: { ids } }\` |
 | \`finished\` | 0 | \`rules.success.installable > 0\` | Route to **automatic-migration-rules-install-rules** (do not start) | — |
 | \`stopped\` or \`interrupted\` | \`items.pending + items.processing > 0\` | any | **RESUME** (continue the run) | \`{ settings: { connector_id } }\` (no \`retry\`, no \`selection\`) |
-| \`running\` | any | any | Tell the user it is already running and route to **${RULE_MIGRATION_SKILLS.SUMMARIZE}** for progress on **this migration only** | — |
+| \`running\` | any | any | Tell the user it is already running and route to **${RULE_MIGRATION_SKILLS.SUMMARIZE.id}** for progress on **this migration only** | — |
 
 ### Notes on the matrix
 
@@ -223,8 +221,9 @@ between them.
 
 **Step-by-step for REPROCESS selected:**
 1. \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` → migration id.
-2. \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` with \`{ migration_id, search_term: '<partial title>' }\` (paginate if
-   total > per_page) → collect the \`id\` field for every title the user named.
+2. \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` with \`{ migration_id, search_term: '<partial title>', detail: 'summary' }\`
+   (paginate if total > per_page) → collect the \`id\` field for every title the user named (see the
+   rule-title resolution rule in *Migration Identity* when a title is not found).
    - **Title not found**: tell the user which titles did not match and ask them to clarify.
      Never silently drop a rule the user named.
    - **Cross-migration rules**: \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` filters by
@@ -248,17 +247,17 @@ Never skip step 2 — you must resolve titles to item ids; titles are not accept
 \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\` returns \`{ started: boolean }\`:
 - \`started: true\` — the task was started/resumed. Your response MUST include the word
   **asynchronously** (e.g. "The migration is running asynchronously"). Direct the user to the
-  \`${RULE_MIGRATION_SKILLS.SUMMARIZE}\` skill to track progress.
+  \`${RULE_MIGRATION_SKILLS.SUMMARIZE.id}\` skill to track progress.
 - \`started: false\` — the task did not start. Do **not** speculate about why — never blame ELSER,
   semantic search, the connector, or the migration "still resetting after a previous failure".
   Instead, call \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`, then act on the status it
   returns: re-run the decision matrix, report the live state via the
-  \`${RULE_MIGRATION_SKILLS.SUMMARIZE}\` skill, and tell the user what you found. If the migration
+  \`${RULE_MIGRATION_SKILLS.SUMMARIZE.id}\` skill, and tell the user what you found. If the migration
   has already finished, say so plainly — do not describe it as a failure.
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
-If the user asks to delete a migration, route them to the **${RULE_MIGRATION_SKILLS.DELETE}** sibling skill — this skill only starts/reprocesses/resumes.
+If the user asks to delete a migration, route them to the **${RULE_MIGRATION_SKILLS.DELETE.id}** sibling skill — this skill only starts/reprocesses/resumes.
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,

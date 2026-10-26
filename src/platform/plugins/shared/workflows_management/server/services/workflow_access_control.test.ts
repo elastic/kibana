@@ -10,6 +10,7 @@
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { InvalidAccessControlError } from '@kbn/entity-access-control';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { assertWorkflowOperation, WorkflowAccessControlService } from './workflow_access_control';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
@@ -84,7 +85,7 @@ describe('WorkflowAccessControlService', () => {
         core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
         await expect(
           service.assertAccess({ ...document, id: 'id' }, operation, request)
-        ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+        ).rejects.toBeInstanceOf(WorkflowNotFoundError);
         expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
           expect.objectContaining({
             message: expect.stringContaining(`"operation":"${operation}"`),
@@ -160,7 +161,7 @@ describe('WorkflowAccessControlService', () => {
       core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
       await expect(
         service.assertAccess({ ...document, id: 'id' }, 'manage', request, { auditOverride: false })
-      ).rejects.toThrow(WorkflowAccessDeniedError);
+      ).rejects.toThrow(WorkflowNotFoundError);
       expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
@@ -687,7 +688,7 @@ describe('WorkflowAccessControlService', () => {
     core.userProfile.getCurrentProfileId.mockResolvedValue(null);
     await expect(
       service.update('id', 'default', { access_mode: 'public', entries: [] }, request)
-    ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+    ).rejects.toBeInstanceOf(WorkflowNotFoundError);
   });
 
   it('allows only the owner to manage public workflow access', () => {
@@ -712,7 +713,41 @@ describe('WorkflowAccessControlService', () => {
     document.owner_id = 'different-owner';
     await expect(
       service.update('id', 'default', { access_mode: 'public', entries: [] }, request)
-    ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+    ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+  });
+
+  describe('hidden workflows', () => {
+    it.each(['read', 'edit', 'execute', 'manage'] as const)(
+      'answers a non-member %s like an unknown workflow',
+      async (operation) => {
+        core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+        await expect(
+          service.assertAccess({ ...document, id: 'id' }, operation, request)
+        ).rejects.toThrow(new WorkflowNotFoundError('id'));
+      }
+    );
+
+    it.each(['edit', 'execute', 'manage'] as const)(
+      'keeps denying a viewer %s access with a forbidden error',
+      async (operation) => {
+        document.access_control = {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'viewer', role: 'viewer', added_at: '2026-09-10' }],
+        };
+        core.userProfile.getCurrentProfileId.mockResolvedValue('viewer');
+        await expect(
+          service.assertAccess({ ...document, id: 'id' }, operation, request)
+        ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      }
+    );
+
+    it('answers a non-member access update like an unknown workflow', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+      await expect(
+        service.update('id', 'default', { access_mode: 'public', entries: [] }, request)
+      ).rejects.toThrow(new WorkflowNotFoundError('id'));
+      expect(crud.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+    });
   });
 
   it('does not use a missing profile as system access', () => {

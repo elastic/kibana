@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 import { ACTIONS_INBOUND_EVENTS_ENABLED_FLAG } from '../../../common';
 import type {
@@ -37,7 +38,7 @@ export interface InboundEventsRouteParams {
   router: IRouter<ActionsRequestHandlerContext>;
   maxBodyBytes: number;
   inboundEventsClient: InboundEventsClient;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
   logger: Logger;
 }
 

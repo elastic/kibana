@@ -7,17 +7,17 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import { categorizationFieldValidationSchema } from '@kbn/aiops-log-pattern-analysis/schema';
+import type { AiopsUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 import { routeHandlerFactory } from './route_handler_factory';
 
 export const defineRoute = (
   router: IRouter<DataRequestHandlerContext>,
   license: AiopsLicense,
-  usageCounter?: UsageCounter
+  aiopsUsage: AiopsUsage
 ) => {
   router.versioned
     .post({
@@ -40,6 +40,6 @@ export const defineRoute = (
           },
         },
       },
-      routeHandlerFactory(license, usageCounter)
+      routeHandlerFactory(license, aiopsUsage)
     );
 };

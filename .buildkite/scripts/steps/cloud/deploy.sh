@@ -51,7 +51,7 @@ if [[ ! "$ELASTICSEARCH_SHA" =~ $ES_SHA_PATTERN ]]; then
 fi
 ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:$VERSION-$ELASTICSEARCH_SHA"
 
-KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
+KIBANA_CLOUD_IMAGE="$(kibana_ci_image_repository kibana-cloud):$VERSION-$GIT_COMMIT"
 
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   PR_NUMBER="$GITHUB_PR_NUMBER"
