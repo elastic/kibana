@@ -563,6 +563,74 @@ describe('Textbased Data Source', () => {
         )?.fieldName
       ).toBe('Over time');
     });
+
+    it('rebuilds the trendline query from the main layer time field after an index switch', () => {
+      const state = {
+        layers: {
+          main: {
+            columns: [
+              {
+                columnId: 'metric-accessor',
+                fieldName: 'avg_bytes',
+                meta: { type: 'number' },
+              },
+            ],
+            query: { esql: 'FROM logs-* | STATS avg_bytes = AVG(bytes)' },
+            index: 'logs',
+            timeField: '@timestamp',
+          },
+          trendline: {
+            columns: [
+              {
+                columnId: 'trendline-time-accessor',
+                fieldName: 'BUCKET(order_date, 75, ?_tstart, ?_tend)',
+                meta: { type: 'date' },
+              },
+              {
+                columnId: 'trendline-metric-accessor',
+                fieldName: 'avg_bytes',
+                meta: { type: 'number' },
+              },
+            ],
+            query: {
+              esql: 'FROM ecommerce | STATS avg_bytes = AVG(bytes) BY BUCKET(order_date, 75, ?_tstart, ?_tend)',
+            },
+            index: 'ecommerce',
+            timeField: 'order_date',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const newState = TextBasedDatasource.syncColumns({
+        state,
+        links: [
+          {
+            from: {
+              layerId: 'main',
+              columnId: 'metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.METRIC,
+            },
+            to: {
+              layerId: 'trendline',
+              columnId: 'trendline-metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
+            },
+          },
+        ],
+        getDimensionGroups: jest.fn(),
+        indexPatterns: {},
+      });
+
+      expect(newState.layers.trendline.timeField).toBe('@timestamp');
+      expect(newState.layers.trendline.index).toBe('logs');
+      expect(newState.layers.trendline.query?.esql).toContain('BUCKET(@timestamp');
+      expect(newState.layers.trendline.query?.esql).not.toContain('order_date');
+      expect(
+        newState.layers.trendline.columns.find(
+          (column) => column.columnId === 'trendline-time-accessor'
+        )?.fieldName
+      ).toContain('@timestamp');
+    });
   });
 
   describe('#initializeDimension', () => {
@@ -1101,7 +1169,7 @@ describe('Textbased Data Source', () => {
   });
 
   describe('#initialize', () => {
-    it('should hydrate timeField from indexPatterns when layer has no timeField', () => {
+    it('should set indexPatternRefs from indexPatterns without copying timeField onto layers', () => {
       const state = {
         layers: {
           a: {
@@ -1113,84 +1181,9 @@ describe('Textbased Data Source', () => {
       } as unknown as TextBasedPersistedState;
 
       const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
-      expect(result.layers.a.timeField).toBe('timestamp');
-    });
 
-    it('should not overwrite timeField when layer already has one', () => {
-      const state = {
-        layers: {
-          a: {
-            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
-            query: { esql: 'FROM foo' },
-            index: '1',
-            timeField: 'custom_time',
-          },
-        },
-      } as unknown as TextBasedPersistedState;
-
-      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
-      expect(result.layers.a.timeField).toBe('custom_time');
-    });
-
-    it('should not hydrate when indexPatterns is undefined', () => {
-      const state = {
-        layers: {
-          a: {
-            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
-            query: { esql: 'FROM foo' },
-            index: '1',
-          },
-        },
-      } as unknown as TextBasedPersistedState;
-
-      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, undefined);
+      expect(result.indexPatternRefs).toEqual([{ id: '1', title: 'foo', timeField: 'timestamp' }]);
       expect(result.layers.a.timeField).toBeUndefined();
-    });
-
-    it('should leave layer unchanged when layer.index does not match any indexPattern', () => {
-      const state = {
-        layers: {
-          a: {
-            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
-            query: { esql: 'FROM unknown' },
-            index: 'non-existent',
-          },
-        },
-      } as unknown as TextBasedPersistedState;
-
-      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
-      expect(result.layers.a.timeField).toBeUndefined();
-    });
-
-    it('should hydrate each layer independently', () => {
-      const patternsWithNoTime = {
-        ...indexPatterns,
-        '2': { ...indexPatterns['1'], id: '2', timeFieldName: undefined },
-      };
-      const state = {
-        layers: {
-          a: {
-            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
-            query: { esql: 'FROM foo' },
-            index: '1',
-          },
-          b: {
-            columns: [{ columnId: 'col2', fieldName: 'src', meta: { type: 'string' } }],
-            query: { esql: 'FROM bar' },
-            index: '2',
-          },
-        },
-      } as unknown as TextBasedPersistedState;
-
-      const result = TextBasedDatasource.initialize(
-        state,
-        [],
-        undefined,
-        undefined,
-        patternsWithNoTime
-      );
-      expect(result.layers.a.timeField).toBe('timestamp');
-      expect(result.layers.b.timeField).toBeUndefined();
     });
   });
 

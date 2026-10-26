@@ -22,6 +22,7 @@ import {
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { ProfilingCpsCallout } from '../../shared/profiling/cps_callout';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
 import { ProfilingSchemaSelector } from '../../shared/profiling/schema_selector';
 import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
@@ -105,12 +106,18 @@ function ProfilingTabContent() {
   }
 
   if (isProfilingAvailable === false) {
-    return <ProfilingEmptyState />;
+    return (
+      <>
+        <ProfilingCpsCallout />
+        <ProfilingEmptyState />
+      </>
+    );
   }
 
   return (
     <>
       <EuiSpacer />
+      <ProfilingCpsCallout />
       <ProfilingSchemaSelector
         serviceName={serviceName}
         start={start}
@@ -137,7 +144,7 @@ export const profilingTab = {
   dataTestSubj: 'apmProfilingTabButton',
   key: 'Profiling',
   label: i18n.translate('xpack.apm.transactionDetails.tabs.ProfilingLabel', {
-    defaultMessage: 'Universal Profiling',
+    defaultMessage: 'Profiling',
   }),
   component: ProfilingTab,
 };

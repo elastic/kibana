@@ -82,10 +82,7 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const customizationContext = useDiscoverCustomizationContext();
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
-  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const [initialCopyOnSave, setInitialCopyOnSave] = useState(false);
-
-  const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
+  const saveSessionModal = useInternalStateSelector((state) => state.saveSessionModal);
 
   const query = useAppStateSelector((state) => state.query);
   const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
@@ -216,21 +213,16 @@ export const DiscoverTopNav = ({
   );
 
   const onOpenSaveModal = useCallback(() => {
-    setInitialCopyOnSave(false);
-    onSaveCbRef.current = undefined;
-    setIsSaveModalVisible(true);
-  }, []);
+    dispatch(internalStateActions.openSaveSessionModal({}));
+  }, [dispatch]);
 
   const onOpenSaveAsModal = useCallback(() => {
-    setInitialCopyOnSave(true);
-    onSaveCbRef.current = undefined;
-    setIsSaveModalVisible(true);
-  }, []);
+    dispatch(internalStateActions.openSaveSessionModal({ initialCopyOnSave: true }));
+  }, [dispatch]);
 
   const onCloseSaveModal = useCallback(() => {
-    setIsSaveModalVisible(false);
-    onSaveCbRef.current = undefined;
-  }, []);
+    dispatch(internalStateActions.closeSaveSessionModal());
+  }, [dispatch]);
   const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
   const onChangeDataView = useCallback(
     (dataViewOrDataViewId: string | DataView) => {
@@ -490,11 +482,11 @@ export const DiscoverTopNav = ({
             : undefined
         }
       />
-      {isSaveModalVisible && (
+      {saveSessionModal.isOpen && (
         <DiscoverSessionSaveModalContainer
-          initialCopyOnSave={initialCopyOnSave}
+          initialCopyOnSave={saveSessionModal.initialCopyOnSave}
+          initialTitle={saveSessionModal.initialTitle}
           onClose={onCloseSaveModal}
-          onSaveCb={onSaveCbRef.current}
           services={services}
         />
       )}

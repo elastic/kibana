@@ -35,6 +35,7 @@ export const useEpisodesBulkActions = ({
 
         return {
           key: action.id,
+          'data-test-subj': `episodesBulkAction-${action.id}`,
           label: action.displayName,
           icon: action.iconType,
           isAvailable: ({ selectedDocIds }) =>

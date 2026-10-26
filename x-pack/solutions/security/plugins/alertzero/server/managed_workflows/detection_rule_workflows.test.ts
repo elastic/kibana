@@ -411,8 +411,17 @@ describe('detection rule workflows', () => {
           caseSteps.map(({ name }) => name),
         ])
       ).toEqual([
-        ['dismissed', ['mark_alerts_declined', 'close_investigation_declined', 'stop_declined']],
-        ['expired', ['stop_expired']],
+        [
+          'dismissed',
+          [
+            'mark_alerts_declined',
+            'close_investigation_declined',
+            'report_investigation_closed_declined',
+            'report_review_completed_declined',
+            'stop_declined',
+          ],
+        ],
+        ['expired', ['report_review_completed_undecided', 'stop_expired']],
       ]);
       expect(entryDecision.default).toBeUndefined();
       for (const [decision, routed] of [
@@ -855,10 +864,10 @@ describe('detection rule workflows', () => {
 
       // The per-document exclusions live in the DSL filter so Lucene drops the rows
       // before ES|QL sees them.
-      it('excludes hidden building-block alerts and bounds the window in the filter', () => {
+      it('excludes EQL sequence members and bounds the window in the filter', () => {
         const filter = JSON.stringify(harvest.with?.filter);
 
-        expect(filter).toContain('"exists":{"field":"kibana.alert.building_block_type"}');
+        expect(filter).toContain('"exists":{"field":"kibana.alert.group.index"}');
         expect(filter).toContain(
           '"range":{"@timestamp":{"gte":"now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"}}'
         );
@@ -1322,26 +1331,24 @@ describe('detection rule workflows', () => {
         expect(rendered.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
       });
 
-      // Appended with `trigger_mode: never` so the note does not run the investigation
-      // agent. A direct request rather than the journal note workflow keeps the
-      // proposal gate the only synchronous child in its wake-up cycle.
+      // Appended as a user message so the note does not run the investigation agent. A
+      // step rather than the journal note workflow keeps the proposal gate the only
+      // synchronous child in its wake-up cycle.
       it.each([
         ['post_fp_pattern', '{{ steps.diagnose_rule.output.structured_output.fp_pattern }}'],
         ['post_reasoning', '{{ steps.diagnose_rule.output.structured_output.reasoning }}'],
       ])('posts %s to the investigation without running the agent', (stepName, field) => {
         const note = reviewSteps.find(({ name }) => name === stepName)!;
-        const body = note.with?.body as Record<string, string>;
+        const input = note.with as Record<string, string>;
 
-        expect(note.type).toBe('kibana.request');
-        expect(note.with?.method).toBe('POST');
-        expect(note.with?.path).toBe('/s/{{ workflow.spaceId }}/api/chat/converse');
+        expect(note.type).toBe('ai.conversation.add_user_message');
         expect(note.if).toContain('steps.create_investigation.output.conversation_id != null');
         expect(note['on-failure']).toEqual({ continue: true });
-        expect(body.conversation_id).toBe(
+        expect(input.conversation_id).toBe(
           '{{ steps.create_investigation.output.conversation_id }}'
         );
-        expect(body.trigger_mode).toBe('never');
-        expect(body.input).toContain(field);
+        expect(input.author_name).toBe('{{ consts.author_name }}');
+        expect(input.message).toContain(field);
         expect(reviewSteps.indexOf(note)).toBeLessThan(
           reviewSteps.findIndex(({ name }) => name === 'compose_proposal')
         );
@@ -1453,7 +1460,7 @@ describe('detection rule workflows', () => {
       // An EQL sequence writes one building-block alert per matched event next to the
       // sequence alert. The sweep leaves those out when it counts false positives, so
       // the backtest counts the same way or a two-event sequence reads as three alerts.
-      it('leaves building blocks out of both preview counts', () => {
+      it('leaves EQL sequence members out of both preview counts', () => {
         const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
         const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
         const counts = previewSteps.filter(({ type }) => type === 'elasticsearch.search');
@@ -1466,9 +1473,7 @@ describe('detection rule workflows', () => {
           expect(query.bool.filter).toEqual([
             { term: { 'kibana.alert.rule.uuid': expect.stringContaining('previewId') } },
           ]);
-          expect(query.bool.must_not).toEqual([
-            { exists: { field: 'kibana.alert.building_block_type' } },
-          ]);
+          expect(query.bool.must_not).toEqual([{ exists: { field: 'kibana.alert.group.index' } }]);
         }
       });
 

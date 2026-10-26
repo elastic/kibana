@@ -21,6 +21,7 @@
     "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/i18n",
+    "@kbn/inspector-plugin",
     "@kbn/search-types",
     "@kbn/shared-ux-ai-components",
     "@kbn/ui-callout",

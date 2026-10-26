@@ -12,10 +12,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { addCommentStepCommonDefinition } from '../../../common/workflows/steps/add_comment';
 import { addAlertsStepCommonDefinition } from '../../../common/workflows/steps/add_alerts';
 import { addEventsStepCommonDefinition } from '../../../common/workflows/steps/add_events';
+import { deleteAttachmentsStepCommonDefinition } from '../../../common/workflows/steps/delete_attachments';
 import { addCommentStepDefinition } from '../../workflows/steps/add_comment';
 import { addAlertsStepDefinition } from '../../workflows/steps/add_alerts';
 import { addEventsStepDefinition } from '../../workflows/steps/add_events';
 import { addAttachmentsStepDefinition } from '../../workflows/steps/add_attachments';
+import { deleteAttachmentsStepDefinition } from '../../workflows/steps/delete_attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../common/constants';
 import type { CasesClient } from '../../client';
@@ -57,17 +59,19 @@ const describeAttachmentsField = (authorableTypeIds: string[]): string => {
 const buildManageAttachmentsSchema = (authorableTypeIds: string[]) =>
   z.object({
     mode: z
-      .enum(['add_comment', 'add_alerts', 'add_events', 'add_attachments'])
+      .enum(['add_comment', 'add_alerts', 'add_events', 'add_attachments', 'delete_attachments'])
       .describe(
         'Required fields per mode:\n' +
           '- add_comment: case_id, comment\n' +
           '- add_alerts: case_id, alerts ({alertId, index, rule?}[])\n' +
           '- add_events: case_id, events ({eventId, index}[])\n' +
-          '- add_attachments: case_id, attachments (generic bulk; supports comments, alerts, and saved-object types like dashboards — see the `attachments` field)'
+          '- add_attachments: case_id, attachments (generic bulk; supports comments, alerts, and saved-object types like dashboards — see the `attachments` field)\n' +
+          '- delete_attachments: case_id, ids (the `id` of each attachment from get_attachments, not its `attachmentId` or an alert/event id; deletion cannot be undone)'
       ),
     ...addCommentStepCommonDefinition.inputSchema.partial().shape,
     ...addAlertsStepCommonDefinition.inputSchema.partial().shape,
     ...addEventsStepCommonDefinition.inputSchema.partial().shape,
+    ...deleteAttachmentsStepCommonDefinition.inputSchema.partial().shape,
     attachments: z
       .array(z.object({ type: z.string() }).loose())
       .min(1)
@@ -101,6 +105,7 @@ export const manageAttachmentsTool = (
   const addCommentStepDef = addCommentStepDefinition(getCasesClientFn);
   const addAlertsStepDef = addAlertsStepDefinition(getCasesClientFn);
   const addEventsStepDef = addEventsStepDefinition(getCasesClientFn);
+  const deleteAttachmentsStepDef = deleteAttachmentsStepDefinition(getCasesClientFn);
 
   // Built lazily on first use: the discriminated union must snapshot the
   // registry after solution plugins have registered their attachment types
@@ -123,11 +128,11 @@ export const manageAttachmentsTool = (
   return {
     id: platformCoreCasesTools.manageAttachments,
     type: ToolType.builtin,
-    description: `Add attachments to cases. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    description: `Add or delete case attachments. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps), \`delete_attachments\` (permanently remove attachments by id). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
       title: 'Manage Case Attachments',
       readOnlyHint: false,
-      destructiveHint: false,
+      destructiveHint: true,
       idempotentHint: false,
       openWorldHint: false,
     },
@@ -135,7 +140,17 @@ export const manageAttachmentsTool = (
     tags: ['cases'],
     excludeFromMcp: true,
     handler: async (args, toolContext) => {
-      const { mode, case_id, attachments, ...rest } = args;
+      const { mode, case_id, attachments, ids, include_related, ...rest } = args;
+
+      if (mode === 'delete_attachments') {
+        // Deletion returns ids only, so there is no case to emit as an attachment.
+        const input = deleteAttachmentsStepCommonDefinition.inputSchema.parse({
+          case_id,
+          ids,
+          include_related,
+        });
+        return invokeStepHandler(deleteAttachmentsStepDef, input, toolContext);
+      }
 
       const runStep = async () => {
         switch (mode) {

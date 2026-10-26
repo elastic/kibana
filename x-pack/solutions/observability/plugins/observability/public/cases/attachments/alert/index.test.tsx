@@ -19,4 +19,9 @@ describe('getObservabilityAlertType', () => {
   it('registers the zod payload schema', () => {
     expect(registration.schema).toBe(ObservabilityAlertAttachmentPayloadSchema);
   });
+
+  it('labels a count of alerts', () => {
+    expect(registration.getCountLabel?.({ count: 1 })).toBe('1 alert');
+    expect(registration.getCountLabel?.({ count: 3 })).toBe('3 alerts');
+  });
 });

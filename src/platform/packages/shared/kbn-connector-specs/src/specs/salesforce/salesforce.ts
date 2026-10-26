@@ -72,7 +72,7 @@ export const SalesforceConnector: ConnectorSpec = {
   metadata: {
     id: '.salesforce',
     displayName: 'Salesforce',
-    description: i18n.translate('core.kibanaConnectorSpecs.salesforce.metadata.description', {
+    description: i18n.translate('connectorSpecs.salesforce.metadata.description', {
       defaultMessage: 'Query records, search, describe objects, and download files in Salesforce',
     }),
     minimumLicense: 'enterprise',
@@ -325,7 +325,7 @@ export const SalesforceConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.salesforce.test.description', {
+    description: i18n.translate('connectorSpecs.salesforce.test.description', {
       defaultMessage: 'Verifies Salesforce connection by running a simple query',
     }),
     handler: async (ctx) => {

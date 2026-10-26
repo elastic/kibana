@@ -8,7 +8,7 @@
 import type { DashboardAgentEvaluator, DashboardRoute } from '../types';
 import { skippedResult } from '../evaluator_utils';
 import {
-  dashboardSkillActivatedEvaluator,
+  dashboardSkillWithoutVisualizationEvaluator,
   dashboardSkillNotActivatedEvaluator,
   getSkillReadPaths,
   visualizationSkillWithoutDashboardEvaluator,
@@ -20,7 +20,7 @@ const ENHANCE_GUIDANCE_FILE = 'dashboards/enhance.md';
 export const DASHBOARD_ROUTING_EVALUATOR_NAME = 'Dashboard Skill Routing';
 
 const EVALUATOR_BY_ROUTE: Record<DashboardRoute, DashboardAgentEvaluator> = {
-  dashboard: dashboardSkillActivatedEvaluator,
+  dashboard: dashboardSkillWithoutVisualizationEvaluator,
   visualization: visualizationSkillWithoutDashboardEvaluator,
   none: dashboardSkillNotActivatedEvaluator,
 };

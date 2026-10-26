@@ -13,11 +13,9 @@ import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
-import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
 import {
   renderAlertTriageWorkerYaml,
   renderCommonWorkerYaml,
-  renderHuntWorkerYaml,
   renderRuleCoverageWorkerYaml,
   renderRuleTuningWorkerYaml,
   renderScheduledWorkerYaml,
@@ -38,6 +36,9 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
           autoCloseConfidenceScoreMinThreshold: 0.85,
           budgetPerHour: 1300,
           lookbackHours: 24,
+          minSeverity: 'low',
+          excludeBuildingBlocks: false,
+          excludedRuleTags: [],
         },
         serviceAccountId,
       }),
@@ -55,15 +56,6 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
     'Endpoint analysis',
     (serviceAccountId) =>
       renderCommonWorkerYaml(FORENSICS_ENDPOINT_ANALYSIS_YAML, { ...shared, serviceAccountId }),
-  ],
-  [
-    'Continuous Threat Hunt',
-    (serviceAccountId) =>
-      renderHuntWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, {
-        ...shared,
-        scheduleInterval: '4h',
-        serviceAccountId,
-      }),
   ],
   [
     'Rule Tuning',
@@ -114,7 +106,7 @@ describe('renderRunAs', () => {
 });
 
 describe('Alert Triage sweep rendering', () => {
-  const render = (scheduleInterval: string) =>
+  const render = (scheduleInterval: string, excludedRuleTags: string[] = []) =>
     renderAlertTriageWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, {
       ...shared,
       scheduleInterval,
@@ -122,6 +114,9 @@ describe('Alert Triage sweep rendering', () => {
         autoCloseConfidenceScoreMinThreshold: 0.85,
         budgetPerHour: 1300,
         lookbackHours: 24,
+        minSeverity: 'low',
+        excludeBuildingBlocks: false,
+        excludedRuleTags,
       },
     });
 
@@ -150,8 +145,28 @@ describe('Alert Triage sweep rendering', () => {
       autoCloseConfidenceScoreMinThreshold: 0.85,
       budgetPerHour: 1300,
       lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
     });
   });
+
+  // Rule tags are free-form, and `$` sequences in a string replacement are expanded: `price$$`
+  // would silently become `price$` and stop matching, and `$'` would splice YAML into the document.
+  it.each(['price$$', "a$'b", 'x$`y', '$&', '$1'])(
+    'renders the excluded rule tag %s exactly as typed',
+    (tag) => {
+      const rendered = render('15m', [tag]);
+
+      expect(
+        (
+          parse(rendered) as {
+            consts: { worker_settings: { extras: { excludedRuleTags: string[] } } };
+          }
+        ).consts.worker_settings.extras.excludedRuleTags
+      ).toEqual([tag]);
+    }
+  );
 
   it('rejects an interval the settings schema would not allow', () => {
     expect(() => render('90s')).toThrow(/Unsupported schedule interval/);

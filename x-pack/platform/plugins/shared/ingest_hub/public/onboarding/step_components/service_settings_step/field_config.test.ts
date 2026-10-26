@@ -30,7 +30,6 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test',
     name: 'Test Service',
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: [],
     inputs: [],

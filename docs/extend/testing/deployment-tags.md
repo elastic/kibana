@@ -61,6 +61,7 @@ Pick the narrowest scope that's still correct for the feature under test, as eve
 | A solution feature                               | `tags.stateful.classic` + `tags.serverless.<solution>` (use `.complete` when the solution has tiers)                 |
 | Behavior specific to one serverless project tier | The explicit tier tag, e.g. `tags.serverless.security.essentials` or `tags.serverless.observability.logs_essentials` |
 | Behavior that only exists on stateful            | `tags.stateful.classic` alone                                                                                        |
+| Behavior that depends on FIPS mode               | The deployment tags above plus a [limit tag](#scout-deployment-tags-limit), for example `tags.limit.only.fips`       |
 
 ::::::{warning}
 Don't reach for `tags.deploymentAgnostic` from a solution module. It runs your test across every solution and is expensive — use explicit per-deployment tags instead. See the [`tags.deploymentAgnostic` note](#scout-deployment-tags-deployment-agnostic).
@@ -148,6 +149,50 @@ This expands to `@local-serverless-vectordb` and `@cloud-serverless-vectordb`. V
 Use `tags.performance` for performance tests. It assigns the `@perf` tag.
 
 For the authoritative list (and the exact tag strings), see `src/platform/packages/shared/kbn-scout/src/playwright/tags.ts` or just rely on editor autocomplete.
+
+## Limit tags [scout-deployment-tags-limit]
+
+Limit tags filter tests by **target attributes**: properties of the environment a run executes in that the deployment target doesn't capture, such as Kibana running in FIPS mode. They are a separate concept from deployment tags and complement them rather than replace them: a suite still needs at least one deployment tag to be discovered at all.
+
+Tags follow this shape:
+
+- `@limit/<only|except>-<attribute>`
+
+These are the available tags:
+
+| Helper                   | Use when the test…                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `tags.limit.only.fips`   | is designed for [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md) (skipped everywhere else) |
+| `tags.limit.except.fips` | is relevant everywhere except in FIPS mode (skipped there)                                                          |
+
+If a test would need more `except` tags than there are environments it actually applies to, it's an `only` test.
+
+::::::{warning}
+Use limit tags sparingly, and never to skip a deployment target (cloud, serverless, a project type): that's what [deployment tags](#scout-deployment-tags-pick) are for.
+::::::
+
+Add the limit tag next to the deployment tags:
+
+```ts
+test.describe(
+  'FIPS-specific behavior',
+  { tag: [...tags.deploymentAgnostic, tags.limit.only.fips] },
+  () => {
+    // ...
+  }
+);
+```
+
+A single test can carry a limit tag too, as long as the enclosing `describe` provides the deployment tags: `test('...', { tag: [tags.limit.except.fips] }, async () => { ... })`. Suites without a limit tag run regardless of attributes.
+
+Scout rejects a suite that has only limit tags, or that combines `only` and `except` for the same attribute (it could never run).
+
+### How limits are applied [scout-deployment-tags-limit-attributes]
+
+1. Tag the suite with a limit tag.
+2. Make sure the run declares its target attributes, so Scout can skip the suites whose limit tags don't apply. Scout never detects attributes on its own; with none declared, suites with a `limit.only` tag are skipped and suites with a `limit.except` tag run.
+
+On CI, attributes are declared automatically from the build. Locally, pass them to `scout run-tests` with `--targetAttribute` (see [Run tests](./run-scout-tests.md#scout-run-tests-target-attributes)).
 
 ::::::{note}
 Use tags to **include** suites where they make sense, instead of skipping suites after the fact.
