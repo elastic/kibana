@@ -14,6 +14,7 @@ import type { PublishingSubject } from '../../publishing_subject';
  */
 export interface CanSelectPanels {
   selectedPanelIds$: PublishingSubject<string[]>;
+  /** Adds the panel ID to the selection if it isn't selected, and removes it if it is selected */
   togglePanelSelection: (panelId: string) => void;
   clearSelectedPanels: () => void;
 }
