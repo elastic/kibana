@@ -16,6 +16,7 @@ import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-sch
 import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
 import { clientTypes } from '@kbn/connector-specs/server';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { buildHeadersFromSecrets } from './auth_helpers';
 
 jest.mock('@kbn/connector-specs/server', () => ({
@@ -30,9 +31,13 @@ jest.mock('@kbn/connector-specs/server', () => ({
   },
 }));
 
-jest.mock('./auth_helpers', () => ({
-  buildHeadersFromSecrets: jest.fn().mockReturnValue({}),
-}));
+jest.mock('./auth_helpers', () => {
+  const actual = jest.requireActual('./auth_helpers');
+  return {
+    ...actual,
+    buildHeadersFromSecrets: jest.fn().mockReturnValue({}),
+  };
+});
 
 const mcpClientType = clientTypes.mcp as {
   id: string;
@@ -56,6 +61,7 @@ describe('McpConnector', () => {
   const connectorVersion = 'WzEsMV0=';
 
   let pool: LeasePool<unknown>;
+  let getCredential: jest.Mock;
   let services: ReturnType<typeof actionsMock.createServices>;
   let configurationUtilities: ReturnType<typeof actionsConfigMock.create>;
   let connectorUsageCollector: ConnectorUsageCollector;
@@ -86,13 +92,16 @@ describe('McpConnector', () => {
 
   const createConnector = (
     overrides: Partial<ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>> = {}
-  ) => new McpConnector(createParams(overrides), pool);
+  ) => new McpConnector(createParams(overrides), pool, getCredential);
 
   beforeEach(() => {
     jest.clearAllMocks();
     listToolsCache.clear();
 
     pool = new LeasePool<unknown>();
+    getCredential = jest.fn().mockReturnValue({
+      getAuthHeaders: jest.fn().mockResolvedValue({}),
+    });
     services = actionsMock.createServices();
     configurationUtilities = actionsConfigMock.create();
     connectorUsageCollector = new ConnectorUsageCollector({
@@ -661,6 +670,222 @@ describe('McpConnector', () => {
         'https://example.com/mcp'
       );
       expect(configurationUtilities.getResponseSettings).toHaveBeenCalled();
+    });
+  });
+
+  describe('per-user oauth', () => {
+    const oauthConfig: MCPConnectorConfig = {
+      serverUrl: 'https://example.com/mcp',
+      hasAuth: true,
+      authType: 'oauth_authorization_code',
+      authorizationUrl: 'https://idp.example.com/authorize',
+      tokenUrl: 'https://idp.example.com/token',
+      clientId: 'client-id',
+      scope: 'tools',
+      headers: { 'X-Custom': 'from-config' },
+    };
+    const oauthSecrets: MCPConnectorSecrets = {
+      clientSecret: 'client-secret',
+      secretHeaders: { 'X-Secret': 'secret-value' },
+    };
+
+    const createPerUserConnector = (
+      profileUid: string,
+      overrides: Partial<ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>> = {}
+    ) =>
+      createConnector({
+        config: oauthConfig,
+        secrets: oauthSecrets,
+        authMode: 'per-user',
+        profileUid,
+        ...overrides,
+      });
+
+    it('resolves the stored token and passes it to the client credential', async () => {
+      const getAuthHeaders = jest.fn().mockResolvedValue({ Authorization: 'Bearer t' });
+      getCredential.mockReturnValue({ getAuthHeaders });
+      fakeClient.listTools.mockResolvedValue({ tools: [{ name: 'tool-a' }] });
+      fakeClient.callTool.mockResolvedValue({ content: [] });
+      const connector = createPerUserConnector('profile-a');
+
+      expect(getCredential).toHaveBeenCalledWith({
+        connectorId: 'test-connector-1',
+        connectorTypeId: CONNECTOR_ID,
+        connectorTokenClient: services.connectorTokenClient,
+        secrets: {
+          authType: 'oauth_authorization_code',
+          authorizationUrl: 'https://idp.example.com/authorize',
+          tokenUrl: 'https://idp.example.com/token',
+          clientId: 'client-id',
+          clientSecret: 'client-secret',
+          scope: 'tools',
+        },
+        authMode: 'per-user',
+        profileUid: 'profile-a',
+      });
+
+      await expect(connector.listTools({}, connectorUsageCollector)).resolves.toEqual({
+        tools: [{ name: 'tool-a' }],
+      });
+      await expect(
+        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+      ).resolves.toEqual({ content: [] });
+      await expect(connector.testConnector({}, connectorUsageCollector)).resolves.toEqual({
+        connected: true,
+        capabilities: { tools: {} },
+      });
+
+      const { credential } = mcpClientType.build.mock.calls[0][0];
+      await expect(credential.getAuthHeaders()).resolves.toEqual({
+        'X-Custom': 'from-config',
+        Authorization: 'Bearer t',
+        'X-Secret': 'secret-value',
+      });
+    });
+
+    it('rejects with ConnectorAuthorizationError and does not lease a client when no token exists', async () => {
+      const authError = new ConnectorAuthorizationError({
+        authMethod: 'oauth_authorization_code',
+        reason: 'no_token',
+        message: 'No access token',
+      });
+      getCredential.mockReturnValue({
+        getAuthHeaders: jest.fn().mockRejectedValue(authError),
+      });
+      const acquireSpy = jest.spyOn(pool, 'acquire');
+      const connector = createPerUserConnector('profile-a');
+
+      await expect(connector.listTools({}, connectorUsageCollector)).rejects.toBe(authError);
+      await expect(
+        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+      ).rejects.toBe(authError);
+      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toBe(authError);
+
+      expect(authError.name).toBe('ConnectorAuthorizationError');
+      expect(acquireSpy).not.toHaveBeenCalled();
+      expect(mcpClientType.build).not.toHaveBeenCalled();
+    });
+
+    it('returns the refreshed token from the pooled client credential', async () => {
+      const getAuthHeaders = jest
+        .fn()
+        .mockResolvedValueOnce({ Authorization: 'Bearer t1' })
+        .mockResolvedValueOnce({ Authorization: 'Bearer t2' });
+      getCredential.mockReturnValue({ getAuthHeaders });
+      const connector = createPerUserConnector('profile-a');
+
+      await connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+
+      const { credential } = mcpClientType.build.mock.calls[0][0];
+      await expect(credential.getAuthHeaders()).resolves.toEqual(
+        expect.objectContaining({ Authorization: 'Bearer t2' })
+      );
+    });
+
+    it('rejects a missing profileUid as a USER task run error before leasing', async () => {
+      const acquireSpy = jest.spyOn(pool, 'acquire');
+      const connector = createConnector({
+        config: oauthConfig,
+        secrets: oauthSecrets,
+        authMode: 'per-user',
+      });
+
+      try {
+        await connector.listTools({}, connectorUsageCollector);
+        throw new Error('expected listTools to throw');
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        expect((err as Error).message).toBe(
+          'A profile UID is required to lease a per-user connector client.'
+        );
+      }
+
+      expect(acquireSpy).not.toHaveBeenCalled();
+      expect(mcpClientType.build).not.toHaveBeenCalled();
+    });
+
+    it('rejects a non-per-user authMode as a FRAMEWORK task run error before leasing', async () => {
+      const acquireSpy = jest.spyOn(pool, 'acquire');
+      const connector = createConnector({
+        config: oauthConfig,
+        secrets: oauthSecrets,
+        authMode: 'shared',
+        profileUid: 'profile-a',
+      });
+
+      try {
+        await connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+        throw new Error('expected callTool to throw');
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
+        expect((err as Error).message).toContain('resolved to "shared"');
+      }
+
+      expect(acquireSpy).not.toHaveBeenCalled();
+      expect(mcpClientType.build).not.toHaveBeenCalled();
+    });
+
+    it('uses a different lease key per profileUid', async () => {
+      getCredential.mockReturnValue({
+        getAuthHeaders: jest.fn().mockResolvedValue({ Authorization: 'Bearer t' }),
+      });
+      const acquireSpy = jest.spyOn(pool, 'acquire');
+      const connectorA = createPerUserConnector('profile-a');
+      const connectorB = createPerUserConnector('profile-b');
+
+      await connectorA.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+      await connectorB.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+
+      expect(acquireSpy.mock.calls[0][0]).not.toEqual(acquireSpy.mock.calls[1][0]);
+      expect(String(acquireSpy.mock.calls[0][0])).toContain('profile-a');
+      expect(String(acquireSpy.mock.calls[1][0])).toContain('profile-b');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not return another profile listTools cache entry', async () => {
+      getCredential.mockReturnValue({
+        getAuthHeaders: jest.fn().mockResolvedValue({ Authorization: 'Bearer t' }),
+      });
+      const toolsA = { tools: [{ name: 'tool-a' }] };
+      const toolsB = { tools: [{ name: 'tool-b' }] };
+      fakeClient.listTools.mockResolvedValueOnce(toolsA).mockResolvedValueOnce(toolsB);
+      const connectorA = createPerUserConnector('profile-a');
+      const connectorB = createPerUserConnector('profile-b');
+
+      await expect(connectorA.listTools({}, connectorUsageCollector)).resolves.toEqual(toolsA);
+      await expect(connectorB.listTools({}, connectorUsageCollector)).resolves.toEqual(toolsB);
+      await expect(connectorA.listTools({}, connectorUsageCollector)).resolves.toEqual(toolsA);
+
+      expect(fakeClient.listTools).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps shared auth types on static headers and a shared lease key', async () => {
+      mockedBuildHeadersFromSecrets.mockReturnValue({ Authorization: 'Bearer static' });
+      const sharedConfig: MCPConnectorConfig = {
+        serverUrl: 'https://example.com/mcp',
+        hasAuth: true,
+        authType: 'bearer',
+      };
+      const connectorA = createConnector({
+        config: sharedConfig,
+        authMode: 'shared',
+        profileUid: 'profile-a',
+      });
+      const connectorB = createConnector({
+        config: sharedConfig,
+        authMode: 'shared',
+        profileUid: 'profile-b',
+      });
+
+      await connectorA.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+      await connectorB.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+
+      expect(getCredential).not.toHaveBeenCalled();
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1);
+      const { credential } = mcpClientType.build.mock.calls[0][0];
+      await expect(credential.getAuthHeaders()).resolves.toEqual({
+        Authorization: 'Bearer static',
+      });
     });
   });
 

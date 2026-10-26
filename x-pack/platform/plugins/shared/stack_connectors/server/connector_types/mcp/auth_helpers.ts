@@ -10,6 +10,59 @@ import { API_KEY_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 
 /**
+ * Secrets object expected by actions.getCredential for the oauth_authorization_code auth type.
+ * Field names match the auth type spec, which reads every value from the secret object.
+ */
+export interface McpOAuthAuthCodeSecrets {
+  authType: 'oauth_authorization_code';
+  authorizationUrl: string;
+  tokenUrl: string;
+  clientId: string;
+  clientSecret: string;
+  scope?: string;
+  [key: string]: unknown;
+}
+
+/** True when the connector should resolve a per-user OAuth authorization-code token. */
+export const isOAuthAuthorizationCode = (config: MCPConnectorConfig): boolean =>
+  Boolean(config.hasAuth) && config.authType === MCPAuthType.OAuthAuthorizationCode;
+
+/**
+ * Builds the secrets object passed to actions.getCredential.
+ * Throws a plain Error naming every missing required field.
+ */
+export const buildOAuthAuthCodeSecrets = (
+  config: MCPConnectorConfig,
+  secrets: MCPConnectorSecrets
+): McpOAuthAuthCodeSecrets => {
+  const { authorizationUrl, tokenUrl, clientId, scope } = config;
+  const { clientSecret } = secrets;
+  if (!authorizationUrl || !tokenUrl || !clientId || !clientSecret) {
+    const missing = [
+      ['authorizationUrl', authorizationUrl],
+      ['tokenUrl', tokenUrl],
+      ['clientId', clientId],
+      ['clientSecret', clientSecret],
+    ]
+      .filter(([, value]) => !value)
+      .map(([name]) => name)
+      .join(', ');
+    throw new Error(
+      `MCP OAuth authorization code connector is missing required fields: ${missing}`
+    );
+  }
+
+  return {
+    authType: MCPAuthType.OAuthAuthorizationCode,
+    authorizationUrl,
+    tokenUrl,
+    clientId,
+    clientSecret,
+    ...(scope ? { scope } : {}),
+  };
+};
+
+/**
  * Builds HTTP headers from MCP connector config and secrets based on the authentication type.
  *
  * @param secrets - The MCP connector secrets (flat structure)

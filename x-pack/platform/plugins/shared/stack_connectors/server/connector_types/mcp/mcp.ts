@@ -8,13 +8,14 @@
 import { LRUCache } from 'lru-cache';
 import hash from 'object-hash';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
+import { CONNECTOR_ID, MCPAuthType, SUB_ACTION } from '@kbn/connector-schemas/mcp';
 import {
   TestConnectorRequestSchema,
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from '@kbn/connector-schemas/mcp/schemas/v1';
-import { SUB_ACTION } from '@kbn/connector-schemas/mcp';
 import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { LeasePool } from '@kbn/actions-plugin/server/lib';
 import {
@@ -41,7 +42,11 @@ import type {
   PlatformServices,
 } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { buildHeadersFromSecrets } from './auth_helpers';
+import {
+  buildHeadersFromSecrets,
+  buildOAuthAuthCodeSecrets,
+  isOAuthAuthorizationCode,
+} from './auth_helpers';
 
 // TTL for list_tools cache: 15 minutes
 export const LIST_TOOLS_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -79,28 +84,89 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   private readonly platform: PlatformServices;
   private readonly credential: CredentialAccessor;
   private readonly authHeaders: Record<string, string>;
+  private readonly isPerUser: boolean;
+  private readonly authMode: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>['authMode'];
+  private readonly profileUid: string | undefined;
+  private readonly oauthCredential: CredentialAccessor | undefined;
 
   constructor(
     params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>,
-    pool: LeasePool<unknown>
+    pool: LeasePool<unknown>,
+    getCredential: ActionsPluginSetupContract['getCredential']
   ) {
     super(params);
 
     this.pool = pool as LeasePool<McpClient>;
     this.connectorVersion = params.connectorVersion;
-    const configHeaders = this.config.headers ?? {};
+    this.isPerUser = isOAuthAuthorizationCode(this.config);
+    this.authMode = params.authMode;
+    this.profileUid = params.profileUid;
     const authHeaders = buildHeadersFromSecrets(this.secrets, this.config);
     this.authHeaders = authHeaders;
     this.networkSettings = createConnectorNetworkSettings(params.configurationUtilities);
     this.platform = createPlatformServices(params.configurationUtilities);
+    this.oauthCredential = this.isPerUser
+      ? getCredential({
+          connectorId: this.connector.id,
+          connectorTypeId: CONNECTOR_ID,
+          connectorTokenClient: params.services.connectorTokenClient,
+          secrets: buildOAuthAuthCodeSecrets(this.config, this.secrets),
+          authMode: params.authMode,
+          profileUid: params.profileUid,
+        })
+      : undefined;
     this.credential = {
-      getAuthHeaders: async () => ({
-        ...configHeaders,
-        ...authHeaders,
-      }),
+      getAuthHeaders: () => this.resolveAuthHeaders(),
     };
 
     this.registerSubActions();
+  }
+
+  private async resolveAuthHeaders(): Promise<Record<string, string>> {
+    const configHeaders = this.config.headers ?? {};
+    if (!this.isPerUser) {
+      return {
+        ...configHeaders,
+        ...this.authHeaders,
+      };
+    }
+
+    if (!this.oauthCredential) {
+      throw new Error('OAuth credential accessor is not configured.');
+    }
+
+    const oauthHeaders = await this.oauthCredential.getAuthHeaders();
+    return {
+      ...configHeaders,
+      ...oauthHeaders,
+      ...(this.secrets.secretHeaders ?? {}),
+    };
+  }
+
+  private assertPerUserIdentity(): void {
+    if (!this.isPerUser) {
+      return;
+    }
+
+    if (this.authMode !== 'per-user') {
+      throw createTaskRunError(
+        new Error(
+          `[Action][ExternalService] Refusing to lease a pooled client: auth type "${
+            MCPAuthType.OAuthAuthorizationCode
+          }" is per-user but connector "${this.connector.id}" resolved to "${
+            this.authMode ?? 'shared'
+          }".`
+        ),
+        TaskErrorSource.FRAMEWORK
+      );
+    }
+
+    if (!this.profileUid) {
+      throw createTaskRunError(
+        new Error('A profile UID is required to lease a per-user connector client.'),
+        TaskErrorSource.USER
+      );
+    }
   }
 
   private registerSubActions() {
@@ -128,13 +194,23 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
    * Uses a hash to keep keys short, consistent, and secure (secret values are not directly visible).
    */
   private getListToolsCacheKey(): string {
-    const configHash = hash({
-      serverUrl: this.config.serverUrl,
-      headers: this.config.headers,
-      hasAuth: this.config.hasAuth,
-      authType: this.config.authType,
-      authHeaders: this.authHeaders,
-    });
+    const configHash = hash(
+      this.isPerUser
+        ? {
+            serverUrl: this.config.serverUrl,
+            headers: this.config.headers,
+            hasAuth: this.config.hasAuth,
+            authType: this.config.authType,
+            profileUid: this.profileUid,
+          }
+        : {
+            serverUrl: this.config.serverUrl,
+            headers: this.config.headers,
+            hasAuth: this.config.hasAuth,
+            authType: this.config.authType,
+            authHeaders: this.authHeaders,
+          }
+    );
     return `${this.connector.id}:${configHash}`;
   }
 
@@ -150,6 +226,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       connectorId: this.connector.id,
       clientTypeId: clientTypes.mcp.id,
       connectorVersion: this.connectorVersion,
+      ...(this.isPerUser ? { authMode: 'per-user' as const, profileUid: this.profileUid } : {}),
     });
   }
 
@@ -232,6 +309,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     _params: z.infer<typeof TestConnectorRequestSchema>,
     _connectorUsageCollector: ConnectorUsageCollector
   ): Promise<McpTestConnectorResponse> {
+    this.assertPerUserIdentity();
+    await this.resolveAuthHeaders();
+
     let client: McpClient;
     try {
       client = await this.buildClient();
@@ -263,6 +343,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     params: z.infer<typeof ListToolsRequestSchema>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<{ tools: Tool[] }> {
+    this.assertPerUserIdentity();
+    await this.resolveAuthHeaders();
+
     const cacheKey = this.getListToolsCacheKey();
 
     if (!params.forceRefresh) {
@@ -290,6 +373,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     params: z.infer<typeof CallToolRequestSchema>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CallToolResponse> {
+    this.assertPerUserIdentity();
+    await this.resolveAuthHeaders();
+
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
     const result = await this.withPooledClient(

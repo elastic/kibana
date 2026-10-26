@@ -31,14 +31,16 @@ import { McpConnector } from './mcp';
 
 export interface McpConnectorTypeDeps {
   getClientLeasePool: ActionsPluginSetupContract['getClientLeasePool'];
+  getCredential: ActionsPluginSetupContract['getCredential'];
 }
 
 export const getMcpConnectorType = ({
   getClientLeasePool,
+  getCredential,
 }: McpConnectorTypeDeps): SubActionConnectorType<MCPConnectorConfig, MCPConnectorSecrets> => ({
   id: CONNECTOR_ID,
   name: CONNECTOR_NAME,
-  getService: (params) => new McpConnector(params, getClientLeasePool()),
+  getService: (params) => new McpConnector(params, getClientLeasePool(), getCredential),
   schema: {
     config: MCPConnectorConfigSchema,
     secrets: MCPConnectorSecretsSchema,

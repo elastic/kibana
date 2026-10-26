@@ -20,6 +20,7 @@ describe('getMcpConnectorType validators', () => {
   const validateConfig = (config: MCPConnectorConfig) => {
     const connectorType = getMcpConnectorType({
       getClientLeasePool: jest.fn(),
+      getCredential: jest.fn(),
     });
     const configValidator = connectorType.validators?.find(
       (validator) => validator.type === ValidatorType.CONFIG
@@ -70,9 +71,7 @@ describe('getMcpConnectorType validators', () => {
 
   it('passes when OAuth URLs are allowed', () => {
     expect(() => validateConfig(allowedOAuthConfig())).not.toThrow();
-    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
-      'https://mcp.example.com'
-    );
+    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://mcp.example.com');
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
       'https://idp.example.com/authorize'
     );
@@ -103,8 +102,6 @@ describe('getMcpConnectorType validators', () => {
     ).not.toThrow();
 
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledTimes(1);
-    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
-      'https://mcp.example.com'
-    );
+    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://mcp.example.com');
   });
 });
