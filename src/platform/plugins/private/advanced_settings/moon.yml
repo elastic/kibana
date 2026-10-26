@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/advanced-settings-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: '@elastic/kibana-management'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/advanced-settings-plugin'
   description: Moon project for @kbn/advanced-settings-plugin
   channel: ''
-  owner: '@elastic/appex-sharedux'
+  owner: '@elastic/kibana-management'
   sourceRoot: src/platform/plugins/private/advanced_settings
 dependsOn:
   - '@kbn/core'
@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/spaces-plugin'
   - '@kbn/scout'
+  - '@kbn/serverless-common-settings'
 tags:
   - plugin
   - prod
