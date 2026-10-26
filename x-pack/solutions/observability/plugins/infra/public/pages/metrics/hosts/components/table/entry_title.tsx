@@ -34,7 +34,11 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
     preferredSchema: searchCriteria?.preferredSchema ?? DEFAULT_SCHEMA,
   });
 
-  const providerName = cloudProvider ?? 'Unknown';
+  const providerName =
+    cloudProvider ??
+    i18n.translate('xpack.infra.hostsViewPage.table.unknownCloudProvider', {
+      defaultMessage: 'Unknown',
+    });
   return (
     <EuiToolTip
       anchorClassName="eui-displayBlock"
