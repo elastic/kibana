@@ -2822,7 +2822,7 @@
             "$ref": "#/components/parameters/page_size"
           },
           {
-            "$ref": "#/components/parameters/sort_order"
+            "$ref": "#/components/parameters/attachment_sort_order"
           }
         ],
         "responses": {
@@ -4256,6 +4256,21 @@
           ]
         },
         "example": "comment"
+      },
+      "attachment_sort_order": {
+        "in": "query",
+        "name": "sortOrder",
+        "description": "Determines the sort order of the attachments by creation date.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": "asc"
+        },
+        "example": "asc"
       },
       "attachment_id": {
         "in": "path",

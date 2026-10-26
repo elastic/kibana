@@ -90,7 +90,7 @@ get:
     - $ref: '../components/parameters/attachment_type_filter.yaml'
     - $ref: '../components/parameters/page_index.yaml'
     - $ref: '../components/parameters/page_size.yaml'
-    - $ref: '../components/parameters/sort_order.yaml'
+    - $ref: '../components/parameters/attachment_sort_order.yaml'
   responses:
     '200':
       description: Indicates a successful call.
