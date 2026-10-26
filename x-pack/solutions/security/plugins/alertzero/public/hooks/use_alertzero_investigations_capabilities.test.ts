@@ -40,7 +40,19 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
       showEscalations: false,
       manageEscalations: false,
       manageInvestigations: false,
+      canAccessAgentBuilder: false,
     });
+  });
+
+  it('maps canAccessAgentBuilder from the Agent Builder show capability', () => {
+    const withAgentBuilder = (show: unknown) =>
+      getAlertZeroInvestigationsCapabilities({
+        ...caps(),
+        agentBuilder: { show },
+      } as unknown as Capabilities);
+
+    expect(withAgentBuilder(true).canAccessAgentBuilder).toBe(true);
+    expect(withAgentBuilder(false).canAccessAgentBuilder).toBe(false);
   });
 
   it('maps showEscalations correctly', () => {
@@ -81,6 +93,7 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
       showEscalations: true,
       manageEscalations: true,
       manageInvestigations: true,
+      canAccessAgentBuilder: false,
     });
   });
   it('requires AlertZero write as well as the dependent feature privileges', () => {
@@ -98,6 +111,7 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
       showEscalations: true,
       manageEscalations: false,
       manageInvestigations: false,
+      canAccessAgentBuilder: false,
     });
   });
 });

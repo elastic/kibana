@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   getStepByNameFromNestedSteps,
+  getTriggerName,
   transformWorkflowToGraph,
   type WorkflowYaml,
 } from '@kbn/workflows';
@@ -50,6 +51,7 @@ import {
   WorkflowVisualEditorFlyout,
   type WorkflowVisualEditorFlyoutTarget,
 } from '../../components';
+import { useWorkflowsUiServices } from '../../context';
 import { useTemplate } from '../hooks/use_template';
 import { getCategoryLabel } from '../lib/category_labels';
 import { getWorkflowTypes } from '../lib/get_workflow_types';
@@ -84,12 +86,6 @@ const SOLUTION_ICONS: Record<string, IconType> = {
   security: 'logoSecurity',
   observability: 'logoObservability',
   search: 'logoElasticsearch',
-};
-
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
 };
 
 const capitalize = (value: string): string =>
@@ -164,10 +160,16 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     () => (data ? renderTemplate({ template: data, values: previewValues }) : ''),
     [data, previewValues]
   );
+  const { workflowsExtensions } = useWorkflowsUiServices();
+  const getTriggerLabel = useCallback(
+    (triggerType: string) =>
+      getTriggerName(triggerType, workflowsExtensions.getTriggerDefinition(triggerType)?.title),
+    [workflowsExtensions]
+  );
   const workflow = useMemo(() => data?.body as WorkflowYaml | undefined, [data]);
   const transformed = useMemo(
-    () => (workflow ? transformWorkflowToGraph(workflow) : undefined),
-    [workflow]
+    () => (workflow ? transformWorkflowToGraph(workflow, getTriggerLabel) : undefined),
+    [workflow, getTriggerLabel]
   );
   const { stepTypes, triggerTypes } = useMemo(
     () => (data ? getWorkflowTypes(data.body) : { stepTypes: [], triggerTypes: [] }),
@@ -193,7 +195,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       return {
         kind: 'trigger',
         triggerType: ref.triggerType,
-        triggerLabel: TRIGGER_LABEL[ref.triggerType] ?? ref.triggerType,
+        triggerLabel: getTriggerLabel(ref.triggerType),
         yamlSnippet: stringify({ triggers: [trigger] }).trimEnd(),
       };
     }
@@ -209,7 +211,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       stepType: step.type,
       yamlSnippet: stringify([step]).trimEnd(),
     };
-  }, [selectedGraphStepId, transformed, workflow]);
+  }, [getTriggerLabel, selectedGraphStepId, transformed, workflow]);
 
   const renderStepIcon = useCallback<RenderStepIcon>(({ stepType, isTrigger, size, color }) => {
     return (
