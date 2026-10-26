@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/scout'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
