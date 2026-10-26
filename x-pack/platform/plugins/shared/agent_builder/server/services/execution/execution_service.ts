@@ -42,6 +42,7 @@ import type {
   AbortExecutionResult,
   AgentExecutionService,
   AgentExecution,
+  AgentExecutionParams,
   ConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
@@ -160,7 +161,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const agentId = conversationParams?.agentId ?? this.requestedAgentId(params);
     // Resolved once the agent is known, which may be the stored conversation's, and before any
     // write: a caller refused here leaves no execution record, no conversation and no message.
-    const runAs = await this.resolveExecutionIdentity({ request, agentId });
+    const runAs = await this.resolveExecutionIdentity({
+      request,
+      agentId,
+      configurationOverrides: params.configurationOverrides,
+    });
 
     if (
       params.reasoningLevel !== undefined &&
@@ -797,14 +802,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    *
    * The caller's own `use` access to the agent is checked first. A bound agent then requires
    * service accounts to be enabled and the caller to hold the invoke privilege; a caller that
-   * fails either is refused rather than run under their own credentials.
+   * fails either is refused rather than run under their own credentials. Runtime configuration
+   * overrides would let such a caller change what the account executes, so on a bound agent they
+   * are only accepted from a request that already runs as that account.
    */
   private async resolveExecutionIdentity({
     request,
     agentId,
+    configurationOverrides,
   }: {
     request: KibanaRequest;
     agentId: string;
+    configurationOverrides?: AgentExecutionParams['configurationOverrides'];
   }): Promise<AgentExecution['runAs']> {
     const agentRegistry = await this.deps.agentService.getRegistry({ request });
     const agent = await agentRegistry.get(agentId, { access: 'use' });
@@ -831,7 +840,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         `You are not allowed to start conversations with agent "${agentId}", which runs as service account "${serviceAccountId}". The Agent Builder privilege "Chat with agents that run as a service account" is required.`
       );
     }
-    return { type: 'service_account', serviceAccountId };
+    const runAs = { type: 'service_account' as const, serviceAccountId };
+    if (
+      configurationOverrides &&
+      Object.keys(configurationOverrides).length > 0 &&
+      !this.requestRunsAs(request, runAs)
+    ) {
+      throw createForbiddenError(
+        `Runtime configuration overrides are not allowed on agent "${agentId}", which runs as service account "${serviceAccountId}": changing what it runs requires editing the agent, which needs the manage_security privilege.`
+      );
+    }
+    return runAs;
   }
 
   private async isIdempotentReplay({

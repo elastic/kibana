@@ -382,6 +382,44 @@ describe('AgentExecutionService', () => {
       );
     });
 
+    it('refuses runtime configuration overrides on a bound agent before creating anything', async () => {
+      await expect(
+        createBoundService().executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'agent-1',
+            nextInput: { message: 'hello' },
+            configurationOverrides: { tools: [{ tool_ids: ['*'] }] },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({
+        meta: { statusCode: 403 },
+        message: expect.stringContaining('configuration overrides'),
+      });
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('accepts runtime configuration overrides from a request already running as the account', async () => {
+      await createBoundService({ principalServiceAccountId: 'sa-1' }).executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+          configurationOverrides: { instructions: 'be brief' },
+        },
+        useTaskManager: true,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ runAs: { type: 'service_account', serviceAccountId: 'sa-1' } })
+      );
+    });
+
     describe('when the request already runs as the bound service account', () => {
       const sameAccount = () => createBoundService({ principalServiceAccountId: 'sa-1' });
 

@@ -32,6 +32,7 @@ const mockUser = { id: 'user-1', username: 'test-user', isAdmin: false };
 
 interface MockEsClient {
   search: jest.Mock;
+  get: jest.Mock;
   index: jest.Mock;
   delete: jest.Mock;
   bulk: jest.Mock;
@@ -39,6 +40,7 @@ interface MockEsClient {
 
 const mockEsClient: MockEsClient = {
   search: jest.fn(),
+  get: jest.fn(),
   index: jest.fn(),
   delete: jest.fn(),
   bulk: jest.fn(),
@@ -1236,17 +1238,44 @@ describe('AgentClient service account bindings', () => {
       expect(mockEsClient.delete).not.toHaveBeenCalled();
     });
 
-    it('unbinds before deleting a bound agent', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+    it('deletes conditionally on the checked version, then unbinds', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [{ ...buildDoc('kibana/sa-1'), _seq_no: 7, _primary_term: 2 }] },
+      });
+      const order: string[] = [];
+      mockEsClient.delete.mockImplementation(async () => {
+        order.push('delete');
+        return { result: 'deleted' };
+      });
+      serviceAccounts.unbindWorkload.mockImplementation(async () => {
+        order.push('unbind');
+        return true;
+      });
       const client = await buildClient(securityUser);
 
       await expect(client.delete({ id: 'agent-1' })).resolves.toBe(true);
 
+      expect(mockEsClient.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 7, if_primary_term: 2 })
+      );
       expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(request, {
         workloadType: 'agent',
         workloadId: 'agent-1',
       });
-      expect(mockEsClient.delete).toHaveBeenCalled();
+      expect(order).toEqual(['delete', 'unbind']);
+    });
+
+    it('reports a concurrent change as a conflict and keeps the binding', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [{ ...buildDoc(), _seq_no: 7, _primary_term: 2 }] },
+      });
+      mockEsClient.delete.mockRejectedValueOnce({ statusCode: 409 });
+      const client = await buildClient(mockUser);
+
+      await expect(client.delete({ id: 'agent-1' })).rejects.toMatchObject({
+        meta: { statusCode: 409 },
+      });
+      expect(serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
     });
   });
 });

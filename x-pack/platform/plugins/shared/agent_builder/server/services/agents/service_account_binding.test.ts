@@ -21,8 +21,9 @@ import {
   AGENT_WORKLOAD_TYPE,
   assertCanConfigureExecutionIdentity,
   assertCanEditBoundAgent,
+  assertCanDeleteBoundAgent,
   resolveAgentWorkloads,
-  unbindAgentBeforeDelete,
+  unbindDeletedAgent,
   withAgentBindingChange,
 } from './service_account_binding';
 
@@ -402,62 +403,69 @@ describe('withAgentBindingChange', () => {
   });
 });
 
-describe('unbindAgentBeforeDelete', () => {
-  const request = httpServerMock.createKibanaRequest();
-  const logger = loggerMock.create();
-
-  it('does nothing for an unbound agent', async () => {
-    const serviceAccounts = createServiceAccounts();
-    await unbindAgentBeforeDelete({
-      bindings: { serviceAccounts },
-      request,
-      logger,
-      source: createSource(),
-      user: owner,
-    });
-    expect(serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
+describe('assertCanDeleteBoundAgent', () => {
+  it('allows deleting an unbound agent without manage_security', () => {
+    expect(() => assertCanDeleteBoundAgent({ source: createSource(), user: owner })).not.toThrow();
   });
 
-  it('refuses to delete a bound agent without manage_security', async () => {
-    const serviceAccounts = createServiceAccounts();
-    expect.assertions(2);
+  it('refuses to delete a bound agent without manage_security', () => {
+    expect.assertions(1);
     try {
-      await unbindAgentBeforeDelete({
-        bindings: { serviceAccounts },
-        request,
-        logger,
+      assertCanDeleteBoundAgent({
         source: createSource({ service_account_id: 'sa-1' }),
         user: owner,
       });
     } catch (error) {
       expect(isForbiddenError(error)).toBe(true);
-      expect(serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
     }
   });
 
-  it('skips Core when service accounts are disabled, so the agent can still be deleted', async () => {
+  it('allows deleting a bound agent with manage_security', () => {
+    expect(() =>
+      assertCanDeleteBoundAgent({
+        source: createSource({ service_account_id: 'sa-1' }),
+        user: securityOwner,
+      })
+    ).not.toThrow();
+  });
+});
+
+describe('unbindDeletedAgent', () => {
+  const request = httpServerMock.createKibanaRequest();
+  const logger = loggerMock.create();
+
+  it('does nothing for an unbound agent', async () => {
+    const serviceAccounts = createServiceAccounts();
+    await unbindDeletedAgent({
+      bindings: { serviceAccounts },
+      request,
+      logger,
+      source: createSource(),
+    });
+    expect(serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('skips Core when service accounts are disabled', async () => {
     const serviceAccounts = createServiceAccounts({
       isEnabled: jest.fn().mockReturnValue(false),
     });
-    await unbindAgentBeforeDelete({
+    await unbindDeletedAgent({
       bindings: { serviceAccounts },
       request,
       logger,
       source: createSource({ service_account_id: 'sa-1' }),
-      user: securityOwner,
     });
     expect(serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('sa-1'));
   });
 
-  it('unbinds a bound agent for a caller with manage_security', async () => {
+  it('unbinds the deleted agent', async () => {
     const serviceAccounts = createServiceAccounts();
-    await unbindAgentBeforeDelete({
+    await unbindDeletedAgent({
       bindings: { serviceAccounts },
       request,
       logger,
       source: createSource({ service_account_id: 'sa-1' }),
-      user: securityOwner,
     });
     expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(request, {
       workloadType: AGENT_WORKLOAD_TYPE,

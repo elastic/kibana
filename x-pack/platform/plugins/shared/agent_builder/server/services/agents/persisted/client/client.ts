@@ -81,8 +81,9 @@ import {
 import { hasRequiredDocumentFields } from './utils/helper';
 import {
   assertCanConfigureExecutionIdentity,
+  assertCanDeleteBoundAgent,
   assertCanEditBoundAgent,
-  unbindAgentBeforeDelete,
+  unbindDeletedAgent,
   withAgentBindingChange,
   type ServiceAccountBindingDeps,
 } from '../../service_account_binding';
@@ -387,11 +388,13 @@ class AgentClientImpl implements AgentClient {
    */
   private async writeWithBinding<T>({
     agentId,
+    documentId,
     previousId,
     nextId,
     write,
   }: {
     agentId: string;
+    documentId: string;
     previousId: string | undefined;
     nextId: string | null | undefined;
     write: () => Promise<T>;
@@ -408,13 +411,18 @@ class AgentClientImpl implements AgentClient {
       spaceId: this.space,
       nextId: resolvedNext,
       write,
+      // A realtime get sees a concurrent writer's document before the index refreshes; a search
+      // could still return the losing version and compensate to the wrong binding.
       readStoredId: async () => {
-        const stored = await getAgentDocument({
-          storage: this.storage,
-          space: this.space,
-          agentId,
-        });
-        return stored ? stored._source?.service_account_id : null;
+        try {
+          const stored = await this.storage.getClient().get({ id: documentId });
+          return stored._source?.service_account_id;
+        } catch (error) {
+          if (error?.meta?.statusCode === 404) {
+            return null;
+          }
+          throw error;
+        }
       },
     });
   }
@@ -683,6 +691,7 @@ class AgentClientImpl implements AgentClient {
 
     await this.writeWithBinding({
       agentId,
+      documentId: document._id,
       previousId: source.service_account_id,
       nextId: profileUpdate.service_account_id,
       write: async () => {
@@ -703,15 +712,25 @@ class AgentClientImpl implements AgentClient {
     const { id } = options;
 
     const document = await this.getDocumentWithAccess({ agentId: id, access: 'delete' });
-    await unbindAgentBeforeDelete({
+    const source = document._source;
+    assertCanDeleteBoundAgent({ source, user: this.user });
+
+    // Conditional on the version checked above, so a binding made concurrently is not deleted
+    // past the manage_security check, and the unbind follows a delete that definitely happened.
+    let deleteResponse;
+    try {
+      deleteResponse = await this.storage
+        .getClient()
+        .delete({ id: document._id, ...occParams(document) });
+    } catch (error) {
+      return rethrowConflict(id, error);
+    }
+    await unbindDeletedAgent({
       bindings: this.bindings,
       request: this.request,
-      source: document._source,
-      user: this.user,
+      source,
       logger: this.logger,
     });
-
-    const deleteResponse = await this.storage.getClient().delete({ id: document._id });
     return deleteResponse.result === 'deleted';
   }
 

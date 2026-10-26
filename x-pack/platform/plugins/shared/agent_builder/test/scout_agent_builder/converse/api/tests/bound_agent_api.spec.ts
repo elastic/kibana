@@ -23,10 +23,9 @@ import {
   mockFinalAnswer,
   mockTitleGeneration,
 } from '../../../../scout_agent_builder_shared/lib/proxy_scenario/calls';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
+import { deleteConversationsByIds } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   ES_SERVICE_ACCOUNT_NAMESPACE,
-  deleteServiceAccount,
   uniqueServiceAccountName,
   type TestServiceAccount,
 } from '../../../../scout_agent_builder_shared/lib/service_accounts_es';
@@ -107,6 +106,9 @@ apiTest.describe(
       return JSON.stringify(data);
     };
 
+    // Only this suite's conversations are removed in teardown; the index is shared.
+    const conversationIds: string[] = [];
+
     const runEsqlTool = async (
       apiClient: ApiClient,
       authHeaders: Record<string, string>,
@@ -130,6 +132,7 @@ apiTest.describe(
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       const { conversation_id: id } = res.body as { conversation_id: string };
+      conversationIds.push(id);
       const conversation = await getConversation(apiClient, authHeaders, id);
       const toolStep = conversation.rounds[0].steps.find((step) => step.type === 'tool_call');
       expect(toolStep).toBeDefined();
@@ -238,8 +241,9 @@ apiTest.describe(
         responseType: 'json',
       });
       await deleteConnectorById(kbnClient, connectorId);
-      await deleteAllConversationsFromEs(esClient);
-      await deleteServiceAccount(esClient, serviceAccount.name);
+      await deleteConversationsByIds(kbnClient, conversationIds);
+      // Kibana removes the account, its tokens and its stored credential; deleting it in
+      // Elasticsearch first would make Kibana keep the credential record behind.
       await kbnClient.request({
         method: 'DELETE',
         path: `${SERVICE_ACCOUNTS_PATH}/${encodeURIComponent(serviceAccount.id)}?force=true`,
@@ -375,6 +379,7 @@ apiTest.describe(
         'task_manager'
       );
       expect(res).toHaveStatusCode(200);
+      conversationIds.push((res.body as { conversation_id: string }).conversation_id);
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       const { toolStep } = await runEsqlTool(apiClient, asEditor);

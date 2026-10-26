@@ -178,36 +178,46 @@ export const withAgentBindingChange = async <T>({
   }
 };
 
+/** Deleting a bound agent removes its binding, which Core only allows with `manage_security`. */
+export const assertCanDeleteBoundAgent = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): void => {
+  if (!source.service_account_id || user.canManageSecurity) {
+    return;
+  }
+  throw createForbiddenError(
+    `Deleting agent "${source.id}", which runs as service account "${source.service_account_id}", requires the manage_security privilege.`
+  );
+};
+
 /**
- * Removes the agent's binding ahead of its deletion. Core requires `manage_security`, so a
- * caller without it is refused before anything is deleted.
+ * Removes the binding of an agent whose document is already deleted. Running after the delete
+ * means a failed delete leaves both stores untouched, and a failed unbind leaves only an orphan
+ * binding that nothing can run under.
  */
-export const unbindAgentBeforeDelete = async ({
+export const unbindDeletedAgent = async ({
   bindings,
   request,
   source,
-  user,
   logger,
 }: {
   bindings: ServiceAccountBindingDeps;
   request: KibanaRequest;
   source: AgentProperties;
-  user: CurrentUser;
   logger: Logger;
 }): Promise<void> => {
   if (!source.service_account_id) {
     return;
   }
-  if (!user.canManageSecurity) {
-    throw createForbiddenError(
-      `Deleting agent "${source.id}", which runs as service account "${source.service_account_id}", requires the manage_security privilege.`
-    );
-  }
   // With service accounts off there is nothing Core can unbind, and nothing can run as the
-  // account either; the stored reference goes away with the document.
+  // account either; the stored reference went away with the document.
   if (!bindings.serviceAccounts.isEnabled()) {
     logger.warn(
-      `Deleting agent ${source.id} without removing its binding to service account ${source.service_account_id}: service accounts are disabled.`
+      `Deleted agent ${source.id} without removing its binding to service account ${source.service_account_id}: service accounts are disabled.`
     );
     return;
   }
