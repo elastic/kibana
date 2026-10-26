@@ -262,8 +262,10 @@ export const streamsUnitStatsDestinationResultSchema = z.object({
   }),
 });
 
-export const streamsUnitStatsProcessorResultSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
+export const streamsUnitStatsProcessorInstanceSchema = z.object({
+  pipeline_id: z.string(),
+  /** The position of the route in the pipeline, null for the processors of the pipeline itself. */
+  route_index: z.number().int().nonnegative().nullable(),
   processing_duration: z.object({ average: statsValueSchema }),
   events: z.object({
     incoming: z.object({
@@ -276,6 +278,17 @@ export const streamsUnitStatsProcessorResultSchema = z.object({
      */
     failed: z.object({ rate: statsRateSchema }),
   }),
+});
+
+export const streamsUnitStatsProcessorResultSchema = z.object({
+  error: streamsUnitStatsErrorSchema.optional(),
+  /**
+   * Where the processor ran in the window, one entry per pipeline and route. Empty when it has no
+   * data. A route is identified by its position as the telemetry reports it, so when routes are
+   * added, removed or reordered a position can mean a different route in an older part of the
+   * window: an instance is only reliable within one unit version.
+   */
+  instances: z.array(streamsUnitStatsProcessorInstanceSchema),
 });
 
 export const streamsUnitStatsMetaSchema = z.object({
@@ -336,6 +349,7 @@ export namespace StreamsUnit {
   export type StatsError = z.infer<typeof streamsUnitStatsErrorSchema>;
   export type StatsSeries = z.infer<typeof streamsUnitStatsSeriesSchema>;
   export type StatsDestinationResult = z.infer<typeof streamsUnitStatsDestinationResultSchema>;
+  export type StatsProcessorInstance = z.infer<typeof streamsUnitStatsProcessorInstanceSchema>;
   export type StatsProcessorResult = z.infer<typeof streamsUnitStatsProcessorResultSchema>;
   export type StatsMeta = z.infer<typeof streamsUnitStatsMetaSchema>;
   export type StatsResponse = z.infer<typeof streamsUnitStatsResponseSchema>;

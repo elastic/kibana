@@ -28,6 +28,7 @@ export {
   streamsUnitStatsErrorSchema,
   streamsUnitStatsFilterSchema,
   streamsUnitStatsMetaSchema,
+  streamsUnitStatsProcessorInstanceSchema,
   streamsUnitStatsProcessorResultSchema,
   streamsUnitStatsRequestSchema,
   streamsUnitStatsResponseSchema,
