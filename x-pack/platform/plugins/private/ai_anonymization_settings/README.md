@@ -46,23 +46,19 @@ disables its controls for users who cannot save. The difference is intentional.
   list of usernames or host names) can be recovered from the mask by guessing. Do not describe the
   masks as irreversible.
 - **Custom patterns use RE2 syntax** (`re2js`), not JavaScript's. They match in linear time, so no
-  pattern or input can stall the regex worker. Lookahead, lookbehind, backreferences and `\uXXXX`
-  escapes are rejected (write `\x{00e9}`); `(?i)`, `\p{L}` and similar are accepted. `\s` and `\w`
-  are ASCII-only. The page and the pattern tester enforce this. The saved setting's schema does
-  not, on purpose: Core also validates the stored value on read and discards the whole setting
-  (masking off) if one rule is invalid, so a rule written through the API that RE2 cannot compile
-  fails at run time instead, and `onFailure` decides what happens.
-- **`onFailure: 'allow_unsafe'` skips what cannot run.** A custom rule that does not compile is
-  skipped on its own and the other rules still apply. If the regex stage fails while running
-  (timeout, crashed worker) none of the rules is applied and the request is sent unmasked. With
-  `block` (default) either case fails the request.
-- **Built-in patterns are written to run the same on native `RegExp` and on RE2.** Do not add
-  lookahead, lookbehind, backreferences or unbounded quantifiers to them;
-  `default_builtin_regex_rules.test.ts` in `@kbn/ai-anonymization-common` fails if a rule behaves differently on the two engines or is
-  slow on long inputs.
-- **Not covered by the built-ins:** email addresses in scripts other than Latin, Greek and Cyrillic
-  (CJK, Arabic, Hebrew, ...) and bare single-label host names (`server01`, `nas.local`). Four-part version numbers (`3.11.4.2`) are indistinguishable from IPv4 addresses and
-  are masked.
+  pattern or input can stall the regex worker. The page and the pattern tester's editor reject
+  lookahead, lookbehind, backreferences and `\uXXXX` escapes for new patterns (write `\x{00e9}`);
+  `(?i)`, `\p{L}` and similar are accepted. `\s` and `\w` are ASCII-only.
+  **Rules saved earlier keep working.** Custom rules ran on native `RegExp` before RE2, so a stored
+  rule that RE2 cannot compile falls back to the native engine instead of being skipped or failing
+  every request. That fallback only keeps the protection those rules always had, the worker
+  timeout; edit such a rule to RE2 syntax to remove the risk. The saved setting's schema does not
+  check patterns either, on purpose: Core also validates the stored value on read and discards the
+  whole setting (masking off) if one rule is invalid. A pattern invalid on both engines fails at
+  run time and `onFailure` decides what happens.
+- **Only a shipped built-in rule runs on the native engine by choice.** A rule counts as built-in
+  when its id and pattern equal a shipped built-in; the `builtIn` flag alone does not, because the
+  setting can be written through the API.
 - **The account rule masks only the account name.** For `DOMAIN\account` the mask covers `account`;
   `DOMAIN\` and the backslashes stay visible. A masked value that contains backslashes does not
   round-trip: the matched text carries the escaping of the layer it was found in, and restoring it

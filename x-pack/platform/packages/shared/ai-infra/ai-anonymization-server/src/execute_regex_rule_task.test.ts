@@ -202,14 +202,23 @@ describe('executeRegexRulesTask', () => {
       expect(matchesOf(pattern, content)).toEqual(expected);
     });
 
+    // Rules saved before custom patterns moved to RE2 must keep masking: RE2 cannot compile these,
+    // so they fall back to the engine they always ran on instead of failing or being skipped.
     it.each([
-      ['lookahead', 'foo(?=bar)'],
-      ['lookbehind', '(?<=@)\\w+'],
-      ['a backreference', '(a)\\1'],
-      ['a \\u escape', '\\u00e9'],
-    ])('rejects %s and says how custom patterns are written', (_, pattern) => {
-      expect(() => matchesOf(pattern, 'x')).toThrow(
-        /"Custom" has an invalid regular expression.*RE2/
+      ['lookahead', 'foo(?=bar)', 'foobar foobaz', ['foo']],
+      ['lookbehind', '(?<=@)\\w+', 'a@bob c', ['bob']],
+      ['a backreference', '(a)\\1', 'aa ab', ['aa']],
+      ['a \\u escape', '\\u00e9', 'café', ['é']],
+    ])(
+      'keeps a rule that only the previous engine supports working: %s',
+      (_, pattern, content, expected) => {
+        expect(matchesOf(pattern, content)).toEqual(expected);
+      }
+    );
+
+    it('still rejects a pattern that is invalid on both engines, naming the rule', () => {
+      expect(() => matchesOf('(unclosed', 'x')).toThrow(
+        /"Custom" has an invalid regular expression/
       );
     });
 
@@ -226,14 +235,6 @@ describe('executeRegexRulesTask', () => {
 
       expect(performance.now() - start).toBeLessThan(1000);
       expect(result).toEqual([]);
-    });
-
-    it('rejects a lookahead pattern even when the rule claims to be built in', () => {
-      const claimsBuiltIn = { ...custom('foo(?=bar)'), id: 'builtin-made-up', builtIn: true };
-
-      expect(() =>
-        executeRegexRulesTask({ rules: [claimsBuiltIn], records: [{ content: 'foobar' }] })
-      ).toThrow(/invalid regular expression.*RE2/);
     });
   });
 

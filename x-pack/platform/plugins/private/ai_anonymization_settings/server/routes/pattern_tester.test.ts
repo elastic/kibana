@@ -213,7 +213,9 @@ describe('registerPatternTesterRoute', () => {
     );
   });
 
-  it('rejects a lookahead pattern as RE2 syntax, since custom rules run on RE2 and not on native RegExp', async () => {
+  // A rule saved before custom patterns moved to RE2 can be tested like it runs: on the engine it
+  // always used. The editor still requires RE2 syntax for new patterns.
+  it('tests a pattern that only the previous engine supports, like the request path runs it', async () => {
     const { handler } = setup();
 
     const response = await callHandler(handler, {
@@ -221,12 +223,8 @@ describe('registerPatternTesterRoute', () => {
       rules: [{ type: 'RegExp', enabled: true, entityClass: 'MISC', pattern: 'foo(?=bar)' }],
     });
 
-    expect(response.customError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        statusCode: 400,
-        body: { message: expect.stringMatching(/RE2/) },
-      })
-    );
+    expect(response.customError).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalled();
   });
 
   it('returns a 400 when the pattern exceeds the worker timeout', async () => {

@@ -18,10 +18,6 @@ interface Span {
 /** Returns every non-empty match of a compiled rule in `value`, in order. */
 type FindSpans = (value: string) => Span[];
 
-const RE2_HINT =
-  'Custom patterns use RE2 syntax: lookahead, lookbehind, backreferences and \\uXXXX escapes ' +
-  'are not supported (write a character code as \\x{00e9}).';
-
 const findSpansNative =
   (regex: RegExp): FindSpans =>
   (value) => {
@@ -67,26 +63,43 @@ const findSpansRe2 =
  * leave data the admin believes is masked going to the model.
  *
  * Shipped built-in rules run on native `RegExp`: they are written to behave the same on both
- * engines and are bounded, so they cannot backtrack catastrophically. Every other rule runs on RE2,
- * which matches in linear time, so a pattern an admin saves (or an attacker's input to it) cannot
- * stall the worker and turn masking off for the request. A rule only counts as built-in when it is
- * identical to a shipped one: the `builtIn` flag is stored in the setting, which can be written
- * through the API, and must not select the unprotected engine on its own.
+ * engines and are bounded, so they cannot backtrack catastrophically. A rule only counts as
+ * built-in when it is identical to a shipped one: the `builtIn` flag is stored in the setting, which
+ * can be written through the API, and must not select the unprotected engine on its own.
+ *
+ * Every other rule runs on RE2, which matches in linear time, so a pattern an admin saves (or an
+ * attacker's input to it) cannot stall the worker and turn masking off for the request.
+ *
+ * A rule that RE2 cannot compile (lookahead, lookbehind, backreferences, `\uXXXX`) falls back to
+ * native `RegExp`, which is what custom rules always ran on before RE2: a customer's existing rule
+ * must not stop masking, or fail every request, because of an engine change. The page only lets
+ * new patterns be saved in RE2 syntax, so the fallback is only reachable for rules saved earlier or
+ * written through the API. It keeps the protection those rules always had, the worker timeout.
  */
 export const compileRulePattern = (rule: RegexAnonymizationRule): FindSpans => {
-  const isShipped = isShippedBuiltInRule(rule);
-  try {
-    return isShipped
-      ? findSpansNative(new RegExp(rule.pattern, 'g'))
-      : findSpansRe2(RE2JS.compile(rule.pattern));
-  } catch (error) {
-    const label = rule.name ?? rule.id ?? rule.entityClass;
-    const reason = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Anonymization rule "${label}" has an invalid regular expression: ${reason}${
-        isShipped ? '' : `. ${RE2_HINT}`
-      }`
+  const label = rule.name ?? rule.id ?? rule.entityClass;
+  const describe = (error: unknown) => (error instanceof Error ? error.message : String(error));
+  const invalid = (error: unknown) =>
+    new Error(
+      `Anonymization rule "${label}" has an invalid regular expression: ${describe(error)}`
     );
+
+  if (isShippedBuiltInRule(rule)) {
+    try {
+      return findSpansNative(new RegExp(rule.pattern, 'g'));
+    } catch (error) {
+      throw invalid(error);
+    }
+  }
+
+  try {
+    return findSpansRe2(RE2JS.compile(rule.pattern));
+  } catch {
+    try {
+      return findSpansNative(new RegExp(rule.pattern, 'g'));
+    } catch (error) {
+      throw invalid(error);
+    }
   }
 };
 
