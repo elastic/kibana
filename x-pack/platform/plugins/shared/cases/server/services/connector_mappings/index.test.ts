@@ -58,7 +58,7 @@ describe('CaseConfigureService', () => {
             attributes,
             references: [],
           })
-        ).rejects.toThrow(`Invalid value "undefined" supplied to "mappings"`);
+        ).rejects.toThrow(`mappings: Invalid input`);
       });
 
       it('strips out excess attributes', async () => {

@@ -5,32 +5,19 @@
  * 2.0.
  */
 
-import type { ActionScope, ConnectorMetadata } from '@kbn/connector-specs';
 import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes/connector/response';
-
-export interface ConnectorActionDef {
-  name: string;
-  description?: string;
-  isTool: boolean;
-  scope?: ActionScope;
-}
-
-export interface GetConnectorSpecServiceResult {
-  metadata: ConnectorMetadata;
-  schema: Record<string, unknown>;
-  isTestable: boolean;
-  actions: ConnectorActionDef[];
-}
+import type { GetConnectorSpecResult } from '../../../../../application/connector/methods/get_connector_spec/types';
+import { formatConnectorSpecAction } from '../../../common_transforms';
 
 export const transformGetConnectorSpecResponse = (
-  spec: GetConnectorSpecServiceResult
+  spec: GetConnectorSpecResult
 ): GetConnectorSpecResponseV1 => ({
   metadata: {
     id: spec.metadata.id,
     display_name: spec.metadata.displayName,
     description: spec.metadata.description,
     minimum_license: spec.metadata.minimumLicense as string,
-    supported_feature_ids: spec.metadata.supportedFeatureIds ?? [],
+    supported_feature_ids: spec.metadata.supportedFeatureIds,
     ...(spec.metadata.icon !== undefined ? { icon: spec.metadata.icon } : {}),
     ...(spec.metadata.docsUrl !== undefined ? { docs_url: spec.metadata.docsUrl } : {}),
     ...(spec.metadata.isTechnicalPreview !== undefined
@@ -39,10 +26,5 @@ export const transformGetConnectorSpecResponse = (
   },
   schema: spec.schema,
   is_testable: spec.isTestable,
-  actions: spec.actions.map(({ name, description, isTool, scope }) => ({
-    name,
-    is_tool: isTool,
-    ...(description !== undefined ? { description } : {}),
-    ...(scope !== undefined ? { scope } : {}),
-  })),
+  actions: spec.actions.map(formatConnectorSpecAction),
 });
