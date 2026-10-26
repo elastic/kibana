@@ -1,0 +1,108 @@
+{
+  "0.0.0": [
+    {
+      "name": "Homepage",
+      "type": "http",
+      "enabled": true,
+      "schedule": { "number": "10", "unit": "s" },
+      "urls": "https://www.elastic.co",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": [],
+      "namespace": "default",
+      "revision": 1
+    },
+    {
+      "name": "Login flow",
+      "type": "browser",
+      "enabled": true,
+      "schedule": { "number": "10", "unit": "m" },
+      "urls": "https://www.elastic.co/login",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": ["login"],
+      "namespace": "default",
+      "revision": 1
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "tcp",
+      "enabled": true,
+      "schedule": { "number": "3" },
+      "hosts": "postgres.internal",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": [],
+      "namespace": "default",
+      "revision": 1
+    }
+  ],
+  "10.1.0": [
+    {
+      "name": "Homepage",
+      "type": "http",
+      "enabled": true,
+      "schedule": { "number": "10", "unit": "s" },
+      "urls": "https://www.elastic.co",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": [],
+      "namespace": "default",
+      "revision": 1
+    },
+    {
+      "name": "Login flow",
+      "type": "browser",
+      "enabled": true,
+      "schedule": { "number": "10", "unit": "m" },
+      "urls": "https://www.elastic.co/login",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": ["login"],
+      "namespace": "default",
+      "revision": 1
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "tcp",
+      "enabled": true,
+      "schedule": { "number": "3" },
+      "hosts": "postgres.internal",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": [],
+      "namespace": "default",
+      "revision": 1
+    }
+  ]
+}
