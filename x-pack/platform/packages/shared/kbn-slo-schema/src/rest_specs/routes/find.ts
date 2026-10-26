@@ -69,7 +69,7 @@ const findSLOQuerySchema = z.object({
   searchAfter: searchAfterSchema
     .optional()
     .describe(
-      'The cursor to use for fetching the results from, when using a cursor-base pagination.'
+      'The cursor to use for fetching the results from, when using a cursor-based pagination.'
     ),
   size: z
     .string()

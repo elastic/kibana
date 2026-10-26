@@ -15,12 +15,16 @@ const PURGE_TYPE_DESCRIPTION =
 
 const fixedAgePurge = z.object({
   purgeType: z.literal('fixed_age').describe(PURGE_TYPE_DESCRIPTION),
-  age: durationType,
+  age: durationType.describe(
+    'The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.'
+  ),
 });
 
 const fixedTimePurge = z.object({
   purgeType: z.literal('fixed_time').describe(PURGE_TYPE_DESCRIPTION),
-  timestamp: dateType,
+  timestamp: dateType.describe(
+    'The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.'
+  ),
 });
 
 const bulkPurgePolicy = z

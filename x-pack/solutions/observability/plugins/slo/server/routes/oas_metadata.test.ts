@@ -52,10 +52,10 @@ const EXPECTED_OPERATION_IDS: Record<string, string> = {
 };
 
 describe('SLO routes OpenAPI metadata', () => {
-  const repository: ServerRouteRepository = getSloRouteRepository();
-  const documentedRoutes = Object.values(repository)
+  const documentedRoutes = Object.values(getSloRouteRepository())
     .map((route) => ({ endpoint: route.endpoint, options: getRouteOptions(route) }))
     .filter(({ options }) => options.access !== 'internal' && !options.excludeFromOAS);
+  const sharedSchemas = readYaml<Record<string, object>>(SHARED_SCHEMAS_FILE);
 
   it('documents exactly the public SLO routes with their legacy operation ids', () => {
     expect(
@@ -65,57 +65,39 @@ describe('SLO routes OpenAPI metadata', () => {
     ).toEqual(EXPECTED_OPERATION_IDS);
   });
 
-  it('tags every documented route with the slo tag', () => {
-    for (const { options } of documentedRoutes) {
-      expect(options.tags).toContain('oas-tag:slo');
-    }
-  });
-
-  it.each(Object.keys(EXPECTED_OPERATION_IDS))('%s has a summary and a description', (endpoint) => {
-    const route = documentedRoutes.find((candidate) => candidate.endpoint === endpoint);
-    expect(route?.options?.summary).toEqual(expect.any(String));
-    expect(route?.options?.description).toEqual(expect.any(String));
-  });
-
   it('resolves every internal reference of the shared response schemas', () => {
-    const sharedSchemas = readYaml<Record<string, object>>(SHARED_SCHEMAS_FILE);
     for (const ref of collectRefs(sharedSchemas)) {
       expect(ref).toMatch(/^#\//);
       expect(sharedSchemas).toHaveProperty([ref.slice(2)]);
     }
   });
 
-  it.each(Object.keys(EXPECTED_OPERATION_IDS))(
-    '%s has a resolvable OpenAPI operation file documenting a successful response',
-    (endpoint) => {
-      const route = documentedRoutes.find((candidate) => candidate.endpoint === endpoint);
-      const operationFile = route?.options?.oasOperationObject?.();
+  describe.each(documentedRoutes)('$endpoint', ({ options }) => {
+    it('has a summary, a description and the slo tag', () => {
+      expect(options).toEqual(
+        expect.objectContaining({
+          summary: expect.any(String),
+          description: expect.any(String),
+          tags: expect.arrayContaining(['oas-tag:slo']),
+        })
+      );
+    });
 
-      expect(typeof operationFile).toBe('string');
-      if (typeof operationFile !== 'string') return;
-      expect(fs.existsSync(operationFile)).toBe(true);
+    it('has an operation file with resolvable references, a successful response and examples', () => {
+      const operationFile = options.oasOperationObject?.();
+      if (typeof operationFile !== 'string') throw new Error('oasOperationObject has no file path');
 
       const operation = readYaml<OperationFile>(operationFile);
-      const sharedSchemas = readYaml<Record<string, object>>(SHARED_SCHEMAS_FILE);
       for (const ref of collectRefs(operation)) {
         const [file, pointer] = ref.split('#/');
         expect(path.resolve(path.dirname(operationFile), file)).toBe(SHARED_SCHEMAS_FILE);
         expect(sharedSchemas).toHaveProperty([pointer]);
       }
-      expect(Object.keys(operation.responses ?? {})).toEqual(
+
+      const { requestBody, responses = {} } = operation;
+      expect(Object.keys(responses)).toEqual(
         expect.arrayContaining([expect.stringMatching(/^20[04]$/)])
       );
-    }
-  );
-
-  it.each(Object.keys(EXPECTED_OPERATION_IDS))(
-    '%s provides examples for every documented request and response media type',
-    (endpoint) => {
-      const route = documentedRoutes.find((candidate) => candidate.endpoint === endpoint);
-      const operationFile = route?.options?.oasOperationObject?.();
-      if (typeof operationFile !== 'string') throw new Error(`${endpoint} has no operation file`);
-
-      const { requestBody, responses = {} } = readYaml<OperationFile>(operationFile);
       // Every server-route-repository route documents a JSON request body, even without `params.body`
       expect(requestBody?.content?.['application/json']?.examples).toBeDefined();
       for (const [status, { content = {} }] of Object.entries(responses)) {
@@ -127,6 +109,6 @@ describe('SLO routes OpenAPI metadata', () => {
           });
         }
       }
-    }
-  );
+    });
+  });
 });

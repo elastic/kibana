@@ -46,7 +46,9 @@ const snapshotResultSchema = z.intersection(
 
 const bulkSnapshotParamsSchema = z.object({
   body: z.object({
-    at: dateType,
+    at: dateType.describe(
+      'The point in time at which to compute the SLO instance summaries, for example 2025-01-12T10:00:00.000Z'
+    ),
     requests: z
       .array(bulkSnapshotRequestItemSchema)
       .describe('The list of SLO instances to compute. Limited to 100 entries.'),

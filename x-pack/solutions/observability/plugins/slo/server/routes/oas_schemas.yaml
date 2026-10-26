@@ -224,7 +224,12 @@ find_slo_response:
       example: 25
       description: Size provided for cursor based pagination
     searchAfter:
-      type: string
+      type: array
+      description: The cursor to provide to get the next page of results, when using cursor-based pagination
+      items:
+        anyOf:
+          - type: string
+          - type: number
     page:
       type: number
       example: 1
@@ -262,7 +267,7 @@ objective:
       description: the target objective between 0 and 1 excluded
       type: number
       minimum: 0
-      maximum: 100
+      maximum: 1
       exclusiveMinimum: true
       exclusiveMaximum: true
       example: 0.99
@@ -270,7 +275,7 @@ objective:
       description: the target objective for each slice when using a timeslices budgeting method
       type: number
       minimum: 0
-      maximum: 100
+      maximum: 1
       example: 0.995
     timesliceWindow:
       description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
@@ -626,7 +631,7 @@ time_window:
       type: string
       example: 30d
     type:
-      description: Indicates weither the time window is a rolling or a calendar aligned time window.
+      description: Indicates whether the time window is a rolling or a calendar aligned time window.
       type: string
       example: rolling
       enum:

@@ -65053,7 +65053,7 @@ paths:
                   - 'false'
                 type: string
               - type: boolean
-        - description: The cursor to use for fetching the results from, when using a cursor-base pagination.
+        - description: The cursor to use for fetching the results from, when using a cursor-based pagination.
           in: query
           name: searchAfter
           required: false
@@ -65210,13 +65210,13 @@ paths:
                               example: 0.99
                               exclusiveMaximum: true
                               exclusiveMinimum: true
-                              maximum: 100
+                              maximum: 1
                               minimum: 0
                               type: number
                             timesliceTarget:
                               description: the target objective for each slice when using a timeslices budgeting method
                               example: 0.995
-                              maximum: 100
+                              maximum: 1
                               minimum: 0
                               type: number
                             timesliceWindow:
@@ -65326,7 +65326,7 @@ paths:
                               example: 30d
                               type: string
                             type:
-                              description: Indicates weither the time window is a rolling or a calendar aligned time window.
+                              description: Indicates whether the time window is a rolling or a calendar aligned time window.
                               enum:
                                 - rolling
                                 - calendarAligned
@@ -65367,7 +65367,12 @@ paths:
                       type: object
                     type: array
                   searchAfter:
-                    type: string
+                    description: The cursor to provide to get the next page of results, when using cursor-based pagination
+                    items:
+                      anyOf:
+                        - type: string
+                        - type: number
+                    type: array
                   size:
                     description: Size provided for cursor based pagination
                     example: 25
@@ -66163,7 +66168,7 @@ paths:
                       type: object
                       properties:
                         age:
-                          description: The duration formatted as {duration}{unit}, for example 30d. Accepted units are m, h, d, w and M
+                          description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
                           maxLength: 16
                           type: string
                         purgeType:
@@ -66183,7 +66188,7 @@ paths:
                             - fixed_time
                           type: string
                         timestamp:
-                          description: A date string, for example 2023-01-12T10:03:19.000Z
+                          description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
                           maxLength: 128
                           type: string
                       required:
@@ -66345,7 +66350,7 @@ paths:
               type: object
               properties:
                 at:
-                  description: A date string, for example 2023-01-12T10:03:19.000Z
+                  description: The point in time at which to compute the SLO instance summaries, for example 2025-01-12T10:00:00.000Z
                   maxLength: 128
                   type: string
                 requests:
@@ -66800,13 +66805,13 @@ paths:
                               example: 0.99
                               exclusiveMaximum: true
                               exclusiveMinimum: true
-                              maximum: 100
+                              maximum: 1
                               minimum: 0
                               type: number
                             timesliceTarget:
                               description: the target objective for each slice when using a timeslices budgeting method
                               example: 0.995
-                              maximum: 100
+                              maximum: 1
                               minimum: 0
                               type: number
                             timesliceWindow:
@@ -66870,7 +66875,7 @@ paths:
                               example: 30d
                               type: string
                             type:
-                              description: Indicates weither the time window is a rolling or a calendar aligned time window.
+                              description: Indicates whether the time window is a rolling or a calendar aligned time window.
                               enum:
                                 - rolling
                                 - calendarAligned
@@ -67494,13 +67499,13 @@ paths:
                         example: 0.99
                         exclusiveMaximum: true
                         exclusiveMinimum: true
-                        maximum: 100
+                        maximum: 1
                         minimum: 0
                         type: number
                       timesliceTarget:
                         description: the target objective for each slice when using a timeslices budgeting method
                         example: 0.995
-                        maximum: 100
+                        maximum: 1
                         minimum: 0
                         type: number
                       timesliceWindow:
@@ -67610,7 +67615,7 @@ paths:
                         example: 30d
                         type: string
                       type:
-                        description: Indicates weither the time window is a rolling or a calendar aligned time window.
+                        description: Indicates whether the time window is a rolling or a calendar aligned time window.
                         enum:
                           - rolling
                           - calendarAligned
@@ -67990,13 +67995,13 @@ paths:
                         example: 0.99
                         exclusiveMaximum: true
                         exclusiveMinimum: true
-                        maximum: 100
+                        maximum: 1
                         minimum: 0
                         type: number
                       timesliceTarget:
                         description: the target objective for each slice when using a timeslices budgeting method
                         example: 0.995
-                        maximum: 100
+                        maximum: 1
                         minimum: 0
                         type: number
                       timesliceWindow:
@@ -68060,7 +68065,7 @@ paths:
                         example: 30d
                         type: string
                       type:
-                        description: Indicates weither the time window is a rolling or a calendar aligned time window.
+                        description: Indicates whether the time window is a rolling or a calendar aligned time window.
                         enum:
                           - rolling
                           - calendarAligned
@@ -68379,13 +68384,13 @@ paths:
                         example: 0.99
                         exclusiveMaximum: true
                         exclusiveMinimum: true
-                        maximum: 100
+                        maximum: 1
                         minimum: 0
                         type: number
                       timesliceTarget:
                         description: the target objective for each slice when using a timeslices budgeting method
                         example: 0.995
-                        maximum: 100
+                        maximum: 1
                         minimum: 0
                         type: number
                       timesliceWindow:
@@ -68449,7 +68454,7 @@ paths:
                         example: 30d
                         type: string
                       type:
-                        description: Indicates weither the time window is a rolling or a calendar aligned time window.
+                        description: Indicates whether the time window is a rolling or a calendar aligned time window.
                         enum:
                           - rolling
                           - calendarAligned

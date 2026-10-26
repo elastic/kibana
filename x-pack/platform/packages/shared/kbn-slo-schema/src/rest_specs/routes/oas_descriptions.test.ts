@@ -190,6 +190,21 @@ describe('SLO public route request bodies are documented', () => {
     );
   });
 
+  it('describes the route-specific meaning of shared date and duration fields', async () => {
+    expect(
+      await getBodyPropertyDescriptions(bulkPurgeRollupSchema.shape.body, [
+        'purgePolicy.age',
+        'purgePolicy.timestamp',
+      ])
+    ).toEqual({
+      'purgePolicy.age': expect.stringContaining('which documents to purge'),
+      'purgePolicy.timestamp': expect.stringContaining('which documents to purge'),
+    });
+    expect(await getBodyPropertyDescriptions(bulkSnapshotParamsSchema.shape.body, ['at'])).toEqual({
+      at: expect.stringContaining('SLO instance summaries'),
+    });
+  });
+
   it('delete SLO instances', async () => {
     expectEveryPropertyDescribed(
       await getBodyPropertyDescriptions(deleteSLOInstancesParamsSchema.shape.body, [
