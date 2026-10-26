@@ -20,6 +20,26 @@ const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfi
     return acc;
   }, new Map<string, UserProfileWithAvatar>());
 
+const USER_PROFILE_UID_PREFIX = 'u_';
+
+/**
+ * Label to show when no user profile matches `executedBy`. Serverless hides an unresolved profile
+ * UID. A service-account id is not a profile UID, so it stays visible.
+ */
+export const executedByFallbackLabel = (
+  executedBy: string | undefined,
+  showUnresolvedExecutors: boolean
+): string | undefined => {
+  const value = executedBy?.trim();
+  if (!value) {
+    return undefined;
+  }
+  if (showUnresolvedExecutors || !value.startsWith(USER_PROFILE_UID_PREFIX)) {
+    return value;
+  }
+  return undefined;
+};
+
 export const getExecutedByLabel = (
   profile?: UserProfileWithAvatar,
   fallbackLabel?: string
