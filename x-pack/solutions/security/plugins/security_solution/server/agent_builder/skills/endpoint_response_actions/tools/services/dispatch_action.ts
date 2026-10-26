@@ -16,6 +16,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import {
+  formatForConfirmationCard,
   licenseLimitOf,
   licenseTierRequiredResult,
   licenseUnavailableResult,
@@ -591,11 +592,16 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
  * Renders the analyst-supplied `comment` on the confirmation card. The comment
  * is model-authored, is recorded in the Response Actions audit log under the
  * *analyst's* username, and used to be invisible at the moment of confirming —
- * so the card shows the exact text it will be attributed to them.
+ * so the card shows the exact text it will be attributed to them. Shown as a
+ * code span with invisible characters escaped: a raw newline would let a
+ * crafted comment forge extra lines on the card (see
+ * `formatForConfirmationCard`).
  */
 export const analystCommentNote = (comment: string | undefined): string =>
   comment
-    ? `\n\nThe response action log will record this comment under your username: "${comment}"`
+    ? `\n\nThe response action log will record this comment under your username: \`${formatForConfirmationCard(
+        comment
+      )}\``
     : '';
 
 interface ConfirmationCardOptions {

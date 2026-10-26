@@ -7,6 +7,7 @@
 
 import {
   endpointNotFoundData,
+  formatForConfirmationCard,
   insufficientPrivilegesResult,
   licenseLimitOf,
   licenseTierRequiredResult,
@@ -236,6 +237,40 @@ describe('response action error helpers', () => {
       reason: 'endpoint_not_found',
       message: "No endpoint found with agent ID 'agent-404'.",
     });
+  });
+});
+
+describe('formatForConfirmationCard', () => {
+  it('escapes newline, tab, NUL and DEL as visible escapes', () => {
+    expect(formatForConfirmationCard('/tmp/a\nb')).toBe('"/tmp/a\\nb"');
+    expect(formatForConfirmationCard('/tmp/a\tb')).toBe('"/tmp/a\\tb"');
+    expect(formatForConfirmationCard('/tmp/a\u0000b')).toBe('"/tmp/a\\u{0000}b"');
+    expect(formatForConfirmationCard('/tmp/a\u007fb')).toBe('"/tmp/a\\u{007F}b"');
+  });
+
+  it('escapes bidi controls including RTLO and zero-width characters', () => {
+    expect(formatForConfirmationCard('/tmp/a\u202eb.exe')).toBe('"/tmp/a\\u{202E}b.exe"');
+    expect(formatForConfirmationCard('/tmp/a\u200bb')).toBe('"/tmp/a\\u{200B}b"');
+    expect(formatForConfirmationCard('/tmp/a\ufeffb')).toBe('"/tmp/a\\u{FEFF}b"');
+  });
+
+  it('keeps Windows backslashes as single, literal backslashes', () => {
+    expect(formatForConfirmationCard('C:\\Users\\x\\evil.exe')).toBe('"C:\\Users\\x\\evil.exe"');
+  });
+
+  it('keeps ordinary text and padding whitespace exactly as typed inside quotes', () => {
+    expect(formatForConfirmationCard('/tmp/payload ')).toBe('"/tmp/payload "');
+    expect(formatForConfirmationCard('  /tmp/x')).toBe('"  /tmp/x"');
+  });
+
+  it('escapes a backtick so the confirmation code span cannot be broken', () => {
+    expect(formatForConfirmationCard('/tmp/a`b')).toBe('"/tmp/a\\u{0060}b"');
+  });
+
+  it('renders a forged multi-line comment as one escaped line', () => {
+    expect(formatForConfirmationCard('x"\n\n---\n\n**Correction:** stale label')).toBe(
+      '"x"\\n\\n---\\n\\n**Correction:** stale label"'
+    );
   });
 });
 

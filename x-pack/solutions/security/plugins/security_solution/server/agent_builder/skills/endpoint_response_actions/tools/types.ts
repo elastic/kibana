@@ -87,6 +87,65 @@ export const MAX_AGENT_STATE_ENTRIES = MAX_OUTPUT_AGENTS;
  */
 export const MAX_AGENT_STATE_TOTAL_CHARS = 24_000;
 
+// Code points that are invisible or misleading when rendered inside the
+// confirmation card's Markdown code span: control characters (C0, DEL, C1 — a
+// newline inside a code span renders as a space, so `/tmp/a\nb` would display
+// as `/tmp/a b` while the real path is what gets dispatched), bidi controls
+// (RTLO U+202E can visually reverse a filename — a spoofing vector on an
+// approval card), zero-width characters, and the backtick that would break the
+// code span itself. Everything else — including backslashes in Windows paths —
+// is left exactly as typed.
+const INVISIBLE_PATH_CODE_POINTS = new Set<number>([
+  0x200e,
+  0x200f, // LRM, RLM
+  ...range(0x202a, 0x202e), // bidi LRE..PDF, incl. RTLO
+  ...range(0x2066, 0x2069), // bidi LRI..PDI
+  0x200b,
+  0x200c,
+  0x200d, // zero-width space, ZWNJ, ZWJ
+  0xfeff, // BOM / zero-width no-break space
+]);
+
+function range(from: number, to: number): number[] {
+  return Array.from({ length: to - from + 1 }, (_, i) => from + i);
+}
+
+function isControlCodePoint(cp: number): boolean {
+  return cp <= 0x1f || cp === 0x7f || (cp >= 0x80 && cp <= 0x9f);
+}
+
+function escapeForCodeSpan(cp: number): string {
+  if (cp === 0x0a) return '\\n';
+  if (cp === 0x0d) return '\\r';
+  if (cp === 0x09) return '\\t';
+  return `\\u{${cp.toString(16).toUpperCase().padStart(4, '0')}}`;
+}
+
+/**
+ * Renders model-authored free text (scan paths, action comments) inside the
+ * confirmation card: wrapped in a plain double-quoted code span with every
+ * invisible or misleading code point shown as an escape. The card is the only
+ * human check before dispatch, so what the analyst reads must be exactly the
+ * text that will be recorded or dispatched — a newline in a comment would
+ * otherwise render as a space and let a crafted comment forge extra card lines.
+ */
+export function formatForConfirmationCard(value: string): string {
+  let formatted = '';
+  for (const ch of value) {
+    const cp = ch.codePointAt(0) ?? ch.charCodeAt(0);
+    if (
+      isControlCodePoint(cp) ||
+      cp === 0x60 /* backtick breaks the code span */ ||
+      INVISIBLE_PATH_CODE_POINTS.has(cp)
+    ) {
+      formatted += escapeForCodeSpan(cp);
+    } else {
+      formatted += ch;
+    }
+  }
+  return `"${formatted}"`;
+}
+
 /**
  * Errors reported for one action. `getActionCompletionInfo` appends every
  * unsuccessful agent response's errors into this aggregate array, so a large
