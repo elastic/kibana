@@ -18,6 +18,7 @@ import {
   reconcileInstances,
   groupByPackage,
   buildGroupPolicyNameStem,
+  deriveGroupPolicyName,
   DEFAULT_NAMESPACE,
 } from './deploy_group_helpers';
 export { collectDeployResults } from './deploy_group_helpers';
@@ -45,6 +46,17 @@ export interface DeployGroup {
   namespace: string;
   /** Sanitized policy name prefix for bundled originals, unique within one deploy. */
   policyNameStem?: string;
+  /**
+   * What follows the integration name in the group's policy name (`aws_bedrock`, `prod`, … or
+   * empty for the bare-name policy), unique within one deploy even where different packages and
+   * namespaces would spell the same suffix.
+   */
+  policyNameSuffix?: string;
+  /**
+   * The package whose policy keeps the integration name as entered. The main `aws` package, or
+   * the only package of the deploy when there is just one (the name already tells which).
+   */
+  bareNamePackage?: string;
 }
 
 export interface GroupDeployOutcome {
@@ -102,7 +114,10 @@ export function buildDeployGroups(
   return groupByPackage(originals, duplicates, storedServiceVars, DEFAULT_NAMESPACE);
 }
 
-function buildAgentlessPolicyName(group: DeployGroup): string {
+function buildAgentlessPolicyName(group: DeployGroup, integrationName?: string): string {
+  const derived = deriveGroupPolicyName(group, integrationName);
+  if (derived) return derived;
+  // Without an integration name (sessions that predate the field), keep the generated name.
   // Date.now() suffix prevents cross-session collisions: Fleet enforces unique agent-policy
   // names space-wide, so a fresh-session re-run would fail without it.
   // Truncate to stay within Fleet's policy name length limit.
@@ -123,11 +138,16 @@ export async function deployGroup(
     globalRegion,
     storedServiceVars,
     authenticateAndDeployStep,
+    integrationName,
+    description,
   }: {
     namespace: string;
     globalRegion: string;
     storedServiceVars: Record<string, ServiceVars>;
     authenticateAndDeployStep: AuthenticateAndDeployStepState;
+    /** Integration name as entered in step 2; the policy name is derived from it. */
+    integrationName?: string;
+    description?: string;
   }
 ): Promise<GroupDeployOutcome> {
   // All members share the same packageName — use the first for pkg info.
@@ -184,7 +204,8 @@ export async function deployGroup(
   );
 
   const response = await sendCreateAgentlessPolicy({
-    name: buildAgentlessPolicyName(group),
+    name: buildAgentlessPolicyName(group, integrationName),
+    ...(description?.trim() ? { description: description.trim() } : {}),
     namespace: group.namespace || namespace,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),

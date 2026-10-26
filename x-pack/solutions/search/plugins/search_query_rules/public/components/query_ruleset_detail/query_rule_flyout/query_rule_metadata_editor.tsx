@@ -47,14 +47,14 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
   }, [criteria]);
 
   const metadataTooltipContent = i18n.translate(
-    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltip',
+    'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltip',
     {
       defaultMessage:
         'Metadata is used to match documents based on their query criteria. Metadata is ignored when the type is set to "always".',
     }
   );
   const valuesTooltipContent = i18n.translate(
-    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltip',
+    'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltip',
     {
       defaultMessage:
         'Values are used to match documents based on their query criteria. Values are ignored when the type is set to "always".',
@@ -72,7 +72,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
                     <FormattedMessage
-                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorLabel"
+                      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorLabel"
                       defaultMessage="Metadata field"
                     />
                   </EuiText>
@@ -97,7 +97,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
               data-test-subj="searchQueryRulesQueryRuleMetadataEditorField"
               fullWidth
               aria-label={i18n.translate(
-                'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorLabel',
+                'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorLabel',
                 {
                   defaultMessage: 'Enter metadata field name',
                 }
@@ -119,13 +119,13 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
               <EuiFlexItem grow={false}>
                 <EuiFormRow
                   label={i18n.translate(
-                    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
+                    'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
                     {
                       defaultMessage: 'Match type',
                     }
                   )}
                   aria-label={i18n.translate(
-                    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
+                    'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
                     {
                       defaultMessage: 'Select matching type',
                     }
@@ -134,7 +134,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   <EuiSelect
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorSelect"
                     aria-label={i18n.translate(
-                      'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
+                      'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
                       {
                         defaultMessage: 'Select matching type',
                       }
@@ -143,77 +143,77 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                       {
                         value: 'global',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorGlobal',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorGlobal',
                           { defaultMessage: 'global' }
                         ),
                       },
                       {
                         value: 'exact',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorExact',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorExact',
                           { defaultMessage: 'exact' }
                         ),
                       },
                       {
                         value: 'fuzzy',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorFuzzy',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorFuzzy',
                           { defaultMessage: 'fuzzy' }
                         ),
                       },
                       {
                         value: 'prefix',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorPrefix',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorPrefix',
                           { defaultMessage: 'prefix' }
                         ),
                       },
                       {
                         value: 'suffix',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorSuffix',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorSuffix',
                           { defaultMessage: 'suffix' }
                         ),
                       },
                       {
                         value: 'contains',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorContains',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorContains',
                           { defaultMessage: 'contains' }
                         ),
                       },
                       {
                         value: 'lt',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorLessThan',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorLessThan',
                           { defaultMessage: 'less than' }
                         ),
                       },
                       {
                         value: 'lte',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorLessThanOrEqual',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorLessThanOrEqual',
                           { defaultMessage: 'less than or equal' }
                         ),
                       },
                       {
                         value: 'gt',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorGreaterThan',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorGreaterThan',
                           { defaultMessage: 'greater than' }
                         ),
                       },
                       {
                         value: 'gte',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorGreaterThanOrEqual',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorGreaterThanOrEqual',
                           { defaultMessage: 'greater than or equal' }
                         ),
                       },
                       {
                         value: 'always',
                         text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorAlways',
+                          'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.operatorAlways',
                           { defaultMessage: 'always' }
                         ),
                       },
@@ -236,7 +236,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                       <EuiFlexItem grow={false}>
                         <EuiText size="xs">
                           <FormattedMessage
-                            id="xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesLabel"
+                            id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesLabel"
                             defaultMessage="Values"
                           />
                         </EuiText>
@@ -263,7 +263,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
                     fullWidth
                     aria-label={i18n.translate(
-                      'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesLabel',
+                      'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesLabel',
                       {
                         defaultMessage: 'Select or create new values',
                       }
@@ -285,7 +285,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                       });
                     }}
                     customOptionText={i18n.translate(
-                      'xpack.search.queryRulesetDetail.queryRuleFlyout.createNewMetadataValue',
+                      'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.createNewMetadataValue',
                       {
                         defaultMessage: 'Create new metadata value: {newMetadataValue}',
                         values: { newMetadataValue: 'New Metadata Value' },
@@ -300,7 +300,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate(
-              'xpack.search.queryRulesetDetail.queryRuleFlyout.removeCriteriaButton',
+              'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.removeCriteriaButton',
               {
                 defaultMessage: 'Remove criteria',
               }
@@ -313,7 +313,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
               color="danger"
               onClick={onRemove}
               aria-label={i18n.translate(
-                'xpack.search.queryRulesetDetail.queryRuleFlyout.removeCriteriaButton',
+                'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.removeCriteriaButton',
                 {
                   defaultMessage: 'Remove criteria',
                 }

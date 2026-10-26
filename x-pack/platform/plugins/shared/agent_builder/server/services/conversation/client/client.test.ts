@@ -1160,6 +1160,46 @@ describe('ConversationClient', () => {
 
       expect(createClientForUser(serviceAccount).getAuthor()).toEqual(serviceAccount);
     });
+
+    describe('author decoration', () => {
+      const serviceAccount = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+      const decoration = { full_name: 'Attack Discovery Review' };
+
+      it('names a service account from the decoration', () => {
+        expect(createClientForUser(serviceAccount).getAuthor(undefined, decoration)).toEqual({
+          ...serviceAccount,
+          full_name: 'Attack Discovery Review',
+        });
+      });
+
+      it('drops the decoration for an interactive user', () => {
+        expect(client.getAuthor(undefined, decoration)).toEqual({
+          id: 'user-1',
+          username: 'test-user',
+        });
+      });
+
+      it('still prefers the origin author over the decoration', () => {
+        const originAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
+
+        expect(createClientForUser(serviceAccount).getAuthor(originAuthor, decoration)).toEqual(
+          originAuthor
+        );
+      });
+
+      it('assigns no author when the user has no profile id, decoration or not', () => {
+        expect(
+          createClientForUser({ username: 'kibana/automation', type: 'service_account' }).getAuthor(
+            undefined,
+            decoration
+          )
+        ).toBeUndefined();
+      });
+    });
   });
 
   describe('space isolation for reads-by-id', () => {

@@ -494,6 +494,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     securitySolution: {
       artifactControl: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-updates-for-protection-artifacts`,
       cloudSecurityPosture: `${ELASTIC_DOCS}solutions/security/cloud/cloud-security-posture-management`,
+      cloudNativeVulnerabilityManagement: `${ELASTIC_DOCS}solutions/security/cloud/cloud-native-vulnerability-management`,
       cspmGcpAgentless: `${ELASTIC_DOCS}solutions/security/cloud/get-started-with-cspm-for-gcp#cspm-gcp-agentless`,
       installElasticDefend: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/install-elastic-defend`,
       avcResults: `https://www.elastic.co/blog/elastic-security-av-comparatives-business-test`,
@@ -1203,9 +1204,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     subscriptions: `${ELASTIC_WEBSITE_URL}subscriptions`,
     cases: {
+      overview: `${ELASTIC_DOCS}explore-analyze/cases`,
       casesPermissions: `${ELASTIC_DOCS}explore-analyze/cases/control-case-access`,
       configureCaseSettings: `${ELASTIC_DOCS}explore-analyze/cases/configure-case-settings`,
       manageCaseTemplates: `${ELASTIC_DOCS}explore-analyze/cases/manage-case-templates`,
+      createCases: `${ELASTIC_DOCS}explore-analyze/cases/create-cases`,
     },
   });
 };

@@ -21,6 +21,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { PopoverFetchOptionsContext } from './popover_fetch_options_context';
 
 jest.mock('../../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: jest.fn(),
@@ -34,9 +35,10 @@ jest.mock('../../../shared/links/discover_links/open_in_discover', () => ({
   )),
 }));
 
+const mockUseFetcher = jest.fn((..._args: unknown[]) => ({ data: {}, status: 'success' }));
 jest.mock('../../../../hooks/use_fetcher', () => ({
-  FETCH_STATUS: { LOADING: 'loading', SUCCESS: 'success' },
-  useFetcher: () => ({ data: {}, status: 'success' }),
+  FETCH_STATUS: { LOADING: 'loading', SUCCESS: 'success', FAILURE: 'failure' },
+  useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
 }));
 
 const mockedUseAnyOfApmParams = jest.mocked(useAnyOfApmParams);
@@ -123,6 +125,114 @@ describe('EdgeContents', () => {
       query: defaultApmQuery,
     } as unknown as ReturnType<typeof useAnyOfApmParams>);
     mockedOpenInDiscover.mockClear();
+  });
+
+  describe('fetch error toast', () => {
+    const renderEdge = (ui?: React.ReactElement) =>
+      render(
+        <IntlProvider locale="en">
+          {ui ?? <EdgeContents selection={createServiceToDependencyEdge()} {...defaultProps} />}
+        </IntlProvider>
+      );
+
+    beforeEach(() => mockUseFetcher.mockClear());
+
+    it('keeps the global error toast by default', () => {
+      renderEdge();
+
+      expect(mockUseFetcher.mock.calls[0][2]).toEqual({ showToastOnError: true });
+    });
+
+    it('suppresses the toast when the host opts out', () => {
+      renderEdge(
+        <PopoverFetchOptionsContext.Provider value={{ showToastOnError: false }}>
+          <EdgeContents selection={createServiceToDependencyEdge()} {...defaultProps} />
+        </PopoverFetchOptionsContext.Provider>
+      );
+
+      expect(mockUseFetcher.mock.calls[0][2]).toEqual({ showToastOnError: false });
+    });
+
+    it('reports a failed request inline when the toast is suppressed', () => {
+      mockUseFetcher.mockReturnValue({ data: {}, status: 'failure' });
+
+      renderEdge(
+        <PopoverFetchOptionsContext.Provider value={{ showToastOnError: false }}>
+          <EdgeContents selection={createServiceToDependencyEdge()} {...defaultProps} />
+        </PopoverFetchOptionsContext.Provider>
+      );
+
+      expect(screen.getByTestId('apmServiceMapPopoverFetchFailure')).toBeInTheDocument();
+      expect(screen.queryByText(/No data for selected environment/)).not.toBeInTheDocument();
+
+      mockUseFetcher.mockReturnValue({ data: {}, status: 'success' });
+    });
+
+    it('keeps the no-data message for a failed request when the toast is shown', () => {
+      mockUseFetcher.mockReturnValue({ data: {}, status: 'failure' });
+
+      renderEdge();
+
+      expect(screen.queryByTestId('apmServiceMapPopoverFetchFailure')).not.toBeInTheDocument();
+      expect(screen.getByText(/No data for selected environment/)).toBeInTheDocument();
+
+      mockUseFetcher.mockReturnValue({ data: {}, status: 'success' });
+    });
+  });
+
+  describe('edge metrics from the map payload', () => {
+    const createServiceToServiceEdge = (metrics?: Record<string, number>): ServiceMapEdge =>
+      ({
+        source: 'frontend',
+        target: 'backend',
+        data: {
+          sourceData: { [SERVICE_NAME_FIELD]: 'frontend' },
+          targetData: { [SERVICE_NAME_FIELD]: 'backend' },
+          resources: [],
+          metrics,
+        },
+      } as unknown as ServiceMapEdge);
+
+    const renderEdge = (edge: ServiceMapEdge) =>
+      render(
+        <IntlProvider locale="en">
+          <EdgeContents selection={edge} {...defaultProps} />
+        </IntlProvider>
+      );
+
+    it('shows the payload metrics of an edge with no resource to fetch stats for', () => {
+      renderEdge(
+        createServiceToServiceEdge({ latencyMs: 150, throughputPerMin: 12, errorRate: 0.05 })
+      );
+
+      const list = screen.getByTestId('apmServiceMapEdgePayloadMetrics');
+      expect(list).toHaveTextContent('150 ms');
+      expect(list).toHaveTextContent('12.0 tpm');
+      expect(list).toHaveTextContent('5.0%');
+    });
+
+    it('only lists the metrics the payload has', () => {
+      renderEdge(createServiceToServiceEdge({ latencyMs: 150 }));
+
+      const list = screen.getByTestId('apmServiceMapEdgePayloadMetrics');
+      expect(list).toHaveTextContent('150 ms');
+      expect(list).not.toHaveTextContent('tpm');
+    });
+
+    it('falls back to the stats list when the edge has no payload metrics', () => {
+      renderEdge(createServiceToServiceEdge());
+
+      expect(screen.queryByTestId('apmServiceMapEdgePayloadMetrics')).not.toBeInTheDocument();
+    });
+
+    it('keeps fetching live stats for an edge with a resource', () => {
+      const edge = createServiceToDependencyEdge();
+      (edge.data as Record<string, unknown>).metrics = { latencyMs: 150 };
+
+      renderEdge(edge);
+
+      expect(screen.queryByTestId('apmServiceMapEdgePayloadMetrics')).not.toBeInTheDocument();
+    });
   });
 
   it('shows stats for a producer edge (service to messaging queue)', () => {

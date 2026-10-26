@@ -153,8 +153,22 @@ export interface AttachmentWorkflow {
   getActivityLabel: (props: WorkflowActivityLabelProps) => React.ReactNode;
 }
 
-export interface CountLabelProps {
+export interface CountProps {
   count: number;
+}
+
+export interface RelatedRemovalOptions {
+  /** Whether the related attachments leave the case too. */
+  includeRelated: boolean;
+}
+
+export interface RelatedRemovalChoice {
+  /** Which related attachments can leave the case with the removed ones. */
+  description: string;
+  /** Label of the button that removes only the selected attachments. */
+  removeOnlyLabel: string;
+  /** Label of the button that also removes the related attachments. */
+  removeWithRelatedLabel: string;
 }
 
 export interface AttachmentType<Props> {
@@ -164,7 +178,12 @@ export interface AttachmentType<Props> {
   getCreationActivity: (props: Props) => AttachmentCreationActivity<Props>;
   getRemovalActivity?: (props: Props) => AttachmentRemovalActivity<Props>;
   /** Counted noun for `count` attachments of this type, e.g. "2 files". Lowercase except brand names. */
-  getCountLabel?: (props: CountLabelProps) => string;
+  getCountLabel?: (props: CountProps) => string;
+  /**
+   * Lets the removal prompt offer to keep the attachments the server would remove with `count`
+   * attachments of this type, e.g. the alerts an attack brought to the case.
+   */
+  getRelatedRemoval?: (props: CountProps) => RelatedRemovalChoice;
   getAttachmentList?: (
     props?: CommonAttachmentListViewProps
   ) => AttachmentList<CommonAttachmentListViewProps>;

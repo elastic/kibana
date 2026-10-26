@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { stripMarkdownFences } from '@kbn/custom-content-common';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +38,8 @@ export interface UseCustomContentHtmlParams {
   filters: Filter[] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
   isInteractive: boolean;
+  /** Records the panel's ES|QL request for the Inspect action. */
+  requestAdapter?: RequestAdapter;
   setApproximationApplied?: (approximationApplied: boolean | undefined) => void;
 }
 
@@ -62,6 +65,7 @@ export function useCustomContentHtml({
   filters,
   esqlVariables,
   isInteractive,
+  requestAdapter,
   setApproximationApplied,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [filledHtml, setFilledHtml] = useState('');
@@ -88,6 +92,7 @@ export function useCustomContentHtml({
         filters,
         esQueryConfig: getEsQueryConfig(uiSettings),
         esqlVariables,
+        requestAdapter,
       };
       const template = stripMarkdownFences(trimmedTemplate);
 
@@ -128,6 +133,7 @@ export function useCustomContentHtml({
     query,
     filters,
     esqlVariables,
+    requestAdapter,
     http,
     uiSettings,
     search,
