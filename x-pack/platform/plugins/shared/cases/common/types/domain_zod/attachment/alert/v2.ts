@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ATTACHMENT_ID_LENGTH, MAX_SOURCE_ATTACHMENT_IDS } from '../../../../constants';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../constants/attachments';
 
 /**
@@ -26,6 +27,11 @@ export const AlertAttachmentMetadataSchema = z
           })
           .strict(),
       ])
+      .optional(),
+    /** The `attachmentId`s of the attachments that put these alerts on the case. */
+    sourceAttachmentIds: z
+      .array(z.string().max(MAX_ATTACHMENT_ID_LENGTH))
+      .max(MAX_SOURCE_ATTACHMENT_IDS)
       .optional(),
   })
   .strict();

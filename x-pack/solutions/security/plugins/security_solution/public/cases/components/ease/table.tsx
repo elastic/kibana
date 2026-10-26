@@ -12,6 +12,7 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type {
   AlertsTableImperativeApi,
   AlertsTableOnLoadedProps,
+  BulkActionsConfig,
 } from '@kbn/response-ops-alerts-table/types';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
@@ -55,13 +56,23 @@ export interface TableProps {
    * Query that contains the id of the alerts to display in the table
    */
   query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
+  /**
+   * Appended to the table's own bulk actions
+   */
+  additionalBulkActionItems?: BulkActionsConfig[];
+  /**
+   * Adds a "Remove from case" item to each row's actions menu
+   */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 /**
  * Component used in the Cases page under Alerts tab, only in the EASE tier.
  * It leverages a lot of configurations and constants from the Alert summary page alerts table, and renders the ResponseOps AlertsTable.
  */
-export const Table = memo(({ dataView, id, onLoaded, packages, query }: TableProps) => {
+export const Table = memo((props: TableProps) => {
+  const { dataView, id, onLoaded, packages, query, additionalBulkActionItems, onRemoveFromCase } =
+    props;
   const {
     services: {
       agentBuilder,
@@ -109,14 +120,20 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
   const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_cases');
   const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
 
-  const additionalContext: AdditionalTableContext = useMemo(() => ({ packages }), [packages]);
+  const additionalContext: AdditionalTableContext = useMemo(
+    () => ({ packages, onRemoveFromCase }),
+    [packages, onRemoveFromCase]
+  );
 
   const refetchRef = useRef<AlertsTableImperativeApi>(null);
   const refetch = useCallback(() => {
     refetchRef.current?.refresh();
   }, []);
 
-  const bulkActions = useAdditionalBulkActions({ refetch });
+  const bulkActions = useAdditionalBulkActions({
+    refetch,
+    additionalItems: additionalBulkActionItems,
+  });
 
   const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 

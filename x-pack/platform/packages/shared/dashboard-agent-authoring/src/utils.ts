@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { type DashboardFailureType } from './failure_types';
+import type { DashboardFailureKind, DashboardFailureType } from './failure_types';
 
 /**
- * Failure record for tracking dashboard operation errors.
+ * Failure record for tracking dashboard update errors.
  */
 export interface DashboardFailure {
   type: DashboardFailureType;
+  /** Omitted when the identifier matches nothing on the dashboard. */
+  kind?: DashboardFailureKind;
   identifier: string;
   error: string;
 }

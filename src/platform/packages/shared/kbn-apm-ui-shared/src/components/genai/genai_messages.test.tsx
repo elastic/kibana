@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { GenAiMessages } from './genai_messages';
 import type { GenAiMessage } from '@kbn/genai-common';
@@ -222,6 +222,55 @@ describe('GenAiMessages', () => {
     const response = screen.getByTestId('genAiToolResponsePart');
     expect(response).toHaveTextContent('search');
     expect(response).toHaveTextContent('done');
+  });
+
+  describe('reasoning parts', () => {
+    const reasoning = '1. **Analyze**\n[not json]';
+
+    const renderReasoning = () =>
+      renderMessages([], [
+        {
+          role: 'assistant',
+          parts: [
+            { type: 'reasoning', content: reasoning },
+            { type: 'text', content: 'Final answer' },
+          ],
+        },
+      ] as unknown as Array<{ role: string; content?: string }>);
+
+    it('renders the reasoning inside an accordion that is collapsed by default', () => {
+      renderReasoning();
+      expect(screen.getByTestId('genAiReasoningPart')).toHaveTextContent('Reasoning');
+      expect(screen.getByRole('button', { name: 'Reasoning' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+      expect(screen.getByText('Final answer')).toBeInTheDocument();
+    });
+
+    it('shows the reasoning content when the accordion is expanded', () => {
+      renderReasoning();
+      const toggle = screen.getByRole('button', { name: 'Reasoning' });
+
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      const content = within(screen.getByTestId('genAiReasoningPart')).getByTestId(
+        'markdownContent'
+      );
+      expect(content).toHaveTextContent('1. **Analyze**');
+      expect(content).toHaveTextContent('[not json]');
+    });
+
+    it('collapses the reasoning again when the toggle is clicked twice', () => {
+      renderReasoning();
+      const toggle = screen.getByRole('button', { name: 'Reasoning' });
+
+      fireEvent.click(toggle);
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    });
   });
 
   it('renders output messages after input messages', () => {

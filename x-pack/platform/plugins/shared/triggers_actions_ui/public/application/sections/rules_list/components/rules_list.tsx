@@ -1073,6 +1073,7 @@ export const RulesList = ({
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
             cps={cps}
+            showClassicBadge={kibanaServices.showClassicBadge}
           />
         )}
       </EuiPageTemplate.Section>

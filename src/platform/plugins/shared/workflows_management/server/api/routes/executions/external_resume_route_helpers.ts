@@ -38,7 +38,7 @@ export const EXTERNAL_RESUME_POST_ROUTE_OPTIONS = {
 } as const;
 
 const EXTERNAL_RESUME_UNEXPECTED_ERROR_MESSAGE = i18n.translate(
-  'workflowsManagement.externalResume.unexpectedError',
+  'workflows.externalResume.unexpectedError',
   {
     defaultMessage:
       'Unable to submit response. Please try again or request a new link from the workflow owner.',
@@ -46,7 +46,7 @@ const EXTERNAL_RESUME_UNEXPECTED_ERROR_MESSAGE = i18n.translate(
 );
 
 const EXTERNAL_RESUME_INVALID_LINK_MESSAGE = i18n.translate(
-  'workflowsManagement.externalResume.invalidLink',
+  'workflows.externalResume.invalidLink',
   {
     defaultMessage:
       'This workflow response link is no longer valid. Request a new link from the workflow owner.',

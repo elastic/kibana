@@ -25,14 +25,14 @@ import { WorkflowSelectorWithProvider } from '@kbn/workflows-ui';
 import type { AlertStateId, AlertStates, WorkflowsActionParams } from './types';
 
 const RUN_WORKFLOW_FOR_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.workflows.runWorkflowFor.label',
+  'workflows.components.workflows.runWorkflowFor.label',
   {
     defaultMessage: 'Run workflow for',
   }
 );
 
 const RUN_WORKFLOW_FOR_HELP_TEXT = i18n.translate(
-  'xpack.stackConnectors.components.workflows.runWorkflowFor.helpText',
+  'workflows.components.workflows.runWorkflowFor.helpText',
   {
     defaultMessage: 'Select which alert states should trigger this workflow',
   }
@@ -41,19 +41,19 @@ const RUN_WORKFLOW_FOR_HELP_TEXT = i18n.translate(
 const ALERT_STATE_OPTIONS: EuiCheckboxGroupOption[] = [
   {
     id: 'new',
-    label: i18n.translate('xpack.stackConnectors.components.workflows.alertState.new', {
+    label: i18n.translate('workflows.components.workflows.alertState.new', {
       defaultMessage: 'New alerts',
     }),
   },
   {
     id: 'ongoing',
-    label: i18n.translate('xpack.stackConnectors.components.workflows.alertState.ongoing', {
+    label: i18n.translate('workflows.components.workflows.alertState.ongoing', {
       defaultMessage: 'Ongoing alerts',
     }),
   },
   {
     id: 'recovered',
-    label: i18n.translate('xpack.stackConnectors.components.workflows.alertState.recovered', {
+    label: i18n.translate('workflows.components.workflows.alertState.recovered', {
       defaultMessage: 'Recovered alerts',
     }),
   },
@@ -70,15 +70,12 @@ const normalizeAlertStates = (partial?: Partial<AlertStates>): AlertStates => ({
   ...partial,
 });
 
-const RUN_PER_ALERT_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.workflows.runPerAlert.label',
-  {
-    defaultMessage: 'Run per alert',
-  }
-);
+const RUN_PER_ALERT_LABEL = i18n.translate('workflows.components.workflows.runPerAlert.label', {
+  defaultMessage: 'Run per alert',
+});
 
 const RUN_PER_ALERT_HELP_TEXT = i18n.translate(
-  'xpack.stackConnectors.components.workflows.runPerAlert.helpText',
+  'workflows.components.workflows.runPerAlert.helpText',
   {
     defaultMessage: 'If enabled, it will be separate workflow for each alert detected',
   }
@@ -233,7 +230,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         label={
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.stackConnectors.components.workflows.executionMode.label', {
+              {i18n.translate('workflows.components.workflows.executionMode.label', {
                 defaultMessage: 'Action frequency',
               })}
             </EuiFlexItem>

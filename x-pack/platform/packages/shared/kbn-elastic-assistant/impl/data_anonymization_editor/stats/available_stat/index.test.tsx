@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AvailableStat } from '.';
@@ -21,15 +20,11 @@ describe('AvailableStat component', () => {
     expect(screen.getByTestId('availableStat')).toHaveTextContent(`${total}Available`);
   });
 
-  it('displays the tooltip with the correct content', async () => {
+  it('displays the tooltip with the correct content', () => {
     render(<AvailableStat total={total} />);
 
-    await userEvent.hover(screen.getByTestId('availableStat'));
+    fireEvent.mouseOver(screen.getByTestId('availableStat'));
 
-    await waitFor(() => {
-      const tooltipContent = i18n.AVAILABLE_TOOLTIP(total);
-
-      expect(screen.getByText(tooltipContent)).toBeInTheDocument();
-    });
+    expect(screen.getByText(i18n.AVAILABLE_TOOLTIP(total))).toBeInTheDocument();
   });
 });

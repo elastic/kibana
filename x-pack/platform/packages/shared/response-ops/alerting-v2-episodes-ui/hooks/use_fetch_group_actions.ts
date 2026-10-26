@@ -8,9 +8,9 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { AlertEpisodeGroupAction } from '../types/action';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
+import type { GroupActionRow } from '../queries/group_actions_query';
 import { QUERY_STALE_TIME } from '../constants';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -31,6 +31,22 @@ export const getGroupAction = (
   groupActionsMap?.get(getGroupActionKey(ruleId, groupHash)) ??
   groupActionsMap?.get(getGroupActionKey(null, groupHash));
 
+const toGroupActionsMap = (rows: GroupActionRow[]) => {
+  const map = new Map<string, AlertEpisodeGroupAction>();
+  for (const row of rows) {
+    map.set(getGroupActionKey(row.rule_id, row.group_hash), {
+      groupHash: row.group_hash,
+      ruleId: row.rule_id ?? null,
+      lastDeactivateAction: row.last_deactivate_action ?? null,
+      lastSnoozeAction: row.last_snooze_action ?? null,
+      snoozedUntil: row.snoozed_until ?? null,
+      lastSnoozeActor: row.last_snooze_actor ?? null,
+      lastDeactivateActor: row.last_deactivate_actor ?? null,
+    });
+  }
+  return map;
+};
+
 export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) => {
   const { expressions } = services;
   const spaceId = useSpaceId(services.spaces);
@@ -41,21 +57,6 @@ export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupAct
     enabled: groupHashes.length > 0,
     keepPreviousData: true,
     staleTime: QUERY_STALE_TIME,
-    select: (rows) => {
-      const map = new Map<string, AlertEpisodeGroupAction>();
-      for (const row of rows) {
-        map.set(getGroupActionKey(row.rule_id, row.group_hash), {
-          groupHash: row.group_hash,
-          ruleId: row.rule_id ?? null,
-          lastDeactivateAction: row.last_deactivate_action ?? null,
-          lastSnoozeAction: row.last_snooze_action ?? null,
-          snoozedUntil: row.snoozed_until ?? null,
-          tags: normalizeTags(row.tags),
-          lastSnoozeActor: row.last_snooze_actor ?? null,
-          lastDeactivateActor: row.last_deactivate_actor ?? null,
-        });
-      }
-      return map;
-    },
+    select: toGroupActionsMap,
   });
 };

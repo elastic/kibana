@@ -11,7 +11,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
 import { TIME_SPAN_UNITS } from '@elastic/esql';
 import { css } from '@emotion/react';
-import { getVariableNamePrefix } from '@kbn/esql-utils';
+import { getVariableNamePrefix } from '@kbn/esql-controls-utils';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return TIME_SPAN_UNITS.some((unit) => unit === timeIntervalUnit.toLowerCase());

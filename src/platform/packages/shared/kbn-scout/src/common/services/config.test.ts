@@ -60,6 +60,21 @@ const baseCloudMkiSecurityConfig = {
   },
 };
 
+const baseCloudEchConfig = {
+  serverless: false,
+  isCloud: true,
+  cloudHostName: 'qa.elastic-cloud.com',
+  cloudUsersFilePath: '/secrets/role_users.json',
+  hosts: {
+    kibana: 'https://my.deployment.kb.co',
+    elasticsearch: 'https://my.deployment.es.co',
+  },
+  auth: {
+    username: 'elastic',
+    password: 'super-secret',
+  },
+};
+
 describe('createScoutConfig', () => {
   let tmpDir: string;
 
@@ -385,6 +400,38 @@ describe('createScoutConfig', () => {
       writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, http2: false });
 
       expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).not.toThrow();
+    });
+
+    it('accepts customSamlProviderName on a cloud stateful (ECH) config', () => {
+      writeConfig('cloud_ech', { ...baseCloudEchConfig, customSamlProviderName: 'qaf' });
+
+      const config = createScoutConfig(tmpDir, 'cloud_ech', noopLogger);
+
+      expect(config.customSamlProviderName).toBe('qaf');
+    });
+
+    it('rejects customSamlProviderName on a local config', () => {
+      writeConfig('local', { ...baseStatefulConfig, customSamlProviderName: 'qaf' });
+
+      expect(() => createScoutConfig(tmpDir, 'local', noopLogger)).toThrow(
+        /'customSamlProviderName' must not be set when 'isCloud' is false/
+      );
+    });
+
+    it('rejects customSamlProviderName on a cloud serverless (MKI) config', () => {
+      writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, customSamlProviderName: 'qaf' });
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
+        /'customSamlProviderName' must not be set when 'serverless' is true/
+      );
+    });
+
+    it('rejects an empty customSamlProviderName', () => {
+      writeConfig('cloud_ech', { ...baseCloudEchConfig, customSamlProviderName: '' });
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_ech', noopLogger)).toThrow(
+        /'customSamlProviderName' must be a non-empty string/
+      );
     });
 
     it('aggregates multiple issues into a single error message', () => {
