@@ -24,6 +24,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { createConversationPublicClient } from '../services/conversation/conversation_public_client';
 import type { RouteDependencies } from './types';
+import { isExecutionLive } from '../services/execution/utils';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
   AddConversationEventsResponse,
@@ -259,14 +260,23 @@ export function registerConversationRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
+        const { conversations: conversationsService, execution } = getInternalServices();
         const { conversation_id: conversationId } = request.params;
 
         const client = await conversationsService.getScopedClient({ request });
-        const conversation = await client.get(conversationId);
+        const { active_execution: activeExecution, ...conversation } = await client.get(
+          conversationId,
+          { includeActiveExecution: true }
+        );
+
+        const holder = activeExecution
+          ? await execution.getExecution(activeExecution.execution_id)
+          : undefined;
 
         return response.ok<GetConversationResponse>({
-          body: conversation,
+          body: isExecutionLive(holder)
+            ? { ...conversation, active_execution: activeExecution }
+            : conversation,
         });
       })
     );

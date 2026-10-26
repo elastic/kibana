@@ -10,6 +10,7 @@ import {
   ConversationAccessControlMode,
   ConversationRoundStatus,
   ConversationOriginType,
+  ExecutionStatus,
   createAgentNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
@@ -134,7 +135,7 @@ describe('registerConversationRoutes', () => {
       response
     );
 
-    expect(get).toHaveBeenCalledWith('conversation-1');
+    expect(get).toHaveBeenCalledWith('conversation-1', { includeActiveExecution: true });
     expect(result.payload).toEqual({
       ...conversation,
       permissions: { rename: true, delete: true, update_access_control: true },
@@ -148,6 +149,100 @@ describe('registerConversationRoutes', () => {
     expect(result.payload.rounds[0].author).toEqual({
       id: 'U123',
       full_name: 'Bruno',
+    });
+  });
+
+  describe('active_execution on get by id', () => {
+    const activeExecution = {
+      execution_id: 'e1',
+      trigger_event_id: 'round-1',
+      started_at: '2026-07-10T00:00:00.000Z',
+    };
+
+    const getConversationWithHolder = async (
+      holder: { status: ExecutionStatus; lastHeartbeat?: string } | undefined
+    ) => {
+      let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+      const get = jest.fn().mockResolvedValue({
+        id: 'conversation-1',
+        agent_id: 'agent-1',
+        active_execution: activeExecution,
+      });
+      const getExecution = jest.fn().mockResolvedValue(holder);
+
+      const router = {
+        versioned: {
+          get: jest.fn().mockImplementation((config: { path: string }) => ({
+            addVersion: jest
+              .fn()
+              .mockImplementation(
+                (
+                  _versionConfig: unknown,
+                  handler: (ctx: any, req: any, res: any) => Promise<any>
+                ) => {
+                  if (config.path === GET_CONVERSATION_PATH) {
+                    getConversationHandler = handler;
+                  }
+                }
+              ),
+          })),
+          delete: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+          post: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+          put: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+        },
+      };
+
+      registerConversationRoutes({
+        router,
+        getInternalServices: jest.fn().mockReturnValue({
+          conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+          execution: { getExecution },
+          agents: { getRegistry: jest.fn().mockResolvedValue({ get: jest.fn() }) },
+        }),
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+
+      const response = {
+        ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
+        forbidden: jest.fn(),
+        customError: jest.fn(),
+        notFound: jest.fn(),
+      };
+
+      const result = await getConversationHandler!(
+        {
+          core: Promise.resolve({}),
+          licensing: Promise.resolve({
+            license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          }),
+        },
+        { params: { conversation_id: 'conversation-1' } },
+        response
+      );
+
+      return { result, getExecution };
+    };
+
+    it('returns active_execution while the holder is live', async () => {
+      const { result, getExecution } = await getConversationWithHolder({
+        status: ExecutionStatus.running,
+        lastHeartbeat: new Date().toISOString(),
+      });
+
+      expect(getExecution).toHaveBeenCalledWith('e1');
+      expect(result.payload.active_execution).toEqual(activeExecution);
+    });
+
+    it('omits active_execution when the holder is not live', async () => {
+      const { result } = await getConversationWithHolder({ status: ExecutionStatus.completed });
+
+      expect(result.payload).not.toHaveProperty('active_execution');
+    });
+
+    it('omits active_execution when the holder has no execution record', async () => {
+      const { result } = await getConversationWithHolder(undefined);
+
+      expect(result.payload).not.toHaveProperty('active_execution');
     });
   });
 
