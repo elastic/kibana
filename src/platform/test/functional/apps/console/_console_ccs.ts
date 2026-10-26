@@ -16,6 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
+  const remoteEs = getService('remoteEs' as 'es');
+  const UNICODE_INDEX = 'makelogs工程-ccs';
 
   describe('Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -35,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await remoteEsArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
+      await remoteEs.indices.delete({ index: UNICODE_INDEX }, { ignore: [404] });
     });
 
     describe('Perform CCS Search in Console', () => {
@@ -47,6 +50,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getOutputText();
           expect(actualResponse).to.contain('"_index": "ftr-remote:logstash-2015.09.20"');
+        });
+      });
+
+      it('it should be able to access remote data from an index with a non-ASCII name', async () => {
+        await remoteEs.index({
+          index: UNICODE_INDEX,
+          document: { extension: 'jpg' },
+          refresh: 'wait_for',
+        });
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText(
+          '\nGET ftr-remote:makelogs工程-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
+        );
+        await PageObjects.console.clickPlayAndWaitForResults();
+
+        await retry.try(async () => {
+          const actualResponse = await PageObjects.console.getOutputText();
+          expect(actualResponse).to.contain(`"_index": "ftr-remote:${UNICODE_INDEX}"`);
         });
       });
     });
