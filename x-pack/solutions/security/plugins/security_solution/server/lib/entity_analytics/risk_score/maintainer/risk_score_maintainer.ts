@@ -54,6 +54,8 @@ import { createRunMetricsTracker } from './utils/run_metrics_tracker';
 import { createRunHealthTracker } from './utils/run_health';
 import type { PageStepTimings } from './utils/page_step_timings';
 import { createRiskWriterProfile } from './utils/risk_writer_profile';
+import { getRiskWriterOptions } from './utils/risk_writer_options';
+import type { RiskScoreStreamOptions } from '../risk_engine_data_writer';
 import { createPageStepTimings } from './utils/page_step_timings';
 import { buildLookupIndex } from './steps/build_lookup_index';
 import { DEFAULT_ALERT_SAMPLE_SIZE } from '../constants';
@@ -90,7 +92,7 @@ const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
  */
 const RESOLVE_FROM_ENTITY_STORE = true;
 
-// Test setting: set to undefined for the page-based writer baseline.
+// Experimental defaults; synchronous runs can override them through x-risk-perf headers.
 const RISK_INDEX_STREAM = {
   flushBytes: 2_000_000,
   flushInterval: 1_000,
@@ -136,6 +138,7 @@ interface LoadedRunConfig {
   sampleSize: number;
   pageSize: number;
   entityTypes: EntityType[];
+  riskIndexStream?: RiskScoreStreamOptions;
 }
 
 export const createRiskScoreMaintainer = ({
@@ -181,7 +184,8 @@ export const createRiskScoreMaintainer = ({
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
       return status.state;
     },
-    run: async ({ status, crudClient, signal, telemetry: frameworkTelemetry }) => {
+    run: async ({ status, crudClient, signal, fakeRequest, telemetry: frameworkTelemetry }) => {
+      const riskIndexStream = getRiskWriterOptions(fakeRequest.headers, RISK_INDEX_STREAM);
       return wrapTaskRun({
         spanName: ENTITY_ANALYTICS_SPAN_NAMES.maintainerRun,
         namespace: status.metadata.namespace,
@@ -217,7 +221,15 @@ export const createRiskScoreMaintainer = ({
             experimentalFeatures,
           });
 
+          runConfig.riskIndexStream = riskIndexStream;
           const calculationRunId = uuidv4();
+          logger.info(
+            `risk writer settings ${JSON.stringify({
+              calculationRunId,
+              mode: riskIndexStream ? 'stream' : 'baseline',
+              ...riskIndexStream,
+            })}`
+          );
           const runNow = new Date().toISOString();
           const maintainerRunStartedAtMs = Date.now();
           const metricsTracker = createRunMetricsTracker();
@@ -585,7 +597,7 @@ const executeEntityTypeRun = async ({
     esClient: runContext.esClient,
     logger: runLogger,
     stage: 'base',
-    mode: RISK_INDEX_STREAM ? 'stream' : 'pages',
+    mode: runConfig.riskIndexStream ? 'stream' : 'pages',
   });
   const basePageTimings = createPageStepTimings(baseWriterProfile.recordStep);
   let allAlertsStamped = false;
@@ -617,7 +629,7 @@ const executeEntityTypeRun = async ({
           skipUnchangedStoreWrites: true,
           entityStoreWriteChunks: 4,
           riskIndexWriteChunks: 4,
-          riskIndexStream: RISK_INDEX_STREAM,
+          riskIndexStream: runConfig.riskIndexStream,
           pagesInFlight: 2,
           // Test setting: page bounds from one sample. A page that reaches the 10k row limit is only
           // found after scoring, so pages aim at 8k, where that practically never happens.
@@ -686,7 +698,7 @@ const executeEntityTypeRun = async ({
       esClient: runContext.esClient,
       logger: runLogger,
       stage: 'resolution',
-      mode: RISK_INDEX_STREAM ? 'stream' : 'pages',
+      mode: runConfig.riskIndexStream ? 'stream' : 'pages',
     });
     const resolutionPageTimings = createPageStepTimings(resolutionWriterProfile.recordStep);
     try {
@@ -714,7 +726,7 @@ const executeEntityTypeRun = async ({
             entityStoreRefresh: false,
             entityStoreWriteChunks: 4,
             riskIndexWriteChunks: 4,
-            riskIndexStream: RISK_INDEX_STREAM,
+            riskIndexStream: runConfig.riskIndexStream,
             pagesInFlight: 2,
             joinEntityStore: true,
             preAggregateByEntity: true,
