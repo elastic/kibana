@@ -1,0 +1,78 @@
+{
+  "sha1": "6823dd3c1dcf7ebc1ff9f7b5eef6d559c6b39f7d",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "8daf5a2d8c71358-a9f110dfa1587e1",
+      "title": "Security Solution alert update audit events signals/status by ids with closed writes alert_update unknown with user.name and trace.id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_audit/api/tests/alert_update_audit.spec.ts",
+        "line": 67,
+        "column": 13
+      }
+    },
+    {
+      "id": "8daf5a2d8c71358-8b402455ceaba4b",
+      "title": "Security Solution alert update audit events signals/status by ids with acknowledged writes alert_update then alert_acknowledge success",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_audit/api/tests/alert_update_audit.spec.ts",
+        "line": 96,
+        "column": 67
+      }
+    },
+    {
+      "id": "8daf5a2d8c71358-e3b8b2ab1725277",
+      "title": "Security Solution alert update audit events signals/tags writes alert_update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_audit/api/tests/alert_update_audit.spec.ts",
+        "line": 174,
+        "column": 9
+      }
+    },
+    {
+      "id": "8daf5a2d8c71358-37633845ddf4742",
+      "title": "Security Solution alert update audit events signals/assignees writes alert_update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_audit/api/tests/alert_update_audit.spec.ts",
+        "line": 203,
+        "column": 13
+      }
+    },
+    {
+      "id": "8daf5a2d8c71358-92a2f4df39ce1b7",
+      "title": "Security Solution alert update audit events signals/status by query with an invalid Elasticsearch query writes alert_update failure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_audit/api/tests/alert_update_audit.spec.ts",
+        "line": 230,
+        "column": 32
+      }
+    }
+  ]
+}
