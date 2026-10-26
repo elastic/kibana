@@ -9,6 +9,7 @@ import {
   DISPATCH_CHUNK_SIZE,
   MAX_WINDOW_MINUTES,
   OVERLAP_WINDOW_MINUTES,
+  TICK_DEADLINE_MARGIN_MS,
   getTickDeadlineMs,
 } from './constants';
 import { parseDurationToMs } from '../duration';
@@ -19,9 +20,13 @@ describe('dispatcher constants invariants', () => {
     expect(MAX_WINDOW_MINUTES).toBeGreaterThan(OVERLAP_WINDOW_MINUTES);
   });
 
-  it.each(['1m', '5m'])('getTickDeadlineMs(%s) is strictly below the task timeout', (timeout) => {
-    expect(getTickDeadlineMs(timeout)).toBeLessThan(parseDurationToMs(timeout));
-  });
+  it.each(['1m', '5m'])(
+    'getTickDeadlineMs(%s) stops the tick 15s before the task timeout',
+    (timeout) => {
+      expect(getTickDeadlineMs(timeout)).toBe(parseDurationToMs(timeout) - TICK_DEADLINE_MARGIN_MS);
+      expect(TICK_DEADLINE_MARGIN_MS).toBe(15_000);
+    }
+  );
 
   it('DISPATCH_CHUNK_SIZE is 250', () => {
     expect(DISPATCH_CHUNK_SIZE).toBe(250);

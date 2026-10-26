@@ -60,18 +60,21 @@ export const DEFAULT_GROUPING = { mode: 'per_alert' } as const;
  */
 export const DISPATCHER_TASK_TIMEOUT = '1m' as const;
 
-/** Share of the task timeout a tick may run before it stops itself. */
-export const TICK_DEADLINE_RATIO = 0.7;
+/**
+ * Time a tick keeps between its soft deadline and the task timeout. Must cover
+ * the slowest step that cannot yield to the abort signal, e.g. one
+ * DISPATCH_CHUNK_SIZE workflow schedule and its `.alert-actions` commit.
+ */
+export const TICK_DEADLINE_MARGIN_MS = 15_000;
 
 /**
- * Self-imposed stop at TICK_DEADLINE_RATIO of the task timeout. The margin is
- * load-bearing: past the TM timeout `isExpired` is already true and the
+ * Self-imposed stop TICK_DEADLINE_MARGIN_MS before the task timeout. The margin
+ * is load-bearing: past the TM timeout `isExpired` is already true and the
  * returned state is discarded (task_manager task_runner.ts:764), so the
- * watermark would freeze. A safe margin must account for the time the current
- * step takes to yield after the signal fires.
+ * watermark would freeze.
  */
 export const getTickDeadlineMs = (timeout: string): number =>
-  Math.round(parseDurationToMs(timeout) * TICK_DEADLINE_RATIO);
+  parseDurationToMs(timeout) - TICK_DEADLINE_MARGIN_MS;
 
 /**
  * Max workflow schedule items per `bulkScheduleWorkflow` call. Sized so a tick

@@ -1179,7 +1179,7 @@ describe('DispatcherService', () => {
       });
       const [[{ signal }]] = mockPipeline.execute.mock.calls;
 
-      jest.advanceTimersByTime(125_999);
+      jest.advanceTimersByTime(164_999);
       expect(signal.aborted).toBe(false);
 
       jest.advanceTimersByTime(1);

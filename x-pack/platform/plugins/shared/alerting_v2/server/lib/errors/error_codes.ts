@@ -422,7 +422,7 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
   /**
-   * The self-imposed tick deadline (70 % of
+   * The self-imposed tick deadline (15s before
    * `xpack.alerting_v2.dispatcher.run.timeout`) fired before the pipeline
    * completed. The pipeline was aborted cooperatively; the returned watermark
    * is safe. This is expected under sustained high load — it is not an error.

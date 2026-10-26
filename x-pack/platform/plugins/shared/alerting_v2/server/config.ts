@@ -183,7 +183,7 @@ const dispatcherSchema = schema.object({
   run: schema.object({
     /**
      * Task Manager timeout for one dispatcher tick. The tick's soft deadline
-     * is derived at 70 % of it. Raise it when slow Elasticsearch responses make
+     * is 15s before it. Raise it when slow Elasticsearch responses make
      * ticks hit `DISPATCHER_TICK_DEADLINE_EXCEEDED`. The default is the floor:
      * the timeout can only be raised, up to 5m.
      */
