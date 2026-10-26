@@ -551,7 +551,6 @@ export function LensEditConfigurationFlyout({
         applyButtonLabel={applyButtonLabel}
         applyButtonDisabledTooltip={applyButtonDisabledTooltip}
         toolbar={toolbar}
-        layerTabs={layerTabs}
       >
         <>
           {/* Flex container for the flyout content layout.
@@ -656,7 +655,24 @@ export function LensEditConfigurationFlyout({
                   setIsLayerAccordionOpen(!isLayerAccordionOpen);
                 }}
               >
-                <>
+                {/* the layer tabs belong to the visualization parameters, so they collapse with them.
+                    With several layers, the tabs and the settings of the selected layer are grouped
+                    in a container */}
+                <div
+                  css={css`
+                    &:has(.lnsLayerTabs--visible) {
+                      border: ${euiTheme.euiTheme.border.thin};
+                      border-radius: ${euiTheme.euiTheme.border.radius.medium};
+                      padding: ${euiTheme.euiTheme.size.s};
+                      // keeps the container clear of the divider above the next accordion
+                      margin-block-end: ${euiTheme.euiTheme.size.base};
+                    }
+                    .lnsLayerTabs--visible {
+                      margin-block-end: ${euiTheme.euiTheme.size.s};
+                    }
+                  `}
+                >
+                  {layerTabs}
                   <LayerConfiguration
                     attributes={attributes}
                     dataLoading$={dataLoading$}
@@ -674,7 +690,7 @@ export function LensEditConfigurationFlyout({
                     editorContainer={editorContainer.current || undefined}
                     onTextBasedQueryStateChange={onTextBasedQueryStateChange}
                   />
-                </>
+                </div>
               </EuiAccordion>
             </EuiFlexItem>
 

@@ -228,6 +228,8 @@ export function LayerTabs({
 
   return (
     <div
+      // lets the flyout style the layer settings as a group only when there are tabs to switch
+      className={managedItems.length > 1 ? 'lnsLayerTabs--visible' : undefined}
       css={css`
         pointer-events: auto;
         background-color: ${euiTheme.colors.emptyShade};
