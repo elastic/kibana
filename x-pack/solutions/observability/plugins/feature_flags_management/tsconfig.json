@@ -8,10 +8,12 @@
     "@kbn/change-history",
     "@kbn/config-schema",
     "@kbn/core",
+    "@kbn/core-http-browser",
     "@kbn/core-user-activity-server",
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
     "@kbn/task-manager-plugin",
     "@kbn/zod"
   ],
