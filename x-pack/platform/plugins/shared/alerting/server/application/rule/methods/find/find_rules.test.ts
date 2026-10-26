@@ -760,7 +760,7 @@ describe('find()', () => {
     `);
   });
 
-  test('returns the rule with its stored params and reports an error if useSavedObjectReferences.injectReferences throws an error', async () => {
+  test('omits the rule from the results and reports an error if useSavedObjectReferences.injectReferences throws an error', async () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
@@ -942,21 +942,65 @@ describe('find()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.find({ options: {} });
 
-    expect(result.total).toEqual(2);
-    expect(result.data.map((rule) => rule.id)).toEqual(['1', '2']);
-    expect(result.data[1].params).toEqual({
-      bar: true,
-      parameterThatIsSavedObjectRef: 'soRef_0',
-    });
-    expect(result.errors).toEqual([
-      {
-        message: 'Error injecting reference into rule params for rule id 2 - something went wrong!',
-        rule: { id: '2', name: 'rule-with-broken-references' },
-      },
-    ]);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      'Error injecting references into the params of rule with id 2 while finding rules, the rule will be returned with its stored params: Error injecting reference into rule params for rule id 2 - something went wrong!'
+      'Error transforming rule with id 2, the rule will be omitted from the results: Error injecting reference into rule params for rule id 2 - something went wrong!'
     );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "actionTypeId": undefined,
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
+                "uuid": undefined,
+              },
+            ],
+            "activeSnoozes": undefined,
+            "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "executionStatus": Object {
+              "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+              "status": "pending",
+            },
+            "id": "1",
+            "isSnoozedUntil": null,
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "snoozeSchedule": Array [],
+            "systemActions": Array [],
+            "updatedAt": 2019-02-12T21:01:22.479Z,
+          },
+        ],
+        "errors": Array [
+          Object {
+            "message": "Error injecting reference into rule params for rule id 2 - something went wrong!",
+            "rule": Object {
+              "id": "2",
+              "name": "rule-with-broken-references",
+            },
+          },
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 2,
+      }
+    `);
   });
 
   test('omits the rule from the results and reports an error if references array is missing', async () => {
@@ -1035,17 +1079,66 @@ describe('find()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.find({ options: {} });
 
-    expect(result.total).toEqual(2);
-    expect(result.data.map((rule) => rule.id)).toEqual(['1']);
-    expect(result.errors).toEqual([
-      {
-        message: 'Action reference "action_0" not found in alert id: 2',
-        rule: { id: '2', name: 'rule-with-missing-action-reference' },
-      },
-    ]);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
       'Error transforming rule with id 2, the rule will be omitted from the results: Action reference "action_0" not found in alert id: 2'
     );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "actionTypeId": undefined,
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
+                "uuid": undefined,
+              },
+            ],
+            "activeSnoozes": undefined,
+            "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "executionStatus": Object {
+              "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+              "status": "pending",
+            },
+            "id": "1",
+            "isSnoozedUntil": null,
+            "name": "valid-rule",
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "snoozeSchedule": Array [],
+            "systemActions": Array [],
+            "updatedAt": 2019-02-12T21:01:22.479Z,
+          },
+        ],
+        "errors": Array [
+          Object {
+            "message": "Action reference \\"action_0\\" not found in alert id: 2",
+            "rule": Object {
+              "id": "2",
+              "name": "rule-with-missing-action-reference",
+            },
+          },
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 2,
+      }
+    `);
   });
 
   describe('authorization', () => {
