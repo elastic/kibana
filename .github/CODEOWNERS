@@ -2788,13 +2788,9 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-core @elastic/kibana-discover # Assigned per Scout saved_objects_management import suites
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
-/x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-management
-/x-pack/platform/test/stack_functional_integration/apps/ccs/ccs_discover.ts @elastic/kibana-discover
+/x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-discover
 /x-pack/platform/test/functional/services/data_stream.ts @elastic/kibana-dashboards
 /x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_lifecycle_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
