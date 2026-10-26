@@ -23,10 +23,15 @@ import { apiTest } from '../fixtures';
 const EICAR_FILE_NAME = 'eicar.com.txt';
 const EICAR_URL = `https://secure.eicar.org/${EICAR_FILE_NAME}`;
 /**
- * Writes the EICAR test file to the VM user's home directory, which Elastic Defend malware
- * protection detects and alerts on. Same trigger as `endpoint_agent_runner`.
+ * Writes the EICAR test file to the VM user's home directory and executes it, which Elastic
+ * Defend malware protection detects and alerts on. Executing it fails by design: the file is
+ * not a valid program. Each command runs on its own because the host may have no shell.
  */
-const MALICIOUS_COMMAND = `curl -LO ${EICAR_URL}`;
+const MALICIOUS_COMMANDS = [
+  `curl -LO ${EICAR_URL}`,
+  `chmod +x ${EICAR_FILE_NAME}`,
+  `./${EICAR_FILE_NAME}`,
+] as const;
 const ENDPOINT_ALERT_TIMEOUT_MS = 240_000;
 const DETECTION_ALERT_TIMEOUT_MS = 180_000;
 const POLL_INTERVAL_MS = 2_000;
@@ -65,9 +70,14 @@ apiTest.describe(
         const { agentId, hostname } = enrolledEndpoint;
 
         await apiTest.step('the Endpoint streams an alert for the EICAR test file', async () => {
-          const { exitCode, stderr } = await runCommandOnHost(hostname, MALICIOUS_COMMAND);
-          const triggerResult = `exit code ${exitCode}, stderr: ${stderr || '<empty>'}`;
-          log.info(`[edr_real_fleet] ran [${MALICIOUS_COMMAND}] on ${hostname}: ${triggerResult}`);
+          const triggerResults: string[] = [];
+          for (const command of MALICIOUS_COMMANDS) {
+            const { exitCode, stderr } = await runCommandOnHost(hostname, command);
+            const commandResult = `exit code ${exitCode}, stderr: ${stderr || '<empty>'}`;
+            log.info(`[edr_real_fleet] ran [${command}] on ${hostname}: ${commandResult}`);
+            triggerResults.push(`[${command}] ${commandResult}`);
+          }
+          const triggerResult = triggerResults.join('; ');
 
           await expect
             .poll(() => countEndpointAlertsForAgent(esClient, agentId), {
